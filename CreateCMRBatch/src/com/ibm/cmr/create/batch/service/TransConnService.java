@@ -74,6 +74,7 @@ import com.ibm.cmr.create.batch.model.MQIntfReqQueueModel;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.model.NotifyReqModel;
 import com.ibm.cmr.create.batch.util.BatchUtil;
+import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.DebugUtil;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.USMassUpdateWorker;
@@ -120,6 +121,10 @@ public class TransConnService extends BaseBatchService {
   protected ProcessClient serviceClient;
   protected MassProcessClient massServiceClient;
   protected UpdateByEntClient updtByEntClient;
+  private CMRRequestContainer cmrObjects;
+  private static final String MASS_UPDATE_FAIL = "FAIL";
+  private static final String MASS_UPDATE_DONE = "DONE";
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZI01", "ZD01", "PG01" };
 
   protected SimpleDateFormat ERDAT_FORMATTER = new SimpleDateFormat("yyyyMMdd");
 
@@ -145,6 +150,9 @@ public class TransConnService extends BaseBatchService {
       ChangeLogListener.setUser(BATCH_USER_ID);
 
       List<Long> records = null;
+      LOG.info("Processing US MassUpdate Request...");
+      monitorCreqcmrMassUpd(entityManager);
+
       LOG.info("Processing Aborted records (retry)...");
       records = gatherAbortedRecords(entityManager);
       monitorAbortedRecords(entityManager, records);
@@ -343,6 +351,402 @@ public class TransConnService extends BaseBatchService {
         LOG.error("Error in processing TransConn Record with Notify ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
+  }
+
+  public void monitorCreqcmrMassUpd(EntityManager entityManager) throws Exception {
+    LOG.info("Initializing Country Map..");
+    // LandedCountryMap.init(entityManager);
+    List<Admin> pending = getPendingRecordsMassUpd(entityManager);
+
+    LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
+
+    Data data = null;
+    ProcessRequest request = null;
+    for (Admin admin : pending) {
+      try {
+        // hard-coding to debug specific request
+        // if (admin.getId().getReqId() != reQId) {
+        // continue;
+        // }
+        this.cmrObjects = prepareRequest(entityManager, admin);
+        data = this.cmrObjects.getData();
+
+        request = new ProcessRequest();
+        request.setCmrNo(data.getCmrNo());
+        request.setMandt(SystemConfiguration.getValue("MANDT"));
+        request.setReqId(admin.getId().getReqId());
+        request.setReqType(admin.getReqType());
+        request.setUserId(BATCH_USER_ID);
+
+        processMassUpdateRequest(entityManager, request, admin, data);
+
+        if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
+          admin.setReqStatus("PPN");
+          admin.setProcessedFlag("E"); // set request status to error.
+          createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin.getId().getReqId());
+        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
+            && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType())) {
+          admin.setReqStatus("COM");
+          admin.setProcessedFlag("Y"); // set request status to processed
+          createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
+        }
+        partialCommit(entityManager);
+      } catch (Exception e) {
+        partialRollback(entityManager);
+        LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
+        processError(entityManager, admin, e.getMessage());
+      }
+    }
+  }
+
+  private List<Admin> getPendingRecordsMassUpd(EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("US.GET_MASS_PROCESS_PENDING.RDCFORUS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    return query.getResults(Admin.class);
+  }
+
+  private CMRRequestContainer prepareRequest(EntityManager entityManager, Admin admin) throws Exception {
+    LOG.debug("Preparing Request Objects... ");
+    CMRRequestContainer container = new CMRRequestContainer();
+
+    DataPK dataPk = new DataPK();
+    dataPk.setReqId(admin.getId().getReqId());
+    Data data = entityManager.find(Data.class, dataPk);
+    if (data == null) {
+      throw new Exception("Cannot locate DATA record");
+    }
+
+    // generateUSCmr
+    // if ("C".equals(admin.getReqType())) {
+    // String cmrNoGen = generateUSCmr(admin);
+    // data.setCmrNo(cmrNoGen);
+    // LOG.debug(" ---- Generate CMR No. is --- " + cmrNoGen);
+    // }
+
+    String sql = ExternalizedQuery.getSql("US.GET.ADDR");
+    // get the address order for US
+    if (getIerpAddressOrder() != null) {
+      String[] order = getIerpAddressOrder();
+      StringBuilder types = new StringBuilder();
+      if (order != null && order.length > 0) {
+
+        for (String type : order) {
+          LOG.trace("Looking for Address Types " + type);
+          types.append(types.length() > 0 ? ", " : "");
+          types.append("'" + type + "'");
+        }
+      }
+
+      if (types.length() > 0) {
+        sql += " and ADDR_TYPE in ( " + types.toString() + ") ";
+      }
+      StringBuilder orderBy = new StringBuilder();
+      int orderIndex = 0;
+      for (String type : order) {
+        orderBy.append(" when ADDR_TYPE = '").append(type).append("' then ").append(orderIndex);
+        orderIndex++;
+      }
+      orderBy.append(" else 25 end, ADDR_TYPE, case when IMPORT_IND = 'Y' then 0 else 1 end, ADDR_SEQ ");
+      sql += " order by case " + orderBy.toString();
+    }
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    // query.setForReadOnly(true);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+
+    List<Addr> addresses = null;
+    if ("R".equals(admin.getReqType()) || "D".equals(admin.getReqType())) {
+      addresses = null;
+    } else {
+      addresses = query.getResults(Addr.class);
+    }
+    // List<Addr> addresses = query.getResults(Addr.class);
+
+    container.setAdmin(admin);
+    container.setData(data);
+    if (addresses != null) {
+      for (Addr addr : addresses) {
+        container.addAddress(addr);
+      }
+    }
+    return container;
+  }
+
+  protected void processMassUpdateRequest(EntityManager entityManager, ProcessRequest request, Admin admin, Data data) throws Exception {
+
+    String resultCode = null;
+    String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
+    long reqId = admin.getId().getReqId();
+    boolean isIndexNotUpdated = false;
+
+    try {
+      // 1. Get request to process
+      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.US.GET.MASS_UPDT"));
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      query.setParameter("ITER_ID", admin.getIterationId());
+
+      List<MassUpdt> results = query.getResults(MassUpdt.class);
+      List<String> statusCodes = new ArrayList<String>();
+      StringBuilder comment = null;
+
+      ProcessResponse response = null;
+      String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
+      List<String> rdcProcessStatusMsgs = new ArrayList<String>();
+      HashMap<String, String> overallStatus = new HashMap<String, String>();
+
+      if (results != null && results.size() > 0) {
+        for (MassUpdt sMassUpdt : results) {
+          comment = new StringBuilder();
+          // if
+          // (!CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus()))
+          // {
+          // admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCO.toString());
+          // updateEntity(admin, entityManager);
+          // partialCommit(entityManager);
+          // }
+
+          request.setCmrNo(sMassUpdt.getCmrNo());
+          request.setMandt(SystemConfiguration.getValue("MANDT"));
+          request.setIterationId(sMassUpdt.getId().getIterationId());
+          request.setReqId(admin.getId().getReqId());
+          request.setReqType(admin.getReqType());
+          request.setUserId(BATCH_USER_ID);
+          request.setSapNo("");
+          request.setAddrType("");
+          request.setSeqNo("");
+
+          // call the create cmr service
+          LOG.info("Sending request to Process Service [Request ID: " + request.getReqId() + " Type: " + request.getReqType() + "]");
+
+          if (LOG.isTraceEnabled()) {
+            LOG.trace("Request JSON:");
+            DebugUtil.printObjectAsJson(LOG, request);
+          }
+
+          response = null;
+          if (applicationId == null) {
+            LOG.debug("No Application ID mapped to " + data.getCmrIssuingCntry());
+            response = new ProcessResponse();
+            response.setReqId(request.getReqId());
+            response.setCmrNo(request.getCmrNo());
+            response.setMandt(request.getMandt());
+            response.setStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+            response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
+          } else {
+            try {
+              this.massServiceClient.setReadTimeout(60 * 30 * 1000); // 30 mins
+              response = this.massServiceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
+
+              if (response != null && response.getStatus().equals("A")
+                  && response.getMessage().contains("was not successfully updated on the index.")) {
+                isIndexNotUpdated = true;
+                response.setStatus("C");
+                response.setMessage("");
+              }
+            } catch (Exception e) {
+              sMassUpdt.setRowStatusCd(MASS_UPDATE_FAIL);
+              LOG.error("Error when connecting to the service.", e);
+              response = new ProcessResponse();
+              response.setReqId(admin.getId().getReqId());
+              response.setCmrNo(request.getCmrNo());
+              response.setMandt(request.getMandt());
+              response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
+              response.setMessage("Cannot connect to the service at the moment.");
+            }
+          }
+
+          //
+          if (response.getReqId() <= 0) {
+            response.setReqId(request.getReqId());
+          }
+
+          resultCode = response.getStatus();
+          if (StringUtils.isBlank(resultCode)) {
+            statusCodes.add(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+          } else {
+            statusCodes.add(resultCode);
+          }
+
+          if (LOG.isTraceEnabled()) {
+            LOG.trace("Response JSON:");
+            DebugUtil.printObjectAsJson(LOG, response);
+          }
+
+          if (isCompletedSuccessfully(resultCode)) {
+            if (response.getRecords() != null) {
+              if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
+                comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
+                    + " was SUCCESSFULLY processed:\n");
+                for (RDcRecord pRecord : response.getRecords()) {
+                  comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                  comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                }
+              }
+            } else {
+              comment.append("RDc records were not processed.");
+              if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
+                comment = comment.append("Warning Message: " + response.getMessage());
+              }
+            }
+
+            if (StringUtils.isEmpty(sMassUpdt.getErrorTxt())) {
+              sMassUpdt.setErrorTxt(comment.toString());
+            } else {
+              sMassUpdt.setErrorTxt(sMassUpdt.getErrorTxt() + comment.toString());
+            }
+
+            sMassUpdt.setRowStatusCd(MASS_UPDATE_DONE);
+
+            rdcProcessStatusMsgs.add(CmrConstants.RDC_STATUS_COMPLETED);
+          } else {
+            if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
+              comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " was ABORTED.");
+              sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
+              sMassUpdt.setErrorTxt(comment.toString());
+              rdcProcessStatusMsgs.add(resultCode);
+            } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
+              comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " was ABORTED.");
+              sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
+              sMassUpdt.setErrorTxt(comment.toString());
+              rdcProcessStatusMsgs.add(resultCode);
+            } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
+              comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " is NOT COMPLETED.");
+              sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
+              rdcProcessStatusMsgs.add(resultCode);
+              sMassUpdt.setErrorTxt(comment.toString());
+            } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
+              comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " is IGNORED.");
+              sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE);
+              sMassUpdt.setErrorTxt(comment.toString());
+              rdcProcessStatusMsgs.add(resultCode);
+            } else {
+              sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_DONE);
+              sMassUpdt.setErrorTxt("");
+            }
+          }
+          updateEntity(sMassUpdt, entityManager);
+          admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
+          admin.setProcessedFlag("Y");
+          admin.setLockInd("N");
+          updateEntity(admin, entityManager);
+          partialCommit(entityManager);
+        }
+
+        // *** START OF FIX
+        LOG.debug("**** Placing comment on success --> " + comment);
+        comment = new StringBuilder();
+        if (rdcProcessStatusMsgs.size() > 0) {
+          if (rdcProcessStatusMsgs.contains(CmrConstants.RDC_STATUS_ABORTED)) {
+            if (isIndexNotUpdated) {
+              overallStatus.put("overallStatus", CmrConstants.RDC_STATUS_COMPLETED);
+            } else {
+              overallStatus.put("overallStatus", CmrConstants.RDC_STATUS_ABORTED);
+            }
+          } else if (rdcProcessStatusMsgs.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED)) {
+            overallStatus.put("overallStatus", CmrConstants.RDC_STATUS_NOT_COMPLETED);
+          } else if (rdcProcessStatusMsgs.contains(CmrConstants.RDC_STATUS_COMPLETED)) {
+            overallStatus.put("overallStatus", CmrConstants.RDC_STATUS_COMPLETED);
+          }
+        } else {
+          LOG.error("Response statuses is empty for request ID: " + admin.getId().getReqId());
+          ProcessResponse customResponse = new ProcessResponse();
+          customResponse.setMessage("No data was updated on RDc for this request. Please contact Ops for assistance.");
+          overallStatus.put("overallStatus", CmrConstants.RDC_STATUS_ABORTED);
+        }
+
+        if (comment != null && !StringUtils.isEmpty(comment.toString())) {
+          RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, reqId, comment.toString().trim());
+        } else {
+          String strOverallStatus = overallStatus.get("overallStatus");
+
+          if (strOverallStatus != null && CmrConstants.RDC_STATUS_COMPLETED.equals(strOverallStatus)) {
+            comment.append("Successfully completed RDc processing for mass update request.");
+          } else {
+            comment.append("Issues happened generating a processing comment. Please contact your Administrator.");
+          }
+          RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, reqId, comment.toString().trim());
+        }
+
+        LOG.debug("Updating Admin record for Request ID " + admin.getId().getReqId());
+
+        if (statusCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED)) {
+          admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+          admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+        } else if (statusCodes.contains(CmrConstants.RDC_STATUS_ABORTED)) {
+          admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+          admin.setRdcProcessingStatus(
+              processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
+        } else if (statusCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
+          admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
+        } else {
+          admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED);
+          admin.setProcessedFlag("Y"); // set request status to processed
+        }
+
+        String rdcProcessingMsg = null;
+        if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
+          rdcProcessingMsg = "Some errors occurred during processing. Please check request's comment log for details.";
+        } else {
+          rdcProcessingMsg = "RDc Processing has been completed. Please check request's comment log for details.";
+        }
+
+        admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
+        admin.setRdcProcessingMsg(rdcProcessingMsg.toString().trim());
+
+        if (!"A".equals(admin.getRdcProcessingStatus()) && !"N".equals(admin.getRdcProcessingStatus())) {
+          admin.setReqStatus("COM");
+        }
+        updateEntity(admin, entityManager);
+
+        if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
+          RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
+              "Some errors occurred during RDc processing. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
+              "COM".equals(admin.getReqStatus()));
+        } else {
+          RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
+              "RDc  Processing has been completed. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
+              "COM".equals(admin.getReqStatus()));
+        }
+
+        partialCommit(entityManager);
+        LOG.debug(
+            "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
+        // *** END OF FIX
+      } else {
+        LOG.error("*****There are no mass update requests for RDC processing.*****");
+      }
+    } catch (Exception e) {
+      LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
+      addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+    }
+  }
+
+  private void processError(EntityManager entityManager, Admin admin, String errorMsg) throws CmrException, SQLException {
+    if (CmrConstants.REQ_TYPE_DELETE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE.equals(admin.getReqType())) {
+      admin.setDisableAutoProc("Y");// disable auto processing if error on
+                                    // processing
+    }
+    // processing pending
+    LOG.info("Processing error for Request ID " + admin.getId().getReqId() + ": " + errorMsg);
+    admin.setReqStatus("PPN");
+    admin.setLockBy(null);
+    admin.setLockByNm(null);
+    admin.setLockInd("N");
+    // error
+    admin.setProcessedFlag("E");
+    admin.setLastUpdtBy(BATCH_USER_ID);
+    updateEntity(admin, entityManager);
+
+    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error",
+        admin.getId().getReqId());
+    createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
+
+    RequestUtils.sendEmailNotifications(entityManager, admin, hist);
+  }
+
+  public String[] getIerpAddressOrder() {
+    return ADDRESS_ORDER;
   }
 
   /**
@@ -910,6 +1314,9 @@ public class TransConnService extends BaseBatchService {
     if (this.multiMode) {
       LOG.debug("Processing in Multi Mode..");
       processMassChangesMulti(entityManager, admin, data);
+      return;
+    }
+    if ("M".equals(admin.getReqType()) && "897".equals(data.getCmrIssuingCntry())) {
       return;
     }
 
