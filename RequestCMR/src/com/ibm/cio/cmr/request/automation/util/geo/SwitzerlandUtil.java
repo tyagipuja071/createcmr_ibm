@@ -202,6 +202,8 @@ public class SwitzerlandUtil extends AutomationUtil {
               addrTypesChanged.add(addrModel.getAddrTypeCode());
             }
           }
+          boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(addrType) && "PG".equals(data.getOrdBlk()));
+
           if ("N".equals(addr.getImportInd())) {
             // new address
             LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
@@ -248,7 +250,7 @@ public class SwitzerlandUtil extends AutomationUtil {
               // just proceed for shipping updates
               LOG.debug("Update to ZD01 " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Updates to ZD01 (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
-            } else if (payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) {
+            } else if ((payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) || isZS01WithAufsdPG) {
               if ("N".equals(addr.getImportInd())) {
                 LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 boolean duplicate = addressExists(entityManager, addr, requestData);
@@ -259,9 +261,10 @@ public class SwitzerlandUtil extends AutomationUtil {
                 } else {
                   LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")" + "with same attentionTo");
+                  checkDetails.append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ")  validated in the checks.\n");
                 }
               } else {
-                checkDetails.append("Updates to address fields for PG01 (" + addr.getId().getAddrSeq() + ")  validated in the checks.\n");
+                checkDetails.append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ")  validated in the checks.\n");
               }
             } else {
               // update to other relevant addresses
