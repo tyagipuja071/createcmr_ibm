@@ -9,6 +9,8 @@ import java.util.Queue;
 
 import javax.persistence.EntityManager;
 
+import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
+
 /**
  * @author 136786PH1
  *
@@ -16,6 +18,7 @@ import javax.persistence.EntityManager;
 public class SwissMultiService extends MultiThreadedBatchService<Long> {
 
   private SWISSService service = new SWISSService();
+  private boolean countryMapInit = false;
 
   public enum Mode {
     Single, MassUpdt
@@ -46,6 +49,11 @@ public class SwissMultiService extends MultiThreadedBatchService<Long> {
   @Override
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
     this.service.initClientSwiss();
+    synchronized (this) {
+      if (!this.countryMapInit) {
+        LandedCountryMap.init(entityManager);
+      }
+    }
     switch (this.mode) {
     case MassUpdt:
       this.service.monitorCreqcmrMassUpd(entityManager, requests);
