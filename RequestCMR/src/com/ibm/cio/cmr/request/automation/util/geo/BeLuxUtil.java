@@ -306,7 +306,7 @@ public class BeLuxUtil extends AutomationUtil {
       query.setParameter("ISSUING_CNTRY", cmrCntry);
       searchTerms = query.getResults();
     }
-    if (searchTerms != null && searchTerms.size() == 1) {
+    if (searchTerms != null) {
       String searchTerm = (String) searchTerms.get(0)[0];
       container.setSearchterm(searchTerm);
     }
