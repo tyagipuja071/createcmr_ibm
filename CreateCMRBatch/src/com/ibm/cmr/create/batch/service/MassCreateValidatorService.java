@@ -48,7 +48,6 @@ import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CATaxHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoNonUSHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CityAndCountyHandler;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CoverageBgGlcISUHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CreatebyModelHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.DPLCheckHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.DataHandler;
@@ -385,7 +384,7 @@ public class MassCreateValidatorService extends BaseBatchService {
         engine.addHandler(new CreatebyModelHandler());
         engine.addHandler(new AddressHandler());
         engine.addHandler(new SubindustryISICHandler());
-        engine.addHandler(new CoverageBgGlcISUHandler());
+        // engine.addHandler(new CoverageBgGlcISUHandler());
         engine.addHandler(new TgmeAddrStdHandler());
         engine.addHandler(new USPostCodeAndStateHandler());
         engine.addHandler(new CityAndCountyHandler());
