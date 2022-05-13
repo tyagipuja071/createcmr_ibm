@@ -9,6 +9,8 @@ import java.util.Queue;
 
 import javax.persistence.EntityManager;
 
+import org.apache.log4j.Logger;
+
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 
 /**
@@ -17,6 +19,7 @@ import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
  */
 public class SwissMultiService extends MultiThreadedBatchService<Long> {
 
+  private static final Logger LOG = Logger.getLogger(SwissMultiService.class);
   private SWISSService service = new SWISSService();
   private boolean countryMapInit = false;
 
@@ -29,6 +32,7 @@ public class SwissMultiService extends MultiThreadedBatchService<Long> {
   @Override
   protected Queue<Long> getRequestsToProcess(EntityManager entityManager) {
     List<Long> records = null;
+    LOG.debug("Gathering requests. MODE: " + this.mode);
     switch (this.mode) {
     case MassUpdt:
       records = this.service.gatherMassUpdateRequests(entityManager);
@@ -49,9 +53,11 @@ public class SwissMultiService extends MultiThreadedBatchService<Long> {
   @Override
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
     this.service.initClientSwiss();
+    LOG.debug("Processing requests. MODE: " + this.mode);
     synchronized (this) {
       if (!this.countryMapInit) {
         LandedCountryMap.init(entityManager);
+        this.countryMapInit = true;
       }
     }
     switch (this.mode) {
@@ -59,7 +65,7 @@ public class SwissMultiService extends MultiThreadedBatchService<Long> {
       this.service.monitorCreqcmrMassUpd(entityManager, requests);
       break;
     case Single:
-      this.service.monitorCreqcmrMassUpd(entityManager, requests);
+      this.service.monitorCreqcmr(entityManager, requests);
       break;
     default:
       break;
