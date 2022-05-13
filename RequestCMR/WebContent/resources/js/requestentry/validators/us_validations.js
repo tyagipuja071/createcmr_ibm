@@ -7,6 +7,7 @@
 var _usSicmenHandler = null;
 var _usIsuHandler = null;
 var _usSicm = "";
+var _kukla = "";
 /**
  * Adds the validator for Invoice-to that only 3 address lines can be specified
  */
@@ -231,9 +232,13 @@ function afterConfigForUS() {
     FormManager.enable('clientTier');
   }
 
-  if (_pagemodel.reqType == 'U' && (role == 'Requester' || role == 'Processor')) {
+  if (_pagemodel.reqType == 'U') {
     FormManager.show('CustClass', 'custClass');
-    FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
+    if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
+      FormManager.readOnly('custClass');
+    } else {
+      FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
+    }
   } else {
     FormManager.removeValidator('custClass', Validators.REQUIRED);
     FormManager.hide('CustClass', 'custClass');
