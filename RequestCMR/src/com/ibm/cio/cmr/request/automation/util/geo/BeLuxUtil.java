@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
@@ -546,7 +547,12 @@ public class BeLuxUtil extends AutomationUtil {
                 // check against D&B
                 matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
               }
-              if (!matchesDnb) {
+              boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+              if ("U".equals(admin.getReqType()) && payGoAddredited) {
+                LOG.debug("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
+                checkDetails.append("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
+                admin.setPaygoProcessIndc("Y");
+              } else if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                 resultCodes.add("X");
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
@@ -559,7 +565,6 @@ public class BeLuxUtil extends AutomationUtil {
                       + dnb.getDnbCountry() + "\n\n");
                 }
               }
-
             }
 
             String soldToCustNm1 = requestData.getAddress("ZS01").getCustNm1();
