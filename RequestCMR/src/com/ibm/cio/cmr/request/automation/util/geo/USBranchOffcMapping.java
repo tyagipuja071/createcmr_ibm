@@ -275,7 +275,7 @@ public class USBranchOffcMapping {
           calculatedMtkgArDept = "7NZ";
         }
       } else if ("Y".equals(admin.getPaygoProcessIndc())) {
-        calculatedMtkgArDept = PAYGO_SVC_ARBO;
+        calculatedMtkgArDept = PAYGO_MKT_ARBO;
       } else {
         if (data != null && StringUtils.isNotBlank(data.getEnterprise())) {
           /*
