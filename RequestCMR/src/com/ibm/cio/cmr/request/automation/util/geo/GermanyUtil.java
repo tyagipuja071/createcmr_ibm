@@ -648,6 +648,17 @@ public class GermanyUtil extends AutomationUtil {
             LOG.debug("Updates to the Order Block field are validated.");
           }
         }
+      } else if (changes.isDataChanged("Abbreviated Name (TELX1)")) {
+        UpdatedDataModel AbbrevNameChange = changes.getDataChange("Abbreviated Name (TELX1)");
+        String oldAbbrName = insertGermanCharacters(AbbrevNameChange.getOldData());
+        if (oldAbbrName.equals(AbbrevNameChange.getNewData())) {
+          detail.append("Updates to the Abbreviated Name field are validated.\n");
+          LOG.debug("Updates to the Abbreviated Name field are validated.");
+        } else {
+          isNegativeCheckNeedeed = true;
+          detail.append("Updates to Abbreviated Name field were found, review is required.\n");
+          LOG.debug("Updates to Abbreviated Name field were found, review is required.");
+        }
       } else {
         boolean otherFieldsChanged = false;
         for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
