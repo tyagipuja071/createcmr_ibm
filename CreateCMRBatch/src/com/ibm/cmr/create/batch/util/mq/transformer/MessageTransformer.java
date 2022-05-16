@@ -399,6 +399,7 @@ public abstract class MessageTransformer {
   public boolean isPG01Supported() {
     return false;
   }
+
   public String getDupCreationCountryId(EntityManager entityManager, String cntry, String cmrNo) {
     return "NA";
   }
