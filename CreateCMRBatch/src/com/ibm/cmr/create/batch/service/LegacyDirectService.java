@@ -202,7 +202,7 @@ public class LegacyDirectService extends TransConnService {
     ProcessRequest request = null;
     for (Admin admin : pending) {
       try {
-        this.cmrObjects = prepareRequest(entityManager, admin);
+        this.cmrObjects = prepareRequest(entityManager, admin, true);
         data = this.cmrObjects.getData();
 
         request = new ProcessRequest();
@@ -2156,6 +2156,20 @@ public class LegacyDirectService extends TransConnService {
    * @throws Exception
    */
   private CMRRequestContainer prepareRequest(EntityManager entityManager, Admin admin) throws Exception {
+    return prepareRequest(entityManager, admin, false);
+  }
+
+  /**
+   * Retrieves the {@link Admin}, {@link Data}, and {@link Addr} records based
+   * on the request
+   * 
+   * @param cmmaMgr
+   * @param reqId
+   * @param toRdc
+   * @return
+   * @throws Exception
+   */
+  private CMRRequestContainer prepareRequest(EntityManager entityManager, Admin admin, boolean toRdc) throws Exception {
     LOG.debug("Preparing Request Objects... ");
     CMRRequestContainer container = new CMRRequestContainer();
 
@@ -2185,7 +2199,11 @@ public class LegacyDirectService extends TransConnService {
 
       if (types.length() > 0) {
         // CREATCMR-5865 add PG01 globally as supported
-        sql += " and ADDR_TYPE in ( " + types.toString() + ", 'PG01') ";
+        if (toRdc) {
+          sql += " and ADDR_TYPE in ( " + types.toString() + ", 'PG01') ";
+        } else {
+          sql += " and ADDR_TYPE in ( " + types.toString() + ") ";
+        }
       }
       StringBuilder orderBy = new StringBuilder();
       int orderIndex = 0;

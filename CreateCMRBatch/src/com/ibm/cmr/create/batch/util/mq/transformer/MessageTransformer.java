@@ -343,6 +343,11 @@ public abstract class MessageTransformer {
   }
 
   public boolean skipLegacyAddressData(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    // CREATCMR-5865 - global change to NOT create paygo billing addresses in
+    // legacy
+    if ("PG01".equals(currAddr.getId().getAddrType())) {
+      return true;
+    }
     return false;
   }
 
@@ -399,6 +404,7 @@ public abstract class MessageTransformer {
   public boolean isPG01Supported() {
     return false;
   }
+
   public String getDupCreationCountryId(EntityManager entityManager, String cntry, String cmrNo) {
     return "NA";
   }
