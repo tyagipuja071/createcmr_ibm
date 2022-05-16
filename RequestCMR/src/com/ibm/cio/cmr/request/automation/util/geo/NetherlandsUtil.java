@@ -450,7 +450,12 @@ public class NetherlandsUtil extends AutomationUtil {
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
     Addr zs01 = requestData.getAddress("ZS01");
-    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
+//    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
+    LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
+        && !changes.isAddressChanged("ZI01");
+
     if (admin.getReqType().equals("U")) {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
     }
@@ -459,6 +464,15 @@ public class NetherlandsUtil extends AutomationUtil {
       addresses = requestData.getAddresses(addrType);
       if (changes.isAddressChanged(addrType)) {
         for (Addr addr : addresses) {
+          List<String> addrTypesChanged = new ArrayList<String>();
+          for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
+            if (!addrTypesChanged.contains(addrModel.getAddrTypeCode())) {
+              addrTypesChanged.add(addrModel.getAddrTypeCode());
+            }
+          }
+
+          boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(addrType) && "PG".equals(data.getOrdBlk()));
+
           if (isRelevantAddressFieldUpdated(changes, addr, nonRelAddrFdsDetails)) {
 
             if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SOLD_TO) && "Y".equals(addr.getImportInd()))) {
@@ -468,6 +482,7 @@ public class NetherlandsUtil extends AutomationUtil {
                 // check against D&B
                 matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
               }
+             
               if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                 resultCodes.add("D");
@@ -521,6 +536,27 @@ public class NetherlandsUtil extends AutomationUtil {
                   LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                   resultCodes.add("D");
+                } else if ((payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) || isZS01WithAufsdPG) {
+                  if ("N".equals(addr.getImportInd())) {
+                    LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                    boolean duplicate = addressExists(entityManager, addr, requestData);
+                    if (duplicate) {
+                      LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                      checkDetails
+                          .append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing Bill-To address.\n");
+                      resultCodes.add("D");
+                    } 
+                    else {
+                      LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                      checkDetails.append(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")" + "with same attentionTo");
+                      checkDetails
+                          .append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ") validated in the checks.\n");
+
+                   }
+                  } else {
+                    checkDetails
+                        .append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ") validated in the checks.\n");
+                  }
                 } else {
                   LOG.debug("Addition/Updation of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Address (" + addr.getId().getAddrSeq() + ") is validated.\n");
