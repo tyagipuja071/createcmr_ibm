@@ -1681,6 +1681,43 @@ function clientTierCodeValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 // CREATCMR-4293
+function validateSortl() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqId = FormManager.getActualValue('reqId');
+        var searchTerm = FormManager.getActualValue('searchTerm');
+        var letterNumber = /^[0-9a-zA-Z]+$/;
+        var qParams = {
+          REQ_ID : reqId,
+        };
+        var result = cmr.query('GET.SEARCH_TERM_DATA_RDC', qParams);
+        if (result != null) {
+          searchTermDataRdc = result.ret1;
+        }
+
+        if (searchTermDataRdc != searchTerm) {
+          console.log("validating Sortl..");
+          if (searchTerm.length != 8) {
+            return new ValidationResult(null, false, 'SORTL should be 8 characters long.');
+          }
+
+          if (!searchTerm.match(letterNumber)) {
+            return new ValidationResult({
+              id : 'searchTerm',
+              type : 'text',
+              name : 'searchTerm'
+            }, false, 'SORTL should be alpha numeric.');
+          }
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+
 
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
@@ -1743,4 +1780,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.SWISS);
+  GEOHandler.registerValidator(validateSortl, GEOHandler.SWISS, null, true);
 });
