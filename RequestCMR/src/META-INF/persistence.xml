@@ -96,8 +96,12 @@
     <class>com.ibm.cio.cmr.request.entity.MrcIsuPK</class>
     <class>com.ibm.cio.cmr.request.entity.A11t0scc</class>
     <class>com.ibm.cio.cmr.request.entity.A11t0sccPK</class>
+    <class>com.ibm.cio.cmr.request.entity.USCMRScc</class>
+    <class>com.ibm.cio.cmr.request.entity.USCMRSccPK</class>
     <class>com.ibm.cio.cmr.request.entity.RequestChangeLog</class>
     <class>com.ibm.cio.cmr.request.entity.RequestChangeLogPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Changelog</class>
+    <class>com.ibm.cio.cmr.request.entity.ChangelogPK</class>
     <class>com.ibm.cio.cmr.request.entity.DefaultApprovalConditions</class>
     <class>com.ibm.cio.cmr.request.entity.DefaultApprovalConditionsPK</class>
     <class>com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients</class>
@@ -200,6 +204,27 @@
     <class>com.ibm.cio.cmr.request.entity.ReftUnsicWPK</class>
     <class>com.ibm.cio.cmr.request.entity.RepTeam</class>
     <class>com.ibm.cio.cmr.request.entity.RepTeamPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.USCompany</class>
+    <class>com.ibm.cio.cmr.request.entity.USCompanyPK</class>
+    <class>com.ibm.cio.cmr.request.entity.USEnterprise</class>
+    <class>com.ibm.cio.cmr.request.entity.USEnterprisePK</class>
+    <class>com.ibm.cio.cmr.request.entity.USTaxData</class>
+    <class>com.ibm.cio.cmr.request.entity.USTaxDataPK</class>
+    <class>com.ibm.cio.cmr.request.entity.BPData</class>
+    <class>com.ibm.cio.cmr.request.entity.BPDataPK</class>
+    <class>com.ibm.cio.cmr.request.entity.USBusinessPartnerMaster</class>
+    <class>com.ibm.cio.cmr.request.entity.USBusinessPartnerMasterPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.USIbmBo</class>
+    <class>com.ibm.cio.cmr.request.entity.USIbmBoPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.USIbmOrg</class>
+    <class>com.ibm.cio.cmr.request.entity.USIbmOrgPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.USTCRUpdtQueue</class>
+    <class>com.ibm.cio.cmr.request.entity.USTCRUpdtQueuePK</class>
+    
     <properties>
     <!-- ORIGINAL -->
       <property name="openjpa.ConnectionFactoryMode" value="managed" />

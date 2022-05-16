@@ -311,7 +311,21 @@ var _allGroups = [ {
     "href" : cmr.CONTEXT_ROOT + '/code/scclist',
     "name" : "SCC Information",
     "description" : "Maintains SCC Entries for Standard City Service (US Only)",
-    "table" : "CREQCMR.A11T0SCC",
+    "table" : "CREQCMR.US_CMR_SCC",
+    "subType" : false,
+    "parent" : "United States"
+  }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/bpintlist',
+    "name" : "Business Partner Codes",
+    "description" : "Maintains US Business Partner Codes Service (US Only)",
+    "table" : "SAPR3.US_BP_INT_CODES",
+    "subType" : false,
+    "parent" : "United States"
+  }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/restrictlist',
+    "name" : "Restrict Codes",
+    "description" : "Maintains US Restrict Codes Service (US Only)",
+    "table" : "SAPR3.US_RESTRICT_CODES",
     "subType" : false,
     "parent" : "United States"
   }, {
@@ -319,6 +333,34 @@ var _allGroups = [ {
     "name" : "IBM Internal Division/Department",
     "description" : "Maintains IBM Internal Division/Department mappings (US Only)",
     "table" : "CREQCMR.LOV",
+    "subType" : false,
+    "parent" : "United States"
+  }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/us_bp_master',
+    "name" : "US Business Partner Master",
+    "description" : "Maintains US Business Partner Master Service (US Only)",
+    "table" : "SAPR3.US_BP_MASTER",
+    "subType" : false,
+    "parent" : "United States"
+  }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/us_ibm_bo',
+    "name" : "US IBM BO",
+    "description" : "Maintains US IBM BO Service (US Only)",
+    "table" : "SAPR3.US_IBM_BO",
+    "subType" : false,
+    "parent" : "United States"
+  }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/us_ibm_org',
+    "name" : "US IBM ORG",
+    "description" : "Maintains US IBM ORG Service (US Only)",
+    "table" : "SAPR3.US_IBM_ORG",
+    "subType" : false,
+    "parent" : "United States"
+  }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/us_tcr_updt_queue',
+    "name" : "US TCR UPDT QUEUE",
+    "description" : "Maintains US TCR UPDT QUEUE Service (US Only)",
+    "table" : "USINTERIM.US_TCR_UPDT_QUEUE",
     "subType" : false,
     "parent" : "United States"
   }, {
@@ -377,8 +419,7 @@ var _allGroups = [ {
     "table" : "CREQCMR.AP_CUST_CLUSTER_TIER_MAP",
     "subType" : false,
     "parent" : "Asia Pacific"
-  },
-  {
+  }, {
     "href" : null,
     "name" : "Germany",
     "description" : null,
@@ -392,6 +433,5 @@ var _allGroups = [ {
     "table" : "CREQCMR.LOV",
     "subType" : false,
     "parent" : "Germany"
-  }, 
-  ]
+  }, ]
 } ];

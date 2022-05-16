@@ -145,6 +145,7 @@ public class TransConnService extends BaseBatchService {
       ChangeLogListener.setUser(BATCH_USER_ID);
 
       List<Long> records = null;
+
       LOG.info("Processing Aborted records (retry)...");
       records = gatherAbortedRecords(entityManager);
       monitorAbortedRecords(entityManager, records);
@@ -1612,7 +1613,7 @@ public class TransConnService extends BaseBatchService {
     List<Addr> addrList = addrQuery.getResults(Addr.class);
     for (Addr addr : addrList) {
       addr.setSapNo(record.getSapNo());
-      addr.setIerpSitePrtyId(record.getIerpSitePartyId());
+      addr.setIerpSitePrtyId("S" + record.getSapNo());
       addr.setRdcCreateDt(record.getCreateDate());
       addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
       LOG.info("Address Record Updated [Request ID: " + addr.getId().getReqId() + " Type: " + addr.getId().getAddrType() + " SAP No: "
@@ -2312,6 +2313,30 @@ public class TransConnService extends BaseBatchService {
         affiliate.setField("KONZS");
         affiliate.setValue(massUpdtData.getAffiliate());
         requestDataValueRecords.add(affiliate);
+      }
+
+      // add KUKLA
+      if (!StringUtils.isBlank(massUpdtData.getCustClass())) {
+        RequestValueRecord kukla = new RequestValueRecord();
+        kukla.setField("KUKLA");
+        kukla.setValue(massUpdtData.getCustClass());
+        requestDataValueRecords.add(kukla);
+      }
+
+      // add Order Block
+      if (!StringUtils.isBlank(massUpdtData.getOrdBlk())) {
+        RequestValueRecord ordblk = new RequestValueRecord();
+        ordblk.setField("AUFSD");
+        ordblk.setValue(massUpdtData.getOrdBlk());
+        requestDataValueRecords.add(ordblk);
+      }
+
+      // Misc Bill Code
+      if (!StringUtils.isBlank(massUpdtData.getMiscBillCd())) {
+        RequestValueRecord miscbill = new RequestValueRecord();
+        miscbill.setField("MISCBILLCD");
+        miscbill.setValue(massUpdtData.getMiscBillCd());
+        requestDataValueRecords.add(miscbill);
       }
 
       // set requestDataValueRecords list updatDataRec

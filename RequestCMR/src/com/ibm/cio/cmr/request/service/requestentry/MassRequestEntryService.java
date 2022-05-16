@@ -252,6 +252,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         performCancelRequest(trans, model, entityManager, request);
       }
     }
+
   }
 
   private void performLDMassDplChecking(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request, Admin admin)
@@ -1906,6 +1907,20 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   if (!validateMassUpdateCA(item.getInputStream())) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
+                } else if (PageManager.fromGeo("US", cmrIssuingCntry)) {
+                  // CREATCMR-4872
+                  boolean requesterFromTaxTeam = false;
+                  String strRequesterId = admin.getRequesterId().toLowerCase();
+                  requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
+                  if (requesterFromTaxTeam) {
+                    if (!validateMassUpdateUSTaxTeam(item.getInputStream())) {
+                      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                    }
+                  } else {
+                    if (!validateMassUpdateUS(item.getInputStream())) {
+                      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                    }
+                  }
                 } else {
                   if (!validateMassUpdateFile(item.getInputStream())) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
@@ -2067,6 +2082,277 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       uploadDir.mkdir();
     }
     return uploadDir;
+  }
+
+  public boolean validateMassUpdateUS(InputStream mfStream) throws Exception {
+
+    Workbook mfWb = new XSSFWorkbook(mfStream);
+
+    Sheet dataSheet = mfWb.getSheet(CMR_SHEET_NAME);
+    Sheet cfgSheet = mfWb.getSheet(CONFIG_SHEET_NAME);
+
+    // Get valid ISU codes
+    List<String> validISUCodes = getValidISUCodes();
+
+    // validate Sheets
+    if (dataSheet == null || cfgSheet == null) {
+      log.error("Mass file does not contain valid sheet names.");
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+    }
+
+    // Set config fields
+    DataFormatter df = new DataFormatter();
+    HashMap<String, Integer> dataLmt = new HashMap<>();
+    HashMap<String, Integer> addrLmt = new HashMap<>(); // For ZS01 , ZI01 ,
+
+    try {
+      for (Row cfgRow : cfgSheet) {
+        if (cfgRow.getRowNum() >= CONFIG_ROW_NO) {
+          String addrTyp = df.formatCellValue(cfgRow.getCell(0));
+          String field = df.formatCellValue(cfgRow.getCell(1));
+          int fieldNo = (int) cfgRow.getCell(2).getNumericCellValue();
+          int length = (int) cfgRow.getCell(3).getNumericCellValue();
+
+          if (!StringUtils.isEmpty(addrTyp) && CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrTyp.trim())) {
+            ZS01_FLD.put(field, fieldNo);
+            addrLmt.put(field, length);
+          } else if (!StringUtils.isEmpty(addrTyp) && CmrConstants.ADDR_TYPE.ZI01.toString().equals(addrTyp.trim())) {
+            ZI01_FLD.put(field, fieldNo);
+          } else {
+            DATA_FLD.put(field, fieldNo);
+            dataLmt.put(field, length);
+          }
+        }
+      }
+    } catch (Exception e) {
+      log.error("Error reading the config sheet, Column and Field Length should be numeric");
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE_CONFIG);
+    }
+
+    // Required: Check cmrNo, and field lengths
+    int cmrRecords = 0;
+    String isuCd = null;
+    for (Row cmrRow : dataSheet) {
+      if (cmrRow.getRowNum() >= CMR_ROW_NO) {
+        if (isRowValid(cmrRow)) {
+          cmrRecords++;
+
+          String val = "";
+          if (StringUtils.isEmpty(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CMR_NO") - 1)).trim())
+              || !StringUtils.isAlphanumeric(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CMR_NO") - 1)))) {
+            log.error("CMR number field is required and should be alphanumeric: row " + (cmrRow.getRowNum() + 1));
+            throw new CmrException(MessageUtil.ERROR_MASS_FILE_CMR_ROW, Integer.toString(cmrRow.getRowNum() + 1));
+          }
+
+          isuCd = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("ISU_CD") - 1)).trim();
+          if (!StringUtils.isEmpty(isuCd) && !validISUCodes.contains(isuCd)) {
+            log.error("Mass file has invalid ISU Code in row " + (cmrRow.getRowNum() + 1));
+            throw new CmrException(MessageUtil.ERROR_MASS_FILE_ISU_CD, Integer.toString(cmrRow.getRowNum() + 1));
+          }
+
+          for (String key : dataLmt.keySet()) {
+            val = df.formatCellValue(cmrRow.getCell(DATA_FLD.get(key) - 1));
+            if (val.length() > dataLmt.get(key)) {
+              log.error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + " exceeded the limit");
+              throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROW, Integer.toString(cmrRow.getRowNum() + 1));
+            }
+          }
+          for (String key : addrLmt.keySet()) {
+            val = df.formatCellValue(cmrRow.getCell(ZS01_FLD.get(key) - 1));
+            if (val != null && val.length() > addrLmt.get(key)) {
+              log.error(key + " ZS01 value on row no. " + (cmrRow.getRowNum() + 1) + " exceeded the limit");
+              throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROW, Integer.toString(cmrRow.getRowNum() + 1));
+            }
+            val = df.formatCellValue(cmrRow.getCell(ZI01_FLD.get(key) - 1));
+            if (val != null && val.length() > addrLmt.get(key)) {
+              log.error(key + " ZI01 value on row no. " + (cmrRow.getRowNum() + 1) + " exceeded the limit");
+              throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROW, Integer.toString(cmrRow.getRowNum() + 1));
+            }
+          }
+          // validate#ofRows if <= MASS_UPDATE_MAX_ROWS
+          String maxRows = SystemConfiguration.getValue("MASS_UPDATE_MAX_ROWS");
+          if (cmrRecords > (Integer.parseInt(maxRows) + 1)) {
+            log.error("Total cmrRecords exceed theh maximum limit of " + maxRows);
+            throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROWS, maxRows);
+          }
+        }
+      }
+    }
+
+    // validate if has CMR rows
+    if (cmrRecords <= 0) {
+      log.error("No valid records to process...");
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE_EMPTY);
+    }
+
+    log.debug("Total cmrRecords = " + cmrRecords);
+
+    // Add validations here...
+
+    return true;
+
+  }
+
+  // CREATCMR-4872
+  public boolean validateMassUpdateUSTaxTeam(InputStream mfStream) throws Exception {
+
+    Workbook mfWb = new XSSFWorkbook(mfStream);
+    String errTxtVal = "";
+    String errTaxStatus = "";
+    Sheet dataSheet = mfWb.getSheet(CMR_SHEET_NAME);
+    Sheet cfgSheet = mfWb.getSheet(CONFIG_SHEET_NAME);
+    // valid TaxTeam
+    List<String> validTaxfields = Arrays.asList("TAX_EXEMPT_STATUS_1", "TAX_EXEMPT_STATUS_2", "TAX_EXEMPT_STATUS_3", "TAX_CD1", "TAX_CD2", "TAX_CD3",
+        "ICC_TAX_CLASS", "ICC_TAX_EXEMPT_STATUS", "CMR_NO", "OUT_CITY_LIMIT", "CITY1", "COUNTY", "STATE_PROV", "LAND_CNTRY");
+    // CREATCMR-5447
+    List<String> validTaxExemptStatus = Arrays.asList("A", "B", "M", "N", "O", "P", "Q", "R", "S", "T", "V", "Z", "X");
+    // validate Sheets
+    List<String> errRowNo = new ArrayList<String>();
+    if (dataSheet == null || cfgSheet == null) {
+      log.error("Mass file does not contain valid sheet names.");
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+    }
+
+    // Set config fields
+    DataFormatter df = new DataFormatter();
+    HashMap<String, Integer> dataLmt = new HashMap<>();
+    HashMap<String, Integer> addrLmt = new HashMap<>(); // For ZS01 , ZI01 ,
+
+    try {
+      for (Row cfgRow : cfgSheet) {
+        if (cfgRow.getRowNum() >= CONFIG_ROW_NO) {
+          String addrTyp = df.formatCellValue(cfgRow.getCell(0));
+          String field = df.formatCellValue(cfgRow.getCell(1));
+          int fieldNo = (int) cfgRow.getCell(2).getNumericCellValue();
+          int length = (int) cfgRow.getCell(3).getNumericCellValue();
+
+          if (!StringUtils.isEmpty(addrTyp) && CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrTyp.trim())) {
+            ZS01_FLD.put(field, fieldNo);
+            addrLmt.put(field, length);
+          } else if (!StringUtils.isEmpty(addrTyp) && CmrConstants.ADDR_TYPE.ZI01.toString().equals(addrTyp.trim())) {
+            ZI01_FLD.put(field, fieldNo);
+          } else {
+            DATA_FLD.put(field, fieldNo);
+            dataLmt.put(field, length);
+          }
+        }
+      }
+    } catch (Exception e) {
+      log.error("Error reading the config sheet, Column and Field Length should be numeric");
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE_CONFIG);
+    }
+
+    // Required: Check cmrNo, and field lengths
+    int cmrRecords = 0;
+    for (Row cmrRow : dataSheet) {
+      if (cmrRow.getRowNum() >= CMR_ROW_NO) {
+        if (isRowValid(cmrRow)) {
+          cmrRecords++;
+          String val = "";
+          if (StringUtils.isEmpty(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CMR_NO") - 1)).trim())
+              || !StringUtils.isAlphanumeric(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CMR_NO") - 1)))) {
+            log.error("CMR number field is required and should be alphanumeric: row " + (cmrRow.getRowNum() + 1));
+            throw new CmrException(MessageUtil.ERROR_MASS_FILE_CMR_ROW, Integer.toString(cmrRow.getRowNum() + 1));
+          }
+
+          for (String key : dataLmt.keySet()) {
+            val = df.formatCellValue(cmrRow.getCell(DATA_FLD.get(key) - 1));
+            if (!StringUtils.isEmpty(val)) {
+              if (validTaxfields.contains(key)) {
+                // CREATCMR-5447
+                if ((key.equals("ICC_TAX_EXEMPT_STATUS") || key.equals("TAX_EXEMPT_STATUS_1") || key.equals("TAX_EXEMPT_STATUS_2")
+                    || key.equals("TAX_EXEMPT_STATUS_3")) && !validTaxExemptStatus.contains(val)) {
+                  log.error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + " cannot be update");
+                  if (!StringUtils.isEmpty(errTaxStatus)) {
+                    errTaxStatus = errTaxStatus + ", row " + Integer.toString(cmrRow.getRowNum() + 1);
+                  } else {
+                    errTaxStatus = Integer.toString(cmrRow.getRowNum() + 1);
+                  }
+                  break;
+                } else {
+                  if (val.length() > dataLmt.get(key)) {
+                    log.error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + " exceeded the limit");
+                    throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROW, Integer.toString(cmrRow.getRowNum() + 1));
+                  }
+                }
+
+              } else {
+                log.error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + " cannot be update");
+                errRowNo.add(Integer.toString(cmrRow.getRowNum() + 1));
+                if (!StringUtils.isEmpty(errTxtVal)) {
+                  errTxtVal = errTxtVal + ", row " + Integer.toString(cmrRow.getRowNum() + 1);
+                } else {
+                  errTxtVal = Integer.toString(cmrRow.getRowNum() + 1);
+                }
+                break;
+              }
+            }
+          }
+          for (String key : addrLmt.keySet()) {
+            val = df.formatCellValue(cmrRow.getCell(ZS01_FLD.get(key) - 1));
+            if (!StringUtils.isEmpty(val)) {
+              if (validTaxfields.contains(key)) {
+                // CREATCMR-5447
+                if (val.length() > addrLmt.get(key)) {
+                  log.error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + " exceeded the limit");
+                  throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROW, Integer.toString(cmrRow.getRowNum() + 1));
+                }
+              } else {
+                log.error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + "  cannot be update");
+                if (!errRowNo.contains(Integer.toString(cmrRow.getRowNum() + 1))) {
+                  errRowNo.add(Integer.toString(cmrRow.getRowNum() + 1));
+                  if (!StringUtils.isEmpty(errTxtVal)) {
+                    errTxtVal = errTxtVal + ", row " + Integer.toString(cmrRow.getRowNum() + 1);
+                  } else {
+                    errTxtVal = Integer.toString(cmrRow.getRowNum() + 1);
+                  }
+                }
+                break;
+              }
+            }
+
+            val = df.formatCellValue(cmrRow.getCell(ZI01_FLD.get(key) - 1));
+            if (!StringUtils.isEmpty(val)) {
+              log.error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + "  cannot be update");
+              if (!errRowNo.contains(Integer.toString(cmrRow.getRowNum() + 1))) {
+                errRowNo.add(Integer.toString(cmrRow.getRowNum() + 1));
+                if (!StringUtils.isEmpty(errTxtVal)) {
+                  errTxtVal = errTxtVal + ", row " + Integer.toString(cmrRow.getRowNum() + 1);
+                } else {
+                  errTxtVal = Integer.toString(cmrRow.getRowNum() + 1);
+                }
+              }
+              break;
+            }
+          }
+          // validate#ofRows if <= MASS_UPDATE_MAX_ROWS
+          String maxRows = SystemConfiguration.getValue("MASS_UPDATE_MAX_ROWS");
+          if (cmrRecords > (Integer.parseInt(maxRows) + 1)) {
+            log.error("Total cmrRecords exceed theh maximum limit of " + maxRows);
+            throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROWS, maxRows);
+          }
+        }
+      }
+    }
+
+    // validate if has CMR rows
+    if (cmrRecords <= 0) {
+      log.error("No valid records to process...");
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE_EMPTY);
+    }
+
+    if (!StringUtils.isEmpty(errTxtVal)) {
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE_TAX_TEAM, errTxtVal);
+    }
+
+    if (!StringUtils.isEmpty(errTaxStatus)) {
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE_TAX_TEAM_STATUS, errTaxStatus);
+    }
+
+    log.debug("Total cmrRecords = " + cmrRecords);
+
+    return true;
+
   }
 
   public boolean validateMassUpdateFile(InputStream mfStream) throws Exception {
@@ -2881,8 +3167,30 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           model.setIsuCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("ISU_CD") - 1)));
           model.setInacCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("INAC_CD") - 1)));
           model.setClientTier(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CLIENT_TIER") - 1)));
-          // model.setTaxExemptStatus(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_EXEMPT_STATUS_1")
-          // - 1)));
+          model.setTaxExemptStatus(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_EXEMPT_STATUS_1") - 1)));
+          model.setTaxExemptStatus2(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_EXEMPT_STATUS_2") - 1)));
+          model.setTaxExemptStatus3(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_EXEMPT_STATUS_3") - 1)));
+
+          String ordBlkTxt = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("ORD_BLK") - 1));
+          StringBuilder ordBlkVal = new StringBuilder();
+          if (StringUtils.isNotBlank(ordBlkTxt)) {
+            ordBlkVal.append(ordBlkTxt.substring(0, 1));
+            if (ordBlkTxt.contains("INSTALL")) {
+              ordBlkVal.append("S");
+            } else if (ordBlkTxt.contains("INVOICE")) {
+              ordBlkVal.append("I");
+            } else if (ordBlkTxt.contains("BOTH")) {
+              ordBlkVal.append("B");
+            }
+          }
+          model.setOrdBlk(ordBlkVal.toString());
+
+          // CREATCMR-4569
+          model.setSearchTerm(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("SEARCH_TERM") - 1)));
+          // CREATCMR-3942
+          model.setCustClass(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CUST_CLASS") - 1)));
+          // CREATCMR-4879
+          model.setEducAllowCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("EDUC_ALLOW_CD") - 1)));
 
           // if (!"Y".equals(massUpdtRdcOnly)) {
           List<MassUpdateAddressModel> addrList = new ArrayList<>();
@@ -4658,7 +4966,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             }
           }
         }
-
         if (!StringUtils.isEmpty(errTxt.toString())) {
           throw new Exception(errTxt.toString());
         }
