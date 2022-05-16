@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -36,6 +37,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.Person;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
@@ -58,6 +60,8 @@ public class GermanyUtil extends AutomationUtil {
   private static final String POSTAL_CD_RANGE = "postalCdRange";
   private static final String SORTL = "SORTL";
 
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_PAYGO_BILLING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
       "Phone #", "PostBox", "State/Province");
 
@@ -712,6 +716,8 @@ public class GermanyUtil extends AutomationUtil {
     String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
     StringBuilder detail = new StringBuilder(details);
     long reqId = requestData.getAdmin().getId().getReqId();
+    LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     if (changes != null && changes.hasAddressChanges()) {
       if (StringUtils.isNotEmpty(data.getCustClass()) && ("81".equals(data.getCustClass()) || "85".equals(data.getCustClass()))
           && !changes.hasDataChanges()) {
@@ -817,17 +823,31 @@ public class GermanyUtil extends AutomationUtil {
         validation.setMessage("Not validated");
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
       } else {
-        for (Addr addr : addressList) {
-          if ("Y".equals(addr.getImportInd())) {
-            if (!isRelevantAddressFieldUpdated(changes, addr)) {
-              validation.setSuccess(true);
-              LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
-              detail.append("Updates to relevant addresses found but have been marked as Verified.");
-              validation.setMessage("Validated");
-              isNegativeCheckNeedeed = false;
-              break;
-            } else if (isRelevantAddressFieldUpdated(changes, addr)) {
-              isNegativeCheckNeedeed = true;
+        for (String addrType : RELEVANT_ADDRESSES) {
+          for (Addr addr : addressList) {
+            List<String> addrTypesChanged = new ArrayList<String>();
+            for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
+              if (!addrTypesChanged.contains(addrModel.getAddrTypeCode())) {
+                addrTypesChanged.add(addrModel.getAddrTypeCode());
+              }
+            }
+            boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(addrType) && "PG".equals(data.getOrdBlk()));
+            if ("Y".equals(addr.getImportInd())) {
+              if ((payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) || isZS01WithAufsdPG) {
+                validation.setSuccess(true);
+                LOG.debug("Updates to PG01 addresses fields is found.Updates verified.");
+                detail.append("Updates to PG01 addresses found but have been marked as Verified.");
+                isNegativeCheckNeedeed = false;
+              } else if (!isRelevantAddressFieldUpdated(changes, addr)) {
+                validation.setSuccess(true);
+                LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
+                detail.append("Updates to relevant addresses found but have been marked as Verified.");
+                validation.setMessage("Validated");
+                isNegativeCheckNeedeed = false;
+                break;
+              } else if (isRelevantAddressFieldUpdated(changes, addr)) {
+                isNegativeCheckNeedeed = true;
+              }
             }
           }
         }
