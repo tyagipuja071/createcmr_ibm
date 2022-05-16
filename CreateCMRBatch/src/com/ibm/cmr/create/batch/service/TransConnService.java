@@ -2315,6 +2315,30 @@ public class TransConnService extends BaseBatchService {
         requestDataValueRecords.add(affiliate);
       }
 
+      // add KUKLA
+      if (!StringUtils.isBlank(massUpdtData.getCustClass())) {
+        RequestValueRecord kukla = new RequestValueRecord();
+        kukla.setField("KUKLA");
+        kukla.setValue(massUpdtData.getCustClass());
+        requestDataValueRecords.add(kukla);
+      }
+
+      // add Order Block
+      if (!StringUtils.isBlank(massUpdtData.getOrdBlk())) {
+        RequestValueRecord ordblk = new RequestValueRecord();
+        ordblk.setField("AUFSD");
+        ordblk.setValue(massUpdtData.getOrdBlk());
+        requestDataValueRecords.add(ordblk);
+      }
+
+      // Misc Bill Code
+      if (!StringUtils.isBlank(massUpdtData.getMiscBillCd())) {
+        RequestValueRecord miscbill = new RequestValueRecord();
+        miscbill.setField("MISCBILLCD");
+        miscbill.setValue(massUpdtData.getMiscBillCd());
+        requestDataValueRecords.add(miscbill);
+      }
+
       // set requestDataValueRecords list updatDataRec
       updtDataRec.setValues(requestDataValueRecords);
       int recordSize = updtDataRec.getValues().size();
