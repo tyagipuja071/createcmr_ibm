@@ -99,6 +99,10 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   private String taxCd2;
 
   @Column(
+      name = "TAX_CD3")
+  private String taxCd3;
+
+  @Column(
       name = "MEM_LVL")
   private String memLvl;
 
@@ -325,6 +329,40 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   @Column(
       name = "SPECIAL_TAX_CD")
   private String specialTaxCd;
+
+  @Column(
+      name = "TAX_EXEMPT_STATUS_1")
+  private String taxExempt1;
+
+  public String getTaxExempt1() {
+    return taxExempt1;
+  }
+
+  public void setTaxExempt1(String taxExempt1) {
+    this.taxExempt1 = taxExempt1;
+  }
+
+  @Column(name = "TAX_EXEMPT_STATUS_2")
+  private String taxExempt2;
+
+  @Column(name = "TAX_EXEMPT_STATUS_3")
+  private String taxExempt3;
+
+  public String getTaxExempt2() {
+    return taxExempt2;
+  }
+
+  public void setTaxExempt2(String taxExempt2) {
+    this.taxExempt2 = taxExempt2;
+  }
+
+  public String getTaxExempt3() {
+    return taxExempt3;
+  }
+
+  public void setTaxExempt3(String taxExempt3) {
+    this.taxExempt3 = taxExempt3;
+  }
 
   @Column(
       name = "ABBREV_LOCN")
@@ -559,16 +597,15 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   private String custAcctType;
 
   @Column(
-      name = "TAX_PAYER_CUST_CD")
-  private String taxPayerCustCd;
-  
-  @Column(
       name = "CUST_INVOICE_COPIES")
   private String cusInvoiceCopies;
 
   @Column(
       name = "LOCN_NO")
   private String locationNumber;
+
+  @Column(name = "TAX_PAYER_CUST_CD")
+  private String taxPayerCustCd;
 
   public String getCusInvoiceCopies() {
     return cusInvoiceCopies;
@@ -1712,6 +1749,14 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   public void setLocationNumber(String locationNumber) {
     this.locationNumber = locationNumber;
+  }
+
+  public String getTaxCd3() {
+    return this.taxCd3;
+  }
+
+  public void setTaxCd3(String taxCd3) {
+    this.taxCd3 = taxCd3;
   }
 
 }

@@ -35,8 +35,8 @@ var FieldInfoService = (function() {
       return '<a href="javascript: FieldInfoService.open(\'' + id + '\', \'' + seq + '\', \'' + cmrIssuingCntry + '\')">' + value + '</a>';
     },
     open : function(id, seq, cmrIssuingCntry) {
-      window.location = cmr.CONTEXT_ROOT + '/code/field_info_details?fieldId=' + encodeURIComponent(id) + '&&seqNo=' + encodeURIComponent(seq) + '&&cmrIssuingCntry='
-          + encodeURIComponent(cmrIssuingCntry);
+      window.location = cmr.CONTEXT_ROOT + '/code/field_info_details?fieldId=' + encodeURIComponent(id) + '&&seqNo=' + encodeURIComponent(seq)
+          + '&&cmrIssuingCntry=' + encodeURIComponent(cmrIssuingCntry);
     },
     addFieldInfo : function() {
       window.location = cmr.CONTEXT_ROOT + '/code/field_info_details';
@@ -53,7 +53,8 @@ var FieldInfoService = (function() {
       } else {
         seq = 1;
       }
-      window.location = cmr.CONTEXT_ROOT + '/code/field_info_details?newseq=Y&type=' + type + '&cntry=' + cntry + '&fieldId=' + encodeURIComponent(fieldId) + '&seqNo=' + seq;
+      window.location = cmr.CONTEXT_ROOT + '/code/field_info_details?newseq=Y&type=' + type + '&cntry=' + cntry + '&fieldId='
+          + encodeURIComponent(fieldId) + '&seqNo=' + seq;
     },
     saveFieldInfo : function(newField) {
       FormManager.save('frmCMR');
@@ -103,7 +104,7 @@ var UserService = (function() {
       }
       dojo.byId('userrolecmt').value = comments;
       var roles = '';
-      for ( var i = 0; i < _CMR_ROLES.length; i++) {
+      for (var i = 0; i < _CMR_ROLES.length; i++) {
         if (dojo.byId('chk_' + _CMR_ROLES[i]) && dojo.byId('chk_' + _CMR_ROLES[i]).checked) {
           roles += roles.length > 0 ? ',' : '';
           roles += _CMR_ROLES[i].replace('|', ':');
@@ -208,11 +209,12 @@ function submitbds(value) {
   document.forms['frmCMRSearch'].submit();
 }
 
-var _CMR_ROLES = [ 'ADMIN|', 'REQUESTER|', 'PROCESSOR|PROC_BASIC', 'PROCESSOR|PROC_VALIDATOR', 'PROCESSOR|PROC_SUBMITTER', 'USER|', 'CMDE|', 'WS_ADMIN|'];
+var _CMR_ROLES = [ 'ADMIN|', 'REQUESTER|', 'PROCESSOR|PROC_BASIC', 'PROCESSOR|PROC_VALIDATOR', 'PROCESSOR|PROC_SUBMITTER', 'USER|', 'CMDE|',
+    'WS_ADMIN|', 'GTS_CROSS|' ];
 function addRolesModal_onLoad() {
-  for ( var i = 0; i < _CMR_ROLES.length; i++) {
+  for (var i = 0; i < _CMR_ROLES.length; i++) {
     cmr.showNode(_CMR_ROLES[i]);
-    if (dojo.byId('chk_' + _CMR_ROLES[i])){
+    if (dojo.byId('chk_' + _CMR_ROLES[i])) {
       dojo.byId('chk_' + _CMR_ROLES[i]).checked = false;
     }
   }
@@ -222,7 +224,7 @@ function addRolesModal_onLoad() {
   }
 
   var key = '';
-  for ( var i = 0; i < CmrGrid.GRIDS.userRoleListGrid_GRID.rowCount; i++) {
+  for (var i = 0; i < CmrGrid.GRIDS.userRoleListGrid_GRID.rowCount; i++) {
     key = CmrGrid.GRIDS.userRoleListGrid_GRID.getItem(i).roleId[0];
     key += '|' + CmrGrid.GRIDS.userRoleListGrid_GRID.getItem(i).subRoleId[0];
     cmr.hideNode(key.trim());
@@ -235,14 +237,91 @@ var SCCService = (function() {
       window.location = cmr.CONTEXT_ROOT + '/code/scc_details';
     },
     searchSCC : function() {
-      if (FormManager.getActualValue('nSt') == '') {
-        cmr.showAlert('Please select the State to filter results.');
+      if (FormManager.getActualValue('nSt') == '' && FormManager.getActualValue('nLand') == '') {
+        cmr.showAlert('Please select the State or Land Cntry to filter results.');
         return;
       }
-      CmrGrid.refresh('sccListGrid', cmr.CONTEXT_ROOT + '/scclist.json', 'nSt=:nSt&nCity=:nCity&nCnty=:nCnty');
+      CmrGrid.refresh('sccListGrid', cmr.CONTEXT_ROOT + '/scclist.json', 'nSt=:nSt&nCity=:nCity&nCnty=:nCnty&nLand=:nLand');
     },
-    saveSCC : function() {
-      FormManager.save('frmCMR');
+    saveSCC : function(newSCC, sccId) {
+      var cCity = FormManager.getActualValue('cCity');
+      var cCnty = FormManager.getActualValue('cCnty');
+      var cSt = FormManager.getActualValue('cSt');
+      var nLand = FormManager.getActualValue('nLand');
+      var cZip = FormManager.getActualValue('cZip');
+      if (newSCC) {
+        /* Create */
+        if (cCity == '' || cCity == null) {
+          cCity = 0;
+        }
+        if (cCnty == '' || cCnty == null) {
+          cCnty = 0;
+        }
+        if (cSt == '' || cSt == null) {
+          cSt = 0;
+        }
+        var result = null;
+        if (nLand == 'US') {
+          result = cmr.query('VALIDATOR.SCC_RECORD', {
+            C_CITY : cCity,
+            C_ST : cSt
+          });
+        } else {
+          result = cmr.query('VALIDATOR.SCC_RECORD_NONUS', {
+            C_CITY : cCity,
+            N_LAND : nLand
+          });
+        }
+        if (result.ret1 == null || result.ret1 == "") {
+          FormManager.save('frmCMR');
+        } else {
+          if (nLand == 'US') {
+            cmr.showAlert('The combination of State Code and City Code already exist,please check your input and resend your request.');
+          } else {
+            cmr.showAlert('The combination of Landed Country and City Code already exist,please check your input and resend your request.');
+          }
+          return;
+        }
+      } else {
+        /* Update */
+        var result = null;
+        result = cmr.query('VALIDATOR.GETCCITY', {
+          SCCID : sccId
+        });
+
+        if (cZip.length > 5) {
+          cmr.showAlert('Zip Code maxlength 5 char.');
+          $('#cZip').attr('maxlength', '5');
+          return;
+        }
+
+        if ((cSt != '99.0' && result.ret1 == cCity) || (cSt == '99.0' && result.ret1 == cCity && result.ret2 == nLand)) {
+          FormManager.save('frmCMR');
+        } else {
+          if (cSt == '99.0') {
+            result = cmr.query('VALIDATOR.SCC_RECORD_NONUS', {
+              C_CITY : cCity,
+              N_LAND : nLand
+            });
+          } else {
+            result = cmr.query('VALIDATOR.SCC_RECORD', {
+              C_CITY : cCity,
+              C_ST : cSt
+            });
+          }
+          if (result.ret1 == null || result.ret1 == "") {
+            FormManager.save('frmCMR');
+          } else {
+            if (cSt == '99.0') {
+              cmr.showAlert('The combination of Landed Country and City Code already exist,please check your input and resend your request.');
+            } else {
+              cmr.showAlert('The combination of State Code and City Code already exist,please check your input and resend your request.');
+            }
+            return;
+          }
+        }
+      }
+
     },
     stateFormatter : function(value, rowIndex) {
       if (value == "''") {
@@ -251,16 +330,44 @@ var SCCService = (function() {
         return value;
       }
     },
+    removeSCC : function(sccId) {
+      cmr.showConfirm('SCCService.actualRemoveSCC(\"' + sccId + '\")', 'Are you sure remove the SCC record?');
+    },
+    updateSCC : function(sccId) {
+      window.location = cmr.CONTEXT_ROOT + '/code/sccdetails?sccId=' + encodeURIComponent(sccId);
+    },
+    actualRemoveSCC : function(sccId) {
+      window.location = cmr.CONTEXT_ROOT + '/code/delete?sccId=' + sccId;
+    },
+    sccActionIcons : function(value, rowIndex) {
+      var imgloc = cmr.CONTEXT_ROOT + '/resources/images/';
+
+      var rowData = this.grid.getItem(0);
+      if (rowData == null) {
+        return ''; // not more than 1 record
+      }
+      rowData = this.grid.getItem(rowIndex);
+      var nSt = rowData.nSt[0];
+      var nCnty = rowData.nCnty[0];
+      var nCity = rowData.nCity[0];
+      var cZip = rowData.cZip;
+      var sccId = rowData.sccId[0];
+      var actions = '';
+      actions += '<img src="' + imgloc + 'addr-edit-icon.png" class="addr-icon" title="Update" onclick="SCCService.updateSCC(\'' + sccId + '\')">';
+      actions += '<img src="' + imgloc + 'addr-remove-icon.png" class="addr-icon" title="Delete" onclick="SCCService.removeSCC(\'' + sccId + '\')">';
+      return actions;
+    },
     cityFormatter : function(value, rowIndex) {
       var rowData = this.grid.getItem(rowIndex);
       var city = rowData.nCity;
       var state = rowData.nSt;
       var county = rowData.nCnty;
       var zip = rowData.cZip;
+      var sccId = rowData.sccId[0];
       if (state == '\'\'') {
         state = '\\\'\\\'';
       }
-      return '<a href="javascript: SCCService.openSCC(\'' + city + '\', \'' + state + '\',\'' + county + '\',\'' + zip + '\')">' + value + '</a>';
+      return '<a href="javascript: SCCService.openSCC(\'' + sccId + '\')">' + value + '</a>';
     },
     zipFormatter : function(value, rowIndex) {
       var rowData = this.grid.getItem(rowIndex);
@@ -272,9 +379,32 @@ var SCCService = (function() {
       zip = zip.substring(0, 5) + '-' + zip.substring(5);
       return zip;
     },
-    openSCC : function(city, state, county, zip) {
-      window.location = cmr.CONTEXT_ROOT + '/code/sccdetails?nSt=' + encodeURIComponent(state) + '&nCity=' + encodeURIComponent(city) + '&nCnty=' + encodeURIComponent(county) + '&cZip='
-          + encodeURIComponent(zip);
+    newZipFormatter : function(value, rowIndex) {
+      var rowData = this.grid.getItem(rowIndex);
+      var zip = rowData.cZip[0] + '';
+
+      if (zip.length < 5) {
+        while (zip.length < 5) {
+          zip = '0' + zip;
+        }
+        zip = zip.substring(0, 5);
+        return zip;
+      }
+
+      if (zip.length == '5') {
+        return zip;
+      }
+
+      if (zip.length > 5 && zip.length <= 9) {
+        while (zip.length < 9) {
+          zip = '0' + zip;
+        }
+        zip = zip.substring(0, 5);
+        return zip;
+      }
+    },
+    openSCC : function(sccId) {
+      window.location = cmr.CONTEXT_ROOT + '/code/sccdetails?sccId=' + encodeURIComponent(sccId);
     },
     addSCC : function(nonUS) {
       window.location = cmr.CONTEXT_ROOT + '/code/sccdetails' + (nonUS ? '?nonUS=Y' : '');
@@ -290,7 +420,7 @@ function userRoleListGrid_showCheck(value, rowIndex, grid) {
   var rowData = grid.getItem(rowIndex);
   var role = rowData.roleId[0];
   console.log(role);
-  if (role == 'USER' || role == 'REQUESTER' || role == 'PROCESSOR'){
+  if (role == 'USER' || role == 'REQUESTER' || role == 'PROCESSOR') {
     return false;
   }
   return true;

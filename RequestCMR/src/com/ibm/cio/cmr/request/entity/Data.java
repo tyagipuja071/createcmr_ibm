@@ -659,6 +659,39 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
   @Column(name = "US_SICMEN")
   private String usSicmen;
 
+  @Column(name = "TAX_EXEMPT_STATUS_1")
+  private String taxExemptStatus1;
+
+  @Column(name = "TAX_EXEMPT_STATUS_2")
+  private String taxExemptStatus2;
+
+  @Column(name = "TAX_EXEMPT_STATUS_3")
+  private String taxExemptStatus3;
+
+  public String getTaxExemptStatus1() {
+    return taxExemptStatus1;
+  }
+
+  public void setTaxExemptStatus1(String taxExemptStatus1) {
+    this.taxExemptStatus1 = taxExemptStatus1;
+  }
+
+  public String getTaxExemptStatus2() {
+    return taxExemptStatus2;
+  }
+
+  public void setTaxExemptStatus2(String taxExemptStatus2) {
+    this.taxExemptStatus2 = taxExemptStatus2;
+  }
+
+  public String getTaxExemptStatus3() {
+    return taxExemptStatus3;
+  }
+
+  public void setTaxExemptStatus3(String taxExemptStatus3) {
+    this.taxExemptStatus3 = taxExemptStatus3;
+  }
+
   private String military;
 
   public String getVatExempt() {

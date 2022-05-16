@@ -216,6 +216,16 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       // }
 
       // }
+
+      if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry())) {
+        if ("C".equals(admin.getReqType())) {
+          if ("ZS01".equals(model.getAddrType())) {
+            newAddrSeq = "001";
+          } else if ("ZI01".equals(model.getAddrType())) {
+            newAddrSeq = "002";
+          }
+        }
+      }
       if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry())) {
         if ("U".equals(admin.getReqType())) {
           String maxAddrSeq = null;

@@ -33,6 +33,26 @@ public class A11t0sccPK extends BaseEntityPk implements Serializable {
   @Column(name = "C_ZIP")
   private float cZip;
 
+  @Column(name = "C_CNTY")
+  private float cCnty;
+
+  @Column(name = "C_CITY")
+  private float cCity;
+
+  @Column(name = "C_ST")
+  private float cSt;
+
+  @Column(name = "LAND_CNTRY")
+  private String nLand;
+
+  public String getNCity() {
+    return this.nCity;
+  }
+
+  public void setNCity(String nCity) {
+    this.nCity = nCity;
+  }
+
   @Override
   public boolean equals(Object other) {
     if (this == other) {
@@ -93,5 +113,37 @@ public class A11t0sccPK extends BaseEntityPk implements Serializable {
 
   public void setcZip(float cZip) {
     this.cZip = cZip;
+  }
+
+  public float getcCity() {
+    return cCity;
+  }
+
+  public void setcCity(float cCity) {
+    this.cCity = cCity;
+  }
+
+  public float getcCnty() {
+    return cCnty;
+  }
+
+  public void setcCnty(float cCnty) {
+    this.cCnty = cCnty;
+  }
+
+  public float getcSt() {
+    return cSt;
+  }
+
+  public void setcSt(float cSt) {
+    this.cSt = cSt;
+  }
+
+  public String getnLand() {
+    return nLand;
+  }
+
+  public void setnLand(String nLand) {
+    this.nLand = nLand;
   }
 }
