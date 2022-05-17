@@ -357,7 +357,7 @@ public class BELUXHandler extends BaseSOFHandler {
     String cmrtAddrTYpe = getSingleAddrType(cmrtAddr);
     List<String> rdcAddrSeqList = new ArrayList<String>();
     for (FindCMRRecordModel record : findCMRRecordList) {
-      if (cmrtAddrTYpe.equals(record.getCmrAddrTypeCode())) {
+      if (cmrtAddrTYpe.equals(record.getCmrAddrTypeCode()) || cmrtAddrSeq.equals(record.getCmrAddrSeq())) {
         rdcAddrSeqList.add(StringUtils.leftPad(String.valueOf(record.getCmrAddrSeq()), 5, '0'));
       }
     }
