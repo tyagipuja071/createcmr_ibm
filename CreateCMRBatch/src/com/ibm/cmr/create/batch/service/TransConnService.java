@@ -1613,7 +1613,7 @@ public class TransConnService extends BaseBatchService {
     List<Addr> addrList = addrQuery.getResults(Addr.class);
     for (Addr addr : addrList) {
       addr.setSapNo(record.getSapNo());
-      addr.setIerpSitePrtyId("S" + record.getSapNo());
+      addr.setIerpSitePrtyId(record.getIerpSitePartyId());
       addr.setRdcCreateDt(record.getCreateDate());
       addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
       LOG.info("Address Record Updated [Request ID: " + addr.getId().getReqId() + " Type: " + addr.getId().getAddrType() + " SAP No: "
