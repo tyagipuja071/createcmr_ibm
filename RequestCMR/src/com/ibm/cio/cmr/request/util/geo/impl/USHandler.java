@@ -186,7 +186,8 @@ public class USHandler extends GEOHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel cmr) throws Exception {
 
-    String processingType = PageManager.getProcessingType("897", "U");
+    // String processingType = PageManager.getProcessingType("897", "U");
+    String processingType = RequestUtils.getProcessingType(entityManager, "897");
 
     String cmrNo = cmr.getCmrNum();
     if (!NumberUtils.isDigits(cmrNo)) {
@@ -566,7 +567,8 @@ public class USHandler extends GEOHandler {
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel cmr, String cmrNo) throws Exception {
 
     // try US CMR DB first
-    String processingType = PageManager.getProcessingType("897", "U");
+    // String processingType = PageManager.getProcessingType("897", "U");
+    String processingType = RequestUtils.getProcessingType(entityManager, "897");
 
     if (cmrNo != null && "TC".equals(processingType)) {
       String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
