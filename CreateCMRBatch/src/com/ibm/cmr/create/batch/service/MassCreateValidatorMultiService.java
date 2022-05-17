@@ -161,6 +161,10 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
         String defaultApprovalResult = approvalService.processDefaultApproval(entityManager, request.getId().getReqId(),
             CmrConstants.REQ_TYPE_MASS_CREATE, dummyUser, new RequestEntryModel());
         LOG.debug("Default Approval Response Code " + defaultApprovalResult);
+        if ("897".equals(data.getCmrIssuingCntry())) {
+          // For US no need approval
+          defaultApprovalResult = "";
+        }
         if (StringUtils.isBlank(defaultApprovalResult)) {
           request.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
           processingCenter = getProcessingCenter(entityManager, data.getCmrIssuingCntry());
