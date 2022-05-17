@@ -2403,19 +2403,36 @@ public class TransConnService extends BaseBatchService {
         requestDataValueRecords.add(CICCTE);
       }
       // Tax Class / Code 2
-      if (!StringUtils.isBlank(massUpdtData.getTaxCd2())) {
+      if (!StringUtils.isBlank(massUpdtData.getTaxCd2()) && massUpdtData.getTaxCd2().length() == 4) {
         RequestValueRecord ITAXCLASS2 = new RequestValueRecord();
         ITAXCLASS2.setField("I_TAX_CLASS_2");
-        ITAXCLASS2.setValue(massUpdtData.getTaxCd2());
+        ITAXCLASS2.setValue(massUpdtData.getTaxCd2().substring(1, 4));
         requestDataValueRecords.add(ITAXCLASS2);
       }
+
+      // I_TYPE_CUST_2
+      if (!StringUtils.isBlank(massUpdtData.getTaxCd2()) && massUpdtData.getTaxCd2().length() == 4) {
+        RequestValueRecord ITYPECUST2 = new RequestValueRecord();
+        ITYPECUST2.setField("I_TYPE_CUST_2");
+        ITYPECUST2.setValue(massUpdtData.getTaxCd2().substring(0, 1));
+        requestDataValueRecords.add(ITYPECUST2);
+      }
       // Tax Class / Code 3
-      if (!StringUtils.isBlank(massUpdtData.getTaxCd3())) {
+      if (!StringUtils.isBlank(massUpdtData.getTaxCd3()) && massUpdtData.getTaxCd3().length() == 4) {
         RequestValueRecord ITAXCLASS3 = new RequestValueRecord();
         ITAXCLASS3.setField("I_TAX_CLASS_3");
-        ITAXCLASS3.setValue(massUpdtData.getTaxCd3());
+        ITAXCLASS3.setValue(massUpdtData.getTaxCd3().substring(1, 4));
         requestDataValueRecords.add(ITAXCLASS3);
       }
+
+      // I_TYPE_CUST_3
+      if (!StringUtils.isBlank(massUpdtData.getTaxCd3()) && massUpdtData.getTaxCd3().length() == 4) {
+        RequestValueRecord ITYPECUST3 = new RequestValueRecord();
+        ITYPECUST3.setField("I_TYPE_CUST_3");
+        ITYPECUST3.setValue(massUpdtData.getTaxCd3().substring(0, 1));
+        requestDataValueRecords.add(ITYPECUST3);
+      }
+
       // Tax Exempt Status
       if (!StringUtils.isBlank(massUpdtData.getTaxExemptStatus())) {
         RequestValueRecord CTECERTST1 = new RequestValueRecord();
