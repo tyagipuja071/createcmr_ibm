@@ -2461,6 +2461,13 @@ public class TransConnService extends BaseBatchService {
         EASTATUS.setValue(massUpdtData.getEducAllowCd());
         requestDataValueRecords.add(EASTATUS);
       }
+      // Out of City Limits
+      if (!StringUtils.isBlank(massUpdtData.getOutCityLimit())) {
+        RequestValueRecord FOCL = new RequestValueRecord();
+        FOCL.setField("F_OCL");
+        FOCL.setValue(massUpdtData.getOutCityLimit());
+        requestDataValueRecords.add(FOCL);
+      }
       // CREATCMR-5828
 
       // set requestDataValueRecords list updatDataRec
