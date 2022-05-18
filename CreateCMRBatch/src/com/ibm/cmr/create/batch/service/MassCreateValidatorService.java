@@ -170,6 +170,7 @@ public class MassCreateValidatorService extends BaseBatchService {
       // process records that passed validation
 
       boolean approvalsNeeded = false;
+      String defaultApprovalResult = "";
       LOG.info("Mass Create Request ID: " + request.getId().getReqId() + " passed system validations.");
       switch (originalStatus) {
       case "SVA":
@@ -182,12 +183,14 @@ public class MassCreateValidatorService extends BaseBatchService {
         dummyUser.setIntranetId(BATCH_USER_ID);
         dummyUser.setBluePagesName(BATCH_USER_ID);
         LOG.debug("Checking default approvals for Request " + request.getId().getReqId());
-        String defaultApprovalResult = approvalService.processDefaultApproval(entityManager, request.getId().getReqId(),
-            CmrConstants.REQ_TYPE_MASS_CREATE, dummyUser, new RequestEntryModel());
-        LOG.debug("Default Approval Response Code " + defaultApprovalResult);
         if ("897".equals(data.getCmrIssuingCntry())) {
           // For US no need approval
           defaultApprovalResult = "";
+        } else {
+          defaultApprovalResult = approvalService.processDefaultApproval(entityManager, request.getId().getReqId(),
+              CmrConstants.REQ_TYPE_MASS_CREATE,
+              dummyUser, new RequestEntryModel());
+          LOG.debug("Default Approval Response Code " + defaultApprovalResult);
         }
         if (StringUtils.isBlank(defaultApprovalResult)) {
           request.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
