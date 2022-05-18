@@ -202,6 +202,11 @@ public class USHandler extends GEOHandler {
       data.setUsSicmen(cmr.getCmrIsic());
     }
 
+    String zzkvLic = getZzkvLicFromRdc(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrNum());
+    if (!StringUtils.isEmpty(zzkvLic)) {
+      data.setIsicCd(zzkvLic);
+    }
+
     // retrieve BP data on import
     String bpType = getBPDataFromRdc(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
     if (!StringUtils.isEmpty(bpType)) {
@@ -1905,6 +1910,24 @@ public class USHandler extends GEOHandler {
     } else {
       return addressType;
     }
+  }
+
+  public String getZzkvLicFromRdc(EntityManager entityManager, String mandt, String cmrNum) {
+    String zzkvLic = "";
+    String sql = ExternalizedQuery.getSql("US.GET.KNA1.ZZKV_LIC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("ZZKV_CUSNO", cmrNum);
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+
+      for (Object[] values : results) {
+        // String ktokd = (String) values[0];
+        // String aufsd = (String) values[1];
+        zzkvLic = (String) values[1];
+      }
+    }
+    return zzkvLic;
   }
 
 }
