@@ -292,10 +292,10 @@ public class AustriaUtil extends AutomationUtil {
               // just proceed for shipping updates
               LOG.debug("Update to ZD01 " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Updates to ZD01 (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
-            } else if (isZS01WithAufsdPG) {
-              LOG.debug("Update to ZS01 " + addrType + "(" + addr.getId().getAddrSeq() + ") with Aufsd = " + data.getOrdBlk());
-              checkDetails
-                  .append("Updates to ZS01 (" + addr.getId().getAddrSeq() + ") with Aufsd = " + data.getOrdBlk() + " skipped in the checks.\n");
+            } else if (isZS01WithAufsdPG || "PG".equals(data.getOrdBlk())) {
+              LOG.debug("Update to " + addrType + "(" + addr.getId().getAddrSeq() + ") with Aufsd = " + data.getOrdBlk());
+              checkDetails.append(
+                  "Updates to " + addrType + "(" + addr.getId().getAddrSeq() + ") with Aufsd = " + data.getOrdBlk() + " skipped in the checks.\n");
             } else {
               // update to other relevant addresses
               if (isRelevantAddressFieldUpdated(changes, addr)) {
