@@ -650,7 +650,7 @@ public class NetherlandsUtil extends AutomationUtil {
    * @return
    */
   private String getSORTLfromCoverage(EntityManager entityManager, String coverage) {
-    String sortl = "";
+    List<String> sortlList = null;
     try {
       LOG.debug("Computing SORTL for Coverage " + coverage);
       String sql = ExternalizedQuery.getSql("AUTO.NL.COV.SORTL");
@@ -659,12 +659,16 @@ public class NetherlandsUtil extends AutomationUtil {
       query.setParameter("COVID", coverage);
       query.setParameter("KATR6", SystemLocation.NETHERLANDS);
       query.setForReadOnly(true);
-      sortl = query.getSingleResult(String.class);
+      sortlList = query.getResults(20, String.class);
     } catch (Exception e) {
       LOG.debug("Error while computing SORTL for Coverage " + coverage + " from RDc query.");
     }
-    if (sortl != null && !StringUtils.isBlank(sortl)) {
-      return sortl;
+    if (sortlList != null) {
+      for (String sortl : sortlList) {
+        if (StringUtils.isNotBlank(sortl) && sortl.length() == 6) {
+          return sortl;
+        }
+      }
     }
     return null;
   }
