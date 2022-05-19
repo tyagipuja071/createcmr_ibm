@@ -1031,6 +1031,8 @@ public class USHandler extends GEOHandler {
         }
       }
     }
+
+    data.setTaxExemptStatus1(data.getSpecialTaxCd());
     // CREATCMR-4569
 
   }
