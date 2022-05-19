@@ -225,6 +225,12 @@
     <class>com.ibm.cio.cmr.request.entity.USTCRUpdtQueue</class>
     <class>com.ibm.cio.cmr.request.entity.USTCRUpdtQueuePK</class>
     
+    <class>com.ibm.cio.cmr.request.entity.BPCodeInt</class>
+    <class>com.ibm.cio.cmr.request.entity.BPCodeIntPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.RestrictToCode</class>
+    <class>com.ibm.cio.cmr.request.entity.RestrictToCodePK</class>
+    
     <properties>
     <!-- ORIGINAL -->
       <property name="openjpa.ConnectionFactoryMode" value="managed" />
