@@ -7,11 +7,18 @@ var _vatExemptHandler = null;
 var _bpRelTypeHandlerGCG = null;
 var  _isuHandler = null;
 var _clusterHandlerANZ = null;
+var _inacCdHandlerIN = null;
+var _importIndIN = null;
 
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
     _isicHandlerAP = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
       setIsuOnIsic();
+    });
+  }
+  if (_inacCdHandlerIN == null) {
+    _inacCdHandlerIN = dojo.connect(FormManager.getField('inacCd'), 'onChange', function(value) {
+      lockInacTypeForIGF();
     });
   }
   if (_isuHandler == null) {
@@ -3935,6 +3942,61 @@ function validateCustNameForInternal() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function getImportIndForIndia(reqId) {
+  var results = cmr.query('VALIDATOR.IMPORTED_IN', {
+    REQID : reqId
+  });
+  var importInd = 'N';
+  if (results != null && results.ret1) {
+    importInd = results.ret1;
+  }
+  console.log('import indicator value for request ID: ' + reqId + ' is ' + importInd);
+  return importInd;
+}
+
+function lockInacTypeForIGF() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqId = FormManager.getActualValue('reqId');
+
+  if (role == 'REQUESTER' && custSubGrp == 'IGF') {
+    if (_importIndIN != null) {
+      if (_importIndIN == 'Y') {
+        FormManager.setValue('inacType','');
+        FormManager.readOnly('inacType');
+      }
+    }
+  }
+}
+
+function lockInacCodeForIGF() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqId = FormManager.getActualValue('reqId');
+
+  if (role == 'REQUESTER' && custSubGrp == 'IGF') {
+    var existingCmr = getImportIndForIndia(reqId);
+    if (existingCmr == 'Y') {
+      _importIndIN =  existingCmr;
+      FormManager.setValue('inacCd', '');
+      FormManager.readOnly('inacCd');
+      lockInacTypeForIGF();
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4090,5 +4152,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(clusterCdValidatorAU, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.AP, null, true);
   GEOHandler.registerValidator(validateClusterBaseOnScenario, [ SysLoc.SINGAPORE ], null, true);  
+  GEOHandler.addAfterConfig(lockInacCodeForIGF, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, SysLoc.INDIA);
   // India Handler
 });

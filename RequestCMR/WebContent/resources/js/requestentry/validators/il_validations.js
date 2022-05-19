@@ -2618,6 +2618,22 @@ function inacValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function validateLandedCountry() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+    var reqType = FormManager.getActualValue('reqType');
+    var landCntry = FormManager.getActualValue('landCntry');
+
+    if (reqType == 'U' && landCntry == '') {
+          return new ValidationResult(null, false, 'Landed Country cannot be blanked out.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -2703,7 +2719,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddrFieldsLimitation, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(inacValidator, [ SysLoc.ISRAEL ], null, true);
-  
+  GEOHandler.registerValidator(validateLandedCountry, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.addAfterTemplateLoad(preTickVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setStreetContBehavior, [ SysLoc.ISRAEL ]);
