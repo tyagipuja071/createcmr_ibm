@@ -55,6 +55,8 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
   protected TerminatorThread terminator = null;
   protected boolean skipExit;
 
+  protected String context = BatchEntryPoint.currentContextName;
+
   /**
    * Constructor
    */
@@ -97,7 +99,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     this.startTime = new Date().getTime();
 
     LOG.info("Starting application at " + TIME_FORMATTER.format(new Date(this.startTime)));
-    LOG.info("Executing " + getClass().getSimpleName() + " batch application..");
+    LOG.info("Executing " + getClass().getSimpleName() + " batch application.. (Context: " + this.context + ")");
     if (process(null, null)) {
       LOG.info("Successfully completed.");
     } else {

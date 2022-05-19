@@ -823,6 +823,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
     admin.setCovBgRetrievedInd(CmrConstants.YES_NO.Y.toString());
     admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+    String sysType = SystemConfiguration.getValue("SYSTEM_TYPE");
+    admin.setWaitInfoInd(!StringUtils.isBlank(sysType) ? sysType.substring(0, 1) : null);
     RequestUtils.setClaimDetails(admin, request);
   }
 
