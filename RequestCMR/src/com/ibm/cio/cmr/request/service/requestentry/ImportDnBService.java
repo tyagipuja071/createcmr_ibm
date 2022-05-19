@@ -808,6 +808,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     admin.setLastUpdtBy(user.getIntranetId());
     admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
     admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+    String sysType = SystemConfiguration.getValue("SYSTEM_TYPE");
+    admin.setWaitInfoInd(!StringUtils.isBlank(sysType) ? sysType.substring(0, 1) : null);
     RequestUtils.setClaimDetails(admin, request);
   }
 

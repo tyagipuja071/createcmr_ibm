@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 import com.ibm.cmr.create.batch.util.AutomationCheckAndRecover;
+import com.ibm.cmr.create.batch.util.BatchUtil;
 
 /**
  * Executes the automation engine and processes all pending records
@@ -84,6 +85,10 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
         RequestData requestData = new RequestData(entityManager, id);
         if (requestData.getAdmin() == null || requestData.getData() == null) {
           throw new IllegalArgumentException("The records for reqId " + id + " cannot be found");
+        }
+        if (BatchUtil.excludeForEnvironment(entityManager, requestData)) {
+          // exclude data created from a diff env
+          continue;
         }
         if (AutomationConst.STATUS_AWAITING_REPLIES.equals(requestData.getAdmin().getReqStatus())) {
 

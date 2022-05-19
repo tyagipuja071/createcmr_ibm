@@ -8,7 +8,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import javax.persistence.EntityManager;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+
+import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 
 /**
  * Retrieves properties from batch-props.properties<br>
@@ -18,6 +28,8 @@ import org.apache.commons.lang3.StringUtils;
  * 
  */
 public class BatchUtil {
+
+  private static final Logger LOG = Logger.getLogger(BatchUtil.class);
 
   private static final ResourceBundle BUNDLE = ResourceBundle.getBundle("batch-props");
 
@@ -68,6 +80,71 @@ public class BatchUtil {
       return Arrays.asList(prop.split(","));
     }
     return new ArrayList<>();
+  }
+
+  /**
+   * Global check for environment for batch exclusion.
+   * 
+   * @param admin
+   * @return
+   */
+  public static boolean excludeForEnvironment(EntityManager entityManager, RequestData requestData) {
+    Admin admin = requestData.getAdmin();
+    boolean exclude = excludeForEnvironment(entityManager, admin);
+    if (exclude) {
+      entityManager.detach(requestData.getData());
+      entityManager.detach(requestData.getScorecard());
+      List<Addr> addresses = requestData.getAddresses();
+      for (Addr addr : addresses) {
+        entityManager.detach(addr);
+      }
+    }
+    return exclude;
+  }
+
+  public static boolean excludeForEnvironment(EntityManager entityManager, long reqId) {
+    boolean filter = "Y".equals(getProperty("env.filter"));
+    if (!filter) {
+      // no retrieval of admin if no filter
+      return false;
+    }
+    AdminPK pk = new AdminPK();
+    pk.setReqId(reqId);
+    Admin admin = entityManager.find(Admin.class, pk);
+    if (admin != null) {
+      return excludeForEnvironment(entityManager, admin);
+    } else {
+      return false;
+    }
+
+  }
+
+  /**
+   * Global check for environment for batch exclusion.
+   * 
+   * @param admin
+   * @return
+   */
+  public static boolean excludeForEnvironment(EntityManager entityManager, Admin admin) {
+    boolean filter = "Y".equals(SystemParameters.getString("XRUN.FILTER"));
+    if (filter) {
+      String sysType = SystemConfiguration.getValue("SYSTEM_TYPE");
+      if (!StringUtils.isBlank(sysType)) {
+        sysType = sysType.substring(0, 1);
+        String env = admin.getWaitInfoInd();
+        LOG.debug("Running Request " + admin.getId().getReqId() + " checks for filter: Type = " + sysType + " Record: " + env);
+        if (StringUtils.isBlank(env)) {
+          env = "";
+        }
+        boolean exclude = !sysType.equals(env);
+        if (exclude) {
+          LOG.debug(" - Request " + admin.getId().getReqId() + " excluded, env was '" + env + "'");
+          entityManager.detach(admin);
+        }
+        return exclude;
+      }
+    }
+    return false;
   }
 
 }
