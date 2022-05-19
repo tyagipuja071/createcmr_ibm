@@ -86,7 +86,7 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
         if (requestData.getAdmin() == null || requestData.getData() == null) {
           throw new IllegalArgumentException("The records for reqId " + id + " cannot be found");
         }
-        if (BatchUtil.excludeForEnvironment(entityManager, requestData)) {
+        if (BatchUtil.excludeForEnvironment(this.context, entityManager, requestData)) {
           // exclude data created from a diff env
           continue;
         }

@@ -88,9 +88,9 @@ public class BatchUtil {
    * @param admin
    * @return
    */
-  public static boolean excludeForEnvironment(EntityManager entityManager, RequestData requestData) {
+  public static boolean excludeForEnvironment(String contextName, EntityManager entityManager, RequestData requestData) {
     Admin admin = requestData.getAdmin();
-    boolean exclude = excludeForEnvironment(entityManager, admin);
+    boolean exclude = excludeForEnvironment(contextName, entityManager, admin);
     if (exclude) {
       entityManager.detach(requestData.getData());
       entityManager.detach(requestData.getScorecard());
@@ -102,8 +102,9 @@ public class BatchUtil {
     return exclude;
   }
 
-  public static boolean excludeForEnvironment(EntityManager entityManager, long reqId) {
-    boolean filter = "Y".equals(getProperty("env.filter"));
+  public static boolean excludeForEnvironment(String contextName, EntityManager entityManager, long reqId) {
+    String paramValue = SystemParameters.getString("XRUN." + contextName);
+    boolean filter = "FILTER".equals(paramValue);
     if (!filter) {
       // no retrieval of admin if no filter
       return false;
@@ -112,7 +113,7 @@ public class BatchUtil {
     pk.setReqId(reqId);
     Admin admin = entityManager.find(Admin.class, pk);
     if (admin != null) {
-      return excludeForEnvironment(entityManager, admin);
+      return excludeForEnvironment(contextName, entityManager, admin);
     } else {
       return false;
     }
@@ -125,8 +126,9 @@ public class BatchUtil {
    * @param admin
    * @return
    */
-  public static boolean excludeForEnvironment(EntityManager entityManager, Admin admin) {
-    boolean filter = "Y".equals(SystemParameters.getString("XRUN.FILTER"));
+  public static boolean excludeForEnvironment(String contextName, EntityManager entityManager, Admin admin) {
+    String paramValue = SystemParameters.getString("XRUN." + contextName);
+    boolean filter = "FILTER".equals(paramValue);
     if (filter) {
       String sysType = SystemConfiguration.getValue("SYSTEM_TYPE");
       if (!StringUtils.isBlank(sysType)) {

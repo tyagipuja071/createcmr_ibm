@@ -285,7 +285,7 @@ public class TransConnService extends BaseBatchService {
         NotifyReqPK pk = new NotifyReqPK();
         pk.setNotifyId(id);
         NotifyReq notify = entityManager.find(NotifyReq.class, pk);
-        if (!BatchUtil.excludeForEnvironment(entityManager, notify.getReqId())) {
+        if (!BatchUtil.excludeForEnvironment(this.context, entityManager, notify.getReqId())) {
           continue;
         }
         LOG.info("Processing Notify Req " + notify.getId().getNotifyId() + " [Request ID: " + notify.getReqId() + "]");
