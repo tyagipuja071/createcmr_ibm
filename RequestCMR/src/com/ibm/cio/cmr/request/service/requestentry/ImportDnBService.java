@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -542,6 +543,9 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       CNHandler cnHandler = (CNHandler) converter;
       cnHandler.convertChinaStateNameToStateCode(addr, cmr, entityManager);
     }
+    if (StringUtils.isBlank(cmr.getCmrState()) && (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()))) {
+      convertStateNameToStateCode(addr, cmr, entityManager);
+    }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {
       addr.setStateProv(null);
     }
@@ -1009,5 +1013,24 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     reqCmtLog.setUpdateTs(reqCmtLog.getCreateTs());
     service.createEntity(reqCmtLog, entityManager);
   }
-
+  
+  public void convertStateNameToStateCode(Addr addr, FindCMRRecordModel cmr, EntityManager entityManager) {
+    LOG.debug("Convert  StateName to StateCode Begin >>>");
+    String stateCode = null;
+    String stateName = cmr.getCmrState().trim();
+    List<Object[]> results = new ArrayList<Object[]>();
+    String cnStateProvCD = ExternalizedQuery.getSql("GET.CN_STATE_PROV_CD");
+    PreparedQuery query = new PreparedQuery(entityManager, cnStateProvCD);
+    query.setParameter("STATE_PROV_DESC", stateName);
+    results = query.getResults();
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      stateCode = sResult[0].toString();
+    }
+    if (StringUtils.isNotBlank(stateCode)) {
+      addr.setStateProv(stateCode);
+      cmr.setCmrState(stateCode);
+      LOG.debug("Convert StateName to StateCode End >>>");
+    }
+  }
 }

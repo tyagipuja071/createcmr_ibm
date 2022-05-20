@@ -667,7 +667,7 @@ public class TemplateColumn {
   private List<String> getBDSChoices(EntityManager entityManager, String bdsId, String country, boolean codeOnly) {
     ParamContainer params = new ParamContainer();
     
-    if (country != null && ("848".equalsIgnoreCase(country) || "618".equalsIgnoreCase(country))) {
+    if (country != null && bdsId != null && ("848".equalsIgnoreCase(country) || "618".equalsIgnoreCase(country)) && ("StateProv").equals(bdsId)) {
       String sql = ExternalizedQuery.getSql("QUERY.QUICK.GET_DEFAULT_COUNTRY");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("CNTRY", country);
