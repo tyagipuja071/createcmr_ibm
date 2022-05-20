@@ -171,6 +171,10 @@ public class BELUXHandler extends BaseSOFHandler {
                 newRecord.setCmrSapNumber(null);
                 mapCmrtAddr2FindCMRRec(newRecord, cmrAddr);
                 newRecord.setCmrAddrTypeCode(getSingleAddrType(cmrAddr));
+                if ("ZS02".equals(newRecord.getCmrAddrTypeCode())) {
+                  newRecord.setCmrSitePartyID(null);
+                  newRecord.setCmrSapNumber(null);
+                }
                 converted.add(newRecord);
               }
             }
@@ -1427,6 +1431,7 @@ public class BELUXHandler extends BaseSOFHandler {
       entityManager.flush();
 
     }
+
   }
 
   private List<Addr> getAddresses(EntityManager entityManager, Long reqId) {
@@ -2267,7 +2272,7 @@ public class BELUXHandler extends BaseSOFHandler {
         error.addError((row.getRowNum() + 1), "CMR No.",
             "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
       }
-      
+
       currCell = row.getCell(7);
       String ctc = validateColValFromCell(currCell);
       String isuCd = ""; // 6
