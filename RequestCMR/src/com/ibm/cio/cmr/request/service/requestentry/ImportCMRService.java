@@ -138,7 +138,12 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
 
       if (reqId <= 0) {
         // generate a Request ID for new requests
-        reqIdToUse = SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "REQ_ID");
+        if (reqModel.getOverrideReqId() > 0) {
+          LOG.debug("Override Req ID specified: " + reqModel.getOverrideReqId());
+          reqIdToUse = reqModel.getOverrideReqId();
+        } else {
+          reqIdToUse = SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "REQ_ID");
+        }
         newRequest = true;
       } else {
         if (mainRecord != null) {
@@ -636,7 +641,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     Map<String, Integer> seqMap = new HashMap<String, Integer>();
     Integer seq = null;
     for (FindCMRRecordModel cmr : cmrs) {
-      if(cmr.getCmrAddrTypeCode().equals("ZLST") && cmr.getCmrIssuedBy().equals("897")) {
+      if (cmr.getCmrAddrTypeCode().equals("ZLST") && cmr.getCmrIssuedBy().equals("897")) {
         continue;
       }
       addr = new Addr();
@@ -646,7 +651,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addrPk.setAddrType(type);
       if (("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) && converter != null && converter.useSeqNoFromImport()) {
         addrPk.setAddrSeq(cmr.getCmrAddrSeq());
-       
+
       } else {
         if (seqMap.get(type) == null) {
           seqMap.put(type, new Integer(0));
@@ -697,8 +702,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       } else if (StringUtils.isBlank(cmr.getCmrAddrSeq()) && "897".equals(reqModel.getCmrIssuingCntry())) {
         addrPk.setAddrSeq("ZI01".equals(type) ? "002" : ("ZP01".equals(type) ? "1" : "001"));
       }
-      
-      
+
       // end -US ZI01 null sequence Import fix - 8 Apr 2022 - garima
       addr.setId(addrPk);
 
@@ -819,6 +823,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
     admin.setCovBgRetrievedInd(CmrConstants.YES_NO.Y.toString());
     admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+    String sysType = SystemConfiguration.getValue("SYSTEM_TYPE");
+    admin.setWaitInfoInd(!StringUtils.isBlank(sysType) ? sysType.substring(0, 1) : null);
     RequestUtils.setClaimDetails(admin, request);
   }
 

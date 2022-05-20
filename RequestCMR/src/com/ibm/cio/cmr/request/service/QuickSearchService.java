@@ -108,6 +108,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
       reqModel.setCustType("CEA");
     }
     reqModel.setCountryUse(model.getSubRegion());
+    reqModel.setOverrideReqId(model.getOverrideReqId());
 
     ImportCMRModel importModel = new ImportCMRModel();
     importModel.setAddressOnly(false);

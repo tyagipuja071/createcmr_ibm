@@ -442,7 +442,9 @@ public class RequestEntryModel extends BaseModel {
 
   // korea fields
   private String installRep;
-  
+
+  private long overrideReqId;
+
   public String getMatchIndc() {
     return matchIndc;
   }
@@ -946,11 +948,11 @@ public class RequestEntryModel extends BaseModel {
   }
 
   public String getTaxPayerCustCd() {
-	return taxPayerCustCd;
+    return taxPayerCustCd;
   }
 
   public void setTaxPayerCustCd(String taxPayerCustCd) {
-	this.taxPayerCustCd = taxPayerCustCd;
+    this.taxPayerCustCd = taxPayerCustCd;
   }
 
   public String getSensitiveFlag() {
@@ -3136,13 +3138,13 @@ public class RequestEntryModel extends BaseModel {
     this.customerIdCd = customerIdCd;
   }
 
-public String getInstallRep() {
-	return installRep;
-}
+  public String getInstallRep() {
+    return installRep;
+  }
 
-public void setInstallRep(String installRep) {
-	this.installRep = installRep;
-}
+  public void setInstallRep(String installRep) {
+    this.installRep = installRep;
+  }
 
   public String getExtWalletId() {
     return extWalletId;
@@ -3150,6 +3152,14 @@ public void setInstallRep(String installRep) {
 
   public void setExtWalletId(String extWalletId) {
     this.extWalletId = extWalletId;
+  }
+
+  public long getOverrideReqId() {
+    return overrideReqId;
+  }
+
+  public void setOverrideReqId(long overrideReqId) {
+    this.overrideReqId = overrideReqId;
   }
 
 }

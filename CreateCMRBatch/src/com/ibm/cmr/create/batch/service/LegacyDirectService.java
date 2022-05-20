@@ -148,6 +148,10 @@ public class LegacyDirectService extends TransConnService {
     LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
     // pending = new ArrayList<Admin>();
     for (Admin admin : pending) {
+      if (BatchUtil.excludeForEnvironment(this.context, entityManager, admin)) {
+        // exclude data created from a diff env
+        continue;
+      }
       try {
         switch (admin.getReqType()) {
         case CmrConstants.REQ_TYPE_CREATE:
@@ -201,6 +205,10 @@ public class LegacyDirectService extends TransConnService {
     Data data = null;
     ProcessRequest request = null;
     for (Admin admin : pending) {
+      if (BatchUtil.excludeForEnvironment(this.context, entityManager, admin)) {
+        // exclude data created from a diff env
+        continue;
+      }
       try {
         this.cmrObjects = prepareRequest(entityManager, admin);
         data = this.cmrObjects.getData();
@@ -304,8 +312,9 @@ public class LegacyDirectService extends TransConnService {
     CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
 
     boolean rdcRecExists = checkIfRecExistOnRDC(entityManager, cmrObjects.getData().getCmrNo(), cmrObjects.getData().getCmrIssuingCntry()).size() > 0;
-    boolean legacyRecExists = checkIfRecExistOnLegacy(entityManager, cmrObjects.getData().getCmrNo(), cmrObjects.getData().getCmrIssuingCntry()).size() > 0;
-    
+    boolean legacyRecExists = checkIfRecExistOnLegacy(entityManager, cmrObjects.getData().getCmrNo(), cmrObjects.getData().getCmrIssuingCntry())
+        .size() > 0;
+
     if (admin.getRdcProcessingStatus() != null
         && (CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())
             || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(admin.getRdcProcessingStatus()))
@@ -4431,7 +4440,7 @@ public class LegacyDirectService extends TransConnService {
     return query.getSingleResult(AddrRdc.class);
 
   }
-  
+
   private List<Kna1> checkIfRecExistOnRDC(EntityManager entityManager, String cmrNo, String cntry) {
     String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_MANDT_CMRNO");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -4473,7 +4482,8 @@ public class LegacyDirectService extends TransConnService {
       addresses = cmrobjects.getAddresses();
       int maxseqno = 1;
       boolean isUpdate = "U".equals(cmrobjects.getAdmin().getReqType());
-      List<String> existingSeq = addresses.stream().filter(e-> !"PG01".equals(e.getId().getAddrType())).map(e -> e.getId().getAddrSeq()).collect(Collectors.toList());
+      List<String> existingSeq = addresses.stream().filter(e -> !"PG01".equals(e.getId().getAddrType())).map(e -> e.getId().getAddrSeq())
+          .collect(Collectors.toList());
       for (Addr addr : addresses) {
         if ("PG01".equals(addr.getId().getAddrType())) {
           pgs.add(addr);
@@ -4530,6 +4540,7 @@ public class LegacyDirectService extends TransConnService {
 
     return addrSeq;
   }
+
   private List<Integer> getSecondarySoldToFromRDC(EntityManager entityManager, String cmrNo, String cntry) {
     LOG.debug("Retrieve secondary sold to from RDC for Legacy Processing ");
     String sql = ExternalizedQuery.getSql("GET.RDC_SEQ.SECONDARY.SOLDTO");
