@@ -543,8 +543,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       CNHandler cnHandler = (CNHandler) converter;
       cnHandler.convertChinaStateNameToStateCode(addr, cmr, entityManager);
     }
-    if(StringUtils.isBlank(cmr.getCmrState()) &&(SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry())||SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()))){
-      convertStateNameToStateCode(addr,cmr,entityManager);
+    if (StringUtils.isBlank(cmr.getCmrState()) && (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()))) {
+      convertStateNameToStateCode(addr, cmr, entityManager);
     }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {
       addr.setStateProv(null);
