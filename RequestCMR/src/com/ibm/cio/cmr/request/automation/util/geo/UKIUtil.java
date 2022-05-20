@@ -86,24 +86,15 @@ public class UKIUtil extends AutomationUtil {
     }
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
     LOG.debug("Scenario to check: " + scenario);
-    if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario))
+   if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario))
         && (!customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
-      details
-          .append(
-              "This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities."
-                  + " \n"
-                  + "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."
-                  + " \n"
-                  + "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.")
-          .append("\n");
-      engineData.addRejectionComment("OTH",
-          "This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities."
-              + " \n"
-              + "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."
-              + " \n"
-              + "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.",
-          "", "");
-      return false;
+      details.append("This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities." + " \n" + 
+      "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."  + " \n" + 
+    		  "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.").append("\n");
+      engineData.addRejectionComment("OTH", "This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities." + " \n" + 
+      "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."  + " \n" + 
+    		  "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.", "", "");
+       return false;
     } else if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_CROSSBORDER.equals(scenario)
         || SCENARIO_CROSS_GOVERNMENT.equals(scenario)) && !addressEquals(zs01, zi01)) {
       details.append("Billing and Installing addresses are not same. Request will require CMDE review before proceeding.").append("\n");
@@ -761,8 +752,7 @@ public class UKIUtil extends AutomationUtil {
       String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
       String repTeamCd = "";
       String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
-      // 2P0 in repTeamCd refers to 2.0 for distinguishing and fetching the
-      // values according to CREATCMR-4530 logic.
+    //2P0 in repTeamCd refers to 2.0 for distinguishing and fetching the values according to CREATCMR-4530 logic.
       repTeamCd = isuCtc + "2P0";
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("ISU_CD", "%" + isuCd + "%");
