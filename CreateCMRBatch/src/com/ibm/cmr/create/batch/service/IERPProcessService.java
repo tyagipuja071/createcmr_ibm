@@ -354,6 +354,10 @@ public class IERPProcessService extends BaseBatchService {
       // start processing
       for (CompoundEntity entity : reqIdList) {
         Admin admin = entity.getEntity(Admin.class);
+        if (BatchUtil.excludeForEnvironment(this.context, em, admin)) {
+          // exclude data created from a diff env
+          continue;
+        }
         Data data = entity.getEntity(Data.class);
         // create a entry in request's comment log re_cmt_log table
         if (admin != null && !CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
