@@ -758,21 +758,16 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         addr.setDplChkInfo(null);
       }
 
-      if (SystemLocation.ISRAEL.equals(reqModel.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(reqModel.getReqType())
-          && StringUtils.isBlank(cmr.getCmrSapNumber())) {
-        addr.setChangedIndc("Y");
-      } else {
-        AddrRdc rdc = new AddrRdc();
-        AddrPK rdcpk = new AddrPK();
-        PropertyUtils.copyProperties(rdc, addr);
-        PropertyUtils.copyProperties(rdcpk, addr.getId());
-        rdc.setId(rdcpk);
-        reqEntryService.updateEntity(rdc, entityManager);
-        // if (this.autoEngineProcess) {
-        // } else {
-        // reqEntryService.createEntity(rdc, entityManager);
-        // }
-      }
+      AddrRdc rdc = new AddrRdc();
+      AddrPK rdcpk = new AddrPK();
+      PropertyUtils.copyProperties(rdc, addr);
+      PropertyUtils.copyProperties(rdcpk, addr.getId());
+      rdc.setId(rdcpk);
+      reqEntryService.updateEntity(rdc, entityManager);
+      // if (this.autoEngineProcess) {
+      // } else {
+      // reqEntryService.createEntity(rdc, entityManager);
+      // }
 
       reqEntryService.updateEntity(addr, entityManager);
       // if (this.autoEngineProcess) {

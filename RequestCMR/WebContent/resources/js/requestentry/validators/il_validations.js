@@ -1191,7 +1191,7 @@ function canRemoveAddress(value, rowIndex, grid) {
   var rowData = grid.getItem(rowIndex);
   var importInd = rowData.importInd[0];
   var reqType = FormManager.getActualValue('reqType');
-  if ('U' == reqType && 'Y' == importInd) {
+  if ('U' == reqType && ('Y' == importInd || 'L' == importInd)) {
     return false;
   }
   return true;
