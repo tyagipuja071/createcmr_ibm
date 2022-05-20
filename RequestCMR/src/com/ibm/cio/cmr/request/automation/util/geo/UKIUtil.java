@@ -88,12 +88,21 @@ public class UKIUtil extends AutomationUtil {
     LOG.debug("Scenario to check: " + scenario);
     if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario))
         && (!customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
-      details.append("This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities." + " \n" + 
-      "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."  + " \n" + 
-    		  "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.").append("\n");
-      engineData.addRejectionComment("OTH", "This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities." + " \n" + 
-      "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."  + " \n" + 
-    		  "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.", "", "");
+      details
+          .append(
+              "This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities."
+                  + " \n"
+                  + "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."
+                  + " \n"
+                  + "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.")
+          .append("\n");
+      engineData.addRejectionComment("OTH",
+          "This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities."
+              + " \n"
+              + "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."
+              + " \n"
+              + "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.",
+          "", "");
       return false;
     } else if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_CROSSBORDER.equals(scenario)
         || SCENARIO_CROSS_GOVERNMENT.equals(scenario)) && !addressEquals(zs01, zi01)) {
@@ -282,6 +291,11 @@ public class UKIUtil extends AutomationUtil {
       return true;
     }
     List<Addr> addresses = null;
+    LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
+        && !changes.isAddressChanged("ZI01");
+
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
     for (String addrType : RELEVANT_ADDRESSES) {
@@ -292,6 +306,13 @@ public class UKIUtil extends AutomationUtil {
           addresses = requestData.getAddresses(addrType);
         }
         for (Addr addr : addresses) {
+          List<String> addrTypesChanged = new ArrayList<String>();
+          for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
+            if (!addrTypesChanged.contains(addrModel.getAddrTypeCode())) {
+              addrTypesChanged.add(addrModel.getAddrTypeCode());
+            }
+          }
+          boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(addrType) && "PG".equals(data.getOrdBlk()));
           if ("N".equals(addr.getImportInd())) {
             // new address
 
@@ -338,46 +359,63 @@ public class UKIUtil extends AutomationUtil {
                 checkDetails.append("Updates to address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") need to be verified.")
                     .append("\n");
                 resultCodes.add("D");
-              } else {
-                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
-                    .append("\n");
               }
-
-            } else if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
-              if (isRelevantAddressFieldUpdated(changes, addr)) {
-                Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-                boolean matchesDnb = false;
-                if (matches != null) {
-                  // check against D&B
-                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
-                }
-                if (!matchesDnb) {
-                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+            } else if ((payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) || isZS01WithAufsdPG) {
+              if ("N".equals(addr.getImportInd())) {
+                LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                boolean duplicate = addressExists(entityManager, addr, requestData);
+                if (duplicate) {
+                  LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing Bill-To address.\n");
                   resultCodes.add("D");
-                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
                 } else {
-                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-                  for (DnBMatchingResponse dnb : matches) {
-                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                        + dnb.getDnbCountry() + "\n\n");
-                  }
+                  LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  checkDetails.append(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")" + "with same attentionTo");
+                  checkDetails.append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ")  validated in the checks.\n");
                 }
               } else {
-                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
-                    .append("\n");
+                checkDetails.append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ") validated in the checks.\n");
               }
             } else {
-              // proceed
-              LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
-              checkDetails.append("Updates to Address (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
+              checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                  .append("\n");
             }
+
+          } else if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+            if (isRelevantAddressFieldUpdated(changes, addr)) {
+              Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+              boolean matchesDnb = false;
+              if (matches != null) {
+                // check against D&B
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+              }
+              if (!matchesDnb) {
+                LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                resultCodes.add("D");
+                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+              } else {
+                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                for (DnBMatchingResponse dnb : matches) {
+                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                      + dnb.getDnbCountry() + "\n\n");
+                }
+              }
+            } else {
+              checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                  .append("\n");
+            }
+          } else {
+            // proceed
+            LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
+            checkDetails.append("Updates to Address (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
           }
         }
       }
     }
+
     if (resultCodes.contains("R")) {
       output.setOnError(true);
       engineData.addRejectionComment("DUPADDR", "Add or update on the address is rejected", "", "");
@@ -718,12 +756,13 @@ public class UKIUtil extends AutomationUtil {
           return container;
         }
       }
-    } else { 
+    } else {
       UkiFieldsContainer container = new UkiFieldsContainer();
       String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
       String repTeamCd = "";
       String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
-      //2P0 in repTeamCd refers to 2.0 for distinguishing and fetching the values according to CREATCMR-4530 logic.
+      // 2P0 in repTeamCd refers to 2.0 for distinguishing and fetching the
+      // values according to CREATCMR-4530 logic.
       repTeamCd = isuCtc + "2P0";
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("ISU_CD", "%" + isuCd + "%");
@@ -743,8 +782,8 @@ public class UKIUtil extends AutomationUtil {
 
   }
 
-  private UkiFieldsContainer calculate32SValuesForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd, 
-  String issuingCntry) {
+  private UkiFieldsContainer calculate32SValuesForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
+      String issuingCntry) {
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
     if (isuCtc.equals("34Y") || isuCtc.equals("5K")) {
       UkiFieldsContainer container = new UkiFieldsContainer();
@@ -764,6 +803,7 @@ public class UKIUtil extends AutomationUtil {
     }
     return null;
   }
+
   @Override
   public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
