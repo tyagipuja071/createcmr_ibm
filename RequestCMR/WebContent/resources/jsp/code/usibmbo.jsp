@@ -39,50 +39,52 @@
     %>
     
     FormManager.addValidator('aLevel1Value', Validators.REQUIRED , ['A_LEVEL_1_VALUE']);
-    FormManager.addValidator('aLevel2Value', Validators.REQUIRED , ['A_LEVEL_2_VALUE']);
+    // FormManager.addValidator('aLevel2Value', Validators.REQUIRED , ['A_LEVEL_2_VALUE']);
     FormManager.addValidator('aLevel3Value', Validators.REQUIRED , ['A_LEVEL_3_VALUE']);
-    FormManager.addValidator('aLevel4Value', Validators.REQUIRED , ['A_LEVEL_4_VALUE']);
+    // FormManager.addValidator('aLevel4Value', Validators.REQUIRED , ['A_LEVEL_4_VALUE']);
     
     FormManager.addValidator('nOff', Validators.REQUIRED , ['N_OFF']);
-    FormManager.addValidator('fDistrcOn', Validators.REQUIRED , ['F_DISTRC_ON']);
+    // FormManager.addValidator('fDistrcOn', Validators.REQUIRED , ['F_DISTRC_ON']);
     FormManager.addValidator('iArOff', Validators.REQUIRED , ['I_AR_OFF']);
-    FormManager.addValidator('fApplicCash', Validators.REQUIRED , ['F_APPLIC_CASH']);
+    // FormManager.addValidator('fApplicCash', Validators.REQUIRED , ['F_APPLIC_CASH']);
     FormManager.addValidator('fApplicColl', Validators.REQUIRED , ['F_APPLIC_COLL']);
-    FormManager.addValidator('fOffFunc', Validators.REQUIRED , ['F_OFF_FUNC']);
+    // FormManager.addValidator('fOffFunc', Validators.REQUIRED , ['F_OFF_FUNC']);
     
     FormManager.addValidator('qTieLineTelOff', Validators.REQUIRED , ['Q_TIE_LINE_TEL_OFF']);
     FormManager.addValidator('qTieLineTelOff', Validators.NUMBER , ['Q_TIE_LINE_TEL_OFF']);
     
-    FormManager.addValidator('tInqAddrLine1', Validators.REQUIRED , ['T_INQ_ADDR_LINE_1']);
-    FormManager.addValidator('tInqAddrLine2', Validators.REQUIRED , ['T_INQ_ADDR_LINE_2']);
-    FormManager.addValidator('nInqCity', Validators.REQUIRED , ['N_INQ_CITY']);
-    FormManager.addValidator('nInqSt', Validators.REQUIRED , ['N_INQ_ST']);
+    // FormManager.addValidator('tInqAddrLine1', Validators.REQUIRED , ['T_INQ_ADDR_LINE_1']);
+    // FormManager.addValidator('tInqAddrLine2', Validators.REQUIRED , ['T_INQ_ADDR_LINE_2']);
+    // FormManager.addValidator('nInqCity', Validators.REQUIRED , ['N_INQ_CITY']);
+    // FormManager.addValidator('nInqSt', Validators.REQUIRED , ['N_INQ_ST']);
+    
     // FormManager.addValidator('cInqZip', Validators.REQUIRED , ['C_INQ_ZIP']);
-    FormManager.addValidator('cInqZip', Validators.NUMBER , ['C_INQ_ZIP']);
+    // FormManager.addValidator('cInqZip', Validators.NUMBER , ['C_INQ_ZIP']);
     FormManager.addValidator('cInqCnty', Validators.REQUIRED , ['C_INQ_CNTY']);
     FormManager.addValidator('cInqCnty', Validators.NUMBER , ['C_INQ_CNTY']);
     FormManager.addValidator('nInqScc', Validators.REQUIRED , ['N_INQ_SCC']);
     
-    FormManager.addValidator('tRemitToAddrL1', Validators.REQUIRED , ['T_REMIT_TO_ADDR_L1']);
-    FormManager.addValidator('tRemitToAddrL2', Validators.REQUIRED , ['T_REMIT_TO_ADDR_L2']);
-    FormManager.addValidator('nRemitToCity', Validators.REQUIRED , ['N_REMIT_TO_CITY']);
-    FormManager.addValidator('nRemitToSt', Validators.REQUIRED , ['N_REMIT_TO_ST']);
+    // FormManager.addValidator('tRemitToAddrL1', Validators.REQUIRED , ['T_REMIT_TO_ADDR_L1']);
+    // FormManager.addValidator('tRemitToAddrL2', Validators.REQUIRED , ['T_REMIT_TO_ADDR_L2']);
+    // FormManager.addValidator('nRemitToCity', Validators.REQUIRED , ['N_REMIT_TO_CITY']);
+    // FormManager.addValidator('nRemitToSt', Validators.REQUIRED , ['N_REMIT_TO_ST']);
     FormManager.addValidator('cRemitToZip', Validators.REQUIRED , ['C_REMIT_TO_ZIP']);
     FormManager.addValidator('cRemitToZip', Validators.NUMBER , ['C_REMIT_TO_ZIP']);
     FormManager.addValidator('cRemitToCnty', Validators.REQUIRED , ['C_REMIT_TO_CNTY']);
     FormManager.addValidator('cRemitToCnty', Validators.NUMBER , ['C_REMIT_TO_CNTY']);
-    FormManager.addValidator('nRemitToScc', Validators.REQUIRED , ['N_REMIT_TO_SCC']);
+    // FormManager.addValidator('nRemitToScc', Validators.REQUIRED , ['N_REMIT_TO_SCC']);
     
-    FormManager.addValidator('tPhysicAddrLn1', Validators.REQUIRED , ['T_PHYSIC_ADDR_LN1']);
-    FormManager.addValidator('tPhysicAddrLn2', Validators.REQUIRED , ['T_PHYSIC_ADDR_LN2']);
-    FormManager.addValidator('nPhysicCity', Validators.REQUIRED , ['N_PHYSIC_CITY']);
-    FormManager.addValidator('nPhysicSt', Validators.REQUIRED , ['N_PHYSIC_ST']);
-    // FormManager.addValidator('cPhysicZip', Validators.REQUIRED , ['C_PHYSIC_ZIP']);
+    // FormManager.addValidator('tPhysicAddrLn1', Validators.REQUIRED , ['T_PHYSIC_ADDR_LN1']);
+    // FormManager.addValidator('tPhysicAddrLn2', Validators.REQUIRED , ['T_PHYSIC_ADDR_LN2']);
+    // FormManager.addValidator('nPhysicCity', Validators.REQUIRED , ['N_PHYSIC_CITY']);
+    // FormManager.addValidator('nPhysicSt', Validators.REQUIRED , ['N_PHYSIC_ST']);
+    
+    FormManager.addValidator('cPhysicZip', Validators.REQUIRED , ['C_PHYSIC_ZIP']);
     FormManager.addValidator('cPhysicZip', Validators.NUMBER , ['C_PHYSIC_ZIP']);
     FormManager.addValidator('cPhysicCnty', Validators.REQUIRED , ['C_PHYSIC_CNTY']);
     FormManager.addValidator('cPhysicCnty', Validators.NUMBER , ['C_PHYSIC_CNTY']);
-    FormManager.addValidator('nPhysicScc', Validators.REQUIRED , ['N_PHYSIC_SCC']);
-    FormManager.addValidator('iCtrlgOff', Validators.REQUIRED , ['I_CTRLG_OFF']);
+    // FormManager.addValidator('nPhysicScc', Validators.REQUIRED , ['N_PHYSIC_SCC']);
+    // FormManager.addValidator('iCtrlgOff', Validators.REQUIRED , ['I_CTRLG_OFF']);
     
     FormManager.ready();
   });
