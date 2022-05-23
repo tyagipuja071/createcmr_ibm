@@ -994,6 +994,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
       admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
       admin.setCovBgRetrievedInd(CmrConstants.YES_NO.N.toString());
+      String sysType = SystemConfiguration.getValue("SYSTEM_TYPE");
+      admin.setWaitInfoInd(!StringUtils.isBlank(sysType) ? sysType.substring(0, 1) : null);
 
       // modified to use the new way of checking automatic processing on request
       // type level
