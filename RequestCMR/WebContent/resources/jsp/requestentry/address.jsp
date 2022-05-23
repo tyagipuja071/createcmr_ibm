@@ -426,6 +426,13 @@ visibility: hidden !IMPORTANT;
           </cmr:gridCol>
         </cmr:view>
         
+         <cmr:view forCountry="618">
+          <cmr:gridCol width="80px" field="stateProv" header="${ui.grid.stateProvince}" >
+            <cmr:formatter functionName="stateProvFormatter" />
+          </cmr:gridCol>
+        </cmr:view>
+        
+        
         <cmr:view forCountry="666">
           <cmr:gridCol width="90px" field="addrTxt2" header="${ui.grid.occupation}" />
         </cmr:view>
