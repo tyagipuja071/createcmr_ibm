@@ -81,10 +81,7 @@ function setClientTierValues() {
   }
   isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
-    clientTiers = [];
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
   } else {
     var reqType = FormManager.getActualValue('reqType');
     if (reqType != 'U') {
