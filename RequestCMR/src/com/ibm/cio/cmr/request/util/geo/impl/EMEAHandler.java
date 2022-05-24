@@ -179,15 +179,11 @@ public class EMEAHandler extends BaseSOFHandler {
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
       } else {
-        if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+        if ((SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy()))
+            && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
           record.setCmrAddrSeq("00001");
         } else {
-          if ((SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy()))
-              && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
-            record.setCmrAddrSeq("00001");
-          } else {
-            record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
-          }
+          record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
         }
       }
 
@@ -4500,7 +4496,7 @@ public class EMEAHandler extends BaseSOFHandler {
   }
 
   private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZS01")) {
@@ -4516,7 +4512,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
   // START -- missing code greece code
   private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZP01")) {
