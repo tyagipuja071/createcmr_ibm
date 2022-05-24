@@ -478,6 +478,15 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     data.setRepTeamMemberNo(!StringUtils.isEmpty(data.getRepTeamMemberNo()) ? data.getRepTeamMemberNo().trim() : "");
     data.setSalesBusOffCd(!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd().trim() : "");
     data.setCompany(!StringUtils.isEmpty(data.getCompany()) ? data.getCompany().trim() : "");
+    // Resolve Data issue length of field MiscBillCd is 3 in db
+    if (!StringUtils.isEmpty(data.getMiscBillCd())) {
+      if (data.getMiscBillCd().trim().length() > 3) {
+        data.setMiscBillCd(data.getMiscBillCd().trim().substring(0, 3));
+      } else {
+        data.setMiscBillCd(data.getMiscBillCd().trim());
+      }
+    }
+
   }
 
   private void clearChecklistAfterImport(EntityManager entityManager, AppUser user, long reqId) {
