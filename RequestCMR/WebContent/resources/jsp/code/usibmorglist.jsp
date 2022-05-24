@@ -24,6 +24,12 @@
       add : function() {
         window.location = cmr.CONTEXT_ROOT + '/code/us_ibm_org_form';
       },
+      remove : function(aLevel1Value, aLevel2Value, aLevel3Value, aLevel4Value) {
+        cmr.showConfirm('actions.actualRemove(\"' + aLevel1Value + '\", \"' + aLevel2Value + '\", \"' + aLevel3Value + '\", \"' + aLevel4Value + '\")', 'Are you sure remove the US IBM ORG record?');
+      },
+      actualRemove : function(aLevel1Value, aLevel2Value, aLevel3Value, aLevel4Value) {
+        window.location = cmr.CONTEXT_ROOT + '/code/us_ibm_org/delete?mandt=' + mandt + '&aLevel1Value=' + encodeURIComponent(aLevel1Value) + '&aLevel2Value=' + encodeURIComponent(aLevel2Value) + '&aLevel3Value=' + encodeURIComponent(aLevel3Value) + '&aLevel4Value=' + encodeURIComponent(aLevel4Value);
+      },
       update : function(aLevel1Value, aLevel2Value, aLevel3Value, aLevel4Value) {
         window.location = cmr.CONTEXT_ROOT + '/code/us_ibm_org_form?mandt=' + mandt + '&aLevel1Value=' + encodeURIComponent(aLevel1Value) + '&aLevel2Value=' + encodeURIComponent(aLevel2Value) + '&aLevel3Value=' + encodeURIComponent(aLevel3Value) + '&aLevel4Value=' + encodeURIComponent(aLevel4Value);
       },
@@ -37,7 +43,9 @@
         
         rowData = this.grid.getItem(rowIndex);
         
-        var actionsTag = '<img src="' + imgloc + 'addr-edit-icon.png" class="addr-icon" title="Update" onclick="actions.update(\'' + rowData.aLevel1Value + '\', \'' + rowData.aLevel2Value + '\', \'' + rowData.aLevel3Value + '\', \'' + rowData.aLevel4Value + '\')" />';
+        var actionsTag = '';
+        actionsTag += '<img src="' + imgloc + 'addr-edit-icon.png" class="addr-icon" title="Update" onclick="actions.update(\'' + rowData.aLevel1Value + '\', \'' + rowData.aLevel2Value + '\', \'' + rowData.aLevel3Value + '\', \'' + rowData.aLevel4Value + '\')" />';
+        actionsTag += '<img src="' + imgloc + 'addr-remove-icon.png" class="addr-icon" title="Delete" onclick="actions.remove(\'' + rowData.aLevel1Value + '\', \'' + rowData.aLevel2Value + '\', \'' + rowData.aLevel3Value + '\', \'' + rowData.aLevel4Value + '\')" />';
         return actionsTag;
       },
       refresh : function(){
