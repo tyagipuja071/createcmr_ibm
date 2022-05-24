@@ -46,6 +46,8 @@
         var actionsTag = '';
         actionsTag += '<img src="' + imgloc + 'addr-edit-icon.png" class="addr-icon" title="Update" onclick="actions.update(\'' + rowData.iOff + '\')" />';
         actionsTag += '<img src="' + imgloc + 'addr-remove-icon.png" class="addr-icon" title="Delete" onclick="actions.remove(\'' + rowData.iOff + '\')">';
+        
+        return actionsTag;
       },
       refresh : function(){
         var url = cmr.CONTEXT_ROOT + '/code/us_ibm_bo_list.json';
