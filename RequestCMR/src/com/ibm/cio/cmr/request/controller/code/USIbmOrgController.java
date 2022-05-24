@@ -114,4 +114,35 @@ public class USIbmOrgController extends BaseController {
     return mv;
   }
 
+  @RequestMapping(value = "/code/us_ibm_org/delete", method = { RequestMethod.POST, RequestMethod.GET })
+  public ModelAndView deleteUSIbmOrg(HttpServletRequest request, HttpServletResponse response, USIbmOrgModel model) throws CmrException {
+
+    model.setAction(BaseModel.ACT_DELETE);
+    model.setState(BaseModel.STATE_EXISTING);
+
+    AppUser user = AppUser.getUser(request);
+    if (!user.isAdmin() && !user.isCmde()) {
+      LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the US IBM ORG Maintenance system function.");
+      ModelAndView mv = new ModelAndView("noaccess", "us_ibm_org", new USIbmOrgModel());
+      return mv;
+    }
+
+    ModelAndView mv = null;
+    if (model.allKeysAssigned()) {
+      if (shouldProcess(model)) {
+        try {
+          maintainService.save(model, request);
+          mv = new ModelAndView("usibmorg", "us_ibm_org", new USIbmOrgModel());
+          MessageUtil.setInfoMessage(mv, MessageUtil.INFO_RECORD_DELETED, model.getRecordDescription());
+        } catch (Exception e) {
+          mv = new ModelAndView("usibmorg", "us_ibm_org", new USIbmOrgModel());
+          setError(e, mv);
+        }
+      }
+    }
+
+    setPageKeys("ADMIN", "CODE_ADMIN", mv);
+    return mv;
+  }
+
 }

@@ -24,8 +24,14 @@
       add : function() {
         window.location = cmr.CONTEXT_ROOT + '/code/us_ibm_bo_form';
       },
+      remove : function(iOff) {
+        cmr.showConfirm('actions.actualRemove(\"' + iOff + '\")', 'Are you sure remove the US IBM BO record?');
+      },
+      actualRemove : function(iOff) {
+        window.location = cmr.CONTEXT_ROOT + '/code/us_ibm_bo/delete?mandt=' + mandt + '&iOff=' + encodeURIComponent(iOff);
+      },
       update : function(iOff) {
-        window.location = cmr.CONTEXT_ROOT + '/code/us_ibm_bo_form?mandt='+mandt+'&iOff='+encodeURIComponent(iOff);
+        window.location = cmr.CONTEXT_ROOT + '/code/us_ibm_bo_form?mandt=' + mandt + '&iOff=' + encodeURIComponent(iOff);
       },
       actionIcons : function(value, rowIndex) {
         var imgloc = cmr.CONTEXT_ROOT + '/resources/images/';
@@ -37,8 +43,9 @@
         
         rowData = this.grid.getItem(rowIndex);
         
-        var actionsTag = '<img src="' + imgloc + 'addr-edit-icon.png" class="addr-icon" title="Update" onclick="actions.update(\'' + rowData.iOff + '\')" />';
-        return actionsTag;
+        var actionsTag = '';
+        actionsTag += '<img src="' + imgloc + 'addr-edit-icon.png" class="addr-icon" title="Update" onclick="actions.update(\'' + rowData.iOff + '\')" />';
+        actionsTag += '<img src="' + imgloc + 'addr-remove-icon.png" class="addr-icon" title="Delete" onclick="actions.remove(\'' + rowData.iOff + '\')">';
       },
       refresh : function(){
         var url = cmr.CONTEXT_ROOT + '/code/us_ibm_bo_list.json';
