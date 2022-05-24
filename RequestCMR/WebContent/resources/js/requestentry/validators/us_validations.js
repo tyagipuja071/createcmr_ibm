@@ -201,6 +201,7 @@ function afterConfigForUS() {
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   _usSicm = FormManager.getActualValue('usSicmen');
+  _kukla = FormManager.getActualValue('custClass');
   if (_usSicm.length > 4) {
     _usSicm = _usSicm.substring(0, 4);
     FormManager.setValue('usSicmen', _usSicm);
@@ -567,13 +568,20 @@ function usRestrictCode() {
 }
 
 function addKuklaValidator() {
+
+  var kuklaOfArray = [ '21', '71', '99', '85', '43', '34', '52' ];
+
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var kukla = FormManager.getActualValue('custClass');
-        if (FormManager.getActualValue('reqType') == 'U'
-            && ('21' == kukla || '71' == kukla || '99' == kukla || '85' == kukla || '43' == kukla || '34' == kukla)) {
-          return new ValidationResult(null, false, 'KUKLA ' + kukla + ' should not be used for update');
+        // if (FormManager.getActualValue('reqType') == 'U'
+        // && ('21' == kukla || '71' == kukla || '99' == kukla || '85' == kukla
+        // || '43' == kukla || '34' == kukla || '52' == kukla)) {
+        if (FormManager.getActualValue('reqType') == 'U' && kukla != _kukla) {
+          if (kuklaOfArray.includes(kukla)) {
+            return new ValidationResult(null, false, 'KUKLA ' + kukla + ' should not be used for update');
+          }
         } else {
           return new ValidationResult(null, true);
         }
@@ -607,10 +615,12 @@ function addDivStreetCountValidator() {
 }
 
 function hideKUKLA() {
-  if (FormManager.getActualValue('reqType') == 'U'
-      && (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' || FormManager.getActualValue('userRole').toUpperCase() == 'PROCESSOR')) {
+  if (FormManager.getActualValue('reqType') == 'U') {
     FormManager.show('CustClass', 'custClass');
     FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
+    if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
+      FormManager.readOnly('custClass');
+    }
   } else {
     FormManager.removeValidator('custClass', Validators.REQUIRED);
     FormManager.hide('CustClass', 'custClass');
