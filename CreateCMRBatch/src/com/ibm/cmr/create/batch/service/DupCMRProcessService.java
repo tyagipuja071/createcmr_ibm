@@ -743,7 +743,6 @@ public class DupCMRProcessService extends LegacyDirectService {
     } else {
       availableSequences = getAvailableSequences(entityManager, dupCntry, cmrNo);
     }
-    availableSequences = getAvailableSequences(entityManager, dupCntry, cmrNo);
     for (Addr addr : cmrObjects.getAddresses()) {
 
       if (availableSequences.contains(Integer.parseInt(addr.getId().getAddrSeq()))) {
