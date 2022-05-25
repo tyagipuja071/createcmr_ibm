@@ -570,14 +570,16 @@ function usRestrictCode() {
 function addKuklaValidator() {
 
   var kuklaOfArray = [ '21', '71', '99', '85', '43', '34', '52' ];
-
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var kukla = FormManager.getActualValue('custClass');
-        // if (FormManager.getActualValue('reqType') == 'U'
-        // && ('21' == kukla || '71' == kukla || '99' == kukla || '85' == kukla
-        // || '43' == kukla || '34' == kukla || '52' == kukla)) {
+        var ret = cmr.query('DATA_RDC.CUST_CLASS', {
+          REQ_ID : FormManager.getActualValue('reqId')
+        });
+        if (ret && ret.ret1 && ret.ret1 != '') {
+          _kukla =ret.ret1;
+        }
         if (FormManager.getActualValue('reqType') == 'U' && kukla != _kukla) {
           if (kuklaOfArray.includes(kukla)) {
             return new ValidationResult(null, false, 'KUKLA ' + kukla + ' should not be used for update');
@@ -864,7 +866,7 @@ function addCompanyEnterpriseValidation() {
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
   GEOHandler.registerValidator(addInvoiceAddressLinesValidator, [ SysLoc.USA ], null, true);
-  GEOHandler.registerValidator(addCountyValidator, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(addCountyValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
