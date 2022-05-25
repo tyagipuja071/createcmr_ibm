@@ -1451,5 +1451,6 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
   @Override
   public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
     return false;
+  }
 
 }
