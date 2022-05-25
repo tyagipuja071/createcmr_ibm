@@ -367,6 +367,55 @@ public class USHandler extends GEOHandler {
       }
     }
 
+    if ("TC".equals(processingType)) {
+      if (uTxData != null) {
+
+        if (!StringUtils.isEmpty(uTxData.getcTeCertST1())) {
+          data.setSpecialTaxCd(uTxData.getcTeCertST1());
+          data.setTaxExemptStatus1(uTxData.getcTeCertST1());
+        }
+        if (!StringUtils.isEmpty(uTxData.getcTeCertST2())) {
+          data.setTaxExemptStatus2(uTxData.getcTeCertST2());
+        }
+        if (!StringUtils.isEmpty(uTxData.getcTeCertST3())) {
+          data.setTaxExemptStatus3(uTxData.getcTeCertST3());
+        }
+
+        String taxcd1ForTC = uTxData.getiTypeCust1() + uTxData.getiTaxClass1();
+        String taxcd2ForTC = uTxData.getiTypeCust2() + uTxData.getiTaxClass2();
+        String taxcd3ForTC = uTxData.getiTypeCust3() + uTxData.getiTaxClass3();
+
+        if (StringUtils.isEmpty(uTxData.getiTypeCust1()) || StringUtils.isEmpty(uTxData.getiTaxClass1())) {
+          data.setTaxCd1("");
+        } else {
+          data.setTaxCd1(taxcd1ForTC);
+        }
+        if (StringUtils.isEmpty(uTxData.getiTypeCust2()) || StringUtils.isEmpty(uTxData.getiTaxClass2())) {
+          data.setTaxCd2("");
+        } else {
+          data.setTaxCd2(taxcd2ForTC);
+        }
+        if (StringUtils.isEmpty(uTxData.getiTypeCust3()) || StringUtils.isEmpty(uTxData.getiTaxClass3())) {
+          data.setTaxCd3("");
+        } else {
+          data.setTaxCd3(taxcd3ForTC);
+        }
+
+        if (!StringUtils.isEmpty(uTxData.getcICCTe())) {
+          data.setIccTaxExemptStatus(uTxData.getcICCTe());
+        }
+        if (!StringUtils.isEmpty(uTxData.getCICCTaxClass())) {
+          data.setIccTaxClass(uTxData.getCICCTaxClass());
+        }
+        if (!StringUtils.isEmpty(uTxData.getfOCL())) {
+          data.setOutCityLimit(uTxData.getfOCL());
+        }
+        if (!StringUtils.isEmpty(uTxData.getEaStatus())) {
+          data.setEducAllowCd(uTxData.getEaStatus());
+        }
+      }
+    }
+
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
       data.setClientTier("");
     }
