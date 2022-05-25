@@ -1619,7 +1619,11 @@ public class LegacyDirectService extends TransConnService {
     LOG.debug("Sequences : " + sequences);
 
     Queue<Integer> availableSequences = new LinkedList<Integer>();
-    availableSequences = getAvailableSequences(entityManager, cntry, cmrNo);
+    if (SystemLocation.IRELAND.equals(cntry)) {
+      availableSequences = getAvailableSequences(entityManager, "866", cmrNo);
+    } else {
+      availableSequences = getAvailableSequences(entityManager, cntry, cmrNo);
+    }
     for (Addr addr : cmrObjects.getAddresses()) {
       if (!SystemLocation.ITALY.equals(data.getCmrIssuingCntry())) {
         if (availableSequences.contains(Integer.parseInt(addr.getId().getAddrSeq()))) {
