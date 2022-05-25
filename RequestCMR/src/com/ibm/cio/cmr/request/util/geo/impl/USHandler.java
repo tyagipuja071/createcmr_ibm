@@ -220,6 +220,7 @@ public class USHandler extends GEOHandler {
 
       if (!StringUtils.isEmpty(uTxData.getcTeCertST1())) {
         data.setSpecialTaxCd(uTxData.getcTeCertST1());
+        data.setTaxExemptStatus1(uTxData.getcTeCertST1());
       }
       if (!StringUtils.isEmpty(uTxData.getcTeCertST2())) {
         data.setTaxExemptStatus2(uTxData.getcTeCertST2());
@@ -451,7 +452,8 @@ public class USHandler extends GEOHandler {
       // commenting this for JIRA CMR-3872
       // data.setSpecialTaxCd((String) record.get("TAX_EXEMPT_STATUS"));
       // always reset to blank
-      data.setSpecialTaxCd("");
+      // 2022.05.25
+      // data.setSpecialTaxCd("");
       data.setBpName((String) record.get("BP_NAME"));
       data.setIccTaxClass((String) record.get("ICC_TAX_CLASS"));
       data.setIccTaxExemptStatus((String) record.get("ICC_TAX_EXEMPT_STATUS"));
@@ -464,7 +466,9 @@ public class USHandler extends GEOHandler {
       data.setLoc((String) record.get("LOC"));
       data.setTaxCd2((String) record.get("TAX_CD2"));
       data.setUsSicmen((String) record.get("SICMEN"));
+      // 2022.05.25
       // data.set((String) record.get("TAX_CD1"));
+      data.setTaxCd1((String) record.get("TAX_CD1"));
       if (StringUtils.isBlank(data.getAbbrevNm())) {
         data.setAbbrevNm((String) record.get("ABBREV_NM"));
       }
@@ -1082,6 +1086,7 @@ public class USHandler extends GEOHandler {
     List<DataRdc> records = query.getResults(DataRdc.class);
     if (records != null && records.size() > 0) {
       DataRdc rdc = records.get(0);
+      rdc.setTaxCd1(!StringUtils.isEmpty(data.getTaxCd1()) ? data.getTaxCd1().trim() : data.getSpecialTaxCd());
       rdc.setTaxExempt2(data.getTaxExemptStatus2());
       rdc.setTaxExempt3(data.getTaxExemptStatus3());
       rdc.setAbbrevNm(data.getAbbrevNm());
