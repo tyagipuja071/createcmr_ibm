@@ -2207,7 +2207,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     List<String> validTaxfields = Arrays.asList("TAX_EXEMPT_STATUS_1", "TAX_EXEMPT_STATUS_2", "TAX_EXEMPT_STATUS_3", "TAX_CD1", "TAX_CD2", "TAX_CD3",
         "ICC_TAX_CLASS", "ICC_TAX_EXEMPT_STATUS", "CMR_NO", "OUT_CITY_LIMIT", "CITY1", "COUNTY", "STATE_PROV", "LAND_CNTRY");
     // CREATCMR-5447
-    List<String> validTaxExemptStatus = Arrays.asList("A", "B", "M", "N", "O", "P", "Q", "R", "S", "T", "V", "Z", "X");
+    List<String> validTaxExemptStatus = Arrays.asList("A", "B", "M", "N", "O", "P", "Q", "R", "S", "T", "V", "Z", "X", "@", " ");
     // validate Sheets
     List<String> errRowNo = new ArrayList<String>();
     if (dataSheet == null || cfgSheet == null) {
