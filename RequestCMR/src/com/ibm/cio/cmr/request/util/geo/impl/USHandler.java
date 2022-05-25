@@ -1087,6 +1087,7 @@ public class USHandler extends GEOHandler {
     if (records != null && records.size() > 0) {
       DataRdc rdc = records.get(0);
       rdc.setTaxCd1(!StringUtils.isEmpty(data.getTaxCd1()) ? data.getTaxCd1().trim() : data.getSpecialTaxCd());
+      rdc.setTaxExempt1(!StringUtils.isEmpty(data.getTaxExemptStatus1()) ? data.getTaxExemptStatus1().trim() : data.getSpecialTaxCd());
       rdc.setTaxExempt2(data.getTaxExemptStatus2());
       rdc.setTaxExempt3(data.getTaxExemptStatus3());
       rdc.setAbbrevNm(data.getAbbrevNm());
