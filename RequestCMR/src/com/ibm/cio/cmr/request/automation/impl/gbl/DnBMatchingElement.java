@@ -123,12 +123,12 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
           } else if (!payGoAddredited) {
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
-          } else if (payGoAddredited) {
-            LOG.debug("DnB Matching skipped for PayGo.");
+          } else if (payGoAddredited && !hasValidMatches) {
+            LOG.debug("DnB Matches not found for PayGo.");
             
             result.setOnError(false); 
-            result.setResults("DnB Matching skipped for PayGo.");
-            result.setDetails("DnB Matching skipped for PayGo.");
+            result.setResults("DnB Matches not found for PayGo.");
+            result.setDetails("DnB Matches not found for PayGo.");
           }
         } else {
           // actions to be performed only when matches with high confidence are
