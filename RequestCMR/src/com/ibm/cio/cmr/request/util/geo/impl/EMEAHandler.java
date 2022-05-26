@@ -179,7 +179,12 @@ public class EMEAHandler extends BaseSOFHandler {
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
       } else {
-        record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        if ((SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy()))
+            && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
+          record.setCmrAddrSeq("00001");
+        } else {
+          record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        }
       }
 
       if (SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {
