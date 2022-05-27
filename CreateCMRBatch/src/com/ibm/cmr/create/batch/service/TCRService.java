@@ -229,6 +229,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
           tcr.setCreateBy(BATCH_USER_ID);
           tcr.setProcStatus(STATUS_PENDING);
           tcr.setUpdateBy(BATCH_USER_ID);
+          tcr.setKatr10("");
         }
         if ("CMR".equalsIgnoreCase(identity)) {
           LOG.info("TCR record CMR number " + tcr.getCmrNo() + ", seq " + tcr.getId().getSeqNo() + " load.");
