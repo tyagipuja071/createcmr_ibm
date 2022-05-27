@@ -2612,6 +2612,28 @@ function setSortlForStateProvince() {
   } 
 }
 
+function setTaxRegimeMX() {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var taxGrp = null;
+  if (custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM') {
+    taxGrp = '1';
+  } else {
+    taxGrp = '2';
+  }
+
+  var qParams = {
+    _qall : 'Y',
+    ISSUING_CNTRY : cntry,
+    CMT: '%' + taxGrp + '%'
+  };
+
+  var taxDropDown = cmr.query('GET.MX_TAX_CODE', qParams);
+  var arr =  taxDropDown.map(taxDropDown => taxDropDown.ret1);
+  FormManager.limitDropdownValues(FormManager.getField('taxCd3'), arr);
+}
+
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2691,5 +2713,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setLocNoLockedForRequesterBR, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
+  GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
+
   
 });
