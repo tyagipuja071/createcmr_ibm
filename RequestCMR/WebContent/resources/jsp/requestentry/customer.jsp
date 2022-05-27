@@ -266,14 +266,14 @@
 
   </cmr:row>
   
-  <cmr:view forCountry="781">
+	<cmr:view forCountry="781">
       <cmr:column span="2" containerForField="LocalTax3">
         <p>
           <label for="taxCd3"> <cmr:fieldLabel fieldId="LocalTax3" />: </label>
           <cmr:field path="taxCd3" id="taxCd3" fieldId="LocalTax3" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-    </cmr:view>
+	</cmr:view>
   
 
   <cmr:row addBackground="true">
