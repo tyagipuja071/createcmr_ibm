@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -20,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -36,6 +39,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
@@ -50,6 +54,7 @@ public class CanadaHandler extends GEOHandler {
   private static final Logger LOG = Logger.getLogger(CanadaHandler.class);
   private static final char SOLD_TO_ADDR_USE = '3';
   private Map<String, String> kunnrToAddrUseMap = new HashMap<>();
+  private static final int MAX_ADDR_SEQ = 99999;
 
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
@@ -722,7 +727,7 @@ public class CanadaHandler extends GEOHandler {
       if (isMultiAddrType(addrType)) {
         newAddrSeq = getSeqForMultiAddress(entityManager, addrType, reqId);
       } else {
-        newAddrSeq = getAvailableAddrSeq(entityManager, reqId);
+        newAddrSeq = getAvailAddrSeqNumInclRdc(entityManager, reqId);
       }
     }
     return newAddrSeq;
@@ -732,7 +737,7 @@ public class CanadaHandler extends GEOHandler {
     List<Addr> addrs = getAddressByType(entityManager, addrType, reqId);
     int addrCount = addrs.size();
     if (addrCount == 0) {
-      return getAvailableAddrSeq(entityManager, reqId);
+      return getAvailAddrSeqNumInclRdc(entityManager, reqId);
     }
 
     String mainAddrSeq = addrs.get(0).getId().getAddrSeq();
@@ -742,8 +747,14 @@ public class CanadaHandler extends GEOHandler {
     }
 
     String addressUse = addrType.equals("ZP01") ? "M" : "2";
-    String multiAddrSeq = mainAddrSeq + "-" + String.format("%02d", addrCount) + "-" + addressUse;
 
+    Set<String> existingAddrSeqSet = getExistingAddrSeqInclRdc(entityManager, reqId);
+    String multiAddrSeq = mainAddrSeq + "-" + String.format("%02d", addrCount) + "-" + addressUse;
+    if (existingAddrSeqSet.contains(multiAddrSeq)) {
+      while (existingAddrSeqSet.contains(multiAddrSeq)) {
+        multiAddrSeq = mainAddrSeq + "-" + String.format("%02d", ++addrCount) + "-" + addressUse;
+      }
+    }
     return multiAddrSeq;
   }
 
@@ -756,17 +767,65 @@ public class CanadaHandler extends GEOHandler {
     return addrList;
   }
 
-  private String getAvailableAddrSeq(EntityManager entityManager, long reqId) {
-    String sql = null;
-    sql = ExternalizedQuery.getSql("ADDRESS.GETAVAILSEQ");
+  private String getAvailAddrSeqNumInclRdc(EntityManager entityManager, long reqId) {
+    Set<String> existingAddrSeqSet = getExistingAddrSeqInclRdc(entityManager, reqId);
+    int candidateSeqNum = 1;
+    int availSeqNum = 0;
+    if (existingAddrSeqSet.contains(String.format("%05d", candidateSeqNum))) {
+      availSeqNum = candidateSeqNum;
+      while (existingAddrSeqSet.contains(String.format("%05d", availSeqNum))) {
+        availSeqNum++;
+        if (availSeqNum > MAX_ADDR_SEQ) {
+          availSeqNum = 1;
+        }
+      }
+    } else {
+      availSeqNum = candidateSeqNum;
+    }
+
+    return String.format("%05d", availSeqNum);
+  }
+
+  private Set<String> getExistingAddrSeqInclRdc(EntityManager entityManager, long reqId) {
+    DataPK pk = new DataPK();
+    pk.setReqId(reqId);
+    Data data = entityManager.find(Data.class, pk);
+
+    String cmrNo = data.getCmrNo();
+    Set<String> allAddrSeqFromAddr = getAllSavedSeqFromAddr(entityManager, reqId);
+    Set<String> allAddrSeqFromRdc = getAllSavedSeqFromRdc(entityManager, cmrNo);
+
+    Set<String> mergedAddrSet = new HashSet<>();
+    mergedAddrSet.addAll(allAddrSeqFromAddr);
+    mergedAddrSet.addAll(allAddrSeqFromRdc);
+
+    return mergedAddrSet;
+  }
+
+  private Set<String> getAllSavedSeqFromAddr(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("CA.GET.ADDRSEQ.BY_REQID");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
-    Integer availSeq = query.getSingleResult(Integer.class);
+    List<String> results = query.getResults(String.class);
 
-    if (availSeq != null) {
-      return String.format("%05d", availSeq);
-    }
-    return "00001";
+    Set<String> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(results);
+
+    return addrSeqSet;
+  }
+
+  private Set<String> getAllSavedSeqFromRdc(EntityManager entityManager, String cmrNo) {
+    String sql = ExternalizedQuery.getSql("CA.GET.KNA1_ZZKV_SEQNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", SystemLocation.CANADA);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<String> resultsRDC = query.getResults(String.class);
+    Set<String> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(resultsRDC);
+
+    return addrSeqSet;
   }
 
   private boolean isMultiAddrType(String addrType) {
