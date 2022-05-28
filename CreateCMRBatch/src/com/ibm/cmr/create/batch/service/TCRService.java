@@ -364,22 +364,22 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
               }
 
               // check exempt statuses
-              if (!StringUtils.isBlank(queue.getTaxExemptStatus1())) {
-                if (!queue.getTaxExemptStatus1().equals(tax.getcTeCertST1())) {
+              if (queue.getTaxExemptStatus1() != null) {
+                if (!queue.getTaxExemptStatus1().trim().equals(tax.getcTeCertST1())) {
                   createChangeLog(entityManager, kna1, queue, ts, "US_TAX", "C_TE_CERT_ST_1", tax.getcTeCertST1(), queue.getTaxExemptStatus1());
-                  tax.setcTeCertST1(queue.getTaxExemptStatus1());
+                  tax.setcTeCertST1(queue.getTaxExemptStatus1().trim());
                 }
               }
-              if (!StringUtils.isBlank(queue.getTaxExemptStatus2())) {
-                if (!queue.getTaxExemptStatus2().equals(tax.getcTeCertST2())) {
+              if (queue.getTaxExemptStatus2() != null) {
+                if (!queue.getTaxExemptStatus2().trim().equals(tax.getcTeCertST2())) {
                   createChangeLog(entityManager, kna1, queue, ts, "US_TAX", "C_TE_CERT_ST_2", tax.getcTeCertST2(), queue.getTaxExemptStatus2());
-                  tax.setcTeCertST2(queue.getTaxExemptStatus2());
+                  tax.setcTeCertST2(queue.getTaxExemptStatus2().trim());
                 }
               }
-              if (!StringUtils.isBlank(queue.getTaxExemptStatus3())) {
-                if (!queue.getTaxExemptStatus1().equals(tax.getcTeCertST3())) {
+              if (queue.getTaxExemptStatus3() != null) {
+                if (!queue.getTaxExemptStatus3().trim().equals(tax.getcTeCertST3())) {
                   createChangeLog(entityManager, kna1, queue, ts, "US_TAX", "C_TE_CERT_ST_3", tax.getcTeCertST3(), queue.getTaxExemptStatus3());
-                  tax.setcTeCertST3(queue.getTaxExemptStatus3());
+                  tax.setcTeCertST3(queue.getTaxExemptStatus3().trim());
                 }
               }
 
