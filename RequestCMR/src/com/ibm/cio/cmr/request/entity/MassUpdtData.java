@@ -86,17 +86,38 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
   @Column(name = "TAX_CD3")
   private String taxCd3;
 
-  // @Column(
-  // name = "TAX_EXEMPT_STATUS_1")
-  // private String taxExemptStatus;
-  //
-  // public String getTaxExemptStatus() {
-  // return taxExemptStatus;
-  // }
-  //
-  // public void setTaxExemptStatus(String taxExemptStatus) {
-  // this.taxExemptStatus = taxExemptStatus;
-  // }
+  @Column(name = "TAX_EXEMPT_STATUS_1")
+  private String taxExemptStatus;
+
+  @Column(name = "TAX_EXEMPT_STATUS_2")
+  private String taxExemptStatus2;
+
+  @Column(name = "TAX_EXEMPT_STATUS_3")
+  private String taxExemptStatus3;
+
+  public String getTaxExemptStatus2() {
+    return taxExemptStatus2;
+  }
+
+  public void setTaxExemptStatus2(String taxExemptStatus2) {
+    this.taxExemptStatus2 = taxExemptStatus2;
+  }
+
+  public String getTaxExemptStatus3() {
+    return taxExemptStatus3;
+  }
+
+  public void setTaxExemptStatus3(String taxExemptStatus3) {
+    this.taxExemptStatus3 = taxExemptStatus3;
+  }
+
+  public String getTaxExemptStatus() {
+    return taxExemptStatus;
+  }
+
+  public void setTaxExemptStatus(String taxExemptStatus) {
+    this.taxExemptStatus = taxExemptStatus;
+  }
 
   @Column(name = "ISU_CD")
   private String isuCd;
@@ -190,6 +211,9 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
 
   @Column(name = "MILITARY")
   private String military;
+
+  @Column(name = "EDUC_ALLOW_CD")
+  private String educAllowCd;
 
   public String getAbbrevNm() {
     return this.abbrevNm;
@@ -550,13 +574,21 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
   public void setEmail3(String email3) {
     this.email3 = email3;
   }
-  
+
   public String getMilitary() {
     return military;
   }
 
   public void setMilitary(String military) {
     this.military = military;
+  }
+
+  public String getEducAllowCd() {
+    return educAllowCd;
+  }
+
+  public void setEducAllowCd(String educAllowCd) {
+    this.educAllowCd = educAllowCd;
   }
 
 }

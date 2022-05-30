@@ -55,6 +55,8 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
   protected TerminatorThread terminator = null;
   protected boolean skipExit;
 
+  protected String context = BatchEntryPoint.currentContextName;
+
   /**
    * Constructor
    */
@@ -97,7 +99,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     this.startTime = new Date().getTime();
 
     LOG.info("Starting application at " + TIME_FORMATTER.format(new Date(this.startTime)));
-    LOG.info("Executing " + getClass().getSimpleName() + " batch application..");
+    LOG.info("Executing " + getClass().getSimpleName() + " batch application.. (Context: " + this.context + ")");
     if (process(null, null)) {
       LOG.info("Successfully completed.");
     } else {
@@ -112,6 +114,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     long elapsed = (endTime - startTime) / 1000;
     LOG.info("Application finished execution at " + TIME_FORMATTER.format(new Date(endTime)));
     LOG.info("Took " + elapsed + " seconds.");
+
     if (!this.skipExit) {
       Timer timer = new Timer();
       timer.schedule(new TimerTask() {
@@ -123,8 +126,8 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
         }
       }, 5000);
 
-      // System.exit(0);
     }
+    // System.exit(0);
   }
 
   @Override

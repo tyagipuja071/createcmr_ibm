@@ -56,6 +56,9 @@ public class ChangeLogService extends BaseService<ChangeLogModel, RequestChangeL
     String changeDateTo = request.getParameter("changeDateTo");
     String loadRec = request.getParameter("loadRec");
     String cmrNo = request.getParameter("cmrNo");
+    String requestStatus = request.getParameter("requestStatus");
+    String cmrIssuingCountry = request.getParameter("cmrIssuingCountry");
+
     if (!"Y".equalsIgnoreCase(loadRec)) {
       return list; // search function has not yet been performed
     }
@@ -92,6 +95,56 @@ public class ChangeLogService extends BaseService<ChangeLogModel, RequestChangeL
       query.append("  or (REQUEST_ID in (select PAR_REQ_ID from CREQCMR.MASS_CREATE where CMR_NO = :CMR_NO))");
       query.append("  or (REQUEST_ID in (select PAR_REQ_ID from CREQCMR.MASS_UPDT where CMR_NO = :CMR_NO)))");
       query.setParameter("CMR_NO", cmrNo);
+    }
+
+    if (!StringUtils.isEmpty(requestStatus)) {
+      query.append("and REQUEST_STATUS = :REQUEST_STATUS");
+      query.setParameter("REQUEST_STATUS", requestStatus);
+    }
+
+    if (!StringUtils.isEmpty(cmrIssuingCountry)) {
+      String Country_CD = cmrIssuingCountry.substring(cmrIssuingCountry.length() - 3, cmrIssuingCountry.length());
+      String Country_NM = cmrIssuingCountry.substring(0, cmrIssuingCountry.length() - 6);
+      String sqlCd = ExternalizedQuery.getSql("CHANGELOG.COUNTRYUSE_CD1");
+
+      PreparedQuery queryCd = new PreparedQuery(entityManager, sqlCd);
+      queryCd.setParameter("CNTRY_CD", Country_CD + "%");
+      queryCd.setForReadOnly(true);
+
+      String cntryCd = "";
+      String cntryNm = "";
+
+      List<Object[]> records = queryCd.getResults();
+      if (records != null && records.size() > 0) {
+        for (Object[] cdValue : records) {
+          if (Country_NM.equals(cdValue[1])) {
+            cntryNm = (String) cdValue[1];
+            cntryCd = (String) cdValue[0];
+            break;
+          }
+        }
+        query.append("and (REQUEST_ID in (SELECT REQ_ID from CREQCMR.DATA ");
+        query.append("where CMR_ISSUING_CNTRY = :CMR_ISSUING_CNTRY and CNTRY_USE = :CNTRY_USE))");
+        query.setParameter("CMR_ISSUING_CNTRY", Country_CD);
+        if (Country_NM.equals(cntryNm)) {
+          query.setParameter("CNTRY_USE", cntryCd);
+        } else {
+          query.setParameter("CNTRY_USE", Country_CD);
+        }
+      } else {
+        sqlCd = ExternalizedQuery.getSql("CHANGELOG.COUNTRYUSE_CD2");
+        queryCd = new PreparedQuery(entityManager, sqlCd);
+        queryCd.setParameter("CNTRY_CD", Country_CD);
+        queryCd.setParameter("CNTRY_NM", Country_NM);
+        queryCd.setForReadOnly(true);
+        cntryCd = queryCd.getSingleResult(String.class);
+        if (cntryCd != null) {
+          query.append(" and (REQUEST_ID in (SELECT REQ_ID from CREQCMR.DATA ");
+          query.append(" where CMR_ISSUING_CNTRY = :CMR_ISSUING_CNTRY and (CNTRY_USE is NUll  OR CNTRY_USE  = :CNTRY_USE )))");
+          query.setParameter("CMR_ISSUING_CNTRY", Country_CD);
+          query.setParameter("CNTRY_USE", Country_CD);
+        }
+      }
     }
 
     query.append("order by CHANGE_TS desc");

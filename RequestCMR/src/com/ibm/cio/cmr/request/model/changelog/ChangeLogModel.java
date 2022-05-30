@@ -35,6 +35,7 @@ public class ChangeLogModel extends BaseModel {
   private String changeDateFrom;
   private String changeDateTo;
   private String cmrNo;
+  private String cmrIssuingCountry;
 
   public long getRequestId() {
     return requestId;
@@ -184,4 +185,11 @@ public class ChangeLogModel extends BaseModel {
     this.cmrNo = cmrNo;
   }
 
+  public String getCmrIssuingCountry() {
+    return cmrIssuingCountry;
+  }
+
+  public void setCmrIssuingCountry(String cmrIssuingCountry) {
+    this.cmrIssuingCountry = cmrIssuingCountry;
+  }
 }

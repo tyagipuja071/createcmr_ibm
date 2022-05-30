@@ -63,7 +63,6 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
-import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.us.SosRequest;
@@ -74,8 +73,6 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
-import com.ibm.cmr.services.client.query.QueryRequest;
-import com.ibm.cmr.services.client.query.QueryResponse;
 
 /**
  * 
@@ -606,8 +603,13 @@ public class USUtil extends AutomationUtil {
       admin.setScenarioVerifiedIndc("N");
       EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
       boolean hasNegativeCheck = false;
-      USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo());
-      String custTypeCd = detailsCont.getCustTypCd();
+      // USDetailsContainer detailsCont = determineUSCMRDetails(entityManager,
+      // requestData.getData().getCmrNo());
+      // String custTypeCd = detailsCont.getCustTypCd();
+      String custTypeCd = "";
+      if (!StringUtils.isEmpty(admin.getCustType())) {
+        custTypeCd = admin.getCustType();
+      }
       List<String> allowedCodesAddition = Arrays.asList("F", "G", "C", "D", "V", "W", "X");
       List<String> allowedCodesRemoval = Arrays.asList("F", "G", "C", "D", "A", "B", "H", "M", "N");
       Map<String, String> failedChecks = new HashMap<String, String>();
@@ -1031,6 +1033,7 @@ public class USUtil extends AutomationUtil {
 
     LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    String processingType = RequestUtils.getProcessingType(entityManager, data.getCmrIssuingCntry());
     boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
         && !changes.isAddressChanged("ZI01");
     // do an initial check for PayGo cmrs
@@ -1116,11 +1119,11 @@ public class USUtil extends AutomationUtil {
                 && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited))) {
               closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
-
             if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZI01"))) {
               matchAddressWithSosRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
           }
+
           if (payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) {
             addresses = requestData.getAddresses(CmrConstants.RDC_PAYGO_BILLING.toString());
             for (Addr addr : addresses) {
@@ -1156,12 +1159,15 @@ public class USUtil extends AutomationUtil {
           validation.setMessage("Validated");
           validation.setSuccess(true);
         }
-      } else {
+      } else if (!StringUtils.isEmpty(processingType) && "TC".equals(processingType)) {
         validation.setSuccess(false);
         validation.setMessage("Unknown CustType");
         details.append("Customer Type could not be determined. Update checks for address could not be run.").append("\n");
         output.setOnError(true);
-
+      } else {
+        output.setDetails("Updated ADDRESS elements were validated successfully.\n");
+        validation.setMessage("Validated");
+        validation.setSuccess(true);
       }
       output.setDetails(details.toString());
 
@@ -1313,6 +1319,9 @@ public class USUtil extends AutomationUtil {
   public static String determineCustSubScenario(EntityManager entityManager, String cmrNo, AutomationEngineData engineData, RequestData requestData)
       throws Exception {
     // get request admin and data
+
+    Admin admin = requestData.getAdmin();
+
     String custSubGroup = "";
 
     String custTypCd = "";
@@ -1326,7 +1335,7 @@ public class USUtil extends AutomationUtil {
     String subIndustryCd = "";
     String affiliate = "";
 
-    USDetailsContainer usDetails = determineUSCMRDetails(entityManager, cmrNo);
+    USDetailsContainer usDetails = determineUSCMRDetails(entityManager, cmrNo, requestData);
 
     custTypCd = usDetails.getCustTypCd();
     usRestricTo = usDetails.getUsRestrictTo();
@@ -1347,6 +1356,27 @@ public class USUtil extends AutomationUtil {
       subIndustryCd = (String) results.get(0)[2];
       affiliate = (String) results.get(0)[3];
     }
+
+    // get Customer Type
+    if (StringUtils.isNotBlank(admin.getModelCmrNo())) {
+      String modelcmrNo = admin.getModelCmrNo();
+
+      String sqlcust = ExternalizedQuery.getSql("AUTO.US.GET_CUSTTYPE");
+      PreparedQuery querycust = new PreparedQuery(entityManager, sqlcust);
+      querycust.setParameter("CMR_NO", modelcmrNo);
+      querycust.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      querycust.setForReadOnly(true);
+      String result = querycust.getSingleResult(String.class);
+
+      if (result != null) {
+        custTypCd = result;
+      }
+      LOG.debug("--------- Customer Type is : " + custTypCd);
+    }
+
+    // if (!StringUtils.isBlank(admin.getCustType())) {
+    // custTypCd = admin.getCustType();
+    // }
 
     // US restrict to LOV mapping
     String usRestrictToLOV = "";
@@ -1709,7 +1739,7 @@ public class USUtil extends AutomationUtil {
     return true;
   }
 
-  public static USDetailsContainer determineUSCMRDetails(EntityManager entityManager, String cmrNo) throws Exception {
+  public static USDetailsContainer determineUSCMRDetails(EntityManager entityManager, String cmrNo, RequestData requestData) throws Exception {
     // get request admin and data
     if (usDetailsMap.containsKey(cmrNo) && usDetailsMap.get(cmrNo) != null) {
       return usDetailsMap.get(cmrNo);
@@ -1730,67 +1760,66 @@ public class USUtil extends AutomationUtil {
     String miscBilling = "";
     String sicmen = "";
 
-    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
-    String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
-    String sql = ExternalizedQuery.getSql("AUTO.GET_CODES_USCMR", usSchema);
-    sql = StringUtils.replace(sql, ":CMR_NO", "'" + cmrNo + "'");
-    String dbId = QueryClient.USCMR_APP_ID;
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
 
-    QueryRequest query = new QueryRequest();
-    query.setSql(sql);
-    query.setRows(1);
-    query.addField("I_ENT_TYPE");
-    query.addField("I_BP_ACCOUNT_TYPE");
-    query.addField("C_LEASING_CO");
-    query.addField("C_GEM");
-    // query.addField("C_COM_RESTRCT_CODE");
-    query.addField("I_CO");
-    query.addField("I_CUST_OFF_5");
-    query.addField("I_CUST_OFF_3");
-    query.addField("I_CUST_OFF_1");
-    query.addField("I_CUST_OFF_2");
-    query.addField("I_CUST_OFF_9");
-    query.addField("F_MISC_BILLING");
-    query.addField("C_SIC_MEN");
-
-    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
-    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
-
-    if (!response.isSuccess()) {
-      custTypCd = "NA";
-
-    } else if (response.getRecords() == null || response.getRecords().size() == 0) {
-      custTypCd = "NA";
-    } else {
-      Map<String, Object> record = response.getRecords().get(0);
-      entType = (String) record.get("I_ENT_TYPE");
-      leasingCo = (String) record.get("C_LEASING_CO");
-      bpAccTyp = (String) record.get("I_BP_ACCOUNT_TYPE");
-      cGem = (String) record.get("C_GEM");
-      // usRestrictTo = (String) record.get("C_COM_RESTRCT_CODE");
-      companyNo = String.valueOf(record.get("I_CO"));
-      pccArDept = String.valueOf(record.get("I_CUST_OFF_5"));
-      mtkgArDept = String.valueOf(record.get("I_CUST_OFF_3"));
-      mktgDept = String.valueOf(record.get("I_CUST_OFF_1"));
-      csoSite = String.valueOf(record.get("I_CUST_OFF_2"));
-      svrArOffice = String.valueOf(record.get("I_CUST_OFF_9"));
-      miscBilling = String.valueOf(record.get("F_MISC_BILLING"));
-      sicmen = String.valueOf(record.get("C_SIC_MEN"));
-      if ("P".equals(entType)) {
-        custTypCd = POWER_OF_ATTORNEY;
-      } else if ("F".equals(entType)) {
-        custTypCd = FEDERAL;
-      } else if ("I".equals(entType)) {
-        custTypCd = INTERNAL;
-      } else if ("C".equals(entType) || StringUtils.isNotBlank(leasingCo)) {
-        custTypCd = LEASING;
-      } else if (StringUtils.isNotBlank(bpAccTyp)) {
-        custTypCd = BUSINESS_PARTNER;
-      } else if ("2".equals(cGem)) {
-        custTypCd = STATE_LOCAL;
-      } else {
-        custTypCd = COMMERCIAL;
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      if ("6".equals(data.getCustGrp().trim())) {
+        if ("3CC".equals(data.getCustSubGrp().trim())) {
+          if ("3".equals(admin.getCustType().trim())) {
+            if (!StringUtils.isEmpty(admin.getMainCustNm1()) && !StringUtils.isEmpty(data.getEnterprise())) {
+              if ("IBM Credit LLC".equals(admin.getMainCustNm1().trim()) && "4482735".equals(data.getEnterprise().trim())) {
+                leasingCo = "45K";
+              }
+            }
+          }
+        } else {
+          if (!StringUtils.isEmpty(admin.getCustType()) && !StringUtils.isEmpty(data.getEnterprise())) {
+            if ("3".equals(admin.getCustType().trim()) && !"4482735".equals(data.getEnterprise().trim())) {
+              leasingCo = "00K";
+            }
+          }
+        }
       }
+    }
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+
+      if (!StringUtils.isEmpty(admin.getMainCustNm1()) && !StringUtils.isEmpty(data.getEnterprise())) {
+        if ("IBM Credit LLC".equals(admin.getMainCustNm1().trim()) && "4482735".equals(data.getEnterprise().trim())) {
+          leasingCo = "45K";
+        }
+      }
+
+      if (!StringUtils.isEmpty(data.getEnterprise())) {
+        if (!"4482735".equals(data.getEnterprise().trim())) {
+          leasingCo = "00K";
+        }
+      }
+
+    }
+
+    entType = getEntType(entityManager, requestData.getData().getEnterprise());
+    bpAccTyp = requestData.getData().getBpAcctTyp();
+    cGem = getcGem(entityManager, cmrNo);
+    companyNo = requestData.getData().getCompany();
+    pccArDept = requestData.getData().getPccArDept();
+    mtkgArDept = requestData.getData().getMtkgArDept();
+
+    if ("P".equals(entType)) {
+      custTypCd = POWER_OF_ATTORNEY;
+    } else if ("F".equals(entType)) {
+      custTypCd = FEDERAL;
+    } else if ("I".equals(entType)) {
+      custTypCd = INTERNAL;
+    } else if ("C".equals(entType) || StringUtils.isNotBlank(leasingCo)) {
+      custTypCd = LEASING;
+    } else if (StringUtils.isNotBlank(bpAccTyp)) {
+      custTypCd = BUSINESS_PARTNER;
+    } else if ("2".equals(cGem)) {
+      custTypCd = STATE_LOCAL;
+    } else {
+      custTypCd = COMMERCIAL;
     }
 
     // GET US_RESTRICT_TO_CODE
@@ -2130,6 +2159,143 @@ public class USUtil extends AutomationUtil {
     }
 
     return query.exists();
+  }
+
+  public static String validateForSCC(EntityManager entityManager, Long reqId) {
+
+    String flag = "N";
+
+    String landCntry = "";
+    String stateProv = "";
+    String county = "";
+    String city1 = "";
+
+    String sql1 = ExternalizedQuery.getSql("US.GET.ADDRESS_BY_REQ_ID");
+    PreparedQuery query1 = new PreparedQuery(entityManager, sql1);
+    query1.setParameter("REQ_ID", reqId);
+
+    List<Object[]> results1 = query1.getResults();
+    if (results1 != null && !results1.isEmpty()) {
+      Object[] scc = results1.get(0);
+      landCntry = (String) scc[0];
+      stateProv = (String) scc[1];
+      county = (String) scc[2];
+      city1 = (String) scc[3];
+    }
+
+    if (!StringUtils.isNumeric(county)) {
+      county = "0";
+    }
+
+    String sql2 = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
+    PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+    query2.setParameter("LAND_CNTRY", landCntry);
+    query2.setParameter("N_ST", stateProv);
+    query2.setParameter("C_CNTY", county);
+    query2.setParameter("N_CITY", city1);
+
+    List<Object[]> results2 = query2.getResults();
+    if (results2 != null && !results2.isEmpty()) {
+      Object[] result = results2.get(0);
+      if (!"".equals(result[0])) {
+        flag = "Y";
+      }
+    }
+
+    return flag;
+
+  }
+
+  public static String getcGem(EntityManager entityManager, String cmrNo) {
+    String code = "";
+    try {
+      LOG.debug("Getting cGem...");
+      String sql = ExternalizedQuery.getSql("AUTO.GET_CGEM");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("CMR_NO", cmrNo);
+      query.setForReadOnly(true);
+      code = query.getSingleResult(String.class);
+      if (code == null) {
+        code = "";
+      }
+    } catch (Exception e) {
+      LOG.error("Error in Getting cGem... ");
+    }
+
+    return code;
+  }
+
+  public static String getEntType(EntityManager entityManager, String entNo) {
+    String code = "";
+    try {
+      LOG.debug("Getting EntType...");
+      String sql = ExternalizedQuery.getSql("AUTO.GET_ENTTYPE");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("ENT_NO", entNo);
+      query.setForReadOnly(true);
+      code = query.getSingleResult(String.class);
+      if (code == null) {
+        code = "";
+      }
+    } catch (Exception e) {
+      LOG.error("Error in Getting EntType.. ");
+    }
+
+    return code;
+  }
+
+  public static USDetailsContainer determineUSCMRDetails(EntityManager entityManager, String cmrNo) throws Exception {
+    // get request admin and data
+    if (usDetailsMap.containsKey(cmrNo) && usDetailsMap.get(cmrNo) != null) {
+      return usDetailsMap.get(cmrNo);
+    }
+    USDetailsContainer usDetails = new USDetailsContainer();
+    String custTypCd = "NA";
+    String entType = "";
+    String leasingCo = "";
+    String bpAccTyp = "";
+    String cGem = "";
+    String usRestrictTo = "";
+    String companyNo = "";
+    String pccArDept = "";
+    String mtkgArDept = "";
+
+    cGem = getcGem(entityManager, cmrNo);
+
+    if ("P".equals(entType)) {
+      custTypCd = POWER_OF_ATTORNEY;
+    } else if ("F".equals(entType)) {
+      custTypCd = FEDERAL;
+    } else if ("I".equals(entType)) {
+      custTypCd = INTERNAL;
+    } else if ("C".equals(entType) || StringUtils.isNotBlank(leasingCo)) {
+      custTypCd = LEASING;
+    } else if (StringUtils.isNotBlank(bpAccTyp)) {
+      custTypCd = BUSINESS_PARTNER;
+    } else if ("2".equals(cGem)) {
+      custTypCd = STATE_LOCAL;
+    } else {
+      custTypCd = COMMERCIAL;
+    }
+
+    // GET US_RESTRICT_TO_CODE
+    String restrictCd = getUSRestrictToCode(entityManager, cmrNo);
+
+    usDetails.setCustTypCd(custTypCd);
+    usDetails.setEntType(entType);
+    usDetails.setLeasingCo(leasingCo);
+    usDetails.setBpAccTyp(bpAccTyp);
+    usDetails.setcGem(cGem);
+    // usDetails.setUsRestrictTo(usRestrictTo);
+    usDetails.setUsRestrictTo(restrictCd);
+    usDetails.setCompanyNo(companyNo);
+    usDetails.setMktgArDept(mtkgArDept);
+
+    usDetails.setPccArDept(pccArDept);
+    usDetailsMap.put(cmrNo, usDetails);
+    return usDetails;
   }
 
 }

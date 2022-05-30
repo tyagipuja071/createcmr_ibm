@@ -14,6 +14,8 @@
     <cmr:column span="2" width="350">
       The current city name <strong><span id="currcityname2">&nbsp;</span></strong> does not match any standard city names the system can use. 
       The city name <strong><span id="stdcityname">&nbsp;</span></strong> closely matches this and is usable by the system. Proceed to use the suggested name?
+      <br/><br/>
+      <strong>Note: Cancel will not save the address, please contact CMDE to add SCC information.</strong>
     </cmr:column>
   </cmr:row>
   <cmr:buttonsRow>

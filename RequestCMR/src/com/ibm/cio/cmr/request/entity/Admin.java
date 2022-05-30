@@ -158,7 +158,7 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
   private Date lockTs;
 
   @NoLog
-  @Column(name = "WAIT_INFO_IND")
+  @Column(name = "WAIT_INFO_IND", updatable = false)
   private String waitInfoInd;
 
   @NoLog

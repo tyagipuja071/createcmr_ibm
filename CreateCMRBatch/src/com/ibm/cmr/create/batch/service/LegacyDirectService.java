@@ -148,6 +148,10 @@ public class LegacyDirectService extends TransConnService {
     LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
     // pending = new ArrayList<Admin>();
     for (Admin admin : pending) {
+      if (BatchUtil.excludeForEnvironment(this.context, entityManager, admin)) {
+        // exclude data created from a diff env
+        continue;
+      }
       try {
         switch (admin.getReqType()) {
         case CmrConstants.REQ_TYPE_CREATE:
@@ -201,6 +205,10 @@ public class LegacyDirectService extends TransConnService {
     Data data = null;
     ProcessRequest request = null;
     for (Admin admin : pending) {
+      if (BatchUtil.excludeForEnvironment(this.context, entityManager, admin)) {
+        // exclude data created from a diff env
+        continue;
+      }
       try {
         this.cmrObjects = prepareRequest(entityManager, admin, true);
         data = this.cmrObjects.getData();
