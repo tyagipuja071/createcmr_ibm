@@ -114,6 +114,13 @@ public class MassCreateData extends BaseEntity<MassCreateDataPK> implements Seri
   private String taxExemp;
 
   @Column(
+      name = "TAX_EXEMPT_STATUS_2")
+  private String taxExempt2;
+
+  @Column(name = "TAX_EXEMPT_STATUS_3")
+  private String taxExempt3;
+
+  @Column(
       name = "SEARCH_TERM")
   private String searchTerm;
 
@@ -286,6 +293,10 @@ public class MassCreateData extends BaseEntity<MassCreateDataPK> implements Seri
   private String modelCmrNo;
 
   @Column(
+      name = "EDUC_ALLOW_CD")
+  private String educAllowCd;
+
+  @Column(
       name = "TAX_PAYER_CUST_CD")
   private String taxPayerCustCd;
 
@@ -344,6 +355,22 @@ public class MassCreateData extends BaseEntity<MassCreateDataPK> implements Seri
   @Column(
       name = "CUST_INVOICE_COPIES")
   private String cusInvoiceCopies;
+
+  public String getTaxExempt2() {
+    return taxExempt2;
+  }
+
+  public void setTaxExemp2(String taxExemp2) {
+    this.taxExempt2 = taxExemp2;
+  }
+
+  public String getTaxExempt3() {
+    return taxExempt3;
+  }
+
+  public void setTaxExempt3(String taxExemp3) {
+    this.taxExempt3 = taxExemp3;
+  }
 
   public String getCustNm1() {
     return this.custNm1;
@@ -873,6 +900,14 @@ public class MassCreateData extends BaseEntity<MassCreateDataPK> implements Seri
     this.modelCmrNo = modelCmrNo;
   }
 
+  public String getEducAllowCd() {
+    return educAllowCd;
+  }
+
+  public void setEducAllowCd(String educAllowCd) {
+    this.educAllowCd = educAllowCd;
+  }
+
   public String getTaxPayerCustCd() {
     return taxPayerCustCd;
   }
@@ -1000,4 +1035,5 @@ public class MassCreateData extends BaseEntity<MassCreateDataPK> implements Seri
   public void setTaxExemp(String taxExemp) {
     this.taxExemp = taxExemp;
   }
+
 }

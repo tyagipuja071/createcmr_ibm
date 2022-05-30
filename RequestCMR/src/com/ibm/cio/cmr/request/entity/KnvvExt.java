@@ -231,6 +231,61 @@ public class KnvvExt extends BaseEntity<KnvvExtPK> implements Serializable {
       name = "UPDATE_TYPE")
   private String updateType;
 
+  @Column(name = "SVC_MASTER_BO")
+  private String svcMasterBo;
+
+  @Column(name = "BO_DIVISION")
+  private String boDiv;
+
+  @Column(name = "BO_TRADING_AREA")
+  private String boTradingArea;
+
+  @Column(name = "NON_IBM_COMP_IND")
+  private String nonIBMCompInd;
+
+  @Column(name = "OEM_IND")
+  private String oemInd;
+
+  public String getSvcMasterBo() {
+    return svcMasterBo;
+  }
+
+  public void setSvcMasterBo(String svcMasterBo) {
+    this.svcMasterBo = svcMasterBo;
+  }
+
+  public String getBoDiv() {
+    return boDiv;
+  }
+
+  public void setBoDiv(String boDiv) {
+    this.boDiv = boDiv;
+  }
+
+  public String getBoTradingArea() {
+    return boTradingArea;
+  }
+
+  public void setBoTradingArea(String boTradingArea) {
+    this.boTradingArea = boTradingArea;
+  }
+
+  public String getNonIBMCompInd() {
+    return nonIBMCompInd;
+  }
+
+  public void setNonIBMCompInd(String nonIBMCompInd) {
+    this.nonIBMCompInd = nonIBMCompInd;
+  }
+
+  public String getOemInd() {
+    return oemInd;
+  }
+
+  public void setOemInd(String oemInd) {
+    this.oemInd = oemInd;
+  }
+
   public String getCsoSite() {
     return this.csoSite;
   }

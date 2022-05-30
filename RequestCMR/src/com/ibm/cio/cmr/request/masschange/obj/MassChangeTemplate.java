@@ -19,6 +19,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -131,6 +132,7 @@ public class MassChangeTemplate {
    * @throws Exception
    */
   public List<TemplateValidation> validate(EntityManager entityManager, InputStream is, String country, int maxRows) throws Exception {
+    ZipSecureFile.setMinInflateRatio(0);
     XSSFWorkbook book = new XSSFWorkbook(is);
     try {
       List<TemplateValidation> validations = new ArrayList<TemplateValidation>();

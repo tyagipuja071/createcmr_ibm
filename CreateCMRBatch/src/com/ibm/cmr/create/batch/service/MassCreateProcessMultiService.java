@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -43,11 +44,13 @@ import com.ibm.cio.cmr.request.model.requestentry.MassCreateBatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.NotifyReqModel;
 import com.ibm.cmr.create.batch.util.BatchUtil;
+import com.ibm.cmr.create.batch.util.USCMRNumGen;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
 import com.ibm.cmr.create.batch.util.worker.impl.USMassCreateMultiWorker;
 
@@ -267,7 +270,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
         LOG.debug("Locking Request ID " + admin.getId().getReqId() + " for processing.");
       }
     }
-    // partialCommit(entityManager);
+    partialCommit(entityManager);
 
   }
 
@@ -314,6 +317,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     massCreatequery.setParameter("ITERATION_ID", itrId);
     List<CompoundEntity> resultsMain = massCreatequery.getCompundResults(Admin.class, map);
     MassCreate mass_create = null;
+    MassCreateData massCrtData = null;
 
     List<String> resultCodes = new ArrayList<String>();
     Map<String, List<String>> backing = new HashMap<String, List<String>>();
@@ -339,7 +343,48 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + reqId));
     for (CompoundEntity entity : resultsMain) {
       mass_create = entity.getEntity(MassCreate.class);
-      USMassCreateMultiWorker worker = new USMassCreateMultiWorker(this, admin, mass_create, cmrServiceInput, cmrNoSapNoMap);
+      massCrtData = entity.getEntity(MassCreateData.class);
+
+      String issuingCntrySql = "BATCH.GET_DATA";
+      PreparedQuery dataQuery = new PreparedQuery(em, ExternalizedQuery.getSql(issuingCntrySql));
+      dataQuery.setParameter("REQ_ID", reqId);
+      Data data = dataQuery.getSingleResult(Data.class);
+      // temp switch for US masscreate
+      String procType = null;
+      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+
+        String sql = "select PROCESSING_TYP from creqcmr.SUPP_CNTRY where CNTRY_CD='897'";
+        Query q = em.createNativeQuery(sql);
+        procType = (String) q.getSingleResult();
+        if (procType.equals("US") && CmrConstants.REQ_TYPE_MASS_CREATE.equalsIgnoreCase(cmrServiceInput.getInputReqType())) {
+          boolean isPoaFed = "4".equals(massCrtData.getCustTyp()) || "6".equals(massCrtData.getCustTyp());
+          boolean isMainCustNm1 = false;
+
+          if (massCrtData.getCustNm1() != null) {
+            isMainCustNm1 = massCrtData.getCustNm1().trim().toUpperCase().startsWith("A");
+          }
+
+          String cmrType = "COMM";
+          if (isPoaFed) {
+            cmrType = "POA";
+          } else if (isMainCustNm1) {
+            cmrType = "MAIN";
+          }
+          // temp try get number, will remove when generate method done
+          String cmrNum = USCMRNumGen.genCMRNum(cmrType);
+          massCrtData.setCmrNo(cmrNum);
+          mass_create.setCmrNo(cmrNum);
+          updateEntity(mass_create, em);
+          updateEntity(massCrtData, em);
+          partialCommit(em);
+        } else if (procType.equals("TC")) {
+          setCmrNoOnMassCrtData(em, admin.getId().getReqId(), mass_create.getCmrNo(), mass_create.getId().getSeqNo());
+        }
+
+      }
+
+      USMassCreateMultiWorker worker = new USMassCreateMultiWorker(this, admin, mass_create, cmrServiceInput, cmrNoSapNoMap,
+          data.getCmrIssuingCntry());
       executor.execute(worker);
       workers.add(worker);
     }
@@ -374,6 +419,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
 
     String overallStatus = null;
     String statusMessage = null;
+    adminEntity.setReqStatus("PPN");
     if ((resultCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED) || resultCodes.contains(CmrConstants.RDC_STATUS_ABORTED))
         && (resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED) || resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED))) {
       overallStatus = CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS;
@@ -381,6 +427,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     } else if ((!resultCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED) && !resultCodes.contains(CmrConstants.RDC_STATUS_ABORTED))
         && (resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED) || resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED))) {
       overallStatus = CmrConstants.RDC_STATUS_COMPLETED;
+      adminEntity.setReqStatus("COM");
       statusMessage = "All records processed successfully.";
     } else if ((!resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED) && !resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS))) {
       overallStatus = CmrConstants.RDC_STATUS_NOT_COMPLETED;
@@ -504,6 +551,14 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     cmrServiceInput.setInputUserId(SystemConfiguration.getValue("BATCH_USERID"));
 
     return cmrServiceInput;
+  }
+
+  private void setCmrNoOnMassCrtData(EntityManager entityManager, long reqId, String cmrNo, int seqNo) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("US.SETCMRNO"));
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setParameter("SEQ_NO", seqNo);
+    query.executeSql();
   }
 
   /**

@@ -5,6 +5,7 @@ package com.ibm.cmr.create.batch.entry;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cmr.create.batch.service.FillSapNoService;
 import com.ibm.cmr.create.batch.service.TransConnMultiService;
 import com.ibm.cmr.create.batch.service.TransConnMultiService.Mode;
 
@@ -16,6 +17,10 @@ public class TransConnMultiEntryPoint extends BatchEntryPoint {
 
   public static void main(String[] args) throws CmrException {
     BatchEntryPoint.initContext("TransConnMulti", true);
+
+    FillSapNoService fill = new FillSapNoService();
+    fill.setSkipExit(true);
+    fill.execute();
 
     TransConnMultiService service = new TransConnMultiService();
     service.setSkipExit(true);

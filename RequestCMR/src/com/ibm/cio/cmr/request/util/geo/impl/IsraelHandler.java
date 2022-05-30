@@ -76,7 +76,7 @@ public class IsraelHandler extends EMEAHandler {
 
   private static final String[] ISRAEL_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode", "LocalTax1",
       "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building",
-      "County", "City2", "CustomerName2", "BPRelationType", "MembLevel", "INACType" };
+      "County", "City2", "BPRelationType", "MembLevel", "INACType" };
 
   private static final List<String> EMEA_COUNTRY_VAL = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL,
       SystemLocation.TURKEY, SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
@@ -543,20 +543,20 @@ public class IsraelHandler extends EMEAHandler {
       if (addressLineVal.contains(" ")) {
         String postalCode = "";
         String city = "";
-        String str1 = addressLineVal.substring(0, addressLineVal.indexOf(' '));
-        String str2 = addressLineVal.substring(addressLineVal.indexOf(' ') + 1);
-        if (StringUtils.isNumeric(str1) && !StringUtils.isNumeric(str2)) {
-          postalCode = str1;
-          city = str2;
-        } else if (StringUtils.isNumeric(str2) && !StringUtils.isNumeric(str1)) {
-          postalCode = str2;
-          city = str1;
+
+        String[] parts = addressLineVal.split(" ");
+        for (int i = 0; i < parts.length; i++) {
+          if ((i == 0 || i == parts.length - 1) && StringUtils.isBlank(postalCode) && StringUtils.isNumeric(parts[i])) {
+            postalCode = parts[i];
+          } else {
+            city += " " + parts[i];
+          }
         }
 
         if ("IP".equals(addrlUVal) && StringUtils.isNumeric(postalCode)) {
           addressLineVal = postalCode;
         } else if ("IC".equals(addrlUVal) && !StringUtils.isNumeric(city)) {
-          addressLineVal = city;
+          addressLineVal = city.trim();
         }
       } else {
         if (StringUtils.isNumeric(addressLineVal)) {
@@ -797,6 +797,9 @@ public class IsraelHandler extends EMEAHandler {
           address.setCustPhone("");
         }
       }
+      if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType()) && StringUtils.isBlank(address.getSapNo())) {
+        address.setImportInd("L");
+      }
     } else {
       super.setAddressValuesOnImport(address, admin, currentRecord, cmrNo);
     }
@@ -965,6 +968,11 @@ public class IsraelHandler extends EMEAHandler {
       assignPairedSequence(entityManager, addr, admin.getReqType());
       clearPOBox(addr);
 
+      AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
+      if (addrRdc != null && StringUtils.isNotBlank(addrRdc.getImportInd()) && "L".equals(addrRdc.getImportInd())) {
+        addr.setImportInd("L");
+      }
+
       switch (cmrIssuingCntry) {
       case SystemLocation.ISRAEL:
         if ("CTYA".equals(addr.getId().getAddrType())) {
@@ -1026,8 +1034,9 @@ public class IsraelHandler extends EMEAHandler {
       if ("Y".equals(addr.getImportInd())) {
 
         AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
-        addr.setPairedAddrSeq(addrRdc.getPairedAddrSeq());
-
+        if (addrRdc != null && StringUtils.isNotBlank(addrRdc.getPairedAddrSeq())) {
+          addr.setPairedAddrSeq(addrRdc.getPairedAddrSeq());
+        }
       } else if ("N".equals(addr.getImportInd())) {
         assignPairedSeqForNewAddr(entityManager, addr);
       }

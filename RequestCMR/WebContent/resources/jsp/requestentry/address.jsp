@@ -175,7 +175,24 @@ visibility: hidden !IMPORTANT;
       <%} %>
     </cmr:column>
   </cmr:row>
-
+  
+  <!-- // CREATCMR-5447 -->
+  <cmr:view forCountry="897">
+    <cmr:row addBackground="true" topPad="10">
+      <cmr:column span="1" width="220">
+        <p>
+          <cmr:label fieldId="dplCheck">
+            SCC: 
+          </cmr:label>
+          <div>
+            <span id="addressTabSccInfo"></span>
+          </div>
+        </p>
+      </cmr:column>
+    </cmr:row>
+  </cmr:view>
+  <!-- // CREATCMR-5447 -->
+  
   <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF' || fn:trim(reqentry.dplChkResult) == 'SF'}">
     <cmr:row>
       <cmr:column span="1" width="220">
@@ -413,7 +430,7 @@ visibility: hidden !IMPORTANT;
 
         
         <!-- State Province -->
-        <cmr:view forGEO="LA,US">
+        <cmr:view forGEO="LA,US,SWISS">
           <cmr:gridCol width="80px" field="stateProv" header="${ui.grid.stateProvince}" >
             <cmr:formatter functionName="stateProvFormatter" />
           </cmr:gridCol>
@@ -425,6 +442,13 @@ visibility: hidden !IMPORTANT;
             <cmr:formatter functionName="stateProvFormatter" />
           </cmr:gridCol>
         </cmr:view>
+        
+         <cmr:view forCountry="618">
+          <cmr:gridCol width="80px" field="stateProv" header="${ui.grid.stateProvince}" >
+            <cmr:formatter functionName="stateProvFormatter" />
+          </cmr:gridCol>
+        </cmr:view>
+        
         
         <cmr:view forCountry="666">
           <cmr:gridCol width="90px" field="addrTxt2" header="${ui.grid.occupation}" />
@@ -484,6 +508,7 @@ visibility: hidden !IMPORTANT;
         <cmr:view forGEO="LA">
         	<cmr:gridCol width="100px" field="vat" header="VAT#" />
         </cmr:view>
+     
         <!-- Change indicator -->
         <%if ("U".equals(reqentry.getReqType())){ %>
           <cmr:gridCol width="70px" field="updateInd" header="Change" >
