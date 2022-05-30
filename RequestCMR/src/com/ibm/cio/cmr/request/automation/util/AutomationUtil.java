@@ -963,8 +963,10 @@ public abstract class AutomationUtil {
       Addr addr = it.next();
       if (!payGoAddredited) {
       if (!"ZS01".equals(addr.getId().getAddrType())) {
-        if (compareCustomerNames(zs01, addr) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
-            && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
+        if (compareCustomerNames(zs01, addr) && 
+            (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
+            && (StringUtils.isNotBlank(addr.getCity1()) && addr.getCity1().trim().toUpperCase().equals(mainCity)) 
+            && (StringUtils.isNotBlank(addr.getPostCd()) && addr.getPostCd().trim().equals(mainPostalCd))) {
           details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
           Addr merged = entityManager.merge(addr);
           if (merged != null) {
@@ -978,8 +980,9 @@ public abstract class AutomationUtil {
         if (!"ZS01".equals(addr.getId().getAddrType())) {
           if (compareCustomerNames(zs01, addr)
               && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
-              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
-              && addr.getExtWalletId().trim().toUpperCase().equals(mainExtWalletId)) {
+              && (StringUtils.isNotBlank(addr.getCity1()) && addr.getCity1().trim().toUpperCase().equals(mainCity))
+              && (StringUtils.isNotBlank(addr.getPostCd()) && addr.getPostCd().trim().equals(mainPostalCd))
+              && (StringUtils.isNotBlank(addr.getExtWalletId()) && addr.getExtWalletId().trim().toUpperCase().equals(mainExtWalletId))) {
             details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
             Addr merged = entityManager.merge(addr);
             if (merged != null) {

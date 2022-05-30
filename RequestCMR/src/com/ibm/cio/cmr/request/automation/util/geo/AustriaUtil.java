@@ -33,6 +33,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
@@ -202,6 +203,11 @@ public class AustriaUtil extends AutomationUtil {
     }
 
     List<Addr> addresses = null;
+    LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
+        && !changes.isAddressChanged("ZI01");
+
 
     StringBuilder duplicateDetails = new StringBuilder();
     StringBuilder checkDetails = new StringBuilder();
@@ -217,6 +223,14 @@ public class AustriaUtil extends AutomationUtil {
           addresses = requestData.getAddresses(addrType);
         }
         for (Addr addr : addresses) {
+          List<String> addrTypesChanged = new ArrayList<String>();
+          for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
+            if (!addrTypesChanged.contains(addrModel.getAddrTypeCode())) {
+              addrTypesChanged.add(addrModel.getAddrTypeCode());
+            }
+          }
+          boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(addrType) && "PG".equals(data.getOrdBlk()));
+
           if ("N".equals(addr.getImportInd())) {
             // new address
             LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
@@ -225,6 +239,23 @@ public class AustriaUtil extends AutomationUtil {
               LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               duplicateDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
               resultCodes.add("D");
+            } else if ((payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) || isZS01WithAufsdPG) {
+              if ("N".equals(addr.getImportInd())) {
+                LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                duplicate = addressExists(entityManager, addr, requestData);
+                if (duplicate) {
+                  LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing Bill-To address.\n");
+                  resultCodes.add("D");
+                } else {
+                  LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  checkDetails.append(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")" + "with same attentionTo");
+                  checkDetails.append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ")  validated in the checks.\n");
+                }
+              } else {
+                checkDetails.append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ")  validated in the checks.\n");
+              }
+
             } else {
               LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               if (CmrConstants.RDC_SHIP_TO.equals(addrType)) {
@@ -261,6 +292,10 @@ public class AustriaUtil extends AutomationUtil {
               // just proceed for shipping updates
               LOG.debug("Update to ZD01 " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Updates to ZD01 (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
+            } else if (isZS01WithAufsdPG || "PG".equals(data.getOrdBlk())) {
+              LOG.debug("Update to " + addrType + "(" + addr.getId().getAddrSeq() + ") with Aufsd = " + data.getOrdBlk());
+              checkDetails.append(
+                  "Updates to " + addrType + "(" + addr.getId().getAddrSeq() + ") with Aufsd = " + data.getOrdBlk() + " skipped in the checks.\n");
             } else {
               // update to other relevant addresses
               if (isRelevantAddressFieldUpdated(changes, addr)) {

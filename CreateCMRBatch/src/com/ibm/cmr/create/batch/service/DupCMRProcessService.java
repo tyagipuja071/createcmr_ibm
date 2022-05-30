@@ -738,7 +738,11 @@ public class DupCMRProcessService extends LegacyDirectService {
     LOG.debug("Sequences : " + sequences);
 
     Queue<Integer> availableSequences = new LinkedList<Integer>();
-    availableSequences = getAvailableSequences(entityManager, dupCntry, cmrNo);
+    if (SystemLocation.IRELAND.equals(cntry)) {
+      availableSequences = getAvailableSequences(entityManager, "866", cmrNo);
+    } else {
+      availableSequences = getAvailableSequences(entityManager, dupCntry, cmrNo);
+    }
     for (Addr addr : cmrObjects.getAddresses()) {
 
       if (availableSequences.contains(Integer.parseInt(addr.getId().getAddrSeq()))) {

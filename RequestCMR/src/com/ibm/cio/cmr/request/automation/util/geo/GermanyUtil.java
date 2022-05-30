@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -15,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -60,6 +60,8 @@ public class GermanyUtil extends AutomationUtil {
   private static final String POSTAL_CD_RANGE = "postalCdRange";
   private static final String SORTL = "SORTL";
 
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_PAYGO_BILLING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
       "Phone #", "PostBox", "State/Province");
 
@@ -106,6 +108,11 @@ public class GermanyUtil extends AutomationUtil {
     // required for BP Portal requests.");
     // skipAllChecks(engineData); // remove after BP is enabled
     // } else
+    if ("C".equals(requestData.getAdmin().getReqType())) {
+      // remove duplicates
+      removeDuplicateAddresses(entityManager, requestData, details);
+    }
+
     if (StringUtils.isNotBlank(scenario)) {
       switch (scenario) {
       case "PRIPE":
@@ -298,59 +305,57 @@ public class GermanyUtil extends AutomationUtil {
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
-    Addr zs01 = requestData.getAddress("ZS01");
-    Admin admin = requestData.getAdmin();
-    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
-    String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1().trim() : "";
-    String custNm2 = StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() : "";
-    String mainCustNm = (custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "")).toUpperCase();
-    String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
-    String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
-    String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
-    String mainExtWalletId = (StringUtils.isNotBlank(zs01.getExtWalletId()) ? zs01.getExtWalletId() : "").trim();
-    Iterator<Addr> it = requestData.getAddresses().iterator();
-    boolean removed = false;
-    details.append("Checking for duplicate address records - ").append("\n");
-    while (it.hasNext()) {
-      Addr addr = it.next();
-      if (!payGoAddredited) {
-        if (!"ZS01".equals(addr.getId().getAddrType())) {
-          removed = true;
-          String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
-              .toUpperCase();
-		  String streetaddress = ((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().trim() : "")).toUpperCase();
-          if (custNm.equals(mainCustNm) && streetaddress.equals(mainStreetAddress1)
-              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
-            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-            Addr merged = entityManager.merge(addr);
-            if (merged != null) {
-              entityManager.remove(merged);
-            }
-            it.remove();
-          }
-        }
-      } else {
-        if (!"ZS01".equals(addr.getId().getAddrType())) {
-          removed = true;
-          String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
-              .toUpperCase();
-          if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
-              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
-              && zs01.getExtWalletId().trim().toUpperCase().equals(mainExtWalletId)) {
-            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-            Addr merged = entityManager.merge(addr);
-            if (merged != null) {
-              entityManager.remove(merged);
-            }
-            it.remove();
-          }
-        }
-      }
-    }
-
-    if (!removed) {
-      details.append("No duplicate address records found on the request.").append("\n");
-    }
+    /*
+     * Addr zs01 = requestData.getAddress("ZS01"); Admin admin =
+     * requestData.getAdmin(); boolean payGoAddredited =
+     * RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+     * String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ?
+     * zs01.getCustNm1().trim() : ""; String custNm2 =
+     * StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() :
+     * ""; String mainCustNm = (custNm1 + (StringUtils.isNotBlank(custNm2) ? " "
+     * + custNm2 : "")).toUpperCase(); String mainStreetAddress1 =
+     * (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() :
+     * "").trim().toUpperCase(); String mainCity =
+     * (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() :
+     * "").trim().toUpperCase(); String mainPostalCd =
+     * (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() :
+     * "").trim(); String mainExtWalletId =
+     * (StringUtils.isNotBlank(zs01.getExtWalletId()) ? zs01.getExtWalletId() :
+     * "").trim(); Iterator<Addr> it = requestData.getAddresses().iterator();
+     * boolean removed = false;
+     * details.append("Checking for duplicate address records - ").append("\n");
+     * while (it.hasNext()) { Addr addr = it.next(); if (!payGoAddredited) { if
+     * (!"ZS01".equals(addr.getId().getAddrType())) { removed = true; String
+     * custNm = (addr.getCustNm1().trim() +
+     * (StringUtils.isNotBlank(addr.getCustNm2()) ? " " +
+     * addr.getCustNm2().trim() : "")) .toUpperCase(); String streetaddress =
+     * ((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().trim() :
+     * "")).toUpperCase(); if (custNm.equals(mainCustNm) &&
+     * streetaddress.equals(mainStreetAddress1) &&
+     * addr.getCity1().trim().toUpperCase().equals(mainCity) &&
+     * addr.getPostCd().trim().equals(mainPostalCd)) {
+     * details.append("Removing duplicate address record: " +
+     * addr.getId().getAddrType() + " from the request.").append("\n"); Addr
+     * merged = entityManager.merge(addr); if (merged != null) {
+     * entityManager.remove(merged); } it.remove(); } } } else { if
+     * (!"ZS01".equals(addr.getId().getAddrType())) { removed = true; String
+     * custNm = (addr.getCustNm1().trim() +
+     * (StringUtils.isNotBlank(addr.getCustNm2()) ? " " +
+     * addr.getCustNm2().trim() : "")) .toUpperCase(); if
+     * (custNm.equals(mainCustNm) &&
+     * addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1) &&
+     * addr.getCity1().trim().toUpperCase().equals(mainCity) &&
+     * addr.getPostCd().trim().equals(mainPostalCd) &&
+     * zs01.getExtWalletId().trim().toUpperCase().equals(mainExtWalletId)) {
+     * details.append("Removing duplicate address record: " +
+     * addr.getId().getAddrType() + " from the request.").append("\n"); Addr
+     * merged = entityManager.merge(addr); if (merged != null) {
+     * entityManager.remove(merged); } it.remove(); } } } }
+     * 
+     * if (!removed) {
+     * details.append("No duplicate address records found on the request.").
+     * append("\n"); }
+     */
 
     // replace special characters from addresses.
     details.append("Replacing German language characters from address fields if any.").append("\n");
@@ -647,6 +652,17 @@ public class GermanyUtil extends AutomationUtil {
             LOG.debug("Updates to the Order Block field are validated.");
           }
         }
+      } else if (changes.isDataChanged("Abbreviated Name (TELX1)")) {
+        UpdatedDataModel AbbrevNameChange = changes.getDataChange("Abbreviated Name (TELX1)");
+        String oldAbbrName = insertGermanCharacters(AbbrevNameChange.getOldData());
+        if (oldAbbrName.equals(AbbrevNameChange.getNewData())) {
+          detail.append("Updates to the Abbreviated Name field are validated.\n");
+          LOG.debug("Updates to the Abbreviated Name field are validated.");
+        } else {
+          isNegativeCheckNeedeed = true;
+          detail.append("Updates to Abbreviated Name field were found, review is required.\n");
+          LOG.debug("Updates to Abbreviated Name field were found, review is required.");
+        }
       } else {
         boolean otherFieldsChanged = false;
         for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
@@ -700,6 +716,8 @@ public class GermanyUtil extends AutomationUtil {
     String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
     StringBuilder detail = new StringBuilder(details);
     long reqId = requestData.getAdmin().getId().getReqId();
+    LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     if (changes != null && changes.hasAddressChanges()) {
       if (StringUtils.isNotEmpty(data.getCustClass()) && ("81".equals(data.getCustClass()) || "85".equals(data.getCustClass()))
           && !changes.hasDataChanges()) {
@@ -805,17 +823,31 @@ public class GermanyUtil extends AutomationUtil {
         validation.setMessage("Not validated");
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
       } else {
-        for (Addr addr : addressList) {
-          if ("Y".equals(addr.getImportInd())) {
-            if (!isRelevantAddressFieldUpdated(changes, addr)) {
-              validation.setSuccess(true);
-              LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
-              detail.append("Updates to relevant addresses found but have been marked as Verified.");
-              validation.setMessage("Validated");
-              isNegativeCheckNeedeed = false;
-              break;
-            } else if (isRelevantAddressFieldUpdated(changes, addr)) {
-              isNegativeCheckNeedeed = true;
+        for (String addrType : RELEVANT_ADDRESSES) {
+          for (Addr addr : addressList) {
+            List<String> addrTypesChanged = new ArrayList<String>();
+            for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
+              if (!addrTypesChanged.contains(addrModel.getAddrTypeCode())) {
+                addrTypesChanged.add(addrModel.getAddrTypeCode());
+              }
+            }
+            boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(addrType) && "PG".equals(data.getOrdBlk()));
+            if ("Y".equals(addr.getImportInd())) {
+              if ((payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) || isZS01WithAufsdPG) {
+                validation.setSuccess(true);
+                LOG.debug("Updates to PG01 addresses fields is found.Updates verified.");
+                detail.append("Updates to PG01 addresses found but have been marked as Verified.");
+                isNegativeCheckNeedeed = false;
+              } else if (!isRelevantAddressFieldUpdated(changes, addr)) {
+                validation.setSuccess(true);
+                LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
+                detail.append("Updates to relevant addresses found but have been marked as Verified.");
+                validation.setMessage("Validated");
+                isNegativeCheckNeedeed = false;
+                break;
+              } else if (isRelevantAddressFieldUpdated(changes, addr)) {
+                isNegativeCheckNeedeed = true;
+              }
             }
           }
         }
