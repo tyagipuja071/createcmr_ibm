@@ -218,6 +218,15 @@ dojo.addOnLoad(function(){
         </p>
       </cmr:column>
 
+      <cmr:column span="2" containerForField="OrdBlk" forCountry="897" >
+        <p>
+          <cmr:label fieldId="ordBlk">
+            <cmr:fieldLabel fieldId="OrdBlk" />: 
+            <cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}"/>
+          </cmr:label>
+          <cmr:field fieldId="OrdBlk" id="ordBlk" path="ordBlk" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
       <cmr:column span="2" containerForField="CommercialFinanced" forCountry="624" >
         <p>
           <cmr:label fieldId="commercialFinanced">

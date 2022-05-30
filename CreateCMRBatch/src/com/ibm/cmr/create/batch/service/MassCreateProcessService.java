@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonGenerationException;
@@ -31,10 +32,12 @@ import com.ibm.cio.cmr.request.model.requestentry.MassCreateBatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.NotifyReqModel;
 import com.ibm.cmr.create.batch.util.DebugUtil;
+import com.ibm.cmr.create.batch.util.USCMRNumGen;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ProcessClient;
 import com.ibm.cmr.services.client.process.ProcessRequest;
@@ -224,6 +227,7 @@ public class MassCreateProcessService extends BaseBatchService {
       String currentRDCProcStat, WfHist wfHist) throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
     String resultCode = "";
+
     // get the params for input to the create cmr service
     List<MassCreateBatchEmailModel> ufailList = new ArrayList<MassCreateBatchEmailModel>();
 
@@ -234,19 +238,69 @@ public class MassCreateProcessService extends BaseBatchService {
     massCreatequery.setParameter("REQ_ID", reqId);
     massCreatequery.setParameter("ITERATION_ID", itrId);
     List<CompoundEntity> results = massCreatequery.getCompundResults(Admin.class, map);
+
+    String issuingCntrySql = "BATCH.GET_DATA";
+    PreparedQuery dataQuery = new PreparedQuery(em, ExternalizedQuery.getSql(issuingCntrySql));
+    dataQuery.setParameter("REQ_ID", reqId);
+    Data data = dataQuery.getSingleResult(Data.class);
+
     MassCreate mass_create = null;
+    MassCreateData massCrtData = null;
 
     List<String> resultCodes = new ArrayList<String>();
     Map<String, List<String>> cmrNoSapNoMap = new HashMap<String, List<String>>();
 
     for (CompoundEntity entity : results) {
       mass_create = entity.getEntity(MassCreate.class);
+      massCrtData = entity.getEntity(MassCreateData.class);
 
       ProcessRequest request = new ProcessRequest();
       request.setCmrNo(mass_create.getCmrNo());
       request.setMandt(cmrServiceInput.getInputMandt());
       request.setReqId(cmrServiceInput.getInputReqId());
-      request.setReqType(CmrConstants.REQ_TYPE_CREATE);
+
+      // temp switch for US masscreate
+      String procType = null;
+      Admin admin = entity.getEntity(Admin.class);
+      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+
+        String sql = "select PROCESSING_TYP from creqcmr.SUPP_CNTRY where CNTRY_CD='897'";
+        Query q = em.createNativeQuery(sql);
+        procType = (String) q.getSingleResult();
+
+        if (procType.equals("US") && CmrConstants.REQ_TYPE_MASS_CREATE.equalsIgnoreCase(cmrServiceInput.getInputReqType())) {
+          request.setReqType(CmrConstants.REQ_TYPE_MASS_CREATE);
+
+          boolean isPoaFed = "4".equals(massCrtData.getCustTyp()) || "6".equals(massCrtData.getCustTyp());
+          boolean isMainCustNm1 = false;
+
+          if (massCrtData.getCustNm1() != null) {
+            isMainCustNm1 = massCrtData.getCustNm1().trim().toUpperCase().startsWith("A");
+          }
+
+          String cmrType = "COMM";
+          if (isPoaFed) {
+            cmrType = "POA";
+          } else if (isMainCustNm1) {
+            cmrType = "MAIN";
+          }
+          // temp try get number, will remove when generate method done
+          String cmrNum = USCMRNumGen.genCMRNum(cmrType);
+          massCrtData.setCmrNo(cmrNum);
+          mass_create.setCmrNo(cmrNum);
+          request.setCmrNo(mass_create.getCmrNo());
+          updateEntity(mass_create, em);
+          updateEntity(massCrtData, em);
+        } else if (procType.equals("TC")) {
+          request.setReqType(CmrConstants.REQ_TYPE_MASS_CREATE);
+          setCmrNoOnMassCrtData(em, request.getReqId(), request.getCmrNo(), mass_create.getId().getSeqNo());
+        } else {
+          request.setReqType(CmrConstants.REQ_TYPE_CREATE);
+        }
+      } else {
+        request.setReqType(CmrConstants.REQ_TYPE_CREATE);
+      }
+
       request.setUserId(cmrServiceInput.getInputUserId());
       request.setIterationId(itrId);
 
@@ -359,6 +413,7 @@ public class MassCreateProcessService extends BaseBatchService {
 
     String overallStatus = null;
     String statusMessage = null;
+    adminEntity.setReqStatus("PPN");
     if ((resultCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED) || resultCodes.contains(CmrConstants.RDC_STATUS_ABORTED))
         && (resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED) || resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED))) {
       overallStatus = CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS;
@@ -366,6 +421,7 @@ public class MassCreateProcessService extends BaseBatchService {
     } else if ((!resultCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED) && !resultCodes.contains(CmrConstants.RDC_STATUS_ABORTED))
         && (resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED) || resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED))) {
       overallStatus = CmrConstants.RDC_STATUS_COMPLETED;
+      adminEntity.setReqStatus("COM");
       statusMessage = "All records processed successfully.";
     } else if ((!resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED) && !resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS))) {
       overallStatus = CmrConstants.RDC_STATUS_NOT_COMPLETED;
@@ -594,6 +650,14 @@ public class MassCreateProcessService extends BaseBatchService {
 
     RequestUtils.sendEmailNotifications(em, adminEntityWf, hist);
 
+  }
+
+  private void setCmrNoOnMassCrtData(EntityManager entityManager, long reqId, String cmrNo, int seqNo) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("US.SETCMRNO"));
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setParameter("SEQ_NO", seqNo);
+    query.executeSql();
   }
 
   private void lockAdminRecordsForProcessing(List<Admin> forProcessing, EntityManager entityManager) {

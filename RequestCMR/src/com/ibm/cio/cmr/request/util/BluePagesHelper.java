@@ -547,4 +547,25 @@ public class BluePagesHelper {
 
   }
 
+  // CREATCMR-5447
+  public static boolean isUserInUSTAXBlueGroup(String intranetId) {
+    cwa2 bpAPI = new cwa2();
+    String groups = SystemParameters.getString("US_TAX_BG_LIST");
+    if (!StringUtils.isEmpty(groups)) {
+      String[] blueGroups = groups.split(",");
+      ReturnCode retCode = null;
+      for (String blueGroup : blueGroups) {
+        if (bpAPI.groupExist(blueGroup.trim())) {
+          retCode = bpAPI.inAGroup(intranetId, blueGroup);
+          if (cwaapi.SUCCESS.equals(retCode)) {
+            return true;
+          }
+        } else {
+          LOG.debug("Group " + blueGroup + " does not exist. Skipping.");
+        }
+      }
+    }
+    return false;
+  }
+
 }

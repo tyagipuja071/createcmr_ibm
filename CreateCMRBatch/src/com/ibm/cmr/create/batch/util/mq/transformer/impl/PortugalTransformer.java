@@ -473,11 +473,7 @@ public class PortugalTransformer extends MessageTransformer {
 
     // vat
     if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
-      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
-      } else {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
-      }
+      legacyCust.setVat(dummyHandler.cmrData.getVat());
     } else {
       if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));

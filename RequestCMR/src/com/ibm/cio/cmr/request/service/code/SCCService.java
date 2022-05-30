@@ -14,8 +14,8 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.ibm.cio.cmr.request.CmrException;
-import com.ibm.cio.cmr.request.entity.A11t0scc;
 import com.ibm.cio.cmr.request.entity.FieldInfo;
+import com.ibm.cio.cmr.request.entity.USCMRScc;
 import com.ibm.cio.cmr.request.model.KeyContainer;
 import com.ibm.cio.cmr.request.model.code.SCCModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -27,7 +27,7 @@ import com.ibm.cio.cmr.request.service.BaseService;
  * 
  */
 @Component
-public class SCCService extends BaseService<SCCModel, A11t0scc> {
+public class SCCService extends BaseService<SCCModel, USCMRScc> {
 
   @Override
   protected Logger initLogger() {
@@ -71,8 +71,10 @@ public class SCCService extends BaseService<SCCModel, A11t0scc> {
     String city = request.getParameter("nCity");
     String state = request.getParameter("nSt");
     String county = request.getParameter("nCnty");
+    String land = request.getParameter("nLand");
     if (StringUtils.isBlank(state)) {
-      state = "xxx"; // to retrieve nothing
+      // state = "xxx"; // to retrieve nothing
+      state = ""; // to retrieve all state
     }
     if (StringUtils.isBlank(city)) {
       city = ""; // to retrieve all cities
@@ -80,32 +82,44 @@ public class SCCService extends BaseService<SCCModel, A11t0scc> {
     if (StringUtils.isBlank(county)) {
       county = ""; // to retrieve all counties
     }
+    if (StringUtils.isBlank(land)) {
+      land = ""; // to retrieve all land
+    }
+    if (StringUtils.isBlank(land) && StringUtils.isBlank(state)) {
+      state = "xxx"; // to retrieve nothing
+    }
     PreparedQuery q = new PreparedQuery(entityManager, sql);
     q.setParameter("STATE", "%" + state.toUpperCase() + "%");
     q.setParameter("CITY", "%" + city.toUpperCase() + "%");
     q.setParameter("COUNTY", "%" + county.toUpperCase() + "%");
+    q.setParameter("LAND", "%" + land.toUpperCase() + "%");
     q.setForReadOnly(true);
-    List<A11t0scc> sccList = q.getResults(A11t0scc.class);
+    List<USCMRScc> sccList = q.getResults(USCMRScc.class);
     List<SCCModel> list = new ArrayList<>();
     SCCModel sccModel = null;
-    for (A11t0scc scc : sccList) {
+    for (USCMRScc scc : sccList) {
       sccModel = new SCCModel();
-      sccModel.setcZip(scc.getId().getcZip());
-      sccModel.setnCity(scc.getId().getnCity());
-      sccModel.setnSt(scc.getId().getnSt());
-      sccModel.setnCnty(scc.getId().getnCnty());
+      sccModel.setSccId(scc.getId().getSccId());
+      sccModel.setcZip(scc.getcZip());
+      sccModel.setnCity(scc.getnCity());
+      sccModel.setnSt(scc.getnSt());
+      sccModel.setnCnty(scc.getnCnty());
+      sccModel.setcCnty(scc.getcCnty());
+      sccModel.setcCity(scc.getcCity());
+      sccModel.setcSt(scc.getcSt());
+      sccModel.setnLand(scc.getnLand());
       list.add(sccModel);
     }
     return list;
   }
 
   @Override
-  protected A11t0scc getCurrentRecord(SCCModel model, EntityManager entityManager, HttpServletRequest request) throws Exception {
+  protected USCMRScc getCurrentRecord(SCCModel model, EntityManager entityManager, HttpServletRequest request) throws Exception {
     return null;
   }
 
   @Override
-  protected A11t0scc createFromModel(SCCModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException {
+  protected USCMRScc createFromModel(SCCModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException {
     return null;
   }
 

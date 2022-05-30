@@ -18,6 +18,7 @@ import com.ibm.cio.cmr.request.entity.MassCreate;
 import com.ibm.cio.cmr.request.entity.MassCreateAddr;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.service.MultiThreadedBatchService;
 import com.ibm.cmr.create.batch.util.DebugUtil;
@@ -41,18 +42,20 @@ public class USMassCreateMultiWorker extends MassCreateMultiWorker {
   private CmrServiceInput input;
   private long iterationId;
   private Map<String, List<String>> cmrNoSapNoMap;
+  private String cntryCode;
 
   /**
    * @param parentAdmin
    * @param parentEntity
    */
   public USMassCreateMultiWorker(MultiThreadedBatchService<?> parentService, Admin parentAdmin, MassCreate parentEntity, CmrServiceInput input,
-      Map<String, List<String>> cmrNoSapNoMap) {
+      Map<String, List<String>> cmrNoSapNoMap, String cntryCode) {
     super(parentService, parentAdmin, parentEntity);
     this.record = parentEntity;
     this.input = input;
     this.iterationId = parentEntity.getId().getIterationId();
     this.cmrNoSapNoMap = cmrNoSapNoMap;
+    this.cntryCode=cntryCode;
 
   }
 
@@ -65,7 +68,12 @@ public class USMassCreateMultiWorker extends MassCreateMultiWorker {
     request.setCmrNo(this.record.getCmrNo());
     request.setMandt(this.input.getInputMandt());
     request.setReqId(this.input.getInputReqId());
-    request.setReqType(CmrConstants.REQ_TYPE_CREATE);
+
+    if (CmrConstants.REQ_TYPE_MASS_CREATE.equals(this.input.getInputReqType()) && SystemLocation.UNITED_STATES.equals(cntryCode)) {
+      request.setReqType(CmrConstants.REQ_TYPE_MASS_CREATE);
+    } else {
+      request.setReqType(CmrConstants.REQ_TYPE_CREATE);
+    }
     request.setUserId(this.input.getInputUserId());
     request.setIterationId(this.iterationId);
 

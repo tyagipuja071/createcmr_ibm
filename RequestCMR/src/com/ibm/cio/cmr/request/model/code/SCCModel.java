@@ -16,6 +16,15 @@ import com.ibm.cio.cmr.request.model.BaseModel;
 public class SCCModel extends BaseModel {
 
   private static final long serialVersionUID = 1L;
+  private long sccId;
+
+  public long getSccId() {
+    return sccId;
+  }
+
+  public void setSccId(long sccId) {
+    this.sccId = sccId;
+  }
 
   private String nCity;
 
@@ -23,11 +32,28 @@ public class SCCModel extends BaseModel {
 
   private String nCnty;
 
-  private float cZip;
+  private int cZip;
+
+  private float cCnty;
+
+  private float cCity;
+
+  private float cSt;
+
+  private String nLand;
+
+  private String cLand;
 
   @Override
   public boolean allKeysAssigned() {
-    return !StringUtils.isBlank(this.nCity) && !StringUtils.isBlank(this.nCnty) && !StringUtils.isBlank(this.nSt);
+
+    boolean blnAllKeys = false;
+    if (this.sccId > 0) {
+      blnAllKeys = true;
+    } else if (!StringUtils.isBlank(this.nCity) && !StringUtils.isBlank(this.nCnty) && !StringUtils.isBlank(this.nSt)) {
+      blnAllKeys = true;
+    }
+    return blnAllKeys;
   }
 
   @Override
@@ -67,12 +93,51 @@ public class SCCModel extends BaseModel {
     this.nCnty = nCnty;
   }
 
-  public float getcZip() {
+  public int getcZip() {
     return cZip;
   }
 
-  public void setcZip(float cZip) {
+  public void setcZip(int cZip) {
     this.cZip = cZip;
   }
 
+  public float getcCnty() {
+    return cCnty;
+  }
+
+  public void setcCnty(float cCnty) {
+    this.cCnty = cCnty;
+  }
+
+  public void setcCity(float cCity) {
+    this.cCity = cCity;
+  }
+
+  public float getcCity() {
+    return cCity;
+  }
+
+  public float getcSt() {
+    return cSt;
+  }
+
+  public void setcSt(float cSt) {
+    this.cSt = cSt;
+  }
+
+  public void setnLand(String nLand) {
+    this.nLand = nLand;
+  }
+
+  public String getnLand() {
+    return nLand;
+  }
+
+  public String getcLand() {
+    return cLand;
+  }
+
+  public void setcLand(String cLand) {
+    this.cLand = cLand;
+  }
 }

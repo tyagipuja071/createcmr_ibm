@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -531,6 +532,13 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       addrSeq = nextSeq + "";
     }
 
+    if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && "C".equals(reqModel.getReqType())) {
+      if ("ZS01".equals(addrPk.getAddrType())) {
+        addrSeq = "001";
+      } else if ("ZI01".equals(addrPk.getAddrType())) {
+        addrSeq = "002";
+      }
+    }
     LOG.debug("Assigning address sequence " + addrSeq);
     addrPk.setAddrSeq(addrSeq);
     addr.setId(addrPk);
@@ -541,6 +549,9 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         && StringUtils.isNotBlank(cmr.getCmrState())) {
       CNHandler cnHandler = (CNHandler) converter;
       cnHandler.convertChinaStateNameToStateCode(addr, cmr, entityManager);
+    }
+    if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3 && (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()))) {
+      convertStateNameToStateCode(addr, cmr, entityManager);
     }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {
       addr.setStateProv(null);
@@ -808,6 +819,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     admin.setLastUpdtBy(user.getIntranetId());
     admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
     admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+    String sysType = SystemConfiguration.getValue("SYSTEM_TYPE");
+    admin.setWaitInfoInd(!StringUtils.isBlank(sysType) ? sysType.substring(0, 1) : null);
     RequestUtils.setClaimDetails(admin, request);
   }
 
@@ -1009,5 +1022,24 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     reqCmtLog.setUpdateTs(reqCmtLog.getCreateTs());
     service.createEntity(reqCmtLog, entityManager);
   }
-
+  
+  public void convertStateNameToStateCode(Addr addr, FindCMRRecordModel cmr, EntityManager entityManager) {
+    LOG.debug("Convert  StateName to StateCode Begin >>>");
+    String stateCode = null;
+    String stateName = cmr.getCmrState().trim();
+    List<Object[]> results = new ArrayList<Object[]>();
+    String cnStateProvCD = ExternalizedQuery.getSql("GET.CN_STATE_PROV_CD");
+    PreparedQuery query = new PreparedQuery(entityManager, cnStateProvCD);
+    query.setParameter("STATE_PROV_DESC", stateName);
+    results = query.getResults();
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      stateCode = sResult[0].toString();
+    }
+    if (StringUtils.isNotBlank(stateCode)) {
+      addr.setStateProv(stateCode);
+      cmr.setCmrState(stateCode);
+      LOG.debug("Convert StateName to StateCode End >>>");
+    }
+  }
 }

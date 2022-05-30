@@ -1093,15 +1093,7 @@ public abstract class GEOHandler {
     // TODO Auto-generated method stub
   }
 
-  public static String getEquivalentAddressType(String addressType, String seqNo) {
-    if (addressType.equals("ZS01"))
-      return "ZS01";
-    else if (addressType.equals("ZI01") && (Integer.parseInt(seqNo) < 200))
-      return "ZP01";
-    else if (addressType.equals("PG01") && (Integer.parseInt(seqNo) >= 200))
-      return "ZP01";
-    else
-      return addressType;
+  public String getEquivalentAddressType(String addressType, String seqNo) {
+    return addressType;
   }
-
 }

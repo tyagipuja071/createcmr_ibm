@@ -72,11 +72,11 @@ public class A11t0scc extends BaseEntity<A11t0sccPK> implements Serializable {
   @Column(name = "C_CITY")
   private float cCity;
 
-   public String getiTable() {
+  public String getITable() {
     return iTable;
   }
 
-  public void setiTable(String iTable) {
+  public void setiITable(String iTable) {
     this.iTable = iTable;
   }
 

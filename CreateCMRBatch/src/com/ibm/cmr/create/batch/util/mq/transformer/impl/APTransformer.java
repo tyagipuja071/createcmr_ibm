@@ -4,7 +4,10 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -21,6 +24,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.APHandler;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasRecord;
+import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
@@ -173,11 +177,19 @@ public abstract class APTransformer extends MessageTransformer {
   protected void handleMove(MQMessageHandler handler, String geo) {
     Addr addrData = handler.addrData;
 
+    List<String> abbrevLandCountries = new ArrayList<String>();
+    abbrevLandCountries = (List<String>) Arrays.asList("US", "MY", "GB", "SG", "AE", "CH", "MV", "AU", "FR", "TH", "NL", "IE", "HK", "DE",
+        "ID", "BD", "CA", "LK", "TW", "NZ", "VN", "PH", "KR", "MM", "KH", "BN", "PG");
     String line66 = "";
+    String scenario = handler.cmrData.getCustSubGrp();
     if (!StringUtils.isBlank(addrData.getCity1())) {
       line66 = addrData.getCity1();
-      if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry())))
-			  line66 += " " + "<" + addrData.getLandCntry() + ">";
+      if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry()))) {
+        if (abbrevLandCountries.contains(addrData.getLandCntry()) && "CROSS".equals(scenario))
+          line66 += " " + "<" + addrData.getLandCntry() + ">";
+        else 
+          line66 += " " + "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
+      }
       if ("LA".equalsIgnoreCase(addrData.getLandCntry()))
         line66 = addrData.getCity1() + " " + "<Laos>";
       if (addrData.getPostCd() != null)
@@ -185,7 +197,11 @@ public abstract class APTransformer extends MessageTransformer {
       handler.messageHash.put("AddrLine6", line66);
     } else {
       if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry())))
-        line66 = "<" + addrData.getLandCntry() + ">";
+        if (abbrevLandCountries.contains(addrData.getLandCntry()) && scenario.equals("CROSS"))
+          line66 += " " + "<" + addrData.getLandCntry() + ">";
+        else 
+          line66 += " " + "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
+        
       if ("LA".equalsIgnoreCase(addrData.getLandCntry()))
         line66 = "<Laos>";
       if (addrData.getPostCd() != null)
@@ -202,7 +218,7 @@ public abstract class APTransformer extends MessageTransformer {
       handler.messageHash.put("AddrLine6", "");
     }
 
-    if ("ISA".equalsIgnoreCase(geo)) {
+    if ("ISA".equalsIgnoreCase(geo) || "GCG".equalsIgnoreCase(geo)) {
       arrangeAddressLinesData(handler);
     }
 
