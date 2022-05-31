@@ -15,6 +15,8 @@
 <script>
   dojo.addOnLoad(function() {
     FilteringDropdown.loadItems('tablName', 'tablName_spinner', 'changelog.table');
+    FilteringDropdown.loadItems('requestStatus', 'requestStatus_spinner',  'lov', 'fieldId=ChangeLogReqStatus');
+    FilteringDropdown.loadItems('cmrIssuingCountry', 'cmrIssuingCountry_spinner', 'changelog.cmrIssuingCountry'); 
   });
 </script>
 
@@ -106,6 +108,40 @@
           </p>
         </cmr:column>
       </cmr:row>
+      <cmr:row>
+        <cmr:column span="1">
+          <p>
+            <cmr:label fieldId="cmrIssuingCountry">
+              CMR Issuing Country:
+              <cmr:spinner fieldId="cmrIssuingCountry" />
+            </cmr:label>
+          </p>
+        </cmr:column>
+        <cmr:column span="1">
+          <p>
+            <form:select dojoType="dijit.form.FilteringSelect" id="cmrIssuingCountry" itemLabel="name" searchAttr="id" style="display: block;" maxHeight="200"
+              path="cmrIssuingCountry" placeHolder="Select CMR Issuing Country">
+            </form:select>
+          </p>
+        </cmr:column>
+      </cmr:row>
+      <cmr:row>
+        <cmr:column span="1">
+          <p>
+            <cmr:label fieldId="requestStatus">
+              Request Status:
+              <cmr:spinner fieldId="requestStatus" />
+            </cmr:label>
+          </p>
+        </cmr:column>
+        <cmr:column span="1">
+          <p>
+            <form:select dojoType="dijit.form.FilteringSelect" id="requestStatus" searchAttr="name" style="display: block;" maxHeight="200"
+              path="requestStatus" placeHolder="Select Request Status">
+            </form:select>
+          </p>
+        </cmr:column>
+      </cmr:row>
       <br>
       <cmr:row>
         <cmr:button label="${ui.btn.search}" onClick="doSearchChangeLogs()" highlight="true" />
@@ -118,8 +154,11 @@
     <cmr:tabs />
     <cmr:section alwaysShown="true">
       <cmr:row topPad="8">
-        <cmr:column span="6">
+        <cmr:column span="5">
           <h4>Change Log Records</h4>
+        </cmr:column>
+        <cmr:column span="1">
+          <cmr:button label="${ui.btn.exportFullReport}" onClick="doDownloadExportFullReport()" />
         </cmr:column>
       </cmr:row>
       <cmr:row topPad="10" addBackground="false">
@@ -149,3 +188,8 @@
     </cmr:section>
   </cmr:boxContent>
 </form:form>
+
+<form id="frmCMRFullReportDownLoad" name="frmCMRFullReportDownLoad" method="POST">
+  <input type="hidden" id="katr6" name="katr6" />
+  <input type="hidden" id="zzkvCusNo" name="zzkvCusNo" />
+</form>

@@ -22,10 +22,6 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.QueryClient;
-import com.ibm.cmr.services.client.query.QueryRequest;
-import com.ibm.cmr.services.client.query.QueryResponse;
 
 /**
  * 
@@ -79,34 +75,33 @@ public class USDelReacCheckElement extends ValidatingElement {
                 engineData.setScenarioVerifiedIndc("N");
                 details.append("CMR No. " + cmrNo + " updated more than 6 months ago.").append("\n");
               }
-            } else {
-              String url = SystemConfiguration.getValue("BATCH_SERVICES_URL");
-              String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
-              String sql1 = ExternalizedQuery.getSql("AUTO.US.GET_LAST_UPD_TS_USCMR", usSchema);
-              sql1 = StringUtils.replace(sql1, ":CMR_NO", "'" + cmrNo + "'");
-              String dbId = QueryClient.USCMR_APP_ID;
-              QueryRequest queryRequest = new QueryRequest();
-              queryRequest.setSql(sql1);
-              queryRequest.setRows(1);
-              queryRequest.addField("D_CHANGE");
-              QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
-
-              QueryResponse response = client.executeAndWrap(dbId, queryRequest, QueryResponse.class);
-
-              if (response.isSuccess() && response.getRecords() != null && !response.getRecords().isEmpty()) {
-                String dateString = (String) response.getRecords().get(0).get("D_CHANGE");
-                if (StringUtils.isNotBlank(dateString)) {
-                  Date usCmrDate = formatter.parse(dateString);
-                  if (usCmrDate != null && usCmrDate.before(dateSixMonthsAgo)) {
-                    oldCMRExist = true;
-                    admin.setScenarioVerifiedIndc("N");
-                    details.append("CMR No. " + cmrNo + " updated more than 6 months ago.").append("\n");
-                  }
-                }
-              } else {
-                log.warn("Query to USCMR data base failed.");
-              }
-            }
+            } /*
+               * else { String url =
+               * SystemConfiguration.getValue("BATCH_SERVICES_URL"); String
+               * usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
+               * String sql1 =
+               * ExternalizedQuery.getSql("AUTO.US.GET_LAST_UPD_TS_USCMR",
+               * usSchema); sql1 = StringUtils.replace(sql1, ":CMR_NO", "'" +
+               * cmrNo + "'"); String dbId = QueryClient.USCMR_APP_ID;
+               * QueryRequest queryRequest = new QueryRequest();
+               * queryRequest.setSql(sql1); queryRequest.setRows(1);
+               * queryRequest.addField("D_CHANGE"); QueryClient client =
+               * CmrServicesFactory.getInstance().createClient(url,
+               * QueryClient.class);
+               * 
+               * QueryResponse response = client.executeAndWrap(dbId,
+               * queryRequest, QueryResponse.class);
+               * 
+               * if (response.isSuccess() && response.getRecords() != null &&
+               * !response.getRecords().isEmpty()) { String dateString =
+               * (String) response.getRecords().get(0).get("D_CHANGE"); if
+               * (StringUtils.isNotBlank(dateString)) { Date usCmrDate =
+               * formatter.parse(dateString); if (usCmrDate != null &&
+               * usCmrDate.before(dateSixMonthsAgo)) { oldCMRExist = true;
+               * admin.setScenarioVerifiedIndc("N"); details.append("CMR No. " +
+               * cmrNo + " updated more than 6 months ago.").append("\n"); } } }
+               * else { log.warn("Query to USCMR data base failed."); } }
+               */
           }
 
           if (oldCMRExist) {

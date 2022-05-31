@@ -171,6 +171,38 @@ public class MassUpdateModel extends BaseModel {
   // this.taxExemptStatus = taxExemptStatus;
   // }
 
+  private String taxExemptStatus;
+
+  private String taxExemptStatus2;
+
+  private String taxExemptStatus3;
+
+  private String educAllowCd;
+
+  public String getTaxExemptStatus2() {
+    return taxExemptStatus2;
+  }
+
+  public void setTaxExemptStatus2(String taxExemptStatus2) {
+    this.taxExemptStatus2 = taxExemptStatus2;
+  }
+
+  public String getTaxExemptStatus3() {
+    return taxExemptStatus3;
+  }
+
+  public void setTaxExemptStatus3(String taxExemptStatus3) {
+    this.taxExemptStatus3 = taxExemptStatus3;
+  }
+
+  public String getTaxExemptStatus() {
+    return taxExemptStatus;
+  }
+
+  public void setTaxExemptStatus(String taxExemptStatus) {
+    this.taxExemptStatus = taxExemptStatus;
+  }
+
   // JP new fields
   private Date requestDueDate;
   private String requestDueDateTemp;
@@ -791,6 +823,14 @@ public class MassUpdateModel extends BaseModel {
 
   public void setMilitary(String military) {
     this.military = military;
+  }
+
+  public String getEducAllowCd() {
+    return educAllowCd;
+  }
+
+  public void setEducAllowCd(String educAllowCd) {
+    this.educAllowCd = educAllowCd;
   }
 
 }

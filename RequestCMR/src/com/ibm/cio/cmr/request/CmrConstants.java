@@ -92,6 +92,10 @@ public class CmrConstants {
      */
     ZS02,
     /**
+     * PayGo Billing
+     */
+    PG01,
+    /**
      * Country Use A
      */
     CTYA,
@@ -134,7 +138,6 @@ public class CmrConstants {
   public static final String RDC_SHIPPING = "ZH02";
   public static final String RDC_SECONDARY_SHIPPING = "ZH01";
   public static final String RDC_PAYGO_BILLING = "PG01";
-
 
   // REQUEST ACTIONS
   public static final String All_Processing_Complete() {

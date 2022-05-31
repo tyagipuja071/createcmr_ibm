@@ -114,6 +114,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     long elapsed = (endTime - startTime) / 1000;
     LOG.info("Application finished execution at " + TIME_FORMATTER.format(new Date(endTime)));
     LOG.info("Took " + elapsed + " seconds.");
+
     if (!this.skipExit) {
       Timer timer = new Timer();
       timer.schedule(new TimerTask() {
@@ -125,8 +126,8 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
         }
       }, 5000);
 
-      // System.exit(0);
     }
+    // System.exit(0);
   }
 
   @Override
