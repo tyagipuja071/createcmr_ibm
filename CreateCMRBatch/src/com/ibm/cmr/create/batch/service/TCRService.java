@@ -355,7 +355,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
               if (!StringUtils.isBlank(queue.getTaxCustTyp3())) {
                 if (!queue.getTaxCustTyp3().equals(tax.getiTypeCust3())) {
                   createChangeLog(entityManager, kna1, queue, ts, "US_TAX", "I_TYPE_CUST_3", tax.getiTypeCust3(), queue.getTaxCustTyp3());
-                  tax.setiTypeCust2(queue.getTaxCustTyp3());
+                  tax.setiTypeCust3(queue.getTaxCustTyp3());
                 }
                 if (!queue.getTaxClass3().equals(tax.getiTaxClass3())) {
                   createChangeLog(entityManager, kna1, queue, ts, "US_TAX", "I_TAX_CLASS_3", tax.getiTaxClass3(), queue.getTaxClass3());
