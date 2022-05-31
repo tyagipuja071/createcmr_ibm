@@ -2312,13 +2312,21 @@ function getAddrMismatchInUpdateMsg() {
         }
         var mismatchKey = updateMismatchLocal[l];
         
-        var addrSeqLocal = allLocalAddrMap.get(mismatchKey).addrSeq[0];
-        var addrSeqTrans = (allTransAddrsMap.get(mismatchKey).addrSeq[0]);
-
-        var addrTextLocal = (allLocalAddrMap.get(mismatchKey).addrTypeText[0]);
-        var addrTextTrans = (allTransAddrsMap.get(mismatchKey).addrTypeText[0]);
-       
-        errorMsg += '<br>Address with sequence ' + addrSeqLocal + ' from pair ' + addrSeqLocal + ' (' + addrTextLocal + ')' + ' - ' + addrSeqTrans + ' ('+ addrTextTrans +') ' + ' was updated, but sequence ' + addrSeqTrans  + ' was not.';
+        var addrSeqLocal = '';
+        if (allLocalAddrMap.get(mismatchKey) != null) {
+          addrSeqLocal = allLocalAddrMap.get(mismatchKey).addrSeq[0];
+        }
+        
+        var addrSeqTrans = '';
+        if(allTransAddrsMap.get(mismatchKey) != null) {
+          addrSeqTrans = (allTransAddrsMap.get(mismatchKey).addrSeq[0]);
+        }
+        
+        if(addrSeqLocal != '' && addrSeqTrans != '') {
+          var addrTextLocal = (allLocalAddrMap.get(mismatchKey).addrTypeText[0]);
+          var addrTextTrans = (allTransAddrsMap.get(mismatchKey).addrTypeText[0]);
+          errorMsg += '<br>Address with sequence ' + addrSeqLocal + ' from pair ' + addrSeqLocal + ' (' + addrTextLocal + ')' + ' - ' + addrSeqTrans + ' ('+ addrTextTrans +') ' + ' was updated, but sequence ' + addrSeqTrans  + ' was not.';
+        }
       }
 
       for (var t = 0; t < updateMismatchTrans.length; t++) {
@@ -2328,13 +2336,21 @@ function getAddrMismatchInUpdateMsg() {
         
         var mismatchKey = updateMismatchTrans[t];
         
-        var addrSeqTrans = (allTransAddrsMap.get(mismatchKey).addrSeq[0]);
-        var addrSeqLocal = (allLocalAddrMap.get(mismatchKey).addrSeq[0]);
+        var addrSeqTrans = '';
+        if(allTransAddrsMap.get(mismatchKey) != null) {
+          addrSeqTrans = (allTransAddrsMap.get(mismatchKey).addrSeq[0]);
+        }
 
-        var addrTextTrans = (allTransAddrsMap.get(mismatchKey).addrTypeText[0]);
-        var addrTextLocal = (allLocalAddrMap.get(mismatchKey).addrTypeText[0]);
-        
-        errorMsg += '<br>Address with sequence ' + addrSeqTrans + ' from pair ' + addrSeqLocal + ' (' + addrTextLocal + ') ' + ' - ' + addrSeqTrans + ' ('+ addrTextTrans +') ' + ' was updated, but sequence ' + addrSeqLocal + ' was not.';
+        var addrSeqLocal = '';
+        if(allLocalAddrMap.get(mismatchKey) != null) {
+          addrSeqLocal = (allLocalAddrMap.get(mismatchKey).addrSeq[0]);
+        }
+
+        if(addrSeqLocal != '' && addrSeqTrans != '') {
+          var addrTextTrans = (allTransAddrsMap.get(mismatchKey).addrTypeText[0]);
+          var addrTextLocal = (allLocalAddrMap.get(mismatchKey).addrTypeText[0]);
+          errorMsg += '<br>Address with sequence ' + addrSeqTrans + ' from pair ' + addrSeqLocal + ' (' + addrTextLocal + ') ' + ' - ' + addrSeqTrans + ' ('+ addrTextTrans +') ' + ' was updated, but sequence ' + addrSeqLocal + ' was not.';
+        }
       }
       
       if(errorMsg != '') {
@@ -2633,6 +2649,62 @@ function validateLandedCountry() {
     };
   })(), null, 'frmCMR_addressModal');
 }
+  
+function validateAddressShippingPairing() {
+  console.log("validateAddressShippingPairing..............");
+  // shipping pair should not contain any duplicates
+  FormManager.addFormValidator((function() {
+    
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        
+        if (FormManager.getActualValue('cmrIssuingCntry') != '755' || reqType != 'U') {
+          return new ValidationResult(null, true);
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var updateInd = null;
+          var shippingPairs = [];
+          var validShippingPairs = true;
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            if (type == 'CTYC') {
+              if(record != null && record.pairedSeq != null && record.pairedSeq[0] != '') {
+                shippingPairs.push(record.pairedSeq[0]);
+              } else {
+                validShippingPairs = false;
+                break;
+              }
+            } 
+          }
+          
+          if(shippingPairs.length > 1 && hasDuplicates(shippingPairs)) {
+            validShippingPairs = false;
+          }
+          
+          if (!validShippingPairs) {
+            return new ValidationResult(null, false, 'There is issue with shipping address and Use C translation not being linked correctly. Please contact CMDE, the CMR needs to be reviewed and fixed.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function hasDuplicates(array) {
+  return (new Set(array)).size !== array.length;
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
@@ -2675,6 +2747,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorBilling, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorShipping, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validatePairedAddrFieldNumericValue, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(validateAddressShippingPairing, [ SysLoc.ISRAEL ], null, true);
 
   GEOHandler.addAfterConfig(setCapInd, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(lockDunsNo, [ SysLoc.ISRAEL ]);
@@ -2720,6 +2793,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(inacValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateLandedCountry, [ SysLoc.ISRAEL ], null, true);
+
   GEOHandler.addAfterTemplateLoad(preTickVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setStreetContBehavior, [ SysLoc.ISRAEL ]);
