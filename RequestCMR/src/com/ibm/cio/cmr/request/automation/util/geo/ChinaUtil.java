@@ -261,6 +261,26 @@ public class ChinaUtil extends AutomationUtil {
           results.setOnError(false);
           results.setResults("Computed");
         }
+      } else if (StringUtils.isNotBlank(scenario) && (SCENARIO_LOCAL_MRKT.equals(scenario) || SCENARIO_LOCAL_BLUMX.equals(scenario))) {
+        List<String> managerID = SystemParameters.getList("AUTO_CN_MRKT_BLUMX_MGR");
+        boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
+        if (!managerCheck) {
+          details.append(
+              "Please double check if your request scenario subtype is 'Bluemix or MaketPlace',for which request must be from DSW team and first line manager is "
+                  + (managerID != null && managerID.size() > 0 ? managerID.get(0) : "")
+                  + ", else please change your request scenario subtype into 'Normal/ESA/Acquistion/Ecosystem partners' based on your business requirement.");
+          engineData.addRejectionComment("OTH",
+              "Please double check if your request scenario subtype is 'Bluemix or MaketPlace',for which request must be from DSW team and first line manager is "
+                  + (managerID != null && managerID.size() > 0 ? managerID.get(0) : "")
+                  + ", else please change your request scenario subtype into 'Normal/ESA/Acquistion/Ecosystem partners' based on your business requirement.",
+              "", "");
+          results.setOnError(true);
+          results.setResults("Requester check fail");
+        } else {
+          details.append("Skipping validation for requester must be from DSW team for requester - " + admin.getRequesterId() + ".\n");
+          results.setOnError(false);
+          results.setResults("Computed");
+        }
       }
       // else {
       // String error = performISICCheck(entityManager, requestData);

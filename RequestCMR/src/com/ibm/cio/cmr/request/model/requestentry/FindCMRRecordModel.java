@@ -268,6 +268,44 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String cmrLtPymntInd;
   private String cmrCustCreditCode;
 
+  // CREATCMR-5116 new US sunset fields
+  private String usCmrMktgArea;
+  private String usCmrMktgDept;
+  private String usCmrOrgMktgBrOfc;
+  private String usCmrPccArBo;
+  private String usCmrPccMktgBo;
+  private String usCmrSvcArOfc;
+  private String usCmrSvcLgsysOfc;
+  private String usCmrSvcSmsysOfc;
+  private String usCmrSvcOthOfc;
+  private String usCmrSvcMasterBo;
+  private String usCmrBoDivision;
+  private String usCmrBoTradingArea;
+  private String usCmrNonIbmCompInd;
+  private String usCmrOemInd;
+  private String usCmrBpAbbrevNm;
+  private String usCmrEnterpriseNm;
+  private String usCmrEnterpriseType;
+  private String usCmrTaxType1;
+  private String usCmrTaxType2;
+  private String usCmrTaxType3;
+  private String usCmrTaxClass1;
+  private String usCmrTaxClass2;
+  private String usCmrTaxClass3;
+  private String usCmrIccTaxExempt;
+  private String usCmrIccTaxClass;
+  private String usCmrTaxCertStat1;
+  private String usCmrTaxCertStat2;
+  private String usCmrTaxCertStat3;
+  private String usCmrSccCd;
+  private String usCmrOcl;
+  private String usCmrEducAllowStat;
+  private String usCmrRestrictToCd;
+  private String usCmrRestrictToDesc;
+  private String usCmrBpCd;
+  private String usCmrBpNm;
+  private String usCmrBpType;
+
   public String getCustClass() {
     return custClass;
   }
@@ -1907,15 +1945,7 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
     this.militaryFlag = militaryFlag;
   }
 
-  public String getExtWalletId() {
-    return extWalletId;
-  }
-
-  public void setExtWalletId(String extWalletId) {
-    this.extWalletId = extWalletId;
-  }
-  
-   public String getCmrSellBoGrp() {
+  public String getCmrSellBoGrp() {
     return cmrSellBoGrp;
   }
 
@@ -2081,6 +2111,302 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setCmrCustCreditCode(String cmrCustCreditCode) {
     this.cmrCustCreditCode = cmrCustCreditCode;
+  }
+
+  public String getExtWalletId() {
+    return extWalletId;
+  }
+
+  public void setExtWalletId(String extWalletId) {
+    this.extWalletId = extWalletId;
+  }
+
+  public String getUsCmrMktgArea() {
+    return usCmrMktgArea;
+  }
+
+  public void setUsCmrMktgArea(String usCmrMktgArea) {
+    this.usCmrMktgArea = usCmrMktgArea;
+  }
+
+  public String getUsCmrMktgDept() {
+    return usCmrMktgDept;
+  }
+
+  public void setUsCmrMktgDept(String usCmrMktgDept) {
+    this.usCmrMktgDept = usCmrMktgDept;
+  }
+
+  public String getUsCmrOrgMktgBrOfc() {
+    return usCmrOrgMktgBrOfc;
+  }
+
+  public void setUsCmrOrgMktgBrOfc(String usCmrOrgMktgBrOfc) {
+    this.usCmrOrgMktgBrOfc = usCmrOrgMktgBrOfc;
+  }
+
+  public String getUsCmrPccArBo() {
+    return usCmrPccArBo;
+  }
+
+  public void setUsCmrPccArBo(String usCmrPccArBo) {
+    this.usCmrPccArBo = usCmrPccArBo;
+  }
+
+  public String getUsCmrPccMktgBo() {
+    return usCmrPccMktgBo;
+  }
+
+  public void setUsCmrPccMktgBo(String usCmrPccMktgBo) {
+    this.usCmrPccMktgBo = usCmrPccMktgBo;
+  }
+
+  public String getUsCmrSvcArOfc() {
+    return usCmrSvcArOfc;
+  }
+
+  public void setUsCmrSvcArOfc(String usCmrSvcArOfc) {
+    this.usCmrSvcArOfc = usCmrSvcArOfc;
+  }
+
+  public String getUsCmrSvcLgsysOfc() {
+    return usCmrSvcLgsysOfc;
+  }
+
+  public void setUsCmrSvcLgsysOfc(String usCmrSvcLgsysOfc) {
+    this.usCmrSvcLgsysOfc = usCmrSvcLgsysOfc;
+  }
+
+  public String getUsCmrSvcSmsysOfc() {
+    return usCmrSvcSmsysOfc;
+  }
+
+  public void setUsCmrSvcSmsysOfc(String usCmrSvcSmsysOfc) {
+    this.usCmrSvcSmsysOfc = usCmrSvcSmsysOfc;
+  }
+
+  public String getUsCmrSvcOthOfc() {
+    return usCmrSvcOthOfc;
+  }
+
+  public void setUsCmrSvcOthOfc(String usCmrSvcOthOfc) {
+    this.usCmrSvcOthOfc = usCmrSvcOthOfc;
+  }
+
+  public String getUsCmrSvcMasterBo() {
+    return usCmrSvcMasterBo;
+  }
+
+  public void setUsCmrSvcMasterBo(String usCmrSvcMasterBo) {
+    this.usCmrSvcMasterBo = usCmrSvcMasterBo;
+  }
+
+  public String getUsCmrBoDivision() {
+    return usCmrBoDivision;
+  }
+
+  public void setUsCmrBoDivision(String usCmrBoDivision) {
+    this.usCmrBoDivision = usCmrBoDivision;
+  }
+
+  public String getUsCmrBoTradingArea() {
+    return usCmrBoTradingArea;
+  }
+
+  public void setUsCmrBoTradingArea(String usCmrBoTradingArea) {
+    this.usCmrBoTradingArea = usCmrBoTradingArea;
+  }
+
+  public String getUsCmrNonIbmCompInd() {
+    return usCmrNonIbmCompInd;
+  }
+
+  public void setUsCmrNonIbmCompInd(String usCmrNonIbmCompInd) {
+    this.usCmrNonIbmCompInd = usCmrNonIbmCompInd;
+  }
+
+  public String getUsCmrOemInd() {
+    return usCmrOemInd;
+  }
+
+  public void setUsCmrOemInd(String usCmrOemInd) {
+    this.usCmrOemInd = usCmrOemInd;
+  }
+
+  public String getUsCmrBpAbbrevNm() {
+    return usCmrBpAbbrevNm;
+  }
+
+  public void setUsCmrBpAbbrevNm(String usCmrBpAbbrevNm) {
+    this.usCmrBpAbbrevNm = usCmrBpAbbrevNm;
+  }
+
+  public String getUsCmrEnterpriseNm() {
+    return usCmrEnterpriseNm;
+  }
+
+  public void setUsCmrEnterpriseNm(String usCmrEnterpriseNm) {
+    this.usCmrEnterpriseNm = usCmrEnterpriseNm;
+  }
+
+  public String getUsCmrEnterpriseType() {
+    return usCmrEnterpriseType;
+  }
+
+  public void setUsCmrEnterpriseType(String usCmrEnterpriseType) {
+    this.usCmrEnterpriseType = usCmrEnterpriseType;
+  }
+
+  public String getUsCmrTaxType1() {
+    return usCmrTaxType1;
+  }
+
+  public void setUsCmrTaxType1(String usCmrTaxType1) {
+    this.usCmrTaxType1 = usCmrTaxType1;
+  }
+
+  public String getUsCmrTaxType2() {
+    return usCmrTaxType2;
+  }
+
+  public void setUsCmrTaxType2(String usCmrTaxType2) {
+    this.usCmrTaxType2 = usCmrTaxType2;
+  }
+
+  public String getUsCmrTaxType3() {
+    return usCmrTaxType3;
+  }
+
+  public void setUsCmrTaxType3(String usCmrTaxType3) {
+    this.usCmrTaxType3 = usCmrTaxType3;
+  }
+
+  public String getUsCmrTaxClass1() {
+    return usCmrTaxClass1;
+  }
+
+  public void setUsCmrTaxClass1(String usCmrTaxClass1) {
+    this.usCmrTaxClass1 = usCmrTaxClass1;
+  }
+
+  public String getUsCmrTaxClass2() {
+    return usCmrTaxClass2;
+  }
+
+  public void setUsCmrTaxClass2(String usCmrTaxClass2) {
+    this.usCmrTaxClass2 = usCmrTaxClass2;
+  }
+
+  public String getUsCmrTaxClass3() {
+    return usCmrTaxClass3;
+  }
+
+  public void setUsCmrTaxClass3(String usCmrTaxClass3) {
+    this.usCmrTaxClass3 = usCmrTaxClass3;
+  }
+
+  public String getUsCmrIccTaxExempt() {
+    return usCmrIccTaxExempt;
+  }
+
+  public void setUsCmrIccTaxExempt(String usCmrIccTaxExempt) {
+    this.usCmrIccTaxExempt = usCmrIccTaxExempt;
+  }
+
+  public String getUsCmrIccTaxClass() {
+    return usCmrIccTaxClass;
+  }
+
+  public void setUsCmrIccTaxClass(String usCmrIccTaxClass) {
+    this.usCmrIccTaxClass = usCmrIccTaxClass;
+  }
+
+  public String getUsCmrTaxCertStat1() {
+    return usCmrTaxCertStat1;
+  }
+
+  public void setUsCmrTaxCertStat1(String usCmrTaxCertStat1) {
+    this.usCmrTaxCertStat1 = usCmrTaxCertStat1;
+  }
+
+  public String getUsCmrTaxCertStat2() {
+    return usCmrTaxCertStat2;
+  }
+
+  public void setUsCmrTaxCertStat2(String usCmrTaxCertStat2) {
+    this.usCmrTaxCertStat2 = usCmrTaxCertStat2;
+  }
+
+  public String getUsCmrTaxCertStat3() {
+    return usCmrTaxCertStat3;
+  }
+
+  public void setUsCmrTaxCertStat3(String usCmrTaxCertStat3) {
+    this.usCmrTaxCertStat3 = usCmrTaxCertStat3;
+  }
+
+  public String getUsCmrSccCd() {
+    return usCmrSccCd;
+  }
+
+  public void setUsCmrSccCd(String usCmrSccCd) {
+    this.usCmrSccCd = usCmrSccCd;
+  }
+
+  public String getUsCmrOcl() {
+    return usCmrOcl;
+  }
+
+  public void setUsCmrOcl(String usCmrOcl) {
+    this.usCmrOcl = usCmrOcl;
+  }
+
+  public String getUsCmrEducAllowStat() {
+    return usCmrEducAllowStat;
+  }
+
+  public void setUsCmrEducAllowStat(String usCmrEducAllowStat) {
+    this.usCmrEducAllowStat = usCmrEducAllowStat;
+  }
+
+  public String getUsCmrRestrictToCd() {
+    return usCmrRestrictToCd;
+  }
+
+  public void setUsCmrRestrictToCd(String usCmrRestrictToCd) {
+    this.usCmrRestrictToCd = usCmrRestrictToCd;
+  }
+
+  public String getUsCmrRestrictToDesc() {
+    return usCmrRestrictToDesc;
+  }
+
+  public void setUsCmrRestrictToDesc(String usCmrRestrictToDesc) {
+    this.usCmrRestrictToDesc = usCmrRestrictToDesc;
+  }
+
+  public String getUsCmrBpCd() {
+    return usCmrBpCd;
+  }
+
+  public void setUsCmrBpCd(String usCmrBpCd) {
+    this.usCmrBpCd = usCmrBpCd;
+  }
+
+  public String getUsCmrBpNm() {
+    return usCmrBpNm;
+  }
+
+  public void setUsCmrBpNm(String usCmrBpNm) {
+    this.usCmrBpNm = usCmrBpNm;
+  }
+
+  public String getUsCmrBpType() {
+    return usCmrBpType;
+  }
+
+  public void setUsCmrBpType(String usCmrBpType) {
+    this.usCmrBpType = usCmrBpType;
   }
 
 }

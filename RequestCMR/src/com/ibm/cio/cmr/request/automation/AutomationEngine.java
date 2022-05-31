@@ -40,10 +40,12 @@ import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
@@ -184,6 +186,22 @@ public class AutomationEngine {
     LOG.debug(" PayGo: " + payGoAddredited);
     int nonCompanyVerificationErrorCount = 0;
 
+    // CREATCMR-4872
+    boolean isUsTaxSkipToPcp = false;
+    // CREATCMR-5447
+    boolean isUsTaxSkipToPpn = false;
+    boolean requesterFromTaxTeam = false;
+    String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
+    requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
+
+    if ("897".equals(requestData.getData().getCmrIssuingCntry()) && "U".equals(requestData.getAdmin().getReqType())) {
+      // CREATCMR-5447
+      if (requesterFromTaxTeam) {
+        isUsTaxSkipToPcp = USHandler.getUSDataSkipToPCP(entityManager, requestData.getData());
+      } else {
+        isUsTaxSkipToPpn = USHandler.getUSDataSkipToPPN(entityManager, requestData.getData());
+      }
+    }
     for (AutomationElement<?> element : this.elements) {
       // determine if element is to be skipped
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
@@ -193,6 +211,11 @@ public class AutomationEngine {
 
       boolean skipVerification = scenarioExceptions != null && scenarioExceptions.isSkipCompanyVerification();
       skipVerification = skipVerification && (element instanceof CompanyVerifier);
+
+      // CREATCMR-4872
+      if (isUsTaxSkipToPcp) {
+        break;
+      }
 
       if (ProcessType.StandardProcess.equals(element.getProcessType())) {
         hasOverrideOrMatchingApplied = true;
@@ -299,8 +322,12 @@ public class AutomationEngine {
 
     // check company verified info
     if (compInfoSrc != null && StringUtils.isNotBlank(compInfoSrc)) {
-      admin.setCompVerifiedIndc("Y");
-      admin.setCompInfoSrc(compInfoSrc);
+      if (!"N".equals(admin.getCompVerifiedIndc())) {
+        admin.setCompVerifiedIndc("Y");
+      }
+      if (!"S".equals(admin.getCompInfoSrc())) {
+        admin.setCompInfoSrc(compInfoSrc);
+      }
     }
     // check scenario verified info
     if (scenarioVerifiedIndc != null && StringUtils.isNotBlank(scenarioVerifiedIndc)) {
@@ -314,11 +341,21 @@ public class AutomationEngine {
             reqId, appUser);
       }
     } else {
-      if (systemError) {
+      if (systemError || "N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
         if (AutomationConst.STATUS_AUTOMATED_PROCESSING.equals(reqStatus)) {
           // change status to retry
-          createComment(entityManager, "A system error occurred during the processing. A retry will be attempted shortly.", reqId, appUser);
-          admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY);
+          if ("N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
+            if ("S".equalsIgnoreCase(admin.getCompInfoSrc())) {
+              createComment(entityManager, "Processing error encountered as SCC(State / County / City) values unavailable.", reqId, appUser);
+            } else {
+              createComment(entityManager, "Processing error encountered as data is not company verified.", reqId, appUser);
+            }
+            admin.setReqStatus("PPN");
+          } else {
+            createComment(entityManager, "A system error occurred during the processing. A retry will be attempted shortly.", reqId, appUser);
+            admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY);
+          }
+
         } else {
           String processingCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
           // change status to awaiting processing
@@ -474,7 +511,17 @@ public class AutomationEngine {
           if (moveForPayGo) {
             pendingChecks.clear();
           }
-          if (processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) {
+          // CREATCMR-4872
+          // if (processOnCompletion && (pendingChecks == null ||
+          // pendingChecks.isEmpty())) {
+          if (isUsTaxSkipToPpn) {
+            LOG.debug("Moving Request " + reqId + " to PPN");
+            String cmt = "A member outside tax team has updated the Tax fields.";
+            admin.setReqStatus("PPN");
+            createComment(entityManager, cmt, reqId, appUser);
+            createHistory(entityManager, admin, cmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false, null);
+            // CREATCMR-5447
+          } else if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {
               // move to PCP

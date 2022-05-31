@@ -1659,7 +1659,10 @@ function addAddrUpdateValidator() {
                       }
                       
                       if (otherAddressUpdated) {
-                        if ((addrTxtZS01 != addrTxtOther) || (addrTxt2ZS01 != addrTxt2Other) || (cnAddrTxtZS01 != cnAddrTxtOther) || (cnAddrTxt2ZS01 != cnAddrTxt2Other)) {
+                        if ((addrTxtZS01.toUpperCase() != addrTxtOther.toUpperCase()) 
+                            || (addrTxt2ZS01.toUpperCase() != addrTxt2Other.toUpperCase()) 
+                            || (cnAddrTxtZS01.toUpperCase() != cnAddrTxtOther.toUpperCase()) 
+                            || (cnAddrTxt2ZS01.toUpperCase() != cnAddrTxt2Other.toUpperCase())) {
                           failInd = true;
                         }
                       }
@@ -2674,16 +2677,22 @@ function validateCnNameAndAddr() {
                     return new ValidationResult(null, true);
                   }
                 } else if(nameEqualFlag && addressEqualFlag){
-                  var id = FormManager.getActualValue('reqId');
-                  var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
-                    ID : id
-                  });
-        
-                  if (ret && ret.ret1 && ret.ret1 != '') {
-                    return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                        + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
-                        );
-                  }else{
+                  var rowCount = CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount;
+                  if (rowCount == 1) {
+                    var id = FormManager.getActualValue('reqId');
+                    var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
+                      ID : id
+                    });
+          
+                    if (ret && ret.ret1 && ret.ret1 != '') {
+                      return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
+                          + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
+                          );
+                    }else{
+                      return new ValidationResult(null, true);
+                    }
+                  } else if (rowCount > 1) {
+                    // var addrDiffIndc = checkAddrDiffIndc();
                     return new ValidationResult(null, true);
                   }
                 }else {
@@ -2700,6 +2709,140 @@ function validateCnNameAndAddr() {
       }
     }
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
+function checkAddrDiffIndc() {
+  var diffIndc = false;
+  
+  var addrList = [];
+  var cnAddrList = [];
+  
+  var failInd = false;
+  var zs01AddressUpdated = false;
+  var otherAddressUpdated = false;
+  
+  var zs01Count = 0;
+  
+  var addrTxtZS01 = null;
+  var addrTxt2ZS01 = null;
+  var cnAddrTxtZS01 = null;
+  var cnAddrTxt2ZS01 = null;
+  
+  var addrTypeOther = null;
+  var addrSeqOther = null;
+  
+  var addrTxtOther = null;
+  var addrTxt2Other = null;
+  var cnAddrTxtOther = null;
+  var cnAddrTxt2Other = null;
+  
+  // get addr
+  var reqId = FormManager.getActualValue('reqId');
+  var qParams = {
+      _qall : 'Y',
+      REQ_ID : reqId ,
+     };
+  var addrResults = cmr.query('GET.ADDR_BY_REQID', qParams);
+  if (addrResults != null) {
+    for (var i = 0; i < addrResults.length; i++) {
+      var addr  = {
+          reqId : addrResults[i].ret1,
+          addrType : addrResults[i].ret2,
+          addrSeq : addrResults[i].ret3,
+          custNm1 : addrResults[i].ret4,
+          custNm2 : addrResults[i].ret5,
+          addrTxt : addrResults[i].ret6,
+          addrTxt2 : addrResults[i].ret7,
+          city1 : addrResults[i].ret8,
+      };
+      addrList.push(addr);
+    }
+  }
+  
+  // get intl_addr
+  var intlAddrResults = cmr.query('GET.INTLADDR_BY_REQID', qParams);
+  if (intlAddrResults != null) {
+    for (var i = 0; i < intlAddrResults.length; i++) {
+      var cnAddr  = {
+          reqId : intlAddrResults[i].ret1,
+          addrType : intlAddrResults[i].ret2,
+          addrSeq : intlAddrResults[i].ret3,
+          cnCustName1 : intlAddrResults[i].ret4,
+          cnCustName2 : intlAddrResults[i].ret5,
+          cnAddrTxt : intlAddrResults[i].ret6,
+          cnAddrTxt2 : intlAddrResults[i].ret7,
+          cnCity1 : intlAddrResults[i].ret8,
+      };
+      cnAddrList.push(cnAddr);
+    }
+  }
+  
+  // check if other addr is diffrent with ZS01 in addr
+  if (addrList != null) {
+    for (var i=0; i< addrList.length; i++) {
+      if (addrList[i].addrType == 'ZS01') {
+        addrTxtZS01 = addrList[i].addrTxt;
+        addrTxt2ZS01 = addrList[i].addrTxt2;
+      }
+    }
+    for (var i=0; i< addrList.length; i++) {
+      if (addrList[i].addrType != 'ZS01') {
+        addrTxtOther = addrList[i].addrTxt;
+        addrTxt2Other = addrList[i].addrTxt2;
+      }
+      if ((addrTxtZS01.toUpperCase() != addrTxtOther.toUpperCase()) 
+          || (addrTxt2ZS01.toUpperCase() != addrTxt2Other.toUpperCase())) {
+        diffIndc = true;
+      }
+    }
+  }
+  
+  // check if other addr is diffrent with ZS01 in intl_addr
+  if (cnAddrList != null) {
+    for (var i=0; i< cnAddrList.length; i++) {
+      if (cnAddrList[i].addrType == 'ZS01') {
+        cnAddrTxtZS01 = cnAddrList[i].cnAddrTxt;
+        cnAddrTxt2ZS01 = cnAddrList[i].cnAddrTxt2;
+      }
+    }
+    for (var i=0; i< cnAddrList.length; i++) {
+      if (cnAddrList[i].addrType != 'ZS01') {
+        cnAddrTxtOther = cnAddrList[i].cnAddrTxt;
+        cnAddrTxt2Other = cnAddrList[i].cnAddrTxt2;
+      }
+      if ((cnAddrTxtZS01.toUpperCase() != cnAddrTxtOther.toUpperCase()) 
+          || (cnAddrTxt2ZS01.toUpperCase() != cnAddrTxt2Other.toUpperCase())) {
+        diffIndc = true;
+      }
+    }
+  }
+  
+  // output
+  if (diffIndc == true) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function getAddrList() {
+  var reqId = FormManager.getActualValue('reqId');
+  var qParams = {
+      _qall : 'Y',
+      REQ_ID : reqId ,
+     };
+  var addrResults = cmr.query('GET.ADDR_BY_REQID', qParams);
+  return addrResults;
+}
+
+function getCnAddrList() {
+  var reqId = FormManager.getActualValue('reqId');
+  var qParams = {
+      _qall : 'Y',
+      REQ_ID : reqId ,
+     };
+  var intlAddrResults = cmr.query('GET.INTLADDR_BY_REQID', qParams);
+  return intlAddrResults;
 }
 
 function validateSearchTermForCROSS() {

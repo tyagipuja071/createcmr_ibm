@@ -271,7 +271,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
   private boolean shouldSetNegativeCheck(EntityManager entityManager, RequestData requestData, String custSubGrp) {
     if (USUtil.SC_BYMODEL.equals(custSubGrp)) {
       try {
-        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
+        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), requestData);
         if (!USUtil.COMMERCIAL.equals(usDetails.getCustTypCd())) {
           return true;
         }
@@ -355,7 +355,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       response.setMatches(reqCheckMatchesTmp);
       break;
     case USUtil.SC_BYMODEL:
-      USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
+      USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), requestData);
       switch (usDetails.getCustTypCd()) {
       case USUtil.POWER_OF_ATTORNEY:
       case USUtil.FEDERAL:
@@ -482,7 +482,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       response.setMatches(cmrCheckMatchesTmp);
       break;
     case USUtil.SC_BYMODEL:
-      USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
+      USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), requestData);
       switch (usDetails.getCustTypCd()) {
       case USUtil.POWER_OF_ATTORNEY:
       case USUtil.FEDERAL:

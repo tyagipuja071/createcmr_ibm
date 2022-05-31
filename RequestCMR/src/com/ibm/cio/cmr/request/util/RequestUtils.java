@@ -1649,4 +1649,16 @@ public class RequestUtils {
     return rejectionReasons.get(rejectionReasonCd);
   }
 
+  public static String getProcessingType(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTO.GET_PROCESSING_TYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", country);
+    query.setForReadOnly(true);
+    String result = query.getSingleResult(String.class);
+    if (StringUtils.isEmpty(result)) {
+      return result;
+    }
+    return null;
+  }
+
 }

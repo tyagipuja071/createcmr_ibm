@@ -256,14 +256,33 @@
         </p>
       </cmr:column>
       
-       <cmr:column span="2" containerForField="SpecialTaxCd">
+
+    </cmr:view>
+
+  </cmr:row>
+   <cmr:row addBackground="true">
+
+    <cmr:view forCountry="897">
+      <cmr:column span="2" containerForField="SpecialTaxCd">
         <p>
           <label for="specialTaxCd"> <cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
           <cmr:field path="specialTaxCd" id="specialTaxCd" fieldId="SpecialTaxCd" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
+       <cmr:column span="2" containerForField="TaxExemptStatus2">
+        <p>
+          <label for="taxExemptStatus2"> <cmr:fieldLabel fieldId="TaxExemptStatus2" />: </label>
+          <cmr:field path="taxExemptStatus2" id="taxExemptStatus2" fieldId="TaxExemptStatus2" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      <cmr:column span="2" containerForField="TaxExemptStatus3">
+        <p>
+          <label for="taxExemptStatus3"> <cmr:fieldLabel fieldId="TaxExemptStatus3" />: </label>
+          <cmr:field path="taxExemptStatus3" id="taxExemptStatus3" fieldId="TaxExemptStatus3" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
     </cmr:view>
-
+    
   </cmr:row>
   
 	<cmr:view forCountry="781">

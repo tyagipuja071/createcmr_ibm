@@ -145,6 +145,7 @@ public class TransConnService extends BaseBatchService {
       ChangeLogListener.setUser(BATCH_USER_ID);
 
       List<Long> records = null;
+
       LOG.info("Processing Aborted records (retry)...");
       records = gatherAbortedRecords(entityManager);
       monitorAbortedRecords(entityManager, records);
@@ -2316,6 +2317,161 @@ public class TransConnService extends BaseBatchService {
         affiliate.setValue(massUpdtData.getAffiliate());
         requestDataValueRecords.add(affiliate);
       }
+
+      // add KUKLA
+      if (!StringUtils.isBlank(massUpdtData.getCustClass())) {
+        RequestValueRecord kukla = new RequestValueRecord();
+        kukla.setField("KUKLA");
+        kukla.setValue(massUpdtData.getCustClass());
+        requestDataValueRecords.add(kukla);
+      }
+
+      // add Order Block
+      if (!StringUtils.isBlank(massUpdtData.getOrdBlk())) {
+        RequestValueRecord ordblk = new RequestValueRecord();
+        ordblk.setField("AUFSD");
+        ordblk.setValue(massUpdtData.getOrdBlk());
+        requestDataValueRecords.add(ordblk);
+      }
+
+      // Misc Bill Code
+      if (!StringUtils.isBlank(massUpdtData.getMiscBillCd())) {
+        RequestValueRecord miscbill = new RequestValueRecord();
+        miscbill.setField("MISCBILLCD");
+        miscbill.setValue(massUpdtData.getMiscBillCd());
+        requestDataValueRecords.add(miscbill);
+      }
+      // CREATCMR-5828
+      // PCC AR Dept.
+      if (!StringUtils.isBlank(massUpdtData.getPccArDept())) {
+        RequestValueRecord PCCARBO = new RequestValueRecord();
+        PCCARBO.setField("PCC_AR_BO");
+        PCCARBO.setValue(massUpdtData.getPccArDept());
+        requestDataValueRecords.add(PCCARBO);
+      }
+      // Restrict To
+      if (!StringUtils.isBlank(massUpdtData.getRestrictTo())) {
+        RequestValueRecord USRESTRICTTO = new RequestValueRecord();
+        USRESTRICTTO.setField("US_RESTRICT_TO");
+        USRESTRICTTO.setValue(massUpdtData.getRestrictTo());
+        requestDataValueRecords.add(USRESTRICTTO);
+      }
+      // SVC AR Office
+      if (!StringUtils.isBlank(massUpdtData.getSvcArOffice())) {
+        RequestValueRecord SVCAROFC = new RequestValueRecord();
+        SVCAROFC.setField("SVC_AR_OFC");
+        SVCAROFC.setValue(massUpdtData.getSvcArOffice());
+        requestDataValueRecords.add(SVCAROFC);
+      }
+      // Marketing AR Dept.
+      if (!StringUtils.isBlank(massUpdtData.getMktgArDept())) {
+        RequestValueRecord MKTGARDEPT = new RequestValueRecord();
+        MKTGARDEPT.setField("MKTG_AR_DEPT");
+        MKTGARDEPT.setValue(massUpdtData.getMktgArDept());
+        requestDataValueRecords.add(MKTGARDEPT);
+      }
+      // CSO Site
+      if (!StringUtils.isBlank(massUpdtData.getCsoSite())) {
+        RequestValueRecord CSOSITE = new RequestValueRecord();
+        CSOSITE.setField("CSO_SITE");
+        CSOSITE.setValue(massUpdtData.getCsoSite());
+        requestDataValueRecords.add(CSOSITE);
+      }
+      // Marketing Dept.
+      if (!StringUtils.isBlank(massUpdtData.getMktgDept())) {
+        RequestValueRecord MKTGDEPT = new RequestValueRecord();
+        MKTGDEPT.setField("MKTG_DEPT");
+        MKTGDEPT.setValue(massUpdtData.getMktgDept());
+        requestDataValueRecords.add(MKTGDEPT);
+      }
+      // Misc Bill Code
+      if (!StringUtils.isBlank(massUpdtData.getMiscBillCd())) {
+        RequestValueRecord MISCBILLING = new RequestValueRecord();
+        MISCBILLING.setField("MISC_BILLING");
+        MISCBILLING.setValue(massUpdtData.getMiscBillCd());
+        requestDataValueRecords.add(MISCBILLING);
+      }
+      // ICC Tax Class
+      if (!StringUtils.isBlank(massUpdtData.getIccTaxClass())) {
+        RequestValueRecord CICCTAXCLASS = new RequestValueRecord();
+        CICCTAXCLASS.setField("C_ICC_TAX_CLASS");
+        CICCTAXCLASS.setValue(massUpdtData.getIccTaxClass());
+        requestDataValueRecords.add(CICCTAXCLASS);
+      }
+      // ICC Tax Exempt Status
+      if (!StringUtils.isBlank(massUpdtData.getIccTaxExemptStatus())) {
+        RequestValueRecord CICCTE = new RequestValueRecord();
+        CICCTE.setField("C_ICC_TE");
+        CICCTE.setValue(massUpdtData.getIccTaxExemptStatus());
+        requestDataValueRecords.add(CICCTE);
+      }
+      // Tax Class / Code 2
+      if (!StringUtils.isBlank(massUpdtData.getTaxCd2()) && massUpdtData.getTaxCd2().length() == 4) {
+        RequestValueRecord ITAXCLASS2 = new RequestValueRecord();
+        ITAXCLASS2.setField("I_TAX_CLASS_2");
+        ITAXCLASS2.setValue(massUpdtData.getTaxCd2().substring(1, 4));
+        requestDataValueRecords.add(ITAXCLASS2);
+      }
+
+      // I_TYPE_CUST_2
+      if (!StringUtils.isBlank(massUpdtData.getTaxCd2()) && massUpdtData.getTaxCd2().length() == 4) {
+        RequestValueRecord ITYPECUST2 = new RequestValueRecord();
+        ITYPECUST2.setField("I_TYPE_CUST_2");
+        ITYPECUST2.setValue(massUpdtData.getTaxCd2().substring(0, 1));
+        requestDataValueRecords.add(ITYPECUST2);
+      }
+      // Tax Class / Code 3
+      if (!StringUtils.isBlank(massUpdtData.getTaxCd3()) && massUpdtData.getTaxCd3().length() == 4) {
+        RequestValueRecord ITAXCLASS3 = new RequestValueRecord();
+        ITAXCLASS3.setField("I_TAX_CLASS_3");
+        ITAXCLASS3.setValue(massUpdtData.getTaxCd3().substring(1, 4));
+        requestDataValueRecords.add(ITAXCLASS3);
+      }
+
+      // I_TYPE_CUST_3
+      if (!StringUtils.isBlank(massUpdtData.getTaxCd3()) && massUpdtData.getTaxCd3().length() == 4) {
+        RequestValueRecord ITYPECUST3 = new RequestValueRecord();
+        ITYPECUST3.setField("I_TYPE_CUST_3");
+        ITYPECUST3.setValue(massUpdtData.getTaxCd3().substring(0, 1));
+        requestDataValueRecords.add(ITYPECUST3);
+      }
+
+      // Tax Exempt Status
+      if (!StringUtils.isBlank(massUpdtData.getTaxExemptStatus())) {
+        RequestValueRecord CTECERTST1 = new RequestValueRecord();
+        CTECERTST1.setField("C_TE_CERT_ST_1");
+        CTECERTST1.setValue(massUpdtData.getTaxExemptStatus());
+        requestDataValueRecords.add(CTECERTST1);
+      }
+      // Tax Exempt Status2
+      if (!StringUtils.isBlank(massUpdtData.getTaxExemptStatus2())) {
+        RequestValueRecord CTECERTST2 = new RequestValueRecord();
+        CTECERTST2.setField("C_TE_CERT_ST_2");
+        CTECERTST2.setValue(massUpdtData.getTaxExemptStatus2());
+        requestDataValueRecords.add(CTECERTST2);
+      }
+      // Tax Exempt Status3
+      if (!StringUtils.isBlank(massUpdtData.getTaxExemptStatus3())) {
+        RequestValueRecord CTECERTST3 = new RequestValueRecord();
+        CTECERTST3.setField("C_TE_CERT_ST_3");
+        CTECERTST3.setValue(massUpdtData.getTaxExemptStatus3());
+        requestDataValueRecords.add(CTECERTST3);
+      }
+      // Education Allowance
+      if (!StringUtils.isBlank(massUpdtData.getEducAllowCd())) {
+        RequestValueRecord EASTATUS = new RequestValueRecord();
+        EASTATUS.setField("EA_STATUS");
+        EASTATUS.setValue(massUpdtData.getEducAllowCd());
+        requestDataValueRecords.add(EASTATUS);
+      }
+      // Out of City Limits
+      if (!StringUtils.isBlank(massUpdtData.getOutCityLimit())) {
+        RequestValueRecord FOCL = new RequestValueRecord();
+        FOCL.setField("F_OCL");
+        FOCL.setValue(massUpdtData.getOutCityLimit());
+        requestDataValueRecords.add(FOCL);
+      }
+      // CREATCMR-5828
 
       // set requestDataValueRecords list updatDataRec
       updtDataRec.setValues(requestDataValueRecords);

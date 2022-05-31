@@ -334,6 +334,52 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               results.add(update);
             }
           }
+          if ("897".equals(oldData.getCmrIssuingCntry())) {
+            if (TYPE_IBM.equals(type) && !equals(oldData.getEducAllowCd(), newData.getEducAllowCd())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "EducAllowCd"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "EducAllowCd", "-"));
+              update.setNewData(newData.getEducAllowCd());
+              update.setOldData(oldData.getEducAllowCd());
+              results.add(update);
+            }
+
+            if (TYPE_IBM.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "OrdBlk"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "OrdBlk", "-"));
+              update.setNewData(newData.getOrdBlk());
+              update.setOldData(oldData.getOrdBlk());
+              results.add(update);
+            }
+
+            if (TYPE_IBM.equals(type) && !equals(oldData.getSpecialTaxCd(), newData.getSpecialTaxCd())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "SpecialTaxCd"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "SpecialTaxCd", "-"));
+              update.setNewData(newData.getSpecialTaxCd());
+              update.setOldData(oldData.getSpecialTaxCd());
+              results.add(update);
+            }
+
+            if (TYPE_IBM.equals(type) && !equals(oldData.getTaxExempt2(), newData.getTaxExemptStatus2())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "TaxExempt2"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "TaxExempt2", "-"));
+              update.setNewData(newData.getTaxExemptStatus2());
+              update.setOldData(oldData.getTaxExempt2());
+              results.add(update);
+            }
+            if (TYPE_IBM.equals(type) && !equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "TaxExempt3"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "TaxExempt3", "-"));
+              update.setNewData(newData.getTaxExemptStatus3());
+              update.setOldData(oldData.getTaxExempt3());
+              results.add(update);
+            }
+
+          }
 
           if (TYPE_IBM.equals(type) && !equals(oldData.getInacCd(), newData.getInacCd()) && !LAHandler.isBRIssuingCountry(cmrCountry)
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "INACCode"))) {
