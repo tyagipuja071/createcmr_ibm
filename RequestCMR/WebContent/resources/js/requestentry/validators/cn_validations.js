@@ -317,15 +317,13 @@ function setCtcOnIsuCdChangeCN() {
   if (isuCd == '5K') {
     FormManager.resetValidations('clientTier');
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
   } else {
     if (FormManager.getActualValue('reqType') == 'U') {
       FormManager.removeValidator('clientTier', Validators.REQUIRED);
     } else {
       FormManager.addValidator('clientTier', Validators.REQUIRED);
     }
-      FormManager.enable('clientTier');
+    FormManager.enable('clientTier');
   }
 }
 
@@ -3066,7 +3064,6 @@ function checkClusterExpired(clusterDataRdc) {
   }
   return true;
 }
-
 
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];

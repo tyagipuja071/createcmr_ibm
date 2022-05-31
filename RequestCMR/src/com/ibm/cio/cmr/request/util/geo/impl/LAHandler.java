@@ -2661,6 +2661,7 @@ public class LAHandler extends GEOHandler {
           data.setGovType(record.getGovernment());
           data.setProxiLocnNo(record.getProxyLoc());
           data.setMrcCd(record.getMrcCode());
+          data.setTaxCd3(record.getFiscalRegime());
 
           if (!StringUtils.isEmpty(record.getDplValidCode())) {
             if ("DENIAL".equalsIgnoreCase(record.getDplValidCode())) {
@@ -3161,6 +3162,7 @@ public class LAHandler extends GEOHandler {
     map.put("##CustLang", "custPrefLang");
     map.put("##ContactType", "contactType");
     map.put("##LocalTax2", "taxCd2");
+    map.put("##LocalTax3", "taxCd3");
     map.put("##GlobalBuyingGroupID", "gbgId");
     map.put("##CoverageID", "covId");
     map.put("##OriginatorID", "originatorId");
