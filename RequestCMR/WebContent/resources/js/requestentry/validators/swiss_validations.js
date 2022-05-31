@@ -1721,12 +1721,7 @@ function validateSortl() {
         var qParams = {
           REQ_ID : reqId,
         };
-        var result = cmr.query('GET.SEARCH_TERM_DATA_RDC', qParams);
-        if (result != null) {
-          searchTermDataRdc = result.ret1;
-        }
-
-        if (searchTermDataRdc != searchTerm) {
+        if (_importedSearchTerm != searchTerm) {
           console.log("validating Sortl..");
           if (searchTerm.length != 8) {
             return new ValidationResult(null, false, 'SORTL should be 8 characters long.');
@@ -1747,6 +1742,24 @@ function validateSortl() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+var _importedSearchTerm = null;
+function resetSortlValidator() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+
+  var qParams = {
+    REQ_ID : reqId,
+  };
+  var result = cmr.query('GET.SEARCH_TERM_DATA_RDC', qParams);
+  if (result != null) {
+    _importedSearchTerm = result.ret1;
+  }
+
+  if (reqType == 'U' && (_importedSearchTerm == '' || _importedSearchTerm == null)) {
+    console.log('Making Sortl optinal as it is empty in RDC');
+    FormManager.resetValidations('searchTerm');
+  }
+}
 
 
 dojo.addOnLoad(function() {
@@ -1811,4 +1824,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.SWISS);
   GEOHandler.registerValidator(validateSortl, GEOHandler.SWISS, null, true);
+  GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.SWISS);
 });
