@@ -1759,7 +1759,6 @@ function resetSortlValidator() {
     console.log('Making Sortl optinal as it is empty in RDC');
     FormManager.resetValidations('searchTerm');
   }
-
 }
 
 
