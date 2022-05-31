@@ -405,7 +405,7 @@ public class USUtil extends AutomationUtil {
       }
 
       // set ISU CTC if not found
-      if (StringUtils.isBlank(data.getIsuCd())) {
+      if (StringUtils.isBlank(data.getIsuCd()) && StringUtils.isNotBlank(admin.getSourceSystId()) && !admin.getSourceSystId().equals("FedCMR")) {
         details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 34-Q.").append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "34");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Q");
@@ -418,7 +418,8 @@ public class USUtil extends AutomationUtil {
 
         if ("C".equals(admin.getReqType())
             && (data.getIsicCd().startsWith("90") || data.getIsicCd().startsWith("91") || data.getIsicCd().startsWith("92"))
-            && !FEDERAL_SCENARIOS.contains(scenarioSubType)) {
+            && StringUtils.isNotBlank(scenarioSubType) && !FEDERAL_SCENARIOS.contains(scenarioSubType)
+            && StringUtils.isNotBlank(admin.getSourceSystId()) && !admin.getSourceSystId().equals("FedCMR")) {
           if (SC_BP_END_USER.equals(scenarioSubType)) {
             details.append("Federal ISIC found on the request for BP@EU. Treating as validated.\n");
             // engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC
@@ -501,6 +502,18 @@ public class USUtil extends AutomationUtil {
         SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS, SC_STATE_COUNTY, SC_STATE_CITY, SC_STATE_STATE, SC_STATE_HOSPITALS,
         SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA, SC_PVT_HOUSEHOLD };
     String scenarioSubType = "";
+    if (StringUtils.isNotEmpty(admin.getSourceSystId()) && admin.getSourceSystId().equals("FedCMR")) {
+      scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
+      ScenarioExceptionsUtil exc = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+      details.append("CMR belongs to " + scenarioSubType + " scenario.");
+      if (exc != null) {
+        exc.setSkipCompanyVerification(true);
+        exc.setSkipDuplicateChecks(true);
+        engineData.put("SCENARIO_EXCEPTIONS", exc);
+      }
+      return true;
+    }
+
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
       if (SC_BYMODEL.equals(scenarioSubType)) {
@@ -555,6 +568,8 @@ public class USUtil extends AutomationUtil {
       String procCntr = query.getSingleResult(String.class);
       if (StringUtils.isNotBlank(procCntr) && "Kuala Lumpur".equalsIgnoreCase(procCntr)) {
         valid = true;
+      } else if (StringUtils.isNotEmpty(admin.getSourceSystId()) && admin.getSourceSystId().equals("FedCMR")) {
+        valid = true;
       } else {
         engineData.addRejectionComment("OTH",
             "Federal CMR with restricted ISIC code is only allowed to be requested via FedCMR, please raise the request in FedCMR.", "", "");
@@ -599,6 +614,15 @@ public class USUtil extends AutomationUtil {
       output.setDetails("Requester is from US CMDE team, skipping update checks.\n");
       validation.setMessage("Skipped");
       validation.setSuccess(true);
+    } else if (StringUtils.isNotEmpty(admin.getSourceSystId()) && admin.getSourceSystId().equals("FedCMR")) {
+      // Cmde review for federal- POA
+      if (StringUtils.isNotEmpty(data.getCustClass()) && data.getCustClass().equals("15")) {
+        engineData.addNegativeCheckStatus("OTH", "Updated elements cannot be checked automatically.");
+        LOG.debug("Updated elements cannot be checked automatically.");
+        output.setDetails("Federal request for POA requires CMDE review.\n");
+        validation.setMessage("Review needed");
+        validation.setSuccess(false);
+      }
     } else {
       admin.setScenarioVerifiedIndc("N");
       EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
@@ -1056,6 +1080,8 @@ public class USUtil extends AutomationUtil {
       output.setDetails("Requester is from CMDE team, skipping Update checks.\n");
       validation.setMessage("Update checks Skipped");
       validation.setSuccess(true);
+    } else if (StringUtils.isNotEmpty(admin.getSourceSystId()) && admin.getSourceSystId().equals("FedCMR")) {
+      // skip computation for federal source
     } else {
       String dataDetails = output.getDetails() != null ? output.getDetails() : "";
       StringBuilder details = new StringBuilder(dataDetails);
@@ -1390,6 +1416,15 @@ public class USUtil extends AutomationUtil {
     }
 
     // determine cust scenarios
+    if ((requestData.getAdmin().getSourceSystId() != null) && requestData.getAdmin().getSourceSystId().equals("FedCMR")) {
+      if (requestData.getAdmin().getCustType().equals(FEDERAL)) {
+        custSubGroup = SC_FED_REGULAR;
+      } else if (requestData.getAdmin().getCustType().equals(POWER_OF_ATTORNEY)) {
+        custSubGroup = SC_FED_POA;
+      }
+      return custSubGroup;
+    }
+
     if (COMMERCIAL.equals(custTypCd)) {
       if (StringUtils.isNotBlank(usRestrictToLOV)) {
         // sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");

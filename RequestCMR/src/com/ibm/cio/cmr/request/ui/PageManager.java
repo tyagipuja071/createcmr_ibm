@@ -434,8 +434,8 @@ public class PageManager implements Serializable {
               json = "{ \"listItems\" : " + json + " }";
               sb.append("    FilteringDropdown.loadFixedItems('" + field + "', '" + field + "_spinner', " + json + ");\n");
             } catch (Exception e) {
-              sb.append("    FilteringDropdown.loadItems('" + field + "', '" + field + "_spinner', '" + refTable + "', 'fieldId=" + dropdown
-                  + "');\n");
+              sb.append(
+                  "    FilteringDropdown.loadItems('" + field + "', '" + field + "_spinner', '" + refTable + "', 'fieldId=" + dropdown + "');\n");
             }
           } else {
             sb.append("    FilteringDropdown.loadItems('" + field + "', '" + field + "_spinner', '" + refTable + "', 'fieldId=" + dropdown + "');\n");
@@ -488,7 +488,7 @@ public class PageManager implements Serializable {
       sb.append("  function configChangeFor_" + country + "(){\n");
       sb.append("    if (FormManager) {\n");
       if ("all".equals(country) || !newEntry) {
-        // sb.append("      FormManager.resetValidations();\n");
+        // sb.append(" FormManager.resetValidations();\n");
         sb.append("      PageManager.clearHandles();\n");
       } else {
         sb.append("      configChangeFor_all();\n");
@@ -545,7 +545,7 @@ public class PageManager implements Serializable {
 
               sb.append("\n     /* " + fieldNm + " (" + label + ") */\n");
               if (readOnly) {
-                // sb.append("      FormManager.resetValidations('" + fieldNm +
+                // sb.append(" FormManager.resetValidations('" + fieldNm +
                 // "');\n");
                 sb.append("      FormManager.readOnly('" + fieldNm + "');\n");
               } else {
@@ -668,8 +668,8 @@ public class PageManager implements Serializable {
     }
   }
 
-  private static void generateScriptsForRadioDependencies(HttpServletRequest request, FieldManager fieldMgr, PageConfig config,
-      FieldInformation info, FieldInformation mainInfo, StringBuilder sb, String fieldNm, String label, String tabId, boolean main) {
+  private static void generateScriptsForRadioDependencies(HttpServletRequest request, FieldManager fieldMgr, PageConfig config, FieldInformation info,
+      FieldInformation mainInfo, StringBuilder sb, String fieldNm, String label, String tabId, boolean main) {
     String depends = info.getDependsOn();
     if (depends != null) {
       depends = depends.replaceAll("#", "");
@@ -732,8 +732,8 @@ public class PageManager implements Serializable {
     if (TEXT.equals(fieldMgr.getType())) {
       int maxLength = getMaxLength(fieldMgr, request);
       if (maxLength > 0) {
-        sb.append("      FormManager.addValidator('" + fieldNm + "', Validators.MAXLENGTH, [ \"" + label + "\", " + maxLength + " ], " + tabId
-            + ");\n");
+        sb.append(
+            "      FormManager.addValidator('" + fieldNm + "', Validators.MAXLENGTH, [ \"" + label + "\", " + maxLength + " ], " + tabId + ");\n");
       }
     }
     if (DROPDOWN.equals(fieldMgr.getType())) {
@@ -806,8 +806,8 @@ public class PageManager implements Serializable {
     if (TEXT.equals(fieldMgr.getType())) {
       int maxLength = getMaxLength(fieldMgr, request);
       if (maxLength > 0) {
-        sb.append("      FormManager.addValidator('" + fieldNm + "', Validators.MAXLENGTH, [ \"" + label + "\", " + maxLength + " ], " + tabId
-            + ");\n");
+        sb.append(
+            "      FormManager.addValidator('" + fieldNm + "', Validators.MAXLENGTH, [ \"" + label + "\", " + maxLength + " ], " + tabId + ");\n");
       }
     }
     if (DROPDOWN.equals(fieldMgr.getType())) {
@@ -860,8 +860,8 @@ public class PageManager implements Serializable {
       int cnt = 0;
       for (TabInfo tab : tabInfoList) {
         if (tab.getGrids() != null && tab.getGrids().size() > 0) {
-          sb.append(cnt > 0 ? "    } else if (sectionId == '" + tab.getSectionId() + "') {\n" : "    if (sectionId == '" + tab.getSectionId()
-              + "') {\n");
+          sb.append(
+              cnt > 0 ? "    } else if (sectionId == '" + tab.getSectionId() + "') {\n" : "    if (sectionId == '" + tab.getSectionId() + "') {\n");
           for (String gridId : tab.getGrids()) {
             sb.append("      CmrGrid.correct('" + gridId + "');\n");
           }
@@ -931,11 +931,11 @@ public class PageManager implements Serializable {
   }
 
   public static boolean autoProcEnabled(String cmrIssuingCntry, String reqType) {
-	if(instance == null)
-		return true;
+    if (instance == null)
+      return true;
     for (String code : instance.autoProcCountries) {
       String reqTypes = null;
-      if (code != null && code.startsWith(cmrIssuingCntry)) {
+      if (code != null && cmrIssuingCntry != null && code.startsWith(cmrIssuingCntry)) {
         reqTypes = code.substring(code.indexOf("-") + 1);
         if (reqTypes != null && reqTypes.contains("-")) {
           reqTypes = reqTypes.substring(0, reqTypes.indexOf("-"));
