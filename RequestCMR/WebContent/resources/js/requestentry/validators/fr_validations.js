@@ -2937,10 +2937,10 @@ function setISUClientTierOnScenario() {
   // CMR-234 change end
   if (countyCd == "TN" && (custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'CBIEU' || custSubGrp == 'CBUEU')) {
     FormManager.setValue('isuCd', '8B');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
   } else if (countyCd == "DZ" && (custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'CBIEU' || custSubGrp == 'CBUEU')) {
     FormManager.setValue('isuCd', '8B');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
   } else if (SUB_REGIONS.has(countyCd)// CMR-234
       && (custSubGrp == 'CBMME' || custSubGrp == 'CBVRN' || custSubGrp == 'XBLUM' || custSubGrp == 'CBIEM' || custSubGrp == 'CBFIN'
           || custSubGrp == 'CBTSO' || custSubGrp == 'CBDPT' || custSubGrp == 'CBSTC')) {
@@ -2948,7 +2948,7 @@ function setISUClientTierOnScenario() {
     FormManager.setValue('clientTier', 'S');
   } else if (custSubGrp == 'XBLUM' || custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP' || custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
     FormManager.setValue('isuCd', '21');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
   } else {
     return;
   }

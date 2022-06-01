@@ -1542,7 +1542,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'N', 'S' ];
       } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
+        clientTiers = [ '' ];
       }
     } else if ((SysLoc.TURKMENISTAN == cntry || SysLoc.TAJIKISTAN == cntry || SysLoc.ALBANIA == cntry || SysLoc.ARMENIA == cntry
         || SysLoc.BELARUS == cntry || SysLoc.BULGARIA == cntry || SysLoc.GEORGIA == cntry || SysLoc.KAZAKHSTAN == cntry || SysLoc.KYRGYZSTAN == cntry
@@ -1587,7 +1587,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'S', 'N' ];
       } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
+        clientTiers = [ '' ];
       }
     } else if ((SysLoc.BOSNIA_HERZEGOVINA == cntry || SysLoc.SLOVENIA == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT'
@@ -1616,7 +1616,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'S' ];
       } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
+        clientTiers = [ '' ];
       }
     } else if ((SysLoc.MOLDOVA == cntry || SysLoc.ROMANIA == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT'
@@ -1627,7 +1627,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'S', 'M' ];
       } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
+        clientTiers = [ '' ];
       }
 
     } else if ((SysLoc.POLAND == cntry || SysLoc.RUSSIA == cntry)
@@ -1639,7 +1639,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'S', 'N' ];
       } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
+        clientTiers = [ '' ];
       }
     } else {
       var qParams = {
@@ -1747,11 +1747,11 @@ function setDupISUCTCValues(custSubGrp) {
     if (FormManager.getActualValue('custSubGrp') == 'XBP' || FormManager.getActualValue('custSubGrp') == 'BUSPR'
         || FormManager.getActualValue('custSubGrp') == 'EXBP' || FormManager.getActualValue('custSubGrp') == 'ELBP') {
       isuCds = [ '8B' ];
-      FormManager.setValue('dupClientTierCd', '7');
+      FormManager.setValue('dupClientTierCd', '');
       FormManager.readOnly('dupClientTierCd');
     } else if (FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'INTER') {
       isuCds = [ '21' ];
-      FormManager.setValue('dupClientTierCd', '7');
+      FormManager.setValue('dupClientTierCd', '');
       FormManager.readOnly('dupClientTierCd')
     } else if (FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'XTP'
         || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'PRICU'

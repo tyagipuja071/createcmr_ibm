@@ -3217,7 +3217,7 @@ function addEMEAClientTierISULogic() {
     } else if (value == '34') {
       tierValues = [ 'A', 'E', 'V', '4', '6' ];
     } else if (value != '') {
-      tierValues = [ '7', 'Z' ];
+      tierValues = [ 'Z' ];
     }
 
     if (tierValues != null) {
@@ -3253,7 +3253,7 @@ function addIEClientTierISULogic() {
     } else if (value == '34') {
       tierValues = [ 'A', 'E', 'V', '4', '6' ];
     } else if (value != '') {
-      tierValues = [ '7', 'Z' ];
+      tierValues = [ 'Z' ];
     }
 
     if (tierValues != null) {
@@ -3291,7 +3291,7 @@ function addILClientTierISULogic() {
     } else if (value == '34') {
       tierValues = [ 'A', 'E', 'V', '4', '6', 'Z' ];
     } else if (value != '') {
-      tierValues = [ '7', 'Z' ];
+      tierValues = [ 'Z' ];
     }
 
     if (tierValues != null) {
@@ -3322,9 +3322,9 @@ function addUKClientTierISULogic() {
     } else if (value == '34') {
       tierValues = [ 'A', 'V', '6' ];
     } else if (value == '21') {
-      tierValues = [ '7', 'Z' ];
+      tierValues = [ 'Z' ];
     } else if (value != '') {
-      tierValues = [ '7', '' ];
+      tierValues = [ '' ];
     }
     if (tierValues != null) {
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
@@ -4814,9 +4814,9 @@ function setClientTierAndISR(value) {
     } else if (value == '32') {
       tierValues = [ 'B', 'N', 'S', 'Z', 'M', '6' ];
     } else if (value == '5B') {
-      tierValues = [ '7' ];
+      tierValues = [ '' ];
     } else if (value == '21') {
-      tierValues = [ '7' ];
+      tierValues = [ '' ];
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (value == '34') {
@@ -4824,7 +4824,7 @@ function setClientTierAndISR(value) {
     } else if (value == '32') {
       tierValues = [ 'B', 'N', 'S', 'Z', 'M' ];
     } else if (value == '21') {
-      tierValues = [ '7' ];
+      tierValues = [ '' ];
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
     if (value == '34') {
@@ -4833,7 +4833,7 @@ function setClientTierAndISR(value) {
       // remove ISU+CTC=32B from all scenarioes
       tierValues = [ 'N', 'S', 'T' ];
     } else if (value == '5B' || value == '21' || value == '8B') {
-      tierValues = [ '7' ];
+      tierValues = [ '' ];
     }
   }
   if (tierValues != null) {
@@ -5991,12 +5991,12 @@ function setSalesRepValuesIT(isuCd, clientTier) {
     }
     if (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN') {
       FormManager.setValue('isuCd', '21');
-      FormManager.readOnly('clientTier', '7');
+      FormManager.readOnly('clientTier', '');
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), [ '0B14A0', '0B1BA0', '0B1GA0', '0B1EA0', '0B11A0', '0B12A0', '0B13A0' ]);
     }
     if (custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP') {
       FormManager.setValue('isuCd', '21');
-      FormManager.readOnly('clientTier', '7');
+      FormManager.readOnly('clientTier', '');
       FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
       FormManager.enable('repTeamMemberNo');
       FormManager.setValue('repTeamMemberNo', '09ZPA0');
@@ -8271,7 +8271,7 @@ function autoSetISUClientTierUK() {
       }
     } else {
       FormManager.setValue('isuCd', '21');
-      FormManager.setValue('clientTier', '7');
+      FormManager.setValue('clientTier', '');
     }
   }
 }

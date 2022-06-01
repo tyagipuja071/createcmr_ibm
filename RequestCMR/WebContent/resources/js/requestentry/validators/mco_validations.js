@@ -691,7 +691,7 @@ function setClientTierValues(value) {
     } else if (value == '60') {
       // CREATCMR-4293
       // value == '21' ||
-      tierValues = [ '7' ];
+      tierValues = [ '' ];
     } else if (value == '34') {
       tierValues = [ 'V', '6', 'A', 'Q', 'Y', 'Z' ];
     } else if (value == '21') {// CREATCMR-4293
@@ -703,7 +703,7 @@ function setClientTierValues(value) {
     } else if (value == '32') {
       tierValues = [ 'B', 'S', 'T', 'N', 'Z', 'M' ];
     } else if (value == '5B' || value == '04' || value == '3T' || value == '60') {
-      tierValues = [ '7' ];
+      tierValues = [ '' ];
     } else if (value == '5K' || value == '21') {// CREATCMR-4293
       tierValues = [ '' ];
     }

@@ -2292,7 +2292,7 @@ function addEMEAClientTierISULogic() {
     } else if (value == '34') {
       tierValues = [ 'A', 'E', 'V', '4', '6' ];
     } else if (value != '') {
-      tierValues = [ '7', 'Z' ];
+      tierValues = [ 'Z' ];
     }
 
     if (tierValues != null) {
@@ -3647,9 +3647,9 @@ function setClientTierAndISR(value) {
     } else if (value == '32') {
       tierValues = [ 'B', 'N', 'S', 'Z', 'M', '6' ];
     } else if (value == '5B') {
-      tierValues = [ '7' ];
+      tierValues = [ '' ];
     } else if (value == '21') {
-      tierValues = [ '7' ];
+      tierValues = [ '' ];
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (value == '34') {
@@ -3657,7 +3657,7 @@ function setClientTierAndISR(value) {
     } else if (value == '32') {
       tierValues = [ 'B', 'N', 'S', 'Z', 'M' ];
     } else if (value == '21') {
-      tierValues = [ '7' ];
+      tierValues = [ '' ];
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
     if (value == '34') {
@@ -3666,7 +3666,7 @@ function setClientTierAndISR(value) {
       // remove ISU+CTC=32B from all scenarioes
       tierValues = [ 'N', 'S', 'T' ];
     } else if (value == '5B' || value == '21' || value == '8B') {
-      tierValues = [ '7' ];
+      tierValues = [ '' ];
     }
   }
   if (tierValues != null) {
@@ -4323,12 +4323,10 @@ function setCustSubTypeBpGRTRCY() {
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
     if (custType == 'BUSPR') {
       FormManager.readOnly('clientTier');
-      FormManager.setValue('clientTier', '7');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '8B');
     } else if (custType == 'INTER') {
       FormManager.readOnly('clientTier');
-      FormManager.setValue('clientTier', '7');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
     } else if (custType == 'PRICU' || custType == 'XPC') {
@@ -4356,7 +4354,6 @@ function setCustSubTypeBpGRTRCY() {
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (custType == 'BUSPR') {
       FormManager.readOnly('clientTier');
-      FormManager.setValue('clientTier', '7');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
     } else if (custType == 'INTER') {
@@ -5349,7 +5346,6 @@ function set34QYZlogicOnISUCtcChange() {
     var custSubType = FormManager.getActualValue('custSubGrp');
     if (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN') {
       FormManager.setValue('isuCd', '21');
-      FormManager.setValue('clientTier', '7');
       FormManager.setValue('repTeamMemberNo', '012345');
       FormManager.setValue('salesBusOffCd', '99');
       FormManager.clearValue('collectionCd');
@@ -6350,7 +6346,6 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
           FormManager.clearValue('collectionCd');
         } else if (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN') {
           FormManager.setValue('isuCd', '21');
-          FormManager.setValue('clientTier', '7');
           FormManager.setValue('repTeamMemberNo', '012345');
           FormManager.setValue('salesBusOffCd', '99');
           FormManager.clearValue('collectionCd');
@@ -6365,7 +6360,6 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
         }
         if (custSubType == 'IBMIT' || custSubType == 'XIBM') {
           FormManager.setValue('isuCd', '21');
-          FormManager.setValue('clientTier', '7');
           FormManager.setValue('repTeamMemberNo', '0B1TA0');
           FormManager.setValue('salesBusOffCd', '1T');
           FormManager.clearValue('collectionCd');
@@ -7727,7 +7721,6 @@ function autoPopulateISUClientTierUK() {
     }
   } else {
     FormManager.setValue('isuCd', "21");
-    FormManager.setValue('clientTier', "7");
   }
 }
 
@@ -10096,7 +10089,7 @@ function clientTierValidatorIS() {
       validate : function() {
         var clientTier = FormManager.getActualValue('clientTier');
         var isuCd = FormManager.getActualValue('isuCd');
-        var validCtcValues = [ '7' ];
+        var validCtcValues = [ '' ];
         if (isuCd != '34') {
           if (clientTier != null && clientTier != undefined) {
             if (!validCtcValues.includes(clientTier)) {

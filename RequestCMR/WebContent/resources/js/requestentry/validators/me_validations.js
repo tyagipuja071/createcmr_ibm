@@ -4353,12 +4353,12 @@ function setIsuCtcOnScenarioChange() {
   currentChosenScenarioME = scenario;
   if (scenario == 'BUSPR' || scenario.includes('BP')) {
     FormManager.setValue('isuCd', '8B');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
   } else if (scenario.includes('IN')) {
     FormManager.setValue('isuCd', '21');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
   } else if (scenarioChanged) {
@@ -4393,12 +4393,12 @@ function setIsuCtcOnScenarioChange() {
   currentChosenScenarioME = scenario;
   if (scenario == 'BUSPR' || scenario.includes('BP')) {
     FormManager.setValue('isuCd', '8B');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
   } else if (scenario.includes('IN')) {
     FormManager.setValue('isuCd', '21');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
   } else if (scenarioChanged) {

@@ -1706,7 +1706,7 @@ function limitClientTierValues(value) {
 
 function preSelectSingleValue(value, tierValues) {
   if ((value == '21' || value == '8B') && tierValues.includes('7')) {
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
   }
 }
 
