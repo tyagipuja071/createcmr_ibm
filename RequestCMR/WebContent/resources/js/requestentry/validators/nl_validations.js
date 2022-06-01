@@ -1653,7 +1653,8 @@ function setSORTLBasedOnIsuCtc() {
 }
 
 function setClientTierValuesForUpdate() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
   var isuList = [ '15', '4A', '04', '28' ];

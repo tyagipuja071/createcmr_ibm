@@ -468,8 +468,8 @@ function getLandedCountryByAddType(addType) {
  * Set Client Tier Value
  */
 function setClientTierValues(isuCd) {
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
 

@@ -161,11 +161,11 @@ function setSearchTermDE() {
 }
 
 function lockCtcFieldOnIsu() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
   var isuList = [ '34', '5K', '19', '3T', '4F' ];
-  var reqType = FormManager.getActualValue('reqType');
   var userRole = _pagemodel.userRole.toUpperCase();
   var isuCd = FormManager.getActualValue('isuCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -177,7 +177,7 @@ function lockCtcFieldOnIsu() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
-    if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+    if (userRole == 'PROCESSOR') {
       FormManager.enable('clientTier');
     }
   }

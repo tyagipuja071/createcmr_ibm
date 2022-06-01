@@ -2058,7 +2058,7 @@ function setSBOValuesForIsuCtcAT() {
     } else if (isuCd == '04' && clientTier == '') {
       FormManager.setValue('salesBusOffCd', 'A0004580');
     }
-    if (isuCd == '04') {
+    if (isuCd == '04' && reqType == 'C') {
       FormManager.resetValidations('clientTier');
       FormManager.setValue('clientTier', '');
       FormManager.readOnly('clientTier');

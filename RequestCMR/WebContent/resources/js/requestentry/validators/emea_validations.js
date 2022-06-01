@@ -1909,7 +1909,6 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
         || custSubType == 'INTVA') {
       FormManager.setValue('isuCd', '21');
       FormManager.readOnly('isuCd');
-      FormManager.setValue('clientTier', '7');
       FormManager.readOnly('clientTier');
     } else if (custSubType == 'BUSPR' || custSubType == 'CROBP' || custSubType == 'BUSSM' || custSubType == 'BUSVA') {
       FormManager.readOnly('collectionCd');
@@ -2321,13 +2320,13 @@ function setClientTierValuesIT(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  var reqType = FormManager.getActualValue('reqType');
   isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '28') {
+  if (isuCd == '28' && reqType == 'C') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
-    var reqType = FormManager.getActualValue('reqType');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     if (reqType != 'U') {
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
@@ -4814,7 +4813,7 @@ function setSboValueBasedOnIsuCtcIT() {
   } else if (isuCd == '4A' && clientTier == '') {
     FormManager.setValue('salesBusOffCd', 'XD');
   }
-  if (isuList.slice(2, 6).includes(isuCd)) {
+  if (isuList.slice(2, 6).includes(isuCd) && reqType == 'C') {
     FormManager.resetValidations('clientTier');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
@@ -4847,7 +4846,7 @@ function setSboValueBasedOnIsuCtcUK() {
     FormManager.setValue('salesBusOffCd', '511');
     FormManager.setValue('repTeamMemberNo', 'SPA511');
   }
-  if (isuList.slice(2, 5).includes(isuCd)) {
+  if (isuList.slice(2, 5).includes(isuCd) && reqType == 'C') {
     FormManager.resetValidations('clientTier');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
