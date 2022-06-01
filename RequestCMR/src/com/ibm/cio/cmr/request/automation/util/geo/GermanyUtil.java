@@ -593,10 +593,13 @@ public class GermanyUtil extends AutomationUtil {
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
     Addr soldTo = requestData.getAddress("ZS01");
     String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
     StringBuilder detail = new StringBuilder(details);
     String duns = null;
+    boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(soldTo.getId().getAddrSeq()) && "PG".equals(data.getOrdBlk()));
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     boolean isNegativeCheckNeedeed = false;
     if (changes != null && changes.hasDataChanges()) {
       if (changes.isDataChanged("VAT #")) {
@@ -658,6 +661,9 @@ public class GermanyUtil extends AutomationUtil {
         if (oldAbbrName.equals(AbbrevNameChange.getNewData())) {
           detail.append("Updates to the Abbreviated Name field are validated.\n");
           LOG.debug("Updates to the Abbreviated Name field are validated.");
+        } else if (payGoAddredited || isZS01WithAufsdPG) {
+          detail.append("Updates to the Abbreviated Name field are skipped for PayGo cmr\n");
+          LOG.debug("Updates to the Abbreviated Name field are skipped for Paygo cmr ");
         } else {
           isNegativeCheckNeedeed = true;
           detail.append("Updates to Abbreviated Name field were found, review is required.\n");
