@@ -72,6 +72,8 @@ public class USHandler extends GEOHandler {
 
   private EntityManager entityManager;
 
+  private String processType;
+
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
@@ -189,6 +191,8 @@ public class USHandler extends GEOHandler {
     // String processingType = PageManager.getProcessingType("897", "U");
 
     String processingType = getProcessingTypeForUS(entityManager, "897");
+    processType = processingType;
+    LOG.debug("processType = " + processType);
 
     String cmrNo = cmr.getCmrNum();
     if (!NumberUtils.isDigits(cmrNo)) {
@@ -627,10 +631,9 @@ public class USHandler extends GEOHandler {
 
     // try US CMR DB first
     // String processingType = PageManager.getProcessingType("897", "U");
-    EntityManager entityManager = JpaManager.getEntityManager();
-    String processingType = getProcessingTypeForUS(entityManager, "897");
+    // String processingType = getProcessingTypeForUS(entityManager, "897");
 
-    if (cmrNo != null && "TC".equals(processingType)) {
+    if (cmrNo != null && "TC".equals(processType)) {
       String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
       String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
       String sql = ExternalizedQuery.getSql("IMPORT.US.USCMR.ADDR", usSchema);
