@@ -78,6 +78,9 @@ function addCMRSearchValidator() {
     return {
       validate : function() {
         var result = FormManager.getActualValue('findCmrResult');
+        if (reqType == 'C' && FormManager.getActualValue('sourceSystId').toUpperCase() == 'FEDCMR' && FormManager.getActualValue('custGrp') == '14'){
+        	return new ValidationResult(null, true);
+        }
         if (result == '' || result.toUpperCase() == 'NOT DONE') {
           return new ValidationResult(null, false, 'CMR Search has not been performed yet.');
         }
