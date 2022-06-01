@@ -206,10 +206,6 @@ public class USHandler extends GEOHandler {
       throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
     }
 
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
-    }
-
   }
 
   private boolean queryAndAssign(String url, String sql, FindCMRResultModel model, Data data, String dbId) throws Exception {

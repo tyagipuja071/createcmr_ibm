@@ -211,11 +211,7 @@ public abstract class APHandler extends GEOHandler {
     LOG.debug("GbSeg Code / Client Tier: " + data.getClientTier());
     LOG.debug("MrktRespCode: " + data.getMrcCd());
     LOG.debug("Province Code/SellBrnchOff : " + data.getTerritoryCd());
-
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
-    }
-
+    
   }
 
   @Override

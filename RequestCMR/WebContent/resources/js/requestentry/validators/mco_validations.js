@@ -659,7 +659,11 @@ function addHandlersForPTES() {
 }
 
 function setClientTierValues(value) {
- value = FormManager.getActualValue('isuCd');
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  value = FormManager.getActualValue('isuCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var userRole = FormManager.getActualValue('userRole').toUpperCase();
   if (value == '5K' || value == '3T') {
@@ -667,7 +671,6 @@ function setClientTierValues(value) {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
-    var reqType = FormManager.getActualValue('reqType');
     var scenario = FormManager.getActualValue('custSubGrp');
     if (cntry == SysLoc.SPAIN) {
       if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
@@ -680,9 +683,6 @@ function setClientTierValues(value) {
         FormManager.enable('clientTier');
       }
     }
-  }
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
   }
   var tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL) {

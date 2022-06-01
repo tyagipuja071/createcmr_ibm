@@ -866,9 +866,6 @@ public class NLHandler extends BaseSOFHandler {
       data.setCmrNo("");
     }
 
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
-    }
   }
 
   private String getInternalDepartment(String cmrNo) throws Exception {

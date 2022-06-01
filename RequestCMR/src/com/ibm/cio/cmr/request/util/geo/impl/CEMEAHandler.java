@@ -1053,9 +1053,6 @@ public class CEMEAHandler extends BaseSOFHandler {
         }
       }
       data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
-      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-        data.setClientTier("");
-      }
     }
     // ICO field
     if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {

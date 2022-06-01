@@ -472,9 +472,6 @@ public class MCOPtEsHandler extends MCOHandler {
           data.setAbbrevLocn(abbrevLocn.length() > 12 ? abbrevLocn.substring(0, 12) : abbrevLocn);
           data.getAbbrevLocn();
         }
-        if ("5K".equals(data.getIsuCd())) {
-          data.setClientTier("");
-        }
       }
 
       if (this.legacyObjects != null) {

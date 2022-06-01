@@ -190,9 +190,6 @@ public class SWISSHandler extends GEOHandler {
       if (StringUtils.isNotBlank(mainRecord.getCmrSortl())) {
         data.setSearchTerm(mainRecord.getCmrSortl());
       }
-      if ("5K".equals(data.getIsuCd())) {
-        data.setClientTier("");
-      }
     }
 
   }
