@@ -85,6 +85,10 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
     return queue;
   }
 
+  public void setDeleteMode(boolean delete) {
+    this.service.setDeleteRDcTargets(true);
+  }
+
   public void setMultiMode(boolean multiMode) {
     this.service.setMultiMode(multiMode);
   }
