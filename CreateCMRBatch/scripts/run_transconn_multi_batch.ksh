@@ -4,7 +4,7 @@ resultTCM=$(ps -ef|grep -v grep|grep TransConnMultiEntryPoint|awk '{print $2}')
 if [ "$resultTCM" = "" ]
 then
 
-. /ci/shared/data/batch/setbatchenv.ksh
+. /cmr/batch/setbatchenv.ksh
 
 echo Classpath = $CLASSPATH
 

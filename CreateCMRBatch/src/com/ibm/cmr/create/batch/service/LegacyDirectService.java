@@ -39,6 +39,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtAddrPK;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
@@ -56,6 +57,8 @@ import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.entity.MassUpdtDataPK;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
+import com.ibm.cio.cmr.request.entity.ReservedCMRNos;
+import com.ibm.cio.cmr.request.entity.ReservedCMRNosPK;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.model.BatchEmailModel;
@@ -94,6 +97,7 @@ import com.ibm.cmr.services.client.process.mass.MassUpdateRecord;
 public class LegacyDirectService extends TransConnService {
 
   private boolean devMode;
+  protected boolean multiMode;
   private static final Logger LOG = Logger.getLogger(LegacyDirectService.class);
 
   public static final String LEGACY_STATUS_ACTIVE = "A";
@@ -139,15 +143,36 @@ public class LegacyDirectService extends TransConnService {
     } else {
       LOG.info("RUNNING IN NON-DEVELOPMENT MODE");
     }
+
+    LOG.info("Multi Mode: " + this.multiMode);
+
     LOG.info("Initializing Country Map..");
     LandedCountryMap.init(entityManager);
     // Retrieve the PCP records and create in the Legacy DB
     LOG.info("Retreiving pending records for processing..");
-    List<Admin> pending = getPendingRecords(entityManager);
+    List<Long> pending = gatherPendingRecords(entityManager);
 
+    processPendingLegacy(entityManager, pending);
+    // fresh cache for send to rdc
+    entityManager.clear();
+
+    initClient();
+
+    // now send to RDc Retrieve the PCP records and create in the Legacy DB
+    pending = gatherPendingRecordsRDC(entityManager);
+
+    processPendingRDC(entityManager, pending);
+
+    return true;
+  }
+
+  protected void processPendingLegacy(EntityManager entityManager, List<Long> pending) throws CmrException, SQLException {
     LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
     // pending = new ArrayList<Admin>();
-    for (Admin admin : pending) {
+    for (Long id : pending) {
+      AdminPK pk = new AdminPK();
+      pk.setReqId(id);
+      Admin admin = entityManager.find(Admin.class, pk);
       if (BatchUtil.excludeForEnvironment(this.context, entityManager, admin)) {
         // exclude data created from a diff env
         continue;
@@ -190,21 +215,17 @@ public class LegacyDirectService extends TransConnService {
       }
       partialCommit(entityManager);
     }
+  }
 
-    // fresh cache for send to rdc
-    entityManager.clear();
-
-    initClient();
-
-    // now send to RDc Retrieve the PCP records and create in the Legacy DB
-    LOG.info("Retrieving pending RDc records for processing..");
-    pending = getPendingRecordsRDC(entityManager);
-
+  protected void processPendingRDC(EntityManager entityManager, List<Long> pending) throws CmrException, SQLException {
     LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
 
     Data data = null;
     ProcessRequest request = null;
-    for (Admin admin : pending) {
+    for (Long id : pending) {
+      AdminPK pk = new AdminPK();
+      pk.setReqId(id);
+      Admin admin = entityManager.find(Admin.class, pk);
       if (BatchUtil.excludeForEnvironment(this.context, entityManager, admin)) {
         // exclude data created from a diff env
         continue;
@@ -264,8 +285,6 @@ public class LegacyDirectService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
-
-    return true;
   }
 
   /**
@@ -281,6 +300,18 @@ public class LegacyDirectService extends TransConnService {
     return query.getResults(Admin.class);
   }
 
+  protected List<Long> gatherPendingRecords(EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("LEGACYD.GET_PENDING");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    List<Admin> pendingRecords = query.getResults(Admin.class);
+    LOG.debug("Size of Pending Records : " + pendingRecords.size());
+    List<Long> queue = new ArrayList<>();
+    for (Admin admin : pendingRecords) {
+      queue.add(admin.getId().getReqId());
+    }
+    return queue;
+  }
+
   /**
    * Gets the Admin records with status = 'PCO' and country has processing type
    * = 'LD'
@@ -289,9 +320,22 @@ public class LegacyDirectService extends TransConnService {
    * @return
    */
   private List<Admin> getPendingRecordsRDC(EntityManager entityManager) {
+    LOG.info("Retrieving pending RDc records for processing..");
     String sql = ExternalizedQuery.getSql("LEGACYD.GET_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(Admin.class);
+  }
+
+  protected List<Long> gatherPendingRecordsRDC(EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("LEGACYD.GET_PENDING.RDC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    List<Admin> pendingRecords = query.getResults(Admin.class);
+    LOG.debug("Size of Pending Records to RDC : " + pendingRecords.size());
+    List<Long> queue = new ArrayList<>();
+    for (Admin admin : pendingRecords) {
+      queue.add(admin.getId().getReqId());
+    }
+    return queue;
   }
 
   /**
@@ -2051,7 +2095,23 @@ public class LegacyDirectService extends TransConnService {
     GenerateCMRNoResponse response = client.executeAndWrap(request, GenerateCMRNoResponse.class);
 
     if (response.isSuccess()) {
-      return response.getCmrNo();
+      String cmrNo = response.getCmrNo();
+      ReservedCMRNos reservedCMRNo = new ReservedCMRNos();
+      ReservedCMRNosPK reservedCMRNoPK = new ReservedCMRNosPK();
+
+      reservedCMRNoPK.setCmrIssuingCntry(cmrObjects.getData().getCmrIssuingCntry());
+      reservedCMRNoPK.setCmrNo(cmrNo);
+      reservedCMRNoPK.setMandt(SystemConfiguration.getValue("MANDT"));
+      reservedCMRNo.setId(reservedCMRNoPK);
+
+      reservedCMRNo.setStatus("A");
+      reservedCMRNo.setCreateTs(SystemUtil.getCurrentTimestamp());
+      reservedCMRNo.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+      reservedCMRNo.setCreateBy(BATCH_USER_ID);
+      reservedCMRNo.setLastUpdtBy(BATCH_USER_ID);
+
+      createEntity(reservedCMRNo, entityManager);
+      return cmrNo;
     } else {
       LOG.error("CMR No cannot be generated. Error: " + response.getMsg());
       throw new Exception("CMR No cannot be generated.");
@@ -4450,6 +4510,21 @@ public class LegacyDirectService extends TransConnService {
     query.setParameter("REQ_ID", data.getId().getReqId());
     query.setForReadOnly(true);
     return query.getSingleResult(DataRdc.class);
+  }
+
+  @Override
+  public boolean isMultiMode() {
+    return multiMode;
+  }
+
+  @Override
+  public void setMultiMode(boolean multiMode) {
+    this.multiMode = multiMode;
+  }
+
+  @Override
+  protected boolean terminateOnLongExecution() {
+    return !this.multiMode;
   }
 
   private AddrRdc getAddrRdcRecord(EntityManager entityManager, Addr addr) {

@@ -2881,7 +2881,7 @@ public class TransConnService extends BaseBatchService {
    * @param cmrIssuingCntry
    * @return
    */
-  protected boolean isOwnerCorrect(EntityManager entityManager, String cmrNo, String cmrIssuingCntry) {
+  public boolean isOwnerCorrect(EntityManager entityManager, String cmrNo, String cmrIssuingCntry) {
     String sql = "select KATR10 from SAPR3.KNA1 where MANDT = :MANDT and KATR6 = :COUNTRY and ZZKV_CUSNO = :CMR_NO and KTOKD = 'ZS01'";
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
