@@ -2221,7 +2221,11 @@ public class MEHandler extends BaseSOFHandler {
           error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, S, J. ");
         }
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
-          if (!StringUtils.isBlank(isuCd) || !StringUtils.isBlank(clientTier)) {
+          if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
+              || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
+            LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+            error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+          } else if (!StringUtils.isBlank(isuCd) || !StringUtils.isBlank(clientTier)) {
             if ("5K".equals(isuCd)) {
               if (!"@".equals(clientTier)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
