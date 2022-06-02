@@ -2937,10 +2937,10 @@ function setISUClientTierOnScenario() {
   // CMR-234 change end
   if (countyCd == "TN" && (custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'CBIEU' || custSubGrp == 'CBUEU')) {
     FormManager.setValue('isuCd', '8B');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
   } else if (countyCd == "DZ" && (custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'CBIEU' || custSubGrp == 'CBUEU')) {
     FormManager.setValue('isuCd', '8B');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
   } else if (SUB_REGIONS.has(countyCd)// CMR-234
       && (custSubGrp == 'CBMME' || custSubGrp == 'CBVRN' || custSubGrp == 'XBLUM' || custSubGrp == 'CBIEM' || custSubGrp == 'CBFIN'
           || custSubGrp == 'CBTSO' || custSubGrp == 'CBDPT' || custSubGrp == 'CBSTC')) {
@@ -2948,7 +2948,7 @@ function setISUClientTierOnScenario() {
     FormManager.setValue('clientTier', 'S');
   } else if (custSubGrp == 'XBLUM' || custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP' || custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
     FormManager.setValue('isuCd', '21');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
   } else {
     return;
   }
@@ -4045,8 +4045,9 @@ function setCTCValues() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
+  var reqType = FormManager.getActualValue('reqType');
 
-  if (isuCode == '21' || isuCode == '8B' || isuCode == '5K') {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -4061,8 +4062,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    if (clientTierCode == '') { 
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',

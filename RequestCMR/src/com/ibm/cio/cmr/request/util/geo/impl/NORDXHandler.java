@@ -1020,9 +1020,6 @@ public class NORDXHandler extends BaseSOFHandler {
     // data.setSitePartyId("");
     // data.setPpsceid("");
     // }
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
-    }
   }
 
   @Override

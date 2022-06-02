@@ -217,11 +217,6 @@ public class FranceHandler extends GEOHandler {
     data.setSalesBusOffCd(search_term);
     LOG.trace("SORTL: " + data.getSalesBusOffCd());
 
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
-        && ("5K".equals(data.getIsuCd()) || "14".equals(data.getIsuCd()) || "18".equals(data.getIsuCd()) || "19".equals(data.getIsuCd())
-            || "1R".equals(data.getIsuCd()) || "31".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()) || "4A".equals(data.getIsuCd()))) {
-      data.setClientTier("");
-    }
   }
 
   @Override

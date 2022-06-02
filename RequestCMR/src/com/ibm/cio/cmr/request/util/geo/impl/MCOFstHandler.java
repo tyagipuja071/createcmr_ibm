@@ -125,9 +125,6 @@ public class MCOFstHandler extends MCOHandler {
       }
 
       data.setDunsNo(mainRecord.getCmrDuns());
-      if ("5K".equals(data.getIsuCd())) {
-        data.setClientTier("");
-      }
       String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), data.getCmrIssuingCntry());
       data.setIbmDeptCostCenter(getDepartment(zs01sapNo));
       data.setAdminDeptLine(data.getIbmDeptCostCenter());

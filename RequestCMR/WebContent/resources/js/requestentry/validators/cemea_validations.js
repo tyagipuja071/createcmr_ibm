@@ -1542,7 +1542,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'N', 'S' ];
       } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
+        clientTiers = [ '' ];
       }
     } else if ((SysLoc.TURKMENISTAN == cntry || SysLoc.TAJIKISTAN == cntry || SysLoc.ALBANIA == cntry || SysLoc.ARMENIA == cntry
         || SysLoc.BELARUS == cntry || SysLoc.BULGARIA == cntry || SysLoc.GEORGIA == cntry || SysLoc.KAZAKHSTAN == cntry || SysLoc.KYRGYZSTAN == cntry
@@ -1587,7 +1587,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'S', 'N' ];
       } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
+        clientTiers = [ '' ];
       }
     } else if ((SysLoc.BOSNIA_HERZEGOVINA == cntry || SysLoc.SLOVENIA == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT'
@@ -1616,7 +1616,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'S' ];
       } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
+        clientTiers = [ '' ];
       }
     } else if ((SysLoc.MOLDOVA == cntry || SysLoc.ROMANIA == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT'
@@ -1627,7 +1627,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'S', 'M' ];
       } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
+        clientTiers = [ '' ];
       }
 
     } else if ((SysLoc.POLAND == cntry || SysLoc.RUSSIA == cntry)
@@ -1639,7 +1639,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'S', 'N' ];
       } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
+        clientTiers = [ '' ];
       }
     } else {
       var qParams = {
@@ -1747,11 +1747,11 @@ function setDupISUCTCValues(custSubGrp) {
     if (FormManager.getActualValue('custSubGrp') == 'XBP' || FormManager.getActualValue('custSubGrp') == 'BUSPR'
         || FormManager.getActualValue('custSubGrp') == 'EXBP' || FormManager.getActualValue('custSubGrp') == 'ELBP') {
       isuCds = [ '8B' ];
-      FormManager.setValue('dupClientTierCd', '7');
+      FormManager.setValue('dupClientTierCd', '');
       FormManager.readOnly('dupClientTierCd');
     } else if (FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'INTER') {
       isuCds = [ '21' ];
-      FormManager.setValue('dupClientTierCd', '7');
+      FormManager.setValue('dupClientTierCd', '');
       FormManager.readOnly('dupClientTierCd')
     } else if (FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'XTP'
         || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'PRICU'
@@ -2058,7 +2058,7 @@ function setSBOValuesForIsuCtcAT() {
     } else if (isuCd == '04' && clientTier == '') {
       FormManager.setValue('salesBusOffCd', 'A0004580');
     }
-    if (isuCd == '04') {
+    if (isuCd == '04' && reqType == 'C') {
       FormManager.resetValidations('clientTier');
       FormManager.setValue('clientTier', '');
       FormManager.readOnly('clientTier');
@@ -5108,8 +5108,9 @@ function setCTCValuesAT() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
+  var reqType = FormManager.getActualValue('reqType');
 
-  if (isuCode == '21' || isuCode == '8B' || isuCode == '5K') {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -5124,8 +5125,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    if (clientTierCode == '') { 
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',

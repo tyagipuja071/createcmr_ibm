@@ -1843,9 +1843,6 @@ public class EMEAHandler extends BaseSOFHandler {
           || SystemLocation.IRELAND.equalsIgnoreCase(data.getCmrIssuingCntry()))) {
         data.setAbbrevLocn((this.currentImportValues.get("AbbreviatedLocation")));
         LOG.trace("AbbreviatedLocation: " + data.getAbbrevLocn());
-        if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-          data.setClientTier("");
-        }
       }
 
       // CMR - 5715
