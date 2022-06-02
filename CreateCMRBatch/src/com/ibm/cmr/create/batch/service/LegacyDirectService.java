@@ -2071,7 +2071,7 @@ public class LegacyDirectService extends TransConnService {
    * @throws SecurityException
    * @throws NoSuchMethodException
    */
-  private String generateCMRNo(EntityManager entityManager, CMRRequestContainer cmrObjects, String cmrIssuingCntry, String targetCountry)
+  private synchronized String generateCMRNo(EntityManager entityManager, CMRRequestContainer cmrObjects, String cmrIssuingCntry, String targetCountry)
       throws Exception {
     GenerateCMRNoRequest request = new GenerateCMRNoRequest();
     request.setLoc1(cmrIssuingCntry);
