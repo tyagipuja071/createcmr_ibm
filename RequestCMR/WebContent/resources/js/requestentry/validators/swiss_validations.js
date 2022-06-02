@@ -1641,8 +1641,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    if (clientTierCode == '') { 
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',

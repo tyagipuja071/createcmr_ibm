@@ -714,7 +714,7 @@ function filterClientTierOnChange() {
 
   if (isuCd == "04") {
     // filter the drop down
-    clientTier = [ 'BLANK', '7' ];
+    clientTier = [ 'BLANK' ];
   } else if (isuCd == "21") {
     // filter the drop down
     clientTier = [ 'Z' ];
@@ -736,10 +736,10 @@ function filterClientTierOnChange() {
     }
   } else if (isuCd == "3T") {
     // filter the drop down
-    clientTier = [ 'BLANK', '7' ];
+    clientTier = [ 'BLANK' ];
   } else if (isuCd == "5E") {
     // filter the drop down
-    clientTier = [ 'BLANK', '7' ];
+    clientTier = [ 'BLANK' ];
   } else if (isuCd == "8B") {
     // filter the drop down
     clientTier = [ 'Z' ];
@@ -780,7 +780,7 @@ function limitClientTierValuesOnCreate() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   if (_custSubGrp != 'undefined' && _custSubGrp != '') {
     if (_custSubGrp == 'COMME' || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
-      var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', '7', 'T', 'S', 'C', 'N' ];
+      var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', 'T', 'S', 'C', 'N' ];
       if (clientTierValues != null) {
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTierValues);
       } else {
@@ -796,7 +796,7 @@ function limitClientTierValuesOnUpdate() {
   if (reqType != 'U') {
     return;
   }
-  var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', '7', 'T', 'S', 'C', 'N' ];
+  var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', 'T', 'S', 'C', 'N' ];
   if (clientTierValues != null) {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTierValues);
   } else {
