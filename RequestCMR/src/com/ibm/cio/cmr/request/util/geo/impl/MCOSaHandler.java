@@ -405,9 +405,6 @@ public class MCOSaHandler extends MCOHandler {
 
       data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
       data.setAdminDeptLine(data.getIbmDeptCostCenter());
-      if ("5K".equals(data.getIsuCd())) {
-        data.setClientTier("");
-      }
     }
 
   }

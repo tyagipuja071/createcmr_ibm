@@ -630,7 +630,6 @@ function addFieldHandlers() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
-      setIsuCtcFor5k();
     });
   }
 }
@@ -679,25 +678,6 @@ function addPSTExemptHandler() {
         dojo.byId('ast-PSTExemptLicNum').style.display = 'none';
       }
     });
-  }
-}
-
-function setIsuCtcFor5k() {
-  isuCd = FormManager.getActualValue('isuCd');
-  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (viewOnlyPage == 'true') {
-    return;
-  }
-  if (custSubGrp == 'ECO') {
-    return;
-  }
-  if (isuCd == '5K') {
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    var reqType = FormManager.getActualValue('reqType');
-    FormManager.enable('clientTier');
   }
 }
 
@@ -1094,7 +1074,7 @@ function limitDropdownOnScenarioChange(fromAddress, scenario, scenarioChanged) {
 
   if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'N' && scenarioChanged) {
     if (scenario == 'GOVT') {
-      var efcValues = [ '7', '8', '9', 'E', 'G' ];
+      var efcValues = [ '8', '9', 'E', 'G' ];
       FormManager.limitDropdownValues(FormManager.getField('taxCd1'), efcValues);
     }
   }
@@ -1260,8 +1240,9 @@ function setAddrFieldsValues() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
+  var reqType = FormManager.getActualValue('reqType');
 
-  if (isuCode == '5K') {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -1339,8 +1320,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
   // ]);
   GEOHandler.addToggleAddrTypeFunction(addPostlCdLogic, [ SysLoc.CANADA ]);
-  GEOHandler.addAfterConfig(setIsuCtcFor5k, [ SysLoc.CANADA ]);
-  GEOHandler.addAfterTemplateLoad(setIsuCtcFor5k, [ SysLoc.CANADA ]);
 
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress([ SysLoc.CANADA ], validateCACopy, [ 'ZP01', 'ZP02' ]);

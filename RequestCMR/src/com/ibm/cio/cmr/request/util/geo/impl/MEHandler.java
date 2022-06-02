@@ -1013,9 +1013,6 @@ public class MEHandler extends BaseSOFHandler {
       LOG.trace("CoF: " + data.getCommercialFinanced());
 
       data.setPhone1(this.currentImportValues.get("TelephoneNo"));
-      if ("5K".equals(data.getIsuCd())) {
-        data.setClientTier("");
-      }
       if (data.getPhone1() != null) {
         // Phone - remove non numeric characters
         data.setPhone1(data.getPhone1().replaceAll("[^0-9]", ""));

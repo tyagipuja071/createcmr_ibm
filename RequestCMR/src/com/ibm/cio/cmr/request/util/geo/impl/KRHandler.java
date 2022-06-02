@@ -140,9 +140,6 @@ public class KRHandler extends GEOHandler {
     if (data.getPhone1() == "" || data.getPhone1() == null) {
       data.setPhone1("1");
     }
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
-    }
   }
 
   @Override
