@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -230,8 +231,25 @@ public class USAddrStdElement extends OverridingElement {
             cityToUse = stdCityResp.getStandardCity();
           }
         } else {
-          LOG.debug("Standard City Name cannot be determined. Found: " + stdCityResp.getStandardCity());
-          hasIssues = true;
+          List<String> cityNames = new ArrayList<String>();
+          if (stdCityResp.getSuggested() != null && !stdCityResp.getSuggested().isEmpty()) {
+            for (County county : stdCityResp.getSuggested()) {
+              if (!cityNames.contains(county.getCity().toUpperCase().trim())) {
+                cityNames.add(county.getCity().toUpperCase().trim());
+              }
+            }
+          }
+          if (cityNames.size() == 1) {
+            details.append(" Standard City Name: " + cityNames.get(0) + "\n");
+            if (!addr.getCity1().trim().equalsIgnoreCase(cityNames.get(0))) {
+              overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "CITY1", addr.getCity1(), cityNames.get(0));
+              cityToUse = cityNames.get(0);
+            }
+          } else {
+            LOG.debug("Standard City Name cannot be determined. Found: " + stdCityResp.getStandardCity());
+            details.append(" Standard City cannot be determined. Multiple City name suggestions found.\n");
+            hasIssues = true;
+          }
         }
         if (stdCityResp.getSuggested() == null || stdCityResp.getSuggested().isEmpty()) {
           LOG.debug("County: " + stdCityResp.getStandardCountyCd() + " - " + stdCityResp.getStandardCountyName());
