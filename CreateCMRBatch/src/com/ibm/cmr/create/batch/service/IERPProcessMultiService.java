@@ -6,8 +6,6 @@ import java.util.Queue;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * 
  * @author Joseph Ramos
@@ -41,7 +39,6 @@ public class IERPProcessMultiService extends MultiThreadedBatchService<Long> {
     Queue<Long> queue = new LinkedList<>();
 
     if (reqIds != null && reqIds.size() > 0) {
-      System.out.println("moja! reqIds: " + StringUtils.join(reqIds, ",")); // todo
       queue.addAll(reqIds);
     }
 

@@ -15,7 +15,6 @@ public class IERPServiceEntryPoint extends BatchEntryPoint {
 
     BaseBatchService service = null;
     if (args != null && args.length > 0 && "MULTI".equalsIgnoreCase(args[0])) {
-      System.out.println("moja! will be using IERPProcessMultiService");
       service = new IERPProcessMultiService();
     } else {
       service = new IERPProcessService();
