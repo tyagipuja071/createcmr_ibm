@@ -785,6 +785,15 @@
 				<div id="dept_view">-</div>
 			</cmr:column>
 		</cmr:row>
+		<cmr:row addBackground="true">
+			<cmr:column span="1" exceptForCountry="724">
+				<cmr:label fieldId="stateProv_view">
+					<span class="lbl-StateProv">${ui.stateProve}</span>:</cmr:label>
+			</cmr:column>
+			<cmr:column span="2">
+				<div id="stateProv_view">-</div>
+			</cmr:column>
+		</cmr:row>
 	</cmr:view>
 
 	<cmr:view forGEO="IERP,CND,CEMEA" exceptForCountry="754,866,755,726,862,666,618,724,848">

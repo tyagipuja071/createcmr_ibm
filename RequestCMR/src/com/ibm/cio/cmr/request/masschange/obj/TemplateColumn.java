@@ -666,6 +666,18 @@ public class TemplateColumn {
    */
   private List<String> getBDSChoices(EntityManager entityManager, String bdsId, String country, boolean codeOnly) {
     ParamContainer params = new ParamContainer();
+    
+    if (country != null && bdsId != null && ("848".equalsIgnoreCase(country) || "618".equalsIgnoreCase(country)) && ("StateProv").equals(bdsId)) {
+      String sql = ExternalizedQuery.getSql("QUERY.QUICK.GET_DEFAULT_COUNTRY");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY", country);
+      Object[] results = query.getSingleResult();
+      if (results != null) {
+        String landedCountry = (String) results[0];
+        params.addParam("landCntry", landedCountry);
+      }
+    }
+    
     List<String> choices = new ArrayList<String>();
     DropDownService service = new DropDownService();
     PreparedQuery query = service.getBDSSql(bdsId, entityManager, params, country);

@@ -182,6 +182,11 @@ public class USBPEndUserHandler extends USBPHandler {
         details.append(" - Client Tier: " + ibmCmr.getCmrTier() + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CLIENT_TIER", data.getClientTier(), ibmCmr.getCmrTier());
       }
+      // CREATCMR-5894
+      if (!StringUtils.isBlank(ibmCmr.getCmrClass())) {
+        details.append(" - Customer Class: " + ibmCmr.getCustClass() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CUST_CLASS", data.getCustClass(), ibmCmr.getCmrClass());
+      }
 
       if (!StringUtils.isBlank(ibmCmr.getCmrInac())) {
         details.append(" - NAC/INAC: " + ("I".equals(ibmCmr.getCmrInacType()) ? "INAC" : ("N".equals(ibmCmr.getCmrInacType()) ? "NAC" : "-")) + " "

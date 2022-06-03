@@ -104,7 +104,12 @@ public class BELUXHandler extends BaseSOFHandler {
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
       } else {
-        record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        if (StringUtils.isNotBlank(reqEntry.getCmrIssuingCntry()) && "624".equals(reqEntry.getCmrIssuingCntry())
+            && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
+          record.setCmrAddrSeq("00001");
+        } else {
+          record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        }
       }
 
       record.setCmrName2Plain(record.getCmrName2Plain());

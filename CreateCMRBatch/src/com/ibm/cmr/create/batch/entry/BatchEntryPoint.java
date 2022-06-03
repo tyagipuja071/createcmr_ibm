@@ -35,6 +35,8 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
  */
 public abstract class BatchEntryPoint {
 
+  public static String currentContextName;
+
   private static Logger logger = null;
 
   public static final String DEFAULT_BATCH_PERSISTENCE_UNIT = "BATCH";
@@ -194,6 +196,7 @@ public abstract class BatchEntryPoint {
    * @return
    */
   private static boolean shouldBatchRun(String contextName) {
+    currentContextName = contextName;
     logger.info("Checking XRUN param for this application..");
     String environment = SystemConfiguration.getValue("SYSTEM_TYPE");
     if (StringUtils.isBlank(environment)) {
@@ -209,6 +212,10 @@ public abstract class BatchEntryPoint {
     }
 
     // match param with environment
+    if ("FILTER".equals(paramValue)) {
+      logger.info("XRUN param is set to FILTER, running...");
+      return true;
+    }
     boolean run = paramValue.equalsIgnoreCase(environment);
     if (!run) {
       logger.warn("XRUN param for " + contextName + " set to " + paramValue + ", currently: " + environment + ". Skipping execution.");

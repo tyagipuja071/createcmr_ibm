@@ -69,7 +69,7 @@
 			<cmr:field fieldId="LandedCountry" id="landCntry" path="landCntry" />
 		</p>
 	</cmr:column>
-	 <%-- <cmr:column span="2">
+	  <cmr:column span="2">
 		<p>
 			<cmr:label fieldId="stateProv">
 				<cmr:fieldLabel fieldId="StateProv" />:
@@ -78,7 +78,7 @@
 			</cmr:label>
 			<cmr:field fieldId="StateProv" id="stateProv" path="stateProv" />
 		</p>
-	</cmr:column> --%>
+	</cmr:column>
 </cmr:row> 
 
 <cmr:row>

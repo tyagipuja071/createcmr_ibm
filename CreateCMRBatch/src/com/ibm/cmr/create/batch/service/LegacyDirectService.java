@@ -173,6 +173,10 @@ public class LegacyDirectService extends TransConnService {
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
+      if (BatchUtil.excludeForEnvironment(this.context, entityManager, admin)) {
+        // exclude data created from a diff env
+        continue;
+      }
       try {
         switch (admin.getReqType()) {
         case CmrConstants.REQ_TYPE_CREATE:
@@ -222,6 +226,10 @@ public class LegacyDirectService extends TransConnService {
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
+      if (BatchUtil.excludeForEnvironment(this.context, entityManager, admin)) {
+        // exclude data created from a diff env
+        continue;
+      }
       try {
 
         this.cmrObjects = prepareRequest(entityManager, admin);
