@@ -873,16 +873,18 @@ public class MCOFstHandler extends MCOHandler {
               }
             }
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
-              if (!StringUtils.isBlank(isuCd)) {
+              if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
+                  || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
+                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+              } else if (!StringUtils.isBlank(isuCd)) {
                 if ("5K".equals(isuCd)) {
                   if (!"@".equals(clientTier)) {
                     LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                     error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
                   }
                 }
-              }
-
-              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+              } else if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Client Tier",

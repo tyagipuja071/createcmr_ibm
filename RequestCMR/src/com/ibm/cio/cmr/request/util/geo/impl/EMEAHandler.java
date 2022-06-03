@@ -3969,7 +3969,11 @@ public class EMEAHandler extends BaseSOFHandler {
         isuCd = validateColValFromCell(currCell);
         currCell = row.getCell(11);
         clientTier = validateColValFromCell(currCell);
-        if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+        if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
+            || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
+          LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+          error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+        } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
             || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
           LOG.trace(
               "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
@@ -4042,7 +4046,11 @@ public class EMEAHandler extends BaseSOFHandler {
 
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
           if (!SystemLocation.UNITED_KINGDOM.equals(country)) {
-            if ("5K".equals(isuCd) && !"@".equals(clientTier)) {
+            if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
+                || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+              error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+            } else if ("5K".equals(isuCd) && !"@".equals(clientTier)) {
               LOG.trace("Client Tier should be '@' for the selected ISU Code.");
               error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
             } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equals(clientTier)) {
@@ -4064,7 +4072,11 @@ public class EMEAHandler extends BaseSOFHandler {
             }
           } else {
             List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F");
-            if (isuCdList.contains(isuCd) && !"@".equals(clientTier)) {
+            if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
+                || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+              error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+            } else if (isuCdList.contains(isuCd) && !"@".equals(clientTier)) {
               LOG.trace("Client Tier should be '@' for the selected ISU Code.");
               error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
             } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equals(clientTier)) {
@@ -4362,7 +4374,11 @@ public class EMEAHandler extends BaseSOFHandler {
         currCell = (XSSFCell) row.getCell(10);
         clientTier = validateColValFromCell(currCell);
         TemplateValidation error = new TemplateValidation("DATA");
-        if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+        if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
+            || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
+          LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+          error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+        } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
             || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
           LOG.trace("The row " + (row.getRowNum()) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
           error.addError((row.getRowNum()), "Client Tier",
