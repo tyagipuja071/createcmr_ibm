@@ -278,6 +278,26 @@ public class RequestEntryModel extends BaseModel {
   private String legacyCurrencyCd;
   private String collectionCd;
   private String specialTaxCd;
+
+  private String taxExemptStatus2;
+  private String taxExemptStatus3;
+
+  public String getTaxExemptStatus2() {
+    return taxExemptStatus2;
+  }
+
+  public void setTaxExemptStatus2(String taxExemptStatus2) {
+    this.taxExemptStatus2 = taxExemptStatus2;
+  }
+
+  public String getTaxExemptStatus3() {
+    return taxExemptStatus3;
+  }
+
+  public void setTaxExemptStatus3(String taxExemptStatus3) {
+    this.taxExemptStatus3 = taxExemptStatus3;
+  }
+
   private String acAdminBo;
   private String engineeringBo;
   private String mktgResponsibilityCd;
@@ -431,7 +451,7 @@ public class RequestEntryModel extends BaseModel {
   // canada fields
   private String invoiceDistCd;
   private String cusInvoiceCopies;
-  private String taxPayerCustCd;
+  private String taxPayerCustCd;  
 
   private String sourceSystId;
 
@@ -442,7 +462,9 @@ public class RequestEntryModel extends BaseModel {
 
   // korea fields
   private String installRep;
-  
+
+  private long overrideReqId;
+
   public String getMatchIndc() {
     return matchIndc;
   }
@@ -946,11 +968,11 @@ public class RequestEntryModel extends BaseModel {
   }
 
   public String getTaxPayerCustCd() {
-	return taxPayerCustCd;
+    return taxPayerCustCd;
   }
 
   public void setTaxPayerCustCd(String taxPayerCustCd) {
-	this.taxPayerCustCd = taxPayerCustCd;
+    this.taxPayerCustCd = taxPayerCustCd;
   }
 
   public String getSensitiveFlag() {
@@ -3136,13 +3158,13 @@ public class RequestEntryModel extends BaseModel {
     this.customerIdCd = customerIdCd;
   }
 
-public String getInstallRep() {
-	return installRep;
-}
+  public String getInstallRep() {
+    return installRep;
+  }
 
-public void setInstallRep(String installRep) {
-	this.installRep = installRep;
-}
+  public void setInstallRep(String installRep) {
+    this.installRep = installRep;
+  }
 
   public String getExtWalletId() {
     return extWalletId;
@@ -3150,6 +3172,14 @@ public void setInstallRep(String installRep) {
 
   public void setExtWalletId(String extWalletId) {
     this.extWalletId = extWalletId;
+  }
+
+  public long getOverrideReqId() {
+    return overrideReqId;
+  }
+
+  public void setOverrideReqId(long overrideReqId) {
+    this.overrideReqId = overrideReqId;
   }
 
 }

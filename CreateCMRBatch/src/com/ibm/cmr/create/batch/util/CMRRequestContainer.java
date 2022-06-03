@@ -12,6 +12,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
+import com.ibm.cio.cmr.request.entity.USTCRUpdtQueue;
 
 /**
  * Contains Admin, Data, and Addr records for the request
@@ -27,6 +28,7 @@ public class CMRRequestContainer {
   private List<MassUpdt> massUpdate = new ArrayList<>();
   private List<MassUpdtAddr> massUpdateAddresses = new ArrayList<>();
   private MassUpdtData massUpdateData;
+  private USTCRUpdtQueue ustcrupdtqueue;
 
   public void addAddress(Addr addr) {
     this.addresses.add(addr);
@@ -50,6 +52,14 @@ public class CMRRequestContainer {
 
   public void setData(Data data) {
     this.data = data;
+  }
+
+  public USTCRUpdtQueue getUSTCRUpdtQueue() {
+    return ustcrupdtqueue;
+  }
+
+  public void setUSTCRUpdtQueue(USTCRUpdtQueue ustcrupdtqueue) {
+    this.ustcrupdtqueue = ustcrupdtqueue;
   }
 
   public void addMassUpdateAddresses(MassUpdtAddr massUpdateAddress) {

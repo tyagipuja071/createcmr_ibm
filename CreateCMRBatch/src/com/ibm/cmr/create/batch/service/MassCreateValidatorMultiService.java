@@ -55,7 +55,6 @@ import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CATaxHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoNonUSHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CityAndCountyHandler;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CoverageBgGlcISUHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CreatebyModelHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.DPLCheckHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.DataHandler;
@@ -147,6 +146,7 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
       // process records that passed validation
 
       boolean approvalsNeeded = false;
+      String defaultApprovalResult = "";
       LOG.info("Mass Create Request ID: " + request.getId().getReqId() + " passed system validations.");
       switch (originalStatus) {
       case "SVA":
@@ -159,9 +159,14 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
         dummyUser.setIntranetId(BATCH_USER_ID);
         dummyUser.setBluePagesName(BATCH_USER_ID);
         LOG.debug("Checking default approvals for Request " + request.getId().getReqId());
-        String defaultApprovalResult = approvalService.processDefaultApproval(entityManager, request.getId().getReqId(),
-            CmrConstants.REQ_TYPE_MASS_CREATE, dummyUser, new RequestEntryModel());
-        LOG.debug("Default Approval Response Code " + defaultApprovalResult);
+        if ("897".equals(data.getCmrIssuingCntry())) {
+          // For US no need approval
+          defaultApprovalResult = "";
+        } else {
+          defaultApprovalResult = approvalService.processDefaultApproval(entityManager, request.getId().getReqId(), CmrConstants.REQ_TYPE_MASS_CREATE,
+              dummyUser, new RequestEntryModel());
+          LOG.debug("Default Approval Response Code " + defaultApprovalResult);
+        }
         if (StringUtils.isBlank(defaultApprovalResult)) {
           request.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
           processingCenter = getProcessingCenter(entityManager, data.getCmrIssuingCntry());
@@ -374,7 +379,7 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
         engine.addHandler(new CreatebyModelHandler());
         engine.addHandler(new AddressHandler());
         engine.addHandler(new SubindustryISICHandler());
-        engine.addHandler(new CoverageBgGlcISUHandler());
+        // engine.addHandler(new CoverageBgGlcISUHandler());
         engine.addHandler(new TgmeAddrStdHandler());
         engine.addHandler(new USPostCodeAndStateHandler());
         engine.addHandler(new CityAndCountyHandler());
