@@ -1306,7 +1306,7 @@ public class MCOPtEsHandler extends MCOHandler {
                   + "If one is populated, the other must be empty. >>");
               error.addError((row.getRowNum() + 1), "Postal Code",
                   "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                  + "If one is populated, the other must be empty.");
+                      + "If one is populated, the other must be empty.");
               validations.add(error);
             }
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(cbPostal)) {
@@ -1408,7 +1408,11 @@ public class MCOPtEsHandler extends MCOHandler {
                   error.addError((row.getRowNum() + 1), "Enterprise No.", "Enterprise Number should have numeric values only. ");
                 }
               }
-              if (StringUtils.isNotBlank(isuCd) && (isuCd.equalsIgnoreCase("5k") || isuCd.equalsIgnoreCase("3T") || "21,8B".contains(isuCd))
+              if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
+                  || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
+                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+              } else if (StringUtils.isNotBlank(isuCd) && (isuCd.equalsIgnoreCase("5k") || isuCd.equalsIgnoreCase("3T") || "21,8B".contains(isuCd))
                   && !"@".equalsIgnoreCase(clientTier)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
@@ -1481,12 +1485,17 @@ public class MCOPtEsHandler extends MCOHandler {
                 if (!StringUtils.isEmpty(salesRep)) {
                   if (salesRep.length() == 6 && !(salesRep.chars().allMatch(Character::isLetterOrDigit))) {
                     LOG.trace("Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), "Sales Rep. No.", "Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
+                    error.addError((row.getRowNum() + 1), "Sales Rep. No.",
+                        "Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
                   }
                 }
 
                 if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
-                  if ((isuCd.equalsIgnoreCase("5k") || isuCd.equalsIgnoreCase("3T")) && !clientTier.equalsIgnoreCase("@")) {
+                  if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
+                      || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
+                    LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                    error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+                  } else if ((isuCd.equalsIgnoreCase("5k") || isuCd.equalsIgnoreCase("3T")) && !clientTier.equalsIgnoreCase("@")) {
                     LOG.trace("For IsuCd set to " + isuCd + " Ctc should be '@'");
                     error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
                   } else if (StringUtils.isNotBlank(isuCd) && "21,8B".contains(isuCd) && !clientTier.equalsIgnoreCase("@")) {

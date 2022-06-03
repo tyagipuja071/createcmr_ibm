@@ -1664,6 +1664,10 @@ public class CyprusHandler extends BaseSOFHandler {
         data.setRepTeamMemberNo(repTeamMmberNo);
       }
     }
+    if ((CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()))
+        && SystemLocation.CYPRUS.equalsIgnoreCase(data.getCmrIssuingCntry()) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
   }
 
   @Override
@@ -3495,7 +3499,7 @@ public class CyprusHandler extends BaseSOFHandler {
                   + "If one is populated, the other must be empty. >>");
               error.addError((row.getRowNum() + 1), "Postal Code",
                   "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                  + "If one is populated, the other must be empty.");
+                      + "If one is populated, the other must be empty.");
               validations.add(error);
             }
 
@@ -3633,7 +3637,10 @@ public class CyprusHandler extends BaseSOFHandler {
                   error.addError((row.getRowNum() + 1), "Enterprise No.", "Enterprise number should have numeric values only. ");
                 }
               }
-              if (StringUtils.isNotBlank(isuCd)) {
+              if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+              } else if (StringUtils.isNotBlank(isuCd)) {
                 if ("5K".equalsIgnoreCase(isuCd) && !"@".equalsIgnoreCase(ctc)) {
                   LOG.trace("For IsuCd set to '" + isuCd + "' Ctc should be '@'");
                   error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
@@ -3655,7 +3662,7 @@ public class CyprusHandler extends BaseSOFHandler {
                 }
               } else if (StringUtils.isNotBlank(ctc)) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
-                        + ":Note that ISU and Client Tier should both be input. Please fix and upload the template again.");
+                    + ":Note that ISU and Client Tier should both be input. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Client Tier",
                     ":Note that that ISU and Client Tier should both be input. Please fix and upload the template again.<br>");
               }
