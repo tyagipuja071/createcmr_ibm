@@ -2616,21 +2616,25 @@ function setTaxRegimeMX() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var taxGrp = null;
-  if (custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM') {
-    taxGrp = '1';
-  } else {
-    taxGrp = '2';
+  if (FormManager.getActualValue('custGrp') == 'CROSS') {
+    FormManager.limitDropdownValues(FormManager.getField('taxCd3'), '616');
+  } else if(FormManager.getActualValue('custGrp') == 'LOCAL') {
+  	if (custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM') {
+    	taxGrp = '1';
+  	} else {
+    	taxGrp = '2';
+  	}
+
+  	var qParams = {
+    	_qall : 'Y',
+    	ISSUING_CNTRY : cntry,
+    	CMT: '%' + taxGrp + '%'
+  	};
+
+  	var taxDropDown = cmr.query('GET.MX_TAX_CODE', qParams);
+  	var arr =  taxDropDown.map(taxDropDown => taxDropDown.ret1);
+  	FormManager.limitDropdownValues(FormManager.getField('taxCd3'), arr);
   }
-
-  var qParams = {
-    _qall : 'Y',
-    ISSUING_CNTRY : cntry,
-    CMT: '%' + taxGrp + '%'
-  };
-
-  var taxDropDown = cmr.query('GET.MX_TAX_CODE', qParams);
-  var arr =  taxDropDown.map(taxDropDown => taxDropDown.ret1);
-  FormManager.limitDropdownValues(FormManager.getField('taxCd3'), arr);
 }
 
 
