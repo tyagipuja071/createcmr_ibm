@@ -1820,18 +1820,16 @@ public class ItalyHandler extends BaseSOFHandler {
         if ((!StringUtils.isEmpty(fiscalCode) || !StringUtils.isEmpty(identClient) || !StringUtils.isEmpty(vatNumPartitaIVA)
             || !StringUtils.isEmpty(enterpriseNumber)) && (!StringUtils.isEmpty(taxCodeIVACode) || !StringUtils.isEmpty(collectionCode))) {
           LOG.trace("Company level fields and Billing level fields can not be filled at the same time");
-          error.addError((row.getRowNum() + 1), "Company [Fiscal code, Vat#, Ident. Cliente, Enterprise number] | Billing [Tax Code/ Code IVA, Collection Code]",
+          error.addError((row.getRowNum() + 1),
+              "Company [Fiscal code, Vat#, Ident. Cliente, Enterprise number] | Billing [Tax Code/ Code IVA, Collection Code]",
               "Company level fields and Billing level fields can not be filled at the same time");
         }
-
-        if ((!StringUtils.isEmpty(isu) && StringUtils.isEmpty(clientTier)) || (StringUtils.isEmpty(isu) && !StringUtils.isEmpty(clientTier))) {
-          LOG.trace("ISU and Client Tier must both be filled if either one was suppplied on the template");
-          error.addError((row.getRowNum() + 1), "Data Tab", "ISU and Client Tier must both be filled if either one was suppplied on the template");
-        }
-
         List<String> isuBlankCtc = Arrays.asList("5K", "14", "19", "3T", "4A");
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
-          if (isuBlankCtc.contains(isu)) {
+          if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(clientTier)) || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isu))) {
+            LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+            error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+          } else if (isuBlankCtc.contains(isu)) {
             if (!"@".equals(clientTier)) {
               LOG.trace("Client Tier should be '@' for the ISU Code: " + isu + ".");
               error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code: " + isu + ".<br>");
@@ -1848,8 +1846,10 @@ public class ItalyHandler extends BaseSOFHandler {
             }
           } else if ((StringUtils.isNotBlank(isu) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
               || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
-            LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-            error.addError((row.getRowNum() + 1), "Client Tier", ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+            LOG.trace(
+                "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+            error.addError((row.getRowNum() + 1), "Client Tier",
+                ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
           }
         }
 
@@ -1872,7 +1872,8 @@ public class ItalyHandler extends BaseSOFHandler {
           Matcher matcher = upperCaseNumeric.matcher(collectionCode);
           if (!matcher.matches()) {
             LOG.trace("Collection Code should contain only upper-case latin and numeric characters.");
-            error.addError((row.getRowNum() + 1), "Collection Code.", "Collection Code should contain only upper-case latin and numeric characters. ");
+            error.addError((row.getRowNum() + 1), "Collection Code.",
+                "Collection Code should contain only upper-case latin and numeric characters. ");
           }
         }
 
