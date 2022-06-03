@@ -658,6 +658,9 @@ public class MaltaHandler extends BaseSOFHandler {
     if (!StringUtils.isEmpty(mainRecord.getCmrSapNumber())) {
       data.setAbbrevLocn(getAbbrLocation(mainRecord.getCmrSapNumber()));
     }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setPpsceid("");
+    }
 
   }
 

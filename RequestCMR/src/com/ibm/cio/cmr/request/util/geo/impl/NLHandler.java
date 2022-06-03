@@ -870,6 +870,9 @@ public class NLHandler extends BaseSOFHandler {
     if (prospectCmrChosen) {
       data.setCmrNo("");
     }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setPpsceid("");
+    }
 
   }
 

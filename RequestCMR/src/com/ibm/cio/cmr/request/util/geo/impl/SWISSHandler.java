@@ -191,6 +191,9 @@ public class SWISSHandler extends GEOHandler {
         data.setSearchTerm(mainRecord.getCmrSortl());
       }
     }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setPpsceid("");
+    }
 
   }
 
