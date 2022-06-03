@@ -887,6 +887,7 @@ public class ItalyHandler extends BaseSOFHandler {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setAbbrevNm("");
       data.setAbbrevLocn("");
+      data.setPpsceid("");
     } else {
       data.setAbbrevNm(abbrevNm);
       data.setAbbrevLocn(abbrevLoc);
