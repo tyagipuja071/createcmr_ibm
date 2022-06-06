@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -205,7 +206,6 @@ public class USAddrStdElement extends OverridingElement {
       stdCity.getStandardCity(addrModel, SystemLocation.UNITED_STATES, map);
       StandardCityResponse stdCityResp = (StandardCityResponse) map.get("result");
       String addrTypeName = addr.getId().getAddrType();
-      StringBuilder addrDetails = null;
       switch (addrTypeName) {
       case "ZS01":
         details.append("Install-at ");
@@ -218,6 +218,9 @@ public class USAddrStdElement extends OverridingElement {
         break;
       }
 
+      String cityToUse = addr.getCity1();
+      String countyCodeToUse = addr.getCounty();
+
       if (stdCityResp != null) {
         if (stdCityResp.isCityMatched()) {
           LOG.debug("Standard City Name: " + stdCityResp.getStandardCity());
@@ -225,16 +228,35 @@ public class USAddrStdElement extends OverridingElement {
 
           if (!addr.getCity1().trim().equalsIgnoreCase(stdCityResp.getStandardCity().trim())) {
             overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "CITY1", addr.getCity1(), stdCityResp.getStandardCity());
+            cityToUse = stdCityResp.getStandardCity();
           }
         } else {
-          LOG.debug("Standard City Name cannot be determined. Found: " + stdCityResp.getStandardCity());
-          hasIssues = true;
+          List<String> cityNames = new ArrayList<String>();
+          if (stdCityResp.getSuggested() != null && !stdCityResp.getSuggested().isEmpty()) {
+            for (County county : stdCityResp.getSuggested()) {
+              if (!cityNames.contains(county.getCity().toUpperCase().trim())) {
+                cityNames.add(county.getCity().toUpperCase().trim());
+              }
+            }
+          }
+          if (cityNames.size() == 1) {
+            details.append(" Standard City Name: " + cityNames.get(0) + "\n");
+            if (!addr.getCity1().trim().equalsIgnoreCase(cityNames.get(0))) {
+              overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "CITY1", addr.getCity1(), cityNames.get(0));
+              cityToUse = cityNames.get(0);
+            }
+          } else {
+            LOG.debug("Standard City Name cannot be determined. Found: " + stdCityResp.getStandardCity());
+            details.append(" Standard City cannot be determined. Multiple City name suggestions found.\n");
+            hasIssues = true;
+          }
         }
         if (stdCityResp.getSuggested() == null || stdCityResp.getSuggested().isEmpty()) {
           LOG.debug("County: " + stdCityResp.getStandardCountyCd() + " - " + stdCityResp.getStandardCountyName());
           details.append(" " + "County: " + stdCityResp.getStandardCountyCd() + " - " + stdCityResp.getStandardCountyName() + "\n");
           if (addr.getCounty() == null || !addr.getCounty().equals(stdCityResp.getStandardCountyCd())) {
             overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "COUNTY", addr.getCounty(), stdCityResp.getStandardCountyCd());
+            countyCodeToUse = stdCityResp.getStandardCountyCd();
           }
           if (addr.getCountyName() == null || (stdCityResp.getStandardCountyName() != null
               && !addr.getCountyName().trim().equalsIgnoreCase(stdCityResp.getStandardCountyName().trim()))) {
@@ -254,6 +276,7 @@ public class USAddrStdElement extends OverridingElement {
               County first = stdCityResp.getSuggested().get(0);
               if (StringUtils.isBlank(addr.getCounty())) {
                 overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "COUNTY", addr.getCounty(), first.getCode());
+                countyCodeToUse = first.getCode();
               }
               if (StringUtils.isBlank(addr.getCountyName())) {
                 overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "COUNTY_NAME", addr.getCountyName(), first.getName());
@@ -272,6 +295,16 @@ public class USAddrStdElement extends OverridingElement {
         hasIssues = true;
       }
 
+      if (!hasIssues && "ZS01".equals(addr.getId().getAddrType())) {
+        // only check SCC for ZS01 address
+        String setREJFlag = validateForSCC(entityManager, addr.getLandCntry(), addr.getStateProv(), cityToUse, countyCodeToUse);
+
+        if ("N".equals(setREJFlag)) {
+          details.append("\n").append("SCC code for the " + addr.getId() + " address is not mapped to SCC table.").append("\n");
+          hasIssues = true;
+        }
+      }
+
       details.append("\n");
 
     }
@@ -279,21 +312,6 @@ public class USAddrStdElement extends OverridingElement {
       String msg = "City and/or County Name for one or more addresses cannot be determined.";
       engineData.addNegativeCheckStatus("_usstdcity", msg);
       details.append("\n").append(msg).append("\n");
-    } else {
-      String setREJFlag = validateForSCC(entityManager, requestData.getAdmin().getId().getReqId());
-
-      if ("N".equals(setREJFlag)) {
-        results.setResults("SCC Check");
-        results.setDetails("SCC(State / County / City) values unavailable. Multiple counties are mapped to the State/City.\n");
-        results.setProcessOutput(overrides);
-        results.setOnError(true);
-        admin.setCompVerifiedIndc("N");
-        admin.setCompInfoSrc("S");
-        return results;
-      } else {
-        admin.setCompVerifiedIndc("");
-        admin.setCompInfoSrc("");
-      }
     }
 
     results.setResults(hasIssues ? "City/County Issu" : "Standardized");
@@ -346,29 +364,11 @@ public class USAddrStdElement extends OverridingElement {
     return null;
   }
 
-  public static String validateForSCC(EntityManager entityManager, Long reqId) {
+  public static String validateForSCC(EntityManager entityManager, String landCntry, String stateProv, String city1, String county) {
 
     String flag = "N";
 
-    String landCntry = "";
-    String stateProv = "";
-    String county = "";
-    String city1 = "";
-
-    String sql1 = ExternalizedQuery.getSql("US.GET.ADDRESS_BY_REQ_ID");
-    PreparedQuery query1 = new PreparedQuery(entityManager, sql1);
-    query1.setParameter("REQ_ID", reqId);
-
-    List<Object[]> results1 = query1.getResults();
-    if (results1 != null && !results1.isEmpty()) {
-      Object[] scc = results1.get(0);
-      landCntry = (String) scc[0];
-      stateProv = (String) scc[1];
-      county = (String) scc[2];
-      city1 = scc[3].toString().toUpperCase();
-    }
-
-    if (!StringUtils.isNumeric(county)) {
+    if (StringUtils.isBlank(county) || !StringUtils.isNumeric(county)) {
       county = "0";
     }
 
@@ -377,7 +377,7 @@ public class USAddrStdElement extends OverridingElement {
     query2.setParameter("LAND_CNTRY", landCntry);
     query2.setParameter("N_ST", stateProv);
     query2.setParameter("C_CNTY", county);
-    query2.setParameter("N_CITY", city1);
+    query2.setParameter("N_CITY", city1.toUpperCase());
 
     List<Object[]> results2 = query2.getResults();
     if (results2 != null && !results2.isEmpty()) {

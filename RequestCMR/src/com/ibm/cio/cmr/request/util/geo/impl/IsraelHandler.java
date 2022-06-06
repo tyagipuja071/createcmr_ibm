@@ -400,8 +400,6 @@ public class IsraelHandler extends EMEAHandler {
     localLangAddr.setCmrAddrTypeCode(addrType);
     localLangAddr.setCmrDept(record.getCmrIntlName4());
 
-    CmrtAddr legacyAddr = legacyObjects.findBySeqNo(String.format("%05d", Integer.parseInt(localLangAddr.getCmrAddrSeq())));
-    fillInMissingAddrDataFromLegacy(entityManager, localLangAddr, legacyAddr, true);
     return localLangAddr;
   }
 
@@ -427,7 +425,6 @@ public class IsraelHandler extends EMEAHandler {
       addr.setTransAddrNo(localAddr.getId().getAddrNo());
     }
 
-    fillInMissingAddrDataFromLegacy(entityManager, addr, legacyAddr, false);
     return addr;
   }
 

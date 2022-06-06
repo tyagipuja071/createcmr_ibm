@@ -590,7 +590,12 @@ public class SpainTransformer extends MessageTransformer {
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     }
+
     legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
+
+    if (StringUtils.isNotEmpty(data.getCollectionCd())) {
+      legacyCust.setCollectionCd("");
+    }
 
     legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
     // CREATCMR-4293
@@ -599,13 +604,12 @@ public class SpainTransformer extends MessageTransformer {
         legacyCust.setIsuCd(data.getIsuCd() + "7");
       }
     }
-  	
 
-      if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()))) {
-        legacyCust.setIsuCd(data.getIsuCd() + "7");     
-      } else {
-        legacyCust.setIsuCd((!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
-            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""));
+    if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()))) {
+      legacyCust.setIsuCd(data.getIsuCd() + "7");
+    } else {
+      legacyCust.setIsuCd(
+          (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "") + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""));
     }
   }
 
