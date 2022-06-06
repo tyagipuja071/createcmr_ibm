@@ -502,16 +502,23 @@ function checkSCCValidate() {
 
     if (numeric.test(cnty)) {
 
-      var ret = cmr.query('US_CMR_SCC.GET_SCC_MULTIPLE_BY_LAND_CNTRY_ST_CITY', {
-        _qall : 'Y',
-        LAND_CNTRY : landCntry,
-        N_ST : st,
-        N_CITY : city
-      });
+      var role = null;
+      if (typeof (_pagemodel) != 'undefined') {
+        role = _pagemodel.userRole;
+      }
 
-      if (ret.length > 1) {
-        $("#addressTabSccInfo").html('');
-        $('#sccMultipleWarn').show();
+      if (role == 'Processor') {
+        var ret = cmr.query('US_CMR_SCC.GET_SCC_MULTIPLE_BY_LAND_CNTRY_ST_CITY', {
+          _qall : 'Y',
+          LAND_CNTRY : landCntry,
+          N_ST : st,
+          N_CITY : city
+        });
+
+        if (ret.length > 1) {
+          $("#addressTabSccInfo").html('');
+          $('#sccMultipleWarn').show();
+        }
       }
 
       var ret1 = cmr.query('US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY', {
@@ -633,7 +640,7 @@ function addKuklaValidator() {
           REQ_ID : FormManager.getActualValue('reqId')
         });
         if (ret && ret.ret1 && ret.ret1 != '') {
-          _kukla =ret.ret1;
+          _kukla = ret.ret1;
         }
         if (FormManager.getActualValue('reqType') == 'U' && kukla != _kukla) {
           if (kuklaOfArray.includes(kukla)) {
@@ -922,7 +929,8 @@ function addCompanyEnterpriseValidation() {
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
   GEOHandler.registerValidator(addInvoiceAddressLinesValidator, [ SysLoc.USA ], null, true);
-  // GEOHandler.registerValidator(addCountyValidator, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(addCountyValidator, [ SysLoc.USA ], null,
+  // true);
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
