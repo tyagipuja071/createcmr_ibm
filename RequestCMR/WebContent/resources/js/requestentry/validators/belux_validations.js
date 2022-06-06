@@ -209,12 +209,6 @@ function disableIBMTab() {
     FormManager.readOnly('covId');
     FormManager.readOnly('geoLocationCd');
     FormManager.readOnly('dunsNo');
-    if (custSubGrp.substring(2, 5) == 'BUS') {
-      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-      FormManager.enable('ppsceid');
-    } else {
-      FormManager.readOnly('ppsceid');
-    }
     FormManager.readOnly('salesBusOffCd');
     FormManager.readOnly('economicCd');
   } else if (reqType == 'C' && role == 'Processor') {
@@ -229,6 +223,22 @@ function disableModeOfPayment() {
   } else if (reqType == 'C') {
     FormManager.readOnly('modeOfPayment');
     FormManager.clearValue('modeOfPayment');
+  }
+}
+
+function setPPSCEIDRequired() {
+  var reqType = FormManager.getActualValue('reqType');
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (subGrp.includes('BP') || subGrp.includes('BUS')) {
+    FormManager.enable('ppsceid');
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.clearValue('ppsceid');
+    FormManager.readOnly('ppsceid');
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }
 }
 
@@ -2120,6 +2130,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.BELUX, null, true);
   GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, GEOHandler.BELUX);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.BELUX);

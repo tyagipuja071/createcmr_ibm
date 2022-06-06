@@ -1757,6 +1757,22 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function setPPSCEIDRequired() {
+  var reqType = FormManager.getActualValue('reqType');
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (subGrp.includes('BP') || subGrp.includes('BUS')) {
+    FormManager.enable('ppsceid');
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.clearValue('ppsceid');
+    FormManager.readOnly('ppsceid');
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -1771,6 +1787,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NL);
   // GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
   GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.NL);
+  GEOHandler.addAfterConfig(setPPSCEIDRequired, GEOHandler.NL);
 
   GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.NL);

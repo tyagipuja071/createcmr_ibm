@@ -1053,6 +1053,22 @@ function clientTierCodeValidator() {
 }
 // CREATCMR-4293
 
+function setPPSCEIDRequired() {
+  var reqType = FormManager.getActualValue('reqType');
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (subGrp.includes('BP') || subGrp.includes('BUS')) {
+    FormManager.enable('ppsceid');
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.clearValue('ppsceid');
+    FormManager.readOnly('ppsceid');
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717',
       '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851',
@@ -1110,6 +1126,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.MCO2);
 
   GEOHandler.addAfterConfig(addHandlersForMCO2, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(setPPSCEIDRequired, GEOHandler.MCO2);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO2);

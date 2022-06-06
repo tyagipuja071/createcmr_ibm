@@ -109,7 +109,11 @@ public class MCOCewaHandler extends MCOHandler {
           data.setCommercialFinanced("");
         }
       }
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        data.setPpsceid("");
+      }
     }
+    
 
   }
 

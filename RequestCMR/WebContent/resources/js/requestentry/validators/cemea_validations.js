@@ -453,14 +453,6 @@ function afterConfigForCEMEA() {
     }
   }
 
-  if (FormManager.getActualValue('cmrIssuingCntry') == '618') {
-    if (custSubType == 'BUSPR' || custSubType == 'XBP') {
-      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-    } else {
-      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
-    }
-  }
-
   setAustriaUIFields();
   setExpediteReason();
   setTypeOfCustomerRequiredProcessor();
@@ -528,12 +520,6 @@ function setAustriaUIFields() {
     FormManager.setValue("enterprise", "");
     FormManager.readOnly("enterprise");
   }
-  // PPS CEID locked for other than BP scenario
-  if (custSubType != null && custSubType != '' && custSubType != 'BUSPR' && custSubType != 'XBP') {
-    FormManager.readOnly("ppsceid");
-  } else {
-    FormManager.enable("ppsceid");
-  }
 }
 
 function setSBOValuesOnCustType() {
@@ -569,11 +555,6 @@ function lockIBMtab() {
     FormManager.readOnly('geoLocationCode');
     FormManager.readOnly('inacCd');
     FormManager.readOnly('dunsNo');
-    if (custSubType != 'XBP' && custSubType != 'BUSPR') {
-      FormManager.readOnly('ppsceid');
-    } else {
-      FormManager.enable('ppsceid');
-    }
     FormManager.readOnly('soeReqNo');
     FormManager.readOnly('salesBusOffCd');
     FormManager.readOnly('locationNumber');
@@ -723,10 +704,6 @@ function addHandlersForCEMEA() {
         }
         // CREATCMR-4293
       }
-
-      if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
-        togglePPSCeidCEE();
-      }
       if (cntry == '618') {
         setClientTierValuesAT(value);
         setSBOValuesForIsuCtcAT();
@@ -754,9 +731,6 @@ function addHandlersForCEMEA() {
       }
       setSBOValuesForIsuCtc();// CMR-2101
       setCEESBOValuesForIsuCtc();
-      if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
-        togglePPSCeidCEE();
-      }
       if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRIA) {
         setSBOValuesForIsuCtcAT();
       }
@@ -4297,6 +4271,7 @@ function togglePPSCeidCEE() {
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
     FormManager.readOnly('ppsceid');
   } else {
+    FormManager.clearValue('ppsceid');
     FormManager.hide('PPSCEID', 'ppsceid');
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }
@@ -4697,7 +4672,6 @@ function hideDisableAutoProcessingCheckBox() {
 
 function afterConfigTemplateLoadForCEE() {
   filterCmrnoForCEE();
-  togglePPSCeidCEE();
   setClassificationCodeCEE();
   // disableSBO();
   setEngineeringBO();
@@ -5444,5 +5418,6 @@ dojo
 
       GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, [ SysLoc.AUSTRIA ]);
       GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, SysLoc.AUSTRIA);
+      GEOHandler.addAfterTemplateLoad(togglePPSCeidCEE, GEOHandler.CEMEA);
 
     });

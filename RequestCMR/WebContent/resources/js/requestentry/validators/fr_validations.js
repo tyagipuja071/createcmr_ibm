@@ -3771,6 +3771,7 @@ function setPPSCEIDRequired() {
     FormManager.enable('ppsceid');
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   } else {
+    FormManager.setValue('ppsceid', '');
     FormManager.readOnly('ppsceid');
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }

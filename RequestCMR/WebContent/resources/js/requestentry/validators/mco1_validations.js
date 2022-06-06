@@ -1,3 +1,4 @@
+
 /* Register MCO1 Javascripts */
 var localScenarios = [ "LSLOC", "NALOC", "SZLOC", "ZALOC" ];
 var crossScenarios = [ "LSCRO", "NACRO", "SZCRO", "ZACRO" ];
@@ -1400,8 +1401,11 @@ function mandatoryForBusinessPartner() {
     var _custType = FormManager.getActualValue('custSubGrp');
     if (_custType == 'LSBP' || _custType == 'SZBP' || _custType == 'ZABP' || _custType == 'NABP' || _custType == 'ZAXBP' || _custType == 'NAXBP' || _custType == 'LSXBP' || _custType == 'SZXBP'
         || _custType == 'LSBLC' || _custType == 'SZBLC' || _custType == 'NABLC') {
+      FormManager.enable('ppsceid');
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
     } else {
+      FormManager.clearValue('ppsceid');
+      FormManager.readOnly('ppsceid');
       FormManager.resetValidations('ppsceid');
     }
   }

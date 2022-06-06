@@ -783,6 +783,7 @@ function disableEnableFieldsForMT() {
   if (custType == 'BUSPR' || custType == 'XBP') {
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPSCEID' ]);
   } else {
+    FormManager.setValue('ppsceid', '');
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }
 
