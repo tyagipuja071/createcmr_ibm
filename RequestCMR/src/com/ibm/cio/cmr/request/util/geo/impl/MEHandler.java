@@ -2239,8 +2239,7 @@ public class MEHandler extends BaseSOFHandler {
                 error.addError(rowIndex, "Client Tier",
                     ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
               }
-            }
-            if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+            } else if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
               LOG.trace("The row " + (rowIndex) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
               error.addError((rowIndex), "Client Tier",
                   ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
