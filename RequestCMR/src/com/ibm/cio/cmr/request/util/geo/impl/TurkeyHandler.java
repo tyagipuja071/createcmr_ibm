@@ -4385,7 +4385,7 @@ public class TurkeyHandler extends BaseSOFHandler {
   }
 
   private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType, String reqType) {
-    Addr addrCopy = SerializationUtils.clone(addr);
+    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZS01")) {
@@ -4406,7 +4406,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 
   // START -- missing code greece code
   private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = SerializationUtils.clone(addr);
+    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZP01")) {
