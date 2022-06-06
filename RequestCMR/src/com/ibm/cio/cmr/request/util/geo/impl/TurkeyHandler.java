@@ -4070,8 +4070,7 @@ public class TurkeyHandler extends BaseSOFHandler {
                           ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                     }
                   }
-                }
-                if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                } else if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
@@ -4386,7 +4385,7 @@ public class TurkeyHandler extends BaseSOFHandler {
   }
 
   private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType, String reqType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZS01")) {
@@ -4407,7 +4406,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 
   // START -- missing code greece code
   private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZP01")) {
