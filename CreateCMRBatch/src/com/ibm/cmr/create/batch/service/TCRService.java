@@ -484,6 +484,8 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
         FileUtils.deleteQuietly(new File(directory + File.separator + fileName));
       }
     }
+    this.fileSizes.clear();
+    this.processedSizes.clear();
   }
 
   @Override
