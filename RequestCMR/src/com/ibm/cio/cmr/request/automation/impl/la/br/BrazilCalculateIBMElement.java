@@ -119,11 +119,11 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "764");
       } else if ("ES".equals(soldTo.getStateProv()) || "MG".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "556");
-      } else if (STATEPROV_758.equals(soldTo.getStateProv())) {
+      } else if (STATEPROV_758.contains(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "758");
-      } else if (STATEPROV_504.equals(soldTo.getStateProv())) {
+      } else if (STATEPROV_504.contains(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "504");
-      } else if (STATEPROV_763.equals(soldTo.getStateProv())) {
+      } else if (STATEPROV_763.contains(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "763");
       }
     }
@@ -190,6 +190,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         LOG.debug("Scenario " + scenarioSubType + " does not need calculation..");
         results.setResults("Execution Not Performed.");
         results.setDetails("Skipping retrieval of IBM values for scenarios.");
+        results.setProcessOutput(overrides);
       }
       return results;
 
@@ -222,6 +223,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         LOG.debug("Scenario " + scenarioSubType + " does not need calculation..");
         results.setResults("Execution Not Performed.");
         results.setDetails("Skipping retrieval of IBM values for Softlayer scenario as VAT contains either all 0s or all 9s.");
+        results.setProcessOutput(overrides);
       }
       return results;
     } else if ("CROSS".equalsIgnoreCase(scenarioSubType)) {
