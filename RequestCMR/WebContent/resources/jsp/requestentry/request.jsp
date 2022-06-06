@@ -510,7 +510,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
         <cmr:column span="6">
           <div class="embargo" >
             <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
-            <cmr:note text="SCC(State / County / City) values unavailable." />
+            <cmr:note text="Unavailable - Undefined SCC value." />
           </div>
         </cmr:column>
       </cmr:row>
