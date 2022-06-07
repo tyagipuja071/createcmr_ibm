@@ -399,6 +399,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
             }
 
             queue.setProcStatus(STATUS_COMPLETED);
+            queue.setProcMsg("");
           } else {
             queue.setProcStatus(STATUS_ERROR);
             queue.setProcMsg("Records for CMR No. " + queue.getCmrNo() + " not found.");
