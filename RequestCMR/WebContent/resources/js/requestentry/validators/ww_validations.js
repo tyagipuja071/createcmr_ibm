@@ -701,6 +701,21 @@ function addGenericZIPValidator() {
 }
 
 /**
+ * Adds the generic postal code validator for Ireland as landed country - CMR -
+ * 6033
+ */
+function addGenericPostalCodeValidator() {
+        var cntry = FormManager.getActualValue('landCntry');
+        var loc = FormManager.getActualValue('cmrIssuingCntry');
+        var postCd = FormManager.getActualValue('postCd');
+
+        console.log('Country: ' + cntry + ' Postal Code: ' + postCd);
+        if(cntry == 'IE' && loc != 'IE') {
+          FormManager.removeValidator('postCd', Validators.REQUIRED);
+        }
+}
+
+/**
  * Adds the general validation for failed DPL checks. This will require a DPL
  * Screening attachment
  */
@@ -974,6 +989,8 @@ dojo.addOnLoad(function() {
   GEOHandler.AFRICA = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
        '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
 
+  GEOHandler.GROUP1 = [ '724', '848', '618', '624', '788', '624', '649', '866', '754' ];
+  
   GEOHandler.registerWWValidator(addCMRSearchValidator);
   GEOHandler.registerWWValidator(addDnBSearchValidator);
   GEOHandler.registerWWValidator(addDnBMatchingAttachmentValidator);
@@ -1018,6 +1035,10 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addGenericZIPValidator,
   // GEOHandler.NO_ME_CEMEA, null, true);
 
+  // Postal Code validation for Ireland as Landed Country - CMR - 6033
+  GEOHandler.addAfterConfig(addGenericPostalCodeValidator, GEOHandler.GROUP1);
+  GEOHandler.addAfterTemplateLoad(addGenericPostalCodeValidator, GEOHandler.GROUP1);
+  
   GEOHandler.registerWWValidator(addINACValidator);
   GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
 
