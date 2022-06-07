@@ -710,7 +710,7 @@ function addGenericPostalCodeValidator() {
         var postCd = FormManager.getActualValue('postCd');
 
         console.log('Country: ' + cntry + ' Postal Code: ' + postCd);
-        if(cntry == 'IE' && loc != 'IE') {
+        if(cntry == 'IE' && loc != '754') {
           FormManager.removeValidator('postCd', Validators.REQUIRED);
         }
 }
