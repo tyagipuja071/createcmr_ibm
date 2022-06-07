@@ -3145,7 +3145,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(forceLockScenariosSpain, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(forceLockScenariosSpain, [ SysLoc.SPAIN ]);
 
-  GEOHandler.addAfterConfig(setPPSCEIDRequired, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLocOnChange, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);

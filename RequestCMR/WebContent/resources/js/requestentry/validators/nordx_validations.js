@@ -3737,9 +3737,9 @@ function setSalesRepValues() {
           } else if (isuAndCtc == '5K') {
             FormManager.setValue('searchTerm', 'T0009073');
           } else if (isuAndCtc == '21') {
-            FormManager.setValue('searchTerm', 'T0000471');
+            FormManager.setValue('searchTerm', 'T0001661');
           } else if (isuAndCtc == '8B') {
-            FormManager.setValue('searchTerm', 'P0000007');
+            FormManager.setValue('searchTerm', 'P0000024');
           } else {
             FormManager.setValue('searchTerm', '');
           }
@@ -3751,9 +3751,9 @@ function setSalesRepValues() {
           } else if (isuAndCtc == '5K') {
             FormManager.setValue('searchTerm', 'T0009071');
           } else if (isuAndCtc == '21') {
-            FormManager.setValue('searchTerm', 'T0000471');
+            FormManager.setValue('searchTerm', 'T0001661');
           } else if (isuAndCtc == '8B') {
-            FormManager.setValue('searchTerm', 'P0000007');
+            FormManager.setValue('searchTerm', 'P0000024');
           } else {
             FormManager.setValue('searchTerm', '');
           }
@@ -3765,9 +3765,9 @@ function setSalesRepValues() {
           } else if (isuAndCtc == '5K') {
             FormManager.setValue('searchTerm', 'T0009072');
           } else if (isuAndCtc == '21') {
-            FormManager.setValue('searchTerm', 'T0000471');
+            FormManager.setValue('searchTerm', 'T0001661');
           } else if (isuAndCtc == '8B') {
-            FormManager.setValue('searchTerm', 'P0000007');
+            FormManager.setValue('searchTerm', 'P0000024');
           } else {
             FormManager.setValue('searchTerm', '');
           }

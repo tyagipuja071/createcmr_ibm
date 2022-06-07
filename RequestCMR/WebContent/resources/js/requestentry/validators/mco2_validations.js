@@ -1126,7 +1126,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.MCO2);
 
   GEOHandler.addAfterConfig(addHandlersForMCO2, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(setPPSCEIDRequired, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, GEOHandler.MCO2);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO2);
