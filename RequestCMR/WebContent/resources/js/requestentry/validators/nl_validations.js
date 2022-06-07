@@ -1787,7 +1787,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NL);
   // GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
   GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.NL);
-  GEOHandler.addAfterConfig(setPPSCEIDRequired, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, GEOHandler.NL);
 
   GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.NL);
