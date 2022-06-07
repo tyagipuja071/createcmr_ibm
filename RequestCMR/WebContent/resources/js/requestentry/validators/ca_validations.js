@@ -447,6 +447,51 @@ function addPSTExemptValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function cmrNoAlreadyExistValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('checking requested cmr number...');
+        var reqType = FormManager.getActualValue('reqType');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+        if (reqType == 'C' && cmrNo) {
+          var numPattern = /^[0-9]+$/;
+
+          if (cmrNo.length >= 1 && cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
+          } else if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR Number should be number only.');
+          } else {
+            var exists = cmr.query('CA.CMR_NO_EXIST', {
+              CNTRY : cntry,
+              CMR_NO : cmrNo,
+              MANDT : cmr.MANDT
+            });
+            if (exists != null && exists.ret1 == 'Y') {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+            }
+          }
+        }
+        return new ValidationResult({
+          id : 'cmrNo',
+          type : 'text',
+          name : 'cmrNo'
+        }, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 /**
  * Checks if the address type is already present in the Address Grid
  * 
@@ -534,6 +579,7 @@ function afterConfigForCA() {
   if (role.toUpperCase() == 'VIEWER') {
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('abbrevNm');
+    FormManager.readOnly('cmrNo');
   }
 
   addFieldHandlers();
@@ -549,6 +595,10 @@ function afterConfigForCA() {
       FormManager.readOnly('QST');
       return;
     }
+  }
+
+  if ('C' == FormManager.getActualValue('reqType') && FormManager.getActualValue('viewOnlyPage') != 'true') {
+    FormManager.enable('cmrNo');
   }
 
 }
@@ -915,31 +965,37 @@ function addProvincePostalCdValidator() {
 
 function addCtcObsoleteValidator() {
   FormManager.addFormValidator((function() {
-        return {
-            validate : function() {
-              var reqType = FormManager.getActualValue('reqType');
-              var reqId = FormManager.getActualValue('reqId');
-              var clientTier = FormManager.getActualValue('clientTier');
-              var oldCtc;
-              var qParams = {
-               REQ_ID : reqId
-               };
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var reqId = FormManager.getActualValue('reqId');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var oldCtc;
+        var qParams = {
+          REQ_ID : reqId
+        };
 
         var result = cmr.query('GET.DATA_RDC.CLIENT_TIER_REQID', qParams);
         if (result != null && result != '') {
-         oldCtc = result.ret1;
-         }
-        if (reqType == 'C' && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" ||clientTier == "M"|| clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" || clientTier == "B" || clientTier == "0")) {
-           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
-          } else if (reqType == 'U'&& oldCtc != null && oldCtc != clientTier && (clientTier == "4" ||clientTier == "6" || clientTier == "A" ||clientTier == "M"|| clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C"|| clientTier == "B" || clientTier == "0")) {
-           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
-           } else {
-             return new ValidationResult(null, true);
-            }
-          }
+          oldCtc = result.ret1;
         }
-    })(), 'MAIN_IBM_TAB', 'frmCMR');
-  } 
+        if (reqType == 'C'
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S"
+                || clientTier == "N" || clientTier == "C" || clientTier == "B" || clientTier == "0")) {
+          return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
+        } else if (reqType == 'U'
+            && oldCtc != null
+            && oldCtc != clientTier
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S"
+                || clientTier == "N" || clientTier == "C" || clientTier == "B" || clientTier == "0")) {
+          return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    }
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
 
 function addINACValidator() {
   FormManager.addFormValidator((function() {
@@ -1267,23 +1323,23 @@ function clientTierValidator() {
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
         var valResult = null;
-        
+
         var oldClientTier = null;
         var oldISU = null;
         var requestId = FormManager.getActualValue('reqId');
-        
+
         if (reqType == 'C') {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-              REQ_ID : requestId,
+            REQ_ID : requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-          
+
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU =  result.ret3 != null ? result.ret3 : '';
-            
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
             if (clientTier != oldClientTier || isuCd != oldISU) {
               valResult = clientTierCodeValidator();
             }
@@ -1312,6 +1368,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addProvincePostalCdValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.CANADA ], null, true);
+  GEOHandler.registerValidator(cmrNoAlreadyExistValidator, [ SysLoc.CANADA ], null, true);
   // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
   // functions on afterConfigForCA
   GEOHandler.addAfterConfig(afterConfigForCA, [ SysLoc.CANADA ]);
@@ -1337,5 +1394,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addStateProvHandler, [ SysLoc.CANADA ]);
-  
+
 });
