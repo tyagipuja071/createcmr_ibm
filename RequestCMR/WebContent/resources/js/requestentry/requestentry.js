@@ -166,7 +166,15 @@ function processRequestAction() {
       } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
       } else if (checkIfUpfrontUpdateChecksRequired()) {
-        addUpdateChecksExecution(frmCMR);
+        // CREATCMR-6074
+        // addUpdateChecksExecution(frmCMR);
+        if (cmrCntry == '897') {
+          if (FormManager.getActualValue('isTaxTeamFlg') != 'true') {
+            addUpdateChecksExecution(frmCMR);
+          }
+        } else {
+          addUpdateChecksExecution(frmCMR);
+        }
       } else {
         if (cmrCntry == '821' || cmrCntry == '755') {
           executeBeforeSubmit();
