@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -53,6 +54,9 @@ public class UpdateSwitchElement extends ValidatingElement {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     long reqId = requestData.getAdmin().getId().getReqId();
+    // CREATCMR-6074
+    String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
+    boolean requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
 
     AutomationResult<ValidationOutput> output = buildResult(reqId);
     ValidationOutput validation = new ValidationOutput();
@@ -72,6 +76,13 @@ public class UpdateSwitchElement extends ValidatingElement {
       validation.setMessage("Skipped");
       output.setDetails("Processing is skipped as requester is from CMDE team.");
       log.debug("Processing is skipped as requester is from CMDE team.");
+      // CREATCMR-6074
+    } else if ("897".equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType()) && requesterFromTaxTeam) {
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      output.setDetails("Processing is skipped as requester is from TAX team.");
+      log.debug("Processing is skipped as requester is from TAX team.");
+      // CREATCMR-6074
     } else if ("U".equals(admin.getReqType())) {
 
       GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
