@@ -10225,7 +10225,7 @@ function setCTCValues() {
       FormManager.removeValidator('clientTier', Validators.REQUIRED);
       var isuCd = FormManager.getActualValue('isuCd');
       if (isuCd == '21') {
-        FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
+        FormManager.setValue('clientTier', '');
         if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
           FormManager.enable('clientTier');
         }
@@ -10244,7 +10244,7 @@ function setCTCValues() {
       FormManager.removeValidator('clientTier', Validators.REQUIRED);
       var isuCd = FormManager.getActualValue('isuCd');
       if (isuCd == '21') {
-        FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
+        FormManager.setValue('clientTier', '');
         if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
           FormManager.enable('clientTier');
         }
@@ -10264,7 +10264,7 @@ function setCTCValues() {
       FormManager.removeValidator('clientTier', Validators.REQUIRED);
       var isuCd = FormManager.getActualValue('isuCd');
       if (isuCd == '21') {
-        FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
+        FormManager.setValue('clientTier', '');
         if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
           FormManager.enable('clientTier');
         }
