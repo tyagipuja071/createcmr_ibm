@@ -2347,7 +2347,7 @@ function setClientTierValuesIT(isuCd) {
       FormManager.enable('clientTier');
     }
   }
-  setSboValueBasedOnIsuCtcIT();
+  // setSboValueBasedOnIsuCtcIT();
 }
 
 function addSalesRepLogicUK2018() {
@@ -4587,7 +4587,7 @@ function afterConfigForIT() {
       autoSetSboOnPostalCode();
       ibmFieldsBehaviourInCreateByScratchIT();
       lockCollectionCode();
-      setSboValueBasedOnIsuCtcIT();
+      //setSboValueBasedOnIsuCtcIT();
     });
   }
 
@@ -4596,7 +4596,7 @@ function afterConfigForIT() {
       autoSetSboOnPostalCode();
       ibmFieldsBehaviourInCreateByScratchIT();
       lockCollectionCode();
-      setSboValueBasedOnIsuCtcIT();
+      //setSboValueBasedOnIsuCtcIT();
     });
   }
 
@@ -4785,6 +4785,8 @@ function afterConfigForIT() {
   }
 }
 
+//CREATCMR-5089 ITALY - coverage 2H22 updates sbo should not be set based on isu/ctc
+/**
 function setSboValueBasedOnIsuCtcIT() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -4816,6 +4818,7 @@ function setSboValueBasedOnIsuCtcIT() {
     FormManager.readOnly('clientTier');
   }
 }
+**/
 
 function setSboValueBasedOnIsuCtcUK() {
   var isuCd = FormManager.getActualValue('isuCd');
