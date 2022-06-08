@@ -56,7 +56,8 @@ public class UpdateSwitchElement extends ValidatingElement {
     long reqId = requestData.getAdmin().getId().getReqId();
     // CREATCMR-6074
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
-    boolean requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
+    boolean requesterFromTaxTeam = false;
+    requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
 
     AutomationResult<ValidationOutput> output = buildResult(reqId);
     ValidationOutput validation = new ValidationOutput();
