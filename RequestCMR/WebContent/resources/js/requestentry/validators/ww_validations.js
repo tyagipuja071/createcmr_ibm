@@ -708,9 +708,10 @@ function addGenericPostalCodeValidator() {
         var cntry = FormManager.getActualValue('landCntry');
         var loc = FormManager.getActualValue('cmrIssuingCntry');
         var postCd = FormManager.getActualValue('postCd');
+        var scenario= FormManager.getActualValue('custGrp');
 
         console.log('Country: ' + cntry + ' Postal Code: ' + postCd);
-        if(cntry == 'IE' && loc != '754') {
+        if(scenario == 'CROSS' && cntry == 'IE' && loc != '754') {
           FormManager.removeValidator('postCd', Validators.REQUIRED);
         }
 }
@@ -1036,8 +1037,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.NO_ME_CEMEA, null, true);
 
   // Postal Code validation for Ireland as Landed Country - CMR - 6033
-  GEOHandler.addAfterConfig(addGenericPostalCodeValidator, GEOHandler.GROUP1);
-  GEOHandler.addAfterTemplateLoad(addGenericPostalCodeValidator, GEOHandler.GROUP1);
+  GEOHandler.addAddrFunction(addGenericPostalCodeValidator, GEOHandler.GROUP1);
   
   GEOHandler.registerWWValidator(addINACValidator);
   GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
