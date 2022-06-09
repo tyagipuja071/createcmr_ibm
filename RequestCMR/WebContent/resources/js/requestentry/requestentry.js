@@ -171,6 +171,8 @@ function processRequestAction() {
         if (cmrCntry == '897') {
           if (FormManager.getActualValue('isTaxTeamFlg') != 'true') {
             addUpdateChecksExecution(frmCMR);
+          } else {
+            cmr.showModal('addressVerificationModal');
           }
         } else {
           addUpdateChecksExecution(frmCMR);
