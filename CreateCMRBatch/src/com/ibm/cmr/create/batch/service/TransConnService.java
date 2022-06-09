@@ -2310,6 +2310,13 @@ public class TransConnService extends BaseBatchService {
         requestDataValueRecords.add(telx1);
       }
 
+      if ("897".equals(data.getCmrIssuingCntry())) {
+        RequestValueRecord telx1 = new RequestValueRecord();
+        telx1.setField("TELX1");
+        telx1.setValue("Update");
+        requestDataValueRecords.add(telx1);
+      }
+
       // CREATCMR-2990 - add affiliate
       if (!StringUtils.isBlank(massUpdtData.getAffiliate())) {
         RequestValueRecord affiliate = new RequestValueRecord();
