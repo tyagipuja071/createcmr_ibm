@@ -91,8 +91,7 @@ function countryScenarioProcessorRules() {
 }
 
 var NORTHERN_IRELAND_POST_CD = [ 'BT' ];
-ar
-UK_LANDED_CNTRY = [ 'AI', 'BM', 'IO', 'VG', 'KY', 'FK', 'GI', 'MS', 'PN', 'SH', 'TC', 'GS', 'GG', 'JE', 'IM', 'AO', 'GB', 'AT', 'DE', 'CH', 'CA', 'BE', 'LU', 'NL' ];
+var UK_LANDED_CNTRY = [ 'AI', 'BM', 'IO', 'VG', 'KY', 'FK', 'GI', 'MS', 'PN', 'SH', 'TC', 'GS', 'GG', 'JE', 'IM', 'AO', 'GB', 'AT', 'DE', 'CH', 'CA', 'BE', 'LU', 'NL' ];
 var _addrTypeITHandler = [];
 var _streetITHandler = null;
 var _custNameITHandler = null;
