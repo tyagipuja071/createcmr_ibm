@@ -503,9 +503,28 @@ public class USUtil extends AutomationUtil {
         SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA, SC_PVT_HOUSEHOLD };
     String scenarioSubType = "";
     if (StringUtils.isNotEmpty(admin.getSourceSystId()) && admin.getSourceSystId().equals("FedCMR")) {
+      Addr zs01 = requestData.getAddress("ZS01");
+      Addr zi01 = requestData.getAddress("ZI01");
+      boolean checkCounty = true;
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
       ScenarioExceptionsUtil exc = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
-      details.append("CMR belongs to " + scenarioSubType + " scenario.");
+      details.append("CMR belongs to " + scenarioSubType + " scenario. ").append("\n");
+      if (checkCounty) {
+        if (zs01 != null) {
+          if (zs01.getCounty().isEmpty()) {
+            engineData.addNegativeCheckStatus("_nullCounty", scenarioSubType + " request need to be send to CMDE queue for review. ");
+            details.append("Install At county value is null. The request need to be send to CMDE queue for review. ").append("\n");
+            checkCounty = false;
+          }
+        }
+        if (zi01 != null) {
+          if (zi01.getCounty().isEmpty()) {
+            engineData.addNegativeCheckStatus("_nullCounty", scenarioSubType + " request need to be send to CMDE queue for review. ");
+            details.append("Invoice To county value is null. The request need to be send to CMDE queue for review. ").append("\n");
+            checkCounty = false;
+          }
+        }
+      }
       if (exc != null) {
         exc.setSkipCompanyVerification(true);
         exc.setSkipDuplicateChecks(true);
