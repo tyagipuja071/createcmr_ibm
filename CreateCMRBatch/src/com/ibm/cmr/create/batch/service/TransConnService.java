@@ -1715,7 +1715,8 @@ public class TransConnService extends BaseBatchService {
       boolean ignoreWfhistory = false;
       for (Addr addr : addresses) {
 
-        if (isDataUpdated || "Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd())) {
+        if (isDataUpdated || "Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()) || "Y".equals(addr.getImportInd())
+            || "D".equals(addr.getImportInd())) {
           continueUpdate = true;
         }
 
