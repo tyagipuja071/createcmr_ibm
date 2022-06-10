@@ -2637,6 +2637,22 @@ function setTaxRegimeMX() {
   }
 }
 
+//CREATCMR-4897  SBO and MRC to not be mandatory for Prospect conversion
+function makeMrcSboOptionalForProspectLA() {
+	var ifProspect = FormManager.getActualValue('prospLegalInd');
+    if (dijit.byId('prospLegalInd')) {
+    	ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+    }
+    if('Y' == ifProspect){
+    	if (typeof (_pagemodel) != 'undefined') {
+    		if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
+    			FormManager.resetValidations('mrcCd');
+                FormManager.resetValidations('salesBusOffCd');
+                }
+    		}
+    	}
+    console.log('SBO & MRC are non mandatory for Prospect');
+}
 
 /* Register LA Validators */
 dojo.addOnLoad(function() {
@@ -2719,5 +2735,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
 
-  
+  //CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
+  GEOHandler.addAfterConfig(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
 });
