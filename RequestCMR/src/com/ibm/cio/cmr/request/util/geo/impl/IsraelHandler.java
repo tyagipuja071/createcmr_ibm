@@ -1836,7 +1836,7 @@ public class IsraelHandler extends EMEAHandler {
         String postalCd = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, row, sheetName));
         String landedCntry = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, row, sheetName));
 
-        if (validateHebrewField) {
+        if (validateHebrewField || (sheetName.equals("Installing") || sheetName.equals("EPL"))) {
           String errKna1 = validateMassKna1AddrSeqExist(cmrNo, addrSeqNo, sheetName);
 
           if (StringUtils.isNotBlank(errKna1)) {
