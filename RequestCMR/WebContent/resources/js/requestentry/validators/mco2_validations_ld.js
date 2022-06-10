@@ -2086,6 +2086,23 @@ function setCTCValues() {
   }
 }
 
+function addPpsCeidValidator() {
+  var _custType = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'C') {
+    if (_custType == 'BUSPR' || _custType == 'XBP') {
+      FormManager.show('PPSCEID', 'ppsceid');
+      FormManager.enable('ppsceid');
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.setValue('ppsceid', '');
+      FormManager.readOnly('ppsceid');
+      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+    }
+  }
+}
+
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
@@ -2243,6 +2260,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(addPpsCeidValidator, GEOHandler.MCO2);
 
   GEOHandler.registerValidator(validateCMRForMCO2GMLLCScenario, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(gmllcExistingCustomerAdditionalValidations, GEOHandler.MCO2, null, true);
