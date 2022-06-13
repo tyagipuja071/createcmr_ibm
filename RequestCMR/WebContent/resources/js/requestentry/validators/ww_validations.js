@@ -78,10 +78,13 @@ function addCMRSearchValidator() {
     return {
       validate : function() {
         var result = FormManager.getActualValue('findCmrResult');
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'C' && FormManager.getActualValue('sourceSystId').toUpperCase() == 'FEDCMR' && FormManager.getActualValue('custGrp') == '14'){
+        	return new ValidationResult(null, true);
+        }
         if (result == '' || result.toUpperCase() == 'NOT DONE') {
           return new ValidationResult(null, false, 'CMR Search has not been performed yet.');
         }
-        var reqType = FormManager.getActualValue('reqType');
         if (reqType == 'U' && result.toUpperCase() != 'ACCEPTED') {
           return new ValidationResult(null, false, 'An existing CMR for update must be searched for and imported properly to the request.');
         }

@@ -299,7 +299,6 @@
 
   <form:hidden path="poBoxPostCd" forCountry="758"/>
   <form:hidden path="transportZone" forCountry="838,758,866,754"/>
-  <form:hidden path="bldg" forCountry="755"/>
 </cmr:row>
 <cmr:row>
 	<cmr:column span="2" containerForField="TaxOffice" forCountry="862">
