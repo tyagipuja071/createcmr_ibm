@@ -392,7 +392,7 @@ public class NordicsUtil extends AutomationUtil {
     response.put("MATCHING", "No Match Found.");
 
     details.append("\n");
-    if (!isCoverageCalculated || (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && !CalculateCoverageElement.COV_BG.equals(covFrom))
+    if ((!isCoverageCalculated || (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && !CalculateCoverageElement.COV_BG.equals(covFrom)))
         && "34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier()) && SCENARIOS_COVERAGE.contains(scenario)) {
       if (!isCoverageCalculated) {
         overrides.clearOverrides();
