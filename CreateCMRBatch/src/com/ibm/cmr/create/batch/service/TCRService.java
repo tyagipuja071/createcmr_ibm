@@ -51,7 +51,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
   private Mode mode = Mode.Extract;
 
   public static enum Mode {
-    Extract, Update
+    Extract, Update, Clean
   };
 
   @Override
@@ -61,6 +61,10 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
       return extractFromFiles(entityManager);
     case Update:
       return getPendingRecords(entityManager);
+    case Clean:
+      Queue<USTCRUpdtQueue> dummy = new LinkedList<USTCRUpdtQueue>();
+      dummy.add(new USTCRUpdtQueue());
+      return dummy;
     default:
       // nothing here
       return new LinkedList<>();
@@ -75,6 +79,9 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
       break;
     case Update:
       updateTaxRecords(entityManager, list);
+      break;
+    case Clean:
+      cleanRedundantRecords(entityManager);
       break;
     }
     return true;
@@ -99,7 +106,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
     if (nameList.size() > 0) {
       for (String filename : nameList) {
         List<USTCRUpdtQueue> list = parseTCRFile(SystemConfiguration.getValue("MANDT"), directory + filename, filename);
-        if (list != null && !list.isEmpty()) {
+        if (list != null) {
           LOG.debug(list.size() + " records added from file " + filename);
           this.fileSizes.putIfAbsent(filename, list.size());
           this.processedSizes.putIfAbsent(filename, 0);
@@ -392,6 +399,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
             }
 
             queue.setProcStatus(STATUS_COMPLETED);
+            queue.setProcMsg("");
           } else {
             queue.setProcStatus(STATUS_ERROR);
             queue.setProcMsg("Records for CMR No. " + queue.getCmrNo() + " not found.");
@@ -414,6 +422,20 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
         partialCommit(entityManager);
       }
     }
+  }
+
+  /**
+   * Cleans redundant
+   * 
+   * @param entityManager
+   */
+  private void cleanRedundantRecords(EntityManager entityManager) {
+    LOG.debug("Cleaning redundant records on the queue..");
+    String sql = ExternalizedQuery.getSql("TCR.CLEAN_REDUNDANT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    int updates = query.executeSql();
+    LOG.debug(updates + " records updated.");
+    partialCommit(entityManager);
   }
 
   /**
@@ -462,6 +484,22 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
         LOG.debug("File " + fileName + " processed fully. Removing..");
         FileUtils.deleteQuietly(new File(directory + File.separator + fileName));
       }
+    }
+    this.fileSizes.clear();
+    this.processedSizes.clear();
+  }
+
+  @Override
+  protected int fixedThreadCount(int currCount) {
+    switch (this.mode) {
+    case Clean:
+      return 0;
+    case Extract:
+      return 0;
+    case Update:
+      return currCount < 10 ? 10 : currCount;
+    default:
+      return 0;
     }
   }
 

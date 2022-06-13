@@ -1715,7 +1715,8 @@ public class TransConnService extends BaseBatchService {
       boolean ignoreWfhistory = false;
       for (Addr addr : addresses) {
 
-        if (isDataUpdated || "Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd())) {
+        if (isDataUpdated || "Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()) || "Y".equals(addr.getImportInd())
+            || "D".equals(addr.getImportInd())) {
           continueUpdate = true;
         }
 
@@ -2307,6 +2308,13 @@ public class TransConnService extends BaseBatchService {
         RequestValueRecord telx1 = new RequestValueRecord();
         telx1.setField("TELX1");
         telx1.setValue(massUpdtData.getAbbrevNm());
+        requestDataValueRecords.add(telx1);
+      }
+
+      if ("897".equals(data.getCmrIssuingCntry())) {
+        RequestValueRecord telx1 = new RequestValueRecord();
+        telx1.setField("TELX1");
+        telx1.setValue("Update");
         requestDataValueRecords.add(telx1);
       }
 
