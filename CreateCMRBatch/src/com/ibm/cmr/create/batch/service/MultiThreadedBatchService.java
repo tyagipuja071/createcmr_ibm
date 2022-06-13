@@ -71,6 +71,10 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
     if (threadCount != null && StringUtils.isNumeric(threadCount)) {
       threads = Integer.parseInt(threadCount);
     }
+    int fixedThreads = fixedThreadCount(threads);
+    if (fixedThreads > 0) {
+      threads = fixedThreads;
+    }
     LOG.debug(threads + " threads to use in execution.");
     // ExecutorService executor = Executors.newFixedThreadPool(threads, new
     // WorkerThreadFactory(getThreadName()));
@@ -323,5 +327,9 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
    */
   protected boolean rolloverSupported() {
     return false;
+  }
+
+  protected int fixedThreadCount(int currCount) {
+    return 0;
   }
 }

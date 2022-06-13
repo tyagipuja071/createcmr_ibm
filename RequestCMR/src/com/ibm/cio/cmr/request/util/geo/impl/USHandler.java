@@ -1101,6 +1101,13 @@ public class USHandler extends GEOHandler {
           }
         }
       }
+
+      // CREATCMR-6081
+      if (StringUtils.isEmpty(data.getIccTaxClass())) {
+        data.setIccTaxClass("000");
+      }
+      // CREATCMR-6081
+
     }
 
     data.setTaxExemptStatus1(data.getSpecialTaxCd());

@@ -6,7 +6,6 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1300,11 +1299,7 @@ public class IsraelHandler extends EMEAHandler {
     mergedAddrSet.addAll(allAddrSeqFromAddr);
     mergedAddrSet.addAll(allAddrSeqFromRdc);
 
-    int candidateSeqNum = Collections.max(mergedAddrSet) + 1;
-
-    if (candidateSeqNum > MAX_ADDR_SEQ) {
-      candidateSeqNum = 1;
-    }
+    int candidateSeqNum = 1;
 
     int availSeqNum = 0;
     if (mergedAddrSet.contains(candidateSeqNum)) {
