@@ -3813,6 +3813,9 @@ function setCoverageFieldsOnScenarioChange(fromAddress, scenario, scenarioChange
   if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
     // 2H21 Coverage Changes
     set2H21CoverageChanges(fromAddress, scenario, scenarioChanged, currentLanded)
+    
+    //2H22 Coverage Changes
+    set2H22CoverageChanges(fromAddress, scenario, scenarioChanged, currentLanded)
   }
 }
 
@@ -3843,6 +3846,7 @@ function setCoverageIsuCtcBasedOnLandCntry(fromAddress, currentLanded) {
   if (isCoverage34QCountry(landedCountry)) {
     FormManager.setValue('isuCd', '34');
     FormManager.setValue('clientTier', 'Q');
+     
   }
 }
 
@@ -4133,6 +4137,55 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function isCoverage2H22MEACountry(country) {
+  var emaCountryList = [ 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'ML', 'MR', 'MA', 'NE', 'SN', 'TG', 'AE' ,'CI'];
+  return emaCountryList.includes(country);
+}
+
+function isCoverage2H22Subregion(countryCd) {
+  var subRegionList = [ 'FR','DZ','GF','KM','MC','NC','PF','PM','WF','YT','NC','VU','RE','MQ','GP','AD'];
+  return subRegionList.includes(countryCd);
+}
+
+function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
+  var landedCountry = getSoldToLanded();
+  if (fromAddress && currentLanded != undefined) {
+    landedCountry = currentLanded;
+  } else {
+    landedCountry = getSoldToLanded();
+  }
+  
+  var countyCd = null;
+  var countryUse = FormManager.getActualValue('countryUse');
+  if (countryUse.length > 3) {
+    countyCd = countryUse.substring(3, 5);
+  } else {
+    countyCd = "FR";
+  }
+  if (isCoverage2H22MEACountry(landedCountry) && isCoverage2H22Subregion(countyCd)) {
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
+    FormManager.setValue('salesBusOffCd', '730730')
+  } else {
+    FormManager.setValue('isuCd', '21');
+    FormManager.setValue('clientTier', '');
+    FormManager.setValue('salesBusOffCd', '200200');
+  }
+}
+function set2H22CoverageChanges(fromAddress, scenario, scenarioChanged, currentLanded) {
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+  
+    var custGrp = FormManager.getActualValue('custGrp');
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    // Set ISU/CTC based on scenario and landed
+    
+    var custSubGrpArray = ['CBMME', 'CBFIN','CBVRN','CBSTC','CBIEM','XBLUM','CBDPT'];
+    if (custSubGrpArray.includes(custSubGrp)) {
+      setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded);
+   }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -4207,5 +4260,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.FR);
   GEOHandler.registerValidator(clientTierValidator, [ '706' ], null, true);
+  GEOHandler.addAddrFunction(set2H22CoverageChanges, '706');
+  GEOHandler.addAfterTemplateLoad(set2H22CoverageChanges, '706');
 
 });
