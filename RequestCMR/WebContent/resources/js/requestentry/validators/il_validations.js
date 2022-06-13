@@ -21,12 +21,6 @@ function addHandlersForIL() {
     }
   }
 
-  if (_CTCHandlerIL == null) {
-    _CTCHandlerIL = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setEnterpriseSalesRepSBO(value);
-    });
-  }
-
   if (_ISUHandlerIL == null) {
     _ISUHandlerIL = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       requireCtcByISU(value);
@@ -34,6 +28,12 @@ function addHandlersForIL() {
     });
   }
   
+  if (_CTCHandlerIL == null) {
+    _CTCHandlerIL = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+      setEnterpriseSalesRepSBO(value);
+    });
+  }
+
   if (_streetHandler == null) {
     _streetHandler = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
       setStreetContBehavior();
