@@ -73,7 +73,7 @@ public class DefaultApprovalsElement extends ApprovalsElement {
         approvalsResult = service.processDefaultApproval(entityManager, reqId, admin.getReqType(), requester, model);
         LOG.trace("China Approvals result: " + approvalsResult);
       }
-    } else {
+    } else if (!engineData.hasPositiveCheckStatus("SKIP_APPROVALS")) {
       LOG.info("Checking and generating required approvals for Request " + reqId);
 
       LOG.debug("Merging admin entity before checking for default approvals.");

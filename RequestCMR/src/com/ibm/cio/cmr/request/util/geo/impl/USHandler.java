@@ -546,6 +546,7 @@ public class USHandler extends GEOHandler {
         FindCMRRecordModel newRecord = new FindCMRRecordModel();
         FindCMRRecordModel oldRecord = model.getItems().get(0);
         newRecord.setCmrAddrTypeCode("ZI01");
+        newRecord.setCmrAddrSeq("002");
         newRecord.setCmrCountryLanded(oldRecord.getCmrCountryLanded());
         newRecord.setCmrCity(oldRecord.getCmrCity());
         newRecord.setCmrCity2(oldRecord.getCmrCity2());
@@ -1100,6 +1101,13 @@ public class USHandler extends GEOHandler {
           }
         }
       }
+
+      // CREATCMR-6081
+      if (StringUtils.isEmpty(data.getIccTaxClass())) {
+        data.setIccTaxClass("000");
+      }
+      // CREATCMR-6081
+
     }
 
     data.setTaxExemptStatus1(data.getSpecialTaxCd());
