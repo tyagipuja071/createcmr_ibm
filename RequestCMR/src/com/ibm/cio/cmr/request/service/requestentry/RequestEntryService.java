@@ -532,6 +532,13 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     if (transitionToNext && "PCP".equals(trans.getNewReqStatus())) {
       admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
       admin.setProcessedTs(null);
+      if (geoHandler != null && LAHandler.isLACountry(model.getCmrIssuingCntry())) {
+        boolean crosCompleted = reqIsCrosCompleted(entityManager, admin.getId().getReqId());
+        if (crosCompleted) {
+          this.log.debug("Setting to PCO:" + trans.getNewReqStatus());
+          admin.setReqStatus("PCO");
+        }
+      }
     }
 
     if (transitionToNext) {
@@ -1660,5 +1667,16 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         this.log.warn("Name for " + admin.getLockBy() + " cannot be retrieved.");
       }
     }
+  }
+
+  private boolean reqIsCrosCompleted(EntityManager entityManager, Long reqId) {
+    String sql = ExternalizedQuery.getSql("LA.GETCOUNT_COM_NOTIFY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    int count = query.getSingleResult(Integer.class);
+    if (count > 0) {
+      return true;
+    }
+    return false;
   }
 }
