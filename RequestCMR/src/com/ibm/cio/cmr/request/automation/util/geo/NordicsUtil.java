@@ -108,18 +108,26 @@ public class NordicsUtil extends AutomationUtil {
   public static final String EE_INTSO_LOCAL = "EEISO";
   public static final String EE_IBME_LOCAL = "EEIBM";
   public static final String EE_PRIPE_LOCAL = "EEPRI";
+  public static final String EE_INTER_LOCAL = "EEINT";
+  public static final String EE_BUSPR_LOCAL = "EEBUS";
+
+  
 
   public static final String LT_COMME_LOCAL = "LTCOM";
   public static final String LT_GOV_LOCAL = "LTGOV";
   public static final String LT_INTSO_LOCAL = "LTISO";
   public static final String LT_IBME_LOCAL = "LTIBM";
   public static final String LT_PRIPE_LOCAL = "LTPRI";
+  public static final String LT_INTER_LOCAL = "LTINT";
+  public static final String LT_BUSPR_LOCAL = "LTBUS";
 
   public static final String LV_COMME_LOCAL = "LVCOM";
   public static final String LV_GOV_LOCAL = "LVGOV";
   public static final String LV_INTSO_LOCAL = "LVISO";
   public static final String LV_IBME_LOCAL = "LVIBM";
   public static final String LV_PRIPE_LOCAL = "LVPRI";
+  public static final String LV_INTER_LOCAL = "LVINT";
+  public static final String LV_BUSPR_LOCAL = "LVBUS";
 
   // Norway and Sweden
   public static final String COMME_LOCAL = "COMME";
@@ -263,6 +271,8 @@ public class NordicsUtil extends AutomationUtil {
     case FI_BUSPR_LOCAL:
     case BUSPR_LOCAL:
     case CROSS_BUSPR:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     case DK_PRIPE_LOCAL:
     case DK_IBMEM_LOCAL:
@@ -302,6 +312,20 @@ public class NordicsUtil extends AutomationUtil {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_FIELD_COMPUTATION);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_RETRIEVE_VALUES);
+      break;
+      
+    case FI_INTER_LOCAL:
+    case EE_INTER_LOCAL:
+    case EE_BUSPR_LOCAL:
+    case LT_BUSPR_LOCAL:
+    case LT_INTER_LOCAL:
+    case LV_BUSPR_LOCAL:
+    case LV_INTER_LOCAL:
+    case INTER_LOCAL:
+    case CROSS_INTER:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+
     }
 
     return true;
