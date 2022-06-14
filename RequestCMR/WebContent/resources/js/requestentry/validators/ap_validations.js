@@ -241,6 +241,9 @@ function addAfterConfigAP() {
     onInacTypeChange();
     setInacByCluster();
   }
+  if (cntry == '834') {
+    addVatValidationforSingapore();
+  }
 }
 
 function setInacByCluster() {
