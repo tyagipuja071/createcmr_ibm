@@ -344,7 +344,7 @@ public class USHandler extends GEOHandler {
       String dbId = QueryClient.USCMR_APP_ID;
 
       LOG.debug("Getting existing values from US CMR DB..");
-      boolean retrieved = queryAndAssign(url, sql, results, data, dbId);
+      boolean retrieved = queryAndAssign(url, sql, results, data, admin, dbId);
 
       LOG.debug("US CMR Data retrieved? " + retrieved);
       if (retrieved) {
@@ -427,7 +427,7 @@ public class USHandler extends GEOHandler {
 
   }
 
-  private boolean queryAndAssign(String url, String sql, FindCMRResultModel model, Data data, String dbId) throws Exception {
+  private boolean queryAndAssign(String url, String sql, FindCMRResultModel model, Data data, Admin admin, String dbId) throws Exception {
 
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
@@ -541,7 +541,8 @@ public class USHandler extends GEOHandler {
         // }
       }
 
-      if ((model.getItems() != null && model.getItems().size() == 1)) {
+      // skipping below for FedCMR -> CREATCMR -6117
+      if (!"FEDCMR".equalsIgnoreCase(admin.getSourceSystId()) && (model.getItems() != null && model.getItems().size() == 1)) {
         LOG.debug("Forcing a second address...");
         FindCMRRecordModel newRecord = new FindCMRRecordModel();
         FindCMRRecordModel oldRecord = model.getItems().get(0);
