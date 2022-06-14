@@ -3845,8 +3845,7 @@ function setCoverageIsuCtcBasedOnLandCntry(fromAddress, currentLanded) {
   }
   if (isCoverage34QCountry(landedCountry)) {
     FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier', 'Q');
-     
+    FormManager.setValue('clientTier', 'Q');     
   }
 }
 
@@ -4137,6 +4136,7 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+//CREATCMR-6000 2H22 coverage changes
 function isCoverage2H22MEACountry(country) {
   var emaCountryList = [ 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'ML', 'MR', 'MA', 'NE', 'SN', 'TG', 'AE' ,'CI'];
   return emaCountryList.includes(country);
@@ -4162,14 +4162,16 @@ function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
   } else {
     countyCd = "FR";
   }
-  if (isCoverage2H22MEACountry(landedCountry) && isCoverage2H22Subregion(countyCd)) {
-    FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier', 'Q');
-    FormManager.setValue('salesBusOffCd', '730730')
-  } else {
-    FormManager.setValue('isuCd', '21');
-    FormManager.setValue('clientTier', '');
-    FormManager.setValue('salesBusOffCd', '200200');
+  if (isCoverage2H22Subregion(countyCd)) {
+    if (isCoverage2H22MEACountry(landedCountry)) {
+      FormManager.setValue('isuCd', '34');
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('salesBusOffCd', '730730')
+    } else {
+      FormManager.setValue('isuCd', '21');
+      FormManager.setValue('clientTier', '');
+      FormManager.setValue('salesBusOffCd', '200200');
+    }
   }
 }
 function set2H22CoverageChanges(fromAddress, scenario, scenarioChanged, currentLanded) {
@@ -4260,7 +4262,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.FR);
   GEOHandler.registerValidator(clientTierValidator, [ '706' ], null, true);
-  GEOHandler.addAddrFunction(set2H22CoverageChanges, '706');
-  GEOHandler.addAfterTemplateLoad(set2H22CoverageChanges, '706');
+  GEOHandler.addAddrFunction(set2H22CoverageChanges, GEOHandler.FR);
+  GEOHandler.addAfterTemplateLoad(set2H22CoverageChanges, GEOHandler.FR);
 
 });
