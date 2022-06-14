@@ -146,6 +146,8 @@ public class SwitzerlandUtil extends AutomationUtil {
         details.append("Third Party/Data Center request needs further validation.").append("\n");
         break;
       case SCENARIO_BUSINESS_PARTNER:
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
         return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
       }
     }
