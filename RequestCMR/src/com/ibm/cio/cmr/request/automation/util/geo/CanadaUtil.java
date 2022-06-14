@@ -574,6 +574,19 @@ public class CanadaUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
 
+    List<Addr> addresses = null;
+    addresses = requestData.getAddresses();
+
+    boolean isVatDocRequired = false;
+
+    for (Addr addr : addresses) {
+      String stateProv = addr.getStateProv();
+      List<String> STATES_TO_VALIDATE_TAXDOC = Arrays.asList("MC", "MD", "SK");
+      if (STATES_TO_VALIDATE_TAXDOC.contains(stateProv)) {
+        isVatDocRequired = true;
+      }
+    }
+
     // if (handlePrivatePersonRecord(entityManager, admin, output, validation,
     // engineData)) {
     // return true;
@@ -672,11 +685,13 @@ public class CanadaUtil extends AutomationUtil {
           break;
         case "Tax Code / Estab. Function Code":
         case "PST Exemption License Number":
-          if (!isVatDocAttachmentProvided(entityManager, admin.getId().getReqId())) {
-            details.append("\nVAT/TAX Documentation required to be attached when updating EFC/PST Exemption License Number.\n");
-            engineData.addRejectionComment("TAX", "VAT/TAX Documentation required when updating EFC/PST Exemption Licenso No.",
-                "VAT/TAX Documentation required when updating EFC/PST Exemption Licenso No", "");
-            output.setOnError(true);
+          if (isVatDocRequired) {
+            if (!isVatDocAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              details.append("\nVAT/TAX Documentation required to be attached when updating EFC/PST Exemption License Number.\n");
+              engineData.addRejectionComment("TAX", "VAT/TAX Documentation required when updating EFC/PST Exemption Licenso No.",
+                  "VAT/TAX Documentation required when updating EFC/PST Exemption Licenso No", "");
+              output.setOnError(true);
+            }
           }
           break;
         case "Client Tier":
