@@ -3043,7 +3043,7 @@ public class TransConnService extends BaseBatchService {
         partialCommit(entityManager);
 
       } catch (Exception e) {
-        LOG.error("Error in processing Aborted Record wit Request ID " + id + " [" + e.getMessage() + "]", e);
+        LOG.error("Error in processing Reprocess RDC Record with Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
   }
