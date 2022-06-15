@@ -3813,9 +3813,7 @@ function setCoverageFieldsOnScenarioChange(fromAddress, scenario, scenarioChange
   if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
     // 2H21 Coverage Changes
     set2H21CoverageChanges(fromAddress, scenario, scenarioChanged, currentLanded)
-    
-    //2H22 Coverage Changes
-    set2H22CoverageChanges(fromAddress, scenario, scenarioChanged, currentLanded)
+   
   }
 }
 
@@ -4148,13 +4146,13 @@ function isCoverage2H22Subregion(countryCd) {
 }
 
 function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
-  var landedCountry = getSoldToLanded();
+
   if (fromAddress && currentLanded != undefined) {
     landedCountry = currentLanded;
   } else {
     landedCountry = getSoldToLanded();
   }
-  
+
   var countyCd = null;
   var countryUse = FormManager.getActualValue('countryUse');
   if (countryUse.length > 3) {
@@ -4162,32 +4160,63 @@ function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
   } else {
     countyCd = "FR";
   }
-  if (isCoverage2H22Subregion(countyCd)) {
-    if (isCoverage2H22MEACountry(landedCountry)) {
-      FormManager.setValue('isuCd', '34');
-      FormManager.setValue('clientTier', 'Q');
-      FormManager.setValue('salesBusOffCd', '730730')
-    } else {
-      FormManager.setValue('isuCd', '21');
-      FormManager.setValue('clientTier', '');
-      FormManager.setValue('salesBusOffCd', '200200');
+
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  // Set ISU/CTC based on scenario and landed
+  var custSubGrpArray = [ 'CBMME', 'CBFIN', 'CBVRN', 'CBSTC', 'CBIEM', 'XBLUM', 'CBDPT' ];
+  if (!custSubGrpArray.includes(custSubGrp)) {
+    return;
+  }
+
+  if (countyCd != '' && landedCountry != '') {
+    if (isCoverage2H22Subregion(countyCd)) {
+      if (isCoverage2H22MEACountry(landedCountry)) {
+        FormManager.setValue('isuCd', '34');
+        FormManager.setValue('clientTier', 'Q');
+        FormManager.setValue('salesBusOffCd', '730730')
+      } else {
+        FormManager.setValue('isuCd', '21');
+        FormManager.setValue('clientTier', '');
+        FormManager.setValue('salesBusOffCd', '200200');
+      }
     }
   }
 }
-function set2H22CoverageChanges(fromAddress, scenario, scenarioChanged, currentLanded) {
-  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
-  
-    var custGrp = FormManager.getActualValue('custGrp');
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    // Set ISU/CTC based on scenario and landed
-    
-    var custSubGrpArray = ['CBMME', 'CBFIN','CBVRN','CBSTC','CBIEM','XBLUM','CBDPT'];
-    if (custSubGrpArray.includes(custSubGrp)) {
-      setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded);
-   }
+
+function set2H22CoverageChanges() {
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
   }
+  var currentLandedCountry = getSoldToLanded();
+  setCoverage2H22IsuCtcSBOBasedOnLandCntry(true, currentLandedCountry);
 }
 
+var _oldLandedCountry = '';
+function set2H22CoverageChangesOnLandedCoutrychange() {
+
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var addrType = FormManager.getActualValue('addrType');
+
+  if (addrType == 'ZS01') {
+    if (_oldLandedCountry == '') {
+      // first load - Address modal load
+      _oldLandedCountry = getSoldToLanded();
+    } else {
+      // second load - user clicks Save
+      var currentLandedCountry = FormManager.getActualValue('landCntry');
+      var valueChanged = _oldLandedCountry != currentLandedCountry;
+      if (valueChanged) {
+        setCoverage2H22IsuCtcSBOBasedOnLandCntry(true, currentLandedCountry)
+      }
+
+    }
+  }
+}
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -4262,7 +4291,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.FR);
   GEOHandler.registerValidator(clientTierValidator, [ '706' ], null, true);
-  GEOHandler.addAddrFunction(set2H22CoverageChanges, GEOHandler.FR);
-  GEOHandler.addAfterTemplateLoad(set2H22CoverageChanges, GEOHandler.FR);
+  GEOHandler.addAddrFunction(set2H22CoverageChangesOnLandedCoutrychange, '706');
+  GEOHandler.addAfterTemplateLoad(set2H22CoverageChanges, '706');
 
 });
