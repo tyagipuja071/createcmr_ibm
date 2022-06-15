@@ -2192,7 +2192,7 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
   if (reqType != 'C') {
     return;
   }
-  if (reqType == 'C' && scenarioChanged) {
+  if (reqType == 'C' && scenarioChanged && !fromAddress) {
 
     if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO') {
       FormManager.setValue('repTeamMemberNo', '000993');
