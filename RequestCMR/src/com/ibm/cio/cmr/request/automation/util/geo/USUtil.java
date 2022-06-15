@@ -1414,9 +1414,11 @@ public class USUtil extends AutomationUtil {
       LOG.debug("--------- Customer Type is : " + custTypCd);
     }
 
-    // if (!StringUtils.isBlank(admin.getCustType())) {
-    // custTypCd = admin.getCustType();
-    // }
+    if (StringUtils.isBlank(custTypCd)) {
+      if (!StringUtils.isBlank(admin.getCustType())) {
+        custTypCd = admin.getCustType();
+      }
+    }
 
     // US restrict to LOV mapping
     String usRestrictToLOV = "";
