@@ -45,6 +45,9 @@ public class TransConnMultiEntryPoint extends BatchEntryPoint {
       service.execute();
     }
 
+    service.setMode(Mode.LAReprocess);
+    service.execute();
+
   }
 
 }

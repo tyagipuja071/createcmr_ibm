@@ -182,7 +182,7 @@ public class TransConnService extends BaseBatchService {
     }
   }
 
-  private List<Long> gatherLAReprocessRdcRecords(EntityManager entityManager) {
+  protected List<Long> gatherLAReprocessRdcRecords(EntityManager entityManager) {
     // search for LA records to be reprocessed in RDC
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR.LA_RDC_REPROCESS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
