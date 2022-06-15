@@ -1716,7 +1716,7 @@ public class TransConnService extends BaseBatchService {
       for (Addr addr : addresses) {
 
         if (isDataUpdated || "Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()) || "Y".equals(addr.getImportInd())
-            || "D".equals(addr.getImportInd())) {
+            || "D".equals(addr.getImportInd()) || StringUtils.isNotBlank(addr.getId().getAddrType())) {
           continueUpdate = true;
         }
 
