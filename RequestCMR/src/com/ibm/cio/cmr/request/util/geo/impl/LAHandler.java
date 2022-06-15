@@ -2150,13 +2150,13 @@ public class LAHandler extends GEOHandler {
       // data.setFunc("R");
     }
 
-    if (data.getCustSubGrp().equals(CmrConstants.CUST_TYPE_INTER)) {
+    if (CmrConstants.CUST_TYPE_INTER.equals(data.getCustSubGrp())) {
       data.setCustClass("81");
-    } else if (data.getCustSubGrp().equals(CmrConstants.CUST_TYPE_BUSPR)) {
+    } else if (CmrConstants.CUST_TYPE_BUSPR.equals(data.getCustSubGrp())) {
       data.setCustClass("45");
-    } else if (data.getCustSubGrp().equals(CmrConstants.CUST_TYPE_PRIPE)) {
+    } else if (CmrConstants.CUST_TYPE_PRIPE.equals(data.getCustSubGrp())) {
       data.setCustClass("60");
-    } else if (data.getCustSubGrp().equals(CmrConstants.CUST_TYPE_IBMEM)) {
+    } else if (CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())) {
       data.setCustClass("71");
     } else {
       data.setCustClass("11");
@@ -2165,9 +2165,9 @@ public class LAHandler extends GEOHandler {
     // set custClass for Creates only
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
       if (isBRIssuingCountry(issuingCntry)) {
-        if (data.getCustSubGrp().equals(CmrConstants.CUST_TYPE_LEASI) && "34270520000136".equals(data.getVat())) {
+        if (CmrConstants.CUST_TYPE_LEASI.equals(data.getCustSubGrp()) && "34270520000136".equals(data.getVat())) {
           data.setCustClass("33");
-        } else if (data.getCustSubGrp().equals(CmrConstants.CUST_TYPE_LEASI) && !"34270520000136".equals(data.getVat())) {
+        } else if (CmrConstants.CUST_TYPE_LEASI.equals(data.getCustSubGrp()) && !"34270520000136".equals(data.getVat())) {
           data.setCustClass("34");
         } else if (("GD".equals(data.getCrosSubTyp()) || "GI".equals(data.getCrosSubTyp())) && "PF".equals(data.getGovType())) {
           data.setCustClass("12");
