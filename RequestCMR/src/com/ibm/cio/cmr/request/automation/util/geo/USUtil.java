@@ -1119,8 +1119,15 @@ public class USUtil extends AutomationUtil {
               addrTypesChanged.add(addrModel.getAddrTypeCode());
             }
           }
+          boolean isBPAccount = false;
+          if (StringUtils.isNotBlank(data.getRestrictTo())) {
+            if ("BPQS".equals(data.getRestrictTo()) || "IRCSO".equals(data.getRestrictTo())) {
+              isBPAccount = true;
+            }
+          }
+
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())
-              && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited))) {
+              && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited)) && (!isBPAccount)) {
             closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
           }
           if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZS01"))) {
@@ -1265,11 +1272,7 @@ public class USUtil extends AutomationUtil {
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, addrType);
     if (response.getSuccess()) {
-      if ("5".equals(data.getCustGrp()) || ("BPQS".equals(data.getRestrictTo()) || "IRCSO".equals(data.getRestrictTo()))) {
-        details.append(addrDesc + " address details matched successfully with High Quality D&B Matches.").append("\n");
-        validation.setMessage("Validated.");
-        validation.setSuccess(true);
-      } else if (response.getMatched() && !response.getMatches().isEmpty()) {
+      if (response.getMatched() && !response.getMatches().isEmpty()) {
         if (DnBUtil.hasValidMatches(response)) {
           boolean isAddressMatched = false;
           for (DnBMatchingResponse record : response.getMatches()) {
@@ -1365,6 +1368,7 @@ public class USUtil extends AutomationUtil {
     // get request admin and data
 
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
 
     String custSubGroup = "";
 
@@ -1421,6 +1425,7 @@ public class USUtil extends AutomationUtil {
     if (StringUtils.isBlank(custTypCd)) {
       if (!StringUtils.isBlank(admin.getCustType())) {
         custTypCd = admin.getCustType();
+        LOG.debug("--------- Customer Type is From admin : " + custTypCd);
       }
     }
 
@@ -1510,6 +1515,8 @@ public class USUtil extends AutomationUtil {
           custSubGroup = SC_CSP;
         } else if (("11".equals(custClass) || "18".equals(custClass) || "19".equals(custClass)) && StringUtils.isBlank(usRestricTo)) {
           custSubGroup = SC_COMM_REGULAR;
+        } else if ("BYMODEL".equals(data.getCustSubGrp())) {
+          custSubGroup = SC_BYMODEL;
         }
       }
     } else if (STATE_LOCAL.equals(custTypCd)) {
