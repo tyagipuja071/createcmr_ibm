@@ -699,15 +699,15 @@ public class USHandler extends GEOHandler {
       } else {
         // break everything here if needed
         String addrTxt = address.getAddrTxt();
-        if (addrTxt != null && addrTxt.length() > 35) {
-          splitAddress(address, address.getAddrTxt(), "", 35, 35);
+        if (addrTxt != null && addrTxt.length() > 24) {
+          splitAddress(address, address.getAddrTxt(), "", 24, 24);
         }
       }
     } else {
       // break everything here if needed
       String addrTxt = address.getAddrTxt();
-      if (addrTxt != null && addrTxt.length() > 35) {
-        splitAddress(address, address.getAddrTxt(), "", 35, 35);
+      if (addrTxt != null && addrTxt.length() > 24) {
+        splitAddress(address, address.getAddrTxt(), "", 24, 24);
       }
     }
     // no cmr no, manual parse

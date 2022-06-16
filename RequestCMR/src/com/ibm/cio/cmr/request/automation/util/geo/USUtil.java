@@ -1265,7 +1265,11 @@ public class USUtil extends AutomationUtil {
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, addrType);
     if (response.getSuccess()) {
-      if (response.getMatched() && !response.getMatches().isEmpty()) {
+      if ("5".equals(data.getCustGrp()) || ("BPQS".equals(data.getRestrictTo()) || "IRCSO".equals(data.getRestrictTo()))) {
+        details.append(addrDesc + " address details matched successfully with High Quality D&B Matches.").append("\n");
+        validation.setMessage("Validated.");
+        validation.setSuccess(true);
+      } else if (response.getMatched() && !response.getMatches().isEmpty()) {
         if (DnBUtil.hasValidMatches(response)) {
           boolean isAddressMatched = false;
           for (DnBMatchingResponse record : response.getMatches()) {
