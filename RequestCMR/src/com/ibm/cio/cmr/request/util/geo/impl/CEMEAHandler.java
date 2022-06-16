@@ -1088,8 +1088,6 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry())) {
       if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
         data.setEnterprise(mainRecord.getCmrNum());
-      } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-        data.setClientTier("");
       }
     }
 
