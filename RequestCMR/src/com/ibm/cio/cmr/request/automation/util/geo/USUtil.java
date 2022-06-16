@@ -1163,7 +1163,7 @@ public class USUtil extends AutomationUtil {
             }
 
             if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))
-                && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited))) {
+                && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited)) && (!isBPAccount)) {
               closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
             if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZI01"))) {
