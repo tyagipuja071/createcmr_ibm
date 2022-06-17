@@ -1276,7 +1276,7 @@ function addTinNumberValidationTz() {
             id : 'taxCd1',
             type : 'text',
             name : 'taxCd1'
-          }, false, 'Invalid format of Tin Number. Format should be NNN-NNN-NNN.');
+          }, false, 'Invalid format of TIN Number. Format should be NNN-NNN-NNN.');
         }
         return new ValidationResult(null, true);
       }
@@ -2216,10 +2216,8 @@ function enableTinNumber() {
       if (soldToLandedCountry == 'KE') {
         FormManager.enable('taxCd1');
       } else {
-        
         FormManager.readOnly('taxCd1');
       }
-
     }
   }
 }
