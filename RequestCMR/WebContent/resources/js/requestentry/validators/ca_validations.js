@@ -620,6 +620,8 @@ var _postalCodeHandler = null;
 var _salesBusOffCdHandler = null;
 var _gtcAddrTypeHandlerCA = [];
 var _ISUHandler = null;
+var _efcHandler = null;
+
 function addFieldHandlers() {
 
   if (_inacCodeHandler == null) {
@@ -692,6 +694,13 @@ function addFieldHandlers() {
       }
     });
   }
+
+  if (_efcHandler == null) {
+    _efcHandler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
+      setCustClassByEfc(value);
+    });
+  }
+
 }
 
 var _pstExemptHandler = null;
@@ -1359,6 +1368,26 @@ function clientTierValidator() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function setCustClassByEfc(efcValue) {
+
+  if (!efcValue) {
+    FormManager.setValue('custClass', '');
+    return;
+  }
+
+  var qParams = {
+    _qall : 'Y',
+    ISSUING_CNTRY : '649',
+    CMT : '%' + efcValue + '%'
+  };
+
+  var result = cmr.query('GET.CUSTCLASS_BY_EFC', qParams);
+  if (result != null && result[0] != null) {
+    FormManager.setValue('custClass', result[0].ret1);
+  }
+
 }
 
 /* Register CA Javascripts */
