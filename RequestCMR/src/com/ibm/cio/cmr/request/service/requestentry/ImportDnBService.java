@@ -1032,7 +1032,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     String stateCode = null;
     String stateName = cmr.getCmrState().trim();
     List<Object[]> results = new ArrayList<Object[]>();
-    String cnStateProvCD = ExternalizedQuery.getSql("GET.CN_STATE_PROV_CD");
+    String cnStateProvCD = ExternalizedQuery.getSql("GET.WW_STATE_PROV_CD");
     PreparedQuery query = new PreparedQuery(entityManager, cnStateProvCD);
     query.setParameter("STATE_PROV_DESC", stateName);
     results = query.getResults();
