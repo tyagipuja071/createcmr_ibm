@@ -819,6 +819,12 @@ function addCompanyEnterpriseValidation() {
         var company = FormManager.getActualValue('company');
         var enterprise = FormManager.getActualValue('enterprise');
 
+        ret = cmr.query('BP.GET_PROCESSING_TYP', {
+          CNTRY_CD : SysLoc.USA
+        });
+        if (ret && ret.ret1 && ret.ret1 != '' && ret.ret1 == 'TC') {
+          return new ValidationResult(null, true);
+        }
         custNm = custNm.toUpperCase().replaceAll(' ', '');
 
         var chkResult = false;
@@ -949,8 +955,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
   // CREATCMR-4466
-  // GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA
-  // ], null, true);
+  GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA ], null, true);
   GEOHandler.addAfterConfig(lockOrdBlk, [ SysLoc.USA ]);
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.USA ], null, true);
 
