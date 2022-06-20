@@ -2842,6 +2842,7 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
     if (custSubType == 'BUSPR' || custSubType == 'INTER' || custSubType == 'CROBP' || custSubType == 'CROIN' || custSubType == 'BUSSM' || custSubType == 'INTSM' || custSubType == 'BUSVA'
         || custSubType == 'INTVA') {
       FormManager.setValue('isuCd', '21');
+      FormManager.setValue('clientTier', '');
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), [ '0B14A0', '0B1BA0', '0B1GA0', '0B1EA0', '0B11A0', '0B12A0', '0B13A0' ]);
