@@ -1059,12 +1059,12 @@ function setSalesRepValuesIT(isuCd, clientTier) {
     }
     if (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN') {
       FormManager.setValue('isuCd', '21');
-      FormManager.readOnly('clientTier', '7');
+      FormManager.readOnly('clientTier', '');
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), [ '0B14A0', '0B1BA0', '0B1GA0', '0B1EA0', '0B11A0', '0B12A0', '0B13A0' ]);
     }
     if (custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP') {
       FormManager.setValue('isuCd', '21');
-      FormManager.readOnly('clientTier', '7');
+      FormManager.readOnly('clientTier', '');
       FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
       FormManager.enable('repTeamMemberNo');
       FormManager.setValue('repTeamMemberNo', '09ZPA0');
