@@ -4217,6 +4217,19 @@ function set2H22CoverageChangesOnLandedCoutrychange() {
     }
   }
 }
+
+function postBoxValidationBillTo() {
+  var addrType = FormManager.getActualValue('addrType');
+  var importInd = FormManager.getActualValue('importInd');
+  var poBox = FormManager.getActualValue('poBox');
+
+  if (addrType == 'ZP01' && importInd == 'N' && poBox != '') {
+    FormManager.removeValidator('addrTxt', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street name and number' ]);
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -4287,6 +4300,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCoverageFieldsOnScenarioChange, '706');
   GEOHandler.addAddrFunction(setFieldsOnLandedCountryChange, '706');
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, '706', null, true);
+  GEOHandler.addAddrFunction(postBoxValidationBillTo, '706');
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.FR);
