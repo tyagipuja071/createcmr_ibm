@@ -461,7 +461,17 @@ function cmrNoAlreadyExistValidator() {
 
           if (cmrNo.length >= 1 && cmrNo.length != 6) {
             return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
-          } else if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+          } 
+       // prod issue: skip validation for prospect request
+          var ifProspect = FormManager.getActualValue('prospLegalInd');
+          if (dijit.byId('prospLegalInd')) {
+            ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+          }
+          console.log("validateCMRNumber ifProspect:" + ifProspect);
+          if ('Y' == ifProspect) {
+            return new ValidationResult(null, true);
+          }          
+          else if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
