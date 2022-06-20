@@ -492,10 +492,6 @@ public class MCOPtEsHandler extends MCOHandler {
       data.setTaxCd1("");
     }
 
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
-        && (data.getCmrIssuingCntry().equals("838") || data.getCmrIssuingCntry().equals("822")) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
-    }
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setPpsceid("");
     }

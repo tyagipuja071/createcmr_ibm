@@ -1664,10 +1664,6 @@ public class CyprusHandler extends BaseSOFHandler {
         data.setRepTeamMemberNo(repTeamMmberNo);
       }
     }
-    if ((CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()))
-        && SystemLocation.CYPRUS.equalsIgnoreCase(data.getCmrIssuingCntry()) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
-    }
   }
 
   @Override

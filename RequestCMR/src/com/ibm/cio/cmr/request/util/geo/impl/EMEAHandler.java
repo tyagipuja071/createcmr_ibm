@@ -2212,12 +2212,7 @@ public class EMEAHandler extends BaseSOFHandler {
         }
 
         if (StringUtils.isEmpty(data.getClientTier()) && !StringUtils.isEmpty(rdcData.getClientTier())) {
-          List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F", "21", "8B");
-          if (isuCdList.contains(data.getIsuCd()) && (data.getCmrIssuingCntry() == "866" || data.getCmrIssuingCntry() == "754")) {
-            data.setClientTier("");
-          } else {
-            data.setClientTier(rdcData.getClientTier());
-          }
+          data.setClientTier(rdcData.getClientTier());
         }
 
         // sales rep
