@@ -3767,7 +3767,7 @@ public class CyprusHandler extends BaseSOFHandler {
 
   // START -- missing code greece code
   private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = SerializationUtils.clone(addr);
+    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZP01")) {
@@ -3781,7 +3781,7 @@ public class CyprusHandler extends BaseSOFHandler {
   // END -- missing code greece code
 
   private void saveAddrCopyForCy(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = SerializationUtils.clone(addr);
+    Addr addrCopy =(Addr) SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZI01") || addrType.equals("ZD01") || addrType.equals("ZS02")) {
