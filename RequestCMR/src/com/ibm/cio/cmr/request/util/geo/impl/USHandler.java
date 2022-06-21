@@ -723,6 +723,16 @@ public class USHandler extends GEOHandler {
     }
     // CREATCMR-5830
 
+    // CREATCMR-6183
+    if ("US".equals(processType)) {
+      if ("E".equals(cmr.getUsCmrBpAccountType())) {
+        if ("ZS01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())) {
+          address.setDivn(cmr.getCmrName());
+        }
+      }
+    }
+    // CREATCMR-6183
+
   }
 
   @Override
