@@ -244,6 +244,9 @@ function addAfterConfigAP() {
   if (cntry == '834') {
     addVatValidationforSingapore();
   }
+  if (cntry != SysLoc.HONG_KONG && cntry !=  SysLoc.MACAO && reqType == 'U') {
+    handleExpiredClusterAP();
+  }
 }
 
 function setInacByCluster() {
@@ -4001,6 +4004,42 @@ function addVatValidationforSingapore() {
   }
 }
 
+
+function handleExpiredClusterAP() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var clusterDataRdc = getAPClusterDataRdc();
+  if (clusterDataRdc != null && clusterDataRdc != undefined && clusterDataRdc != '') {
+    var clusterExpired = checkClusterExpired(clusterDataRdc);
+    if (clusterExpired) {
+      handleObseleteExpiredDataForUpdate();
+    }
+  }
+}
+
+// CREATCMR -5269
+function handleObseleteExpiredDataForUpdate() {
+// var isSuperUserMode = isSuperUserMode();
+ var reqType = FormManager.getActualValue('reqType');
+ // lock all the coverage fields and remove validator
+ if (reqType == 'U') {
+   FormManager.readOnly('apCustClusterId');
+   FormManager.readOnly('clientTier');
+   FormManager.readOnly('mrcCd');
+   FormManager.readOnly('inacType');
+   FormManager.readOnly('isuCd');
+   FormManager.readOnly('inacCd');
+   FormManager.removeValidator('apCustClusterId', Validators.REQUIRED);
+   FormManager.removeValidator('clientTier', Validators.REQUIRED);
+   FormManager.removeValidator('isuCd', Validators.REQUIRED);
+   FormManager.removeValidator('mrcCd', Validators.REQUIRED);
+   FormManager.removeValidator('inacType', Validators.REQUIRED);
+   FormManager.removeValidator('inacCd', Validators.REQUIRED);
+ } 
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4159,6 +4198,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateClusterBaseOnScenario, [ SysLoc.SINGAPORE ], null, true);  
   GEOHandler.addAfterConfig(lockInacCodeForIGF, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, SysLoc.INDIA);
+  GEOHandler.addAfterTemplateLoad(handleExpiredClusterAP,  GEOHandler.ASEAN , GEOHandler.ANZ ,  GEOHandler.ISA );
+  GEOHandler.addAfterConfig(handleExpiredClusterAP, GEOHandler.ASEAN , GEOHandler.ANZ ,  GEOHandler.ISA );
   // India Handler
 
 });
