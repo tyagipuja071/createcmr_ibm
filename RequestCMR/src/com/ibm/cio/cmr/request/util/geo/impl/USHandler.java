@@ -756,6 +756,17 @@ public class USHandler extends GEOHandler {
       admin.setOldCustNm2(parts[1]);
     }
 
+    String processingType = getProcessingTypeForUS(entityManager, "897");
+    if ("US".equals(processingType)) {
+      if ("E".equals(currentRecord.getUsCmrBpAccountType())) {
+        parts = splitName(currentRecord.getLeasingCompanyIndc(), null, 35, 24);
+        admin.setMainCustNm1(parts[0]);
+        admin.setOldCustNm1(parts[0]);
+        admin.setMainCustNm2(parts[1]);
+        admin.setOldCustNm2(parts[1]);
+      }
+    }
+
   }
 
   public boolean checkIfTerritory(String land1) throws CmrException {
