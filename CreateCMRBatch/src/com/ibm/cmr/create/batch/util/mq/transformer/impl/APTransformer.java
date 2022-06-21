@@ -182,10 +182,11 @@ public abstract class APTransformer extends MessageTransformer {
         "ID", "BD", "CA", "LK", "TW", "NZ", "VN", "PH", "KR", "MM", "KH", "BN", "PG");
     String line66 = "";
     String scenario = handler.cmrData.getCustSubGrp();
+    boolean update = "U".equals(handler.adminData.getReqType());
     if (!StringUtils.isBlank(addrData.getCity1())) {
       line66 = addrData.getCity1();
       if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry()))) {
-        if (abbrevLandCountries.contains(addrData.getLandCntry()) && "CROSS".equals(scenario))
+        if (!update && abbrevLandCountries.contains(addrData.getLandCntry()) && "CROSS".equals(scenario))
           line66 += " " + "<" + addrData.getLandCntry() + ">";
         else 
           line66 += " " + "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
