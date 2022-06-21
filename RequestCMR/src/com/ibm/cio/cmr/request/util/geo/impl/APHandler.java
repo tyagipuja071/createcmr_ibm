@@ -32,6 +32,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -211,7 +212,7 @@ public abstract class APHandler extends GEOHandler {
     LOG.debug("GbSeg Code / Client Tier: " + data.getClientTier());
     LOG.debug("MrktRespCode: " + data.getMrcCd());
     LOG.debug("Province Code/SellBrnchOff : " + data.getTerritoryCd());
-    
+
   }
 
   @Override
@@ -340,12 +341,46 @@ public abstract class APHandler extends GEOHandler {
     }
 
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getApCustClusterId(), newData.getApCustClusterId())) {
+      // apply country check
+      Boolean expiredCluster = expiredClusterForAP(newData.getApCustClusterId(), oldData.getApCustClusterId(), oldData.getId().getReqId(),
+          oldData.getCmrIssuingCntry());
+      if (expiredCluster) {
+        return;
+      }
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Cluster", "-"));
       update.setNewData(newData.getApCustClusterId());
       update.setOldData(oldData.getApCustClusterId());
       results.add(update);
     }
+  }
+
+  private boolean expiredClusterForAP(String newCluster, String oldCluster, long reqId, String cmrIssuingCntry) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    DataPK dataPK = new DataPK();
+    dataPK.setReqId(reqId);
+    Data data = entityManager.find(Data.class, dataPK);
+    // new Cluster won't be empty if CMDE edits it by SuperUser Mode
+    if (!StringUtils.isEmpty(oldCluster) && StringUtils.isBlank(newCluster)) {
+      String sql = ExternalizedQuery.getSql("QUERY.CHECK.CLUSTER");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
+      query.setParameter("AP_CUST_CLUSTER_ID", oldCluster);
+      query.setForReadOnly(true);
+      List<String> result = query.getResults(String.class);
+      if (result != null && !result.isEmpty()) {
+        return false;
+      }
+      // data.setApCustClusterId(oldCluster);
+      // entityManager.getTransaction().commit();
+      // EntityTransaction tx = em.getTransaction();
+      // tx.begin();
+      // em.persist(someObject);
+      // tx.commit();
+      // entityManager. (data, entityManager);
+      return true;
+    }
+    return false;
   }
 
   @Override
