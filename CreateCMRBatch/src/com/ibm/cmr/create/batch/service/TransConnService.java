@@ -810,10 +810,16 @@ public class TransConnService extends BaseBatchService {
             if (newAddresses != null) {
               for (Addr newAddr : newAddresses) {
                 AddrPK addrPK = newAddr.getId();
-                if (zi01Addr != null && addrPK.getAddrType().equals("ZI01")) {
-                  copyValuesToEntity(zi01Addr, newAddr);
+                if ("ZI01".equals(addrPK.getAddrType())) {
+                  if (zi01Addr != null) {
+                    // there is an actual ZI01 on original request
+                    copyValuesToEntity(zi01Addr, newAddr);
+                    newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
+                  } else {
+                    // ZI01 was dummy copy
+                    newAddr.setImportInd(CmrConstants.YES_NO.Y.toString());
+                  }
                   newAddr.setSapNo(null);
-                  newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
                   newAddr.setChangedIndc(null);
                 } else {
                   copyValuesToEntity(addr, newAddr);
@@ -1735,7 +1741,7 @@ public class TransConnService extends BaseBatchService {
       for (Addr addr : addresses) {
 
         if (isDataUpdated || "Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()) || "Y".equals(addr.getImportInd())
-            || "D".equals(addr.getImportInd())) {
+            || "D".equals(addr.getImportInd()) || StringUtils.isNotBlank(addr.getId().getAddrType())) {
           continueUpdate = true;
         }
 
