@@ -91,9 +91,9 @@ public class SWISSHandler extends GEOHandler {
             && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
           record.setCmrAddrSeq("00001");
           converted.add(record);
+          source.setItems(converted);
         }
       }
-      source.setItems(converted);
     }
   }
 

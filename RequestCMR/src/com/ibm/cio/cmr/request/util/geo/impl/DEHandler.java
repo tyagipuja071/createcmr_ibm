@@ -87,9 +87,9 @@ public class DEHandler extends GEOHandler {
             && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
           record.setCmrAddrSeq("1");
           converted.add(record);
+          source.setItems(converted);
         }
       }
-      source.setItems(converted);
     }
   }
 
