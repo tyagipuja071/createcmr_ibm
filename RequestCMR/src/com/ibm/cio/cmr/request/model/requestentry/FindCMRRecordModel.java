@@ -7,8 +7,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 
-@JsonIgnoreProperties(
-    ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecordModel> {
 
   private static final long serialVersionUID = 1L;
@@ -305,6 +304,16 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String usCmrBpCd;
   private String usCmrBpNm;
   private String usCmrBpType;
+
+  private String usCmrCompanyNm;
+
+  public String getUsCmrCompanyNm() {
+    return usCmrCompanyNm;
+  }
+
+  public void setUsCmrCompanyNm(String usCmrCompanyNm) {
+    this.usCmrCompanyNm = usCmrCompanyNm;
+  }
 
   public String getCustClass() {
     return custClass;

@@ -223,15 +223,15 @@ public class USHandler extends GEOHandler {
 
     // retrieve US_Tax_Data on import
 
-    if (!StringUtils.isEmpty(cmr.getUsCmrTaxType1())) {
-      data.setSpecialTaxCd(cmr.getUsCmrTaxType1());
-      data.setTaxExemptStatus1(cmr.getUsCmrTaxType1());
+    if (!StringUtils.isEmpty(cmr.getUsCmrTaxCertStat1())) {
+      data.setSpecialTaxCd(cmr.getUsCmrTaxCertStat1());
+      data.setTaxExemptStatus1(cmr.getUsCmrTaxCertStat1());
     }
-    if (!StringUtils.isEmpty(cmr.getUsCmrTaxType2())) {
-      data.setTaxExemptStatus2(cmr.getUsCmrTaxType2());
+    if (!StringUtils.isEmpty(cmr.getUsCmrTaxCertStat2())) {
+      data.setTaxExemptStatus2(cmr.getUsCmrTaxCertStat2());
     }
-    if (!StringUtils.isEmpty(cmr.getUsCmrTaxType2())) {
-      data.setTaxExemptStatus3(cmr.getUsCmrTaxType2());
+    if (!StringUtils.isEmpty(cmr.getUsCmrTaxCertStat3())) {
+      data.setTaxExemptStatus3(cmr.getUsCmrTaxCertStat3());
     }
 
     String taxcd1Str = cmr.getUsCmrTaxType1() + cmr.getUsCmrTaxClass1();
@@ -328,6 +328,8 @@ public class USHandler extends GEOHandler {
     } else {
       data.setTaxCd3(taxcd3);
     }
+
+    data.setBpName(cmr.getUsCmrBpAbbrevNm());
 
     // Non-IBM Company
     // data.setNonIbmCompanyInd(main.getUsCmrNonIbmCompInd());
@@ -759,7 +761,7 @@ public class USHandler extends GEOHandler {
     String processingType = getProcessingTypeForUS(entityManager, "897");
     if ("US".equals(processingType)) {
       if ("E".equals(currentRecord.getUsCmrBpAccountType())) {
-        parts = splitName(currentRecord.getLeasingCompanyIndc(), null, 35, 24);
+        parts = splitName(currentRecord.getUsCmrCompanyNm(), null, 35, 24);
         admin.setMainCustNm1(parts[0]);
         admin.setOldCustNm1(parts[0]);
         admin.setMainCustNm2(parts[1]);
