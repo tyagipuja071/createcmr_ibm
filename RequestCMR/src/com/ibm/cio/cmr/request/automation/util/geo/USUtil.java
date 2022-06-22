@@ -1124,8 +1124,15 @@ public class USUtil extends AutomationUtil {
               addrTypesChanged.add(addrModel.getAddrTypeCode());
             }
           }
+          boolean isBPAccount = false;
+          if (StringUtils.isNotBlank(data.getRestrictTo())) {
+            if ("BPQS".equals(data.getRestrictTo()) || "IRCSO".equals(data.getRestrictTo())) {
+              isBPAccount = true;
+            }
+          }
+
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())
-              && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited))) {
+              && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited)) && (!isBPAccount)) {
             closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
           }
           if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZS01"))) {
@@ -1161,7 +1168,7 @@ public class USUtil extends AutomationUtil {
             }
 
             if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))
-                && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited))) {
+                && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited)) && (!isBPAccount)) {
               closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
             if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZI01"))) {
@@ -1366,6 +1373,7 @@ public class USUtil extends AutomationUtil {
     // get request admin and data
 
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
 
     String custSubGroup = "";
 
@@ -1419,9 +1427,12 @@ public class USUtil extends AutomationUtil {
       LOG.debug("--------- Customer Type is : " + custTypCd);
     }
 
-    // if (!StringUtils.isBlank(admin.getCustType())) {
-    // custTypCd = admin.getCustType();
-    // }
+    if (StringUtils.isBlank(custTypCd)) {
+      if (!StringUtils.isBlank(admin.getCustType())) {
+        custTypCd = admin.getCustType();
+        LOG.debug("--------- Customer Type is From admin : " + custTypCd);
+      }
+    }
 
     // US restrict to LOV mapping
     String usRestrictToLOV = "";
@@ -1509,6 +1520,8 @@ public class USUtil extends AutomationUtil {
           custSubGroup = SC_CSP;
         } else if (("11".equals(custClass) || "18".equals(custClass) || "19".equals(custClass)) && StringUtils.isBlank(usRestricTo)) {
           custSubGroup = SC_COMM_REGULAR;
+        } else if ("BYMODEL".equals(data.getCustSubGrp())) {
+          custSubGroup = SC_BYMODEL;
         }
       }
     } else if (STATE_LOCAL.equals(custTypCd)) {

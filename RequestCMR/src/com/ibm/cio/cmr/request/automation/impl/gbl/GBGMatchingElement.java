@@ -185,7 +185,7 @@ public class GBGMatchingElement extends MatchingElement {
 
         int itemNo = 0;
         for (GBGResponse gbg : gbgMatches) {
-          if (gbg.isDomesticGBG() || !domesticGBGFound) {
+          if (gbg.isDomesticGBG()) {
             itemNo++;
             details.append("\n");
             if (gbg.isDnbMatch()) {
