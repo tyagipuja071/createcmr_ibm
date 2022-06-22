@@ -342,8 +342,7 @@ public abstract class APHandler extends GEOHandler {
 
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getApCustClusterId(), newData.getApCustClusterId())) {
       // apply country check
-      Boolean expiredCluster = expiredClusterForAP(newData.getApCustClusterId(), oldData.getApCustClusterId(), oldData.getId().getReqId(),
-          oldData.getCmrIssuingCntry());
+      Boolean expiredCluster = expiredClusterForAP(newData, oldData);
       if (expiredCluster) {
         return;
       }
@@ -355,7 +354,14 @@ public abstract class APHandler extends GEOHandler {
     }
   }
 
-  private boolean expiredClusterForAP(String newCluster, String oldCluster, long reqId, String cmrIssuingCntry) {
+  public boolean expiredClusterForAP(Data newData, DataRdc oldData) {
+    String oldCluster = oldData.getApCustClusterId();
+    String newCluster = newData.getApCustClusterId();
+    long reqId = oldData.getId().getReqId();
+    String cmrIssuingCntry = oldData.getCmrIssuingCntry();
+    if (cmrIssuingCntry.equalsIgnoreCase(SystemLocation.MACAO) || cmrIssuingCntry.equalsIgnoreCase(SystemLocation.HONG_KONG)) {
+      return false;
+    }
     EntityManager entityManager = JpaManager.getEntityManager();
     DataPK dataPK = new DataPK();
     dataPK.setReqId(reqId);
@@ -371,16 +377,24 @@ public abstract class APHandler extends GEOHandler {
       if (result != null && !result.isEmpty()) {
         return false;
       }
-      // data.setApCustClusterId(oldCluster);
-      // entityManager.getTransaction().commit();
-      // EntityTransaction tx = em.getTransaction();
-      // tx.begin();
-      // em.persist(someObject);
-      // tx.commit();
-      // entityManager. (data, entityManager);
       return true;
     }
     return false;
+  }
+
+  public DataRdc getAPClusterDataRdc(long reqId) {
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    List<DataRdc> records = query.getResults(DataRdc.class);
+    if (records != null && records.size() > 0) {
+      for (DataRdc oldData : records) {
+        return oldData;
+      }
+    }
+    return null;
   }
 
   @Override

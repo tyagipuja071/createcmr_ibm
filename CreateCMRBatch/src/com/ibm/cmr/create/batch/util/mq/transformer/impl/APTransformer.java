@@ -17,9 +17,11 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueuePK;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.APHandler;
@@ -87,6 +89,7 @@ public abstract class APTransformer extends MessageTransformer {
   protected void handleDataDefaults(MQMessageHandler handler) {
     // String mrcCode = (("32".equalsIgnoreCase(handler.cmrData.getIsuCd()) ||
     // ("34".equalsIgnoreCase(handler.cmrData.getIsuCd())))) ? "3" : "2";
+    APHandler aphandler = (APHandler) RequestUtils.getGEOHandler(handler.cmrData.getCmrIssuingCntry());
     handler.messageHash.put("MrktRespCode", "3");
     handler.messageHash.put("SellBrnchOff", handler.cmrData.getTerritoryCd());
     handler.messageHash.put("SellDept", handler.cmrData.getIsbuCd());
@@ -133,6 +136,22 @@ public abstract class APTransformer extends MessageTransformer {
     } else {
       // handler.messageHash.put("NotifierSrc1", "");
       handler.messageHash.put("NotifierSrc2", "");
+    }
+
+    // Handling obsolete data
+    if (handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.KOREA)) {
+      DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
+      Boolean expiredCluster = false;
+      if (oldDataRdc != null)
+        expiredCluster = aphandler.expiredClusterForAP(handler.cmrData, oldDataRdc);
+      if (expiredCluster) {
+        handler.messageHash.put("ClusterNo", oldDataRdc.getApCustClusterId());
+        handler.messageHash.put("GB_SegCode", oldDataRdc.getClientTier());
+        handler.messageHash.put("ISU", oldDataRdc.getIsuCd());
+        handler.messageHash.put("MrktRespCode", oldDataRdc.getMrcCd());
+        handler.messageHash.put("inacType", oldDataRdc.getInacType());
+        handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
+      }
     }
   }
 
