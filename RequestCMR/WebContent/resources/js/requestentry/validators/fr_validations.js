@@ -629,6 +629,7 @@ function setSalesRepLogic() {
 var _isuHandler = null;
 var _postCdHandler = null;
 var _isicHandler = null;
+var _postBoxHandler = null;
 function addISUHandler() {
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
@@ -636,6 +637,22 @@ function addISUHandler() {
         value = FormManager.getActualValue('isuCd');
       }
       setCoverageSBOBasedOnIsuCtc();
+    });
+  }
+}
+
+function addPostBoxHandler() {
+  if (_postBoxHandler == null) {
+    _postBoxHandler = dojo.connect(FormManager.getField('poBox'), 'onChange', function() {
+      var poBox = FormManager.getActualValue('poBox');
+      var addrType = FormManager.getActualValue('addrType');
+      var importInd = FormManager.getActualValue('importInd');
+      
+      if (addrType == 'ZP01' && importInd == 'N' && poBox != '') {
+        FormManager.removeValidator('addrTxt', Validators.REQUIRED);
+      } else {
+        FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street name and number' ]);
+      }
     });
   }
 }
@@ -4219,15 +4236,22 @@ function set2H22CoverageChangesOnLandedCoutrychange() {
 }
 
 function postBoxValidationBillTo() {
-  var addrType = FormManager.getActualValue('addrType');
-  var importInd = FormManager.getActualValue('importInd');
-  var poBox = FormManager.getActualValue('poBox');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var addrType = FormManager.getActualValue('addrType');
+        var importInd = FormManager.getActualValue('importInd');
+        var poBox = FormManager.getActualValue('poBox');
+        var addrTxt = FormManager.getActualValue('addrTxt');
 
-  if (addrType == 'ZP01' && importInd == 'N' && poBox != '') {
-    FormManager.removeValidator('addrTxt', Validators.REQUIRED);
-  } else {
-    FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street name and number' ]);
-  }
+        if (addrType == 'ZP01' && importInd == 'N') {
+          if (poBox == '' && addrTxt == '') {
+            return new ValidationResult(null, false, 'Street Name and Number is required.');
+          }
+        }
+       }
+    };
+  })(), null, 'frmCMR_addressModal');
 }
 
 dojo.addOnLoad(function() {
@@ -4239,6 +4263,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addFRClientTierLogic, '706');
   // GEOHandler.addAfterConfig(add32PostCdCntrySBOlogicOnISUChange, '706');
   GEOHandler.addAfterConfig(addISUHandler, '706');
+  GEOHandler.addAfterConfig(addPostBoxHandler, '706');
   GEOHandler.addAfterConfig(addIsicCdHandler, '706');
   // GEOHandler.addAfterConfig(addIBOlogic, '706');
   GEOHandler.registerValidator(addFRAddressTypeValidator, '706', null, true);
@@ -4300,7 +4325,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCoverageFieldsOnScenarioChange, '706');
   GEOHandler.addAddrFunction(setFieldsOnLandedCountryChange, '706');
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, '706', null, true);
-  GEOHandler.addAddrFunction(postBoxValidationBillTo, '706');
+  GEOHandler.registerValidator(postBoxValidationBillTo, '706');
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.FR);
