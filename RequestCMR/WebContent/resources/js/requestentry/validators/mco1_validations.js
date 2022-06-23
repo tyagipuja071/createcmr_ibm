@@ -1932,7 +1932,7 @@ function setCTCValues() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   // Business Partner
-  var custSubGrpForBusinessPartner = [ 'BUSPR', 'LSBP', 'LSXBP', 'NABP', 'NAXBP', 'SZBP', 'SZXBP', 'XBP', 'ZABP', 'ZAXBP', 'LSLOC', 'NALOC', 'SZLOC' ];
+  var custSubGrpForBusinessPartner = [ 'BUSPR', 'LSBP', 'LSXBP', 'NABP', 'NAXBP', 'SZBP', 'SZXBP', 'XBP', 'ZABP', 'ZAXBP', 'LSLOC', 'NALOC', 'SZLOC', 'LSBLC', 'SZBLC', 'NABLC'  ];
 
   // Business Partner
   if (custSubGrpForBusinessPartner.includes(custSubGrp)) {

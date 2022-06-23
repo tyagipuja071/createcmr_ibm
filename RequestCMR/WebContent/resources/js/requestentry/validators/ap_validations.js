@@ -426,7 +426,7 @@ function setIsuOnIsic(){
   
     var clusterDesc = cmr.query('GET.DESC_BY_CLUSTER', qParams);
     if(((cmrIssuingCntry == '616' || cmrIssuingCntry == '796' ) &&(clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S2') || clusterDesc[0].ret1.includes('Default') || 
-        clusterDesc[0].ret1.includes('EC') || clusterDesc[0].ret1.includes('Kyndryl')))) || (cmrIssuingCntry == '616' && (clusterDesc[0].ret2.includes('05221') || clusterDesc[0].ret2.includes('04500')))) {
+        clusterDesc[0].ret1.includes('EC') || clusterDesc[0].ret1.includes('Kyndryl')))) || (cmrIssuingCntry == '616' && (clusterDesc[0].ret2.includes('05221') || clusterDesc[0].ret2.includes('04500') || clusterDesc[0].ret2.includes('08039'))) || (cmrIssuingCntry == '796' && (clusterDesc[0].ret2.includes('08037')))) {
       FormManager.setValue('repTeamMemberNo', '000000');
       FormManager.readOnly('repTeamMemberNo');
     } 
