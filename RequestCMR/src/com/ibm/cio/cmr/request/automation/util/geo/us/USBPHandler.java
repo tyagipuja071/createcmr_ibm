@@ -596,7 +596,7 @@ public abstract class USBPHandler {
     boolean federalPoa = childIsic != null && (childIsic.startsWith("90") || childIsic.startsWith("91") || childIsic.startsWith("92"));
     if (federalPoa) {
       String enterprise = completedChildData.getEnterprise();
-      if (StringUtils.isBlank(enterprise)) {
+      if (StringUtils.isBlank(enterprise) && "TC".equals(processingType)) {
         enterprise = getUSCMREnterprise(completedChildData.getCmrNo());
       }
       ibmCmrModel.setCmrEnterpriseNumber(enterprise);
