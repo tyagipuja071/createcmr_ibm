@@ -76,7 +76,7 @@ public abstract class ASEANTransformer extends APTransformer {
       handler.messageHash.put("ISU", "5K7");
     }
     String clusterID = handler.cmrData.getApCustClusterId();
-    if (clusterID.contains("BLAN")) {
+    if (clusterID != null && clusterID.contains("BLAN")) {
       handler.messageHash.put("ClusterNo", "");
     } else {
       handler.messageHash.put("ClusterNo", clusterID);
