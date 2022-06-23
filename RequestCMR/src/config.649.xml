@@ -132,6 +132,12 @@
 					<width>20</width>
 					<length>1</length>
 					<bdsId>CustLang</bdsId>
+				</column>
+				<column>
+					<label>Established Function Code</label>
+					<dbColumn>TAX_CD1</dbColumn>
+					<width>25</width>
+					<lovId>LocalTax1</lovId>
 				</column>				
 			</columns>
 		</tab>
