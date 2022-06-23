@@ -575,7 +575,7 @@ public abstract class USBPHandler {
    * @param childRequest
    * @return
    */
-  public FindCMRRecordModel createIBMCMRFromChild(RequestData childRequest) {
+  public FindCMRRecordModel createIBMCMRFromChild(RequestData childRequest, EntityManager entityManager) {
     if (childRequest == null || !"COM".equals(childRequest.getAdmin().getReqStatus())) {
       return null;
     }
@@ -584,7 +584,10 @@ public abstract class USBPHandler {
     // make sure we switch the codes to use directly from child
     ibmCmrModel.setCmrNum(completedChildData.getCmrNo());
     String affiliate = completedChildData.getAffiliate();
-    if (StringUtils.isBlank(affiliate)) {
+
+    String processingType = getProcessingTypeForUS(entityManager, "897");
+
+    if (StringUtils.isBlank(affiliate) && "TC".equals(processingType)) {
       affiliate = getUSCMRAffiliate(completedChildData.getCmrNo());
     }
     ibmCmrModel.setCmrAffiliate(affiliate);
@@ -1480,7 +1483,7 @@ public abstract class USBPHandler {
       // prioritize child request here
       if (childCompleted) {
         details.append("Copying CMR values direct CMR " + childCmrNo + " from Child Request " + childRequest.getAdmin().getId().getReqId() + ".\n");
-        this.ibmCmr = createIBMCMRFromChild(childRequest);
+        this.ibmCmr = createIBMCMRFromChild(childRequest, entityManager);
       } else {
         // check IBM Direct CMR
         if (this.ibmCmr == null) {
@@ -1502,6 +1505,14 @@ public abstract class USBPHandler {
 
   public void setIbmCmr(FindCMRRecordModel ibmCmr) {
     this.ibmCmr = ibmCmr;
+  }
+
+  public static String getProcessingTypeForUS(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTO.GET_PROCESSING_TYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", country);
+    query.setForReadOnly(true);
+    return query.getSingleResult(String.class);
   }
 
 }
