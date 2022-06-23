@@ -1946,6 +1946,7 @@ function setCtcOnIsuCdChangeISA() {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     FormManager.enable('clientTier');
   }
+  handleExpiredClusterAP();
 }
 
 function onIsuCdChangeAseanAnzIsa() {
@@ -4007,7 +4008,9 @@ function addVatValidationforSingapore() {
 
 function handleExpiredClusterAP() {
   var reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' || cntry == SysLoc.HONG_KONG || cntry ==  SysLoc.MACAO) {
     return;
   }
   var clusterDataRdc = getAPClusterDataRdc();
@@ -4037,6 +4040,12 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
    FormManager.removeValidator('inacType', Validators.REQUIRED);
    FormManager.removeValidator('inacCd', Validators.REQUIRED);
+   FormManager.setValue('apCustClusterId', '');
+   FormManager.setValue('clientTier', '');
+   FormManager.setValue('isuCd', '');
+   FormManager.setValue('mrcCd', '');
+   FormManager.setValue('inacType', '');
+   FormManager.setValue('inacCd', '');
  } 
 }
 
@@ -4073,6 +4082,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa, GEOHandler.ISA);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.AP);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.AP);
+  GEOHandler.addAddrFunction(handleExpiredClusterAP, GEOHandler.AP);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.AP);
   // GEOHandler.addAddrFunction(addMandateCmrNoForSG, [ SysLoc.SINGAPORE ]);
 
@@ -4198,8 +4208,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateClusterBaseOnScenario, [ SysLoc.SINGAPORE ], null, true);  
   GEOHandler.addAfterConfig(lockInacCodeForIGF, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, SysLoc.INDIA);
-  GEOHandler.addAfterTemplateLoad(handleExpiredClusterAP,  GEOHandler.ASEAN , GEOHandler.ANZ ,  GEOHandler.ISA );
-  GEOHandler.addAfterConfig(handleExpiredClusterAP, GEOHandler.ASEAN , GEOHandler.ANZ ,  GEOHandler.ISA );
+  GEOHandler.addAfterTemplateLoad(handleExpiredClusterAP,  GEOHandler.AP );
+  GEOHandler.addAfterConfig(handleExpiredClusterAP, GEOHandler.AP );
   // India Handler
 
 });
