@@ -4008,6 +4008,8 @@ function addVatValidationforSingapore() {
 
 function handleExpiredClusterAP() {
   var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
   if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' || cntry == SysLoc.HONG_KONG || cntry ==  SysLoc.MACAO) {
     return;
   }
