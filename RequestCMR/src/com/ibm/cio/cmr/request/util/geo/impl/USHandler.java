@@ -761,7 +761,7 @@ public class USHandler extends GEOHandler {
     String processingType = getProcessingTypeForUS(entityManager, "897");
     if ("US".equals(processingType)) {
       if ("E".equals(currentRecord.getUsCmrBpAccountType())) {
-        parts = splitName(currentRecord.getUsCmrCompanyNm(), null, 35, 24);
+        parts = splitName(currentRecord.getUsCmrCompanyNm(), null, 28, 24);
         admin.setMainCustNm1(parts[0]);
         admin.setOldCustNm1(parts[0]);
         admin.setMainCustNm2(parts[1]);
