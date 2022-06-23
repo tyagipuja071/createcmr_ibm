@@ -4188,16 +4188,14 @@ function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
   }
 
   if (countyCd != '' && landedCountry != '') {
-    if (isCoverage2H22Subregion(countyCd)) {
-      if (isCoverage2H22MEACountry(landedCountry)) {
-        FormManager.setValue('isuCd', '34');
-        FormManager.setValue('clientTier', 'Q');
-        FormManager.setValue('salesBusOffCd', '730730')
-      } else {
-        FormManager.setValue('isuCd', '21');
-        FormManager.setValue('clientTier', '');
-        FormManager.setValue('salesBusOffCd', '200200');
-      }
+    if (FormManager.getActualValue('cmrIssuingCntry') == '706' && isCoverage2H22MEACountry(landedCountry)) {
+      FormManager.setValue('isuCd', '34');
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('salesBusOffCd', '730730')
+    } else if (!isCoverage2H22Subregion(landedCountry) && !isCoverage2H22MEACountry(landedCountry)) {
+      FormManager.setValue('isuCd', '21');
+      FormManager.setValue('clientTier', '');
+      FormManager.setValue('salesBusOffCd', '200200');
     }
   }
 }
