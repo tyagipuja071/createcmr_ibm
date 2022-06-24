@@ -472,9 +472,6 @@ public class MCOPtEsHandler extends MCOHandler {
           data.setAbbrevLocn(abbrevLocn.length() > 12 ? abbrevLocn.substring(0, 12) : abbrevLocn);
           data.getAbbrevLocn();
         }
-        if ("5K".equals(data.getIsuCd())) {
-          data.setClientTier("");
-        }
       }
 
       if (this.legacyObjects != null) {
@@ -493,11 +490,6 @@ public class MCOPtEsHandler extends MCOHandler {
         data.setSpecialTaxCd(StringUtils.isEmpty(cust.getTaxCd()) ? "" : cust.getTaxCd());
       }
       data.setTaxCd1("");
-    }
-
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
-        && (data.getCmrIssuingCntry().equals("838") || data.getCmrIssuingCntry().equals("822")) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
     }
   }
 

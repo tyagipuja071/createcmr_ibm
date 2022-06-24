@@ -1843,9 +1843,6 @@ public class EMEAHandler extends BaseSOFHandler {
           || SystemLocation.IRELAND.equalsIgnoreCase(data.getCmrIssuingCntry()))) {
         data.setAbbrevLocn((this.currentImportValues.get("AbbreviatedLocation")));
         LOG.trace("AbbreviatedLocation: " + data.getAbbrevLocn());
-        if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-          data.setClientTier("");
-        }
       }
 
       // CMR - 5715
@@ -2212,12 +2209,7 @@ public class EMEAHandler extends BaseSOFHandler {
         }
 
         if (StringUtils.isEmpty(data.getClientTier()) && !StringUtils.isEmpty(rdcData.getClientTier())) {
-          List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F", "21", "8B");
-          if (isuCdList.contains(data.getIsuCd()) && (data.getCmrIssuingCntry() == "866" || data.getCmrIssuingCntry() == "754")) {
-            data.setClientTier("");
-          } else {
-            data.setClientTier(rdcData.getClientTier());
-          }
+          data.setClientTier(rdcData.getClientTier());
         }
 
         // sales rep
