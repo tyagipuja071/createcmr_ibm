@@ -629,6 +629,7 @@ function setSalesRepLogic() {
 var _isuHandler = null;
 var _postCdHandler = null;
 var _isicHandler = null;
+var _postBoxHandler = null;
 function addISUHandler() {
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
@@ -636,6 +637,22 @@ function addISUHandler() {
         value = FormManager.getActualValue('isuCd');
       }
       setCoverageSBOBasedOnIsuCtc();
+    });
+  }
+}
+
+function addPostBoxHandler() {
+  if (_postBoxHandler == null) {
+    _postBoxHandler = dojo.connect(FormManager.getField('poBox'), 'onChange', function() {
+      var poBox = FormManager.getActualValue('poBox');
+      var addrType = FormManager.getActualValue('addrType');
+      var importInd = FormManager.getActualValue('importInd');
+      
+      if (addrType == 'ZP01' && importInd == 'N' && poBox != '') {
+        FormManager.removeValidator('addrTxt', Validators.REQUIRED);
+      } else {
+        FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street name and number' ]);
+      }
     });
   }
 }
@@ -1023,8 +1040,6 @@ function setCtcForIsu5K() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (isuCd == '5K' || isuCd == '14' || isuCd == '18' || isuCd == '19' || isuCd == '1R' || isuCd == '31' || isuCd == '3T' || isuCd == '4A') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
   } else {
     if (reqType == 'U' || (reqType != 'U' && role == 'PROCESSOR')) {
       FormManager.enable('clientTier');
@@ -2939,10 +2954,10 @@ function setISUClientTierOnScenario() {
   // CMR-234 change end
   if (countyCd == "TN" && (custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'CBIEU' || custSubGrp == 'CBUEU')) {
     FormManager.setValue('isuCd', '8B');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
   } else if (countyCd == "DZ" && (custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'CBIEU' || custSubGrp == 'CBUEU')) {
     FormManager.setValue('isuCd', '8B');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
   } else if (SUB_REGIONS.has(countyCd)// CMR-234
       && (custSubGrp == 'CBMME' || custSubGrp == 'CBVRN' || custSubGrp == 'XBLUM' || custSubGrp == 'CBIEM' || custSubGrp == 'CBFIN'
           || custSubGrp == 'CBTSO' || custSubGrp == 'CBDPT' || custSubGrp == 'CBSTC')) {
@@ -2950,7 +2965,7 @@ function setISUClientTierOnScenario() {
     FormManager.setValue('clientTier', 'S');
   } else if (custSubGrp == 'XBLUM' || custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP' || custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
     FormManager.setValue('isuCd', '21');
-    FormManager.setValue('clientTier', '7');
+    FormManager.setValue('clientTier', '');
   } else {
     return;
   }
@@ -3773,6 +3788,7 @@ function setPPSCEIDRequired() {
     FormManager.enable('ppsceid');
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   } else {
+    FormManager.setValue('ppsceid', '');
     FormManager.readOnly('ppsceid');
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }
@@ -4088,6 +4104,25 @@ function clientTierCodeValidator() {
 }
 // CREATCMR-4293
 
+function postBoxValidationBillTo() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var addrType = FormManager.getActualValue('addrType');
+        var importInd = FormManager.getActualValue('importInd');
+        var poBox = FormManager.getActualValue('poBox');
+        var addrTxt = FormManager.getActualValue('addrTxt');
+
+        if (addrType == 'ZP01' && importInd == 'N') {
+          if (poBox == '' && addrTxt == '') {
+            return new ValidationResult(null, false, 'Street Name and Number is required.');
+          }
+        }
+       }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -4097,6 +4132,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addFRClientTierLogic, '706');
   // GEOHandler.addAfterConfig(add32PostCdCntrySBOlogicOnISUChange, '706');
   GEOHandler.addAfterConfig(addISUHandler, '706');
+  GEOHandler.addAfterConfig(addPostBoxHandler, '706');
   GEOHandler.addAfterConfig(addIsicCdHandler, '706');
   // GEOHandler.addAfterConfig(addIBOlogic, '706');
   GEOHandler.registerValidator(addFRAddressTypeValidator, '706', null, true);
@@ -4158,6 +4194,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCoverageFieldsOnScenarioChange, '706');
   GEOHandler.addAddrFunction(setFieldsOnLandedCountryChange, '706');
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, '706', null, true);
+  GEOHandler.registerValidator(postBoxValidationBillTo, '706');
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.FR);
