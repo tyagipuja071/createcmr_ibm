@@ -722,12 +722,10 @@ public class USHandler extends GEOHandler {
     String strAddrTxt2 = address.getAddrTxt2();
     // address.setAddrTxt2(cmr.getCmrStreetAddressCont());
     // CREATCMR-5830
-    if (StringUtils.isNotBlank(address.getDivn())) {
-      address.setAddrTxt2(null);
+    if (StringUtils.isNotBlank(cmr.getCmrName3())) {
+      address.setAddrTxt2(cmr.getCmrName3());
     } else if (StringUtils.isNotBlank(strAddrTxt2)) {
       address.setAddrTxt2(strAddrTxt2);
-    } else if (StringUtils.isNotBlank(cmr.getCmrStreetAddressCont())) {
-      address.setAddrTxt2(cmr.getCmrStreetAddressCont());
     }
     // CREATCMR-5830
 
