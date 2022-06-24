@@ -355,7 +355,8 @@ public class USUtil extends AutomationUtil {
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
         details.append("Branch Office codes computed by another element/external process.");
       } else {
-        if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
+        if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)
+            && !data.getEnterprise().equals("6500871")) {
           for (USBranchOffcMapping mapping : boMappings) {
             if (mapping.getScenario().equalsIgnoreCase(scenarioSubType)) {
               String csoSite = mapping.getCsoSite(entityManager, requestData);
