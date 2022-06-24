@@ -658,8 +658,8 @@ function addDivStreetCountValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('addrType') != 'ZP01' && FormManager.getActualValue('addrType') != 'ZS01'
-            && FormManager.getActualValue('addrType') != 'ZI01') {
+        if (FormManager.getActualValue('addrType') != 'ZP01' && FormManager.getActualValue('addrType') != 'ZS01' && FormManager.getActualValue('addrType') != 'ZI01'
+            || FormManager.getActualValue('bpAcctTyp') == 'E') {
           return new ValidationResult(null, true);
         }
         var count = 0;
