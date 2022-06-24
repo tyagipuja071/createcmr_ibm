@@ -229,6 +229,8 @@ public class GermanyUtil extends AutomationUtil {
         }
         break;
       case "BUSPR":
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
         if (StringUtils.isNotBlank(data.getPpsceid())) {
           try {
             if (!checkPPSCEID(data.getPpsceid())) {
