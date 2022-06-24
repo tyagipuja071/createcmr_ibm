@@ -108,9 +108,6 @@ public class MCOCewaHandler extends MCOHandler {
           data.setCreditCd("");
           data.setCommercialFinanced("");
         }
-        if ("5K".equals(data.getIsuCd())) {
-          data.setClientTier("");
-        }
       }
     }
 

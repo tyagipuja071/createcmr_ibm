@@ -1688,9 +1688,6 @@ public class GreeceHandler extends BaseSOFHandler {
       if (legacyObjects != null && legacyObjects.getCustomer() != null) {
         data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
       }
-      if (data.getIsuCd().equals("5K")) {
-        data.setClientTier("");
-      }
     }
 
     if (legacyObjects != null && legacyObjects.getCustomer() != null) {
@@ -1700,9 +1697,6 @@ public class GreeceHandler extends BaseSOFHandler {
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setModeOfPayment("");
-      if (data.getIsuCd().equals("5K")) {
-        data.setClientTier("");
-      }
     }
   }
 

@@ -1822,9 +1822,6 @@ public class TurkeyHandler extends BaseSOFHandler {
           String customerType = cust.getCustType();
           data.setCrosSubTyp(customerType);
         }
-        if ("5K".equals(data.getIsuCd())) {
-          data.setClientTier("");
-        }
       }
     } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
 
@@ -2262,9 +2259,6 @@ public class TurkeyHandler extends BaseSOFHandler {
         } else {
           data.setCrosSubTyp(null);
         }
-      }
-      if ("5K".equals(data.getIsuCd())) {
-        data.setClientTier("");
       }
     }
   }

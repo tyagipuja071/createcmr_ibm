@@ -2516,7 +2516,7 @@ function clientTierValidator() {
               REQ_ID : requestId,
           };
         
-          var result = cmr.query('GET.IL.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
+          var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
           
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
