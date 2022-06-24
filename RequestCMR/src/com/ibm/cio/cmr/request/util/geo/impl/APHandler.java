@@ -17,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -340,18 +341,56 @@ public abstract class APHandler extends GEOHandler {
       results.add(update);
     }
 
+    // If Coverage expired then ignore coverage related field Update
+    Boolean expiredCluster = expiredClusterForAP(newData, oldData);
+    if (expiredCluster) {
+      return;
+    }
+
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getApCustClusterId(), newData.getApCustClusterId())) {
-      // apply country check
-      Boolean expiredCluster = expiredClusterForAP(newData, oldData);
-      if (expiredCluster) {
-        return;
-      }
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Cluster", "-"));
       update.setNewData(newData.getApCustClusterId());
       update.setOldData(oldData.getApCustClusterId());
       results.add(update);
     }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getInacCd(), newData.getInacCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "INACCode", "-"));
+      update.setNewData(newData.getInacCd());
+      update.setOldData(oldData.getInacCd());
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getInacType(), newData.getInacType())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "INACType", "-"));
+      update.setNewData(getCodeAndDescription(newData.getInacType(), "INACType", cmrCountry));
+      update.setOldData(getCodeAndDescription(oldData.getInacType(), "INACType", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getIsuCd(), newData.getIsuCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ISU", "-"));
+      update.setNewData(getCodeAndDescription(newData.getIsuCd(), "ISU", cmrCountry));
+      update.setOldData(getCodeAndDescription(oldData.getIsuCd(), "ISU", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getClientTier(), newData.getClientTier())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ClientTier", "-"));
+      update.setNewData(getCodeAndDescription(newData.getClientTier(), "ClientTier", cmrCountry));
+      update.setOldData(getCodeAndDescription(oldData.getClientTier(), "ClientTier", cmrCountry));
+      results.add(update);
+    }
+  }
+
+  public String getCodeAndDescription(String code, String fieldId, String cntry) {
+    String desc = DropdownListController.getDescription(fieldId, code, cntry);
+    if (!StringUtils.isEmpty(desc)) {
+      return desc;
+    }
+    return code;
   }
 
   public boolean expiredClusterForAP(Data newData, DataRdc oldData) {
