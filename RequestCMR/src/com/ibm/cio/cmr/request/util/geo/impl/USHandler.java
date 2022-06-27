@@ -780,7 +780,7 @@ public class USHandler extends GEOHandler {
     String processingType = getProcessingTypeForUS(entityManager, "897");
     if ("US".equals(processingType)) {
       if ("E".equals(currentRecord.getUsCmrBpAccountType())) {
-        parts = splitName(currentRecord.getUsCmrCompanyNm(), null, 35, 24);
+        parts = splitName(currentRecord.getUsCmrCompanyNm(), null, 28, 24);
         admin.setMainCustNm1(parts[0]);
         admin.setOldCustNm1(parts[0]);
         admin.setMainCustNm2(parts[1]);
@@ -1148,6 +1148,16 @@ public class USHandler extends GEOHandler {
         data.setIccTaxClass("000");
       }
       // CREATCMR-6081
+
+      // CREATCMR-6315
+      String processingType = getProcessingTypeForUS(entityManager, "897");
+      if ("US".equals(processingType)) {
+        if ("P".equals(data.getBpAcctTyp()) && "TT2".equals(data.getCsoSite())) {
+          data.setBpAcctTyp("");
+          data.setBpName("");
+        }
+      }
+      // CREATCMR-6315
 
     }
 
