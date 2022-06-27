@@ -1130,6 +1130,16 @@ public class USHandler extends GEOHandler {
       }
       // CREATCMR-6081
 
+      // CREATCMR-6315
+      String processingType = getProcessingTypeForUS(entityManager, "897");
+      if ("US".equals(processingType)) {
+        if ("P".equals(data.getBpAcctTyp()) && "TT2".equals(data.getCsoSite())) {
+          data.setBpAcctTyp("");
+          data.setBpName("");
+        }
+      }
+      // CREATCMR-6315
+
     }
 
     data.setTaxExemptStatus1(data.getSpecialTaxCd());
