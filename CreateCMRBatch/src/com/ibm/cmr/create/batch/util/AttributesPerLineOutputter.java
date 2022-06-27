@@ -5,14 +5,11 @@ package com.ibm.cmr.create.batch.util;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.jdom.Attribute;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Attribute;
+import org.jdom2.Element;
+import org.jdom2.output.support.AbstractXMLOutputProcessor;
+import org.jdom2.output.support.FormatStack;
 
 /**
  * Outputter to format the XML of max attributes per line
@@ -20,16 +17,15 @@ import org.jdom.output.XMLOutputter;
  * @author Jeffrey Zamora
  * 
  */
-public class AttributesPerLineOutputter extends XMLOutputter {
-  private int attributesPerLine;
-  private boolean omitDeclaration;
+public class AttributesPerLineOutputter extends AbstractXMLOutputProcessor {
+  protected int attributesPerLine;
+  private boolean omitDeclaration = true;
 
   public AttributesPerLineOutputter(int attributesPerLine) {
     this.attributesPerLine = attributesPerLine;
-    setFormat(Format.getPrettyFormat());
   }
 
-  private int elementDepth(Element element) {
+  protected int elementDepth(Element element) {
     int result = 0;
     while (element != null) {
       result++;
@@ -47,34 +43,16 @@ public class AttributesPerLineOutputter extends XMLOutputter {
   }
 
   @Override
-  protected void printDeclaration(Writer out, Document doc, String encoding) throws IOException {
+  protected void printDeclaration(Writer out, FormatStack stack) throws IOException {
     if (!this.omitDeclaration) {
-      super.printDeclaration(out, doc, encoding);
+      super.printDeclaration(out, stack);
     }
   }
 
-  @SuppressWarnings("rawtypes")
   @Override
-  protected void printAttributes(Writer writer, List attribs, Element parent, NamespaceStack ns) throws IOException {
-    // Loop on attributes
-    for (Object attribObj : attribs) {
-
-      Attribute attrib = (Attribute) attribObj;
-
-      if (attribs.size() > this.attributesPerLine) {
-
-        writer.append("\n");
-
-        for (int i = 0; i < elementDepth(parent); i++) {
-          writer.append(this.getFormat().getIndent());
-        }
-      }
-
-      List<Attribute> list = new ArrayList<Attribute>();
-      list.add(attrib);
-      super.printAttributes(writer, list, parent, ns);
-    }
+  protected void printAttribute(Writer writer, FormatStack fstack, Attribute attrib) throws IOException {
     writer.append("\n");
+    super.printAttribute(writer, fstack, attrib);
   }
 
 }
