@@ -680,7 +680,9 @@ public class USHandler extends GEOHandler {
         address.setStateProv((String) record.get("N_ST"));
         if ("US".equals(address.getLandCntry())) {
           address.setCity1((String) record.get("N_CITY"));
-          address.setAddrTxt2((String) record.get("T_ADDR_LINE_4"));
+          if (StringUtils.isEmpty(address.getDivn()) && !"E".equals(cmr.getUsCmrBpAccountType())) {
+            address.setAddrTxt2((String) record.get("T_ADDR_LINE_4"));
+          }
         } else {
           address.setCity1((String) record.get("T_ADDR_LINE_4"));
           address.setAddrTxt2(null);
@@ -703,6 +705,15 @@ public class USHandler extends GEOHandler {
         if (addrTxt != null && addrTxt.length() > 24) {
           splitAddress(address, address.getAddrTxt(), "", 24, 24);
         }
+        if (!"E".equals(cmr.getUsCmrBpAccountType())) {
+          String strAddrTxt2 = address.getAddrTxt2();
+          if (StringUtils.isEmpty(address.getDivn()) && StringUtils.isEmpty(cmr.getCmrName3())
+              && StringUtils.isEmpty(cmr.getCmrStreetAddressCont())) {
+            if (StringUtils.isNotBlank(strAddrTxt2)) {
+              address.setAddrTxt2(strAddrTxt2);
+            }
+          }
+        }
       }
     } else {
       // break everything here if needed
@@ -718,13 +729,7 @@ public class USHandler extends GEOHandler {
       LOG.debug("Postal code formatted: " + postCd);
       address.setPostCd(postCd);
     }
-    address.setAddrTxt2(cmr.getCmrStreetAddressCont());
-    // CREATCMR-5830
-    if (StringUtils.isNotBlank(address.getDivn())) {
-      address.setAddrTxt2(null);
-    } else {
-      address.setAddrTxt2(cmr.getCmrStreetAddressCont());
-    }
+
     if ("US".equals(processType)) {
       // CREATCMR-6182
       String strAddrTxt2 = address.getAddrTxt2();
@@ -732,6 +737,12 @@ public class USHandler extends GEOHandler {
         address.setAddrTxt2(cmr.getCmrName3());
       } else if (StringUtils.isNotBlank(strAddrTxt2)) {
         address.setAddrTxt2(strAddrTxt2);
+      }
+    }
+
+    if (!"E".equals(cmr.getUsCmrBpAccountType())) {
+      if (StringUtils.isNotBlank(address.getDivn())) {
+        address.setAddrTxt2(null);
       }
     }
 
