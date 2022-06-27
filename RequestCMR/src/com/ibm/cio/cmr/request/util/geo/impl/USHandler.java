@@ -718,16 +718,22 @@ public class USHandler extends GEOHandler {
       LOG.debug("Postal code formatted: " + postCd);
       address.setPostCd(postCd);
     }
-    // CREATCMR-6182
-    String strAddrTxt2 = address.getAddrTxt2();
-    // address.setAddrTxt2(cmr.getCmrStreetAddressCont());
+    address.setAddrTxt2(cmr.getCmrStreetAddressCont());
     // CREATCMR-5830
-    if (StringUtils.isNotBlank(cmr.getCmrName3())) {
-      address.setAddrTxt2(cmr.getCmrName3());
-    } else if (StringUtils.isNotBlank(strAddrTxt2)) {
-      address.setAddrTxt2(strAddrTxt2);
+    if (StringUtils.isNotBlank(address.getDivn())) {
+      address.setAddrTxt2(null);
+    } else {
+      address.setAddrTxt2(cmr.getCmrStreetAddressCont());
     }
-    // CREATCMR-5830
+    if ("US".equals(processType)) {
+      // CREATCMR-6182
+      String strAddrTxt2 = address.getAddrTxt2();
+      if (StringUtils.isNotBlank(cmr.getCmrName3())) {
+        address.setAddrTxt2(cmr.getCmrName3());
+      } else if (StringUtils.isNotBlank(strAddrTxt2)) {
+        address.setAddrTxt2(strAddrTxt2);
+      }
+    }
 
     // CREATCMR-6183
     if ("US".equals(processType)) {
