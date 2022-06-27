@@ -2707,6 +2707,130 @@ function validateCnNameAndAddr() {
                 }
               }
             } else {
+              if (FormManager.getActualValue('reqType') == 'U') {
+                // check TianYanCha even CN info not updated.
+                // need to remove attachment if 100% matched.
+                var busnType = FormManager.getActualValue('busnType');
+                var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
+                var result = {};
+                var busnTypeResult = {};
+                var nameResult = {};
+                dojo.xhrGet({
+                  url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+                  handleAs : 'json',
+                  method : 'GET',
+                  content : {
+                    busnType : busnType,
+                    cnName : cnName
+                  },
+                  timeout : 50000,
+                  sync : true,
+                  load : function(data, ioargs) {
+                    if (data && data.result) {
+                      busnTypeResult = data.result;
+                    }
+                  },
+                  error : function(error, ioargs) {
+                    busnTypeResult = {};
+                  }
+                });
+                result = busnTypeResult;
+                
+                if($.isEmptyObject(result)){
+                  dojo.xhrGet({
+                    url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+                    handleAs : 'json',
+                    method : 'GET',
+                    content : {
+                      cnName : cnName
+                    },
+                    timeout : 50000,
+                    sync : true,
+                    load : function(data, ioargs) {
+                      if (data && data.result) {
+                        nameResult = data.result;
+                      }
+                    },
+                    error : function(error, ioargs) {
+                      nameResult = {};
+                    }
+                  });
+                  result = nameResult;
+                }
+                
+                if($.isEmptyObject(busnTypeResult) && !$.isEmptyObject(nameResult)) {
+                  // not math, bypass
+                  return new ValidationResult(null, true);
+                } else {
+                  var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
+                  var name2SBCS = convert2SBCS(result.name);
+                  var address2SBCS = convert2SBCS(result.regLocation);
+                  var apiCity = '';
+                  var apiDistrict = '';
+                  var nameEqualFlag = true;
+                  var addressEqualFlag = true;
+                  if(result.city != null){
+                    apiCity = result.city;
+                  }
+                  if(result.district != null){
+                    apiDistrict = result.district;
+                  }
+
+                  var correctName = '';
+                  var correctAddress = '';
+                  
+                  if (name2SBCS != cnName) {
+                    nameEqualFlag = false;
+                    if(!$.isEmptyObject(result)){
+                      correctName = '<br/>Company Name: ' + result.name;
+                    } else {
+                      correctName = '<br/>Company Name: No Data';
+                    }
+                  }
+                  if (address2SBCS != cnAddress) {
+                    // address2SBCS = address2SBCS.replace(apiCity,'');
+                    // address2SBCS = address2SBCS.replace(apiDistrict,'');
+                    if (address2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+                      addressEqualFlag = true;
+                    } else if(address2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && address2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+                        addressEqualFlag = true;
+                    } else {
+                      addressEqualFlag = false;
+                      if(!$.isEmptyObject(result)){
+                        correctAddress = '<br/>Company Address: ' + result.regLocation;
+                      } else {
+                        correctAddress = '<br/>Company Address: No Data';
+                      }
+                    }
+                  }
+
+                  if(!nameEqualFlag || !addressEqualFlag){
+                    // not math, bypass
+                    return new ValidationResult(null, true);
+                  } else if(nameEqualFlag && addressEqualFlag){
+                    var rowCount = CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount;
+                    if (rowCount == 1) {
+                      var id = FormManager.getActualValue('reqId');
+                      var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
+                        ID : id
+                      });
+            
+                      if (ret && ret.ret1 && ret.ret1 != '') {
+                        return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
+                            + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
+                            );
+                      }else{
+                        return new ValidationResult(null, true);
+                      }
+                    } else if (rowCount > 1) {
+                      // var addrDiffIndc = checkAddrDiffIndc();
+                      return new ValidationResult(null, true);
+                    }
+                  }else {
+                    return new ValidationResult(null, true);
+                  }
+                }
+              }
               return new ValidationResult(null, true);
             }
           } else {
