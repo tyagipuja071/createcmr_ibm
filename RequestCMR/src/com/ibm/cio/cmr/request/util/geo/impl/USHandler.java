@@ -1181,6 +1181,14 @@ public class USHandler extends GEOHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+
+    String addrTxt = addr.getAddrTxt();
+    if (addrTxt != null && addrTxt.length() > 24) {
+      splitAddress(addr, addr.getAddrTxt(), "", 24, 24);
+      if (!StringUtils.isEmpty(addr.getAddrTxt2())) {
+        addr.setAddrTxt2(addr.getAddrTxt2().trim());
+      }
+    }
   }
 
   @Override
