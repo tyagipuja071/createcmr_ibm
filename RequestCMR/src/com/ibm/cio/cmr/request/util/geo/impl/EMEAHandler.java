@@ -3971,14 +3971,18 @@ public class EMEAHandler extends BaseSOFHandler {
             || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
           LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
           error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
-        } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
-            || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
-          LOG.trace(
-              "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-          error.addError((row.getRowNum() + 1), "Client Tier",
-              ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
-          validations.add(error);
+        } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+          if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+            LOG.trace("The row " + (row.getRowNum() + 1)
+                + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+            error.addError((row.getRowNum() + 1), "Client Tier",
+                ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+          }
+        } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
+          LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+          error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
+        validations.add(error);
       }
 
     } else {
@@ -3998,12 +4002,15 @@ public class EMEAHandler extends BaseSOFHandler {
         String salesRep = null;
         String isuCd = null; // 8
         String clientTier = null; // 9
+        String cmrNo = ""; // 0
         TemplateValidation error = new TemplateValidation("Data");
         row = sheet.getRow(rowIndex);
         if (row == null) {
           return; // stop immediately when row is blank
         }
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+          currCell = row.getCell(0);
+          cmrNo = validateColValFromCell(currCell);
           currCell = row.getCell(4);
           collectionCd = validateColValFromCell(currCell);
           if (country.equals(SystemLocation.IRELAND)) {
@@ -4042,18 +4049,17 @@ public class EMEAHandler extends BaseSOFHandler {
           validations.add(error);
         }
 
+        if (StringUtils.isEmpty(cmrNo)) {
+          LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
+          error.addError((row.getRowNum() + 1), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
+        }
+
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
           if (!SystemLocation.UNITED_KINGDOM.equals(country)) {
             if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                 || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
               LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
               error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
-            } else if ("5K".equals(isuCd) && !"@".equals(clientTier)) {
-              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-              error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
-            } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equals(clientTier)) {
-              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-              error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
             } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
               if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
@@ -4061,25 +4067,15 @@ public class EMEAHandler extends BaseSOFHandler {
                 error.addError((row.getRowNum() + 1), "Client Tier",
                     ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
               }
-            } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
-                || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
-              LOG.trace("The row " + ((row.getRowNum() + 1))
-                  + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-              error.addError(((row.getRowNum() + 1)), "Client Tier",
-                  ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+            } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
+              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+              error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
             }
           } else {
-            List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F");
             if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                 || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
               LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
               error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
-            } else if (isuCdList.contains(isuCd) && !"@".equals(clientTier)) {
-              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-              error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
-            } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equals(clientTier)) {
-              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-              error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
             } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
               if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
@@ -4087,12 +4083,9 @@ public class EMEAHandler extends BaseSOFHandler {
                 error.addError((row.getRowNum() + 1), "Client Tier",
                     ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
               }
-            } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
-                || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
-              LOG.trace("The row " + ((row.getRowNum() + 1))
-                  + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-              error.addError(((row.getRowNum() + 1)), "Client Tier",
-                  ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+            } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
+              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+              error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
             }
           }
           if (error.hasErrors()) {
@@ -4376,13 +4369,19 @@ public class EMEAHandler extends BaseSOFHandler {
             || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
           LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
           error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
-        } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
-            || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
-          LOG.trace("The row " + (row.getRowNum()) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-          error.addError((row.getRowNum()), "Client Tier",
-              ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
-          validations.add(error);
+        } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+          if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+            LOG.trace("The row " + ((row.getRowNum() + 1))
+                + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+            error.addError(((row.getRowNum() + 1)), "Client Tier",
+                ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+          }
+        } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
+          LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+          error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
+        validations.add(error);
+
       }
     }
 

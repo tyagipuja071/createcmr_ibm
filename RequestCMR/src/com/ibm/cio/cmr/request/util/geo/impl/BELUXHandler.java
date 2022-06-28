@@ -2294,18 +2294,9 @@ public class BELUXHandler extends BaseSOFHandler {
             error.addError((row.getRowNum() + 1), "Client Tier",
                 ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
           }
-        } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(ctc)) {
+        } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-          error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
-        } else if ((isuCd.equalsIgnoreCase("5K") || isuCd.equalsIgnoreCase("28")) && !ctc.equalsIgnoreCase("@")) {
-          LOG.trace("For IsuCd set to '5K' or '28' Ctc should be '@'");
-          error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
-        }
-        if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
-          LOG.trace(
-              "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-          error.addError((row.getRowNum() + 1), "Client Tier",
-              ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+          error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
       }
       if (is93CMR(cmrNo)) {
