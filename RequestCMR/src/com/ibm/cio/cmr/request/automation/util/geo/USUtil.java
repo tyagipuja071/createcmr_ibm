@@ -355,7 +355,7 @@ public class USUtil extends AutomationUtil {
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
         details.append("Branch Office codes computed by another element/external process.");
       } else {
-        if (data.getEnterprise().equals("6500871")) {
+        if (StringUtils.isNotEmpty(data.getEnterprise()) && data.getEnterprise().equals("6500871")) {
           String csoSite = "PAH";
           String mktgDept = "SVB";
           String mtkgArDept = "SD3";
