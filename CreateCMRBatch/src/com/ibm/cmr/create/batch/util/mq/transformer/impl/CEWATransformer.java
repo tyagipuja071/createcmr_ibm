@@ -818,9 +818,14 @@ public class CEWATransformer extends MCOTransformer {
         custExt.setiTaxCode(muData.getCompany());
       }
     }
-    if(SystemLocation.KENYA.equals(cmrIssuingCntry) && !StringUtils.isBlank(muData.getTaxCd1())){
-      custExt.setiTaxCode(muData.getTaxCd1());
+    if (SystemLocation.KENYA.equals(cmrIssuingCntry) && !StringUtils.isBlank(muData.getTaxCd1())) {
+      if ("@".equals(muData.getTaxCd1())) {
+        custExt.setiTaxCode("");
+      } else {
+        custExt.setiTaxCode(muData.getTaxCd1());
+      }
     }
+
   }
 
   @Override
