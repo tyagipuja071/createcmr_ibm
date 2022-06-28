@@ -682,6 +682,8 @@ public class USHandler extends GEOHandler {
           address.setCity1((String) record.get("N_CITY"));
           if (StringUtils.isEmpty(address.getDivn()) && !"E".equals(cmr.getUsCmrBpAccountType())) {
             address.setAddrTxt2((String) record.get("T_ADDR_LINE_4"));
+          } else if ("E".equals(cmr.getUsCmrBpAccountType())) {
+            address.setAddrTxt2((String) record.get("T_ADDR_LINE_4"));
           }
         } else {
           address.setCity1((String) record.get("T_ADDR_LINE_4"));
@@ -713,6 +715,11 @@ public class USHandler extends GEOHandler {
               address.setAddrTxt2(strAddrTxt2);
             }
           }
+        } else if ("E".equals(cmr.getUsCmrBpAccountType())) {
+          String strAddrTxt2 = address.getAddrTxt2();
+          if (StringUtils.isNotBlank(strAddrTxt2)) {
+            address.setAddrTxt2(strAddrTxt2);
+          }
         }
       }
     } else {
@@ -743,6 +750,11 @@ public class USHandler extends GEOHandler {
     if (!"E".equals(cmr.getUsCmrBpAccountType())) {
       if (StringUtils.isNotBlank(address.getDivn())) {
         address.setAddrTxt2(null);
+      }
+    } else if ("E".equals(cmr.getUsCmrBpAccountType())) {
+      String strAddrTxt2 = address.getAddrTxt2();
+      if (StringUtils.isNotBlank(strAddrTxt2)) {
+        address.setAddrTxt2(strAddrTxt2);
       }
     }
 
