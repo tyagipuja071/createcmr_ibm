@@ -96,6 +96,26 @@ function afterConfigForDE() {
   GEOHandler.disableCopyAddress();
 }
 
+function vatExemptIBMEmp() {
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
+    dijit.byId('vatExempt').set('checked', true);
+  } else {
+    FormManager.enable('vat');
+    if (dijit.byId('vatExempt').get('checked')) {
+      dijit.byId('vatExempt').set('checked', false);
+      FormManager.resetValidations('vat');
+      if (!dijit.byId('vatExempt').get('checked')) {
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      }
+    }
+  }
+}
+
 function setSboOnIMS(postCd, subIndustryCd, clientTier) {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1081,6 +1101,7 @@ dojo.addOnLoad(function() {
 //  GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockCtcFieldOnIsu, GEOHandler.DE);
   GEOHandler.addAfterConfig(lockCtcFieldOnIsu, SysLoc.GERMANY);
+  GEOHandler.addAfterTemplateLoad(vatExemptIBMEmp, GEOHandler.DE);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.GERMANY ]);
