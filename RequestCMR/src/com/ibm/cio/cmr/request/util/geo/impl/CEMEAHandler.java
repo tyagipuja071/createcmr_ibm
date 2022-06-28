@@ -2243,12 +2243,6 @@ public class CEMEAHandler extends BaseSOFHandler {
         if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
           LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
           error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
-        } else if (isuCd.equalsIgnoreCase("5k") && !ctc.equalsIgnoreCase("@")) {
-          LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
-          error.addError(rowIndex, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
-        } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(ctc)) {
-          LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-          error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
         } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
           if (StringUtils.isBlank(ctc) || !"QY".contains(ctc)) {
             LOG.trace("The row " + rowIndex
@@ -2256,10 +2250,9 @@ public class CEMEAHandler extends BaseSOFHandler {
             error.addError(rowIndex, "Client Tier",
                 ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
           }
-        } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(ctc) || !"@QY".contains(ctc)))
-            || (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc))) {
-          LOG.trace("The row " + (rowIndex) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-          error.addError((rowIndex), "Client Tier", ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+        } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
+          LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+          error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
         if (error.hasErrors()) {
           validations.add(error);
