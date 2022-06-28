@@ -4169,6 +4169,89 @@ function postBoxValidationBillTo() {
   })(), null, 'frmCMR_addressModal');
 }
 
+//CREATCMR-6000 2H22 coverage changes
+function isCoverage2H22MEACountry(country) {
+  var emaCountryList = [ 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'ML', 'MR', 'MA', 'NE', 'SN', 'TG', 'AE' ,'CI'];
+  return emaCountryList.includes(country);
+}
+
+function isCoverage2H22Subregion(countryCd) {
+  var subRegionList = [ 'FR','DZ','GF','KM','MC','NC','PF','PM','WF','YT','NC','VU','RE','MQ','GP','AD'];
+  return subRegionList.includes(countryCd);
+}
+
+function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
+
+  if (fromAddress && currentLanded != undefined) {
+    landedCountry = currentLanded;
+  } else {
+    landedCountry = getSoldToLanded();
+  }
+
+  var countyCd = null;
+  var countryUse = FormManager.getActualValue('countryUse');
+  if (countryUse.length > 3) {
+    countyCd = countryUse.substring(3, 5);
+  } else {
+    countyCd = "FR";
+  }
+
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  // Set ISU/CTC based on scenario and landed
+  var custSubGrpArray = [ 'CBMME', 'CBFIN', 'CBVRN', 'CBSTC', 'CBIEM', 'XBLUM', 'CBDPT' ];
+  if (!custSubGrpArray.includes(custSubGrp)) {
+    return;
+  }
+
+  if (countyCd != '' && landedCountry != '') {
+    if (FormManager.getActualValue('cmrIssuingCntry') == '706' && isCoverage2H22MEACountry(landedCountry)) {
+      FormManager.setValue('isuCd', '34');
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('salesBusOffCd', '730730')
+    } else if (!isCoverage2H22Subregion(landedCountry) && !isCoverage2H22MEACountry(landedCountry)) {
+      FormManager.setValue('isuCd', '21');
+      FormManager.setValue('clientTier', '');
+      FormManager.setValue('salesBusOffCd', '200200');
+    }
+  }
+}
+
+function set2H22CoverageChanges() {
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var currentLandedCountry = getSoldToLanded();
+  setCoverage2H22IsuCtcSBOBasedOnLandCntry(true, currentLandedCountry);
+}
+
+var _oldLandedCountry = '';
+function set2H22CoverageChangesOnLandedCoutrychange() {
+
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var addrType = FormManager.getActualValue('addrType');
+
+  if (addrType == 'ZS01') {
+    if (_oldLandedCountry == '') {
+      // first load - Address modal load
+      _oldLandedCountry = getSoldToLanded();
+    } else {
+      // second load - user clicks Save
+      var currentLandedCountry = FormManager.getActualValue('landCntry');
+      var valueChanged = _oldLandedCountry != currentLandedCountry;
+      if (valueChanged) {
+        setCoverage2H22IsuCtcSBOBasedOnLandCntry(true, currentLandedCountry)
+      }
+
+    }
+  }
+}
+
+
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -4245,5 +4328,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.FR);
   GEOHandler.registerValidator(clientTierValidator, [ '706' ], null, true);
+  GEOHandler.addAddrFunction(set2H22CoverageChangesOnLandedCoutrychange, '706');
+  GEOHandler.addAfterTemplateLoad(set2H22CoverageChanges, '706');
 
 });
