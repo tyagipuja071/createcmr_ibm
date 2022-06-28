@@ -213,69 +213,68 @@ public class USHandler extends GEOHandler {
     }
 
     // retrieve BP data on import
-    String bpType = getBPDataFromRdc(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
+    // String bpType = getBPDataFromRdc(entityManager,
+    // SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
+
+    String bpType = cmr.getUsCmrBpAccountType();
     if (!StringUtils.isEmpty(bpType)) {
       data.setBpAcctTyp(bpType);
     }
 
     // retrieve US_Tax_Data on import
-    USTaxData uTxData = getUSTaxDataById(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
 
-    if (uTxData != null) {
+    if (!StringUtils.isEmpty(cmr.getUsCmrTaxCertStat1())) {
+      data.setSpecialTaxCd(cmr.getUsCmrTaxCertStat1());
+      data.setTaxExemptStatus1(cmr.getUsCmrTaxCertStat1());
+    }
+    if (!StringUtils.isEmpty(cmr.getUsCmrTaxCertStat2())) {
+      data.setTaxExemptStatus2(cmr.getUsCmrTaxCertStat2());
+    }
+    if (!StringUtils.isEmpty(cmr.getUsCmrTaxCertStat3())) {
+      data.setTaxExemptStatus3(cmr.getUsCmrTaxCertStat3());
+    }
 
-      if (!StringUtils.isEmpty(uTxData.getcTeCertST1())) {
-        data.setSpecialTaxCd(uTxData.getcTeCertST1());
-        data.setTaxExemptStatus1(uTxData.getcTeCertST1());
-      }
-      if (!StringUtils.isEmpty(uTxData.getcTeCertST2())) {
-        data.setTaxExemptStatus2(uTxData.getcTeCertST2());
-      }
-      if (!StringUtils.isEmpty(uTxData.getcTeCertST3())) {
-        data.setTaxExemptStatus3(uTxData.getcTeCertST3());
-      }
+    String taxcd1Str = cmr.getUsCmrTaxType1() + cmr.getUsCmrTaxClass1();
+    String taxcd2Str = cmr.getUsCmrTaxType2() + cmr.getUsCmrTaxClass2();
+    String taxcd3Str = cmr.getUsCmrTaxType3() + cmr.getUsCmrTaxClass3();
 
-      String taxcd1 = uTxData.getiTypeCust1() + uTxData.getiTaxClass1();
-      String taxcd2 = uTxData.getiTypeCust2() + uTxData.getiTaxClass2();
-      String taxcd3 = uTxData.getiTypeCust3() + uTxData.getiTaxClass3();
+    if (StringUtils.isEmpty(cmr.getUsCmrTaxType1()) || StringUtils.isEmpty(cmr.getUsCmrTaxClass1())) {
+      data.setTaxCd1("");
+    } else {
+      data.setTaxCd1(taxcd1Str);
+    }
+    if (StringUtils.isEmpty(cmr.getUsCmrTaxType2()) || StringUtils.isEmpty(cmr.getUsCmrTaxClass2())) {
+      data.setTaxCd2("");
+    } else {
+      data.setTaxCd2(taxcd2Str);
+    }
+    if (StringUtils.isEmpty(cmr.getUsCmrTaxType3()) || StringUtils.isEmpty(cmr.getUsCmrTaxClass3())) {
+      data.setTaxCd3("");
+    } else {
+      data.setTaxCd3(taxcd3Str);
+    }
 
-      if (StringUtils.isEmpty(uTxData.getiTypeCust1()) || StringUtils.isEmpty(uTxData.getiTaxClass1())) {
-        data.setTaxCd1("");
-      } else {
-        data.setTaxCd1(taxcd1);
-      }
-      if (StringUtils.isEmpty(uTxData.getiTypeCust2()) || StringUtils.isEmpty(uTxData.getiTaxClass2())) {
-        data.setTaxCd2("");
-      } else {
-        data.setTaxCd2(taxcd2);
-      }
-      if (StringUtils.isEmpty(uTxData.getiTypeCust3()) || StringUtils.isEmpty(uTxData.getiTaxClass3())) {
-        data.setTaxCd3("");
-      } else {
-        data.setTaxCd3(taxcd3);
-      }
+    if (!StringUtils.isEmpty(cmr.getUsCmrIccTaxExempt())) {
+      data.setIccTaxExemptStatus(cmr.getUsCmrIccTaxExempt());
+    }
+    if (!StringUtils.isEmpty(cmr.getUsCmrIccTaxClass())) {
+      data.setIccTaxClass(cmr.getUsCmrIccTaxClass());
+    }
+    if (!StringUtils.isEmpty(cmr.getUsCmrOcl())) {
+      data.setOutCityLimit(cmr.getUsCmrOcl());
+    }
+    if (!StringUtils.isEmpty(cmr.getUsCmrEducAllowStat())) {
+      data.setEducAllowCd(cmr.getUsCmrEducAllowStat());
+    }
 
-      if (!StringUtils.isEmpty(uTxData.getcICCTe())) {
-        data.setIccTaxExemptStatus(uTxData.getcICCTe());
-      }
-      if (!StringUtils.isEmpty(uTxData.getCICCTaxClass())) {
-        data.setIccTaxClass(uTxData.getCICCTaxClass());
-      }
-      if (!StringUtils.isEmpty(uTxData.getfOCL())) {
-        data.setOutCityLimit(uTxData.getfOCL());
-      }
-      if (!StringUtils.isEmpty(uTxData.getEaStatus())) {
-        data.setEducAllowCd(uTxData.getEaStatus());
-      }
+    if (!StringUtils.isEmpty(cmr.getUsCmrOemInd())) {
+      data.setOemInd(cmr.getUsCmrOemInd());
     }
 
     // retrieve knvvExt data on import
     KnvvExt knvvExt = getKnvvExtById(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
 
     if (knvvExt != null) {
-      if (!StringUtils.isEmpty(knvvExt.getOemInd())) {
-        data.setOemInd(knvvExt.getOemInd());
-      }
-
       // Miscellaneous Bill Code
       data.setMiscBillCd(knvvExt.getMiscBilling());
 
@@ -330,6 +329,8 @@ public class USHandler extends GEOHandler {
       data.setTaxCd3(taxcd3);
     }
 
+    data.setBpName(cmr.getUsCmrBpAbbrevNm());
+
     // Non-IBM Company
     // data.setNonIbmCompanyInd(main.getUsCmrNonIbmCompInd());
 
@@ -371,6 +372,9 @@ public class USHandler extends GEOHandler {
         throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
       }
     }
+
+    // retrieve US_Tax_Data on import
+    USTaxData uTxData = getUSTaxDataById(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
 
     if ("TC".equals(processingType)) {
       if (uTxData != null) {
@@ -722,6 +726,17 @@ public class USHandler extends GEOHandler {
     }
     // CREATCMR-5830
 
+    // CREATCMR-6183
+    if ("US".equals(processType)) {
+      if ("E".equals(cmr.getUsCmrBpAccountType())) {
+        if ("ZS01".equals(address.getId().getAddrType())) {
+          // || "ZI01".equals(address.getId().getAddrType())
+          address.setDivn(cmr.getCmrName());
+        }
+      }
+    }
+    // CREATCMR-6183
+
   }
 
   @Override
@@ -741,6 +756,17 @@ public class USHandler extends GEOHandler {
       admin.setOldCustNm1(parts[0]);
       admin.setMainCustNm2(parts[1]);
       admin.setOldCustNm2(parts[1]);
+    }
+
+    String processingType = getProcessingTypeForUS(entityManager, "897");
+    if ("US".equals(processingType)) {
+      if ("E".equals(currentRecord.getUsCmrBpAccountType())) {
+        parts = splitName(currentRecord.getUsCmrCompanyNm(), null, 28, 24);
+        admin.setMainCustNm1(parts[0]);
+        admin.setOldCustNm1(parts[0]);
+        admin.setMainCustNm2(parts[1]);
+        admin.setOldCustNm2(parts[1]);
+      }
     }
 
   }
@@ -1103,6 +1129,16 @@ public class USHandler extends GEOHandler {
         data.setIccTaxClass("000");
       }
       // CREATCMR-6081
+
+      // CREATCMR-6315
+      String processingType = getProcessingTypeForUS(entityManager, "897");
+      if ("US".equals(processingType)) {
+        if ("P".equals(data.getBpAcctTyp()) && "TT2".equals(data.getCsoSite())) {
+          data.setBpAcctTyp("");
+          data.setBpName("");
+        }
+      }
+      // CREATCMR-6315
 
     }
 
