@@ -3832,7 +3832,7 @@ public class GreeceHandler extends BaseSOFHandler {
                   error.addError(((row.getRowNum() + 1)), "Client Tier",
                       ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(dataIsu) && !"34".equals(dataIsu)) && !dataCtc.equalsIgnoreCase("@")) {
+              } else if ((!StringUtils.isBlank(dataIsu) && !"34".equals(dataIsu)) && !"@".equalsIgnoreCase(dataCtc)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + dataIsu + ".<br>");
               }
