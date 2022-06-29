@@ -241,6 +241,11 @@ function addAfterConfigAP() {
     onInacTypeChange();
     setInacByCluster();
   }
+  // CREATCMR-5258
+  if (cntry == '834') {
+    addVatValidationforSingapore();
+  }
+  // CREATCMR-5258
 }
 
 function setInacByCluster() {
@@ -3997,6 +4002,25 @@ function lockInacCodeForIGF() {
   }
 }
 
+// CREATCMR-5258
+function addVatValidationforSingapore() {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var flag = "N";
+  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      landCntry = record.landCntry;
+      if (landCntry == 'TH') {
+        flag = "Y";
+      }
+    }
+  }
+  if (cntry == '834' && flag == "Y") {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'UEN#' ], 'MAIN_CUST_TAB');
+  }
+}
+// CREATCMR-5258
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4079,6 +4103,8 @@ dojo.addOnLoad(function() {
   // 2333
   GEOHandler.addAfterConfig(setISBUforBPscenario, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setISBUforBPscenario, GEOHandler.ASEAN);
+  // CREATCMR-5258
+  GEOHandler.addAfterConfig(addVatValidationforSingapore, [ SysLoc.SINGAPORE ]);
 
   // checklist
   GEOHandler.registerValidator(addChecklistValidator, [ SysLoc.VIETNAM, SysLoc.LAOS, SysLoc.CAMBODIA, SysLoc.HONG_KONG, SysLoc.SINGAPORE, SysLoc.MACAO, SysLoc.MYANMAR ]);
