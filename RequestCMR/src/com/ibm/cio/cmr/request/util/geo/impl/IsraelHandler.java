@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.CellType;
@@ -181,6 +182,13 @@ public class IsraelHandler extends EMEAHandler {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+
+              if (isEnglishAllSharedSequence(sofUses)) {
+                if ("ZI01".equals(record.getCmrAddrTypeCode())) {
+                  sofUses = setUsesIfDuplicate(sofUses, record);
+                }
+              }
+
               for (String sofUse : sofUses) {
                 addrType = getAddressTypeByUse(sofUse);
                 if (!StringUtils.isEmpty(addrType)) {
@@ -220,13 +228,13 @@ public class IsraelHandler extends EMEAHandler {
 
                     // Handle Sold to shared sequence -- EPL and Installing
                     if ("ZS01".equals(addrType)) {
-                      if ("Y".equals(legacyAddr.getIsAddrUseInstalling())) {
+                      if ("Y".equals(legacyAddr.getIsAddrUseInstalling()) && !isLegacyAddrInRdc(legacyAddr.getId().getAddrNo(), source.getItems())) {
                         FindCMRRecordModel installing = cloneAddress(addr, "ZI01");
                         installing.setTransAddrNo("");
 
                         converted.add(installing);
                       }
-                      if ("Y".equals(legacyAddr.getIsAddrUseEPL())) {
+                      if ("Y".equals(legacyAddr.getIsAddrUseEPL()) && !isLegacyAddrInRdc(legacyAddr.getId().getAddrNo(), source.getItems())) {
                         FindCMRRecordModel epl = cloneAddress(addr, "ZS02");
                         epl.setTransAddrNo("");
                         converted.add(epl);
@@ -363,6 +371,29 @@ public class IsraelHandler extends EMEAHandler {
     } else {
       super.handleSOFConvertFrom(entityManager, source, reqEntry, mainRecord, converted, searchModel);
     }
+  }
+
+  private List<String> setUsesIfDuplicate(List<String> sofUses, FindCMRRecordModel record) {
+    List<String> newSofUses = new ArrayList<>();
+    newSofUses.add("3");
+    newSofUses.add("5");
+    return newSofUses;
+  }
+
+  private boolean isEnglishAllSharedSequence(List<String> sofUses) {
+
+    if (sofUses != null) {
+      List<String> allEngSharedAddrUses = new ArrayList<>();
+      allEngSharedAddrUses.add("3");
+      allEngSharedAddrUses.add("5");
+      allEngSharedAddrUses.add("A");
+      allEngSharedAddrUses.add("B");
+      allEngSharedAddrUses.add("C");
+
+      return CollectionUtils.isEqualCollection(sofUses, allEngSharedAddrUses);
+    }
+
+    return false;
   }
 
   private boolean isLegacyAddrInRdc(String addrNo, List<FindCMRRecordModel> converted) {
