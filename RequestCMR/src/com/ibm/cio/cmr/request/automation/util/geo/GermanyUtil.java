@@ -719,6 +719,7 @@ public class GermanyUtil extends AutomationUtil {
     boolean isBillToMatchesDnb = true;
     boolean isNegativeCheckNeedeed = false;
     boolean isInstallAtExistOnReq = false;
+    boolean isInstallAtSameAsSoldTo = false;
     boolean isBillToExistOnReq = false;
     boolean isPayGoBillToExistOnReq = false;
     boolean isShipToExistOnReq = false;
@@ -760,6 +761,19 @@ public class GermanyUtil extends AutomationUtil {
       }
 
       if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
+        // Check If Address same as Sold To address
+        isInstallAtSameAsSoldTo = addressExistsOnSoldTo(entityManager, installAt, requestData);
+        if (isInstallAtSameAsSoldTo) {
+          detail.append("Install At details provided matches an existing Sold To address.");
+          engineData.addRejectionComment("OTH", "Install At details provided matches an existing Sold To address.", "", "");
+          LOG.debug("Install At details provided matches an existing  Sold To address.");
+          output.setOnError(true);
+          validation.setSuccess(false);
+          validation.setMessage("Not validated");
+          output.setDetails(detail.toString());
+          output.setProcessOutput(validation);
+          return true;
+        }
         // Check If Address already exists on request
         isInstallAtExistOnReq = addressExists(entityManager, installAt, requestData);
         if (isInstallAtExistOnReq) {
