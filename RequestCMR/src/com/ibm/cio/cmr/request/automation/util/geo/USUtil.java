@@ -355,7 +355,7 @@ public class USUtil extends AutomationUtil {
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
         details.append("Branch Office codes computed by another element/external process.");
       } else {
-        if (data.getEnterprise().equals("6500871")) {
+        if (StringUtils.isNotEmpty(data.getEnterprise()) && data.getEnterprise().equals("6500871")) {
           String csoSite = "PAH";
           String mktgDept = "SVB";
           String mtkgArDept = "SD3";
@@ -374,6 +374,15 @@ public class USUtil extends AutomationUtil {
           details.append("SVC A/R Office = " + svcArOffice).append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), svcArOffice);
 
+          if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
+            for (USBranchOffcMapping mapping : boMappings) {
+              if (mapping.getScenario().equalsIgnoreCase(scenarioSubType)) {
+                String pccArDept = mapping.getPccArDept(entityManager, requestData);
+                details.append("PCC A/R Department = " + pccArDept).append("\n");
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "PCC_AR_DEPT", data.getPccArDept(), pccArDept);
+              }
+            }
+          }
           boCodesCalculated = true;
         } else if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
           for (USBranchOffcMapping mapping : boMappings) {
