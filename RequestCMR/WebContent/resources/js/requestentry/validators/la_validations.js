@@ -2598,7 +2598,7 @@ function setSortlForStateProvince() {
     FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '504', '515', '161' ]);
     FormManager.setValue('salesBusOffCd', '504');
     FormManager.enable('salesBusOffCd');
-  } else if (stateProv == 'PR' || stateProv == 'ES' || stateProv == 'MG') {
+  } else if (stateProv == 'ES' || stateProv == 'MG') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '556', '515', '161' ]);
     FormManager.setValue('salesBusOffCd', '556');
