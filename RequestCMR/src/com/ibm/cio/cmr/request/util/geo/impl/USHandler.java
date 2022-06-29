@@ -33,6 +33,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.KnvvExt;
+import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.entity.USTaxData;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
@@ -2068,4 +2069,33 @@ public class USHandler extends GEOHandler {
     return query.getSingleResult(String.class);
   }
 
+  // CREATCMR-6331
+  public static String getUSEntCompToPPN(EntityManager entityManager, Admin admin) {
+    String sql = ExternalizedQuery.getSql("QUERY.US_GETMASSUPDGETENTNO");
+    String cmtUsEntCompToPpn = "";
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("PAR_REQ_ID", admin.getId().getReqId());
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    List<MassUpdtData> rs = query.getResults(MassUpdtData.class);
+
+    for (MassUpdtData muData : rs) {
+      if (!StringUtils.isEmpty(muData.getCompany()) || !StringUtils.isEmpty(muData.getEnterprise())) {
+        if (StringUtils.isEmpty(muData.getCustNm1())) {
+          if ("".equals(cmtUsEntCompToPpn)) {
+            cmtUsEntCompToPpn = Integer.toString(muData.getId().getSeqNo()).trim();
+          } else {
+            cmtUsEntCompToPpn = cmtUsEntCompToPpn + ", row " + Integer.toString(muData.getId().getSeqNo()).trim();
+          }
+        }
+      }
+    }
+
+    if (!StringUtils.isEmpty(cmtUsEntCompToPpn)) {
+      cmtUsEntCompToPpn = "\nPlease check the fields in row " + cmtUsEntCompToPpn + ".";
+      cmtUsEntCompToPpn = "Mass file Customer Name1, Customer Name2, Enterprise# and Company# have changes, please make sure all 4 fields are filled in together."
+          + cmtUsEntCompToPpn;
+    }
+
+    return cmtUsEntCompToPpn;
+  }
 }
