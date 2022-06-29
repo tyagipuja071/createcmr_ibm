@@ -19,6 +19,11 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -30,6 +35,7 @@ import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -883,6 +889,71 @@ public class CanadaHandler extends GEOHandler {
     query.setParameter("REQ_ID", reqId);
     addresses = query.getResults(Addr.class);
     return addresses;
+  }
+
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    List<String> validISU = getExcelDropdownValues(book.getSheet("Control"), 2);
+    List<String> validCTC = getExcelDropdownValues(book.getSheet("Control"), 3);
+
+    XSSFSheet sheet = book.getSheet("Data");
+    if (sheet != null) {
+      TemplateValidation error = new TemplateValidation("Data");
+      XSSFRow row = null;
+
+      for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+        row = sheet.getRow(rowIndex);
+        if (row != null) {
+          // Validate CMR No
+          String cmrNo = validateColValFromCell(row.getCell(0));
+          if (StringUtils.isBlank(cmrNo)) {
+            error.addError(rowIndex + 1, "<br>CMR No.", "CMR Number is required.");
+          }
+
+          // Validate ISU
+          String isuCd = validateColValFromCell(row.getCell(8));
+          if (StringUtils.isNotBlank(isuCd) && !validISU.contains(isuCd)) {
+            error.addError(rowIndex + 1, "<br>ISU", "Invalid ISU value.");
+          }
+
+          // Validate CTC
+          String ctc = validateColValFromCell(row.getCell(9));
+          if (StringUtils.isNotBlank(ctc) && !validCTC.contains(ctc)) {
+            error.addError(rowIndex + 1, "<br>CTC", "Invalid CTC value.");
+          }
+        }
+      }
+
+      if (error.hasErrors()) {
+        validations.add(error);
+      }
+    }
+  }
+
+  private List<String> getExcelDropdownValues(XSSFSheet sheet, int col) {
+    List<String> dropDownValues = new ArrayList<String>();
+
+    if (sheet != null) {
+      XSSFRow sheetRow = null;
+      XSSFCell rowCell = null;
+      int rowIndex = 0;
+
+      for (Row row : sheet) {
+        sheetRow = (XSSFRow) row;
+        if (rowIndex > 0) {
+          rowCell = sheetRow.getCell(col);
+          String ddCellVal = validateColValFromCell(rowCell);
+          if (StringUtils.isNotBlank(ddCellVal)) {
+            dropDownValues.add(ddCellVal);
+          } else {
+            return dropDownValues;
+          }
+        }
+        rowIndex++;
+      }
+    }
+
+    return dropDownValues;
   }
 
 }
