@@ -207,7 +207,25 @@ public class SwitzerlandUtil extends AutomationUtil {
           boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(addrType) && "PG".equals(data.getOrdBlk()));
 
           if ("N".equals(addr.getImportInd())) {
-            // new address
+            // new address           
+            
+            boolean isInstallAtSameAsSoldTo=false;
+            // checking if install at address same as Sold To address
+            if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+              isInstallAtSameAsSoldTo = addressExistsOnSoldTo(entityManager, addr, requestData);
+              if (isInstallAtSameAsSoldTo) {
+                checkDetails.append("Install At details provided matches an existing Sold To address.");
+                engineData.addRejectionComment("OTH", "Install At details provided matches an existing Sold To address.", "", "");
+                LOG.debug("Install At details provided matches an existing  Sold To address.");
+                output.setOnError(true);
+                validation.setSuccess(false);
+                validation.setMessage("Not validated");
+                output.setDetails(checkDetails.toString());
+                output.setProcessOutput(validation);
+                return true;
+              }
+            }
+                       
             LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
 
             boolean duplicate = addressExists(entityManager, addr, requestData);
