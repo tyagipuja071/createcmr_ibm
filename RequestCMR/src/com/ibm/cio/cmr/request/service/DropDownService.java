@@ -349,6 +349,10 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
     if ("StateProvChina".equalsIgnoreCase(fieldId)) {
       query.append(" and LAND1 = :LAND1 ");
       query.append(" and MANDT = :MANDT ");
+      String landCntryCN = params.getParam("landCntry").toString();
+      if ("CN".equals(landCntryCN)) {
+        query.append(" AND SUBSTRING((BLAND),1,1) > '9' ");
+      }
       query.setParameter("LAND1", params.getParam("landCntry"));
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     }
