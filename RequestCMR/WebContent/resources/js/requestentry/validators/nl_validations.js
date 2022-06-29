@@ -353,7 +353,7 @@ function addHandlersForNL() {
   if (_BOTeamHandler == null) {
     _BOTeamHandler = dojo.connect(FormManager.getField('engineeringBo'), 'onChange', function(value) {
       // setINACValues(value);
-      setEconomicCodeValues(value);
+      // setEconomicCodeValues(value);
       setSORTL();
     });
   }
@@ -1797,7 +1797,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setBOTeamValues, GEOHandler.NL);
   // GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.NL);
-  GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.NL);
+  // GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setFieldsMandtOnSc, GEOHandler.NL);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.NL);
