@@ -176,7 +176,14 @@ public class CyprusHandler extends BaseSOFHandler {
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
       } else {
-        record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        // CREATCMR-6139 Prospect CMR Conversion - address sequence A
+        if (StringUtils.isNotBlank(reqEntry.getCmrIssuingCntry()) && "666".equals(reqEntry.getCmrIssuingCntry())
+            && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
+          record.setCmrAddrSeq("00001");
+        } else {
+          record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        }
+
       }
 
       if (SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {
@@ -3495,7 +3502,7 @@ public class CyprusHandler extends BaseSOFHandler {
                   + "If one is populated, the other must be empty. >>");
               error.addError((row.getRowNum() + 1), "Postal Code",
                   "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                  + "If one is populated, the other must be empty.");
+                      + "If one is populated, the other must be empty.");
               validations.add(error);
             }
 
@@ -3655,7 +3662,7 @@ public class CyprusHandler extends BaseSOFHandler {
                 }
               } else if (StringUtils.isNotBlank(ctc)) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
-                        + ":Note that ISU and Client Tier should both be input. Please fix and upload the template again.");
+                    + ":Note that ISU and Client Tier should both be input. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Client Tier",
                     ":Note that that ISU and Client Tier should both be input. Please fix and upload the template again.<br>");
               }
