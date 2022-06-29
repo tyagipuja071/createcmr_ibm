@@ -80,6 +80,9 @@ public class ProcessingMonitor {
   private boolean obsolete;
 
   @Transient
+  private boolean manual;
+
+  @Transient
   private boolean stuck;
 
   public long getReqId() {
@@ -240,6 +243,14 @@ public class ProcessingMonitor {
 
   public void setProcessBy(String processBy) {
     this.processBy = processBy;
+  }
+
+  public boolean isManual() {
+    return manual;
+  }
+
+  public void setManual(boolean manual) {
+    this.manual = manual;
   }
 
 }

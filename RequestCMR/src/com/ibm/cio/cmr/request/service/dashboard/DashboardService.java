@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.ibm.cio.cmr.request.entity.dashboard.AutomationMonitor;
 import com.ibm.cio.cmr.request.entity.dashboard.ProcessingMonitor;
+import com.ibm.cio.cmr.request.model.DropdownItemModel;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.dashboard.DashboardResult;
 import com.ibm.cio.cmr.request.model.dashboard.ProcessingModel;
@@ -26,6 +27,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 
 /**
  * @author 136786PH1
@@ -50,7 +52,10 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     appendQueryParams(query, params);
     List<AutomationMonitor> autos = query.getResults(AutomationMonitor.class);
 
-    return analyzeResults(procs, autos);
+    DashboardResult result = new DashboardResult();
+    initFilters(entityManager, result);
+
+    return analyzeResults(result, procs, autos, "Y".equals(params.getParam("LIST_RECORDS")));
   }
 
   private void appendQueryParams(PreparedQuery query, ParamContainer params) {
@@ -70,21 +75,90 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       query.append("and s.PROCESSING_TYP = :PROC_TYPE");
       query.setParameter("PROC_TYPE", type);
     }
+    query.append("order by a.LAST_UPDT_TS desc");
+    query.append("fetch first 200 rows only");
+    query.setForReadOnly(true);
 
   }
 
-  private DashboardResult analyzeResults(List<ProcessingMonitor> procs, List<AutomationMonitor> autos) {
-    DashboardResult result = new DashboardResult();
-    analyzeProcess(result, procs);
+  private DashboardResult analyzeResults(DashboardResult result, List<ProcessingMonitor> procs, List<AutomationMonitor> autos, boolean addRecords) {
+    analyzeProcess(result, procs, addRecords);
     LOG.debug("Returning monitoring results..");
     return result;
   }
 
-  private void analyzeProcess(DashboardResult result, List<ProcessingMonitor> procs) {
+  private void initFilters(EntityManager entityManager, DashboardResult result) {
+    String sql = "select CNTRY_CD, upper(NM), nvl(PROCESSING_TYP,'MAN') from CREQCMR.SUPP_CNTRY order by CNTRY_CD";
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    List<DropdownItemModel> countries = new ArrayList<DropdownItemModel>();
+    List<Object[]> results = query.getResults();
+    for (Object[] rec : results) {
+      DropdownItemModel cntry = new DropdownItemModel();
+      cntry.setId((String) rec[0]);
+      cntry.setName(rec[0] + "-" + rec[1]);
+      countries.add(cntry);
+    }
+    result.setCountries(countries);
+
+    List<DropdownItemModel> processes = new ArrayList<DropdownItemModel>();
+    DropdownItemModel proc = null;
+
+    proc = new DropdownItemModel();
+    proc.setId("LD");
+    proc.setName("LD - LegacyDirect (CMRDB2)");
+    processes.add(proc);
+    proc = new DropdownItemModel();
+    proc.setId("DR");
+    proc.setName("DR - iERP (RDC Only)");
+    processes.add(proc);
+    proc = new DropdownItemModel();
+    proc.setId("TC");
+    proc.setName("TC - TransactionConnect (Legacy)");
+    processes.add(proc);
+    proc = new DropdownItemModel();
+    proc.setId("MQ");
+    proc.setName("MQ - MQ Interface (Legacy)");
+    processes.add(proc);
+    proc = new DropdownItemModel();
+    proc.setId("FR");
+    proc.setName("FR - France");
+    processes.add(proc);
+    proc = new DropdownItemModel();
+    proc.setId("MA");
+    proc.setName("MA - Austria");
+    processes.add(proc);
+    proc = new DropdownItemModel();
+    proc.setId("MD");
+    proc.setName("MD - Switzerland");
+    processes.add(proc);
+
+    result.setProcTypes(processes);
+
+    sql = "select distinct UPPER(SOURCE_SYST_ID),UPPER(SOURCE_SYST_ID) from CREQCMR.ADMIN";
+    query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    List<DropdownItemModel> partners = new ArrayList<DropdownItemModel>();
+    results = query.getResults();
+    for (Object[] rec : results) {
+      DropdownItemModel partner = new DropdownItemModel();
+      partner.setId((String) rec[0]);
+      partner.setName((String) rec[0]);
+      partners.add(partner);
+    }
+    result.setPartners(partners);
+
+  }
+
+  private void analyzeProcess(DashboardResult result, List<ProcessingMonitor> procs, boolean listRecords) {
     LOG.debug("Analyzing processing status..");
 
     SimpleDateFormat tsFormatter = new SimpleDateFormat("yyyy-MMM-dd");
-    result.setProcessingRecords(procs);
+    if (listRecords) {
+      result.setProcessingRecords(procs);
+    } else {
+      result.setProcessingRecords(new ArrayList<ProcessingMonitor>());
+    }
     Map<String, Integer> countryCounts = new HashMap<String, Integer>();
     Map<String, Long> minCounts = new HashMap<String, Long>();
     Map<String, Long> maxCounts = new HashMap<String, Long>();
@@ -111,13 +185,16 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       minCounts.putIfAbsent(cntry, Long.MAX_VALUE);
       maxCounts.putIfAbsent(cntry, new Long(0));
 
+      if (proc.getLockBy() != null && proc.getLockBy().contains("@")) {
+        proc.setManual(true);
+      }
+
       if (proc.getDiffDay() > 30) {
         proc.setObsolete(true);
-      } else if (proc.getDiffMin() > minsMaxStuck && !"Y".equals(proc.getHostDown())) {
-        if (proc.getLockBy() == null || !proc.getLockBy().contains("@")) {
-          proc.setStuck(true);
-        }
+      } else if (proc.getDiffMin() > minsMaxStuck && !"Y".equals(proc.getHostDown()) && !proc.isManual()) {
+        proc.setStuck(true);
       }
+
       long millis = proc.getDiffMin() * 1000 * 60;
       String duration = DurationFormatUtils.formatDuration(millis, "d'd' HH'h' mm'm'");
       proc.setPendingTime(duration);
@@ -162,14 +239,14 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       }
       switch (proc.getReqStatus()) {
       case "PCR":
-        if (proc.getLockBy() != null && proc.getLockBy().contains("@")) {
+        if (proc.isManual()) {
           proc.setProcessBy("Manual");
         } else {
           proc.setProcessBy("In Legacy/DB2");
         }
         break;
       case "PCO":
-        if (proc.getLockBy() != null && proc.getLockBy().contains("@")) {
+        if (proc.isManual()) {
           proc.setProcessBy("Manual");
         } else {
           proc.setProcessBy("In RDC");
@@ -179,8 +256,17 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
         proc.setProcessBy("Pending");
         break;
       }
+
+      if (!"Y".equals(proc.getHostDown())) {
+        if (!LegacyDowntimes.isUp(proc.getCmrIssuingCntry(), proc.getTs())) {
+          proc.setHostDown("Y");
+        }
+      }
+
     }
-    for (String key : minCounts.keySet()) {
+    for (
+
+    String key : minCounts.keySet()) {
       if (minCounts.get(key) == Long.MAX_VALUE) {
         minCounts.put(key, (long) 0);
       }

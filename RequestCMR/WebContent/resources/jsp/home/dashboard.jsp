@@ -20,6 +20,8 @@
   img.proc-img {
     width: 11px;
     height:11px;
+    cursor: help;
+    vertical-align: sub;
   }
   table.rec-table {
     margin-left: 10px;
@@ -67,6 +69,14 @@
     font-size: 11px;
     margin-right: 10px;
   }
+  select.filter {
+    font-size: 11px;
+    width: 180px;
+  }
+  td.filter {
+    padding-right: 5px;
+    text-align: right !important;
+  }
 </style>
 <div ng-app="DashboardApp" ng-controller="DashboardController" ng-cloak>
   <cmr:boxContent>
@@ -74,12 +84,70 @@
   <cmr:section>
   <cmr:row>
     <cmr:column span="6">
-      <h3>Dashboard</h3>
+      <h3>Dashboard <span ng-show="filterStatus"> - {{filterStatus}}</span></h3>
+    </cmr:column>
+  </cmr:row>
+  <cmr:row>
+    <cmr:column span="1" width="280">
+      <table width="100%" class="cntry-table">
+        <tr>
+          <td class="filter">Country:</td>
+          <td> 
+            <select class="filter" ng-model="filterCountry" placeholder="Filter by country">
+              <option value=""></option>
+              <option ng-repeat="fc in fCountries" value="{{fc.id}}">{{fc.name}}</option>
+            </select>
+          </td>
+        </tr>
+      </table>
+    </cmr:column>
+    <cmr:column span="1" width="280">
+      <table width="100%" class="cntry-table">
+        <tr>
+          <td class="filter">Partner:</td>
+          <td> 
+            <select class="filter" ng-model="filterPartner" placeholder="Filter by partner">
+              <option value=""></option>
+              <option ng-repeat="fp in fPartners" value="{{fp.id}}">{{fp.name}}</option>
+            </select>
+          </td>
+        </tr>
+      </table>
+    </cmr:column>
+    <cmr:column span="1" width="280">
+      <table width="100%" class="cntry-table">
+        <tr>
+          <td class="filter">Process:</td>
+          <td> 
+            <select class="filter" ng-model="filterProcess" placeholder="Filter by process">
+              <option value=""></option>
+              <option ng-repeat="fr in fProcess" value="{{fr.id}}">{{fr.name}}</option>
+            </select>
+          </td>
+        </tr>
+      </table>
+    </cmr:column>
+    <cmr:column span="1" width="180">
+      <input type="button" class="filter" value="Filter Monitor" ng-click="extract()">
+      <input type="button" class="filter" value="Check All" ng-click="checkAll()">
     </cmr:column>
   </cmr:row>
   <cmr:row>
     <cmr:column span="6">
-      <div class="proc-head" ng-class="{'proc-g' : process.processingStatus == 'GREEN', 'proc-r' : process.processingStatus == 'RED', 'proc-o' : process.processingStatus == 'YELLOW'}">Processing Status - {{process.processingStatus}}</div>
+      &nbsp;
+    </cmr:column>
+  </cmr:row>
+  </cmr:section>
+  </cmr:boxContent>
+  
+  <div ng-show="report">
+  <cmr:boxContent>
+  <cmr:tabs />
+
+  <cmr:section>
+  <cmr:row>
+    <cmr:column span="6">
+      <div ng-show="report" class="proc-head" ng-class="{'proc-g' : process.processingStatus == 'GREEN', 'proc-r' : process.processingStatus == 'RED', 'proc-o' : process.processingStatus == 'YELLOW'}">Processing Status - {{process.processingStatus}}</div>
     </cmr:column>
   </cmr:row>
   <cmr:row>
@@ -87,7 +155,7 @@
     <div class="processing" ng-show="report">
       <table width="100%" class="cntry-table">
         <tr>
-          <td>Threshold (counts):</td>
+          <td width="50%">Threshold (counts):</td>
           <td>{{process.countsThreshold}}</td>
         </tr>
         <tr>
@@ -109,9 +177,12 @@
           <td>{{proc}}</td>
           <td>{{process.stuckCounts[proc]}}</td> 
         </tr>
+        <tr ng-show="stuckProcess.length == 0">
+          <td colspan="2">No stuck processes</td>
+        </tr>
       </table>
       <div class="tab-head">Country Requests</div>
-      <div style="height:350px; overflow-y:auto">
+      <div style="height:280px; overflow-y:auto">
       <table width="100%" class="cntry-table">
         <tr>
           <th>Country</th>
@@ -120,6 +191,9 @@
         <tr ng-repeat="cntry in countries">
           <td>{{cntry}}</td>
           <td>{{process.pendingCounts[cntry]}}</td> 
+        </tr>
+        <tr ng-show="countries.length == 0">
+          <td colspan="2">No pending requests</td>
         </tr>
       </table>
       </div>
@@ -146,19 +220,22 @@
           <th>Since</th>
           <th>State</th>
         </tr>
+        <tr ng-show="report.processingRecords == 0">
+          <td colspan="9">No pending requests</td>
+        </tr>
         <tr ng-repeat="rec in report.processingRecords | filter:processFilterText">
           <td><a href="${contextPath}/request/{{rec.reqId}}" target="_blank">{{rec.reqId}}</a></td>
           <td>{{rec.reqStatus}} - {{rec.processBy}}</td>
           <td>{{rec.reqType}}</td>
           <td>{{rec.cmrIssuingCntry}}-{{rec.cntryNm}}</td>
           <td>
-            <div ng-show="rec.custNm">{{rec.custNm.length > 15 ? rec.custNm.substring(0,15)+'...' : rec.custNm}}</div>
+            <div ng-show="rec.custNm" title="{{rec.custNm}}" style="cursor:pointer">{{rec.custNm.length > 15 ? rec.custNm.substring(0,15)+'...' : rec.custNm}}</div>
             
           </td>
           <td>{{rec.sourceSystId}}</td>
           <td>
             {{rec.processingTyp}}
-            <img src="${resourcesPath}/images/remove.png" class="proc-img" ng-show="rec.hostDown == 'Y'">
+            <img src="${resourcesPath}/images/remove.png" class="proc-img" ng-show="rec.hostDown == 'Y'" title="Host System is down right now">
           </td>
           <td>
             <div ng-show="rec.obsolete">{{rec.lastUpdated}}</div>
@@ -167,7 +244,8 @@
           <td>
             <div ng-show="rec.obsolete" >Obsolete</div>
             <div ng-show="rec.stuck" style="color:orange">Stuck</div>
-            <div ng-show="!rec.obsolete && !rec.stuck" style="color:green">In Queue</div>
+            <div ng-show="rec.manual && !rec.obsolete" style="color:brown">Manual</div>
+            <div ng-show="!rec.obsolete && !rec.stuck && !rec.manual" style="color:green">In Queue</div>
           </td>
         </tr>
       </table>
@@ -176,6 +254,7 @@
   </cmr:row>
   </cmr:section>
   </cmr:boxContent>
+  </div>
 
 </div>
 
