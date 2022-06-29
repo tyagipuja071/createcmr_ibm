@@ -2648,6 +2648,7 @@ function makeMrcSboOptionalForProspectLA() {
     		if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
     			FormManager.resetValidations('mrcCd');
                 FormManager.resetValidations('salesBusOffCd');
+                FormManager.setValue("isuCd", "");
                 }
     		}
     	}
