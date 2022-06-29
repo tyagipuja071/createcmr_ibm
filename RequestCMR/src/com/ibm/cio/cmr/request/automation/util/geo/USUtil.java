@@ -374,6 +374,15 @@ public class USUtil extends AutomationUtil {
           details.append("SVC A/R Office = " + svcArOffice).append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), svcArOffice);
 
+          if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
+            for (USBranchOffcMapping mapping : boMappings) {
+              if (mapping.getScenario().equalsIgnoreCase(scenarioSubType)) {
+                String pccArDept = mapping.getPccArDept(entityManager, requestData);
+                details.append("PCC A/R Department = " + pccArDept).append("\n");
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "PCC_AR_DEPT", data.getPccArDept(), pccArDept);
+              }
+            }
+          }
           boCodesCalculated = true;
         } else if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
           for (USBranchOffcMapping mapping : boMappings) {
