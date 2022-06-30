@@ -29,6 +29,7 @@ div#ibm-top {
       <div class="ibm-columns">
         <form:form method="POST" action="performLogin" id="login-form" name="frmCMR" class="ibm-column-form ibm-styled-form"
           modelAttribute="loginUser">
+          <input type="hidden" name="csrf" value="">
           <div class="ibm-col-2-1" style="width:100px">
             &nbsp;
           </div>
