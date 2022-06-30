@@ -2132,6 +2132,14 @@ public class LAHandler extends GEOHandler {
         if (hwBoRepTeam == null || hwBoRepTeam.isEmpty()) {
           addrService.updateDataForBRCreate(entityManager, null, soldToAddr);
         }
+
+        if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
+          if (CmrConstants.CUST_TYPE_LEASI.equals(data.getCustSubGrp()) && "34270520000136".equals(soldToAddr.getVat())) {
+            data.setCustClass("33");
+          } else if (CmrConstants.CUST_TYPE_LEASI.equals(data.getCustSubGrp()) && !"34270520000136".equals(soldToAddr.getVat())) {
+            data.setCustClass("34");
+          }
+        }
       }
     }
 
@@ -2165,15 +2173,11 @@ public class LAHandler extends GEOHandler {
     // set custClass for Creates only
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
       if (isBRIssuingCountry(issuingCntry)) {
-        if (CmrConstants.CUST_TYPE_LEASI.equals(data.getCustSubGrp()) && "34270520000136".equals(data.getVat())) {
-          data.setCustClass("33");
-        } else if (CmrConstants.CUST_TYPE_LEASI.equals(data.getCustSubGrp()) && !"34270520000136".equals(data.getVat())) {
-          data.setCustClass("34");
-        } else if (("GD".equals(data.getCrosSubTyp()) || "GI".equals(data.getCrosSubTyp())) && "PF".equals(data.getGovType())) {
+        if (("GD".equals(data.getCrosSubTyp()) || "GI".equals(data.getCrosSubTyp())) && "PF".equals(data.getGovType())) {
           data.setCustClass("12");
-        } else if ("GD".equals(data.getCrosSubTyp()) && "PF".equals(data.getGovType())) {
+        } else if ("GD".equals(data.getCrosSubTyp()) && !"PF".equals(data.getGovType())) {
           data.setCustClass("13");
-        } else if ("GI".equals(data.getCrosSubTyp()) && "PF".equals(data.getGovType())) {
+        } else if ("GI".equals(data.getCrosSubTyp()) && !"PF".equals(data.getGovType())) {
           data.setCustClass("11");
         }
       }
