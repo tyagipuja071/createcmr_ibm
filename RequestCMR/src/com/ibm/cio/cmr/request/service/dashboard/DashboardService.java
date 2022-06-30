@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.service.dashboard;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +22,8 @@ import com.ibm.cio.cmr.request.entity.dashboard.AutomationMonitor;
 import com.ibm.cio.cmr.request.entity.dashboard.ProcessingMonitor;
 import com.ibm.cio.cmr.request.model.DropdownItemModel;
 import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.model.dashboard.AutoProcessModel;
+import com.ibm.cio.cmr.request.model.dashboard.CountryAutoStats;
 import com.ibm.cio.cmr.request.model.dashboard.DashboardResult;
 import com.ibm.cio.cmr.request.model.dashboard.ProcessingModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -30,6 +33,8 @@ import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 
 /**
+ * Handles the creation of the monitor dashboard with results of system checks
+ * 
  * @author 136786PH1
  *
  */
@@ -43,13 +48,13 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     LOG.debug("Querying processing status..");
     String sql = ExternalizedQuery.getSql("DASHBOARD.PROCESS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    appendQueryParams(query, params);
+    appendQueryParams(query, params, false);
     List<ProcessingMonitor> procs = query.getResults(ProcessingMonitor.class);
 
     LOG.debug("Querying automation status..");
     sql = ExternalizedQuery.getSql("DASHBOARD.AUTOMATION");
     query = new PreparedQuery(entityManager, sql);
-    appendQueryParams(query, params);
+    appendQueryParams(query, params, true);
     List<AutomationMonitor> autos = query.getResults(AutomationMonitor.class);
 
     DashboardResult result = new DashboardResult();
@@ -58,7 +63,13 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     return analyzeResults(result, procs, autos, "Y".equals(params.getParam("LIST_RECORDS")));
   }
 
-  private void appendQueryParams(PreparedQuery query, ParamContainer params) {
+  /**
+   * Appends the SQL for the 3 available params
+   * 
+   * @param query
+   * @param params
+   */
+  private void appendQueryParams(PreparedQuery query, ParamContainer params, boolean automation) {
     String country = (String) params.getParam("CNTRY");
     String source = (String) params.getParam("SOURCE");
     String type = (String) params.getParam("PROC_TYPE");
@@ -75,19 +86,47 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       query.append("and s.PROCESSING_TYP = :PROC_TYPE");
       query.setParameter("PROC_TYPE", type);
     }
-    query.append("order by a.LAST_UPDT_TS desc");
+    if (automation) {
+      query.append(
+          "order by case when a.REQ_STATUS = 'AUT' then 0 when a.REQ_STATUS = 'RET' then 1 when a.REQ_STATUS in ('PPN', 'PVA') then 2 else 3 end, a.LAST_UPDT_TS desc");
+    } else {
+      query.append("order by a.LAST_UPDT_TS desc");
+    }
     query.append("fetch first 200 rows only");
     query.setForReadOnly(true);
 
   }
 
+  /**
+   * Analyzes the results
+   * 
+   * @param result
+   * @param procs
+   * @param autos
+   * @param addRecords
+   * @return
+   */
   private DashboardResult analyzeResults(DashboardResult result, List<ProcessingMonitor> procs, List<AutomationMonitor> autos, boolean addRecords) {
     analyzeProcess(result, procs, addRecords);
+    analyzeAutomation(result, autos, addRecords);
+
+    if ("RED".equals(result.getAutomation().getAutomationStatus()) || "RED".equals(result.getProcessing().getProcessingStatus())) {
+      result.setOverallStatus("RED");
+    } else if ("ORANGE".equals(result.getAutomation().getAutomationStatus()) || "ORANGE".equals(result.getProcessing().getProcessingStatus())) {
+      result.setOverallStatus("ORANGE");
+    }
     LOG.debug("Returning monitoring results..");
     return result;
   }
 
+  /**
+   * Initializes the available values for the filters
+   * 
+   * @param entityManager
+   * @param result
+   */
   private void initFilters(EntityManager entityManager, DashboardResult result) {
+    // countries
     String sql = "select CNTRY_CD, upper(NM), nvl(PROCESSING_TYP,'MAN') from CREQCMR.SUPP_CNTRY order by CNTRY_CD";
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setForReadOnly(true);
@@ -101,6 +140,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     }
     result.setCountries(countries);
 
+    // processes
     List<DropdownItemModel> processes = new ArrayList<DropdownItemModel>();
     DropdownItemModel proc = null;
 
@@ -135,6 +175,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
 
     result.setProcTypes(processes);
 
+    // partners
     sql = "select distinct UPPER(SOURCE_SYST_ID),UPPER(SOURCE_SYST_ID) from CREQCMR.ADMIN";
     query = new PreparedQuery(entityManager, sql);
     query.setForReadOnly(true);
@@ -150,6 +191,13 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
 
   }
 
+  /**
+   * Analyzes the records processed and creates the stats
+   * 
+   * @param result
+   * @param procs
+   * @param listRecords
+   */
   private void analyzeProcess(DashboardResult result, List<ProcessingMonitor> procs, boolean listRecords) {
     LOG.debug("Analyzing processing status..");
 
@@ -299,4 +347,289 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
 
     result.setProcessing(procModel);
   }
+
+  /**
+   * Analyzes the automation records and creates the stats
+   * 
+   * @param result
+   * @param autos
+   * @param listRecords
+   */
+  private void analyzeAutomation(DashboardResult result, List<AutomationMonitor> autos, boolean listRecords) {
+    LOG.debug("Analyzing automation status..");
+
+    if (listRecords) {
+      result.setAutomationRecords(autos);
+    }
+
+    Map<String, List<AutomationMonitor>> countryRecs = new HashMap<String, List<AutomationMonitor>>();
+    String cntry = null;
+    // register all recs per country
+    for (AutomationMonitor auto : autos) {
+      cntry = auto.getCmrIssuingCntry() + "-" + auto.getCntryNm();
+      countryRecs.putIfAbsent(cntry, new ArrayList<AutomationMonitor>());
+      countryRecs.get(cntry).add(auto);
+    }
+
+    // 10 mins by default
+    String autoThreshold = SystemParameters.getString("DASHBOARD.AUTO.PROC");
+    int autoProcMax = 10;
+    if (!StringUtils.isBlank(autoThreshold) && !StringUtils.isNumeric(autoThreshold)) {
+      autoProcMax = Integer.parseInt(autoThreshold);
+    }
+    boolean autoProcExceeded = false;
+
+    // 20 mins by default
+    String completeThreshold = SystemParameters.getString("DASHBOARD.AUTO.COMP");
+    int compMax = 20;
+    if (!StringUtils.isBlank(completeThreshold) && !StringUtils.isNumeric(completeThreshold)) {
+      compMax = Integer.parseInt(completeThreshold);
+    }
+    boolean compExceeded = false;
+
+    // 50 %
+    String manualThreshold = SystemParameters.getString("DASHBOARD.AUTO.MANUAL");
+    int manualMax = 50;
+    if (!StringUtils.isBlank(manualThreshold) && !StringUtils.isNumeric(manualThreshold)) {
+      compMax = Integer.parseInt(manualThreshold);
+    }
+    boolean manualExceeded = false;
+
+    AutoProcessModel model = new AutoProcessModel();
+    int allPending = 0;
+    for (String key : countryRecs.keySet()) {
+
+      long maxAutoDiff = 0;
+      long maxCompleteDiff = 0;
+      long maxFullAutoDiff = 0;
+      List<Long> autoCompletes = new ArrayList<Long>();
+      List<Long> allCompletes = new ArrayList<Long>();
+      List<Long> processings = new ArrayList<Long>();
+      long manualCount = 0;
+      long fullAutoCount = 0;
+      long total = 0;
+
+      // iterate the records and compute stats
+      List<AutomationMonitor> list = countryRecs.get(key);
+      total = list.size();
+      long pending = 0;
+      for (AutomationMonitor rec : list) {
+        long diff = rec.getDiffMin() - (rec.getAprMin() < rec.getDiffMin() ? rec.getAprMin() : 0);
+        if ("COM".equals(rec.getReqStatus()) && !"Y".equals(rec.getManual())) {
+          autoCompletes.add(diff);
+          if (diff > maxFullAutoDiff) {
+            maxFullAutoDiff = diff;
+          }
+          fullAutoCount++;
+        }
+        if ("AUT".equals(rec.getReqStatus()) || "RET".equals(rec.getReqStatus())) {
+          pending++;
+        }
+        if ("COM".equals(rec.getReqStatus())) {
+          allCompletes.add(diff);
+          if (diff > maxCompleteDiff) {
+            maxCompleteDiff = diff;
+          }
+        }
+
+        if ("Y".equals(rec.getManual())) {
+          manualCount++;
+        }
+        processings.add(rec.getDiffMinNxt());
+        if (rec.getDiffMinNxt() > maxAutoDiff) {
+          maxAutoDiff = rec.getDiffMinNxt();
+        }
+
+        switch (rec.getReqType()) {
+        case "C":
+          rec.setReqType("CRE");
+          break;
+        case "U":
+          rec.setReqType("UPD");
+          break;
+        case "M":
+          rec.setReqType("MU");
+          break;
+        case "N":
+          rec.setReqType("MC");
+          break;
+        case "D":
+          rec.setReqType("DEL");
+          break;
+        case "R":
+          rec.setReqType("REA");
+          break;
+        case "E":
+          rec.setReqType("ENT");
+          break;
+        }
+
+      }
+      CountryAutoStats stats = new CountryAutoStats();
+      // churn numbers
+      DecimalFormat pctFormat = new DecimalFormat("0.0");
+      float manualPct = (float) manualCount / (float) total;
+      stats.setManualPercentage(pctFormat.format(manualPct * 100));
+      if (manualPct * 100 > manualMax) {
+        manualExceeded = true;
+      }
+
+      float fullAutoPct = (float) fullAutoCount / (float) total;
+      stats.setFullAutoPercentage(pctFormat.format(fullAutoPct * 100));
+
+      boolean found = false;
+      int index = 0;
+      for (int i = 0; i < autoCompletes.size(); i++) {
+        if (autoCompletes.get(i) == maxFullAutoDiff) {
+          LOG.trace(key + " Auto complete outlier: " + maxFullAutoDiff);
+          found = true;
+          index = i;
+          break;
+        }
+      }
+      if (found && autoCompletes.size() > 2) {
+        autoCompletes.remove(index);
+      }
+      long totalMins = 0;
+      for (Long mins : autoCompletes) {
+        totalMins += mins * 1000 * 60;
+      }
+      long ave = (long) ((float) totalMins / (float) autoCompletes.size());
+      if (ave < 0) {
+        ave = 0;
+      }
+      LOG.trace(key + " Auto Complete Average: " + ave);
+      String duration = DurationFormatUtils.formatDuration(ave, "HH'h' mm'm'");
+      String durMin = DurationFormatUtils.formatDuration(ave, "mm");
+      stats.setFullAutoAverageMin(Long.parseLong(durMin));
+      stats.setFullAutoAverage(duration);
+      stats.setFullAutoOutlier(autoCompletes.size() > 5 ? maxFullAutoDiff : 0);
+      if (stats.getFullAutoAverageMin() > compMax) {
+        compExceeded = true;
+      }
+      found = false;
+
+      index = 0;
+      for (int i = 0; i < allCompletes.size(); i++) {
+        if (allCompletes.get(i) == maxCompleteDiff) {
+          LOG.trace(key + " All complete outlier: " + maxCompleteDiff);
+          found = true;
+          index = i;
+          break;
+        }
+      }
+      if (found && allCompletes.size() > 2) {
+        allCompletes.remove(index);
+      }
+      totalMins = 0;
+      for (Long mins : allCompletes) {
+        totalMins += mins * 1000 * 60;
+      }
+      ave = (long) ((float) totalMins / (float) allCompletes.size());
+      if (ave < 0) {
+        ave = 0;
+      }
+      LOG.trace(key + " All Completes Average: " + ave);
+      duration = DurationFormatUtils.formatDuration(ave, "HH'h' mm'm'");
+      durMin = DurationFormatUtils.formatDuration(ave, "mm");
+      stats.setCompletionAverageMin(Long.parseLong(durMin));
+      stats.setCompletionAverage(duration);
+
+      index = 0;
+      for (int i = 0; i < processings.size(); i++) {
+        if (processings.get(i) == maxAutoDiff) {
+          LOG.trace(key + " Processing outlier: " + maxAutoDiff);
+          found = true;
+          index = i;
+          break;
+        }
+      }
+      if (found && processings.size() > 2) {
+        processings.remove(index);
+      }
+      totalMins = 0;
+      for (Long mins : processings) {
+        totalMins += mins * 1000 * 60;
+      }
+      ave = (long) ((float) totalMins / (float) processings.size());
+      if (ave < 0) {
+        ave = 0;
+      }
+      LOG.trace(key + " Processing Average: " + ave);
+      duration = DurationFormatUtils.formatDuration(ave, "mm'm'");
+      durMin = DurationFormatUtils.formatDuration(ave, "mm");
+      stats.setAutomationAverage(duration);
+      stats.setAutomationOutlier(processings.size() > 5 ? maxAutoDiff : 0);
+      stats.setAutomationAverageMin(Long.parseLong(durMin));
+      if (stats.getAutomationAverageMin() > autoProcMax) {
+        autoProcExceeded = true;
+      }
+
+      // no completes, remove completions
+      if (allCompletes.isEmpty()) {
+        stats.setCompletionAverage(null);
+        stats.setCompletionAverageMin(0);
+      }
+      if (autoCompletes.isEmpty()) {
+        stats.setFullAutoAverage(null);
+        stats.setFullAutoAverageMin(0);
+        stats.setFullAutoPercentage(null);
+        stats.setFullAutoOutlier(0);
+      }
+      stats.setTotal(total);
+      stats.setReviews(manualCount);
+      stats.setCompletes(fullAutoCount);
+
+      stats.setCurrentQueue(pending);
+      allPending += pending;
+      model.getCountryStats().put(key, stats);
+    }
+
+    // 20 requests by default
+    String pendingThreshold = SystemParameters.getString("DASHBOARD.AUTO.MAX");
+    int pendMaxStuck = 20;
+    if (!StringUtils.isBlank(pendingThreshold) && !StringUtils.isNumeric(pendingThreshold)) {
+      pendMaxStuck = Integer.parseInt(pendingThreshold);
+    }
+
+    model.setAutomationStatus("GREEN");
+    StringBuilder alert = new StringBuilder();
+    if (allPending > pendMaxStuck) {
+      if (allPending > pendMaxStuck * 2) {
+        model.setAutomationStatus("RED");
+      }
+      model.setAutomationStatus("ORANGE");
+      alert.append("Total Pending requests for automation is greater than threshold.");
+    }
+    if (autoProcExceeded) {
+      if (!"RED".equals(model.getAutomationStatus())) {
+        model.setAutomationStatus("ORANGE");
+      }
+      alert.append(alert.length() > 0 ? " " : "");
+      alert.append("Automation validations for some countries take longer than the threshold.");
+    }
+    if (compExceeded) {
+      if (!"RED".equals(model.getAutomationStatus())) {
+        model.setAutomationStatus("ORANGE");
+      }
+      alert.append(alert.length() > 0 ? " " : "");
+      alert.append("Completion turn-around times for some countries take longer than the threshold.");
+    }
+    if (manualExceeded) {
+      if (!"RED".equals(model.getAutomationStatus())) {
+        model.setAutomationStatus("ORANGE");
+      }
+      alert.append(alert.length() > 0 ? " " : "");
+      alert.append("Manual review percentage for some countries are greater than the threshold.");
+    }
+    model.setAllPending(allPending);
+    model.setTotalRecords(autos.size());
+    model.setManualPctThreshold(manualMax);
+    model.setPendingThreshold(pendMaxStuck);
+    model.setProcessTimeThreshold(compMax);
+    model.setProcessTimeThreshold(autoProcMax);
+    model.setAlert(alert.toString());
+    result.setAutomation(model);
+  }
+
 }

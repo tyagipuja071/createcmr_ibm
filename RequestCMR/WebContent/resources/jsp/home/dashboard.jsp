@@ -77,14 +77,30 @@
     padding-right: 5px;
     text-align: right !important;
   }
+  div.alert {
+    background: #eaefb5; /* Old browsers */
+    background: -moz-linear-gradient(top,  #eaefb5 0%, #e1e9a0 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  #eaefb5 0%,#e1e9a0 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  #eaefb5 0%,#e1e9a0 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaefb5', endColorstr='#e1e9a0',GradientType=0 ); /* IE6-9 */
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: none;
+    padding-left: 10px;
+  }
 </style>
 <div ng-app="DashboardApp" ng-controller="DashboardController" ng-cloak>
   <cmr:boxContent>
   <cmr:tabs />
   <cmr:section>
+  <cmr:row addBackground="true">
+    <cmr:column span="6">
+      <h3><span ng-show="filterStatus">{{filterStatus}}</span></h3>
+    </cmr:column>
+  </cmr:row>
   <cmr:row>
     <cmr:column span="6">
-      <h3>Dashboard <span ng-show="filterStatus"> - {{filterStatus}}</span></h3>
+      &nbsp;
     </cmr:column>
   </cmr:row>
   <cmr:row>
@@ -164,7 +180,7 @@
         </tr>
         <tr>
           <td>Pending Counts:</td>
-          <td>{{totalPending}}</td>
+          <td><strong>{{totalPending}}</strong></td>
         </tr>
       </table>
       <div class="tab-head">Stuck Processes</div>
@@ -254,6 +270,140 @@
   </cmr:row>
   </cmr:section>
   </cmr:boxContent>
+  
+  
+  <div ng-show="report">
+  <cmr:boxContent>
+  <cmr:tabs />
+
+  <cmr:section> 
+  <cmr:row>
+    <cmr:column span="6">
+      <div ng-show="report" class="proc-head" ng-class="{'proc-g' : automation.automationStatus == 'GREEN', 'proc-r' : automation.automationStatus == 'RED', 'proc-o' : automation.automationStatus == 'ORANGE'}">Automation Status - {{automation.automationStatus}}</div>
+      <div ng-show="automation.alert" class="alert">{{automation.alert}}</div>
+    </cmr:column>
+  </cmr:row>
+  <cmr:row>
+    <cmr:column span="2" width="220">
+    <div class="processing" ng-show="report">
+      <table width="100%" class="cntry-table">
+        <tr>
+          <td width="50%">Threshold (pending):</td>
+          <td>{{automation.pendingThreshold}} requests</td>
+        </tr>
+        <tr>
+          <td>Threshold (validation):</td>
+          <td>{{automation.processTimeThreshold}}m</td>
+        </tr>
+        <tr>
+          <td>Threshold (review %):</td>
+          <td>{{automation.manualPctThreshold}}%</td>
+        </tr>
+        <tr>
+          <td>Threshold (completion TAT):</td>
+          <td>{{automation.tatThreshold}}m</td>
+        </tr>
+        <tr>
+          <td>All Requests:</td>
+          <td>{{automation.totalRecords}}</td>
+        </tr>
+        <tr>
+          <td>Pending Automation:</td>
+          <td><strong>{{automation.allPending}}</strong></td>
+        </tr>
+      </table>
+    </div>
+    </cmr:column>
+    <cmr:column span="1" width="20">
+      &nbsp;
+    </cmr:column>
+    <cmr:column span="4" width="780">
+      <div ng-show="report" style="background:#EEE; height:300px; overflow-y:auto" >
+      <div class="tab-head">Automation Statistics</div>
+      <table width="100%" cellspacing="0" cellpadding="0" margin="0" class="rec-table">
+        <tr>
+          <th>Country</th>
+          <th>Review %</th>
+          <th>Validation</th>
+          <th><div>TAT (All)</div></th>
+          <th><div>TAT (Auto)</div></th>
+          <th>Total</th>
+          <th>Reviews</th>
+          <th>Touchless (COM)</th>
+          <th>Queue</th>
+        </tr>
+        <tr ng-show="autoContries == 0">
+          <td colspan="9">No data found</td>
+        </tr>
+        <tr ng-repeat="rec in autoCountries | filter:autoFilterText">
+          <td>{{rec.cntry}}</td>
+          <td>
+            {{rec.rec.manualPercentage}}%
+          </td>
+          <td>{{rec.rec.automationAverage}}</td>
+          <td>{{rec.rec.completionAverage}}</td>
+          <td>{{rec.rec.fullAutoAverage}}</td>
+          <td>{{rec.rec.total}}</td>
+          <td>{{rec.rec.reviews}}</td>
+          <td>{{rec.rec.completes}}</td>
+          <td>{{rec.rec.currentQueue}}</td>
+        </tr>
+      </table>
+      </div>
+    </cmr:column>
+  </cmr:row>
+  <cmr:row>
+  <cmr:column span="6" >
+  <div class="processing" ng-show="report">
+    <div ng-show="report" style="background:#FFF; height:450px; overflow-y:auto" >
+    <div class="tab-head">Today's Requests</div>
+    <table width="100%" class="cntry-table">
+      <tr>
+        <tr>
+          <th>ID</th>
+          <th>Status</th>
+          <th>Type</th>
+          <th>Country</th>
+          <th>Customer</th>
+          <th>Source</th>
+          <th>Manual</th>
+          <th>TAT</th>
+          <th>Appr.</th>
+          <th>Validation</th>
+        </tr>
+      </tr>
+      <tr ng-show="report.automationRecords == 0">
+        <td colspan="10">No requests found</td>
+      </tr>
+      <tr ng-repeat="rec in report.automationRecords">
+          <td><a href="${contextPath}/request/{{rec.reqId}}" target="_blank">{{rec.reqId}}</a></td>
+          <td>{{rec.reqStatus}}</td>
+          <td>{{rec.reqType}}</td>
+          <td>{{rec.cmrIssuingCntry}}-{{rec.cntryNm}}</td>
+          <td>
+            <div ng-show="rec.custNm" title="{{rec.custNm}}" style="cursor:pointer">{{rec.custNm.length > 15 ? rec.custNm.substring(0,15)+'...' : rec.custNm}}</div>
+          </td>
+          <td>{{rec.sourceSystId}}</td>
+          <td>{{rec.manual}}</td>
+          <td>
+            {{rec.diffMin}}m
+          </td>
+          <td>
+            {{rec.aprMin}}m
+          </td>
+          <td>
+            {{rec.diffMinNxt}}m
+          </td>
+      </tr>
+    </table>
+    </div>
+  </div>
+  </cmr:column>
+  </cmr:row>
+  
+  </cmr:section>
+  </cmr:boxContent>
+  
   </div>
 
 </div>

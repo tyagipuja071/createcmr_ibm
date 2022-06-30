@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 /**
  * @author 136786PH1
@@ -61,6 +62,12 @@ public class AutomationMonitor {
 
   @Column(name = "HOST_DOWN")
   private String hostDown;
+
+  @Column(name = "DIFF_MIN_NXT")
+  private long diffMinNxt;
+
+  @Transient
+  private long netDiff;
 
   public long getReqId() {
     return reqId;
@@ -172,6 +179,22 @@ public class AutomationMonitor {
 
   public void setLockBy(String lockBy) {
     this.lockBy = lockBy;
+  }
+
+  public long getDiffMinNxt() {
+    return diffMinNxt;
+  }
+
+  public void setDiffMinNxt(long diffMinNxt) {
+    this.diffMinNxt = diffMinNxt;
+  }
+
+  public long getNetDiff() {
+    return netDiff;
+  }
+
+  public void setNetDiff(long netDiff) {
+    this.netDiff = netDiff;
   }
 
 }

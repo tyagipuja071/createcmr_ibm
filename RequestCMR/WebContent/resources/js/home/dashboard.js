@@ -41,10 +41,12 @@ app.controller('DashboardController', [ '$scope', '$document', '$http', '$timeou
 
   $scope.report = null;
   $scope.process = null;
+  $scope.automation = null;
   $scope.countries = null;
   $scope.stuckProcess = null;
   $scope.totalPending = 0;
   $scope.querying = false;
+  $scope.autoCountries = null;
   
   $scope.fCountries = [];
   $scope.fPartners = [];
@@ -96,8 +98,10 @@ app.controller('DashboardController', [ '$scope', '$document', '$http', '$timeou
         $scope.filterStatus = 'System Checks for ALL Components';
       }
       if (response.data && response.data.dashboardResult){
+        console.log(response.data.dashboardResult);
         $scope.report = response.data.dashboardResult;
         $scope.process = $scope.report.processing;
+        $scope.automation = $scope.report.automation;
         $scope.fCountries = $scope.report.countries;
         $scope.fPartners = $scope.report.partners;
         $scope.fProcess = $scope.report.procTypes;
@@ -123,6 +127,23 @@ app.controller('DashboardController', [ '$scope', '$document', '$http', '$timeou
         }
         stuck.sort();
         $scope.stuckProcess = stuck;
+      }
+      if ($scope.automation && $scope.automation.countryStats){
+        console.log('automation country stats');
+        var autoCountries1 = [];
+        for (var i in $scope.automation.countryStats){
+          if ($scope.automation.countryStats.hasOwnProperty(i)){
+            autoCountries1.push({
+              cntry : i,
+              rec : $scope.automation.countryStats[i]
+            });
+            console.log({
+              cntry : i,
+              rec : $scope.automation.countryStats[i]
+            });
+          }
+        }
+        $scope.autoCountries = autoCountries1;
       }
     }, function(error) {
       $scope.querying = false;

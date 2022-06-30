@@ -6,6 +6,7 @@ package com.ibm.cio.cmr.request.model.dashboard;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ibm.cio.cmr.request.entity.dashboard.AutomationMonitor;
 import com.ibm.cio.cmr.request.entity.dashboard.ProcessingMonitor;
 import com.ibm.cio.cmr.request.model.DropdownItemModel;
 
@@ -19,11 +20,13 @@ public class DashboardResult {
   private String alertMessage;
 
   private List<ProcessingMonitor> processingRecords = new ArrayList<ProcessingMonitor>();
+  private List<AutomationMonitor> automationRecords = new ArrayList<AutomationMonitor>();
   private List<DropdownItemModel> countries = new ArrayList<DropdownItemModel>();
   private List<DropdownItemModel> procTypes = new ArrayList<DropdownItemModel>();
   private List<DropdownItemModel> partners = new ArrayList<DropdownItemModel>();
 
   private ProcessingModel processing;
+  private AutoProcessModel automation;
 
   public String getOverallStatus() {
     return overallStatus;
@@ -79,6 +82,22 @@ public class DashboardResult {
 
   public void setPartners(List<DropdownItemModel> partners) {
     this.partners = partners;
+  }
+
+  public List<AutomationMonitor> getAutomationRecords() {
+    return automationRecords;
+  }
+
+  public void setAutomationRecords(List<AutomationMonitor> automationRecords) {
+    this.automationRecords = automationRecords;
+  }
+
+  public AutoProcessModel getAutomation() {
+    return automation;
+  }
+
+  public void setAutomation(AutoProcessModel automation) {
+    this.automation = automation;
   }
 
 }
