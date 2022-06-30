@@ -309,6 +309,14 @@ function updateBPSearchTerm() {
         FormManager.readOnly('inacCd');
       }
     }
+  } else if (FormManager.getActualValue('reqType') == 'U' && _pagemodel.userRole.toUpperCase() == 'REQUESTER' && (ppsceidBP == undefined || ppsceidBP == null || ppsceidBP == '')){
+    // CREATCMR-6084
+    if (searchTerm == null || searchTerm.trim() == '' || searchTerm == '00000' || searchTerm == '000000' || regString.test(searchTerm)) {
+      if (cmrNo.startsWith('1') || cmrNo.startsWith('2')){
+        FormManager.setValue('searchTerm', '04182');
+        FormManager.readOnly('searchTerm');
+      }
+    }
   }
 }
 

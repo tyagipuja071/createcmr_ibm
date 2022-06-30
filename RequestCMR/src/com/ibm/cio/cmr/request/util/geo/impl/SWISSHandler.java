@@ -73,6 +73,7 @@ public class SWISSHandler extends GEOHandler {
       throws Exception {
     List<FindCMRRecordModel> recordsFromSearch = source.getItems();
     List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
+    List<FindCMRRecordModel> converted = new ArrayList<FindCMRRecordModel>();
 
     if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0) {
       doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
@@ -81,6 +82,21 @@ public class SWISSHandler extends GEOHandler {
         source.setItems(filteredRecords);
       }
     }
+
+    // CREATCMR-6139 Prospect CMR Conversion - address sequence A
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+      FindCMRRecordModel record = source.getItems() != null && !source.getItems().isEmpty() ? source.getItems().get(0) : null;
+      if (record != null) {
+        if (StringUtils.isNotBlank(reqEntry.getCmrIssuingCntry()) && "848".equals(reqEntry.getCmrIssuingCntry())
+            && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
+          record.setCmrAddrSeq("00001");
+          converted.add(record);
+          source.setItems(converted);
+        }
+      }
+    }
+    // CREATCMR-6139
+
   }
 
   // Story : 1824918 - Secondary Sold to address (order block is 90 for update

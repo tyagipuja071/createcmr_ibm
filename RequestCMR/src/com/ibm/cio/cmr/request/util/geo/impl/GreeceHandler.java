@@ -164,7 +164,14 @@ public class GreeceHandler extends BaseSOFHandler {
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
       } else {
-        record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        // CREATCMR-6139 Prospect CMR Conversion - address sequence A
+        if (StringUtils.isNotBlank(reqEntry.getCmrIssuingCntry()) && "726".equals(reqEntry.getCmrIssuingCntry())
+            && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
+          record.setCmrAddrSeq("00001");
+        } else {
+          record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        }
+        // CREATCMR-6139
       }
 
       if (SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {
@@ -3760,7 +3767,7 @@ public class GreeceHandler extends BaseSOFHandler {
                   + "If one is populated, the other must be empty. >>");
               error.addError((row.getRowNum() + 1), "Postal Code",
                   "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                  + "If one is populated, the other must be empty.");
+                      + "If one is populated, the other must be empty.");
               validations.add(error);
             }
 
@@ -3834,8 +3841,8 @@ public class GreeceHandler extends BaseSOFHandler {
                   error.addError(((row.getRowNum() + 1)), "Client Tier",
                       ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((StringUtils.isNotBlank(dataIsu) && (StringUtils.isBlank(dataCtc) || !"@QY".contains(dataCtc))) || 
-                  (StringUtils.isNotBlank(dataCtc) && !"@QY".contains(dataCtc))) {
+              } else if ((StringUtils.isNotBlank(dataIsu) && (StringUtils.isBlank(dataCtc) || !"@QY".contains(dataCtc)))
+                  || (StringUtils.isNotBlank(dataCtc) && !"@QY".contains(dataCtc))) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Client Tier",

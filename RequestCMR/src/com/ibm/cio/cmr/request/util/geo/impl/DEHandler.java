@@ -70,6 +70,7 @@ public class DEHandler extends GEOHandler {
     List<FindCMRRecordModel> recordsFromSearch = source.getItems();
     List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
     FindCMRRecordModel mainRecord = null;
+    List<FindCMRRecordModel> converted = new ArrayList<FindCMRRecordModel>();
 
     if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0) {
       doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
@@ -77,6 +78,20 @@ public class DEHandler extends GEOHandler {
         source.setItems(filteredRecords);
       }
     }
+
+    // CREATCMR-6139 Prospect CMR Conversion - address sequence A
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+      FindCMRRecordModel record = source.getItems() != null && !source.getItems().isEmpty() ? source.getItems().get(0) : null;
+      if (record != null) {
+        if (StringUtils.isNotBlank(reqEntry.getCmrIssuingCntry()) && "724".equals(reqEntry.getCmrIssuingCntry())
+            && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
+          record.setCmrAddrSeq("1");
+          converted.add(record);
+          source.setItems(converted);
+        }
+      }
+    }
+
   }
 
   @SuppressWarnings("unchecked")
@@ -182,7 +197,40 @@ public class DEHandler extends GEOHandler {
         return "599";
       }
     }
-    return super.generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+
+    // CREATCMR-6139
+    // return super.generateAddrSeq(entityManager, addrType, reqId,
+    // cmrIssuingCntry);
+    String newAddrSeq = null;
+    int addrSeq = 0;
+    String maxAddrSeq = null;
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_CEE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "0");
+
+      if (!(Integer.valueOf(maxAddrSeq) >= 0 && Integer.valueOf(maxAddrSeq) <= 20849)) {
+        maxAddrSeq = "";
+      }
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "0";
+      }
+      try {
+        addrSeq = Integer.parseInt(maxAddrSeq);
+      } catch (Exception e) {
+        // if returned value is invalid
+      }
+      addrSeq++;
+    }
+
+    newAddrSeq = Integer.toString(addrSeq);
+    return newAddrSeq;
+    // CREATCMR-6139
+
   }
 
   @Override
@@ -371,7 +419,7 @@ public class DEHandler extends GEOHandler {
     // CMR-3171 - add ORB_BLK here
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
         "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
-        "DUNS_NO", "ORD_BLK","ENTERPRISE"));
+        "DUNS_NO", "ORD_BLK", "ENTERPRISE"));
     return fields;
   }
 
