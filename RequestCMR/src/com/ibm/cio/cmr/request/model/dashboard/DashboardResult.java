@@ -27,6 +27,7 @@ public class DashboardResult {
 
   private ProcessingModel processing;
   private AutoProcessModel automation;
+  private ServicesModel services;
 
   public String getOverallStatus() {
     return overallStatus;
@@ -98,6 +99,14 @@ public class DashboardResult {
 
   public void setAutomation(AutoProcessModel automation) {
     this.automation = automation;
+  }
+
+  public ServicesModel getServices() {
+    return services;
+  }
+
+  public void setServices(ServicesModel services) {
+    this.services = services;
   }
 
 }

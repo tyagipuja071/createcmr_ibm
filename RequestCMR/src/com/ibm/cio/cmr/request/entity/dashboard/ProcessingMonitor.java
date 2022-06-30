@@ -67,6 +67,12 @@ public class ProcessingMonitor {
   @Column(name = "HOST_DOWN")
   private String hostDown;
 
+  @Column(name = "PROCESSED_FLAG")
+  private String processedFlag;
+
+  @Column(name = "RDC_PROCESSING_STATUS")
+  private String rdcProcessingStatus;
+
   @Transient
   private String pendingTime;
 
@@ -251,6 +257,22 @@ public class ProcessingMonitor {
 
   public void setManual(boolean manual) {
     this.manual = manual;
+  }
+
+  public String getProcessedFlag() {
+    return processedFlag;
+  }
+
+  public void setProcessedFlag(String processedFlag) {
+    this.processedFlag = processedFlag;
+  }
+
+  public String getRdcProcessingStatus() {
+    return rdcProcessingStatus;
+  }
+
+  public void setRdcProcessingStatus(String rdcProcessingStatus) {
+    this.rdcProcessingStatus = rdcProcessingStatus;
   }
 
 }

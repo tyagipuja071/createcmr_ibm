@@ -42,9 +42,12 @@ app.controller('DashboardController', [ '$scope', '$document', '$http', '$timeou
   $scope.report = null;
   $scope.process = null;
   $scope.automation = null;
+  $scope.services = null;
+
   $scope.countries = null;
   $scope.stuckProcess = null;
   $scope.totalPending = 0;
+  $scope.totalErrors = 0;
   $scope.querying = false;
   $scope.autoCountries = null;
   
@@ -102,6 +105,7 @@ app.controller('DashboardController', [ '$scope', '$document', '$http', '$timeou
         $scope.report = response.data.dashboardResult;
         $scope.process = $scope.report.processing;
         $scope.automation = $scope.report.automation;
+        $scope.services = $scope.report.services;
         $scope.fCountries = $scope.report.countries;
         $scope.fPartners = $scope.report.partners;
         $scope.fProcess = $scope.report.procTypes;
@@ -113,6 +117,11 @@ app.controller('DashboardController', [ '$scope', '$document', '$http', '$timeou
           if ($scope.process.pendingCounts.hasOwnProperty(i)){
             countryList.push(i);
             $scope.totalPending += $scope.process.pendingCounts[i];
+          }
+        }
+        for (var i in $scope.process.errorCounts){
+          if ($scope.process.errorCounts.hasOwnProperty(i)){
+            $scope.totalErrors += $scope.process.errorCounts[i];
           }
         }
         countryList.sort();
@@ -134,10 +143,6 @@ app.controller('DashboardController', [ '$scope', '$document', '$http', '$timeou
         for (var i in $scope.automation.countryStats){
           if ($scope.automation.countryStats.hasOwnProperty(i)){
             autoCountries1.push({
-              cntry : i,
-              rec : $scope.automation.countryStats[i]
-            });
-            console.log({
               cntry : i,
               rec : $scope.automation.countryStats[i]
             });

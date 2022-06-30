@@ -16,8 +16,10 @@ public class ProcessingModel {
   private Map<String, Long> minCounts;
   private Map<String, Long> maxCounts;
   private Map<String, Integer> stuckCounts;
+  private Map<String, Integer> errorCounts;
   private int countsThreshold;
   private int minsThreshold;
+  private int errorThreshold;
   private String alert;
 
   public String getProcessingStatus() {
@@ -82,6 +84,22 @@ public class ProcessingModel {
 
   public void setCountsThreshold(int countsThreshold) {
     this.countsThreshold = countsThreshold;
+  }
+
+  public int getErrorThreshold() {
+    return errorThreshold;
+  }
+
+  public void setErrorThreshold(int errorThreshold) {
+    this.errorThreshold = errorThreshold;
+  }
+
+  public Map<String, Integer> getErrorCounts() {
+    return errorCounts;
+  }
+
+  public void setErrorCounts(Map<String, Integer> errorCounts) {
+    this.errorCounts = errorCounts;
   }
 
 }

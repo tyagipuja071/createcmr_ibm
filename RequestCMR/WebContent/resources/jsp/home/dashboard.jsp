@@ -1,3 +1,4 @@
+<%@page import="com.ibm.cio.cmr.request.config.SystemConfiguration"%>
 <%@page import="org.apache.commons.lang3.StringUtils"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -23,10 +24,21 @@
     cursor: help;
     vertical-align: sub;
   }
+  img.proc-img-m {
+    width: 15px;
+    height:15px;
+    cursor: help;
+    vertical-align: sub;
+  }
   table.rec-table {
     margin-left: 10px;
     font-size: 11px;
     background: #EEE;
+  }
+  table.rec-table-h {
+    margin-left: 10px;
+    font-size: 11px;
+    background: #FFF;
   }
   table.rec-table td, table.rec-table th{
     font-size: 11px;
@@ -88,6 +100,17 @@
     text-shadow: none;
     padding-left: 10px;
   }
+  img.health {
+    width: 70px;
+    height: 70px;
+    cursor: help;
+  }
+  div.health {
+    text-align: center;
+    font-size:13px;
+    font-weight: bold;
+    padding-bottom:5px;
+  }
 </style>
 <div ng-app="DashboardApp" ng-controller="DashboardController" ng-cloak>
   <cmr:boxContent>
@@ -98,12 +121,7 @@
       <h3><span ng-show="filterStatus">{{filterStatus}}</span></h3>
     </cmr:column>
   </cmr:row>
-  <cmr:row>
-    <cmr:column span="6">
-      &nbsp;
-    </cmr:column>
-  </cmr:row>
-  <cmr:row>
+  <cmr:row topPad="5">
     <cmr:column span="1" width="280">
       <table width="100%" class="cntry-table">
         <tr>
@@ -113,6 +131,12 @@
               <option value=""></option>
               <option ng-repeat="fc in fCountries" value="{{fc.id}}">{{fc.name}}</option>
             </select>
+            
+            <div style="padding-top:10px">
+              <input type="button" class="filter" value="Filter Monitor" ng-click="extract()">
+              <input type="button" class="filter" value="Check All" ng-click="checkAll()">
+            </div>
+
           </td>
         </tr>
       </table>
@@ -143,9 +167,121 @@
         </tr>
       </table>
     </cmr:column>
-    <cmr:column span="1" width="180">
-      <input type="button" class="filter" value="Filter Monitor" ng-click="extract()">
-      <input type="button" class="filter" value="Check All" ng-click="checkAll()">
+    <cmr:column span="1" width="170">
+      <div class="health">
+        OVERALL STATUS
+        <img src="${resourcesPath}/images/check.png" ng-show="report.overallStatus == 'GREEN'" class="health" title="System is healthy">
+        <img src="${resourcesPath}/images/warning.png" ng-show="report.overallStatus == 'RED'" class="health" title="One or more components need to be checked urgently">
+        <img src="${resourcesPath}/images/yellow.png" ng-show="report.overallStatus == 'ORANGE'" class="health" title="Components need to be further monitored in the next hours">
+        <img src="${resourcesPath}/images/loading.gif" ng-show="!report" class="health" title="System is healthy">
+      </div>
+    </cmr:column>
+  </cmr:row>
+  </cmr:section>
+  </cmr:boxContent>
+  
+  
+  <div ng-show="report">
+  <cmr:boxContent>
+  <cmr:tabs />
+
+  <cmr:section> 
+  <cmr:row>
+    <cmr:column span="6">
+      <div ng-show="report" class="proc-head" ng-class="{'proc-g' : services.servicesStatus == 'GREEN', 'proc-r' : services.servicesStatus == 'RED', 'proc-o' : services.servicesStatus == 'ORANGE'}">Connections Status - {{services.servicesStatus}}</div>
+      <div ng-show="services.alert" class="alert">{{services.alert}}</div>
+    </cmr:column>
+  </cmr:row>
+  <cmr:row>
+    <cmr:column span="6">
+      <div ng-show="report">
+      <div class="tab-head">Application Connections</div>
+      <table width="100%" cellspacing="0" cellpadding="0" margin="0" class="rec-table rec-table-h">
+        <tr>
+          <th>Component</th>
+          <th>Classification</th>
+          <th>Usage</th>
+          <th>Status</th>
+          <th>Check URL</th>
+        </tr>
+        <tr>
+          <td>FindCMR</td>
+          <td>Primary</td>
+          <td>Used to search for CMRs for in updating CMRs</td>
+          <td style="text-align:center">
+            <img src="${resourcesPath}/images/approve.png" class="proc-img-m" ng-show="services.findCmr" title="Connection is successful">
+            <img src="${resourcesPath}/images/reject.png" class="proc-img-m" ng-show="!services.findCmr" title="Connection is DOWN">
+          </td>
+          <td>
+            <a href="<%=SystemConfiguration.getValue("FIND_CMR_URL")+"/getCMRData"%>" target="_blank">Web Service URL</a>
+          </td>
+        </tr>
+        <tr>
+          <td>CMR Services</td>
+          <td>Primary</td>
+          <td>Contains all external services and RDC processes used by CreateCMR</td>
+          <td style="text-align:center">
+            <img src="${resourcesPath}/images/approve.png" class="proc-img-m" ng-show="services.cmrServices" title="Connection is successful">
+            <img src="${resourcesPath}/images/reject.png" class="proc-img-m" ng-show="!services.cmrServices" title="Connection is DOWN">
+          </td>
+          <td>
+            <a href="<%=SystemConfiguration.getValue("CMR_SERVICES_URL")+"/cmrs/ping"%>" target="_blank">Ping URL</a>
+          </td>
+        </tr>
+        <tr>
+          <td>CI Services</td>
+          <td>Primary</td>
+          <td>Connects to the FindCMR Elastic Search index for searching</td>
+          <td style="text-align:center">
+            <img src="${resourcesPath}/images/approve.png" class="proc-img-m" ng-show="services.ciServices" title="Connection is successful">
+            <img src="${resourcesPath}/images/reject.png" class="proc-img-m" ng-show="!services.ciServices" title="Connection is DOWN">
+          </td>
+          <td>
+            <a href="<%=SystemConfiguration.getValue("BATCH_CI_SERVICES_URL")+"/service/ping"%>" target="_blank">Ping URL</a>
+          </td>
+        </tr>
+        <tr>
+          <td>US CMR (US Legacy)</td>
+          <td>Secondary</td>
+          <td>Retrieves US CMR values and primary point of creation and updates</td>
+          <td style="text-align:center">
+            <img src="${resourcesPath}/images/approve.png" class="proc-img-m" ng-show="services.usCmr" title="Connection is successful">
+            <img src="${resourcesPath}/images/reject.png" class="proc-img-m" ng-show="!services.usCmr" title="Connection is DOWN">
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>CROS (LA Legacy)</td>
+          <td>Secondary</td>
+          <td>Retrieves LA CMR values and primary point of creation and updates</td>
+          <td style="text-align:center">
+            <img src="${resourcesPath}/images/approve.png" class="proc-img-m" ng-show="services.cros" title="Connection is successful">
+            <img src="${resourcesPath}/images/reject.png" class="proc-img-m" ng-show="!services.cros" title="Connection is DOWN">
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>CRIS (Japan Legacy)</td>
+          <td>Secondary</td>
+          <td>Retrieves Japan CMR values and primary point of creation and updates</td>
+          <td style="text-align:center">
+            <img src="${resourcesPath}/images/approve.png" class="proc-img-m" ng-show="services.cris" title="Connection is successful">
+            <img src="${resourcesPath}/images/reject.png" class="proc-img-m" ng-show="!services.cris" title="Connection is DOWN">
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>MQ (WTAAS AP)</td>
+          <td>Secondary</td>
+          <td>Retrieves AP CMR values and primary point of creation and updates</td>
+          <td style="text-align:center">
+            <img src="${resourcesPath}/images/approve.png" class="proc-img-m" ng-show="services.mq" title="Connection is successful">
+            <img src="${resourcesPath}/images/reject.png" class="proc-img-m" ng-show="!services.mq" title="Connection is DOWN">
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      </div>
     </cmr:column>
   </cmr:row>
   <cmr:row>
@@ -156,6 +292,7 @@
   </cmr:section>
   </cmr:boxContent>
   
+  
   <div ng-show="report">
   <cmr:boxContent>
   <cmr:tabs />
@@ -163,7 +300,8 @@
   <cmr:section>
   <cmr:row>
     <cmr:column span="6">
-      <div ng-show="report" class="proc-head" ng-class="{'proc-g' : process.processingStatus == 'GREEN', 'proc-r' : process.processingStatus == 'RED', 'proc-o' : process.processingStatus == 'YELLOW'}">Processing Status - {{process.processingStatus}}</div>
+      <div ng-show="report" class="proc-head" ng-class="{'proc-g' : process.processingStatus == 'GREEN', 'proc-r' : process.processingStatus == 'RED', 'proc-o' : process.processingStatus == 'ORANGE'}">Processing Status - {{process.processingStatus}}</div>
+      <div ng-show="process.alert" class="alert">{{process.alert}}</div>
     </cmr:column>
   </cmr:row>
   <cmr:row>
@@ -171,12 +309,20 @@
     <div class="processing" ng-show="report">
       <table width="100%" class="cntry-table">
         <tr>
-          <td width="50%">Threshold (counts):</td>
+          <td width="50%">Threshold (stuck):</td>
           <td>{{process.countsThreshold}}</td>
         </tr>
         <tr>
           <td>Threshold (mins):</td>
           <td>{{process.minsThreshold}}</td>
+        </tr>
+        <tr>
+          <td>Threshold (errors):</td>
+          <td>{{process.errorThreshold}}</td>
+        </tr>
+        <tr>
+          <td>Error Counts:</td>
+          <td><strong>{{totalErrors}}</strong></td>
         </tr>
         <tr>
           <td>Pending Counts:</td>
@@ -191,7 +337,9 @@
         </tr>
         <tr ng-repeat="proc in stuckProcess">
           <td>{{proc}}</td>
-          <td>{{process.stuckCounts[proc]}}</td> 
+          <td>
+            {{process.stuckCounts[proc]}}
+          </td> 
         </tr>
         <tr ng-show="stuckProcess.length == 0">
           <td colspan="2">No stuck processes</td>
@@ -202,11 +350,14 @@
       <table width="100%" class="cntry-table">
         <tr>
           <th>Country</th>
-          <th>Counts</th>
+          <th>Counts / Err</th>
         </tr>
         <tr ng-repeat="cntry in countries">
           <td>{{cntry}}</td>
-          <td>{{process.pendingCounts[cntry]}}</td> 
+          <td>{{process.pendingCounts[cntry]}} / 
+          <span style="color:red" ng-show="process.errorCounts[cntry] > 0">{{process.errorCounts[cntry]}}</span>
+          <span ng-show="process.errorCounts[cntry] == 0">0</span>
+          </td> 
         </tr>
         <tr ng-show="countries.length == 0">
           <td colspan="2">No pending requests</td>
@@ -235,6 +386,7 @@
           <th>Process</th>
           <th>Since</th>
           <th>State</th>
+          <th>Errors</th>
         </tr>
         <tr ng-show="report.processingRecords == 0">
           <td colspan="9">No pending requests</td>
@@ -258,10 +410,17 @@
             <div ng-show="!rec.obsolete">{{rec.pendingTime}}</div>
           </td>
           <td>
-            <div ng-show="rec.obsolete" >Obsolete</div>
-            <div ng-show="rec.stuck" style="color:orange">Stuck</div>
-            <div ng-show="rec.manual && !rec.obsolete" style="color:brown">Manual</div>
-            <div ng-show="!rec.obsolete && !rec.stuck && !rec.manual" style="color:green">In Queue</div>
+            <div ng-show="rec.reqStatus == 'COM'">Complete</div>
+            <div ng-show="rec.reqStatus != 'COM'">
+              <div ng-show="rec.obsolete" style="color:coral">Obsolete</div>
+              <div ng-show="rec.stuck" style="color:orange">Stuck</div>
+              <div ng-show="rec.manual && !rec.obsolete" style="color:brown">Manual</div>
+              <div ng-show="!rec.obsolete && !rec.stuck && !rec.manual" style="color:green">In Queue</div>
+            </div>
+          </td>
+          <td style="text-align:center">
+            <img src="${resourcesPath}/images/error-icon.png" class="proc-img" ng-show="rec.reqStatus == 'COM' && (rec.processedFlag == 'E' || rec.rdcProcessingStatus == 'A' || rec.rdcProcessingStatus == 'N')"
+            title="Errors in Legacy/DB2 and RDC were encountered. Please check request summary.">
           </td>
         </tr>
       </table>

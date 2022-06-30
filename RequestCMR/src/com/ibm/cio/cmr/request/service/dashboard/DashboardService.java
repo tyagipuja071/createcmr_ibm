@@ -3,6 +3,11 @@
  */
 package com.ibm.cio.cmr.request.service.dashboard;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,6 +23,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.dashboard.AutomationMonitor;
 import com.ibm.cio.cmr.request.entity.dashboard.ProcessingMonitor;
 import com.ibm.cio.cmr.request.model.DropdownItemModel;
@@ -26,11 +32,20 @@ import com.ibm.cio.cmr.request.model.dashboard.AutoProcessModel;
 import com.ibm.cio.cmr.request.model.dashboard.CountryAutoStats;
 import com.ibm.cio.cmr.request.model.dashboard.DashboardResult;
 import com.ibm.cio.cmr.request.model.dashboard.ProcessingModel;
+import com.ibm.cio.cmr.request.model.dashboard.ServicesModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
+import com.ibm.cmr.services.client.CROSServiceClient;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.cros.CROSQueryRequest;
+import com.ibm.cmr.services.client.cros.CROSQueryResponse;
+import com.ibm.json.java.JSONArray;
+import com.ibm.json.java.JSONObject;
 
 /**
  * Handles the creation of the monitor dashboard with results of system checks
@@ -90,7 +105,8 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       query.append(
           "order by case when a.REQ_STATUS = 'AUT' then 0 when a.REQ_STATUS = 'RET' then 1 when a.REQ_STATUS in ('PPN', 'PVA') then 2 else 3 end, a.LAST_UPDT_TS desc");
     } else {
-      query.append("order by a.LAST_UPDT_TS desc");
+      query.append(
+          "order by case when timestampdiff(16,current timestamp - a.LAST_UPDT_TS) > 30 then 2 else 1 end, case when a.REQ_STATUS = 'COM' then 5 else 1 end, a.LAST_UPDT_TS desc");
     }
     query.append("fetch first 200 rows only");
     query.setForReadOnly(true);
@@ -109,10 +125,16 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
   private DashboardResult analyzeResults(DashboardResult result, List<ProcessingMonitor> procs, List<AutomationMonitor> autos, boolean addRecords) {
     analyzeProcess(result, procs, addRecords);
     analyzeAutomation(result, autos, addRecords);
+    checkConnections(result);
 
-    if ("RED".equals(result.getAutomation().getAutomationStatus()) || "RED".equals(result.getProcessing().getProcessingStatus())) {
+    List<String> statuses = new ArrayList<>();
+    statuses.add(result.getServices().getServicesStatus());
+    statuses.add(result.getProcessing().getProcessingStatus());
+    statuses.add(result.getAutomation().getAutomationStatus());
+    result.setOverallStatus("GREEN");
+    if (statuses.contains("RED")) {
       result.setOverallStatus("RED");
-    } else if ("ORANGE".equals(result.getAutomation().getAutomationStatus()) || "ORANGE".equals(result.getProcessing().getProcessingStatus())) {
+    } else if (statuses.contains("ORANGE")) {
       result.setOverallStatus("ORANGE");
     }
     LOG.debug("Returning monitoring results..");
@@ -211,6 +233,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     Map<String, Long> minCounts = new HashMap<String, Long>();
     Map<String, Long> maxCounts = new HashMap<String, Long>();
     Map<String, Integer> stuckCounts = new HashMap<String, Integer>();
+    Map<String, Integer> errorCounts = new HashMap<String, Integer>();
     List<String> stuckCountries = new ArrayList<String>();
 
     String processThreshold = SystemParameters.getString("DASHBOARD.PROC.MAX");
@@ -225,11 +248,18 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       minsMaxStuck = Integer.parseInt(minsThreshold);
     }
 
+    String errorThreshold = SystemParameters.getString("DASHBOARD.PROC.ERR");
+    int errorMax = 3;
+    if (!StringUtils.isBlank(errorThreshold) && !StringUtils.isNumeric(errorThreshold)) {
+      errorMax = Integer.parseInt(errorThreshold);
+    }
+
     String cntry = null;
     for (ProcessingMonitor proc : procs) {
       cntry = proc.getCmrIssuingCntry() + "-" + proc.getCntryNm();
       countryCounts.putIfAbsent(cntry, 0);
-      stuckCounts.putIfAbsent(proc.getProcessingTyp(), 0);
+      errorCounts.putIfAbsent(cntry, 0);
+      stuckCounts.putIfAbsent(StringUtils.isBlank(proc.getProcessingTyp()) ? "NONE" : proc.getProcessingTyp(), 0);
       minCounts.putIfAbsent(cntry, Long.MAX_VALUE);
       maxCounts.putIfAbsent(cntry, new Long(0));
 
@@ -237,10 +267,12 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
         proc.setManual(true);
       }
 
-      if (proc.getDiffDay() > 30) {
-        proc.setObsolete(true);
-      } else if (proc.getDiffMin() > minsMaxStuck && !"Y".equals(proc.getHostDown()) && !proc.isManual()) {
-        proc.setStuck(true);
+      if (!"COM".equals(proc.getReqStatus())) {
+        if (proc.getDiffDay() > 30) {
+          proc.setObsolete(true);
+        } else if (proc.getDiffMin() > minsMaxStuck && !"Y".equals(proc.getHostDown()) && !proc.isManual()) {
+          proc.setStuck(true);
+        }
       }
 
       long millis = proc.getDiffMin() * 1000 * 60;
@@ -249,17 +281,23 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       String lastUpdate = tsFormatter.format(proc.getLastUpdtTs());
       proc.setLastUpdated(lastUpdate);
 
-      countryCounts.put(cntry, countryCounts.get(cntry) + 1);
-      if (proc.getDiffMin() < minCounts.get(cntry) && !proc.isObsolete()) {
-        minCounts.put(cntry, proc.getDiffMin());
+      if ("COM".equals(proc.getReqStatus())
+          && ("E".equals(proc.getProcessedFlag()) || "A".equals(proc.getRdcProcessingStatus()) || "N".equals(proc.getRdcProcessingStatus()))) {
+        errorCounts.put(cntry, errorCounts.get(cntry) + 1);
       }
-      if (proc.getDiffMin() > maxCounts.get(cntry) && !proc.isObsolete()) {
-        maxCounts.put(cntry, proc.getDiffMin());
-      }
-      if (proc.isStuck()) {
-        stuckCounts.put(proc.getProcessingTyp(), stuckCounts.get(proc.getProcessingTyp()) + 1);
-        if (stuckCounts.get(proc.getProcessingTyp()) > procMaxStuck && !stuckCountries.contains(proc.getProcessingTyp())) {
-          stuckCountries.add(proc.getProcessingTyp());
+      if (!"COM".equals(proc.getReqStatus())) {
+        countryCounts.put(cntry, countryCounts.get(cntry) + 1);
+        if (proc.getDiffMin() < minCounts.get(cntry) && !proc.isObsolete()) {
+          minCounts.put(cntry, proc.getDiffMin());
+        }
+        if (proc.getDiffMin() > maxCounts.get(cntry) && !proc.isObsolete()) {
+          maxCounts.put(cntry, proc.getDiffMin());
+        }
+        if (proc.isStuck()) {
+          stuckCounts.put(proc.getProcessingTyp(), stuckCounts.get(proc.getProcessingTyp()) + 1);
+          if (stuckCounts.get(proc.getProcessingTyp()) > procMaxStuck && !stuckCountries.contains(proc.getProcessingTyp())) {
+            stuckCountries.add(proc.getProcessingTyp());
+          }
         }
       }
       switch (proc.getReqType()) {
@@ -292,6 +330,9 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
         } else {
           proc.setProcessBy("In Legacy/DB2");
         }
+        break;
+      case "COM":
+        proc.setProcessBy("Complete");
         break;
       case "PCO":
         if (proc.isManual()) {
@@ -327,23 +368,48 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     procModel.setStuckCounts(stuckCounts);
     procModel.setCountsThreshold(procMaxStuck);
     procModel.setMinsThreshold(minsMaxStuck);
+    procModel.setErrorCounts(errorCounts);
 
-    procModel.setProcessingStatus("ORANGE");
+    procModel.setProcessingStatus("GREEN");
+
     for (String key : stuckCounts.keySet()) {
       if (stuckCounts.get(key) > procMaxStuck * 2) {
         procModel.setProcessingStatus("RED");
+      } else if (stuckCounts.get(key) > procMaxStuck) {
+        procModel.setProcessingStatus("ORANGE");
       }
     }
+
+    StringBuilder alert = new StringBuilder();
+
     if (!stuckCountries.isEmpty()) {
       StringBuilder msg = new StringBuilder();
       for (String country : stuckCountries) {
         msg.append(msg.length() > 0 ? ", " : "");
         msg.append(country);
       }
-      procModel.setAlert("Processing may be stuck for the following: " + msg.toString() + ".");
-    } else {
-      procModel.setProcessingStatus("GREEN");
+      alert.append("Processing may be stuck for the following: " + msg.toString() + ".");
     }
+
+    boolean exceed = false;
+    for (String key : errorCounts.keySet()) {
+      if (errorCounts.get(key) > errorMax * 2) {
+        procModel.setProcessingStatus("RED");
+        exceed = true;
+      }
+      if (errorCounts.get(key) > errorMax) {
+        if (!"RED".equals(procModel.getProcessingStatus())) {
+          procModel.setProcessingStatus("ORANGE");
+          exceed = true;
+        }
+      }
+    }
+    if (exceed) {
+      alert.append(alert.length() > 0 ? " " : "");
+      alert.append("Legacy and/or RDC processing errors exceeded the threshold for some countries.");
+    }
+    procModel.setErrorThreshold(errorMax);
+    procModel.setAlert(alert.toString());
 
     result.setProcessing(procModel);
   }
@@ -391,7 +457,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     String manualThreshold = SystemParameters.getString("DASHBOARD.AUTO.MANUAL");
     int manualMax = 50;
     if (!StringUtils.isBlank(manualThreshold) && !StringUtils.isNumeric(manualThreshold)) {
-      compMax = Integer.parseInt(manualThreshold);
+      manualMax = Integer.parseInt(manualThreshold);
     }
     boolean manualExceeded = false;
 
@@ -626,10 +692,215 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     model.setTotalRecords(autos.size());
     model.setManualPctThreshold(manualMax);
     model.setPendingThreshold(pendMaxStuck);
-    model.setProcessTimeThreshold(compMax);
     model.setProcessTimeThreshold(autoProcMax);
+    model.setTatThreshold(compMax);
     model.setAlert(alert.toString());
     result.setAutomation(model);
+  }
+
+  private void checkConnections(DashboardResult result) {
+    ServicesModel model = new ServicesModel();
+    try {
+      LOG.debug("Checking findCMR connection...");
+      FindCMRResultModel cmr = SystemUtil.findCMRs("1000000", "897", 1);
+      if (cmr != null && cmr.getItems() != null && !cmr.getItems().isEmpty()) {
+        LOG.debug("FindCMR check successful");
+        model.setFindCmr(true);
+      } else {
+        model.setFindCmr(false);
+      }
+    } catch (Exception e) {
+      LOG.error("FindCMR error", e);
+    }
+    pingCmrservices(model);
+    pingCIservices(model);
+    testCROS(model);
+
+    model.setServicesStatus("GREEN");
+    if (!model.isFindCmr() || !model.isCmrServices() || !model.isCiServices()) {
+      model.setServicesStatus("RED");
+      model.setAlert("One or more connections to main components are down.");
+    } else if (!model.isCris() || !model.isCros() || !model.isMq() || !model.isUsCmr()) {
+      model.setServicesStatus("ORANGE");
+      model.setAlert("One or more connections to secondary components are down.");
+    }
+    result.setServices(model);
+  }
+
+  private boolean pingCmrservices(ServicesModel model) {
+    LOG.debug("Checking CMR services ping..");
+    String cmrservices = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    if (StringUtils.isBlank(cmrservices)) {
+      return false;
+    }
+    cmrservices += "/cmrs/ping";
+    try {
+      URL ping = new URL(cmrservices);
+      LOG.debug("Connecting to CMR Services ping " + cmrservices);
+      HttpURLConnection conn = (HttpURLConnection) ping.openConnection();
+      conn.setDoInput(true);
+      conn.setConnectTimeout(1000 * 30); // 30 seconds
+      InputStream is = conn.getInputStream();
+      StringBuilder results = new StringBuilder();
+      try {
+        InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+        try {
+          BufferedReader br = new BufferedReader(isr);
+          try {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+              results.append(line);
+            }
+          } finally {
+            br.close();
+          }
+        } finally {
+          isr.close();
+        }
+      } finally {
+        is.close();
+      }
+
+      LOG.debug(" - ping inputstream read..");
+
+      conn.disconnect();
+
+      JSONObject json = JSONObject.parse(results.toString());
+      JSONObject pingResults = (JSONObject) json.get("pingResults");
+      JSONArray services = (JSONArray) pingResults.get("services");
+      for (Object o : services) {
+        JSONObject service = (JSONObject) o;
+        if (service.containsKey("DatabaseService")) {
+          JSONObject db = (JSONObject) service.get("DatabaseService");
+          JSONObject databases = (JSONObject) db.get("databases");
+          if (databases.containsKey("USCMR")) {
+            String uscmr = (String) databases.get("USCMR");
+            if ("connected".equals(uscmr)) {
+              model.setUsCmr(true);
+            }
+          }
+          if (databases.containsKey("CRIS")) {
+            String cris = (String) databases.get("CRIS");
+            if ("connected".equals(cris)) {
+              model.setCris(true);
+            }
+          }
+        }
+        model.setMq(true);
+        if (service.containsKey("WTAASQueryService")) {
+          JSONObject mq = (JSONObject) service.get("WTAASQueryService");
+          JSONArray managers = (JSONArray) mq.get("managers");
+          for (Object o1 : managers) {
+            JSONObject mgr = (JSONObject) o1;
+            String mgrKey = null;
+            if (mgr.containsKey("WTAS1")) {
+              mgrKey = "WTAS2";
+            } else if (mgr.containsKey("WTAS2")) {
+              mgrKey = "WTAS2";
+            } else if (mgr.containsKey("WTAS3")) {
+              mgrKey = "WTAS3";
+            }
+            String status = (String) mgr.get(mgrKey);
+            if (!"connected".equals(status)) {
+              model.setMq(false);
+            }
+          }
+        }
+      }
+      LOG.debug("CMR Services ping successful");
+      model.setCmrServices(true);
+      return true;
+    } catch (Exception e) {
+      LOG.error("Error when pinging CMR Services", e);
+      model.setCmrServices(false);
+      return false;
+    }
+  }
+
+  private boolean pingCIservices(ServicesModel model) {
+    LOG.debug("Checking CI services ping..");
+    String cmrservices = SystemConfiguration.getValue("BATCH_CI_SERVICES_URL");
+    if (StringUtils.isBlank(cmrservices)) {
+      return false;
+    }
+    cmrservices += "/service/ping";
+    try {
+      URL ping = new URL(cmrservices);
+      LOG.debug("Connecting to CI Services ping " + cmrservices);
+      HttpURLConnection conn = (HttpURLConnection) ping.openConnection();
+      conn.setDoInput(true);
+      conn.setConnectTimeout(1000 * 30); // 30 seconds
+      InputStream is = conn.getInputStream();
+      StringBuilder results = new StringBuilder();
+      try {
+        InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+        try {
+          BufferedReader br = new BufferedReader(isr);
+          try {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+              results.append(line);
+            }
+          } finally {
+            br.close();
+          }
+        } finally {
+          isr.close();
+        }
+      } finally {
+        is.close();
+      }
+
+      LOG.debug(" - ping inputstream read..");
+
+      conn.disconnect();
+
+      JSONObject json = JSONObject.parse(results.toString());
+      JSONObject pingResults = (JSONObject) json.get("pingResults");
+      JSONArray services = (JSONArray) pingResults.get("services");
+      for (Object o : services) {
+        JSONObject service = (JSONObject) o;
+        if (service.containsKey("SearchService")) {
+          JSONObject db = (JSONObject) service.get("SearchService");
+          JSONArray applications = (JSONArray) db.get("applications");
+          for (Object o1 : applications) {
+            JSONObject app = (JSONObject) o1;
+            if (app.containsKey("findcmr")) {
+              JSONObject findcmr = (JSONObject) app.get("findcmr");
+              JSONObject test = (JSONObject) findcmr.get("test");
+              String connection = (String) test.get("connect");
+              if ("successful".equals(connection)) {
+                model.setCiServices(true);
+              }
+            }
+          }
+        }
+      }
+      LOG.debug("CI Services ping successful");
+      return true;
+    } catch (Exception e) {
+      LOG.error("Error when pinging CI Services", e);
+      model.setCiServices(false);
+      return false;
+    }
+  }
+
+  public void testCROS(ServicesModel model) {
+    LOG.debug("Checkin CROS connection..");
+    String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    CROSQueryRequest request = new CROSQueryRequest();
+    request.setIssuingCntry("631");
+    request.setCmrNo("780080");
+
+    try {
+      CROSServiceClient client = CmrServicesFactory.getInstance().createClient(baseUrl, CROSServiceClient.class);
+      CROSQueryResponse response = client.executeAndWrap(CROSServiceClient.QUERY_APP_ID, request, CROSQueryResponse.class);
+      if (response != null && response.isSuccess()) {
+        model.setCros(true);
+      }
+    } catch (Exception e) {
+      LOG.error("Error when testing CROS.", e);
+    }
   }
 
 }
