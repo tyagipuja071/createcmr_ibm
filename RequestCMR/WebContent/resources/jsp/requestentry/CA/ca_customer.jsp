@@ -209,6 +209,15 @@
         <cmr:field path="collectorNameNo" id="collectorNameNo" fieldId="BillingProcCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    <cmr:column span="2" containerForField="CustClass">
+        <p>
+          <cmr:label fieldId="custClass">
+            <cmr:fieldLabel fieldId="CustClass" />:
+          </cmr:label>
+          <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_CUST_TAB" />
+        </p>
+    </cmr:column>
+    
     <%-- 
     <cmr:column span="2" containerForField="CustomerData">
       <p>
