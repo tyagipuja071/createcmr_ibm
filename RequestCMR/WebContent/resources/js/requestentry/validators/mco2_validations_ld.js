@@ -2184,7 +2184,6 @@ function enableTinNumber() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (cntry == '764') {
     if (FormManager.getActualValue('reqType') == 'C') {
-
       var custType = FormManager.getActualValue('custGrp')
       if (custType == 'LOCAL') {
         FormManager.enable('taxCd1');
@@ -2194,7 +2193,6 @@ function enableTinNumber() {
         FormManager.readOnly('taxCd1');
       }
     } else if (FormManager.getActualValue('reqType') == 'U') {
-
       var soldToLandedCountry = getSoldToLanded();
       if (soldToLandedCountry == 'KE') {
         FormManager.enable('taxCd1');
@@ -2217,9 +2215,9 @@ function getSoldToLanded() {
   if (cntryCdResult.ret1 != undefined) {
     countryCd = cntryCdResult.ret1;
   }
-
   return countryCd;
 }
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717',
       '718', '725', '745', '753', '764', '769', '770', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857',
