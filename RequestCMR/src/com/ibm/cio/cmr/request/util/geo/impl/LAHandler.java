@@ -2114,6 +2114,7 @@ public class LAHandler extends GEOHandler {
       data.setInstallBranchOff(data.getSalesBusOffCd());
     }
 
+    boolean isLeasingBr = false;
     if (!StringUtils.isBlank(cmrIssuingCntry) && isBRIssuingCountry(cmrIssuingCntry)) {
       String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -2136,8 +2137,10 @@ public class LAHandler extends GEOHandler {
         if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
           if (CmrConstants.CUST_TYPE_LEASI.equals(data.getCustSubGrp()) && "34270520000136".equals(soldToAddr.getVat())) {
             data.setCustClass("33");
+            isLeasingBr = true;
           } else if (CmrConstants.CUST_TYPE_LEASI.equals(data.getCustSubGrp()) && !"34270520000136".equals(soldToAddr.getVat())) {
             data.setCustClass("34");
+            isLeasingBr = true;
           }
         }
       }
@@ -2167,7 +2170,9 @@ public class LAHandler extends GEOHandler {
     } else if (CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())) {
       data.setCustClass("71");
     } else {
-      data.setCustClass("11");
+      if (!isLeasingBr) {
+        data.setCustClass("11");
+      }
     }
 
     // set custClass for Creates only
