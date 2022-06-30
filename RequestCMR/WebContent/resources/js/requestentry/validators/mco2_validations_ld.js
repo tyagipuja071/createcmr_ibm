@@ -1276,7 +1276,7 @@ function addTinNumberValidationTz() {
             id : 'taxCd1',
             type : 'text',
             name : 'taxCd1'
-          }, false, 'Invalid format of Tin Number. Format should be NNN-NNN-NNN.');
+          }, false, 'Invalid format of TIN Number. Format should be NNN-NNN-NNN.');
         }
         return new ValidationResult(null, true);
       }
@@ -2176,6 +2176,50 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function enableTinNumber() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == '764') {
+    if (FormManager.getActualValue('reqType') == 'C') {
+
+      var custType = FormManager.getActualValue('custGrp')
+      if (custType == 'LOCAL') {
+        FormManager.enable('taxCd1');
+      }
+      if (custType == 'CROSS') {
+        FormManager.clearValue('taxCd1');
+        FormManager.readOnly('taxCd1');
+      }
+    } else if (FormManager.getActualValue('reqType') == 'U') {
+
+      var soldToLandedCountry = getSoldToLanded();
+      if (soldToLandedCountry == 'KE') {
+        FormManager.enable('taxCd1');
+      } else {
+        FormManager.readOnly('taxCd1');
+      }
+    }
+  }
+}
+
+function getSoldToLanded() {
+  var countryCd = FormManager.getActualValue('landCntry');
+  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var cntryCdParams = {
+    REQ_ID : _zs01ReqId,
+    ADDR_TYPE : 'ZS01',
+  };
+  var cntryCdResult = cmr.query('ADDR.GET.LANDEDCNTRY.BY_REQID_ADDRTYPE', cntryCdParams);
+
+  if (cntryCdResult.ret1 != undefined) {
+    countryCd = cntryCdResult.ret1;
+  }
+
+  return countryCd;
+}
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717',
       '718', '725', '745', '753', '764', '769', '770', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857',
@@ -2239,7 +2283,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addInternalDeptNumberValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addTaxRegFormatValidationMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addAttachmentValidatorOnTaxRegMadagascar, [ SysLoc.MADAGASCAR ], null, true);
-  GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA ], null, true);
+  GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA, SysLoc.KENYA], null, true);
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO2);
@@ -2275,4 +2319,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO2);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.MCO2, null, true);
+  
+  GEOHandler.addAfterConfig(enableTinNumber, SysLoc.KENYA);
+  GEOHandler.addAfterTemplateLoad(enableTinNumber, SysLoc.KENYA);
 });

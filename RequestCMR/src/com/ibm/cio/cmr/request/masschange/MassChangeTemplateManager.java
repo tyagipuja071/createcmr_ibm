@@ -99,7 +99,7 @@ public class MassChangeTemplateManager {
     configList.put("698", "config.CEWA.xml");
     configList.put("725", "config.CEWA.xml");
     configList.put("745", "config.CEWA.xml");
-    configList.put("764", "config.CEWA.xml");
+    configList.put("764", "config.764.xml");
     configList.put("769", "config.CEWA.xml");
     configList.put("770", "config.CEWA.xml");
     configList.put("782", "config.CEWA.xml");

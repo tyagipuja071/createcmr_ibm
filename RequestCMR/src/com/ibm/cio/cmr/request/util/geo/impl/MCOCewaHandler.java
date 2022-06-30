@@ -765,7 +765,7 @@ public class MCOCewaHandler extends MCOHandler {
                 }
               }
             }
-            if (tin.length() != 0) {
+            if (tin.length() != 0 && !tin.equals("@")) {
               boolean isMatch = Pattern.matches("\\d{3}[-]\\d{3}[-]\\d{3}$", tin);
               if (!isMatch) {
                 LOG.trace("Invalid format for TIN Number.");
