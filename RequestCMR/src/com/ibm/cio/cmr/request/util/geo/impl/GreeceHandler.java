@@ -3828,12 +3828,10 @@ public class GreeceHandler extends BaseSOFHandler {
                 LOG.trace("Please input CMR No. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "CMR No.", "Please input CMR No. Please fix and upload the template again.");
               }
-              if (dataIsu.equalsIgnoreCase("5k") && !"@".equalsIgnoreCase(dataCtc)) {
-                LOG.trace("For IsuCd set to " + dataIsu + ", Ctc should be '@'");
-                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + dataIsu);
-              } else if (!StringUtils.isBlank(dataIsu) && "21,8B".contains(dataIsu) && !"@".equalsIgnoreCase(dataCtc)) {
-                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
+              if ((StringUtils.isNotBlank(dataIsu) && StringUtils.isBlank(dataCtc))
+                  || (StringUtils.isNotBlank(dataCtc) && StringUtils.isBlank(dataIsu))) {
+                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(dataIsu) && "34".equals(dataIsu)) {
                 if (StringUtils.isBlank(dataCtc) || !"QY".contains(dataCtc)) {
                   LOG.trace("The row " + ((row.getRowNum() + 1))
@@ -3841,12 +3839,9 @@ public class GreeceHandler extends BaseSOFHandler {
                   error.addError(((row.getRowNum() + 1)), "Client Tier",
                       ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((StringUtils.isNotBlank(dataIsu) && (StringUtils.isBlank(dataCtc) || !"@QY".contains(dataCtc)))
-                  || (StringUtils.isNotBlank(dataCtc) && !"@QY".contains(dataCtc))) {
-                LOG.trace("The row " + (row.getRowNum() + 1)
-                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Client Tier",
-                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+              } else if ((!StringUtils.isBlank(dataIsu) && !"34".equals(dataIsu)) && !"@".equalsIgnoreCase(dataCtc)) {
+                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + dataIsu + ".<br>");
               }
               if (error.hasErrors()) {
                 validations.add(error);
