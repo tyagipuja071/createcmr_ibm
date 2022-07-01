@@ -757,6 +757,12 @@
     <put-attribute name="title" value="CreateCMR | US TCR UPDT QUEUE Maintenance" />
     <put-attribute name="body" value="/resources/jsp/code/ustcrupdtqueue.jsp" />
   </definition>
+
+  <definition name="dashboard" extends="base">
+    <put-attribute name="title" value="CreateCMR | Dashboard" />
+    <put-attribute name="body" value="/resources/jsp/home/dashboard.jsp" />
+  </definition>
+
   
    <!-- Single Reactivation End -->
 </tiles-definitions>
