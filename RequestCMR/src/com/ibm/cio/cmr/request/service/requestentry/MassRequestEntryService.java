@@ -2134,6 +2134,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     // Required: Check cmrNo, and field lengths
     int cmrRecords = 0;
     String isuCd = null;
+    String errTxtCmrNo = "";
     for (Row cmrRow : dataSheet) {
       if (cmrRow.getRowNum() >= CMR_ROW_NO) {
         if (isRowValid(cmrRow)) {
@@ -2144,6 +2145,15 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
               || !StringUtils.isAlphanumeric(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CMR_NO") - 1)))) {
             log.error("CMR number field is required and should be alphanumeric: row " + (cmrRow.getRowNum() + 1));
             throw new CmrException(MessageUtil.ERROR_MASS_FILE_CMR_ROW, Integer.toString(cmrRow.getRowNum() + 1));
+          } else {
+            String strCmrNo = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CMR_NO") - 1)).trim();
+            if (isSkipCMRno(strCmrNo)) {
+              if (!StringUtils.isEmpty(errTxtCmrNo)) {
+                errTxtCmrNo = errTxtCmrNo + ", row " + Integer.toString(cmrRow.getRowNum() + 1);
+              } else {
+                errTxtCmrNo = Integer.toString(cmrRow.getRowNum() + 1);
+              }
+            }
           }
 
           isuCd = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("ISU_CD") - 1)).trim();
@@ -2187,6 +2197,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       throw new CmrException(MessageUtil.ERROR_MASS_FILE_EMPTY);
     }
 
+    if (!StringUtils.isEmpty(errTxtCmrNo)) {
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE_CMR_IS_NOT_IBM, errTxtCmrNo);
+    }
+
     log.debug("Total cmrRecords = " + cmrRecords);
 
     // Add validations here...
@@ -2200,6 +2214,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
     Workbook mfWb = new XSSFWorkbook(mfStream);
     String errTxtVal = "";
+    String errTxtCmrNo = "";
     String errTaxStatus = "";
     Sheet dataSheet = mfWb.getSheet(CMR_SHEET_NAME);
     Sheet cfgSheet = mfWb.getSheet(CONFIG_SHEET_NAME);
@@ -2255,6 +2270,15 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
               || !StringUtils.isAlphanumeric(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CMR_NO") - 1)))) {
             log.error("CMR number field is required and should be alphanumeric: row " + (cmrRow.getRowNum() + 1));
             throw new CmrException(MessageUtil.ERROR_MASS_FILE_CMR_ROW, Integer.toString(cmrRow.getRowNum() + 1));
+          } else {
+            String strCmrNo = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CMR_NO") - 1)).trim();
+            if (isSkipCMRno(strCmrNo)) {
+              if (!StringUtils.isEmpty(errTxtCmrNo)) {
+                errTxtCmrNo = errTxtCmrNo + ", row " + Integer.toString(cmrRow.getRowNum() + 1);
+              } else {
+                errTxtCmrNo = Integer.toString(cmrRow.getRowNum() + 1);
+              }
+            }
           }
 
           for (String key : dataLmt.keySet()) {
@@ -2349,6 +2373,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
     if (!StringUtils.isEmpty(errTaxStatus)) {
       throw new CmrException(MessageUtil.ERROR_MASS_FILE_TAX_TEAM_STATUS, errTaxStatus);
+    }
+
+    if (!StringUtils.isEmpty(errTxtCmrNo)) {
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE_CMR_IS_NOT_IBM, errTxtCmrNo);
     }
 
     log.debug("Total cmrRecords = " + cmrRecords);
@@ -6564,4 +6592,20 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     return !isInvalidRow;
   }
 
+  // katr10 <> '' skip this CMR record.
+  private boolean isSkipCMRno(String cmr) {
+    boolean isSkip = false;
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("QUERY.US.GETMASSUPDTSKIP");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ZZKV_CUSNO", cmr);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    List<String> katr10s = query.getResults(String.class);
+    if (katr10s == null || katr10s.isEmpty()) {
+      LOG.error("The CMR No: " + cmr + " is not IBM record.");
+      isSkip = true;
+    }
+
+    return isSkip;
+  }
 }
