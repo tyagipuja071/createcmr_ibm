@@ -188,6 +188,11 @@ public class RequestSearchService extends BaseService<RequestSearchCriteriaModel
       if (!StringUtils.isEmpty(model.getPendingAppr())) {
         query.append(ExternalizedQuery.getSql("WORKFLOW.CLAUSE_PENDING_APPR"));
       }
+      if (!StringUtils.isEmpty(model.getPendingApprAdmin())) {
+        query.append(ExternalizedQuery.getSql("WORKFLOW.CLAUSE_PENDING_APPR"));
+        query.append("and a.REQ_STATUS not in ('COM', 'PRJ', 'CAN')");
+        query.append("and a.LAST_UPDT_TS >  current timestamp - 60 days");
+      }
 
       if (!StringUtils.isBlank(model.getPayGo())) {
         query.append(ExternalizedQuery.getSql("WORKFLOW.CLAUSE_PAYGO"));

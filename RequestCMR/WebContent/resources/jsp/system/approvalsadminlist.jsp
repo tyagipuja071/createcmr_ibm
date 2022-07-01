@@ -62,11 +62,11 @@ div.cmr-sub {
     <cmr:section id="GRIDSECTION">
       <cmr:row>
         <cmr:column span="6">
-          <h3>Requests with Pending Approvals</h3>
+          <h3>Requests with Pending Approvals <cmr:info text="Not including Completed, Cancelled, and Rejected requests and those not updated in the last 60 days." /></h3>
         </cmr:column>
       </cmr:row>
       <cmr:grid url="/workflow/search/results/list.json" id="requestResultGrid" useFilter="true" width="1120" innerWidth="1120">
-        <cmr:gridParam fieldId="pendingAppr" value="Y" />
+        <cmr:gridParam fieldId="pendingApprAdmin" value="Y" />
         <cmr:gridCol width="80px" field="reqId" header="${ui.grid.requestID}" align="right">
           <cmr:formatter functionName="requestIdFormatter" />
         </cmr:gridCol>
