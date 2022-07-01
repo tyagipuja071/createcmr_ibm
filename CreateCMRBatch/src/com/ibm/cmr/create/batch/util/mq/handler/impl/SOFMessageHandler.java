@@ -14,16 +14,15 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.xml.sax.InputSource;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -1005,7 +1004,7 @@ public class SOFMessageHandler extends MQMessageHandler {
         try {
           SAXParserFactory factory = SAXParserFactory.newInstance();
           factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
           factory.newSAXParser().parse(new InputSource(bis), handler);
         } finally {
           bis.close();

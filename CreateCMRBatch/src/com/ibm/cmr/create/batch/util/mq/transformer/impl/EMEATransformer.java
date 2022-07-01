@@ -6,9 +6,12 @@ package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cmr.create.batch.util.SingleQuoteAttributeOutputtter;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
@@ -53,4 +56,12 @@ public abstract class EMEATransformer extends MessageTransformer {
       messageHash.put("FSLICAM", "");
     }
   }
+
+  @Override
+  public XMLOutputter getXmlOutputter(Format format) {
+    SingleQuoteAttributeOutputtter outputter = new SingleQuoteAttributeOutputtter();
+    XMLOutputter fmt = new XMLOutputter(format, outputter);
+    return fmt;
+  }
+
 }

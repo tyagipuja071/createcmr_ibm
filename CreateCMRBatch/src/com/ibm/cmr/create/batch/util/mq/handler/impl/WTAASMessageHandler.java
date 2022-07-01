@@ -19,9 +19,11 @@ import javax.xml.parsers.SAXParserFactory;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -268,8 +270,7 @@ public class WTAASMessageHandler extends MQMessageHandler {
     }
     String fileName = messageIdPlus + ".xml";
 
-    AttributesPerLineOutputter xmlOutputter = new AttributesPerLineOutputter(1);
-    xmlOutputter.omitDeclaration(true);
+    XMLOutputter xmlOutputter = getXmlOutputter(Format.getPrettyFormat());
 
     StringWriter sw = new StringWriter();
     try {
@@ -350,7 +351,7 @@ public class WTAASMessageHandler extends MQMessageHandler {
 
       SAXParserFactory factory = SAXParserFactory.newInstance();
       factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
       factory.newSAXParser().parse(source, handler);
 
       reply = handler.getReply();
@@ -360,7 +361,7 @@ public class WTAASMessageHandler extends MQMessageHandler {
         Document document = builder.build(source2);
 
         // save the XML
-        AttributesPerLineOutputter xmlOutputter = new AttributesPerLineOutputter(1);
+        XMLOutputter xmlOutputter = getXmlOutputter(Format.getPrettyFormat());
         File outXml = new File(inPath + reply.getRefNo() + "_" + MQMsgConstants.FILE_TIME_FORMATTER.format(new Date()) + ".xml");
 
         int cnt = 1;
@@ -750,7 +751,7 @@ public class WTAASMessageHandler extends MQMessageHandler {
 
       SAXParserFactory factory = SAXParserFactory.newInstance();
       factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
       factory.newSAXParser().parse(source, handler);
 
       reply = handler.getReply();
@@ -827,6 +828,12 @@ public class WTAASMessageHandler extends MQMessageHandler {
       }
     }
     return -1;
+  }
+
+  public XMLOutputter getXmlOutputter(Format format) {
+    AttributesPerLineOutputter outputter = new AttributesPerLineOutputter(1);
+    XMLOutputter fmt = new XMLOutputter(format, outputter);
+    return fmt;
   }
 
 }
