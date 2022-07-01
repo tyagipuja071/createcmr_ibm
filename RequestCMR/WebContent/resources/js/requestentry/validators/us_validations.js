@@ -8,6 +8,7 @@ var _usSicmenHandler = null;
 var _usIsuHandler = null;
 var _usSicm = "";
 var _kukla = "";
+var _enterpriseHandler = null;
 /**
  * Adds the validator for Invoice-to that only 3 address lines can be specified
  */
@@ -311,6 +312,12 @@ function afterConfigForUS() {
   if (_usIsuHandler == null && FormManager.getField('isuCd')) {
     _usIsuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValuesUS();
+    });
+  }
+  
+  if (_enterpriseHandler == null) {
+	  _enterpriseHandler = dojo.connect(FormManager.getField('enterprise'), 'onChange', function(value) {
+		  updateBOForEntp();
     });
   }
 
@@ -869,6 +876,17 @@ function addCompanyEnterpriseValidation() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
+//CREATCMR-3440 - BO Computation Update - Entp - 6500871
+function updateBOForEntp(){
+	if (FormManager.getActualValue('enterprise') == '6500871') {
+		FormManager.setValue('csoSite', 'PAH');
+	    FormManager.setValue('svcArOffice', 'IJ9');
+	    FormManager.setValue('mtkgArDept', 'SD3');
+	    FormManager.setValue('mktgDept', 'SVB');
+	  }
+}
+
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
