@@ -198,7 +198,6 @@ var _PostalCodeHandler = null;
 var _TaxCdHandler = null;
 var _custCodeHanlder = null;
 var _CTCHandler = null;
-var _reqReasonHandler = null;
 var _vatExemptHandler = null;
 var addrTypeHandler = [];
 var _hwMstrInstallFlagHandler = null;
@@ -347,12 +346,6 @@ function addHandlersForSWISS() {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
       setISUCTCOnIMSChange();
       setMubotyOnPostalCodeIMS();
-    });
-  }
-
-  if (_reqReasonHandler == null) {
-    _reqReasonHandler = dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
-      checkEmbargoCd(value);
     });
   }
 
