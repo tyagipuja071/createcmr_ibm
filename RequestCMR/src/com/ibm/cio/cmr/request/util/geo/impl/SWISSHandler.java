@@ -217,8 +217,9 @@ public class SWISSHandler extends GEOHandler {
         address.setIerpSitePrtyId(spid);
 
       } else {
-        String addrSeq = address.getId().getAddrSeq();
+        String addrSeq = "1";
         addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+        address.getId().setAddrSeq(addrSeq);
         address.getId().setAddrSeq(addrSeq);
         address.setIerpSitePrtyId(spid);
       }
