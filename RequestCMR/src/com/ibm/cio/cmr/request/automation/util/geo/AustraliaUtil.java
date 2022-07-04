@@ -215,7 +215,7 @@ public class AustraliaUtil extends AutomationUtil {
       pk.setNotifId(user);
       notif.setId(pk);
       notif.setNotifNm(user);
-      entityManager.persist(notif);
+      entityManager.merge(notif);
     }
   }
 
