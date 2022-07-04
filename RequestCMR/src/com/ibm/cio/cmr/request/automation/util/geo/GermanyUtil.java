@@ -133,7 +133,12 @@ public class GermanyUtil extends AutomationUtil {
             request.setIssuingCountry(data.getCmrIssuingCntry());
             request.setLandedCountry(zs01.getLandCntry());
             request.setIsicCd("9500");
-            request.setNameMatch("Y");
+            request.setPostalCode(zs01.getPostCd());
+            request.setStateProv(zs01.getStateProv());
+            request.setStreetLine1(zs01.getAddrTxt());
+            request.setStreetLine2(zs01.getAddrTxt2());
+            request.setCity(zs01.getCity1());
+            request.setCustClass("71");
             client.setReadTimeout(1000 * 60 * 5);
             LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
             MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
@@ -229,6 +234,8 @@ public class GermanyUtil extends AutomationUtil {
         }
         break;
       case "BUSPR":
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
         if (StringUtils.isNotBlank(data.getPpsceid())) {
           try {
             if (!checkPPSCEID(data.getPpsceid())) {

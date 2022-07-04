@@ -343,6 +343,8 @@
               <cmr:info text="${ui.info.vATFR}" />
             </cmr:view> <cmr:view forCountry="618">
               <cmr:info text="${ui.info.vatAT}" />
+            </cmr:view> <cmr:view forCountry="834">
+              <cmr:info text="${ui.info.vatSG}" />
             </cmr:view> <!--<cmr:view forCountry="846">
               <cmr:info text="${ui.info.vatSE}" />
             </cmr:view>--> <!--<cmr:view forCountry="702">

@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.CellType;
@@ -181,6 +182,13 @@ public class IsraelHandler extends EMEAHandler {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+
+              if (isEnglishAllSharedSequence(sofUses)) {
+                if ("ZI01".equals(record.getCmrAddrTypeCode())) {
+                  sofUses = setUsesIfDuplicate(sofUses, record);
+                }
+              }
+
               for (String sofUse : sofUses) {
                 addrType = getAddressTypeByUse(sofUse);
                 if (!StringUtils.isEmpty(addrType)) {
@@ -220,13 +228,13 @@ public class IsraelHandler extends EMEAHandler {
 
                     // Handle Sold to shared sequence -- EPL and Installing
                     if ("ZS01".equals(addrType)) {
-                      if ("Y".equals(legacyAddr.getIsAddrUseInstalling())) {
+                      if ("Y".equals(legacyAddr.getIsAddrUseInstalling()) && !isLegacyAddrInRdc(legacyAddr.getId().getAddrNo(), source.getItems())) {
                         FindCMRRecordModel installing = cloneAddress(addr, "ZI01");
                         installing.setTransAddrNo("");
 
                         converted.add(installing);
                       }
-                      if ("Y".equals(legacyAddr.getIsAddrUseEPL())) {
+                      if ("Y".equals(legacyAddr.getIsAddrUseEPL()) && !isLegacyAddrInRdc(legacyAddr.getId().getAddrNo(), source.getItems())) {
                         FindCMRRecordModel epl = cloneAddress(addr, "ZS02");
                         epl.setTransAddrNo("");
                         converted.add(epl);
@@ -363,6 +371,29 @@ public class IsraelHandler extends EMEAHandler {
     } else {
       super.handleSOFConvertFrom(entityManager, source, reqEntry, mainRecord, converted, searchModel);
     }
+  }
+
+  private List<String> setUsesIfDuplicate(List<String> sofUses, FindCMRRecordModel record) {
+    List<String> newSofUses = new ArrayList<>();
+    newSofUses.add("3");
+    newSofUses.add("5");
+    return newSofUses;
+  }
+
+  private boolean isEnglishAllSharedSequence(List<String> sofUses) {
+
+    if (sofUses != null) {
+      List<String> allEngSharedAddrUses = new ArrayList<>();
+      allEngSharedAddrUses.add("3");
+      allEngSharedAddrUses.add("5");
+      allEngSharedAddrUses.add("A");
+      allEngSharedAddrUses.add("B");
+      allEngSharedAddrUses.add("C");
+
+      return CollectionUtils.isEqualCollection(sofUses, allEngSharedAddrUses);
+    }
+
+    return false;
   }
 
   private boolean isLegacyAddrInRdc(String addrNo, List<FindCMRRecordModel> converted) {
@@ -1836,6 +1867,20 @@ public class IsraelHandler extends EMEAHandler {
         String postalCd = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, row, sheetName));
         String landedCntry = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, row, sheetName));
 
+        if (validateHebrewField || (sheetName.equals("Installing") || sheetName.equals("EPL"))) {
+          String errKna1 = validateMassKna1AddrSeqExist(cmrNo, addrSeqNo, sheetName);
+
+          if (StringUtils.isNotBlank(errKna1)) {
+            error.addError(rowIndex + 1, "<br>", errKna1);
+          }
+
+          String errDb2 = validateMassLegacyAddrSeqExist(cmrNo, addrSeqNo, sheetName);
+
+          if (StringUtils.isNotBlank(errDb2)) {
+            error.addError(rowIndex + 1, "<br>", errDb2);
+          }
+        }
+
         if (StringUtils.isNotBlank(landedCntry)) {
           // Check postalCode cache
           boolean isLandCountryInCache = postalCdValidationCache.containsKey(landedCntry);
@@ -1938,6 +1983,56 @@ public class IsraelHandler extends EMEAHandler {
         }
       }
     }
+  }
+
+  private static String validateMassKna1AddrSeqExist(String cmrNo, String seqNo, String addrType) {
+    LOG.info("Israel MU validate rdc address sequence " + seqNo + " for CMR No. " + cmrNo);
+    String errMessage = "";
+
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("IL.MASS.GET.KNA1.ADDR.SEQ");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("KATR6", SystemLocation.ISRAEL);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("ZZKV_CUSNO", cmrNo);
+        query.setParameter("ZZKV_SEQNO", Integer.valueOf(seqNo));
+        query.setParameter("ZZKV_SEQNO_PAD", seqNo);
+        query.setForReadOnly(true);
+        String result = query.getSingleResult(String.class);
+
+        if (StringUtils.isBlank(result)) {
+          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
+              + " does not exist in RDC. Please raise single update for CMR " + cmrNo + " so the address can be inserted to RDC.";
+        }
+      }
+    }
+    return errMessage;
+  }
+
+  private static String validateMassLegacyAddrSeqExist(String cmrNo, String seqNo, String addrType) {
+    LOG.info("Israel MU validate legacy address sequence " + seqNo + " for CMR No. " + cmrNo);
+    String errMessage = "";
+
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("IL.MASS.GET.LEGACY.ADDR.SEQ");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("RCYAA", SystemLocation.ISRAEL);
+        query.setParameter("RCUXA", cmrNo);
+        query.setParameter("SEQ", seqNo);
+        query.setForReadOnly(true);
+        String result = query.getSingleResult(String.class);
+
+        if (StringUtils.isBlank(result)) {
+          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
+              + " does not exist in DB2. Please contact CMDE team to review the CMR.";
+        }
+      }
+    }
+    return errMessage;
   }
 
   private void validateAddrRequiredFields(XSSFRow row, TemplateValidation error, String sheetName) {

@@ -346,6 +346,13 @@ public class SpainUtil extends AutomationUtil {
         cmdeReview = true;
         break;
       case "Mode Of Payment":
+        requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES_MOPA_AUTO_UPDATE"));
+        if (requesterFromTeam) {
+          details.append("Skipping validation for MOPA update for requester - " + admin.getRequesterId() + ".\n");
+          engineData.addPositiveCheckStatus("SKIP_APPROVALS");
+          admin.setScenarioVerifiedIndc("Y");
+        }
+        break;
       case "Mailing Condition":
         requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
         if (!requesterFromTeam) {

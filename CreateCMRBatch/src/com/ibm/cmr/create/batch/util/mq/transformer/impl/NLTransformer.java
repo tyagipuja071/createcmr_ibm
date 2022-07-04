@@ -16,8 +16,6 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -37,7 +35,6 @@ import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
-import com.ibm.cmr.create.batch.util.SingleQuoteAttributeOutputtter;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
@@ -523,11 +520,6 @@ public class NLTransformer extends EMEATransformer {
   }
 
   @Override
-  public XMLOutputter getXmlOutputter(Format format) {
-    return new SingleQuoteAttributeOutputtter(format);
-  }
-
-  @Override
   public boolean isCrossBorderForMass(MassUpdtAddr addr, CmrtAddr legacyAddr) {
     boolean isCrossBorder = false;
     if (!StringUtils.isEmpty(addr.getLandCntry()) && !DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry())) {
@@ -951,7 +943,7 @@ public class NLTransformer extends EMEATransformer {
       }
     }
 
-		List<String> isuCdList = Arrays.asList("5K", "15", "4A", "04", "28");
+    List<String> isuCdList = Arrays.asList("5K", "15", "4A", "04", "28");
     if (!StringUtils.isEmpty(data.getIsuCd()) && isuCdList.contains(data.getIsuCd())) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
     }
@@ -1026,12 +1018,12 @@ public class NLTransformer extends EMEATransformer {
     if (!StringUtils.isEmpty(muData.getIsuCd()) && "5K".equals(muData.getIsuCd())) {
       cust.setIsuCd(muData.getIsuCd() + "7");
     } else {
-    String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-        + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
-    if (isuClientTier != null && isuClientTier.endsWith("@")) {
-      cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
-    } else if (isuClientTier.contains("@")) {
-      cust.setIsuCd("7");
+      String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+      if (isuClientTier != null && isuClientTier.endsWith("@")) {
+        cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
+      } else if (isuClientTier.contains("@")) {
+        cust.setIsuCd("7");
       }
     }
 
@@ -1436,7 +1428,7 @@ public class NLTransformer extends EMEATransformer {
   }
 
   private void copyMailingFromBilling(LegacyDirectObjectContainer legacyObjects, CmrtAddr billingAddr) {
-    CmrtAddr mailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
+    CmrtAddr mailingAddr = SerializationUtils.clone(billingAddr);
     mailingAddr.getId().setAddrNo("00001");
     mailingAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
     mailingAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
@@ -1445,7 +1437,7 @@ public class NLTransformer extends EMEATransformer {
   }
 
   private void copyBillingFromMailing(LegacyDirectObjectContainer legacyObjects, CmrtAddr mailingAddr, String billingseq) {
-    CmrtAddr billingAddr = (CmrtAddr) SerializationUtils.clone(mailingAddr);
+    CmrtAddr billingAddr = SerializationUtils.clone(mailingAddr);
     billingAddr.getId().setAddrNo(billingseq);
     billingAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
     billingAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);

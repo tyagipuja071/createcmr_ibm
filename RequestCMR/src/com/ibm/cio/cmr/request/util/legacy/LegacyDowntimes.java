@@ -51,7 +51,7 @@ public class LegacyDowntimes {
    */
   public static boolean isUp(String country, Date currentTime) {
     if (!PROPS.containsKey(country + ".TIMEZONE")) {
-      LOG.debug("No timezone property for " + country);
+      LOG.trace("No timezone property for " + country);
       return true;
     }
     String tz = PROPS.getProperty(country + ".TIMEZONE");
@@ -59,7 +59,7 @@ public class LegacyDowntimes {
     formatter.setTimeZone(TimeZone.getTimeZone(tz));
     String day = formatter.format(currentTime).toUpperCase();
     if (!PROPS.containsKey(country + "." + day + ".START") || !PROPS.containsKey(country + "." + day + ".END")) {
-      LOG.debug("No start/end found for country " + country);
+      LOG.trace("No start/end found for country " + country);
       return true;
     }
     formatter = new SimpleDateFormat("HHmm");

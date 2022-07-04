@@ -332,14 +332,6 @@ public class LegacyDirectService extends TransConnService {
       LegacyDirectObjectContainer legacyObjects = mapRequestDataForCreate(entityManager, cmrObjects);
       MessageTransformer transformer = TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
 
-      LOG.info("Checking existing records with same Name and Location..");
-      LOG.trace("Name: " + legacyObjects.getCustomer().getAbbrevNm() + " - Location: " + legacyObjects.getCustomer().getAbbrevLocn());
-      if (validateNameAndLocation(entityManager, legacyObjects.getSofCntryCd(), legacyObjects.getCustomer().getAbbrevNm(),
-          legacyObjects.getCustomer().getAbbrevLocn())) {
-        throw new Exception("An record with Name = " + legacyObjects.getCustomer().getAbbrevNm() + " and Location = "
-            + legacyObjects.getCustomer().getAbbrevLocn() + " already exists.");
-      }
-
       // finally persist all data
       CmrtCust legacyCust = legacyObjects.getCustomer();
       if (legacyCust == null) {
@@ -1901,7 +1893,7 @@ public class LegacyDirectService extends TransConnService {
           custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
           custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
           legacyObjects.setCustomerExt(custExt);
-        } else if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+        } else if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()) || SystemLocation.KENYA.equals(data.getCmrIssuingCntry())) {
           CmrtCustExtPK custExtPk = null;
           LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
           // Initialize the object
@@ -2398,23 +2390,6 @@ public class LegacyDirectService extends TransConnService {
       RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment,
           "C".equals(admin.getReqType()) ? ACTION_RDC_CREATE : ACTION_RDC_UPDATE, null, null, true, true);
     }
-  }
-
-  /**
-   * Validates existing abbrev name and abrev location
-   * 
-   * @param entityManager
-   * @param abbrName
-   * @param abbrLoc
-   */
-  private boolean validateNameAndLocation(EntityManager entityManager, String country, String abbrName, String abbrLoc) {
-    String sql = ExternalizedQuery.getSql("LEGACYD.VALIDATE");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("COUNTRY", country);
-    query.setParameter("NAME", abbrName);
-    query.setParameter("LOC", abbrLoc);
-    query.setForReadOnly(true);
-    return query.exists();
   }
 
   protected void processMassUpdateRequest(EntityManager entityManager, ProcessRequest request, Admin admin, Data data) throws Exception {

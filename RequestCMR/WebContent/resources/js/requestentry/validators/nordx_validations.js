@@ -468,8 +468,8 @@ function getLandedCountryByAddType(addType) {
  * Set Client Tier Value
  */
 function setClientTierValues(isuCd) {
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
 
@@ -479,19 +479,19 @@ function setClientTierValues(isuCd) {
   var lockClientTier = false;
 
   if (cmrIssuingCntry == '678') {
-    if ([ '5K', '19' ].includes(isuCd)) {
+    if ('19' == isuCd) {
       lockClientTier = true;
     }
   } else if (cmrIssuingCntry == '806' || countryUse == '702') {
-    if ([ '5K', '04' ].includes(isuCd)) {
+    if ('04' == isuCd) {
       lockClientTier = true;
     }
   } else if (cmrIssuingCntry == '846') {
-    if ([ '5K', '5E', '1R', '04' ].includes(isuCd)) {
+    if ([ '5E', '1R', '04' ].includes(isuCd)) {
       lockClientTier = true;
     }
   } else if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
-    if ([ '5K', '21', '8B' ].includes(isuCd)) {
+    if ([ '21', '8B' ].includes(isuCd)) {
       lockClientTier = true;
     }
   }
@@ -3737,9 +3737,9 @@ function setSalesRepValues() {
           } else if (isuAndCtc == '5K') {
             FormManager.setValue('searchTerm', 'T0009073');
           } else if (isuAndCtc == '21') {
-            FormManager.setValue('searchTerm', 'T0000471');
+            FormManager.setValue('searchTerm', 'T0001661');
           } else if (isuAndCtc == '8B') {
-            FormManager.setValue('searchTerm', 'P0000007');
+            FormManager.setValue('searchTerm', 'P0000024');
           } else {
             FormManager.setValue('searchTerm', '');
           }
@@ -3751,9 +3751,9 @@ function setSalesRepValues() {
           } else if (isuAndCtc == '5K') {
             FormManager.setValue('searchTerm', 'T0009071');
           } else if (isuAndCtc == '21') {
-            FormManager.setValue('searchTerm', 'T0000471');
+            FormManager.setValue('searchTerm', 'T0001661');
           } else if (isuAndCtc == '8B') {
-            FormManager.setValue('searchTerm', 'P0000007');
+            FormManager.setValue('searchTerm', 'P0000024');
           } else {
             FormManager.setValue('searchTerm', '');
           }
@@ -3765,9 +3765,9 @@ function setSalesRepValues() {
           } else if (isuAndCtc == '5K') {
             FormManager.setValue('searchTerm', 'T0009072');
           } else if (isuAndCtc == '21') {
-            FormManager.setValue('searchTerm', 'T0000471');
+            FormManager.setValue('searchTerm', 'T0001661');
           } else if (isuAndCtc == '8B') {
-            FormManager.setValue('searchTerm', 'P0000007');
+            FormManager.setValue('searchTerm', 'P0000024');
           } else {
             FormManager.setValue('searchTerm', '');
           }
@@ -4202,11 +4202,18 @@ function setSRValuesBaseOnSubInd() {
             FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'T0009073' : _pagemodel.searchTerm);
             subIndFlag = 'Y';
           }
-        } else if (isuAndCtc == '21' || isuAndCtc == '8B') {
+        } else if (isuAndCtc == '21') {
           if (subIndFlag == 'Y') {
-            FormManager.setValue('searchTerm', 'T0001640');
+            FormManager.setValue('searchTerm', 'T0001661');
           } else {
-            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'T0001640' : _pagemodel.searchTerm);
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'T0001661' : _pagemodel.searchTerm);
+            subIndFlag = 'Y';
+          }
+        } else if (isuAndCtc == '8B') {
+          if (subIndFlag == 'Y') {
+            FormManager.setValue('searchTerm', 'P0000024');
+          } else {
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'P0000024' : _pagemodel.searchTerm);
             subIndFlag = 'Y';
           }
         } else {
@@ -4241,16 +4248,16 @@ function setSRValuesBaseOnSubInd() {
           }
         } else if (isuAndCtc == '21') {
           if (subIndFlag == 'Y') {
-            FormManager.setValue('searchTerm', 'T0000468');
+            FormManager.setValue('searchTerm', 'T0001661');
           } else {
-            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'T0000468' : _pagemodel.searchTerm);
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'T0001661' : _pagemodel.searchTerm);
             subIndFlag = 'Y';
           }
         } else if (isuAndCtc == '8B') {
           if (subIndFlag == 'Y') {
-            FormManager.setValue('searchTerm', 'P0000007');
+            FormManager.setValue('searchTerm', 'P0000024');
           } else {
-            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'P0000007' : _pagemodel.searchTerm);
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'P0000024' : _pagemodel.searchTerm);
             subIndFlag = 'Y';
           }
         } else {
@@ -4285,16 +4292,16 @@ function setSRValuesBaseOnSubInd() {
           }
         } else if (isuAndCtc == '21') {
           if (subIndFlag == 'Y') {
-            FormManager.setValue('searchTerm', 'T0000468');
+            FormManager.setValue('searchTerm', 'T0001661');
           } else {
-            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'T0000468' : _pagemodel.searchTerm);
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'T0001661' : _pagemodel.searchTerm);
             subIndFlag = 'Y';
           }
         } else if (isuAndCtc == '8B') {
           if (subIndFlag == 'Y') {
-            FormManager.setValue('searchTerm', 'P0000007');
+            FormManager.setValue('searchTerm', 'P0000024');
           } else {
-            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'P0000007' : _pagemodel.searchTerm);
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'P0000024' : _pagemodel.searchTerm);
             subIndFlag = 'Y';
           }
         } else {
@@ -4739,65 +4746,94 @@ function setCTCValues() {
 }
 
 function clientTierCodeValidator() {
+  var isuCode = FormManager.getActualValue('isuCd');
+  var clientTierCode = FormManager.getActualValue('clientTier');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
+    if (clientTierCode == '') {
+      $("#clientTierSpan").html('');
+
+      return new ValidationResult(null, true);
+    } else {
+      $("#clientTierSpan").html('');
+
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank.');
+    }
+  } else if (isuCode == '34') {
+    if (clientTierCode == '') { 
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+    }
+  } else {
+    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+      $("#clientTierSpan").html('');
+
+      return new ValidationResult(null, true);
+    } else {
+      $("#clientTierSpan").html('');
+      $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+    }
+  }
+}
+// CREATCMR-4293
+
+function clientTierValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var isuCode = FormManager.getActualValue('isuCd');
-        var clientTierCode = FormManager.getActualValue('clientTier');
-
-        if (isuCode == '21' || isuCode == '8B') {
-          if (clientTierCode == '') {
-            $("#clientTierSpan").html('');
-
-            return new ValidationResult(null, true);
-          } else {
-            $("#clientTierSpan").html('');
-
-            return new ValidationResult({
-              id : 'clientTier',
-              type : 'text',
-              name : 'clientTier'
-            }, false, 'Client Tier can only accept blank.');
-          }
-        } else if (isuCode == '34') {
-          if (clientTierCode == '') {
-            FormManager.addValidator('clientTier', Validators.REQUIRED);
-            return new ValidationResult({
-              id : 'clientTier',
-              type : 'text',
-              name : 'clientTier'
-            }, false, 'Client Tier code is Mandatory.');
-          } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
-            return new ValidationResult(null, true);
-          } else {
-            return new ValidationResult({
-              id : 'clientTier',
-              type : 'text',
-              name : 'clientTier'
-            }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
-          }
+        var clientTier = FormManager.getActualValue('clientTier');
+        var isuCd = FormManager.getActualValue('isuCd');
+        var reqType = FormManager.getActualValue('reqType');
+        var valResult = null;
+        
+        var oldClientTier = null;
+        var oldISU = null;
+        var requestId = FormManager.getActualValue('reqId');
+        
+        if (reqType == 'C') {
+          valResult = clientTierCodeValidator();
         } else {
-          if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
-            $("#clientTierSpan").html('');
-
-            return new ValidationResult(null, true);
-          } else {
-            $("#clientTierSpan").html('');
-            $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
-
-            return new ValidationResult({
-              id : 'clientTier',
-              type : 'text',
-              name : 'clientTier'
-            }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+          qParams = {
+              REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
+          
+          if (result != null && result != '') {
+            oldClientTier = result.ret1 != null ? result.ret1 : '';
+            oldISU =  result.ret3 != null ? result.ret3 : '';
+            
+            if (clientTier != oldClientTier || isuCd != oldISU) {
+              valResult = clientTierCodeValidator();
+            }
           }
         }
-
+        return valResult;
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
-// CREATCMR-4293
 
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
@@ -4890,6 +4926,6 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);
-  GEOHandler.registerValidator(clientTierCodeValidator, GEOHandler.NORDX, null, true);
+  GEOHandler.registerValidator(clientTierValidator, GEOHandler.NORDX, null, true);
 
 });

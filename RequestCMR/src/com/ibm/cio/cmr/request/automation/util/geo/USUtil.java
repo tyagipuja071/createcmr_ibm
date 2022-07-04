@@ -355,7 +355,36 @@ public class USUtil extends AutomationUtil {
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
         details.append("Branch Office codes computed by another element/external process.");
       } else {
-        if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
+        if (StringUtils.isNotEmpty(data.getEnterprise()) && data.getEnterprise().equals("6500871")) {
+          String csoSite = "PAH";
+          String mktgDept = "SVB";
+          String mtkgArDept = "SD3";
+          String svcArOffice = "IJ9";
+
+          details.append("Setting Fields based on US Scenarios:").append("\n");
+          details.append("CSO Site = " + csoSite).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CSO_SITE", data.getCsoSite(), csoSite);
+
+          details.append("Marketing Department = " + mktgDept).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MKTG_DEPT", data.getMktgDept(), mktgDept);
+
+          details.append("Marketing A/R Department = " + mtkgArDept).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), mtkgArDept);
+
+          details.append("SVC A/R Office = " + svcArOffice).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), svcArOffice);
+
+          if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
+            for (USBranchOffcMapping mapping : boMappings) {
+              if (mapping.getScenario().equalsIgnoreCase(scenarioSubType)) {
+                String pccArDept = mapping.getPccArDept(entityManager, requestData);
+                details.append("PCC A/R Department = " + pccArDept).append("\n");
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "PCC_AR_DEPT", data.getPccArDept(), pccArDept);
+              }
+            }
+          }
+          boCodesCalculated = true;
+        } else if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
           for (USBranchOffcMapping mapping : boMappings) {
             if (mapping.getScenario().equalsIgnoreCase(scenarioSubType)) {
               String csoSite = mapping.getCsoSite(entityManager, requestData);
@@ -1119,8 +1148,15 @@ public class USUtil extends AutomationUtil {
               addrTypesChanged.add(addrModel.getAddrTypeCode());
             }
           }
+          boolean isBPAccount = false;
+          if (StringUtils.isNotBlank(data.getRestrictTo())) {
+            if ("BPQS".equals(data.getRestrictTo()) || "IRCSO".equals(data.getRestrictTo())) {
+              isBPAccount = true;
+            }
+          }
+
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())
-              && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited))) {
+              && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited)) && (!isBPAccount)) {
             closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
           }
           if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZS01"))) {
@@ -1156,7 +1192,7 @@ public class USUtil extends AutomationUtil {
             }
 
             if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))
-                && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited))) {
+                && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited)) && (!isBPAccount)) {
               closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
             if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZI01"))) {
@@ -1361,6 +1397,7 @@ public class USUtil extends AutomationUtil {
     // get request admin and data
 
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
 
     String custSubGroup = "";
 
@@ -1414,9 +1451,12 @@ public class USUtil extends AutomationUtil {
       LOG.debug("--------- Customer Type is : " + custTypCd);
     }
 
-    // if (!StringUtils.isBlank(admin.getCustType())) {
-    // custTypCd = admin.getCustType();
-    // }
+    if (StringUtils.isBlank(custTypCd)) {
+      if (!StringUtils.isBlank(admin.getCustType())) {
+        custTypCd = admin.getCustType();
+        LOG.debug("--------- Customer Type is From admin : " + custTypCd);
+      }
+    }
 
     // US restrict to LOV mapping
     String usRestrictToLOV = "";
@@ -1504,6 +1544,8 @@ public class USUtil extends AutomationUtil {
           custSubGroup = SC_CSP;
         } else if (("11".equals(custClass) || "18".equals(custClass) || "19".equals(custClass)) && StringUtils.isBlank(usRestricTo)) {
           custSubGroup = SC_COMM_REGULAR;
+        } else if ("BYMODEL".equals(data.getCustSubGrp())) {
+          custSubGroup = SC_BYMODEL;
         }
       }
     } else if (STATE_LOCAL.equals(custTypCd)) {

@@ -6,8 +6,8 @@ package com.ibm.cmr.create.batch.util.mq.transformer;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -399,6 +399,7 @@ public abstract class MessageTransformer {
   public boolean isPG01Supported() {
     return false;
   }
+
   public String getDupCreationCountryId(EntityManager entityManager, String cntry, String cmrNo) {
     return "NA";
   }

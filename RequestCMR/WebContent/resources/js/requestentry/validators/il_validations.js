@@ -21,15 +21,15 @@ function addHandlersForIL() {
     }
   }
 
-  if (_CTCHandlerIL == null) {
-    _CTCHandlerIL = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setEnterpriseSalesRepSBO(value);
-    });
-  }
-
   if (_ISUHandlerIL == null) {
     _ISUHandlerIL = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       requireCtcByISU(value);
+      setEnterpriseSalesRepSBO(value);
+    });
+  }
+  
+  if (_CTCHandlerIL == null) {
+    _CTCHandlerIL = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setEnterpriseSalesRepSBO(value);
     });
   }
@@ -2192,7 +2192,7 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
   if (reqType != 'C') {
     return;
   }
-  if (reqType == 'C' && scenarioChanged) {
+  if (reqType == 'C' && scenarioChanged && !fromAddress) {
 
     if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO') {
       FormManager.setValue('repTeamMemberNo', '000993');
@@ -2516,7 +2516,7 @@ function clientTierValidator() {
               REQ_ID : requestId,
           };
         
-          var result = cmr.query('GET.IL.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
+          var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
           
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';

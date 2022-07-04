@@ -8,6 +8,7 @@ var _usSicmenHandler = null;
 var _usIsuHandler = null;
 var _usSicm = "";
 var _kukla = "";
+var _enterpriseHandler = null;
 /**
  * Adds the validator for Invoice-to that only 3 address lines can be specified
  */
@@ -313,6 +314,12 @@ function afterConfigForUS() {
       setClientTierValuesUS();
     });
   }
+  
+  if (_enterpriseHandler == null) {
+	  _enterpriseHandler = dojo.connect(FormManager.getField('enterprise'), 'onChange', function(value) {
+		  updateBOForEntp();
+    });
+  }
 
 }
 
@@ -603,8 +610,8 @@ function addDivStreetCountValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('addrType') != 'ZP01' && FormManager.getActualValue('addrType') != 'ZS01'
-            && FormManager.getActualValue('addrType') != 'ZI01') {
+        if (FormManager.getActualValue('addrType') != 'ZP01' && FormManager.getActualValue('addrType') != 'ZS01' && FormManager.getActualValue('addrType') != 'ZI01'
+            || FormManager.getActualValue('bpAcctTyp') == 'E') {
           return new ValidationResult(null, true);
         }
         var count = 0;
@@ -869,6 +876,17 @@ function addCompanyEnterpriseValidation() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
+//CREATCMR-3440 - BO Computation Update - Entp - 6500871
+function updateBOForEntp(){
+	if (FormManager.getActualValue('enterprise') == '6500871') {
+		FormManager.setValue('csoSite', 'PAH');
+	    FormManager.setValue('svcArOffice', 'IJ9');
+	    FormManager.setValue('mtkgArDept', 'SD3');
+	    FormManager.setValue('mktgDept', 'SVB');
+	  }
+}
+
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');

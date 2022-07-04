@@ -230,6 +230,9 @@
     
     <class>com.ibm.cio.cmr.request.entity.RestrictToCode</class>
     <class>com.ibm.cio.cmr.request.entity.RestrictToCodePK</class>
+
+    <class>com.ibm.cio.cmr.request.entity.dashboard.AutomationMonitor</class>
+    <class>com.ibm.cio.cmr.request.entity.dashboard.ProcessingMonitor</class>
     
     <properties>
     <!-- ORIGINAL -->
