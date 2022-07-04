@@ -43,6 +43,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
 
   private static final Logger log = Logger.getLogger(DupCMRCheckElement.class);
   private static final List<String> AP_COUNTRIES = Arrays.asList("744");
+  private static final List<String> DACH_COUNTRIES = Arrays.asList("618", "724", "848");
 
   public DupCMRCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -323,6 +324,9 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
         request.setStreetLine3(StringUtils.isEmpty(addr.getDept()) ? "" : addr.getDept());
       } else {
         request.setStreetLine3("");
+      }
+      if (DACH_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+        request.setCustClass(StringUtils.isEmpty(data.getCustClass()) ? "" : data.getCustClass());
       }
       request.setCity(addr.getCity1());
 

@@ -86,6 +86,11 @@ boolean approver = user != null && user.isApprover();
 				  <!-- Home Secondary Tabs -->
 				  <li id="OVERVIEW_TAB"><a href="javascript: goToUrl('${contextPath}/home')">Overview</a></li>
           <li id="LOG"><a href="javascript: showAppLog()">Release Notes</a></li>
+          <%if (user != null && (user.isAdmin() || user.isCmde()) ){%>            
+            <li id="DASHBOARD_TAB">
+              <a href="javascript: goToUrl('${contextPath}/dashboard')">Dashboard</a>
+            </li>
+          <%}%>
 				</c:if>
 
         <c:if test="${primaryTabId ==  'APPROVALS'}">

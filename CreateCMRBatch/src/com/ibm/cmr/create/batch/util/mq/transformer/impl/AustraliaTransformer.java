@@ -84,9 +84,10 @@ public class AustraliaTransformer extends ANZTransformer {
       abbrevLandCountries = (List<String>) Arrays.asList("US", "MY", "GB", "SG", "AE", "CH", "MV", "AU", "FR", "TH", "NL", "IE", "HK", "DE", "ID",
           "BD", "CA", "LK", "TW", "NZ", "VN", "PH", "KR", "MM", "KH", "BN", "PG");
       String scenario = handler.cmrData.getCustSubGrp();
+      boolean update = "U".equals(handler.adminData.getReqType());
       line6 = addrData.getCity1();
       if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry()))) {
-        if (abbrevLandCountries.contains(addrData.getLandCntry()) && scenario.equals("CROSS"))
+        if (!update && abbrevLandCountries.contains(addrData.getLandCntry()) && scenario.equals("CROSS"))
           line6 += " " + "<" + addrData.getLandCntry() + ">";
         else
           line6 += " " + "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";

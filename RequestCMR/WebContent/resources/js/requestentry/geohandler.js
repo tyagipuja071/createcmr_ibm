@@ -113,7 +113,8 @@ var SysLoc = (function() {
     BOSNIA_HERZEGOVINA : '699',
     MADAGASCAR : '700',
     CANADA : '649',
-    KOREA : '766'
+    KOREA : '766',
+    KENYA: '764'
   };
 })();
 

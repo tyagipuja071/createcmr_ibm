@@ -15,8 +15,6 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -36,7 +34,6 @@ import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
-import com.ibm.cmr.create.batch.util.SingleQuoteAttributeOutputtter;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
@@ -545,11 +542,6 @@ public class TurkeyTransformer extends EMEATransformer {
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
-  }
-
-  @Override
-  public XMLOutputter getXmlOutputter(Format format) {
-    return new SingleQuoteAttributeOutputtter(format);
   }
 
   @Override
@@ -1651,7 +1643,7 @@ public class TurkeyTransformer extends EMEATransformer {
           CmrtAddr sourceAddr = mailLegacyAddr != null ? mailLegacyAddr : billLegacyAddr;
           String sourceType = mailLegacyAddr != null ? "M" : "B";
 
-          CmrtAddr targetAddr = (CmrtAddr) SerializationUtils.clone(sourceAddr);
+          CmrtAddr targetAddr = SerializationUtils.clone(sourceAddr);
           String targetSeq = sourceType.equals("M") ? billseqinlegacy : mailseqinlegacy;
           targetAddr.getId().setAddrNo(targetSeq);
 
@@ -1831,7 +1823,7 @@ public class TurkeyTransformer extends EMEATransformer {
   }
 
   private void copyMailingFromBilling(LegacyDirectObjectContainer legacyObjects, CmrtAddr billingAddr) {
-    CmrtAddr mailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
+    CmrtAddr mailingAddr = SerializationUtils.clone(billingAddr);
     mailingAddr.getId().setAddrNo("00002");
     mailingAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
     mailingAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
@@ -1840,7 +1832,7 @@ public class TurkeyTransformer extends EMEATransformer {
   }
 
   private void copyBillingFromMailing(LegacyDirectObjectContainer legacyObjects, CmrtAddr mailingAddr, String billingseq) {
-    CmrtAddr billingAddr = (CmrtAddr) SerializationUtils.clone(mailingAddr);
+    CmrtAddr billingAddr = SerializationUtils.clone(mailingAddr);
     billingAddr.getId().setAddrNo(billingseq);
     billingAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
     billingAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);

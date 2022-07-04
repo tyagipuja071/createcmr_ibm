@@ -706,11 +706,12 @@ public class CNHandler extends GEOHandler {
         // to the value on our list.
         String city1Upper = addr.getCity1() != null ? addr.getCity1().toUpperCase() : "";
         city1Upper = city1Upper.replaceAll("[^a-zA-Z]+", "");
+        String state = addr.getStateProv() != null ? addr.getStateProv().toUpperCase() : "";
         String cmtMsg = "Your address city value on address type " + addr.getId().getAddrType() + ", sequence number " + addr.getId().getAddrSeq()
             + " has been changed because the city value is not on CreateCMR.";
         if (!containsWhiteSpace(addr.getCity1()) && !StringUtils.isEmpty(city1Upper) && !CmrConstants.CN_NON_SPACED_CITIES.contains(city1Upper)) {
           // 1. query code from LOV
-          String cdOfUpperDesc = getCNCityCdByUpperDesc(entityManager, city1Upper);
+          String cdOfUpperDesc = getCNCityCdByUpperDesc(entityManager, city1Upper, state);
           // 2. query desc from lov with the use of code from 1
           String enDesc = getCnCityEngDescById(entityManager, cdOfUpperDesc);
           // 3. save desc as addr.city1
@@ -725,7 +726,7 @@ public class CNHandler extends GEOHandler {
         } else {
           // ASSUMPTION: CITY CONTAINS WHITESPACE
           // 1. query desc from lov with the use of desc from toUpperCase
-          String enDesc = getCNCityCdByUpperDesc(entityManager, city1Upper);
+          String enDesc = getCNCityCdByUpperDesc(entityManager, city1Upper, state);
           // 2. save desc as addr.city1
           if (StringUtils.isEmpty(enDesc) || StringUtils.isBlank(enDesc)) {
             cmtMsg += "\n\nFrom: " + addr.getCity1() + "    To: " + enDesc;
@@ -884,6 +885,8 @@ public class CNHandler extends GEOHandler {
         } else if ("21".equals(data.getIsuCd()) || "60".equals(data.getIsuCd())) {
           data.setClientTier("Z");
           data.setSearchTerm("00000");
+        } else if (isBPUser(data)) { // CREATCMR-6084
+          data.setSearchTerm("04182");
         } else {
           data.setClientTier("Q");
           data.setSearchTerm("00000");
@@ -1184,23 +1187,47 @@ public class CNHandler extends GEOHandler {
     return found;
   }
 
-  private String getCNCityCdByUpperDesc(EntityManager entityManager, String desc) {
+  private String getCNCityCdByUpperDesc(EntityManager entityManager, String cityDesc, String state) {
     String cdOfUpperDesc = "";
     List<Object[]> results = new ArrayList<Object[]>();
     String qryCNCityCdByUpperDesc = ExternalizedQuery.getSql("GET.CN_ENCITY_BY_UPPER_DESC");
     PreparedQuery query = new PreparedQuery(entityManager, qryCNCityCdByUpperDesc);
-    query.setParameter("DESC", desc);
+    String cityDescTemp = cityDesc + "%";
+    query.setParameter("DESC", cityDescTemp);
     query.setParameter("FIELD_ID", CmrConstants.CN_CITIES_UPPER_FIELD_ID);
     query.setParameter("CNTRY", SystemLocation.CHINA);
 
     results = query.getResults();
 
     if (results != null && !results.isEmpty()) {
-      Object[] sResult = results.get(0);
-      cdOfUpperDesc = sResult[1].toString();
+      if (results.size() == 1) {
+        Object[] sResult = results.get(0);
+        cdOfUpperDesc = sResult[1].toString();
+      } else if (results.size() > 1) {
+        // in case duplicate City name with different State/prov
+        for (int i = 0; i < results.size(); i++) {
+          Object[] sResult = results.get(i);
+          String cityCd = sResult[1].toString();
+          if (cityMatchState(cityCd, state)) {
+            cdOfUpperDesc = sResult[1].toString();
+          }
+        }
+      }
+
     }
 
     return cdOfUpperDesc;
+  }
+
+  private boolean cityMatchState(String cityCd, String state) {
+    if (cityCd == null || state == null) {
+      return false;
+    }
+    String temp = cityCd.substring(0, 2);
+    if (state.equals(temp)) {
+      return true;
+    }
+    return false;
   }
 
   private String getCnCityEngDescById(EntityManager entityManager, String cityId) {
@@ -2032,6 +2059,7 @@ public class CNHandler extends GEOHandler {
     LOG.debug("Convert China StateName to StateCode Begin >>>");
     String stateCode = null;
     String stateName = cmr.getCmrState().trim();
+    stateName = stateName != null ? stateName + "%" : "";
     List<Object[]> results = new ArrayList<Object[]>();
     String cnStateProvCD = ExternalizedQuery.getSql("GET.CN_STATE_PROV_CD");
     PreparedQuery query = new PreparedQuery(entityManager, cnStateProvCD);
@@ -2053,9 +2081,10 @@ public class CNHandler extends GEOHandler {
     LOG.debug("Convert China ENCITY Begin >>>");
     String city1Upper = addr.getCity1() != null ? addr.getCity1().toUpperCase() : "";
     city1Upper = city1Upper.replaceAll("[^a-zA-Z]+", "");
+    String state = addr.getStateProv() != null ? addr.getStateProv().toUpperCase() : "";
     if (!containsWhiteSpace(addr.getCity1()) && !StringUtils.isEmpty(city1Upper) && !CmrConstants.CN_NON_SPACED_CITIES.contains(city1Upper)) {
       // 1. query code from LOV
-      String cdOfUpperDesc = getCNCityCdByUpperDesc(entityManager, city1Upper);
+      String cdOfUpperDesc = getCNCityCdByUpperDesc(entityManager, city1Upper, state);
       // 2. query desc from lov with the use of code from 1
       String enDesc = getCnCityEngDescById(entityManager, cdOfUpperDesc);
       // 3. save desc as addr.city1
@@ -2065,7 +2094,7 @@ public class CNHandler extends GEOHandler {
     } else {
       // ASSUMPTION: CITY CONTAINS WHITESPACE
       // 1. query desc from lov with the use of desc from toUpperCase
-      String enDesc = getCNCityCdByUpperDesc(entityManager, city1Upper);
+      String enDesc = getCNCityCdByUpperDesc(entityManager, city1Upper, state);
       // 2. save desc as addr.city1
       if (StringUtils.isEmpty(enDesc) || StringUtils.isBlank(enDesc)) {
         addr.setCity1(enDesc);
@@ -2094,7 +2123,7 @@ public class CNHandler extends GEOHandler {
     results = query.getResults();
     if (results != null && !results.isEmpty()) {
       Object[] sResult = results.get(0);
-      cityCode = sResult[0].toString();
+      cityCode = sResult[1].toString();
     }
     LOG.debug("Convert China CNCITY Begin get cityCode is " + cityCode);
     String cnCity = null;
@@ -2105,7 +2134,7 @@ public class CNHandler extends GEOHandler {
       List<Object[]> results2 = queryCity.getResults();
       if (results2 != null && !results2.isEmpty()) {
         Object[] sResult = results2.get(0);
-        cnCity = sResult[1].toString();
+        cnCity = sResult[0].toString();
       }
     }
     LOG.debug("Convert China CNCITY End >>> cnCity is " + cnCity);

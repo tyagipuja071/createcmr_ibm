@@ -309,6 +309,14 @@ function updateBPSearchTerm() {
         FormManager.readOnly('inacCd');
       }
     }
+  } else if (FormManager.getActualValue('reqType') == 'U' && _pagemodel.userRole.toUpperCase() == 'REQUESTER' && (ppsceidBP == undefined || ppsceidBP == null || ppsceidBP == '')){
+    // CREATCMR-6084
+    if (searchTerm == null || searchTerm.trim() == '' || searchTerm == '00000' || searchTerm == '000000' || regString.test(searchTerm)) {
+      if (cmrNo.startsWith('1') || cmrNo.startsWith('2')){
+        FormManager.setValue('searchTerm', '04182');
+        FormManager.readOnly('searchTerm');
+      }
+    }
   }
 }
 
@@ -317,15 +325,13 @@ function setCtcOnIsuCdChangeCN() {
   if (isuCd == '5K') {
     FormManager.resetValidations('clientTier');
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
   } else {
     if (FormManager.getActualValue('reqType') == 'U') {
       FormManager.removeValidator('clientTier', Validators.REQUIRED);
     } else {
       FormManager.addValidator('clientTier', Validators.REQUIRED);
     }
-      FormManager.enable('clientTier');
+    FormManager.enable('clientTier');
   }
 }
 
@@ -716,7 +722,7 @@ function filterClientTierOnChange() {
 
   if (isuCd == "04") {
     // filter the drop down
-    clientTier = [ 'BLANK', '7' ];
+    clientTier = [ 'BLANK' ];
   } else if (isuCd == "21") {
     // filter the drop down
     clientTier = [ 'Z' ];
@@ -738,10 +744,10 @@ function filterClientTierOnChange() {
     }
   } else if (isuCd == "3T") {
     // filter the drop down
-    clientTier = [ 'BLANK', '7' ];
+    clientTier = [ 'BLANK' ];
   } else if (isuCd == "5E") {
     // filter the drop down
-    clientTier = [ 'BLANK', '7' ];
+    clientTier = [ 'BLANK' ];
   } else if (isuCd == "8B") {
     // filter the drop down
     clientTier = [ 'Z' ];
@@ -782,7 +788,7 @@ function limitClientTierValuesOnCreate() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   if (_custSubGrp != 'undefined' && _custSubGrp != '') {
     if (_custSubGrp == 'COMME' || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
-      var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', '7', 'T', 'S', 'C', 'N' ];
+      var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', 'T', 'S', 'C', 'N' ];
       if (clientTierValues != null) {
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTierValues);
       } else {
@@ -798,7 +804,7 @@ function limitClientTierValuesOnUpdate() {
   if (reqType != 'U') {
     return;
   }
-  var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', '7', 'T', 'S', 'C', 'N' ];
+  var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', 'T', 'S', 'C', 'N' ];
   if (clientTierValues != null) {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTierValues);
   } else {
@@ -3066,7 +3072,6 @@ function checkClusterExpired(clusterDataRdc) {
   }
   return true;
 }
-
 
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];

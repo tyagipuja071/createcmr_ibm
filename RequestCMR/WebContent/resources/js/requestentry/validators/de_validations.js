@@ -96,6 +96,26 @@ function afterConfigForDE() {
   GEOHandler.disableCopyAddress();
 }
 
+function vatExemptIBMEmp() {
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
+    dijit.byId('vatExempt').set('checked', true);
+  } else {
+    FormManager.enable('vat');
+    if (dijit.byId('vatExempt').get('checked')) {
+      dijit.byId('vatExempt').set('checked', false);
+      FormManager.resetValidations('vat');
+      if (!dijit.byId('vatExempt').get('checked')) {
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      }
+    }
+  }
+}
+
 function setSboOnIMS(postCd, subIndustryCd, clientTier) {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -161,7 +181,8 @@ function setSearchTermDE() {
 }
 
 function lockCtcFieldOnIsu() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
   var isuList = [ '34', '5K', '19', '3T', '4F' ];
@@ -925,8 +946,9 @@ function setCTCValues() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
+	var reqType = FormManager.getActualValue('reqType');
 
-  if (isuCode == '21' || isuCode == '8B' || isuCode == '5K') {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -1081,6 +1103,7 @@ dojo.addOnLoad(function() {
 //  GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockCtcFieldOnIsu, GEOHandler.DE);
   GEOHandler.addAfterConfig(lockCtcFieldOnIsu, SysLoc.GERMANY);
+  GEOHandler.addAfterTemplateLoad(vatExemptIBMEmp, GEOHandler.DE);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.GERMANY ]);
