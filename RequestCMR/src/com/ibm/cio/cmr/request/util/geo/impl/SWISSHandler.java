@@ -220,7 +220,6 @@ public class SWISSHandler extends GEOHandler {
         String addrSeq = "1";
         addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
         address.getId().setAddrSeq(addrSeq);
-        address.getId().setAddrSeq(addrSeq);
         address.setIerpSitePrtyId(spid);
       }
       KunnrExt addlAddDetail = getKunnrExtDetails(currentRecord.getCmrSapNumber());
