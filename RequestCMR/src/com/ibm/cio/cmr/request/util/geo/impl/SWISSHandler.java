@@ -502,7 +502,7 @@ public class SWISSHandler extends GEOHandler {
     addrPk.setAddrSeq("00001");
     addrPk.setAddrType("ZS01");
     Addr addr = entityManager.find(Addr.class, addrPk);
-    if (!StringUtils.isEmpty(data.getCustPrefLang())) {
+    if (addr != null && !StringUtils.isEmpty(data.getCustPrefLang())) {
       addr.setCustLangCd(data.getCustPrefLang());
     }
 
