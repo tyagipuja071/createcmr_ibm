@@ -151,14 +151,8 @@ function processRequestAction() {
           cmr.showModal('addressVerificationModal');
         }
       } else if (cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
-        // Cmr-3156- Dnb match
-        if (findDnbResult == 'Accepted') {
-          if (checkIfDnBCheckReqForAUSG()) {
-            matchDnbForAUSG();
-          } else {
-            cmr.showModal('addressVerificationModal');
-          }
-        } else if (checkIfFinalDnBCheckRequired() && reqType == 'U') {
+        // Cmr-3176- Dnb match
+        if (checkIfFinalDnBCheckRequired() && reqType == 'U') {
           matchDnBForAutomationCountries();
         } else {
           cmr.showModal('addressVerificationModal');
