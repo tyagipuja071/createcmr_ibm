@@ -186,6 +186,7 @@ function lockCtcFieldOnIsu() {
     return;
   }
   var isuList = [ '34', '5K', '19', '3T', '4F' ];
+  var reqType = FormManager.getActualValue('reqType');
   var userRole = _pagemodel.userRole.toUpperCase();
   var isuCd = FormManager.getActualValue('isuCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -197,7 +198,7 @@ function lockCtcFieldOnIsu() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
-    if (userRole == 'PROCESSOR') {
+    if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
       FormManager.enable('clientTier');
     }
   }
@@ -341,7 +342,7 @@ function limitClientTierValuesOnCreate() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   if (_custSubGrp != 'undefined' && _custSubGrp != '') {
     if (_custSubGrp == 'COMME' || _custSubGrp == '3PADC' || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
-      var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', 'T', 'S', 'C', 'N' ];
+      var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', '7', 'T', 'S', 'C', 'N' ];
       if (clientTierValues != null) {
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTierValues);
       } else {
@@ -357,7 +358,7 @@ function limitClientTierValuesOnUpdate() {
   if (reqType != 'U') {
     return;
   }
-  var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', 'T', 'S', 'C', 'N' ];
+  var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', '7', 'T', 'S', 'C', 'N' ];
   if (clientTierValues != null) {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTierValues);
   } else {
@@ -945,7 +946,7 @@ function setCTCValues() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-  var reqType = FormManager.getActualValue('reqType');
+	var reqType = FormManager.getActualValue('reqType');
 
   if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
@@ -962,7 +963,8 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') { 
+    if (clientTierCode == '') {
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',

@@ -44,7 +44,6 @@ import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
-
 /**
  * {@link AutomationElement} implementation for the advanced D&B matching
  *
@@ -124,11 +123,13 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
           } else if (!payGoAddredited) {
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
-          } else if (!override && payGoAddredited) {
-            LOG.debug("No Matches in DNB");
-            result.setResults("No Matches");
-            result.setDetails("No high quality matches with D&B records.");
-          }  
+          } else if (payGoAddredited && !hasValidMatches) {
+            LOG.debug("DnB Matches not found for PayGo.");
+            
+            result.setOnError(false); 
+            result.setResults("DnB Matches not found for PayGo.");
+            result.setDetails("DnB Matches not found for PayGo.");
+          }
         } else {
           // actions to be performed only when matches with high confidence are
           // found
@@ -191,6 +192,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
 
           }
+          
           Boolean processDnbFlag = false;
           // assess the matches here
           if (perfectMatch != null) {
@@ -264,7 +266,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             details.append("Showing D&B matches:\n");
             int itemNo = 1;
             for (DnBMatchingResponse dnbRecord : dnbMatches) {
-              processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
+              processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
               itemNo++;
             }
             if (StringUtils.isBlank(data.getVat()) || "CROSS".equals(scenario)) {
@@ -284,6 +286,12 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             int itemNo = 1;
             for (DnBMatchingResponse dnbRecord : dnbMatches) {
               processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
+              if (processDnbFlag == true) {
+                /*
+                 * scorecard.setDnbMatchingResult("Y");
+                 * admin.setCompVerifiedIndc("Y");
+                 */
+              }
               itemNo++;
             }
             if (!override) {
@@ -344,6 +352,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       result.setResults("No Matches");
       result.setOnError(true);
     }
+
     return result;
   }
 

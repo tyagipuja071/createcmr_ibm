@@ -944,7 +944,8 @@ public abstract class GEOHandler {
             continue;
           } catch (Exception e) {
             LOG.trace("General error when trying to access field.", e);
-            // no stored value or field not on addr rdc, return null for no
+            // no stored value or field not on addr rdc, return null
+            // for no
             // changes
             continue;
           }

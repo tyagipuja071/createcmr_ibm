@@ -1169,7 +1169,7 @@ function limitDropdownOnScenarioChange(fromAddress, scenario, scenarioChanged) {
 
   if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'N' && scenarioChanged) {
     if (scenario == 'GOVT') {
-      var efcValues = [ '8', '9', 'E', 'G' ];
+      var efcValues = [ '7', '8', '9', 'E', 'G' ];
       FormManager.limitDropdownValues(FormManager.getField('taxCd1'), efcValues);
     }
   }
@@ -1335,7 +1335,7 @@ function setAddrFieldsValues() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-  var reqType = FormManager.getActualValue('reqType');
+	 var reqType = FormManager.getActualValue('reqType');
 
   if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
@@ -1362,23 +1362,23 @@ function clientTierValidator() {
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
         var valResult = null;
-
+        
         var oldClientTier = null;
         var oldISU = null;
         var requestId = FormManager.getActualValue('reqId');
-
+        
         if (reqType == 'C') {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-            REQ_ID : requestId,
+              REQ_ID : requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-
+          
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU = result.ret3 != null ? result.ret3 : '';
-
+            oldISU =  result.ret3 != null ? result.ret3 : '';
+            
             if (clientTier != oldClientTier || isuCd != oldISU) {
               valResult = clientTierCodeValidator();
             }

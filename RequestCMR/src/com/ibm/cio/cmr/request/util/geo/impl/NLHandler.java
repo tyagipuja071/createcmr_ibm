@@ -1162,15 +1162,12 @@ public class NLHandler extends BaseSOFHandler {
     query.setParameter("REQ_ID", admin.getId().getReqId());
     List<Addr> addresses = query.getResults(Addr.class);
 
-    for (Addr addr : addresses) {
-      try {
-        addr.setIerpSitePrtyId(data.getSitePartyId());
-        entityManager.merge(addr);
-        entityManager.flush();
-      } catch (Exception e) {
-        LOG.error("Error occured on setting SPID after import.");
-      }
-    }
+    /*
+     * for (Addr addr : addresses) { try {
+     * addr.setIerpSitePrtyId(data.getSitePartyId()); entityManager.merge(addr);
+     * entityManager.flush(); } catch (Exception e) {
+     * LOG.error("Error occured on setting SPID after import."); } }
+     */
 
     for (Addr addr : addresses) {
       if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -2770,7 +2767,7 @@ public class NLHandler extends BaseSOFHandler {
       }
     }
   }
-  
+
   @Override
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
     return true;

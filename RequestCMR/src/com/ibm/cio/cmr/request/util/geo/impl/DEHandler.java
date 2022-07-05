@@ -150,12 +150,23 @@ public class DEHandler extends GEOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-    String[] parts = null;
-    String name1 = currentRecord.getCmrName1Plain();
-    String name2 = currentRecord.getCmrName2Plain();
-    parts = splitName(name1, name2, 35, 35);
-    address.setCustNm1(parts[0]);
-    address.setCustNm2(parts[1]);
+    boolean doSplitForName = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 35)
+        || (currentRecord.getCmrName2Plain() != null && currentRecord.getCmrName2Plain().length() > 35);
+    if (doSplitForName) {
+      String[] parts = null;
+      String name1 = currentRecord.getCmrName1Plain();
+      String name2 = currentRecord.getCmrName2Plain();
+      parts = splitName(name1, name2, 35, 35);
+      address.setCustNm1(parts[0]);
+      address.setCustNm2(parts[1]);
+      if (!StringUtils.isEmpty(parts[2])) {
+        address.setDept(parts[2]);
+      }
+    } else {
+      address.setCustNm1(currentRecord.getCmrName1Plain());
+      address.setCustNm2(currentRecord.getCmrName2Plain());
+    }
+
     // addrtxt2 issue
     String name4 = currentRecord.getCmrName4();
     address.setBldg(name4);
@@ -165,10 +176,6 @@ public class DEHandler extends GEOHandler {
       splitAddress(address, currentRecord.getCmrStreetAddress(), currentRecord.getCmrStreetAddressCont(), 35, 35);
     } else {
       address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
-    }
-
-    if (!StringUtils.isEmpty(parts[2])) {
-      address.setDept(parts[2]);
     }
 
     // CMR-3171 - do not block seq import for OB records

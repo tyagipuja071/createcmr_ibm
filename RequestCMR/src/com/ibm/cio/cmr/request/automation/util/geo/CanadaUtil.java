@@ -45,6 +45,7 @@ import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
@@ -714,7 +715,10 @@ public class CanadaUtil extends AutomationUtil {
         }
       }
 
-      if (changes.isLegalNameChanged()) {
+      LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
+      boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+
+      if (changes.isLegalNameChanged() && !payGoAddredited) {
         engineData.addNegativeCheckStatus("_legalNameChanged", "Legal Name change should be validated.");
         details.append("Legal Name change should be validated.\n");
         validation.setSuccess(false);

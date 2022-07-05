@@ -1395,16 +1395,6 @@ public class CEMEAHandler extends BaseSOFHandler {
     List<Addr> addresses = query.getResults(Addr.class);
 
     for (Addr addr : addresses) {
-      try {
-        addr.setIerpSitePrtyId(data.getSitePartyId());
-        entityManager.merge(addr);
-        entityManager.flush();
-      } catch (Exception e) {
-        LOG.error("Error occured on setting SPID after import.");
-      }
-    }
-
-    for (Addr addr : addresses) {
       if ("ZS01".equals(addr.getId().getAddrType())) {
         String adrnr = getaddAddressAdrnr(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), addr.getSapNo(),
             addr.getId().getAddrType(), addr.getId().getAddrSeq());
