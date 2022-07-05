@@ -758,6 +758,29 @@ var cmr = {
     });
     return result;
   },
+  validateABN : function(businessNumber, reqId) {
+    var result = {};
+    dojo.xhrGet({
+      url : cmr.CONTEXT_ROOT + '/au/abn.json',
+      handleAs : 'json',
+      method : 'GET',
+      content : {
+        abn : businessNumber,
+        reqId : reqId
+      },
+      timeout : 50000,
+      sync : true,
+      load : function(data, ioargs) {
+        if (data && data.result) {
+          result = data.result;
+        }
+      },
+      error : function(error, ioargs) {
+        result = {};
+      }
+    });
+    return result;
+  },
   validateZIP : function(country, zip, loc) {
     var result = {};
     dojo.xhrGet({
