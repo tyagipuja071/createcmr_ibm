@@ -293,8 +293,12 @@ public class USBPEhostHandler extends USBPHandler {
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     details.append(" - Restricted to: BPQS\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "BPQS");
-    details.append(" - Misc Bill Code: I\n");
-    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
+    // CREATCMR-6342
+    if (!USUtil.CG_BY_MODEL.equals(data.getCustGrp())) {
+      details.append(" - Misc Bill Code: I\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
+    }
+    // CREATCMR-6342
     details.append(" - Marketing Dept: EI3\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
     details.append(" - SVC A/R Office: IKE\n");

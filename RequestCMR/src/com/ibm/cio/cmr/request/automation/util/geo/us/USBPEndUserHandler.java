@@ -254,8 +254,11 @@ public class USBPEndUserHandler extends USBPHandler {
 
     // do final checks on request data
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
-    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
-
+    // CREATCMR-6342
+    if (!USUtil.CG_BY_MODEL.equals(data.getCustGrp())) {
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
+    }
+    // CREATCMR-6342
     Addr installAt = requestData.getAddress("ZS01");
     if (installAt != null && SPECIAL_TAX_STATES.contains(installAt.getStateProv())) {
       details.append("Tax Code set to J000 based on state.\n");
