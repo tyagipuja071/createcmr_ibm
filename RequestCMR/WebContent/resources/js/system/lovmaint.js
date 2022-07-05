@@ -197,7 +197,7 @@ app.controller('LOVController', [
         }
 
         cmr.showProgress('Saving, please wait...');
-        $http({
+        $http.post({
           url : cmr.CONTEXT_ROOT + '/code/lovs/process.json',
           method : 'POST',
           params : toSend
