@@ -1,15 +1,19 @@
 package com.ibm.cio.cmr.request.controller.code;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,6 +27,8 @@ import com.ibm.cio.cmr.request.service.code.LovMaintService;
 import com.ibm.cio.cmr.request.service.code.LovService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.json.java.JSONArray;
+import com.ibm.json.java.JSONObject;
 
 /**
  * @author Rochelle Salazar
@@ -39,9 +45,10 @@ public class LovController extends BaseController {
 
   private static final Logger LOG = Logger.getLogger(LovController.class);
 
-  @RequestMapping(value = "/code/lovs", method = RequestMethod.GET)
-  public @ResponseBody
-  ModelAndView showLovMaint(HttpServletRequest request, ModelMap model) {
+  @RequestMapping(
+      value = "/code/lovs",
+      method = RequestMethod.GET)
+  public @ResponseBody ModelAndView showLovMaint(HttpServletRequest request, ModelMap model) {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the maintain Lov Table function.");
@@ -55,9 +62,9 @@ public class LovController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(value = "/code/lovsmain")
-  public @ResponseBody
-  ModelAndView maintainlovs(HttpServletRequest request, HttpServletResponse response, LovModel model) throws CmrException {
+  @RequestMapping(
+      value = "/code/lovsmain")
+  public @ResponseBody ModelAndView maintainlovs(HttpServletRequest request, HttpServletResponse response, LovModel model) throws CmrException {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the maintain Lov Table function.");
@@ -99,20 +106,35 @@ public class LovController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(value = "/code/lovslist", method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(
+      value = "/code/lovslist",
+      method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap getLovsList(HttpServletRequest request, HttpServletResponse response, LovModel model) throws CmrException {
     List<LovModel> results = lovService.search(model, request);
     return wrapAsSearchResult(results);
   }
 
-  @RequestMapping(value = "/code/lovs/process", method = { RequestMethod.POST, RequestMethod.GET })
-  public ModelMap processlov(HttpServletRequest request, HttpServletResponse response, LovValuesModel model) throws CmrException {
+  @RequestMapping(
+      value = "/code/lovs/process",
+      method = { RequestMethod.POST, RequestMethod.GET })
+  public ModelMap processlov(@Context HttpServletRequest request, @Context HttpServletResponse response, @RequestBody String modelModel)
+      throws CmrException {
     ModelMap map = new ModelMap();
-    lovService.setValuesModel(model);
     try {
+      JSONObject json = JSONObject.parse(modelModel);
+      LovValuesModel model = new LovValuesModel();
+      PropertyUtils.copyProperties(model, json);
+      model.setValues(new ArrayList<String>());
+      JSONArray values = (JSONArray) json.get("values");
+      for (Object o : values) {
+        JSONObject val = (JSONObject) o;
+        model.getValues().add(val.toString());
+      }
+      lovService.setValuesModel(model);
       lovService.processTransaction(new LovModel(), request);
       map.put("success", true);
     } catch (Exception e) {
+      LOG.debug("Error in saving LOV", e);
       map.put("success", false);
     }
     return map;

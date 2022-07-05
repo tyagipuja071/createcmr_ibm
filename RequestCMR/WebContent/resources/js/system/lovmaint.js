@@ -197,16 +197,16 @@ app.controller('LOVController', [
         }
 
         cmr.showProgress('Saving, please wait...');
-        $http({
-          url : cmr.CONTEXT_ROOT + '/code/lovs/process.json',
-          method : 'POST',
-          params : toSend
-        }).then(function(response) {
+        
+        $http.post(cmr.CONTEXT_ROOT + '/code/lovs/process.json',
+          JSON.stringify(toSend), {headers : {'Content-Type' : 'text/plain'}} 
+        ).then(function(response) {
           cmr.hideProgress();
           if (response.data.success) {
             $scope.existing = true;
             cmr.showAlert('List of values saved successfully', null, "refreshLOVPage()", true);
           } else {
+		    console.log(response);	
             cmr.showAlert('An error occurred while saving the values.');
           }
         }, function(response) {
