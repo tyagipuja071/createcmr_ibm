@@ -3221,7 +3221,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           model.setCustClass(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CUST_CLASS") - 1)));
           // CREATCMR-4879
           model.setEducAllowCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("EDUC_ALLOW_CD") - 1)));
-
+          // CREATCMR-6397
+          model.setCompany(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COMPANY") - 1)));
           // if (!"Y".equals(massUpdtRdcOnly)) {
           List<MassUpdateAddressModel> addrList = new ArrayList<>();
           MassUpdateAddressModel zs01Addr = new MassUpdateAddressModel();
