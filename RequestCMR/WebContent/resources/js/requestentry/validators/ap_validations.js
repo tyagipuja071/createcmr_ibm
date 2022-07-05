@@ -3567,6 +3567,52 @@ function validateGSTForIndia() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+// API call for validating ABN for Australia on Save Request and Send for
+// Processing
+function validateABNForAU() {
+
+FormManager.addFormValidator((function() {
+ return {
+   validate : function() {
+     var cntry = FormManager.getActualValue('cmrIssuingCntry');
+     var reqTyp = FormManager.getActualValue('reqType');
+     var vat = FormManager.getActualValue('vat');
+     var reqId = FormManager.getActualValue('reqId');
+     if (reqTyp == 'C') {
+       return new ValidationResult(null, true);
+     }
+     var country = "";
+     if (SysLoc.AUSTRALIA == FormManager.getActualValue('cmrIssuingCntry')) {
+     country = "AU";
+     if (country != '') {
+       if (vat == '') {
+         return new ValidationResult(null, true);
+       } else {
+         if (reqId != null) {
+           reqParam = {
+             REQ_ID : reqId
+           };
+         }              
+         var abnRet = cmr.validateABN(vat, reqId);
+         if (!abnRet.success) {
+           return new ValidationResult({
+             id : 'vat',
+             type : 'text',
+             name : 'vat'
+           }, false, abnRet.errorMessage);
+         } else {
+           return new ValidationResult(null, true);
+         }
+       }
+     } else {
+       return new ValidationResult(null, true);
+     }
+   }
+   }
+ };
+})(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function lockFieldsForIndia(){
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -4238,6 +4284,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForANZ, GEOHandler.ANZ);
   GEOHandler.addAfterTemplateLoad(setInacByClusterHKMO, GEOHandler.GCG);
   GEOHandler.registerValidator(validateGSTForIndia, [ SysLoc.INDIA ], null, true);
+  GEOHandler.registerValidator(validateABNForAU, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.addAfterConfig(afterConfigForIndia, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForIndia, SysLoc.INDIA);
   GEOHandler.addAfterConfig(resetGstExempt, [ SysLoc.INDIA ]);
