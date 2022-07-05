@@ -81,6 +81,7 @@ public class USService extends TransConnService {
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCP = "PCP";
   private static final String ACTION_RDC_UPDT_BY_ENT = "System Action:RDc Enterprise update";
+  protected boolean multiMode;
 
   public boolean isMassServiceMode() {
     return massServiceMode;
@@ -111,6 +112,7 @@ public class USService extends TransConnService {
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
     try {
       initClientUS();
+      LOG.info("Multi Mode: " + this.multiMode);
       if (isMassServiceMode()) {
         monitorCreqcmrMassUpd(entityManager);
       } else {
@@ -129,7 +131,7 @@ public class USService extends TransConnService {
     return true;
   }
 
-  private void initClientUS() throws Exception {
+  public void initClientUS() throws Exception {
     if (this.serviceClient == null) {
       this.serviceClient = CmrServicesFactory.getInstance().createClient(BATCH_SERVICES_URL, ProcessClient.class);
     }
@@ -345,7 +347,7 @@ public class USService extends TransConnService {
    * @param entityManager
    * @return
    */
-  private List<Admin> getPendingRecords(EntityManager entityManager) {
+  public List<Admin> getPendingRecords(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("US.GET_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(Admin.class);

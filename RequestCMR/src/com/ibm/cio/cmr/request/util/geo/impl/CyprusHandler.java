@@ -176,7 +176,14 @@ public class CyprusHandler extends BaseSOFHandler {
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
       } else {
-        record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        // CREATCMR-6139 Prospect CMR Conversion - address sequence A
+        if (StringUtils.isNotBlank(reqEntry.getCmrIssuingCntry()) && "666".equals(reqEntry.getCmrIssuingCntry())
+            && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
+          record.setCmrAddrSeq("00001");
+        } else {
+          record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        }
+
       }
 
       if (SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {
@@ -1664,10 +1671,6 @@ public class CyprusHandler extends BaseSOFHandler {
         data.setRepTeamMemberNo(repTeamMmberNo);
       }
     }
-      if ((CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()))  && SystemLocation.CYPRUS.equalsIgnoreCase(data.getCmrIssuingCntry())
-        && "5K".equals(data.getIsuCd())) {
-        data.setClientTier("");
-      }
   }
 
   @Override
@@ -3492,15 +3495,13 @@ public class CyprusHandler extends BaseSOFHandler {
               LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
               error.addError((row.getRowNum() + 1), "City",
                   "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
-              validations.add(error);
             }
             if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
               LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                   + "If one is populated, the other must be empty. >>");
               error.addError((row.getRowNum() + 1), "Postal Code",
                   "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                  + "If one is populated, the other must be empty.");
-              validations.add(error);
+                      + "If one is populated, the other must be empty.");
             }
 
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(cbPostal)) {
@@ -3509,14 +3510,12 @@ public class CyprusHandler extends BaseSOFHandler {
                 LOG.trace("Crossborder city and crossborder postal code should have a maximun of 30 characters.");
                 error.addError((row.getRowNum() + 1), "Crossborder City/Postal",
                     "Crossborder city and crossborder postal code should have a maximun of 30 characters.");
-                validations.add(error);
               }
             }
             if (count > 2) {
               LOG.trace("Out of Street, Address Con't, PO BOX and Att Person only 2 can be filled at the same time .");
               error.addError((row.getRowNum() + 1), "Address Con't/PO BOX",
                   "Out of Street, Address Con't, PO BOX and Att Person only 2 can be filled at the same time . ");
-              validations.add(error);
               count = 0;
             }
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localPostal)) {
@@ -3524,32 +3523,27 @@ public class CyprusHandler extends BaseSOFHandler {
                   "Cross Border City and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
               error.addError((row.getRowNum() + 1), "Local Postal Code",
                   "Cross Border City and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
-              validations.add(error);
             }
             if (!StringUtils.isEmpty(localCity) && !StringUtils.isEmpty(cbPostal)) {
               LOG.trace(
                   "Local City and Cross Border Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
               error.addError((row.getRowNum() + 1), "Local City",
                   "Local City and Cross Border Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
-              validations.add(error);
             }
 
             if (!StringUtils.isEmpty(landCountry)) {
               if (!("CY").equals(landCountry) && (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
                 LOG.trace("Landed Country should be CY for Local Scenario.");
                 error.addError((row.getRowNum() + 1), "Landed Country", "Landed Country should be CY for Local Scenario.");
-                validations.add(error);
               } else if (("CY").equals(landCountry) && (!StringUtils.isEmpty(crossCity) || !StringUtils.isEmpty(cbPostal))) {
                 LOG.trace("Landed Country shouldn't be CY for Cross Borders.");
                 error.addError((row.getRowNum() + 1), "Landed Country", "Landed Country shouldn't be CY for Cross Borders.");
-                validations.add(error);
               }
             }
 
             if (!StringUtils.isEmpty(localPostal) && !localPostal.matches("-?\\d+(\\.\\d+)?")) {
               LOG.trace("Local postal code should have numeric values only.");
               error.addError((row.getRowNum() + 1), "Local Postal Code", "Only numeric values are allowed.");
-              validations.add(error);
             }
 
             if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
@@ -3557,33 +3551,28 @@ public class CyprusHandler extends BaseSOFHandler {
                 LOG.trace("Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Street/PO Box",
                     "Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
-                validations.add(error);
               }
               if (poBox.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
-                validations.add(error);
               }
             }
             if (StringUtils.isEmpty(street) && !StringUtils.isEmpty(addressCont)) {
               LOG.trace("Address Con't cannot be filled if Street is empty .Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "Street/Address Con't",
                   "Address Con't cannot be filled if Street is empty .Please fix and upload the template again.");
-              validations.add(error);
             }
 
             if (!StringUtils.isEmpty(addressCont) && !StringUtils.isEmpty(attPerson)) {
               LOG.trace("Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "Address Con't/Att. Person",
                   "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
-              validations.add(error);
             }
 
             if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
               LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "Address Sequence No.",
                   "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-              validations.add(error);
             }
 
             if (StringUtils.isEmpty(dataCmrNo)) {
@@ -3592,42 +3581,36 @@ public class CyprusHandler extends BaseSOFHandler {
               }
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
-              validations.add(error);
             }
 
             if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
               if (phoneNo.contains("+") || (!StringUtils.isEmpty(phoneNo) && !phoneNo.matches("-?\\d+(\\.\\d+)?"))) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
-                validations.add(error);
               }
             }
 
             if (localCity.contains("@") && localCity.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "Local City", "Field contains invalid character. Please fix and upload the template again.");
-              validations.add(error);
             }
 
             if (crossCity.contains("@") && crossCity.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "Cross Border City",
                   "Field contains invalid character. Please fix and upload the template again.");
-              validations.add(error);
             }
 
             if (localPostal.contains("@") && localPostal.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "Local Postal Code",
                   "Field contains invalid character. Please fix and upload the template again.");
-              validations.add(error);
             }
 
             if (cbPostal.contains("@") && cbPostal.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "Cross Border Postal Code",
                   "Field contains invalid character. Please fix and upload the template again.");
-              validations.add(error);
             }
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -3637,35 +3620,24 @@ public class CyprusHandler extends BaseSOFHandler {
                   error.addError((row.getRowNum() + 1), "Enterprise No.", "Enterprise number should have numeric values only. ");
                 }
               }
-              if (StringUtils.isNotBlank(isuCd)) {
-                if ("5K".equalsIgnoreCase(isuCd) && !"@".equalsIgnoreCase(ctc)) {
-                  LOG.trace("For IsuCd set to '" + isuCd + "' Ctc should be '@'");
-                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
-                } else if ("21,8B".contains(isuCd) && !"@".equalsIgnoreCase(ctc)) {
-                  LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
-                } else if ("34".equals(isuCd)) {
-                  if (StringUtils.isBlank(ctc) || !"QY".contains(ctc)) {
-                    LOG.trace("The row " + (row.getRowNum() + 1)
-                        + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), "Client Tier",
-                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
-                  }
-                } else if (StringUtils.isBlank(ctc) || !"@QY".contains(ctc)) {
+              if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+              } else if ("34".equals(isuCd)) {
+                if (StringUtils.isBlank(ctc) || !"QY".contains(ctc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if (StringUtils.isNotBlank(ctc)) {
-                LOG.trace("The row " + (row.getRowNum() + 1)
-                        + ":Note that ISU and Client Tier should both be input. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Client Tier",
-                    ":Note that that ISU and Client Tier should both be input. Please fix and upload the template again.<br>");
+              } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
+                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
               }
-              if (error.hasErrors()) {
-                validations.add(error);
-              }
+
+            }
+            if (error.hasErrors()) {
+              validations.add(error);
             }
           }
         }

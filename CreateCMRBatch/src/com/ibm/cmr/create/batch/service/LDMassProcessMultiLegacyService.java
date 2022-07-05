@@ -409,7 +409,7 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
         custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
         legacyObjects.setCustomerExt(custExt);
       } else if (transformer != null
-          && (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()))) {
+          && (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()) || SystemLocation.KENYA.equals(data.getCmrIssuingCntry()))) {
         CmrtCustExtPK custExtPk = null;
         LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
         // Initialize the object

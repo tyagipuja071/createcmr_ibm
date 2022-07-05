@@ -213,7 +213,10 @@ public class USHandler extends GEOHandler {
     }
 
     // retrieve BP data on import
-    String bpType = getBPDataFromRdc(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
+    // String bpType = getBPDataFromRdc(entityManager,
+    // SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
+
+    String bpType = cmr.getUsCmrBpAccountType();
     if (!StringUtils.isEmpty(bpType)) {
       data.setBpAcctTyp(bpType);
     }
@@ -268,14 +271,14 @@ public class USHandler extends GEOHandler {
       }
     }
 
+    if (!StringUtils.isEmpty(cmr.getUsCmrOemInd())) {
+      data.setOemInd(cmr.getUsCmrOemInd());
+    }
+
     // retrieve knvvExt data on import
     KnvvExt knvvExt = getKnvvExtById(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
 
     if (knvvExt != null) {
-      if (!StringUtils.isEmpty(knvvExt.getOemInd())) {
-        data.setOemInd(knvvExt.getOemInd());
-      }
-
       // Miscellaneous Bill Code
       data.setMiscBillCd(knvvExt.getMiscBilling());
 
@@ -330,6 +333,8 @@ public class USHandler extends GEOHandler {
       data.setTaxCd3(taxcd3);
     }
 
+    data.setBpName(cmr.getUsCmrBpAbbrevNm());
+
     // Non-IBM Company
     // data.setNonIbmCompanyInd(main.getUsCmrNonIbmCompInd());
 
@@ -371,6 +376,8 @@ public class USHandler extends GEOHandler {
         throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
       }
     }
+
+    // retrieve US_Tax_Data on import
 
     if ("TC".equals(processingType)) {
       if (uTxData != null) {
@@ -419,10 +426,6 @@ public class USHandler extends GEOHandler {
           data.setEducAllowCd(uTxData.getEaStatus());
         }
       }
-    }
-
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
     }
 
   }
@@ -679,7 +682,11 @@ public class USHandler extends GEOHandler {
         address.setStateProv((String) record.get("N_ST"));
         if ("US".equals(address.getLandCntry())) {
           address.setCity1((String) record.get("N_CITY"));
-          address.setAddrTxt2((String) record.get("T_ADDR_LINE_4"));
+          if (StringUtils.isEmpty(address.getDivn()) && !"E".equals(cmr.getUsCmrBpAccountType())) {
+            address.setAddrTxt2((String) record.get("T_ADDR_LINE_4"));
+          } else if ("E".equals(cmr.getUsCmrBpAccountType())) {
+            address.setAddrTxt2((String) record.get("T_ADDR_LINE_4"));
+          }
         } else {
           address.setCity1((String) record.get("T_ADDR_LINE_4"));
           address.setAddrTxt2(null);
@@ -699,15 +706,29 @@ public class USHandler extends GEOHandler {
       } else {
         // break everything here if needed
         String addrTxt = address.getAddrTxt();
-        if (addrTxt != null && addrTxt.length() > 35) {
-          splitAddress(address, address.getAddrTxt(), "", 35, 35);
+        if (addrTxt != null && addrTxt.length() > 24) {
+          splitAddress(address, address.getAddrTxt(), "", 24, 24);
+        }
+        if (!"E".equals(cmr.getUsCmrBpAccountType())) {
+          String strAddrTxt2 = address.getAddrTxt2();
+          if (StringUtils.isEmpty(address.getDivn()) && StringUtils.isEmpty(cmr.getCmrName3())
+              && StringUtils.isEmpty(cmr.getCmrStreetAddressCont())) {
+            if (StringUtils.isNotBlank(strAddrTxt2)) {
+              address.setAddrTxt2(strAddrTxt2);
+            }
+          }
+        } else if ("E".equals(cmr.getUsCmrBpAccountType())) {
+          String strAddrTxt2 = address.getAddrTxt2();
+          if (StringUtils.isNotBlank(strAddrTxt2)) {
+            address.setAddrTxt2(strAddrTxt2);
+          }
         }
       }
     } else {
       // break everything here if needed
       String addrTxt = address.getAddrTxt();
-      if (addrTxt != null && addrTxt.length() > 35) {
-        splitAddress(address, address.getAddrTxt(), "", 35, 35);
+      if (addrTxt != null && addrTxt.length() > 24) {
+        splitAddress(address, address.getAddrTxt(), "", 24, 24);
       }
     }
     // no cmr no, manual parse
@@ -717,14 +738,39 @@ public class USHandler extends GEOHandler {
       LOG.debug("Postal code formatted: " + postCd);
       address.setPostCd(postCd);
     }
-    address.setAddrTxt2(cmr.getCmrStreetAddressCont());
-    // CREATCMR-5830
-    if (StringUtils.isNotBlank(address.getDivn())) {
-      address.setAddrTxt2(null);
-    } else {
-      address.setAddrTxt2(cmr.getCmrStreetAddressCont());
+
+    if ("US".equals(processType)) {
+      // CREATCMR-6182
+      String strAddrTxt2 = address.getAddrTxt2();
+      if (StringUtils.isNotBlank(cmr.getCmrName3())) {
+        address.setAddrTxt2(cmr.getCmrName3());
+      } else if (StringUtils.isNotBlank(strAddrTxt2)) {
+        address.setAddrTxt2(strAddrTxt2);
+      }
+    }
+
+    if (!"E".equals(cmr.getUsCmrBpAccountType())) {
+      if (StringUtils.isNotBlank(address.getDivn())) {
+        address.setAddrTxt2(null);
+      }
+    } else if ("E".equals(cmr.getUsCmrBpAccountType())) {
+      String strAddrTxt2 = address.getAddrTxt2();
+      if (StringUtils.isNotBlank(strAddrTxt2)) {
+        address.setAddrTxt2(strAddrTxt2);
+      }
     }
     // CREATCMR-5830
+
+    // CREATCMR-6183
+    if ("US".equals(processType)) {
+      if ("E".equals(cmr.getUsCmrBpAccountType())) {
+        if ("ZS01".equals(address.getId().getAddrType())) {
+          // || "ZI01".equals(address.getId().getAddrType())
+          address.setDivn(cmr.getCmrName());
+        }
+      }
+    }
+    // CREATCMR-6183
 
   }
 
@@ -745,6 +791,17 @@ public class USHandler extends GEOHandler {
       admin.setOldCustNm1(parts[0]);
       admin.setMainCustNm2(parts[1]);
       admin.setOldCustNm2(parts[1]);
+    }
+
+    String processingType = getProcessingTypeForUS(entityManager, "897");
+    if ("US".equals(processingType)) {
+      if ("E".equals(currentRecord.getUsCmrBpAccountType())) {
+        parts = splitName(currentRecord.getUsCmrCompanyNm(), null, 28, 24);
+        admin.setMainCustNm1(parts[0]);
+        admin.setOldCustNm1(parts[0]);
+        admin.setMainCustNm2(parts[1]);
+        admin.setOldCustNm2(parts[1]);
+      }
     }
 
   }
@@ -1117,6 +1174,14 @@ public class USHandler extends GEOHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+
+    String addrTxt = addr.getAddrTxt();
+    if (addrTxt != null && addrTxt.length() > 24) {
+      splitAddress(addr, addr.getAddrTxt(), "", 24, 24);
+      if (!StringUtils.isEmpty(addr.getAddrTxt2())) {
+        addr.setAddrTxt2(addr.getAddrTxt2().trim());
+      }
+    }
   }
 
   @Override

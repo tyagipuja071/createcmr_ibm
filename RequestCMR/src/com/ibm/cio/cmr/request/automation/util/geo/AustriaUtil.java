@@ -100,7 +100,12 @@ public class AustriaUtil extends AutomationUtil {
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRIA, soldTo.getLandCntry(), customerName, details,
           SCENARIO_IBM_EMPLOYEE.equals(scenario), requestData);
     case SCENARIO_BUSINESS_PARTNER:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      break;
     case SCENARIO_BUSINESS_PARTNER_CROSS:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     case SCENARIO_THIRD_PARTY_DC:
       engineData.addNegativeCheckStatus("_atThirdParty", "Third Party/Data Center request needs further validation.");

@@ -202,7 +202,7 @@ public class CEWATransformer extends MCOTransformer {
       CMRRequestContainer cmrObjects) {
     Data data = cmrObjects.getData();
 
-    if (SystemLocation.TANZANIA.equals(cmrIssuingCntry)) {
+    if (SystemLocation.TANZANIA.equals(cmrIssuingCntry) || SystemLocation.KENYA.equals(cmrIssuingCntry) ) {
       if (StringUtils.isNotBlank(data.getTaxCd1())) {
         legacyCustExt.setiTaxCode(data.getTaxCd1());
       } else {
@@ -213,7 +213,7 @@ public class CEWATransformer extends MCOTransformer {
 
   @Override
   public boolean hasCmrtCustExt() {
-    if (SystemLocation.TANZANIA.equals(cmrIssuingCntry)) {
+    if (SystemLocation.TANZANIA.equals(cmrIssuingCntry) || SystemLocation.KENYA.equals(cmrIssuingCntry)) {
       return true;
     }
     return false;
@@ -818,6 +818,14 @@ public class CEWATransformer extends MCOTransformer {
         custExt.setiTaxCode(muData.getCompany());
       }
     }
+    if (SystemLocation.KENYA.equals(cmrIssuingCntry) && !StringUtils.isBlank(muData.getTaxCd1())) {
+      if ("@".equals(muData.getTaxCd1())) {
+        custExt.setiTaxCode("");
+      } else {
+        custExt.setiTaxCode(muData.getTaxCd1());
+      }
+    }
+
   }
 
   @Override

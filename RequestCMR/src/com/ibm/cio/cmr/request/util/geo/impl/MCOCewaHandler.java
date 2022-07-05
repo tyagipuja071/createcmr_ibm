@@ -108,9 +108,6 @@ public class MCOCewaHandler extends MCOHandler {
           data.setCreditCd("");
           data.setCommercialFinanced("");
         }
-        if ("5K".equals(data.getIsuCd())) {
-          data.setClientTier("");
-        }
       }
     }
 
@@ -768,7 +765,7 @@ public class MCOCewaHandler extends MCOHandler {
                 }
               }
             }
-            if (tin.length() != 0) {
+            if (tin.length() != 0 && !tin.equals("@")) {
               boolean isMatch = Pattern.matches("\\d{3}[-]\\d{3}[-]\\d{3}$", tin);
               if (!isMatch) {
                 LOG.trace("Invalid format for TIN Number.");
@@ -804,31 +801,22 @@ public class MCOCewaHandler extends MCOHandler {
               }
             }
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
-              if (!StringUtils.isBlank(isuCd)) {
-                if ("5K".equals(isuCd)) {
-                  if (!"@".equals(clientTier)) {
-                    LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                    error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
-                  }
-                } else if ("21,8B".contains(isuCd) && !"@".equals(clientTier)) {
-                  LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
-                } else if ("34".equals(isuCd)) {
-                  if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
-                    LOG.trace("The row " + (row.getRowNum() + 1)
-                        + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), "Client Tier",
-                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
-                  }
+              if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
+                  || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
+                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+              } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+                if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
+              } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
+                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
               }
-              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
-                LOG.trace("The row " + ((row.getRowNum() + 1))
-                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Client Tier",
-                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
             }
-          }
         } // end row loop
       }
         if (error.hasErrors()) {

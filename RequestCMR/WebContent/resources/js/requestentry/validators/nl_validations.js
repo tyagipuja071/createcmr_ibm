@@ -41,6 +41,7 @@ function afterConfigForNL() {
 
   if (role == 'Processor' && reqType == 'C') {
     FormManager.enable('abbrevNm');
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
@@ -1653,7 +1654,8 @@ function setSORTLBasedOnIsuCtc() {
 }
 
 function setClientTierValuesForUpdate() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
   var isuList = [ '15', '4A', '04', '28' ];
@@ -1669,8 +1671,9 @@ function setClientTierValuesForUpdate() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
+	var reqType = FormManager.getActualValue('reqType');
 
-  if (isuCode == '21' || isuCode == '8B' || isuCode == '5K') {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 

@@ -521,7 +521,7 @@ function setSORTLOnIsuCtc() {
   } else if (isuCd == '28' && clientTier == '') {
     FormManager.setValue('searchTerm', 'A0005227');
   }
-  if ([ '18', '28' ].includes(isuCd)) {
+  if ([ '18', '28' ].includes(isuCd) && reqType == 'C') {
     FormManager.resetValidations('clientTier');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
@@ -532,8 +532,9 @@ function setSORTLOnIsuCtc() {
  * Swiss - sets Client_Tier based on ISU
  */
 function setClientTierValues(isuCd) {
+  var reqType = FormManager.getActualValue('reqType');
   isuCd = FormManager.getActualValue('isuCd');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
   var isuList = [ '18', '28' ];
@@ -880,7 +881,7 @@ function addEmbargoCdValidator() {
     return {
       validate : function() {
         var reqType = null;
-	  var cmrno = FormManager.getActualValue('enterCMRNo');
+        var cmrno = FormManager.getActualValue('enterCMRNo');
         var mandt = FormManager.getActualValue('mandt');
         var isscntry = FormManager.getActualValue('cmrIssuingCntry');
         // PayGo_check
@@ -1624,8 +1625,9 @@ function setCTCValues() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-
-  if (isuCode == '21' || isuCode == '8B' || isuCode == '5K') {
+	var reqType = FormManager.getActualValue('reqType');
+	
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
