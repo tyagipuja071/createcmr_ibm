@@ -20,6 +20,8 @@ import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.ValidatorClient;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.ap.anz.BNValidationRequest;
+import com.ibm.cmr.services.client.automation.ap.anz.BNValidationResponse;
 import com.ibm.cmr.services.client.automation.cn.CNRequest;
 import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
@@ -227,7 +229,66 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(value = "/cn/tyc")
+  @RequestMapping(
+      value = "/au/abn")
+  public ModelMap validateABN(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelMap map = new ModelMap();
+
+    ValidationResult validation = null;
+
+    String abn = request.getParameter("abn");
+    if (StringUtils.isEmpty(abn)) {
+      validation = ValidationResult.error("'ABN' param is required.");
+    }
+    String reqId = request.getParameter("reqId");
+    if (StringUtils.isEmpty(reqId)) {
+      validation = ValidationResult.error("'reqId' param is required.");
+    }
+
+    if (validation == null || validation.isSuccess()) {
+
+      LOG.debug("Validating ABN " + abn + " for Australia");
+
+      String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(baseUrl, AutomationServiceClient.class);
+      autoClient.setReadTimeout(1000 * 60 * 5);
+      autoClient.setRequestMethod(Method.Get);
+
+      BNValidationRequest requestToAPI = new BNValidationRequest();
+      requestToAPI.setBusinessNumber(abn);
+      System.out.println(requestToAPI + requestToAPI.getBusinessNumber());
+
+      LOG.debug("Connecting to the ABNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+      AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.AU_ABN_VALIDATION_SERVICE_ID, requestToAPI,
+          AutomationResponse.class);
+      ObjectMapper mapper = new ObjectMapper();
+      String json = mapper.writeValueAsString(rawResponse);
+
+      TypeReference<AutomationResponse<BNValidationResponse>> ref = new TypeReference<AutomationResponse<BNValidationResponse>>() {
+      };
+      AutomationResponse<BNValidationResponse> abnResponse = mapper.readValue(json, ref);
+      if (StringUtils.isBlank(abn)) {
+        validation = ValidationResult.success();
+      } else if (abnResponse != null && abnResponse.isSuccess()) {
+        if (abnResponse.getRecord().isValid() && !(abnResponse.getRecord().getStatus().equalsIgnoreCase("Cancelled"))) {
+          validation = ValidationResult.success();
+        } else if (abnResponse.getRecord().isValid()
+            && (!abnResponse.getRecord().getStatus().equals(null) && abnResponse.getRecord().getStatus().equalsIgnoreCase("Cancelled"))) {
+          validation = ValidationResult.error(
+              "ABN provided on the request cancelled as per API Validation. Please provide Supporting documentation(Company Proof) as attachment");
+        } else {
+          validation = ValidationResult.success();
+        }
+      } else {
+        validation = ValidationResult.error("ABN Validation Failed.Failed to connect to ABN Service. Checking ABN and Company Name with D&B.");
+      }
+    }
+    map.addAttribute("result", validation);
+    return map;
+  }
+
+  @RequestMapping(
+      value = "/cn/tyc")
   public ModelMap checkCnAddr(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     // ValidationResult validation = null;

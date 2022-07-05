@@ -325,7 +325,6 @@ public class NordicsUtil extends AutomationUtil {
     case CROSS_INTER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-
     }
 
     return true;

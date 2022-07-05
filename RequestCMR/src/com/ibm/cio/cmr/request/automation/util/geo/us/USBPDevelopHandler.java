@@ -318,8 +318,12 @@ public class USBPDevelopHandler extends USBPHandler {
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_ACCT_TYP", data.getBpAcctTyp(), "D");
     details.append(" - Marketing Dept: " + "EI3" + "\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
-    details.append(" - Miscellaneous Bill Code: " + "I" + "\n");
-    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
+    // CREATCMR-6342
+    if (!USUtil.CG_BY_MODEL.equals(data.getCustGrp())) {
+      details.append(" - Miscellaneous Bill Code: " + "I" + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
+    }
+    // CREATCMR-6342
     details.append(" - Business Partner Name: " + "MIR" + "\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
     details.append(" - PCC A/R Dept: " + "G8M" + "\n");

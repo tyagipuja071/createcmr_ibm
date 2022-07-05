@@ -2513,4 +2513,22 @@ public class USService extends TransConnService {
     query.executeSql();
   }
 
+  protected List<Long> gatherSingleRequests(EntityManager entityManager) {
+    List<Admin> list = getPendingRecords(entityManager);
+    List<Long> ids = new ArrayList<Long>();
+    for (Admin admin : list) {
+      ids.add(admin.getId().getReqId());
+    }
+    return ids;
+  }
+
+  protected List<Long> gatherMassUpdateRequests(EntityManager entityManager) {
+    List<Admin> list = getPendingRecordsMassUpd(entityManager);
+    List<Long> ids = new ArrayList<Long>();
+    for (Admin admin : list) {
+      ids.add(admin.getId().getReqId());
+    }
+    return ids;
+  }
+
 }
