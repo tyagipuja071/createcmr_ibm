@@ -4789,6 +4789,8 @@ function afterConfigForIT() {
     FormManager.readOnly('cmrNo');
   }
 }
+//CREATCMR-5089 ITALY - coverage 2H22 updates sbo should not be set based on isu/ctc
+/**
 
 //CREATCMR-5089 ITALY - coverage 2H22 updates sbo should not be set based on isu/ctc
 /**

@@ -99,6 +99,7 @@ public class RequestSearchCriteriaModel extends BaseModel {
   private String prospect;
   private int iterationId;
   private String pendingAppr;
+  private String pendingApprAdmin;
   private String sourceSystId;
 
   public String getCmrOwnerDesc() {
@@ -621,6 +622,14 @@ public class RequestSearchCriteriaModel extends BaseModel {
 
   public void setSourceSystem(String sourceSystem) {
     this.sourceSystem = sourceSystem;
+  }
+
+  public String getPendingApprAdmin() {
+    return pendingApprAdmin;
+  }
+
+  public void setPendingApprAdmin(String pendingApprAdmin) {
+    this.pendingApprAdmin = pendingApprAdmin;
   }
 
 }

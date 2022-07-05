@@ -200,6 +200,7 @@ public abstract class APTransformer extends MessageTransformer {
     abbrevLandCountries = (List<String>) Arrays.asList("US", "MY", "GB", "SG", "AE", "CH", "MV", "AU", "FR", "TH", "NL", "IE", "HK", "DE",
         "ID", "BD", "CA", "LK", "TW", "NZ", "VN", "PH", "KR", "MM", "KH", "BN", "PG");
     String line66 = "";
+    boolean update = "U".equals(handler.adminData.getReqType());
     String scenario = handler.cmrData.getCustSubGrp();
     boolean update = "U".equals(handler.adminData.getReqType());
     if (!StringUtils.isBlank(addrData.getCity1())) {
