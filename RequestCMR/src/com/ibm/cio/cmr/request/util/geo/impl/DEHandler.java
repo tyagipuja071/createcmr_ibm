@@ -746,7 +746,6 @@ public class DEHandler extends GEOHandler {
     map.put("##DUNS", "dunsNo");
     map.put("##BuyingGroupID", "bgId");
     map.put("##GeoLocationCode", "geoLocationCd");
-    map.put("##MembLevel", "memLvl");
     map.put("##PrivacyIndc", "privIndc");
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
