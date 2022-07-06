@@ -517,8 +517,10 @@ public class CEMEAPDFConverter extends DefaultPDFConverter {
     ibm.addCell(createLabelCell("PPS CEID:"));
     ibm.addCell(createValueCell(data.getPpsceid()));
 
-    ibm.addCell(createLabelCell("Membership Level:"));
-    ibm.addCell(createValueCell(data.getMemLvl()));
+    if (!cmrCntry.equals("618")) {
+      ibm.addCell(createLabelCell("Membership Level:"));
+      ibm.addCell(createValueCell(data.getMemLvl()));
+    }
 
     ibm.addCell(createLabelCell("BP Relation Type:"));
     ibm.addCell(createValueCell(data.getBpRelType()));
