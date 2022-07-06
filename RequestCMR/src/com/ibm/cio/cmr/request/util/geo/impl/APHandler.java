@@ -17,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -32,6 +33,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -339,6 +341,12 @@ public abstract class APHandler extends GEOHandler {
       results.add(update);
     }
 
+    // If Coverage expired then ignore coverage related field Update
+    Boolean expiredCluster = expiredClusterForAP(newData, oldData);
+    if (expiredCluster) {
+      return;
+    }
+
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getApCustClusterId(), newData.getApCustClusterId())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Cluster", "-"));
@@ -346,6 +354,86 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(oldData.getApCustClusterId());
       results.add(update);
     }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getInacCd(), newData.getInacCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "INACCode", "-"));
+      update.setNewData(newData.getInacCd());
+      update.setOldData(oldData.getInacCd());
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getInacType(), newData.getInacType())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "INACType", "-"));
+      update.setNewData(getCodeAndDescription(newData.getInacType(), "INACType", cmrCountry));
+      update.setOldData(getCodeAndDescription(oldData.getInacType(), "INACType", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getIsuCd(), newData.getIsuCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ISU", "-"));
+      update.setNewData(getCodeAndDescription(newData.getIsuCd(), "ISU", cmrCountry));
+      update.setOldData(getCodeAndDescription(oldData.getIsuCd(), "ISU", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getClientTier(), newData.getClientTier())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ClientTier", "-"));
+      update.setNewData(getCodeAndDescription(newData.getClientTier(), "ClientTier", cmrCountry));
+      update.setOldData(getCodeAndDescription(oldData.getClientTier(), "ClientTier", cmrCountry));
+      results.add(update);
+    }
+  }
+
+  public String getCodeAndDescription(String code, String fieldId, String cntry) {
+    String desc = DropdownListController.getDescription(fieldId, code, cntry);
+    if (!StringUtils.isEmpty(desc)) {
+      return desc;
+    }
+    return code;
+  }
+
+  public boolean expiredClusterForAP(Data newData, DataRdc oldData) {
+    String oldCluster = oldData.getApCustClusterId();
+    String newCluster = newData.getApCustClusterId();
+    long reqId = oldData.getId().getReqId();
+    String cmrIssuingCntry = oldData.getCmrIssuingCntry();
+    if (cmrIssuingCntry.equalsIgnoreCase(SystemLocation.MACAO) || cmrIssuingCntry.equalsIgnoreCase(SystemLocation.HONG_KONG)) {
+      return false;
+    }
+    EntityManager entityManager = JpaManager.getEntityManager();
+    DataPK dataPK = new DataPK();
+    dataPK.setReqId(reqId);
+    Data data = entityManager.find(Data.class, dataPK);
+    // new Cluster won't be empty if CMDE edits it by SuperUser Mode
+    if (!StringUtils.isEmpty(oldCluster) && StringUtils.isBlank(newCluster)) {
+      String sql = ExternalizedQuery.getSql("QUERY.CHECK.CLUSTER");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
+      query.setParameter("AP_CUST_CLUSTER_ID", oldCluster);
+      query.setForReadOnly(true);
+      List<String> result = query.getResults(String.class);
+      if (result != null && !result.isEmpty()) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  public DataRdc getAPClusterDataRdc(long reqId) {
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    List<DataRdc> records = query.getResults(DataRdc.class);
+    if (records != null && records.size() > 0) {
+      for (DataRdc oldData : records) {
+        return oldData;
+      }
+    }
+    return null;
   }
 
   @Override

@@ -4128,7 +4128,6 @@ function addVatValidationforSingapore() {
 }
 // CREATCMR-5258
 
-
 function handleExpiredClusterAP() {
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');

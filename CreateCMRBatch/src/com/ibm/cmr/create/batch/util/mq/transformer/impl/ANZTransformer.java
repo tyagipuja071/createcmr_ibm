@@ -9,6 +9,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.geo.impl.APHandler;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 
@@ -31,7 +34,7 @@ public abstract class ANZTransformer extends APTransformer {
   @Override
   protected void handleDataDefaults(MQMessageHandler handler) {
     super.handleDataDefaults(handler);
-
+    APHandler aphandler = (APHandler) RequestUtils.getGEOHandler(handler.cmrData.getCmrIssuingCntry());
     handler.messageHash.put("SellBrnchOff", "000");
     handler.messageHash.put("SellDept", "0000");
     handler.messageHash.put("InstBrnchOff", "000");
@@ -68,6 +71,19 @@ public abstract class ANZTransformer extends APTransformer {
       handler.messageHash.put("GB_SegCode", gb_SegCode);
     }
 
+    // Handling obsolete data
+    DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
+    Boolean expiredCluster = false;
+    if (oldDataRdc != null)
+      expiredCluster = aphandler.expiredClusterForAP(handler.cmrData, oldDataRdc);
+    if (expiredCluster) {
+      handler.messageHash.put("ClusterNo", oldDataRdc.getApCustClusterId());
+      handler.messageHash.put("GB_SegCode", oldDataRdc.getClientTier());
+      handler.messageHash.put("ISU", oldDataRdc.getIsuCd());
+      handler.messageHash.put("MrktRespCode", oldDataRdc.getMrcCd());
+      handler.messageHash.put("inacType", oldDataRdc.getInacType());
+      handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
+    }
   }
 
   @Override
