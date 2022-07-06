@@ -703,10 +703,10 @@ public class DnBUtil {
       dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
     }
     dnbAddress = dnbAddress.trim();
-
-    if (StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
+    Boolean isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
+    if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
         && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
-        && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) {
+        && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr) {
       return false;
     }
 
