@@ -125,6 +125,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
       String pcmrs = "";
       boolean prospectCMRFlag = false;
+      boolean convertPCMRFlag = false;
       boolean shouldGoToCMDE = false;
       boolean skipAndPpn = false;
 
@@ -225,6 +226,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             prospectCMRFlag = true;
                             handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                           } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                            convertPCMRFlag = true;
                             log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                           } else {
                             log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -321,6 +323,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               prospectCMRFlag = true;
                               handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                             } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                              convertPCMRFlag = true;
                               log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                             } else {
                               log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -424,6 +427,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 prospectCMRFlag = true;
                                 handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                convertPCMRFlag = true;
                                 log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                               } else {
                                 log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -533,6 +537,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 prospectCMRFlag = true;
                                 handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                convertPCMRFlag = true;
                                 log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                               } else {
                                 log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -614,7 +619,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
                   sendManagerEmail(entityManager, admin, data, soldTo, details);
-                } else if (prospectCMRFlag && !shouldBeRejected) { // CREATCMR-6302
+                } else if (prospectCMRFlag && !convertPCMRFlag && !shouldBeRejected) { // CREATCMR-6302
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate Prospect CMRs only.");
                   pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
@@ -757,6 +762,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             prospectCMRFlag = true;
                             handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                           } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                            convertPCMRFlag = true;
                             log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                           } else {
                             log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -852,6 +858,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               prospectCMRFlag = true;
                               handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                             } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                              convertPCMRFlag = true;
                               log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                             } else {
                               log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -948,6 +955,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 prospectCMRFlag = true;
                                 handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                convertPCMRFlag = true;
                                 log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                               } else {
                                 log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -1049,6 +1057,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 prospectCMRFlag = true;
                                 handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                convertPCMRFlag = true;
                                 log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                               } else {
                                 log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -1121,7 +1130,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
                   sendManagerEmail(entityManager, admin, data, soldTo, details);
-                } else if (prospectCMRFlag && !shouldBeRejected) { // CREATCMR-6302
+                } else if (prospectCMRFlag && !convertPCMRFlag && !shouldBeRejected) { // CREATCMR-6302
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate Prospect CMRs only.");
                   pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
@@ -1733,6 +1742,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             prospectCMRFlag = true;
                             handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                           } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                            convertPCMRFlag = true;
                             log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                           } else {
                             log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -1867,6 +1877,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               prospectCMRFlag = true;
                               handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                             } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                              convertPCMRFlag = true;
                               log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                             } else {
                               log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -2008,6 +2019,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 prospectCMRFlag = true;
                                 handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                convertPCMRFlag = true;
                                 log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                               } else {
                                 log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -2157,6 +2169,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 prospectCMRFlag = true;
                                 handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                convertPCMRFlag = true;
                                 log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                               } else {
                                 log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -2291,7 +2304,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setDetails(details.toString().trim());
                   requestData.getAdmin().setMatchIndc("C");
 
-                } else if (prospectCMRFlag && !shouldBeRejected) { // CREATCMR-6302
+                } else if (prospectCMRFlag && !convertPCMRFlag && !shouldBeRejected) { // CREATCMR-6302
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate Prospect CMRs only.");
                   pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
@@ -2405,6 +2418,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             cmrData = resultFindCmrCN.get(i);
                             handleLogDetails(cmrData, matchedCMRs, details);
                           } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(resultFindCmrCN.get(i).getCmrNo())) {
+                            convertPCMRFlag = true;
                             log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + resultFindCmrCN.get(i).getCmrNo());
                           } else {
                             log.debug("Skip Duplicate CMR check for prospect CmrNo " + resultFindCmrCN.get(i).getCmrNo());
@@ -2456,6 +2470,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               cmrData = resultFindCmrCN.get(i);
                               handleLogDetails(cmrData, matchedCMRs, details);
                             } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(resultFindCmrCN.get(i).getCmrNo())) {
+                              convertPCMRFlag = true;
                               log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + resultFindCmrCN.get(i).getCmrNo());
                             } else {
                               log.debug("Skip Duplicate CMR check for prospect CmrNo " + resultFindCmrCN.get(i).getCmrNo());
@@ -2511,6 +2526,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 cmrData = resultFindCmrCN.get(i);
                                 handleLogDetails(cmrData, matchedCMRs, details);
                               } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(resultFindCmrCN.get(i).getCmrNo())) {
+                                convertPCMRFlag = true;
                                 log.debug(
                                     "Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + resultFindCmrCN.get(i).getCmrNo());
                               } else {
@@ -2572,6 +2588,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 cmrData = resultFindCmrCN.get(i);
                                 handleLogDetails(cmrData, matchedCMRs, details);
                               } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(resultFindCmrCN.get(i).getCmrNo())) {
+                                convertPCMRFlag = true;
                                 log.debug(
                                     "Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + resultFindCmrCN.get(i).getCmrNo());
                               } else {
@@ -2615,7 +2632,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
                   sendManagerEmail(entityManager, admin, data, soldTo, details);
-                } else if (prospectCMRFlag && !nameMatched && !historyNmMatched) { // CREATCMR-6302
+                } else if (prospectCMRFlag && !convertPCMRFlag && !nameMatched && !historyNmMatched) { // CREATCMR-6302
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate Prospect CMRs only.");
                   pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
@@ -2676,6 +2693,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     prospectCMRFlag = true;
                     handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                   } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                    convertPCMRFlag = true;
                     log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                   } else {
                     log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -2707,7 +2725,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 result.setProcessOutput(output);
                 result.setDetails(details.toString().trim());
                 sendManagerEmail(entityManager, admin, data, soldTo, details);
-              } else if (prospectCMRFlag && !shouldBeRejected) { // CREATCMR-6302
+              } else if (prospectCMRFlag && !convertPCMRFlag && !shouldBeRejected) { // CREATCMR-6302
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate Prospect CMRs only.");
                 pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
@@ -3363,6 +3381,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   prospectCMRFlag = true;
                   handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                 } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                  convertPCMRFlag = true;
                   log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
                 } else {
                   log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
@@ -3394,7 +3413,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
               result.setProcessOutput(output);
               result.setDetails(details.toString().trim());
               sendManagerEmail(entityManager, admin, data, soldTo, details);
-            } else if (prospectCMRFlag && !shouldBeRejected) { // CREATCMR-6302
+            } else if (prospectCMRFlag && !convertPCMRFlag && !shouldBeRejected) { // CREATCMR-6302
               result.setResults("Matches Found");
               result.setResults("Found Duplicate Prospect CMRs only.");
               pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
