@@ -31,7 +31,7 @@ dojo.addOnLoad(function() {
 </script>
 <!--  Modal for the Workflow History Screen -->
 <cmr:modal title="${ui.title.subindisicsearch}" id="subindustryIsicSearchModal" widthId="980">
-  <form:form id="frmCMRIsic" method="GET" action="${contextPath}/request/${reqntry.reqId}" name="frmCMRIsic" class="ibm-column-form ibm-styled-form" modelAttribute="subindisic">
+  <cmr:form id="frmCMRIsic" method="GET" action="${contextPath}/request/${reqntry.reqId}" name="frmCMRIsic" class="ibm-column-form ibm-styled-form" modelAttribute="subindisic">
 
     <cmr:row>
       <cmr:column span="6">
@@ -91,5 +91,5 @@ dojo.addOnLoad(function() {
         </cmr:grid>
       </cmr:column>
     </cmr:row>
-  </form:form>
+  </cmr:form>
 </cmr:modal>

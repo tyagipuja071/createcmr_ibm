@@ -8,7 +8,7 @@
 
 <!--  Modal for the address details creen -->
 <cmr:modal title="${ui.title.addrStdRejectReason}" id="addressStdRejectReasonModal" widthId="570">
-  <form:form method="GET" action="${contextPath}/request/address/process" name="frmCMR_addressModalRej" class="ibm-column-form ibm-styled-form" modelAttribute="addressModal" id="frmCMR_addressModalRej">
+  <cmr:form method="GET" action="${contextPath}/request/address/process" name="frmCMR_addressModalRej" class="ibm-column-form ibm-styled-form" modelAttribute="addressModal" id="frmCMR_addressModalRej">
 
   <cmr:row>
     <cmr:column span="2">
@@ -36,6 +36,6 @@
     <cmr:button label="${ui.btn.save}" onClick="doSaveRejectReason()" highlight="true" />
     <cmr:button label="${ui.btn.cancel}" onClick="doCancelRejectReason()" highlight="false" pad="true"/>
   </cmr:buttonsRow>
-</form:form>
+</cmr:form>
 
 </cmr:modal>

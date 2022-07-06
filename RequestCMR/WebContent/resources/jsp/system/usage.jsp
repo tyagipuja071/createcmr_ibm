@@ -114,7 +114,7 @@ div#filterlabels table td, div#filterlabels table th {
   <cmr:tabs />
 
   <cmr:section>
-    <form:form method="GET" action="${contextPath}/metrics/usage_export" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"
+    <cmr:form method="GET" action="${contextPath}/metrics/usage_export" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"
       modelAttribute="usage">
       <cmr:row>
         <h3>Web Service Usage</h3>
@@ -210,7 +210,7 @@ div#filterlabels table td, div#filterlabels table th {
           <cmr:button label="Export to File" onClick="SvcUsage.exportReport()" highlight="false" pad="true" />
         </cmr:column>
       </cmr:row>
-    </form:form>
+    </cmr:form>
     <cmr:row topPad="10">
       <div style="width: 100%">
         <canvas id="canvas" style="height:20px"></canvas>

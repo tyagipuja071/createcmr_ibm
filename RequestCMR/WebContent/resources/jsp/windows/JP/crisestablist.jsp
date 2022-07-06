@@ -75,7 +75,7 @@ div.ibm-columns {
 </style>
 <cmr:window>
   <jsp:include page="crisreject.jsp" />
-  <form:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="crit">
+  <cmr:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="crit">
     <jsp:include page="criscriteria.jsp" />
     <cmr:row>
       <cmr:column span="6">
@@ -100,7 +100,7 @@ div.ibm-columns {
         </cmr:grid>
       </cmr:column>
     </cmr:row>
-  </form:form>
+  </cmr:form>
   <cmr:windowClose>
     <cmr:button label="Search Again" onClick="backToSearch()" highlight="true" pad="true"/>
     <cmr:button label="I don't like the choices" onClick="rejectSearch()" highlight="true" pad="true"/>

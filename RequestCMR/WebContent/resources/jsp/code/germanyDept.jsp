@@ -121,7 +121,7 @@ span.rt-del {
 }
 </style>
 <div ng-app="GDApp" ng-controller="GDController" ng-cloak>
- <form:form method="POST" action="${contextPath}/code/germanyDept" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="germanyDept">
+ <cmr:form method="POST" action="${contextPath}/code/germanyDept" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="germanyDept">
   <cmr:boxContent>
     <cmr:tabs />
     <cmr:section>
@@ -197,7 +197,7 @@ span.rt-del {
   </cmr:buttonsRow>
 </cmr:section>
   </cmr:boxContent>
-</form:form>
+</cmr:form>
 </div> 
 <script src="${resourcesPath}/js/system/germanyDept.js?${cmrv}"></script>
 

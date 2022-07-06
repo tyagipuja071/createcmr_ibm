@@ -41,7 +41,7 @@
   margin-top : 10px !important;
 }
 </style>
-<form:form method="POST" action="${contextPath}/reactivaterequest/process" name="frmReactivate" class="ibm-column-form ibm-styled-form"
+<cmr:form method="POST" action="${contextPath}/reactivaterequest/process" name="frmReactivate" class="ibm-column-form ibm-styled-form"
   modelAttribute="reqentry" id="frmReactivate">
   <cmr:modelAction formName="frmReactivate" />
   <form:hidden path="reqId" id="procReqId" name="reqId" value="${reqentry.reqId}" />
@@ -120,4 +120,4 @@
     <br>
   </cmr:row>
   <jsp:include page="addcmrs.jsp" />
-</form:form>
+</cmr:form>

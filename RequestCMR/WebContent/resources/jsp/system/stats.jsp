@@ -110,7 +110,7 @@ div#filterlabels table {
   <cmr:tabs />
 
   <cmr:section>
-    <form:form method="GET" action="${contextPath}/metrics/statexport" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"
+    <cmr:form method="GET" action="${contextPath}/metrics/statexport" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"
       modelAttribute="metrics">
       <cmr:row>
         <h3>Request Statistics</h3>
@@ -195,7 +195,7 @@ div#filterlabels table {
           <cmr:button label="Export Requester Statistics" onClick="CmrMetrics.exportRequesterStats()" highlight="false" pad="true" />
         </cmr:column>
       </cmr:row>
-    </form:form>
+    </cmr:form>
     <cmr:row topPad="10">
       <div style="width: 100%">
         <canvas id="canvas" style="height:20px"></canvas>

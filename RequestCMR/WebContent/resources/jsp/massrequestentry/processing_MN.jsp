@@ -34,7 +34,7 @@
   }
   String procCenter = reqentry.getProcCenter() != null ? reqentry.getProcCenter() : "";
 %>
-<form:form method="POST" action="${contextPath}/massrequest/process" name="frmCMRProcess" class="ibm-column-form ibm-styled-form"
+<cmr:form method="POST" action="${contextPath}/massrequest/process" name="frmCMRProcess" class="ibm-column-form ibm-styled-form"
   modelAttribute="reqentry" id="frmCMRProcess" enctype="multipart/form-data" target="processFrame">
   <cmr:modelAction formName="frmCMRProcess" />
   <form:hidden path="reqId" id="procReqId" name="reqId" value="${reqentry.reqId}" />
@@ -317,4 +317,4 @@
     }
   %>
   <form:hidden path="iterId" id="iterId"/>
-</form:form>
+</cmr:form>

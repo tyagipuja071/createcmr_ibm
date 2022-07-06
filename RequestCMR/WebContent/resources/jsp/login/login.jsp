@@ -3,6 +3,7 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@ taglib uri="/tags/cmr" prefix="cmr"%>
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
@@ -27,7 +28,7 @@ div#ibm-top {
   <div class="ibm-col-1-1">
     <div id="wwq-content">
       <div class="ibm-columns">
-        <form:form method="POST" action="performLogin" id="login-form" name="frmCMR" class="ibm-column-form ibm-styled-form"
+        <cmr:form method="POST" action="performLogin" id="login-form" name="frmCMR" class="ibm-column-form ibm-styled-form"
           modelAttribute="loginUser">
           <input type="hidden" name="csrf" value="">
           <div class="ibm-col-2-1" style="width:100px">
@@ -77,7 +78,7 @@ div#ibm-top {
             </div>
           </div>
           </div>
-        </form:form>
+        </cmr:form>
       </div>
 
 <%--

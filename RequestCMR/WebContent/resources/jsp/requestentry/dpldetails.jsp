@@ -15,7 +15,7 @@
 </style>
 <!--  Modal for the DPL Check Details -->
 <cmr:modal title="${ui.title.dplDetails}" id="DplDetailsModal"  widthId="570">
-  <form:form name="fmrDPLDetails">
+  <cmr:form name="fmrDPLDetails">
     <cmr:row addBackground="true">
       <cmr:column span="1" width="200">
         <cmr:label fieldId="dpl_result">${ui.dpl.Result}:</cmr:label>
@@ -75,5 +75,5 @@
       <cmr:info text="Searches the DPL Database using the saved information on the request" />
       <cmr:button label="${ui.btn.close}" onClick="cmr.hideModal('DplDetailsModal')" highlight="false" pad="true" />
     </cmr:buttonsRow>
-  </form:form>
+  </cmr:form>
 </cmr:modal>
