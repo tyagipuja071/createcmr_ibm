@@ -189,7 +189,8 @@
   </cmr:boxContent>
 </cmr:form>
 
-<form id="frmCMRFullReportDownLoad" name="frmCMRFullReportDownLoad" method="POST">
+<form _csrf="GhtjeYhfngleOImde2" id="frmCMRFullReportDownLoad" name="frmCMRFullReportDownLoad" method="POST">
   <input type="hidden" id="katr6" name="katr6" />
   <input type="hidden" id="zzkvCusNo" name="zzkvCusNo" />
+  <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
 </form>

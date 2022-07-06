@@ -615,9 +615,10 @@ form.ibm-column-form .dijitTextBox INPUT {
   <cmr:model model="search" />
 </cmr:section>
 </cmr:boxContent>
-<form name="frmPDF" id="frmPDF" action="${contextPath}/request/pdf" method="POST" target="attachDlFrame">
+<form _csrf="GhtjeYhfngleOImde2" name="frmPDF" id="frmPDF" action="${contextPath}/request/pdf" method="POST" target="attachDlFrame">
   <input type="hidden" id="pdfReqId" name="reqId">
   <input type="hidden" id="pdfTokenId" name="tokenId">
+  <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
 </form>
 <iframe id="attachDlFrame" style="display:none" name="attachDlFrame"></iframe>
 

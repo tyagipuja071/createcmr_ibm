@@ -72,7 +72,7 @@ div.bg {
 </head>
 <body>
   <div class="bg">
-    <form id="connectForm" action="<%=url%>/connect" method="GET">
+    <form _csrf="GhtjeYhfngleOImde2" id="connectForm" action="<%=url%>/connect" method="GET">
       <input type="hidden" name="authCode" value="<%=auth%>"> 
       <input type="hidden" name="system" value="<%=system%>"> 
       <input type="hidden" name="cntry" value="<%=cntry%>">
@@ -80,6 +80,7 @@ div.bg {
       <input type="hidden" name="request" value="<%=details%>">
       <input type="hidden" name="reqId" value="<%=reqId%>">
       <input type="hidden" name="source" value="<%=source%>">
+      <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
 <%if (auth != null){ %>
       <div class="loader">
         <h3>Please wait while FindCMR is loading...</h3>
