@@ -326,6 +326,7 @@ var _BOTeamHandler = null;
 var _IMSHandler = null;
 var _vatExemptHandler = null;
 var _ExpediteHandler = null;
+var _SubSceanrioHandler = null;
 
 function addHandlersForNL() {
 
@@ -369,6 +370,12 @@ function addHandlersForNL() {
       setExpediteReason();
     });
   }
+  
+  if (_SubSceanrioHandler == null) {
+	  _SubSceanrioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+	      setEcoCodeBasedOnSubScenario();
+	    });
+	  }
 
 }
 
@@ -1771,6 +1778,34 @@ function setPPSCEIDRequired() {
     FormManager.readOnly('ppsceid');
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }
+}
+
+/*
+ * CREATECMR-6379 NL - Economic Code based on Customer Sub Scenario Values
+ */
+function setEcoCodeBasedOnSubScenario(){
+	var reqType = FormManager.getActualValue('reqType');
+	var custSubScnrio = FormManager.getActualValue('custSubGrp');
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    return;
+	  }
+
+	  if (FormManager.getActualValue('reqType') != 'C') {
+	    return;
+	  }else{
+		  if (custSubScnrio == ''){
+			  FormManager.setValue('economicCd', '');
+		  }else if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
+			  FormManager.setValue('economicCd', 'K49');
+		  }else if (custSubScnrio == 'PRICU') {
+	          FormManager.setValue('economicCd', 'K60');
+	        }
+		  else if (custSubScnrio == 'INTER') {
+	          FormManager.setValue('economicCd', 'K81');
+	        }else{
+	        	FormManager.setValue('economicCd', 'K11');
+	        }
+	  }
 }
 
 dojo.addOnLoad(function() {
