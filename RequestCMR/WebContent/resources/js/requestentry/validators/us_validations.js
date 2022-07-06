@@ -982,7 +982,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(sccWarningShowAndHide, [ SysLoc.USA ], null, false);
 
   GEOHandler.addAddrFunction(hideKUKLA, [ SysLoc.USA ]);
-  GEOHandler.registerValidator(addKuklaValidator, [ SysLoc.USA ], null, true);
+  // CREATCMR-6375
+  // GEOHandler.registerValidator(addKuklaValidator, [ SysLoc.USA ], null,
+  // true);
   GEOHandler.registerValidator(addDivStreetCountValidator, [ SysLoc.USA ], null, true);
 
   GEOHandler.addAfterTemplateLoad(setClientTierValuesUS, [ SysLoc.USA ]);
