@@ -20,7 +20,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/revivedcmrs/process" name="frmCMRRevived" class="ibm-column-form ibm-styled-form" 
+  <cmr:form method="POST" action="${contextPath}/revivedcmrs/process" name="frmCMRRevived" class="ibm-column-form ibm-styled-form" 
 	 id="frmCMRRevived" enctype="multipart/form-data" target="processFrame">
     <cmr:section>
 		      <cmr:row topPad="10" addBackground="true">
@@ -47,7 +47,7 @@
       </cmr:row>	  
     </cmr:section>
     <input name="processTokenId" id="processTokenId" type="hidden">
-  </form:form>
+  </cmr:form>
   <iframe id="processFrame" style="display:none" name="processFrame"></iframe>
         	<form>
 			<input name="dummyform" type="hidden">

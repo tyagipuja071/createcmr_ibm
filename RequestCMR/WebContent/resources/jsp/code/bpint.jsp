@@ -56,7 +56,7 @@ var BPIService = (function() {
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/bpidetails" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="POST" action="${contextPath}/code/bpidetails" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"
     modelAttribute="bpInt">
     <cmr:modelAction formName="frmCMR" /> 
     <cmr:section>
@@ -188,7 +188,7 @@ var BPIService = (function() {
         </cmr:column>
       </cmr:row>
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

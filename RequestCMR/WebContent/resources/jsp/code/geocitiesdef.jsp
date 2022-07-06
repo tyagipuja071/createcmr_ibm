@@ -72,7 +72,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/geocitiesmain" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="geoCitiesMain">
+  <cmr:form method="POST" action="${contextPath}/code/geocitiesmain" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="geoCitiesMain">
     <cmr:modelAction formName="frmCMR" />
     <cmr:section>
       <cmr:row topPad="8">
@@ -185,7 +185,7 @@
         }
       %>
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

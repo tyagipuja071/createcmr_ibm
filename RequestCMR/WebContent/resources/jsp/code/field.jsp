@@ -205,7 +205,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/field_info_details" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="POST" action="${contextPath}/code/field_info_details" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"
     modelAttribute="field">
     <cmr:modelAction formName="frmCMR" />
     <cmr:section>
@@ -549,7 +549,7 @@
       </cmr:row>
 
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

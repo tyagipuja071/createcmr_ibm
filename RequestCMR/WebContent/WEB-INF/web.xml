@@ -20,6 +20,15 @@
 	    <servlet-name>Spring MVC Dispatcher Servlet</servlet-name>
 	    <url-pattern>/</url-pattern> 
 	</servlet-mapping>
+
+  <filter>
+    <filter-name>SecurityFilter</filter-name>
+      <filter-class>com.ibm.cio.cmr.request.filter.SecurityFilter</filter-class>
+  </filter>
+  <filter-mapping>
+      <filter-name>SecurityFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+  </filter-mapping> 
 	
 	<filter>
 		<filter-name>SessionInactivityFilter</filter-name>

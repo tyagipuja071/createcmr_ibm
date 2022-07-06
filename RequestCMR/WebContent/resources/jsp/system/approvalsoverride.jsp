@@ -30,7 +30,7 @@ ApprovalResponseModel approval = (ApprovalResponseModel) request.getAttribute("a
 
 <!--  Modal for the Add Approval Screen -->
 <cmr:modal title="Override Approval" id="adminApprovalModal" widthId="750">
-  <form:form method="POST" action="${contextPath}/approval/process" name="frmCMRApprovalAdmin" class="ibm-column-form ibm-styled-form" modelAttribute="approval" id="frmCMR_adminApprovalModal">
+  <cmr:form method="POST" action="${contextPath}/approval/process" name="frmCMRApprovalAdmin" class="ibm-column-form ibm-styled-form" modelAttribute="approval" id="frmCMR_adminApprovalModal">
     <cmr:modelAction formName="frmCMR_adminApprovalModal" />
     <form:hidden path="reqId" id="reqId" />
     <form:hidden path="approvalId" id="approvalId" />
@@ -99,5 +99,5 @@ ApprovalResponseModel approval = (ApprovalResponseModel) request.getAttribute("a
       <cmr:button label="Submit" onClick="processOverride()" highlight="true" id="approvalBtnSubmit"/>
       <cmr:button label="${ui.btn.cancel}" onClick="cmr.hideModal('adminApprovalModal')" highlight="false" pad="true" />
     </cmr:buttonsRow>
-  </form:form>
+  </cmr:form>
 </cmr:modal>
