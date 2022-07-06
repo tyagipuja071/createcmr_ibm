@@ -3465,7 +3465,7 @@ function validateCustNameForNonContractAddrs() {
           zs01CustName = contractCustNm.ret1.toUpperCase() + contractCustNm.ret2.toUpperCase();
         }
         
-        if (zs01CustName != custNm &&  addrType != "ZS01" && reqType == 'U') {
+        if (zs01CustName != custNm &&  addrType != "ZS01" && _pagemodel.reqType == 'U') {
           return new ValidationResult(null, false, 'customer name of additional address must be the same as the customer name of contract address');
         }
         return new ValidationResult(null, true);
