@@ -179,6 +179,26 @@ public class MassUpdateModel extends BaseModel {
 
   private String educAllowCd;
 
+  private String bpAcctTyp;
+
+  private String bpName;
+
+  public String getBpAcctTyp() {
+    return bpAcctTyp;
+  }
+
+  public void setBpAcctTyp(String bpAcctTyp) {
+    this.bpAcctTyp = bpAcctTyp;
+  }
+
+  public String getBpName() {
+    return bpName;
+  }
+
+  public void setBpName(String bpName) {
+    this.bpName = bpName;
+  }
+
   public String getTaxExemptStatus2() {
     return taxExemptStatus2;
   }
