@@ -355,6 +355,119 @@ public class AustraliaUtil extends AutomationUtil {
     output.setProcessOutput(validation);
     return true;
   }
+  
+    @Override
+  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    boolean cmdeReview = false;
+    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
+      return true;
+    }
+    List<Addr> addresses = null;
+    StringBuilder checkDetails = new StringBuilder();
+    Set<String> resultCodes = new HashSet<String>();// R - review
+    for (String addrType : RELEVANT_ADDRESSES) {
+      if (changes.isAddressChanged(addrType)) {
+        if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+        } else {
+          addresses = requestData.getAddresses(addrType);
+        }
+        for (Addr addr : addresses) {
+          Addr addressToChk = requestData.getAddress(addrType);
+          if ("Y".equals(addr.getChangedIndc())) {
+            // update address
+            if (RELEVANT_ADDRESSES.contains(addrType)) {
+              if (isRelevantAddressFieldUpdated(changes, addr)) {
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
+                boolean matchesDnb = false;
+                if (matches != null) {
+                  // check against D&B
+                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+                }
+                if (!matchesDnb) {
+                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                  cmdeReview = true;
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                  // company proof
+                  if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                    checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
+                  } else {
+                    checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
+                  }
+
+                } else {
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
+                }
+
+              } else {
+                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                    .append("\n");
+              }
+            } else {
+              // proceed
+              LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
+              checkDetails.append("Updates to Address (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
+            }
+          } else if ("N".equals(addr.getImportInd())) {
+            // new address addition
+
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+            }
+
+            if (!matchesDnb) {
+              LOG.debug("New address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+              cmdeReview = true;
+              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B.\n");
+              // company proof
+              if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
+              } else {
+                checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
+              }
+            } else {
+              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+              for (DnBMatchingResponse dnb : matches) {
+                checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                    + dnb.getDnbCountry() + "\n\n");
+              }
+            }
+          }
+        }
+      }
+    }
+    if (resultCodes.contains("D")) {
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+      engineData.addNegativeCheckStatus("_auCheckFailed", "Updates to addresses cannot be checked automatically.");
+    } else if (cmdeReview) {
+      engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_", "Updates to addresses cannot be checked automatically.");
+      validation.setSuccess(false);
+      validation.setMessage("Review Required.");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
+    String details = (output.getDetails() != null && output.getDetails().length() > 0) ? output.getDetails() : "";
+    details += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : "";
+    output.setDetails(details);
+    output.setProcessOutput(validation);
+    return true;
+  }
 
   private static StringBuilder getANZEcoNotifyList() {
     StringBuilder anzEcoNotifyList = new StringBuilder();
