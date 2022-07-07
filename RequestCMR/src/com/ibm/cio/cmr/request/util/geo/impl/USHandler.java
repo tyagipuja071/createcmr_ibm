@@ -745,20 +745,28 @@ public class USHandler extends GEOHandler {
       // CREATCMR-6182
       String strAddrTxt2 = address.getAddrTxt2();
       if (StringUtils.isNotBlank(cmr.getCmrName3())) {
-        address.setAddrTxt2(cmr.getCmrName3());
+        // CREATCMR-6255
+        // address.setAddrTxt2(cmr.getCmrName3());
+        address.setDivn(cmr.getCmrName3());
       } else if (StringUtils.isNotBlank(strAddrTxt2)) {
-        address.setAddrTxt2(strAddrTxt2);
+        // CREATCMR-6255
+        // address.setAddrTxt2(strAddrTxt2);
+        address.setDivn(strAddrTxt2);
       }
     }
 
     if (!"E".equals(cmr.getUsCmrBpAccountType())) {
       if (StringUtils.isNotBlank(address.getDivn())) {
-        address.setAddrTxt2(null);
+        // CREATCMR-6255
+        // address.setAddrTxt2(null);
+        address.setDivn(null);
       }
     } else if ("E".equals(cmr.getUsCmrBpAccountType())) {
       String strAddrTxt2 = address.getAddrTxt2();
       if (StringUtils.isNotBlank(strAddrTxt2)) {
-        address.setAddrTxt2(strAddrTxt2);
+        // CREATCMR-6255
+        // address.setAddrTxt2(strAddrTxt2);
+        address.setDivn(strAddrTxt2);
       }
     }
 
@@ -1191,7 +1199,9 @@ public class USHandler extends GEOHandler {
     if (addrTxt != null && addrTxt.length() > 24) {
       splitAddress(addr, addr.getAddrTxt(), "", 24, 24);
       if (!StringUtils.isEmpty(addr.getAddrTxt2())) {
-        addr.setAddrTxt2(addr.getAddrTxt2().trim());
+        // CREATCMR-6255
+        // addr.setAddrTxt2(addr.getAddrTxt2().trim());
+        addr.setDivn(addr.getAddrTxt2().trim());
       }
     }
   }
@@ -2107,8 +2117,7 @@ public class USHandler extends GEOHandler {
 
     if (!StringUtils.isEmpty(cmtUsEntCompToPpn)) {
       cmtUsEntCompToPpn = "\nPlease check the fields in row " + cmtUsEntCompToPpn + ".";
-      cmtUsEntCompToPpn = "Mass file Customer Name1, Customer Name2, Enterprise# and Company# have changes, please make sure all 4 fields are filled in together."
-          + cmtUsEntCompToPpn;
+      cmtUsEntCompToPpn = "If Enterprise# or Company# has been changes, Customer Name must be filled in please." + cmtUsEntCompToPpn;
     }
 
     return cmtUsEntCompToPpn;
