@@ -64,7 +64,7 @@
       <cmr:field fieldId="StreetAddress1" id="addrTxt" path="addrTxt" />
     </p>
   </cmr:column>
-  <cmr:column span="2">
+  <cmr:column span="2" exceptForCountry = "897">
     <p>
       <cmr:label fieldId="addrTxt2">
         <cmr:fieldLabel fieldId="StreetAddress2" />: 
