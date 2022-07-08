@@ -340,7 +340,6 @@ function initUSTemplateHandler() {
 
 function addUSAddressHandler(cntry, addressMode, saving) {
   if (!saving) {
-    FormManager.readOnly('addrTxt2');
     if (addressMode == 'newAddress') {
       FilteringDropdown['val_landCntry'] = 'US';
       FormManager.setValue('landCntry', 'US');
