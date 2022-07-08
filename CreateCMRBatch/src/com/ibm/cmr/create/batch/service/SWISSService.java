@@ -559,6 +559,18 @@ public class SWISSService extends BaseBatchService {
               + ". Number of response records and on ADDR table are inconsistent.");
           break;
         }
+        
+        deleteEntity(addr, entityManager);
+        
+        for (RDcRecord red : response.getRecords()) {
+          String[] addrSeqs = {};
+          if (red.getSeqNo() != null && red.getSeqNo() != "") {
+            addrSeqs = red.getSeqNo().split(",");
+          }
+          if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+            addr.getId().setAddrSeq(addrSeqs[0]);
+          }
+        }
 
         if (response.getRecords() != null && response.getRecords().size() != 0) {
 
@@ -570,11 +582,10 @@ public class SWISSService extends BaseBatchService {
           } else {
             for (RDcRecord red : response.getRecords()) {
               String[] addrSeqs = { "", "" };
-
               if (red.getSeqNo() != null && red.getSeqNo() != "") {
                 addrSeqs = red.getSeqNo().split(",");
               }
-
+              
               if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                 LOG.debug("Address matched");
                 addr.setPairedAddrSeq(addrSeqs[0]);
@@ -591,7 +602,7 @@ public class SWISSService extends BaseBatchService {
             }
           }
 
-          updateEntity(addr, entityManager);
+          createEntity(addr, entityManager);
         }
         index++;
       }

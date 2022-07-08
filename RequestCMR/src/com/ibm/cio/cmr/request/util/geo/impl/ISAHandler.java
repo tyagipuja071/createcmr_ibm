@@ -5,13 +5,12 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -435,13 +434,28 @@ public class ISAHandler extends APHandler {
     if (!country.equalsIgnoreCase(SystemLocation.INDIA)) {
       return false;
     }
-    final Set<String> dnb = new HashSet<>(Arrays.asList(dnbAddress.toLowerCase().split("\\s+")));
-    final Set<String> addrCmr = new HashSet<>(Arrays.asList(address.toLowerCase().split("\\s+")));
-    final Set<String> addrDnb = new HashSet<>(Arrays.asList(dnbAddress.toLowerCase().split("\\s+")));
-    addrDnb.retainAll(addrCmr);
-    long sizeDifference = (long) addrDnb.size() - (long) dnb.size();
-    if (Math.abs(sizeDifference) > 2)
+    final List<String> dnb = new ArrayList<>(Arrays.asList(dnbAddress.toLowerCase().split("\\s+")));
+    final List<String> addrCmr = new ArrayList<>(Arrays.asList(address.toLowerCase().split("\\s+")));
+
+    Collections.sort(dnb);
+    Collections.sort(addrCmr);
+    StringBuilder sb1 = new StringBuilder();
+    StringBuilder sb2 = new StringBuilder();
+    for (Object obj : dnb) {
+      sb1.append(obj.toString());
+      sb1.append("\t");
+    }
+    String dnbAddr = sb1.toString();
+    for (Object obj : addrCmr) {
+      sb2.append(obj.toString());
+      sb2.append("\t");
+    }
+    String cmrAddress = sb2.toString();
+
+    if (StringUtils.isNotBlank(cmrAddress) && StringUtils.isNotBlank(dnbAddr)
+        && StringUtils.getLevenshteinDistance(cmrAddress.toUpperCase(), dnbAddr.toUpperCase()) > 8) {
       return false;
+    }
     return true;
   }
 
