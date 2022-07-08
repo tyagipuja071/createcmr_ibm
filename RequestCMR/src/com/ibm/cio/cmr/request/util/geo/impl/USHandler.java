@@ -755,20 +755,16 @@ public class USHandler extends GEOHandler {
       }
     }
 
-    if (!"E".equals(cmr.getUsCmrBpAccountType())) {
-      if (StringUtils.isNotBlank(address.getDivn())) {
-        // CREATCMR-6255
-        // address.setAddrTxt2(null);
-        address.setDivn(null);
-      }
-    } else if ("E".equals(cmr.getUsCmrBpAccountType())) {
-      String strAddrTxt2 = address.getAddrTxt2();
-      if (StringUtils.isNotBlank(strAddrTxt2)) {
-        // CREATCMR-6255
-        // address.setAddrTxt2(strAddrTxt2);
-        address.setDivn(strAddrTxt2);
-      }
-    }
+    // if (!"E".equals(cmr.getUsCmrBpAccountType())) {
+    // if (StringUtils.isNotBlank(address.getDivn())) {
+    // address.setAddrTxt2(null);
+    // }
+    // } else if ("E".equals(cmr.getUsCmrBpAccountType())) {
+    // String strAddrTxt2 = address.getAddrTxt2();
+    // if (StringUtils.isNotBlank(strAddrTxt2)) {
+    // address.setAddrTxt2(strAddrTxt2);
+    // }
+    // }
 
     // CREATCMR-6183
     if ("US".equals(processType)) {
