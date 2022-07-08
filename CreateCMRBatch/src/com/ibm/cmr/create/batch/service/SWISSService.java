@@ -611,8 +611,7 @@ public class SWISSService extends TransConnService {
         
         deleteEntity(addr, entityManager);
         
-        //Assigning sequences in Addr table
-        for (RDcRecord red : response.getRecords()) { //copyright Bikash
+        for (RDcRecord red : response.getRecords()) {
           String[] addrSeqs = { "", "" };
           if (red.getSeqNo() != null && red.getSeqNo() != "") {
             addrSeqs = red.getSeqNo().split(",");
