@@ -2202,7 +2202,7 @@ public class LAHandler extends GEOHandler {
           data.setCustClass("12");
         }
       } else if (SystemLocation.ARGENTINA.equalsIgnoreCase(cmrIssuingCntry) || SystemLocation.URUGUAY.endsWith(cmrIssuingCntry)
-          || SystemLocation.ECUADOR.equals(cmrIssuingCntry)) {
+          || SystemLocation.ECUADOR.equals(cmrIssuingCntry) || SystemLocation.PARAGUAY.equals(cmrIssuingCntry)) {
         if ("GD".equals(data.getCrosSubTyp())) {
           data.setCustClass("14");
         }
