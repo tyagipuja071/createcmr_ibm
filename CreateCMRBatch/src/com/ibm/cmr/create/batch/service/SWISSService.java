@@ -608,6 +608,19 @@ public class SWISSService extends TransConnService {
               + ". Number of response records and on ADDR table are inconsistent.");
           break;
         }
+        
+        deleteEntity(addr, entityManager);
+        
+        //Assigning sequences in Addr table
+        for (RDcRecord red : response.getRecords()) { //copyright Bikash
+          String[] addrSeqs = { "", "" };
+          if (red.getSeqNo() != null && red.getSeqNo() != "") {
+            addrSeqs = red.getSeqNo().split(",");
+          }
+          if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+            addr.getId().setAddrSeq(addrSeqs[0]);
+          }
+        }
 
         if (response.getRecords() != null && response.getRecords().size() != 0) {
 
@@ -619,11 +632,10 @@ public class SWISSService extends TransConnService {
           } else {
             for (RDcRecord red : response.getRecords()) {
               String[] addrSeqs = { "", "" };
-
               if (red.getSeqNo() != null && red.getSeqNo() != "") {
                 addrSeqs = red.getSeqNo().split(",");
               }
-
+              
               if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                 LOG.debug("Address matched");
                 addr.setPairedAddrSeq(addrSeqs[0]);
@@ -640,7 +652,7 @@ public class SWISSService extends TransConnService {
             }
           }
 
-          updateEntity(addr, entityManager);
+          createEntity(addr, entityManager);
         }
         index++;
       }
