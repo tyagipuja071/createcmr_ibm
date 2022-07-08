@@ -61,7 +61,7 @@ public class DEHandler extends GEOHandler {
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("724");
   protected static final String[] MT_MASS_UPDATE_SHEET_NAMES = { "Data", "Sold To", "Bill To", "Install-At", "Ship-To" };
   private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
-      "City2", "Affiliate", "Company", "INACType", "TransportZone", "Office", "Floor" };
+      "City2", "Affiliate", "Company", "INACType", "TransportZone", "Office", "Floor", "BPRelationType", "MembLevel" };
   protected LegacyDirectObjectContainer legacyObjects;
 
   @Override
