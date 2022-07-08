@@ -612,7 +612,7 @@ public class SWISSService extends TransConnService {
         deleteEntity(addr, entityManager);
         
         for (RDcRecord red : response.getRecords()) {
-          String[] addrSeqs = { "", "" };
+          String[] addrSeqs = {};
           if (red.getSeqNo() != null && red.getSeqNo() != "") {
             addrSeqs = red.getSeqNo().split(",");
           }
