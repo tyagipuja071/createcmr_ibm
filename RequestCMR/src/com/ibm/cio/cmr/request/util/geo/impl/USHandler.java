@@ -753,6 +753,7 @@ public class USHandler extends GEOHandler {
         // address.setAddrTxt2(strAddrTxt2);
         address.setDivn(strAddrTxt2);
       }
+      address.setAddrTxt2(null);
     }
 
     // if (!"E".equals(cmr.getUsCmrBpAccountType())) {
