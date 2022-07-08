@@ -64,14 +64,6 @@
       <cmr:field fieldId="StreetAddress1" id="addrTxt" path="addrTxt" />
     </p>
   </cmr:column>
-  <cmr:column span="2" exceptForCountry = "897">
-    <p>
-      <cmr:label fieldId="addrTxt2">
-        <cmr:fieldLabel fieldId="StreetAddress2" />: 
-          </cmr:label>
-      <cmr:field fieldId="StreetAddress2" id="addrTxt2" path="addrTxt2" />
-    </p>
-  </cmr:column>
 </cmr:row>
 
 <cmr:row>
@@ -207,6 +199,14 @@
         <cmr:info text="${ui.info.addrTransportZone}" />
       </cmr:label>
       <cmr:field fieldId="TransportZone" id="transportZone" path="transportZone" />
+    </p>
+  </cmr:column>
+<cmr:column span="2">
+    <p>
+      <cmr:label fieldId="addrTxt2">
+        <cmr:fieldLabel fieldId="StreetAddress2" />: 
+          </cmr:label>
+      <cmr:field fieldId="StreetAddress2" id="addrTxt2" path="addrTxt2" />
     </p>
   </cmr:column>
 </cmr:row>
