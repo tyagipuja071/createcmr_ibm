@@ -3831,7 +3831,6 @@ function setEnterpriseSalesRepSBO(isuCd) {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
-    FormManager.setValue('clientTier', '')
   }
 }
 
@@ -7840,7 +7839,6 @@ function autoSetISUClientTierUK() {
       }
     } else {
       FormManager.setValue('isuCd', '21');
-      FormManager.setValue('clientTier', '');
 
       // CREATCMR-4293
       var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -9606,7 +9604,6 @@ function autoSetUIFieldsOnScnrioUKI() {
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (custSubGrp == 'INTER') {
     FormManager.setValue('company', '');
     FormManager.readOnly('company');
