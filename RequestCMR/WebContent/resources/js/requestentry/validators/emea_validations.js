@@ -8579,7 +8579,7 @@ function setIBMFieldsMandtOptional() {
 
       FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep No' ], null);
       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], null);
-      setClientTierValuesUKI();
+     //setClientTierValuesUKI();
     }
   }
 }
@@ -10293,7 +10293,7 @@ dojo.addOnLoad(function() {
   // UKI Specific
   GEOHandler.addAfterConfig(afterConfigForUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(defaultCapIndicatorUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.addAfterConfig(setClientTierValuesUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
+  //GEOHandler.addAfterConfig(setClientTierValuesUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(setAbbrevNmLocationLockAndMandatoryUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(lockCmrOwner, [ SysLoc.TURKEY ]);
@@ -10552,7 +10552,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addISUHandlerIT, [ SysLoc.ITALY ]);
 
   // CREATCMR-4293
-  GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.IRELAND, SysLoc.ITALY, SysLoc.UK ]);
+  GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.ITALY, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
