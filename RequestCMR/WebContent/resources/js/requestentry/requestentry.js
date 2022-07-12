@@ -597,6 +597,10 @@ function doSaveChangeComments() {
     var rejField = '<input type="hidden" name="rejectReason" value="' + rej + '">';
     rejField += '<input type="hidden" name="rejSupplInfo1" value="' + rejInfo1 + '">';
     rejField += '<input type="hidden" name="rejSupplInfo2" value="' + rejInfo2 + '">';
+
+    if (SysLoc.ISRAEL == FormManager.getActualValue('cmrIssuingCntry')) {
+      rejField += '<input type="hidden" name="statusChgCmt" value="' + cmt + '">';
+    }
     dojo.place(rejField, document.forms['frmCMR'], 'last');
   }
 
