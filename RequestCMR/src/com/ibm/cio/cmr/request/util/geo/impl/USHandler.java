@@ -42,6 +42,8 @@ import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.DataService;
+import com.ibm.cio.cmr.request.service.requestentry.RequestEntryService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -74,6 +76,8 @@ public class USHandler extends GEOHandler {
   private EntityManager entityManager;
 
   private String processType;
+
+  private final DataService dataService = new DataService();
 
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
@@ -1171,6 +1175,11 @@ public class USHandler extends GEOHandler {
     data.setTaxExemptStatus1(data.getSpecialTaxCd());
     // CREATCMR-4569
 
+    // CREATCMR-6342
+    String scc = getSCCByReqId(entityManager, data.getId().getReqId());
+    data.setCompanyNm(scc);
+    // CREATCMR-6342
+
   }
 
   @Override
@@ -1183,6 +1192,20 @@ public class USHandler extends GEOHandler {
         addr.setAddrTxt2(addr.getAddrTxt2().trim());
       }
     }
+
+    // CREATCMR-6342
+    Data currentData = dataService.getCurrentRecordById(addr.getId().getReqId(), entityManager);
+    String scc = getSCCByReqId(entityManager, currentData.getId().getReqId());
+    currentData.setCompanyNm(scc);
+
+    RequestEntryService service = new RequestEntryService();
+    service.updateEntity(currentData, entityManager);
+    // CREATCMR-6342
+
+    // AddrPK pk = new AddrPK();
+    // pk.setReqId(addr.getId().getReqId());
+    // Addr currentAddr = entityManager.find(Addr.class, pk);
+
   }
 
   @Override
@@ -2102,4 +2125,20 @@ public class USHandler extends GEOHandler {
 
     return cmtUsEntCompToPpn;
   }
+
+  // CREATCMR-6342
+  private String getSCCByReqId(EntityManager entityManager, long req_id) {
+    String scc = "";
+    String sql = ExternalizedQuery.getSql("US.GET.US_CMR_SCC.GET_SCC_BY_REQ_ID_LAND_CNTRY_ST_CNTY_CITY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", req_id);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      scc = result;
+    }
+    return scc;
+  }
+  // CREATCMR-6342
+
 }
