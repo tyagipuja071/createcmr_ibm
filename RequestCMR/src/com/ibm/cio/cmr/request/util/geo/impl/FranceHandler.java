@@ -216,6 +216,10 @@ public class FranceHandler extends GEOHandler {
     String search_term = data.getSearchTerm();
     data.setSalesBusOffCd(search_term);
     LOG.trace("SORTL: " + data.getSalesBusOffCd());
+    
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setPpsceid("");
+    }
 
   }
 

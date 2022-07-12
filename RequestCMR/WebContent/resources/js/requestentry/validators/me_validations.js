@@ -3820,6 +3820,7 @@ function togglePPSCeidME() {
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
     FormManager.readOnly('ppsceid');
   } else {
+    FormManager.clearValue('ppsceid');
     FormManager.hide('PPSCEID', 'ppsceid');
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }

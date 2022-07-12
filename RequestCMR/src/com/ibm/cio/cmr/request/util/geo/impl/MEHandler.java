@@ -1131,6 +1131,7 @@ public class MEHandler extends BaseSOFHandler {
     data.setInacType("");
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setCmrNo("");
+      data.setPpsceid("");
     }
 
     // Ticked - load CIS duplicate fields
