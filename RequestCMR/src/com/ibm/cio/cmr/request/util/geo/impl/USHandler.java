@@ -1199,6 +1199,7 @@ public class USHandler extends GEOHandler {
         // CREATCMR-6255
         // addr.setAddrTxt2(addr.getAddrTxt2().trim());
         addr.setDivn(addr.getAddrTxt2().trim());
+        addr.setAddrTxt2(null);
       }
     }
   }
