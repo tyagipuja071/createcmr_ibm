@@ -1,6 +1,6 @@
 ####################################################################
 
-resultUSM=$(ps -ef|grep -v grep|grep USMultiServiceEntryPoint|awk '{print $2}')
+resultATM=$(ps -ef|grep -v grep|grep ATServiceMultiEntryPoint|awk '{print $2}')
 if [ "$resultATM" = "" ]
 then
 
@@ -8,9 +8,9 @@ then
 
 echo Classpath = $CLASSPATH
 
-java -Xms64M -Xmx512M $JAVA_BATCH_ARGS com.ibm.cmr.create.batch.entry.USMultiServiceEntryPoint
+java -Xms64M -Xmx512M $JAVA_BATCH_ARGS com.ibm.cmr.create.batch.entry.ATServiceMultiEntryPoint
 
 else
-echo USMulti currently running
+echo ATMulti currently running
 fi
 
