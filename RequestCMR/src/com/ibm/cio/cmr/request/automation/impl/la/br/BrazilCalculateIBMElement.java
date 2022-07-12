@@ -353,7 +353,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       checkIfFiscalCodeExists = ifStateFiscalCodeEmpty(scenarioSubType, details, overrides, engineData, admin, data, soldTo, installAt,
           midasResponse);
       if (checkIfFiscalCodeExists == false) {
-        ifErrorSoldTo = checkSintegraResponse(vat, soldTo.getStateProv(), results, overrides, "ZS01", soldTo, "Sold To", details, data);
+        ifErrorSoldTo = checkSintegraResponse(soldTo.getVat(), soldTo.getStateProv(), results, overrides, "ZS01", soldTo, "Sold To", details, data);
         if ("LEASI".equalsIgnoreCase(scenarioSubType)) {
           ifErrorInstallAt = checkSintegraResponse(vat, installAt.getStateProv(), results, overrides, "ZI01", installAt, "Install At", details, data);
         }
