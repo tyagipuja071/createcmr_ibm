@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -427,6 +428,36 @@ public class ISAHandler extends APHandler {
       addr.setDept(line3);
       cmrModel.setCmrDept(line3);
     }
+  }
+
+  @Override
+  public Boolean compareReshuffledAddress(String dnbAddress, String address, String country) {
+    if (!country.equalsIgnoreCase(SystemLocation.INDIA)) {
+      return false;
+    }
+    final List<String> dnb = new ArrayList<>(Arrays.asList(dnbAddress.toLowerCase().split("\\s+")));
+    final List<String> addrCmr = new ArrayList<>(Arrays.asList(address.toLowerCase().split("\\s+")));
+
+    Collections.sort(dnb);
+    Collections.sort(addrCmr);
+    StringBuilder sb1 = new StringBuilder();
+    StringBuilder sb2 = new StringBuilder();
+    for (Object obj : dnb) {
+      sb1.append(obj.toString());
+      sb1.append("\t");
+    }
+    String dnbAddr = sb1.toString();
+    for (Object obj : addrCmr) {
+      sb2.append(obj.toString());
+      sb2.append("\t");
+    }
+    String cmrAddress = sb2.toString();
+
+    if (StringUtils.isNotBlank(cmrAddress) && StringUtils.isNotBlank(dnbAddr)
+        && StringUtils.getLevenshteinDistance(cmrAddress.toUpperCase(), dnbAddr.toUpperCase()) > 8) {
+      return false;
+    }
+    return true;
   }
 
   @Override
