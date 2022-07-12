@@ -605,7 +605,7 @@ function addHandlersForUK() {
   }
 /* if (_isicCdHandler && _isicCdHandler[0]) {
     _isicCdHandler[0].onChange();
-  }*/
+  }*/
   if (_postCdHandlerUK == null && FormManager.getField('postCd')) {
     _postCdHandlerUK = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
       autoSetSBO(value, _pagemodel.postCd);
