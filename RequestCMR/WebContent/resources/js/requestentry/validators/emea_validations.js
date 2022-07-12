@@ -603,7 +603,7 @@ function addHandlersForUK() {
       }
     });
   }
-/** if (_isicCdHandler && _isicCdHandler[0]) {
+/* if (_isicCdHandler && _isicCdHandler[0]) {
     _isicCdHandler[0].onChange();
   }*/
   if (_postCdHandlerUK == null && FormManager.getField('postCd')) {
