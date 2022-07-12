@@ -327,6 +327,7 @@ var _BOTeamHandler = null;
 var _IMSHandler = null;
 var _vatExemptHandler = null;
 var _ExpediteHandler = null;
+var _SubSceanrioHandler = null;
 
 function addHandlersForNL() {
 
@@ -354,7 +355,7 @@ function addHandlersForNL() {
   if (_BOTeamHandler == null) {
     _BOTeamHandler = dojo.connect(FormManager.getField('engineeringBo'), 'onChange', function(value) {
       // setINACValues(value);
-      setEconomicCodeValues(value);
+      // setEconomicCodeValues(value);
       setSORTL();
     });
   }
@@ -370,7 +371,12 @@ function addHandlersForNL() {
       setExpediteReason();
     });
   }
-
+  
+  if (_SubSceanrioHandler == null) {
+	  _SubSceanrioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+	      setEcoCodeBasedOnSubScenario();
+	    });
+	  }
 }
 
 function setExpediteReason() {
@@ -1759,6 +1765,7 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+
 function setPPSCEIDRequired() {
   var reqType = FormManager.getActualValue('reqType');
   var subGrp = FormManager.getActualValue('custSubGrp');
@@ -1774,7 +1781,6 @@ function setPPSCEIDRequired() {
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }
 }
-
 /*
  * CREATECMR-6379 NL - Economic Code based on Customer Sub Scenario Values
  */
@@ -1827,7 +1833,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setBOTeamValues, GEOHandler.NL);
   // GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.NL);
-  GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.NL);
+  // GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setFieldsMandtOnSc, GEOHandler.NL);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.NL);
