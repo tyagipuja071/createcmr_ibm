@@ -109,8 +109,10 @@ public class MCOCewaHandler extends MCOHandler {
           data.setCommercialFinanced("");
         }
       }
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        data.setPpsceid("");
+      }
     }
-
   }
 
   private String getKunnrSapr3Kna1(String cmrNo, String cntry) throws Exception {

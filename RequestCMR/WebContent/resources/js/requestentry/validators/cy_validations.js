@@ -2464,8 +2464,11 @@ function mandatoryForBusinessPartnerCY() {
     var _custType = FormManager.getActualValue('custSubGrp');
     if (_custType == 'BUSPR' || _custType == 'CRBUS') {
       FormManager.show('PPSCEID', 'ppsceid');
+      FormManager.enable('ppsceid');
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
     } else {
+      FormManager.setValue('ppsceid', '');
+      FormManager.readOnly('ppsceid');
       FormManager.resetValidations('ppsceid');
       FormManager.removeValidator('ppsceid', Validators.REQUIRED);
     }
@@ -2935,7 +2938,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCollectionCodeforCyprus, [ SysLoc.CYPRUS ],null, true);
   GEOHandler.addAfterConfig(setAbbrvCyprus, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.CYPRUS ]);
-  GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(disableAddrFieldsCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(showOnlyMailingOnFirstAddrAdd, [ SysLoc.CYPRUS ]);

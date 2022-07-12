@@ -1248,7 +1248,9 @@ public class BELUXHandler extends BaseSOFHandler {
     if (prospectCmrChosen) {
       data.setCmrNo("");
     }
-
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setPpsceid("");
+    }
   }
 
   private String getInternalDepartment(String cmrNo) throws Exception {

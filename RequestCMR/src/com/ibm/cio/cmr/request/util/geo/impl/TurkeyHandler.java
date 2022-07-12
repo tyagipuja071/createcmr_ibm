@@ -1894,6 +1894,9 @@ public class TurkeyHandler extends BaseSOFHandler {
 
       data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
     }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setPpsceid("");
+    }
   }
 
   @Override

@@ -1400,8 +1400,11 @@ function mandatoryForBusinessPartner() {
     var _custType = FormManager.getActualValue('custSubGrp');
     if (_custType == 'LSBP' || _custType == 'SZBP' || _custType == 'ZABP' || _custType == 'NABP' || _custType == 'ZAXBP' || _custType == 'NAXBP' || _custType == 'LSXBP' || _custType == 'SZXBP'
         || _custType == 'LSBLC' || _custType == 'SZBLC' || _custType == 'NABLC') {
+      FormManager.enable('ppsceid');
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
     } else {
+      FormManager.clearValue('ppsceid');
+      FormManager.readOnly('ppsceid');
       FormManager.resetValidations('ppsceid');
     }
   }
@@ -2094,7 +2097,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(enableCMRNOSAGLLC, SysLoc.SOUTH_AFRICA);
   GEOHandler.addAfterTemplateLoad(enableCMRNOSAGLLC, SysLoc.SOUTH_AFRICA);
   GEOHandler.addAfterConfig(enableCmrForProcessor, [ SysLoc.SOUTH_AFRICA ]);
-  GEOHandler.addAfterConfig(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterConfig(validateTypeOfCustomer, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO1);

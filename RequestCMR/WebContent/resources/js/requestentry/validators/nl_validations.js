@@ -1759,6 +1759,50 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function setPPSCEIDRequired() {
+  var reqType = FormManager.getActualValue('reqType');
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (subGrp.includes('BP') || subGrp.includes('BUS')) {
+    FormManager.enable('ppsceid');
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.clearValue('ppsceid');
+    FormManager.readOnly('ppsceid');
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+  }
+}
+
+/*
+ * CREATECMR-6379 NL - Economic Code based on Customer Sub Scenario Values
+ */
+function setEcoCodeBasedOnSubScenario(){
+	var reqType = FormManager.getActualValue('reqType');
+	var custSubScnrio = FormManager.getActualValue('custSubGrp');
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    return;
+	  }
+
+	  if (FormManager.getActualValue('reqType') != 'C') {
+	    return;
+	  }else{
+		  if (custSubScnrio == ''){
+			  FormManager.setValue('economicCd', '');
+		  }else if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
+			  FormManager.setValue('economicCd', 'K49');
+		  }else if (custSubScnrio == 'PRICU') {
+	          FormManager.setValue('economicCd', 'K60');
+	        }
+		  else if (custSubScnrio == 'INTER') {
+	          FormManager.setValue('economicCd', 'K81');
+	        }else{
+	        	FormManager.setValue('economicCd', 'K11');
+	        }
+	  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -1773,6 +1817,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NL);
   // GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
   GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, GEOHandler.NL);
 
   GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.NL);
