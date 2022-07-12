@@ -955,6 +955,28 @@ public class KRHandler extends GEOHandler {
   }
 
   @Override
+  public String getBPMANAGER(EntityManager entityManager, long reqId, DefaultApprovalRecipients recipients, AppUser user, RequestEntryModel model)
+      throws CmrException, SQLException {
+
+    Person ibmer = null;
+    String originatorIdInAdmin = getOriginatorIdInAdmin(entityManager, reqId);
+
+    if (originatorIdInAdmin != null && !originatorIdInAdmin.isEmpty()) {
+      Person ibmerManager = null;
+      ibmerManager = BluePagesHelper.getPerson(originatorIdInAdmin);
+      ibmer = BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(ibmerManager == null ? "" : ibmerManager.getEmployeeId()));
+    } else {
+      ibmer = BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(user.getUserCnum()));
+    }
+    if (ibmer != null) {
+      return ibmer.getEmail();
+    } else {
+      return recipients.getId().getIntranetId();
+    }
+
+  }
+
+  @Override
   public ApprovalReq handleBPMANAGERApproval(EntityManager entityManager, long reqId, ApprovalReq approver, DefaultApprovals defaultApprovals,
       DefaultApprovalRecipients recipients, AppUser user, RequestEntryModel model) throws CmrException, SQLException {
     ApprovalReq theApprovalReq = saveAproval(entityManager, reqId, approver, defaultApprovals, recipients, user);

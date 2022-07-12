@@ -1102,4 +1102,10 @@ public abstract class GEOHandler {
   public String getEquivalentAddressType(String addressType, String seqNo) {
     return addressType;
   }
+
+  public String getBPMANAGER(EntityManager entityManager, long reqId, DefaultApprovalRecipients recipients, AppUser user, RequestEntryModel model)
+      throws CmrException, SQLException {
+    // TODO Auto-generated method stub
+    return recipients.getId().getIntranetId();
+  }
 }
