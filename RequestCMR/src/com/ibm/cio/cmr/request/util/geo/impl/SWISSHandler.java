@@ -474,6 +474,38 @@ public class SWISSHandler extends GEOHandler {
     if ("C".equals(admin.getReqType())) {
       data.setCurrencyCd("CHF");
     }
+    if (StringUtils.isBlank(data.getCustPrefLang())) {
+      String sql = ExternalizedQuery.getSql("QUERY.ADDR.GET.POST_CD.BY_REQID");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      query.setParameter("ADDR_TYPE", "ZS01");
+      List<Object[]> results = query.getResults();
+      if (!results.isEmpty() && results.get(0) != null) {
+        int postCd = Integer.parseInt((String) results.get(0)[0]);
+        String landCntry = (String) results.get(0)[1];
+        if ("CH".equalsIgnoreCase(landCntry) || "LI".equalsIgnoreCase(landCntry)) {
+          if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+            data.setCustPrefLang("D");
+          } else if (postCd >= 6500 && postCd <= 6999) {
+            data.setCustPrefLang("I");
+          } else if (postCd >= 0000 && postCd <= 3000) {
+            data.setCustPrefLang("F");
+          }
+        } else {
+          data.setCustPrefLang("E");
+        }
+
+      }
+    }
+
+    AddrPK addrPk = new AddrPK();
+    addrPk.setReqId(data.getId().getReqId());
+    addrPk.setAddrSeq("00001");
+    addrPk.setAddrType("ZS01");
+    Addr addr = entityManager.find(Addr.class, addrPk);
+    if (addr != null && !StringUtils.isEmpty(data.getCustPrefLang())) {
+      addr.setCustLangCd(data.getCustPrefLang());
+    }
 
   }
 
