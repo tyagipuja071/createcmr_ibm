@@ -985,7 +985,9 @@ dojo.addOnLoad(function() {
   // CREATCMR-6375
   // GEOHandler.registerValidator(addKuklaValidator, [ SysLoc.USA ], null,
   // true);
-  GEOHandler.registerValidator(addDivStreetCountValidator, [ SysLoc.USA ], null, true);
+  // CREATCMR-6255
+  // GEOHandler.registerValidator(addDivStreetCountValidator, [ SysLoc.USA ],
+  // null, true);
 
   GEOHandler.addAfterTemplateLoad(setClientTierValuesUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(setClientTierValuesUS, [ SysLoc.USA ]);
