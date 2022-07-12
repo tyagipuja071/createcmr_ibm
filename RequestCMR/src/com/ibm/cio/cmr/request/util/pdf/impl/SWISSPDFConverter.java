@@ -426,12 +426,6 @@ public class SWISSPDFConverter extends DefaultPDFConverter {
 
     ibm.addCell(createLabelCell("PPS CIED:"));
     ibm.addCell(createValueCell(data.getPpsceid()));
-
-    ibm.addCell(createLabelCell("Memebership Level:"));
-    ibm.addCell(createValueCell(data.getMemLvl()));
-
-    ibm.addCell(createLabelCell("BP Relation Type:"));
-    ibm.addCell(createValueCell(data.getBpRelType()));
   }
 
   public String textContainingLanguage(String text) {
