@@ -1304,7 +1304,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
    * @return
    * @throws Exception
    */
-  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, String soldToLandedCountry, String issuingCountry, boolean useNameOnMain)
+  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, String soldToLandedCountry, String issuingCountry, boolean useNameOnMain,boolean isPrivate)
       throws Exception {
     String servicesUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String appId = SystemConfiguration.getSystemProperty("evs.appID");
@@ -1336,6 +1336,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     request.setAddr1(addr.getAddrTxt());
     request.setAddr2(addr.getAddrTxt2());
     request.setId(id);
+    request.setPrivate(isPrivate);
     if (JPHandler.isJPIssuingCountry(issuingCountry))
       request.setCompanyName(addr.getCustNm3());
     else
