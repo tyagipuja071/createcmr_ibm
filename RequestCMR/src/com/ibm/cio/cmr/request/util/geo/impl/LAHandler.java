@@ -2192,7 +2192,7 @@ public class LAHandler extends GEOHandler {
       if (isMXIssuingCountry(issuingCntry)) {
         if ("GD".equals(data.getCrosSubTyp())) {
           data.setCustClass("12");
-        } else if ("GI".equals(data.getCrosSubTyp()) && "PF".equals(data.getGovType())) {
+        } else if ("GI".equals(data.getCrosSubTyp())) {
           data.setCustClass("13");
         }
       }
