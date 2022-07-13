@@ -180,6 +180,10 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
       LOG.debug("D&B Address to be imported? " + importAddress);
 
+      if ("706".equals(data.getCmrIssuingCntry())) {
+        data.setCountryUse("706");
+      }
+
       if (!StringUtils.isBlank(mainRecord.getCmrIsic())) {
         if (!CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
             || (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()))) {
