@@ -743,7 +743,7 @@ public class USHandler extends GEOHandler {
       address.setPostCd(postCd);
     }
 
-    if ("US".equals(processType)) {
+    if (!"TC".equals(processType)) {
       // CREATCMR-6182
       String strAddrTxt2 = address.getAddrTxt2();
       if (StringUtils.isNotBlank(cmr.getCmrName3())) {
@@ -774,7 +774,7 @@ public class USHandler extends GEOHandler {
     // }
 
     // CREATCMR-6183
-    if ("US".equals(processType)) {
+    if (!"TC".equals(processType)) {
       if ("E".equals(cmr.getUsCmrBpAccountType())) {
         if ("ZS01".equals(address.getId().getAddrType())) {
           // || "ZI01".equals(address.getId().getAddrType())
@@ -785,7 +785,7 @@ public class USHandler extends GEOHandler {
     // CREATCMR-6183
 
     // CREATCMR-6183
-    if ("US".equals(processType)) {
+    if (!"TC".equals(processType)) {
       if ("E".equals(cmr.getUsCmrBpAccountType())) {
         if ("ZS01".equals(address.getId().getAddrType())) {
           // || "ZI01".equals(address.getId().getAddrType())
