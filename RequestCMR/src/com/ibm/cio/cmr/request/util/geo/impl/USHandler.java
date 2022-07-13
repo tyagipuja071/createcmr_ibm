@@ -732,8 +732,10 @@ public class USHandler extends GEOHandler {
       }
     } else {
       // break everything here if needed
+      LOG.debug("setAddressValuesOnImport processType = " + processType);
       String addrTxt = address.getAddrTxt();
       if (addrTxt != null && addrTxt.length() > 24) {
+        LOG.debug("setAddressValuesOnImport addrTxt > 24 ");
         splitAddress(address, address.getAddrTxt(), "", 24, 24);
       }
     }
@@ -745,19 +747,23 @@ public class USHandler extends GEOHandler {
       address.setPostCd(postCd);
     }
 
-    if ("US".equals(processType)) {
+    if (!"TC".equals(processType)) {
       // CREATCMR-6182
       String strAddrTxt2 = address.getAddrTxt2();
       if (StringUtils.isNotBlank(cmr.getCmrName3())) {
         // CREATCMR-6255
         // address.setAddrTxt2(cmr.getCmrName3());
         address.setDivn(cmr.getCmrName3());
+        LOG.debug("setAddressValuesOnImport name3 ");
       } else if (StringUtils.isNotBlank(strAddrTxt2)) {
         // CREATCMR-6255
         // address.setAddrTxt2(strAddrTxt2);
         address.setDivn(strAddrTxt2);
+        LOG.debug("setAddressValuesOnImport strAddrTxt2 ");
       }
       address.setAddrTxt2(null);
+
+      LOG.debug("setAddressValuesOnImport reset Divn : " + address.getDivn() + " AddrTxt2 : " + address.getAddrTxt2());
     }
 
     // if (!"E".equals(cmr.getUsCmrBpAccountType())) {
@@ -772,7 +778,7 @@ public class USHandler extends GEOHandler {
     // }
 
     // CREATCMR-6183
-    if ("US".equals(processType)) {
+    if (!"TC".equals(processType)) {
       if ("E".equals(cmr.getUsCmrBpAccountType())) {
         if ("ZS01".equals(address.getId().getAddrType())) {
           // || "ZI01".equals(address.getId().getAddrType())
@@ -783,7 +789,7 @@ public class USHandler extends GEOHandler {
     // CREATCMR-6183
 
     // CREATCMR-6183
-    if ("US".equals(processType)) {
+    if (!"TC".equals(processType)) {
       if ("E".equals(cmr.getUsCmrBpAccountType())) {
         if ("ZS01".equals(address.getId().getAddrType())) {
           // || "ZI01".equals(address.getId().getAddrType())
