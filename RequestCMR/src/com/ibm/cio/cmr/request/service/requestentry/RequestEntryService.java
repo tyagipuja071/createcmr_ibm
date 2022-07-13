@@ -651,6 +651,14 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       saveChecklist(entityManager, model.getReqId(), user);
     }
 
+    if (data != null && admin != null && CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())
+        && StringUtils.isNotBlank(data.getCmrIssuingCntry()) && PageManager.fromGeo("EMEA", data.getCmrIssuingCntry())
+        && "Y".equals(admin.getProspLegalInd())) {
+      if (StringUtils.isBlank(data.getCmrNo()) || (StringUtils.isNotBlank(data.getCmrNo()) && !data.getCmrNo().startsWith("P"))) {
+        admin.setProspLegalInd("");
+        updateEntity(admin, entityManager);
+      }
+    }
   }
 
   /**
