@@ -1283,6 +1283,27 @@ function addTinNumberValidationTz() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
+
+function addTinNumberValidationKn() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var tinNumber = FormManager.getActualValue('taxCd1');
+
+        if (tinNumber.length > 0 && (!tinNumber.match(/^[0-9A-Z]*$/) || tinNumber.length != 11)) {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'Invalid format of TIN Number. It should be 11 characters long containing only upper-case latin and numeric characters.');
+        }
+        
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function addTaxRegFormatValidationMadagascar() {
   FormManager.addFormValidator((function() {
     return {
@@ -2281,7 +2302,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addInternalDeptNumberValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addTaxRegFormatValidationMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addAttachmentValidatorOnTaxRegMadagascar, [ SysLoc.MADAGASCAR ], null, true);
-  GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA, SysLoc.KENYA], null, true);
+  GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA ], null, true);
+  GEOHandler.registerValidator(addTinNumberValidationKn, [ SysLoc.KENYA ], null, true);
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO2);

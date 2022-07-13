@@ -274,6 +274,9 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       } else {
         legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
       }
+      if ("GR".equals(landedCntry)) {
+        legacyCust.setVat("EL" + dummyHandler.cmrData.getVat().substring(2));
+      }
     } else {
       if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
