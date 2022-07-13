@@ -411,6 +411,8 @@ public class TWHandler extends GEOHandler {
     String oldCluster = oldData.getApCustClusterId();
     String newCluster = newData.getApCustClusterId();
     long reqId = oldData.getId().getReqId();
+    String isuCd = oldData.getIsuCd();
+    String gbSegement = oldData.getClientTier();
     String cmrIssuingCntry = oldData.getCmrIssuingCntry();
     EntityManager entityManager = JpaManager.getEntityManager();
     DataPK dataPK = new DataPK();
@@ -424,7 +426,7 @@ public class TWHandler extends GEOHandler {
       query.setParameter("AP_CUST_CLUSTER_ID", oldCluster);
       query.setForReadOnly(true);
       List<String> result = query.getResults(String.class);
-      if (result != null && !result.isEmpty()) {
+      if ((result != null && !result.isEmpty()) && !isuCd.equalsIgnoreCase("C") || !gbSegement.equalsIgnoreCase("32")) {
         return false;
       }
       return true;
