@@ -79,6 +79,10 @@ public class USHandler extends GEOHandler {
 
   private final DataService dataService = new DataService();
 
+  private String copyZI01Flag = "N";
+
+  private String addFlag = "N";
+
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
@@ -146,6 +150,33 @@ public class USHandler extends GEOHandler {
     // if (!addressesList.isEmpty() && addressesList.size() > 0) {
     // converted.addAll(addressesList);
     // }
+
+    // CREATCMR-6433
+    for (FindCMRRecordModel record : converted) {
+      if ("BPQS".equals(record.getUsCmrRestrictTo())) {
+        if (!"ZI01".equals(record.getCmrAddrTypeCode())) {
+          if (!"PG".equals(record.getCmrOrderBlock())) {
+            copyZI01Flag = "Y";
+          }
+        }
+      }
+    }
+
+    if ("Y".equals(copyZI01Flag)) {
+      FindCMRRecordModel zi01 = new FindCMRRecordModel();
+      zi01.setCmrAddrTypeCode("ZI01");
+      zi01.setCmrAddrSeq("002");
+      zi01.setCmrCountryLanded("US");
+      zi01.setCmrState("NY");
+      zi01.setCmrCity("ARMONK");
+      zi01.setCmrStreetAddress("1 N CASTLE DR MD NC313");
+      zi01.setCmrPostalCode("10504-1725");
+
+      addFlag = "Y";
+      converted.add(zi01);
+    }
+    // CREATCMR-6433
+
     Collections.sort(converted);
     source.setItems(converted);
 
@@ -790,6 +821,14 @@ public class USHandler extends GEOHandler {
 
     // CREATCMR-6183
     if (!"TC".equals(processType)) {
+
+      if ("ZI01".equals(address.getId().getAddrType())) {
+        if ("Y".equals(addFlag)) {
+          address.setDivn("IBM CREDIT LLC");
+          addFlag = "N";
+        }
+      }
+
       if ("E".equals(cmr.getUsCmrBpAccountType())) {
         if ("ZS01".equals(address.getId().getAddrType())) {
           // || "ZI01".equals(address.getId().getAddrType())
