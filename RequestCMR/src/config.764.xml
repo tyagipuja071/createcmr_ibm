@@ -93,7 +93,7 @@
 					<width>20</width>
 					<length>6</length>
 				</column>
-					<column>
+					<column exactLength="true">
 					<label>TIN/PIN Number (local identifier)</label>
 					<dbColumn>TAX_CD1</dbColumn>
 					<width>20</width>
