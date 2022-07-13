@@ -196,12 +196,30 @@ public class SwitzerlandUtil extends AutomationUtil {
         }
         for (Addr addr : addresses) {
           if ("N".equals(addr.getImportInd())) {
-            // new address
+            // new address           
+            
+            boolean isInstallAtSameAsSoldTo=false;
+            // checking if install at address same as Sold To address
+            if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+              isInstallAtSameAsSoldTo = addressExistsOnSoldTo(entityManager, addr, requestData);
+              if (isInstallAtSameAsSoldTo) {
+                checkDetails.append("Install At details provided matches an existing Sold To address.");
+                engineData.addRejectionComment("OTH", "Install At details provided matches an existing Sold To address.", "", "");
+                LOG.debug("Install At details provided matches an existing  Sold To address.");
+                output.setOnError(true);
+                validation.setSuccess(false);
+                validation.setMessage("Not validated");
+                output.setDetails(checkDetails.toString());
+                output.setProcessOutput(validation);
+                return true;
+              }
+            }
+                       
             LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
 
             boolean duplicate = addressExists(entityManager, addr, requestData);
 
-            if (duplicate) {
+            if (duplicate  && addrType!=CmrConstants.RDC_INSTALL_AT) {
               LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               duplicateDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
               resultCodes.add("D");
@@ -213,7 +231,10 @@ public class SwitzerlandUtil extends AutomationUtil {
               } else if (CmrConstants.RDC_PAYGO_BILLING.equals(addrType)) {
                 LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Addition of new PG01 (" + addr.getId().getAddrSeq() + ") address validated in the checks.\n");
-              } else {
+              } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+                LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Addition of new ZI01 (" + addr.getId().getAddrSeq() + ") address validated in the checks.\n");
+              }else {
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
                 boolean matchesDnb = false;
                 if (matches != null) {
