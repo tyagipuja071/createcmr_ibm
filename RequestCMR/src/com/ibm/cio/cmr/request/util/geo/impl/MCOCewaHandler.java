@@ -766,10 +766,10 @@ public class MCOCewaHandler extends MCOHandler {
               }
             }
             if (tin.length() != 0 && !tin.equals("@")) {
-              boolean isMatch = Pattern.matches("\\d{3}[-]\\d{3}[-]\\d{3}$", tin);
+              boolean isMatch = Pattern.matches("^[A-Z0-9]+$", tin);
               if (!isMatch) {
                 LOG.trace("Invalid format for TIN Number.");
-                error.addError((row.getRowNum() + 1), "TIN Number", "Invalid format for TIN Number. Format should be NNN-NNN-NNN. ");
+                error.addError((row.getRowNum() + 1), "TIN Number", "Invalid format for TIN Number. It should contain only upper-case latin and numeric characters. ");
               }
             }
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
