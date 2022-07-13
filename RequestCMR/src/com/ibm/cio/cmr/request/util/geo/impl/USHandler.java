@@ -163,9 +163,6 @@ public class USHandler extends GEOHandler {
     }
 
     if ("Y".equals(copyZI01Flag)) {
-
-      System.out.println("IN ADD...");
-
       FindCMRRecordModel zi01 = new FindCMRRecordModel();
       zi01.setCmrAddrTypeCode("ZI01");
       zi01.setCmrAddrSeq("002");
