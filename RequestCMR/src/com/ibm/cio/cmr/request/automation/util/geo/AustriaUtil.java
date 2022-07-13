@@ -269,7 +269,7 @@ public class AustriaUtil extends AutomationUtil {
               LOG.debug("Update to ZD01 " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Updates to ZD01 (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
             } 
-            else if(CmrConstants.RDC_SOLD_TO.equals(addrType)){
+            else if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
               if (isRelevantZS01AddressFieldUpdated(changes, addr)) {
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
                 boolean matchesDnb = false;
@@ -290,11 +290,11 @@ public class AustriaUtil extends AutomationUtil {
                         + dnb.getDnbCountry() + "\n\n");
                   }
                 }
-              }else if(isNonRelevantZS01AddressFieldUpdated(changes, addr)){
+              } else if (isNonRelevantZS01AddressFieldUpdated(changes, addr)) {
                 checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
-                .append("\n");
+                    .append("\n");
               }
-            }           
+            } 
             else {
               // update to other relevant addresses
               if (isRelevantAddressFieldUpdated(changes, addr)) {
@@ -532,7 +532,7 @@ public class AustriaUtil extends AutomationUtil {
     }
     return false;
   }
-  
+
   private boolean isNonRelevantZS01AddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
     List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
     if (addrChanges == null) {

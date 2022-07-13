@@ -973,7 +973,7 @@ public class GermanyUtil extends AutomationUtil {
     }
     return false;
   }
-  
+
   private boolean isNonRelevantZS01AddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
     List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
     if (addrChanges == null) {
