@@ -730,8 +730,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
     for (Addr addrM : tempExtractAddr) {
       Boolean errorStatus = false;
+      Boolean isPrivate=false;
       try {
-        dplResult = addrService.dplCheckAddress(admin, addrM, null, model.getCmrIssuingCntry(), false);
+        dplResult = addrService.dplCheckAddress(admin, addrM, null, model.getCmrIssuingCntry(), false, isPrivate);
       } catch (Exception ex) {
         initLogger().error("Error in performing DPL Check when call EVS on Request ID " + reqId, ex);
         if (dplResult == null) {
