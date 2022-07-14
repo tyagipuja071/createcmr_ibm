@@ -531,7 +531,7 @@ function setClientTierValues(isuCd) {
     FormManager.readOnly('clientTier');
   } else {
     var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (role == 'PROCESSOR') {
+    if (reqType == 'U' || (reqType != 'U' && role == 'PROCESSOR')) {
       FormManager.enable('clientTier');
     }
   }
@@ -1626,7 +1626,8 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') { 
+    if (clientTierCode == '') {
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
