@@ -18,10 +18,14 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.ProlifChecklist;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.approval.ChecklistItem;
+import com.ibm.cio.cmr.request.util.approval.ChecklistUtil;
+import com.ibm.cio.cmr.request.util.approval.ChecklistUtil.ChecklistResponse;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.font.PdfEncodings;
@@ -115,6 +119,81 @@ public class KRPDFConverter extends DefaultPDFConverter {
   @Override
   protected void addExtraSections(EntityManager entityManager, Admin admin, Data data, String sysLoc, Addr soldTo, Document document) {
 
+    String sql = ExternalizedQuery.getSql("APPROVAL.GET_CHECKLIST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setForReadOnly(true);
+    ProlifChecklist checklist = query.getSingleResult(ProlifChecklist.class);
+    if (checklist != null) {
+      document.add(blankLine());
+      document.add(createSubHeader("Proliferation Checklist"));
+
+      Table checklistMain = createDetailsTable(new float[] { 25, 75 });
+
+      checklistMain.addCell(createLabelCell("Customer Name:"));
+      checklistMain
+          .addCell(createValueCell(admin.getMainCustNm1() + (!StringUtils.isEmpty(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "")));
+      if (!StringUtils.isEmpty(checklist.getLocalCustNm())) {
+        checklistMain.addCell(createLabelCell("Local Customer Name:"));
+        checklistMain.addCell(createValueCell(checklist.getLocalCustNm()));
+      }
+
+      if (soldTo != null) {
+        checklistMain.addCell(createLabelCell("Address:"));
+        String address = soldTo.getAddrTxt() != null ? soldTo.getAddrTxt() : "";
+        checklistMain.addCell(createValueCell(address + (!StringUtils.isEmpty(soldTo.getAddrTxt2()) ? " " + soldTo.getAddrTxt2() : "")));
+      }
+      if (!StringUtils.isEmpty(checklist.getLocalAddr())) {
+        checklistMain.addCell(createLabelCell("Local Address:"));
+        checklistMain.addCell(createValueCell(checklist.getLocalAddr()));
+      }
+      if (!StringUtils.isEmpty(checklist.getFreeTxtField1())) {
+        checklistMain.addCell(createLabelCell("Nature of Business:"));
+        checklistMain.addCell(createValueCell(checklist.getFreeTxtField1()));
+      }
+      if (!StringUtils.isEmpty(checklist.getFreeTxtField2())) {
+        checklistMain.addCell(createLabelCell("Products/Service etc. they want to buy?"));
+        checklistMain.addCell(createValueCell(checklist.getFreeTxtField2()));
+      }
+      if (!StringUtils.isEmpty(checklist.getFreeTxtField3())) {
+        checklistMain.addCell(createLabelCell("Purpose of End Use"));
+        checklistMain.addCell(createValueCell(checklist.getFreeTxtField3()));
+      }
+
+      document.add(checklistMain);
+      document.add(blankLine());
+
+      Table checklistSection = createDetailsTable(new float[] { 91, 9 });
+
+      try {
+        List<ChecklistItem> items = ChecklistUtil.getItems(checklist, sysLoc, ChecklistResponse.Responded);
+        String answer = null;
+        Cell answerCell = null;
+        checklistSection.addCell(createLabelCell("Questionnaire", 1, 2));
+        checklistSection.addCell(createLabelCell("Item"));
+        checklistSection.addCell(createLabelCell("Response"));
+        for (ChecklistItem item : items) {
+          int padding = 1;
+          int textLength = item.getLabel().length();
+          if (textLength > 150) {
+            padding = textLength / 80;
+          }
+          if (items.indexOf(item) == 9) {
+            padding = textLength / 70;
+          }
+          checklistSection.addCell(createValueCellExtended(item.getLabel(), 1, 1, padding));
+          answer = "Y".equals(item.getAnswer()) ? "Yes" : "No";
+          answerCell = createValueCell(answer);
+          if ("Y".equals(item.getAnswer())) {
+            answerCell.setFontColor(ColorConstants.RED);
+          }
+          checklistSection.addCell(answerCell);
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      document.add(checklistSection);
+    }
   }
 
   @Override
@@ -477,4 +556,33 @@ public class KRPDFConverter extends DefaultPDFConverter {
     }
     return cell;
   }
+
+  private Cell createValueCellExtended(String text, int rowSpan, int colSpan, int padding) {
+    Cell cell = new Cell(rowSpan, colSpan);
+    if ((text != null && (!text.isEmpty())) && (textContainingLanguage(text) != null)) {
+      if (textContainingLanguage(text).equalsIgnoreCase("KOREA")) {
+        cell.setFont(this.koreaFont);
+        Paragraph label = new Paragraph();
+        label.setFontSize(7);
+        label.add(text);
+        cell.setFont(this.koreaFont);
+        cell.add(label);
+        return cell;
+      }
+    } else {
+      cell.setHeight(10 * padding);
+      Paragraph label = null;
+      if (!StringUtils.isBlank(text)) {
+        label = new Paragraph(text);
+      } else {
+        label = new Paragraph();
+      }
+      label.setFont(this.regularFont);
+      label.setFontSize(7);
+      cell.add(label);
+      return cell;
+    }
+    return cell;
+  }
+
 }
