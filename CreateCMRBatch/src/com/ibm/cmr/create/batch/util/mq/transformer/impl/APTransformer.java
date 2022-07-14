@@ -151,6 +151,11 @@ public abstract class APTransformer extends MessageTransformer {
         handler.messageHash.put("MrktRespCode", oldDataRdc.getMrcCd());
         handler.messageHash.put("inacType", oldDataRdc.getInacType());
         handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
+        handler.messageHash.put("SalesmanNo", oldDataRdc.getRepTeamMemberNo());
+        handler.messageHash.put("InstDept", oldDataRdc.getIsbuCd());
+        handler.messageHash.put("SellDept", oldDataRdc.getIsbuCd());
+        handler.messageHash.put("IBMCode", oldDataRdc.getCollectionCd());
+        handler.messageHash.put("EngrBrnchOff", oldDataRdc.getEngineeringBo());
       }
     }
   }
@@ -197,8 +202,8 @@ public abstract class APTransformer extends MessageTransformer {
     Addr addrData = handler.addrData;
 
     List<String> abbrevLandCountries = new ArrayList<String>();
-    abbrevLandCountries = (List<String>) Arrays.asList("US", "MY", "GB", "SG", "AE", "CH", "MV", "AU", "FR", "TH", "NL", "IE", "HK", "DE",
-        "ID", "BD", "CA", "LK", "TW", "NZ", "VN", "PH", "KR", "MM", "KH", "BN", "PG");
+    abbrevLandCountries = Arrays.asList("US", "MY", "GB", "SG", "AE", "CH", "MV", "AU", "FR", "TH", "NL", "IE", "HK", "DE", "ID", "BD", "CA", "LK",
+        "TW", "NZ", "VN", "PH", "KR", "MM", "KH", "BN", "PG");
     String line66 = "";
     String scenario = handler.cmrData.getCustSubGrp();
     boolean update = "U".equals(handler.adminData.getReqType());
@@ -207,7 +212,7 @@ public abstract class APTransformer extends MessageTransformer {
       if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry()))) {
         if (!update && abbrevLandCountries.contains(addrData.getLandCntry()) && "CROSS".equals(scenario))
           line66 += " " + "<" + addrData.getLandCntry() + ">";
-        else 
+        else
           line66 += " " + "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
       }
       if ("LA".equalsIgnoreCase(addrData.getLandCntry()))
@@ -219,9 +224,9 @@ public abstract class APTransformer extends MessageTransformer {
       if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry())))
         if (abbrevLandCountries.contains(addrData.getLandCntry()) && scenario.equals("CROSS"))
           line66 += " " + "<" + addrData.getLandCntry() + ">";
-        else 
+        else
           line66 += " " + "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
-        
+
       if ("LA".equalsIgnoreCase(addrData.getLandCntry()))
         line66 = "<Laos>";
       if (addrData.getPostCd() != null)

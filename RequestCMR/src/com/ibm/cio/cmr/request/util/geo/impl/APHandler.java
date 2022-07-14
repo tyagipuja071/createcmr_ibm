@@ -396,6 +396,8 @@ public abstract class APHandler extends GEOHandler {
   public boolean expiredClusterForAP(Data newData, DataRdc oldData) {
     String oldCluster = oldData.getApCustClusterId();
     String newCluster = newData.getApCustClusterId();
+    String isuCd = oldData.getIsuCd();
+    String gbSegement = oldData.getClientTier();
     long reqId = oldData.getId().getReqId();
     String cmrIssuingCntry = oldData.getCmrIssuingCntry();
     if (cmrIssuingCntry.equalsIgnoreCase(SystemLocation.MACAO) || cmrIssuingCntry.equalsIgnoreCase(SystemLocation.HONG_KONG)) {
@@ -413,7 +415,7 @@ public abstract class APHandler extends GEOHandler {
       query.setParameter("AP_CUST_CLUSTER_ID", oldCluster);
       query.setForReadOnly(true);
       List<String> result = query.getResults(String.class);
-      if (result != null && !result.isEmpty()) {
+      if (result != null && !result.isEmpty()) && !isuCd.equalsIgnoreCase("C") || !gbSegement.equalsIgnoreCase("32")){
         return false;
       }
       return true;

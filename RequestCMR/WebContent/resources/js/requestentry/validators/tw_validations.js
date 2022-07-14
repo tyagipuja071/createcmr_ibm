@@ -206,18 +206,56 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('inacType');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('inacCd');
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('repTeamMemberName');
+    FormManager.readOnly('isbuCd');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('stateProv');
+    FormManager.readOnly('collectionCd');
+    FormManager.readOnly('engineeringBo');
+    FormManager.readOnly('commercialFinanced');
+    FormManager.readOnly('creditCd');
+    FormManager.readOnly('contactName2');
+    FormManager.readOnly('contactName3');
+    FormManager.readOnly('busnType');
+
     FormManager.removeValidator('searchTerm', Validators.REQUIRED);
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.removeValidator('isuCd', Validators.REQUIRED);
     FormManager.removeValidator('mrcCd', Validators.REQUIRED);
     FormManager.removeValidator('inacType', Validators.REQUIRED);
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
+    FormManager.removeValidator('isbuCd', Validators.REQUIRED);
+    FormManager.removeValidator('covId', Validators.REQUIRED);
+    FormManager.removeValidator('stateProv', Validators.REQUIRED);
+    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+    FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
+    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
+    FormManager.removeValidator('creditCd', Validators.REQUIRED);
+    FormManager.removeValidator('contactName2', Validators.REQUIRED);
+    FormManager.removeValidator('contactName3', Validators.REQUIRED);
+    FormManager.removeValidator('busnType', Validators.REQUIRED);
+
     FormManager.setValue('searchTerm', '');
     FormManager.setValue('clientTier', '');
     FormManager.setValue('isuCd', '');
     FormManager.setValue('mrcCd', '');
     FormManager.setValue('inacType', '');
     FormManager.setValue('inacCd', '');
+    FormManager.setValue('repTeamMemberNo', '');
+    FormManager.setValue('repTeamMemberName', '');
+    FormManager.setValue('isbuCd', '');
+    FormManager.setValue('covId', '');
+    FormManager.setValue('stateProv', '');
+    FormManager.setValue('collectionCd', '');
+    FormManager.setValue('engineeringBo', '');
+    FormManager.setValue('commercialFinanced', '');
+    FormManager.setValue('creditCd', '');
+    FormManager.setValue('contactName3', '');
+    FormManager.setValue('contactName2', '');
+    FormManager.setValue('busnType', '');
 
   }
 }

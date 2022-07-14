@@ -93,6 +93,11 @@ public abstract class ASEANTransformer extends APTransformer {
       handler.messageHash.put("MrktRespCode", oldDataRdc.getMrcCd());
       handler.messageHash.put("inacType", oldDataRdc.getInacType());
       handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
+      handler.messageHash.put("SalesmanNo", oldDataRdc.getRepTeamMemberNo());
+      handler.messageHash.put("InstDept", oldDataRdc.getIsbuCd());
+      handler.messageHash.put("SellDept", oldDataRdc.getIsbuCd());
+      handler.messageHash.put("IBMCode", oldDataRdc.getCollectionCd());
+      handler.messageHash.put("EngrBrnchOff", oldDataRdc.getEngineeringBo());
     }
 
   }
