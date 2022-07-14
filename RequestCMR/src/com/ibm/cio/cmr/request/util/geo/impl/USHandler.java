@@ -83,6 +83,8 @@ public class USHandler extends GEOHandler {
 
   private String addFlag = "N";
 
+  private String addZI01Flag = "N";
+
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
@@ -117,6 +119,7 @@ public class USHandler extends GEOHandler {
           // set the address type to Invoice To for CreateCMR
           record.setCmrAddrTypeCode("ZI01");
           record.setCmrAddrSeq("002");
+          addZI01Flag = "Y";
         }
       }
       if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
@@ -152,28 +155,30 @@ public class USHandler extends GEOHandler {
     // }
 
     // CREATCMR-6433
-    for (FindCMRRecordModel record : converted) {
-      if ("BPQS".equals(record.getUsCmrRestrictTo())) {
-        if (!"ZI01".equals(record.getCmrAddrTypeCode())) {
-          if (!"PG".equals(record.getCmrOrderBlock())) {
-            copyZI01Flag = "Y";
+    if (!"Y".equals(addZI01Flag)) {
+      for (FindCMRRecordModel record : converted) {
+        if ("BPQS".equals(record.getUsCmrRestrictTo())) {
+          if (!"ZI01".equals(record.getCmrAddrTypeCode())) {
+            if (!"PG".equals(record.getCmrOrderBlock())) {
+              copyZI01Flag = "Y";
+            }
           }
         }
       }
-    }
 
-    if ("Y".equals(copyZI01Flag)) {
-      FindCMRRecordModel zi01 = new FindCMRRecordModel();
-      zi01.setCmrAddrTypeCode("ZI01");
-      zi01.setCmrAddrSeq("002");
-      zi01.setCmrCountryLanded("US");
-      zi01.setCmrState("NY");
-      zi01.setCmrCity("ARMONK");
-      zi01.setCmrStreetAddress("1 N CASTLE DR MD NC313");
-      zi01.setCmrPostalCode("10504-1725");
+      if ("Y".equals(copyZI01Flag)) {
+        FindCMRRecordModel zi01 = new FindCMRRecordModel();
+        zi01.setCmrAddrTypeCode("ZI01");
+        zi01.setCmrAddrSeq("002");
+        zi01.setCmrCountryLanded("US");
+        zi01.setCmrState("NY");
+        zi01.setCmrCity("ARMONK");
+        zi01.setCmrStreetAddress("1 N CASTLE DR MD NC313");
+        zi01.setCmrPostalCode("10504-1725");
 
-      addFlag = "Y";
-      converted.add(zi01);
+        addFlag = "Y";
+        converted.add(zi01);
+      }
     }
     // CREATCMR-6433
 
