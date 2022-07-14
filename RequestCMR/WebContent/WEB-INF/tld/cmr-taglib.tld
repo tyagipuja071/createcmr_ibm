@@ -1077,11 +1077,11 @@
   </tag>
 
   <tag>
-    <description>Renders an HTML 'form' tag and exposes a binding path to inner tags
-    for binding.</description>
     <name>form</name>
     <tag-class>com.ibm.cio.cmr.request.ui.taglib.CmrFormTag</tag-class>
     <body-content>JSP</body-content>
+    <description>Renders an HTML 'form' tag and exposes a binding path to inner tags
+    for binding.</description>
     <attribute>
       <name>id</name>
       <required>false</required>
