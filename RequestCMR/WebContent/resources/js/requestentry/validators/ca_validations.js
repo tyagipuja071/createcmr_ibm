@@ -1149,7 +1149,7 @@ function limitDropdownOnScenarioChange(fromAddress, scenario, scenarioChanged) {
 
   if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'N' && scenarioChanged) {
     if (scenario == 'GOVT') {
-      var efcValues = [ '8', '9', 'E', 'G' ];
+      var efcValues = [ '7', '8', '9', 'E', 'G' ];
       FormManager.limitDropdownValues(FormManager.getField('taxCd1'), efcValues);
     }
   }
