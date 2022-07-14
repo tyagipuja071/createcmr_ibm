@@ -230,7 +230,7 @@ public class SwitzerlandUtil extends AutomationUtil {
 
             boolean duplicate = addressExists(entityManager, addr, requestData);
 
-            if (duplicate) {
+            if (duplicate  && addrType!=CmrConstants.RDC_INSTALL_AT) {
               LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               duplicateDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
               resultCodes.add("D");
@@ -242,7 +242,10 @@ public class SwitzerlandUtil extends AutomationUtil {
               } else if (CmrConstants.RDC_PAYGO_BILLING.equals(addrType)) {
                 LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Addition of new PG01 (" + addr.getId().getAddrSeq() + ") address validated in the checks.\n");
-              } else {
+              } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+                LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Addition of new ZI01 (" + addr.getId().getAddrSeq() + ") address validated in the checks.\n");
+              }else {
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
                 boolean matchesDnb = false;
                 if (matches != null) {
