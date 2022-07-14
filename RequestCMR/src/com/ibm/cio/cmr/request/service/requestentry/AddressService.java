@@ -1146,9 +1146,14 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         errorInfo = null;
         if (addr.getDplChkResult() == null) {
           Boolean errorStatus = false;
+          Boolean isPrivate=false;
+          if (data.getCustSubGrp().equals("PRIV")) {
+            isPrivate = true;
+
+          }
           try {
             dplResult = dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
-                geoHandler != null ? !geoHandler.customerNamesOnAddress() : false);
+                geoHandler != null ? !geoHandler.customerNamesOnAddress() : false, isPrivate);
           } catch (Exception e) {
             log.error("Error in performing DPL Check when call EVS on Request ID " + reqId + " Addr " + addr.getId().getAddrType() + "/"
                 + addr.getId().getAddrSeq(), e);
