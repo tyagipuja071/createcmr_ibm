@@ -345,29 +345,31 @@ public class USHandler extends GEOHandler {
     data.setRestrictTo(main.getUsCmrRestrictTo());
 
     // Tax Class / Code 1
-    String taxcd1 = main.getUsCmrTaxType1() + main.getUsCmrTaxClass1();
-
-    if (StringUtils.isEmpty(main.getUsCmrTaxType1()) || StringUtils.isEmpty(main.getUsCmrTaxClass1())) {
-      data.setTaxCd1("");
-    } else {
-      data.setTaxCd1(taxcd1);
-    }
+    // String taxcd1 = main.getUsCmrTaxType1() + main.getUsCmrTaxClass1();
+    // if (StringUtils.isEmpty(main.getUsCmrTaxType1()) ||
+    // StringUtils.isEmpty(main.getUsCmrTaxClass1())) {
+    // data.setTaxCd1("");
+    // } else {
+    // data.setTaxCd1(taxcd1);
+    // }
 
     // Tax Class / Code 2
-    String taxcd2 = main.getUsCmrTaxType2() + main.getUsCmrTaxClass2();
-    if (StringUtils.isEmpty(main.getUsCmrTaxType2()) || StringUtils.isEmpty(main.getUsCmrTaxClass2())) {
-      data.setTaxCd2("");
-    } else {
-      data.setTaxCd2(taxcd2);
-    }
+    // String taxcd2 = main.getUsCmrTaxType2() + main.getUsCmrTaxClass2();
+    // if (StringUtils.isEmpty(main.getUsCmrTaxType2()) ||
+    // StringUtils.isEmpty(main.getUsCmrTaxClass2())) {
+    // data.setTaxCd2("");
+    // } else {
+    // data.setTaxCd2(taxcd2);
+    // }
 
     // Tax Class / Code 3
-    String taxcd3 = main.getUsCmrTaxType3() + main.getUsCmrTaxClass3();
-    if (StringUtils.isEmpty(main.getUsCmrTaxType3()) || StringUtils.isEmpty(main.getUsCmrTaxClass3())) {
-      data.setTaxCd3("");
-    } else {
-      data.setTaxCd3(taxcd3);
-    }
+    // String taxcd3 = main.getUsCmrTaxType3() + main.getUsCmrTaxClass3();
+    // if (StringUtils.isEmpty(main.getUsCmrTaxType3()) ||
+    // StringUtils.isEmpty(main.getUsCmrTaxClass3())) {
+    // data.setTaxCd3("");
+    // } else {
+    // data.setTaxCd3(taxcd3);
+    // }
 
     data.setBpName(cmr.getUsCmrBpAbbrevNm());
 
