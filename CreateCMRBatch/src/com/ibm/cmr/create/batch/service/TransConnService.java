@@ -2070,7 +2070,7 @@ public class TransConnService extends BaseBatchService {
       if (CmrConstants.YES_NO.Y.toString().equals(result[0])) {
         String prospectCMR = (String) result[1];
         if (StringUtils.isEmpty(prospectCMR)) {
-          throw new Exception("Cannot process Propsect to Legal CMR conversion for Request ID " + reqId + ". Propsect CMR No. is missing.");
+          throw new Exception("Cannot process Prospect to Legal CMR conversion for Request ID " + reqId + ". Prospect CMR No. is missing.");
         }
         request.setProspectCMRNo(prospectCMR);
         request.setSeqNo((String) result[2]);
