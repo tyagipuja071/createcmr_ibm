@@ -1,5 +1,6 @@
 <%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@page import="com.ibm.cio.cmr.request.config.SystemConfiguration"%>
+<%@page import="com.ibm.cio.cmr.request.util.BluePagesHelper" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -64,6 +65,16 @@ AppUser user = AppUser.getUser(request);
                 <td style="font-size:13px">Lists file attachments related to requests.</td>
               </tr>
             <%}%>
+            <%
+              if(BluePagesHelper.isUserInUSTAXBlueGroup(user.getIntranetId()) || (user != null && (user.isAdmin()))){
+            %>
+              <tr>
+                <td><a style="cursor:pointer;font-size:13px" title="US SCC" href="${contextPath}/code/scclist?taxTeamFlag=Y">US SCC</a></td>
+                <td style="font-size:13px">Lists off State/County/City(SCC) Registered on the System.</td>
+              </tr>
+            <%
+              }
+            %>
             </tbody>
           </table>
           </div>

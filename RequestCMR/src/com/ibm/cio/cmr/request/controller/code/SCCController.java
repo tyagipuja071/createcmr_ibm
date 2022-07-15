@@ -47,17 +47,36 @@ public class SCCController extends BaseController {
 
   @RequestMapping(value = "/code/scclist", method = RequestMethod.GET)
   public @ResponseBody ModelAndView showSCC(HttpServletRequest request, ModelMap model) {
-    AppUser user = AppUser.getUser(request);
-    if (!user.isAdmin() && !user.isCmde()) {
-      LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Fields system function.");
-      ModelAndView mv = new ModelAndView("noaccess", "scc", new SCCModel());
-      return mv;
-    }
+    String taxTeamFlag = request.getParameter("taxTeamFlag");
 
-    // access granted
-    ModelAndView mv = new ModelAndView("scclist", "scc", new SCCModel());
-    setPageKeys("ADMIN", "CODE_ADMIN", mv);
-    return mv;
+    if ("Y".equals(taxTeamFlag)) {
+      // AppUser user = AppUser.getUser(request);
+      // if (!user.isAdmin() && !user.isCmde()) {
+      // LOG.warn("User " + user.getIntranetId() + " (" +
+      // user.getBluePagesName() + ") tried accessing the Fields system
+      // function.");
+      // ModelAndView mv = new ModelAndView("noaccess", "scc", new SCCModel());
+      // return mv;
+      // }
+
+      // access granted
+      ModelAndView mv = new ModelAndView("scclist", "scc", new SCCModel());
+      setPageKeys("SEARCH_HOME", "USSCC", mv);
+      return mv;
+    } else {
+      AppUser user = AppUser.getUser(request);
+      if (!user.isAdmin() && !user.isCmde()) {
+        LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Fields system function.");
+        ModelAndView mv = new ModelAndView("noaccess", "scc", new SCCModel());
+        return mv;
+      }
+
+      // access granted
+      ModelAndView mv = new ModelAndView("scclist", "scc", new SCCModel());
+      setPageKeys("ADMIN", "CODE_ADMIN", mv);
+      return mv;
+
+    }
   }
 
   @RequestMapping(value = "/code/delete", method = { RequestMethod.POST, RequestMethod.GET })
