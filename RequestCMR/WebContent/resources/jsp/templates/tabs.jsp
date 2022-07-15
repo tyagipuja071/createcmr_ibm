@@ -1,5 +1,6 @@
 <%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@page import="com.ibm.cio.cmr.request.config.SystemConfiguration"%>
+<%@page import="com.ibm.cio.cmr.request.util.BluePagesHelper" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
@@ -8,6 +9,9 @@
 AppUser user = AppUser.getUser(request);
 boolean hasPref = user != null && user.isPreferencesSet();
 boolean approver = user != null && user.isApprover();
+
+//CREATCMR-6522
+boolean isTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(user.getIntranetId());
 %>
 
 			<div id="ibm-primary-tabs">
@@ -126,6 +130,9 @@ boolean approver = user != null && user.isApprover();
             <li id="MQSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/mqsearch')">SOF/WTAAS</a></li>
             <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
             <li id="FILEATTACH_TAB"><a href="javascript: goToUrl('${contextPath}/attachlist')">File Attachments</a></li>
+            <%}%>
+            <%if (isTaxTeam || (user != null && (user.isAdmin()))){%>
+            <li id="USSCC_TAB"><a href="javascript: goToUrl('${contextPath}/code/scclist?taxTeamFlag=Y')">US SCC</a></li>
             <%}%>
         </c:if>
         
