@@ -1283,6 +1283,27 @@ function addTinNumberValidationTz() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
+
+function addTinNumberValidationKn() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var tinNumber = FormManager.getActualValue('taxCd1');
+
+        if (tinNumber.length > 0 && (!tinNumber.match(/^[0-9A-Z]*$/) || tinNumber.length != 11)) {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'Invalid format of TIN Number. It should be 11 characters long containing only upper-case latin and numeric characters.');
+        }
+        
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function addTaxRegFormatValidationMadagascar() {
   FormManager.addFormValidator((function() {
     return {
@@ -2086,6 +2107,23 @@ function setCTCValues() {
   }
 }
 
+function addPpsCeidValidator() {
+  var _custType = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'C') {
+    if (_custType == 'BUSPR' || _custType == 'XBP') {
+      FormManager.show('PPSCEID', 'ppsceid');
+      FormManager.enable('ppsceid');
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.setValue('ppsceid', '');
+      FormManager.readOnly('ppsceid');
+      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+    }
+  }
+}
+
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
@@ -2281,10 +2319,12 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addInternalDeptNumberValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addTaxRegFormatValidationMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addAttachmentValidatorOnTaxRegMadagascar, [ SysLoc.MADAGASCAR ], null, true);
-  GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA, SysLoc.KENYA], null, true);
+  GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA ], null, true);
+  GEOHandler.registerValidator(addTinNumberValidationKn, [ SysLoc.KENYA ], null, true);
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(addPpsCeidValidator, GEOHandler.MCO2);
 
   GEOHandler.registerValidator(validateCMRForMCO2GMLLCScenario, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(gmllcExistingCustomerAdditionalValidations, GEOHandler.MCO2, null, true);
