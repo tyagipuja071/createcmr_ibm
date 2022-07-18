@@ -906,7 +906,7 @@
 			<cmr:column span="1">
 				<cmr:label fieldId="divn_view">
 					<span class="lbl-Division">${ui.divn}</span>
-				</cmr:label>:111
+				</cmr:label>:
       		</cmr:column>
 			<cmr:column span="2">
 				<div id="divn_view">-</div>
