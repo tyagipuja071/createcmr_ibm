@@ -290,6 +290,28 @@ public class USAddrStdElement extends OverridingElement {
             }
           }
         }
+
+        // CREATCMR-6342
+        if ("ZS01".equals(addrTypeName)) {
+
+          String landCntry = addr.getLandCntry();
+          String stateProv = addr.getStateProv();
+
+          String scc = resetForSCC(entityManager, landCntry, stateProv, cityToUse, countyCodeToUse);
+
+          if (scc != "") {
+            try {
+              data.setCompanyNm(scc);
+              entityManager.merge(data);
+              entityManager.flush();
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
+
+        }
+        // CREATCMR-6342
+
       } else {
         details.append("-System error when connecting to the standard city service-.\n");
         hasIssues = true;
@@ -390,5 +412,28 @@ public class USAddrStdElement extends OverridingElement {
     return flag;
 
   }
+
+  // CREATCMR-6342
+  private String resetForSCC(EntityManager entityManager, String landCntry, String stateProv, String city1, String county) {
+    String scc = "";
+
+    String sql = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("LAND_CNTRY", landCntry);
+    query.setParameter("N_ST", stateProv);
+    query.setParameter("C_CNTY", county);
+    query.setParameter("N_CITY", city1.toUpperCase());
+
+    List<Object[]> results = query.getResults();
+    if (results != null && !results.isEmpty()) {
+      Object[] result = results.get(0);
+      if (!"".equals(result[0])) {
+        scc = (String) result[0];
+      }
+    }
+
+    return scc;
+  }
+  // CREATCMR-6342
 
 }
