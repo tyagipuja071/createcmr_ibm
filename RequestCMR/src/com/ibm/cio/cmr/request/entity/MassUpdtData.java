@@ -95,6 +95,12 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
   @Column(name = "TAX_EXEMPT_STATUS_3")
   private String taxExemptStatus3;
 
+  @Column(name = "BP_ACCT_TYP")
+  private String bpAcctTyp;
+
+  @Column(name = "BP_NAME")
+  private String bpName;
+
   public String getTaxExemptStatus2() {
     return taxExemptStatus2;
   }
@@ -589,6 +595,22 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
 
   public void setEducAllowCd(String educAllowCd) {
     this.educAllowCd = educAllowCd;
+  }
+
+  public String getBpAcctTyp() {
+    return bpAcctTyp;
+  }
+
+  public void setBpAcctTyp(String bpAcctTyp) {
+    this.bpAcctTyp = bpAcctTyp;
+  }
+
+  public String getBpName() {
+    return bpName;
+  }
+
+  public void setBpName(String bpName) {
+    this.bpName = bpName;
   }
 
 }
