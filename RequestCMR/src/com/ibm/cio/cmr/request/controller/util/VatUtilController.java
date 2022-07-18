@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.controller.util;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,6 +16,9 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -235,6 +239,7 @@ public class VatUtilController {
     ModelMap map = new ModelMap();
 
     ValidationResult validation = null;
+    Boolean comp_proof_Abn = false;
 
     String abn = request.getParameter("abn");
     if (StringUtils.isEmpty(abn)) {
@@ -244,6 +249,7 @@ public class VatUtilController {
     if (StringUtils.isEmpty(reqId)) {
       validation = ValidationResult.error("'reqId' param is required.");
     }
+    comp_proof_Abn = isDnbOverrideAttachmentProvided(reqId);
 
     if (validation == null || validation.isSuccess()) {
 
@@ -273,11 +279,12 @@ public class VatUtilController {
         if (abnResponse.getRecord().isValid() && !(abnResponse.getRecord().getStatus().equalsIgnoreCase("Cancelled"))) {
           validation = ValidationResult.success();
         } else if (abnResponse.getRecord().isValid()
-            && (!abnResponse.getRecord().getStatus().equals(null) && abnResponse.getRecord().getStatus().equalsIgnoreCase("Cancelled"))) {
+            && (!abnResponse.getRecord().getStatus().equals(null) && abnResponse.getRecord().getStatus().equalsIgnoreCase("Cancelled"))
+            && !comp_proof_Abn) {
           validation = ValidationResult.error(
               "ABN provided on the request cancelled as per API Validation. Please provide Supporting documentation(Company Proof) as attachment");
         } else {
-          validation = ValidationResult.success();
+          validation = ValidationResult.error("ABN provided on the request mismatches with API.Please provide correct ABN#");
         }
       } else {
         validation = ValidationResult.error("ABN Validation Failed.Failed to connect to ABN Service. Checking ABN and Company Name with D&B.");
@@ -320,5 +327,15 @@ public class VatUtilController {
       map.addAttribute("result", tycResponse.getRecord());
     }
     return map;
+  }
+
+  // CREATCMR 3176 company Proof
+  public static boolean isDnbOverrideAttachmentProvided(String reqId) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_MATCH_ATTACHMENT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", reqId);
+
+    return query.exists();
   }
 }
