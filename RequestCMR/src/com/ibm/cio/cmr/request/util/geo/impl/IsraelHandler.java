@@ -1058,7 +1058,7 @@ public class IsraelHandler extends EMEAHandler {
     if ("C".equals(reqType)) {
       assignPairedSeqForNewAddr(entityManager, addr);
     } else if ("U".equals(reqType)) {
-      if ("Y".equals(addr.getImportInd())) {
+      if ("Y".equals(addr.getImportInd()) || "L".equals(addr.getImportInd())) {
 
         AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
         if (addrRdc != null && StringUtils.isNotBlank(addrRdc.getPairedAddrSeq())) {
