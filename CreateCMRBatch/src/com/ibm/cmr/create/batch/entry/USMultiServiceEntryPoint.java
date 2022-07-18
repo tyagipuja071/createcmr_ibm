@@ -16,11 +16,11 @@ public class USMultiServiceEntryPoint extends BatchEntryPoint {
   public static void main(String[] args) throws CmrException {
     USMultiService service = null;
     if (args != null && args.length > 0 && "MASS".equals(args[0])) {
-      BatchEntryPoint.initContext("SwissMultiMass");
+      BatchEntryPoint.initContext("USMultiMass");
       service = new USMultiService();
       service.setMode(Mode.MassUpdt);
     } else {
-      BatchEntryPoint.initContext("SwissMulti");
+      BatchEntryPoint.initContext("USMulti");
       service = new USMultiService();
       service.setMode(Mode.Single);
     }
