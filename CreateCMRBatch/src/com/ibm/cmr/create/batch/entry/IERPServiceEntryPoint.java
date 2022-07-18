@@ -11,12 +11,13 @@ public class IERPServiceEntryPoint extends BatchEntryPoint {
    * @param args
    */
   public static void main(String[] args) throws CmrException {
-    BatchEntryPoint.initContext("IERPProcess");
 
     BaseBatchService service = null;
     if (args != null && args.length > 0 && "MULTI".equalsIgnoreCase(args[0])) {
+      BatchEntryPoint.initContext("IERPProcessMulti");
       service = new IERPProcessMultiService();
     } else {
+      BatchEntryPoint.initContext("IERPProcess");
       service = new IERPProcessService();
     }
 
