@@ -906,7 +906,7 @@
 			<cmr:column span="1">
 				<cmr:label fieldId="divn_view">
 					<span class="lbl-Division">${ui.divn}</span>
-				</cmr:label>:
+				</cmr:label>:111
       		</cmr:column>
 			<cmr:column span="2">
 				<div id="divn_view">-</div>
@@ -1524,10 +1524,19 @@
       </cmr:column>
     </cmr:view>
     
-    <cmr:view exceptForGEO="IERP,CND,MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,SWISS,FR,TW,KR" exceptForCountry="862,726,666,822,838,758,631,760,858,766,649">
+    <cmr:view exceptForGEO="IERP,CND,MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,SWISS,FR,TW,KR,US" exceptForCountry="862,726,666,822,838,758,631,760,858,766,649,897">
       <cmr:column span="1">
         <cmr:label fieldId="divn_view">
           <span class="lbl-Division">${ui.divn}</span>:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="divn_view">-</div>
+      </cmr:column>
+    </cmr:view>
+    <cmr:view forGEO="US" forCountry="897">
+      <cmr:column span="1">
+        <cmr:label fieldId="divn_view">
+          <span class="lbl-Division">Division/Address Con't</span>:</cmr:label>
       </cmr:column>
       <cmr:column span="2">
         <div id="divn_view">-</div>
