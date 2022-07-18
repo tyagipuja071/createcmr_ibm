@@ -183,10 +183,11 @@ public class AustraliaUtil extends AutomationUtil {
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scenarioList));
     processSkipCompanyChecks(engineData, requestData, details);
     switch (scenario) {
-    case SCENARIO_BLUEMIX:
-    case SCENARIO_MARKETPLACE:
-      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-      break;
+    // CREATCMR - 2031
+    // case SCENARIO_BLUEMIX:
+    // case SCENARIO_MARKETPLACE:
+    // engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+    // break;
     case SCENARIO_PRIVATE_CUSTOMER:
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_ECOSYS:
