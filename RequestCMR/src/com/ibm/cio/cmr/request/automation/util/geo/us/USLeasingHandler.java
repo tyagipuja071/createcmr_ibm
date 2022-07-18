@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
@@ -249,6 +250,9 @@ public class USLeasingHandler extends USBPHandler {
 
     details.append(" - PCC A/R Dept: G8M\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
+
+    String processingType = getProcessingTypeForUS(entityManager, "897");
+
     if (childRequest != null) {
       if (!StringUtils.isBlank(childRequest.getData().getMktgDept())) {
         details.append(" - Marketing Dept: " + childRequest.getData().getMktgDept() + "\n");
@@ -259,7 +263,7 @@ public class USLeasingHandler extends USBPHandler {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(),
             childRequest.getData().getSvcArOffice());
       }
-    } else if (ibmCmr != null) {
+    } else if (ibmCmr != null && "TC".equals(processingType)) {
       try {
         getMktgSvcUsCmr(ibmCmr.getCmrNum(), details, overrides, data);
       } catch (Exception e) {
@@ -501,6 +505,14 @@ public class USLeasingHandler extends USBPHandler {
     childData.setCustGrp(type);
     childData.setCustSubGrp(subType);
     childAdmin.setCustType(custType);
+  }
+
+  public static String getProcessingTypeForUS(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTO.GET_PROCESSING_TYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", country);
+    query.setForReadOnly(true);
+    return query.getSingleResult(String.class);
   }
 
 }
