@@ -1147,7 +1147,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         if (addr.getDplChkResult() == null) {
           Boolean errorStatus = false;
           Boolean isPrivate=false;
-          if (data.getCustSubGrp().equals("PRIV")) {
+          if ("PRIV".equals(data.getCustSubGrp())) {
             isPrivate = true;
 
           }
