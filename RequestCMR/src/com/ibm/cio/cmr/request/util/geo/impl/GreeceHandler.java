@@ -1703,6 +1703,7 @@ public class GreeceHandler extends BaseSOFHandler {
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setModeOfPayment("");
+      data.setPpsceid("");
     }
   }
 

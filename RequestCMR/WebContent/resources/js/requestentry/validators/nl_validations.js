@@ -377,7 +377,6 @@ function addHandlersForNL() {
 	      setEcoCodeBasedOnSubScenario();
 	    });
 	  }
-
 }
 
 function setExpediteReason() {
@@ -1766,6 +1765,7 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+
 function setPPSCEIDRequired() {
   var reqType = FormManager.getActualValue('reqType');
   var subGrp = FormManager.getActualValue('custSubGrp');
@@ -1781,7 +1781,6 @@ function setPPSCEIDRequired() {
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }
 }
-
 /*
  * CREATECMR-6379 NL - Economic Code based on Customer Sub Scenario Values
  */

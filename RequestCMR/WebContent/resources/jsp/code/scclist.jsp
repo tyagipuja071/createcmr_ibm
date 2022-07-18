@@ -11,10 +11,21 @@
 <%
     // CREATCMR-5447
     boolean showFlag = true;
+
     AppUser user = AppUser.getUser(request);
     if (BluePagesHelper.isUserInUSTAXBlueGroup(user.getIntranetId())) {
        showFlag = false;
     }
+    
+    String taxTeamFlag = request.getParameter("taxTeamFlag");
+    if("Y".equals(taxTeamFlag)) {
+      showFlag = false;
+    }
+    
+    if((user.isAdmin() && !"Y".equals(taxTeamFlag)) && !BluePagesHelper.isUserInUSTAXBlueGroup(user.getIntranetId())){
+      showFlag = true;
+    }
+    
     // CREATCMR-5447
 %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
@@ -28,6 +39,9 @@
  }
 </style>
 <script>
+  function backToSearchHome() {
+    window.location = cmr.CONTEXT_ROOT + '/searchhome';
+  }
   dojo.addOnLoad(function(){
     var ids = cmr.query('SCCSTATES', {_qall  : 'Y'});
     var model = { 
@@ -151,7 +165,9 @@
             </cmr:gridCol>
             <cmr:gridCol width="150px" field="nCnty" header="County / Country" />
             <cmr:gridCol width="150px" field="nCity" header="City" >
+            <% if(showFlag) { %>
               <cmr:formatter functionName="SCCService.cityFormatter" />
+            <% } %>
             </cmr:gridCol>
             <cmr:gridCol width="115px" field="cZip" header="Zip Code">
               <cmr:formatter functionName="SCCService.newZipFormatter"/>
@@ -176,6 +192,14 @@
     <cmr:button label="Add US SCC" onClick="SCCService.addSCC(false)" highlight="true" />
     <cmr:button label="Add Non-US SCC" onClick="SCCService.addSCC(true)" pad="true" />
     <% } %>  
+    <% if("Y".equals(taxTeamFlag)) { %>
+    <cmr:button label="Back to Search Home" onClick="backToSearchHome()" pad="true" />
+    <%
+      } else {
+    %>
     <cmr:button label="Back to Code Maintenance Home" onClick="backToCodeMaintHome()" pad="true" />
+    <%
+    }
+    %>
   </cmr:buttonsRow>
 </cmr:section>

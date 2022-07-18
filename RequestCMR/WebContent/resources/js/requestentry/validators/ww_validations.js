@@ -80,7 +80,7 @@ function addCMRSearchValidator() {
         var result = FormManager.getActualValue('findCmrResult');
         var reqType = FormManager.getActualValue('reqType');
         if (reqType == 'C' && FormManager.getActualValue('sourceSystId').toUpperCase() == 'FEDCMR' && FormManager.getActualValue('custGrp') == '14'){
-        	return new ValidationResult(null, true);
+          return new ValidationResult(null, true);
         }
         if (result == '' || result.toUpperCase() == 'NOT DONE') {
           return new ValidationResult(null, false, 'CMR Search has not been performed yet.');
@@ -940,23 +940,23 @@ function resetVATValidationsForPayGo(){
 }
 
 function addIsuCdObsoleteValidator(){
-	var oldIsuCd = _pagemodel.isuCd;
-	FormManager.addFormValidator((function() {
-		return {
-			validate : function() {
-				var reqType = FormManager.getActualValue('reqType');
-	             var isuCd = FormManager.getActualValue('isuCd');
-	             if (reqType == 'C' && isuCd == '32') {
-	            	 return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');
-	             }else  if (reqType == 'U' && isuCd == '32' && oldIsuCd != '32') {
-	            	 return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');
-	             }
-	             else {
-        			 return new ValidationResult(null, true);
-        		 }
-			}
-		}
-	})(), 'MAIN_IBM_TAB', 'frmCMR');
+  var oldIsuCd = _pagemodel.isuCd;
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+               var isuCd = FormManager.getActualValue('isuCd');
+               if (reqType == 'C' && isuCd == '32') {
+                 return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');
+               }else  if (reqType == 'U' && isuCd == '32' && oldIsuCd != '32') {
+                 return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');
+               }
+               else {
+               return new ValidationResult(null, true);
+             }
+      }
+    }
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 /* Register WW Validators */
