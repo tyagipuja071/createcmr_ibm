@@ -1677,7 +1677,7 @@ function setClientTierValuesForUpdate() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-	var reqType = FormManager.getActualValue('reqType');
+  var reqType = FormManager.getActualValue('reqType');
 
   if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {

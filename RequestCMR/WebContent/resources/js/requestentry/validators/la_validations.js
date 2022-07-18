@@ -278,6 +278,9 @@ function autoSetDataCrosTypSubTypeSSAMX() {
 
 // Story :1278109- By Mukesh Kumar
 function autoSetSBOAndSalesTMNo() {
+  if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
+    return;
+  }
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var _custType = FormManager.getActualValue('custType');
   console.log(">>> Process _custSubGrp >> " + _custSubGrp);
@@ -2625,24 +2628,41 @@ function setTaxRegimeMX() {
   if (FormManager.getActualValue('custGrp') == 'CROSS') {
     FormManager.limitDropdownValues(FormManager.getField('taxCd3'), '616');
   } else if(FormManager.getActualValue('custGrp') == 'LOCAL') {
-    if (custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM') {
-      taxGrp = '1';
-    } else {
-      taxGrp = '2';
-    }
-  
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      CMT: '%' + taxGrp + '%'
-    };
-  
-    var taxDropDown = cmr.query('GET.MX_TAX_CODE', qParams);
-    var arr =  taxDropDown.map(taxDropDown => taxDropDown.ret1);
-    FormManager.limitDropdownValues(FormManager.getField('taxCd3'), arr);
+  	if (custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM') {
+    	taxGrp = '1';
+  	} else {
+    	taxGrp = '2';
+  	}
+
+  	var qParams = {
+    	_qall : 'Y',
+    	ISSUING_CNTRY : cntry,
+    	CMT: '%' + taxGrp + '%'
+  	};
+
+  	var taxDropDown = cmr.query('GET.MX_TAX_CODE', qParams);
+  	var arr =  taxDropDown.map(taxDropDown => taxDropDown.ret1);
+  	FormManager.limitDropdownValues(FormManager.getField('taxCd3'), arr);
   }
 }
 
+//CREATCMR-4897  SBO and MRC to not be mandatory for Prospect conversion
+function makeMrcSboOptionalForProspectLA() {
+	var ifProspect = FormManager.getActualValue('prospLegalInd');
+    if (dijit.byId('prospLegalInd')) {
+    	ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+    }
+    if('Y' == ifProspect){
+    	if (typeof (_pagemodel) != 'undefined') {
+    		if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
+    			FormManager.resetValidations('mrcCd');
+                FormManager.resetValidations('salesBusOffCd');
+                FormManager.setValue("isuCd", "");
+                }
+    		}
+    	}
+    console.log('SBO & MRC are non mandatory for Prospect');
+}
 
 /* Register LA Validators */
 dojo.addOnLoad(function() {
@@ -2725,5 +2745,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
 
-  
+  //CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
+  GEOHandler.addAfterConfig(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
 });

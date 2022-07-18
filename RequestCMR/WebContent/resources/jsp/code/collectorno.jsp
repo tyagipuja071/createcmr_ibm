@@ -41,7 +41,7 @@ function backToCodeMaintHome() {
 <cmr:boxContent>
   <cmr:tabs />
   
-  <form:form method="POST" action="${contextPath}/code/collectornolist" name="frmCMRCollectorNoList" class="ibm-column-form ibm-styled-form" modelAttribute="collector">
+  <cmr:form method="POST" action="${contextPath}/code/collectornolist" name="frmCMRCollectorNoList" class="ibm-column-form ibm-styled-form" modelAttribute="collector">
   <cmr:model model="collector" />
     <cmr:section>
       <cmr:row topPad="8">
@@ -69,7 +69,7 @@ function backToCodeMaintHome() {
       <cmr:row topPad="10">
       </cmr:row>
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

@@ -1305,7 +1305,7 @@ public class MCOPtEsHandler extends MCOHandler {
                   + "If one is populated, the other must be empty. >>");
               error.addError((row.getRowNum() + 1), "Postal Code",
                   "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                  + "If one is populated, the other must be empty.");
+                      + "If one is populated, the other must be empty.");
               validations.add(error);
             }
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(cbPostal)) {
@@ -1477,7 +1477,8 @@ public class MCOPtEsHandler extends MCOHandler {
                 if (!StringUtils.isEmpty(salesRep)) {
                   if (salesRep.length() == 6 && !(salesRep.chars().allMatch(Character::isLetterOrDigit))) {
                     LOG.trace("Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), "Sales Rep. No.", "Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
+                    error.addError((row.getRowNum() + 1), "Sales Rep. No.",
+                        "Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
                   }
                 }
 

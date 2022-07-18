@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.service.window;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,10 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
   private static Logger LOG = Logger.getLogger(RequestSummaryService.class);
   public static final String TYPE_CUSTOMER = "C";
   public static final String TYPE_IBM = "IBM";
+  public static final List<String> AP_COUNTRIES = Arrays.asList(SystemLocation.AUSTRALIA, SystemLocation.BANGLADESH, SystemLocation.BRUNEI,
+      SystemLocation.MYANMAR, SystemLocation.SRI_LANKA, SystemLocation.INDIA, SystemLocation.INDONESIA, SystemLocation.PHILIPPINES,
+      SystemLocation.SINGAPORE, SystemLocation.VIETNAM, SystemLocation.THAILAND, SystemLocation.HONG_KONG, SystemLocation.NEW_ZEALAND,
+      SystemLocation.LAOS, SystemLocation.MALAYSIA, SystemLocation.NEPAL, SystemLocation.CAMBODIA, SystemLocation.TAIWAN);
 
   @Override
   public RequestSummaryModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
@@ -382,6 +387,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           }
 
           if (TYPE_IBM.equals(type) && !equals(oldData.getInacCd(), newData.getInacCd()) && !LAHandler.isBRIssuingCountry(cmrCountry)
+              && !AP_COUNTRIES.contains(newData.getCmrIssuingCntry())
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "INACCode"))) {
             update = new UpdatedDataModel();
             update.setDataField(PageManager.getLabel(cmrCountry, "INACCode", "-"));
@@ -390,6 +396,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             results.add(update);
           }
           if (TYPE_IBM.equals(type) && !equals(oldData.getInacType(), newData.getInacType()) && !LAHandler.isBRIssuingCountry(cmrCountry)
+              && !AP_COUNTRIES.contains(newData.getCmrIssuingCntry())
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "INACType"))) {
             update = new UpdatedDataModel();
             update.setDataField(PageManager.getLabel(cmrCountry, "INACType", "-"));
@@ -397,7 +404,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update.setOldData(getCodeAndDescription(oldData.getInacType(), "INACType", cmrCountry));
             results.add(update);
           }
-          if (TYPE_IBM.equals(type) && !equals(oldData.getIsuCd(), newData.getIsuCd())
+          if (TYPE_IBM.equals(type) && !equals(oldData.getIsuCd(), newData.getIsuCd()) && !AP_COUNTRIES.contains(newData.getCmrIssuingCntry())
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "ISU"))) {
             update = new UpdatedDataModel();
             update.setDataField(PageManager.getLabel(cmrCountry, "ISU", "-"));
@@ -456,6 +463,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               results.add(update);
             }
             if (TYPE_IBM.equals(type) && !equals(oldData.getClientTier(), newData.getClientTier())
+                && !AP_COUNTRIES.contains(newData.getCmrIssuingCntry())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "ClientTier"))) {
               update = new UpdatedDataModel();
               update.setDataField(PageManager.getLabel(cmrCountry, "ClientTier", "-"));

@@ -33,7 +33,7 @@ function addHandlersForIL() {
       setEnterpriseSalesRepSBO(value);
     });
   }
-  
+
   if (_streetHandler == null) {
     _streetHandler = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
       setStreetContBehavior();

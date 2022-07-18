@@ -153,9 +153,6 @@ public class CNHandler extends GEOHandler {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
-    }
   }
 
   @Override
@@ -885,7 +882,7 @@ public class CNHandler extends GEOHandler {
         } else if ("21".equals(data.getIsuCd()) || "60".equals(data.getIsuCd())) {
           data.setClientTier("Z");
           data.setSearchTerm("00000");
-        } else if (isBPUser(data)) { // CREATCMR-6084
+        } else if (isBPUser(data)) {
           data.setSearchTerm("04182");
         } else {
           data.setClientTier("Q");

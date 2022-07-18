@@ -39,7 +39,7 @@
   margin-bottom: 5px;
 }
 </style>
-<form:form method="POST" action="<%=action%>" name="frmApproval" class="ibm-column-form ibm-styled-form" modelAttribute="approval">
+<cmr:form method="POST" action="<%=action%>" name="frmApproval" class="ibm-column-form ibm-styled-form" modelAttribute="approval">
   <form:hidden path="approverId"/>
   <form:hidden path="type"/>
   <form:hidden path="approvalId"/>
@@ -149,7 +149,7 @@
     </cmr:buttonsRow>
 </cmr:section>
 <%} %>
-</form:form>
+</cmr:form>
 <jsp:include page="../requestentry/attach_dl.jsp" />
 <jsp:include page="../requestentry/viewattachment.jsp" />
 <jsp:include page="../requestentry/addattachment.jsp" />

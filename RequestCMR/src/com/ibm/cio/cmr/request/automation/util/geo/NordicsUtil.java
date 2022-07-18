@@ -111,6 +111,8 @@ public class NordicsUtil extends AutomationUtil {
   public static final String EE_INTER_LOCAL = "EEINT";
   public static final String EE_BUSPR_LOCAL = "EEBUS";
 
+  
+
   public static final String LT_COMME_LOCAL = "LTCOM";
   public static final String LT_GOV_LOCAL = "LTGOV";
   public static final String LT_INTSO_LOCAL = "LTISO";
@@ -311,7 +313,7 @@ public class NordicsUtil extends AutomationUtil {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_FIELD_COMPUTATION);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_RETRIEVE_VALUES);
       break;
-
+      
     case FI_INTER_LOCAL:
     case EE_INTER_LOCAL:
     case EE_BUSPR_LOCAL:
@@ -323,7 +325,6 @@ public class NordicsUtil extends AutomationUtil {
     case CROSS_INTER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-     
     }
 
     return true;

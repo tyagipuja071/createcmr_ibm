@@ -3,6 +3,10 @@ package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.geo.impl.APHandler;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 
@@ -26,6 +30,7 @@ public abstract class GCGTransformer extends APTransformer {
   @Override
   protected void handleDataDefaults(MQMessageHandler handler) {
     super.handleDataDefaults(handler);
+    APHandler aphandler = (APHandler) RequestUtils.getGEOHandler(handler.cmrData.getCmrIssuingCntry());
 
     String sellingDept = "Z2I0";
     String ZERO4 = "0000";
@@ -90,6 +95,26 @@ public abstract class GCGTransformer extends APTransformer {
 
     if ("0".equalsIgnoreCase(handler.cmrData.getClientTier())) {
       handler.messageHash.put("GB_SegCode", "");
+    }
+    // Handling obsolete data
+    if (handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.TAIWAN)) {
+      DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
+      Boolean expiredCluster = false;
+      if (oldDataRdc != null)
+        expiredCluster = aphandler.expiredClusterForAP(handler.cmrData, oldDataRdc);
+      if (expiredCluster) {
+        handler.messageHash.put("ClusterNo", oldDataRdc.getApCustClusterId());
+        handler.messageHash.put("GB_SegCode", oldDataRdc.getClientTier());
+        handler.messageHash.put("ISU", oldDataRdc.getIsuCd());
+        handler.messageHash.put("MrktRespCode", oldDataRdc.getMrcCd());
+        handler.messageHash.put("inacType", oldDataRdc.getInacType());
+        handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
+        handler.messageHash.put("SalesmanNo", oldDataRdc.getRepTeamMemberNo());
+        handler.messageHash.put("InstDept", oldDataRdc.getIsbuCd());
+        handler.messageHash.put("SellDept", oldDataRdc.getIsbuCd());
+        handler.messageHash.put("IBMCode", oldDataRdc.getCollectionCd());
+        handler.messageHash.put("EngrBrnchOff", oldDataRdc.getEngineeringBo());
+      }
     }
   }
 

@@ -6,10 +6,9 @@
 // var _addrTypesForFR = [ 'ZP01', 'ZS01', 'ZI01', 'ZD01', 'ZS02' ];
 var _addrTypesForFR = [ 'ZP01', 'ZS01', 'ZI01', 'ZD01' ];
 var _poBOXHandler = [];
-var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "GR", "FI", "FR", "GB", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL",
-    "PL", "PT", "RO", "SE", "SI", "SK" ];
-var VAT_EU_COUNTRY = [ "AT", "BE", "BG", "HR", "CY", "CZ", "EG", "FR", "DE", "GR", "HU", "IE", "IL", "IT", "LU", "MT", "NL", "PK", "PL", "PT", "RO",
-    "RU", "RS", "SK", "SI", "ZA", "ES", "TR", "GB", "UA" ];
+var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "GR", "FI", "FR", "GB", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK" ];
+var VAT_EU_COUNTRY = [ "AT", "BE", "BG", "HR", "CY", "CZ", "EG", "FR", "DE", "GR", "HU", "IE", "IL", "IT", "LU", "MT", "NL", "PK", "PL", "PT", "RO", "RU", "RS", "SK", "SI", "ZA", "ES", "TR", "GB",
+    "UA" ];
 var SUB_REGIONS = new Set([ 'MQ', 'GP', 'GF', 'PM', 'RE', 'TF', 'KM', 'YT', 'NC', 'VU', 'WF', 'PF', 'MC', 'AD', 'DZ' ]);
 
 function afterConfigForFR() {
@@ -220,7 +219,7 @@ function setINACOnScenario() {
   }
   if (countyCd == 'MC') {
     if (role == 'Requester') {
-      FormManager.setValue('inacCd', 'MI80');
+      FormManager.setValue('inacCd', '');
       FormManager.readOnly('inacCd');
 
     } else if (role == 'Processor') {
@@ -390,8 +389,8 @@ function setVATOnScenario(vatExemptOnchange) {
     } else if (custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'BUSPR' || custSubGrp == 'LCFIN') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.enable('vat');
-    } else if (custSubGrp == 'CBMME' || custSubGrp == 'XBUSP' || custSubGrp == 'CBTER' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT'
-        || custSubGrp == 'CBTSO' || custSubGrp == 'CBFIN' || custSubGrp == 'CBVRN') {
+    } else if (custSubGrp == 'CBMME' || custSubGrp == 'XBUSP' || custSubGrp == 'CBTER' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT' || custSubGrp == 'CBTSO' || custSubGrp == 'CBFIN'
+        || custSubGrp == 'CBVRN') {
       var isVATEUCntry = false;
       var reqId = FormManager.getActualValue('reqId');
       var qParams = {
@@ -470,8 +469,8 @@ function setSBOOnScenario() {
         FormManager.enable('salesBusOffCd');
       }
     } else if (!SUB_REGIONS.has(countyCd)
-        && (custSubGrp == 'CBMME' || custSubGrp == 'CBICU' || custSubGrp == 'CBVRN' || custSubGrp == 'CBFIN' || custSubGrp == 'CBTSO'
-            || custSubGrp == 'XBLUM' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT' || custSubGrp == 'CBIEM')) {
+        && (custSubGrp == 'CBMME' || custSubGrp == 'CBICU' || custSubGrp == 'CBVRN' || custSubGrp == 'CBFIN' || custSubGrp == 'CBTSO' || custSubGrp == 'XBLUM' || custSubGrp == 'CBSTC'
+            || custSubGrp == 'CBDPT' || custSubGrp == 'CBIEM')) {
       if (role == 'Requester') {
         FormManager.setValue('salesBusOffCd', '200200');// CMR-221
         FormManager.readOnly('salesBusOffCd');
@@ -647,7 +646,7 @@ function addPostBoxHandler() {
       var poBox = FormManager.getActualValue('poBox');
       var addrType = FormManager.getActualValue('addrType');
       var importInd = FormManager.getActualValue('importInd');
-      
+
       if (addrType == 'ZP01' && importInd == 'N' && poBox != '') {
         FormManager.removeValidator('addrTxt', Validators.REQUIRED);
       } else {
@@ -738,33 +737,28 @@ function autoSetValuesOnPostalCode(postCd) {
   if (!sboSetbyPostalCdLogic) {
 
     var IsicCdList1 = [ '9806', '6519', '6591', '6592', '7020', '7705', '9819', '6511', '6599', '6711', '6712', '6719', '7715' ];
-    var IsicCdList2 = [ '9811', '4888', '9213', '2230', '9211', '9212', '9214', '9219', '9249', '2211', '2212', '2213', '2219', '2221', '2222',
-        '7413', '9220', '9241', '7430', '7709', '9233', '9801', '6420', '7700', '9111', '9112', '9120', '9191', '9192', '9199', '9232' ];
+    var IsicCdList2 = [ '9811', '4888', '9213', '2230', '9211', '9212', '9214', '9219', '9249', '2211', '2212', '2213', '2219', '2221', '2222', '7413', '9220', '9241', '7430', '7709', '9233', '9801',
+        '6420', '7700', '9111', '9112', '9120', '9191', '9192', '9199', '9232' ];
     var IsicCdList3 = [ '9808', '8512', '8511', '8519', '7707' ];
-    var IsicCdList4 = [ '9821', '4010', '4020', '4030', '4100', '9000', '7717', '9822', '2330', '2411', '2412', '2413', '2421', '2422', '2429',
-        '2430', '1110', '1120', '2320', '5050', '5141', '6030', '7713' ];
+    var IsicCdList4 = [ '9821', '4010', '4020', '4030', '4100', '9000', '7717', '9822', '2330', '2411', '2412', '2413', '2421', '2422', '2429', '2430', '1110', '1120', '2320', '5050', '5141', '6030',
+        '7713' ];
     var IsicCdList5 = [ '9816', '3530', '2927', '3511', '7718' ];
-    var IsicCdList6 = [ '0140', '0150', '0200', '0501', '0502', '7495', '9812', '1513', '1514', '1520', '1541', '1542', '1543', '1544', '1549',
-        '1551', '1552', '1553', '1554', '1600', '0111', '0112', '0113', '0121', '0122', '0130', '1511', '1512', '1531', '1532', '1533', '8520',
-        '7703', '5121', '5122', '5139', '5142', '5149', '5151', '5152', '5159', '5190', '5020', '5110', '5260', '7112', '7113', '7121', '7129',
-        '7130', '7422', '7491', '7492', '7493', '7494', '7499', '8531', '9301', '9302', '9303', '9309', '9500', '7719', '9804', '5219', '5251',
-        '5030', '5240', '5211', '5220', '5252', '5259', '5520', '5233', '5234', '7714' ];
-    var IsicCdList7 = [ '7511', '7523', '9900', '7706', '9807', '7513', '7514', '7521', '7522', '7720', '9818', '8030', '8090', '8010', '8021',
-        '8022', '7704', '9231', '7512', '7320' ];
+    var IsicCdList6 = [ '0140', '0150', '0200', '0501', '0502', '7495', '9812', '1513', '1514', '1520', '1541', '1542', '1543', '1544', '1549', '1551', '1552', '1553', '1554', '1600', '0111', '0112',
+        '0113', '0121', '0122', '0130', '1511', '1512', '1531', '1532', '1533', '8520', '7703', '5121', '5122', '5139', '5142', '5149', '5151', '5152', '5159', '5190', '5020', '5110', '5260', '7112',
+        '7113', '7121', '7129', '7130', '7422', '7491', '7492', '7493', '7494', '7499', '8531', '9301', '9302', '9303', '9309', '9500', '7719', '9804', '5219', '5251', '5030', '5240', '5211', '5220',
+        '5252', '5259', '5520', '5233', '5234', '7714' ];
+    var IsicCdList7 = [ '7511', '7523', '9900', '7706', '9807', '7513', '7514', '7521', '7522', '7720', '9818', '8030', '8090', '8010', '8021', '8022', '7704', '9231', '7512', '7320' ];
     var IsicCdList8 = [ '8532', '7530' ];
     var IsicCdList9 = [ '9814', '6601', '6603', '6602', '6720', '7712' ];
-    var IsicCdList10 = [ '9813', '2930', '3410', '3420', '3591', '2511', '3430', '2911', '2921', '3520', '3599', '5010', '5040', '7708', '2811',
-        '2812', '2813', '2892', '2893', '2899', '2912', '2913', '2914', '2915', '2919', '2922', '2923', '2925', '2926', '2929', '3320', '3512',
-        '3592', '3610', '3691', '3692', '3693', '3694', '3699', '4510', '4530', '4540', '7010', '2010', '2021', '2022', '2023', '2029', '2101',
-        '2102', '2109', '1711', '1712', '1722', '1723', '1729', '2310', '2710', '2720', '2731', '2732', '2891', '3710', '1010', '1020', '1030',
-        '1200', '1310', '1320', '1410', '1421', '1422', '1429', '2519', '2520', '2610', '2691', '2692', '2693', '2694', '2695', '2696', '2699',
-        '3720', '7711', '9817', '3110', '3120', '3130', '3140', '3150', '3190', '3210', '3220', '3230', '3311', '3312', '3313', '3330', '3000',
-        '7710' ];
+    var IsicCdList10 = [ '9813', '2930', '3410', '3420', '3591', '2511', '3430', '2911', '2921', '3520', '3599', '5010', '5040', '7708', '2811', '2812', '2813', '2892', '2893', '2899', '2912',
+        '2913', '2914', '2915', '2919', '2922', '2923', '2925', '2926', '2929', '3320', '3512', '3592', '3610', '3691', '3692', '3693', '3694', '3699', '4510', '4530', '4540', '7010', '2010', '2021',
+        '2022', '2023', '2029', '2101', '2102', '2109', '1711', '1712', '1722', '1723', '1729', '2310', '2710', '2720', '2731', '2732', '2891', '3710', '1010', '1020', '1030', '1200', '1310', '1320',
+        '1410', '1421', '1422', '1429', '2519', '2520', '2610', '2691', '2692', '2693', '2694', '2695', '2696', '2699', '3720', '7711', '9817', '3110', '3120', '3130', '3140', '3150', '3190', '3210',
+        '3220', '3230', '3311', '3312', '3313', '3330', '3000', '7710' ];
     var IsicCdList11 = [ '2924', '4520', '7421', '5143', '4550', '7122' ];
     var IsicCdList12 = [ '2424', '5131', '1721', '1730', '1810', '1820', '1911', '1912', '1920', '5232', '5239', '5231' ];
     var IsicCdList13 = [ '7310', '2423', '7721' ];
-    var IsicCdList14 = [ '9820', '6210', '6220', '6010', '6021', '6022', '6023', '6110', '6120', '6301', '6302', '6303', '6304', '5510', '7111',
-        '6309', '6411', '6412', '7716' ];
+    var IsicCdList14 = [ '9820', '6210', '6220', '6010', '6021', '6022', '6023', '6110', '6120', '6301', '6302', '6303', '6304', '5510', '7111', '6309', '6411', '6412', '7716' ];
     var IsicCdList15 = [ '9802', '7230', '7240', '7290', '7210', '7221', '7229', '7250', '7123', '7701', '7702' ];
     var IsicCdList16 = [ '7414', '7411', '7412' ];
 
@@ -1077,9 +1071,8 @@ function add32PostCdCntrySBOlogic() {
     countyCd = "FR";
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (!((countyCd == "FR" || countyCd == "KM" || countyCd == "WF") && (custSubGrp == 'COMME' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN'
-      || custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'IBMEM' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC'
-      || custSubGrp == 'THDPT' || custSubGrp == 'CBTER' || custSubGrp == 'LCFIN'))) {
+  if (!((countyCd == "FR" || countyCd == "KM" || countyCd == "WF") && (custSubGrp == 'COMME' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'INTSO'
+      || custSubGrp == 'IBMEM' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBTER' || custSubGrp == 'LCFIN'))) {
     return;
   }
 
@@ -1134,14 +1127,12 @@ function add32PostCdCntrySBOlogic() {
       sboValue = sboResult.ret1;
       sboValue = sboValue + sboValue;// CMR-221
       FormManager.setValue('salesBusOffCd', sboValue);
-    } else if (postCd == '75' || postCd == '77' || postCd == '78' || postCd == '91' || postCd == '92' || postCd == '93' || postCd == '94'
-        || postCd == '95') {
+    } else if (postCd == '75' || postCd == '77' || postCd == '78' || postCd == '91' || postCd == '92' || postCd == '93' || postCd == '94' || postCd == '95') {
       var insustry = FormManager.getActualValue('subIndustryCd').substring(0, 1);
-      if (insustry == 'A' || insustry == 'B' || insustry == 'C' || insustry == 'D' || insustry == 'F' || insustry == 'H' || insustry == 'K'
-          || insustry == 'N' || insustry == 'R' || insustry == 'S' || insustry == 'T' || insustry == 'W') {
+      if (insustry == 'A' || insustry == 'B' || insustry == 'C' || insustry == 'D' || insustry == 'F' || insustry == 'H' || insustry == 'K' || insustry == 'N' || insustry == 'R' || insustry == 'S'
+          || insustry == 'T' || insustry == 'W') {
         FormManager.setValue('salesBusOffCd', '01D01D');// CMR-221
-      } else if (insustry == 'E' || insustry == 'G' || insustry == 'J' || insustry == 'L' || insustry == 'M' || insustry == 'P' || insustry == 'U'
-          || insustry == 'V' || insustry == 'X') {
+      } else if (insustry == 'E' || insustry == 'G' || insustry == 'J' || insustry == 'L' || insustry == 'M' || insustry == 'P' || insustry == 'U' || insustry == 'V' || insustry == 'X') {
         FormManager.setValue('salesBusOffCd', '01M01M');// CMR-221
       }
     }
@@ -1292,8 +1283,7 @@ function setAbbrevLocnOnCustSubGrpChange() {
   if (custGrp == null) {
     return;
   } else if (custGrp == "LOCAL") {
-    if (countyCd != "VU" && countyCd != "PF" && countyCd != "YT" && countyCd != "NC" && countyCd != "WF" && countyCd != "AD" && countyCd != "DZ"
-        && countyCd != "TN") {
+    if (countyCd != "VU" && countyCd != "PF" && countyCd != "YT" && countyCd != "NC" && countyCd != "WF" && countyCd != "AD" && countyCd != "DZ" && countyCd != "TN") {
       var reqId = FormManager.getActualValue('reqId');
       var qParams = {
         REQ_ID : reqId,
@@ -1474,8 +1464,7 @@ function setDummySIRETOnCustSubGrpChange(value) {
   var countpaygo = paygoUser.ret1;
   if ((Number(countpaygo) == 1 && role == 'Processor')) {
     FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-  } else if (value == "COMME" || value == "HOSTC" || value == "THDPT" || value == "BUSPR" || value == "GOVRN" || value == "INTER" || value == "INTSO"
-      || value == "LCFIN") {
+  } else if (value == "COMME" || value == "HOSTC" || value == "THDPT" || value == "BUSPR" || value == "GOVRN" || value == "INTER" || value == "INTSO" || value == "LCFIN") {
     FormManager.enable('taxCd1');
     FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'SIRET' ], 'MAIN_CUST_TAB');
   } else if (value == 'PRICU' || value == 'XBLUM' || value == 'IBMEM' || value == 'CBIEM') {
@@ -1937,8 +1926,7 @@ function addAbbrevLocnlogic() {
     if (custGrp == null) {
       return;
     } else if (custGrp == "LOCAL") {
-      if (countyCd != "VU" && countyCd != "PF" && countyCd != "YT" && countyCd != "NC" && countyCd != "WF" && countyCd != "AD" && countyCd != "DZ"
-          && countyCd != "TN") {
+      if (countyCd != "VU" && countyCd != "PF" && countyCd != "YT" && countyCd != "NC" && countyCd != "WF" && countyCd != "AD" && countyCd != "DZ" && countyCd != "TN") {
         abbrevLocnValue = FormManager.getActualValue('city1');
       } else if (countyCd == "VU") {
         abbrevLocnValue = "Vanuatu";
@@ -2009,9 +1997,9 @@ function add32SBODependcyOnPostCdOnAddrSave() {
     countyCd = "FR";
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (!((countyCd == "FR" || countyCd == "KM" || countyCd == "WF") && (custSubGrp == 'COMME' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN'
-      || custSubGrp == 'INTER' || custSubGrp == 'LCIFF' || custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN' || custSubGrp == 'IBMEM'
-      || custSubGrp == 'LCOEM' || custSubGrp == 'INTSO' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBTER' || custSubGrp == 'LCFIN'))) {
+  if (!((countyCd == "FR" || countyCd == "KM" || countyCd == "WF") && (custSubGrp == 'COMME' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'LCIFF'
+      || custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN' || custSubGrp == 'IBMEM' || custSubGrp == 'LCOEM' || custSubGrp == 'INTSO' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT'
+      || custSubGrp == 'CBTER' || custSubGrp == 'LCFIN'))) {
     return;
   }
 
@@ -2051,14 +2039,12 @@ function add32SBODependcyOnPostCdOnAddrSave() {
       sboValue = sboResult.ret1;
       sboValue = sboValue + sboValue;// CMR-221
       FormManager.setValue('salesBusOffCd', sboValue);
-    } else if (postCd == '75' || postCd == '77' || postCd == '78' || postCd == '91' || postCd == '92' || postCd == '93' || postCd == '94'
-        || postCd == '95') {
+    } else if (postCd == '75' || postCd == '77' || postCd == '78' || postCd == '91' || postCd == '92' || postCd == '93' || postCd == '94' || postCd == '95') {
       var insustry = FormManager.getActualValue('subIndustryCd').substring(0, 1);
-      if (insustry == 'A' || insustry == 'B' || insustry == 'C' || insustry == 'D' || insustry == 'F' || insustry == 'H' || insustry == 'K'
-          || insustry == 'N' || insustry == 'R' || insustry == 'S' || insustry == 'T' || insustry == 'W') {
+      if (insustry == 'A' || insustry == 'B' || insustry == 'C' || insustry == 'D' || insustry == 'F' || insustry == 'H' || insustry == 'K' || insustry == 'N' || insustry == 'R' || insustry == 'S'
+          || insustry == 'T' || insustry == 'W') {
         FormManager.setValue('salesBusOffCd', '01D01D');// CMR-221
-      } else if (insustry == 'E' || insustry == 'G' || insustry == 'J' || insustry == 'L' || insustry == 'M' || insustry == 'P' || insustry == 'U'
-          || insustry == 'V' || insustry == 'X') {
+      } else if (insustry == 'E' || insustry == 'G' || insustry == 'J' || insustry == 'L' || insustry == 'M' || insustry == 'P' || insustry == 'U' || insustry == 'V' || insustry == 'X') {
         FormManager.setValue('salesBusOffCd', '01M01M');// CMR-221
       }
     }
@@ -2174,8 +2160,7 @@ function addVATScenarioOnAddrSave() {
     } else if (custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'BUSPR' || custSubGrp == 'LCFIN') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.enable('vat');
-    } else if (custSubGrp == 'CBMME' || custSubGrp == 'XBUSP' || custSubGrp == 'CBTER' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT'
-        || custSubGrp == 'CBTSO' || custSubGrp == 'CBFIN') {
+    } else if (custSubGrp == 'CBMME' || custSubGrp == 'XBUSP' || custSubGrp == 'CBTER' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT' || custSubGrp == 'CBTSO' || custSubGrp == 'CBFIN') {
       var isVATEUCntry = false;
       var landCntry = FormManager.getActualValue('landCntry');
       for (var i = 0; i < VAT_EU_COUNTRY.length; i++) {
@@ -2280,14 +2265,10 @@ function addCrossBorderValidatorForFR() {
           REQID : reqId
         });
 
-        if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 != defaultLandCntry
-            && scenario != 'CROSS') {
-          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should be \'' + defaultLandCntry
-              + '\' for Non Cross-Border customers.');
-        } else if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 == defaultLandCntry
-            && scenario == 'CROSS') {
-          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should not be \'' + defaultLandCntry
-              + '\' for Cross-Border customers.');
+        if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 != defaultLandCntry && scenario != 'CROSS') {
+          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should be \'' + defaultLandCntry + '\' for Non Cross-Border customers.');
+        } else if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 == defaultLandCntry && scenario == 'CROSS') {
+          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should not be \'' + defaultLandCntry + '\' for Cross-Border customers.');
         }
         return new ValidationResult(null, true);
       }
@@ -2959,8 +2940,7 @@ function setISUClientTierOnScenario() {
     FormManager.setValue('isuCd', '8B');
     FormManager.setValue('clientTier', '');
   } else if (SUB_REGIONS.has(countyCd)// CMR-234
-      && (custSubGrp == 'CBMME' || custSubGrp == 'CBVRN' || custSubGrp == 'XBLUM' || custSubGrp == 'CBIEM' || custSubGrp == 'CBFIN'
-          || custSubGrp == 'CBTSO' || custSubGrp == 'CBDPT' || custSubGrp == 'CBSTC')) {
+      && (custSubGrp == 'CBMME' || custSubGrp == 'CBVRN' || custSubGrp == 'XBLUM' || custSubGrp == 'CBIEM' || custSubGrp == 'CBFIN' || custSubGrp == 'CBTSO' || custSubGrp == 'CBDPT' || custSubGrp == 'CBSTC')) {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'S');
   } else if (custSubGrp == 'XBLUM' || custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP' || custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
@@ -3204,59 +3184,58 @@ function isZD01OrZP01ExistOnCMR(addressType) {
 }
 
 function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
-  FormManager
-      .addFormValidator(
-          (function() {
-            return {
-              validate : function() {
-                var reqReason = FormManager.getActualValue('reqReason');
-                var addressType = FormManager.getActualValue('addrType');
-                if (addressType == 'ZP02' || addressType == 'ZD02') {
-                  if (reqReason != 'IGF') {
-                    return new ValidationResult(null, false, 'Request Reason should be IGF.');
-                  }
-                }
-                var requestId = FormManager.getActualValue('reqId');
-                var addressSeq = FormManager.getActualValue('addrSeq');
-                var dummyseq = "xx";
-                var showDuplicateIGFBillToError = false;
-                var showDuplicateIGFInstallAtToError = false;
-                var qParams;
-                if (addressMode == 'updateAddress') {
-                  qParams = {
-                    REQ_ID : requestId,
-                    ADDR_SEQ : addressSeq,
-                    ADDR_TYPE : addressType
-                  };
-                } else {
-                  qParams = {
-                    REQ_ID : requestId,
-                    ADDR_SEQ : dummyseq,
-                    ADDR_TYPE : addressType
-                  };
-                }
-                var result = cmr.query('GETADDRECORDSBYTYPE', qParams);
-                var addCount = result.ret1;
-                if (addressType != undefined && addressType != '' && addressType == 'ZP02' && cmr.addressMode != 'updateAddress') {
-                  showDuplicateIGFBillToError = Number(addCount) >= 1 && addressType == 'ZP02';
-                  if (showDuplicateIGFBillToError) {
-                    return new ValidationResult(null, false,
-                        'Only one IGF Bill-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
-                  }
-                }
-
-                if (addressType != undefined && addressType != '' && addressType == 'ZD02' && cmr.addressMode != 'updateAddress') {
-                  showDuplicateIGFInstallAtToError = Number(addCount) >= 1 && addressType == 'ZD02';
-                  if (showDuplicateIGFInstallAtToError) {
-                    return new ValidationResult(null, false,
-                        'Only one IGF Ship-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
-                  }
-                }
-
-                return new ValidationResult(null, true);
+  FormManager.addFormValidator(
+      (function() {
+        return {
+          validate : function() {
+            var reqReason = FormManager.getActualValue('reqReason');
+            var addressType = FormManager.getActualValue('addrType');
+            if (addressType == 'ZP02' || addressType == 'ZD02') {
+              if (reqReason != 'IGF') {
+                return new ValidationResult(null, false, 'Request Reason should be IGF.');
               }
-            };
-          })(), null, 'frmCMR_addressModal');
+            }
+            var requestId = FormManager.getActualValue('reqId');
+            var addressSeq = FormManager.getActualValue('addrSeq');
+            var dummyseq = "xx";
+            var showDuplicateIGFBillToError = false;
+            var showDuplicateIGFInstallAtToError = false;
+            var qParams;
+            if (addressMode == 'updateAddress') {
+              qParams = {
+                REQ_ID : requestId,
+                ADDR_SEQ : addressSeq,
+                ADDR_TYPE : addressType
+              };
+            } else {
+              qParams = {
+                REQ_ID : requestId,
+                ADDR_SEQ : dummyseq,
+                ADDR_TYPE : addressType
+              };
+            }
+            var result = cmr.query('GETADDRECORDSBYTYPE', qParams);
+            var addCount = result.ret1;
+            if (addressType != undefined && addressType != '' && addressType == 'ZP02' && cmr.addressMode != 'updateAddress') {
+              showDuplicateIGFBillToError = Number(addCount) >= 1 && addressType == 'ZP02';
+              if (showDuplicateIGFBillToError) {
+                return new ValidationResult(null, false,
+                    'Only one IGF Bill-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+              }
+            }
+
+            if (addressType != undefined && addressType != '' && addressType == 'ZD02' && cmr.addressMode != 'updateAddress') {
+              showDuplicateIGFInstallAtToError = Number(addCount) >= 1 && addressType == 'ZD02';
+              if (showDuplicateIGFInstallAtToError) {
+                return new ValidationResult(null, false,
+                    'Only one IGF Ship-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+              }
+            }
+
+            return new ValidationResult(null, true);
+          }
+        };
+      })(), null, 'frmCMR_addressModal');
 }
 
 function filterCmrnoP() {
@@ -3289,11 +3268,9 @@ function addCmrNoValidator() {
             return new ValidationResult(null, false, 'CMR Number should be only numbers.');
           } else if (cmrNo == "000000") {
             return new ValidationResult(null, false, 'CMR Number should not be 000000.');
-          } else if (cmrNo != '' && custSubType != ''
-              && (custSubType == 'CBTER' || custSubType == 'CBTSO' || custSubType == 'INTER' || custSubType == 'INTSO') && !cmrNo.startsWith('99')) {
+          } else if (cmrNo != '' && custSubType != '' && (custSubType == 'CBTER' || custSubType == 'CBTSO' || custSubType == 'INTER' || custSubType == 'INTSO') && !cmrNo.startsWith('99')) {
             return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format for internal scenarios');
-          } else if (cmrNo != '' && custSubType != '' && custSubType != 'CBTER' && custSubType != 'CBTSO' && custSubType != 'INTER'
-              && custSubType != 'INTSO' && cmrNo.startsWith('99')) {
+          } else if (cmrNo != '' && custSubType != '' && custSubType != 'CBTER' && custSubType != 'CBTSO' && custSubType != 'INTER' && custSubType != 'INTSO' && cmrNo.startsWith('99')) {
             return new ValidationResult(null, false, 'Non Internal CMR Number should not be in 99XXXX for scenarios');
           } else {
             var qParams = {
@@ -3360,8 +3337,7 @@ function setClassificationCode() {
   if (role == 'Requester') {
     if (reqType == 'C') {
       if (custSubGrp != '') {
-        if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || custSubGrp == 'CBSTC' || custSubGrp == 'THDPT'
-            || custSubGrp == 'CBDPT') {
+        if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || custSubGrp == 'CBSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBDPT') {
           FormManager.setValue(field, '11');
           FormManager.readOnly('custClass');
         } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
@@ -3413,16 +3389,14 @@ function setClassificationCode() {
         FormManager.readOnly('custClass');
       }
     } else if (reqType == 'U') {
-      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45', '46', '47', '48',
-          '60', '71', '81', '85' ]);
+      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45', '46', '47', '48', '60', '71', '81', '85' ]);
       FormManager.setValue(field, _pagemodel.custClass);
       FormManager.readOnly('custClass');
     }
   } else if (role == 'Processor') {
     if (reqType == 'C') {
       if (custSubGrp != '') {
-        if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || custSubGrp == 'CBSTC' || custSubGrp == 'THDPT'
-            || custSubGrp == 'CBDPT') {
+        if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || custSubGrp == 'CBSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBDPT') {
           FormManager.setValue(field, '11');
           FormManager.readOnly('custClass');
         } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
@@ -3473,13 +3447,11 @@ function setClassificationCode() {
         FormManager.readOnly('custClass');
       }
     } else if (reqType == 'U') {
-      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45', '46', '47', '48',
-          '60', '71', '81', '85' ]);
+      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45', '46', '47', '48', '60', '71', '81', '85' ]);
       FormManager.setValue(field, _pagemodel.custClass);
     }
   } else if (role == 'Viewer') {
-    FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45', '46', '47', '48',
-        '60', '71', '81', '85' ]);
+    FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45', '46', '47', '48', '60', '71', '81', '85' ]);
     FormManager.setValue(field, _pagemodel.custClass);
     FormManager.readOnly('custClass');
   }
@@ -3859,7 +3831,7 @@ function setCoverageIsuCtcBasedOnLandCntry(fromAddress, currentLanded) {
   }
   if (isCoverage34QCountry(landedCountry)) {
     FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier', 'Q');     
+    FormManager.setValue('clientTier', 'Q');
   }
 }
 
@@ -3912,7 +3884,7 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
     }
 
     var landedCountry = '';
-      landedCountry = getSoldToLanded();
+    landedCountry = getSoldToLanded();
 
     if (custSubGrp == 'INTSO' && custGrp == 'LOCAL') {
       FormManager.setValue('salesBusOffCd', '98F98F');
@@ -4080,7 +4052,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') { 
+    if (clientTierCode == '') {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
@@ -4122,23 +4094,23 @@ function clientTierValidator() {
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
         var valResult = null;
-        
+
         var oldClientTier = null;
         var oldISU = null;
         var requestId = FormManager.getActualValue('reqId');
-        
+
         if (reqType == 'C') {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-              REQ_ID : requestId,
+            REQ_ID : requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-          
+
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU =  result.ret3 != null ? result.ret3 : '';
-            
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
             if (clientTier != oldClientTier || isuCd != oldISU) {
               valResult = clientTierCodeValidator();
             }
@@ -4164,19 +4136,19 @@ function postBoxValidationBillTo() {
             return new ValidationResult(null, false, 'Street Name and Number is required.');
           }
         }
-       }
+      }
     };
   })(), null, 'frmCMR_addressModal');
 }
 
-//CREATCMR-6000 2H22 coverage changes
+// CREATCMR-6000 2H22 coverage changes
 function isCoverage2H22MEACountry(country) {
-  var emaCountryList = [ 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'ML', 'MR', 'MA', 'NE', 'SN', 'TG', 'AE' ,'CI'];
+  var emaCountryList = [ 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'ML', 'MR', 'MA', 'NE', 'SN', 'TG', 'AE', 'CI' ];
   return emaCountryList.includes(country);
 }
 
 function isCoverage2H22Subregion(countryCd) {
-  var subRegionList = [ 'FR','DZ','GF','KM','MC','NC','PF','PM','WF','YT','NC','VU','RE','MQ','GP','AD'];
+  var subRegionList = [ 'FR', 'DZ', 'GF', 'KM', 'MC', 'NC', 'PF', 'PM', 'WF', 'YT', 'NC', 'VU', 'RE', 'MQ', 'GP', 'AD' ];
   return subRegionList.includes(countryCd);
 }
 
@@ -4250,7 +4222,6 @@ function set2H22CoverageChangesOnLandedCoutrychange() {
     }
   }
 }
-
 
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];

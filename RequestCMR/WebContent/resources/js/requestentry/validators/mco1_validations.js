@@ -1,3 +1,4 @@
+
 /* Register MCO1 Javascripts */
 var localScenarios = [ "LSLOC", "NALOC", "SZLOC", "ZALOC" ];
 var crossScenarios = [ "LSCRO", "NACRO", "SZCRO", "ZACRO" ];

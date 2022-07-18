@@ -62,7 +62,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/field_lbl" name="frmCMRSearch" class="ibm-column-form ibm-styled-form" modelAttribute="fieldlbl">
+  <cmr:form method="POST" action="${contextPath}/code/field_lbl" name="frmCMRSearch" class="ibm-column-form ibm-styled-form" modelAttribute="fieldlbl">
     <cmr:section>
      <cmr:row topPad="8" addBackground="true">
         <cmr:column span="1">
@@ -106,7 +106,7 @@
       <cmr:row topPad="10">
       </cmr:row>
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

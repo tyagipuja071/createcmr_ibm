@@ -44,7 +44,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 </style>
 <cmr:window>
   <div class="cmr-summary">
-    <form:form method="GET" action="${contextPath}/window/summary/create" name="frmCMR" class="ibm-column-form ibm-styled-form"
+    <cmr:form method="GET" action="${contextPath}/window/summary/create" name="frmCMR" class="ibm-column-form ibm-styled-form"
       modelAttribute="summary">
       <!--  Main Details Section -->
       <jsp:include page="summary_main.jsp" />
@@ -620,10 +620,10 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
             ${summary.addr.addrTxt}
 		  </cmr:column>
 		</cmr:view>
-        <cmr:column span="1" width="130" exceptForCountry="755,848,724" exceptForGEO="CEMEA,NL,NORDX,JP,TW,KR">
+        <cmr:column span="1" width="130" exceptForCountry="755,848,724,897" exceptForGEO="CEMEA,NL,NORDX,JP,TW,KR,US">
           <label><cmr:fieldLabel fieldId="StreetAddress2" />:</label>
         </cmr:column>
-        <cmr:column span="1" width="170" exceptForCountry="755,848,724" exceptForGEO="CEMEA,NL,NORDX,JP,TW,KR">
+        <cmr:column span="1" width="170" exceptForCountry="755,848,724,897" exceptForGEO="CEMEA,NL,NORDX,JP,TW,KR,US">
           ${summary.addr.addrTxt2}
 				</cmr:column>
         <cmr:column span="1" width="130" forCountry="755">
@@ -1432,7 +1432,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
         </cmr:row>
       </cmr:view>
 
-    </form:form>
+    </cmr:form>
   </div>
   <cmr:windowClose>
     <cmr:button label="${ui.btn.refresh}" onClick="window.location.reload()" pad="true" highlight="true" />

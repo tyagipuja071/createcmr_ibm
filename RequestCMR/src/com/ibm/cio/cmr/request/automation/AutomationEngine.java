@@ -194,12 +194,24 @@ public class AutomationEngine {
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
     requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
 
-    if ("897".equals(requestData.getData().getCmrIssuingCntry()) && "U".equals(requestData.getAdmin().getReqType())) {
-      // CREATCMR-5447
-      if (requesterFromTaxTeam) {
-        isUsTaxSkipToPcp = USHandler.getUSDataSkipToPCP(entityManager, requestData.getData());
-      } else {
-        isUsTaxSkipToPpn = USHandler.getUSDataSkipToPPN(entityManager, requestData.getData());
+    // CREATCMR-6331
+    boolean isUsEntCompToPpn = false;
+    String strCmtUsEntCompToPpn = "";
+
+    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+      if ("U".equals(requestData.getAdmin().getReqType())) {
+        // CREATCMR-5447
+        if (requesterFromTaxTeam) {
+          isUsTaxSkipToPcp = USHandler.getUSDataSkipToPCP(entityManager, requestData.getData());
+        } else {
+          isUsTaxSkipToPpn = USHandler.getUSDataSkipToPPN(entityManager, requestData.getData());
+        }
+      } else if ("M".equals(requestData.getAdmin().getReqType())) {
+        // CREATCMR-6331
+        strCmtUsEntCompToPpn = USHandler.getUSEntCompToPPN(entityManager, requestData.getAdmin());
+        if (StringUtils.isNotBlank(strCmtUsEntCompToPpn)) {
+          isUsEntCompToPpn = true;
+        }
       }
     }
     for (AutomationElement<?> element : this.elements) {
@@ -520,6 +532,14 @@ public class AutomationEngine {
             admin.setReqStatus("PPN");
             createComment(entityManager, cmt, reqId, appUser);
             createHistory(entityManager, admin, cmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false, null);
+            // CREATCMR-5447
+          } else if (isUsEntCompToPpn) {
+            // CREATCMR-6331
+            LOG.debug("Moving Request " + reqId + " to PPN");
+            admin.setReqStatus("PPN");
+            createComment(entityManager, strCmtUsEntCompToPpn, reqId, appUser);
+            createHistory(entityManager, admin, strCmtUsEntCompToPpn, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false,
+                null);
             // CREATCMR-5447
           } else if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
             String country = data.getCmrIssuingCntry();

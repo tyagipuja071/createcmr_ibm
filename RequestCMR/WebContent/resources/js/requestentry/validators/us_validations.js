@@ -471,8 +471,6 @@ function setClientTierValuesUS() {
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.resetValidations('clientTier');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
   } else {
     var role = FormManager.getActualValue('userRole').toUpperCase();
     var reqType = FormManager.getActualValue('reqType');
@@ -581,6 +579,63 @@ function usRestrictCode() {
   }
 }
 
+function clientTierCodeValidator() {
+  var isuCode = FormManager.getActualValue('isuCd');
+  var clientTierCode = FormManager.getActualValue('clientTier');
+
+  if (isuCode == '5K') {
+    if (clientTierCode == '') {
+      $("#clientTierSpan").html('');
+
+      return new ValidationResult(null, true);
+    } else {
+      $("#clientTierSpan").html('');
+
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank.');
+    }
+  }
+}
+
+function clientTierValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var clientTier = FormManager.getActualValue('clientTier');
+        var isuCd = FormManager.getActualValue('isuCd');
+        var reqType = FormManager.getActualValue('reqType');
+        var valResult = null;
+        
+        var oldClientTier = null;
+        var oldISU = null;
+        var requestId = FormManager.getActualValue('reqId');
+        
+        if (reqType == 'C') {
+          valResult = clientTierCodeValidator();
+        } else {
+          qParams = {
+              REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
+          
+          if (result != null && result != '') {
+            oldClientTier = result.ret1 != null ? result.ret1 : '';
+            oldISU =  result.ret3 != null ? result.ret3 : '';
+            
+            if (clientTier != oldClientTier || isuCd != oldISU) {
+              valResult = clientTierCodeValidator();
+            }
+          }
+        }
+        return valResult;
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function addKuklaValidator() {
 
   var kuklaOfArray = [ '21', '71', '99', '85', '43', '34', '52' ];
@@ -679,6 +734,7 @@ function orderBlockValidation() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 // CREATCMR-5447
 function TaxTeamUpdateAddrValidation() {
   FormManager.addFormValidator((function() {
@@ -770,6 +826,12 @@ function addCompanyEnterpriseValidation() {
         var company = FormManager.getActualValue('company');
         var enterprise = FormManager.getActualValue('enterprise');
 
+        ret = cmr.query('BP.GET_PROCESSING_TYP', {
+          CNTRY_CD : SysLoc.USA
+        });
+        if (ret && ret.ret1 && ret.ret1 != '' && ret.ret1 == 'TC') {
+          return new ValidationResult(null, true);
+        }
         custNm = custNm.toUpperCase().replaceAll(' ', '');
 
         var chkResult = false;
@@ -886,7 +948,7 @@ function updateBOForEntp(){
 	    FormManager.setValue('mktgDept', 'SVB');
 	  }
 }
-
+	 
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
@@ -896,6 +958,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
+  GEOHandler.registerValidator(clientTierValidator, [ SysLoc.USA ], null, true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(initUSTemplateHandler, [ SysLoc.USA ]);
@@ -910,8 +973,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
   // CREATCMR-4466
-  // GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA
-  // ], null, true);
+  GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA ], null, true);
   GEOHandler.addAfterConfig(lockOrdBlk, [ SysLoc.USA ]);
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.USA ], null, true);
 
@@ -920,8 +982,12 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(sccWarningShowAndHide, [ SysLoc.USA ], null, false);
 
   GEOHandler.addAddrFunction(hideKUKLA, [ SysLoc.USA ]);
-  GEOHandler.registerValidator(addKuklaValidator, [ SysLoc.USA ], null, true);
-  GEOHandler.registerValidator(addDivStreetCountValidator, [ SysLoc.USA ], null, true);
+  // CREATCMR-6375
+  // GEOHandler.registerValidator(addKuklaValidator, [ SysLoc.USA ], null,
+  // true);
+  // CREATCMR-6255
+  // GEOHandler.registerValidator(addDivStreetCountValidator, [ SysLoc.USA ],
+  // null, true);
 
   GEOHandler.addAfterTemplateLoad(setClientTierValuesUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(setClientTierValuesUS, [ SysLoc.USA ]);

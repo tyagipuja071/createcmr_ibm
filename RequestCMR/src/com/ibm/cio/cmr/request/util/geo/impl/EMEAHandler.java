@@ -3973,7 +3973,7 @@ public class EMEAHandler extends BaseSOFHandler {
         isuCd = validateColValFromCell(currCell);
         currCell = row.getCell(11);
         clientTier = validateColValFromCell(currCell);
-             if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
+        if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
             || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
           LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
           error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");

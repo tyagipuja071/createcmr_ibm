@@ -150,6 +150,13 @@ function processRequestAction() {
         } else {
           cmr.showModal('addressVerificationModal');
         }
+      } else if (cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
+        // Cmr-3176- Dnb match
+        if (checkIfFinalDnBCheckRequired() && reqType == 'U') {
+          matchDnBForAutomationCountries();
+        } else {
+          cmr.showModal('addressVerificationModal');
+        }
       } else if (cmrCntry == SysLoc.SINGAPORE || cmrCntry == SysLoc.AUSTRALIA) {
         // Cmr-1701 for isic Dnb match acc to scenario
         if (findDnbResult == 'Accepted') {
@@ -1608,6 +1615,14 @@ function checkIfFinalDnBCheckRequired() {
       return true;
     }
   }
+
+  if (cmrCntry == '616') {
+    if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+        && matchOverrideIndc != 'Y') {
+      // currently Enabled Only For AU
+      return true;
+    }
+  }
   return false;
 }
 function checkIfDnBCheckReqForIndia() {
@@ -1712,7 +1727,7 @@ function matchDnBForAutomationCountries() {
                     .showAlert('This action will override the D&B Matching Process. By overriding the D&B matching, you\'re obliged to provide either one of the following documentation '
                         + 'as backup-client\'s official website, business registration proof, government issued documents, client\'s confirmation email and signed PO, attach it under the file content of Company Proof. '
                         + 'Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.');
-                FormManager.setValue('matchOverrideIndc', 'Y');                
+                FormManager.setValue('matchOverrideIndc', 'Y');
               } else {
                 cmr.showModal('addressVerificationModal');
               }

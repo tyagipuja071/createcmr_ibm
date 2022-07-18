@@ -6,6 +6,9 @@ package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.geo.impl.APHandler;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 
@@ -36,6 +39,7 @@ public abstract class ISATransformer extends APTransformer {
   @Override
   protected void handleDataDefaults(MQMessageHandler handler) {
     super.handleDataDefaults(handler);
+    APHandler aphandler = (APHandler) RequestUtils.getGEOHandler(handler.cmrData.getCmrIssuingCntry());
     if ("NA".equalsIgnoreCase(handler.cmrData.getVat())) {
       handler.messageHash.put("CtryText", "");
     } else {
@@ -61,10 +65,29 @@ public abstract class ISATransformer extends APTransformer {
     handler.messageHash.put("AbbrLoc", "   " + abbloc);
 
     String clusterID = handler.cmrData.getApCustClusterId();
-    if (clusterID.contains("BLAN")) {
+    if (clusterID != null && clusterID.contains("BLAN")) {
       handler.messageHash.put("ClusterNo", "");
     } else {
       handler.messageHash.put("ClusterNo", clusterID);
+    }
+
+    // Handling obsolete data
+    DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
+    Boolean expiredCluster = false;
+    if (oldDataRdc != null)
+      expiredCluster = aphandler.expiredClusterForAP(handler.cmrData, oldDataRdc);
+    if (expiredCluster) {
+      handler.messageHash.put("ClusterNo", oldDataRdc.getApCustClusterId());
+      handler.messageHash.put("GB_SegCode", oldDataRdc.getClientTier());
+      handler.messageHash.put("ISU", oldDataRdc.getIsuCd());
+      handler.messageHash.put("MrktRespCode", oldDataRdc.getMrcCd());
+      handler.messageHash.put("inacType", oldDataRdc.getInacType());
+      handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
+      handler.messageHash.put("SalesmanNo", oldDataRdc.getRepTeamMemberNo());
+      handler.messageHash.put("InstDept", oldDataRdc.getIsbuCd());
+      handler.messageHash.put("SellDept", oldDataRdc.getIsbuCd());
+      handler.messageHash.put("IBMCode", oldDataRdc.getCollectionCd());
+      handler.messageHash.put("EngrBrnchOff", oldDataRdc.getEngineeringBo());
     }
   }
 

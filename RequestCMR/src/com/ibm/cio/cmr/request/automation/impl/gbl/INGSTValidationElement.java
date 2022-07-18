@@ -3,6 +3,9 @@
  */
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
@@ -80,20 +83,25 @@ public class INGSTValidationElement extends ValidatingElement implements Company
 
     if (zs01 != null) {
       AutomationResponse<GstLayerResponse> response = getGstMatches(entityManager, admin.getId().getReqId(), zs01, data.getVat());
-      if (response != null && response.isSuccess() && response.getMessage().equals("Valid Address and Company Name entered on the Request")) {
+      String msg1 = "Valid GST and Company Name entered on the Request";
+      String msg2 = "Valid Address and Company Name entered on the Request";
+      List<String> messageList = new ArrayList<String>();
+      messageList.add(msg1);
+      messageList.add(msg2);
+      if (response != null && response.isSuccess() && messageList.contains(response.getMessage())) {
         admin.setCompVerifiedIndc("Y");
         validation.setSuccess(true);
         validation.setMessage("Successful Execution");
         log.debug(response.getMessage());
         details.append("Record found in GST service : Address and Company Name Validated on API");
-        
+
         details.append("\nCustomer Name = " + (StringUtils.isBlank(response.getRecord().getName()) ? "" : response.getRecord().getName()));
         details.append("\nGST = " + (StringUtils.isBlank(response.getRecord().getGst()) ? "" : response.getRecord().getGst()));
         details.append("\nAddress = " + (StringUtils.isBlank(response.getRecord().getAddress()) ? "" : response.getRecord().getAddress()));
         details.append("\nCity = " + (StringUtils.isBlank(response.getRecord().getCity()) ? "" : response.getRecord().getCity()));
         details.append("\nState = " + (StringUtils.isBlank(response.getRecord().getState()) ? "" : response.getRecord().getState()));
         details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getPostal()) ? "" : response.getRecord().getPostal()));
-         
+
       } else {
         // company proof
         if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {

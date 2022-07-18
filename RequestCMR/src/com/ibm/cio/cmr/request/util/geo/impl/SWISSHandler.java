@@ -95,8 +95,6 @@ public class SWISSHandler extends GEOHandler {
         }
       }
     }
-    // CREATCMR-6139
-
   }
 
   // Story : 1824918 - Secondary Sold to address (order block is 90 for update
@@ -232,7 +230,7 @@ public class SWISSHandler extends GEOHandler {
         address.setIerpSitePrtyId(spid);
 
       } else {
-        String addrSeq = address.getId().getAddrSeq();
+        String addrSeq = "1";
         addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
         address.getId().setAddrSeq(addrSeq);
         address.setIerpSitePrtyId(spid);
@@ -802,7 +800,8 @@ public class SWISSHandler extends GEOHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(
         Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD", "SUB_INDUSTRY_CD",
-            "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO"));
+            "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO",
+            "ORD_BLK"));
     return fields;
   }
 

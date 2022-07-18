@@ -64,6 +64,9 @@ public class GermanyUtil extends AutomationUtil {
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_PAYGO_BILLING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
       "Phone #", "PostBox", "State/Province");
+  private static final List<String> ZS01_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Street name and number", "Customer legal name");
+  private static final List<String> ZS01_NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention To/Building/Floor/Office","Division/Department");
+  
 
   @SuppressWarnings("unchecked")
   public GermanyUtil() {
@@ -717,8 +720,10 @@ public class GermanyUtil extends AutomationUtil {
     List<Addr> addressList = requestData.getAddresses();
     boolean isInstallAtMatchesDnb = true;
     boolean isBillToMatchesDnb = true;
+    boolean isSoldToMatchesDnb = true;
     boolean isNegativeCheckNeedeed = false;
     boolean isInstallAtExistOnReq = false;
+    boolean isInstallAtSameAsSoldTo = false;
     boolean isBillToExistOnReq = false;
     boolean isPayGoBillToExistOnReq = false;
     boolean isShipToExistOnReq = false;
@@ -726,6 +731,7 @@ public class GermanyUtil extends AutomationUtil {
     Addr billTo = requestData.getAddress("ZP01");
     Addr shipTo = requestData.getAddress("ZD01");
     Addr payGoBillTo = requestData.getAddress("PG01");
+    Addr soldTo=requestData.getAddress("ZS01");
     String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
     StringBuilder detail = new StringBuilder(details);
     long reqId = requestData.getAdmin().getId().getReqId();
@@ -760,30 +766,18 @@ public class GermanyUtil extends AutomationUtil {
       }
 
       if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
-        // Check If Address already exists on request
-        isInstallAtExistOnReq = addressExists(entityManager, installAt, requestData);
-        if (isInstallAtExistOnReq) {
-          detail.append("Install At details provided matches an existing address.");
-          engineData.addRejectionComment("OTH", "Install At details provided matches an existing address.", "", "");
-          LOG.debug("Install At details provided matches an existing address.");
+        // Check If Address same as Sold To address
+        isInstallAtSameAsSoldTo = addressExistsOnSoldTo(entityManager, installAt, requestData);
+        if (isInstallAtSameAsSoldTo) {
+          detail.append("Install At details provided matches an existing Sold To address.");
+          engineData.addRejectionComment("OTH", "Install At details provided matches an existing Sold To address.", "", "");
+          LOG.debug("Install At details provided matches an existing  Sold To address.");
           output.setOnError(true);
           validation.setSuccess(false);
           validation.setMessage("Not validated");
           output.setDetails(detail.toString());
           output.setProcessOutput(validation);
           return true;
-        }
-        if ((changes.isAddressChanged("ZI01") && isOnlyDnBRelevantFieldUpdated(changes, "ZI01")) || isAddressAdded(installAt)) {
-          // Check if address closely matches DnB
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installAt, false);
-          if (matches != null) {
-            isInstallAtMatchesDnb = ifaddressCloselyMatchesDnb(matches, installAt, admin, data.getCmrIssuingCntry());
-          }
-          if (!isInstallAtMatchesDnb) {
-            isNegativeCheckNeedeed = true;
-            detail.append("Updates to Install At address need verification as it does not matches D&B");
-            LOG.debug("Updates to Install At address need verification as it does not matches D&B");
-          }
         }
       }
 
@@ -815,7 +809,7 @@ public class GermanyUtil extends AutomationUtil {
           }
         }
       }
-
+     
       if (payGoBillTo != null && (changes.isAddressChanged("PG01") || isAddressAdded(payGoBillTo))) {
         // Check If Address already exists on request
         isPayGoBillToExistOnReq = addressExists(entityManager, payGoBillTo, requestData);
@@ -851,6 +845,26 @@ public class GermanyUtil extends AutomationUtil {
                 LOG.debug("Updates to PG01 addresses fields is found.Updates verified.");
                 detail.append("Updates to PG01 addresses found but have been marked as Verified.");
                 isNegativeCheckNeedeed = false;
+              } else if (CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && (changes.isAddressChanged("ZS01"))) {
+                if (isRelevantZS01AddressFieldUpdated(changes, soldTo)) {
+                  // Check if address closely matches DnB
+                  List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, false);
+                  if (matches != null) {
+                    isSoldToMatchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+                    if (!isSoldToMatchesDnb) {
+                      isNegativeCheckNeedeed = true;
+                      detail.append("Updates to Sold To address need verification as it does not matches D&B");
+                      LOG.debug("Updates to Sold To address need verification as it does not matches D&B");
+                    }
+                  }
+                } else if (isNonRelevantZS01AddressFieldUpdated(changes, soldTo)) {
+                  validation.setSuccess(true);
+                  LOG.debug("Updates to relevant addresses fields is found. Updates verified.");
+                  detail.append("Updates to relevant addresses found but have been marked as Verified.");
+                  validation.setMessage("Validated");
+                  isNegativeCheckNeedeed = false;
+
+                }
               } else if (!isRelevantAddressFieldUpdated(changes, addr)) {
                 validation.setSuccess(true);
                 LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
@@ -971,6 +985,32 @@ public class GermanyUtil extends AutomationUtil {
   @Override
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M");
+  }
+  
+  private boolean isRelevantZS01AddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (ZS01_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean isNonRelevantZS01AddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (ZS01_NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

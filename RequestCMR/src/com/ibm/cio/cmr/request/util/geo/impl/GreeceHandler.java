@@ -171,7 +171,6 @@ public class GreeceHandler extends BaseSOFHandler {
         } else {
           record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
         }
-        // CREATCMR-6139
       }
 
       if (SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {

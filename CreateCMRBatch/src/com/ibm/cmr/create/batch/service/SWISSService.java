@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
@@ -56,9 +57,8 @@ import com.ibm.cmr.services.client.process.mass.MassProcessRequest;
 import com.ibm.cmr.services.client.process.mass.MassUpdateRecord;
 import com.ibm.cmr.services.client.process.mass.RequestValueRecord;
 
-public class SWISSService extends TransConnService {
-  // private static final String BATCH_SERVICES_URL =
-  // SystemConfiguration.getValue("BATCH_SERVICES_URL");
+public class SWISSService extends BaseBatchService {
+  private static final String BATCH_SERVICES_URL = SystemConfiguration.getValue("BATCH_SERVICES_URL");
   private ProcessClient serviceClient;
   private static final String COMMENT_LOGGER = "Swiss Service";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
@@ -100,14 +100,19 @@ public class SWISSService extends TransConnService {
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
     try {
       initClientSwiss();
+      LOG.info("Initializing Country Map..");
+      LandedCountryMap.init(entityManager);
+      List<Long> ids = null;
       if (isMassServiceMode()) {
-        monitorCreqcmrMassUpd(entityManager);
+        ids = gatherMassUpdateRequests(entityManager);
+        monitorCreqcmrMassUpd(entityManager, ids);
       } else {
         // LOG.info("Processing Aborted records (retry)...");
         // monitorAbortedRecords(entityManager);
 
         LOG.info("Processing New records...");
-        monitorCreqcmr(entityManager);
+        ids = gatherSingleRequests(entityManager);
+        monitorCreqcmr(entityManager, ids);
       }
 
     } catch (Exception e) {
@@ -118,24 +123,32 @@ public class SWISSService extends TransConnService {
     return true;
   }
 
-  private void initClientSwiss() throws Exception {
+  protected void initClientSwiss() throws Exception {
     if (this.serviceClient == null) {
       this.serviceClient = CmrServicesFactory.getInstance().createClient(BATCH_SERVICES_URL, ProcessClient.class);
     }
   }
 
-  @SuppressWarnings("unused")
-  public void monitorCreqcmr(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
+  protected List<Long> gatherSingleRequests(EntityManager entityManager) {
+    List<Admin> list = getPendingRecords(entityManager);
+    List<Long> ids = new ArrayList<Long>();
+    for (Admin admin : list) {
+      ids.add(admin.getId().getReqId());
+    }
+    return ids;
+  }
 
-    LOG.info("Initializing Country Map..");
-    LandedCountryMap.init(entityManager);
+  @SuppressWarnings("unused")
+  public void monitorCreqcmr(EntityManager entityManager, List<Long> requests) throws Exception {
+
     // Retrieve the PCP records
-    LOG.info("Retreiving pending records for processing..");
-    List<Admin> pending = getPendingRecords(entityManager);
-    LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
+    LOG.debug((requests != null ? requests.size() : 0) + " records to process to RDc.");
     Data data = null;
     ProcessRequest request = null;
-    for (Admin admin : pending) {
+    for (Long id : requests) {
+      AdminPK pk = new AdminPK();
+      pk.setReqId(id);
+      Admin admin = entityManager.find(Admin.class, pk);
       if ("M".equals(admin.getReqType())) {
         continue;
       }
@@ -194,93 +207,31 @@ public class SWISSService extends TransConnService {
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
         processError(entityManager, admin, e.getMessage());
       }
+      keepAlive();
     }
   }
 
-  public void monitorAbortedRecords(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
-
-    // search the aborted records from Admin table
-    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_ABORTED_REC");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    List<Admin> abortedRecords = query.getResults(Admin.class);
-    LOG.debug("Size of Aborted Records : " + abortedRecords.size());
-
-    // lockAdminRecordsForProcessing(abortedRecords, entityManager);
-
-    for (Admin admin : abortedRecords) {
-      LOG.info("Processing Aborted Record " + admin.getId().getReqId() + " [Request ID: " + admin.getId().getReqId() + "]");
-      // get the data
-      sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
-      query = new PreparedQuery(entityManager, sql);
-      query.setParameter("REQ_ID", admin.getId().getReqId());
-
-      Data data = query.getSingleResult(Data.class);
-      entityManager.detach(data);
-      try {
-        CmrServiceInput input = prepareSingleRequestInput(entityManager, admin, data);
-
-        ProcessRequest request = new ProcessRequest();
-        request.setCmrNo(input.getInputCmrNo());
-        request.setMandt(input.getInputMandt());
-        request.setReqId(input.getInputReqId());
-        request.setReqType(input.getInputReqType());
-        request.setUserId(input.getInputUserId());
-
-        // send all as create process so that it will be sent as 1 request even
-        // for updates
-
-        switch (admin.getReqType()) {
-        case CmrConstants.REQ_TYPE_CREATE:
-          processCreateRequest(entityManager, request, admin, data);
-          break;
-        case CmrConstants.REQ_TYPE_UPDATE:
-          processUpdateRequest(entityManager, request, admin, data);
-          break;
-        case CmrConstants.REQ_TYPE_REACTIVATE:
-        case CmrConstants.REQ_TYPE_DELETE:
-          processReactivateDeleteRequest(entityManager, admin, data);
-          break;
-        default:
-          LOG.warn("Request ID " + admin.getId().getReqId() + " cannot be processed. Improper Type or not completed.");
-        }
-
-        if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(admin.getRdcProcessingStatus())
-            || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
-          admin.setReqStatus("PPN");
-          admin.setProcessedFlag("E"); // set request status to error.
-          WfHist hist = createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing",
-              admin.getId().getReqId());
-        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
-            || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
-            && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-          admin.setReqStatus("COM");
-          admin.setProcessedFlag("Y"); // set request status to processed
-          WfHist hist = createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
-        }
-        partialCommit(entityManager);
-      } catch (Exception e) {
-        LOG.error("Error in processing Aborted Record " + admin.getId().getReqId() + " for Request ID " + admin.getId().getReqId() + " ["
-            + e.getMessage() + "]", e);
-      }
+  protected List<Long> gatherMassUpdateRequests(EntityManager entityManager) {
+    List<Admin> list = getPendingRecordsMassUpd(entityManager);
+    List<Long> ids = new ArrayList<Long>();
+    for (Admin admin : list) {
+      ids.add(admin.getId().getReqId());
     }
-
+    return ids;
   }
 
-  public void monitorCreqcmrMassUpd(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
-    LOG.info("Initializing Country Map..");
-    LandedCountryMap.init(entityManager);
-    List<Admin> pending = getPendingRecordsMassUpd(entityManager);
+  public void monitorCreqcmrMassUpd(EntityManager entityManager, List<Long> requests)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
-    LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
+    LOG.debug((requests != null ? requests.size() : 0) + " mass update records to process to RDc.");
 
     Data data = null;
     ProcessRequest request = null;
-    for (Admin admin : pending) {
+    for (Long id : requests) {
+      AdminPK pk = new AdminPK();
+      pk.setReqId(id);
+      Admin admin = entityManager.find(Admin.class, pk);
       try {
-        // hard-coding to debug specific request
-        // if (admin.getId().getReqId() != reQId) {
-        // continue;
-        // }
         this.cmrObjects = prepareRequest(entityManager, admin);
         data = this.cmrObjects.getData();
 
@@ -311,6 +262,7 @@ public class SWISSService extends TransConnService {
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
         processError(entityManager, admin, e.getMessage());
       }
+      keepAlive();
     }
   }
 
@@ -444,7 +396,6 @@ public class SWISSService extends TransConnService {
    * @param data
    * @throws Exception
    */
-  @Override
   @SuppressWarnings("unused")
   protected void processCreateRequest(EntityManager entityManager, ProcessRequest request, Admin admin, Data data) throws Exception {
     LOG.debug("Started Create processing of Request " + admin.getId().getReqId());
@@ -608,6 +559,18 @@ public class SWISSService extends TransConnService {
               + ". Number of response records and on ADDR table are inconsistent.");
           break;
         }
+        
+        deleteEntity(addr, entityManager);
+        
+        for (RDcRecord red : response.getRecords()) {
+          String[] addrSeqs = {};
+          if (red.getSeqNo() != null && red.getSeqNo() != "") {
+            addrSeqs = red.getSeqNo().split(",");
+          }
+          if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+            addr.getId().setAddrSeq(addrSeqs[0]);
+          }
+        }
 
         if (response.getRecords() != null && response.getRecords().size() != 0) {
 
@@ -619,11 +582,10 @@ public class SWISSService extends TransConnService {
           } else {
             for (RDcRecord red : response.getRecords()) {
               String[] addrSeqs = { "", "" };
-
               if (red.getSeqNo() != null && red.getSeqNo() != "") {
                 addrSeqs = red.getSeqNo().split(",");
               }
-
+              
               if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                 LOG.debug("Address matched");
                 addr.setPairedAddrSeq(addrSeqs[0]);
@@ -640,7 +602,7 @@ public class SWISSService extends TransConnService {
             }
           }
 
-          updateEntity(addr, entityManager);
+          createEntity(addr, entityManager);
         }
         index++;
       }
@@ -663,7 +625,6 @@ public class SWISSService extends TransConnService {
     }
   }
 
-  @Override
   protected void updateRequestAddress(EntityManager entityManager, Admin admin, Data data, RDcRecord record) {
     AddrPK pk = new AddrPK();
     pk.setReqId(admin.getId().getReqId());
@@ -708,8 +669,7 @@ public class SWISSService extends TransConnService {
    * @param data
    * @throws Exception
    */
-  @Override
-  @SuppressWarnings("unused")
+  @SuppressWarnings({ "unused", "unchecked" })
   protected void processUpdateRequest(EntityManager entityManager, ProcessRequest request, Admin admin, Data data) throws Exception {
     HashMap<String, Object> overallResponse = new HashMap<String, Object>();
     List<ProcessResponse> responses = new ArrayList<ProcessResponse>();
@@ -931,12 +891,12 @@ public class SWISSService extends TransConnService {
 
           if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
             RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
-                "Some errors occurred during RDc processing. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
-                "CPR".equals(admin.getReqStatus()));
+                "Some errors occurred during RDc processing. Please check request's comment log for details.", TransConnService.ACTION_RDC_UPDATE,
+                null, null, "CPR".equals(admin.getReqStatus()));
           } else {
             RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
-                "RDc  Processing has been completed(First batch run). Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
-                "CPR".equals(admin.getReqStatus()));
+                "RDc  Processing has been completed(First batch run). Please check request's comment log for details.",
+                TransConnService.ACTION_RDC_UPDATE, null, null, "CPR".equals(admin.getReqStatus()));
           }
 
           partialCommit(entityManager);
@@ -1141,12 +1101,12 @@ public class SWISSService extends TransConnService {
 
             if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
               RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
-                  "Some errors occurred during RDc processing. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
-                  "COM".equals(admin.getReqStatus()));
+                  "Some errors occurred during RDc processing. Please check request's comment log for details.", TransConnService.ACTION_RDC_UPDATE,
+                  null, null, "COM".equals(admin.getReqStatus()));
             } else {
               RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
-                  "RDc  Processing has been completed. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
-                  "COM".equals(admin.getReqStatus()));
+                  "RDc  Processing has been completed. Please check request's comment log for details.", TransConnService.ACTION_RDC_UPDATE, null,
+                  null, "COM".equals(admin.getReqStatus()));
             }
 
             partialCommit(entityManager);
@@ -1450,8 +1410,7 @@ public class SWISSService extends TransConnService {
     long reqId = admin.getId().getReqId();
     long iterationId = admin.getIterationId();
     String processingStatus = admin.getRdcProcessingStatus();
-
-    MassUpdateServiceInput input = prepareMassChangeInput(entityManager, admin);
+    MassUpdateServiceInput input = TransConnService.prepareMassChangeInput(entityManager, admin);
 
     MassProcessRequest request = new MassProcessRequest();
     // set the update mass record in request
@@ -1537,11 +1496,11 @@ public class SWISSService extends TransConnService {
       String action = "";
       switch (admin.getReqType()) {
       case "D":
-        action = ACTION_RDC_DELETE;
+        action = TransConnService.ACTION_RDC_DELETE;
         requestType = "Mass Delete";
         break;
       case "R":
-        action = ACTION_RDC_REACTIVATE;
+        action = TransConnService.ACTION_RDC_REACTIVATE;
         requestType = "Mass Reactivate";
         break;
       }
@@ -1700,7 +1659,6 @@ public class SWISSService extends TransConnService {
    * @param status
    * @return
    */
-  @Override
   protected boolean isCompletedSuccessfully(String status) {
     return CmrConstants.RDC_STATUS_COMPLETED.equals(status) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(status);
   }
@@ -1793,7 +1751,8 @@ public class SWISSService extends TransConnService {
           request.setAddrType("");
           request.setSeqNo("");
 
-          if (!isOwnerCorrect(entityManager, sMassUpdt.getCmrNo(), data.getCmrIssuingCntry())) {
+          TransConnService tc = new TransConnService();
+          if (!tc.isOwnerCorrect(entityManager, sMassUpdt.getCmrNo(), data.getCmrIssuingCntry())) {
             throw new Exception("Some CMRs on the request are not owned by IBM. Please check input CMRs");
           }
 
@@ -1981,11 +1940,11 @@ public class SWISSService extends TransConnService {
 
         if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
           RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
-              "Some errors occurred during RDc processing. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
-              "COM".equals(admin.getReqStatus()));
+              "Some errors occurred during RDc processing. Please check request's comment log for details.", TransConnService.ACTION_RDC_UPDATE, null,
+              null, "COM".equals(admin.getReqStatus()));
         } else {
           RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
-              "RDc  Processing has been completed. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
+              "RDc  Processing has been completed. Please check request's comment log for details.", TransConnService.ACTION_RDC_UPDATE, null, null,
               "COM".equals(admin.getReqStatus()));
         }
 
@@ -2083,7 +2042,6 @@ public class SWISSService extends TransConnService {
    * @param reqId
    * @throws Exception
    */
-  @Override
   protected void convertToProspectToLegalCMRInput(ProcessRequest request, EntityManager entityManager, long reqId) throws Exception {
     String sql = ExternalizedQuery.getSql("BATCH.GET_PROSPECT");
     PreparedQuery q = new PreparedQuery(entityManager, sql);

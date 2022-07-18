@@ -60,6 +60,8 @@ public class IERPProcessService extends BaseBatchService {
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
   protected static final String ACTION_RDC_UPDATE = "System Action:RDc Update";
+  private boolean multiMode;
+  private List<Long> pendingReqIds;
 
   @Override
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
@@ -328,23 +330,15 @@ public class IERPProcessService extends BaseBatchService {
 
   @SuppressWarnings("unchecked")
   public void monitorCreqcmr(EntityManager em) throws JsonGenerationException, JsonMappingException, IOException, Exception {
-    // DTN: 1) Get the list of DR type countries
     String actionRdc = "";
-    String sql1 = ExternalizedQuery.getSql("BATCH.GET_DR_COUNTRIES");
-    PreparedQuery query = new PreparedQuery(em, sql1);
-    List<SuppCntry> drList = query.getResults(SuppCntry.class);
-    LOG.debug(
-        "Executing batch code for R" + SystemConfiguration.getSystemProperty("RELEASE") + ".b" + SystemConfiguration.getSystemProperty("BUILD"));
-    LOG.debug("Size of DR list : " + drList.size());
-
-    // DTN: 2) Get the requests
-    String isngCntryCds = convertToIssuingCntryCSV(drList);
-    String sql2 = ExternalizedQuery.getSql("BATCH.GET_DR_PROC_PENDING");
-    String mapping = Admin.BATCH_SERVICE_MAPPING;
     StringBuffer siteIds = new StringBuffer();
-    sql2 = sql2.replace("<CMR_ISSUING_CNTRY>", isngCntryCds);
-    query = new PreparedQuery(em, sql2);
-    List<CompoundEntity> reqIdList = query.getCompundResults(Admin.class, Admin.BATCH_MASS_CREATE_GET_RECORD);
+    List<CompoundEntity> reqIdList = null;
+
+    if (multiMode) {
+      reqIdList = getPendingRequestByReqIds(em, pendingReqIds);
+    } else {
+      reqIdList = getPendingRequest(em);
+    }
     LOG.debug("Size of REQ_ID list : " + reqIdList.size());
 
     if (reqIdList != null && !reqIdList.isEmpty()) {
@@ -566,10 +560,11 @@ public class IERPProcessService extends BaseBatchService {
               }
               if (admin.getReqStatus() != null && CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
                 LOG.debug("no Of Working days before check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
-                noOFWorkingDays = IERPRequestUtils.checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
+                noOFWorkingDays = IERPRequestUtils.checkNoOfWorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
                 LOG.debug("no Of Working days after check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
               }
-              if (noOFWorkingDays >= 3) {
+              int tempReactThres = SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) ? 2 : 3;
+              if (noOFWorkingDays >= tempReactThres) {
                 LOG.debug("Processing 2nd time ,no Of Working days = " + noOFWorkingDays);
                 createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
                 data.setCustAcctType(rdcOrderBlk);
@@ -1501,4 +1496,63 @@ public class IERPProcessService extends BaseBatchService {
 
     return overallResponse;
   }
+
+  public List<Long> gatherDRPending(EntityManager entityManager) {
+    String sqlPendingDrReq = ExternalizedQuery.getSql("BATCH.MULTI.GET_DR_PENDING_REQIDS");
+    PreparedQuery query = new PreparedQuery(entityManager, sqlPendingDrReq);
+    List<Long> reqIds = query.getResults(Long.class);
+
+    return reqIds;
+  }
+
+  private List<CompoundEntity> getPendingRequest(EntityManager em) {
+    // DTN: 1) Get the list of DR type countries
+    String sql1 = ExternalizedQuery.getSql("BATCH.GET_DR_COUNTRIES");
+    PreparedQuery query = new PreparedQuery(em, sql1);
+    List<SuppCntry> drList = query.getResults(SuppCntry.class);
+    LOG.debug(
+        "Executing batch code for R" + SystemConfiguration.getSystemProperty("RELEASE") + ".b" + SystemConfiguration.getSystemProperty("BUILD"));
+    LOG.debug("Size of DR list : " + drList.size());
+
+    // DTN: 2) Get the requests
+    String isngCntryCds = convertToIssuingCntryCSV(drList);
+    String sql2 = ExternalizedQuery.getSql("BATCH.GET_DR_PROC_PENDING");
+    sql2 = sql2.replace("<CMR_ISSUING_CNTRY>", isngCntryCds);
+    query = new PreparedQuery(em, sql2);
+    List<CompoundEntity> pendingReqList = query.getCompundResults(Admin.class, Admin.BATCH_MASS_CREATE_GET_RECORD);
+    LOG.debug("Size of REQ_ID list : " + pendingReqList.size());
+
+    return pendingReqList;
+  }
+
+  private List<CompoundEntity> getPendingRequestByReqIds(EntityManager em, List<Long> pendingReqIds) {
+    List<CompoundEntity> pendingReqList = null;
+
+    if (pendingReqIds != null && pendingReqIds.size() > 0) {
+      String sqlPendingDRReq = ExternalizedQuery.getSql("BATCH.MULTI.GET_DR_PROC_PENDING");
+      sqlPendingDRReq = sqlPendingDRReq.replace("<PENDING_REQIDS>", StringUtils.join(pendingReqIds, ','));
+
+      PreparedQuery query = new PreparedQuery(em, sqlPendingDRReq);
+      pendingReqList = query.getCompundResults(Admin.class, Admin.BATCH_MASS_CREATE_GET_RECORD);
+    }
+
+    return pendingReqList;
+  }
+
+  public boolean isMultiMode() {
+    return multiMode;
+  }
+
+  public void setMultiMode(boolean multiMode) {
+    this.multiMode = multiMode;
+  }
+
+  public List<Long> getPendingReqIds() {
+    return pendingReqIds;
+  }
+
+  public void setPendingReqIds(List<Long> pendingReqIds) {
+    this.pendingReqIds = pendingReqIds;
+  }
+
 }

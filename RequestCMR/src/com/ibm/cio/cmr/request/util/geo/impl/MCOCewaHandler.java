@@ -826,13 +826,13 @@ public class MCOCewaHandler extends MCOHandler {
                 error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
               }
             }
-        } // end row loop
-      }
+          } // end row loop
+        }
         if (error.hasErrors()) {
           validations.add(error);
         }
+      }
     }
-  }
   }
 
   private String getShippingPhoneFromLegacy(FindCMRRecordModel address) {

@@ -1198,7 +1198,7 @@ public class NORDXHandler extends BaseSOFHandler {
               ctc = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
               isu = validateColValFromCell(currCell);
-                if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isu))) {
+              if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isu))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
@@ -2956,5 +2956,20 @@ public class NORDXHandler extends BaseSOFHandler {
 
     return addrSeq;
   }
+
+  // private boolean isAllClientTierAllowed(String country, String isuCd) {
+  // boolean isAllClientTierAllowed = true;
+  // if (country.equals("678") && (isuCd == "5K" || isuCd == "19")) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("806") && (isuCd == "5K" || isuCd == "04")) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("846") && Arrays.asList("5K", "5E", "1R",
+  // "04").contains(isuCd)) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("702") && isuCd.equals("5K")) {
+  // isAllClientTierAllowed = false;
+  // }
+  // return isAllClientTierAllowed;
+  // }
 
 }

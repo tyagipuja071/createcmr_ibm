@@ -63,7 +63,7 @@ div.ibm-columns {
 }
 </style>
 <cmr:window>
-<form:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="sreact">
+<cmr:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="sreact">
    	<form:hidden path="katr6" />
    	<form:hidden path="reqId" />
    
@@ -111,7 +111,7 @@ div.ibm-columns {
         <form:input path="stcd1" dojoType="dijit.form.TextBox"/>
       </cmr:column>
     </cmr:row>
-</form:form>
+</cmr:form>
   <cmr:windowClose>
     <cmr:button label="Search" onClick="searchSREACT()" highlight="true" pad="true"/>
     <cmr:button label="Clear Search Criteria" onClick="clearSearch()" highlight="false" pad="true"/>

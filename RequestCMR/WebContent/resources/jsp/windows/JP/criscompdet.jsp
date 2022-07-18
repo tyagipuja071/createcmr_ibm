@@ -57,10 +57,10 @@ div.ibm-columns {
 }
 </style>
 <cmr:window>
-  <form:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="crit">
+  <cmr:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="crit">
     <jsp:include page="criscriteria.jsp" />
-  </form:form>
-  <form:form method="POST" action="<%=actionUrl%>" name="frmCMRDet" class="ibm-column-form ibm-styled-form" modelAttribute="record">
+  </cmr:form>
+  <cmr:form method="POST" action="<%=actionUrl%>" name="frmCMRDet" class="ibm-column-form ibm-styled-form" modelAttribute="record">
     <cmr:row>
       <cmr:column span="1" width="180">
         <label for="companyNo">Company No:</label>
@@ -143,7 +143,7 @@ div.ibm-columns {
         ${record.employeeSize}
       </cmr:column>
     </cmr:row>
-  </form:form>
+  </cmr:form>
   <cmr:windowClose>
     <cmr:button label="Import Company" onClick="chooseRecord()" highlight="true" pad="true"/>
     <cmr:button label="Search Again" onClick="backToSearch()" highlight="true" pad="true" />
