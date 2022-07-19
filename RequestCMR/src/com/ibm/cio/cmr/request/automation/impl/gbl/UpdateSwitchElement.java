@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.automation.ActionOnError;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
+import com.ibm.cio.cmr.request.automation.AutomationEngine;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.ValidatingElement;
@@ -21,11 +22,14 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.ChinaUtil;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.dpl.DPLSearchService;
+import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -41,6 +45,7 @@ public class UpdateSwitchElement extends ValidatingElement {
 
   private static final Logger log = Logger.getLogger(UpdateSwitchElement.class);
   private static final List<String> NCHECK_NO_UPD_COUNTRIES = Arrays.asList(SystemLocation.UNITED_STATES);
+  private static final DPLSearchService dplService = new DPLSearchService();
 
   public UpdateSwitchElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -51,9 +56,14 @@ public class UpdateSwitchElement extends ValidatingElement {
       throws Exception {
     log.debug("Entering global Update Switch Element");
     // get request admin and data
+    Addr pg01 = requestData.getAddress("PG01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     long reqId = requestData.getAdmin().getId().getReqId();
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    // String mainExtWalletId = (StringUtils.isNotBlank(zp01.getExtWalletId()) ?
+    // zp01.getExtWalletId() : "").trim();
+
     // CREATCMR-6074
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
     boolean requesterFromTaxTeam = false;
@@ -129,6 +139,30 @@ public class UpdateSwitchElement extends ValidatingElement {
 
       log.debug("Validation after data checks: " + validation.isSuccess());
 
+      // CREATCMR-6299
+
+      AppUser user = (AppUser) engineData.get("appUser");
+
+      if (changes.hasDataChanges() || changes.hasAddressChanges()) {
+
+        if (changes.hasAddressChanges()) {
+
+          if (payGoAddredited) {
+
+            log.debug("Performing DPL check on Request " + reqId);
+
+            for (Addr addr : requestData.getAddresses()) {
+              if ("P".equals(addr.getDplChkResult())) {
+                AutomationEngine.createComment(entityManager, "Additional PayGo billing only being added by PayGo accredited partner.", reqId, user);
+                admin.setReqStatus("PCP");
+
+              }
+            }
+          }
+
+        }
+      }
+      // *************************************
       if (!output.isOnError() && changes.hasAddressChanges()) {
 
         Map<String, String> addressTypes = getAddressTypes(data.getCmrIssuingCntry(), entityManager);
