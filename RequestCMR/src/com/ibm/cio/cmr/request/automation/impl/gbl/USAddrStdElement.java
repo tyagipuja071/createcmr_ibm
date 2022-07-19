@@ -417,6 +417,10 @@ public class USAddrStdElement extends OverridingElement {
   private String resetForSCC(EntityManager entityManager, String landCntry, String stateProv, String city1, String county) {
     String scc = "";
 
+    if (StringUtils.isBlank(county) || !StringUtils.isNumeric(county)) {
+      county = "0";
+    }
+
     String sql = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("LAND_CNTRY", landCntry);
