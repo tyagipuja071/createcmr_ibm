@@ -28,7 +28,6 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.service.dpl.DPLSearchService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -45,7 +44,6 @@ public class UpdateSwitchElement extends ValidatingElement {
 
   private static final Logger log = Logger.getLogger(UpdateSwitchElement.class);
   private static final List<String> NCHECK_NO_UPD_COUNTRIES = Arrays.asList(SystemLocation.UNITED_STATES);
-  private static final DPLSearchService dplService = new DPLSearchService();
 
   public UpdateSwitchElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -56,7 +54,6 @@ public class UpdateSwitchElement extends ValidatingElement {
       throws Exception {
     log.debug("Entering global Update Switch Element");
     // get request admin and data
-    Addr pg01 = requestData.getAddress("PG01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     long reqId = requestData.getAdmin().getId().getReqId();
