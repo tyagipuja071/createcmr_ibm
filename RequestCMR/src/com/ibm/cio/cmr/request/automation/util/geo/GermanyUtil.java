@@ -874,9 +874,9 @@ public class GermanyUtil extends AutomationUtil {
                   LOG.debug("Updates to PG01 addresses fields is found.Updates verified.");
                   detail.append("Updates to PG01 addresses found but have been marked as Verified.");
                   isNegativeCheckNeedeed = false;
-                } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && soldTo != null && isNonRelevantZS01AddressFieldUpdated(changes, soldTo)) {
+                } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && soldTo != null && (isNonRelevantZS01AddressFieldUpdated(changes, soldTo) || isRelevantZS01AddressFieldUpdated(changes, soldTo))) {
                   validation.setSuccess(true);
-                  LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
+                  LOG.debug("Updates to relevant addresses is found.Updates verified.");
                   detail.append("Updates to relevant addresses found but have been marked as Verified.");
                   validation.setMessage("Validated");
                   isNegativeCheckNeedeed = false;
