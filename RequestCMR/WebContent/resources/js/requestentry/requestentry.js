@@ -153,7 +153,7 @@ function processRequestAction() {
       } else if (cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
         // Cmr-3176- Dnb match
         if (checkIfFinalDnBCheckRequired() && reqType == 'U') {
-          matchDnBForAutomationCountries();
+          matchDnbForAUSG();
         } else {
           cmr.showModal('addressVerificationModal');
         }
@@ -202,6 +202,13 @@ function processRequestAction() {
         matchDnBForIndia();
       } else {
         // if there are no errors, show the Address Verification modal window
+        cmr.showModal('addressVerificationModal');
+      }
+    } else if (comp_proof_INAUSG && cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
+      // Cmr-3176- Dnb match
+      if (checkIfFinalDnBCheckRequired() && reqType == 'U') {
+        matchDnbForAUSG();
+      } else {
         cmr.showModal('addressVerificationModal');
       }
     } else if (comp_proof_INAUSG && (cmrCntry == SysLoc.SINGAPORE || cmrCntry == SysLoc.AUSTRALIA)) {
@@ -571,8 +578,7 @@ function doSaveChangeComments() {
           if (kunnr1 != null || kunnr1 != undefined) {
             dojo.byId('rejSupplInfo2').value = kunnr1;
             console.log(dojo.byId('rejSupplInfo2').value);
-	            }
-	            else{
+          } else {
             cmr.showAlert('No Sold-To Kunnr found for ' + rejInfo1 + ".");
             return;
           }
@@ -585,8 +591,7 @@ function doSaveChangeComments() {
           cmr.showAlert('The CMR Number is not correct');
           return;
         }
-	        }
-	        else{
+      } else {
         cmr.showAlert('Please specify ' + dojo.byId('rejInfo1Label').innerText + ".");
         return;
       }
@@ -1613,8 +1618,7 @@ function checkIfFinalDnBCheckRequired() {
   }
 
   if (cmrCntry == '616') {
-    if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
-        && matchOverrideIndc != 'Y') {
+    if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')) {
       // currently Enabled Only For AU
       return true;
     }
@@ -1872,7 +1876,7 @@ function matchDnbForAUSG() {
               } else {
                 cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
               }
-            } else if (data.match && !data.isicMatch) {
+            } else if (data.match && !data.isicMatch && !(reqType == 'U' && cntry == SysLoc.AUSTRALIA)) {
               comp_proof_INAUSG = false;
               console.log("ISIC validation failed by Dnb.");
               cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");
