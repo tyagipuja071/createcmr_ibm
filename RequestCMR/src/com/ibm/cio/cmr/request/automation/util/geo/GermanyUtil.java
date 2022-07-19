@@ -3,6 +3,7 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -825,55 +826,72 @@ public class GermanyUtil extends AutomationUtil {
           return true;
         }
       }
+      
+      if (CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && isRelevantZS01AddressFieldUpdated(changes, soldTo)) {
+          // Check if address closely matches DnB
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, false);
+          if (matches != null) {
+            isSoldToMatchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+            if (!isSoldToMatchesDnb) {
+              isNegativeCheckNeedeed = true;
+              detail.append("Updates to Sold To address need verification as it does not matches D&B");
+              LOG.debug("Updates to Sold To address need verification as it does not matches D&B");
+            } else {
+              detail.append("Updated address ZS01 (" + soldTo.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+              for (DnBMatchingResponse dnb : matches) {
+                detail.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                detail.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                detail.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                    + dnb.getDnbCountry() + "\n\n");
+              }
+            }
+          }
+      }
       if (isNegativeCheckNeedeed || isShipToExistOnReq || isInstallAtExistOnReq || isBillToExistOnReq || isPayGoBillToExistOnReq) {
         validation.setSuccess(false);
         validation.setMessage("Not validated");
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
       } else {
         for (String addrType : RELEVANT_ADDRESSES) {
-          for (Addr addr : addressList) {
-            List<String> addrTypesChanged = new ArrayList<String>();
-            for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
-              if (!addrTypesChanged.contains(addrModel.getAddrTypeCode())) {
-                addrTypesChanged.add(addrModel.getAddrTypeCode());
-              }
+          if (changes.isAddressChanged(addrType)) {
+            if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+              addressList = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+            } else {
+              addressList = requestData.getAddresses(addrType);
             }
-            boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(addrType) && "PG".equals(data.getOrdBlk()));
-            if ("Y".equals(addr.getImportInd())) {
-              if ((payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) || isZS01WithAufsdPG) {
-                validation.setSuccess(true);
-                LOG.debug("Updates to PG01 addresses fields is found.Updates verified.");
-                detail.append("Updates to PG01 addresses found but have been marked as Verified.");
-                isNegativeCheckNeedeed = false;
-              } else if (CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && (changes.isAddressChanged("ZS01"))) {
-                if (isRelevantZS01AddressFieldUpdated(changes, soldTo)) {
-                  // Check if address closely matches DnB
-                  List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, false);
-                  if (matches != null) {
-                    isSoldToMatchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-                    if (!isSoldToMatchesDnb) {
-                      isNegativeCheckNeedeed = true;
-                      detail.append("Updates to Sold To address need verification as it does not matches D&B");
-                      LOG.debug("Updates to Sold To address need verification as it does not matches D&B");
-                    }
-                  }
-                } else if (isNonRelevantZS01AddressFieldUpdated(changes, soldTo)) {
+
+            for (Addr addr : addressList) {
+              List<String> addrTypesChanged = new ArrayList<String>();
+              for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
+                if (!addrTypesChanged.contains(addrModel.getAddrTypeCode())) {
+                  addrTypesChanged.add(addrModel.getAddrTypeCode());
+                }
+              }
+              boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(addrType) && "PG".equals(data.getOrdBlk()));
+              if ("Y".equals(addr.getImportInd())) {
+                if ((payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) || isZS01WithAufsdPG) {
                   validation.setSuccess(true);
-                  LOG.debug("Updates to relevant addresses fields is found. Updates verified.");
+                  LOG.debug("Updates to PG01 addresses fields is found.Updates verified.");
+                  detail.append("Updates to PG01 addresses found but have been marked as Verified.");
+                  isNegativeCheckNeedeed = false;
+                } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && soldTo != null && isNonRelevantZS01AddressFieldUpdated(changes, soldTo)) {
+                  validation.setSuccess(true);
+                  LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
                   detail.append("Updates to relevant addresses found but have been marked as Verified.");
                   validation.setMessage("Validated");
                   isNegativeCheckNeedeed = false;
+                  break;
 
+                } else if (!isRelevantAddressFieldUpdated(changes, addr)) {
+                  validation.setSuccess(true);
+                  LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
+                  detail.append("Updates to relevant addresses found but have been marked as Verified.");
+                  validation.setMessage("Validated");
+                  isNegativeCheckNeedeed = false;
+                  break;
+                } else if (isRelevantAddressFieldUpdated(changes, addr)) {
+                  isNegativeCheckNeedeed = true;
                 }
-              } else if (!isRelevantAddressFieldUpdated(changes, addr)) {
-                validation.setSuccess(true);
-                LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
-                detail.append("Updates to relevant addresses found but have been marked as Verified.");
-                validation.setMessage("Validated");
-                isNegativeCheckNeedeed = false;
-                break;
-              } else if (isRelevantAddressFieldUpdated(changes, addr)) {
-                isNegativeCheckNeedeed = true;
               }
             }
           }
