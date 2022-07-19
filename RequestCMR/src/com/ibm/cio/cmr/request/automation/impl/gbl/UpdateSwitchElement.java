@@ -137,29 +137,21 @@ public class UpdateSwitchElement extends ValidatingElement {
       log.debug("Validation after data checks: " + validation.isSuccess());
 
       // CREATCMR-6299
-
       AppUser user = (AppUser) engineData.get("appUser");
-
       if (changes.hasDataChanges() || changes.hasAddressChanges()) {
-
         if (changes.hasAddressChanges()) {
-
           if (payGoAddredited) {
-
             log.debug("Performing DPL check on Request " + reqId);
-
             for (Addr addr : requestData.getAddresses()) {
               if ("P".equals(addr.getDplChkResult())) {
                 AutomationEngine.createComment(entityManager, "Additional PayGo billing only being added by PayGo accredited partner.", reqId, user);
                 admin.setReqStatus("PCP");
-
               }
             }
           }
-
         }
       }
-      // *************************************
+      // CREATCMR-6299
       if (!output.isOnError() && changes.hasAddressChanges()) {
 
         Map<String, String> addressTypes = getAddressTypes(data.getCmrIssuingCntry(), entityManager);
