@@ -59,7 +59,7 @@ import com.ibm.cmr.services.client.process.mass.RequestValueRecord;
 public class ATService extends TransConnService {
   // private static final String BATCH_SERVICES_URL =
   // SystemConfiguration.getValue("BATCH_SERVICES_URL");
-  private ProcessClient serviceClient;
+  //private ProcessClient serviceClient;
   private static final String COMMENT_LOGGER = "AT Service";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   private boolean massServiceMode;
@@ -2168,8 +2168,9 @@ public class ATService extends TransConnService {
     }
 
     try {
-      this.serviceClient.setReadTimeout(60 * 20 * 1000); // 10 mins
-      response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
+      serviceClient.setReadTimeout(60 * 20 * 1000); // 10 mins
+      
+      response = serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
 
       if (response != null && response.getStatus().equals("A") && response.getMessage().contains("was not successfully updated on the index.")) {
         isIndexNotUpdated = true;
