@@ -2168,9 +2168,8 @@ public class ATService extends TransConnService {
     }
 
     try {
-      serviceClient.setReadTimeout(60 * 20 * 1000); // 10 mins
-      
-      response = serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
+      this.serviceClient.setReadTimeout(60 * 20 * 1000); // 10 mins
+      response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
 
       if (response != null && response.getStatus().equals("A") && response.getMessage().contains("was not successfully updated on the index.")) {
         isIndexNotUpdated = true;
