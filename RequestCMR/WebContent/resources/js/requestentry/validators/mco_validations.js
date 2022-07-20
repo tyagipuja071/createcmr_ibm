@@ -3114,6 +3114,32 @@ function setPPSCEIDRequired() {
   }
 }
 
+function validateInacForSpain() {
+  console.log("validateInacForSpain..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var inacCd = FormManager.getActualValue('inacCd');
+
+        if (inacCd != null && inacCd != undefined && inacCd != '') {
+          if (inacCd.length != 4) {
+            return new ValidationResult(null, false, 'INAC should be exactly 4 characters.');
+          }
+
+          if (!inacCd.match("^[0-9]*$")) {
+            var firstTwoChars = inacCd.substring(0, 2);
+            var lastTwoChars = inacCd.substring(2);
+            if (!firstTwoChars.match(/^[A-Z]*$/) || !lastTwoChars.match(/^[0-9]+$/)) {
+              return new ValidationResult(null, false, 'INAC should be 4 digits or two letters (Uppercase characters) followed by 2 digits.');
+            }
+          }
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -3230,7 +3256,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.MCO, null, true);
-  
+  GEOHandler.registerValidator(validateInacForSpain, [ SysLoc.SPAIN ], null, true);
   GEOHandler.addAfterTemplateLoad(addISUHandlerPt, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(addISUHandlerPt, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(addISUHandlerEs, [ SysLoc.SPAIN ]);
