@@ -676,9 +676,8 @@ public class GermanyUtil extends AutomationUtil {
           detail.append("Updates to the Abbreviated Name field are skipped for PayGo cmr\n");
           LOG.debug("Updates to the Abbreviated Name field are skipped for Paygo cmr ");
         } else {
-          isNegativeCheckNeedeed = true;
-          detail.append("Updates to Abbreviated Name field were found, review is required.\n");
-          LOG.debug("Updates to Abbreviated Name field were found, review is required.");
+          detail.append("Updates to the Abbreviated Name field  are skipped.\n");
+          LOG.debug("Updates to the Abbreviated Name field  are skipped.");
         }
       } else {
         boolean otherFieldsChanged = false;
