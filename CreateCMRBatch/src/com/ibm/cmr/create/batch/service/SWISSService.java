@@ -601,8 +601,19 @@ public class SWISSService extends BaseBatchService {
 
             }
           }
+          updateEntity(addr, entityManager);
+        }
+        if (response.getRecords() != null && response.getRecords().size() != 0) {
+          for (RDcRecord red : response.getRecords()) {
+            String[] addrSeqs = { "", "" };
 
-          createEntity(addr, entityManager);
+            if (red.getSeqNo() != null && red.getSeqNo() != "") {
+              addrSeqs = red.getSeqNo().split(",");
+            }
+            if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+              updateAddrSeq(entityManager, admin.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq(), addrSeqs[0]);
+            }
+          }
         }
         index++;
       }
@@ -2173,5 +2184,16 @@ public class SWISSService extends BaseBatchService {
       partialCommit(em);
     }
     return response;
+  }
+  
+  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq) {
+    String updateSeq = ExternalizedQuery.getSql("SWISS.UPDATE_ADDR_SEQ");
+    PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
+    q.setParameter("NEW_SEQ", newSeq);
+    q.setParameter("REQ_ID", reqId);
+    q.setParameter("TYPE", addrType);
+    q.setParameter("OLD_SEQ", oldSeq);
+    LOG.debug("Assigning address sequence " + newSeq + " to " + addrType + " address.");
+    q.executeSql();
   }
 }
