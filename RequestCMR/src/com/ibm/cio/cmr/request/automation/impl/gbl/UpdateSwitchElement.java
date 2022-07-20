@@ -56,11 +56,9 @@ public class UpdateSwitchElement extends ValidatingElement {
     // get request admin and data
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    Addr addr = requestData.getAddress("PG01");
     long reqId = requestData.getAdmin().getId().getReqId();
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
-    // String mainExtWalletId = (StringUtils.isNotBlank(zp01.getExtWalletId()) ?
-    // zp01.getExtWalletId() : "").trim();
-
     // CREATCMR-6074
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
     boolean requesterFromTaxTeam = false;
@@ -136,33 +134,17 @@ public class UpdateSwitchElement extends ValidatingElement {
 
       log.debug("Validation after data checks: " + validation.isSuccess());
 
-      // CREATCMR-6299
-      AppUser user = (AppUser) engineData.get("appUser");
-      if (changes.hasDataChanges() || changes.hasAddressChanges()) {
-        if (changes.hasAddressChanges()) {
-          if (payGoAddredited) {
-            log.debug("Performing DPL check on Request " + reqId);
-            for (Addr addr : requestData.getAddresses()) {
-              if ("P".equals(addr.getDplChkResult())) {
-                AutomationEngine.createComment(entityManager, "Additional PayGo billing only being added by PayGo accredited partner.", reqId, user);
-                admin.setReqStatus("PCP");
-              }
-            }
-          }
-        }
-      }
-      // CREATCMR-6299
       if (!output.isOnError() && changes.hasAddressChanges()) {
 
         Map<String, String> addressTypes = getAddressTypes(data.getCmrIssuingCntry(), entityManager);
 
         List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
-
+        String addrTypeCode = null;
         log.debug("Addr types for skip check are: " + scenarioExceptions.getAddressTypesForSkipChecks().toString());
         boolean onlySkipAddr = false;
         if (scenarioExceptions.getAddressTypesForSkipChecks() != null && scenarioExceptions.getAddressTypesForSkipChecks().size() > 0) {
           onlySkipAddr = true;
-          String addrTypeCode = null;
+
           for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
             addrTypeCode = addressTypes.get(updatedAddrModel.getAddrType());
             if (StringUtils.isBlank(addrTypeCode)) {
@@ -175,6 +157,26 @@ public class UpdateSwitchElement extends ValidatingElement {
             }
           }
         }
+        // CREATCMR-6299
+        AppUser user = (AppUser) engineData.get("appUser");
+        if (!changes.hasDataChanges()) {
+          for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
+            addrTypeCode = addressTypes.get(updatedAddrModel.getAddrType());
+            if ("PG01".equals(addrTypeCode)) {
+              if (payGoAddredited) {
+                log.debug("Performing DPL check on Request " + reqId);
+
+                if ("P".equals(addr.getDplChkResult())) {
+                  AutomationEngine.createComment(entityManager, "Additional PayGo billing only being added by PayGo accredited partner.", reqId,
+                      user);
+                  admin.setReqStatus("PCP");
+                }
+              }
+            }
+          }
+        }
+        // CREATCMR-6299
+
         if (onlySkipAddr) {
           engineData.setSkipChecks();
           output.setDetails("Updates found on non-relevant addresses only.");
