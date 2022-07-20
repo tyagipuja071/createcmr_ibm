@@ -2211,4 +2211,9 @@ public class USHandler extends GEOHandler {
   }
   // CREATCMR-6342
 
+  @Override
+  public Boolean compareReshuffledAddress(String dnbAddress, String address, String country) {
+    return false;
+  }
+
 }
