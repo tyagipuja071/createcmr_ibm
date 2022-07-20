@@ -263,7 +263,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
       admin.setCovBgRetrievedInd(CmrConstants.YES_NO.N.toString());
       String sysType = SystemConfiguration.getValue("SYSTEM_TYPE");
-      admin.setWaitInfoInd(!StringUtils.isBlank(sysType) ? sysType.substring(0,1) : null);
+      admin.setWaitInfoInd(!StringUtils.isBlank(sysType) ? sysType.substring(0, 1) : null);
       RequestUtils.setClaimDetails(admin, request);
       // clear cmt value as it is saved in new table .
 
@@ -912,7 +912,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     to.setCanClaimAll((String) from.getValue("CAN_CLAIM_ALL"));
     to.setAutoProcessing((String) from.getValue("AUTO_PROCESSING"));
 
-    //copy internal dpl fields, for display only
+    // copy internal dpl fields, for display only
     SimpleDateFormat dateFormat = CmrConstants.DATE_FORMAT();
     if (score != null) {
       to.setIntDplAssessmentResult(score.getDplAssessmentResult());
@@ -933,10 +933,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     adminService.copyValuesToEntity(from, admin);
     Data data = to.getEntity(Data.class);
     if (data != null) {
+      String usemail3 = data.getEmail3() == null ? null : new String(data.getEmail3());
       dataService.copyValuesToEntity(from, data);
       // 1261175 -Dennis - We need to auto assign the cust type if it is an
       // update type and for BR
-      if (LAHandler.isSSAMXBRIssuingCountry(data.getCmrIssuingCntry()) && admin!=null && CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+      if (LAHandler.isSSAMXBRIssuingCountry(data.getCmrIssuingCntry()) && admin != null
+          && CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
         admin.setCustType(CmrConstants.DEFAULT_CUST_TYPE);
       }
 
@@ -945,11 +947,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         if (!StringUtils.isEmpty(from.getMrcCd())) {
           data.setCountryUse(from.getMrcCd());
         }
-        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && admin!=null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && admin != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
           data.setModeOfPayment(from.getCrosSubTyp());
         }
       } else {
-        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && admin!=null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && admin != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
           data.setModeOfPayment(from.getCrosSubTyp());
         }
       }
@@ -980,6 +982,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       if (PageManager.fromGeo("CEMEA", data.getCmrIssuingCntry())) {
         this.log.debug("Setting location no...");
         data.setLocationNumber(from.getLocationNo());
+      }
+      // Save email3 value anywhere for us bp source
+      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && !StringUtils.isEmpty(usemail3)
+          && "CreateCMR-BP".equals(admin.getSourceSystId())) {
+        this.log.debug("Setting BP us client model:email3");
+        data.setEmail3(usemail3);
       }
     }
     Scorecard score = to.getEntity(Scorecard.class);
@@ -1478,7 +1486,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               if (record.getConfidenceCode() >= 8) {
                 confidenceCd = true;
               }
-              DnBCompany dnbCompny=getDnBDetailsUI(record.getDunsNo());
+              DnBCompany dnbCompny = getDnBDetailsUI(record.getDunsNo());
               if (dnbCompny != null) {
                 isicMatch = dnbCompny.getIbmIsic().equals(model.getIsicCd());
               }
