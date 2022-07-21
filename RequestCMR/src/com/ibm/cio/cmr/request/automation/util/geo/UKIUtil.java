@@ -79,6 +79,16 @@ public class UKIUtil extends AutomationUtil {
     custNm1 = zi01.getCustNm1();
     custNm2 = !StringUtils.isBlank(zi01.getCustNm2()) ? " " + zi01.getCustNm2() : "";
     String customerNameZI01 = custNm1 + custNm2;
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if(zs01 != null){
+    	String landCntry = zs01.getLandCntry();
+    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
+                && ("CROSS".equals(custGrp))){
+        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+        }
+    }
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
@@ -207,8 +217,13 @@ public class UKIUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "VAT #":
-        // noop, for switch handling only
-        break;
+    	  if(requestData.getAddress("ZS01").getLandCntry().equals("GB") && !data.getCmrIssuingCntry().equals("866")){
+    		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
+                  engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+                  details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+                  }
+    		  }
+    	  break;
       case "INAC/NAC Code":
       case "ISU Code":
       case "Client Tier":
