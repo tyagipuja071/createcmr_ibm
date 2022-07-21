@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.ValidatorClient;
@@ -703,7 +704,19 @@ public class DnBUtil {
       dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
     }
     dnbAddress = dnbAddress.trim();
-    Boolean isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
+    
+    LOG.debug("DNB match country =  " + country);
+    Boolean isReshuffledAddr = false;
+    if ("897".equals(country) || "US".equals(country)) {
+      isReshuffledAddr = USHandler.compareUSReshuffledAddress(dnbAddress, address, country);
+      LOG.debug("US isReshuffledAddr =  " + isReshuffledAddr);
+    } else {
+      isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
+      LOG.debug("isReshuffledAddr =  " + isReshuffledAddr);
+    }
+
+    // Boolean isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress,
+    // address, country);
     if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
         && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
         && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr) {

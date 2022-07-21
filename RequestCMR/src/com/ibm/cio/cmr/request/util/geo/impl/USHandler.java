@@ -2216,4 +2216,8 @@ public class USHandler extends GEOHandler {
     return false;
   }
 
+  public static Boolean compareUSReshuffledAddress(String dnbAddress, String address, String country) {
+    return false;
+  }
+
 }
