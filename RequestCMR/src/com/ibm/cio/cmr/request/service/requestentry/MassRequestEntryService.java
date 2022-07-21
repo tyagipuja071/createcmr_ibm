@@ -1019,7 +1019,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         pk.setParReqId(reqId);
 
         massUpdt.setId(pk);
-        massUpdt.setRowStatusCd("");
+        massUpdt.setRowStatusCd("PASS");
         massUpdt.setCmrNo("");
         createEntity(massUpdt, entityManager);
 
