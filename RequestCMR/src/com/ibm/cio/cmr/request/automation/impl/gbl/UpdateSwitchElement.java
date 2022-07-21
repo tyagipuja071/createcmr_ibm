@@ -162,13 +162,18 @@ public class UpdateSwitchElement extends ValidatingElement {
         if (!changes.hasDataChanges()) {
           for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
             addrTypeCode = addressTypes.get(updatedAddrModel.getAddrType());
-            if ("PG01".equals(addrTypeCode)) {
-              if (payGoAddredited) {
-                log.debug("Performing DPL check on Request " + reqId);
-                if ("P".equals(addr.getDplChkResult())) {
-                  AutomationEngine.createComment(entityManager, "Additional PayGo billing only being added by PayGo accredited partner.", reqId,
-                      user);
-                  admin.setReqStatus("PCP");
+            boolean paygoToBill = true;
+            if (!"PG01".equals(addrTypeCode)) {
+              paygoToBill = false;
+            } else {
+              if (paygoToBill) {
+                if (payGoAddredited) {
+                  log.debug("Performing DPL check on Request " + reqId);
+                  if ("P".equals(addr.getDplChkResult())) {
+                    AutomationEngine.createComment(entityManager, "Additional PayGo billing only being added by PayGo accredited partner.", reqId,
+                        user);
+                    admin.setReqStatus("PCP");
+                  }
                 }
               }
             }

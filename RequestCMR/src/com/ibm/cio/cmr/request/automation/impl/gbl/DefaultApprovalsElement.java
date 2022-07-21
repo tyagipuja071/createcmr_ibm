@@ -88,8 +88,13 @@ public class DefaultApprovalsElement extends ApprovalsElement {
       result.setDetails("Skip processing of element as requester is from CMDE team.");
       result.setResults("Skipped");
     } else if (StringUtils.isBlank(approvalsResult) || "NONE".equalsIgnoreCase(approvalsResult)) {
-      result.setResults("None");
-      result.setDetails("No approvals are required.");
+      if (admin.getReqStatus().equalsIgnoreCase("PCP")) {
+        result.setResults("Skipped");
+        result.setDetails("Skip processing of element as request status is PCP");
+      } else {
+        result.setResults("None");
+        result.setDetails("No approvals are required.");
+      }
     } else {
       result.setOnError(true);
       result.setResults("Generated");
