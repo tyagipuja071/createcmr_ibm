@@ -193,6 +193,13 @@ function disableCmrNo() {
 function setVatValidatorNL() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01"
+  };
+
+  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+  landCntry = landCntryResult.ret1;
   if (custSubGrp == 'PUBCU') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     return;
@@ -204,8 +211,10 @@ function setVatValidatorNL() {
       return;
     }
     FormManager.resetValidations('vat');
-    if (!dojo.byId('vatExempt').checked) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    if (landCntry != 'GB') {
+      if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      }
     }
   }
 }

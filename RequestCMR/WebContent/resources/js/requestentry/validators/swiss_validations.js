@@ -446,9 +446,18 @@ function addVatSuffixForCustLangCdScrtch() {
 /* Vat Exempt Handler */
 function setVatValidatorSWISS() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var _reqId = FormManager.getActualValue('reqId');
+  var params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01"
+  };
+
+  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+  landCntry = landCntryResult.ret1;
+
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    if (!dijit.byId('vatExempt').get('checked')) {
+    if (!dijit.byId('vatExempt').get('checked') && landCntry != 'GB') {
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
   }

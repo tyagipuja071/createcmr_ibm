@@ -756,6 +756,14 @@ function setExpediteReason() {
 function setVatValidatorBELUX() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01"
+  };
+
+  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+  landCntry = landCntryResult.ret1;
+
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     if (custSubGrp == 'BEPRI' || custSubGrp == 'LUPRI') {
       // FormManager.removeValidator('vat', Validators.REQUIRED);
@@ -767,8 +775,11 @@ function setVatValidatorBELUX() {
     }
     FormManager.resetValidations('vat');
     // if (!dijit.byId('vatExempt').get('checked')) {
-    if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    // CREATCMR-6244 LandedCntry UK
+    if (landCntry != 'GB') {
+      if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      }
     }
   }
 }
