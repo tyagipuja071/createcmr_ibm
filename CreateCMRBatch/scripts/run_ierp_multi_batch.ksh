@@ -1,6 +1,6 @@
 ####################################################################
 
-resultIERPM=$(ps -ef|grep -v grep|grep IERPServiceEntryPoint|awk '{print $2}')
+resultIERPM=$(ps -ef|grep -v grep|grep "IERPServiceEntryPoint MULTI"|awk '{print $2}')
 if [ "$resultIERPM" = "" ]
 then
 
