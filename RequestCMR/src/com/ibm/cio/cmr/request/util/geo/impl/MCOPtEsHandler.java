@@ -1481,7 +1481,7 @@ public class MCOPtEsHandler extends MCOHandler {
 
                 // INAC Code
                 if (StringUtils.isNotBlank(inacCd)) {
-                  if (!StringUtils.isNumeric(inacCd) && !"@@@@".equals(inacCd)) {
+                  if (!StringUtils.isNumeric(inacCd) && !"@".equals(inacCd)) {
                     String firstTwoinacCdChar = StringUtils.substring(inacCd, 0, 2);
                     String lastTwoinacCdChar = StringUtils.substring(inacCd, 2);
 
