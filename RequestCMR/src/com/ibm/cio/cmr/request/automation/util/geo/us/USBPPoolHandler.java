@@ -116,6 +116,7 @@ public class USBPPoolHandler extends USBPHandler {
       StringBuilder details, OverrideOutput overrides, RequestData childRequest, FindCMRRecordModel ibmCmr) {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
+    Admin admin = requestData.getAdmin();
 
     details.append("\nComputing field values for IBM BP " + getCmrType() + "CMR:\n");
 
@@ -188,6 +189,8 @@ public class USBPPoolHandler extends USBPHandler {
       landCntry = zs01.getLandCntry();
     }
 
+    
+    if (!"Y".equals(admin.getProspLegalInd())){
     if (zi01 == null) {
 
       LOG.debug("Adding the main address..");
@@ -228,6 +231,7 @@ public class USBPPoolHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", zi01.getCity1(), city);
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", zi01.getStateProv(), state);
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", zi01.getPostCd(), postCd);
+    }
     }
 
     if (!hasFieldErrors) {
