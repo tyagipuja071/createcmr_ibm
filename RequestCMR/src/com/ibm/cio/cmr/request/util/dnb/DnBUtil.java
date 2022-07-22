@@ -307,6 +307,7 @@ public class DnBUtil {
         // do 2 VAT checks
         boolean vatValid = validateVAT(country, vat);
         if (!vatValid && !vat.startsWith(country)) {
+          country = "GR".equals(country) ? "EL" : country;
           vatValid = validateVAT(country, country + vat);
           if (vatValid) {
             vat = country + vat;
