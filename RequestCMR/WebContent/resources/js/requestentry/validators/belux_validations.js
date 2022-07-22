@@ -766,6 +766,7 @@ function setExpediteReason() {
 function setVatValidatorBELUX() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var _reqId = FormManager.getActualValue('reqId');
   var params = {
     REQ_ID : _reqId,
     ADDR_TYPE : "ZS01"
