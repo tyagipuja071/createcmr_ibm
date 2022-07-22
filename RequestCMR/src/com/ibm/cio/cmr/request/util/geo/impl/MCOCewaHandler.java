@@ -779,6 +779,9 @@ public class MCOCewaHandler extends MCOHandler {
               if (!isMatch) {
                 LOG.trace("Invalid format for TIN Number.");
                 error.addError((row.getRowNum() + 1), "TIN Number", "Invalid format for TIN Number. It should contain only upper-case latin and numeric characters. ");
+              } else if (tin.length() != 11) {
+                LOG.trace("Invalid length for TIN Number.");
+                error.addError((row.getRowNum() + 1), "TIN Number", "Invalid length for TIN Number. It should contain exactly 11 characters. ");
               }
             }
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
