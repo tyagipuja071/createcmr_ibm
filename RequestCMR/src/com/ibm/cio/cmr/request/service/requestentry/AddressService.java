@@ -1147,9 +1147,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         if (addr.getDplChkResult() == null) {
           Boolean errorStatus = false;
           Boolean isPrivate=false;
-          if ("PRIV".equals(data.getCustSubGrp())) {
+          if ("PRIV".equals(data.getCustSubGrp()) || "PRICU".equals(data.getCustSubGrp())) {
             isPrivate = true;
-
           }
           try {
             dplResult = dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
