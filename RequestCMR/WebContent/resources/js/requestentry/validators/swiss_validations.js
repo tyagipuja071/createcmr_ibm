@@ -148,7 +148,7 @@ function addAfterConfigForSWISS() {
       FormManager.setValue('vat', '');
     } else {
       FormManager.enable('vat');
-      if (dijit.byId('vatExempt').get('checked')) {
+      if (!dijit.byId('vatExempt').get('checked')) {
         dijit.byId('vatExempt').set('checked', false);
         setVatValidatorSWISS();
       }
