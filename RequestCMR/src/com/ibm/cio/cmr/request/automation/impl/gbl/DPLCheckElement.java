@@ -57,7 +57,7 @@ public class DPLCheckElement extends ValidatingElement {
       throws Exception {
 
     AppUser user = (AppUser) engineData.get("appUser");
-    Admin admin = requestData.getAdmin();
+
     long reqId = requestData.getAdmin().getId().getReqId();
 
     AutomationResult<ValidationOutput> output = buildResult(reqId);
@@ -73,15 +73,6 @@ public class DPLCheckElement extends ValidatingElement {
       output.setResults(validation.getMessage());
       output.setProcessOutput(validation);
       return output;
-    } else if (admin.getReqStatus().equalsIgnoreCase("PCP")) {
-      validation.setSuccess(true);
-      validation.setMessage("Skipped");
-      output.setOnError(false);
-      output.setDetails("Skipping DPL check as request status is PCP");
-      output.setResults(validation.getMessage());
-      output.setProcessOutput(validation);
-      return output;
-
     }
 
     try {
@@ -89,6 +80,7 @@ public class DPLCheckElement extends ValidatingElement {
       GEOHandler geoHandler = null;
 
       Data data = requestData.getData();
+      Admin admin = requestData.getAdmin();
       Scorecard scorecard = requestData.getScorecard();
 
       if (data != null) {
