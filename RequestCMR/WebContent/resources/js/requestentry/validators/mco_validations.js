@@ -590,7 +590,7 @@ var _SalesRepHandler = null;
 var _LocNumHandler = null;
 var _vatExemptHandler = null;
 var _isicHandler = null;
-var _noISRLogicPT = new Set([ 'BUSPR', 'INTER', 'INTSO', 'ININV', 'IBMEM', 'XBP' ]);
+var _noISRLogicPT = new Set([ 'BUSPR', 'INTER', 'INTSO', 'ININV', 'XBP' ]);
 var _noISRLogicES = new Set([ 'INTER', 'INTSO', 'XINTR', 'XINSO' ]);
 function addHandlersForPTES() {
   if (_ISUHandler == null) {
@@ -755,7 +755,17 @@ function setSalesRepValues(clientTier) {
         salesReps[0] = '1FICTI';
       }
       if (cntry == SysLoc.PORTUGAL) {
-        FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
+        // CREATCMR-6055
+        if (custSubGroup == 'IBMEM') {
+          salesReps.length = 0;
+          salesReps[0] = '000001';
+        }
+        if (isuCd.concat(clientTier) == '34Y' || isuCd.concat(clientTier) == '34Q') {
+          FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
+        } else {
+          FormManager.enable('repTeamMemberNo');
+          FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
+        }
       }
       if (salesReps.length == 1) {
         FormManager.setValue('repTeamMemberNo', salesReps[0]);
