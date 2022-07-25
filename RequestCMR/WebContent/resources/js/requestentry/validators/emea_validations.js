@@ -983,7 +983,8 @@ function autoSetVAT() {
 }
 
 function autoSetSBO(value, valueInDB) {
-  if (PageManager.isReadOnly()) {
+  var custGrp = FormManager.getActualValue('custSubGrp');
+  if (PageManager.isReadOnly() || custGrp) {
     return;
   }
   if (value == 'undefined' || value == '') {
