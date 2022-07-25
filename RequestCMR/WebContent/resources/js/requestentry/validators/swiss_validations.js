@@ -113,6 +113,10 @@ function addAfterConfigForSWISS() {
   if (FormManager.getActualValue('custGrp') == 'CROSS') {
     FormManager.setValue('custLangCd', 'E');
   }
+  // CREATCMR-6378
+  if (reqType == 'C' && custSubGrp == 'CHBUS') {
+    retainVatValueAT();
+  }
 
   // abbrev name locked optional for requester
   if (role == 'REQUESTER') {
@@ -1754,6 +1758,20 @@ function resetSortlValidator() {
     console.log('Making Sortl optinal as it is empty in RDC');
     FormManager.resetValidations('searchTerm');
   }
+}
+
+//CREATCMR-6378
+function retainVatValueAT() {
+    var vat = FormManager.getActualValue('vat');
+    var reqId = FormManager.getActualValue('reqId');
+    var qParams = {
+      REQ_ID : reqId,
+    };
+    if (vat == '' || vat == null || vat == undefined) {
+      var result = cmr.query('ADDR.GET.VAT_REQID', qParams);
+      var _vat = result.ret1;
+      FormManager.setValue('vat', _vat);
+    }
 }
 
 dojo.addOnLoad(function() {
