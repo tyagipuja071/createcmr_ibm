@@ -665,6 +665,7 @@ function addHandlersForPTES() {
 }
 
 function setClientTierValues(value) {
+  console.log('setClientTierValues....');
   var reqType = FormManager.getActualValue('reqType');
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
@@ -729,6 +730,7 @@ function setClientTierValues(value) {
 }
 
 function setSalesRepValues(clientTier) {
+  console.log('setSalesRepValues........')
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
@@ -772,11 +774,13 @@ function setSalesRepValues(clientTier) {
 }
 
 function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
+  console.log('checkScenarioChanged......')
   setEnterpriseValues(scenarioChanged)
 }
 
 var _subindustryChanged = false;
 function setEnterpriseBasedOnSubIndustry() {
+  console.log('setEnterpriseBasedOnSubIndustry..........');
   if (_subIndCdHanlder == null && FormManager.getField('subIndustryCd')) {
     _subIndCdHanlder = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
       if (cmr.currentTab == "CUST_REQ_TAB") {
@@ -790,6 +794,7 @@ function setEnterpriseBasedOnSubIndustry() {
 
 var _oldIsuCtc = '';
 function setEnterpriseValues34Q() {
+  console.log('setEnterpriseValues34Q........');
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -863,6 +868,7 @@ function setEnterpriseValues34Q() {
 }
 
 function setEnterpriseValues(scenarioChanged) {  
+  console.log('setEnterpriseValues.......');
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -2951,7 +2957,7 @@ function validateExistingCMRNo() {
 
 // CREATCMR-4293
 function setCTCValues() {
-
+  
   FormManager.removeValidator('clientTier', Validators.REQUIRED);
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');
