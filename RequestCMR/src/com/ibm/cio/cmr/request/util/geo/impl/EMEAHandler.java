@@ -2217,10 +2217,11 @@ public class EMEAHandler extends BaseSOFHandler {
           data.setSpecialTaxCd(rdcData.getSpecialTaxCd());
         }
 
-        if (StringUtils.isEmpty(data.getClientTier()) && !StringUtils.isEmpty(rdcData.getClientTier())) {
+        //storing blankout of ctc
+      /*  if (StringUtils.isEmpty(data.getClientTier()) && !StringUtils.isEmpty(rdcData.getClientTier())) {
           data.setClientTier(rdcData.getClientTier());
         }
-
+       */
         // sales rep
         if (StringUtils.isEmpty(data.getRepTeamMemberNo()) && !StringUtils.isEmpty(rdcData.getRepTeamMemberNo())) {
           data.setRepTeamMemberNo(rdcData.getRepTeamMemberNo());
