@@ -60,7 +60,7 @@ public class SWISSHandler extends GEOHandler {
   private static final Logger LOG = Logger.getLogger(DEHandler.class);
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("848");
 
-  private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "Division", "POBoxCity", "City2", "Affiliate",
+  private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "Division", "POBoxCity", "Affiliate",
       "Company", "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode", "BPRelationType", "MembLevel" };
 
   public static final String SWISS_MASSCHANGE_TEMPLATE_ID = "SWISS";
