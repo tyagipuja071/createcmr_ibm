@@ -261,7 +261,7 @@ function addAfterConfigAP() {
 }
 
 function setInacByCluster() {
-	console.log(">>>> setInacByCluster >>>>");
+  console.log(">>>> setInacByCluster >>>>");
     var _cluster = FormManager.getActualValue('apCustClusterId');
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     if (cntry == '736' || cntry == '738') {
@@ -2285,8 +2285,8 @@ function setCTCIsuByClusterANZ() {
        }
       }    
       if (clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || _cluster.includes('BLAN') || clusterDesc[0].ret1.includes('S&S'))) {
-		  setIsuOnIsic();
-	  } 
+      setIsuOnIsic();
+    } 
     }
    } 
    
@@ -3475,6 +3475,9 @@ function validateCustNameForNonContractAddrs() {
   })(), null, 'frmCMR_addressModal');
 }
 
+
+
+
 function validateStreetAddrCont2() {
   FormManager.addFormValidator((function() {
     return {
@@ -3579,6 +3582,7 @@ FormManager.addFormValidator((function() {
      var reqTyp = FormManager.getActualValue('reqType');
      var vat = FormManager.getActualValue('vat');
      var reqId = FormManager.getActualValue('reqId');
+     var formerAbn = getFormerVatAU(reqId);
      if (reqTyp == 'C') {
        return new ValidationResult(null, true);
      }
@@ -3594,7 +3598,7 @@ FormManager.addFormValidator((function() {
              REQ_ID : reqId
            };
          }              
-         var abnRet = cmr.validateABN(vat, reqId);
+         var abnRet = cmr.validateABN(vat, reqId, formerAbn);
          if (!abnRet.success) {
            return new ValidationResult({
              id : 'vat',
@@ -3612,6 +3616,18 @@ FormManager.addFormValidator((function() {
    }
  };
 })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function getFormerVatAU(reqId) {
+  var formerVat = '';
+  var qParams = {
+    REQ_ID : reqId,
+  };
+  var result = cmr.query('GET.VAT_DATA_RDC', qParams);
+  if (result != null) {
+    formerVat = result.ret1;
+  }
+  return formerVat;
 }
 
 function lockFieldsForIndia(){
@@ -4341,7 +4357,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ASEAN, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.addAfterTemplateLoad(lockAbbvNameOnScenarioChangeGCG, GEOHandler.GCG);
   GEOHandler.addAfterTemplateLoad(setAbbrvNameBPScen, GEOHandler.GCG);
-	GEOHandler.addAfterConfig(handleExpiredClusterGCG, GEOHandler.GCG);
+  GEOHandler.addAfterConfig(handleExpiredClusterGCG, GEOHandler.GCG);
   GEOHandler.addAfterConfig(setCtcOnIsuCdChangeASEAN, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeASEAN, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeISA, GEOHandler.ISA);

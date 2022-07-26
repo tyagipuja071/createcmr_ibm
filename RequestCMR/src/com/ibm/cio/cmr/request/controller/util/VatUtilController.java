@@ -241,6 +241,7 @@ public class VatUtilController {
     ValidationResult validation = null;
     Boolean comp_proof_Abn = false;
 
+    String formerAbn = request.getParameter("formerAbn");
     String abn = request.getParameter("abn");
     if (StringUtils.isEmpty(abn)) {
       validation = ValidationResult.error("'ABN' param is required.");
@@ -276,13 +277,38 @@ public class VatUtilController {
       if (StringUtils.isBlank(abn)) {
         validation = ValidationResult.success();
       } else if (abnResponse != null && abnResponse.isSuccess()) {
-        if (abnResponse.getRecord().isValid() && !(abnResponse.getRecord().getStatus().equalsIgnoreCase("Cancelled"))) {
-          validation = ValidationResult.success();
-        } else if (abnResponse.getRecord().isValid()
-            && (!abnResponse.getRecord().getStatus().equals(null) && abnResponse.getRecord().getStatus().equalsIgnoreCase("Cancelled"))
-            && !comp_proof_Abn) {
-          validation = ValidationResult.error(
-              "ABN provided on the request cancelled as per API Validation. Please provide Supporting documentation(Company Proof) as attachment");
+        if (abnResponse.getRecord().isValid()) {
+          if (StringUtils.isBlank(formerAbn)) {
+            validation = ValidationResult.success();
+          } else {
+            LOG.debug("Validating former ABN " + abn + " for Australia");
+            BNValidationRequest requestToAPIForFormer = new BNValidationRequest();
+            requestToAPIForFormer.setBusinessNumber(formerAbn);
+            System.out.println(requestToAPIForFormer + requestToAPIForFormer.getBusinessNumber());
+
+            LOG.debug("Connecting to the ABNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+            AutomationResponse<?> rawResponseFormerAbn = autoClient.executeAndWrap(AutomationServiceClient.AU_ABN_VALIDATION_SERVICE_ID,
+                requestToAPIForFormer, AutomationResponse.class);
+            String json2 = mapper.writeValueAsString(rawResponseFormerAbn);
+            AutomationResponse<BNValidationResponse> formerAbnResponse = mapper.readValue(json2, ref);
+            if (formerAbnResponse != null && formerAbnResponse.isSuccess()) {
+              if (formerAbnResponse.getRecord().isValid() && (formerAbnResponse.getRecord().getStatus().equalsIgnoreCase("Cancelled"))) {
+                validation = ValidationResult.success();
+              } else if (formerAbnResponse.getRecord().isValid() && (!formerAbnResponse.getRecord().getStatus().equals(null)
+                  && !formerAbnResponse.getRecord().getStatus().equalsIgnoreCase("Cancelled")) && !comp_proof_Abn) {
+                validation = ValidationResult.error(
+                    "ABN provided on Matches API But Former ABN isn't cancelled. Please provide Supporting documentation(Company Proof) as attachment");
+              } else {
+                if (!comp_proof_Abn)
+                  validation = ValidationResult.error(
+                      "ABN provided on Matches API But Former ABN mismatches with API.Please provide Supporting documentation(Company Proof) as attachment");
+                else
+                  validation = ValidationResult.success();
+              }
+            } else {
+              validation = ValidationResult.error("ABN Validation Failed.Failed to connect to ABN Service. Checking ABN and Company Name with D&B.");
+            }
+          }
         } else {
           validation = ValidationResult.error("ABN provided on the request mismatches with API.Please provide correct ABN#");
         }
@@ -335,7 +361,6 @@ public class VatUtilController {
     String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_MATCH_ATTACHMENT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", reqId);
-
     return query.exists();
   }
 }

@@ -758,7 +758,7 @@ var cmr = {
     });
     return result;
   },
-  validateABN : function(businessNumber, reqId) {
+  validateABN : function(businessNumber, reqId, formerAbn) {
     var result = {};
     dojo.xhrGet({
       url : cmr.CONTEXT_ROOT + '/au/abn.json',
@@ -766,7 +766,8 @@ var cmr = {
       method : 'GET',
       content : {
         abn : businessNumber,
-        reqId : reqId
+        reqId : reqId,
+        formerAbn : formerAbn
       },
       timeout : 50000,
       sync : true,
