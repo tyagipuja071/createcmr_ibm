@@ -984,7 +984,7 @@ function autoSetVAT() {
 
 function autoSetSBO(value, valueInDB) {
   var custGrp = FormManager.getActualValue('custSubGrp');
-  if (PageManager.isReadOnly() || custGrp) {
+  if (PageManager.isReadOnly() || custGrp == 'BUSPR') {
     return;
   }
   if (value == 'undefined' || value == '') {
