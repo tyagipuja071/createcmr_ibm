@@ -351,10 +351,16 @@ public class NordicsUtil extends AutomationUtil {
     String scenario = requestData.getData().getCustSubGrp();
     String[] kuklaBUSPR = { "43", "44", "45" };
     String[] kuklaISO = { "81", "85" };
+    String NORDX_DENMARK_VKBUR = "0036";
+    String NORDX_ICELAND_VKBUR = "0503";
+    String NORDX_ESTONIA_VKBUR = "0393";
+    String NORDX_LITHUNIA_VKBUR = "0081";
+    String NORDX_FINLAND_VKBUR = "0047";
     String cntry = requestData.getData().getCmrIssuingCntry();
 
     List<DuplicateCMRCheckResponse> matches = response.getMatches();
     List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+    List<DuplicateCMRCheckResponse> subScenarioMatches = new ArrayList<DuplicateCMRCheckResponse>();
 
     if (Arrays.asList(bpScenariosToBeChecked).contains(scenario)) {
       for (DuplicateCMRCheckResponse match : matches) {
@@ -393,6 +399,37 @@ public class NordicsUtil extends AutomationUtil {
       // set filtered matches in response
       response.setMatches(filteredMatches);
     }
+    
+    if (response.getMatches() != null) {
+      for (DuplicateCMRCheckResponse res : response.getMatches()) {
+        List<Object[]> results = null;
+        try {
+          String sql = ExternalizedQuery.getSql("NORDX.KNVV.GETVKBUR");
+          PreparedQuery query = new PreparedQuery(entityManager, sql);
+          query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+          query.setParameter("CMRNO", res.getCmrNo());
+          query.setParameter("CNTRY", requestData.getData().getCmrIssuingCntry());
+          query.setParameter("ADDR_TYPE", res.getAddrType());
+          results = query.getResults(); 
+        } catch (Exception e) {
+          LOG.debug("An error occurred while retrieving RDc results.");
+        }
+        
+        if (results != null) {
+          String countryUse = requestData.getData().getCountryUse();
+          for (Object[] result : results) {
+            if ((countryUse.equals("702EE") && NORDX_ESTONIA_VKBUR.equals(result[0].toString())) ||
+                (countryUse.equals("702LT") && NORDX_LITHUNIA_VKBUR.equals(result[0].toString())) || 
+                (countryUse.equals("702") && NORDX_FINLAND_VKBUR.equals(result[0].toString())) || 
+                (countryUse.equals("678IS") && NORDX_ICELAND_VKBUR.equals(result[0].toString())) || 
+                (!countryUse.equals("678IS") && countryUse.startsWith("678") && NORDX_DENMARK_VKBUR.equals(result[0].toString()))) {
+              subScenarioMatches.add(res);
+            }
+          }
+        }
+      }
+    }
+    response.setMatches(subScenarioMatches);
   }
 
   private boolean isuCTCMatch(String cmr, EntityManager entityManager, String cntry) {
