@@ -3,9 +3,6 @@
  */
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
@@ -83,12 +80,8 @@ public class INGSTValidationElement extends ValidatingElement implements Company
 
     if (zs01 != null) {
       AutomationResponse<GstLayerResponse> response = getGstMatches(entityManager, admin.getId().getReqId(), zs01, data.getVat());
-      String msg1 = "Valid GST and Company Name entered on the Request";
-      String msg2 = "Valid Address and Company Name entered on the Request";
-      List<String> messageList = new ArrayList<String>();
-      messageList.add(msg1);
-      messageList.add(msg2);
-      if (response != null && response.isSuccess() && messageList.contains(response.getMessage())) {
+      String msg = "Valid Address and Company Name entered on the Request";
+      if (response != null && response.isSuccess() && msg.equalsIgnoreCase(response.getMessage())) {
         admin.setCompVerifiedIndc("Y");
         validation.setSuccess(true);
         validation.setMessage("Successful Execution");
