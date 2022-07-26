@@ -113,8 +113,9 @@ function addAfterConfigForSWISS() {
   if (FormManager.getActualValue('custGrp') == 'CROSS') {
     FormManager.setValue('custLangCd', 'E');
   }
+  
   // CREATCMR-6378
-  if (reqType == 'C' && custSubGrp == 'CHBUS') {
+  if(reqType == 'C' && custSubGrp == 'CHBUS'){
     retainVatValueAT();
   }
 
