@@ -261,7 +261,7 @@ function addAfterConfigAP() {
 }
 
 function setInacByCluster() {
-  console.log(">>>> setInacByCluster >>>>");
+	console.log(">>>> setInacByCluster >>>>");
     var _cluster = FormManager.getActualValue('apCustClusterId');
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     if (cntry == '736' || cntry == '738') {
@@ -2285,8 +2285,8 @@ function setCTCIsuByClusterANZ() {
        }
       }    
       if (clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || _cluster.includes('BLAN') || clusterDesc[0].ret1.includes('S&S'))) {
-      setIsuOnIsic();
-    } 
+		  setIsuOnIsic();
+	  } 
     }
    } 
    
@@ -3475,9 +3475,6 @@ function validateCustNameForNonContractAddrs() {
   })(), null, 'frmCMR_addressModal');
 }
 
-
-
-
 function validateStreetAddrCont2() {
   FormManager.addFormValidator((function() {
     return {
@@ -4357,7 +4354,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ASEAN, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.addAfterTemplateLoad(lockAbbvNameOnScenarioChangeGCG, GEOHandler.GCG);
   GEOHandler.addAfterTemplateLoad(setAbbrvNameBPScen, GEOHandler.GCG);
-  GEOHandler.addAfterConfig(handleExpiredClusterGCG, GEOHandler.GCG);
+	GEOHandler.addAfterConfig(handleExpiredClusterGCG, GEOHandler.GCG);
   GEOHandler.addAfterConfig(setCtcOnIsuCdChangeASEAN, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeASEAN, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
