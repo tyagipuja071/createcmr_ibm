@@ -332,14 +332,15 @@ public class USBPEndUserHandler extends USBPHandler {
     // CMR-3334 - do some last checks on Enterprise/Affiliate/Company
     Data data = requestData.getData();
     details.append("\n");
-    String affiliate = data.getAffiliate();
-    if (ibmCmr != null && !StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
-      affiliate = ibmCmr.getCmrAffiliate();
-    }
-    if (StringUtils.isBlank(affiliate)) {
-      details.append("\nAffiliate cannot be computed automatically.");
-      engineData.addNegativeCheckStatus("_usBpAff", "Affiliate cannot be computed automatically");
-    }
+    // String affiliate = data.getAffiliate();
+    // if (ibmCmr != null && !StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
+    // affiliate = ibmCmr.getCmrAffiliate();
+    // }
+    // if (StringUtils.isBlank(affiliate)) {
+    // details.append("\nAffiliate cannot be computed automatically.");
+    // engineData.addNegativeCheckStatus("_usBpAff", "Affiliate cannot be
+    // computed automatically");
+    // }
 
     // USCeIdMapping mapping = USCeIdMapping.getByCeid(data.getPpsceid());
     USCeIdMapping mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
