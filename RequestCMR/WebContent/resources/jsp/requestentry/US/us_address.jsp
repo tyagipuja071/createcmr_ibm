@@ -65,7 +65,7 @@
     </p>
   </cmr:column>
   <cmr:column span="2">
-    <p>
+    <p id = "addrTxt2Div" style= "display : none">
       <cmr:label fieldId="addrTxt2">
         <cmr:fieldLabel fieldId="StreetAddress2" />: 
           </cmr:label>

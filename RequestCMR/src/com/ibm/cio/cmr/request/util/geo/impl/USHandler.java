@@ -33,6 +33,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.KnvvExt;
+import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.entity.USTaxData;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
@@ -41,6 +42,8 @@ import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.DataService;
+import com.ibm.cio.cmr.request.service.requestentry.RequestEntryService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -73,6 +76,14 @@ public class USHandler extends GEOHandler {
   private EntityManager entityManager;
 
   private String processType;
+
+  private final DataService dataService = new DataService();
+
+  private String copyZI01Flag = "N";
+
+  private String addFlag = "N";
+
+  private String addZI01Flag = "N";
 
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
@@ -108,6 +119,7 @@ public class USHandler extends GEOHandler {
           // set the address type to Invoice To for CreateCMR
           record.setCmrAddrTypeCode("ZI01");
           record.setCmrAddrSeq("002");
+          addZI01Flag = "Y";
         }
       }
       if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
@@ -141,6 +153,35 @@ public class USHandler extends GEOHandler {
     // if (!addressesList.isEmpty() && addressesList.size() > 0) {
     // converted.addAll(addressesList);
     // }
+
+    // CREATCMR-6433
+    if (!"Y".equals(addZI01Flag)) {
+      for (FindCMRRecordModel record : converted) {
+        if ("BPQS".equals(record.getUsCmrRestrictTo())) {
+          if (!"ZI01".equals(record.getCmrAddrTypeCode())) {
+            if (!"PG".equals(record.getCmrOrderBlock())) {
+              copyZI01Flag = "Y";
+            }
+          }
+        }
+      }
+
+      if ("Y".equals(copyZI01Flag)) {
+        FindCMRRecordModel zi01 = new FindCMRRecordModel();
+        zi01.setCmrAddrTypeCode("ZI01");
+        zi01.setCmrAddrSeq("002");
+        zi01.setCmrCountryLanded("US");
+        zi01.setCmrState("NY");
+        zi01.setCmrCity("ARMONK");
+        zi01.setCmrStreetAddress("1 N CASTLE DR MD NC313");
+        zi01.setCmrPostalCode("10504-1725");
+
+        addFlag = "Y";
+        converted.add(zi01);
+      }
+    }
+    // CREATCMR-6433
+
     Collections.sort(converted);
     source.setItems(converted);
 
@@ -309,29 +350,31 @@ public class USHandler extends GEOHandler {
     data.setRestrictTo(main.getUsCmrRestrictTo());
 
     // Tax Class / Code 1
-    String taxcd1 = main.getUsCmrTaxType1() + main.getUsCmrTaxClass1();
-
-    if (StringUtils.isEmpty(main.getUsCmrTaxType1()) || StringUtils.isEmpty(main.getUsCmrTaxClass1())) {
-      data.setTaxCd1("");
-    } else {
-      data.setTaxCd1(taxcd1);
-    }
+    // String taxcd1 = main.getUsCmrTaxType1() + main.getUsCmrTaxClass1();
+    // if (StringUtils.isEmpty(main.getUsCmrTaxType1()) ||
+    // StringUtils.isEmpty(main.getUsCmrTaxClass1())) {
+    // data.setTaxCd1("");
+    // } else {
+    // data.setTaxCd1(taxcd1);
+    // }
 
     // Tax Class / Code 2
-    String taxcd2 = main.getUsCmrTaxType2() + main.getUsCmrTaxClass2();
-    if (StringUtils.isEmpty(main.getUsCmrTaxType2()) || StringUtils.isEmpty(main.getUsCmrTaxClass2())) {
-      data.setTaxCd2("");
-    } else {
-      data.setTaxCd2(taxcd2);
-    }
+    // String taxcd2 = main.getUsCmrTaxType2() + main.getUsCmrTaxClass2();
+    // if (StringUtils.isEmpty(main.getUsCmrTaxType2()) ||
+    // StringUtils.isEmpty(main.getUsCmrTaxClass2())) {
+    // data.setTaxCd2("");
+    // } else {
+    // data.setTaxCd2(taxcd2);
+    // }
 
     // Tax Class / Code 3
-    String taxcd3 = main.getUsCmrTaxType3() + main.getUsCmrTaxClass3();
-    if (StringUtils.isEmpty(main.getUsCmrTaxType3()) || StringUtils.isEmpty(main.getUsCmrTaxClass3())) {
-      data.setTaxCd3("");
-    } else {
-      data.setTaxCd3(taxcd3);
-    }
+    // String taxcd3 = main.getUsCmrTaxType3() + main.getUsCmrTaxClass3();
+    // if (StringUtils.isEmpty(main.getUsCmrTaxType3()) ||
+    // StringUtils.isEmpty(main.getUsCmrTaxClass3())) {
+    // data.setTaxCd3("");
+    // } else {
+    // data.setTaxCd3(taxcd3);
+    // }
 
     data.setBpName(cmr.getUsCmrBpAbbrevNm());
 
@@ -727,8 +770,10 @@ public class USHandler extends GEOHandler {
       }
     } else {
       // break everything here if needed
+      LOG.debug("setAddressValuesOnImport processType = " + processType);
       String addrTxt = address.getAddrTxt();
       if (addrTxt != null && addrTxt.length() > 24) {
+        LOG.debug("setAddressValuesOnImport addrTxt > 24 ");
         splitAddress(address, address.getAddrTxt(), "", 24, 24);
       }
     }
@@ -740,30 +785,57 @@ public class USHandler extends GEOHandler {
       address.setPostCd(postCd);
     }
 
-    if ("US".equals(processType)) {
+    if (!"TC".equals(processType)) {
       // CREATCMR-6182
       String strAddrTxt2 = address.getAddrTxt2();
       if (StringUtils.isNotBlank(cmr.getCmrName3())) {
-        address.setAddrTxt2(cmr.getCmrName3());
+        // CREATCMR-6255
+        // address.setAddrTxt2(cmr.getCmrName3());
+        address.setDivn(cmr.getCmrName3());
+        LOG.debug("setAddressValuesOnImport name3 ");
       } else if (StringUtils.isNotBlank(strAddrTxt2)) {
-        address.setAddrTxt2(strAddrTxt2);
+        // CREATCMR-6255
+        // address.setAddrTxt2(strAddrTxt2);
+        address.setDivn(strAddrTxt2);
+        LOG.debug("setAddressValuesOnImport strAddrTxt2 ");
       }
+      address.setAddrTxt2(null);
+
+      LOG.debug("setAddressValuesOnImport reset Divn : " + address.getDivn() + " AddrTxt2 : " + address.getAddrTxt2());
     }
 
-    if (!"E".equals(cmr.getUsCmrBpAccountType())) {
-      if (StringUtils.isNotBlank(address.getDivn())) {
-        address.setAddrTxt2(null);
-      }
-    } else if ("E".equals(cmr.getUsCmrBpAccountType())) {
-      String strAddrTxt2 = address.getAddrTxt2();
-      if (StringUtils.isNotBlank(strAddrTxt2)) {
-        address.setAddrTxt2(strAddrTxt2);
-      }
-    }
-    // CREATCMR-5830
+    // if (!"E".equals(cmr.getUsCmrBpAccountType())) {
+    // if (StringUtils.isNotBlank(address.getDivn())) {
+    // address.setAddrTxt2(null);
+    // }
+    // } else if ("E".equals(cmr.getUsCmrBpAccountType())) {
+    // String strAddrTxt2 = address.getAddrTxt2();
+    // if (StringUtils.isNotBlank(strAddrTxt2)) {
+    // address.setAddrTxt2(strAddrTxt2);
+    // }
+    // }
 
     // CREATCMR-6183
-    if ("US".equals(processType)) {
+    if (!"TC".equals(processType)) {
+      if ("E".equals(cmr.getUsCmrBpAccountType())) {
+        if ("ZS01".equals(address.getId().getAddrType())) {
+          // || "ZI01".equals(address.getId().getAddrType())
+          address.setDivn(cmr.getCmrName());
+        }
+      }
+    }
+    // CREATCMR-6183
+
+    // CREATCMR-6183
+    if (!"TC".equals(processType)) {
+
+      if ("ZI01".equals(address.getId().getAddrType())) {
+        if ("Y".equals(addFlag)) {
+          address.setDivn("IBM CREDIT LLC");
+          addFlag = "N";
+        }
+      }
+
       if ("E".equals(cmr.getUsCmrBpAccountType())) {
         if ("ZS01".equals(address.getId().getAddrType())) {
           // || "ZI01".equals(address.getId().getAddrType())
@@ -1171,6 +1243,11 @@ public class USHandler extends GEOHandler {
     data.setTaxExemptStatus1(data.getSpecialTaxCd());
     // CREATCMR-4569
 
+    // CREATCMR-6342
+    String scc = getSCCByReqId(entityManager, data.getId().getReqId());
+    data.setCompanyNm(scc);
+    // CREATCMR-6342
+
   }
 
   @Override
@@ -1180,9 +1257,26 @@ public class USHandler extends GEOHandler {
     if (addrTxt != null && addrTxt.length() > 24) {
       splitAddress(addr, addr.getAddrTxt(), "", 24, 24);
       if (!StringUtils.isEmpty(addr.getAddrTxt2())) {
-        addr.setAddrTxt2(addr.getAddrTxt2().trim());
+        // CREATCMR-6255
+        // addr.setAddrTxt2(addr.getAddrTxt2().trim());
+        addr.setDivn(addr.getAddrTxt2().trim());
+        addr.setAddrTxt2(null);
       }
     }
+
+    // CREATCMR-6342
+    Data currentData = dataService.getCurrentRecordById(addr.getId().getReqId(), entityManager);
+    String scc = getSCCByReqId(entityManager, currentData.getId().getReqId());
+    currentData.setCompanyNm(scc);
+
+    RequestEntryService service = new RequestEntryService();
+    service.updateEntity(currentData, entityManager);
+    // CREATCMR-6342
+
+    // AddrPK pk = new AddrPK();
+    // pk.setReqId(addr.getId().getReqId());
+    // Addr currentAddr = entityManager.find(Addr.class, pk);
+
   }
 
   @Override
@@ -2071,6 +2165,59 @@ public class USHandler extends GEOHandler {
     query.setParameter("CNTRY", country);
     query.setForReadOnly(true);
     return query.getSingleResult(String.class);
+  }
+
+  // CREATCMR-6331
+  public static String getUSEntCompToPPN(EntityManager entityManager, Admin admin) {
+    String sql = ExternalizedQuery.getSql("QUERY.US_GETMASSUPDGETENTNO");
+    String cmtUsEntCompToPpn = "";
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("PAR_REQ_ID", admin.getId().getReqId());
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    List<MassUpdtData> rs = query.getResults(MassUpdtData.class);
+
+    for (MassUpdtData muData : rs) {
+      if (!StringUtils.isEmpty(muData.getCompany()) || !StringUtils.isEmpty(muData.getEnterprise())) {
+        if (StringUtils.isEmpty(muData.getCustNm1())) {
+          if ("".equals(cmtUsEntCompToPpn)) {
+            cmtUsEntCompToPpn = Integer.toString(muData.getId().getSeqNo()).trim();
+          } else {
+            cmtUsEntCompToPpn = cmtUsEntCompToPpn + ", row " + Integer.toString(muData.getId().getSeqNo()).trim();
+          }
+        }
+      }
+    }
+
+    if (!StringUtils.isEmpty(cmtUsEntCompToPpn)) {
+      cmtUsEntCompToPpn = "\nPlease check the fields in row " + cmtUsEntCompToPpn + ".";
+      cmtUsEntCompToPpn = "If Enterprise# or Company# has been changes, Customer Name must be filled in please." + cmtUsEntCompToPpn;
+    }
+
+    return cmtUsEntCompToPpn;
+  }
+
+  // CREATCMR-6342
+  private String getSCCByReqId(EntityManager entityManager, long req_id) {
+    String scc = "";
+    String sql = ExternalizedQuery.getSql("US.GET.US_CMR_SCC.GET_SCC_BY_REQ_ID_LAND_CNTRY_ST_CNTY_CITY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", req_id);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      scc = result;
+    }
+    return scc;
+  }
+  // CREATCMR-6342
+
+  @Override
+  public Boolean compareReshuffledAddress(String dnbAddress, String address, String country) {
+    return false;
+  }
+
+  public static Boolean compareUSReshuffledAddress(String dnbAddress, String address, String country) {
+    return false;
   }
 
 }

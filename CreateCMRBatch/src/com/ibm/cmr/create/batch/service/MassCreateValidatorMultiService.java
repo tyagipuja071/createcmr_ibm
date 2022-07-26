@@ -152,7 +152,8 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
       case "SVA":
         if (!hasRecordsForIteration(entityManager, request.getId().getReqId(), request.getIterationId())) {
           LOG.debug("Mass Create records does not exist for the current iteration, creating...");
-          MassCreateUtil.createMassCreateRecords(massCreate, entityManager);
+          // MassCreateUtil.createMassCreateRecords(massCreate, entityManager);
+          MassCreateUtil.createMassCreateRecords(massCreate, entityManager, data.getCmrIssuingCntry(), originalStatus);
         }
         ApprovalService approvalService = new ApprovalService();
         AppUser dummyUser = new AppUser();
@@ -189,10 +190,15 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
       case "SV2":
         if (!hasRecordsForIteration(entityManager, request.getId().getReqId(), request.getIterationId())) {
           LOG.debug("Mass Create records does not exist for the current iteration, creating...");
-          MassCreateUtil.createMassCreateRecords(massCreate, entityManager);
+          // MassCreateUtil.createMassCreateRecords(massCreate, entityManager);
+          MassCreateUtil.createMassCreateRecords(massCreate, entityManager, data.getCmrIssuingCntry(), originalStatus);
         }
         request.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
         request.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+        // For US, set rdcProcessingStatus
+        if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+          request.setRdcProcessingStatus(CmrConstants.RDC_STATUS_ABORTED);
+        }
         comment = "System validation succeeded. Request ready for automatic processing.";
         sendToId = null;
         break;
@@ -205,6 +211,7 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
         request.setLockInd(CmrConstants.YES_NO.N.toString());
         request.setLockTs(null);
       }
+
       updateEntity(request, entityManager);
       LOG.debug("Mass Create Request ID: " + request.getId().getReqId() + " creating Workflow History and Change Logs");
 
