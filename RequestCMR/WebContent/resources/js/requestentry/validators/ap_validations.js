@@ -3579,6 +3579,7 @@ FormManager.addFormValidator((function() {
      var reqTyp = FormManager.getActualValue('reqType');
      var vat = FormManager.getActualValue('vat');
      var reqId = FormManager.getActualValue('reqId');
+     var formerAbn = getFormerVatAU(reqId);
      if (reqTyp == 'C') {
        return new ValidationResult(null, true);
      }
@@ -3594,7 +3595,7 @@ FormManager.addFormValidator((function() {
              REQ_ID : reqId
            };
          }              
-         var abnRet = cmr.validateABN(vat, reqId);
+         var abnRet = cmr.validateABN(vat, reqId, formerAbn);
          if (!abnRet.success) {
            return new ValidationResult({
              id : 'vat',
@@ -3612,6 +3613,18 @@ FormManager.addFormValidator((function() {
    }
  };
 })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function getFormerVatAU(reqId) {
+  var formerVat = '';
+  var qParams = {
+    REQ_ID : reqId,
+  };
+  var result = cmr.query('GET.VAT_DATA_RDC', qParams);
+  if (result != null) {
+    formerVat = result.ret1;
+  }
+  return formerVat;
 }
 
 function lockFieldsForIndia(){
