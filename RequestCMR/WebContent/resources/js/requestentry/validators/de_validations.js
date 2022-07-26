@@ -1060,6 +1060,17 @@ function validateEnterpriseNum() {
 	    };
 	  })(), 'MAIN_IBM_TAB', 'frmCMR');
 	}
+// CREATCMR-1815
+function addLandedCountryHandler(cntry, addressMode, saving, finalSave) {
+  if (!saving) {
+    if (addressMode == 'newAddress') {
+      FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
+      FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+    } else {
+      FilteringDropdown['val_landCntry'] = null;
+    }
+  }
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
@@ -1069,6 +1080,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.DE);
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.DE);
   GEOHandler.addAddrFunction(setAbbrevNameDEUpdate, GEOHandler.DE);
+  GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.DE);
   // DENNIS: COMMENTED BECAUSE THIS IS IN DUPLICATE OF THE VALIDATOR REGISTERED
   // ON WW
   // GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.DE,
