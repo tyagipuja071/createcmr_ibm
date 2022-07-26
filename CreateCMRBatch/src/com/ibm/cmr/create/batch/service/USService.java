@@ -496,6 +496,7 @@ public class USService extends TransConnService {
 
     // lock
     //lockRecord(entityManager, admin);
+    lockUSRecord(entityManager, admin.getId().getReqId());
 
     CmrServiceInput cmrServiceInput = getReqParam(entityManager, admin.getId().getReqId(), admin.getReqType(), data);
 
@@ -785,6 +786,7 @@ public class USService extends TransConnService {
           boolean isDataUpdated = false;
           isDataUpdated = USHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
           //lockRecordUpdt(entityManager, admin);
+          lockUSRecord(entityManager, admin.getId().getReqId());
 
           for (Addr addr : addresses) {
             entityManager.detach(addr);
@@ -2091,6 +2093,14 @@ public class USService extends TransConnService {
 
     partialCommit(entityManager);
   }
+  
+  private void lockUSRecord(EntityManager entityManager, long reqId) throws Exception {
+	    LOG.info("Locking Request " + reqId);
+	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("LOCK.US.DATA"));
+	    query.setParameter("REQ_ID", reqId);
+	    query.executeSql();
+	   
+	  }
 
   public CmrServiceInput getReqParam(EntityManager em, long reqId, String reqType, Data data) {
     String cmrNo = "";
