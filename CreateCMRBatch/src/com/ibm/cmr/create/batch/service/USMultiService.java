@@ -62,10 +62,10 @@ public class USMultiService extends MultiThreadedBatchService<Long> {
     }
     switch (this.mode) {
     case MassUpdt:
-      this.service.monitorCreqcmrMassUpd(entityManager);
+      this.service.monitorCreqcmrMassUpd(entityManager, requests);
       break;
     case Single:
-      this.service.monitorCreqcmr(entityManager);
+      this.service.monitorCreqcmr(entityManager, requests);
       break;
     default:
       break;
