@@ -1122,10 +1122,8 @@ function setVatValidatorPTES() {
     };
     var results = cmr.query('ADDR.GET.ZS01LANDCNTRY.BY_REQID', reqParam);
     var zs01LandCntry = results.ret2;
-    if (!dijit.byId('vatExempt').get('checked') && zs01LandCntry != 'US') {
-      if (zs01LandCntry != 'GB' && cntry != '838') {
+    if (!dijit.byId('vatExempt').get('checked') && zs01LandCntry != 'US' && zs01LandCntry != 'GB') {
         checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-      }
     }
   }
 }
