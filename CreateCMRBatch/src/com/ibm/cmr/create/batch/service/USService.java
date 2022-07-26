@@ -495,7 +495,7 @@ public class USService extends TransConnService {
     String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
 
     // lock
-    lockRecord(entityManager, admin);
+    //lockRecord(entityManager, admin);
 
     CmrServiceInput cmrServiceInput = getReqParam(entityManager, admin.getId().getReqId(), admin.getReqType(), data);
 
@@ -784,7 +784,7 @@ public class USService extends TransConnService {
 
           boolean isDataUpdated = false;
           isDataUpdated = USHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
-          lockRecordUpdt(entityManager, admin);
+          //lockRecordUpdt(entityManager, admin);
 
           for (Addr addr : addresses) {
             entityManager.detach(addr);
