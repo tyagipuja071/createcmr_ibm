@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.automation.ActionOnError;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
+import com.ibm.cio.cmr.request.automation.AutomationEngine;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.ValidatingElement;
@@ -21,11 +22,13 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.ChinaUtil;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -53,7 +56,9 @@ public class UpdateSwitchElement extends ValidatingElement {
     // get request admin and data
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    Addr addr = requestData.getAddress("PG01");
     long reqId = requestData.getAdmin().getId().getReqId();
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     // CREATCMR-6074
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
     boolean requesterFromTaxTeam = false;
@@ -158,12 +163,12 @@ public class UpdateSwitchElement extends ValidatingElement {
          */
 
         List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
-
+        String addrTypeCode = null;
         log.debug("Addr types for skip check are: " + scenarioExceptions.getAddressTypesForSkipChecks().toString());
         boolean onlySkipAddr = false;
         if (scenarioExceptions.getAddressTypesForSkipChecks() != null && scenarioExceptions.getAddressTypesForSkipChecks().size() > 0) {
           onlySkipAddr = true;
-          String addrTypeCode = null;
+
           for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
             addrTypeCode = addressTypes.get(updatedAddrModel.getAddrType());
             if (StringUtils.isBlank(addrTypeCode)) {
@@ -176,6 +181,32 @@ public class UpdateSwitchElement extends ValidatingElement {
             }
           }
         }
+        // Start CREATCMR-6229
+        AppUser user = (AppUser) engineData.get("appUser");
+        if (!changes.hasDataChanges()) {
+          boolean paygoToBill = true;
+          boolean isDPLpassed = true;
+          for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
+            addrTypeCode = addressTypes.get(updatedAddrModel.getAddrType());
+            if (!"PG01".equals(addrTypeCode)) {
+              paygoToBill = false;
+            }
+            if ("PG01".equals(addrTypeCode)) {
+              if (!"P".equals(addr.getDplChkResult())) {
+                isDPLpassed = false;
+                log.debug("DPL failed: " + reqId);
+              }
+            }
+          }
+          if (paygoToBill && isDPLpassed) {
+            if (payGoAddredited) {
+              AutomationEngine.createComment(entityManager, "Additional PayGo billing only being added by PayGo accredited partner.", reqId, user);
+              admin.setReqStatus("PCP");
+            }
+          }
+        }
+        // End CREATCMR-6229
+
         if (onlySkipAddr) {
           engineData.setSkipChecks();
           output.setDetails("Updates found on non-relevant addresses only.");
