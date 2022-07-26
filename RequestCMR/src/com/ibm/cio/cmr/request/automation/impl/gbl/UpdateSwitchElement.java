@@ -157,29 +157,31 @@ public class UpdateSwitchElement extends ValidatingElement {
             }
           }
         }
-        // CREATCMR-6299
+        // Start CREATCMR-6229
         AppUser user = (AppUser) engineData.get("appUser");
         if (!changes.hasDataChanges()) {
+          boolean paygoToBill = true;
+          boolean isDPLpassed = true;
           for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
             addrTypeCode = addressTypes.get(updatedAddrModel.getAddrType());
-            boolean paygoToBill = true;
             if (!"PG01".equals(addrTypeCode)) {
               paygoToBill = false;
-            } else {
-              if (paygoToBill) {
-                if (payGoAddredited) {
-                  log.debug("Performing DPL check on Request " + reqId);
-                  if ("P".equals(addr.getDplChkResult())) {
-                    AutomationEngine.createComment(entityManager, "Additional PayGo billing only being added by PayGo accredited partner.", reqId,
-                        user);
-                    admin.setReqStatus("PCP");
-                  }
-                }
+            }
+            if ("PG01".equals(addrTypeCode)) {
+              if (!"P".equals(addr.getDplChkResult())) {
+                isDPLpassed = false;
+                log.debug("DPL failed: " + reqId);
               }
             }
           }
+          if (paygoToBill && isDPLpassed) {
+            if (payGoAddredited) {
+              AutomationEngine.createComment(entityManager, "Additional PayGo billing only being added by PayGo accredited partner.", reqId, user);
+              admin.setReqStatus("PCP");
+            }
+          }
         }
-        // CREATCMR-6299
+        // End CREATCMR-6229
 
         if (onlySkipAddr) {
           engineData.setSkipChecks();
