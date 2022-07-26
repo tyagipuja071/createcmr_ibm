@@ -9,6 +9,232 @@ var _usIsuHandler = null;
 var _usSicm = "";
 var _kukla = "";
 var _enterpriseHandler = null;
+var affiliateArray = {
+  9001 : '0089800',
+  9002 : '0084800',
+  9003 : '0086100',
+  9004 : '0085900',
+  9005 : '0086000',
+  9006 : '0085800',
+  9007 : '0080200',
+  9008 : '0085300',
+  9009 : '0085600',
+  9010 : '0080300',
+  9011 : '0088300',
+  9012 : '0086900',
+  9013 : '0082200',
+  9014 : '0082100',
+  9015 : '0082700',
+  9016 : '0085300',
+  9017 : '0082800',
+  9018 : '0082900',
+  9019 : '0082600',
+  9020 : '0083400',
+  9021 : '0083100',
+  9022 : '0083200',
+  9023 : '0082500',
+  9024 : '0083000',
+  9025 : '0088600',
+  9026 : '0088800',
+  9027 : '0083300',
+  9028 : '0083100',
+  9029 : '0086400',
+  9030 : '0081900',
+  9031 : '0081000',
+  9032 : '0087900',
+  9033 : '0085500',
+  9034 : '0084200',
+  9035 : '0084300',
+  9036 : '0084700',
+  9037 : '0084400',
+  9038 : '0076500',
+  9040 : '0084900',
+  9041 : '0085000',
+  9042 : '0089300',
+  9043 : '0089400',
+  9044 : '0089000',
+  9045 : '0089500',
+  9046 : '0060100',
+  9048 : '0062100',
+  9049 : '0069300',
+  9050 : '0066600',
+  9051 : '0069600',
+  9052 : '0074800',
+  9053 : '0082300',
+  9054 : '0080600',
+  9055 : '0060600',
+  9056 : '0080400',
+  9057 : '0088400',
+  9058 : '0088500',
+  9060 : '0062300',
+  9061 : '0062400',
+  9063 : '0062600',
+  9064 : '0062700',
+  9065 : '0088700',
+  9066 : '0062200',
+  9067 : '0061300',
+  9068 : '0061400',
+  9069 : '0061500',
+  9070 : '0085700',
+  9071 : '0061800',
+  9072 : '0060200',
+  9073 : '0060300',
+  9074 : '0060400',
+  9075 : '0060500',
+  9076 : '0069000',
+  9077 : '0060700',
+  9078 : '0060800',
+  9079 : '0061100',
+  9080 : '0075200',
+  9081 : '0061600',
+  9083 : '0062000',
+  9084 : '0061900',
+  9085 : '0080500',
+  9086 : '0074000',
+  9087 : '0061700',
+  9088 : '0060900',
+  9089 : '0061000',
+  9093 : '0066000',
+  9095 : '0065300',
+  9096 : '0061200',
+  9098 : '0066800',
+  9099 : '0076800',
+  9100 : '0067200',
+  9102 : '0068600',
+  9104 : '0068800',
+  9105 : '0068900',
+  9108 : '0069200',
+  9109 : '0065000',
+  9110 : '0063700',
+  9111 : '0066800',
+  9112 : '0064100',
+  9113 : '0069700',
+  9115 : '0064200',
+  9117 : '0073100',
+  9119 : '0073300',
+  9120 : '0073500',
+  9121 : '0064300',
+  9122 : '0073700',
+  9124 : '0073900',
+  9125 : '0064400',
+  9126 : '0064500',
+  9127 : '0064600',
+  9129 : '0070100',
+  9130 : '0064700',
+  9131 : '0070300',
+  9132 : '0064800',
+  9134 : '0071000',
+  9135 : '0064900',
+  9136 : '0071200',
+  9137 : '0071300',
+  9138 : '0071400',
+  9139 : '0065400',
+  9140 : '0065500',
+  9141 : '0072000',
+  9142 : '0082400',
+  9147 : '0079700',
+  9148 : '0078600',
+  9151 : '0078900',
+  9153 : '0078300',
+  9155 : '0078400',
+  9156 : '0078500',
+  9157 : '0078700',
+  9158 : '0078800',
+  9159 : '0079100',
+  9160 : '0062100',
+  9162 : '0065600',
+  9163 : '0065800',
+  9164 : '0065900',
+  9165 : '0080100',
+  9166 : '0066200',
+  9167 : '0066300',
+  9168 : '0066500',
+  9169 : '0066700',
+  9170 : '0067400',
+  9171 : '0067500',
+  9172 : '0067600',
+  9173 : '0067700',
+  9174 : '0067800',
+  9175 : '0068100',
+  9176 : '0067900',
+  9178 : '0068200',
+  9179 : '0068300',
+  9180 : '0068400',
+  9181 : '0068500',
+  9182 : '0069400',
+  9183 : '0069500',
+  9184 : '0086100',
+  9185 : '0076500',
+  9186 : '0076600',
+  9187 : '0076700',
+  9189 : '0075500',
+  9191 : '0075700',
+  9192 : '0071100',
+  9193 : '0075900',
+  9194 : '0070700',
+  9195 : '0076100',
+  9196 : '0071500',
+  9197 : '0071600',
+  9198 : '0076400',
+  9199 : '0075100',
+  9200 : '0076500',
+  9201 : '0075000',
+  9203 : '0085100',
+  9204 : '0085100',
+  9207 : '0084100',
+  9208 : '0085100',
+  9209 : '0085200',
+  9210 : '0086200',
+  9211 : '0086500',
+  9213 : '0087100',
+  9214 : '0087200',
+  9215 : '0087300',
+  9216 : '0086700',
+  9218 : '0086100',
+  9219 : '0086800',
+  9222 : '0062800',
+  9223 : '0062900',
+  9224 : '0063000',
+  9226 : '0063200',
+  9227 : '0063300',
+  9228 : '0063400',
+  9230 : '0089700',
+  9231 : '0089900',
+  9232 : '0085200',
+  9234 : '0075300',
+  9235 : '0088900',
+  9236 : '0089200',
+  9237 : '0089600',
+  9239 : '0072700',
+  9240 : '0072900',
+  9241 : '0073000',
+  9242 : '0074300',
+  9243 : '0088000',
+  9244 : '0079900',
+  9245 : '0085400',
+  9246 : '0070800',
+  9247 : '0070900',
+  9248 : '0071800',
+  9250 : '0072100',
+  9251 : '0072200',
+  9252 : '0072300',
+  9253 : '0072400',
+  9254 : '0072600',
+  9255 : '0073400',
+  9260 : '0075600',
+  9261 : '0075800',
+  9262 : '0076000',
+  9263 : '0076200',
+  9264 : '0076300',
+  9265 : '0076900',
+  9267 : '0077100',
+  9268 : '0077200',
+  9269 : '0077300',
+  9273 : '0077700',
+  9274 : '0079800',
+  9275 : '0080900',
+  9276 : '0081100'
+}
 /**
  * Adds the validator for Invoice-to that only 3 address lines can be specified
  */
@@ -902,457 +1128,7 @@ function setAffiliateNumber() {
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
   var isicCd = FormManager.getActualValue('isicCd');
   if (subIndustryCd.startsWith('Y') && (isicCd.startsWith('90') || isicCd.startsWith('91') || isicCd.startsWith('92'))) {
-    if (isicCd == '9001') {
-      FormManager.setValue('affiliate', '0089800');
-    } else if (isicCd == '9002') {
-      FormManager.setValue('affiliate', '0084800');
-    } else if (isicCd == '9003') {
-      FormManager.setValue('affiliate', '0086100');
-    } else if (isicCd == '9004') {
-      FormManager.setValue('affiliate', '0085900');
-    } else if (isicCd == '9005') {
-      FormManager.setValue('affiliate', '0086000');
-    } else if (isicCd == '9006') {
-      FormManager.setValue('affiliate', '0085800');
-    } else if (isicCd == '9007') {
-      FormManager.setValue('affiliate', '0080200');
-    } else if (isicCd == '9008') {
-      FormManager.setValue('affiliate', '0085300');
-    } else if (isicCd == '9009') {
-      FormManager.setValue('affiliate', '0085600');
-    } else if (isicCd == '9010') {
-      FormManager.setValue('affiliate', '0080300');
-    } else if (isicCd == '9011') {
-      FormManager.setValue('affiliate', '0088300');
-    } else if (isicCd == '9012') {
-      FormManager.setValue('affiliate', '0086900');
-    } else if (isicCd == '9013') {
-      FormManager.setValue('affiliate', '0082200');
-    } else if (isicCd == '9014') {
-      FormManager.setValue('affiliate', '0082100');
-    } else if (isicCd == '9015') {
-      FormManager.setValue('affiliate', '0082700');
-    } else if (isicCd == '9016') {
-      FormManager.setValue('affiliate', '0085300');
-    } else if (isicCd == '9017') {
-      FormManager.setValue('affiliate', '0082800');
-    } else if (isicCd == '9018') {
-      FormManager.setValue('affiliate', '0082900');
-    } else if (isicCd == '9019') {
-      FormManager.setValue('affiliate', '0082600');
-    } else if (isicCd == '9020') {
-      FormManager.setValue('affiliate', '0083400');
-    } else if (isicCd == '9021') {
-      FormManager.setValue('affiliate', '0083100');
-    } else if (isicCd == '9022') {
-      FormManager.setValue('affiliate', '0083200');
-    } else if (isicCd == '9023') {
-      FormManager.setValue('affiliate', '0082500');
-    } else if (isicCd == '9024') {
-      FormManager.setValue('affiliate', '0083000');
-    } else if (isicCd == '9025') {
-      FormManager.setValue('affiliate', '0088600');
-    } else if (isicCd == '9026') {
-      FormManager.setValue('affiliate', '0088800');
-    } else if (isicCd == '9027') {
-      FormManager.setValue('affiliate', '0083300');
-    } else if (isicCd == '9028') {
-      FormManager.setValue('affiliate', '0083100');
-    } else if (isicCd == '9029') {
-      FormManager.setValue('affiliate', '0086400');
-    } else if (isicCd == '9030') {
-      FormManager.setValue('affiliate', '0081900');
-    } else if (isicCd == '9031') {
-      FormManager.setValue('affiliate', '0081000');
-    } else if (isicCd == '9032') {
-      FormManager.setValue('affiliate', '0087900');
-    } else if (isicCd == '9033') {
-      FormManager.setValue('affiliate', '0085500');
-    } else if (isicCd == '9034') {
-      FormManager.setValue('affiliate', '0084200');
-    } else if (isicCd == '9035') {
-      FormManager.setValue('affiliate', '0084300');
-    } else if (isicCd == '9036') {
-      FormManager.setValue('affiliate', '0084700');
-    } else if (isicCd == '9037') {
-      FormManager.setValue('affiliate', '0084400');
-    } else if (isicCd == '9038') {
-      FormManager.setValue('affiliate', '0076500');
-    } else if (isicCd == '9040') {
-      FormManager.setValue('affiliate', '0084900');
-    } else if (isicCd == '9041') {
-      FormManager.setValue('affiliate', '0085000');
-    } else if (isicCd == '9042') {
-      FormManager.setValue('affiliate', '0089300');
-    } else if (isicCd == '9043') {
-      FormManager.setValue('affiliate', '0089400');
-    } else if (isicCd == '9044') {
-      FormManager.setValue('affiliate', '0089000');
-    } else if (isicCd == '9045') {
-      FormManager.setValue('affiliate', '0089500');
-    } else if (isicCd == '9046') {
-      FormManager.setValue('affiliate', '0060100');
-    } else if (isicCd == '9048') {
-      FormManager.setValue('affiliate', '0062100');
-    } else if (isicCd == '9049') {
-      FormManager.setValue('affiliate', '0069300');
-    } else if (isicCd == '9050') {
-      FormManager.setValue('affiliate', '0066600');
-    } else if (isicCd == '9051') {
-      FormManager.setValue('affiliate', '0069600');
-    } else if (isicCd == '9052') {
-      FormManager.setValue('affiliate', '0074800');
-    } else if (isicCd == '9053') {
-      FormManager.setValue('affiliate', '0082300');
-    } else if (isicCd == '9054') {
-      FormManager.setValue('affiliate', '0080600');
-    } else if (isicCd == '9055') {
-      FormManager.setValue('affiliate', '0060600');
-    } else if (isicCd == '9056') {
-      FormManager.setValue('affiliate', '0080400');
-    } else if (isicCd == '9057') {
-      FormManager.setValue('affiliate', '0088400');
-    } else if (isicCd == '9058') {
-      FormManager.setValue('affiliate', '0088500');
-    } else if (isicCd == '9060') {
-      FormManager.setValue('affiliate', '0062300');
-    } else if (isicCd == '9061') {
-      FormManager.setValue('affiliate', '0062400');
-    } else if (isicCd == '9063') {
-      FormManager.setValue('affiliate', '0062600');
-    } else if (isicCd == '9064') {
-      FormManager.setValue('affiliate', '0062700');
-    } else if (isicCd == '9065') {
-      FormManager.setValue('affiliate', '0088700');
-    } else if (isicCd == '9066') {
-      FormManager.setValue('affiliate', '0062200');
-    } else if (isicCd == '9067') {
-      FormManager.setValue('affiliate', '0061300');
-    } else if (isicCd == '9068') {
-      FormManager.setValue('affiliate', '0061400');
-    } else if (isicCd == '9069') {
-      FormManager.setValue('affiliate', '0061500');
-    } else if (isicCd == '9070') {
-      FormManager.setValue('affiliate', '0085700');
-    } else if (isicCd == '9071') {
-      FormManager.setValue('affiliate', '0061800');
-    } else if (isicCd == '9072') {
-      FormManager.setValue('affiliate', '0060200');
-    } else if (isicCd == '9073') {
-      FormManager.setValue('affiliate', '0060300');
-    } else if (isicCd == '9074') {
-      FormManager.setValue('affiliate', '0060400');
-    } else if (isicCd == '9075') {
-      FormManager.setValue('affiliate', '0060500');
-    } else if (isicCd == '9076') {
-      FormManager.setValue('affiliate', '0069000');
-    } else if (isicCd == '9077') {
-      FormManager.setValue('affiliate', '0060700');
-    } else if (isicCd == '9078') {
-      FormManager.setValue('affiliate', '0060800');
-    } else if (isicCd == '9079') {
-      FormManager.setValue('affiliate', '0061100');
-    } else if (isicCd == '9080') {
-      FormManager.setValue('affiliate', '0075200');
-    } else if (isicCd == '9081') {
-      FormManager.setValue('affiliate', '0061600');
-    } else if (isicCd == '9083') {
-      FormManager.setValue('affiliate', '0062000');
-    } else if (isicCd == '9084') {
-      FormManager.setValue('affiliate', '0061900');
-    } else if (isicCd == '9085') {
-      FormManager.setValue('affiliate', '0080500');
-    } else if (isicCd == '9086') {
-      FormManager.setValue('affiliate', '0074000');
-    } else if (isicCd == '9087') {
-      FormManager.setValue('affiliate', '0061700');
-    } else if (isicCd == '9088') {
-      FormManager.setValue('affiliate', '0060900');
-    } else if (isicCd == '9089') {
-      FormManager.setValue('affiliate', '0061000');
-    } else if (isicCd == '9093') {
-      FormManager.setValue('affiliate', '0066000');
-    } else if (isicCd == '9095') {
-      FormManager.setValue('affiliate', '0065300');
-    } else if (isicCd == '9096') {
-      FormManager.setValue('affiliate', '0061200');
-    } else if (isicCd == '9098') {
-      FormManager.setValue('affiliate', '0066800');
-    } else if (isicCd == '9099') {
-      FormManager.setValue('affiliate', '0076800');
-    } else if (isicCd == '9100') {
-      FormManager.setValue('affiliate', '0067200');
-    } else if (isicCd == '9102') {
-      FormManager.setValue('affiliate', '0068600');
-    } else if (isicCd == '9104') {
-      FormManager.setValue('affiliate', '0068800');
-    } else if (isicCd == '9105') {
-      FormManager.setValue('affiliate', '0068900');
-    } else if (isicCd == '9108') {
-      FormManager.setValue('affiliate', '0069200');
-    } else if (isicCd == '9109') {
-      FormManager.setValue('affiliate', '0065000');
-    } else if (isicCd == '9110') {
-      FormManager.setValue('affiliate', '0063700');
-    } else if (isicCd == '9111') {
-      FormManager.setValue('affiliate', '0066800');
-    } else if (isicCd == '9112') {
-      FormManager.setValue('affiliate', '0064100');
-    } else if (isicCd == '9113') {
-      FormManager.setValue('affiliate', '0069700');
-    } else if (isicCd == '9115') {
-      FormManager.setValue('affiliate', '0064200');
-    } else if (isicCd == '9117') {
-      FormManager.setValue('affiliate', '0073100');
-    } else if (isicCd == '9119') {
-      FormManager.setValue('affiliate', '0073300');
-    } else if (isicCd == '9120') {
-      FormManager.setValue('affiliate', '0073500');
-    } else if (isicCd == '9121') {
-      FormManager.setValue('affiliate', '0064300');
-    } else if (isicCd == '9122') {
-      FormManager.setValue('affiliate', '0073700');
-    } else if (isicCd == '9124') {
-      FormManager.setValue('affiliate', '0073900');
-    } else if (isicCd == '9125') {
-      FormManager.setValue('affiliate', '0064400');
-    } else if (isicCd == '9126') {
-      FormManager.setValue('affiliate', '0064500');
-    } else if (isicCd == '9127') {
-      FormManager.setValue('affiliate', '0064600');
-    } else if (isicCd == '9129') {
-      FormManager.setValue('affiliate', '0070100');
-    } else if (isicCd == '9130') {
-      FormManager.setValue('affiliate', '0064700');
-    } else if (isicCd == '9131') {
-      FormManager.setValue('affiliate', '0070300');
-    } else if (isicCd == '9132') {
-      FormManager.setValue('affiliate', '0064800');
-    } else if (isicCd == '9134') {
-      FormManager.setValue('affiliate', '0071000');
-    } else if (isicCd == '9135') {
-      FormManager.setValue('affiliate', '0064900');
-    } else if (isicCd == '9136') {
-      FormManager.setValue('affiliate', '0071200');
-    } else if (isicCd == '9137') {
-      FormManager.setValue('affiliate', '0071300');
-    } else if (isicCd == '9138') {
-      FormManager.setValue('affiliate', '0071400');
-    } else if (isicCd == '9139') {
-      FormManager.setValue('affiliate', '0065400');
-    } else if (isicCd == '9140') {
-      FormManager.setValue('affiliate', '0065500');
-    } else if (isicCd == '9141') {
-      FormManager.setValue('affiliate', '0072000');
-    } else if (isicCd == '9142') {
-      FormManager.setValue('affiliate', '0082400');
-    } else if (isicCd == '9147') {
-      FormManager.setValue('affiliate', '0079700');
-    } else if (isicCd == '9148') {
-      FormManager.setValue('affiliate', '0078600');
-    } else if (isicCd == '9151') {
-      FormManager.setValue('affiliate', '0078900');
-    } else if (isicCd == '9153') {
-      FormManager.setValue('affiliate', '0078300');
-    } else if (isicCd == '9155') {
-      FormManager.setValue('affiliate', '0078400');
-    } else if (isicCd == '9156') {
-      FormManager.setValue('affiliate', '0078500');
-    } else if (isicCd == '9157') {
-      FormManager.setValue('affiliate', '0078700');
-    } else if (isicCd == '9158') {
-      FormManager.setValue('affiliate', '0078800');
-    } else if (isicCd == '9159') {
-      FormManager.setValue('affiliate', '0079100');
-    } else if (isicCd == '9160') {
-      FormManager.setValue('affiliate', '0062100');
-    } else if (isicCd == '9162') {
-      FormManager.setValue('affiliate', '0065600');
-    } else if (isicCd == '9163') {
-      FormManager.setValue('affiliate', '0065800');
-    } else if (isicCd == '9164') {
-      FormManager.setValue('affiliate', '0065900');
-    } else if (isicCd == '9165') {
-      FormManager.setValue('affiliate', '0080100');
-    } else if (isicCd == '9166') {
-      FormManager.setValue('affiliate', '0066200');
-    } else if (isicCd == '9167') {
-      FormManager.setValue('affiliate', '0066300');
-    } else if (isicCd == '9168') {
-      FormManager.setValue('affiliate', '0066500');
-    } else if (isicCd == '9169') {
-      FormManager.setValue('affiliate', '0066700');
-    } else if (isicCd == '9170') {
-      FormManager.setValue('affiliate', '0067400');
-    } else if (isicCd == '9171') {
-      FormManager.setValue('affiliate', '0067500');
-    } else if (isicCd == '9172') {
-      FormManager.setValue('affiliate', '0067600');
-    } else if (isicCd == '9173') {
-      FormManager.setValue('affiliate', '0067700');
-    } else if (isicCd == '9174') {
-      FormManager.setValue('affiliate', '0067800');
-    } else if (isicCd == '9175') {
-      FormManager.setValue('affiliate', '0068100');
-    } else if (isicCd == '9176') {
-      FormManager.setValue('affiliate', '0067900');
-    } else if (isicCd == '9178') {
-      FormManager.setValue('affiliate', '0068200');
-    } else if (isicCd == '9179') {
-      FormManager.setValue('affiliate', '0068300');
-    } else if (isicCd == '9180') {
-      FormManager.setValue('affiliate', '0068400');
-    } else if (isicCd == '9181') {
-      FormManager.setValue('affiliate', '0068500');
-    } else if (isicCd == '9182') {
-      FormManager.setValue('affiliate', '0069400');
-    } else if (isicCd == '9183') {
-      FormManager.setValue('affiliate', '0069500');
-    } else if (isicCd == '9184') {
-      FormManager.setValue('affiliate', '0086100');
-    } else if (isicCd == '9185') {
-      FormManager.setValue('affiliate', '0076500');
-    } else if (isicCd == '9186') {
-      FormManager.setValue('affiliate', '0076600');
-    } else if (isicCd == '9187') {
-      FormManager.setValue('affiliate', '0076700');
-    } else if (isicCd == '9189') {
-      FormManager.setValue('affiliate', '0075500');
-    } else if (isicCd == '9191') {
-      FormManager.setValue('affiliate', '0075700');
-    } else if (isicCd == '9192') {
-      FormManager.setValue('affiliate', '0071100');
-    } else if (isicCd == '9193') {
-      FormManager.setValue('affiliate', '0075900');
-    } else if (isicCd == '9194') {
-      FormManager.setValue('affiliate', '0070700');
-    } else if (isicCd == '9195') {
-      FormManager.setValue('affiliate', '0076100');
-    } else if (isicCd == '9196') {
-      FormManager.setValue('affiliate', '0071500');
-    } else if (isicCd == '9197') {
-      FormManager.setValue('affiliate', '0071600');
-    } else if (isicCd == '9198') {
-      FormManager.setValue('affiliate', '0076400');
-    } else if (isicCd == '9199') {
-      FormManager.setValue('affiliate', '0075100');
-    } else if (isicCd == '9200') {
-      FormManager.setValue('affiliate', '0076500');
-    } else if (isicCd == '9201') {
-      FormManager.setValue('affiliate', '0075000');
-    } else if (isicCd == '9203') {
-      FormManager.setValue('affiliate', '0085100');
-    } else if (isicCd == '9204') {
-      FormManager.setValue('affiliate', '0085100');
-    } else if (isicCd == '9207') {
-      FormManager.setValue('affiliate', '0084100');
-    } else if (isicCd == '9208') {
-      FormManager.setValue('affiliate', '0085100');
-    } else if (isicCd == '9209') {
-      FormManager.setValue('affiliate', '0085200');
-    } else if (isicCd == '9210') {
-      FormManager.setValue('affiliate', '0086200');
-    } else if (isicCd == '9211') {
-      FormManager.setValue('affiliate', '0086500');
-    } else if (isicCd == '9213') {
-      FormManager.setValue('affiliate', '0087100');
-    } else if (isicCd == '9214') {
-      FormManager.setValue('affiliate', '0087200');
-    } else if (isicCd == '9215') {
-      FormManager.setValue('affiliate', '0087300');
-    } else if (isicCd == '9216') {
-      FormManager.setValue('affiliate', '0086700');
-    } else if (isicCd == '9218') {
-      FormManager.setValue('affiliate', '0086100');
-    } else if (isicCd == '9219') {
-      FormManager.setValue('affiliate', '0086800');
-    } else if (isicCd == '9222') {
-      FormManager.setValue('affiliate', '0062800');
-    } else if (isicCd == '9223') {
-      FormManager.setValue('affiliate', '0062900');
-    } else if (isicCd == '9224') {
-      FormManager.setValue('affiliate', '0063000');
-    } else if (isicCd == '9226') {
-      FormManager.setValue('affiliate', '0063200');
-    } else if (isicCd == '9227') {
-      FormManager.setValue('affiliate', '0063300');
-    } else if (isicCd == '9228') {
-      FormManager.setValue('affiliate', '0063400');
-    } else if (isicCd == '9230') {
-      FormManager.setValue('affiliate', '0089700');
-    } else if (isicCd == '9231') {
-      FormManager.setValue('affiliate', '0089900');
-    } else if (isicCd == '9232') {
-      FormManager.setValue('affiliate', '0085200');
-    } else if (isicCd == '9234') {
-      FormManager.setValue('affiliate', '0075300');
-    } else if (isicCd == '9235') {
-      FormManager.setValue('affiliate', '0088900');
-    } else if (isicCd == '9236') {
-      FormManager.setValue('affiliate', '0089200');
-    } else if (isicCd == '9237') {
-      FormManager.setValue('affiliate', '0089600');
-    } else if (isicCd == '9239') {
-      FormManager.setValue('affiliate', '0072700');
-    } else if (isicCd == '9240') {
-      FormManager.setValue('affiliate', '0072900');
-    } else if (isicCd == '9241') {
-      FormManager.setValue('affiliate', '0073000');
-    } else if (isicCd == '9242') {
-      FormManager.setValue('affiliate', '0074300');
-    } else if (isicCd == '9243') {
-      FormManager.setValue('affiliate', '0088000');
-    } else if (isicCd == '9244') {
-      FormManager.setValue('affiliate', '0079900');
-    } else if (isicCd == '9245') {
-      FormManager.setValue('affiliate', '0085400');
-    } else if (isicCd == '9246') {
-      FormManager.setValue('affiliate', '0070800');
-    } else if (isicCd == '9247') {
-      FormManager.setValue('affiliate', '0070900');
-    } else if (isicCd == '9248') {
-      FormManager.setValue('affiliate', '0071800');
-    } else if (isicCd == '9250') {
-      FormManager.setValue('affiliate', '0072100');
-    } else if (isicCd == '9251') {
-      FormManager.setValue('affiliate', '0072200');
-    } else if (isicCd == '9252') {
-      FormManager.setValue('affiliate', '0072300');
-    } else if (isicCd == '9253') {
-      FormManager.setValue('affiliate', '0072400');
-    } else if (isicCd == '9254') {
-      FormManager.setValue('affiliate', '0072600');
-    } else if (isicCd == '9255') {
-      FormManager.setValue('affiliate', '0073400');
-    } else if (isicCd == '9260') {
-      FormManager.setValue('affiliate', '0075600');
-    } else if (isicCd == '9261') {
-      FormManager.setValue('affiliate', '0075800');
-    } else if (isicCd == '9262') {
-      FormManager.setValue('affiliate', '0076000');
-    } else if (isicCd == '9263') {
-      FormManager.setValue('affiliate', '0076200');
-    } else if (isicCd == '9264') {
-      FormManager.setValue('affiliate', '0076300');
-    } else if (isicCd == '9265') {
-      FormManager.setValue('affiliate', '0076900');
-    } else if (isicCd == '9267') {
-      FormManager.setValue('affiliate', '0077100');
-    } else if (isicCd == '9268') {
-      FormManager.setValue('affiliate', '0077200');
-    } else if (isicCd == '9269') {
-      FormManager.setValue('affiliate', '0077300');
-    } else if (isicCd == '9273') {
-      FormManager.setValue('affiliate', '0077700');
-    } else if (isicCd == '9274') {
-      FormManager.setValue('affiliate', '0079800');
-    } else if (isicCd == '9275') {
-      FormManager.setValue('affiliate', '0080900');
-    } else if (isicCd == '9276') {
-      FormManager.setValue('affiliate', '0081100');
-    } else {
-      FormManager.setValue('affiliate', '');
-    }
+    FormManager.setValue('affiliate', affiliateArray[isicCd]);
   } else {
     FormManager.setValue('affiliate', '');
   }
