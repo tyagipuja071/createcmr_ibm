@@ -188,6 +188,21 @@ public class USBPPoolHandler extends USBPHandler {
       postCd = zs01.getPostCd();
       landCntry = zs01.getLandCntry();
     }
+    if (!"Y".equals(admin.getProspLegalInd())) {
+      if (zi01 == null) {
+        LOG.debug("Adding the main address..");
+        AddressService addrService = new AddressService();
+        AddressModel addrModel = new AddressModel();
+        addrModel.setReqId(data.getId().getReqId());
+        addrModel.setDivn(divn);
+        addrModel.setLandCntry(landCntry);
+        addrModel.setAddrTxt(address);
+        addrModel.setAddrTxt2(address2);
+        addrModel.setCity1(city);
+        addrModel.setStateProv(state);
+        addrModel.setPostCd(postCd);
+        addrModel.setState(BaseModel.STATE_NEW);
+        addrModel.setAction("ADD_ADDRESS");
 
     
     if (!"Y".equals(admin.getProspLegalInd())){
@@ -220,17 +235,14 @@ public class USBPPoolHandler extends USBPHandler {
         } else {
           LOG.warn("Session not found for dummy req");
         }
-        addrService.performTransaction(addrModel, entityManager, dummyReq);
-      } catch (Exception e) {
-        LOG.error("An error occurred while adding ZI01 address", e);
+        entityManager.flush();
+      } else {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DIVN", zi01.getDivn(), divn);
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", zi01.getAddrTxt(), address);
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", zi01.getCity1(), city);
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", zi01.getStateProv(), state);
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", zi01.getPostCd(), postCd);
       }
-      entityManager.flush();
-    } else {
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DIVN", zi01.getDivn(), divn);
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", zi01.getAddrTxt(), address);
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", zi01.getCity1(), city);
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", zi01.getStateProv(), state);
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", zi01.getPostCd(), postCd);
     }
     }
 
