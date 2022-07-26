@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cmr.create.batch.util.BatchThreadWorker;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.TerminatorThread;
+import com.ibm.cmr.create.batch.util.USCMRNumGen;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
 
 /**
@@ -84,6 +85,7 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
 
     BatchThreadWorker worker = null;
     List<BatchThreadWorker> workers = new ArrayList<BatchThreadWorker>();
+    USCMRNumGen.init();
 
     for (List<T> requestBatch : allocatedRequests) {
       worker = new BatchThreadWorker(this, requestBatch);
