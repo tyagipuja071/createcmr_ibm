@@ -29,6 +29,7 @@ public class LegacyDirectMultiEntryPoint extends BatchEntryPoint {
     service.setMode(Mode.PendingLegacy);
     service.execute();
 
+    service.setSkipExit(false);
     service.setMode(Mode.PendingRDC);
     service.execute();
 
