@@ -321,7 +321,7 @@ public class ATService extends TransConnService {
    * @param entityManager
    * @return
    */
-  private List<Admin> getPendingRecords(EntityManager entityManager) {
+  List<Admin> getPendingRecords(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("AT.GET_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(Admin.class);
@@ -334,7 +334,7 @@ public class ATService extends TransConnService {
    * @param entityManager
    * @return
    */
-  private List<Admin> getPendingRecordsMassUpd(EntityManager entityManager) {
+  List<Admin> getPendingRecordsMassUpd(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("AT.GET_MASS_PROCESS_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(Admin.class);
