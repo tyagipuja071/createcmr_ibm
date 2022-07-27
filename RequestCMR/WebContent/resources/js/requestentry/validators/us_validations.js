@@ -1129,10 +1129,7 @@ function setAffiliateNumber() {
   var isicCd = FormManager.getActualValue('isicCd');
   if (subIndustryCd.startsWith('Y') && (isicCd.startsWith('90') || isicCd.startsWith('91') || isicCd.startsWith('92'))) {
     FormManager.setValue('affiliate', affiliateArray[isicCd]);
-  } else {
-    FormManager.setValue('affiliate', '');
   }
-
 }
 // CREATCMR-6587
 
