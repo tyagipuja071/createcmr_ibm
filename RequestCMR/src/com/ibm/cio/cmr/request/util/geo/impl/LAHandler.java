@@ -2162,7 +2162,7 @@ public class LAHandler extends GEOHandler {
     }
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
-      if (CmrConstants.CUST_TYPE_INTER.equals(data.getCustSubGrp()) || "INTUS".equals(data.getCustSubGrp())) {
+      if (CmrConstants.CUST_TYPE_INTER.equals(data.getCustSubGrp()) || "INTUS".equals(data.getCustSubGrp()) || "INIBM".equals(data.getCustSubGrp())) {
         data.setCustClass("81");
       } else if (CmrConstants.CUST_TYPE_BUSPR.equals(data.getCustSubGrp())) {
         data.setCustClass("45");
