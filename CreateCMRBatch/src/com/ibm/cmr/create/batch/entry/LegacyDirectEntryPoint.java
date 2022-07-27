@@ -22,6 +22,12 @@ public class LegacyDirectEntryPoint extends BatchEntryPoint {
 
     LegacyDirectService service = new LegacyDirectService();
     service.setDevMode(args != null && args.length > 0 && "DEV".equals(args[0]));
+    if (args != null && args.length > 0 && "MULTI".equalsIgnoreCase(args[0].trim())) {
+      service.setMultiMode(true);
+    }
+    if (args != null && args.length > 1 && "MULTI".equalsIgnoreCase(args[1].trim())) {
+      service.setMultiMode(true);
+    }
     service.execute();
   }
 
