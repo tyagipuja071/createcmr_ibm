@@ -1128,7 +1128,7 @@ function setAffiliateNumber() {
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
   var isicCd = FormManager.getActualValue('isicCd');
   if (subIndustryCd.startsWith('Y') && (isicCd.startsWith('90') || isicCd.startsWith('91') || isicCd.startsWith('92'))) {
-    FormManager.setValue('affiliate', affiliateArray[isicCd]);
+    FormManager.setValue('affiliate', affiliateArray[isicCd] == undefined ? '' : affiliateArray[isicCd]);
   } else {
     FormManager.setValue('affiliate', '');
   }
