@@ -66,7 +66,7 @@ public class USCMRNumGen {
     return cmrNum;
   }
 
-  private static void init() {
+  public static void init() {
     cmrNumMap = new HashMap<String, ArrayList<String>>();
     ArrayList<String> poaList = getPOANumList(entityManager);
     ArrayList<String> commonList = getCommonNumList(entityManager);

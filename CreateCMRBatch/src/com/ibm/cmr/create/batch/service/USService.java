@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
@@ -113,14 +114,17 @@ public class USService extends TransConnService {
     try {
       initClientUS();
       LOG.info("Multi Mode: " + this.multiMode);
+      List<Long> ids = null;
       if (isMassServiceMode()) {
-        monitorCreqcmrMassUpd(entityManager);
+    	  ids = gatherMassUpdateRequests(entityManager);
+          monitorCreqcmrMassUpd(entityManager, ids);
       } else {
         // LOG.info("Processing Aborted records (retry)...");
         // monitorAbortedRecords(entityManager);
 
-        LOG.info("Processing New records...");
-        monitorCreqcmr(entityManager);
+    	  LOG.info("Processing New records...");
+          ids = gatherSingleRequests(entityManager);
+          monitorCreqcmr(entityManager, ids);
       }
 
     } catch (Exception e) {
@@ -144,17 +148,20 @@ public class USService extends TransConnService {
   }
 
   @SuppressWarnings("unused")
-  public void monitorCreqcmr(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
+  public void monitorCreqcmr(EntityManager entityManager, List<Long> requests) throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
     LOG.info("Initializing Country Map..");
     LandedCountryMap.init(entityManager);
     // Retrieve the PCP records
     LOG.info("Retreiving pending records for processing..");
-    List<Admin> pending = getPendingRecords(entityManager);
-    LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
+    //List<Admin> pending = getPendingRecords(entityManager);
+    //LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
     Data data = null;
     ProcessRequest request = null;
-    for (Admin admin : pending) {
+    for (Long id : requests) {
+    	AdminPK pk = new AdminPK();
+        pk.setReqId(id);
+        Admin admin = entityManager.find(Admin.class, pk);
       if ("M".equals(admin.getReqType())) {
         continue;
       }
@@ -292,16 +299,19 @@ public class USService extends TransConnService {
 
   }
 
-  public void monitorCreqcmrMassUpd(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
+  public void monitorCreqcmrMassUpd(EntityManager entityManager, List<Long> requests) throws JsonGenerationException, JsonMappingException, IOException, Exception {
     LOG.info("Initializing Country Map..");
     LandedCountryMap.init(entityManager);
-    List<Admin> pending = getPendingRecordsMassUpd(entityManager);
+    //List<Admin> pending = getPendingRecordsMassUpd(entityManager);
 
-    LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
+    //LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
 
     Data data = null;
     ProcessRequest request = null;
-    for (Admin admin : pending) {
+    for (Long id : requests) {
+    	AdminPK pk = new AdminPK();
+        pk.setReqId(id);
+        Admin admin = entityManager.find(Admin.class, pk);
       try {
         // hard-coding to debug specific request
         // if (admin.getId().getReqId() != reQId) {
@@ -495,8 +505,8 @@ public class USService extends TransConnService {
     String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
 
     // lock
-    //lockRecord(entityManager, admin);
-    lockUSRecord(entityManager, admin.getId().getReqId());
+    lockRecord(entityManager, admin);
+    //lockUSRecord(entityManager, admin.getId().getReqId());
 
     CmrServiceInput cmrServiceInput = getReqParam(entityManager, admin.getId().getReqId(), admin.getReqType(), data);
 
@@ -785,8 +795,8 @@ public class USService extends TransConnService {
 
           boolean isDataUpdated = false;
           isDataUpdated = USHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
-          //lockRecordUpdt(entityManager, admin);
-          lockUSRecord(entityManager, admin.getId().getReqId());
+          lockRecordUpdt(entityManager, admin);
+          //lockUSRecord(entityManager, admin.getId().getReqId());
 
           for (Addr addr : addresses) {
             entityManager.detach(addr);
