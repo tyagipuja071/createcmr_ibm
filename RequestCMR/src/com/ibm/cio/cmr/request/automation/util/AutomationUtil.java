@@ -1392,29 +1392,4 @@ public abstract class AutomationUtil {
     }
     return query.exists();
   }
-  /**
-   * This method should be overridden by implementing classes and
-   * <strong>always</strong> return true if there are country specific logic
-   * 
-   * @param entityManager
-   * @param engineData
-   * @param requestData
-   * @param return
-   * @throws Exception
-   */
-  public static boolean isTaxManagerEmeaUpdateCheck(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData) throws Exception {
-	  Data data = requestData.getData();
-	  Admin admin = requestData.getAdmin();
-	  String cmrIssuingCntry = data.getCmrIssuingCntry();
-	  if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(admin.getReqType())) {
-		  String sql =  ExternalizedQuery.getSql("QUERY.GET.TAX_MANAGER.BY_ISSUING_CNTRY");
-		  PreparedQuery query = new PreparedQuery(entityManager, sql);
-	      query.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
-	      List<String> taxManagers = query.getResults(String.class);
-	      if(taxManagers != null){
-	    	  return taxManagers.stream().anyMatch(res -> res.equalsIgnoreCase(admin.getRequesterId()));
-	      }
-	  }
-	  return false ;
-  }
-}
+ }
