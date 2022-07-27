@@ -3354,6 +3354,9 @@ public class LAHandler extends GEOHandler {
     if ("ZS01".equalsIgnoreCase(addr.getId().getAddrType())) {
       addr.setVat(v2Model.getVat());
       addr.setTaxCd2(v2Model.getMunicipalFiscalCode());
+      if ("C".equals(v2Model.getReqType())) {
+        addr.setTransportZone("Z000000001");
+      }
 
       if (StringUtils.isBlank(addr.getLandCntry())) {
         addr.setLandCntry("BR");
@@ -3387,6 +3390,10 @@ public class LAHandler extends GEOHandler {
         addrzi01.setId(pkzi01);
         addrzi01.setVat(v2Model.getVatEndUser());
         addrzi01.setTaxCd2(v2Model.getMunicipalFiscalCodeEndUser());
+        if ("C".equals(v2Model.getReqType())) {
+          addrzi01.setTransportZone("Z000000001");
+        }
+
         if (StringUtils.isBlank(addrzi01.getImportInd())) {
           addr.setImportInd("N");
         }
