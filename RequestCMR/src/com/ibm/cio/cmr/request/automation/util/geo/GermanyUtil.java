@@ -672,9 +672,8 @@ public class GermanyUtil extends AutomationUtil {
           detail.append("Updates to the Abbreviated Name field are skipped for PayGo cmr\n");
           LOG.debug("Updates to the Abbreviated Name field are skipped for Paygo cmr ");
         } else {
-          isNegativeCheckNeedeed = true;
-          detail.append("Updates to Abbreviated Name field were found, review is required.\n");
-          LOG.debug("Updates to Abbreviated Name field were found, review is required.");
+          detail.append("Updates to the Abbreviated Name field  are skipped.\n");
+          LOG.debug("Updates to the Abbreviated Name field  are skipped.");
         }
       } else {
         boolean otherFieldsChanged = false;
@@ -719,6 +718,7 @@ public class GermanyUtil extends AutomationUtil {
     boolean isBillToMatchesDnb = true;
     boolean isNegativeCheckNeedeed = false;
     boolean isInstallAtExistOnReq = false;
+    boolean isInstallAtSameAsSoldTo = false;
     boolean isBillToExistOnReq = false;
     boolean isPayGoBillToExistOnReq = false;
     boolean isShipToExistOnReq = false;
@@ -760,30 +760,18 @@ public class GermanyUtil extends AutomationUtil {
       }
 
       if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
-        // Check If Address already exists on request
-        isInstallAtExistOnReq = addressExists(entityManager, installAt, requestData);
-        if (isInstallAtExistOnReq) {
-          detail.append("Install At details provided matches an existing address.");
-          engineData.addRejectionComment("OTH", "Install At details provided matches an existing address.", "", "");
-          LOG.debug("Install At details provided matches an existing address.");
+        // Check If Address same as Sold To address
+        isInstallAtSameAsSoldTo = addressExistsOnSoldTo(entityManager, installAt, requestData);
+        if (isInstallAtSameAsSoldTo) {
+          detail.append("Install At details provided matches an existing Sold To address.");
+          engineData.addRejectionComment("OTH", "Install At details provided matches an existing Sold To address.", "", "");
+          LOG.debug("Install At details provided matches an existing  Sold To address.");
           output.setOnError(true);
           validation.setSuccess(false);
           validation.setMessage("Not validated");
           output.setDetails(detail.toString());
           output.setProcessOutput(validation);
           return true;
-        }
-        if ((changes.isAddressChanged("ZI01") && isOnlyDnBRelevantFieldUpdated(changes, "ZI01")) || isAddressAdded(installAt)) {
-          // Check if address closely matches DnB
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installAt, false);
-          if (matches != null) {
-            isInstallAtMatchesDnb = ifaddressCloselyMatchesDnb(matches, installAt, admin, data.getCmrIssuingCntry());
-          }
-          if (!isInstallAtMatchesDnb) {
-            isNegativeCheckNeedeed = true;
-            detail.append("Updates to Install At address need verification as it does not matches D&B");
-            LOG.debug("Updates to Install At address need verification as it does not matches D&B");
-          }
         }
       }
 
