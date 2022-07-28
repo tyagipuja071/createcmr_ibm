@@ -1926,70 +1926,55 @@ function matchDnbForAUUpdate() {
   cmr.showProgress('Checking request data with D&B...');
   dojo
       .xhrGet({
-        url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatchUpdate.json',
-        handleAs : 'json',
-        method : 'GET',
-        content : {
-          'reqId' : reqId,
-          'isicCd' : isicCd
-        },
-        timeout : 50000,
-        sync : false,
-        load : function(data, ioargs) {
-          cmr.hideProgress();
-          console.log(data);
-          console.log(data.success);
-          console.log(data.match);
-          console.log(data.isicMatch);
-          console.log(data.validate);
-          if (data && data.success) {
-            if (data.match && data.isicMatch) {
-              comp_proof_INAUSG = true;
-              if (!data.validate) {
-                checkDnBMatchingAttachmentValidator();
-              }
-              if (FormManager.validate('frmCMR')) {
-                MessageMgr.clearMessages();
-                doValidateRequest();
-                cmr.showModal('addressVerificationModal');
-              } else {
-                cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
-              }
-            } else if (data.match && !data.isicMatch && !(reqType == 'U' && cntry == SysLoc.AUSTRALIA)) {
-              comp_proof_INAUSG = false;
-              console.log("ISIC validation failed by Dnb.");
-              cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");
-            } else if (data.tradeStyleMatch && data.isicMatch) {
-              cmr
-                  .showConfirm(
-                      'autoDnbImportMatch("' + data.dunsNo + '","0")',
-                      'The customer name on the request is a tradestyle name. For CMR creation, legal name should be used. <strong>Tradestyle name can be placed on the address’s division line.</strong> Do you want to override the customer name on the request with <strong><u>'
-                          + data.legalName + '</u></strong>?' + '?', 'Warning', 'doOverrideDnBMatch()', {
-                        OK : 'Yes',
-                        CANCEL : 'No'
-                      });
-            } else if (data.confidenceCd) {
-              showDnBMatchModal();
-            } else {
-              comp_proof_INAUSG = false;
-              console.log("Name/Address validation failed by dnb");
-              cmr.showAlert("Please attach company proof as Name/Address validation failed by Dnb.");
-            }
-            if (!data.validate) {
-              checkDnBMatchingAttachmentValidator();
-            }
-          } else {
-            // continue
-            console.log("An error occurred while matching dnb.");
-            cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
-              OK : 'Yes',
-              CANCEL : 'No'
-            });
+    url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatchUpdate.json',
+    handleAs : 'json',
+    method : 'GET',
+    content : {
+      'reqId' : reqId,
+      'isicCd' : isicCd
+    },
+    timeout : 50000,
+    sync : false,
+    load : function(data, ioargs) {
+      cmr.hideProgress();
+      console.log(data);
+      console.log(data.success);
+      console.log(data.match);
+      console.log(data.isicMatch);
+      console.log(data.validate);
+      if (data && data.success) {
+        if (data.match) {
+          comp_proof_INAUSG = true;
+          if (!data.validate) {
+            checkDnBMatchingAttachmentValidator();
           }
-        },
-        error : function(error, ioargs) {
+          if (FormManager.validate('frmCMR')) {
+            MessageMgr.clearMessages();
+            doValidateRequest();
+            cmr.showModal('addressVerificationModal');
+          } else {
+            cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
+          }
+        } else {
+          comp_proof_INAUSG = false;
+          console.log("Name/Address validation failed by dnb");
+          cmr.showAlert("Please attach company proof as Name/Address validation failed by Dnb.");
         }
-      });
+        if (!data.validate) {
+          checkDnBMatchingAttachmentValidator();
+        }
+      } else {
+        // continue
+        console.log("An error occurred while matching dnb.");
+        cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+          OK : 'Yes',
+          CANCEL : 'No'
+        });
+      }
+    },
+    error : function(error, ioargs) {
+    }
+  });
 }
 
 function checkIfUpfrontUpdateChecksRequired() {

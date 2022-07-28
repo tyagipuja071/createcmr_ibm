@@ -3434,12 +3434,12 @@ function validateContractAddrAU() {
         var custNm1 = FormManager.getActualValue('custNm1').toUpperCase();;
         var custNm2 = FormManager.getActualValue('custNm2').toUpperCase();;
         var dept = FormManager.getActualValue('dept').toUpperCase();;
-        var addrTxt1= FormManager.getActualValue('addrTxt1').toUpperCase();;
+        var addrTxt1= FormManager.getActualValue('addrTxt').toUpperCase();;
         var addrTxt2 = FormManager.getActualValue('addrTxt2').toUpperCase();;
         var city1 = FormManager.getActualValue('city1').toUpperCase();;
         var addrType = FormManager.getActualValue('addrType');
         var address = custNm1 + custNm2 + dept + addrTxt1 + addrTxt2 + city1 ;
-        if (address.includes("PO BOX") && addrType == "ZS01") {
+        if ((address.includes("PO BOX") || address.includes("POBOX")) && addrType == "ZS01") {
           return new ValidationResult(null, false, 'Contract address can not contain wording PO BOX');
         }
         return new ValidationResult(null, true);
