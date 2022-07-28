@@ -933,7 +933,7 @@ function addVatSuffixForCustLangCd() {
 
   var custLangCd = '';
   if ("ZS01" == FormManager.getActualValue('addrType')) {
-    custangCd = FormManager.getActualValue('custLangCd');
+    custLangCd = FormManager.getActualValue('custLangCd');
   }
   if (custLangCd == null || custLangCd == '' || custLangCd == undefined) {
     var result = cmr.query('ADDR.GET.CUST_LANG_CD.BY_REQID', qParams);
