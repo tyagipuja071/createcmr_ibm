@@ -1115,25 +1115,55 @@ public class FranceUtil extends AutomationUtil {
                       + ") could not be verified because of SIRET update. CMDE review required.\\n");
                   checkDetails.append("Updates to Address " + addrType + "(" + addr.getId().getAddrSeq()
                       + ") could not be verified because of SIRET update. CMDE review required.\n");
-                } else {
-                  // if only address has been updated , validate vat with DnB
+                } else{
                   Addr addrToChk = requestData.getAddress(addrType);
-                  List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addrToChk, true);
-                  boolean matchesDnb = false;
-                  if (matches != null) {
-                    // check against D&B
-                    matchesDnb = ifaddressCloselyMatchesDnb(matches, addrToChk, admin, data.getCmrIssuingCntry());
-                  }
-                  if (!matchesDnb) {
-                    // engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
-                    resultCodes.add("R"); // reject
-                    engineData.addNegativeCheckStatus("_frVATCheckFailed", "VAT # on the request did not match D&B");
-                    checkDetails.append("VAT # on the request did not match D&B\n");
-                  } else {
-                    checkDetails.append("VAT # on the request matches D&B\n");
-                  }
-
+                  List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addrToChk, false);
+                  boolean matchesDnbSoldTo = false;
+                  matchesDnbSoldTo = ifaddressCloselyMatchesDnb(matches, addrToChk, admin, data.getCmrIssuingCntry());
+                  if (!matchesDnbSoldTo) {
+                      resultCodes.add("D"); // send to cmde for review
+                      engineData.addNegativeCheckStatus("_frSIRETCheckFailed",
+                          "Sold-To address is validated in DnB but Sold-To with SIRET couldn't be validated.");
+                      checkDetails.append("Sold-To address is validated in DnB but Sold-To with SIRET couldn't be validated.\n");
+                    } else {
+                      // siert check against D&B
+                      boolean siretMatch = false;
+                      for (DnBMatchingResponse dnb : matches) {
+                        String siret = DnBUtil.getTaxCode1(dnb.getDnbCountry(), dnb.getOrgIdDetails());
+                        if (StringUtils.isNotBlank(siret) && siret.equalsIgnoreCase(data.getTaxCd1())
+                            && !"O".equalsIgnoreCase(dnb.getOperStatusCode())) {
+                          siretMatch = true;
+                          checkDetails.append("Sold-To address is validated in DnB and Sold-To with SIRET is validated and is active.\n");
+                          break;
+                        }
+                      }
+                      if (!siretMatch) {
+                        resultCodes.add("R"); // reject
+                        engineData.addNegativeCheckStatus("_frSIRETCheckFailed",
+                            "Sold-To is validated but SIRET with Sold-To couldn't be validated in DnB.");
+                        checkDetails.append("Sold-To is validated but SIRET with Sold-To couldn't be validated in DnB.\n");
+                      }
+                    }
                 }
+//                else {
+//                  // if only address has been updated , validate vat with DnB
+//                  Addr addrToChk = requestData.getAddress(addrType);
+//                  List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addrToChk, true);
+//                  boolean matchesDnb = false;
+//                  if (matches != null) {
+//                    // check against D&B
+//                    matchesDnb = ifaddressCloselyMatchesDnb(matches, addrToChk, admin, data.getCmrIssuingCntry());
+//                  }
+//                  if (!matchesDnb) {
+//                    // engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
+//                    resultCodes.add("R"); // reject
+//                    engineData.addNegativeCheckStatus("_frVATCheckFailed", "VAT # on the request did not match D&B");
+//                    checkDetails.append("VAT # on the request did not match D&B\n");
+//                  } else {
+//                    checkDetails.append("VAT # on the request matches D&B\n");
+//                  }
+//
+//                }
               } else if (CmrConstants.RDC_BILL_TO.equals(addrType)) {
                 // CMR - 1606
                 // if bill-to has been updated , validate Bill-To with
@@ -1168,7 +1198,7 @@ public class FranceUtil extends AutomationUtil {
                       }
                     }
                     if (!siretMatch) {
-                      resultCodes.add("D"); // send to cmde for review
+                      resultCodes.add("R"); // reject
                       engineData.addNegativeCheckStatus("_frSIRETCheckFailed",
                           "Bill-To is validated but SIRET with Sold-To couldn't be validated in DnB.");
                       checkDetails.append("Bill-To is validated but SIRET with Sold-To couldn't be validated in DnB.\n");
