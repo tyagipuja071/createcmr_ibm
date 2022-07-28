@@ -321,6 +321,88 @@ public class VatUtilController {
   }
 
   @RequestMapping(
+      value = "/au/custNm")
+  public ModelMap validateCustNmFromVat(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelMap map = new ModelMap();
+    String regex = "\\s+$";
+    String abn = request.getParameter("abn");
+    String reqId = request.getParameter("reqId");
+    String formerCustNm = request.getParameter("formerCustNm").replaceAll(regex, "");
+    String custNm = request.getParameter("custNm").replaceAll(regex, "");
+    ;
+    if (map.isEmpty() && !StringUtils.isBlank(abn) && !StringUtils.isBlank(reqId)) {
+
+      LOG.debug("Validating Customer Name  " + custNm + " and Former Customer Name " + formerCustNm + " for Australia");
+
+      String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(baseUrl, AutomationServiceClient.class);
+      autoClient.setReadTimeout(1000 * 60 * 5);
+      autoClient.setRequestMethod(Method.Get);
+
+      BNValidationRequest requestToAPI = new BNValidationRequest();
+      requestToAPI.setBusinessNumber(abn);
+      System.out.println(requestToAPI + requestToAPI.getBusinessNumber());
+
+      LOG.debug("Connecting to the ABNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+      AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.AU_ABN_VALIDATION_SERVICE_ID, requestToAPI,
+          AutomationResponse.class);
+      ObjectMapper mapper = new ObjectMapper();
+      String json = mapper.writeValueAsString(rawResponse);
+
+      TypeReference<AutomationResponse<BNValidationResponse>> ref = new TypeReference<AutomationResponse<BNValidationResponse>>() {
+      };
+      AutomationResponse<BNValidationResponse> abnResponse = mapper.readValue(json, ref);
+      if (StringUtils.isBlank(abn)) {
+        map.put("success", true);
+      } else if (abnResponse != null && abnResponse.isSuccess()) {
+        if (abnResponse.getRecord().isValid()) {
+
+          String responseCustNm = StringUtils.isBlank(abnResponse.getRecord().getCompanyName()) ? ""
+              : abnResponse.getRecord().getCompanyName().replaceAll(regex, "");
+          String responseTradingNm = StringUtils.isBlank(abnResponse.getRecord().getTradingName()) ? ""
+              : abnResponse.getRecord().getTradingName().replaceAll(regex, "");
+          String responseOthTradingNm = StringUtils.isBlank(abnResponse.getRecord().getOtherTradingName()) ? ""
+              : abnResponse.getRecord().getOtherTradingName().replaceAll(regex, "");
+          String responseBusinessNm = StringUtils.isBlank(abnResponse.getRecord().getBusinessName()) ? ""
+              : abnResponse.getRecord().getBusinessName().replaceAll(regex, "");
+          if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm)) && ((formerCustNm.equalsIgnoreCase(responseTradingNm))
+              || (formerCustNm.equalsIgnoreCase(responseOthTradingNm)) || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            map.put("success", true);
+            map.put("custNmMatch", true);
+            map.put("formerCustNmMatch", true);
+          } else if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm))
+              && !((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
+                  || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            map.put("success", true);
+            map.put("custNmMatch", true);
+            map.put("formerCustNmMatch", false);
+          } else if (abnResponse.getRecord().isValid() && !(custNm.equalsIgnoreCase(responseCustNm))
+              && ((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
+                  || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            map.put("success", true);
+            map.put("custNmMatch", false);
+            map.put("formerCustNmMatch", true);
+          } else {
+            map.put("success", true);
+            map.put("custNmMatch", false);
+            map.put("formerCustNmMatch", false);
+          }
+        }
+      } else {
+        map.put("success", false);
+        map.put("custNmMatch", false);
+        map.put("formerCustNmMatch", false);
+        String message = "ABN Validation Failed.Failed to connect to ABN Service. Checking ABN and Company Name with D&B.";
+        if (abnResponse != null) {
+          message = abnResponse.getMessage();
+        }
+        map.put("message", message);
+      }
+    }
+    return map;
+  }
+
+  @RequestMapping(
       value = "/cn/tyc")
   public ModelMap checkCnAddr(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
