@@ -259,12 +259,13 @@ public class SingaporeUtil extends AutomationUtil {
       }
     }
     switch (scenario) {
-    case SCENARIO_BLUEMIX:
-    case SCENARIO_MARKETPLACE:
-    case SCENARIO_CROSS_BLUEMIX:
-    case SCENARIO_CROSS_MARKETPLACE:
-      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-      break;
+    // CREATCMR - 2031
+    // case SCENARIO_BLUEMIX:
+    // case SCENARIO_MARKETPLACE:
+    // case SCENARIO_CROSS_BLUEMIX:
+    // case SCENARIO_CROSS_MARKETPLACE:
+    // engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+    // break;
     case SCENARIO_ECOSYS:
     case SCENARIO_CROSS_ECOSYS:
       addToNotifyListASEAN(entityManager, data.getId().getReqId());
