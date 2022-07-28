@@ -644,6 +644,8 @@ function hideKUKLA() {
 }
 
 function lockOrdBlk() {
+  FormManager.addValidator('mainCustNm1', Validators.LATIN1, [ 'Customer Name' ], 'MAIN_GENERAL_TAB');
+  FormManager.addValidator('mainCustNm2', Validators.LATIN1, [ 'Customer Name 2' ], 'MAIN_GENERAL_TAB');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqType = FormManager.getActualValue('reqType');
 
