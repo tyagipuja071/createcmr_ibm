@@ -3,6 +3,7 @@ package com.ibm.cio.cmr.request.automation.impl.gbl;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -612,6 +613,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 if (shouldBeRejected) {
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate CMRs.");
+                  Collections.sort(matchedCMRs);
                   engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
                   // to allow overides later
                   requestData.getAdmin().setMatchIndc("C");
@@ -623,6 +625,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate Prospect CMRs only.");
                   pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
+                  Collections.sort(matchedCMRs);
                   engineData.addRejectionComment("DUPC",
                       "please import the existing Prospect CMR(" + pcmrs + ") into CreateCMR to convert into Legal CMR.",
                       StringUtils.join(matchedCMRs, ", "), "");
@@ -1123,6 +1126,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 if (shouldBeRejected) {
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate CMRs.");
+                  Collections.sort(matchedCMRs);
                   engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
                   // to allow overides later
                   requestData.getAdmin().setMatchIndc("C");
@@ -1134,6 +1138,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate Prospect CMRs only.");
                   pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
+                  Collections.sort(matchedCMRs);
                   engineData.addRejectionComment("DUPC",
                       "please import the existing Prospect CMR(" + pcmrs + ") into CreateCMR to convert into Legal CMR.",
                       StringUtils.join(matchedCMRs, ", "), "");
@@ -2286,6 +2291,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 if (shouldBeRejected && !shouldGoToCMDE) {
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate CMRs.");
+                  Collections.sort(matchedCMRs);
                   engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
                   // to allow overides later
                   requestData.getAdmin().setMatchIndc("C");
@@ -2308,6 +2314,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate Prospect CMRs only.");
                   pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
+                  Collections.sort(matchedCMRs);
                   engineData.addRejectionComment("DUPC",
                       "please import the existing Prospect CMR(" + pcmrs + ") into CreateCMR to convert into Legal CMR.",
                       StringUtils.join(matchedCMRs, ", "), "");
@@ -2625,6 +2632,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 if (nameMatched || historyNmMatched) {
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate CMRs.");
+                  Collections.sort(matchedCMRs);
                   engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
                   // to allow overides later
                   requestData.getAdmin().setMatchIndc("C");
@@ -2636,6 +2644,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate Prospect CMRs only.");
                   pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
+                  Collections.sort(matchedCMRs);
                   engineData.addRejectionComment("DUPC",
                       "please import the existing Prospect CMR(" + pcmrs + ") into CreateCMR to convert into Legal CMR.",
                       StringUtils.join(matchedCMRs, ", "), "");
@@ -2718,6 +2727,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
               if (shouldBeRejected) {
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate CMRs.");
+                Collections.sort(matchedCMRs);
                 engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
                 // to allow overides later
                 requestData.getAdmin().setMatchIndc("C");
@@ -2729,6 +2739,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate Prospect CMRs only.");
                 pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
+                Collections.sort(matchedCMRs);
                 engineData.addRejectionComment("DUPC",
                     "please import the existing Prospect CMR(" + pcmrs + ") into CreateCMR to convert into Legal CMR.",
                     StringUtils.join(matchedCMRs, ", "), "");
@@ -3406,6 +3417,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             if (shouldBeRejected) {
               result.setResults("Matches Found");
               result.setResults("Found Duplicate CMRs.");
+              Collections.sort(matchedCMRs);
               engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
               // to allow overides later
               requestData.getAdmin().setMatchIndc("C");
@@ -3417,6 +3429,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
               result.setResults("Matches Found");
               result.setResults("Found Duplicate Prospect CMRs only.");
               pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
+              Collections.sort(matchedCMRs);
               engineData.addRejectionComment("DUPC",
                   "please import the existing Prospect CMR(" + pcmrs + ") into CreateCMR to convert into Legal CMR.",
                   StringUtils.join(matchedCMRs, ", "), "");
