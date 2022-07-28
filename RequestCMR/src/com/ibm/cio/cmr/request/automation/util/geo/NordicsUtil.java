@@ -47,6 +47,7 @@ import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+import com.ibm.cmr.services.client.matching.request.ReqCheckResponse;
 
 /**
  * 
@@ -430,6 +431,33 @@ public class NordicsUtil extends AutomationUtil {
       }
     }
     response.setMatches(subScenarioMatches);
+  }
+  
+  @Override
+  public void filterDuplicateReqMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<ReqCheckResponse> response) {
+    Data matchedData = new Data();
+    Data data = requestData.getData();
+    List<ReqCheckResponse> filteredMatches = new ArrayList<ReqCheckResponse>();
+    for (ReqCheckResponse res : response.getMatches()) {
+      try {
+        String sql = ExternalizedQuery.getSql("REQUESTENTRY.DATA.SEARCH_BY_REQID");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", res.getReqId());
+        query.setForReadOnly(true);
+        matchedData = query.getSingleResult(Data.class);
+      } catch (Exception e) {
+        LOG.error("An error occurred while trying to retrieve CREQCMR data.");
+      }
+      
+      if (matchedData != null) {
+        if (!StringUtils.isEmpty(matchedData.getCountryUse()) && !StringUtils.isEmpty(data.getCountryUse()) 
+            && matchedData.getCountryUse().equals(data.getCountryUse())) {
+          filteredMatches.add(res);
+        }
+      }
+    }
+    response.setMatches(filteredMatches);
   }
 
   private boolean isuCTCMatch(String cmr, EntityManager entityManager, String cntry) {

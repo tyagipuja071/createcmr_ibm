@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -40,6 +41,7 @@ import com.ibm.cmr.services.client.matching.request.ReqCheckResponse;
 public class DupReqCheckElement extends DuplicateCheckElement {
 
   private static final Logger LOG = Logger.getLogger(DupReqCheckElement.class);
+  private static final List<String> NORDX_SUB_COUNTRIES = Arrays.asList("678", "702");
 
   public DupReqCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -198,6 +200,15 @@ public class DupReqCheckElement extends DuplicateCheckElement {
       } else {
         LOG.debug("No '" + addrType + "' address on the request. Skipping duplicate check.");
         continue;
+      }
+    }
+    
+    // Filer requests based on sub-region
+    if (NORDX_SUB_COUNTRIES.contains(data.getCmrIssuingCntry()) && response.getSuccess() && response.getMatches().size() > 0) {
+      LOG.debug("Matches found for the given search criteria.");
+      AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+      if (countryUtil != null) {
+        countryUtil.filterDuplicateReqMatches(entityManager, requestData, engineData, response);
       }
     }
 

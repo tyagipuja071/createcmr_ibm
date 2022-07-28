@@ -65,6 +65,7 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+import com.ibm.cmr.services.client.matching.request.ReqCheckResponse;
 import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -1210,6 +1211,12 @@ public abstract class AutomationUtil {
   public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<DuplicateCMRCheckResponse> response) {
     LOG.debug("No Country Specific Filter for Duplicate CMR Checks Defined.");
+    // NOOP
+  }
+  
+  public void filterDuplicateReqMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<ReqCheckResponse> response) {
+    LOG.debug("No Country Specific Filter for Duplicate Req Checks Defined.");
     // NOOP
   }
 
