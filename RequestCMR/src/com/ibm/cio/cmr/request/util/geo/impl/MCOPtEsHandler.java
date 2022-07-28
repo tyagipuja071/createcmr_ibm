@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 
@@ -1432,6 +1434,7 @@ public class MCOPtEsHandler extends MCOHandler {
                 String collectionCd = null;
                 String salesRep = null;
                 String enterprise = null;
+                String inacCd = null;
                 row = sheet.getRow(rowIndex);
                 if (row == null) {
                   validations.add(error);
@@ -1442,6 +1445,8 @@ public class MCOPtEsHandler extends MCOHandler {
                   collectionCd = validateColValFromCell(currCell);
                   currCell = (XSSFCell) row.getCell(7);
                   enterprise = validateColValFromCell(currCell);
+                  currCell = (XSSFCell) row.getCell(8);
+                  inacCd = validateColValFromCell(currCell);
                   currCell = (XSSFCell) row.getCell(12);
                   salesRep = validateColValFromCell(currCell);
                   currCell = (XSSFCell) row.getCell(9);
@@ -1471,6 +1476,25 @@ public class MCOPtEsHandler extends MCOHandler {
                     LOG.trace("Enterprise Number should be exactly 6 characters. Please fix and upload the template again.");
                     error.addError((row.getRowNum() + 1), "Enterprise Number",
                         "Enterprise Number should be exactly 6 characters. Please fix and upload the template again.");
+                  }
+                }
+
+                // INAC Code
+                if (StringUtils.isNotBlank(inacCd)) {
+                  if (!StringUtils.isNumeric(inacCd) && !"@".equals(inacCd)) {
+                    String firstTwoinacCdChar = StringUtils.substring(inacCd, 0, 2);
+                    String lastTwoinacCdChar = StringUtils.substring(inacCd, 2);
+
+                    Pattern upperCaseChars = Pattern.compile("^[A-Z]*$");
+                    Matcher matcherFirstTwo = upperCaseChars.matcher(firstTwoinacCdChar);
+
+                    Pattern digitsChars = Pattern.compile("^[0-9]+$");
+                    Matcher matcherLastTwo = digitsChars.matcher(lastTwoinacCdChar);
+
+                    if (!matcherFirstTwo.matches() || !matcherLastTwo.matches()) {
+                      error.addError(rowIndex + 1, "<br>INAC/NAC",
+                          "INAC should be 4 digits or two letters (Uppercase characters) followed by 2 digits.");
+                    }
                   }
                 }
 
