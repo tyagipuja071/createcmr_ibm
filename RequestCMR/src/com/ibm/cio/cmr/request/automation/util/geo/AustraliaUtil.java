@@ -41,6 +41,8 @@ public class AustraliaUtil extends AutomationUtil {
   public static final String SCENARIO_BLUEMIX = "BLUMX";
   public static final String SCENARIO_MARKETPLACE = "MKTPC";
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
+  private static final String SCENARIO_DUMMY = "DUMMY";
+  private static final String SCENARIO_INTERNAL = "INTER";
   private static final String SCENARIO_ECOSYS = "ECSYS";
   private static final String SCENARIO_CROSS_ECOSYS = "XECO";
 
@@ -177,7 +179,16 @@ public class AustraliaUtil extends AutomationUtil {
     // case SCENARIO_MARKETPLACE:
     // engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
     // break;
+    // CREATCMR - 5772
+    case SCENARIO_BLUEMIX:
+    case SCENARIO_MARKETPLACE:
+    case SCENARIO_DUMMY:
+    case SCENARIO_INTERNAL:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      break;
+
     case SCENARIO_PRIVATE_CUSTOMER:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_ECOSYS:
     case SCENARIO_CROSS_ECOSYS:
