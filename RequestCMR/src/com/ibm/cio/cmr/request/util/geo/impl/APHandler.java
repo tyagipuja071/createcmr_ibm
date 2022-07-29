@@ -415,7 +415,7 @@ public abstract class APHandler extends GEOHandler {
       query.setParameter("AP_CUST_CLUSTER_ID", oldCluster);
       query.setForReadOnly(true);
       List<String> result = query.getResults(String.class);
-      if ((result != null && !result.isEmpty()) && !isuCd.equalsIgnoreCase("C") || !gbSegement.equalsIgnoreCase("32")) {
+      if ((result != null && !result.isEmpty())) {
         return false;
       }
       return true;

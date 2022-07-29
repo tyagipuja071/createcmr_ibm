@@ -782,6 +782,31 @@ var cmr = {
     });
     return result;
   },
+  validateCustNmFromVat: function(businessNumber, reqId, formerCustNm, custNm) {
+    var result = {};
+    dojo.xhrGet({
+      url : cmr.CONTEXT_ROOT + '/au/custNm.json',
+      handleAs : 'json',
+      method : 'GET',
+      content : {
+        abn : businessNumber,
+        reqId : reqId,
+        formerCustNm : formerCustNm,
+        custNm : custNm
+      },
+      timeout : 50000,
+      sync : true,
+      load : function(data, ioargs) {
+        if (data) {
+          result = data;
+        }
+      },
+      error : function(error, ioargs) {
+        result = {};
+      }
+    });
+    return result;
+  },
   validateZIP : function(country, zip, loc) {
     var result = {};
     dojo.xhrGet({

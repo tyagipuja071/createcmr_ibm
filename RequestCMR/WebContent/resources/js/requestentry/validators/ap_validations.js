@@ -3631,6 +3631,21 @@ function getFormerVatAU(reqId) {
   return formerVat;
 }
 
+function getFormerCustNameAU(reqId) {
+  var custNm1 = '';
+  var custNM2 = '';
+  var formerCustNm = '';
+  var qParams = {
+    REQ_ID : reqId,
+    ADDR_TYPE : "ZS01"
+  };
+  var result = cmr.query('GET.CUSTNM_DATA_RDC', qParams);
+  if (result != null) {
+    formerCustNm = result.ret1.toUpperCase() + " " + result.ret2.toUpperCase();
+  }
+  return formerCustNm;
+}
+
 function lockFieldsForIndia(){
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -4139,7 +4154,7 @@ function handleExpiredClusterAP() {
   var clusterDataRdc = getAPClusterDataRdc();
   if (clusterDataRdc != null && clusterDataRdc != undefined && clusterDataRdc != '') {
     var clusterExpired = checkClusterExpired(clusterDataRdc);
-    if (clusterExpired || isu == '32' || gbSegment == 'C') {
+    if (clusterExpired) {
       handleObseleteExpiredDataForUpdate();
     }
   }
@@ -4161,7 +4176,6 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.readOnly('repTeamMemberName');
    FormManager.readOnly('isbuCd');
    FormManager.readOnly('covId');
-   FormManager.readOnly('stateProv');
    FormManager.readOnly('collectionCd');
    FormManager.readOnly('engineeringBo');
    FormManager.readOnly('commercialFinanced');
@@ -4181,7 +4195,6 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
    FormManager.removeValidator('isbuCd', Validators.REQUIRED);
    FormManager.removeValidator('covId', Validators.REQUIRED);
-   FormManager.removeValidator('stateProv', Validators.REQUIRED);
    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
    FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
