@@ -571,6 +571,36 @@ function doImportCmrs(addressOnly) {
       return;
     }
   }
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if ('U' == FormManager.getActualValue('reqType') && GEOHandler.EMEA && GEOHandler.EMEA.includes(cntry)) {
+    var inactiveCmr = false;
+    // check DB2 status
+    var cmrStatus = cmr.query('LD.GET_STATUS', {
+      COUNTRY : cntry,
+      CMR_NO : cmrNo
+    });
+
+    if (cmrStatus.ret1 == 'C') {
+      inactiveCmr = true;
+    } else {
+      // check sold to if AUFSD 93
+      var checkActive = cmr.query('EMEA.CHECK_ACTIVE_CMR', {
+        ZZKV_CUSNO : cmrNo,
+        MANDT : cmr.MANDT,
+        KATR6 : cntry
+      });
+      if (checkActive.ret1 != '1') {
+        inactiveCmr = true;
+      }
+    }
+
+    if (inactiveCmr) {
+      cmr.showAlert('CMR ' + cmrNo + ' is inactive and cannot be imported');
+      return;
+    }
+  }
+
   cmr.showProgress('Importing records with CMR Number ' + cmrNo + '.  This process might take a while. Please wait..');
   document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/import?addressOnly=' + (addressOnly ? 'true' : 'false') + '&addrType=' + addrType + '&addrSeq=' + addrSeq + '&cmrNum='
       + cmrNo + '&system=cmr' + (cmr.searchIssuingCntry != null ? '&searchIssuingCntry=' + cmr.searchIssuingCntry : '') + (cmr.skipAddress != null ? '&skipAddress=' + cmr.skipAddress : ''));
