@@ -860,6 +860,7 @@ function checkSCCValidateForProcessor() {
 
 function addLatinCharValidatorUS() {
   FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Address' ]);
+  FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
   FormManager.addValidator('city2', Validators.LATIN, [ 'District' ]);
   FormManager.addValidator('divn', Validators.LATIN, [ 'Division/Address Con\'t' ]);
   FormManager.addValidator('dept', Validators.LATIN, [ 'Department / Attn' ]);
