@@ -1324,6 +1324,34 @@ public abstract class USBPHandler {
       childData.setIsicCd(data.getIsicCd());
       childData.setSubIndustryCd(data.getSubIndustryCd());
     }
+
+    // CREATCMR-4569
+    if (StringUtils.isEmpty(childData.getAbbrevNm())) {
+      if (!StringUtils.isEmpty(childAdmin.getMainCustNm1())) {
+        if (childAdmin.getMainCustNm1().length() >= 15) {
+          childData.setAbbrevNm(childAdmin.getMainCustNm1().substring(0, 15));
+        } else {
+          childData.setAbbrevNm(childAdmin.getMainCustNm1().substring(0, childAdmin.getMainCustNm1().length()));
+        }
+      }
+    }
+
+    if (StringUtils.isEmpty(childData.getSearchTerm())) {
+      if (!StringUtils.isEmpty(childData.getAbbrevNm())) {
+        if (childData.getAbbrevNm().length() >= 10) {
+          childData.setSearchTerm(childData.getAbbrevNm().substring(0, 10));
+        } else {
+          childData.setSearchTerm(childData.getAbbrevNm().substring(0, childData.getAbbrevNm().length()));
+        }
+      }
+    }
+
+    // CREATCMR-6081
+    if (StringUtils.isEmpty(childData.getIccTaxClass())) {
+      childData.setIccTaxClass("000");
+    }
+    // CREATCMR-6081
+
     // set ppsceid if pool scenario request
     if (USUtil.CG_THIRD_P_BUSINESS_PARTNER.equals(childData.getCustGrp()) && USUtil.SC_BP_POOL.equals(childData.getCustSubGrp())) {
       childData.setPpsceid(data.getPpsceid());
