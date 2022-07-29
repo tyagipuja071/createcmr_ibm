@@ -2421,6 +2421,12 @@ public class CNHandler extends GEOHandler {
     LOG.debug("approvalDesc = " + approvalDesc);
     LOG.debug("currentStatus = " + approval.getCurrentStatus());
     LOG.debug("processing = " + approval.getProcessing());
+    // CREATCMR-6548
+    String reqScenario = getSubScenario(entityManager, admin.getId().getReqId());
+    if ("CROSS".equalsIgnoreCase(reqScenario)) {
+      return;
+    }
+
     if (approvalDesc != null
         && (CmrConstants.CN_ERO_APPROVAL_DESC.equals(approvalDesc) || CmrConstants.CN_ECO_LEADER_APPROVAL_DESC.equals(approvalDesc)
             || CmrConstants.CN_TECH_LEADER_APPROVAL_DESC.equals(approvalDesc))
@@ -2439,6 +2445,21 @@ public class CNHandler extends GEOHandler {
       return approve.getDefaultApprovalDesc();
     }
     return null;
+  }
+
+  // CREATCMR-6548
+  private String getSubScenario(EntityManager entityManager, long id) {
+    String subScenario = "";
+    List<Object[]> results = new ArrayList<Object[]>();
+    String sql = ExternalizedQuery.getSql("QUERY.DATA.GET.CUSTSUBGRP.BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", id);
+    results = query.getResults();
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      subScenario = sResult[0].toString();
+    }
+    return subScenario;
   }
 
 }
