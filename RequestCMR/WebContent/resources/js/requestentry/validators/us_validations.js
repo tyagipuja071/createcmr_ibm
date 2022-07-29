@@ -859,12 +859,12 @@ function checkSCCValidateForProcessor() {
 }
 
 function addLatinCharValidatorUS() {
-  FormManager.addValidator('addrTxt', Validators.LATIN1, [ 'Address' ]);
-  FormManager.addValidator('city2', Validators.LATIN1, [ 'District' ]);
-  FormManager.addValidator('divn', Validators.LATIN1, [ 'Division/Address Con\'t' ]);
-  FormManager.addValidator('dept', Validators.LATIN1, [ 'Department / Attn' ]);
-  FormManager.addValidator('bldg', Validators.LATIN1, [ 'Building' ]);
-  FormManager.addValidator('floor', Validators.LATIN1, [ 'Floor' ]);
+  FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Address' ]);
+  FormManager.addValidator('city2', Validators.LATIN, [ 'District' ]);
+  FormManager.addValidator('divn', Validators.LATIN, [ 'Division/Address Con\'t' ]);
+  FormManager.addValidator('dept', Validators.LATIN, [ 'Department / Attn' ]);
+  FormManager.addValidator('bldg', Validators.LATIN, [ 'Building' ]);
+  FormManager.addValidator('floor', Validators.LATIN, [ 'Floor' ]);
 }
 
 function usRestrictCode() {
