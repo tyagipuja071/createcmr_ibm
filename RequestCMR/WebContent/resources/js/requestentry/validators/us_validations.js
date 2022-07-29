@@ -798,6 +798,15 @@ function sccWarningShowAndHide() {
 
 }
 
+function addLatinCharValidatorUS() {
+  FormManager.addValidator('addrTxt', Validators.LATIN1, [ 'Address' ]);
+  FormManager.addValidator('city2', Validators.LATIN1, [ 'District' ]);
+  FormManager.addValidator('divn', Validators.LATIN1, [ 'Division/Address Con\'t' ]);
+  FormManager.addValidator('dept', Validators.LATIN1, [ 'Department / Attn' ]);
+  FormManager.addValidator('bldg', Validators.LATIN1, [ 'Building' ]);
+  FormManager.addValidator('floor', Validators.LATIN1, [ 'Floor' ]);
+}
+
 function usRestrictCode() {
   if (FormManager.getActualValue('custSubGrp') == 'KYN') {
     FormManager.setValue('inacType', 'I');
@@ -1164,6 +1173,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-3298
   GEOHandler.addAfterConfig(checkSCCValidate, [ SysLoc.USA ]);
   GEOHandler.registerValidator(sccWarningShowAndHide, [ SysLoc.USA ], null, false);
+  GEOHandler.addAddrFunction(addLatinCharValidatorUS, [ SysLoc.USA ]);
 
   GEOHandler.addAddrFunction(hideKUKLA, [ SysLoc.USA ]);
   // CREATCMR-6375
