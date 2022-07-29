@@ -4209,7 +4209,6 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.setValue('repTeamMemberName', '');
    FormManager.setValue('isbuCd', '');
    FormManager.setValue('covId', '');
-   FormManager.setValue('stateProv', '');
    FormManager.setValue('collectionCd', '');
    FormManager.setValue('engineeringBo', '');
    FormManager.setValue('commercialFinanced', '');
