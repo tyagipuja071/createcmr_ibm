@@ -24,7 +24,6 @@ import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cmr.create.batch.util.BatchThreadWorker;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.TerminatorThread;
-import com.ibm.cmr.create.batch.util.USCMRNumGen;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
 
 /**
@@ -85,7 +84,9 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
 
     BatchThreadWorker worker = null;
     List<BatchThreadWorker> workers = new ArrayList<BatchThreadWorker>();
-    USCMRNumGen.init();
+    if (hasPreProcess()) {
+      preProcess(entityManager);
+    }
 
     for (List<T> requestBatch : allocatedRequests) {
       worker = new BatchThreadWorker(this, requestBatch);
@@ -319,6 +320,24 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
    * @throws Exception
    */
   protected void cleanUp(EntityManager entityManager) {
+    // NOOP
+  }
+
+  /**
+   * Override to call the {@link #preProcess(EntityManager)} function
+   * 
+   * @return
+   */
+  protected boolean hasPreProcess() {
+    return false;
+  }
+
+  /**
+   * Preprocess function, to be called before multi threading starts
+   * 
+   * @throws Exception
+   */
+  protected void preProcess(EntityManager entityManager) {
     // NOOP
   }
 
