@@ -144,6 +144,12 @@ public class AustraliaUtil extends AutomationUtil {
     return results;
   }
 
+  @Override
+  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    return true;
+  }
+
   /**
    * CHecks if the record is a private customer / bluemix / marketplace
    * 
