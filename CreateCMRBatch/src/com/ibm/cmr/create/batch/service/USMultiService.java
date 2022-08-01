@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
+import com.ibm.cmr.create.batch.util.USCMRNumGen;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 
 /**
@@ -72,6 +73,16 @@ public class USMultiService extends MultiThreadedBatchService<Long> {
     }
     keepAlive();
     return true;
+  }
+
+  @Override
+  protected boolean hasPreProcess() {
+    return true;
+  }
+
+  @Override
+  protected void preProcess(EntityManager entityManager) {
+    USCMRNumGen.init(entityManager);
   }
 
   @Override
