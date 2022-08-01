@@ -148,7 +148,7 @@ function processRequestAction() {
         } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
           matchDnBForAutomationCountries();
         } else {
-          cmr.showModal('addressVerificationModal');
+          executeBeforeSubmit();
         }
       } else if (cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
         // Cmr-3176- Dnb match
@@ -170,7 +170,11 @@ function processRequestAction() {
         } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
           matchDnBForAutomationCountries();
         } else {
-          cmr.showModal('addressVerificationModal');
+          if (cmrCntry == SysLoc.SINGAPORE) {
+            executeBeforeSubmit();
+          } else {
+            cmr.showModal('addressVerificationModal');
+          }
         }
       } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
