@@ -780,6 +780,8 @@ function checkSCCValidate() {
       } else {
         $('#sccWarn').show();
       }
+    } else {
+      $('#sccWarn').show();
     }
   }
 }
