@@ -780,6 +780,8 @@ function checkSCCValidate() {
       } else {
         $('#sccWarn').show();
       }
+    } else {
+      $('#sccWarn').show();
     }
   }
 }
@@ -851,6 +853,8 @@ function checkSCCValidateForProcessor() {
         } else {
           $('#sccWarn').show();
         }
+      } else {
+        $('#sccWarn').show();
       }
     }
 
