@@ -218,6 +218,10 @@ public abstract class APHandler extends GEOHandler {
 
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      admin.setOldCustNm1(currentRecord.getCmrName1Plain());
+      admin.setOldCustNm2(currentRecord.getCmrName2Plain());
+    }
   }
 
   @Override
