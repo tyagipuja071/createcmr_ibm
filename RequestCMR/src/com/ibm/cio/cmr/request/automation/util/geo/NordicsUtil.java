@@ -192,9 +192,9 @@ public class NordicsUtil extends AutomationUtil {
 
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    String custType = admin.getCustType();
+    String custType = data.getCustGrp();
     if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getVat()) && SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())
-        && "LOCAL".equalsIgnoreCase(admin.getCustType())) {
+        && "LOCAL".equalsIgnoreCase(custType)) {
       LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
       // register vat service of Norway
       AutomationResponse<NorwayVatResponse> resp = getMVAVatInfo(admin, data);
