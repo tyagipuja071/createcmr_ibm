@@ -1918,6 +1918,7 @@ function matchCustNmAUUpdate() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqType = FormManager.getActualValue('reqType');
   var formerCustNm = getFormerCustNameAU(reqId);
+  formerCustNm = formerCustNm.trim();
   var vat = FormManager.getActualValue('vat');
   var custNm = '';
   var dataAPI = {};
@@ -1927,9 +1928,9 @@ function matchCustNmAUUpdate() {
     ADDR_TYPE : 'ZS01'
   });
   if (contractCustNm != undefined) {
-    custNm = contractCustNm.ret1.toUpperCase() + contractCustNm.ret2.toUpperCase();
+    custNm = contractCustNm.ret1.toUpperCase() + " " + contractCustNm.ret2.toUpperCase();
   }
-  // custNm = trim(custNm);
+  custNm = custNm.trim();
   console.log("Checking if the request matches D&B...");
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
