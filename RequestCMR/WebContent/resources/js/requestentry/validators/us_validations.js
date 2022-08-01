@@ -851,6 +851,8 @@ function checkSCCValidateForProcessor() {
         } else {
           $('#sccWarn').show();
         }
+      } else {
+        $('#sccWarn').show();
       }
     }
 
