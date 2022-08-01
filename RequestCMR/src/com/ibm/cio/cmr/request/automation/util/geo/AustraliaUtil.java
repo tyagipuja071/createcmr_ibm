@@ -145,6 +145,10 @@ public class AustraliaUtil extends AutomationUtil {
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    validation.setSuccess(true);
+    validation.setMessage("Successful");
+    output.setProcessOutput(validation);
+    output.setDetails("Updates to the dataFields fields skipped validation");
     return true;
   }
 
