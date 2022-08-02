@@ -71,6 +71,7 @@ import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -263,7 +264,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
       admin.setCovBgRetrievedInd(CmrConstants.YES_NO.N.toString());
       String sysType = SystemConfiguration.getValue("SYSTEM_TYPE");
-      admin.setWaitInfoInd(!StringUtils.isBlank(sysType) ? sysType.substring(0,1) : null);
+      admin.setWaitInfoInd(!StringUtils.isBlank(sysType) ? sysType.substring(0, 1) : null);
       RequestUtils.setClaimDetails(admin, request);
       // clear cmt value as it is saved in new table .
 
@@ -785,6 +786,14 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
             if (SystemLocation.CHINA.equals(model.getCmrIssuingCntry()) && StringUtils.isNotBlank(model.getDisableAutoProc())
                 && model.getDisableAutoProc().equalsIgnoreCase("Y")) {
               // transrec.setNewReqStatus("PPN");// set to PPN for CHINA
+            } else if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry())) {
+              String setPPNFlag = USHandler.validateForSCC(entityManager, model.getReqId());
+              if ("N".equals(setPPNFlag)) {
+                // set NewReqStatus value PPN for US
+              } else {
+                this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
+                transrec.setNewReqStatus("AUT"); // set to automated processing
+              }
             } else {
               this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
               transrec.setNewReqStatus("AUT"); // set to automated processing
@@ -905,7 +914,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     to.setCanClaimAll((String) from.getValue("CAN_CLAIM_ALL"));
     to.setAutoProcessing((String) from.getValue("AUTO_PROCESSING"));
 
-    //copy internal dpl fields, for display only
+    // copy internal dpl fields, for display only
     SimpleDateFormat dateFormat = CmrConstants.DATE_FORMAT();
     if (score != null) {
       to.setIntDplAssessmentResult(score.getDplAssessmentResult());
@@ -930,7 +939,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       dataService.copyValuesToEntity(from, data);
       // 1261175 -Dennis - We need to auto assign the cust type if it is an
       // update type and for BR
-      if (LAHandler.isSSAMXBRIssuingCountry(data.getCmrIssuingCntry()) && admin!=null && CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+      if (LAHandler.isSSAMXBRIssuingCountry(data.getCmrIssuingCntry()) && admin != null
+          && CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
         admin.setCustType(CmrConstants.DEFAULT_CUST_TYPE);
       }
 
@@ -939,11 +949,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         if (!StringUtils.isEmpty(from.getMrcCd())) {
           data.setCountryUse(from.getMrcCd());
         }
-        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && admin!=null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && admin != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
           data.setModeOfPayment(from.getCrosSubTyp());
         }
       } else {
-        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && admin!=null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && admin != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
           data.setModeOfPayment(from.getCrosSubTyp());
         }
       }
@@ -1478,7 +1488,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               if (record.getConfidenceCode() >= 8) {
                 confidenceCd = true;
               }
-              DnBCompany dnbCompny=getDnBDetailsUI(record.getDunsNo());
+              DnBCompany dnbCompny = getDnBDetailsUI(record.getDunsNo());
               if (dnbCompny != null) {
                 isicMatch = dnbCompny.getIbmIsic().equals(model.getIsicCd());
               }
