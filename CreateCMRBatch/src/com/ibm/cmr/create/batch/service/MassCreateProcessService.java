@@ -285,7 +285,7 @@ public class MassCreateProcessService extends BaseBatchService {
             cmrType = "MAIN";
           }
           // temp try get number, will remove when generate method done
-          String cmrNum = USCMRNumGen.genCMRNum(cmrType);
+          String cmrNum = USCMRNumGen.genCMRNum(em, cmrType);
           massCrtData.setCmrNo(cmrNum);
           mass_create.setCmrNo(cmrNum);
           request.setCmrNo(mass_create.getCmrNo());

@@ -12,19 +12,17 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 
 public class USCMRNumGen {
   private static final Logger LOG = Logger.getLogger(USCMRNumGen.class);
   public static HashMap<String, ArrayList<String>> cmrNumMap = null;
-  private static EntityManager entityManager = JpaManager.getEntityManager();
 
-  public static String genCMRNum(String type) {
+  public static synchronized String genCMRNum(EntityManager entityManager, String type) {
     String cmrNum = "";
     if (cmrNumMap == null || cmrNumMap.isEmpty()) {
       LOG.info("there is no CMR number stored in cache, so init...");
-      init();
+      init(entityManager);
     }
 
     if ("POA".equals(type)) {
@@ -60,13 +58,13 @@ public class USCMRNumGen {
     boolean nonExisted = query.getResults().isEmpty();
     while (!nonExisted) {
       LOG.info(" CMR number:" + cmrNum + " already existed, re-generate CMR number again.");
-      cmrNum = genCMRNum(type);
+      cmrNum = genCMRNum(entityManager, type);
     }
 
     return cmrNum;
   }
 
-  public static void init() {
+  public static synchronized void init(EntityManager entityManager) {
     cmrNumMap = new HashMap<String, ArrayList<String>>();
     ArrayList<String> poaList = getPOANumList(entityManager);
     ArrayList<String> commonList = getCommonNumList(entityManager);

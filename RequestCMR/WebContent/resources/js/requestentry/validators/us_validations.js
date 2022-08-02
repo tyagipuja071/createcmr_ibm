@@ -772,6 +772,7 @@ function checkSCCValidate() {
           sccValue = ret1.ret1;
           // CREATCMR-5447
           $("#addressTabSccInfo").html(sccValue);
+          $("#scc").val(sccValue);
         } else {
           $('#sccWarn').show();
         }
@@ -779,6 +780,8 @@ function checkSCCValidate() {
       } else {
         $('#sccWarn').show();
       }
+    } else {
+      $('#sccWarn').show();
     }
   }
 }
@@ -796,6 +799,77 @@ function sccWarningShowAndHide() {
     })(), 'MAIN_NAME_TAB', 'frmCMR');
   }
 
+}
+
+function checkSCCValidateForProcessor() {
+
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+
+  if (role == 'Processor') {
+
+    if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+      for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+
+        record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+        type = record.addrType;
+
+        if (typeof (type) == 'object') {
+          type = type[0];
+        }
+
+        if (type == 'ZS01') {
+          landCntry = record.landCntry;
+          st = record.stateProv;
+          cnty = record.county;
+          city = record.city1.toString().toUpperCase();
+        }
+      }
+
+      var numeric = /^[0-9]*$/;
+
+      if (cnty != '') {
+        if (numeric.test(cnty)) {
+          var ret1 = cmr.query('US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY', {
+            LAND_CNTRY : landCntry,
+            N_ST : st,
+            C_CNTY : cnty,
+            N_CITY : city
+          });
+
+          var sccValue = '';
+
+          if (ret1 && ret1.ret1 && ret1.ret1 != '') {
+            sccValue = ret1.ret1;
+            // CREATCMR-5447
+            $("#addressTabSccInfo").html(sccValue);
+            $("#scc").val(sccValue);
+          } else {
+            $('#sccWarn').show();
+          }
+
+        } else {
+          $('#sccWarn').show();
+        }
+      } else {
+        $('#sccWarn').show();
+      }
+    }
+
+    FormManager.addValidator('scc', Validators.REQUIRED, [ 'SCC Code' ], 'MAIN_NAME_TAB');
+  }
+}
+
+function addLatinCharValidatorUS() {
+  FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Address' ]);
+  FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
+  FormManager.addValidator('city2', Validators.LATIN, [ 'District' ]);
+  FormManager.addValidator('divn', Validators.LATIN, [ 'Division/Address Con\'t' ]);
+  FormManager.addValidator('dept', Validators.LATIN, [ 'Department / Attn' ]);
+  FormManager.addValidator('bldg', Validators.LATIN, [ 'Building' ]);
+  FormManager.addValidator('floor', Validators.LATIN, [ 'Floor' ]);
 }
 
 function usRestrictCode() {
@@ -1166,6 +1240,8 @@ dojo.addOnLoad(function() {
   // CREATCMR-3298
   GEOHandler.addAfterConfig(checkSCCValidate, [ SysLoc.USA ]);
   GEOHandler.registerValidator(sccWarningShowAndHide, [ SysLoc.USA ], null, false);
+  GEOHandler.registerValidator(checkSCCValidateForProcessor, [ SysLoc.USA ], null, false);
+  GEOHandler.addAddrFunction(addLatinCharValidatorUS, [ SysLoc.USA ]);
 
   GEOHandler.addAddrFunction(hideKUKLA, [ SysLoc.USA ]);
   // CREATCMR-6375
