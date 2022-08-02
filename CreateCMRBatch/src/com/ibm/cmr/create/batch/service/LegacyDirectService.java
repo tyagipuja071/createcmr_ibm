@@ -2161,7 +2161,7 @@ public class LegacyDirectService extends TransConnService {
    *         values
    * @throws Exception
    */
-  private CMRRequestContainer prepareRequest(EntityManager entityManager, MassUpdt massUpdt, Admin admin) throws Exception {
+  private synchronized CMRRequestContainer prepareRequest(EntityManager entityManager, MassUpdt massUpdt, Admin admin) throws Exception {
     LOG.debug(">>Preparing Request Objects for CMR# > " + massUpdt.getCmrNo());
     CMRRequestContainer container = new CMRRequestContainer();
 
@@ -2224,7 +2224,7 @@ public class LegacyDirectService extends TransConnService {
    * @return
    * @throws Exception
    */
-  private CMRRequestContainer prepareRequest(EntityManager entityManager, Admin admin) throws Exception {
+  private synchronized CMRRequestContainer prepareRequest(EntityManager entityManager, Admin admin) throws Exception {
     LOG.debug("Preparing Request Objects... ");
     CMRRequestContainer container = new CMRRequestContainer();
 
