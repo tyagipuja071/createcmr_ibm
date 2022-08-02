@@ -123,7 +123,7 @@ public class LegacyDirectService extends TransConnService {
   private static final String ADDRESS_USE_COUNTRY_H = "H";
   private static final String ADDRESS_USE_EXISTS = "Y";
   private static final String ADDRESS_USE_NOT_EXISTS = "N";
-  private CMRRequestContainer cmrObjects;
+  // private CMRRequestContainer cmrObjects;
   private static final String MASS_UPDATE_FAIL = "FAIL";
   private static final String MASS_UPDATE_DONE = "DONE";
   private static final String MASS_UDPATE_LEGACY_FAIL_MSG = "Errors happened in legacy mass updates. Pleaes see request summary for details.";
@@ -232,8 +232,8 @@ public class LegacyDirectService extends TransConnService {
       }
       try {
 
-        this.cmrObjects = prepareRequest(entityManager, admin);
-        data = this.cmrObjects.getData();
+        CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
+        data = cmrObjects.getData();
 
         request = new ProcessRequest();
         request.setCmrNo(data.getCmrNo());
@@ -2161,7 +2161,7 @@ public class LegacyDirectService extends TransConnService {
    *         values
    * @throws Exception
    */
-  private synchronized CMRRequestContainer prepareRequest(EntityManager entityManager, MassUpdt massUpdt, Admin admin) throws Exception {
+  private CMRRequestContainer prepareRequest(EntityManager entityManager, MassUpdt massUpdt, Admin admin) throws Exception {
     LOG.debug(">>Preparing Request Objects for CMR# > " + massUpdt.getCmrNo());
     CMRRequestContainer container = new CMRRequestContainer();
 
@@ -2224,7 +2224,7 @@ public class LegacyDirectService extends TransConnService {
    * @return
    * @throws Exception
    */
-  private synchronized CMRRequestContainer prepareRequest(EntityManager entityManager, Admin admin) throws Exception {
+  private CMRRequestContainer prepareRequest(EntityManager entityManager, Admin admin) throws Exception {
     LOG.debug("Preparing Request Objects... ");
     CMRRequestContainer container = new CMRRequestContainer();
 
@@ -2734,6 +2734,7 @@ public class LegacyDirectService extends TransConnService {
     long reqId = admin.getId().getReqId();
     // String rdcEmbargoCd = getEmbargoCdFromDataRdc(entityManager, admin);
     DataRdc dataRdc = getDataRdcRecords(entityManager, data);
+    CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
     if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
         && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())
         && (dataRdc.getEmbargoCd() != null && !StringUtils.isBlank(dataRdc.getEmbargoCd())) && EMBARGO_LIST.contains(dataRdc.getEmbargoCd())
@@ -2744,7 +2745,7 @@ public class LegacyDirectService extends TransConnService {
         LOG.info("Temporary Reactivate Embargo process: Batch 1st run for Req Id :" + admin.getId().getReqId());
         try {
 
-          List<Addr> addresses = this.cmrObjects.getAddresses();
+          List<Addr> addresses = cmrObjects.getAddresses();
 
           List<String> statusCodes = new ArrayList<String>();
 
@@ -2968,7 +2969,7 @@ public class LegacyDirectService extends TransConnService {
           LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setProcessedTs(SystemUtil.getCurrentTimestamp());
-            List<Addr> addresses = this.cmrObjects.getAddresses();
+            List<Addr> addresses = cmrObjects.getAddresses();
 
             List<String> statusCodes = new ArrayList<String>();
 
@@ -3180,7 +3181,7 @@ public class LegacyDirectService extends TransConnService {
     } else { // Normal Update Process
       try {
 
-        List<Addr> addresses = this.cmrObjects.getAddresses();
+        List<Addr> addresses = cmrObjects.getAddresses();
 
         List<String> statusCodes = new ArrayList<String>();
 
