@@ -462,6 +462,7 @@ public class RequestUtils {
       } else {
         type = "Update by Enterprise";
       }
+      LOG.debug("ReqType is " + type.toString() + " , and status is " + status.toString());
     } else {
       type = "-";
     }
