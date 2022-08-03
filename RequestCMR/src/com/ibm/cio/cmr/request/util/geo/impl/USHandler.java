@@ -1265,7 +1265,7 @@ public class USHandler extends GEOHandler {
       }
     }
     // CREATCMR-6696
-    if (addrTxt2 != null && addr.getAddrTxt2().length() > 0) {
+    if (addrTxt2 != null && addrTxt2.length() > 0) {
       addr.setDivn(addrTxt2.length() > 24 ? addrTxt2.trim().substring(0, 24) : addrTxt2.trim());
       addr.setAddrTxt2(null);
     }
