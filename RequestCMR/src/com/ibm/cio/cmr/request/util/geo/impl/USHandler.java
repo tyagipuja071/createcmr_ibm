@@ -1254,6 +1254,7 @@ public class USHandler extends GEOHandler {
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
 
     String addrTxt = addr.getAddrTxt();
+    String addrTxt2 = addr.getAddrTxt2();
     if (addrTxt != null && addrTxt.length() > 24) {
       splitAddress(addr, addr.getAddrTxt(), "", 24, 24);
       if (!StringUtils.isEmpty(addr.getAddrTxt2())) {
@@ -1262,10 +1263,11 @@ public class USHandler extends GEOHandler {
         addr.setDivn(addr.getAddrTxt2().trim());
         addr.setAddrTxt2(null);
       }
-    } else if (addr.getAddrTxt2() != null && addr.getAddrTxt2().length() > 0) {
-      addr.setDivn(addr.getAddrTxt2().length() > 24 ? addr.getAddrTxt2().trim().substring(0, 24) : addr.getAddrTxt2().trim());
+    }
+    // CREATCMR-6696
+    if (addrTxt2 != null && addr.getAddrTxt2().length() > 0) {
+      addr.setDivn(addrTxt2.length() > 24 ? addrTxt2.trim().substring(0, 24) : addrTxt2.trim());
       addr.setAddrTxt2(null);
-
     }
 
     // CREATCMR-6342
