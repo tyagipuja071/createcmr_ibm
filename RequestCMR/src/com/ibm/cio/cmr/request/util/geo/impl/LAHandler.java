@@ -91,6 +91,7 @@ public class LAHandler extends GEOHandler {
    */
   private static final List<String> LA_ISSUING_COUNTRY_VAL = Arrays.asList("613", "629", "631", "655", "661", "663", "681", "683", "829", "731",
       "735", "781", "799", "811", "813", "815", "869", "871");
+  private static final List<String> LA_ISSUING_COUNTRY_LCR = Arrays.asList("663", "681", "829", "731", "735", "799", "811");
 
   private static final String[] BRAZIL_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Division", "LocalTax1" };
 
@@ -2113,6 +2114,7 @@ public class LAHandler extends GEOHandler {
       data.setInstallBranchOff(data.getSalesBusOffCd());
     }
 
+    boolean isLeasingBr = false;
     if (!StringUtils.isBlank(cmrIssuingCntry) && isBRIssuingCountry(cmrIssuingCntry)) {
       String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -2131,6 +2133,16 @@ public class LAHandler extends GEOHandler {
         if (hwBoRepTeam == null || hwBoRepTeam.isEmpty()) {
           addrService.updateDataForBRCreate(entityManager, null, soldToAddr);
         }
+
+        if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
+          if (CmrConstants.CUST_TYPE_LEASI.equals(data.getCustSubGrp()) && "34270520000136".equals(soldToAddr.getVat())) {
+            data.setCustClass("33");
+            isLeasingBr = true;
+          } else if (CmrConstants.CUST_TYPE_LEASI.equals(data.getCustSubGrp()) && !"34270520000136".equals(soldToAddr.getVat())) {
+            data.setCustClass("34");
+            isLeasingBr = true;
+          }
+        }
       }
     }
 
@@ -2147,6 +2159,62 @@ public class LAHandler extends GEOHandler {
         }
       }
       // data.setFunc("R");
+    }
+
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
+      if (CmrConstants.CUST_TYPE_INTER.equals(data.getCustSubGrp()) || "INTUS".equals(data.getCustSubGrp()) || "INIBM".equals(data.getCustSubGrp())) {
+        data.setCustClass("81");
+      } else if (CmrConstants.CUST_TYPE_BUSPR.equals(data.getCustSubGrp())) {
+        data.setCustClass("45");
+      } else if (CmrConstants.CUST_TYPE_PRIPE.equals(data.getCustSubGrp())) {
+        data.setCustClass("60");
+      } else if (CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())) {
+        data.setCustClass("71");
+      } else if ("INTOU".equals(data.getCustSubGrp())) {
+        data.setCustClass("85");
+      } else {
+        if (!isLeasingBr) {
+          data.setCustClass("11");
+        }
+      }
+    }
+
+    // set custClass for Creates only
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
+      if (isBRIssuingCountry(issuingCntry)) {
+        if (("GD".equals(data.getCrosSubTyp()) || "GI".equals(data.getCrosSubTyp())) && "PF".equals(data.getGovType())) {
+          data.setCustClass("12");
+        } else if ("GD".equals(data.getCrosSubTyp()) && !"PF".equals(data.getGovType())) {
+          data.setCustClass("13");
+        } else if ("GI".equals(data.getCrosSubTyp()) && !"PF".equals(data.getGovType())) {
+          data.setCustClass("11");
+        }
+      }
+
+      if (isMXIssuingCountry(issuingCntry)) {
+        if ("GD".equals(data.getCrosSubTyp())) {
+          data.setCustClass("12");
+        } else if ("GI".equals(data.getCrosSubTyp())) {
+          data.setCustClass("13");
+        }
+      }
+
+      if (isARIssuingCountry(issuingCntry) || LA_ISSUING_COUNTRY_LCR.contains(cmrIssuingCntry)) {
+        if ("GD".equals(data.getCrosSubTyp())) {
+          data.setCustClass("12");
+        }
+      } else if (SystemLocation.ARGENTINA.equalsIgnoreCase(cmrIssuingCntry) || SystemLocation.URUGUAY.endsWith(cmrIssuingCntry)
+          || SystemLocation.ECUADOR.equals(cmrIssuingCntry) || SystemLocation.PARAGUAY.equals(cmrIssuingCntry)) {
+        if ("GD".equals(data.getCrosSubTyp())) {
+          data.setCustClass("14");
+        }
+      } else if (SystemLocation.BOLIVIA_PLURINA.equals(cmrIssuingCntry) || SystemLocation.VENEZUELA_BOLIVARIAN.equals(cmrIssuingCntry)
+          || SystemLocation.PERU.equals(cmrIssuingCntry) || SystemLocation.CHILE.equals(cmrIssuingCntry)
+          || SystemLocation.COLOMBIA.equals(cmrIssuingCntry)) {
+        if ("GD".equals(data.getCrosSubTyp())) {
+          data.setCustClass("13");
+        }
+      }
     }
 
   }
@@ -3286,6 +3354,9 @@ public class LAHandler extends GEOHandler {
     if ("ZS01".equalsIgnoreCase(addr.getId().getAddrType())) {
       addr.setVat(v2Model.getVat());
       addr.setTaxCd2(v2Model.getMunicipalFiscalCode());
+      if ("C".equals(v2Model.getReqType())) {
+        addr.setTransportZone("Z000000001");
+      }
 
       if (StringUtils.isBlank(addr.getLandCntry())) {
         addr.setLandCntry("BR");
@@ -3319,6 +3390,10 @@ public class LAHandler extends GEOHandler {
         addrzi01.setId(pkzi01);
         addrzi01.setVat(v2Model.getVatEndUser());
         addrzi01.setTaxCd2(v2Model.getMunicipalFiscalCodeEndUser());
+        if ("C".equals(v2Model.getReqType())) {
+          addrzi01.setTransportZone("Z000000001");
+        }
+
         if (StringUtils.isBlank(addrzi01.getImportInd())) {
           addr.setImportInd("N");
         }
