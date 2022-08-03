@@ -197,8 +197,8 @@ function addAfterConfigAP() {
   }
 
   if (reqType == 'U' && cntry == '834') {
-	    FormManager.readOnly('isicCd');
-	  }
+	  FormManager.readOnly('isicCd');
+	}
 
   if (reqType == 'C' && custGrp == 'CROSS' && cntry == '736') {
     FormManager.enable('postCd');
