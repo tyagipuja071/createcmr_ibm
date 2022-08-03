@@ -510,7 +510,7 @@ public class IERPRequestUtils extends RequestUtils {
     return sDate1.equals(sDate2) ? true : false;
   }
 
-  public static int checked2WorkingDays(Date processedTs, Timestamp currentTimestamp) {
+  public static int checkNoOfWorkingDays(Date processedTs, Timestamp currentTimestamp) {
     LOG.debug("processedTs=" + processedTs + " currentTimestamp=" + currentTimestamp);
 
     int workingDays = 0;
