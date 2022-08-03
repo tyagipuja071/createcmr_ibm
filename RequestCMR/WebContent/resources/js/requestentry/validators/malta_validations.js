@@ -626,6 +626,10 @@ function setClientTierValuesMT(isuCd) {
   } else {
     FormManager.enable('clientTier');
   }
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  }
 }
 
 function enterpriseValidation() {
@@ -844,8 +848,8 @@ function addISICValidatorForScenario() {
           reqType = FormManager.getActualValue('reqType');
         }
         if ("C" == reqType) {
-          if ((_custType != null && _isicCd != null) && _custType != 'PRICU' && _isicCd == '9500') {
-            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60 (Private Person).');
+          if ((_custType != null && _isicCd != null) && (_custType != 'PRICU' || _custType != 'IBMEM') && _isicCd == '9500') {
+            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60/71 (Private Person/IBM Employee).');
           } else {
             return new ValidationResult(null, true);
           }
@@ -869,12 +873,12 @@ function addIsicClassificationCodeValidator() {
           var field = FormManager.getField('custClass');
           var value = FormManager.getActualValue('isicCd');
 
-          if (value == '9500' && field == '60') {
+          if (value == '9500' && (field == '60' || field == '71')) {
             return new ValidationResult(null, true);
-          } else if (value != '9500' && field == '60') {
-            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60 (Private Person)');
-          } else if (value == '9500' && field != '60') {
-            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60 (Private Person)');
+          } else if (value != '9500' && (field == '60' || field == '71')) {
+            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60/71 (Private Person/IBM Employee).');
+          } else if (value == '9500' && (field != '60' && field != '71')) {
+            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60/71 (Private Person/IBM Employee).');
           } else {
             return new ValidationResult(null, true);
           }

@@ -710,6 +710,7 @@ function addHandlersForCEMEA() {
         setClientTierValuesAT(value);
         setSBOValuesForIsuCtcAT();
       }
+      disableFieldsIBMEm();
     });
   }
 
@@ -760,6 +761,15 @@ function addHandlersForCEMEA() {
     });
   }
 
+}
+
+function disableFieldsIBMEm() {
+  var scenario = FormManager.getActualValue('custSubGrp');
+  if (!scenario.includes('IBM')) {
+    return;
+  }
+  FormManager.setValue('clientTier', '');
+  FormManager.readOnly('clientTier');
 }
 
 function setClientTierValuesAT(isuCd) {
@@ -4314,6 +4324,8 @@ function setClassificationCodeCEE() {
       FormManager.setValue('custClass', '81');
     } else if (_custType == 'PRICU' || _custType == 'CSPC' || _custType == 'MEPC' || _custType == 'RSPC' || _custType == 'RSXPC') {
       FormManager.setValue('custClass', '60');
+    } else if (_custType.includes('IBM')) {
+      FormManager.setValue('custClass', '71');
     } else if (isicCds.has(isicCd)) {
       FormManager.setValue('custClass', '13');
     } else {
@@ -4674,7 +4686,6 @@ function hideDisableAutoProcessingCheckBox() {
 
 function afterConfigTemplateLoadForCEE() {
   filterCmrnoForCEE();
-  setClassificationCodeCEE();
   // disableSBO();
   setEngineeringBO();
 }
@@ -4794,6 +4805,10 @@ function setCEESBOValuesForIsuCtc() {
   }
 
   if ('U' == FormManager.getActualValue('reqType')) {
+    return;
+  }
+  
+  if (FormManager.getActualValue('custSubGrp').includes('IBM')) {
     return;
   }
 
@@ -5435,5 +5450,7 @@ dojo
       GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, [ SysLoc.AUSTRIA ]);
       GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, SysLoc.AUSTRIA);
       GEOHandler.addAfterTemplateLoad(togglePPSCeidCEE, GEOHandler.CEMEA);
+      GEOHandler.addAfterTemplateLoad(disableFieldsIBMEm, GEOHandler.CEMEA);
+      GEOHandler.addAfterTemplateLoad(setClassificationCodeCEE, GEOHandler.CEMEA);
 
     });

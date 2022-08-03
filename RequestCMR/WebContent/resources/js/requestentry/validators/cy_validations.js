@@ -1467,23 +1467,31 @@ function setCustSubTypeBpGRTRCY(fromAddress, scenario, scenarioChanged) {
         checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
         FormManager.setValue('vatExempt', false);
       }
+    } else if (custType == 'IBMEM') {
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('isuCd');
+      if (FormManager.getActualValue('userRole').toUpperCase() == 'PROCESSOR') {
+        FormManager.enable('clientTier');
+        FormManager.enable('isuCd');
+      }
     } else if (custType == 'SAASP') {
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', 'Q');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '34');
-      if(scenarioChanged){
+      if(scenarioChanged) {
         FormManager.resetValidations('vat');
         FormManager.setValue('vatExempt', 'Y');
       }
-     }else if (custType == 'PRICU') {
+    } else if (custType == 'PRICU') {
        FormManager.enable('clientTier');
        FormManager.enable('isuCd');
        if(scenarioChanged){
          FormManager.resetValidations('vat');
          FormManager.setValue('vatExempt', 'Y');
        }
-     }else {
+    } else {
       FormManager.enable('clientTier');
       FormManager.enable('isuCd');
       if(scenarioChanged){
