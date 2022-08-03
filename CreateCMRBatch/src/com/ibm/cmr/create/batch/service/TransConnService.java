@@ -171,11 +171,28 @@ public class TransConnService extends BaseBatchService {
         monitorLegacyPending(entityManager, records);
       }
 
+      LOG.info("Processing LA Reprocess RDC records...");
+      records = gatherLAReprocessRdcRecords(entityManager);
+      monitorLAReprocessRdcRecords(entityManager, records);
+
       return true;
     } catch (Exception e) {
       addError(e);
       return false;
     }
+  }
+
+  protected List<Long> gatherLAReprocessRdcRecords(EntityManager entityManager) {
+    // search for LA records to be reprocessed in RDC
+    String sql = ExternalizedQuery.getSql("BATCH.MONITOR.LA_RDC_REPROCESS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    List<Admin> reprocessRecords = query.getResults(Admin.class);
+    LOG.debug("Size of LA Reprocess Rdc Records : " + reprocessRecords.size());
+    List<Long> queue = new ArrayList<>();
+    for (Admin admin : reprocessRecords) {
+      queue.add(admin.getId().getReqId());
+    }
+    return queue;
   }
 
   /**
@@ -1482,6 +1499,7 @@ public class TransConnService extends BaseBatchService {
       // request
       if (isCompletedSuccessfully(resultCode)) {
 
+        setLAAdminToCompleted(admin, data);
         if (response.isCmrNoGenerated() && !StringUtils.isEmpty(response.getCmrNo())) {
           LOG.debug("CMR No. " + response.getCmrNo() + " generated. Updating DATA for Request " + data.getId().getReqId());
           data.setCmrNo(response.getCmrNo());
@@ -1519,6 +1537,7 @@ public class TransConnService extends BaseBatchService {
           comment = comment.append("RDc create processing for CMR No " + request.getCmrNo() + " failed. Error: " + response.getMessage()
               + " System will retry processing once.");
         } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
+          setLAAdminToPending(admin, data);
           comment = comment.append("RDc create processing for CMR No " + request.getCmrNo() + " failed. Error: " + response.getMessage());
         } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
           comment = comment.append("Create processing in RDc skipped: " + response.getMessage());
@@ -2999,6 +3018,52 @@ public class TransConnService extends BaseBatchService {
       }
     } else {
       LOG.debug("NO RECORD Fetch For UPDATE SAP NUMBER IN ADDR TABLE");
+    }
+  }
+
+  public void monitorLAReprocessRdcRecords(EntityManager entityManager, List<Long> reprocessRecords)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
+
+    for (Long id : reprocessRecords) {
+      try {
+        AdminPK pk = new AdminPK();
+        pk.setReqId(id);
+        Admin admin = entityManager.find(Admin.class, pk);
+
+        LOG.info("Processing LA RDC Record " + admin.getId().getReqId() + " [Request ID: " + admin.getId().getReqId() + "]");
+
+        // get the data
+        String sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", admin.getId().getReqId());
+
+        Data data = query.getSingleResult(Data.class);
+        entityManager.detach(data);
+
+        if (SINGLE_REQUEST_TYPES.contains(admin.getReqType()) && CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus())) {
+          processSingleRequest(entityManager, admin, data);
+        } else {
+          LOG.warn("Request ID " + admin.getId().getReqId() + " cannot be processed. Improper Type or not completed.");
+        }
+
+        partialCommit(entityManager);
+
+      } catch (Exception e) {
+        LOG.error("Error in processing Reprocess RDC Record with Request ID " + id + " [" + e.getMessage() + "]", e);
+      }
+    }
+  }
+
+  private void setLAAdminToCompleted(Admin admin, Data data) {
+    if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+      admin.setReqStatus("COM");
+    }
+  }
+
+  private void setLAAdminToPending(Admin admin, Data data) {
+    if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+      admin.setReqStatus("PPN");
+      admin.setProcessedFlag("E"); // set request status to error.
     }
   }
 }
