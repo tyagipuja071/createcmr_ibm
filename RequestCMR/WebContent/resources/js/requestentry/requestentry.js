@@ -154,8 +154,8 @@ function processRequestAction() {
         // Cmr-3176- Dnb match
         var checkCompProof = checkForCompanyProofAttachment();
         if (checkIfFinalDnBCheckRequired() && reqType == 'U' && checkCompProof) {
+          // CustNm check and Addresses Dnb Check
           matchCustNmAUUpdate();
-          matchDnbForAUUpdate();
         } else {
           cmr.showModal('addressVerificationModal');
         }
@@ -208,6 +208,14 @@ function processRequestAction() {
         matchDnBForIndia();
       } else {
         // if there are no errors, show the Address Verification modal window
+        cmr.showModal('addressVerificationModal');
+      }
+    } else if (comp_proof_INAUSG && cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
+      // Cmr-3176- Dnb match
+      var checkCompProof = checkForCompanyProofAttachment();
+      if (checkIfFinalDnBCheckRequired() && reqType == 'U' && checkCompProof) {
+        matchCustNmAUUpdate();
+      } else {
         cmr.showModal('addressVerificationModal');
       }
     } else if (comp_proof_INAUSG && (cmrCntry == SysLoc.SINGAPORE || cmrCntry == SysLoc.AUSTRALIA)) {
@@ -1945,9 +1953,10 @@ function matchCustNmAUUpdate() {
   }
   cmr.showProgress('Checking Customer Name with API...');
   if (custNm == formerCustNm) {
+    comp_proof_INAUSG = false;
+    matchDnbForAUUpdate();
     return;
   }
-  // var currentCustNm = custNm;
   // match with API
   if (vat != '' && reqId != '' && formerCustNm != '' && custNm != '') {
     dataAPI = cmr.validateCustNmFromVat(vat, reqId, formerCustNm, custNm);
@@ -1958,48 +1967,63 @@ function matchCustNmAUUpdate() {
   if (dataAPI.success && dataAPI.custNmMatch) {
     if (dataAPI.formerCustNmMatch) {
       comp_proof_INAUSG = true;
-      return;
+      checkDnBMatchingAttachmentValidator();
+      if (FormManager.validate('frmCMR')) {
+        MessageMgr.clearMessages();
+        doValidateRequest();
+        matchDnbForAUUpdate();
+        return;
+      } else {
+        cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
+      }
+
     } else {
       console.log("Name matches found in API but former Name doesn't match with Historical/trading/business name in API");
       comp_proof_INAUSG = false;
       cmr.showAlert("Please attach company proof as Name validation failed by API.");
-      return;
     }
   } else if (dataAPI.success && dataAPI.formerCustNmMatch && !dataAPI.custNmMatch) {
     comp_proof_INAUSG = false;
     console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");
     cmr.showAlert("Please attach company proof as Name validation failed by API.");
-    return;
   } else {
     cmr.showProgress('Customer Name match with API failed . Now Checking Customer Name with Dnb...');
     // API match failed for CustomerName now checking for Dnb Match Start
     dojo.xhrGet({
-      url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
+      url : cmr.CONTEXT_ROOT + '/request//dnb/custNmUpdate.json',
       handleAs : 'json',
       method : 'GET',
       content : {
         'reqId' : reqId,
-        'isicCd' : isicCd
+        'custNm' : custNm,
+        'formerCustNm' : formerCustNm
       },
       timeout : 50000,
-      sync : false,
+      sync : true,
       load : function(data, ioargs) {
         cmr.hideProgress();
         console.log(data);
         console.log(data.success);
         console.log(data.match);
-        console.log(data.isicMatch);
-        console.log(data.validate);
+        console.log(data.custNmMatch);
+        console.log(data.formerCustNmMatch);
         if (data && data.success) {
-          if (data.match && data.legalName == formerCustNm) {
+          if (data.custNmMatch && data.formerCustNmMatch) {
             comp_proof_INAUSG = true;
-            return;
-          } else if (data.match && data.legalName != formerCustNm) {
+            checkDnBMatchingAttachmentValidator();
+            if (FormManager.validate('frmCMR')) {
+              MessageMgr.clearMessages();
+              doValidateRequest();
+              matchDnbForAUUpdate();
+              return;
+            } else {
+              cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
+            }
+          } else if (data.custNmMatch && !data.formerCustNmMatch) {
             console.log("Customer name matched with Dnb But Former Customer name match failed by Tradestyle Name");
             comp_proof_INAUSG = false;
             cmr.showAlert("Please attach company proof as Former Customer Name match failed by Dnb.");
-            return;
-          } else if (!data.match && data.legalName == formerCustNm) {
+          } else if (!data.custNmMatch && data.formerCustNmMatch) {
             console.log("Former Customer name matched with Dnb Tradestyle name But Customer name match failed by Dnb");
             comp_proof_INAUSG = false;
             cmr.showAlert("Please attach company proof as Former Customer Name match failed by Dnb.");
@@ -2007,6 +2031,11 @@ function matchCustNmAUUpdate() {
             comp_proof_INAUSG = false;
             console.log("Name validation failed by dnb and API ");
             cmr.showAlert("Please attach company proof as Name validation failed by Dnb.");
+          }
+          checkDnBMatchingAttachmentValidator();
+          var checkCompProof = checkForCompanyProofAttachment();
+          if (!checkCompProof) {
+            matchDnbForAUUpdate
           }
         } else {
           // continue
@@ -2060,9 +2089,7 @@ function matchDnbForAUUpdate() {
       if (data && data.success) {
         if (data.match) {
           comp_proof_INAUSG = true;
-          if (!data.validate) {
-            checkDnBMatchingAttachmentValidator();
-          }
+          checkDnBMatchingAttachmentValidator();
           if (FormManager.validate('frmCMR')) {
             MessageMgr.clearMessages();
             doValidateRequest();
@@ -2075,9 +2102,7 @@ function matchDnbForAUUpdate() {
           console.log("Name/Address validation failed by dnb");
           cmr.showAlert("Please attach company proof as Name/Address validation failed by Dnb.");
         }
-        if (!data.validate) {
-          checkDnBMatchingAttachmentValidator();
-        }
+        checkDnBMatchingAttachmentValidator();
       } else {
         // continue
         console.log("An error occurred while matching dnb.");

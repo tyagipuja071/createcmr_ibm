@@ -1643,6 +1643,66 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
   }
 
+  public ModelMap isCustNmMatch(AutoDNBDataModel model, long reqId, String custNm, String formerCustNm) {
+
+    ModelMap map = new ModelMap();
+    EntityManager entityManager = null;
+    try {
+      if (reqId > 0) {
+        entityManager = JpaManager.getEntityManager();
+        RequestData requestData = new RequestData(entityManager, reqId);
+        List<String> dnbTradestyleNames = new ArrayList<String>();
+        boolean dnbCustNmMatch = false;
+        boolean dnbFormerCustNmMatch = false;
+        boolean dnbSuccess = false;
+        boolean dnbMatch = false;
+
+        MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
+        if (response != null && response.getMatched()) {
+          dnbSuccess = true;
+          List<DnBMatchingResponse> dnbMatches = response.getMatches();
+          for (DnBMatchingResponse dnbRecord : dnbMatches) {
+            dnbMatch = true;
+            String dnbCustNm = StringUtils.isBlank(dnbRecord.getDnbName()) ? "" : dnbRecord.getDnbName().replaceAll("\\s+$", "");
+            if (custNm.equalsIgnoreCase(dnbCustNm)) {
+              dnbCustNmMatch = true;
+              dnbTradestyleNames = dnbRecord.getTradeStyleNames();
+              if (dnbTradestyleNames != null) {
+                for (String tradestyleNm : dnbTradestyleNames) {
+                  tradestyleNm = tradestyleNm.replaceAll("\\s+$", "");
+                  if (tradestyleNm.equalsIgnoreCase(formerCustNm)) {
+                    dnbFormerCustNmMatch = true;
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }
+        map.put("match", dnbMatch);
+        map.put("success", dnbSuccess);
+        map.put("formerCustNmMatch", dnbFormerCustNmMatch);
+        map.put("custNmMatch", dnbCustNmMatch);
+      } else {
+        map.put("success", false);
+        map.put("match", false);
+        String message = "Invalid request Id";
+        map.put("message", message);
+      }
+    } catch (Exception e) {
+      log.debug("Error occurred while checking DnB Matches." + e);
+      map.put("success", false);
+      map.put("match", false);
+      String message = "An error occurred while matching with DnB.";
+      map.put("message", message);
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+    return map;
+  }
+
   private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
     List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
     List<String> NON_RELEVANT_ADDRESS_FIELDS_AU = Arrays.asList("Attn", "Phone #");
