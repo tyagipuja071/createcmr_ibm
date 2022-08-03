@@ -61,7 +61,7 @@ public class DEHandler extends GEOHandler {
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("724");
   protected static final String[] MT_MASS_UPDATE_SHEET_NAMES = { "Data", "Sold To", "Bill To", "Install-At", "Ship-To" };
   private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
-      "City2", "Affiliate", "Company", "INACType", "TransportZone", "Office", "Floor" };
+      "City2", "Affiliate", "Company", "INACType", "TransportZone", "Office", "Floor", "BPRelationType", "MembLevel" };
   protected LegacyDirectObjectContainer legacyObjects;
 
   @Override
@@ -142,6 +142,9 @@ public class DEHandler extends GEOHandler {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setPpsceid("");
+    }
   }
 
   @Override
@@ -150,12 +153,23 @@ public class DEHandler extends GEOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-    String[] parts = null;
-    String name1 = currentRecord.getCmrName1Plain();
-    String name2 = currentRecord.getCmrName2Plain();
-    parts = splitName(name1, name2, 35, 35);
-    address.setCustNm1(parts[0]);
-    address.setCustNm2(parts[1]);
+    boolean doSplitForName = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 35)
+        || (currentRecord.getCmrName2Plain() != null && currentRecord.getCmrName2Plain().length() > 35);
+    if (doSplitForName) {
+      String[] parts = null;
+      String name1 = currentRecord.getCmrName1Plain();
+      String name2 = currentRecord.getCmrName2Plain();
+      parts = splitName(name1, name2, 35, 35);
+      address.setCustNm1(parts[0]);
+      address.setCustNm2(parts[1]);
+      if (!StringUtils.isEmpty(parts[2])) {
+        address.setDept(parts[2]);
+      }
+    } else {
+      address.setCustNm1(currentRecord.getCmrName1Plain());
+      address.setCustNm2(currentRecord.getCmrName2Plain());
+    }
+
     // addrtxt2 issue
     String name4 = currentRecord.getCmrName4();
     address.setBldg(name4);
@@ -165,10 +179,6 @@ public class DEHandler extends GEOHandler {
       splitAddress(address, currentRecord.getCmrStreetAddress(), currentRecord.getCmrStreetAddressCont(), 35, 35);
     } else {
       address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
-    }
-
-    if (!StringUtils.isEmpty(parts[2])) {
-      address.setDept(parts[2]);
     }
 
     // CMR-3171 - do not block seq import for OB records
@@ -741,7 +751,6 @@ public class DEHandler extends GEOHandler {
     map.put("##DUNS", "dunsNo");
     map.put("##BuyingGroupID", "bgId");
     map.put("##GeoLocationCode", "geoLocationCd");
-    map.put("##MembLevel", "memLvl");
     map.put("##PrivacyIndc", "privIndc");
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");

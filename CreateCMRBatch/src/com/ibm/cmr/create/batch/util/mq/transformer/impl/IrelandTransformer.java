@@ -274,6 +274,9 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       } else {
         legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
       }
+      if ("GR".equals(landedCntry)) {
+        legacyCust.setVat("EL" + dummyHandler.cmrData.getVat().substring(2));
+      }
     } else {
       if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
@@ -1446,6 +1449,11 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     if (cntry.equals("754")) {
       generateCMRNoObj.setLoc1("866");
     }
+  }
+
+  @Override
+  public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    return false;
   }
 
 }

@@ -651,6 +651,14 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       saveChecklist(entityManager, model.getReqId(), user);
     }
 
+    if (data != null && admin != null && CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())
+        && StringUtils.isNotBlank(data.getCmrIssuingCntry()) && PageManager.fromGeo("EMEA", data.getCmrIssuingCntry())
+        && "Y".equals(admin.getProspLegalInd())) {
+      if (StringUtils.isBlank(data.getCmrNo()) || (StringUtils.isNotBlank(data.getCmrNo()) && !data.getCmrNo().startsWith("P"))) {
+        admin.setProspLegalInd("");
+        updateEntity(admin, entityManager);
+      }
+    }
   }
 
   /**
@@ -925,6 +933,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     adminService.copyValuesToEntity(from, admin);
     Data data = to.getEntity(Data.class);
     if (data != null) {
+      String usemail3 = data.getEmail3() == null ? null : new String(data.getEmail3());
       dataService.copyValuesToEntity(from, data);
       // 1261175 -Dennis - We need to auto assign the cust type if it is an
       // update type and for BR
@@ -972,6 +981,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       if (PageManager.fromGeo("CEMEA", data.getCmrIssuingCntry())) {
         this.log.debug("Setting location no...");
         data.setLocationNumber(from.getLocationNo());
+      }
+      // Save email3 value anywhere for us bp source
+      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && !StringUtils.isEmpty(usemail3)
+          && "CreateCMR-BP".equals(admin.getSourceSystId())) {
+        this.log.debug("Setting BP us client model:email3");
+        data.setEmail3(usemail3);
       }
     }
     Scorecard score = to.getEntity(Scorecard.class);

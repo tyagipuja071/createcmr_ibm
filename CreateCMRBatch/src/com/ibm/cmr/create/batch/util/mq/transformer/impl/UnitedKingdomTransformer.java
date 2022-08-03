@@ -3,7 +3,6 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -50,8 +49,8 @@ public class UnitedKingdomTransformer extends EMEATransformer {
 
   // added marekting response code to preserve BP = 5 for updates
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
-  
-  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02", "PG01" };
+
+  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02" };
 
   private static final String DEFAULT_LANDED_COUNTRY = "UK";
   private static final String DEFAULT_CLEAR_CHAR = "@";
@@ -947,6 +946,9 @@ public class UnitedKingdomTransformer extends EMEATransformer {
       } else {
         legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
       }
+      if ("GR".equals(landedCntry)) {
+        legacyCust.setVat("EL" + dummyHandler.cmrData.getVat().substring(2));
+      }
     } else {
       if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
@@ -1525,7 +1527,7 @@ public class UnitedKingdomTransformer extends EMEATransformer {
       cust.setIsuCd(muData.getIsuCd() + "7");
     } else {
       String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-        + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
       if (isuClientTier != null && isuClientTier.endsWith("@")) {
         cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
       } else if (isuClientTier != null && isuClientTier.length() == 3) {

@@ -2588,26 +2588,32 @@ function setSortlForStateProvince() {
       || stateProv == 'CE' || stateProv == 'RN' || stateProv == 'PB' || stateProv == 'PE' || stateProv == 'AL' || stateProv == 'SE' || stateProv == 'BA') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '763', '515', '161' ]);
+    FormManager.setValue('salesBusOffCd', '763');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'DF' || stateProv == 'GO' || stateProv == 'MT' || stateProv == 'MS') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '504', '515', '161' ]);
+    FormManager.setValue('salesBusOffCd', '504');
     FormManager.enable('salesBusOffCd');
-  } else if (stateProv == 'PR' || stateProv == 'ES' || stateProv == 'MG') {
+  } else if (stateProv == 'ES' || stateProv == 'MG') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '556', '515', '161' ]);
+    FormManager.setValue('salesBusOffCd', '556');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'PR' || stateProv == 'SC' || stateProv == 'RS') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '758', '515', '161' ]);
+    FormManager.setValue('salesBusOffCd', '758');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'RJ') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '761', '515', '161' ]);
+    FormManager.setValue('salesBusOffCd', '761');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'SP') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '764', '515', '161' ]);
+    FormManager.setValue('salesBusOffCd', '764');
     FormManager.enable('salesBusOffCd');
   } 
 }

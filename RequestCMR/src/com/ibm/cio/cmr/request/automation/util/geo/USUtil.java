@@ -486,14 +486,18 @@ public class USUtil extends AutomationUtil {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IJ9");
       }
 
-      if (CG_BY_MODEL.equals(data.getCustGrp()) && StringUtils.isNotEmpty(data.getMiscBillCd())) {
-        String miscBillCode = "";
-        miscBillCode = data.getMiscBillCd().toUpperCase();
-        if (miscBillCode.matches(".*[ABMNH]+.*")) {
-          miscBillCode = miscBillCode.replaceAll("[ABMNH]", "");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), miscBillCode.trim());
-        }
-      }
+      // CREATCMR-6342
+      // if (CG_BY_MODEL.equals(data.getCustGrp()) &&
+      // StringUtils.isNotEmpty(data.getMiscBillCd())) {
+      // String miscBillCode = "";
+      // miscBillCode = data.getMiscBillCd().toUpperCase();
+      // if (miscBillCode.matches(".*[ABMNH]+.*")) {
+      // miscBillCode = miscBillCode.replaceAll("[ABMNH]", "");
+      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+      // "DATA", "MISC_BILL_CD", data.getMiscBillCd(), miscBillCode.trim());
+      // }
+      // }
+      // CREATCMR-6342
 
       if ("X".equals(data.getSpecialTaxCd())) {
         details.append("Tax Exempt Status cannot be 'X'. Clearing Tax Exempt Status value.").append("\n");
@@ -834,9 +838,14 @@ public class USUtil extends AutomationUtil {
               // SKIP THESE FIELDS
               break;
             default:
-              // Set Negative check status for any other fields updated.
-              failedChecks.put(field, field + " updated.");
-              hasNegativeCheck = true;
+              boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+              if ("BP Relation Type".equals(field) && payGoAddredited) {
+                // NOOP
+              } else {
+                // Set Negative check status for any other fields updated.
+                failedChecks.put(field, field + " updated.");
+                hasNegativeCheck = true;
+              }
               break;
             }
           }

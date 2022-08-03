@@ -12,6 +12,8 @@ import com.ibm.cio.cmr.request.automation.impl.OverridingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
 
 public class FieldComputationElement extends OverridingElement {
 
@@ -78,6 +80,27 @@ public class FieldComputationElement extends OverridingElement {
     results.setDetails(details.toString());
 
     log.debug(details.toString());
+
+    // CREATCMR-6342
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+
+    if ("897".equals(data.getCmrIssuingCntry())) {
+      if ("C".equals(admin.getReqType()) || "U".equals(admin.getReqType())) {
+        if ("TT2".equals(data.getCsoSite()) && "P".equals(data.getBpAcctTyp())) {
+          try {
+            data.setBpAcctTyp("");
+            data.setBpName("");
+            entityManager.merge(data);
+            entityManager.flush();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+    // CREATCMR-6342
+
     return results;
   }
 

@@ -209,12 +209,6 @@ function disableIBMTab() {
     FormManager.readOnly('covId');
     FormManager.readOnly('geoLocationCd');
     FormManager.readOnly('dunsNo');
-    if (custSubGrp.substring(2, 5) == 'BUS') {
-      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-      FormManager.enable('ppsceid');
-    } else {
-      FormManager.readOnly('ppsceid');
-    }
     FormManager.readOnly('salesBusOffCd');
     FormManager.readOnly('economicCd');
   } else if (reqType == 'C' && role == 'Processor') {
@@ -229,6 +223,22 @@ function disableModeOfPayment() {
   } else if (reqType == 'C') {
     FormManager.readOnly('modeOfPayment');
     FormManager.clearValue('modeOfPayment');
+  }
+}
+
+function setPPSCEIDRequired() {
+  var reqType = FormManager.getActualValue('reqType');
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (subGrp.includes('BP') || subGrp.includes('BUS')) {
+    FormManager.enable('ppsceid');
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.clearValue('ppsceid');
+    FormManager.readOnly('ppsceid');
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }
 }
 
@@ -1970,7 +1980,7 @@ function setCTCValues() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-  var reqType = FormManager.getActualValue('reqType');
+   var reqType = FormManager.getActualValue('reqType');
 
   if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
@@ -1987,7 +1997,8 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') { 
+    if (clientTierCode == '') {
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
@@ -2120,6 +2131,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.BELUX, null, true);
   GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, GEOHandler.BELUX);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.BELUX);

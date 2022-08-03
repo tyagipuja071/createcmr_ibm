@@ -61,7 +61,7 @@ public class SWISSHandler extends GEOHandler {
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("848");
 
   private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "Division", "POBoxCity", "City2", "Affiliate",
-      "Company", "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode" };
+      "Company", "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode", "BPRelationType", "MembLevel" };
 
   public static final String SWISS_MASSCHANGE_TEMPLATE_ID = "SWISS";
 
@@ -183,7 +183,6 @@ public class SWISSHandler extends GEOHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
 
     String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), mainRecord.getCmrOrderBlock());
-    data.setMemLvl(getMembershipLevel(zs01sapNo));
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
@@ -206,6 +205,9 @@ public class SWISSHandler extends GEOHandler {
       if (StringUtils.isNotBlank(mainRecord.getCmrSortl())) {
         data.setSearchTerm(mainRecord.getCmrSortl());
       }
+    }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setPpsceid("");
     }
 
   }
@@ -472,6 +474,38 @@ public class SWISSHandler extends GEOHandler {
     if ("C".equals(admin.getReqType())) {
       data.setCurrencyCd("CHF");
     }
+    if (StringUtils.isBlank(data.getCustPrefLang())) {
+      String sql = ExternalizedQuery.getSql("QUERY.ADDR.GET.POST_CD.BY_REQID");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      query.setParameter("ADDR_TYPE", "ZS01");
+      List<Object[]> results = query.getResults();
+      if (!results.isEmpty() && results.get(0) != null) {
+        int postCd = Integer.parseInt((String) results.get(0)[0]);
+        String landCntry = (String) results.get(0)[1];
+        if ("CH".equalsIgnoreCase(landCntry) || "LI".equalsIgnoreCase(landCntry)) {
+          if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+            data.setCustPrefLang("D");
+          } else if (postCd >= 6500 && postCd <= 6999) {
+            data.setCustPrefLang("I");
+          } else if (postCd >= 0000 && postCd <= 3000) {
+            data.setCustPrefLang("F");
+          }
+        } else {
+          data.setCustPrefLang("E");
+        }
+
+      }
+    }
+
+    AddrPK addrPk = new AddrPK();
+    addrPk.setReqId(data.getId().getReqId());
+    addrPk.setAddrSeq("00001");
+    addrPk.setAddrType("ZS01");
+    Addr addr = entityManager.find(Addr.class, addrPk);
+    if (addr != null && !StringUtils.isEmpty(data.getCustPrefLang())) {
+      addr.setCustLangCd(data.getCustPrefLang());
+    }
 
   }
 
@@ -659,35 +693,6 @@ public class SWISSHandler extends GEOHandler {
       LOG.debug("***RETURNING WAERS > " + currCode + " WHERE KUNNR IS > " + kunnr);
     }
     return currCode;
-  }
-
-  private String getMembershipLevel(String kunnr) throws Exception {
-    String memLevel = "";
-
-    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
-    String mandt = SystemConfiguration.getValue("MANDT");
-    String sql = ExternalizedQuery.getSql("GET.KUNNR_EXT.BP_MBR_LVL_TYPE");
-    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
-    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
-    String dbId = QueryClient.RDC_APP_ID;
-
-    QueryRequest query = new QueryRequest();
-    query.setSql(sql);
-    query.addField("BP_MBR_LVL_TYPE");
-    query.addField("KUNNR");
-
-    LOG.debug("Getting existing BP_MBR_LVL_TYPE value from RDc DB..");
-
-    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
-    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
-
-    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
-      List<Map<String, Object>> records = response.getRecords();
-      Map<String, Object> record = records.get(0);
-      memLevel = record.get("BP_MBR_LVL_TYPE") != null ? record.get("BP_MBR_LVL_TYPE").toString() : "";
-      LOG.debug("***RETURNING BP_MBR_LVL_TYPE > " + memLevel + " WHERE KUNNR IS > " + kunnr);
-    }
-    return memLevel;
   }
 
   /* Story : 1834659 - Import from KUNNR_EXT table */
@@ -1206,7 +1211,6 @@ public class SWISSHandler extends GEOHandler {
     map.put("##BuyingGroupID", "bgId");
     map.put("##RequesterID", "requesterId");
     map.put("##GeoLocationCode", "geoLocationCd");
-    map.put("##MembLevel", "memLvl");
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     return map;

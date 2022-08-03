@@ -91,7 +91,7 @@ function countryScenarioProcessorRules() {
 }
 
 var NORTHERN_IRELAND_POST_CD = [ 'BT' ];
-var UK_LANDED_CNTRY = [ 'AI', 'BM', 'IO', 'VG', 'KY', 'FK', 'GI', 'MS', 'PN', 'SH', 'TC', 'GS', 'GG', 'JE', 'IM', 'AO' ];
+var UK_LANDED_CNTRY = [ 'AI', 'BM', 'IO', 'VG', 'KY', 'FK', 'GI', 'MS', 'PN', 'SH', 'TC', 'GS', 'GG', 'JE', 'IM', 'AO', 'IE' ];
 var _addrTypeITHandler = [];
 var _streetITHandler = null;
 var _custNameITHandler = null;
@@ -2348,7 +2348,7 @@ function setClientTierValuesIT(isuCd) {
       FormManager.enable('clientTier');
     }
   }
-  //setSboValueBasedOnIsuCtcIT();
+  setSboValueBasedOnIsuCtcIT();
 }
 
 function addSalesRepLogicUK2018() {
@@ -4592,7 +4592,7 @@ function afterConfigForIT() {
       autoSetSboOnPostalCode();
       ibmFieldsBehaviourInCreateByScratchIT();
       lockCollectionCode();
-      //setSboValueBasedOnIsuCtcIT();
+      setSboValueBasedOnIsuCtcIT();
     });
   }
 
@@ -4601,7 +4601,7 @@ function afterConfigForIT() {
       autoSetSboOnPostalCode();
       ibmFieldsBehaviourInCreateByScratchIT();
       lockCollectionCode();
-      //setSboValueBasedOnIsuCtcIT();
+      setSboValueBasedOnIsuCtcIT();
     });
   }
 
@@ -4789,10 +4789,8 @@ function afterConfigForIT() {
     FormManager.readOnly('cmrNo');
   }
 }
-//CREATCMR-5089 ITALY - coverage 2H22 updates sbo should not be set based on isu/ctc
-/**
 
- function setSboValueBasedOnIsuCtcIT() {
+function setSboValueBasedOnIsuCtcIT() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -4817,14 +4815,12 @@ function afterConfigForIT() {
   } else if (isuCd == '4A' && clientTier == '') {
     FormManager.setValue('salesBusOffCd', 'XD');
   }
-  if (isuList.slice(1, 6).includes(isuCd)) {
+  if (isuList.slice(2, 6).includes(isuCd) && reqType == 'C') {
     FormManager.resetValidations('clientTier');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   }
-} 
-**/
-
+}
 
 function setSboValueBasedOnIsuCtcUK() {
   var isuCd = FormManager.getActualValue('isuCd');
@@ -9536,7 +9532,6 @@ function autoSetUIFieldsOnScnrioUKI() {
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (custSubGrp == 'INTER') {
     FormManager.setValue('company', '');
     FormManager.readOnly('company');
@@ -9547,6 +9542,12 @@ function autoSetUIFieldsOnScnrioUKI() {
     FormManager.setValue('collectionCd', '69');
     FormManager.readOnly('custClass');
     FormManager.setValue('custClass', '33');
+  }
+  
+  if (issuingCntry == '754') {
+    if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
+      FormManager.setValue('clientTier', '');
+    }
   }
 
   // if (reqType == 'C' && !(custGrp == 'CROSS' || custSubGrp == 'PRICU') &&

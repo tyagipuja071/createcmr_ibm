@@ -944,7 +944,8 @@ public abstract class GEOHandler {
             continue;
           } catch (Exception e) {
             LOG.trace("General error when trying to access field.", e);
-            // no stored value or field not on addr rdc, return null for no
+            // no stored value or field not on addr rdc, return null
+            // for no
             // changes
             continue;
           }
@@ -1089,11 +1090,22 @@ public abstract class GEOHandler {
     return new String[] { namePart1, namePart2, namePart3 };
   }
 
+  public Boolean compareReshuffledAddress(String dnbAddress, String address, String country) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
   public void setReqStatusAfterApprove(EntityManager entityManager, ApprovalResponseModel approval, ApprovalReq req, Admin admin) {
     // TODO Auto-generated method stub
   }
 
   public String getEquivalentAddressType(String addressType, String seqNo) {
     return addressType;
+  }
+
+  public String getBPMANAGER(EntityManager entityManager, long reqId, DefaultApprovalRecipients recipients, AppUser user, RequestEntryModel model)
+      throws CmrException, SQLException {
+    // TODO Auto-generated method stub
+    return recipients.getId().getIntranetId();
   }
 }

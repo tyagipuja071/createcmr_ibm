@@ -45,6 +45,7 @@ function afterConfigForNL() {
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'BO Team' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('isuCd', Validators.REQUIRED);
@@ -326,6 +327,7 @@ var _BOTeamHandler = null;
 var _IMSHandler = null;
 var _vatExemptHandler = null;
 var _ExpediteHandler = null;
+var _SubSceanrioHandler = null;
 
 function addHandlersForNL() {
 
@@ -353,7 +355,7 @@ function addHandlersForNL() {
   if (_BOTeamHandler == null) {
     _BOTeamHandler = dojo.connect(FormManager.getField('engineeringBo'), 'onChange', function(value) {
       // setINACValues(value);
-      setEconomicCodeValues(value);
+      // setEconomicCodeValues(value);
       setSORTL();
     });
   }
@@ -369,7 +371,12 @@ function addHandlersForNL() {
       setExpediteReason();
     });
   }
-
+  
+  if (_SubSceanrioHandler == null) {
+	  _SubSceanrioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+	      setEcoCodeBasedOnSubScenario();
+	    });
+	  }
 }
 
 function setExpediteReason() {
@@ -1670,7 +1677,7 @@ function setClientTierValuesForUpdate() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-  var reqType = FormManager.getActualValue('reqType');
+	var reqType = FormManager.getActualValue('reqType');
 
   if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
@@ -1687,7 +1694,8 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') { 
+    if (clientTierCode == '') {
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
@@ -1757,6 +1765,50 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+
+function setPPSCEIDRequired() {
+  var reqType = FormManager.getActualValue('reqType');
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (subGrp.includes('BP') || subGrp.includes('BUS')) {
+    FormManager.enable('ppsceid');
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.clearValue('ppsceid');
+    FormManager.readOnly('ppsceid');
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+  }
+}
+/*
+ * CREATECMR-6379 NL - Economic Code based on Customer Sub Scenario Values
+ */
+function setEcoCodeBasedOnSubScenario(){
+	var reqType = FormManager.getActualValue('reqType');
+	var custSubScnrio = FormManager.getActualValue('custSubGrp');
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    return;
+	  }
+
+	  if (FormManager.getActualValue('reqType') != 'C') {
+	    return;
+	  }else{
+		  if (custSubScnrio == ''){
+			  FormManager.setValue('economicCd', '');
+		  }else if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
+			  FormManager.setValue('economicCd', 'K49');
+		  }else if (custSubScnrio == 'PRICU') {
+	          FormManager.setValue('economicCd', 'K60');
+	        }
+		  else if (custSubScnrio == 'INTER') {
+	          FormManager.setValue('economicCd', 'K81');
+	        }else{
+	        	FormManager.setValue('economicCd', 'K11');
+	        }
+	  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -1771,6 +1823,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NL);
   // GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
   GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, GEOHandler.NL);
 
   GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.NL);
@@ -1780,7 +1833,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setBOTeamValues, GEOHandler.NL);
   // GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.NL);
-  GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.NL);
+  // GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setFieldsMandtOnSc, GEOHandler.NL);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.NL);

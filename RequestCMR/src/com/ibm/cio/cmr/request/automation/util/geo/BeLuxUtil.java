@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
@@ -306,7 +307,7 @@ public class BeLuxUtil extends AutomationUtil {
       query.setParameter("ISSUING_CNTRY", cmrCntry);
       searchTerms = query.getResults();
     }
-    if (searchTerms != null && searchTerms.size() == 1) {
+    if (searchTerms != null) {
       String searchTerm = (String) searchTerms.get(0)[0];
       container.setSearchterm(searchTerm);
     }
@@ -528,6 +529,10 @@ public class BeLuxUtil extends AutomationUtil {
     StringBuilder duplicateDetails = new StringBuilder();
     StringBuilder nonRelAddrFdsDetails = new StringBuilder();
     List<Addr> addresses = null;
+    LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
+        && !changes.isAddressChanged("ZI01");
     int ignoredAddr = 0;
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
@@ -535,6 +540,14 @@ public class BeLuxUtil extends AutomationUtil {
       addresses = requestData.getAddresses(addrType);
       if (changes.isAddressChanged(addrType)) {
         for (Addr addr : addresses) {
+          List<String> addrTypesChanged = new ArrayList<String>();
+          for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
+            if (!addrTypesChanged.contains(addrModel.getAddrTypeCode())) {
+              addrTypesChanged.add(addrModel.getAddrTypeCode());
+            }
+          }
+          boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(addrType) && "PG".equals(data.getOrdBlk()));
+
           if (isRelevantAddressFieldUpdated(changes, addr, nonRelAddrFdsDetails)) {
 
             if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SOLD_TO) && "Y".equals(addr.getImportInd()))
@@ -546,7 +559,11 @@ public class BeLuxUtil extends AutomationUtil {
                 // check against D&B
                 matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
               }
-              if (!matchesDnb) {
+              if ("U".equals(admin.getReqType()) && payGoAddredited) {
+                LOG.debug("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
+                checkDetails.append("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
+                admin.setPaygoProcessIndc("Y");
+              } else if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                 resultCodes.add("X");
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
@@ -559,7 +576,6 @@ public class BeLuxUtil extends AutomationUtil {
                       + dnb.getDnbCountry() + "\n\n");
                 }
               }
-
             }
 
             String soldToCustNm1 = requestData.getAddress("ZS01").getCustNm1();
@@ -577,29 +593,44 @@ public class BeLuxUtil extends AutomationUtil {
                 LOG.debug("Addition/Updation of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Address (" + addr.getId().getAddrSeq() + ") is validated.\n");
               }
-            }
+            } else if ((payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) || isZS01WithAufsdPG) {
+              if ("N".equals(addr.getImportInd())) {
+                LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                boolean duplicate = addressExists(entityManager, addr, requestData);
+                if (duplicate) {
+                  LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing Bill-To address.\n");
+                  resultCodes.add("D");
+                } else {
+                  LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  checkDetails.append(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")" + "with same attentionTo");
+                  checkDetails.append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ")  validated in the checks.\n");
+                }
+              } else {
+                checkDetails.append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ")  validated in the checks.\n");
+              }
+              if (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) && "Y".equals(addr.getImportInd())) {
+                ignoredAddr++;
+              }
 
-            if (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) && "Y".equals(addr.getImportInd())) {
-              ignoredAddr++;
             }
           }
         }
       }
+      if (resultCodes.contains("X")) {
+        validation.setSuccess(false);
+        validation.setMessage("Review Required.");
+        engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
+      } else if (resultCodes.contains("R")) {
+        output.setOnError(true);
+        engineData.addRejectionComment("_atRejectAddr", "Addition or updation on the address is rejected", "", "");
+        validation.setSuccess(false);
+        validation.setMessage("Rejected.");
+      } else {
+        validation.setSuccess(true);
+        validation.setMessage("Successful");
+      }
     }
-    if (resultCodes.contains("X")) {
-      validation.setSuccess(false);
-      validation.setMessage("Review Required.");
-      engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
-    } else if (resultCodes.contains("R")) {
-      output.setOnError(true);
-      engineData.addRejectionComment("_atRejectAddr", "Addition or updation on the address is rejected", "", "");
-      validation.setSuccess(false);
-      validation.setMessage("Rejected.");
-    } else {
-      validation.setSuccess(true);
-      validation.setMessage("Successful");
-    }
-
     if (ignoredAddr > 0) {
       checkDetails.append("Updates to imported Address Ship-To(ZD01) ignored. ");
     }
@@ -635,7 +666,7 @@ public class BeLuxUtil extends AutomationUtil {
    * @return
    */
   private String getSORTLfromCoverage(EntityManager entityManager, String coverage, String gbgCntry) {
-    String sortl = "";
+    List<String> sortlList = null;
     try {
       LOG.debug("Computing SORTL for Coverage " + coverage);
       String gbgCntryCd = gbgCntry.equalsIgnoreCase("Belgium") ? "BE" : "LU";
@@ -647,12 +678,16 @@ public class BeLuxUtil extends AutomationUtil {
       query.setParameter("LAND1", gbgCntryCd);
       query.setParameter("KONZS", konzs);
       query.setForReadOnly(true);
-      sortl = query.getSingleResult(String.class);
+      sortlList = query.getResults(20, String.class);
     } catch (Exception e) {
       LOG.debug("Error while computing SORTL for Coverage " + coverage + " from RDc query.");
     }
-    if (sortl != null && !StringUtils.isBlank(sortl)) {
-      return sortl;
+    if (sortlList != null) {
+      for (String sortl : sortlList) {
+        if (StringUtils.isNotBlank(sortl) && sortl.length() == 6) {
+          return sortl;
+        }
+      }
     }
     return null;
   }

@@ -1928,6 +1928,9 @@ public class EMEAHandler extends BaseSOFHandler {
 
       data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
     }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setPpsceid("");
+    }
   }
 
   @Override
@@ -2011,6 +2014,12 @@ public class EMEAHandler extends BaseSOFHandler {
         if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
             && "ZS01".equalsIgnoreCase(address.getId().getAddrType()) && SystemLocation.TURKEY.equals(country)) {
           address.getId().setAddrSeq("00003");
+        }
+         if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
+            && "ZS01".equalsIgnoreCase(address.getId().getAddrType()) && (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country))) {
+          String addrSeq = "1";
+          addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+          address.getId().setAddrSeq(addrSeq);
         }
         if ("D".equals(address.getImportInd())) {
           String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');

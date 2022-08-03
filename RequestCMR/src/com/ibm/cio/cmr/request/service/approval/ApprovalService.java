@@ -1269,11 +1269,15 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       for (CompoundEntity entity : results) {
         defaultApprovals = entity.getEntity(DefaultApprovals.class);
         recipients = entity.getEntity(DefaultApprovalRecipients.class);
+        String IntranetId = recipients.getId().getIntranetId();
+        if (IntranetId.equalsIgnoreCase(BP_MANAGER_ID)) {
+          IntranetId = geoHandler.getBPMANAGER(entityManager, reqId, recipients, user, model);
+        }
         PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GET_APPROVAL_REQ"));
         query.setParameter("REQ_ID", reqId);
         query.setParameter("GEO_CD", defaultApprovals.getGeoCd());
         query.setParameter("TYP_ID", defaultApprovals.getTypId());
-        query.setParameter("INTRANET_ID", recipients.getId().getIntranetId());
+        query.setParameter("INTRANET_ID", IntranetId);
         List<ApprovalReq> approvalRecords = query.getResults(ApprovalReq.class);
 
         if (approvalRecords.size() > 0) {

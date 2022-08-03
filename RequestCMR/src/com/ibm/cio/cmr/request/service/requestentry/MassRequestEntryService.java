@@ -1018,7 +1018,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         pk.setParReqId(reqId);
 
         massUpdt.setId(pk);
-        massUpdt.setRowStatusCd("");
+        massUpdt.setRowStatusCd("PASS");
         massUpdt.setCmrNo("");
         createEntity(massUpdt, entityManager);
 
@@ -3221,6 +3221,18 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           model.setCustClass(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CUST_CLASS") - 1)));
           // CREATCMR-4879
           model.setEducAllowCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("EDUC_ALLOW_CD") - 1)));
+          // CREATCMR-6397
+          model.setCompany(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COMPANY") - 1)));
+          // CREATCMR-6130
+          model.setBpAcctTyp(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("BP_ACCT_TYP") - 1)));
+          String txtBpNm = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("BP_NAME") - 1));
+          if (!StringUtils.isEmpty(txtBpNm)) {
+            if (!"@".equals(txtBpNm.trim())) {
+              String[] txtSplit = txtBpNm.split(" - ");
+              txtBpNm = txtSplit[0].trim();
+            }
+          }
+          model.setBpName(txtBpNm);
 
           // if (!"Y".equals(massUpdtRdcOnly)) {
           List<MassUpdateAddressModel> addrList = new ArrayList<>();

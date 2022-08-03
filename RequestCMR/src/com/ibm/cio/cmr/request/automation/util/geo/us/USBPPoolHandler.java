@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
+import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -115,6 +116,7 @@ public class USBPPoolHandler extends USBPHandler {
       StringBuilder details, OverrideOutput overrides, RequestData childRequest, FindCMRRecordModel ibmCmr) {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
+    Admin admin = requestData.getAdmin();
 
     details.append("\nComputing field values for IBM BP " + getCmrType() + "CMR:\n");
 
@@ -136,8 +138,12 @@ public class USBPPoolHandler extends USBPHandler {
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     details.append(" - Restricted to: BPQS\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "BPQS");
-    details.append(" - Misc Bill Code: I\n");
-    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
+    // CREATCMR-6342
+    if (!USUtil.CG_BY_MODEL.equals(data.getCustGrp())) {
+      details.append(" - Misc Bill Code: I\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
+    }
+    // CREATCMR-6342
     details.append(" - Tax Code: J000\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "TAX_CD1", data.getTaxCd1(), "J000");
     details.append(" - Marketing Dept: EI3\n");
@@ -182,47 +188,47 @@ public class USBPPoolHandler extends USBPHandler {
       postCd = zs01.getPostCd();
       landCntry = zs01.getLandCntry();
     }
+    if (!"Y".equals(admin.getProspLegalInd())) {
+      if (zi01 == null) {
+        LOG.debug("Adding the main address..");
+        AddressService addrService = new AddressService();
+        AddressModel addrModel = new AddressModel();
+        addrModel.setReqId(data.getId().getReqId());
+        addrModel.setDivn(divn);
+        addrModel.setLandCntry(landCntry);
+        addrModel.setAddrTxt(address);
+        addrModel.setAddrTxt2(address2);
+        addrModel.setCity1(city);
+        addrModel.setStateProv(state);
+        addrModel.setPostCd(postCd);
+        addrModel.setState(BaseModel.STATE_NEW);
+        addrModel.setAction("ADD_ADDRESS");
 
-    if (zi01 == null) {
-
-      LOG.debug("Adding the main address..");
-      AddressService addrService = new AddressService();
-      AddressModel addrModel = new AddressModel();
-      addrModel.setReqId(data.getId().getReqId());
-      addrModel.setDivn(divn);
-      addrModel.setLandCntry(landCntry);
-      addrModel.setAddrTxt(address);
-      addrModel.setAddrTxt2(address2);
-      addrModel.setCity1(city);
-      addrModel.setStateProv(state);
-      addrModel.setPostCd(postCd);
-      addrModel.setState(BaseModel.STATE_NEW);
-      addrModel.setAction("ADD_ADDRESS");
-
-      addrModel.setAddrType(CmrConstants.ADDR_TYPE.ZI01.toString());
-      addrModel.setCmrIssuingCntry(data.getCmrIssuingCntry());
-      try {
-        AppUser user = new AppUser();
-        user.setIntranetId(requestData.getAdmin().getRequesterId());
-        user.setBluePagesName(requestData.getAdmin().getRequesterNm());
-        DummyServletRequest dummyReq = new DummyServletRequest();
-        if (dummyReq.getSession() != null) {
-          LOG.trace("Session found for dummy req");
-          dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
-        } else {
-          LOG.warn("Session not found for dummy req");
+        addrModel.setAddrType(CmrConstants.ADDR_TYPE.ZI01.toString());
+        addrModel.setCmrIssuingCntry(data.getCmrIssuingCntry());
+        try {
+          AppUser user = new AppUser();
+          user.setIntranetId(requestData.getAdmin().getRequesterId());
+          user.setBluePagesName(requestData.getAdmin().getRequesterNm());
+          DummyServletRequest dummyReq = new DummyServletRequest();
+          if (dummyReq.getSession() != null) {
+            LOG.trace("Session found for dummy req");
+            dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+          } else {
+            LOG.warn("Session not found for dummy req");
+          }
+          addrService.performTransaction(addrModel, entityManager, dummyReq);
+        } catch (Exception e) {
+          LOG.error("An error occurred while adding ZI01 address", e);
         }
-        addrService.performTransaction(addrModel, entityManager, dummyReq);
-      } catch (Exception e) {
-        LOG.error("An error occurred while adding ZI01 address", e);
+        entityManager.flush();
+      } else {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DIVN", zi01.getDivn(), divn);
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", zi01.getAddrTxt(), address);
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", zi01.getCity1(), city);
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", zi01.getStateProv(), state);
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", zi01.getPostCd(), postCd);
       }
-      entityManager.flush();
-    } else {
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DIVN", zi01.getDivn(), divn);
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", zi01.getAddrTxt(), address);
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", zi01.getCity1(), city);
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", zi01.getStateProv(), state);
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", zi01.getPostCd(), postCd);
     }
 
     if (!hasFieldErrors) {

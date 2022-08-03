@@ -1671,6 +1671,9 @@ public class CyprusHandler extends BaseSOFHandler {
         data.setRepTeamMemberNo(repTeamMmberNo);
       }
     }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setPpsceid("");
+    }
   }
 
   @Override

@@ -36,9 +36,9 @@ public class DupAbbrevCheckElement extends OverridingElement{
 		    String sqlKey = ExternalizedQuery.getSql("AUTO.EMEA.DUP_ABBREV_CHECK");
 		    PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
 		    query.setParameter("CNTRY", data.getCmrIssuingCntry());
-		    query.setParameter("ABBREV_NM", data.getAbbrevNm());
-		    query.setParameter("ABBREV_LOCN", data.getAbbrevLocn());
-		    query.setForReadOnly(true);
+		    query.setParameter("ABBREV_NM", data.getAbbrevNm() != null ? data.getAbbrevNm().toUpperCase() : data.getAbbrevNm());
+        query.setParameter("ABBREV_LOCN", data.getAbbrevLocn() != null ? data.getAbbrevLocn().toUpperCase() : data.getAbbrevLocn());
+        query.setForReadOnly(true);
 		      if (query.exists()) {
 		        //condition 
 		    	  String abbrNm = data.getAbbrevNm();

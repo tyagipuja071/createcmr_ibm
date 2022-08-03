@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang3.StringUtils;
@@ -552,6 +553,8 @@ public class SOFMessageHandler extends MQMessageHandler {
     StringReader read = new StringReader(resXML);
     InputSource source = new InputSource(read);
     SAXBuilder builder = new SAXBuilder();
+    builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+    builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
     Document doc = builder.build(source);
 
     List<String> xmlFirstPartElementList = new ArrayList<String>();
@@ -1051,6 +1054,8 @@ public class SOFMessageHandler extends MQMessageHandler {
     StringReader read = new StringReader(xmlData);
     InputSource source = new InputSource(read);
     SAXBuilder builder = new SAXBuilder();
+    builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+    builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
     Document doc = builder.build(source);
     Element root = doc.getRootElement();
     @SuppressWarnings("rawtypes")

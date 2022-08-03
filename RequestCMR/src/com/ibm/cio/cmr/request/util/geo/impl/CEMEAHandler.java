@@ -149,7 +149,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 
   private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX",
-      "TransportZone", "Office", "Floor", "Building", "County", "City2", "Department" };
+      "TransportZone", "Office", "Floor", "Building", "County", "City2", "Department", "BPRelationType", "MembLevel" };
 
   public static final List<String> CEMEA_POSTAL_FORMAT = Arrays.asList("603", "607", "644", "651", "740", "705", "708", "626", "694", "695", "826",
       "821", "363", "359", "741", "699", "704", "707", "707", "889", "668", "693", "787", "820", "358");
@@ -1106,6 +1106,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     data.setInacType("");
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setCmrNo("");
+      data.setPpsceid("");
     }
 
     // Ticked - load CIS duplicate fields
@@ -1393,16 +1394,6 @@ public class CEMEAHandler extends BaseSOFHandler {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
     List<Addr> addresses = query.getResults(Addr.class);
-
-    for (Addr addr : addresses) {
-      try {
-        addr.setIerpSitePrtyId(data.getSitePartyId());
-        entityManager.merge(addr);
-        entityManager.flush();
-      } catch (Exception e) {
-        LOG.error("Error occured on setting SPID after import.");
-      }
-    }
 
     for (Addr addr : addresses) {
       if ("ZS01".equals(addr.getId().getAddrType())) {

@@ -3098,6 +3098,22 @@ function setValuesWRTIsuCtcEs(ctc) {
   }
 }
 
+function setPPSCEIDRequired() {
+  var reqType = FormManager.getActualValue('reqType');
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (subGrp == 'XBP' || subGrp == 'BUSPR') {
+    FormManager.enable('ppsceid');
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.clearValue('ppsceid');
+    FormManager.readOnly('ppsceid');
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -3129,6 +3145,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(forceLockScenariosSpain, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(forceLockScenariosSpain, [ SysLoc.SPAIN ]);
 
+  GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLocOnChange, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);

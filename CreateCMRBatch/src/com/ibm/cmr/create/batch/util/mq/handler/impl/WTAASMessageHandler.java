@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -358,6 +359,8 @@ public class WTAASMessageHandler extends MQMessageHandler {
 
       if (reply != null) {
         SAXBuilder builder = new SAXBuilder();
+        builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         Document document = builder.build(source2);
 
         // save the XML
