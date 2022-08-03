@@ -884,6 +884,9 @@ function setClientTierForCreates(isuCd) {
     FormManager.readOnly('clientTier');
   } else if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'XBP' || custSubGrp == 'XINTR') {
     FormManager.readOnly('clientTier');
+  } else if (custSubGrp == 'IBMEM') {
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
   } else {
     FormManager.enable('clientTier');
   }

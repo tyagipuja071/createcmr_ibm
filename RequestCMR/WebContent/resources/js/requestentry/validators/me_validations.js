@@ -1256,11 +1256,15 @@ function setClientTierValues(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  isuCd = FormManager.getActualValue('isuCd');
+  var scenario = FormManager.getActualValue('custSubGrp');
+  var isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
     FormManager.enable('clientTier');
+  }
+  if (scenario.includes('IBM')) {
+    FormManager.readOnly('clientTier');
   }
 }
 
@@ -1761,7 +1765,7 @@ function setSBO(repTeamMemberNo) {
       FormManager.getField('templatevalue-repTeamMemberNo').style.display = 'none';
     }
     // FormManager.setValue('salesBusOffCd', '0000000');
-    // FormManager.setValue('repTeamMemberNo', '099998');
+//    FormManager.setValue('repTeamMemberNo', '099998');
     return;
   }
 
@@ -3860,6 +3864,8 @@ function setClassificationCodeME() {
       FormManager.setValue('custClass', '81');
     } else if (_custType == 'PRICU' || _custType.includes('PC')) {
       FormManager.setValue('custClass', '60');
+    } else if (_custType.includes('IBM')) {
+      FormManager.setValue('custClass', '71');
     } else if (isicCds.has(isicCd)) {
       FormManager.setValue('custClass', '13');
     } else {
@@ -4176,7 +4182,6 @@ function hideDisableAutoProcessingCheckBox() {
 function afterConfigTemplateLoadForME() {
   filterCmrnoForME();
   togglePPSCeidME();
-  setClassificationCodeME();
   // disableSBO();
   setEngineeringBO();
   addLandCntryHandler();
@@ -4357,7 +4362,7 @@ function setIsuCtcOnScenarioChange() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (scenario.includes('IN')) {
+  } else if (scenario.includes('IN') || scenario.includes('IBM')) {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
@@ -4397,7 +4402,7 @@ function setIsuCtcOnScenarioChange() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (scenario.includes('IN')) {
+  } else if (scenario.includes('IN') || scenario.includes('IBM')) {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
@@ -4803,6 +4808,7 @@ dojo
       GEOHandler.addAfterConfig(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
       GEOHandler.addAfterTemplateLoad(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
       GEOHandler.addAfterTemplateLoad(setIsuCtcOnScenarioChange, GEOHandler.ME);
+      GEOHandler.addAfterTemplateLoad(setClassificationCodeME, GEOHandler.ME);
       GEOHandler.registerValidator(addVATAttachValidation, [ SysLoc.EGYPT ], null, true);
       // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
       // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
