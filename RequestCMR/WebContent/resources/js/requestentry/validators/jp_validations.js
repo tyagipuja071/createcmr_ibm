@@ -97,6 +97,8 @@ function afterConfigForJP() {
     setCSBOOnScenarioChange();
     setSalesBusOffCdRequired();
     setSalesTeamCdEditoble();
+    // CREATCMR-6694
+    setAdminDeptOptional();
     addScenarioDriven()
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
@@ -690,6 +692,19 @@ function setAccntAbbNmOnScrnarioChange() {
     setAccountAbbNm();
   }
 }
+
+// CREATCMR-6694
+function setAdminDeptOptional() {
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('reqType') == 'C') {
+    if (custGrp == 'IBMTP' && custSubGrp == 'INTER') {
+      FormManager.removeValidator('adminDeptCd', Validators.REQUIRED);
+      FormManager.removeValidator('adminDeptLine', Validators.REQUIRED);
+    }
+  }
+}
+
 function setAccountAbbNm() {
   if (FormManager.getActualValue('reqType') == 'C') {
     setAccountAbbNmForCreate();
@@ -5392,6 +5407,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setOutsourcingServiceRequired, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSalesBusOffCdRequired, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(addScenarioDriven, GEOHandler.JP);
+
+  // CREATCMR-6694
+  GEOHandler.addAfterConfig(setAdminDeptOptional, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(setAdminDeptOptional, GEOHandler.JP);
 
   // 1686132: Special requirement for Subscenario = BQ - IBM Japan Credit LLC
   // under the scenario of Subsidiary
