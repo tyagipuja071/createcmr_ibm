@@ -159,6 +159,10 @@ public class IERPRequestUtils extends RequestUtils {
   }
 
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history, String siteIds, String emailCmt) {
+    if (!"PRJ".equals(admin.getReqStatus()) && !"COM".equals(admin.getReqStatus())) {
+      // CREATCMR-2625,6677
+      return;
+    }
     String cmrno = "";
     String siteId = siteIds == null ? "" : siteIds;
     String rejectReason = history.getRejReason();
