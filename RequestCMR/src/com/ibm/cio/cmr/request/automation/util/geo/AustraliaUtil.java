@@ -228,8 +228,7 @@ public class AustraliaUtil extends AutomationUtil {
           }
         }
         if (!(custNmMatch && formerCustNmMatch)) {
-          LOG.debug(
-              "CustNm and formerCustNm match failed with API now matching with Dnb service for match.Now Checking with DNB to vrify CustNm update");
+          LOG.debug("CustNm and formerCustNm match failed with API.Now Checking with DNB to vrify CustNm update");
           MatchingResponse<DnBMatchingResponse> Dnbresponse = DnBUtil.getMatches(requestData, null, "ZS01");
           List<DnBMatchingResponse> matches = Dnbresponse.getMatches();
           if (!matches.isEmpty()) {
