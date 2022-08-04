@@ -127,7 +127,7 @@ function afterConfigForBELUX() {
     FormManager.setValue('taxCd1', '15');
   }
 
-  setVatValidatorBELUX();
+//  setVatValidatorBELUX();
   addHandlerForReqRsn();
   disableModeOfPayment();
   setAccTemNumValueOnScenarios();
@@ -768,17 +768,20 @@ function setVatValidatorBELUX() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     if (custSubGrp == 'BEPRI' || custSubGrp == 'LUPRI') {
-      // FormManager.removeValidator('vat', Validators.REQUIRED);
+//      FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.readOnly('vat');
-      return;
     } else if (custSubGrp == 'BEPUB' || custSubGrp == 'LUPUB') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       return;
+    }
+    if (custSubGrp.includes('IBM')) {
+      FormManager.readOnly('vat');
     }
     FormManager.resetValidations('vat');
     // if (!dijit.byId('vatExempt').get('checked')) {
     if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
     }
   }
 }
@@ -1702,7 +1705,7 @@ function setSORTL() {
 }
 
 function setSBOValuesForIsuCtc() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('custSubGrp').includes('IBM')) {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
@@ -1945,7 +1948,7 @@ function addREALCTYValidator() {
 
 function setClientTierValuesForUpdate() {
   var reqType = FormManager.getActualValue('reqType');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C' || FormManager.getActualValue('custSubGrp').includes('IBM')) {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
@@ -1954,6 +1957,9 @@ function setClientTierValuesForUpdate() {
     FormManager.readOnly('clientTier');
   } else {
     FormManager.enable('clientTier');
+  }
+  if (FormManager.getActualValue('custSubGrp').includes('IBM')) {
+    FormManager.readOnly('clientTier');
   }
 }
 
