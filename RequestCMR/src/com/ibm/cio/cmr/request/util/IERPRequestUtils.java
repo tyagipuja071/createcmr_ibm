@@ -232,7 +232,13 @@ public class IERPRequestUtils extends RequestUtils {
     } else if ("N".equals(reqType)) {
       type = "Mass Create";
     } else if ("E".equals(reqType)) {
-      type = "Update by Enterprise";
+      // CREATCMR-6639
+      if (data != null && US_CMRISSUINGCOUNTRY.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+        type = "Update Enterprise Name";
+      } else {
+        type = "Update by Enterprise";
+      }
+      // type = "Update by Enterprise";
     } else {
       type = "-";
     }

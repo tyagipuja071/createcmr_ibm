@@ -460,7 +460,7 @@ public class RequestUtils {
       if (cmrIssuingCountry != null && US_CMRISSUINGCOUNTRY.equalsIgnoreCase(cmrIssuingCountry)) {
         type = "Update Enterprise Name";
       } else {
-        type = "Update Enterprise Name";
+        type = "Update by Enterprise";
       }
       LOG.debug("ReqType is " + type.toString() + " , and status is " + status.toString());
     } else {
