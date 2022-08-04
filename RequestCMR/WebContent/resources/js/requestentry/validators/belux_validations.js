@@ -125,7 +125,7 @@ function afterConfigForBELUX() {
     FormManager.setValue('taxCd1', '15');
   }
 
-  setVatValidatorBELUX();
+//  setVatValidatorBELUX();
   addHandlerForReqRsn();
   disableModeOfPayment();
   setAccTemNumValueOnScenarios();
@@ -774,13 +774,14 @@ function setVatValidatorBELUX() {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       return;
     }
+    if (custSubGrp.includes('IBM')) {
+      FormManager.readOnly('vat');
+    }
     FormManager.resetValidations('vat');
     // if (!dijit.byId('vatExempt').get('checked')) {
-    // CREATCMR-6244 LandedCntry UK
-    if (landCntry != 'GB') {
-      if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
-        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-      }
+    if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
     }
   }
 }
@@ -1701,7 +1702,7 @@ function setSORTL() {
 }
 
 function setSBOValuesForIsuCtc() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('custSubGrp').includes('IBM')) {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
@@ -1944,7 +1945,7 @@ function addREALCTYValidator() {
 
 function setClientTierValuesForUpdate() {
   var reqType = FormManager.getActualValue('reqType');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C' || FormManager.getActualValue('custSubGrp').includes('IBM')) {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
@@ -1953,6 +1954,9 @@ function setClientTierValuesForUpdate() {
     FormManager.readOnly('clientTier');
   } else {
     FormManager.enable('clientTier');
+  }
+  if (FormManager.getActualValue('custSubGrp').includes('IBM')) {
+    FormManager.readOnly('clientTier');
   }
 }
 

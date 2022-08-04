@@ -212,10 +212,16 @@ function setVatValidatorNL() {
       FormManager.readOnly('vat');
       return;
     }
+    if (custSubGrp == 'IBMEM' && dojo.byId('vatExempt').checked) {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
+    }
     FormManager.resetValidations('vat');
     if (landCntry != 'GB') {
       if (!dojo.byId('vatExempt').checked) {
         checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+        FormManager.enable('vat');
       }
     }
   }
@@ -1619,7 +1625,8 @@ function addIGFZP02Validator() {
 }
 
 function setSORTLBasedOnIsuCtc() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U'
+    || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
@@ -1654,7 +1661,7 @@ function setSORTLBasedOnIsuCtc() {
 
 function setClientTierValuesForUpdate() {
   var reqType = FormManager.getActualValue('reqType');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C'|| FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     return;
   }
   var isuList = [ '15', '4A', '04', '28' ];
@@ -1782,21 +1789,21 @@ function setEcoCodeBasedOnSubScenario() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
+  }
+  if (custSubScnrio == '') {
+    FormManager.setValue('economicCd', '');
+  } else if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
+    FormManager.setValue('economicCd', 'K49');
+  } else if (custSubScnrio == 'PRICU') {
+    FormManager.setValue('economicCd', 'K60');
+  } else if (custSubScnrio == 'INTER') {
+    FormManager.setValue('economicCd', 'K81');
+  } else if (custSubScnrio == 'IBMEM') {
+    FormManager.setValue('economicCd', 'K71');
   } else {
-    if (custSubScnrio == '') {
-      FormManager.setValue('economicCd', '');
-    } else if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
-      FormManager.setValue('economicCd', 'K49');
-    } else if (custSubScnrio == 'PRICU') {
-      FormManager.setValue('economicCd', 'K60');
-    } else if (custSubScnrio == 'INTER') {
-      FormManager.setValue('economicCd', 'K81');
-    } else {
-      FormManager.setValue('economicCd', 'K11');
-    }
+    FormManager.setValue('economicCd', 'K11');
   }
 }
 

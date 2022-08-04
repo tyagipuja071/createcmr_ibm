@@ -808,6 +808,9 @@ function setEnterpriseValues34Q() {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    return;
+  }
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
@@ -880,6 +883,9 @@ function setEnterpriseValues(scenarioChanged) {
     return;
   }
   if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  if (FormManager.getActualValue('custSubGrp' == 'IBMEM')) {
     return;
   }
 
@@ -1070,6 +1076,9 @@ function setSBOAndEBO() {
 
       // CREATCMR-4293
       // isuCtc == '217'
+      if (FormManager.getActualValue('custSubGrp') == 'IBMEM' || FormManager.getActualValue('custSubGrp') == '') {
+        return;
+      }
       if (isuCtc == '32B' || isuCtc == '32T' || isuCtc == '21') {
         if (ent == undefined) {
           FormManager.setValue('enterprise', '');
@@ -1745,6 +1754,8 @@ function forceLockScenariosSpain() {
   } else if (custSubGroup == 'XINTR') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
+  } else if (custSubGroup == 'IBMEM') {
+    fieldsToDisable.push('isicCd');
   }
 
   // common to all scenarios
