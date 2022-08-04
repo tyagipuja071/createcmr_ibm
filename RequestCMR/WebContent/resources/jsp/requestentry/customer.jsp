@@ -414,7 +414,7 @@
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,FR" exceptForCountry="755">
+     <!--  <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,FR" exceptForCountry="755">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
@@ -425,9 +425,9 @@
             </cmr:label>
           </p>
         </cmr:column>
-      </cmr:view>
+      </cmr:view> -->
     </cmr:view>
-    <cmr:view forGEO="MCO1,MCO2">
+    <!--<cmr:view forGEO="MCO1,MCO2">
       <c:if test="${reqentry.reqType != 'U'}">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
@@ -439,8 +439,8 @@
           </p>
         </cmr:column>
       </c:if>
-    </cmr:view>
-    <cmr:view forCountry="724,619,755">
+    </cmr:view>-->
+    <!--<cmr:view forCountry="724,619,755">
       <c:if test="${reqentry.reqType != 'U'}">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
@@ -453,8 +453,8 @@
           </p>
         </cmr:column>
       </c:if>
-    </cmr:view>
-        <cmr:view forCountry="744">
+    </cmr:view>-->
+      <!-- <cmr:view forCountry="744">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
@@ -465,7 +465,7 @@
             </cmr:label>
           </p>
         </cmr:column>
-    </cmr:view>
+    </cmr:view> -->  
   </cmr:row>
 
   <!-- Include Here Customer Specific fields for GEOs -->
