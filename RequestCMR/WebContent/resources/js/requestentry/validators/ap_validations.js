@@ -4025,6 +4025,72 @@ function addVatValidationforSingapore() {
 }
 // CREATCMR-5258
 
+function executeBeforeSubmit() {
+  var reqType = FormManager.getActualValue('reqType');
+  var action = FormManager.getActualValue('yourAction');
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == SysLoc.SINGAPORE || cntry == SysLoc.INDIA) {
+    if (reqType == 'U') {
+      var errMsg = checkAnyChangesOnCustNameAddrGST();
+      if (errMsg != '' && action == 'SFP') {
+        cmr.showConfirm('showVerificationModal()', errMsg, 'Warning', null, {
+          OK : 'Yes',
+          CANCEL : 'No'
+        });
+      } else {
+        showVerificationModal();
+      }
+    } else {
+      showVerificationModal();
+    }
+  }
+}
+
+function showVerificationModal() {
+  cmr.showModal('addressVerificationModal');
+}
+
+function checkAnyChangesOnCustNameAddrGST() {
+  var errorMsg = '';
+  var isUpdated = false;
+  
+  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+    var record = null;
+    var updateInd = null;
+    
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      updateInd = record.updateInd;
+      if (typeof (updateInd) == 'object') {
+        updateInd = updateInd[0];
+        if(updateInd == 'U' || updateInd == 'N') {
+          isUpdated = true;
+          break;
+        }
+      }
+    }
+  }
+  if (!isUpdated) {
+    var currentGst = FormManager.getActualValue('vat'); 
+    var qParams = {
+        REQ_ID : FormManager.getActualValue('reqId'),
+    };
+    
+    var result = cmr.query('GET.OLD_VAT_BY_REQID', qParams);
+    var oldGst = result.ret1;
+    oldGst = oldGst == undefined ? '' : oldGst;
+    
+    if (result != null && oldGst != null && oldGst != currentGst) {
+      isUpdated = true;
+    }
+  }
+  if (!isUpdated) {
+    errorMsg = 'You haven\'t updated anything on customer name/address or GST#, please check and take relevant edit operation before submit this Update request. Proceed?';
+  }
+  return errorMsg;
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
