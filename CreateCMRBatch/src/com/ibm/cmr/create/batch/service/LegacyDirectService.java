@@ -1067,6 +1067,7 @@ public class LegacyDirectService extends TransConnService {
 
     WfHist hist = createHistory(entityManager, message, "PCO", "Legacy Processing", admin.getId().getReqId());
     createComment(entityManager, message, admin.getId().getReqId());
+
     RequestUtils.sendEmailNotifications(entityManager, admin, hist, false, true);
     // CREATCMR-2625,6677
     // String mailFlag = transformer.getMailSendingFlag(cmrObjects.getData(),
