@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -38,6 +40,7 @@ import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.ap.anz.BNValidationRequest;
 import com.ibm.cmr.services.client.automation.ap.anz.BNValidationResponse;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 public class AustraliaUtil extends AutomationUtil {
@@ -142,13 +145,167 @@ public class AustraliaUtil extends AutomationUtil {
     return results;
   }
 
+  private AutomationResponse<BNValidationResponse> getVatLayerInfo(Admin admin, Data data) throws Exception {
+    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        AutomationServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    client.setRequestMethod(Method.Get);
+
+    BNValidationRequest request = new BNValidationRequest();
+    request.setBusinessNumber(data.getVat());
+    System.out.println(request + request.getBusinessNumber());
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.AU_ABN_VALIDATION_SERVICE_ID, request,
+        AutomationResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<AutomationResponse<BNValidationResponse>> ref = new TypeReference<AutomationResponse<BNValidationResponse>>() {
+    };
+    return mapper.readValue(json, ref);
+
+  }
+
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
-    validation.setSuccess(true);
-    validation.setMessage("Successful");
-    output.setProcessOutput(validation);
-    output.setDetails("Updates to the dataFields fields skipped validation");
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    StringBuilder details = new StringBuilder();
+    boolean CustNmChanged = changes.isLegalNameChanged();
+    ChangeLogListener.setManager(entityManager);
+
+    if (CustNmChanged) {
+      AutomationResponse<BNValidationResponse> response = null;
+      Addr zs01 = requestData.getAddress("ZS01");
+      String regex = "\\s+$";
+      String customerName = zs01.getCustNm1() + (StringUtils.isBlank(zs01.getCustNm2()) ? "" : " " + zs01.getCustNm2());
+      String formerCustName = !StringUtils.isBlank(admin.getOldCustNm1()) ? admin.getOldCustNm1().toUpperCase() : "";
+      formerCustName += !StringUtils.isBlank(admin.getOldCustNm2()) ? " " + admin.getOldCustNm2().toUpperCase() : "";
+      List<String> dnbTradestyleNames = new ArrayList<String>();
+      boolean custNmMatch = false;
+      boolean formerCustNmMatch = false;
+      try {
+        try {
+          response = getVatLayerInfo(admin, data);
+        } catch (Exception e) {
+          if (response == null || !response.isSuccess()
+              && "Parameter 'businessNumber' is required by the service to verify CustNm change.".equalsIgnoreCase(response.getMessage())) {
+            LOG.debug("\nFailed to Connect to ABN Service.Now Checking with DNB to vrify CustNm update");
+          }
+        }
+
+        if (!StringUtils.isBlank(data.getVat())) {
+          if (response != null && response.isSuccess()) {
+            // custNm Validation
+            if (response.getRecord().isValid()) {
+              String responseCustNm = StringUtils.isBlank(response.getRecord().getCompanyName()) ? ""
+                  : response.getRecord().getCompanyName().replaceAll(regex, "");
+              String responseTradingNm = StringUtils.isBlank(response.getRecord().getTradingName()) ? ""
+                  : response.getRecord().getTradingName().replaceAll(regex, "");
+              String responseOthTradingNm = StringUtils.isBlank(response.getRecord().getOtherTradingName()) ? ""
+                  : response.getRecord().getOtherTradingName().replaceAll(regex, "");
+              String responseBusinessNm = StringUtils.isBlank(response.getRecord().getBusinessName()) ? ""
+                  : response.getRecord().getBusinessName().replaceAll(regex, "");
+              if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
+                  && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
+                custNmMatch = true;
+                formerCustNmMatch = true;
+              } else if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
+                  && !((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
+                custNmMatch = true;
+                formerCustNmMatch = false;
+              } else if (response.getRecord().isValid() && !(customerName.equalsIgnoreCase(responseCustNm))
+                  && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
+                custNmMatch = false;
+                formerCustNmMatch = true;
+              } else {
+                custNmMatch = false;
+                formerCustNmMatch = false;
+              }
+            }
+          }
+        }
+        if (!(custNmMatch && formerCustNmMatch)) {
+          LOG.debug(
+              "CustNm and formerCustNm match failed with API now matching with Dnb service for match.Now Checking with DNB to vrify CustNm update");
+          MatchingResponse<DnBMatchingResponse> Dnbresponse = DnBUtil.getMatches(requestData, null, "ZS01");
+          List<DnBMatchingResponse> matches = Dnbresponse.getMatches();
+          if (!matches.isEmpty()) {
+            for (DnBMatchingResponse dnbRecord : matches) {
+              // checks for CustNm match
+              String dnbCustNm = StringUtils.isBlank(dnbRecord.getDnbName()) ? "" : dnbRecord.getDnbName().replaceAll("\\s+$", "");
+              if (customerName.equalsIgnoreCase(dnbCustNm)) {
+                custNmMatch = true;
+                dnbTradestyleNames = dnbRecord.getTradeStyleNames();
+                if (dnbTradestyleNames != null) {
+                  for (String tradestyleNm : dnbTradestyleNames) {
+                    tradestyleNm = tradestyleNm.replaceAll("\\s+$", "");
+                    if (tradestyleNm.equalsIgnoreCase(formerCustName)) {
+                      formerCustNmMatch = true;
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        // customerNm Validation
+        details.append("\nUpdates to the non Relevant dataFields fields skipped validation \n\n");
+        if (custNmMatch && formerCustNmMatch) {
+          validation.setSuccess(true);
+          validation.setMessage("Successful");
+          output.setProcessOutput(validation);
+          output.setDetails("Updates to the CustomerNm field Verified");
+        } else if (custNmMatch && !formerCustNmMatch) {
+          validation.setMessage("Not Validated");
+          details.append("The Customer Name on the request verified but former Customer Name does not match from API & DNB service.");
+          // company proof
+          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+            details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+          } else {
+            details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
+                + customerName + " update.");
+          }
+          output.setDetails(details.toString());
+          engineData.addNegativeCheckStatus("ABNLegalName", "Former Customer name doesn't matches from API & DNB match");
+        } else if (!custNmMatch && formerCustNmMatch) {
+          validation.setMessage("Not Validated");
+          details.append("The Former Customer Name on the request matches but Customer Name does not match match from API & DNB.");
+          // company proof
+          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+            details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+          } else {
+            details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
+                + customerName + " update.");
+          }
+          output.setDetails(details.toString());
+          engineData.addNegativeCheckStatus("ABNLegalName", "Customer name doesn't matches from API & DNB match");
+        } else {
+          validation.setMessage("Not Validated");
+          details.append("The Customer Name and Former Customer Name doesn't match from API & DNB");
+          // company proof
+          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+            details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+          } else {
+            details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
+                + customerName + " update.");
+          }
+          output.setDetails(details.toString());
+          engineData.addNegativeCheckStatus("ABNLegalName", "The Customer Name and Former Customer Name doesn't match from API & DNB");
+        }
+
+      } finally {
+        ChangeLogListener.clearManager();
+      }
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+      output.setProcessOutput(validation);
+      output.setDetails("Updates to the dataFields fields skipped validation");
+    }
     return true;
   }
 
@@ -288,16 +445,16 @@ public class AustraliaUtil extends AutomationUtil {
                 if (!matchesDnb) {
                   LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                   cmdeReview = true;
-                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                  checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
                   // company proof
                   if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-                    checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
+                    checkDetails.append("\nSupporting documentation is provided by the requester as attachment for " + addrType).append("\n");
                   } else {
                     checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
                   }
 
                 } else {
-                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
                   for (DnBMatchingResponse dnb : matches) {
                     checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
                     checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
@@ -328,7 +485,7 @@ public class AustraliaUtil extends AutomationUtil {
             if (!matchesDnb) {
               LOG.debug("New address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
               cmdeReview = true;
-              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B.\n");
+              checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B.\n");
               // company proof
               if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
                 checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
@@ -336,7 +493,7 @@ public class AustraliaUtil extends AutomationUtil {
                 checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
               }
             } else {
-              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+              checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
               for (DnBMatchingResponse dnb : matches) {
                 checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
                 checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
