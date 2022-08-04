@@ -41,7 +41,7 @@
 				<cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
 			</p>
 		</cmr:column>
-		<cmr:column span="1" containerForField="VATExempt">
+		<!--<cmr:column span="1" containerForField="VATExempt">
 			<p>
 				<cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
 				<cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt"
@@ -52,7 +52,7 @@
 						oldValue="${reqentry.vatExempt == 'Y' ? 'Yes' : 'No'}" />
 				</cmr:label>
 			</p>
-		</cmr:column>
+		</cmr:column>-->
 	</cmr:row>
 	<cmr:row addBackground="false">
 		<cmr:column span="2" containerForField="CustClass">
