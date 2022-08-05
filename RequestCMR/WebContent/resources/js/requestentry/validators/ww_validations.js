@@ -102,7 +102,12 @@ function addDnBSearchValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('dnbPrimary') != 'Y') {
+        var ifProspect = FormManager.getActualValue('prospLegalInd');
+        if (dijit.byId('prospLegalInd')) {
+          ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+        }
+       
+        if (FormManager.getActualValue('dnbPrimary') != 'Y' && ifProspect != 'Y') {
           return new ValidationResult(null, true);
         }
         var reqType = FormManager.getActualValue('reqType');
@@ -113,7 +118,7 @@ function addDnBSearchValidator() {
         if (reqStatus != 'DRA') {
           return new ValidationResult(null, true);
         }
-        if (isSkipDnbMatching()) {
+        if (isSkipDnbMatching() && ifProspect != 'Y') {
           return new ValidationResult(null, true);
         }
         var result = FormManager.getActualValue('findDnbResult');
