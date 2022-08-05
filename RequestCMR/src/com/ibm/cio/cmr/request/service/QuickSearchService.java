@@ -213,7 +213,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
       AppUser user = AppUser.getUser(request);
       Scorecard scorecard = entityManager.find(Scorecard.class, pk);
       if (!model.isHasCmr()) {
-        scorecard.setFindCmrResult(CmrConstants.RESULT_NO_RESULT);
+        scorecard.setFindCmrResult(CmrConstants.DNBSEARCH_NOT_DONE);
       } else {
         scorecard.setFindCmrResult(CmrConstants.RESULT_REJECTED);
         scorecard.setFindCmrRejReason("Record Not Found");
