@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -74,6 +75,7 @@ import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.DebugUtil;
+import com.ibm.cmr.create.batch.util.ProfilerLogger;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.impl.SOFMessageHandler;
@@ -147,7 +149,9 @@ public class LegacyDirectService extends TransConnService {
     LOG.info("Multi Mode: " + this.multiMode);
 
     LOG.info("Initializing Country Map..");
+    long start = new Date().getTime();
     LandedCountryMap.init(entityManager);
+    ProfilerLogger.LOG.trace("After Landed country init " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     // Retrieve the PCP records and create in the Legacy DB
     LOG.info("Retreiving pending records for processing..");
     List<Long> pending = gatherPendingRecords(entityManager);
@@ -170,6 +174,7 @@ public class LegacyDirectService extends TransConnService {
     LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
     // pending = new ArrayList<Admin>();
     for (Long id : pending) {
+      long start = new Date().getTime();
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -214,6 +219,8 @@ public class LegacyDirectService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
       partialCommit(entityManager);
+      ProfilerLogger.LOG.trace(
+          "After processPendingLegacy for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     }
   }
 
@@ -223,6 +230,7 @@ public class LegacyDirectService extends TransConnService {
     Data data = null;
     ProcessRequest request = null;
     for (Long id : pending) {
+      long start = new Date().getTime();
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -279,6 +287,8 @@ public class LegacyDirectService extends TransConnService {
           WfHist hist = createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
         }
         partialCommit(entityManager);
+        ProfilerLogger.LOG.trace(
+            "After processPendingRDC for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
@@ -301,6 +311,7 @@ public class LegacyDirectService extends TransConnService {
   }
 
   protected List<Long> gatherPendingRecords(EntityManager entityManager) {
+    long start = new Date().getTime();
     String sql = ExternalizedQuery.getSql("LEGACYD.GET_PENDING");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     List<Admin> pendingRecords = query.getResults(Admin.class);
@@ -309,6 +320,7 @@ public class LegacyDirectService extends TransConnService {
     for (Admin admin : pendingRecords) {
       queue.add(admin.getId().getReqId());
     }
+    ProfilerLogger.LOG.trace("After gatherPendingRecords " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return queue;
   }
 
@@ -327,6 +339,7 @@ public class LegacyDirectService extends TransConnService {
   }
 
   protected List<Long> gatherPendingRecordsRDC(EntityManager entityManager) {
+    long start = new Date().getTime();
     String sql = ExternalizedQuery.getSql("LEGACYD.GET_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     List<Admin> pendingRecords = query.getResults(Admin.class);
@@ -335,6 +348,7 @@ public class LegacyDirectService extends TransConnService {
     for (Admin admin : pendingRecords) {
       queue.add(admin.getId().getReqId());
     }
+    ProfilerLogger.LOG.trace("After gatherPendingRecordsRDC " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return queue;
   }
 
