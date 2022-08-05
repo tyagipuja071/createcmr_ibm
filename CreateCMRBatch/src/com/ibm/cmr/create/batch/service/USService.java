@@ -116,15 +116,15 @@ public class USService extends TransConnService {
       LOG.info("Multi Mode: " + this.multiMode);
       List<Long> ids = null;
       if (isMassServiceMode()) {
-    	  ids = gatherMassUpdateRequests(entityManager);
-          monitorCreqcmrMassUpd(entityManager, ids);
+        ids = gatherMassUpdateRequests(entityManager);
+        monitorCreqcmrMassUpd(entityManager, ids);
       } else {
         // LOG.info("Processing Aborted records (retry)...");
         // monitorAbortedRecords(entityManager);
 
-    	  LOG.info("Processing New records...");
-          ids = gatherSingleRequests(entityManager);
-          monitorCreqcmr(entityManager, ids);
+        LOG.info("Processing New records...");
+        ids = gatherSingleRequests(entityManager);
+        monitorCreqcmr(entityManager, ids);
       }
 
     } catch (Exception e) {
@@ -148,20 +148,22 @@ public class USService extends TransConnService {
   }
 
   @SuppressWarnings("unused")
-  public void monitorCreqcmr(EntityManager entityManager, List<Long> requests) throws JsonGenerationException, JsonMappingException, IOException, Exception {
+  public void monitorCreqcmr(EntityManager entityManager, List<Long> requests)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
     LOG.info("Initializing Country Map..");
     LandedCountryMap.init(entityManager);
     // Retrieve the PCP records
     LOG.info("Retreiving pending records for processing..");
-    //List<Admin> pending = getPendingRecords(entityManager);
-    //LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
+    // List<Admin> pending = getPendingRecords(entityManager);
+    // LOG.debug((pending != null ? pending.size() : 0) + " records to process
+    // to RDc.");
     Data data = null;
     ProcessRequest request = null;
     for (Long id : requests) {
-    	AdminPK pk = new AdminPK();
-        pk.setReqId(id);
-        Admin admin = entityManager.find(Admin.class, pk);
+      AdminPK pk = new AdminPK();
+      pk.setReqId(id);
+      Admin admin = entityManager.find(Admin.class, pk);
       if ("M".equals(admin.getReqType())) {
         continue;
       }
@@ -299,19 +301,21 @@ public class USService extends TransConnService {
 
   }
 
-  public void monitorCreqcmrMassUpd(EntityManager entityManager, List<Long> requests) throws JsonGenerationException, JsonMappingException, IOException, Exception {
+  public void monitorCreqcmrMassUpd(EntityManager entityManager, List<Long> requests)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
     LOG.info("Initializing Country Map..");
     LandedCountryMap.init(entityManager);
-    //List<Admin> pending = getPendingRecordsMassUpd(entityManager);
+    // List<Admin> pending = getPendingRecordsMassUpd(entityManager);
 
-    //LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
+    // LOG.debug((pending != null ? pending.size() : 0) + " records to process
+    // to RDc.");
 
     Data data = null;
     ProcessRequest request = null;
     for (Long id : requests) {
-    	AdminPK pk = new AdminPK();
-        pk.setReqId(id);
-        Admin admin = entityManager.find(Admin.class, pk);
+      AdminPK pk = new AdminPK();
+      pk.setReqId(id);
+      Admin admin = entityManager.find(Admin.class, pk);
       try {
         // hard-coding to debug specific request
         // if (admin.getId().getReqId() != reQId) {
@@ -398,7 +402,7 @@ public class USService extends TransConnService {
 
     // generateUSCmr
     if ("C".equals(admin.getReqType())) {
-      String cmrNoGen = generateUSCmr(admin);
+      String cmrNoGen = generateUSCmr(entityManager, admin);
       data.setCmrNo(cmrNoGen);
       LOG.debug(" ---- Generate CMR No. is --- " + cmrNoGen);
     }
@@ -506,7 +510,6 @@ public class USService extends TransConnService {
 
     // lock
     lockRecord(entityManager, admin);
-    //lockUSRecord(entityManager, admin.getId().getReqId());
 
     CmrServiceInput cmrServiceInput = getReqParam(entityManager, admin.getId().getReqId(), admin.getReqType(), data);
 
@@ -796,7 +799,6 @@ public class USService extends TransConnService {
           boolean isDataUpdated = false;
           isDataUpdated = USHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
           lockRecordUpdt(entityManager, admin);
-          //lockUSRecord(entityManager, admin.getId().getReqId());
 
           for (Addr addr : addresses) {
             entityManager.detach(addr);
@@ -2103,14 +2105,6 @@ public class USService extends TransConnService {
 
     partialCommit(entityManager);
   }
-  
-  private void lockUSRecord(EntityManager entityManager, long reqId) throws Exception {
-	    LOG.info("Locking Request " + reqId);
-	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("LOCK.US.DATA"));
-	    query.setParameter("REQ_ID", reqId);
-	    query.executeSql();
-	   
-	  }
 
   public CmrServiceInput getReqParam(EntityManager em, long reqId, String reqType, Data data) {
     String cmrNo = "";
@@ -2280,7 +2274,7 @@ public class USService extends TransConnService {
     return response;
   }
 
-  private String generateUSCmr(Admin admin) {
+  private String generateUSCmr(EntityManager entityManager, Admin admin) {
 
     String cndCMR = "";
     String cmrType = "COMM";
@@ -2297,7 +2291,7 @@ public class USService extends TransConnService {
     } else if (isMainCustNm1) {
       cmrType = "MAIN";
     }
-    cndCMR = USCMRNumGen.genCMRNum(cmrType);
+    cndCMR = USCMRNumGen.genCMRNum(entityManager, cmrType);
 
     return cndCMR;
   }
