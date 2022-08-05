@@ -1553,19 +1553,37 @@ public class USHandler extends GEOHandler {
       county = "0";
     }
 
-    String sql2 = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
-    PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
-    query2.setParameter("LAND_CNTRY", landCntry);
-    query2.setParameter("N_ST", stateProv);
-    query2.setParameter("C_CNTY", county);
-    query2.setParameter("N_CITY", city1);
+    if ("US".equals(landCntry)) {
+      String sql2 = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
+      PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+      query2.setParameter("LAND_CNTRY", landCntry);
+      query2.setParameter("N_ST", stateProv);
+      query2.setParameter("C_CNTY", county);
+      query2.setParameter("N_CITY", city1);
 
-    List<Object[]> results2 = query2.getResults();
-    if (results2 != null && !results2.isEmpty()) {
-      Object[] result = results2.get(0);
-      if (!"".equals(result[0])) {
-        flag = "Y";
+      List<Object[]> results2 = query2.getResults();
+      if (results2 != null && !results2.isEmpty()) {
+        Object[] result = results2.get(0);
+        if (!"".equals(result[0])) {
+          flag = "Y";
+        }
       }
+    } else {
+      String sql2 = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY_NON_US");
+      PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+      query2.setParameter("LAND_CNTRY", landCntry);
+      // query2.setParameter("N_ST", stateProv);
+      // query2.setParameter("C_CNTY", county);
+      query2.setParameter("N_CITY", city1);
+
+      List<Object[]> results2 = query2.getResults();
+      if (results2 != null && !results2.isEmpty()) {
+        Object[] result = results2.get(0);
+        if (!"".equals(result[0])) {
+          flag = "Y";
+        }
+      }
+
     }
 
     return flag;
