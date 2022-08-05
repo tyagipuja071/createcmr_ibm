@@ -760,6 +760,12 @@ function addHandlersForCEMEA() {
       setSBOValuesForIsuCtc();// CMR-2101
     });
   }
+  
+  if (_vatExemptHandler == null) {
+    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      setVatValidatorCEMEA();
+    });
+  }
 
 }
 
@@ -818,9 +824,11 @@ function addFiscalExemptHandler() {
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       RomaniaFiscalCdMandatory();
+      setVatValidatorCEMEA();
     });
   }
 }
+
 
 function RomaniaFiscalCdMandatory() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -839,6 +847,23 @@ function RomaniaFiscalCdMandatory() {
     }
   } else if (cntry == SysLoc.ROMANIA && vatExempt == false) {
     FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+  }
+}
+
+function setVatValidatorCEMEA() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+    FormManager.resetValidations('vat');
+    if (FormManager.getActualValue('custSubGrp').includes('IBM')) {
+      FormManager.readOnly('vat');
+    }
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+    }
+    if (!dijit.byId('vatExempt').get('checked')) {
+//      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
+    }
   }
 }
 
@@ -5380,6 +5405,7 @@ dojo
       // CEE
       GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
       GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
+      GEOHandler.addAfterTemplateLoad(setVatValidatorCEMEA, GEOHandler.CEE);
       GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
       GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
       GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
