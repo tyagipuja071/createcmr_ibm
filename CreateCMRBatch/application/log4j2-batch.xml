@@ -15,6 +15,12 @@
         <TimeBasedTriggeringPolicy interval="1" modulate="true" />
       </Policies>
     </RollingFile>
+    <RollingFile name="rollingFileProfiler" fileName="/cmr/batch/logs/${sys:BATCH_APP}-profiler.log" filePattern="/cmr/batch/logs/${sys:BATCH_APP}-profiler.log-%d{yyyy-MM-dd}-%i.log.gz">
+      <PatternLayout pattern="[%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p [%t] (%13F:%L) : %m%n" charset="UTF-8"/>
+      <Policies>
+        <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+      </Policies>
+    </RollingFile>    
   </Appenders>
 
   <Loggers>
@@ -24,5 +30,8 @@
     <Logger name="com.ibm" level="DEBUG" additivity="false">
       <AppenderRef ref="console" level="DEBUG"/>
     </Logger>
+    <Logger name="batch-profiler" level="TRACE" additivity="false">
+      <AppenderRef ref="rollingFileProfiler" level="TRACE"/>
+    </Logger>    
   </Loggers>
 </Configuration>
