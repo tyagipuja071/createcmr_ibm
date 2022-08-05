@@ -767,9 +767,8 @@ function setVatValidatorBELUX() {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     if (custSubGrp == 'BEPRI' || custSubGrp == 'LUPRI') {
-      // FormManager.removeValidator('vat', Validators.REQUIRED);
+//      FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.readOnly('vat');
-      return;
     } else if (custSubGrp == 'BEPUB' || custSubGrp == 'LUPUB') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       return;

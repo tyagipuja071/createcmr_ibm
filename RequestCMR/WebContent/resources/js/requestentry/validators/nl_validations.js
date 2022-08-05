@@ -217,6 +217,7 @@ function setVatValidatorNL() {
       FormManager.clearValue('vat');
       FormManager.readOnly('vat');
     }
+    
     FormManager.resetValidations('vat');
     if (landCntry != 'GB') {
       if (!dojo.byId('vatExempt').checked) {

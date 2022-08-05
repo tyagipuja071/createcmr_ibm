@@ -220,6 +220,10 @@ function addVATDisabler() {
     var role = FormManager.getActualValue('userRole').toUpperCase();
     var req = FormManager.getActualValue('reqType').toUpperCase();
     var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+    
+    if (req == 'C') {
+      return;
+    }
 
     FormManager.enable('vat');
 
@@ -960,8 +964,15 @@ function setVatValidatorGRCYTR() {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
+    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+      FormManager.readOnly('vat');
+    }
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+    }
     if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
     }
   }
 }
@@ -2347,7 +2358,7 @@ dojo.addOnLoad(function() {
 
   // common greece/cyprus/turkey
   GEOHandler.addAfterConfig(viewOnlyAddressDetails, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setVatValidatorGRCYTR, [ SysLoc.GREECE, SysLoc.TURKEY, ]);
+  GEOHandler.addAfterTemplateLoad(setVatValidatorGRCYTR, [ SysLoc.GREECE, SysLoc.TURKEY, ]);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
