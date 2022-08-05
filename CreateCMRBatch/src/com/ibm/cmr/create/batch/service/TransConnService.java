@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
@@ -75,6 +76,7 @@ import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.model.NotifyReqModel;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
+import com.ibm.cmr.create.batch.util.ProfilerLogger;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.USMassUpdateWorker;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
@@ -185,6 +187,7 @@ public class TransConnService extends BaseBatchService {
    * @return
    */
   protected List<Long> gatherAbortedRecords(EntityManager entityManager) {
+    long start = new Date().getTime();
     // search the aborted records from Admin table
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR_ABORTED_REC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -194,6 +197,7 @@ public class TransConnService extends BaseBatchService {
     for (Admin admin : abortedRecords) {
       queue.add(admin.getId().getReqId());
     }
+    ProfilerLogger.LOG.trace("After gatherAbortedRecords " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return queue;
   }
 
@@ -213,6 +217,7 @@ public class TransConnService extends BaseBatchService {
 
     for (Long id : abortedRecords) {
       try {
+        long start = new Date().getTime();
         AdminPK pk = new AdminPK();
         pk.setReqId(id);
         Admin admin = entityManager.find(Admin.class, pk);
@@ -241,7 +246,8 @@ public class TransConnService extends BaseBatchService {
         }
 
         partialCommit(entityManager);
-
+        ProfilerLogger.LOG.trace("After monitorAbortedRecords for Request ID: " + id + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         LOG.error("Error in processing Aborted Record wit Request ID " + id + " [" + e.getMessage() + "]", e);
       }
@@ -255,6 +261,7 @@ public class TransConnService extends BaseBatchService {
    * @return
    */
   protected List<Long> gatherTransConnRecords(EntityManager entityManager) {
+    long start = new Date().getTime();
     // search the notify requests from transconn where NOTIFIED_IND <> 'Y'
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR_TRANSCONN");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -266,6 +273,7 @@ public class TransConnService extends BaseBatchService {
     for (NotifyReq notif : notifyList) {
       queue.add(notif.getId().getNotifyId());
     }
+    ProfilerLogger.LOG.trace("After gatherTransConnRecords " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return queue;
 
   }
@@ -283,6 +291,7 @@ public class TransConnService extends BaseBatchService {
 
     for (Long id : notifyList) {
       try {
+        long start = new Date().getTime();
         NotifyReqPK pk = new NotifyReqPK();
         pk.setNotifyId(id);
         NotifyReq notify = entityManager.find(NotifyReq.class, pk);
@@ -342,7 +351,8 @@ public class TransConnService extends BaseBatchService {
         }
 
         partialCommit(entityManager);
-
+        ProfilerLogger.LOG.trace(
+            "After monitorTransconn for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         LOG.error("Error in processing TransConn Record with Notify ID " + id + " [" + e.getMessage() + "]", e);
       }
@@ -356,6 +366,7 @@ public class TransConnService extends BaseBatchService {
    * @return
    */
   protected List<Long> gatherMQInterfaceRequests(EntityManager entityManager) {
+    long start = new Date().getTime();
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR_MQ_INTF_REQ_QUEUE");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MQ_IND", CmrConstants.MQ_IND_YES);
@@ -367,6 +378,7 @@ public class TransConnService extends BaseBatchService {
     for (MqIntfReqQueue mq : mqIntfList) {
       queue.add(mq.getId().getQueryReqId());
     }
+    ProfilerLogger.LOG.trace("After gatherMQInterfaceRequests " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return queue;
 
   }
@@ -385,6 +397,7 @@ public class TransConnService extends BaseBatchService {
 
     boolean isError = false;
     for (Long id : mqIntfList) {
+      long start = new Date().getTime();
       MqIntfReqQueuePK pk = new MqIntfReqQueuePK();
       pk.setQueryReqId(id);
       MqIntfReqQueue mqIntfReq = entityManager.find(MqIntfReqQueue.class, pk);
@@ -464,7 +477,8 @@ public class TransConnService extends BaseBatchService {
         }
 
         partialCommit(entityManager);
-
+        ProfilerLogger.LOG.trace("After monitorMQInterfaceRequests for Request ID: " + id + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         LOG.error("Error in processing TransConn Record " + mqIntfReq.getId().getQueryReqId() + " for Request ID " + mqIntfReq.getReqId() + " ["
             + e.getMessage() + "]", e);
@@ -479,6 +493,7 @@ public class TransConnService extends BaseBatchService {
    * @return
    */
   protected List<Long> gatherDisAutoProcRecords(EntityManager entityManager) {
+    long start = new Date().getTime();
     // search the manual processed records from Admin table
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR_DISABLE_AUTO_PROC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -488,6 +503,7 @@ public class TransConnService extends BaseBatchService {
     for (Admin admin : manualRecList) {
       queue.add(admin.getId().getReqId());
     }
+    ProfilerLogger.LOG.trace("After gatherDisAutoProcRecords " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return queue;
   }
 
@@ -504,6 +520,7 @@ public class TransConnService extends BaseBatchService {
 
     for (Long id : manualRecList) {
       try {
+        long start = new Date().getTime();
         AdminPK pk = new AdminPK();
         pk.setReqId(id);
         Admin admin = entityManager.find(Admin.class, pk);
@@ -524,6 +541,8 @@ public class TransConnService extends BaseBatchService {
         }
 
         partialCommit(entityManager);
+        ProfilerLogger.LOG.trace("After monitorDisAutoProcRec for Request ID: " + id + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         LOG.error("Error in processing Manual Record with Request ID " + id + " [" + e.getMessage() + "]", e);
       }
@@ -537,6 +556,7 @@ public class TransConnService extends BaseBatchService {
    * @return
    */
   protected List<Long> gatherLegacyPending(EntityManager entityManager) {
+    long start = new Date().getTime();
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR_LEGACY_PENDING");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("PROC_TYPE", SystemConfiguration.getValue("BATCH_CMR_POOL_PROCESSING_TYPE"));
@@ -552,6 +572,7 @@ public class TransConnService extends BaseBatchService {
     for (Admin admin : pvcRecords) {
       queue.add(admin.getId().getReqId());
     }
+    ProfilerLogger.LOG.trace("After gatherLegacyPending " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return queue;
   }
 
@@ -565,6 +586,7 @@ public class TransConnService extends BaseBatchService {
     // info CreateCMR, DISABLE_AUTO_PROC = 'Y'
     for (Long id : pvcRecords) {
       try {
+        long start = new Date().getTime();
         AdminPK pk = new AdminPK();
         pk.setReqId(id);
         Admin admin = entityManager.find(Admin.class, pk);
@@ -855,7 +877,8 @@ public class TransConnService extends BaseBatchService {
         }
 
         partialCommit(entityManager);
-
+        ProfilerLogger.LOG.trace("After monitorLegacyPending for Request ID: " + id + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         LOG.error("Error in processing PVC Record with Request ID " + id + " [" + e.getMessage() + "]", e);
       }
