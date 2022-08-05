@@ -2199,7 +2199,7 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
   }
   if (reqType == 'C' && scenarioChanged && !fromAddress) {
 
-    if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO') {
+    if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'IBMEM') {
       FormManager.setValue('repTeamMemberNo', '000993');
       FormManager.setValue('enterprise', '985999');
       FormManager.setValue('salesBusOffCd', '009');
@@ -2222,7 +2222,7 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
       requireSalesRepEnterpriseSBOByRole();
     }
   } else if (reqType == 'C' && !scenarioChanged) {
-      if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE') {
+      if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE' || scenario == 'IBMEM') {
         FormManager.readOnly('repTeamMemberNo');
         FormManager.readOnly('enterprise');
         FormManager.readOnly('salesBusOffCd');

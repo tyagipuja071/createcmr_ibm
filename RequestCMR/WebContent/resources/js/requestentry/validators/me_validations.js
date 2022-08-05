@@ -675,6 +675,7 @@ var _SalesRep2Handler = null;
 var _ExpediteHandler = null;
 var _IMSHandler = null;
 var _landCntryHandler = null;
+var _vatExempthandler = null;
 function addHandlersForCEMEA() {
   for (var i = 0; i < _addrTypesForCEMEA.length; i++) {
     _addrTypeHandler[i] = null;
@@ -691,6 +692,12 @@ function addHandlersForCEMEA() {
       if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidME();
       }
+    });
+  }
+  
+  if (_vatExemptHandler == null) {
+    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      setVatValidatorCEMEA();
     });
   }
 
@@ -741,6 +748,23 @@ function setISUCTCOnIMSChange() {
       FormManager.setValue('clientTier', 'N');
     } else if ('32' == isuCd && 'N' == clientTier && !subIndustryCd.startsWith('B')) {
       FormManager.setValue('clientTier', 'S');
+    }
+  }
+}
+
+function setVatValidatorCEMEA() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+    FormManager.resetValidations('vat');
+    if (FormManager.getActualValue('custSubGrp').includes('IBM')) {
+      FormManager.readOnly('vat');
+    }
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+    }
+    if (!dijit.byId('vatExempt').get('checked')) {
+//      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
     }
   }
 }
@@ -4773,6 +4797,7 @@ dojo
       GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
       GEOHandler.registerValidator(validateIsicMEValidator, GEOHandler.ME, null, true);
       GEOHandler.registerValidator(addAddressTypeValidatorME, GEOHandler.ME, null, true);
+      GEOHandler.addAfterTemplateLoad(setVatValidatorCEMEA, GEOHandler.ME);
       // CMR-5993
       GEOHandler.registerValidator(validateMESBO, GEOHandler.ME, GEOHandler.ROLE_PROCESSOR, true);
       GEOHandler.addAfterConfig(setMESBO, GEOHandler.ME);

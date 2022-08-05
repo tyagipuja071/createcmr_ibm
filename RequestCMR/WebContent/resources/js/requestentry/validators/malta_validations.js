@@ -718,7 +718,7 @@ function addAfterConfigMalta() {
   enterpriseMalta();
   cmrNoforProspect();
   classFieldBehaviour();
-  setVatValidatorMalta();
+//  setVatValidatorMalta();
   setVatExemptValidatorMalta();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
@@ -737,6 +737,7 @@ function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
   hidePpsceidExceptBP();
   setVatValidatorMalta();
   setVatExemptValidatorMalta();
+  lockFieldsIBMEM();
 }
 
 function canCopyAddress(value, rowIndex, grid) {
@@ -830,8 +831,15 @@ function setVatValidatorMalta() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
+    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+      FormManager.readOnly('vat');
+    }
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+    }
     if (!dijit.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
     }
   }
 }
@@ -1032,6 +1040,21 @@ function setCTCValues() {
     }
   }
 
+}
+
+function lockFieldsIBMEM() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('dunsNo');
+    return;
+  }
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('dunsNo');
+  } else {
+    FormManager.enable('inacCd');
+    FormManager.enable('dunsNo');
+  }
 }
 
 function clientTierCodeValidator() {

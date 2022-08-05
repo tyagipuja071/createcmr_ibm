@@ -135,6 +135,10 @@ function addVATDisabler() {
     var role = FormManager.getActualValue('userRole').toUpperCase();
     var req = FormManager.getActualValue('reqType').toUpperCase();
     var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+    
+    if (req == 'C') {
+      return;
+    }
 
     FormManager.enable('vat');
 
@@ -823,11 +827,19 @@ function disableAddrFieldsCY(){
 
 function setVatValidator() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
+    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+      FormManager.readOnly('vat');
+    }
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+    }
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
     }
   }
 }
@@ -2950,7 +2962,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(showOnlyMailingOnFirstAddrAdd, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
-  GEOHandler.addAfterConfig(setVatValidator, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterTemplateLoad(setVatValidator, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.registerValidator(modeOfPaymentValidator, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.addAfterConfig(disableProcpectCmrCY, [ SysLoc.CYPRUS ]);
