@@ -3761,13 +3761,15 @@ function setVatValidatorGRCYTR() {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    if (cntry == SysLoc.TURKEY && dijit.byId('vatExempt') == undefined) {
-      return;
+    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+      FormManager.readOnly('vat');
     }
-    if (!dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+    }
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-    } else if (!dijit.byId('vatExempt').get('checked') && cntry == SysLoc.TURKEY) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'Tax Number' ]);
+      FormManager.enable('vat');
     }
   }
 }
