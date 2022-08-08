@@ -837,7 +837,7 @@ function setVatValidator() {
     if (dijit.byId('vatExempt').get('checked')) {
       FormManager.clearValue('vat');
     }
-    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
       FormManager.enable('vat');
     }
