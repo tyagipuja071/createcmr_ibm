@@ -73,6 +73,9 @@ public class ProcessingMonitor {
   @Column(name = "RDC_PROCESSING_STATUS")
   private String rdcProcessingStatus;
 
+  @Column(name = "STATUS_DESC")
+  private String statusDesc;
+
   @Transient
   private String pendingTime;
 
@@ -273,6 +276,14 @@ public class ProcessingMonitor {
 
   public void setRdcProcessingStatus(String rdcProcessingStatus) {
     this.rdcProcessingStatus = rdcProcessingStatus;
+  }
+
+  public String getStatusDesc() {
+    return statusDesc;
+  }
+
+  public void setStatusDesc(String statusDesc) {
+    this.statusDesc = statusDesc;
   }
 
 }

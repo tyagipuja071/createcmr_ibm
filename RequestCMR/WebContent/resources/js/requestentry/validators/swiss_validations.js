@@ -115,6 +115,11 @@ function addAfterConfigForSWISS() {
   if (FormManager.getActualValue('custGrp') == 'CROSS') {
     FormManager.setValue('custLangCd', 'E');
   }
+  
+//CREATCMR-6378
+  if(reqType == 'C' && custSubGrp == 'CHBUS'){
+    retainVatValueAT();
+  }
 
   // abbrev name locked optional for requester
   if (role == 'REQUESTER') {
@@ -150,7 +155,7 @@ function addAfterConfigForSWISS() {
       FormManager.setValue('vat', '');
     } else {
       FormManager.enable('vat');
-      if (dijit.byId('vatExempt').get('checked')) {
+      if (!dijit.byId('vatExempt').get('checked')) {
         dijit.byId('vatExempt').set('checked', false);
         setVatValidatorSWISS();
       }
@@ -200,7 +205,6 @@ var _PostalCodeHandler = null;
 var _TaxCdHandler = null;
 var _custCodeHanlder = null;
 var _CTCHandler = null;
-var _reqReasonHandler = null;
 var _vatExemptHandler = null;
 var addrTypeHandler = [];
 var _hwMstrInstallFlagHandler = null;
@@ -352,12 +356,6 @@ function addHandlersForSWISS() {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
       setISUCTCOnIMSChange();
       setMubotyOnPostalCodeIMS();
-    });
-  }
-
-  if (_reqReasonHandler == null) {
-    _reqReasonHandler = dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
-      checkEmbargoCd(value);
     });
   }
 
@@ -928,7 +926,7 @@ function addVatSuffixForCustLangCd() {
 
   var custLangCd = '';
   if ("ZS01" == FormManager.getActualValue('addrType')) {
-    custangCd = FormManager.getActualValue('custLangCd');
+    custLangCd = FormManager.getActualValue('custLangCd');
   }
   if (custLangCd == null || custLangCd == '' || custLangCd == undefined) {
     var result = cmr.query('ADDR.GET.CUST_LANG_CD.BY_REQID', qParams);
@@ -1723,12 +1721,7 @@ function validateSortl() {
         var qParams = {
           REQ_ID : reqId,
         };
-        var result = cmr.query('GET.SEARCH_TERM_DATA_RDC', qParams);
-        if (result != null) {
-          searchTermDataRdc = result.ret1;
-        }
-
-        if (searchTermDataRdc != searchTerm) {
+        if (_importedSearchTerm != searchTerm) {
           console.log("validating Sortl..");
           if (searchTerm.length != 8) {
             return new ValidationResult(null, false, 'SORTL should be 8 characters long.');
@@ -1749,7 +1742,37 @@ function validateSortl() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+var _importedSearchTerm = null;
+function resetSortlValidator() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
 
+  var qParams = {
+    REQ_ID : reqId,
+  };
+  var result = cmr.query('GET.SEARCH_TERM_DATA_RDC', qParams);
+  if (result != null) {
+    _importedSearchTerm = result.ret1;
+  }
+
+  if (reqType == 'U' && (_importedSearchTerm == '' || _importedSearchTerm == null)) {
+    console.log('Making Sortl optinal as it is empty in RDC');
+    FormManager.resetValidations('searchTerm');
+  }
+}
+//CREATCMR-6378
+function retainVatValueAT() {
+    var vat = FormManager.getActualValue('vat');
+    var reqId = FormManager.getActualValue('reqId');
+    var qParams = {
+      REQ_ID : reqId,
+    };
+    if (vat == '' || vat == null || vat == undefined) {
+      var result = cmr.query('ADDR.GET.VAT_REQID', qParams);
+      var _vat = result.ret1;
+      FormManager.setValue('vat', _vat);
+    }
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
@@ -1813,4 +1836,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.SWISS);
   GEOHandler.registerValidator(validateSortl, GEOHandler.SWISS, null, true);
+  GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.SWISS);
 });

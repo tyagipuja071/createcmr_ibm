@@ -57,6 +57,8 @@ public class SingaporeUtil extends AutomationUtil {
   public static final String SCENARIO_CROSS_MARKETPLACE = "XMKTP";
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
   private static final String SCENARIO_CROSS_PRIVATE_CUSTOMER = "XPRIV";
+  private static final String SCENARIO_INTERNAL = "INTER";
+  private static final String SCENARIO_DUMMY = "DUMMY";
   private static final String SCENARIO_ECOSYS = "ECSYS";
   private static final String SCENARIO_CROSS_ECOSYS = "XECO";
 
@@ -259,18 +261,28 @@ public class SingaporeUtil extends AutomationUtil {
       }
     }
     switch (scenario) {
+    // CREATCMR - 2031
+    // case SCENARIO_BLUEMIX:
+    // case SCENARIO_MARKETPLACE:
+    // case SCENARIO_CROSS_BLUEMIX:
+    // case SCENARIO_CROSS_MARKETPLACE:
+    // engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+    // break;
+    // CREATCMR - 5772
     case SCENARIO_BLUEMIX:
     case SCENARIO_MARKETPLACE:
-    case SCENARIO_CROSS_BLUEMIX:
-    case SCENARIO_CROSS_MARKETPLACE:
-      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+    case SCENARIO_DUMMY:
+    case SCENARIO_INTERNAL:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
+
     case SCENARIO_ECOSYS:
     case SCENARIO_CROSS_ECOSYS:
       addToNotifyListASEAN(entityManager, data.getId().getReqId());
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_CROSS_PRIVATE_CUSTOMER:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       return doPrivatePersonChecks(engineData, SystemLocation.SINGAPORE, soldTo.getLandCntry(), customerName, details, false, requestData);
     }
     result.setDetails(details.toString());

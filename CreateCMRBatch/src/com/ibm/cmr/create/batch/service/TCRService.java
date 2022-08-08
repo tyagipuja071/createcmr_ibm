@@ -4,6 +4,7 @@
 package com.ibm.cmr.create.batch.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
 
   private static final Logger LOG = Logger.getLogger(TCRService.class);
   private static final String DEFAULT_DIR = "/ci/shared/data/tcr/";
+  private static final String ARCHIVE_DIR = "/ci/shared/data/tcrarchive/";
   private Map<String, Integer> fileSizes = new HashMap<String, Integer>();
   private Map<String, Integer> processedSizes = new HashMap<String, Integer>();
 
@@ -477,12 +479,28 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
     if (StringUtils.isBlank(directory)) {
       directory = DEFAULT_DIR;
     }
+    String archive = SystemParameters.getString("TCR.ARCHIVE.DIR");
+    if (StringUtils.isBlank(archive)) {
+      archive = ARCHIVE_DIR;
+    }
+
     for (String fileName : this.fileSizes.keySet()) {
       int expected = this.fileSizes.get(fileName);
       int processed = this.processedSizes.get(fileName);
       if (expected == processed) {
-        LOG.debug("File " + fileName + " processed fully. Removing..");
-        FileUtils.deleteQuietly(new File(directory + File.separator + fileName));
+        // copy the file to archive first
+        File source = new File(directory + File.separator + fileName);
+        File target = new File(archive + File.separator + fileName);
+        LOG.debug("File " + fileName + " processed fully. Archiving to " + target.getAbsolutePath());
+        try {
+          FileUtils.copyFile(source, target);
+          LOG.debug(" - archived successfully.");
+        } catch (IOException e) {
+          LOG.warn("Cannot archive file " + source.getAbsolutePath());
+        }
+        LOG.debug("Removing file " + source.getAbsolutePath());
+        boolean removed = FileUtils.deleteQuietly(source);
+        LOG.debug(" - Deleted: " + removed);
       }
     }
     this.fileSizes.clear();

@@ -370,40 +370,35 @@
       &nbsp;
     </cmr:column>
     <cmr:column span="4" width="780">
-      <div ng-show="report" style="background:#EEE; height:450px; overflow-y:auto" >
+      <div ng-show="report" style="background:#EEE; height:450px; overflow:auto" >
       <div class="tab-head">Pending Requests</div>
       <div class="filters">
         <input class="filter" ng-model="processFilterText" placeholder="Input any text filter"> 
       </div>
-      <table width="100%" cellspacing="0" cellpadding="0" margin="0" class="rec-table">
+      <table width="100%" cellspacing="0" cellpadding="0" margin="0" class="rec-table" style="width:900px">
         <tr>
           <th>ID</th>
           <th>Status</th>
           <th>Type</th>
           <th>Country</th>
           <th>Customer</th>
-          <th>Source</th>
-          <th>Process</th>
           <th>Since</th>
           <th>State</th>
           <th>Errors</th>
+          <th>Process</th>
+          <th>Source</th>
         </tr>
         <tr ng-show="report.processingRecords == 0">
           <td colspan="9">No pending requests</td>
         </tr>
         <tr ng-repeat="rec in report.processingRecords | filter:processFilterText">
           <td><a href="${contextPath}/request/{{rec.reqId}}" target="_blank">{{rec.reqId}}</a></td>
-          <td>{{rec.reqStatus}} - {{rec.processBy}}</td>
+          <td>{{rec.statusDesc}} {{rec.processBy ? '(' + rec.processBy + ')' : ''}}</td>
           <td>{{rec.reqType}}</td>
           <td>{{rec.cmrIssuingCntry}}-{{rec.cntryNm}}</td>
           <td>
             <div ng-show="rec.custNm" title="{{rec.custNm}}" style="cursor:pointer">{{rec.custNm.length > 15 ? rec.custNm.substring(0,15)+'...' : rec.custNm}}</div>
             
-          </td>
-          <td>{{rec.sourceSystId}}</td>
-          <td>
-            {{rec.processingTyp}}
-            <img src="${resourcesPath}/images/remove.png" class="proc-img" ng-show="rec.hostDown == 'Y'" title="Host System is down right now">
           </td>
           <td>
             <div ng-show="rec.obsolete">{{rec.lastUpdated}}</div>
@@ -422,6 +417,11 @@
             <img src="${resourcesPath}/images/error-icon.png" class="proc-img" ng-show="rec.reqStatus == 'COM' && (rec.processedFlag == 'E' || rec.rdcProcessingStatus == 'A' || rec.rdcProcessingStatus == 'N')"
             title="Errors in Legacy/DB2 and RDC were encountered. Please check request summary.">
           </td>
+          <td>
+            {{rec.processingTyp}}
+            <img src="${resourcesPath}/images/remove.png" class="proc-img" ng-show="rec.hostDown == 'Y'" title="Host System is down right now">
+          </td>
+          <td>{{rec.sourceSystId}}</td>
         </tr>
       </table>
       </div>
@@ -494,7 +494,7 @@
         <tr ng-show="autoContries == 0">
           <td colspan="9">No data found</td>
         </tr>
-        <tr ng-repeat="rec in autoCountries | filter:autoFilterText">
+        <tr ng-repeat="rec in autoCountries">
           <td>{{rec.cntry}}</td>
           <td>
             {{rec.rec.manualPercentage}}%
@@ -516,6 +516,9 @@
   <div class="processing" ng-show="report">
     <div ng-show="report" style="background:#FFF; height:450px; overflow-y:auto" >
     <div class="tab-head">Today's Requests</div>
+      <div class="filters">
+        <input class="filter" ng-model="autoFilterText" placeholder="Input any text filter"> 
+      </div>
     <table width="100%" class="cntry-table">
       <tr>
         <tr>
@@ -529,14 +532,15 @@
           <th>TAT</th>
           <th>Appr.</th>
           <th>Validation</th>
+          <th>Pending</th>
         </tr>
       </tr>
       <tr ng-show="report.automationRecords == 0">
         <td colspan="10">No requests found</td>
       </tr>
-      <tr ng-repeat="rec in report.automationRecords">
+      <tr ng-repeat="rec in report.automationRecords | filter:autoFilterText">
           <td><a href="${contextPath}/request/{{rec.reqId}}" target="_blank">{{rec.reqId}}</a></td>
-          <td>{{rec.reqStatus}}</td>
+          <td>{{rec.statusDesc}}</td>
           <td>{{rec.reqType}}</td>
           <td>{{rec.cmrIssuingCntry}}-{{rec.cntryNm}}</td>
           <td>
@@ -552,6 +556,9 @@
           </td>
           <td>
             {{rec.diffMinNxt}}m
+          </td>
+          <td>
+            {{rec.reqStatus == 'AUT' ? rec.diffWait +'m' :  ''}}
           </td>
       </tr>
     </table>

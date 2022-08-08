@@ -226,7 +226,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
           }
         }
       }
-      if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry())) {
+      if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry()) || SystemLocation.GREECE.equals(model.getCmrIssuingCntry())) {
         if ("U".equals(admin.getReqType())) {
           String maxAddrSeq = null;
           maxAddrSeq = getMaxSequenceAddr(entityManager, model.getReqId());
@@ -1146,9 +1146,14 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         errorInfo = null;
         if (addr.getDplChkResult() == null) {
           Boolean errorStatus = false;
+          Boolean isPrivate=false;
+          if ("PRIV".equals(data.getCustSubGrp()) || "PRICU".equals(data.getCustSubGrp())) {
+            isPrivate = true;
+
+          }
           try {
             dplResult = dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
-                geoHandler != null ? !geoHandler.customerNamesOnAddress() : false);
+                geoHandler != null ? !geoHandler.customerNamesOnAddress() : false,isPrivate);
           } catch (Exception e) {
             log.error("Error in performing DPL Check when call EVS on Request ID " + reqId + " Addr " + addr.getId().getAddrType() + "/"
                 + addr.getId().getAddrSeq(), e);
@@ -1304,7 +1309,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
    * @return
    * @throws Exception
    */
-  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, String soldToLandedCountry, String issuingCountry, boolean useNameOnMain)
+  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, String soldToLandedCountry, String issuingCountry, boolean useNameOnMain, boolean isPrivate)
       throws Exception {
     String servicesUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String appId = SystemConfiguration.getSystemProperty("evs.appID");
@@ -1336,6 +1341,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     request.setAddr1(addr.getAddrTxt());
     request.setAddr2(addr.getAddrTxt2());
     request.setId(id);
+    request.setPrivate(isPrivate);
+
     if (JPHandler.isJPIssuingCountry(issuingCountry))
       request.setCompanyName(addr.getCustNm3());
     else

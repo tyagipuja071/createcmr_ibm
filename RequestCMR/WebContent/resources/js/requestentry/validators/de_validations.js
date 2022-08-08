@@ -5,7 +5,6 @@
 var _vatExemptHandler = null;
 var _scenarioSubTypeHandler = null;
 var _deClientTierHandler = null;
-var _reqReasonHandler = null;
 var _ISUHandler = null;
 var _IMSHandler = null;
 var _deIsuCdHandler = null;
@@ -76,13 +75,6 @@ function afterConfigForDE() {
       lockCtcFieldOnIsu();
     });
   }
-
-  if (_reqReasonHandler == null) {
-    _reqReasonHandler = dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
-      checkOrderBlk();
-    });
-  }
-  _reqReasonHandler[0].onChange();
 
   if (!PageManager.isReadOnly() && FormManager.getActualValue('reqType') == 'C') {
     if (role == 'REQUESTER') {
@@ -1061,6 +1053,18 @@ function validateEnterpriseNum() {
 	  })(), 'MAIN_IBM_TAB', 'frmCMR');
 	}
 
+// CREATCMR-1815
+function addLandedCountryHandler(cntry, addressMode, saving, finalSave) {
+  if (!saving) {
+    if (addressMode == 'newAddress') {
+      FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
+      FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+    } else {
+      FilteringDropdown['val_landCntry'] = null;
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -1069,6 +1073,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.DE);
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.DE);
   GEOHandler.addAddrFunction(setAbbrevNameDEUpdate, GEOHandler.DE);
+  GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.DE);
   // DENNIS: COMMENTED BECAUSE THIS IS IN DUPLICATE OF THE VALIDATOR REGISTERED
   // ON WW
   // GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.DE,
@@ -1096,7 +1101,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateAddressTypeForScenario, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(addSoldToAddressValidator, GEOHandler.DE);
   GEOHandler.registerValidator(addOrderBlockValidator, GEOHandler.DE, null, true);
-  GEOHandler.registerValidator(addReqReasonValidator, GEOHandler.DE, null, true);
+//  GEOHandler.registerValidator(addReqReasonValidator, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);
