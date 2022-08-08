@@ -1813,6 +1813,16 @@ function addDnBSearchValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var ifProspect = FormManager.getActualValue('prospLegalInd');
+        if (dijit.byId('prospLegalInd')) {
+          ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+        }
+        var reqType = FormManager.getActualValue('reqType');
+        var result = FormManager.getActualValue('findDnbResult');
+        var reqStatus = FormManager.getActualValue('reqStatus');
+        if ((result == '' || result.toUpperCase() == 'NOT DONE') && reqType == 'C' && reqStatus == 'DRA' && ifProspect == 'Y') {
+          return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
+        }
         return new ValidationResult(null, true);
       }
     };
