@@ -64,13 +64,19 @@ public class InjectedEMFactory {
       String value = entry.getValue();
       boolean overridden = false;
       if (containsVariable(key)) {
-        LOG.debug("Replacing variable '" + key + "'");
+        LOG.debug("Replacing key '" + key + "':");
         key = replaceWithValue(key);
+        LOG.debug(" - " + key);
         overridden = true;
       }
       if (containsVariable(value)) {
-        LOG.debug("Replacing value '" + key + "'");
+        LOG.debug("Replacing value '" + value + "'");
         value = replaceWithValue(value);
+        if (!key.toUpperCase().contains("PASSWORD") && !key.toUpperCase().contains("PWD") && !key.toUpperCase().contains("PASS")) {
+          LOG.debug(" - " + value);
+        } else {
+          LOG.debug(" - " + value.replaceAll(".*", "*"));
+        }
         overridden = true;
       }
       if (overridden) {
