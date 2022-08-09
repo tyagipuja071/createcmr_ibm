@@ -1742,19 +1742,6 @@ function validateSortl() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-//CREATCMR-6378
-function retainVatValueAT() {
-    var vat = FormManager.getActualValue('vat');
-    var reqId = FormManager.getActualValue('reqId');
-    var qParams = {
-      REQ_ID : reqId,
-    };
-    if (vat == '' || vat == null || vat == undefined) {
-      var result = cmr.query('ADDR.GET.VAT_REQID', qParams);
-      var _vat = result.ret1;
-      FormManager.setValue('vat', _vat);
-    }
-}
 var _importedSearchTerm = null;
 function resetSortlValidator() {
   var reqId = FormManager.getActualValue('reqId');
