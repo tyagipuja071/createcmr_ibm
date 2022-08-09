@@ -66,6 +66,12 @@ public class AutomationMonitor {
   @Column(name = "DIFF_MIN_NXT")
   private long diffMinNxt;
 
+  @Column(name = "DIFF_WAIT")
+  private long diffWait;
+
+  @Column(name = "STATUS_DESC")
+  private String statusDesc;
+
   @Transient
   private long netDiff;
 
@@ -195,6 +201,22 @@ public class AutomationMonitor {
 
   public void setNetDiff(long netDiff) {
     this.netDiff = netDiff;
+  }
+
+  public String getStatusDesc() {
+    return statusDesc;
+  }
+
+  public void setStatusDesc(String statusDesc) {
+    this.statusDesc = statusDesc;
+  }
+
+  public long getDiffWait() {
+    return diffWait;
+  }
+
+  public void setDiffWait(long diffWait) {
+    this.diffWait = diffWait;
   }
 
 }
