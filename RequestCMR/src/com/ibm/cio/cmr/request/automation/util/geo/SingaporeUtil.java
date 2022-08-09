@@ -59,8 +59,6 @@ public class SingaporeUtil extends AutomationUtil {
   private static final String SCENARIO_DUMMY = "DUMMY";
   private static final String SCENARIO_INTERNAL = "INTER";
   private static final String SCENARIO_CROSS_PRIVATE_CUSTOMER = "XPRIV";
-  private static final String SCENARIO_INTERNAL = "INTER";
-  private static final String SCENARIO_DUMMY = "DUMMY";
   private static final String SCENARIO_ECOSYS = "ECSYS";
   private static final String SCENARIO_CROSS_ECOSYS = "XECO";
 
