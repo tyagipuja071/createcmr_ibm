@@ -17,6 +17,7 @@ import java.util.Queue;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrException;
@@ -36,6 +37,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 import com.ibm.cmr.create.batch.util.AutomationCheckAndRecover;
 import com.ibm.cmr.create.batch.util.BatchUtil;
+import com.ibm.cmr.create.batch.util.ProfilerLogger;
 
 /**
  * Executes the automation engine and processes all pending records
@@ -52,6 +54,7 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
 
   @Override
   protected Queue<Long> getRequestsToProcess(EntityManager entityManager) {
+    long start = new Date().getTime();
     LinkedList<Long> pendingList = new LinkedList<>();
 
     String sql = ExternalizedQuery.getSql("AUTOMATION.GET_PENDING");
@@ -67,7 +70,8 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
     } catch (Exception e) {
       LOG.error("Error in initializing rules...");
     }
-
+    ProfilerLogger.LOG
+        .trace("[Automation] After getRequestsToProcess " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return pendingList;
   }
 
@@ -77,6 +81,7 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
 
     Timestamp current = SystemUtil.getActualTimestamp();
     for (Long id : requests) {
+      long start = new Date().getTime();
       entityManager.clear();
       LOG.info("Processing request " + id);
 
@@ -129,6 +134,8 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
         }
         LOG.debug("Committing transactions for Request " + id);
         partialCommit(entityManager);
+        ProfilerLogger.LOG.trace("[Automation] After executeBatchForRequests for Request ID: " + id + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         addError(e);
         LOG.error("An error occurred during the execution of the automation engine for Request " + id, e);

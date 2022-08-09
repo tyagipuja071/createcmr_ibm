@@ -59,6 +59,8 @@ public class SingaporeUtil extends AutomationUtil {
   private static final String SCENARIO_DUMMY = "DUMMY";
   private static final String SCENARIO_INTERNAL = "INTER";
   private static final String SCENARIO_CROSS_PRIVATE_CUSTOMER = "XPRIV";
+  private static final String SCENARIO_INTERNAL = "INTER";
+  private static final String SCENARIO_DUMMY = "DUMMY";
   private static final String SCENARIO_ECOSYS = "ECSYS";
   private static final String SCENARIO_CROSS_ECOSYS = "XECO";
 
@@ -275,6 +277,7 @@ public class SingaporeUtil extends AutomationUtil {
     case SCENARIO_INTERNAL:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
+
     case SCENARIO_ECOSYS:
     case SCENARIO_CROSS_ECOSYS:
       addToNotifyListASEAN(entityManager, data.getId().getReqId());

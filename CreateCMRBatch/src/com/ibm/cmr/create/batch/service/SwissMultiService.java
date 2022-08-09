@@ -11,17 +11,16 @@ import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
-import com.ibm.cmr.create.batch.util.USCMRNumGen;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 
 /**
- * @author Paul
+ * @author 136786PH1
  *
  */
-public class USMultiService extends MultiThreadedBatchService<Long> {
+public class SwissMultiService extends MultiThreadedBatchService<Long> {
 
-  private static final Logger LOG = Logger.getLogger(USMultiService.class);
-  private USService service = new USService();
+  private static final Logger LOG = Logger.getLogger(SwissMultiService.class);
+  private SWISSService service = new SWISSService();
   private boolean countryMapInit = false;
 
   public enum Mode {
@@ -53,7 +52,7 @@ public class USMultiService extends MultiThreadedBatchService<Long> {
 
   @Override
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
-    this.service.initClientUS();
+    this.service.initClientSwiss();
     LOG.debug("Processing requests. MODE: " + this.mode);
     synchronized (this) {
       if (!this.countryMapInit) {
@@ -76,18 +75,8 @@ public class USMultiService extends MultiThreadedBatchService<Long> {
   }
 
   @Override
-  protected boolean hasPreProcess() {
-    return true;
-  }
-
-  @Override
-  protected void preProcess(EntityManager entityManager) {
-    USCMRNumGen.init(entityManager);
-  }
-
-  @Override
   protected String getThreadName() {
-    return "USMulti";
+    return "SwissMulti";
   }
 
   @Override

@@ -451,7 +451,7 @@ function afterConfigForCEMEA() {
     } else {
       FormManager.enable('custClass');
     }
- // CREATCMR-6378
+    // CREATCMR-6378
     retainVatValueAT();
   }
 

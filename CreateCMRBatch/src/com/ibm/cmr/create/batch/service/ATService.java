@@ -59,7 +59,7 @@ import com.ibm.cmr.services.client.process.mass.RequestValueRecord;
 public class ATService extends TransConnService {
   // private static final String BATCH_SERVICES_URL =
   // SystemConfiguration.getValue("BATCH_SERVICES_URL");
-  private ProcessClient serviceClient;
+  // private ProcessClient serviceClient;
   private static final String COMMENT_LOGGER = "AT Service";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   private boolean massServiceMode;
@@ -321,7 +321,7 @@ public class ATService extends TransConnService {
    * @param entityManager
    * @return
    */
-  private List<Admin> getPendingRecords(EntityManager entityManager) {
+  List<Admin> getPendingRecords(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("AT.GET_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(Admin.class);
@@ -334,7 +334,7 @@ public class ATService extends TransConnService {
    * @param entityManager
    * @return
    */
-  private List<Admin> getPendingRecordsMassUpd(EntityManager entityManager) {
+  List<Admin> getPendingRecordsMassUpd(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("AT.GET_MASS_PROCESS_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(Admin.class);

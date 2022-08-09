@@ -264,7 +264,8 @@ var SCCService = (function() {
         if (nLand == 'US') {
           result = cmr.query('VALIDATOR.SCC_RECORD', {
             C_CITY : cCity,
-            C_ST : cSt
+            C_ST : cSt,
+            C_CNTY : cCnty
           });
         } else {
           result = cmr.query('VALIDATOR.SCC_RECORD_NONUS', {
@@ -276,7 +277,8 @@ var SCCService = (function() {
           FormManager.save('frmCMR');
         } else {
           if (nLand == 'US') {
-            cmr.showAlert('The combination of State Code and City Code already exist,please check your input and resend your request.');
+            cmr
+                .showAlert('The combination of State Code and City Code and County Code and Con already exist,please check your input and resend your request.');
           } else {
             cmr.showAlert('The combination of Landed Country and City Code already exist,please check your input and resend your request.');
           }
@@ -306,7 +308,8 @@ var SCCService = (function() {
           } else {
             result = cmr.query('VALIDATOR.SCC_RECORD', {
               C_CITY : cCity,
-              C_ST : cSt
+              C_ST : cSt,
+              C_CNTY : cCnty
             });
           }
           if (result.ret1 == null || result.ret1 == "") {
@@ -315,7 +318,8 @@ var SCCService = (function() {
             if (cSt == '99.0') {
               cmr.showAlert('The combination of Landed Country and City Code already exist,please check your input and resend your request.');
             } else {
-              cmr.showAlert('The combination of State Code and City Code already exist,please check your input and resend your request.');
+              cmr
+                  .showAlert('The combination of State Code and City Code and County Code already exist,please check your input and resend your request.');
             }
             return;
           }

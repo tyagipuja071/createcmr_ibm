@@ -1,40 +1,5 @@
 var app = angular.module('DashboardApp', [ 'ngRoute', 'ngSanitize' ]);
 
-app.filter('processFilter', function() {
-  return function(items, search) {
-    if (!search) {
-      return items;
-    }
-
-    return items.filter(function(text, index, array) {
-      var val = search;
-      if (!val) {
-        return true;
-      }
-      val = val.toUpperCase();
-      if (text.reqStatus.toUpperCase().indexOf(val) >= 0) {
-        return true;
-      }
-      if (text.reqType.toUpperCase().indexOf(val) >= 0) {
-        return true;
-      }
-      if (text.cmrIssuingCntry.toUpperCase().indexOf(val) >= 0) {
-        return true;
-      }
-      if (text.custNm.toUpperCase().indexOf(val) >= 0) {
-        return true;
-      }
-      if (text.sourceSystId.toUpperCase().indexOf(val) >= 0) {
-        return true;
-      }
-      if (text.processingTyp.toUpperCase().indexOf(val) >= 0) {
-        return true;
-      }
-      return false;
-    });
-
-  };
-});
 
 
 app.controller('DashboardController', [ '$scope', '$document', '$http', '$timeout', '$sanitize', '$filter', function($scope, $document, $http, $timeout, $sanitize, $filter) {
