@@ -1915,6 +1915,7 @@ function setCtcOnIsuCdChangeASEAN() {
     return;
   }
   isuCd = FormManager.getActualValue('isuCd');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   var cluster = FormManager.getActualValue('apCustClusterId');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqType = FormManager.getActualValue('reqType');
@@ -1925,6 +1926,12 @@ function setCtcOnIsuCdChangeASEAN() {
   }
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+      FormManager.enable('clientTier');
+    }
   }
 }
 

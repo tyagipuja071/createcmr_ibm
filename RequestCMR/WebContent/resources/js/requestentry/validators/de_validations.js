@@ -1064,6 +1064,18 @@ function addLandedCountryHandler(cntry, addressMode, saving, finalSave) {
   }
 }
 
+// CREATCMR-1815
+function addLandedCountryHandler(cntry, addressMode, saving, finalSave) {
+  if (!saving) {
+    if (addressMode == 'newAddress') {
+      FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
+      FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+    } else {
+      FilteringDropdown['val_landCntry'] = null;
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');

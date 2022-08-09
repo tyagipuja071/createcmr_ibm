@@ -4711,6 +4711,7 @@ function hideDisableAutoProcessingCheckBox() {
 
 function afterConfigTemplateLoadForCEE() {
   filterCmrnoForCEE();
+  setClassificationCodeCEE();
   // disableSBO();
   setEngineeringBO();
 }

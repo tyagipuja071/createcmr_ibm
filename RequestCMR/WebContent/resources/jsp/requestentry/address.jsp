@@ -186,6 +186,7 @@ visibility: hidden !IMPORTANT;
           </cmr:label>
           <div>
             <span id="addressTabSccInfo"></span>
+            <input type="hidden" id="scc" name="scc" />
           </div>
         </p>
       </cmr:column>

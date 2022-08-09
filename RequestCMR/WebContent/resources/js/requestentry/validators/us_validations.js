@@ -9,6 +9,232 @@ var _usIsuHandler = null;
 var _usSicm = "";
 var _kukla = "";
 var _enterpriseHandler = null;
+var affiliateArray = {
+  9001 : '0089800',
+  9002 : '0084800',
+  9003 : '0086100',
+  9004 : '0085900',
+  9005 : '0086000',
+  9006 : '0085800',
+  9007 : '0080200',
+  9008 : '0085300',
+  9009 : '0085600',
+  9010 : '0080300',
+  9011 : '0088300',
+  9012 : '0086900',
+  9013 : '0082200',
+  9014 : '0082100',
+  9015 : '0082700',
+  9016 : '0085300',
+  9017 : '0082800',
+  9018 : '0082900',
+  9019 : '0082600',
+  9020 : '0083400',
+  9021 : '0083100',
+  9022 : '0083200',
+  9023 : '0082500',
+  9024 : '0083000',
+  9025 : '0088600',
+  9026 : '0088800',
+  9027 : '0083300',
+  9028 : '0083100',
+  9029 : '0086400',
+  9030 : '0081900',
+  9031 : '0081000',
+  9032 : '0087900',
+  9033 : '0085500',
+  9034 : '0084200',
+  9035 : '0084300',
+  9036 : '0084700',
+  9037 : '0084400',
+  9038 : '0076500',
+  9040 : '0084900',
+  9041 : '0085000',
+  9042 : '0089300',
+  9043 : '0089400',
+  9044 : '0089000',
+  9045 : '0089500',
+  9046 : '0060100',
+  9048 : '0062100',
+  9049 : '0069300',
+  9050 : '0066600',
+  9051 : '0069600',
+  9052 : '0074800',
+  9053 : '0082300',
+  9054 : '0080600',
+  9055 : '0060600',
+  9056 : '0080400',
+  9057 : '0088400',
+  9058 : '0088500',
+  9060 : '0062300',
+  9061 : '0062400',
+  9063 : '0062600',
+  9064 : '0062700',
+  9065 : '0088700',
+  9066 : '0062200',
+  9067 : '0061300',
+  9068 : '0061400',
+  9069 : '0061500',
+  9070 : '0085700',
+  9071 : '0061800',
+  9072 : '0060200',
+  9073 : '0060300',
+  9074 : '0060400',
+  9075 : '0060500',
+  9076 : '0069000',
+  9077 : '0060700',
+  9078 : '0060800',
+  9079 : '0061100',
+  9080 : '0075200',
+  9081 : '0061600',
+  9083 : '0062000',
+  9084 : '0061900',
+  9085 : '0080500',
+  9086 : '0074000',
+  9087 : '0061700',
+  9088 : '0060900',
+  9089 : '0061000',
+  9093 : '0066000',
+  9095 : '0065300',
+  9096 : '0061200',
+  9098 : '0066800',
+  9099 : '0076800',
+  9100 : '0067200',
+  9102 : '0068600',
+  9104 : '0068800',
+  9105 : '0068900',
+  9108 : '0069200',
+  9109 : '0065000',
+  9110 : '0063700',
+  9111 : '0066800',
+  9112 : '0064100',
+  9113 : '0069700',
+  9115 : '0064200',
+  9117 : '0073100',
+  9119 : '0073300',
+  9120 : '0073500',
+  9121 : '0064300',
+  9122 : '0073700',
+  9124 : '0073900',
+  9125 : '0064400',
+  9126 : '0064500',
+  9127 : '0064600',
+  9129 : '0070100',
+  9130 : '0064700',
+  9131 : '0070300',
+  9132 : '0064800',
+  9134 : '0071000',
+  9135 : '0064900',
+  9136 : '0071200',
+  9137 : '0071300',
+  9138 : '0071400',
+  9139 : '0065400',
+  9140 : '0065500',
+  9141 : '0072000',
+  9142 : '0082400',
+  9147 : '0079700',
+  9148 : '0078600',
+  9151 : '0078900',
+  9153 : '0078300',
+  9155 : '0078400',
+  9156 : '0078500',
+  9157 : '0078700',
+  9158 : '0078800',
+  9159 : '0079100',
+  9160 : '0062100',
+  9162 : '0065600',
+  9163 : '0065800',
+  9164 : '0065900',
+  9165 : '0080100',
+  9166 : '0066200',
+  9167 : '0066300',
+  9168 : '0066500',
+  9169 : '0066700',
+  9170 : '0067400',
+  9171 : '0067500',
+  9172 : '0067600',
+  9173 : '0067700',
+  9174 : '0067800',
+  9175 : '0068100',
+  9176 : '0067900',
+  9178 : '0068200',
+  9179 : '0068300',
+  9180 : '0068400',
+  9181 : '0068500',
+  9182 : '0069400',
+  9183 : '0069500',
+  9184 : '0086100',
+  9185 : '0076500',
+  9186 : '0076600',
+  9187 : '0076700',
+  9189 : '0075500',
+  9191 : '0075700',
+  9192 : '0071100',
+  9193 : '0075900',
+  9194 : '0070700',
+  9195 : '0076100',
+  9196 : '0071500',
+  9197 : '0071600',
+  9198 : '0076400',
+  9199 : '0075100',
+  9200 : '0076500',
+  9201 : '0075000',
+  9203 : '0085100',
+  9204 : '0085100',
+  9207 : '0084100',
+  9208 : '0085100',
+  9209 : '0085200',
+  9210 : '0086200',
+  9211 : '0086500',
+  9213 : '0087100',
+  9214 : '0087200',
+  9215 : '0087300',
+  9216 : '0086700',
+  9218 : '0086100',
+  9219 : '0086800',
+  9222 : '0062800',
+  9223 : '0062900',
+  9224 : '0063000',
+  9226 : '0063200',
+  9227 : '0063300',
+  9228 : '0063400',
+  9230 : '0089700',
+  9231 : '0089900',
+  9232 : '0085200',
+  9234 : '0075300',
+  9235 : '0088900',
+  9236 : '0089200',
+  9237 : '0089600',
+  9239 : '0072700',
+  9240 : '0072900',
+  9241 : '0073000',
+  9242 : '0074300',
+  9243 : '0088000',
+  9244 : '0079900',
+  9245 : '0085400',
+  9246 : '0070800',
+  9247 : '0070900',
+  9248 : '0071800',
+  9250 : '0072100',
+  9251 : '0072200',
+  9252 : '0072300',
+  9253 : '0072400',
+  9254 : '0072600',
+  9255 : '0073400',
+  9260 : '0075600',
+  9261 : '0075800',
+  9262 : '0076000',
+  9263 : '0076200',
+  9264 : '0076300',
+  9265 : '0076900',
+  9267 : '0077100',
+  9268 : '0077200',
+  9269 : '0077300',
+  9273 : '0077700',
+  9274 : '0079800',
+  9275 : '0080900',
+  9276 : '0081100'
+}
 /**
  * Adds the validator for Invoice-to that only 3 address lines can be specified
  */
@@ -299,6 +525,8 @@ function afterConfigForUS() {
             _usSicm = _usSicm.substring(0, 4);
           }
           FormManager.setValue('isicCd', _usSicm);
+          // CREATCMR-6587
+          setAffiliateNumber();
         }
       }
     });
@@ -471,6 +699,8 @@ function setClientTierValuesUS() {
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.resetValidations('clientTier');
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
   } else {
     var role = FormManager.getActualValue('userRole').toUpperCase();
     var reqType = FormManager.getActualValue('reqType');
@@ -507,31 +737,56 @@ function checkSCCValidate() {
 
     var numeric = /^[0-9]*$/;
 
-    if (numeric.test(cnty)) {
+    if (landCntry == 'US') {
+      if (cnty != '') {
+        if (numeric.test(cnty)) {
 
-      var role = null;
-      if (typeof (_pagemodel) != 'undefined') {
-        role = _pagemodel.userRole;
-      }
+          var role = null;
+          if (typeof (_pagemodel) != 'undefined') {
+            role = _pagemodel.userRole;
+          }
 
-      if (role == 'Processor') {
-        var ret = cmr.query('US_CMR_SCC.GET_SCC_MULTIPLE_BY_LAND_CNTRY_ST_CITY', {
-          _qall : 'Y',
-          LAND_CNTRY : landCntry,
-          N_ST : st,
-          N_CITY : city
-        });
+          if (role == 'Processor') {
+            var ret = cmr.query('US_CMR_SCC.GET_SCC_MULTIPLE_BY_LAND_CNTRY_ST_CITY', {
+              _qall : 'Y',
+              LAND_CNTRY : landCntry,
+              N_ST : st,
+              N_CITY : city
+            });
 
-        if (ret.length > 1) {
-          $("#addressTabSccInfo").html('');
-          $('#sccMultipleWarn').show();
+            if (ret.length > 1) {
+              $("#addressTabSccInfo").html('');
+              $('#sccMultipleWarn').show();
+            }
+          }
+
+          var ret1 = cmr.query('US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY', {
+            LAND_CNTRY : landCntry,
+            N_ST : st,
+            C_CNTY : cnty,
+            N_CITY : city
+          });
+
+          var sccValue = '';
+
+          if (ret1 && ret1.ret1 && ret1.ret1 != '') {
+            sccValue = ret1.ret1;
+            // CREATCMR-5447
+            $("#addressTabSccInfo").html(sccValue);
+            $("#scc").val(sccValue);
+          } else {
+            $('#sccWarn').show();
+          }
+
+        } else {
+          $('#sccWarn').show();
         }
+      } else {
+        $('#sccWarn').show();
       }
-
-      var ret1 = cmr.query('US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY', {
+    } else {
+      var ret1 = cmr.query('US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY_NON_US', {
         LAND_CNTRY : landCntry,
-        N_ST : st,
-        C_CNTY : cnty,
         N_CITY : city
       });
 
@@ -541,15 +796,15 @@ function checkSCCValidate() {
         sccValue = ret1.ret1;
         // CREATCMR-5447
         $("#addressTabSccInfo").html(sccValue);
+        $("#scc").val(sccValue);
       } else {
         $('#sccWarn').show();
       }
 
-    } else {
-      $('#sccWarn').show();
     }
   }
 }
+
 
 function sccWarningShowAndHide() {
   var action = FormManager.getActualValue('yourAction');
@@ -566,6 +821,77 @@ function sccWarningShowAndHide() {
 
 }
 
+function checkSCCValidateForProcessor() {
+
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+
+  if (role == 'Processor') {
+
+    if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+      for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+
+        record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+        type = record.addrType;
+
+        if (typeof (type) == 'object') {
+          type = type[0];
+        }
+
+        if (type == 'ZS01') {
+          landCntry = record.landCntry;
+          st = record.stateProv;
+          cnty = record.county;
+          city = record.city1.toString().toUpperCase();
+        }
+      }
+
+      var numeric = /^[0-9]*$/;
+
+      if (cnty != '') {
+        if (numeric.test(cnty)) {
+          var ret1 = cmr.query('US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY', {
+            LAND_CNTRY : landCntry,
+            N_ST : st,
+            C_CNTY : cnty,
+            N_CITY : city
+          });
+
+          var sccValue = '';
+
+          if (ret1 && ret1.ret1 && ret1.ret1 != '') {
+            sccValue = ret1.ret1;
+            // CREATCMR-5447
+            $("#addressTabSccInfo").html(sccValue);
+            $("#scc").val(sccValue);
+          } else {
+            $('#sccWarn').show();
+          }
+
+        } else {
+          $('#sccWarn').show();
+        }
+      } else {
+        $('#sccWarn').show();
+      }
+    }
+
+    FormManager.addValidator('scc', Validators.REQUIRED, [ 'SCC Code' ], 'MAIN_NAME_TAB');
+  }
+}
+
+function addLatinCharValidatorUS() {
+  FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Address' ]);
+  FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
+  FormManager.addValidator('city2', Validators.LATIN, [ 'District' ]);
+  FormManager.addValidator('divn', Validators.LATIN, [ 'Division/Address Con\'t' ]);
+  FormManager.addValidator('dept', Validators.LATIN, [ 'Department / Attn' ]);
+  FormManager.addValidator('bldg', Validators.LATIN, [ 'Building' ]);
+  FormManager.addValidator('floor', Validators.LATIN, [ 'Floor' ]);
+}
+
 function usRestrictCode() {
   if (FormManager.getActualValue('custSubGrp') == 'KYN') {
     FormManager.setValue('inacType', 'I');
@@ -577,63 +903,6 @@ function usRestrictCode() {
     FormManager.readOnly('mtkgArDept');
     FormManager.readOnly('svcArOffice');
   }
-}
-
-function clientTierCodeValidator() {
-  var isuCode = FormManager.getActualValue('isuCd');
-  var clientTierCode = FormManager.getActualValue('clientTier');
-
-  if (isuCode == '5K') {
-    if (clientTierCode == '') {
-      $("#clientTierSpan").html('');
-
-      return new ValidationResult(null, true);
-    } else {
-      $("#clientTierSpan").html('');
-
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept blank.');
-    }
-  }
-}
-
-function clientTierValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var clientTier = FormManager.getActualValue('clientTier');
-        var isuCd = FormManager.getActualValue('isuCd');
-        var reqType = FormManager.getActualValue('reqType');
-        var valResult = null;
-        
-        var oldClientTier = null;
-        var oldISU = null;
-        var requestId = FormManager.getActualValue('reqId');
-        
-        if (reqType == 'C') {
-          valResult = clientTierCodeValidator();
-        } else {
-          qParams = {
-              REQ_ID : requestId,
-          };
-          var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-          
-          if (result != null && result != '') {
-            oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU =  result.ret3 != null ? result.ret3 : '';
-            
-            if (clientTier != oldClientTier || isuCd != oldISU) {
-              valResult = clientTierCodeValidator();
-            }
-          }
-        }
-        return valResult;
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function addKuklaValidator() {
@@ -699,6 +968,8 @@ function hideKUKLA() {
 }
 
 function lockOrdBlk() {
+  FormManager.addValidator('mainCustNm1', Validators.LATIN, [ 'Customer Name' ], 'MAIN_GENERAL_TAB');
+  FormManager.addValidator('mainCustNm2', Validators.LATIN, [ 'Customer Name 2' ], 'MAIN_GENERAL_TAB');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqType = FormManager.getActualValue('reqType');
 
@@ -949,6 +1220,17 @@ function updateBOForEntp(){
 	  }
 }
 	 
+
+// CREATCMR-6587
+function setAffiliateNumber() {
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  var isicCd = FormManager.getActualValue('isicCd');
+  if (subIndustryCd.startsWith('Y') && (isicCd.startsWith('90') || isicCd.startsWith('91') || isicCd.startsWith('92'))) {
+    FormManager.setValue('affiliate', affiliateArray[isicCd]);
+  }
+}
+// CREATCMR-6587
+
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
@@ -980,6 +1262,8 @@ dojo.addOnLoad(function() {
   // CREATCMR-3298
   GEOHandler.addAfterConfig(checkSCCValidate, [ SysLoc.USA ]);
   GEOHandler.registerValidator(sccWarningShowAndHide, [ SysLoc.USA ], null, false);
+  GEOHandler.registerValidator(checkSCCValidateForProcessor, [ SysLoc.USA ], null, false);
+  GEOHandler.addAddrFunction(addLatinCharValidatorUS, [ SysLoc.USA ]);
 
   GEOHandler.addAddrFunction(hideKUKLA, [ SysLoc.USA ]);
   // CREATCMR-6375

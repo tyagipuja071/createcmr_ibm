@@ -539,6 +539,7 @@ function setClientTierValues(isuCd) {
     return;
   }
   var isuList = [ '18', '28' ];
+  var reqType = FormManager.getActualValue('reqType');
   if (isuList.includes(isuCd)) {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
