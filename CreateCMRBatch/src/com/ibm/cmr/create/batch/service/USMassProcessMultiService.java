@@ -124,7 +124,7 @@ public class USMassProcessMultiService extends MultiThreadedBatchService<Long> {
       if (resultsMain != null && resultsMain.size() > 0) {
         // 2. If results are not empty, lock the admin record
         lockRecord(entityManager, admin);
-        int threads = 5;
+        int threads = 10;
         String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
         if (threadCount != null && StringUtils.isNumeric(threadCount)) {
           threads = Integer.parseInt(threadCount);

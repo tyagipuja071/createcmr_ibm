@@ -371,7 +371,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
             cmrType = "MAIN";
           }
           // temp try get number, will remove when generate method done
-          String cmrNum = USCMRNumGen.genCMRNum(em, cmrType);
+          String cmrNum = USCMRNumGen.genCMRNumMassCrt(em, cmrType);
           massCrtData.setCmrNo(cmrNum);
           mass_create.setCmrNo(cmrNum);
           updateEntity(mass_create, em);
@@ -634,7 +634,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
 
   @Override
   protected void preProcess(EntityManager entityManager) {
-    USCMRNumGen.init(entityManager);
+    USCMRNumGen.initMassCrt(entityManager);
   }
 
 }
