@@ -45,7 +45,9 @@ function afterConfigForNL() {
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    if (FormManager.getActualValue('custSubGrp') != 'IBMEM') {
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    }
     FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'BO Team' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('isuCd', Validators.REQUIRED);
@@ -111,6 +113,7 @@ function afterConfigForNL() {
     setBOTeamValues(clientTier);
   }
   lockDunsNo();
+  disableIBMTab();
 }
 
 function lockDunsNo() {
@@ -121,6 +124,50 @@ function lockDunsNo() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (role == 'REQUESTER') {
     FormManager.readOnly('dunsNo');
+  }
+}
+
+function disableIBMTab() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntryUse = FormManager.getActualValue('countryUse');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'C' && role == 'Requester') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('enterprise');
+
+    FormManager.readOnly('bgId');
+    FormManager.readOnly('gbgId');
+    FormManager.readOnly('bgRuleId');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('geoLocationCd');
+    FormManager.readOnly('dunsNo');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.readOnly('economicCd');
+  } else if (reqType == 'C' && role == 'Processor') {
+    FormManager.enable('cmrNo');
+  }
+  if (custSubGrp.includes('IBM')) {
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('dunsNo');
+    FormManager.readOnly('cmrNo');
+  } else {
+    FormManager.enable('enterprise');
+    FormManager.enable('inacCd');
+    FormManager.enable('searchTerm');
+    if (role == 'Processor') {
+      FormManager.enable('cmrNo');
+      FormManager.enable('dunsNo');
+    }
   }
 }
 

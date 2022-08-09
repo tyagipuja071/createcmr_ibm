@@ -1111,7 +1111,7 @@ function setSrAndSboOnIsicUK() {
 
 function setClientTierValuesUKI() {
 
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     return;
   }
   var reqType = FormManager.getActualValue('reqType');
@@ -4829,6 +4829,10 @@ function setSboValueBasedOnIsuCtcUK() {
   var reqType = FormManager.getActualValue('reqType');
   var isuList = [ '34', '5K', '05', '11', '4F' ];
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    return;
+  }
 
   if (isuCd == '34' && clientTier == 'Y') {
     FormManager.setValue('salesBusOffCd', '015');
@@ -7436,6 +7440,9 @@ function lockRequireFieldsUKI() {
     if (custSubGroup == 'PRICU' || custSubGroup == 'BUSPR' || custSubGroup == 'INTER') {
       FormManager.readOnly('inacCd');
     }
+    if (custSubGroup == 'IBMEM') {
+      FormManager.setValue('clientTier', '');
+    }
   }
 
   if (reqType == 'C' && role == 'REQUESTER') {
@@ -7501,7 +7508,18 @@ function lockRequireFieldsUKI() {
     FormManager.enable('abbrevNm');
     FormManager.enable('abbrevLocn');
   }
-
+  
+  if (reqType == 'C' && role == 'PROCESSOR') {
+    if (custSubGroup == 'IBMEM') {
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('company');
+      FormManager.readOnly('collectionCd');
+    } else {
+      FormManager.enable('clientTier');
+      FormManager.enable('company');
+      FormManager.enable('collectionCd');
+    }
+  }
 }
 function lockCustClassUKI() {
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -8585,7 +8603,7 @@ function setCtcFieldMandtUKI() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
   var reqType = FormManager.getActualValue('reqType');
-  if (role != 'PROCESSOR' || reqType != 'C') {
+  if (role != 'PROCESSOR' || reqType != 'C' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     return;
   }
   if (cntry == '866') {
@@ -9533,6 +9551,7 @@ function autoSetUIFieldsOnScnrioUKI() {
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (custSubGrp == 'INTER') {
     FormManager.setValue('company', '');
     FormManager.readOnly('company');
