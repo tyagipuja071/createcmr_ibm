@@ -604,13 +604,10 @@ function addHandlersForPTES() {
   }
 
   if (_CTCHandler == null) { 
-    _oldClientTier = FormManager.getActualValue('clientTier');
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      if (_oldClientTier != FormManager.getActualValue('clientTier')) {
         setSalesRepValues(value);
         setEnterpriseValues(false);
         setEnterpriseValues34Q();
-      }
     });
   }
 
@@ -2570,12 +2567,12 @@ function setFieldsCharForScenarios() {
   if (custSubGroup == 'BUSPR') {
     FormManager.setValue('custClass', '45');
     FormManager.setValue('inacCd', '');
-    FormManager.setValue('repTeamMemberNo', '1Ficti');
+    FormManager.setValue('repTeamMemberNo', '1FICTI');
   }
   if (custSubGroup == 'XBP') {
     FormManager.setValue('custClass', '45');
     FormManager.setValue('inacCd', '');
-    FormManager.setValue('repTeamMemberNo', '1Ficti');
+    FormManager.setValue('repTeamMemberNo', '1FICTI');
   }
 
   if (custSubGroup == 'COMME' || custSubGroup == 'IGSGS' || custSubGroup == 'THDPT' || custSubGroup == 'THDIG' || custSubGroup == 'XCRO'
