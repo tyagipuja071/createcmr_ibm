@@ -54,6 +54,25 @@
       FormManager.addValidator('newEntpNameCont', Validators.REQUIRED, [ 'New Account Number' ]);
      // FormManager.addValidator('newEntpNameCont', Validators.NUMBER, [ 'New Account Number' ]);
     }
+  } else if (FormManager.getActualValue('cmrIssuingCntry') == '897'){
+    //FormManager.addValidator('entNo', Validators.REQUIRED, [ 'Enterprise No.' ]);
+    //FormManager.addValidator('entNo', Validators.NUMBER, [ 'Enterprise No.' ]);
+    /*
+    if (FormManager.getActualValue('entUpdTyp') == 'A') {
+      FormManager.addValidator('comp', Validators.REQUIRED, [ 'Company Number' ]);
+      FormManager.addValidator('comp', Validators.NUMBER, [ 'Company Number' ]);
+      FormManager.addValidator('cname1', Validators.REQUIRED, [ 'New Company Name' ]);
+    }
+    if (FormManager.getActualValue('entUpdTyp') == 'B') {
+      FormManager.addValidator('comp1', Validators.REQUIRED, [ 'Company Number' ]);
+      FormManager.addValidator('comp1', Validators.NUMBER, [ 'Company Number' ]);
+      FormManager.addValidator('newEntp', Validators.REQUIRED, [ 'New Enterprise No.' ]);
+      FormManager.addValidator('newEntp', Validators.NUMBER, [ 'New Enterprise No.' ]);
+    }*/
+    if (FormManager.getActualValue('entUpdTyp') == 'C') {
+      FormManager.addValidator('newEntpName', Validators.REQUIRED, [ 'New Enterprise Name' ]);
+      //FormManager.addValidator('newEntpNameCont', Validators.REQUIRED, [ 'New Enterprise Name Cont.' ]);
+    }
   }else{
     FormManager.addValidator('entNo', Validators.REQUIRED, [ 'Enterprise No.' ]);
     FormManager.addValidator('entNo', Validators.NUMBER, [ 'Enterprise No.' ]);
@@ -80,7 +99,7 @@
   });
 </script>
 <jsp:include page="/resources/jsp/requestentry/detailstrip.jsp" />
-<cmr:view exceptForCountry="760">
+<cmr:view exceptForCountry="760,897">
 <cmr:row addBackground="true">
   <cmr:column span="6">
     <h3>Select the type of Update you want to do for the Enterprise:</h3>
@@ -260,4 +279,95 @@
 <%
   }
 %>
+</cmr:view>
+
+<cmr:view forCountry="897">
+<cmr:row addBackground="true">
+  <cmr:column span="6">
+    <h3>Select the type of Update you want to do for the Enterprise:</h3>
+  </cmr:column>
+</cmr:row>
+<cmr:row addBackground="true">
+  <cmr:column span="6">
+    <p>
+      <cmr:label fieldId="entNo">
+             Enterprise # <span style="color: red">*</span>: 
+          </cmr:label>
+      <form:input path="entNo" id="entNo" dojoType="dijit.form.TextBox" placeHolder="Enterprise # " maxlength="7" />
+  </cmr:column>
+</cmr:row>
+<span style="display:none">
+<cmr:row topPad="10" addBackground="true">
+  <cmr:column span="6">
+    <input type="radio" id="entUpdTyp_A" name="entUpdTyp" value="A" onclick="UpdateByEntSrvc.clickRadio(this)"> Update Company Legal Name
+  </cmr:column>
+</cmr:row>
+<cmr:row>
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="comp">
+             Company #: 
+          </cmr:label>
+      <form:input path="comp" id="comp" dojoType="dijit.form.TextBox" placeHolder="Company #" maxlength="8" />
+
+    </p>
+  </cmr:column>
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="cname1">
+             New Company Name: 
+          </cmr:label>
+      <form:input path="cname1" id="cname1" dojoType="dijit.form.TextBox" placeHolder="Company Name " maxlength="52" />
+    </p>
+  </cmr:column>
+</cmr:row>
+
+<cmr:row topPad="10" addBackground="true">
+  <cmr:column span="6">
+    <input type="radio" id="entUpdTyp_B" name="entUpdTyp" value="B" onclick="UpdateByEntSrvc.clickRadio(this)"> Move Company to new Enterprise
+  </cmr:column>
+</cmr:row>
+<cmr:row addBackground="true">
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="comp1">
+             Company #: 
+          </cmr:label>
+      <form:input path="comp1" id="comp1" dojoType="dijit.form.TextBox" placeHolder="Company # " maxlength="8" />
+    </p>
+  </cmr:column>
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="newEntp">
+             New Enterprise #: 
+          </cmr:label>
+      <form:input path="newEntp" id="newEntp" dojoType="dijit.form.TextBox" placeHolder="New Enterprise # " maxlength="7" />
+    </p>
+  </cmr:column>
+</cmr:row>
+</span>
+<cmr:row topPad="10" addBackground="false">
+  <cmr:column span="6">
+    <input type="radio" id="entUpdTyp_C" name="entUpdTyp" value="C" onclick="UpdateByEntSrvc.clickRadio(this)" checked="checked" > Update Enterprise Name
+  </cmr:column>
+</cmr:row>
+<cmr:row addBackground="false">
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="newEntpName">
+             New Enterprise Name: 
+          </cmr:label>
+      <form:input path="newEntpName" id="newEntpName" dojoType="dijit.form.TextBox" placeHolder="New Enterprise Name " maxlength="28" />
+    </p>
+  </cmr:column>
+
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="newEntpNameCont">
+             New Enterprise Name Con't: 
+          </cmr:label>
+      <form:input path="newEntpNameCont" id="newEntpNameCont" dojoType="dijit.form.TextBox" placeHolder="New Enterprise Name Con't' " maxlength="24" />
+    </p>
+  </cmr:column>
+</cmr:row>
 </cmr:view>

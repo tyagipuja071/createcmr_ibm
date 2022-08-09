@@ -94,8 +94,8 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       query.setParameter("CNTRY", country);
     }
     if (!StringUtils.isBlank(source)) {
-      query.append("and a.SOURCE_SYST_ID = :SOURCE");
-      query.setParameter("SOURCE", source);
+      query.append("and upper(a.SOURCE_SYST_ID) = :SOURCE");
+      query.setParameter("SOURCE", source.toUpperCase());
     }
     if (!StringUtils.isBlank(type)) {
       query.append("and s.PROCESSING_TYP = :PROC_TYPE");
@@ -332,7 +332,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
         }
         break;
       case "COM":
-        proc.setProcessBy("Complete");
+        proc.setProcessBy("");
         break;
       case "PCO":
         if (proc.isManual()) {
@@ -342,7 +342,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
         }
         break;
       case "PCP":
-        proc.setProcessBy("Pending");
+        proc.setProcessBy("");
         break;
       }
 
@@ -453,9 +453,9 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     }
     boolean compExceeded = false;
 
-    // 50 %
+    // 70 %
     String manualThreshold = SystemParameters.getString("DASHBOARD.AUTO.MANUAL");
-    int manualMax = 50;
+    int manualMax = 70;
     if (!StringUtils.isBlank(manualThreshold) && !StringUtils.isNumeric(manualThreshold)) {
       manualMax = Integer.parseInt(manualThreshold);
     }
