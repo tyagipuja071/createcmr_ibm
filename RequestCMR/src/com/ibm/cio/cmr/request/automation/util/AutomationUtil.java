@@ -1369,4 +1369,27 @@ public abstract class AutomationUtil {
     return false;
   }
 
-}
+  protected boolean addressExistsOnSoldTo(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String sql = "";
+    sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST_ON_SOLDTO");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
+    query.setParameter("ADDR_TYPE", "ZS01");
+    query.setParameter("NAME1", addrToCheck.getCustNm1());
+    query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
+    query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
+    query.setParameter("CITY", addrToCheck.getCity1());
+    if (addrToCheck.getAddrTxt() != null) {
+      query.append(" and lower(ADDR_TXT) like lower(:ADDR_TXT)");
+      query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt());
+    }
+    if (addrToCheck.getCustNm2() != null) {
+      query.append(" and lower(CUST_NM2) like lower(:NAME2)");
+      query.setParameter("NAME2", addrToCheck.getCustNm2());
+    }
+    return query.exists();
+  }
+ }

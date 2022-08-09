@@ -357,6 +357,14 @@ public class DEHandler extends GEOHandler {
       }
     }
 
+    if (StringUtils.isEmpty(data.getCmrOwner())) {
+      DataRdc rdcData = null;
+      rdcData = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
+
+      if (rdcData != null) {
+        data.setCmrOwner(rdcData.getCmrOwner());
+      }
+    }
     // if (!StringUtils.isEmpty(data.getCovId())) {
     // LOG.debug("*** Auto setting for Germany the Search Term Value as the
     // coverage ID");
@@ -1098,5 +1106,22 @@ public class DEHandler extends GEOHandler {
       LOG.debug("***RETURNING NAME4 > " + name4);
     }
     return name4;
+  }
+  
+  private DataRdc getOldData(EntityManager entityManager, String reqId) {
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    List<DataRdc> records = query.getResults(DataRdc.class);
+    DataRdc oldData = new DataRdc();
+
+    if (records != null && records.size() > 0) {
+      oldData = records.get(0);
+    } else {
+      oldData = null;
+    }
+
+    return oldData;
   }
 }

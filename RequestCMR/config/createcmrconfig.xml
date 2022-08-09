@@ -142,7 +142,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://localhost:9444/FindCMR</value>
+    <value>https://findcmr.c360-dev-cluster.us-south.containers.appdomain.cloud/FindCMR</value>
   </item>
   <item>
     <id>MAIL_SUBJECT</id>
@@ -164,7 +164,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>/requestcmrfiles/createcmr</value>
+    <value>/ci/shared/file/attachments/2020</value>
   </item>
   <item>
     <id>ATTACHMENT_MAX_SIZE</id>
@@ -208,7 +208,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://localhost:9444/CMRServices</value>
+    <value>https://cmrservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRServices</value>
   </item>
   <item>
     <id>ADDRESS_VERIFICATION_RULES_LINK</id>
@@ -241,7 +241,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://localhost:9444/CMRServices</value>
+    <value>https://cmrservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRServices</value>
   </item>
   <item>
     <id>MASS_UPDATE_MAX_ROWS</id>
@@ -263,7 +263,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>/requestcmrfiles/createcmr</value>
+    <value>/ci/shared/file/attachments/2020/masschange</value>
   </item>
   <item>
     <id>REACTIVE_MAX_ROWS</id>
@@ -296,7 +296,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>RT201</value>
+    <value>UATMST</value>
   </item>
   <item>
     <id>MASS_CREATE_TEMPLATE_VER</id>
@@ -362,7 +362,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://localhost:9444/CISearchServices</value>
+    <value>https://ciservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CISearchServices</value>
   </item>
   <item>
     <id>CREATECMR_BP_URL</id>
@@ -373,7 +373,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://tdydalbpgui01.sl.bluecloud.ibm.com:20002/CMRBPPortal/home</value>
+    <value>https://ibmbp.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRBPPortal/home</value>
   </item>
   <item>
     <id>BATCH_CMR_POOL_ISSUING_CNTRY</id>

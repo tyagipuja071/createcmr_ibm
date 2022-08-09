@@ -456,7 +456,13 @@ public class RequestUtils {
     } else if ("N".equals(reqType)) {
       type = "Mass Create";
     } else if ("E".equals(reqType)) {
-      type = "Update by Enterprise";
+      // CREATCMR-6639
+      if (cmrIssuingCountry != null && US_CMRISSUINGCOUNTRY.equalsIgnoreCase(cmrIssuingCountry)) {
+        type = "Update Enterprise Name";
+      } else {
+        type = "Update by Enterprise";
+      }
+      LOG.debug("ReqType is " + type.toString() + " , and status is " + status.toString());
     } else {
       type = "-";
     }

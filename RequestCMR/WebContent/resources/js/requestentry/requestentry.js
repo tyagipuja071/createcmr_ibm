@@ -148,7 +148,7 @@ function processRequestAction() {
         } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
           matchDnBForAutomationCountries();
         } else {
-          cmr.showModal('addressVerificationModal');
+          executeBeforeSubmit();
         }
       } else if (cmrCntry == SysLoc.SINGAPORE || cmrCntry == SysLoc.AUSTRALIA) {
         // Cmr-1701 for isic Dnb match acc to scenario
@@ -161,7 +161,11 @@ function processRequestAction() {
         } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
           matchDnBForAutomationCountries();
         } else {
-          cmr.showModal('addressVerificationModal');
+          if (cmrCntry == SysLoc.SINGAPORE) {
+            executeBeforeSubmit();
+          } else {
+            cmr.showModal('addressVerificationModal');
+          }
         }
       } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();

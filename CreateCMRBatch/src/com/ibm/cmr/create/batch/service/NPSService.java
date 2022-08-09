@@ -79,8 +79,13 @@ public class NPSService extends BaseBatchService {
               LOG.debug("Sending client statisfaction survey to Request " + admin.getId().getReqId());
 
               String npsMail = new String(template);
-              npsMail = StringUtils.replace(npsMail, "{{REQUEST}}",
-                  admin.getId().getReqId() + " (" + this.requestTypeDescriptions.get(admin.getReqType()) + ")");
+              // CREATCMR-6639
+              // npsMail = StringUtils.replace(npsMail, "{{REQUEST}}",
+              // admin.getId().getReqId() + " (" +
+              // this.requestTypeDescriptions.get(admin.getReqType()) + ")");
+              String cmrIssuingCntry = data.getCmrIssuingCntry();
+              String reqType = !"897".equals(cmrIssuingCntry) ? this.requestTypeDescriptions.get(admin.getReqType()) : "Update Enterprise Name";
+              npsMail = StringUtils.replace(npsMail, "{{REQUEST}}", admin.getId().getReqId() + " (" + reqType + ")");
               npsMail = StringUtils.replace(npsMail, "{{CMR}}", data.getCmrNo() + " (" + admin.getMainCustNm1()
                   + (!StringUtils.isBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "") + ")");
 
