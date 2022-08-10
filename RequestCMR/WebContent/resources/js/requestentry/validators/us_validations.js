@@ -542,10 +542,10 @@ function afterConfigForUS() {
       setClientTierValuesUS();
     });
   }
-  
+
   if (_enterpriseHandler == null) {
-	  _enterpriseHandler = dojo.connect(FormManager.getField('enterprise'), 'onChange', function(value) {
-		  updateBOForEntp();
+    _enterpriseHandler = dojo.connect(FormManager.getField('enterprise'), 'onChange', function(value) {
+      updateBOForEntp();
     });
   }
 
@@ -805,7 +805,6 @@ function checkSCCValidate() {
   }
 }
 
-
 function sccWarningShowAndHide() {
   var action = FormManager.getActualValue('yourAction');
 
@@ -934,8 +933,8 @@ function addDivStreetCountValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('addrType') != 'ZP01' && FormManager.getActualValue('addrType') != 'ZS01' && FormManager.getActualValue('addrType') != 'ZI01'
-            || FormManager.getActualValue('bpAcctTyp') == 'E') {
+        if (FormManager.getActualValue('addrType') != 'ZP01' && FormManager.getActualValue('addrType') != 'ZS01'
+            && FormManager.getActualValue('addrType') != 'ZI01' || FormManager.getActualValue('bpAcctTyp') == 'E') {
           return new ValidationResult(null, true);
         }
         var count = 0;
@@ -1210,16 +1209,15 @@ function addCompanyEnterpriseValidation() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-//CREATCMR-3440 - BO Computation Update - Entp - 6500871
-function updateBOForEntp(){
-	if (FormManager.getActualValue('enterprise') == '6500871') {
-		FormManager.setValue('csoSite', 'PAH');
-	    FormManager.setValue('svcArOffice', 'IJ9');
-	    FormManager.setValue('mtkgArDept', 'SD3');
-	    FormManager.setValue('mktgDept', 'SVB');
-	  }
+// CREATCMR-3440 - BO Computation Update - Entp - 6500871
+function updateBOForEntp() {
+  if (FormManager.getActualValue('enterprise') == '6500871') {
+    FormManager.setValue('csoSite', 'PAH');
+    FormManager.setValue('svcArOffice', 'IJ9');
+    FormManager.setValue('mtkgArDept', 'SD3');
+    FormManager.setValue('mktgDept', 'SVB');
+  }
 }
-	 
 
 // CREATCMR-6587
 function setAffiliateNumber() {
@@ -1240,7 +1238,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
-  GEOHandler.registerValidator(clientTierValidator, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(clientTierValidator, [ SysLoc.USA ], null,
+  // true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(initUSTemplateHandler, [ SysLoc.USA ]);
