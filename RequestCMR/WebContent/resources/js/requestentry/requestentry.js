@@ -512,6 +512,8 @@ function statusChangeModal_onLoad() {
   dijit.byId('rejectReason').set('value', '');
   cmr.hideNode('sendToBlock');
   cmr.hideNode('rejectReasonBlock');
+  cmr.hideNode('bpIBMDirectCMR');
+  cmr.hideNode('bpIBMDirectCMRWR');
   dojo.byId('newReqStatus').innerHTML = details.ret2;
   dojo.byId('statusChgCmt').value = '';
   dojo.byId('statusChgCmt_charind').innerHTML = 1000;
@@ -520,6 +522,24 @@ function statusChangeModal_onLoad() {
   } else if (action == YourActions.Send_for_Processing) {
     dojo.byId('sendToProcessingCenter').innerHTML = details.ret3;
     cmr.showNode('sendToBlock');
+  }else{
+    var isscntry = FormManager.getActualValue('cmrIssuingCntry');
+    if(isscntry == '897'){
+      var reqId = FormManager.getActualValue('reqId');
+      var qParams = {
+        REQ_ID : reqId
+      };
+      var resultSource = cmr.query('bpsourceflag', qParams);
+      if (resultSource.ret1 == 'CreateCMR-BP' && resultSource.ret2 == 'E') {
+        var result = cmr.query('bpibmdirectcmr', qParams);
+        if (result.ret1 == null || result.ret1 == '') {
+          cmr.showNode('bpIBMDirectCMRWR');         
+        }else{
+          cmr.showNode('bpIBMDirectCMR');
+          dojo.byId('childIbmDrCMR').innerHTML = result.ret1;
+        }
+      }
+    }
   }
 }
 
@@ -621,6 +641,27 @@ function doSaveChangeComments() {
       rejField += '<input type="hidden" name="statusChgCmt" value="' + cmt + '">';
     }
     dojo.place(rejField, document.forms['frmCMR'], 'last');
+  }else{
+    var isscntry = FormManager.getActualValue('cmrIssuingCntry');
+    if(isscntry == '897'){
+      var reqId = FormManager.getActualValue('reqId');
+      var qParams = {
+        REQ_ID : reqId
+      };
+      var resultSource = cmr.query('bpsourceflag', qParams);
+      if (resultSource.ret1 == 'CreateCMR-BP' && resultSource.ret2 == 'E') {
+        var result = cmr.query('bpibmdirectcmr', qParams);
+        if (result.ret1 == null || result.ret1 == '') {
+          var ibmDrCMR = FormManager.getActualValue('cmrNo2');
+          if (ibmDrCMR == '' || ibmDrCMR.length < 6 || ibmDrCMR.length > 6) {
+            cmr.showAlert('Please input correct IBM Direct CMR.');
+            return;
+          }
+          var cmt = FormManager.getActualValue('statusChgCmt');
+          FormManager.setValue('statusChgCmt', 'BPIBMDIRECTCMR'+ibmDrCMR+cmt);
+        }
+      }
+    }
   }
 
   /* 824560 fixed to be able to handle strings with quotes */
