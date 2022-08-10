@@ -653,12 +653,12 @@ function doSaveChangeComments() {
         var result = cmr.query('bpibmdirectcmr', qParams);
         if (result.ret1 == null || result.ret1 == '') {
           var ibmDrCMR = FormManager.getActualValue('cmrNo2');
-          if (ibmDrCMR == '' || ibmDrCMR.length < 6 || ibmDrCMR.length > 6) {
+          if (ibmDrCMR == '' || ibmDrCMR.length < 7 || ibmDrCMR.length > 7) {
             cmr.showAlert('Please input correct IBM Direct CMR.');
             return;
           }
           var cmt = FormManager.getActualValue('statusChgCmt');
-          FormManager.setValue('statusChgCmt', 'BPIBMDIRECTCMR'+ibmDrCMR+cmt);
+          FormManager.setValue('statusChgCmt', 'IBMDIRECT_CMR'+ibmDrCMR+cmt);
         }
       }
     }

@@ -1535,6 +1535,13 @@ public abstract class USBPHandler {
         if (this.ibmCmr != null) {
           details.append("Copying CMR values CMR " + ibmCmr.getCmrNum() + " from FindCMR.\n");
           LOG.debug("IBM Direct CMR Found: " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName());
+          Admin theAdmin = requestData.getAdmin();
+          if (theAdmin != null && "CreateCMR-BP".equals(theAdmin.getSourceSystId())) {
+            Data theData = requestData.getData();
+            if (theData != null && SystemLocation.UNITED_STATES.equals(theData.getCmrIssuingCntry()) && "E".equals(theData.getEmail3())) {
+              theData.setCmrNo2(ibmCmr.getCmrNum());
+            }
+          }
         }
       }
     }

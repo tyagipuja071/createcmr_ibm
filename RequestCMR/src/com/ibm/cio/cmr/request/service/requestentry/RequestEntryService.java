@@ -597,8 +597,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       geoHandler.doBeforeDataSave(entityManager, admin, data, model.getCmrIssuingCntry());
       if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry()) && "CreateCMR-BP".equals(admin.getSourceSystId())
           && StringUtils.isNotEmpty(model.getStatusChgCmt()) && model.getStatusChgCmt().length() >= 20
-          && model.getStatusChgCmt().startsWith("BPIBMDIRECTCMR")) {
-        data.setCmrNo2(model.getStatusChgCmt().substring(14, 20));
+          && model.getStatusChgCmt().startsWith("IBMDIRECT_CMR")) {
+        data.setCmrNo2(model.getStatusChgCmt().substring(13, 20));
         model.setStatusChgCmt(model.getStatusChgCmt().substring(20));
       }
     }
