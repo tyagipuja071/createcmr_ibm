@@ -152,6 +152,9 @@ public abstract class AutomationUtil {
 
   private static final List<String> VAT_CHECK_COUNTRIES = Arrays.asList(SystemLocation.BRAZIL);
 
+  private static final List<String> DUP_ADDR_CHECK_COUNTRIES = Arrays.asList(SystemLocation.FRANCE, SystemLocation.SPAIN,
+      SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.GERMANY, SystemLocation.AUSTRIA, SystemLocation.SWITZERLAND);
+
   /**
    * returns an instance of
    *
@@ -876,6 +879,8 @@ public abstract class AutomationUtil {
         || SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry()) || SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())
         || SystemLocation.FINLAND.equals(data.getCmrIssuingCntry()) || SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
+    } else if (DUP_ADDR_CHECK_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+      sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE_OR_SOLDTO");
     } else {
       sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
     }
@@ -963,19 +968,19 @@ public abstract class AutomationUtil {
     while (it.hasNext()) {
       Addr addr = it.next();
       if (!payGoAddredited) {
-      if (!"ZS01".equals(addr.getId().getAddrType())) {
-        if (compareCustomerNames(zs01, addr) && 
-            (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
-            && (StringUtils.isNotBlank(addr.getCity1()) && addr.getCity1().trim().toUpperCase().equals(mainCity)) 
-            && (StringUtils.isNotBlank(addr.getPostCd()) && addr.getPostCd().trim().equals(mainPostalCd))) {
-          details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-          Addr merged = entityManager.merge(addr);
-          if (merged != null) {
-            entityManager.remove(merged);
+        if (!"ZS01".equals(addr.getId().getAddrType())) {
+          if (compareCustomerNames(zs01, addr)
+              && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
+              && (StringUtils.isNotBlank(addr.getCity1()) && addr.getCity1().trim().toUpperCase().equals(mainCity))
+              && (StringUtils.isNotBlank(addr.getPostCd()) && addr.getPostCd().trim().equals(mainPostalCd))) {
+            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+            Addr merged = entityManager.merge(addr);
+            if (merged != null) {
+              entityManager.remove(merged);
+            }
+            it.remove();
+            removed = true;
           }
-          it.remove();
-          removed = true;
-        }
         }
       } else {
         if (!"ZS01".equals(addr.getId().getAddrType())) {
@@ -1213,7 +1218,7 @@ public abstract class AutomationUtil {
     LOG.debug("No Country Specific Filter for Duplicate CMR Checks Defined.");
     // NOOP
   }
-  
+
   public void filterDuplicateReqMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<ReqCheckResponse> response) {
     LOG.debug("No Country Specific Filter for Duplicate Req Checks Defined.");
@@ -1399,4 +1404,4 @@ public abstract class AutomationUtil {
     }
     return query.exists();
   }
- }
+}
