@@ -190,13 +190,11 @@ public class SpainUtil extends AutomationUtil {
             details.append("Employee details not found in IBM BluePages.").append("\n");
             return false;
           } else {
-            details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
-                .append("\n");
+            details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
           }
         } catch (Exception e) {
           LOG.error("Not able to check name against bluepages", e);
-          engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED",
-              "Not able to check name against bluepages for scenario IBM Employee.");
+          engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check name against bluepages for scenario IBM Employee.");
           return false;
         }
       } else {
@@ -475,7 +473,7 @@ public class SpainUtil extends AutomationUtil {
     }
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
-    Set<String> resultCodes = new HashSet<String>();// R - review
+    Set<String> resultCodes = new HashSet<String>();// R - review, D-Reject
     for (String addrType : RELEVANT_ADDRESSES) {
       if (changes.isAddressChanged(addrType)) {
         if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
@@ -486,7 +484,13 @@ public class SpainUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           if ("N".equals(addr.getImportInd())) {
             // new address
-            if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
+            // CREATCMR-6649
+            LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+            if (addressExists(entityManager, addr, requestData)) {
+              LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
+              resultCodes.add("D");
+            } else if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Addition of new ZD01 and ZS02(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getAddressChange(addrType, "Customer Name")
@@ -548,7 +552,12 @@ public class SpainUtil extends AutomationUtil {
         }
       }
     }
-    if (resultCodes.contains("R")) {
+    if (resultCodes.contains("D")) {
+      output.setOnError(true);
+      engineData.addRejectionComment("DUPADDR", "Add or update on the address is rejected", "", "");
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
+    } else if (resultCodes.contains("R")) {
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
       engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
@@ -702,7 +711,7 @@ public class SpainUtil extends AutomationUtil {
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M", "D", "R");
   }
-  
+
   public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
       CoverageContainer container, boolean isCoverageCalculated) throws Exception {
