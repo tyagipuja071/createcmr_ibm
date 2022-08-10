@@ -676,7 +676,8 @@ public class USService extends TransConnService {
 
           for (RDcRecord red : response.getRecords()) {
 
-            if ("ZS01".equalsIgnoreCase(red.getAddressType()) && red.getSeqNo().equalsIgnoreCase(addr.getId().getAddrSeq())) {
+            if (("ZS01".equalsIgnoreCase(red.getAddressType()) || "ZI01".equalsIgnoreCase(red.getAddressType()))
+                && red.getSeqNo().equalsIgnoreCase(addr.getId().getAddrSeq())) {
               addr.setPairedAddrSeq(red.getSeqNo());
               addr.setSapNo(red.getSapNo());
               addr.setIerpSitePrtyId(red.getIerpSitePartyId());
