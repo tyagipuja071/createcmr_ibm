@@ -604,13 +604,10 @@ function addHandlersForPTES() {
   }
 
   if (_CTCHandler == null) { 
-    _oldClientTier = FormManager.getActualValue('clientTier');
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      if (_oldClientTier != FormManager.getActualValue('clientTier')) {
         setSalesRepValues(value);
         setEnterpriseValues(false);
         setEnterpriseValues34Q();
-      }
     });
   }
 
