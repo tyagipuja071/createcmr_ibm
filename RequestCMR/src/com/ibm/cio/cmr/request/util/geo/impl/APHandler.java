@@ -404,7 +404,7 @@ public abstract class APHandler extends GEOHandler {
     String gbSegement = oldData.getClientTier();
     long reqId = oldData.getId().getReqId();
     String cmrIssuingCntry = oldData.getCmrIssuingCntry();
-    if (cmrIssuingCntry.equalsIgnoreCase(SystemLocation.MACAO) || cmrIssuingCntry.equalsIgnoreCase(SystemLocation.HONG_KONG)) {
+    if (SystemLocation.MACAO.equalsIgnoreCase(cmrIssuingCntry) || SystemLocation.HONG_KONG.equalsIgnoreCase(cmrIssuingCntry)) {
       return false;
     }
     EntityManager entityManager = JpaManager.getEntityManager();
