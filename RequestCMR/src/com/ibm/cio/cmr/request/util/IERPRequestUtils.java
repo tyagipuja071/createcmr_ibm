@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -159,8 +160,8 @@ public class IERPRequestUtils extends RequestUtils {
   }
 
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history, String siteIds, String emailCmt) {
-    if (!"PRJ".equals(admin.getReqStatus()) && !"COM".equals(admin.getReqStatus())) {
-      // CREATCMR-2625,6677
+    List<String> reqStatusFrMailNotif = Arrays.asList("PRJ", "COM");
+    if (!reqStatusFrMailNotif.contains(admin.getReqStatus())) {
       return;
     }
     String cmrno = "";
