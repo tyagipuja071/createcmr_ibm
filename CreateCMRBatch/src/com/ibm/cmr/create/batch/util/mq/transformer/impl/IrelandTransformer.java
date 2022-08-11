@@ -3,6 +3,7 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -1453,7 +1454,33 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
 
   @Override
   public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    if (isSharedSequence(cmrObjects, currAddr)) {
+      return true;
+    }
     return false;
+  }
+  
+  private boolean isSharedSequence(CMRRequestContainer cmrObjects, Addr currAddr) {
+    Map<String, Integer> sequences = new HashMap<String, Integer>();
+    String zs01Seq = "";
+
+    for (Addr addr : cmrObjects.getAddresses()) {
+      if (!sequences.containsKey(addr.getId().getAddrSeq())) {
+        sequences.put(addr.getId().getAddrSeq(), 0);
+      }
+      sequences.put(addr.getId().getAddrSeq(), sequences.get(addr.getId().getAddrSeq()) + 1);
+
+      if ("ZS01".equals(addr.getId().getAddrType())) {
+        zs01Seq = addr.getId().getAddrSeq();
+      }
+    }
+    LOG.debug("GR Sequences : " + sequences);
+
+    if (sequences.get(currAddr.getId().getAddrSeq()) > 1) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }
