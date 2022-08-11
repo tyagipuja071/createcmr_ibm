@@ -20,12 +20,13 @@
 <form>
 	<input name="dummyform" type="hidden">
 </form>
-<form id="fileTemplateDownloadForm" name="fileTemplateDownloadForm" method="POST" action="${contextPath}/template/download" target="fileTemplateDownloadFrame">
+<form _csrf="GhtjeYhfngleOImde2" id="fileTemplateDownloadForm" name="fileTemplateDownloadForm" method="POST" action="${contextPath}/template/download" target="fileTemplateDownloadFrame">
   <input name="dlTokenId" id="dlTokenId" type="hidden">
   <input name="dlDocType" id="dlDocType" type="hidden">
   <input name="dlReqId" id="dlReqId" type="hidden">
   <input name="dlIterId" id="dlIterId" type="hidden">
   <input type="hidden" name="cmrIssuingCntry" value="${reqentry.cmrIssuingCntry}">
+  <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
 </form>
 </cmr:section>
 <iframe id="fileTemplateDownloadFrame" style="display:none" name="fileTemplateDownloadFrame"></iframe>

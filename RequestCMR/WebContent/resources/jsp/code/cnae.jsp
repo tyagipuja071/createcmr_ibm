@@ -42,7 +42,7 @@
 <cmr:boxContent>
 	<cmr:tabs />
 
-	<form:form method="POST" action="javascript: searchCnae()"
+	<cmr:form method="POST" action="javascript: searchCnae()"
 		name="frmCMR" class="ibm-column-form ibm-styled-form"
 		modelAttribute="cnae" id="frmCMR">
 		<cmr:model model="cnae" />
@@ -88,7 +88,7 @@
 			<cmr:row topPad="10">
 			</cmr:row>
 		</cmr:section>
-	</form:form>
+	</cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
 	<cmr:buttonsRow>

@@ -108,7 +108,7 @@
 </script>
 <cmr:boxContent>
   <cmr:tabs />
-  <form:form method="POST" action="${contextPath}/code/apClusterMapdetails" id = "frmCMRApDetail" name="frmCMRApDetail" title="<%=title%>" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="POST" action="${contextPath}/code/apClusterMapdetails" id = "frmCMRApDetail" name="frmCMRApDetail" title="<%=title%>" class="ibm-column-form ibm-styled-form"
     modelAttribute="apClusterMapDetails">
     <cmr:modelAction formName="frmCMRApDetail" />
     <cmr:section>
@@ -239,7 +239,7 @@
       <form:hidden id="createBy" path="createBy" />
       <form:hidden id="UpdtBy" path="UpdtBy" />
   </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

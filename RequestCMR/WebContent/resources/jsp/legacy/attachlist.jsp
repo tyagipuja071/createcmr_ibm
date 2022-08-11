@@ -158,8 +158,9 @@
 
 
     </cmr:section>
-    <form name="frmAttach" action="${contextPath}/attachlist/dl" method="POST" style="display:none">
+    <form _csrf="GhtjeYhfngleOImde2" name="frmAttach" action="${contextPath}/attachlist/dl" method="POST" style="display:none">
       <input id="attachFile" name="fileName">
+      <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
     </form>
   </cmr:boxContent>
   <cmr:section alwaysShown="true">

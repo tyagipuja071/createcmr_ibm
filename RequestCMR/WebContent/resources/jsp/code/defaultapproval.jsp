@@ -172,7 +172,7 @@ span.mail {
   <cmr:tabs />
 
  <cmr:section>
-  <form:form method="POST" action="${contextPath}/code/defaultapprdetails" name="frmCMR" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="POST" action="${contextPath}/code/defaultapprdetails" name="frmCMR" class="ibm-column-form ibm-styled-form"
     modelAttribute="appr" id="frmCMR">
     <%if (!newEntry){%>
       <form:hidden path="createTs"/>
@@ -367,7 +367,7 @@ span.mail {
           <cmr:button label="Save" onClick="saveApproval()" highlight="true"/>
         </p>
       </cmr:row>
-  </form:form>
+  </cmr:form>
   <cmr:model model="appr" />
 <%if (!newEntry){%>
 

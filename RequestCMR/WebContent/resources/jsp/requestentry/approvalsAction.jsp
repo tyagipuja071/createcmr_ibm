@@ -32,7 +32,7 @@ RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry"
 
 <!--  Modal for the Add Approval Screen -->
 <cmr:modal title="${ui.title.addApproval}" id="addApprovalModal" widthId="750">
-  <form:form method="POST" action="${contextPath}/approval/process" name="frmCMRApprovalAdd" class="ibm-column-form ibm-styled-form" modelAttribute="approval" id="frmCMR_addApprovalModal">
+  <cmr:form method="POST" action="${contextPath}/approval/process" name="frmCMRApprovalAdd" class="ibm-column-form ibm-styled-form" modelAttribute="approval" id="frmCMR_addApprovalModal">
     <cmr:modelAction formName="frmCMR_addApprovalModal" />
     <form:hidden path="reqId" id="reqId" value="${reqentry.reqId}" />
     <form:hidden path="approvalId" id="approvalId" />
@@ -98,5 +98,5 @@ RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry"
       <cmr:button label="${ui.btn.addApproval}" onClick="addApproval()" highlight="true" id="approvalBtnAdd"/>
       <cmr:button label="${ui.btn.cancel}" onClick="cmr.hideModal('addApprovalModal')" highlight="false" pad="true" />
     </cmr:buttonsRow>
-  </form:form>
+  </cmr:form>
 </cmr:modal>

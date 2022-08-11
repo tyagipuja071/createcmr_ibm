@@ -34,7 +34,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/user" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="user">
+  <cmr:form method="POST" action="${contextPath}/user" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="user">
     <cmr:modelAction formName="frmCMR" />
     <cmr:section>
       <cmr:row topPad="8">
@@ -184,7 +184,7 @@
       </cmr:row>
 
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>
@@ -199,7 +199,7 @@
   <br>
   <%if (!newEntry){ %>
   <cmr:boxContent>
-    <form:form method="POST" action="${contextPath}/userroles" id="frmCMRRoles" name="frmCMRRoles" class="ibm-column-form ibm-styled-form"
+    <cmr:form method="POST" action="${contextPath}/userroles" id="frmCMRRoles" name="frmCMRRoles" class="ibm-column-form ibm-styled-form"
       modelAttribute="userrole">
       <input type="hidden" name="userId" value="${user.userId}">
       <cmr:modelAction formName="frmCMRRoles" />
@@ -247,7 +247,7 @@
         </cmr:buttonsRow>
         <br>
       </cmr:section>
-    </form:form>
+    </cmr:form>
   </cmr:boxContent>
   <jsp:include page="addroles.jsp" />
   <%} %>

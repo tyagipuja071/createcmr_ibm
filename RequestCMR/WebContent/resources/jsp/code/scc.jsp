@@ -139,7 +139,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/sccdetails" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="POST" action="${contextPath}/code/sccdetails" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"
     modelAttribute="scc">
     <cmr:modelAction formName="frmCMR" /> 
     <cmr:section>
@@ -287,7 +287,7 @@
       </cmr:row>
       <form:hidden path="sccId"/>
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

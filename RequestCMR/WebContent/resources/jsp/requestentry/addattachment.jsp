@@ -32,7 +32,7 @@
 
 <!--  Modal for the Status Change Screen -->
 <cmr:modal title="${ui.title.addFile}" id="addAttachmentModal" widthId="570">
-  <form:form method="POST" action="${contextPath}/request/attach/process" name="frmCMRAttachAdd" class="ibm-column-form ibm-styled-form" modelAttribute="attach" id="frmCMR_addAttachmentModal" enctype="multipart/form-data">
+  <cmr:form method="POST" action="${contextPath}/request/attach/process" name="frmCMRAttachAdd" class="ibm-column-form ibm-styled-form" modelAttribute="attach" id="frmCMR_addAttachmentModal" enctype="multipart/form-data">
     <cmr:modelAction formName="frmCMR_addAttachmentModal" />
     <form:hidden path="reqId" id="attach_reqId" value="${reqentry.reqId}" />
     <form:hidden path="attachMode" id="attachmentmode" />
@@ -96,5 +96,5 @@
       <cmr:button label="${ui.btn.saveattachment}" onClick="addAttachment()" highlight="true" />
       <cmr:button label="${ui.btn.cancel}" onClick="cmr.hideModal('addAttachmentModal')" highlight="false" pad="true" />
     </cmr:buttonsRow>
-  </form:form>
+  </cmr:form>
 </cmr:modal>
