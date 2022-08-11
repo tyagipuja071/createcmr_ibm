@@ -194,8 +194,6 @@ public class UpdateSwitchElement extends ValidatingElement {
          * output.setProcessOutput(validation); return output; }
          */
 
-        List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
-
         log.debug("Addr types for skip check are: " + scenarioExceptions.getAddressTypesForSkipChecks().toString());
         boolean onlySkipAddr = false;
         if (scenarioExceptions.getAddressTypesForSkipChecks() != null && scenarioExceptions.getAddressTypesForSkipChecks().size() > 0) {
