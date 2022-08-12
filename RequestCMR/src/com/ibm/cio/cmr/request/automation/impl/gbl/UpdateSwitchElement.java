@@ -169,6 +169,31 @@ public class UpdateSwitchElement extends ValidatingElement {
         }
         // End CREATCMR-6229
         Map<String, String> addressTypes = getAddressTypes(data.getCmrIssuingCntry(), entityManager);
+
+        /*
+         * String sql = ExternalizedQuery.getSql("AUTO_UPDATE_EXT_FIND");
+         * PreparedQuery query = new PreparedQuery(entityManager, sql);
+         * query.setParameter("REQ_ID", reqId); query.setForReadOnly(true);
+         * boolean foundWalletid = false; List<Object[]> walletIds =
+         * query.getResults(); if (walletIds != null && !walletIds.isEmpty()) {
+         * for (Object[] result : walletIds) { String walletId = (String)
+         * result[0]; sql = ExternalizedQuery.getSql("AUTO_UPDATE_EXT_CHECK");
+         * query = new PreparedQuery(entityManager, sql);
+         * query.setParameter("EXT_WALLET_ID", walletId);
+         * query.setParameter("REQ_ID", reqId); List<Addr> listDupExtReq =
+         * query.getResults(Addr.class); if (listDupExtReq != null &&
+         * listDupExtReq.size() > 0) { foundWalletid = true; break; } } } if
+         * (foundWalletid) { validation.setSuccess(false);
+         * validation.setMessage("Not Validated");
+         * engineData.addRejectionComment("DUPADDR",
+         * "Duplicate EXTWALLETID on PG01 address on request.", "", "");
+         * output.setOnError(true);
+         * output.setDetails("Duplicate EXTWALLETID on PG01 address on request."
+         * ); log.debug("Duplicate EXTWALLETID on PG01 address on request.");
+         * output.setResults(validation.getMessage());
+         * output.setProcessOutput(validation); return output; }
+         */
+
         log.debug("Addr types for skip check are: " + scenarioExceptions.getAddressTypesForSkipChecks().toString());
         boolean onlySkipAddr = false;
         if (scenarioExceptions.getAddressTypesForSkipChecks() != null && scenarioExceptions.getAddressTypesForSkipChecks().size() > 0) {
