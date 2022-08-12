@@ -165,7 +165,7 @@ public class USCMRNumGen {
 	    String cndCMR = "";
 	    ArrayList<String> cndCMRList = new ArrayList<String>();
 
-	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO");
+	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_MASSCRT");
 	    PreparedQuery query = new PreparedQuery(entityManager, sql);
 
 	    query.setParameter("MANDT1", SystemConfiguration.getValue("MANDT"));
@@ -229,7 +229,7 @@ public class USCMRNumGen {
 	    String cndCMR = "";
 	    ArrayList<String> cndCMRList = new ArrayList<String>();
 
-	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO");
+	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_MASSCRT");
 	    PreparedQuery query = new PreparedQuery(entityManager, sql);
 
 	    query.setParameter("MANDT1", SystemConfiguration.getValue("MANDT"));
@@ -287,7 +287,7 @@ public class USCMRNumGen {
 	    String cndCMR = "";
 	    ArrayList<String> cndCMRList = new ArrayList<String>();
 
-	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO");
+	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_MASSCRT");
 	    PreparedQuery query = new PreparedQuery(entityManager, sql);
 
 	    query.setParameter("MANDT1", SystemConfiguration.getValue("MANDT"));
