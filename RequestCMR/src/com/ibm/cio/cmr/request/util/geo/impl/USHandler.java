@@ -1247,10 +1247,6 @@ public class USHandler extends GEOHandler {
     String scc = getSCCByReqId(entityManager, data.getId().getReqId());
     data.setCompanyNm(scc);
     // CREATCMR-6342
-    
-    if ("N".equals(admin.getReqType())){
-    	cleanmasscreatedata(entityManager, admin.getId().getReqId(), admin.getIterationId());
-    }
 
   }
 
@@ -2194,13 +2190,6 @@ public class USHandler extends GEOHandler {
     query.setForReadOnly(true);
     return query.getSingleResult(String.class);
   }
-  
-  private void cleanmasscreatedata(EntityManager entityManager, long reqId, int itertionId) {
-	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("US.MASSCRT.CLEANOLDITER"));
-	    query.setParameter("REQ_ID", reqId);
-	    query.setParameter("ITERATION_ID", itertionId);
-	    query.executeSql();
-	  }
 
   // CREATCMR-6331
   public static String getUSEntCompToPPN(EntityManager entityManager, Admin admin) {

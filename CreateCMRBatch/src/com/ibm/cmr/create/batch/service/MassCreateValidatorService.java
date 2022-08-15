@@ -284,6 +284,9 @@ public class MassCreateValidatorService extends BaseBatchService {
 
       partialCommit(entityManager);
     }
+    if("897".equals(data.getCmrIssuingCntry())){
+    	cleanMassCrtPreData(entityManager, request.getId().getReqId(), request.getIterationId());
+    }
 
   }
 
@@ -367,6 +370,13 @@ public class MassCreateValidatorService extends BaseBatchService {
     query.setParameter("ITER_ID", iterationId);
     return query.exists();
   }
+  
+  private void cleanMassCrtPreData(EntityManager entityManager, long reqId, int itertionId) {
+	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("US.MASSCRT.CLEANOLDITER"));
+	    query.setParameter("REQ_ID", reqId);
+	    query.setParameter("ITERATION_ID", itertionId);
+	    query.executeSql();
+	  }
 
   @Override
   protected boolean isTransactional() {
