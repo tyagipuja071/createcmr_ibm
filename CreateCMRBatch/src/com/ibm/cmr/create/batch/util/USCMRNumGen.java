@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import org.apache.log4j.Logger;
 
@@ -112,6 +113,9 @@ public class USCMRNumGen {
 	  }
 
   public static synchronized void init(EntityManager entityManager) {
+	  if (cmrNumMap == null || cmrNumMap.isEmpty()) {
+	      LOG.info("there is no CMR number stored in cache, so init...");
+	     
     cmrNumMap = new HashMap<String, ArrayList<String>>();
     ArrayList<String> poaList = getPOANumList(entityManager);
     ArrayList<String> commonList = getCommonNumList(entityManager);
@@ -119,9 +123,14 @@ public class USCMRNumGen {
     cmrNumMap.put("POA", poaList);
     cmrNumMap.put("COMM", commonList);
     cmrNumMap.put("MAIN", mainList);
+	  }
   }
   
   public static synchronized void initMassCrt(EntityManager entityManager) {
+	  
+	  if (cmrNumMapMassCrt == null || cmrNumMapMassCrt.isEmpty()) {
+	      LOG.info("there is no CMR number stored for mass create in cache, so init...");
+	      	  
 	    cmrNumMapMassCrt = new HashMap<String, ArrayList<String>>();
 	    ArrayList<String> poaListMassCrt = getPOANumListMassCrt(entityManager);
 	    ArrayList<String> commonListMassCrt = getCommonNumListMassCrt(entityManager);
@@ -130,6 +139,7 @@ public class USCMRNumGen {
 	    cmrNumMapMassCrt.put("COMM", commonListMassCrt);
 	    cmrNumMapMassCrt.put("MAIN", mainListMassCrt);
 	  }
+  }
 
   private static ArrayList<String> getPOANumList(EntityManager entityManager) {
 
@@ -165,8 +175,17 @@ public class USCMRNumGen {
 	    String cndCMR = "";
 	    ArrayList<String> cndCMRList = new ArrayList<String>();
 
-	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_MASSCRT");
-	    PreparedQuery query = new PreparedQuery(entityManager, sql);
+	    int counts = 0;
+	    String sqlc = "SELECT count(*) FROM creqcmr.MASS_CREATE WHERE PAR_REQ_ID IN (SELECT REQ_ID FROM creqcmr.ADMIN WHERE REQ_TYPE = 'N' AND RDC_PROCESSING_STATUS = 'A')";
+        Query q = entityManager.createNativeQuery(sqlc);
+        counts = (int) q.getSingleResult();
+
+	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_PART");	    
+	    String sql1 = sql + " FETCH FIRST " + counts +" ROWS ONLY WITH UR";
+	    LOG.info(" NEW Query for Mass Crt is " + sql1 + "the counts = " + counts);
+	    LOG.info(" The counts = " + counts);
+	    
+	    PreparedQuery query = new PreparedQuery(entityManager, sql1);
 
 	    query.setParameter("MANDT1", SystemConfiguration.getValue("MANDT"));
 	    query.setParameter("KATR61", SystemLocation.UNITED_STATES);
@@ -228,9 +247,18 @@ public class USCMRNumGen {
 
 	    String cndCMR = "";
 	    ArrayList<String> cndCMRList = new ArrayList<String>();
+	    
+	    int counts = 0;
+	    String sqlc = "SELECT count(*) FROM creqcmr.MASS_CREATE WHERE PAR_REQ_ID IN (SELECT REQ_ID FROM creqcmr.ADMIN WHERE REQ_TYPE = 'N' AND RDC_PROCESSING_STATUS = 'A')";
+        Query q = entityManager.createNativeQuery(sqlc);
+        counts = (int) q.getSingleResult();
 
-	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_MASSCRT");
-	    PreparedQuery query = new PreparedQuery(entityManager, sql);
+	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_PART");	    
+	    String sql1 = sql + " FETCH FIRST " + counts +" ROWS ONLY WITH UR";
+	    LOG.info(" NEW Query for Mass Crt is " + sql1 + "the counts = " + counts);
+	    LOG.info(" The counts = " + counts);
+	    
+	    PreparedQuery query = new PreparedQuery(entityManager, sql1);
 
 	    query.setParameter("MANDT1", SystemConfiguration.getValue("MANDT"));
 	    query.setParameter("KATR61", SystemLocation.UNITED_STATES);
@@ -287,16 +315,25 @@ public class USCMRNumGen {
 	    String cndCMR = "";
 	    ArrayList<String> cndCMRList = new ArrayList<String>();
 
-	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_MASSCRT");
-	    PreparedQuery query = new PreparedQuery(entityManager, sql);
+	    int counts = 0;
+	    String sqlc = "SELECT count(*) FROM creqcmr.MASS_CREATE WHERE PAR_REQ_ID IN (SELECT REQ_ID FROM creqcmr.ADMIN WHERE REQ_TYPE = 'N' AND RDC_PROCESSING_STATUS = 'A')";
+        Query q = entityManager.createNativeQuery(sqlc);
+        counts = (int) q.getSingleResult();
+
+	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_PART");	    
+	    String sql1 = sql + " FETCH FIRST " + counts +" ROWS ONLY WITH UR";
+	    LOG.info(" NEW Query for Mass Crt is " + sql1 + "the counts = " + counts);
+	    LOG.info(" The counts = " + counts);
+	    
+	    PreparedQuery query = new PreparedQuery(entityManager, sql1);
 
 	    query.setParameter("MANDT1", SystemConfiguration.getValue("MANDT"));
 	    query.setParameter("KATR61", SystemLocation.UNITED_STATES);
 	    query.setParameter("MANDT2", SystemConfiguration.getValue("MANDT"));
 	    query.setParameter("KATR62", SystemLocation.UNITED_STATES);
 
-	    query.setParameter("ZZKV_CUSNO1", 06 + "%");
-	    query.setParameter("ZZKV_CUSNO2", 06 + "%");
+	    query.setParameter("ZZKV_CUSNO1", "06" + "%");
+	    query.setParameter("ZZKV_CUSNO2", "06" + "%");
 	    List<String> records = query.getResults(String.class);
 	    if (records != null && records.size() > 0) {
 	      for (String missCmrNo : records) {
