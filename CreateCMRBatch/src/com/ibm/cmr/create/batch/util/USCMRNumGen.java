@@ -178,7 +178,7 @@ public class USCMRNumGen {
 	    int counts = 0;
 	    String sqlc = "SELECT count(*) FROM creqcmr.MASS_CREATE WHERE PAR_REQ_ID IN (SELECT REQ_ID FROM creqcmr.ADMIN WHERE REQ_TYPE = 'N' AND RDC_PROCESSING_STATUS = 'A')";
         Query q = entityManager.createNativeQuery(sqlc);
-        counts = (int) q.getSingleResult();
+        counts = (int) q.getSingleResult() + 50;
 
 	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_PART");	    
 	    String sql1 = sql + " FETCH FIRST " + counts +" ROWS ONLY WITH UR";
@@ -251,7 +251,7 @@ public class USCMRNumGen {
 	    int counts = 0;
 	    String sqlc = "SELECT count(*) FROM creqcmr.MASS_CREATE WHERE PAR_REQ_ID IN (SELECT REQ_ID FROM creqcmr.ADMIN WHERE REQ_TYPE = 'N' AND RDC_PROCESSING_STATUS = 'A')";
         Query q = entityManager.createNativeQuery(sqlc);
-        counts = (int) q.getSingleResult();
+        counts = (int) q.getSingleResult() + 50;
 
 	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_PART");	    
 	    String sql1 = sql + " FETCH FIRST " + counts +" ROWS ONLY WITH UR";
@@ -318,7 +318,7 @@ public class USCMRNumGen {
 	    int counts = 0;
 	    String sqlc = "SELECT count(*) FROM creqcmr.MASS_CREATE WHERE PAR_REQ_ID IN (SELECT REQ_ID FROM creqcmr.ADMIN WHERE REQ_TYPE = 'N' AND RDC_PROCESSING_STATUS = 'A')";
         Query q = entityManager.createNativeQuery(sqlc);
-        counts = (int) q.getSingleResult();
+        counts = (int) q.getSingleResult() + 50;
 
 	    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_ZZKV_CUSNO.US_FIND_MISSINGCMRNO_PART");	    
 	    String sql1 = sql + " FETCH FIRST " + counts +" ROWS ONLY WITH UR";
