@@ -3,17 +3,18 @@
  */
 package com.ibm.cmr.create.batch.util;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
-import javax.persistence.Persistence;
 
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cio.cmr.request.util.InjectedEMFactory;
 import com.ibm.cmr.create.batch.entry.BatchEntryPoint;
 import com.ibm.cmr.create.batch.service.MultiThreadedBatchService;
 
@@ -48,7 +49,7 @@ public class BatchThreadWorker<T> implements Runnable {
       }
       LOG.info("Starting processing of " + this.requestIds.size() + " requests");
 
-      EntityManagerFactory emf = Persistence.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT);
+      EntityManagerFactory emf = InjectedEMFactory.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT, Collections.emptyMap());
       try {
         EntityManager entityManager = emf.createEntityManager();
         if (this.batchService.flushOnCommitOnly()) {

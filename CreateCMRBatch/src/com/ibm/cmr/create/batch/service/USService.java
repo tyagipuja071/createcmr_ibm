@@ -15,6 +15,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
@@ -47,6 +48,7 @@ import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.DebugUtil;
+import com.ibm.cmr.create.batch.util.ProfilerLogger;
 import com.ibm.cmr.create.batch.util.USCMRNumGen;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -152,6 +154,7 @@ public class USService extends TransConnService {
       throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
     LOG.info("Initializing Country Map..");
+    long start = new Date().getTime();
     LandedCountryMap.init(entityManager);
     // Retrieve the PCP records
     LOG.info("Retreiving pending records for processing..");
@@ -220,6 +223,8 @@ public class USService extends TransConnService {
           }
         }
         partialCommit(entityManager);
+        ProfilerLogger.LOG.trace(
+            "After monitorCreqcmr for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
@@ -304,6 +309,7 @@ public class USService extends TransConnService {
   public void monitorCreqcmrMassUpd(EntityManager entityManager, List<Long> requests)
       throws JsonGenerationException, JsonMappingException, IOException, Exception {
     LOG.info("Initializing Country Map..");
+    long start = new Date().getTime();
     LandedCountryMap.init(entityManager);
     // List<Admin> pending = getPendingRecordsMassUpd(entityManager);
 
@@ -346,6 +352,8 @@ public class USService extends TransConnService {
           createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
         }
         partialCommit(entityManager);
+        ProfilerLogger.LOG.trace("After monitorCreqcmrMassUpd for Request ID: " + id + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
@@ -668,7 +676,8 @@ public class USService extends TransConnService {
 
           for (RDcRecord red : response.getRecords()) {
 
-            if ("ZS01".equalsIgnoreCase(red.getAddressType()) && red.getSeqNo().equalsIgnoreCase(addr.getId().getAddrSeq())) {
+            if (("ZS01".equalsIgnoreCase(red.getAddressType()) || "ZI01".equalsIgnoreCase(red.getAddressType()))
+                && red.getSeqNo().equalsIgnoreCase(addr.getId().getAddrSeq())) {
               addr.setPairedAddrSeq(red.getSeqNo());
               addr.setSapNo(red.getSapNo());
               addr.setIerpSitePrtyId(red.getIerpSitePartyId());
@@ -2528,20 +2537,24 @@ public class USService extends TransConnService {
   }
 
   protected List<Long> gatherSingleRequests(EntityManager entityManager) {
+    long start = new Date().getTime();
     List<Admin> list = getPendingRecords(entityManager);
     List<Long> ids = new ArrayList<Long>();
     for (Admin admin : list) {
       ids.add(admin.getId().getReqId());
     }
+    ProfilerLogger.LOG.trace("After gatherSingleRequests " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return ids;
   }
 
   protected List<Long> gatherMassUpdateRequests(EntityManager entityManager) {
+    long start = new Date().getTime();
     List<Admin> list = getPendingRecordsMassUpd(entityManager);
     List<Long> ids = new ArrayList<Long>();
     for (Admin admin : list) {
       ids.add(admin.getId().getReqId());
     }
+    ProfilerLogger.LOG.trace("After gatherMassUpdateRequests " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return ids;
   }
 

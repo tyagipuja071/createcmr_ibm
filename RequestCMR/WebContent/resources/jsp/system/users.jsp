@@ -13,7 +13,7 @@
     FilteringDropdown.loadItems('requesterFor', null, 'bds', 'fieldId=CMRIssuingCountry');
   });
 </script>
-<form:form method="POST" action="${contextPath}/users" name="frmCMRSearch" class="ibm-column-form ibm-styled-form" modelAttribute="users">
+<cmr:form method="POST" action="${contextPath}/users" name="frmCMRSearch" class="ibm-column-form ibm-styled-form" modelAttribute="users">
   <cmr:boxContent>
     <cmr:tabs />
     <cmr:section>
@@ -100,7 +100,7 @@
       </cmr:row>
     </cmr:section>
   </cmr:boxContent>
-</form:form>
+</cmr:form>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>
     <cmr:button label="Add User" onClick="UserService.addUser()" highlight="true" />

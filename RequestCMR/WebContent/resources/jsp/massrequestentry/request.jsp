@@ -167,7 +167,7 @@ dojo.addOnLoad(function() {
 </style>
 
 <cmr:boxContent>
-  <form:form id="frmCMR" method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="reqentry">
+  <cmr:form id="frmCMR" method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="reqentry">
     <jsp:include page="/resources/jsp/requestentry/actionstatus.jsp" />
     <input type="hidden" value="${yourActionsViewOnly}" id="viewOnlyPage">
     <input type="hidden" value="<%=mandt%>" id="mandt">
@@ -280,7 +280,7 @@ dojo.addOnLoad(function() {
     <%if (!newEntry && CmrConstants.REQ_TYPE_UPDT_BY_ENT.equals(reqentry.getReqType())){ %>
       <jsp:include page="processing.jsp" />
     <%}%>
-  </form:form>
+  </cmr:form>
 
   <%if (!newEntry){ %>
   <jsp:include page="/resources/jsp/requestentry/notify.jsp" />

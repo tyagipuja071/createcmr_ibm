@@ -10,7 +10,7 @@
 
 <!--  Modal for the Workflow History Screen -->
 <cmr:modal title="${ui.title.wfhist}" id="workflowHistoryModal" widthId="980">
-  <form:form method="GET" action="${contextPath}/workflow/history" name="frmCMRHist" class="ibm-column-form ibm-styled-form" modelAttribute="wfhist">
+  <cmr:form method="GET" action="${contextPath}/workflow/history" name="frmCMRHist" class="ibm-column-form ibm-styled-form" modelAttribute="wfhist">
 
     <form:hidden path="reqId" id="workflowRequestId" />
     <form:hidden path="mainReqType" />
@@ -74,5 +74,5 @@
       <cmr:hr />
       <cmr:button label="${ui.btn.close}" onClick="cmr.hideModal('workflowHistoryModal')" highlight="true" />
     </cmr:buttonsRow>
-  </form:form>
+  </cmr:form>
 </cmr:modal>

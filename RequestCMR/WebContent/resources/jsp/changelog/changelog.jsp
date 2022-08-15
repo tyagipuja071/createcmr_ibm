@@ -22,7 +22,7 @@
 
 
 
-<form:form method="POST" action="${contextPath}/changelog" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="changelog">
+<cmr:form method="POST" action="${contextPath}/changelog" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="changelog">
   <cmr:boxContent>
     <cmr:tabs />
     <cmr:section alwaysShown="true">
@@ -187,9 +187,10 @@
       </cmr:row>
     </cmr:section>
   </cmr:boxContent>
-</form:form>
+</cmr:form>
 
-<form id="frmCMRFullReportDownLoad" name="frmCMRFullReportDownLoad" method="POST">
+<form _csrf="GhtjeYhfngleOImde2" id="frmCMRFullReportDownLoad" name="frmCMRFullReportDownLoad" method="POST">
   <input type="hidden" id="katr6" name="katr6" />
   <input type="hidden" id="zzkvCusNo" name="zzkvCusNo" />
+  <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
 </form>

@@ -96,9 +96,10 @@ tr {
   <cmr:windowClose />
 
 <iframe id="xmlFrame" style="display:none" name="attachDlFrame"></iframe>
-<form id="xmlForm" name="xmlForm" method="POST" action="${contextPath}/code/mqstatus/xml">
+<form _csrf="GhtjeYhfngleOImde2" id="xmlForm" name="xmlForm" method="POST" action="${contextPath}/code/mqstatus/xml">
   <input name="action" value="XML" type="hidden">
   <input name="queryReqId" value="<%=uniqueId%>" type="hidden">
   <input name="fileName" id="fileName" type="hidden">
+  <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
 </form>
 </cmr:window>

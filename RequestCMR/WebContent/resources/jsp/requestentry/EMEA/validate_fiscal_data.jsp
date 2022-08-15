@@ -149,7 +149,7 @@
 <!--  Modal for the ValidateFiscalData Screen -->
 <cmr:modal id="validateFiscalDataModal" title="Fiscal Data Modal"
 	widthId="750">
-	<form:form method="POST"
+	<cmr:form method="POST"
 		action="${contextPath}/request/fiscalinfo/process"
 		name="validateFiscalDataForm" class="ibm-column-form ibm-styled-form"
 		modelAttribute="fiscal" id="validateFiscalDataForm">
@@ -444,5 +444,5 @@
 				onClick="cmr.hideModal('validateFiscalDataModal')" highlight="false"
 				pad="true" />
 		</cmr:buttonsRow>
-	</form:form>
+	</cmr:form>
 </cmr:modal>

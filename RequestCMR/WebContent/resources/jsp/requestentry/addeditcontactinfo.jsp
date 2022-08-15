@@ -22,7 +22,7 @@
 </style>
 <!--  Modal for contact information Add/Edit Screen -->
 <cmr:modal title="" id="addEditContactInfoModal" widthId="750">
-  <form:form method="GET" action="${contextPath}/request/contactinfo/process.json" name="frmCMR_contactInfoModal"
+  <cmr:form method="GET" action="${contextPath}/request/contactinfo/process.json" name="frmCMR_contactInfoModal"
     class="ibm-column-form ibm-styled-form" modelAttribute="contactInfoModel" id="frmCMR_contactInfoModal">
     <cmr:modelAction formName="frmCMR_contactInfoModal" />
     <form:hidden path="reqId" id="contactInfo_reqId" value="${reqentry.reqId}" />
@@ -84,5 +84,5 @@
       <cmr:button label="${ui.btn.save}" onClick="addToContactInfoList()" highlight="true" pad="true" id="contactInfoBtn" />
       <cmr:button label="${ui.btn.cancel}" onClick="hideContactInfoModal()" highlight="false" pad="true" />
     </cmr:buttonsRow>
-  </form:form>
+  </cmr:form>
 </cmr:modal>

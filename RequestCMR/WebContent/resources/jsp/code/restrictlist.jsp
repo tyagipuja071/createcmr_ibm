@@ -70,7 +70,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/rst/process" name="frmCMR" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="POST" action="${contextPath}/code/rst/process" name="frmCMR" class="ibm-column-form ibm-styled-form"
     modelAttribute="restrict" id="frmCMR">
     <cmr:model model="restrict" />
     <cmr:modelAction formName="frmCMR" />
@@ -142,7 +142,7 @@
       <cmr:row topPad="10">
       </cmr:row>
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

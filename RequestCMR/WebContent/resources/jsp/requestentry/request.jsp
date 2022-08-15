@@ -272,7 +272,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
 </style>
 <cmr:model model="reqentry" />
 <cmr:boxContent>
-  <form:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="reqentry">
+  <cmr:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="reqentry">
     <jsp:include page="actionstatus.jsp" />
     <input type="hidden" value="${yourActionsViewOnly}" id="viewOnlyPage">
     <input type="hidden" value="${dnbPrimary}" id="dnbPrimary">
@@ -604,7 +604,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     %>
 
     <input type="hidden" name="statusChgCmt" id="statusChgCmt_main">
-  </form:form>
+  </cmr:form>
   <%
     if (!newEntry) {
   %>

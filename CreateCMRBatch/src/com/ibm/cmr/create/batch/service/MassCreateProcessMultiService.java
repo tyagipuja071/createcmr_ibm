@@ -344,6 +344,10 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     for (CompoundEntity entity : resultsMain) {
       mass_create = entity.getEntity(MassCreate.class);
       massCrtData = entity.getEntity(MassCreateData.class);
+      //if (USCMRNumGen.cmrNumMapMassCrt == null || USCMRNumGen.cmrNumMapMassCrt.isEmpty()) {
+	   //   LOG.info("there is no CMR number stored for Mass Create in cache, so init...");
+	   //   USCMRNumGen.initMassCrt(em);
+	   // }
 
       String issuingCntrySql = "BATCH.GET_DATA";
       PreparedQuery dataQuery = new PreparedQuery(em, ExternalizedQuery.getSql(issuingCntrySql));
@@ -371,7 +375,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
             cmrType = "MAIN";
           }
           // temp try get number, will remove when generate method done
-          String cmrNum = USCMRNumGen.genCMRNum(em, cmrType);
+          String cmrNum = USCMRNumGen.genCMRNumMassCrt(em, cmrType);
           massCrtData.setCmrNo(cmrNum);
           mass_create.setCmrNo(cmrNum);
           updateEntity(mass_create, em);
@@ -634,7 +638,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
 
   @Override
   protected void preProcess(EntityManager entityManager) {
-    USCMRNumGen.init(entityManager);
+    USCMRNumGen.initMassCrt(entityManager);
   }
 
 }

@@ -46,7 +46,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/statuschange" name="frmCMRSearch" class="ibm-column-form ibm-styled-form" modelAttribute="status">
+  <cmr:form method="POST" action="${contextPath}/statuschange" name="frmCMRSearch" class="ibm-column-form ibm-styled-form" modelAttribute="status">
     <cmr:section>
       <cmr:row topPad="10" addBackground="true">
         <cmr:column span="3">
@@ -73,9 +73,9 @@
       </cmr:row>
 
     </cmr:section>
-  </form:form>
+  </cmr:form>
   <c:if test="${status.reqId > 0}">
-    <form:form method="POST" action="${contextPath}/statuschange/process" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="status">
+    <cmr:form method="POST" action="${contextPath}/statuschange/process" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="status">
       <cmr:modelAction formName="frmCMR" />
       <form:hidden path="reqId" />
       <cmr:section>
@@ -178,7 +178,7 @@
         </cmr:column>
         </cmr:row>
       </cmr:section>
-    </form:form>
+    </cmr:form>
   </c:if>
 </cmr:boxContent>
 <c:if test="${status.reqId > 0}">

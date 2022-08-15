@@ -20,7 +20,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/revivedcmrs/process" name="frmCMRRevived" class="ibm-column-form ibm-styled-form" 
+  <cmr:form method="POST" action="${contextPath}/revivedcmrs/process" name="frmCMRRevived" class="ibm-column-form ibm-styled-form" 
 	 id="frmCMRRevived" enctype="multipart/form-data" target="processFrame">
     <cmr:section>
 		      <cmr:row topPad="10" addBackground="true">
@@ -47,16 +47,18 @@
       </cmr:row>	  
     </cmr:section>
     <input name="processTokenId" id="processTokenId" type="hidden">
-  </form:form>
+  </cmr:form>
   <iframe id="processFrame" style="display:none" name="processFrame"></iframe>
-        	<form>
+        	<form _csrf="GhtjeYhfngleOImde2" >
 			<input name="dummyform" type="hidden">
+      <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
 		</form>
-		<form id="fileTemplateDownloadForm" name="fileTemplateDownloadForm" method="POST" action="${contextPath}/revcmrs/template/download" target="fileTemplateDownloadFrame">
+		<form _csrf="GhtjeYhfngleOImde2" id="fileTemplateDownloadForm" name="fileTemplateDownloadForm" method="POST" action="${contextPath}/revcmrs/template/download" target="fileTemplateDownloadFrame">
 		  <input name="dlTokenId" id="dlTokenId" type="hidden">
 		  <input name="dlDocType" id="dlDocType" type="hidden">
 		  <input name="dlReqId" id="dlReqId" type="hidden">
 		  <input name="dlIterId" id="dlIterId" type="hidden">
+      <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
 		</form>
 		<iframe id="fileTemplateDownloadFrame" style="display:none" name="fileTemplateDownloadFrame"></iframe>
 </cmr:boxContent>

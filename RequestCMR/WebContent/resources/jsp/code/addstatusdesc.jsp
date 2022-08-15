@@ -34,7 +34,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/addstatusdesc" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="statusdesc">
+  <cmr:form method="POST" action="${contextPath}/code/addstatusdesc" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="statusdesc">
     <cmr:modelAction formName="frmCMR" />
     <cmr:section>
       <cmr:row topPad="8">
@@ -125,7 +125,7 @@
       </cmr:row>
 
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

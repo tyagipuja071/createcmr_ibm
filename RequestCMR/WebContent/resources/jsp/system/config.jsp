@@ -67,8 +67,9 @@
 
       <div class="ibm-columns">
         <div class="ibm-col-1-1" style="width: 915px">
-          <form name="frmCONFIG" id="frmCONFIG" action="${contextPath}/config/process" method="POST">
+          <form _csrf="GhtjeYhfngleOImde2" name="frmCONFIG" id="frmCONFIG" action="${contextPath}/config/process" method="POST">
             <input type="hidden" name="configdownload" id="configdownload"> 
+            <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
             <table cellspacing="0" cellpadding="0" border="0" summary="Config" class="ibm-data-table ibm-sortable-table ibm-alternating">
               <caption>
                 <em>Configuration</em>
@@ -105,8 +106,9 @@
       <div class="ibm-columns">
         <div class="ibm-col-1-1">
           <h3>Upload</h3>
-          <form name="fmrUPLOAD" id="frmUPLOAD" method="POST" action="${contextPath}/config/upload" enctype="multipart/form-data">
+          <form _csrf="GhtjeYhfngleOImde2" name="fmrUPLOAD" id="frmUPLOAD" method="POST" action="${contextPath}/config/upload" enctype="multipart/form-data">
           <input type="file" name="configupload">
+          <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
           <input type="hidden" name="configuploadname" id="configuploadname">
           <br>
           <input type="button" onclick="uploadConfig()" value="Upload File">

@@ -1956,7 +1956,8 @@ public class LegacyDirectService extends TransConnService {
           custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
           custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
           legacyObjects.setCustomerExt(custExt);
-        } else if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()) || SystemLocation.KENYA.equals(data.getCmrIssuingCntry())) {
+        } else if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())
+            || SystemLocation.KENYA.equals(data.getCmrIssuingCntry())) {
           CmrtCustExtPK custExtPk = null;
           LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
           // Initialize the object
@@ -2746,7 +2747,7 @@ public class LegacyDirectService extends TransConnService {
     long reqId = admin.getId().getReqId();
     // String rdcEmbargoCd = getEmbargoCdFromDataRdc(entityManager, admin);
     DataRdc dataRdc = getDataRdcRecords(entityManager, data);
-    CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
+    CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin, true);
     if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
         && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())
         && (dataRdc.getEmbargoCd() != null && !StringUtils.isBlank(dataRdc.getEmbargoCd())) && EMBARGO_LIST.contains(dataRdc.getEmbargoCd())

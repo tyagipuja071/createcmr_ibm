@@ -20,6 +20,7 @@ public class ATServiceMultiEntryPoint extends BatchEntryPoint {
     service.setMode(Mode.Normal);
     service.execute();
 
+    service.setSkipExit(false);
     service.setMode(Mode.Mass);
     service.execute();
 

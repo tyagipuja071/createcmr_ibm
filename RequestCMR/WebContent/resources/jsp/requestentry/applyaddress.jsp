@@ -21,7 +21,7 @@
 
 <!--  Modal for the Apply Address Changes Screen -->
 <cmr:modal title="${ui.title.applyAddrChanges}" id="applyAddrChangesModal" widthId="570">
-  <form:form method="POST" action="${contextPath}/request/address/apply" name="frmCMRCopyAddrChanges" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="POST" action="${contextPath}/request/address/apply" name="frmCMRCopyAddrChanges" class="ibm-column-form ibm-styled-form"
     modelAttribute="copyAddr" id="frmCMRCopyAddrChanges" >
     <cmr:modelAction formName="frmCMRCopyAddrChanges" />
     <form:hidden path="reqId" id="apply_reqId" value="${reqentry.reqId}" />
@@ -57,5 +57,5 @@
       <cmr:button label="${ui.btn.applyChanges}" onClick="copyAddressData()" highlight="true" />
       <cmr:button label="${ui.btn.cancel}" onClick="cancelCopyAddress()" highlight="false" pad="true" />
     </cmr:buttonsRow>
-  </form:form>
+  </cmr:form>
 </cmr:modal>
