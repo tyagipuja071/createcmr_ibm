@@ -636,6 +636,7 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public <T> T initEmpty(Class<T> entityClass) throws Exception {
     try {
       T object = entityClass.newInstance();
@@ -662,6 +663,7 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public void capsAndFillNulls(Object entity, boolean capitalize) throws Exception {
     try {
       Class<?> entityClass = entity.getClass();
@@ -914,7 +916,7 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
               if (isForErrorTests(entityManager, admin)) {
                 response = processMassUpdateError(admin, request.getCmrNo());
               } else {
-                this.serviceClient.setReadTimeout(60 * 30 * 1000); // 30 mins
+                this.serviceClient.setReadTimeout(60 * 60 * 1000); // 30 mins
                 response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
               }
 
