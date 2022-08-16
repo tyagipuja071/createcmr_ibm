@@ -7,7 +7,6 @@
 var _usSicmenHandler = null;
 var _usIsuHandler = null;
 var _usTaxcd1Handler = null;
-var _usTaxcd1Flg = false;
 var _usSicm = "";
 var _kukla = "";
 var _enterpriseHandler = null;
@@ -1244,14 +1243,13 @@ function setTaxcd1Status() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if ((reqType == 'C' || (reqType == 'U' && _usTaxcd1Flg)) && (role == 'REQUESTER' || role == 'PROCESSOR')) {
+  if ((reqType == 'C' || reqType == 'U') && (role == 'REQUESTER' || role == 'PROCESSOR')) {
     if (taxCd1.indexOf("000") != -1) {
       FormManager.setValue('specialTaxCd', 'X');
     } else if (FormManager.getActualValue('specialTaxCd') != '') {
       FormManager.setValue('specialTaxCd', '');
     }
   }
-  _usTaxcd1Flg = true;
 
 }
 
