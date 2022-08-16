@@ -2155,7 +2155,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.BELUX);
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.BELUX, null, true);
-  GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addDepartmentNumberValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addREALCTYValidator, GEOHandler.BELUX, null, true);

@@ -73,21 +73,29 @@ public abstract class ISATransformer extends APTransformer {
 
     // Handling obsolete data
     DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
-    Boolean expiredCluster = false;
-    if (oldDataRdc != null)
-      expiredCluster = aphandler.expiredClusterForAP(handler.cmrData, oldDataRdc);
-    if (expiredCluster) {
-      handler.messageHash.put("ClusterNo", oldDataRdc.getApCustClusterId());
-      handler.messageHash.put("GB_SegCode", oldDataRdc.getClientTier());
-      handler.messageHash.put("ISU", oldDataRdc.getIsuCd());
-      handler.messageHash.put("MrktRespCode", oldDataRdc.getMrcCd());
-      handler.messageHash.put("inacType", oldDataRdc.getInacType());
-      handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
-      handler.messageHash.put("SalesmanNo", oldDataRdc.getRepTeamMemberNo());
-      handler.messageHash.put("InstDept", oldDataRdc.getIsbuCd());
-      handler.messageHash.put("SellDept", oldDataRdc.getIsbuCd());
-      handler.messageHash.put("IBMCode", oldDataRdc.getCollectionCd());
-      handler.messageHash.put("EngrBrnchOff", oldDataRdc.getEngineeringBo());
+    String reqType = handler.adminData.getReqType();
+    if (StringUtils.equalsIgnoreCase(reqType, "U")) {
+      if (!StringUtils.isNotBlank(handler.cmrData.getApCustClusterId())) {
+        handler.messageHash.put("ClusterNo", oldDataRdc.getApCustClusterId());
+      }
+      if (!StringUtils.isNotBlank(handler.cmrData.getClientTier())) {
+        handler.messageHash.put("GB_SegCode", oldDataRdc.getClientTier());
+      }
+      if (!StringUtils.isNotBlank(handler.cmrData.getIsuCd())) {
+        handler.messageHash.put("ISU", oldDataRdc.getIsuCd());
+      }
+      if (!StringUtils.isNotBlank(handler.cmrData.getInacType())) {
+        handler.messageHash.put("inacType", oldDataRdc.getInacType());
+      }
+      if (!StringUtils.isNotBlank(handler.cmrData.getInacCd())) {
+        handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
+      }
+      if (!StringUtils.isNotBlank(handler.cmrData.getCollectionCd())) {
+        handler.messageHash.put("IBMCode", oldDataRdc.getCollectionCd());
+      }
+      if (!StringUtils.isNotBlank(handler.cmrData.getEngineeringBo())) {
+        handler.messageHash.put("EngrBrnchOff", oldDataRdc.getEngineeringBo());
+      }
     }
   }
 
