@@ -854,11 +854,12 @@ public class ItalyHandler extends BaseSOFHandler {
         customerType = cust.getCustType();
       }
     }
-    // Defect 1517492: ISU & CTC should be copied from imported company number
-    if (isuClientTier != null) {
-      data.setIsuCd(isuClientTier.substring(0, 2));
-      data.setClientTier(isuClientTier.substring(2));
-    }
+    String isu = mainRecord.getIsuCode() != null ? mainRecord.getIsuCode() : "";
+    String ctc = mainRecord.getCmrTier() != null ? mainRecord.getCmrTier() : "";
+
+    data.setIsuCd(isu);
+    data.setClientTier(ctc);
+
     if (sbo != null && sbo.length() == 7) {
       sbo = sbo.substring(1, 3);
     }
