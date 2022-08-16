@@ -1851,7 +1851,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NL, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.NL, null, true);
-  GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(rdcDupZP01Check, GEOHandler.NL, null, true);

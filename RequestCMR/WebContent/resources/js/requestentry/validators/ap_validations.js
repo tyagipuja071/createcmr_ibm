@@ -34,8 +34,8 @@ function addHandlersForAP() {
       setIsuOnIsic();
     });
   }
-  handleExpiredClusterAP();
-}
+  handleObseleteExpiredDataForUpdate();
+  }
 
 function addHandlersForANZ() {
   if (_clusterHandlerANZ == null && FormManager.getActualValue('reqType') != 'U') {
@@ -246,7 +246,7 @@ function addAfterConfigAP() {
     addVatValidationforSingapore();
   }
   if (cntry != SysLoc.HONG_KONG && cntry !=  SysLoc.MACAO && reqType == 'U') {
-    handleExpiredClusterAP();
+    handleObseleteExpiredDataForUpdate();
   }
   if (cntry == '616' && reqType == 'U' && (role == 'PROCESSOR' || role == 'REQUESTER')) {
     FormManager.readOnly('isicCd');
@@ -1957,7 +1957,7 @@ function setCtcOnIsuCdChangeISA() {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     FormManager.enable('clientTier');
   }
-  handleExpiredClusterAP();
+  handleObseleteExpiredDataForUpdate();
 }
 
 function onIsuCdChangeAseanAnzIsa() {
@@ -3958,6 +3958,21 @@ function checkClusterExpired(clusterDataRdc) {
   return true;
 }
 
+function checkExpiredData() {
+  var reqId = FromManager.getActualValue('reqId')
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var DataRdc ={};
+  
+  var qParams = {
+      REQ_ID : reqId,
+  };
+  var records = cmr.query('SUMMARY.OLDDATA', qParams);
+  if (records != null && records.size()>0) {
+    return false;
+  }
+  return true;
+}
+
 function addCtcObsoleteValidator() {
     FormManager.addFormValidator((function() {
         return {
@@ -4138,28 +4153,33 @@ function addVatValidationforSingapore() {
   }
 }
 
-function handleExpiredClusterAP() {
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-
-  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' || cntry == SysLoc.HONG_KONG || cntry ==  SysLoc.MACAO) {
-    return;
-  }
-  var gbSegment = FormManager.getField('clientTier');
-  var isu = FormManager.getField('isuCd');
-  var clusterDataRdc = getAPClusterDataRdc();
-  if (clusterDataRdc != null && clusterDataRdc != undefined && clusterDataRdc != '') {
-    var clusterExpired = checkClusterExpired(clusterDataRdc);
-    if (clusterExpired) {
-      handleObseleteExpiredDataForUpdate();
-    }
-  }
-}
+// function handleExpiredClusterAP() {
+// var reqType = FormManager.getActualValue('reqType');
+// var cntry = FormManager.getActualValue('cmrIssuingCntry');
+//
+// if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' ||
+// cntry == SysLoc.HONG_KONG || cntry == SysLoc.MACAO) {
+// return;
+// }
+// var gbSegment = FormManager.getField('clientTier');
+// var isu = FormManager.getField('isuCd');
+// var clusterDataRdc = getAPClusterDataRdc();
+// if (clusterDataRdc != null && clusterDataRdc != undefined && clusterDataRdc
+// != '') {
+// var clusterExpired = checkClusterExpired(clusterDataRdc);
+// if (clusterExpired) {
+// handleObseleteExpiredDataForUpdate();
+// }
+// }
+// }
 
 // CREATCMR -5269
 function handleObseleteExpiredDataForUpdate() {
-// var isSuperUserMode = isSuperUserMode();
  var reqType = FormManager.getActualValue('reqType');
+ var cntry = FormManager.getActualValue('cmrIssuingCntry');
+ if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' || cntry == SysLoc.HONG_KONG || cntry ==  SysLoc.MACAO) {
+   return;
+ }
  // lock all the coverage fields and remove validator
  if (reqType == 'U') {
    FormManager.readOnly('apCustClusterId');
@@ -4172,6 +4192,7 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.readOnly('repTeamMemberName');
    FormManager.readOnly('isbuCd');
    FormManager.readOnly('covId');
+   FormManager.readOnly('cmrNoPrefix');
    FormManager.readOnly('collectionCd');
    FormManager.readOnly('engineeringBo');
    FormManager.readOnly('commercialFinanced');
@@ -4179,9 +4200,14 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.readOnly('contactName2');
    FormManager.readOnly('contactName3');
    FormManager.readOnly('busnType');
+   FormManager.readOnly('taxCd2');
+   FormManager.readOnly('cmrOwner');
 
-
+// setting all fields as not Mandt for update Req
    FormManager.removeValidator('apCustClusterId', Validators.REQUIRED);
+   FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+   FormManager.removeValidator('taxCd2', Validators.REQUIRED);
+   FormManager.removeValidator('cmrOwner', Validators.REQUIRED);
    FormManager.removeValidator('clientTier', Validators.REQUIRED);
    FormManager.removeValidator('isuCd', Validators.REQUIRED);
    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
@@ -4198,25 +4224,6 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.removeValidator('contactName2', Validators.REQUIRED);
    FormManager.removeValidator('contactName3', Validators.REQUIRED);
    FormManager.removeValidator('busnType', Validators.REQUIRED);
-   
-   FormManager.setValue('apCustClusterId', '');
-   FormManager.setValue('clientTier', '');
-   FormManager.setValue('isuCd', '');
-   FormManager.setValue('mrcCd', '');
-   FormManager.setValue('inacType', '');
-   FormManager.setValue('inacCd', '');
-   FormManager.setValue('repTeamMemberNo', '');
-   FormManager.setValue('repTeamMemberName', '');
-   FormManager.setValue('isbuCd', '');
-   FormManager.setValue('covId', '');
-   FormManager.setValue('collectionCd', '');
-   FormManager.setValue('engineeringBo', '');
-   FormManager.setValue('commercialFinanced', '');
-   FormManager.setValue('creditCd', '');
-   FormManager.setValue('contactName3', '');
-   FormManager.setValue('contactName2', '');
-   FormManager.setValue('busnType', '');
-   
  } 
 }
 
@@ -4253,7 +4260,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa, GEOHandler.ISA);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.AP);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.AP);
-  GEOHandler.addAddrFunction(handleExpiredClusterAP, GEOHandler.AP);
+  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.AP);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.AP);
   // GEOHandler.addAddrFunction(addMandateCmrNoForSG, [ SysLoc.SINGAPORE ]);
 
@@ -4382,8 +4389,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateClusterBaseOnScenario, [ SysLoc.SINGAPORE ], null, true);  
   GEOHandler.addAfterConfig(lockInacCodeForIGF, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, SysLoc.INDIA);
-  GEOHandler.addAfterTemplateLoad(handleExpiredClusterAP,  GEOHandler.AP );
-  GEOHandler.addAfterConfig(handleExpiredClusterAP, GEOHandler.AP );
+  GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate,  GEOHandler.AP );
+  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.AP );
   // India Handler
 
 });
