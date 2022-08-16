@@ -4439,7 +4439,7 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-6398
   GEOHandler.registerValidator(businessParterValidator, [ SysLoc.SINGAPORE ], null, true);
-
+  
   GEOHandler.addAddrFunction(lockCustMainNames, GEOHandler.AP);
   // Story - 1781935 -> AR Code for Singapore
   GEOHandler.addAddrFunction(setCollCdFrSGOnAddrSave, [ SysLoc.SINGAPORE ]);

@@ -1301,4 +1301,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-5447
   GEOHandler.registerValidator(TaxTeamUpdateDataValidation, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(TaxTeamUpdateAddrValidation, [ SysLoc.USA ], null, true);
+  // CREATCMR-6777
+  // GEOHandler.addAfterTemplateLoad(setTaxcd1Status, [ SysLoc.USA ]);
+  // GEOHandler.addAfterConfig(setTaxcd1Status, [ SysLoc.USA ]);
 });
