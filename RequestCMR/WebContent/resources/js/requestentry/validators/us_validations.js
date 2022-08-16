@@ -6,6 +6,7 @@
 
 var _usSicmenHandler = null;
 var _usIsuHandler = null;
+var _usTaxcd1Handler = null;
 var _usSicm = "";
 var _kukla = "";
 var _enterpriseHandler = null;
@@ -540,6 +541,12 @@ function afterConfigForUS() {
   if (_usIsuHandler == null && FormManager.getField('isuCd')) {
     _usIsuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValuesUS();
+    });
+  }
+  // CREATCMR-6777
+  if (_usTaxcd1Handler == null && FormManager.getField('taxCd1')) {
+    _usTaxcd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
+      setTaxcd1Status();
     });
   }
 
@@ -1237,8 +1244,12 @@ function setTaxcd1Status() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (reqType == 'C' && taxCd1.indexOf("000") != -1 && (role == 'REQUESTER' || role == 'PROCESSOR')) {
-    FormManager.setValue('specialTaxCd', 'X');
+  if ((reqType == 'C' || reqType == 'U') && (role == 'REQUESTER' || role == 'PROCESSOR')) {
+    if (taxCd1.indexOf("000") != -1) {
+      FormManager.setValue('specialTaxCd', 'X');
+    } else if (FormManager.getActualValue('specialTaxCd') != '') {
+      FormManager.setValue('specialTaxCd', '');
+    }
   }
 }
 
@@ -1290,7 +1301,4 @@ dojo.addOnLoad(function() {
   // CREATCMR-5447
   GEOHandler.registerValidator(TaxTeamUpdateDataValidation, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(TaxTeamUpdateAddrValidation, [ SysLoc.USA ], null, true);
-  // CREATCMR-6777
-  GEOHandler.addAfterTemplateLoad(setTaxcd1Status, [ SysLoc.USA ]);
-  GEOHandler.addAfterConfig(setTaxcd1Status, [ SysLoc.USA ]);
 });
