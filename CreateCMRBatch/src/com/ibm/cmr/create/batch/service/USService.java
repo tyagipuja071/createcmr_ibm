@@ -656,6 +656,7 @@ public class USService extends TransConnService {
     }else{
     	data.setCmrNo("");
         updateEntity(data, entityManager);
+        LOG.debug("*** Response CMR_No >> " + response.getCmrNo());
     }
 
     // update addr
