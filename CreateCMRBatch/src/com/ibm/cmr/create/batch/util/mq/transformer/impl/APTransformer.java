@@ -143,25 +143,25 @@ public abstract class APTransformer extends MessageTransformer {
       DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
       String reqType = handler.adminData.getReqType();
       if (StringUtils.equalsIgnoreCase(reqType, "U")) {
-        if (!StringUtils.isNotBlank(handler.cmrData.getApCustClusterId())) {
+        if (StringUtils.isBlank(handler.cmrData.getApCustClusterId())) {
           handler.messageHash.put("ClusterNo", oldDataRdc.getApCustClusterId());
         }
-        if (!StringUtils.isNotBlank(handler.cmrData.getClientTier())) {
+        if (StringUtils.isBlank(handler.cmrData.getClientTier())) {
           handler.messageHash.put("GB_SegCode", oldDataRdc.getClientTier());
         }
-        if (!StringUtils.isNotBlank(handler.cmrData.getIsuCd())) {
+        if (StringUtils.isBlank(handler.cmrData.getIsuCd())) {
           handler.messageHash.put("ISU", oldDataRdc.getIsuCd());
         }
-        if (!StringUtils.isNotBlank(handler.cmrData.getInacType())) {
+        if (StringUtils.isBlank(handler.cmrData.getInacType())) {
           handler.messageHash.put("inacType", oldDataRdc.getInacType());
         }
-        if (!StringUtils.isNotBlank(handler.cmrData.getInacCd())) {
+        if (StringUtils.isBlank(handler.cmrData.getInacCd())) {
           handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
         }
-        if (!StringUtils.isNotBlank(handler.cmrData.getCollectionCd())) {
+        if (StringUtils.isBlank(handler.cmrData.getCollectionCd())) {
           handler.messageHash.put("IBMCode", oldDataRdc.getCollectionCd());
         }
-        if (!StringUtils.isNotBlank(handler.cmrData.getEngineeringBo())) {
+        if (StringUtils.isBlank(handler.cmrData.getEngineeringBo())) {
           handler.messageHash.put("EngrBrnchOff", oldDataRdc.getEngineeringBo());
         }
       }
