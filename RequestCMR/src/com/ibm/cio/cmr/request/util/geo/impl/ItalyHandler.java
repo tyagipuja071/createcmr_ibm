@@ -854,11 +854,14 @@ public class ItalyHandler extends BaseSOFHandler {
         customerType = cust.getCustType();
       }
     }
-    String isu = mainRecord != null && mainRecord.getIsuCode() != null ? mainRecord.getIsuCode() : "";
-    String ctc = mainRecord != null && mainRecord.getCmrTier() != null ? mainRecord.getCmrTier() : "";
 
-    data.setIsuCd(isu);
-    data.setClientTier(ctc);
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      String isu = mainRecord != null && mainRecord.getIsuCode() != null ? mainRecord.getIsuCode() : "";
+      String ctc = mainRecord != null && mainRecord.getCmrTier() != null ? mainRecord.getCmrTier() : "";
+
+      data.setIsuCd(isu);
+      data.setClientTier(ctc);
+    }
 
     if (sbo != null && sbo.length() == 7) {
       sbo = sbo.substring(1, 3);
