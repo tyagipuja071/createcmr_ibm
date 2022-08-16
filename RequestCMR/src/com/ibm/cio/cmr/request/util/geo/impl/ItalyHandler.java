@@ -854,8 +854,8 @@ public class ItalyHandler extends BaseSOFHandler {
         customerType = cust.getCustType();
       }
     }
-    String isu = mainRecord.getIsuCode() != null ? mainRecord.getIsuCode() : "";
-    String ctc = mainRecord.getCmrTier() != null ? mainRecord.getCmrTier() : "";
+    String isu = mainRecord != null && mainRecord.getIsuCode() != null ? mainRecord.getIsuCode() : "";
+    String ctc = mainRecord != null && mainRecord.getCmrTier() != null ? mainRecord.getCmrTier() : "";
 
     data.setIsuCd(isu);
     data.setClientTier(ctc);
