@@ -179,7 +179,7 @@ public class DPLCheckElement extends ValidatingElement {
             entityManager.merge(addr);
           } else {
             Boolean isPrivate = false;
-            if (data.getCustSubGrp().equals("PRIV")) {
+            if ("PRIV".equals(data.getCustSubGrp())) {
               isPrivate = true;
             }
 
