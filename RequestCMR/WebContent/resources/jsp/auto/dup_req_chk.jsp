@@ -15,7 +15,7 @@
 	<cmr:view forCountry="631">
 <cmr:modal id="dupReq_modal" title="Request Matches found."
 	widthId="570">
-<form:form method="POST" action="<%=actionUrl%>" id="frmDupReq"
+<cmr:form method="POST" action="<%=actionUrl%>" id="frmDupReq"
 		name="frmDupReq" class="ibm-column-form ibm-styled-form"
 		modelAttribute="dupChkModel">
 	 		<cmr:grid url="/auto/duplicate/reqslist.json"
@@ -39,6 +39,6 @@
 				onClick="Automation.redirectToWorkflow()" highlight="false"
 				pad="true" />
 		</cmr:buttonsRow>         
-	</form:form>
+	</cmr:form>
 </cmr:modal>
 </cmr:view>

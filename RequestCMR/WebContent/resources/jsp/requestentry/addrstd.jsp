@@ -9,7 +9,7 @@
 <!--  Modal for the Search Rejection Info Screen -->
 <cmr:modal title="${ui.title.addrStd}" id="AddrStdModal"
 	widthId="750">
-	<form:form method="GET" action="${contextPath}/request/addrstd"
+	<cmr:form method="GET" action="${contextPath}/request/addrstd"
 		name="frmCMR_srchRejAddrStd" class="ibm-column-form ibm-styled-form"
 		modelAttribute="reqentry">
 		
@@ -21,5 +21,5 @@
 			<cmr:button label="${ui.btn.close}"
 				onClick="cmr.hideModal('AddrStdModal')" highlight="true" />
 		</cmr:buttonsRow>
-	</form:form>
+	</cmr:form>
 </cmr:modal>

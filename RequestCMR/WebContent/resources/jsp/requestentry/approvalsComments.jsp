@@ -22,7 +22,7 @@ String createTsHeader =title+"<img src=\""+contextPath+"/resources/images/info-b
 %>
 <!--  Modal for the Approval Comments Screen -->
 <cmr:modal title="${ui.title.approvalComments}" id="viewApprCommentsModal" widthId="750">
-  <form:form method="POST" action="${contextPath}/approval/comments" name="frmApprComments" class="ibm-column-form ibm-styled-form" modelAttribute="approval" id="frmApprComments">
+  <cmr:form method="POST" action="${contextPath}/approval/comments" name="frmApprComments" class="ibm-column-form ibm-styled-form" modelAttribute="approval" id="frmApprComments">
       <cmr:column span="3" width="680">
         <cmr:grid url="/approval/comments.json" id="APPROVAL_CMT_GRID" span="3" width="680" innerWidth="680" height="200" usePaging="false">
           <cmr:gridParam fieldId="reqId" value="${reqentry.reqId}"></cmr:gridParam>
@@ -38,5 +38,5 @@ String createTsHeader =title+"<img src=\""+contextPath+"/resources/images/info-b
       <br>
       <cmr:button label="${ui.btn.close}" onClick="cmr.hideModal('viewApprCommentsModal')" highlight="false" pad="true" />
     </cmr:buttonsRow>
-  </form:form>
+  </cmr:form>
 </cmr:modal>

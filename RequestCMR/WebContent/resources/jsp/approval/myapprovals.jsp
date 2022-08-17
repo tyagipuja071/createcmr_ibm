@@ -58,7 +58,7 @@ div.cmr-sub {
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/myappr/process" name="frmCMR" id="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="approval">
+  <cmr:form method="POST" action="${contextPath}/myappr/process" name="frmCMR" id="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="approval">
     <cmr:modelAction formName="frmCMR" />
     <form:hidden path="approvalId" id="approvalId" />
     <form:hidden path="reqId" id="reqId" />
@@ -103,7 +103,7 @@ div.cmr-sub {
       <br>
     </cmr:section>
     <cmr:model model="approval" />
-  </form:form>
+  </cmr:form>
 
 </cmr:boxContent>
 

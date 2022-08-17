@@ -15,7 +15,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/bds_tbl_info" name="frmCMRSearch" class="ibm-column-form ibm-styled-form" modelAttribute="bds">
+  <cmr:form method="POST" action="${contextPath}/code/bds_tbl_info" name="frmCMRSearch" class="ibm-column-form ibm-styled-form" modelAttribute="bds">
     <cmr:section>
       <cmr:row topPad="8">
         <cmr:column span="6">
@@ -43,7 +43,7 @@
       <cmr:row topPad="10">
       </cmr:row>
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

@@ -129,7 +129,7 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/addsuppcountrypage" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="suppcountrymodel">
+  <cmr:form method="POST" action="${contextPath}/code/addsuppcountrypage" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="suppcountrymodel">
     <cmr:modelAction formName="frmCMR" />
     <cmr:section>
       <cmr:row topPad="8">
@@ -434,7 +434,7 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
       <form:hidden path="suppReqType" id="suppReqType"></form:hidden>
       <form:hidden path="createDt" id="createDt"></form:hidden>
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

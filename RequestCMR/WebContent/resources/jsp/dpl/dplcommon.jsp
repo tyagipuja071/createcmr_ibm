@@ -296,9 +296,10 @@ table.search-results-dpl td, table.search-results-dpl th {
         </table>
 
       <iframe id="pdfFrame" style="display:none" name="pdfFrame"></iframe>
-      <form name="frmPDF" method="POST" action="${contextPath}/dplsearch/pdf" target="pdfFrame">
+      <form _csrf="GhtjeYhfngleOImde2" name="frmPDF" method="POST" action="${contextPath}/dplsearch/pdf" target="pdfFrame">
         <input type="hidden" name="processType" value="SEARCH">
         <input id="pdfSearchString" type="hidden" name="searchString">
+        <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
       </form>
        
     </div>

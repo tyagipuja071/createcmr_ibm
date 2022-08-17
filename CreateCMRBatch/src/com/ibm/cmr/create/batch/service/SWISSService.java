@@ -15,6 +15,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
@@ -47,6 +48,7 @@ import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.DebugUtil;
+import com.ibm.cmr.create.batch.util.ProfilerLogger;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ProcessClient;
@@ -140,7 +142,7 @@ public class SWISSService extends BaseBatchService {
 
   @SuppressWarnings("unused")
   public void monitorCreqcmr(EntityManager entityManager, List<Long> requests) throws Exception {
-
+    long start = new Date().getTime();
     // Retrieve the PCP records
     LOG.debug((requests != null ? requests.size() : 0) + " records to process to RDc.");
     Data data = null;
@@ -202,6 +204,8 @@ public class SWISSService extends BaseBatchService {
           }
         }
         partialCommit(entityManager);
+        ProfilerLogger.LOG.trace(
+            "After monitorCreqcmr for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
@@ -222,7 +226,7 @@ public class SWISSService extends BaseBatchService {
 
   public void monitorCreqcmrMassUpd(EntityManager entityManager, List<Long> requests)
       throws JsonGenerationException, JsonMappingException, IOException, Exception {
-
+    long start = new Date().getTime();
     LOG.debug((requests != null ? requests.size() : 0) + " mass update records to process to RDc.");
 
     Data data = null;
@@ -257,6 +261,8 @@ public class SWISSService extends BaseBatchService {
           createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
         }
         partialCommit(entityManager);
+        ProfilerLogger.LOG.trace("After monitorCreqcmrMassUpd for Request ID: " + id + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
