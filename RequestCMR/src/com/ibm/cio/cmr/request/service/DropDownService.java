@@ -387,7 +387,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       // query.setParameter("LAND1", params.getParam("landCntry"));
 
       query.append(
-          "SELECT trim(C_CNTY) TXT, trim(N_CNTY) CD FROM CREQCMR.US_CMR_SCC WHERE LAND_CNTRY = :LAND1 AND N_ST = :N_ST GROUP BY N_CNTY, C_CNTY ORDER BY N_CNTY, C_CNTY ");
+          "SELECT trim(LPAD(C_CNTY,3,0)) TXT, trim(N_CNTY) CD FROM CREQCMR.US_CMR_SCC WHERE LAND_CNTRY = :LAND1 AND N_ST = :N_ST GROUP BY N_CNTY, C_CNTY ORDER BY N_CNTY, C_CNTY ");
       query.setParameter("LAND1", params.getParam("landCntry"));
       query.setParameter("N_ST", params.getParam("stateProv"));
     }
