@@ -62,7 +62,7 @@ function backToCodeMaintHome() {
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/apClusterMap" name="frmCMRAp" id="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="apClusterMap">
+  <cmr:form method="POST" action="${contextPath}/code/apClusterMap" name="frmCMRAp" id="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="apClusterMap">
   <cmr:modelAction formName="frmCMR" />
     <cmr:section>
     <cmr:row topPad="8" addBackground="true">
@@ -101,7 +101,7 @@ function backToCodeMaintHome() {
       </cmr:row>
     </cmr:section>
   <cmr:model model="apClusterMap" />
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

@@ -51,7 +51,7 @@
 <style>
 
 </style>
-<form:form method="POST" action="${contextPath}/workflow/results" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="requestSearchCriteriaModel">
+<cmr:form method="POST" action="${contextPath}/workflow/results" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="requestSearchCriteriaModel">
 
 
   <cmr:boxContent>
@@ -298,5 +298,5 @@
 <input type="hidden" id="fromURL" name="fromUrl" value="" />
 <input type="hidden" id="newReqCntry_h" name="newReqCntry" value="" />
 <input type="hidden" id="newReqType_h" name="newReqType" value="" />
-</form:form>
+</cmr:form>
 <cmr:model model="requestSearchCriteriaModel" />

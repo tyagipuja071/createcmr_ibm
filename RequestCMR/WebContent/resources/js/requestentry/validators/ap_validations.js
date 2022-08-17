@@ -4091,6 +4091,36 @@ function checkAnyChangesOnCustNameAddrGST() {
   return errorMsg;
 }
 
+// CREATCMR-6398
+function businessParterValidator() {
+  console.log("running businessParterValidator...");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (typeof (_pagemodel) != 'undefined') {
+          if (cmrIssuingCntry == '834' && reqType == 'C' && (custSubType == 'BUSPR' || custSubType == 'XBUSP')) {
+            var id = FormManager.getActualValue('reqId');
+            var ret = cmr.query('CHECK_BUSP_MATCH_ATTACHMENT', {
+              ID : id
+            });
+
+            if (ret == null || ret.ret1 == null || ret.ret1 == 0) {
+              return new ValidationResult(null, false, 'Business Partner Proof attachment is required for Scenario Sub-type \'Business Partner\'.');
+            } else {
+              return new ValidationResult(null, true);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4201,6 +4231,9 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addFormatForCMRNumValidator, [ SysLoc.SINGAPORE ], null, true);
 
+  // CREATCMR-6398
+  GEOHandler.registerValidator(businessParterValidator, [ SysLoc.SINGAPORE ], null, true);
+  
   GEOHandler.addAddrFunction(lockCustMainNames, GEOHandler.AP);
   // Story - 1781935 -> AR Code for Singapore
   GEOHandler.addAddrFunction(setCollCdFrSGOnAddrSave, [ SysLoc.SINGAPORE ]);

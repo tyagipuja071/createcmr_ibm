@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.util;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +37,11 @@ public class JpaManager {
     EntityManagerFactory sf = managerMap.get(name);
     if (sf == null) {
       try {
-        sf = Persistence.createEntityManagerFactory(name);
+        if ("BATCH".equals(name)) {
+          sf = InjectedEMFactory.createEntityManagerFactory(name, Collections.emptyMap());
+        } else {
+          sf = Persistence.createEntityManagerFactory(name);
+        }
         managerMap.put(name, sf);
       } catch (Exception e) {
         LOG.warn("Persistence Unit " + name + " cannot be initialized.", e);

@@ -25,7 +25,7 @@ if (readOnly == null){
 %>
 
 <link href="//1.www.s81c.com/common/v17e/css/data.css" rel="stylesheet" title="www" type="text/css" />
-<form:form method="POST" action="${contextPath}/request/validations" name="frmCMRVal" class="ibm-column-form ibm-styled-form" modelAttribute="requestentry" id="frmCMRVal">
+<cmr:form method="POST" action="${contextPath}/request/validations" name="frmCMRVal" class="ibm-column-form ibm-styled-form" modelAttribute="requestentry" id="frmCMRVal">
 
 <cmr:section id="VALIDATIONS_REQ_TAB" hidden="true">
   <jsp:include page="detailstrip.jsp" />
@@ -110,4 +110,4 @@ if (readOnly == null){
     </cmr:column>
   </cmr:row>
 </cmr:section>
-</form:form>
+</cmr:form>

@@ -48,7 +48,7 @@
   })();
 </script>
 
-<form:form method="POST" action="#" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="us_bp_master" id="frmCMR">
+<cmr:form method="POST" action="#" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="us_bp_master" id="frmCMR">
   <cmr:boxContent>
     <cmr:tabs />
     <cmr:section>
@@ -124,7 +124,7 @@
       
     </cmr:section>
   </cmr:boxContent>
-</form:form>
+</cmr:form>
 
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

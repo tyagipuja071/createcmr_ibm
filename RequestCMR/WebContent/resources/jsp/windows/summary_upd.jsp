@@ -53,7 +53,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 </style>
 <cmr:window>
   <div class="cmr-summary">
-    <form:form method="GET" action="${contextPath}/window/summary/update" name="frmCMR" class="ibm-column-form ibm-styled-form"
+    <cmr:form method="GET" action="${contextPath}/window/summary/update" name="frmCMR" class="ibm-column-form ibm-styled-form"
       modelAttribute="summary">
       <!--  Main Details Section -->
       <jsp:include page="summary_main.jsp" />
@@ -344,7 +344,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           </cmr:column>
         </cmr:row>
       </cmr:view>
-    </form:form>
+    </cmr:form>
   </div>
   <cmr:windowClose>
     <cmr:button label="${ui.btn.refresh}" onClick="window.location = window.location.href" pad="true" highlight="true" />

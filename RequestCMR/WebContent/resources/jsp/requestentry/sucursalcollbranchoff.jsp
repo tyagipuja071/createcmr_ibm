@@ -31,7 +31,7 @@ dojo.addOnLoad(function() {
 </script>
 <!--  Modal for the Workflow History Screen -->
 <cmr:modal title="${ui.title.sucursalcollBOsearch}" id="sucursalCollBranchOffModel" widthId="980">
-  <form:form id="frmCMRSucursalCollBO" method="GET" action="${contextPath}/request/${reqntry.reqId}" name="frmCMRSucursalCollBO" class="ibm-column-form ibm-styled-form" modelAttribute="sucursalCollBO">
+  <cmr:form id="frmCMRSucursalCollBO" method="GET" action="${contextPath}/request/${reqntry.reqId}" name="frmCMRSucursalCollBO" class="ibm-column-form ibm-styled-form" modelAttribute="sucursalCollBO">
 
     <cmr:row>
       <cmr:column span="6">
@@ -77,5 +77,5 @@ dojo.addOnLoad(function() {
         </cmr:grid>
       </cmr:column>
     </cmr:row>
-  </form:form>
+  </cmr:form>
 </cmr:modal>

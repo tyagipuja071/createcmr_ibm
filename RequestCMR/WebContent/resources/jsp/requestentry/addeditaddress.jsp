@@ -17,7 +17,7 @@
 </style>
 <!--  Modal for the Add/Edit Screen -->
 <cmr:modal title="${ui.title.addEditAddress}" id="addEditAddressModal" widthId="750">
-  <form:form method="GET" action="${contextPath}/request/address/process" name="frmCMR_addressModal" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="GET" action="${contextPath}/request/address/process" name="frmCMR_addressModal" class="ibm-column-form ibm-styled-form"
     modelAttribute="addressModal" id="frmCMR_addressModal">
     <cmr:modelAction formName="frmCMR_addressModal" />
     <form:hidden path="cmrIssuingCntry" id="addr_cmrIssuingCntry" value="${reqentry.cmrIssuingCntry}" />
@@ -217,5 +217,5 @@
       </cmr:view>
       <cmr:button label="${ui.btn.cancel}" onClick="cancelAddressModal()" highlight="false" pad="true" />
     </cmr:buttonsRow>
-  </form:form>
+  </cmr:form>
 </cmr:modal>

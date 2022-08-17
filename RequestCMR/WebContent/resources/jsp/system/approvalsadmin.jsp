@@ -98,7 +98,7 @@ String createTsHeader =title+"<img src=\""+contextPath+"/resources/images/info-b
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/approvalsadmin" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="approval">
+  <cmr:form method="POST" action="${contextPath}/approvalsadmin" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="approval">
     <form:hidden path="reqId"/>
     <cmr:section>
       <cmr:row addBackground="true">
@@ -107,7 +107,7 @@ String createTsHeader =title+"<img src=\""+contextPath+"/resources/images/info-b
         </cmr:column>
       </cmr:row>
     </cmr:section>
-  </form:form>
+  </cmr:form>
   <cmr:section>
     <cmr:row addBackground="true">
       <cmr:column span="6">
