@@ -40,6 +40,7 @@ import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.ap.anz.BNValidationRequest;
 import com.ibm.cmr.services.client.automation.ap.anz.BNValidationResponse;
+import com.ibm.cmr.services.client.automation.ap.anz.NMValidationRequest;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
@@ -166,6 +167,23 @@ public class AustraliaUtil extends AutomationUtil {
 
   }
 
+  private AutomationResponse<BNValidationResponse> getAuCustNmLayerInfo(String customerName) throws Exception {
+    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        AutomationServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    client.setRequestMethod(Method.Get);
+
+    NMValidationRequest request = new NMValidationRequest();
+    request.setCustNm(customerName);
+    System.out.println(request + request.getCustNm());
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.AU_NM_VALIDATION_SERVICE_ID, request, AutomationResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<AutomationResponse<BNValidationResponse>> ref = new TypeReference<AutomationResponse<BNValidationResponse>>() {
+    };
+    return mapper.readValue(json, ref);
+  }
+
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
@@ -230,22 +248,65 @@ public class AustraliaUtil extends AutomationUtil {
           }
         }
         if (!(custNmMatch && formerCustNmMatch)) {
-          LOG.debug("CustNm and formerCustNm match failed with API.Now Checking with DNB to vrify CustNm update");
-          MatchingResponse<DnBMatchingResponse> Dnbresponse = DnBUtil.getMatches(requestData, null, "ZS01");
-          List<DnBMatchingResponse> matches = Dnbresponse.getMatches();
-          if (!matches.isEmpty()) {
-            for (DnBMatchingResponse dnbRecord : matches) {
-              // checks for CustNm match
-              String dnbCustNm = StringUtils.isBlank(dnbRecord.getDnbName()) ? "" : dnbRecord.getDnbName().replaceAll("\\s+$", "");
-              if (customerName.equalsIgnoreCase(dnbCustNm)) {
+          try {
+            response = getAuCustNmLayerInfo(customerName);
+          } catch (Exception e) {
+            if (response == null || !response.isSuccess()
+                && "Parameter 'CustomerName' is required by the service to verify CustNm change.".equalsIgnoreCase(response.getMessage())) {
+              LOG.debug("\nFailed to Connect to AU Customer Name Service.Now Checking with DNB to vrify CustNm update");
+            }
+          }
+
+          if (response != null && response.isSuccess()) {
+            // custNm Validation
+            if (response.getRecord().isValid()) {
+              String responseCustNm = StringUtils.isBlank(response.getRecord().getCompanyName()) ? ""
+                  : response.getRecord().getCompanyName().replaceAll(regex, "");
+              String responseTradingNm = StringUtils.isBlank(response.getRecord().getTradingName()) ? ""
+                  : response.getRecord().getTradingName().replaceAll(regex, "");
+              String responseOthTradingNm = StringUtils.isBlank(response.getRecord().getOtherTradingName()) ? ""
+                  : response.getRecord().getOtherTradingName().replaceAll(regex, "");
+              String responseBusinessNm = StringUtils.isBlank(response.getRecord().getBusinessName()) ? ""
+                  : response.getRecord().getBusinessName().replaceAll(regex, "");
+              if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
+                  && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
                 custNmMatch = true;
-                dnbTradestyleNames = dnbRecord.getTradeStyleNames();
-                if (dnbTradestyleNames != null) {
-                  for (String tradestyleNm : dnbTradestyleNames) {
-                    tradestyleNm = tradestyleNm.replaceAll("\\s+$", "");
-                    if (tradestyleNm.equalsIgnoreCase(formerCustName)) {
-                      formerCustNmMatch = true;
-                      break;
+                formerCustNmMatch = true;
+              } else if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
+                  && !((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
+                custNmMatch = true;
+                formerCustNmMatch = false;
+              } else if (response.getRecord().isValid() && !(customerName.equalsIgnoreCase(responseCustNm))
+                  && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
+                custNmMatch = false;
+                formerCustNmMatch = true;
+              } else {
+                custNmMatch = false;
+                formerCustNmMatch = false;
+              }
+            }
+          }
+          if (!(custNmMatch && formerCustNmMatch)) {
+            LOG.debug("CustNm and formerCustNm match failed with API.Now Checking with DNB to vrify CustNm update");
+            MatchingResponse<DnBMatchingResponse> Dnbresponse = DnBUtil.getMatches(requestData, null, "ZS01");
+            List<DnBMatchingResponse> matches = Dnbresponse.getMatches();
+            if (!matches.isEmpty()) {
+              for (DnBMatchingResponse dnbRecord : matches) {
+                // checks for CustNm match
+                String dnbCustNm = StringUtils.isBlank(dnbRecord.getDnbName()) ? "" : dnbRecord.getDnbName().replaceAll("\\s+$", "");
+                if (customerName.equalsIgnoreCase(dnbCustNm)) {
+                  custNmMatch = true;
+                  dnbTradestyleNames = dnbRecord.getTradeStyleNames();
+                  if (dnbTradestyleNames != null) {
+                    for (String tradestyleNm : dnbTradestyleNames) {
+                      tradestyleNm = tradestyleNm.replaceAll("\\s+$", "");
+                      if (tradestyleNm.equalsIgnoreCase(formerCustName)) {
+                        formerCustNmMatch = true;
+                        break;
+                      }
                     }
                   }
                 }
