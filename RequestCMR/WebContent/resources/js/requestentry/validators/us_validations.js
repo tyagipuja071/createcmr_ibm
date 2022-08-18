@@ -536,6 +536,7 @@ function afterConfigForUS() {
 
   if (reqType == 'U') {
     FormManager.readOnly('custType');
+    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
   }
 
   if (_usIsuHandler == null && FormManager.getField('isuCd')) {
