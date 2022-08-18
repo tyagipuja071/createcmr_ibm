@@ -782,6 +782,9 @@ public class NordicsUtil extends AutomationUtil {
     if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.SWEDEN.equalsIgnoreCase(data.getCmrIssuingCntry())) {
       request.setOrgId(data.getVat().substring(2, 12));
     }
+    if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.NORWAY.equalsIgnoreCase(data.getCmrIssuingCntry()) && data.getVat().contains("MVA")) {
+      request.setOrgId(data.getVat().replaceAll("MVA", "").trim());
+    }
   }
 
   @Override

@@ -1992,9 +1992,7 @@ function matchCustNmAUUpdate() {
     cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
     return;
   }
-  cmr.showProgress('Checking Customer Name with API...');
   if (custNm == formerCustNm) {
-    cmr.hideProgress();
     comp_proof_INAUSG = false;
     matchDnbForAUUpdate();
     return;
@@ -2009,7 +2007,6 @@ function matchCustNmAUUpdate() {
   if (dataAPI.success && dataAPI.custNmMatch) {
     if (dataAPI.formerCustNmMatch) {
       comp_proof_INAUSG = true;
-      cmr.hideProgress();
       checkDnBMatchingAttachmentValidator();
       if (FormManager.validate('frmCMR')) {
         MessageMgr.clearMessages();
@@ -2023,13 +2020,11 @@ function matchCustNmAUUpdate() {
     } else {
       console.log("Name matches found in API but former Name doesn't match with Historical/trading/business name in API");
       comp_proof_INAUSG = false;
-      cmr.hideProgress();
       cmr.showAlert("Please attach company proof as Name validation failed by API.");
     }
   } else if (dataAPI.success && dataAPI.formerCustNmMatch && !dataAPI.custNmMatch) {
     comp_proof_INAUSG = false;
     console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");
-    cmr.hideProgress();
     cmr.showAlert("Please attach company proof as Name validation failed by API.");
   } else {
     // match it with AU customerNm API
@@ -2042,7 +2037,6 @@ function matchCustNmAUUpdate() {
     if (dataAPI.success && dataAPI.custNmMatch) {
       if (dataAPI.formerCustNmMatch) {
         comp_proof_INAUSG = true;
-        cmr.hideProgress();
         checkDnBMatchingAttachmentValidator();
         if (FormManager.validate('frmCMR')) {
           MessageMgr.clearMessages();
@@ -2056,16 +2050,13 @@ function matchCustNmAUUpdate() {
       } else {
         console.log("Name matches found in API but former Name doesn't match with Historical/trading/business name in API");
         comp_proof_INAUSG = false;
-        cmr.hideProgress();
         cmr.showAlert("Please attach company proof as Name validation failed by API.");
       }
     } else if (dataAPI.success && dataAPI.formerCustNmMatch && !dataAPI.custNmMatch) {
       comp_proof_INAUSG = false;
-      console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");
-      cmr.hideProgress();
+      console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");   
       cmr.showAlert("Please attach company proof as Name validation failed by API.");
     } else {
-      cmr.hideProgress();
       cmr.showProgress('Customer Name match with API failed . Now Checking Customer Name with Dnb...');
       // API match failed for CustomerName now checking for Dnb Match Start
       dojo.xhrGet({
