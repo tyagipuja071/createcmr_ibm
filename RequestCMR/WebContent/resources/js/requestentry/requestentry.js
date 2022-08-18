@@ -522,9 +522,9 @@ function statusChangeModal_onLoad() {
   } else if (action == YourActions.Send_for_Processing) {
     dojo.byId('sendToProcessingCenter').innerHTML = details.ret3;
     cmr.showNode('sendToBlock');
-  }else{
+  } else {
     var isscntry = FormManager.getActualValue('cmrIssuingCntry');
-    if(isscntry == '897'){
+    if (isscntry == '897') {
       var reqId = FormManager.getActualValue('reqId');
       var qParams = {
         REQ_ID : reqId
@@ -533,8 +533,8 @@ function statusChangeModal_onLoad() {
       if (resultSource.ret1 == 'CreateCMR-BP' && resultSource.ret2 == 'E') {
         var result = cmr.query('bpibmdirectcmr', qParams);
         if (result.ret1 == null || result.ret1 == '') {
-          cmr.showNode('bpIBMDirectCMRWR');         
-        }else{
+          cmr.showNode('bpIBMDirectCMRWR');
+        } else {
           cmr.showNode('bpIBMDirectCMR');
           dojo.byId('childIbmDrCMR').innerHTML = result.ret1;
         }
@@ -641,9 +641,9 @@ function doSaveChangeComments() {
       rejField += '<input type="hidden" name="statusChgCmt" value="' + cmt + '">';
     }
     dojo.place(rejField, document.forms['frmCMR'], 'last');
-  }else{
+  } else {
     var isscntry = FormManager.getActualValue('cmrIssuingCntry');
-    if(isscntry == '897'){
+    if (isscntry == '897') {
       var reqId = FormManager.getActualValue('reqId');
       var qParams = {
         REQ_ID : reqId
@@ -658,7 +658,7 @@ function doSaveChangeComments() {
             return;
           }
           var cmt = FormManager.getActualValue('statusChgCmt');
-          FormManager.setValue('statusChgCmt', 'IBMDIRECT_CMR'+ibmDrCMR+cmt);
+          FormManager.setValue('statusChgCmt', 'IBMDIRECT_CMR' + ibmDrCMR + cmt);
         }
       }
     }
@@ -755,7 +755,8 @@ function commentImgFormatter(value, rowIndex) {
   }
   if (value.indexOf('@') > 0) {
     if (value.indexOf('ibm.com') > 0) {
-      return '<img title="'+value+'" src="https://unified-profile-api.us-south-k8s.intranet.ibm.com/v3/image/'+value+'" class="cmt-img" onerror="this.onerror=null; this.src=\''+cmr.CONTEXT_ROOT+'/resources/images/person.jpg\'">';
+      return '<img title="' + value + '" src="https://unified-profile-api.us-south-k8s.intranet.ibm.com/v3/image/' + value + '" class="cmt-img" onerror="this.onerror=null; this.src=\''
+          + cmr.CONTEXT_ROOT + '/resources/images/person.jpg\'">';
     } else {
       return '<img title="' + value + '" src="' + cmr.CONTEXT_ROOT + '/resources/images/person.jpg" class="cmt-img">';
     }
@@ -1617,7 +1618,8 @@ function isSkipDnbMatching() {
         }
       }
       return false;
-    } else return true;
+    } else
+      return true;
   } else {
     return true;
   }
@@ -1656,8 +1658,8 @@ function checkIfFinalDnBCheckRequired() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
-  if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester'
-      && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
+  if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+      && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US
     return true;
   }
@@ -1687,8 +1689,7 @@ function checkIfDnBCheckReqForIndia() {
   if (reqType == 'C' && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS')) {
     if (result && result.ret1) {
       return false;
-   }
-   else {
+    } else {
       return true;
     }
   }
@@ -1771,7 +1772,9 @@ function matchDnBForAutomationCountries() {
                 FormManager.setValue('matchOverrideIndc', 'Y');
               }
               // Cmr-2755_India_no_match_found
-              else if(cntry == SysLoc.INDIA && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS') && !flag){      
+              else if (cntry == SysLoc.INDIA
+                  && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS')
+                  && !flag) {
                 cmr.showAlert('Please attach company proof as no matches found in dnb.');
                 checkNoMatchingAttachmentValidator();
               } else if (cntry == SysLoc.CANADA) {
@@ -1788,8 +1791,7 @@ function matchDnBForAutomationCountries() {
             // continue
             console.log("An error occurred while matching dnb.");
             if (cntry == '641') {
-              cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?',
-                  'Warning', null, {
+              cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
                 OK : 'Yes',
                 CANCEL : 'No'
               });
@@ -1818,8 +1820,7 @@ function matchDnBForIndia() {
     return;
   }
   cmr.showProgress('Checking request data with D&B...');
-  dojo
-      .xhrGet({
+  dojo.xhrGet({
     url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
     handleAs : 'json',
     method : 'GET',
@@ -1870,8 +1871,7 @@ function matchDnBForIndia() {
       } else {
         // continue
         console.log("An error occurred while matching dnb.");
-            cmr.showConfirm("cmr.showModal('addressVerificationModal')",
-                'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+        cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
           OK : 'Yes',
           CANCEL : 'No'
         });
@@ -2148,8 +2148,7 @@ function matchDnbForAUUpdate() {
     return;
   }
   cmr.showProgress('Checking request data with D&B...');
-  dojo
-      .xhrGet({
+  dojo.xhrGet({
     url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatchUpdate.json',
     handleAs : 'json',
     method : 'GET',
@@ -2180,7 +2179,7 @@ function matchDnbForAUUpdate() {
         } else {
           comp_proof_INAUSG = false;
           console.log("Name/Address validation failed by dnb");
-          cmr.showAlert("Please attach company proof as Name/Address validation failed by Dnb.");
+          cmr.showAlert("Please attach company proof as Address validation failed by Dnb.");
         }
         checkDnBMatchingAttachmentValidator();
       } else {
@@ -2328,12 +2327,8 @@ function checkNoMatchingAttachmentValidator() {
 }
 
 function showDocTypeConfirmDialog() {
-	cmr
-	.showConfirm(
-		'doChangeDocType()',
-		'There are Legal Name Confirmation and/or Address Confirmation attachment(s) attached with the request. '+
-		'These attachment types are not supported anymore and will be sunset. Do you want to use <strong>Company Proof</strong> instead?',
-		'Warning', null, null);
+  cmr.showConfirm('doChangeDocType()', 'There are Legal Name Confirmation and/or Address Confirmation attachment(s) attached with the request. '
+      + 'These attachment types are not supported anymore and will be sunset. Do you want to use <strong>Company Proof</strong> instead?', 'Warning', null, null);
 }
 
 function doChangeDocType() {
