@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -121,6 +122,36 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
     addressLine1 = addressLine1.trim();
     params.add(addressLine1); // {14}
     params.add(addressLine2); // {15}
+    if ("897".equalsIgnoreCase(cmrIssuingCountry) && "CreateCMR-BP".equals(admin.getSourceSystId())) {
+      if (admin.getChildReqId() > 0) {
+        Data theChindData = getChildData(entityManager, admin.getChildReqId());
+        if (theChindData != null && StringUtils.isNotEmpty(theChindData.getCmrNo())) {
+          params.add(" BP CMR#: " + params.get(3)); // {16}
+          params.add(" IBM Direct CMR#: " + theChindData.getCmrNo()); // {17}
+        } else {
+          Data theData = getChildData(entityManager, admin.getId().getReqId());
+          if (theData != null && StringUtils.isNotEmpty(theData.getCmrNo2())) {
+            params.add(" BP CMR#: " + params.get(3)); // {16}
+            params.add(" IBM Direct CMR#: " + theData.getCmrNo2()); // {17}
+          } else {
+            params.add(""); // {16}
+            params.add(""); // {17}
+          }
+        }
+      } else {
+        Data theData = getChildData(entityManager, admin.getId().getReqId());
+        if (theData != null && StringUtils.isNotEmpty(theData.getCmrNo2())) {
+          params.add(" BP CMR#: " + params.get(3)); // {16}
+          params.add(" IBM Direct CMR#: " + theData.getCmrNo2()); // {17}
+        } else {
+          params.add(""); // {16}
+          params.add(""); // {17}
+        }
+      }
+    } else {
+      params.add(""); // {16}
+      params.add(""); // {17}
+    }
 
   }
 
@@ -135,4 +166,18 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
     }
     return cmrIssuingCntry;
   }
+
+  public static Data getChildData(EntityManager entityManager, long reqId) {
+
+    String sql = ExternalizedQuery.getSql("BATCH.EMAILENGINE.GETDATA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Data> dataList = query.getResults(Data.class);
+    Data theData = null;
+    if (dataList != null) {
+      theData = dataList.get(0);
+    }
+    return theData;
+  }
+
 }
