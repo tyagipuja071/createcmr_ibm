@@ -3531,6 +3531,16 @@ function setInacCd() {
   }
 }
 
+function setAddressDetailsForView() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage == 'true') {
+    $('label[for="custNm1_view"]').text('Customer Name:');
+    $('label[for="custNm2_view"]').text('Customer Name Con\'t:');
+    $('label[for="custNm3_view"]').text('Additional Info');
+    $('label[for="custNm4_view"]').text(' Att. Person');
+  }
+}
+
 function setSensitiveFlag() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -4924,6 +4934,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockIBMTabFields, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(lockIBMTabFields, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NORDX);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);
