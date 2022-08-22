@@ -434,7 +434,7 @@ public class USUtil extends AutomationUtil {
       }
 
       // set ISU CTC if not found
-      if (StringUtils.isBlank(data.getIsuCd()) && StringUtils.isNotBlank(admin.getSourceSystId()) && !admin.getSourceSystId().equals("FedCMR")) {
+      if (StringUtils.isBlank(data.getIsuCd())) {
         details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 34-Q.").append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "34");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Q");
