@@ -1510,7 +1510,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               }
               log.debug("ISIC Match : " + isicMatch);
               if (record.getConfidenceCode() >= 8 && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
-                  && (StringUtils.isBlank(data.getCustSubGrp()) || !data.getCustSubGrp().equals("CROSS"))) {
+                  && (StringUtils.isBlank(data.getCustSubGrp()) && "CN".equalsIgnoreCase(addr.getLandCntry())
+                      || !data.getCustSubGrp().equals("CROSS"))) {
                 match = true;
                 break;
               }

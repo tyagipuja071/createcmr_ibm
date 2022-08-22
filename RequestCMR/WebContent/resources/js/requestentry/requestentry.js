@@ -1783,6 +1783,9 @@ function matchDnBForAutomationCountries() {
                         + 'as backup-client\'s official website, business registration proof, government issued documents, client\'s confirmation email and signed PO, attach it under the file content of Company Proof. '
                         + 'Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.');
                 FormManager.setValue('matchOverrideIndc', 'Y');
+              } else if (cntry == '641' && (custSubGrp == 'CROSS' && reqType == 'C' || reqType == 'U')) {
+                cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');
+                FormManager.setValue('matchOverrideIndc', 'Y');
               } else {
                 cmr.showModal('addressVerificationModal');
               }

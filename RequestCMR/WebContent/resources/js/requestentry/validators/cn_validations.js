@@ -3221,7 +3221,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSocialCreditCdLengthValidator, GEOHandler.CN, GEOHandler.REQUESTER, true);
   GEOHandler.registerValidator(addAddrUpdateValidator, GEOHandler.CN, null, true);
   GEOHandler.registerValidator(validateCnNameAndAddr, GEOHandler.CN, null, false);
-  GEOHandler.registerValidator(foreignValidator, GEOHandler.CN, null, false,false);
+  // GEOHandler.registerValidator(foreignValidator, GEOHandler.CN, null,
+  // false,false);
   GEOHandler.registerValidator(addPRIVCustNameValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(addPRIVCustNameSFPValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(validateEnNameForInter, GEOHandler.CN, null, false);
