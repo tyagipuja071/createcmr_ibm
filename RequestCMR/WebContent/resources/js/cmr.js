@@ -784,7 +784,6 @@ var cmr = {
   },
   validateCustNmFromVat: function(businessNumber, reqId, formerCustNm, custNm) {
     var result = {};
-// cmr.showProgress('Checking Customer Name with API By Using Vat...');
     dojo.xhrGet({
       url : cmr.CONTEXT_ROOT + '/au/custNm.json',
       handleAs : 'json',
@@ -798,7 +797,6 @@ var cmr = {
       timeout : 50000,
       sync : true,
       load : function(data, ioargs) {
-// cmr.hideProgress();
         if (data) {
           result = data;
         }
@@ -811,7 +809,6 @@ var cmr = {
   },
   validateCustNmFromAPI: function(reqId, formerCustNm, custNm) {
     var result = {};
-// cmr.showProgress('Checking Customer Name with API By Using Vat...');
     dojo.xhrGet({
       url : cmr.CONTEXT_ROOT + '/au/custNmFromAPI.json',
       handleAs : 'json',
@@ -824,7 +821,6 @@ var cmr = {
       timeout : 50000,
       sync : true,
       load : function(data, ioargs) {
-// cmr.hideProgress();
         if (data) {
           result = data;
         }
