@@ -104,7 +104,7 @@ function addDnBSearchValidator() {
       validate : function() {
         var ifProspect = FormManager.getActualValue('prospLegalInd');
         if (dijit.byId('prospLegalInd')) {
-          ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+          ifProspect = dijit.byId('prospLegalInd').get('value');
         }
        
         if (FormManager.getActualValue('dnbPrimary') != 'Y' && ifProspect != 'Y') {

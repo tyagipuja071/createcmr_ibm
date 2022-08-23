@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasAddress;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys.Address;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 /**
  * {@link GEOHandler} for:
@@ -550,4 +551,84 @@ public class ANZHandler extends APHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
+
+  @Override
+  public boolean matchDnbMailingAddr(DnBMatchingResponse dnbRecord, Addr addr, String issuingCountry, Boolean allowLongNameAddress) {
+    if ("616".equals(issuingCountry)) {
+      // match address
+      String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
+      address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
+      address = address.trim();
+
+      String handlerAddress = buildAddressForDnbMatching(issuingCountry, addr);
+      if (!StringUtils.isBlank(handlerAddress)) {
+        address = handlerAddress;
+        LOG.debug("Address used for matching: " + address);
+      }
+
+      String MailingDnbAddress = dnbRecord.getMailingDnbStreetLine1() != null ? dnbRecord.getMailingDnbStreetLine1() : "";
+      if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
+        MailingDnbAddress += StringUtils.isNotBlank(dnbRecord.getMailingDnbStreetLine2()) ? " " + dnbRecord.getMailingDnbStreetLine2() : "";
+      }
+      MailingDnbAddress = MailingDnbAddress.trim();
+      Boolean isReshuffledAddr = compareReshuffledAddress(MailingDnbAddress, address, issuingCountry);
+      if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(MailingDnbAddress)
+          && StringUtils.getLevenshteinDistance(address.toUpperCase(), MailingDnbAddress.toUpperCase()) > 8
+          && !(allowLongNameAddress && MailingDnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr) {
+        return false;
+      }
+      // match postal cd
+      if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getMailingDnbPostalCd())) {
+        String currentPostalCode = addr.getPostCd();
+        String dnbMailingPostalCode = dnbRecord.getMailingDnbPostalCd();
+        if (currentPostalCode.length() != dnbMailingPostalCode.length()) {
+          if (calAlignPostalCodeLength(currentPostalCode, dnbMailingPostalCode)) {
+            return false;
+          }
+        }
+        if (currentPostalCode.length() == dnbMailingPostalCode.length()) {
+          if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbMailingPostalCode)) {
+            return false;
+          }
+        }
+      }
+      // match city
+      if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getMailingDnbCity())
+          && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getMailingDnbCity().toUpperCase()) > 6) {
+        return false;
+      }
+      // Mailing Address close matching - END
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private static boolean calAlignPostalCodeLength(String currPostalCd, String dnBPostalCd) {
+    String shortPostalCd = "";
+    currPostalCd = currPostalCd.replaceAll("[^\\w\\s]+", "").trim();
+    dnBPostalCd = dnBPostalCd.replaceAll("[^\\w\\s]+", "").trim();
+    boolean res = true;
+    if (currPostalCd.length() > dnBPostalCd.length()) {
+      shortPostalCd = currPostalCd.substring(0, dnBPostalCd.length());
+      currPostalCd = shortPostalCd;
+    } else {
+      shortPostalCd = dnBPostalCd.substring(0, currPostalCd.length());
+      dnBPostalCd = shortPostalCd;
+    }
+    LOG.debug("Shortned postal code= " + shortPostalCd);
+    res = isPostalCdCloselyMatchesDnB(currPostalCd, dnBPostalCd);
+    return res;
+  }
+
+  private static boolean isPostalCdCloselyMatchesDnB(String currPostalCd, String dnBPostalCd) {
+    boolean res = true;
+    if (dnBPostalCd.length() <= 5 && StringUtils.getLevenshteinDistance(currPostalCd.toUpperCase(), dnBPostalCd.toUpperCase()) > 2) {
+      res = false;
+    } else if (dnBPostalCd.length() > 5 && StringUtils.getLevenshteinDistance(currPostalCd.toUpperCase(), dnBPostalCd.toUpperCase()) > 3) {
+      res = false;
+    }
+    return res;
+  }
+
 }
