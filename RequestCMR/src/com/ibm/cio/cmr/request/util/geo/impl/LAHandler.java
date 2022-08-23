@@ -2143,6 +2143,15 @@ public class LAHandler extends GEOHandler {
             isLeasingBr = true;
           }
         }
+
+        // CreateCMR-6681 - Predefined enterprise value
+        if (isBRIssuingCountry(cmrIssuingCntry) && "LOCAL".equals(data.getCustGrp())) {
+          data.setVat(soldToAddr.getVat());
+          LOG.debug("Setting VAT in DATA table : " + soldToAddr.getVat());
+
+          data.setEnterprise(soldToAddr.getVat().substring(0, 8));
+          LOG.debug("Setting ENTERPRISE in DATA table : " + soldToAddr.getVat().substring(0, 8));
+        }
       }
     }
 
@@ -2216,7 +2225,6 @@ public class LAHandler extends GEOHandler {
         }
       }
     }
-
   }
 
   @Override
@@ -2333,7 +2341,6 @@ public class LAHandler extends GEOHandler {
       if (addr.getId().getAddrType().equals("ZS01")) {
         addrService.updateDataForBRCreate(entityManager, null, addr);
       }
-
     }
   }
 
@@ -3405,6 +3412,12 @@ public class LAHandler extends GEOHandler {
         entityManager.persist(addrzi01);
         LOG.debug("ZI01 address for req id= " + reqId + " successfully created.");
 
+      }
+
+      // CreateCMR-6681 - Predefined enterprise value
+      if ("LOCAL".equals(data.getCustGrp())) {
+        LOG.debug("Setting ENTERPRISE in DATA tabe to : " + v2Model.getVat().substring(0, 8));
+        data.setEnterprise(v2Model.getVat().substring(0, 8));
       }
     }
 
