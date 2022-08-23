@@ -2113,7 +2113,8 @@ function setFieldRequiredSSAMXOnSecnarios() {
       if (role == 'Processor' || role == 'Requester') {
         FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
         FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
-        FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
+        // FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [
+        // 'SalRepNameNo' ], 'MAIN_IBM_TAB');
       }
     } else {
       FormManager.resetValidations('isicCd');
@@ -2524,14 +2525,21 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
 /* 1640462 - MRC should be optional for requester for SSA&MX */
 function setMrcCdRequiredForProcessors() {
   var _country = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
   console.log('****Executiing setMrcCdRequiredForProcessors for country ' + _country);
   if (_country != '631') {
     if (typeof (_pagemodel) != 'undefined') {
       if (_pagemodel.userRole == 'Processor') {
         var lblMrcCd = FormManager.getLabel('MrcCd');
         FormManager.addValidator('mrcCd', Validators.REQUIRED, [ lblMrcCd ], 'MAIN_IBM_TAB');
+          if(reqType == 'C') {
+            FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term/Sales Branch Office' ], 'MAIN_IBM_TAB');
+            FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep No' ], 'MAIN_IBM_TAB'); 
+          }               
       } else {
         FormManager.resetValidations('mrcCd');
+        FormManager.resetValidations('salesBusOffCd');
+        FormManager.resetValidations('repTeamMemberNo');
       }
     }
   }
