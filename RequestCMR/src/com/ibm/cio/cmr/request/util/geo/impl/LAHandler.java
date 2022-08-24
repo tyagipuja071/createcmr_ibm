@@ -2142,6 +2142,18 @@ public class LAHandler extends GEOHandler {
             data.setCustClass("34");
             isLeasingBr = true;
           }
+
+          // CreatCMR-6681 - Predefined enterprise value for BR local scenarios
+          String vat = soldToAddr.getVat();
+          if ("LOCAL".equals(data.getCustGrp()) && StringUtils.isNotBlank(vat)) {
+            if (soldToAddr.getVat().length() >= 8) {
+              data.setVat(soldToAddr.getVat());
+              LOG.debug("Setting VAT in DATA table : " + soldToAddr.getVat());
+
+              data.setEnterprise(soldToAddr.getVat().substring(0, 8));
+              LOG.debug("Setting ENTERPRISE in DATA table : " + soldToAddr.getVat().substring(0, 8));
+            }
+          }
         }
       }
     }
@@ -2216,7 +2228,6 @@ public class LAHandler extends GEOHandler {
         }
       }
     }
-
   }
 
   @Override
@@ -2333,7 +2344,6 @@ public class LAHandler extends GEOHandler {
       if (addr.getId().getAddrType().equals("ZS01")) {
         addrService.updateDataForBRCreate(entityManager, null, addr);
       }
-
     }
   }
 
@@ -3405,6 +3415,15 @@ public class LAHandler extends GEOHandler {
         entityManager.persist(addrzi01);
         LOG.debug("ZI01 address for req id= " + reqId + " successfully created.");
 
+      }
+
+      // CreatCMR-6681 - Predefined enterprise value for BR local scenarios
+      String vat = v2Model.getVat();
+      if ("C".equals(v2Model.getReqType()) && "LOCAL".equals(data.getCustGrp()) && StringUtils.isNotBlank(vat)) {
+        if (v2Model.getVat().length() >= 8) {
+          LOG.debug("Setting ENTERPRISE in DATA table to : " + v2Model.getVat().substring(0, 8));
+          data.setEnterprise(v2Model.getVat().substring(0, 8));
+        }
       }
     }
 
