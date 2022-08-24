@@ -4604,12 +4604,10 @@ function addTRAddressTypeValidator() {
             if (zs01data[4] != zp01converted[4]) {
               errorMessage = errorMessage + (errorMessage.length > 0 ? ', District' : 'District');
             }
-            
-           /* if (errorMessage.length > 0) {
+            if (errorMessage.length > 0) {
               return new ValidationResult(null, false, "Field value mismatch for Sold-To and Local Language Translation of Sold To: " + errorMessage);
-            }*/
+            }
           }
-
           return new ValidationResult(null, true);
         }
       }
