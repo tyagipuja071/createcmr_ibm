@@ -2041,9 +2041,7 @@ function matchCustNmAUUpdate() {
       if (dataAPI.formerCustNmMatch) {
         comp_proof_INAUSG = true;
         checkDnBMatchingAttachmentValidator();
-        if (FormManager.validate('frmCMR')) {
-          MessageMgr.clearMessages();
-          doValidateRequest();
+        if (FormManager.validate('frmCMR')) {         
           matchDnbForAUUpdate();
           return;
         } else {
@@ -2084,9 +2082,7 @@ function matchCustNmAUUpdate() {
             if (data.custNmMatch && data.formerCustNmMatch) {
               comp_proof_INAUSG = true;
               checkDnBMatchingAttachmentValidator();
-              if (FormManager.validate('frmCMR')) {
-                MessageMgr.clearMessages();
-                doValidateRequest();
+              if (FormManager.validate('frmCMR')) {             
                 matchDnbForAUUpdate();
                 return;
               } else {
