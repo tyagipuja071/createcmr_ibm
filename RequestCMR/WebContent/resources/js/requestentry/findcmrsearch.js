@@ -588,16 +588,6 @@ function doImportCmrs(addressOnly) {
 
     if (cmrStatus.ret1 == 'C') {
       inactiveCmr = true;
-    } else {
-      // check sold to if AUFSD 93
-      var checkActive = cmr.query('EMEA.CHECK_ACTIVE_CMR', {
-        ZZKV_CUSNO : cmrNo,
-        MANDT : cmr.MANDT,
-        KATR6 : cntry
-      });
-      if (checkActive.ret1 != '1') {
-        inactiveCmr = true;
-      }
     }
 
     if (inactiveCmr) {
