@@ -2144,7 +2144,7 @@ public class LAHandler extends GEOHandler {
           }
         }
 
-        // CreateCMR-6681 - Predefined enterprise value
+        // CreatCMR-6681 - Predefined enterprise value for BR local scenarios
         if (isBRIssuingCountry(cmrIssuingCntry) && "LOCAL".equals(data.getCustGrp())) {
           data.setVat(soldToAddr.getVat());
           LOG.debug("Setting VAT in DATA table : " + soldToAddr.getVat());
@@ -3414,9 +3414,9 @@ public class LAHandler extends GEOHandler {
 
       }
 
-      // CreateCMR-6681 - Predefined enterprise value
+      // CreatCMR-6681 - Predefined enterprise value for BR local scenarios
       if ("LOCAL".equals(data.getCustGrp())) {
-        LOG.debug("Setting ENTERPRISE in DATA tabe to : " + v2Model.getVat().substring(0, 8));
+        LOG.debug("Setting ENTERPRISE in DATA table to : " + v2Model.getVat().substring(0, 8));
         data.setEnterprise(v2Model.getVat().substring(0, 8));
       }
     }
