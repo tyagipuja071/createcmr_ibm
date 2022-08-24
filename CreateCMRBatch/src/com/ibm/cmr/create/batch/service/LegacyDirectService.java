@@ -1127,16 +1127,20 @@ public class LegacyDirectService extends TransConnService {
     WfHist hist = createHistory(entityManager, message, "PCO", "Legacy Processing", admin.getId().getReqId());
     createComment(entityManager, message, admin.getId().getReqId());
     RequestUtils.sendEmailNotifications(entityManager, admin, hist, false, true);
-
-    String mailFlag = transformer.getMailSendingFlag(cmrObjects.getData(), admin, entityManager);
-    if (!"NA".equals(mailFlag)) {
-      String mailTemplate = transformer.getEmailTemplateName(mailFlag);
-      String statusForMailSend = transformer.getReqStatusForSendingMail(mailFlag);
-      if (statusForMailSend != null && "PCO".equals(statusForMailSend)) {
-        BatchEmailModel mailParams = transformer.getMailFormatParams(entityManager, cmrObjects, mailFlag);
-        LegacyCommonUtil.sendfieldUpdateEmailNotification(entityManager, mailParams, mailTemplate);
-      }
-    }
+    // CREATCMR-2625,6677
+    // String mailFlag = transformer.getMailSendingFlag(cmrObjects.getData(),
+    // admin, entityManager);
+    // if (!"NA".equals(mailFlag)) {
+    // String mailTemplate = transformer.getEmailTemplateName(mailFlag);
+    // String statusForMailSend =
+    // transformer.getReqStatusForSendingMail(mailFlag);
+    // if (statusForMailSend != null && "PCO".equals(statusForMailSend)) {
+    // BatchEmailModel mailParams =
+    // transformer.getMailFormatParams(entityManager, cmrObjects, mailFlag);
+    // LegacyCommonUtil.sendfieldUpdateEmailNotification(entityManager,
+    // mailParams, mailTemplate);
+    // }
+    // }
 
     partialCommit(entityManager);
   }
