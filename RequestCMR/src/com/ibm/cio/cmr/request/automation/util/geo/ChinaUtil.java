@@ -112,11 +112,12 @@ public class ChinaUtil extends AutomationUtil {
     // result.setOnError(true);
     // }
     // break;
-    case SCENARIO_CROSS_CROSS:
-      details.append("This Foreign Request will be routed to CMDE.\n");
-      engineData.addRejectionComment("OTH", "This Foreign Request will be routed to CMDE.", "", "");
-      result.setOnError(true);
-      break;
+    // case SCENARIO_CROSS_CROSS:
+    // details.append("This Foreign Request will be routed to CMDE.\n");
+    // engineData.addRejectionComment("OTH", "This Foreign Request will be
+    // routed to CMDE.", "", "");
+    // result.setOnError(true);
+    // break;
     case SCENARIO_LOCAL_BLUMX:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
