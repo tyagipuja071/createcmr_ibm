@@ -336,6 +336,10 @@ public class RequestUtils {
    */
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history, boolean excludeRequester,
       boolean legacyDirect) {
+    List<String> reqStatusFrMailNotif = Arrays.asList("PRJ", "COM");
+    if (!reqStatusFrMailNotif.contains(admin.getReqStatus())) {
+      return;
+    }
     String cmrno = "";
     String siteId = "";
     String rejectReason = history.getRejReason();
