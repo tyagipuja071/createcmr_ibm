@@ -3583,12 +3583,10 @@ function addTRAddressTypeValidator() {
             if (zs01data[4] != zp01converted[4]) {
               errorMessage = errorMessage + (errorMessage.length > 0 ? ', District' : 'District');
             }
-
             if (errorMessage.length > 0) {
               return new ValidationResult(null, false, "Field value mismatch for Sold-To and Local Language Translation of Sold To: " + errorMessage);
             }
           }
-
           return new ValidationResult(null, true);
         }
       }
@@ -9019,6 +9017,60 @@ function clientTierValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+// creatcmr-6032
+function vatValidatorTR() {
+  console.log('>>Running VAT validation for Turkey.');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custGrp = FormManager.getActualValue('custGrp');
+        var vat = FormManager.getActualValue('vat');
+        var reqId = FormManager.getActualValue('reqId');
+        var districts = [ 'GAZIMAGUSA', 'GIRNE', 'GUZELYURT', 'YENI ISKELE', 'LEFKE', 'LEFKOSA' ];
+        var soldToDistrict = null;
+        var vatPattern = null;
+        var vatDistrictChkUpdate = true;
+        if (_allAddressData.length > 0) {
+          for (var i = 0; i < _allAddressData.length; i++) {
+            if (_allAddressData[i].addrType[0] == 'ZS01') {
+              soldToDistrict = _allAddressData[i].dept[0];
+            }
+          }
+        }
+        var qParams = {
+          REQ_ID : reqId
+        };
+        var result = cmr.query('GET.VAT_OLD_BY_REQID', qParams);
+        if (result.ret1 == '' && result.ret1 != null) {
+          vatDistrictChkUpdate = true;
+        }
+        if (soldToDistrict != null && districts.includes(soldToDistrict.toUpperCase()) && (reqType == 'C' || (reqType == 'U' && vatDistrictChkUpdate))) {
+          vatPattern = /^[0-9]{9}$/;
+          if (vat.match(vatPattern) != null && vat.match(vatPattern).length > 0) {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'vat',
+              type : 'text',
+              name : 'vat'
+            }, false, 'Format for VAT is incorrect. Correct format is 999999999.');
+          }
+        } else {
+          if (vat.match(/^[0-9]{10}$/) || vat.match(/^[0-9]{11}$/)) {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'vat',
+              type : 'text',
+              name : 'vat'
+            }, false, 'Invalid VAT for TR. Length should be 10, or 11 characters long.');
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
@@ -9103,7 +9155,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(preFillTranslationAddrWithSoldToForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(addTurkishCharValidator, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addTRAddressTypeValidator, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
+  GEOHandler.registerValidator(vatValidatorTR, [ SysLoc.TURKEY ], null, true);
+  //GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addALPHANUMValidatorForEnterpriseNumber, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addALPHANUMValidatorForTypeOfCustomer, [ SysLoc.TURKEY ], null, true);
