@@ -6,6 +6,7 @@ package com.ibm.cio.cmr.request.model.system;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 
 /**
  * @author JeffZAMORA
@@ -51,6 +52,9 @@ public class AutomationStatsModel {
   @Column(name = "PROCESS_CD")
   private String processCd;
 
+  @Transient
+  private String subProcessCd;
+
   @Column(name = "FAILURE_INDC")
   private String failureIndc;
 
@@ -89,12 +93,27 @@ public class AutomationStatsModel {
 
   @Column(name = "CREATE_TS")
   private String createTs;
-  @Column(
-      name = "DNB_MATCHING_RESULT")
+  @Column(name = "DNB_MATCHING_RESULT")
   private String dnbMatchingResult;
-  @Column(
-      name = "RPA_MATCHING_RESULT")
+  @Column(name = "RPA_MATCHING_RESULT")
   private String rpaMatchingResult;
+
+  @Column(name = "AUTO_COMMENT")
+  private String autoComment;
+
+  private String approvals;
+
+  @Column(name = "ERROR_CMT")
+  private String errorCmt;
+
+  @Column(name = "FORCE_CMT")
+  private String forceCmt;
+
+  @Transient
+  private String allReviewCauses;
+
+  @Column(name = "DISABLE_AUTO_PROC")
+  private String disableAutoProc;
 
   public StatsPK getId() {
     return id;
@@ -334,6 +353,62 @@ public class AutomationStatsModel {
 
   public void setCreateTs(String createTs) {
     this.createTs = createTs;
+  }
+
+  public String getAutoComment() {
+    return autoComment;
+  }
+
+  public void setAutoComment(String autoComment) {
+    this.autoComment = autoComment;
+  }
+
+  public String getApprovals() {
+    return approvals;
+  }
+
+  public void setApprovals(String approvals) {
+    this.approvals = approvals;
+  }
+
+  public String getErrorCmt() {
+    return errorCmt;
+  }
+
+  public void setErrorCmt(String errorCmt) {
+    this.errorCmt = errorCmt;
+  }
+
+  public String getAllReviewCauses() {
+    return allReviewCauses;
+  }
+
+  public void setAllReviewCauses(String allReviewCauses) {
+    this.allReviewCauses = allReviewCauses;
+  }
+
+  public String getForceCmt() {
+    return forceCmt;
+  }
+
+  public void setForceCmt(String forceCmt) {
+    this.forceCmt = forceCmt;
+  }
+
+  public String getSubProcessCd() {
+    return subProcessCd;
+  }
+
+  public void setSubProcessCd(String subProcessCd) {
+    this.subProcessCd = subProcessCd;
+  }
+
+  public String getDisableAutoProc() {
+    return disableAutoProc;
+  }
+
+  public void setDisableAutoProc(String disableAutoProc) {
+    this.disableAutoProc = disableAutoProc;
   }
 
 }
