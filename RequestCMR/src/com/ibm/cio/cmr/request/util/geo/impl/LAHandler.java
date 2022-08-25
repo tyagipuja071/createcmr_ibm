@@ -196,7 +196,12 @@ public class LAHandler extends GEOHandler {
     String issuingCountry = mainRecord.getCmrIssuedBy();
     String sORTL = mainRecord.getCmrSortl();
     String subindustry = data.getSubIndustryCd();
+    String mexicoBillingName = mainRecord.getCmrMexBillingName() != null ? mainRecord.getCmrMexBillingName() : "";
     AddressService addSvc = new AddressService();
+
+    if (isMXIssuingCountry(issuingCountry)) {
+      data.setMexicoBillingName(mexicoBillingName);
+    }
 
     // Defect 1267371 :Municipal Fiscal Code/ Tax Code 2 wrongly imported
     // from
@@ -577,6 +582,15 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public void setAdminDefaultsOnCreate(Admin admin) {
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    if (isMXIssuingCountry(cmrIssuingCntry)) {
+      fields.addAll(Arrays.asList("MEXICO_BILLING_NAME"));
+    }
+    return fields;
   }
 
   @Override
@@ -1498,6 +1512,17 @@ public class LAHandler extends GEOHandler {
         update.setDataField(PageManager.getLabel(cntry, "LocalTax1", "-"));
         update.setNewData(service.getCodeAndDescription(newData.getTaxCd1(), "LocalTax1", cmrCountry));
         update.setOldData(service.getCodeAndDescription(oldData.getTaxCd1(), "LocalTax1", cmrCountry));
+        results.add(update);
+      }
+    }
+
+    // Mexico Billing Name
+    if (isMXIssuingCountry(cmrCountry)) {
+      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getMexicoBillingName(), newData.getMexicoBillingName())) {
+        update = new UpdatedDataModel();
+        update.setDataField(PageManager.getLabel(cmrCountry, "BillingName", "-"));
+        update.setNewData(newData.getMexicoBillingName());
+        update.setOldData(oldData.getMexicoBillingName());
         results.add(update);
       }
     }
