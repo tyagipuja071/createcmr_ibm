@@ -686,7 +686,7 @@ function addGenericZIPValidator() {
               var msg;
   
               if (loc == '754' || loc == '866') {
-                msg = result.errorMessage + '. Please refer to info bubble for the correct format.';
+                msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
               } else {
                 msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
               }
