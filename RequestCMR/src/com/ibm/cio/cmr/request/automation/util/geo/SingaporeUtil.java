@@ -3,14 +3,19 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
@@ -38,6 +43,9 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
@@ -642,5 +650,69 @@ public class SingaporeUtil extends AutomationUtil {
   protected List<String> getCountryLegalEndings() {
     return Arrays.asList("PTY LTD", "LTD", "company", "limited", "PT", "SDN BHD", "berhad", "CO. LTD", "company limited", "JSC", "JOINT STOCK",
         "INC.", "PTE LTD", "PVT LTD", "private limited", "CORPORATION", "hospital", "university");
+  }
+
+  // CREATCMR-6358
+  public MatchingResponse<DnBMatchingResponse> getAddrListDnbMatches(RequestData requestData, AutomationEngineData engineData, Admin admin, Data data)
+      throws Exception {
+    MatchingResponse<DnBMatchingResponse> dnbresponse = new MatchingResponse<DnBMatchingResponse>();
+    List<DnBMatchingResponse> dnbMatches = new ArrayList<DnBMatchingResponse>();
+    List<Addr> addrList = requestData.getAddresses();
+    boolean isTaxCdMatch = false;
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+
+    if (addrList != null && addrList.size() > 0) {
+      for (Addr addr : addrList) {
+        if (isTaxCdMatch && StringUtils.isNotBlank(data.getTaxCd1())) {
+          request.setOrgId(data.getTaxCd1());
+        } else if (!isTaxCdMatch) {
+          if (StringUtils.isNotBlank(data.getVat())) {
+            request.setOrgId(data.getVat());
+          } else if (StringUtils.isNotBlank(addr.getVat())) {
+            request.setOrgId(addr.getVat());
+          }
+        }
+
+        request.setCity(addr.getCity1());
+        request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+        request.setStreetLine1(addr.getAddrTxt());
+        request.setStreetLine2(addr.getAddrTxt2());
+        request.setLandedCountry(addr.getLandCntry());
+        request.setPostalCode(addr.getPostCd());
+        request.setStateProv(addr.getStateProv());
+        request.setMinConfidence("4");
+
+        tweakDnBMatchingRequest(request, requestData, engineData);
+
+        MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(rawResponse);
+
+        TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+        };
+
+        dnbresponse = mapper.readValue(json, ref);
+
+        List<DnBMatchingResponse> matches = dnbresponse.getMatches();
+        if (matches.size() == 0) {
+          break;
+        } else {
+          dnbMatches.addAll(matches);
+        }
+      }
+    }
+    if (dnbMatches != null && dnbMatches.size() > 0) {
+      dnbMatches = dnbMatches.stream().collect(Collectors
+          .collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(DnBMatchingResponse::getDunsNo))), ArrayList::new));
+      dnbMatches = dnbMatches.stream().sorted(Comparator.comparing(DnBMatchingResponse::getConfidenceCode).reversed()).collect(Collectors.toList());
+      dnbresponse.setMatches(dnbMatches);
+      dnbresponse.setMessage("Found " + dnbMatches.size() + " matches for the given search criteria.");
+    }
+    return dnbresponse;
   }
 }
