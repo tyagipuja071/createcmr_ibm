@@ -47,6 +47,9 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.util.geo.MarketUtil;
+import com.ibm.cio.cmr.request.util.metrics.AutomationReviews;
+import com.ibm.cio.cmr.request.util.metrics.ReviewCategory;
+import com.ibm.cio.cmr.request.util.metrics.ReviewGroup;
 import com.ibm.cio.cmr.request.util.system.RequestStatsContainer;
 import com.ibm.cio.cmr.request.util.system.StatXLSConfig;
 
@@ -93,6 +96,7 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
       }
     }
 
+    // sql += "and admin.REQ_ID = 564592";
     String procCenter = model.getGroupByProcCenter();
     if (!StringUtils.isBlank(procCenter)) {
       sql += " and data.CMR_ISSUING_CNTRY in (select CMR_ISSUING_CNTRY from CREQCMR.PROC_CENTER where upper(PROC_CENTER_NM) = :PROC_CENTER)";
@@ -141,7 +145,32 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
 
     List<AutomationStatsModel> stats = query.getResults(AutomationStatsModel.class);
 
+    for (AutomationStatsModel stat : stats) {
+      if ("Y".equals(stat.getReview())) {
+        String processCd = "Unclassified";
+        List<ReviewGroup> reviews = AutomationReviews.findCategory(stat);
+        if (!reviews.isEmpty()) {
+          ReviewGroup group = reviews.get(0);
+          processCd = group.getName();
+          stat.setProcessCd(processCd);
+          ReviewCategory cat = group.getCurrentMatch() != null ? group.getCurrentMatch() : null;
+          stat.setSubProcessCd(cat != null ? cat.getName() : "[Unclassified]");
+          StringBuilder allRev = new StringBuilder();
+          for (ReviewGroup grp : reviews) {
+            cat = grp.getCurrentMatch() != null ? grp.getCurrentMatch() : null;
+            allRev.append(allRev.length() > 0 ? "\n" : "");
+            allRev.append(grp.getName() + " - " + (cat != null ? cat.getName() : "[Unclassified]"));
+          }
+          stat.setAllReviewCauses(allRev.toString());
+        } else {
+          stat.setProcessCd("[Unclassified]");
+          stat.setAllReviewCauses("[Unclassified]");
+        }
+      }
+    }
+
     container.setAutomationRecords(stats);
+
     if ("Y".equals(params.getParam("buildSummary"))) {
       LOG.debug("Building summary for statistics..");
       buildSummaries(container, stats, !StringUtils.isBlank(model.getCountry()), !StringUtils.isBlank(model.getSourceSystId()));
@@ -172,18 +201,29 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         summary.setNoStatus(summary.getNoStatus() + 1);
       }
 
-      if ("Y".equals(stat.getReview()) && !StringUtils.isBlank(stat.getProcessCd())) {
+      // CREATCMR-6871 - update categorization
+
+      // jz 20220823 - remove old
+      // if ("Y".equals(stat.getReview()) &&
+      // !StringUtils.isBlank(stat.getProcessCd())) {
+      // String processCd = stat.getProcessCd();
+      // if ("S".equals(stat.getFailureIndc())) {
+      // processCd = "System Error";
+      // } else if ("CHECKS".equals(processCd)) {
+      // processCd = extractProcessCause(stat, null);
+      // } else if ("Y".equals(stat.getPaygo())) {
+      // processCd = extractProcessCause(stat, processCd);
+      // }
+      // if (summary.getReviewMap().get(processCd) == null) {
+      // summary.getReviewMap().put(processCd, (long) 0);
+      // }
+      // Map<String, Long> revMap = summary.getReviewMap();
+      // revMap.put(processCd, revMap.get(processCd) + 1);
+      // }
+
+      if ("Y".equals(stat.getReview())) {
         String processCd = stat.getProcessCd();
-        if ("S".equals(stat.getFailureIndc())) {
-          processCd = "System Error";
-        } else if ("CHECKS".equals(processCd)) {
-          processCd = extractProcessCause(stat, null);
-        } else if ("Y".equals(stat.getPaygo())) {
-          processCd = extractProcessCause(stat, processCd);
-        }
-        if (summary.getReviewMap().get(processCd) == null) {
-          summary.getReviewMap().put(processCd, (long) 0);
-        }
+        summary.getReviewMap().putIfAbsent(processCd, (long) 0);
         Map<String, Long> revMap = summary.getReviewMap();
         revMap.put(processCd, revMap.get(processCd) + 1);
       }
@@ -276,7 +316,15 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     }
   }
 
-  private String extractProcessCause(AutomationStatsModel stat, String defaultProcess) {
+  /**
+   * 
+   * @param stat
+   * @param defaultProcess
+   * @return
+   * @deprecated - recompute using {@link AutomationReviews} flow
+   */
+  @Deprecated
+  protected String extractProcessCause(AutomationStatsModel stat, String defaultProcess) {
     String cmt = stat.getCmt();
     if (StringUtils.isBlank(cmt)) {
       return "Other Checks";
@@ -317,6 +365,7 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
    * @throws IllegalArgumentException
    * @throws IllegalAccessException
    */
+  @SuppressWarnings("rawtypes")
   public void exportToExcel(RequestStatsContainer container, MetricsModel model, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
@@ -426,6 +475,7 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
    * @param drawing
    * @param helper
    */
+  @SuppressWarnings("rawtypes")
   private void createHeaders(XSSFRow header, XSSFCellStyle style, Drawing drawing, List<StatXLSConfig> config, CreationHelper helper) {
     XSSFCell cell = null;
 
@@ -452,6 +502,7 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
    * @param drawing
    * @param helper
    */
+  @SuppressWarnings("rawtypes")
   private void addComment(XSSFRow row, XSSFCell cell, String author, String content, Drawing drawing, CreationHelper helper) {
     ClientAnchor anchor = helper.createClientAnchor();
     anchor.setCol1(cell.getColumnIndex());
@@ -482,11 +533,11 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         cell.setCellValue(MarketUtil.getMarket(value.toString().trim()));
       } else if ("PROCESS_CD".equals(sc.getDbField())) {
         String processCd = request.getProcessCd();
-        if (!"Y".equals(request.getReview())) {
-          processCd = "";
-        } else if ("Y".equals(request.getPaygo())) {
-          processCd = extractProcessCause(request, processCd);
-        }
+        // if (!"Y".equals(request.getReview())) {
+        // processCd = "";
+        // } else if ("Y".equals(request.getPaygo())) {
+        // processCd = extractProcessCause(request, processCd);
+        // }
         cell.setCellValue(processCd);
       } else if ("OVERALL_TAT".equals(sc.getDbField())) {
         Long lVal = (Long) value;
@@ -519,18 +570,29 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
   private Object getValue(String columnName, AutomationStatsModel request) throws IllegalArgumentException, IllegalAccessException {
     Column col = null;
 
-    if ("ERROR_CHECKS".equals(columnName) || "PROCESS_CD".equals(columnName)) {
+    if ("ERROR_CHECKS".equals(columnName)) {
       if (!"Y".equals(request.getReview())) {
         return "";
       }
-      if ("CHECKS".equals(request.getProcessCd())) {
-        if ("Y".equals(request.getFullAuto())) {
-          return "";
-        }
-        return extractProcessCause(request, null);
-      } else {
+      if ("Y".equals(request.getFullAuto())) {
         return "";
       }
+      return request.getSubProcessCd();
+    }
+    if ("ALL_REVIEWS".equals(columnName)) {
+      return request.getAllReviewCauses();
+    }
+    if ("AUTO_COMMENT".equals(columnName)) {
+      if (!StringUtils.isBlank(request.getAutoComment())) {
+        return request.getAutoComment();
+      }
+      if (!StringUtils.isBlank(request.getErrorCmt())) {
+        return request.getErrorCmt();
+      }
+      if (!StringUtils.isBlank(request.getForceCmt())) {
+        return "Forced Status Change";
+      }
+      return "";
     }
     if (columnName.equals("REQ_ID") && (request instanceof AutomationStatsModel)) {
       return request.getId().getReqId();
@@ -572,14 +634,18 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     config.add(new StatXLSConfig("RPA Matching", "RPA_MATCHING_RESULT", 16, "Indicates whether the RPA matches were found."));
     config.add(new StatXLSConfig("Touchless", "FULL_AUTO", 16, "Indicates whether the request was completed without any form of manual work."));
     config.add(new StatXLSConfig("Review Required", "REVIEW", 16, "Indicates whether the request needed manual CMDE review."));
-    config.add(new StatXLSConfig("Review Cause", "PROCESS_CD", 25, "Specifies the first automation element that caused automation to stop."));
-    config.add(new StatXLSConfig("Error Checks", "ERROR_CHECKS", 25, "Indicates the checks that caused the review"));
+    config.add(new StatXLSConfig("Review Category", "PROCESS_CD", 25, "Main category for the review cause"));
+    config.add(new StatXLSConfig("Review Sub-category", "ERROR_CHECKS", 25, "Sub-category of the review cause under the main category"));
     config.add(new StatXLSConfig("Failure Type", "FAILURE_INDC", 16,
         "Specifies the automation element that caused automation to stop. S - System Error, P - Processing Error"));
     config.add(new StatXLSConfig("Rejected", "REJECT", 16, "Indicates whether the request was rejected by the automation engine."));
     config.add(new StatXLSConfig("Reject Reason", "REJ_REASON", 25, "Indicates whether the first rejection reason for the request."));
     config
         .add(new StatXLSConfig("Overall TAT", "OVERALL_TAT", 25, "Indicates the total time (hh:mm:ss) it took from request creation to completion."));
+    config.add(new StatXLSConfig("Review Comments", "AUTO_COMMENT", 25, "Comment added by Automation Engine which caused the review."));
+    config.add(new StatXLSConfig("All Categories", "ALL_REVIEWS", 25, "All Matched Categories for the review"));
+    // config.add(new StatXLSConfig("Error Comment", "ERROR_CMT", 25,
+    // "Processing error comments."));
 
   }
 
