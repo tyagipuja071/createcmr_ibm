@@ -690,64 +690,81 @@ public class DnBUtil {
     // Name/TradestyleName close matching - END
 
     // Address close matching - BEGIN
-    String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
-    address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
-    address = address.trim();
 
-    if (handler != null) {
-      String handlerAddress = handler.buildAddressForDnbMatching(country, addr);
-      if (handler != null && !StringUtils.isBlank(handlerAddress)) {
-        address = handlerAddress;
-      }
+    // CREATCMR-6358 Address close matching for Singapore
+    AutomationUtil countryUtil = null;
+    try {
+      countryUtil = AutomationUtil.getNewCountryUtil(country);
+    } catch (Exception e) {
+      LOG.error("Unable to get countryUtil", e);
     }
-    LOG.debug("Address used for matching: " + address);
-
-    String dnbAddress = dnbRecord.getDnbStreetLine1() != null ? dnbRecord.getDnbStreetLine1() : "";
-    if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
-      dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
-    }
-    dnbAddress = dnbAddress.trim();
-    Boolean matchWithDnbMailingAddr = false;
-    if (handler != null) {
-      matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
-    }
-    LOG.debug("DNB match country =  " + country);
-    Boolean isReshuffledAddr = false;
-    if ("897".equals(country) || "US".equals(country)) {
-      isReshuffledAddr = USHandler.compareUSReshuffledAddress(dnbAddress, address, country);
-      LOG.debug("US isReshuffledAddr =  " + isReshuffledAddr);
+    Boolean matched = true;
+    if (countryUtil != null && countryUtil instanceof SingaporeUtil && SystemLocation.SINGAPORE.equals(country)) {
+      SingaporeUtil singaporeUtil = (SingaporeUtil) countryUtil;
+      matched = singaporeUtil.addrCloselyMatchesDnb(country, admin, dnbRecord, nameToUse, useTradestyleName, allowLongNameAddress);
+      return matched;
     } else {
-      isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
-      LOG.debug("isReshuffledAddr =  " + isReshuffledAddr);
-    }
 
-    // Boolean isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress,
-    // address, country);
-    if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
-        && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
-        && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr
-        && !matchWithDnbMailingAddr) {
-      return false;
-    }
+      String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
+      address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
+      address = address.trim();
 
-    if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())) {
-      String currentPostalCode = addr.getPostCd();
-      String dnbPostalCode = dnbRecord.getDnbPostalCode();
-      if (currentPostalCode.length() != dnbPostalCode.length()) {
-        if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
-          return false;
+      if (handler != null) {
+        String handlerAddress = handler.buildAddressForDnbMatching(country, addr);
+        if (handler != null && !StringUtils.isBlank(handlerAddress)) {
+          address = handlerAddress;
         }
       }
-      if (currentPostalCode.length() == dnbPostalCode.length()) {
-        if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
-          return false;
+      LOG.debug("Address used for matching: " + address);
+
+      String dnbAddress = dnbRecord.getDnbStreetLine1() != null ? dnbRecord.getDnbStreetLine1() : "";
+      if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
+        dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
+      }
+      dnbAddress = dnbAddress.trim();
+      Boolean matchWithDnbMailingAddr = false;
+      if (handler != null) {
+        matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
+      }
+      LOG.debug("DNB match country =  " + country);
+      Boolean isReshuffledAddr = false;
+      if ("897".equals(country) || "US".equals(country)) {
+        isReshuffledAddr = USHandler.compareUSReshuffledAddress(dnbAddress, address, country);
+        LOG.debug("US isReshuffledAddr =  " + isReshuffledAddr);
+      } else {
+        isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
+        LOG.debug("isReshuffledAddr =  " + isReshuffledAddr);
+      }
+
+      // Boolean isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress,
+      // address, country);
+      if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
+          && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
+          && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr
+          && !matchWithDnbMailingAddr) {
+        return false;
+      }
+
+      if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())) {
+        String currentPostalCode = addr.getPostCd();
+        String dnbPostalCode = dnbRecord.getDnbPostalCode();
+        if (currentPostalCode.length() != dnbPostalCode.length()) {
+          if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
+            return false;
+          }
+        }
+        if (currentPostalCode.length() == dnbPostalCode.length()) {
+          if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
+            return false;
+          }
         }
       }
-    }
 
-    if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
-        && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6 && !matchWithDnbMailingAddr) {
-      return false;
+      if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
+          && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6
+          && !matchWithDnbMailingAddr) {
+        return false;
+      }
     }
 
     // Address close matching - END

@@ -41,8 +41,11 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
+import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -714,5 +717,102 @@ public class SingaporeUtil extends AutomationUtil {
       dnbresponse.setMessage("Found " + dnbMatches.size() + " matches for the given search criteria.");
     }
     return dnbresponse;
+  }
+
+  public boolean addrCloselyMatchesDnb(String country, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse, boolean useTradestyleName,
+      boolean allowLongNameAddress) {
+
+    EntityManager entityManager = JpaManager.getEntityManager();
+    GEOHandler handler = RequestUtils.getGEOHandler(country);
+    long reqId = admin.getId().getReqId();
+
+    RequestData requestData = new RequestData(entityManager, reqId);
+    List<Addr> addrList = requestData.getAddresses();
+    if (addrList != null && addrList.size() > 0) {
+      for (Addr addr : addrList) {
+        String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
+        address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
+        address = address.trim();
+
+        if (handler != null) {
+          String handlerAddress = handler.buildAddressForDnbMatching(country, addr);
+          if (handler != null && !StringUtils.isBlank(handlerAddress)) {
+            address = handlerAddress;
+          }
+        }
+        LOG.debug("Address used for matching: " + address);
+
+        String dnbAddress = dnbRecord.getDnbStreetLine1() != null ? dnbRecord.getDnbStreetLine1() : "";
+        if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
+          dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
+        }
+        dnbAddress = dnbAddress.trim();
+        Boolean matchWithDnbMailingAddr = false;
+        if (handler != null) {
+          matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
+        }
+        LOG.debug("DNB match country =  " + country);
+
+        Boolean isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
+        if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
+            && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
+            && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr
+            && !matchWithDnbMailingAddr) {
+          return false;
+        }
+
+        if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())) {
+          String currentPostalCode = addr.getPostCd();
+          String dnbPostalCode = dnbRecord.getDnbPostalCode();
+          if (currentPostalCode.length() != dnbPostalCode.length()) {
+            if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
+              return false;
+            }
+          }
+          if (currentPostalCode.length() == dnbPostalCode.length()) {
+            if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
+              return false;
+            }
+          }
+        }
+
+        if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
+            && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6
+            && !matchWithDnbMailingAddr) {
+          return false;
+        }
+
+        // Address close matching - END
+      }
+
+    }
+    return true;
+  }
+
+  private static boolean calAlignPostalCodeLength(String currPostalCd, String dnBPostalCd) {
+    String shortPostalCd = "";
+    currPostalCd = currPostalCd.replaceAll("[^\\w\\s]+", "").trim();
+    dnBPostalCd = dnBPostalCd.replaceAll("[^\\w\\s]+", "").trim();
+    boolean res = true;
+    if (currPostalCd.length() > dnBPostalCd.length()) {
+      shortPostalCd = currPostalCd.substring(0, dnBPostalCd.length());
+      currPostalCd = shortPostalCd;
+    } else {
+      shortPostalCd = dnBPostalCd.substring(0, currPostalCd.length());
+      dnBPostalCd = shortPostalCd;
+    }
+    LOG.debug("Shortned postal code= " + shortPostalCd);
+    res = isPostalCdCloselyMatchesDnB(currPostalCd, dnBPostalCd);
+    return res;
+  }
+
+  private static boolean isPostalCdCloselyMatchesDnB(String currPostalCd, String dnBPostalCd) {
+    boolean res = true;
+    if (dnBPostalCd.length() <= 5 && StringUtils.getLevenshteinDistance(currPostalCd.toUpperCase(), dnBPostalCd.toUpperCase()) > 2) {
+      res = false;
+    } else if (dnBPostalCd.length() > 5 && StringUtils.getLevenshteinDistance(currPostalCd.toUpperCase(), dnBPostalCd.toUpperCase()) > 3) {
+      res = false;
+    }
+    return res;
   }
 }
