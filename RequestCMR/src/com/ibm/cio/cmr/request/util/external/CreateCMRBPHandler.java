@@ -126,13 +126,13 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
       if (admin.getChildReqId() > 0) {
         Data theChindData = getChildData(entityManager, admin.getChildReqId());
         if (theChindData != null && StringUtils.isNotEmpty(theChindData.getCmrNo())) {
-        	params.add("<tr><th style=\"text-align:left\" width=\"200px\">BP CMR#:</th><td " + params.get(3) + "</td></tr>"); // {16}
-        	params.add("<tr><th style=\"text-align:left\" width=\"200px\">IBM Direct CMR#:</th><td " + theChindData.getCmrNo() + "</td></tr>"); // {17}
+          params.add(params.get(3)); // {16}
+          params.add(theChindData.getCmrNo()); // {17}
         } else {
           Data theData = getChildData(entityManager, admin.getId().getReqId());
           if (theData != null && StringUtils.isNotEmpty(theData.getCmrNo2())) {
-            params.add("<tr><th style=\"text-align:left\" width=\"200px\">BP CMR#:</th><td " + params.get(3) + "</td></tr>"); // {16}
-        	params.add("<tr><th style=\"text-align:left\" width=\"200px\">IBM Direct CMR#:</th><td " + theData.getCmrNo() + "</td></tr>"); // {17}
+            params.add(params.get(3)); // {16}
+            params.add(theData.getCmrNo()); // {17}
           } else {
             params.add(""); // {16}
             params.add(""); // {17}
@@ -141,14 +141,14 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
       } else {
         Data theData = getChildData(entityManager, admin.getId().getReqId());
         if (theData != null && StringUtils.isNotEmpty(theData.getCmrNo2())) {
-          params.add(" BP CMR#: " + params.get(3)); // {16}
-          params.add(" IBM Direct CMR#: " + theData.getCmrNo2()); // {17}
+          params.add(params.get(3)); // {16}
+          params.add(theData.getCmrNo2()); // {17}
         } else {
           params.add(""); // {16}
           params.add(""); // {17}
         }
       }
-    }else{
+    } else {
       params.add(""); // {16}
       params.add(""); // {17}
     }
