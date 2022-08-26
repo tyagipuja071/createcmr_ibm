@@ -201,6 +201,15 @@ public class NordicsUtil extends AutomationUtil {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "VAT", data.getVat(), newVAT);
         results.setResults("Calculated.");
         results.setProcessOutput(overrides);
+      } else if (resp.isSuccess() && !resp.getRecord().isMva()) {
+        String newVAT = data.getVat();
+        if (StringUtils.isNotBlank(newVAT) && newVAT.contains("MVA")) {
+          newVAT = newVAT.replaceAll("MVA", "").trim();
+        }
+        details.append("MVA will not be appeneded to VAT.").append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "VAT", data.getVat(), newVAT);
+        results.setResults("Calculated.");
+        results.setProcessOutput(overrides);
       } else if (!resp.isSuccess()) {
         details.append("MVA will not be appeneded to VAT and request to be sent for review.").append("\n");
         engineData.addNegativeCheckStatus("MVA_NOT_APPENDED", "MVA will not be appeneded to VAT and request to be sent for review.");
@@ -324,7 +333,7 @@ public class NordicsUtil extends AutomationUtil {
     case CROSS_INTER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-     
+
     }
 
     return true;
@@ -389,7 +398,7 @@ public class NordicsUtil extends AutomationUtil {
       // set filtered matches in response
       response.setMatches(filteredMatches);
     }
-    
+
     if (response.getMatches() != null) {
       for (DuplicateCMRCheckResponse res : response.getMatches()) {
         List<Object[]> results = null;
@@ -400,11 +409,11 @@ public class NordicsUtil extends AutomationUtil {
           query.setParameter("CMRNO", res.getCmrNo());
           query.setParameter("CNTRY", requestData.getData().getCmrIssuingCntry());
           query.setParameter("ADDR_TYPE", res.getAddrType());
-          results = query.getResults(); 
+          results = query.getResults();
         } catch (Exception e) {
           LOG.debug("An error occurred while retrieving RDc results.");
         }
-        
+
         if (results != null) {
           String countryUse = requestData.getData().getCountryUse();
           for (Object[] result : results) {
@@ -421,7 +430,7 @@ public class NordicsUtil extends AutomationUtil {
     }
     response.setMatches(subScenarioMatches);
   }
-  
+
   @Override
   public void filterDuplicateReqMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<ReqCheckResponse> response) {
@@ -438,9 +447,9 @@ public class NordicsUtil extends AutomationUtil {
       } catch (Exception e) {
         LOG.error("An error occurred while trying to retrieve CREQCMR data.");
       }
-      
+
       if (matchedData != null) {
-        if (!StringUtils.isEmpty(matchedData.getCountryUse()) && !StringUtils.isEmpty(data.getCountryUse()) 
+        if (!StringUtils.isEmpty(matchedData.getCountryUse()) && !StringUtils.isEmpty(data.getCountryUse())
             && matchedData.getCountryUse().equals(data.getCountryUse())) {
           filteredMatches.add(res);
         }
@@ -715,9 +724,12 @@ public class NordicsUtil extends AutomationUtil {
         AutomationServiceClient.class);
     client.setReadTimeout(1000 * 60 * 5);
     client.setRequestMethod(Method.Get);
-
+    String vat = data.getVat();
+    if (StringUtils.isNotBlank(vat) && SystemLocation.NORWAY.equalsIgnoreCase(data.getCmrIssuingCntry()) && vat.contains("MVA")) {
+      vat = vat.replaceAll("MVA", "").trim();
+    }
     NorwayVatRequest request = new NorwayVatRequest();
-    String vatReq = StringUtils.isNumeric(data.getVat()) ? data.getVat() : data.getVat().substring(2);
+    String vatReq = StringUtils.isNumeric(vat) ? vat : vat.substring(2);
     request.setVat(vatReq);
     System.out.println(request + request.getVat());
 
