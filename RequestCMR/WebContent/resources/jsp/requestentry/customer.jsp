@@ -260,6 +260,7 @@
     </cmr:view>
 
   </cmr:row>
+  
    <cmr:row addBackground="true">
 
     <cmr:view forCountry="897">
@@ -285,6 +286,7 @@
     
   </cmr:row>
   
+  <cmr:row addBackground="true">
 	<cmr:view forCountry="781">
       <cmr:column span="2" containerForField="LocalTax3">
         <p>
@@ -293,7 +295,17 @@
         </p>
       </cmr:column>
 	</cmr:view>
-  
+	</cmr:row>
+  <cmr:row addBackground="true">
+  	<cmr:view forCountry="781">
+      <cmr:column span="2" containerForField="BillingName">
+        <p>
+          <label for="mexicoBillingName"> <cmr:fieldLabel fieldId="BillingName" />: </label>
+          <cmr:field path="mexicoBillingName" id="mexicoBillingName" fieldId="BillingName" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+	</cmr:view>
+  </cmr:row>	
 
   <cmr:row addBackground="true">
     <!-- // 1164558 -->

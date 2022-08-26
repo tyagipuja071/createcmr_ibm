@@ -196,7 +196,12 @@ public class LAHandler extends GEOHandler {
     String issuingCountry = mainRecord.getCmrIssuedBy();
     String sORTL = mainRecord.getCmrSortl();
     String subindustry = data.getSubIndustryCd();
+    String mexicoBillingName = mainRecord.getCmrMexBillingName() != null ? mainRecord.getCmrMexBillingName() : "";
     AddressService addSvc = new AddressService();
+
+    if (isMXIssuingCountry(issuingCountry)) {
+      data.setMexicoBillingName(mexicoBillingName);
+    }
 
     // Defect 1267371 :Municipal Fiscal Code/ Tax Code 2 wrongly imported
     // from
@@ -577,6 +582,15 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public void setAdminDefaultsOnCreate(Admin admin) {
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    if (isMXIssuingCountry(cmrIssuingCntry)) {
+      fields.addAll(Arrays.asList("MEXICO_BILLING_NAME"));
+    }
+    return fields;
   }
 
   @Override
@@ -1501,6 +1515,17 @@ public class LAHandler extends GEOHandler {
         results.add(update);
       }
     }
+
+    // Mexico Billing Name
+    if (isMXIssuingCountry(cmrCountry)) {
+      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getMexicoBillingName(), newData.getMexicoBillingName())) {
+        update = new UpdatedDataModel();
+        update.setDataField(PageManager.getLabel(cmrCountry, "BillingName", "-"));
+        update.setNewData(newData.getMexicoBillingName());
+        update.setOldData(oldData.getMexicoBillingName());
+        results.add(update);
+      }
+    }
   }
 
   @Override
@@ -2142,6 +2167,18 @@ public class LAHandler extends GEOHandler {
             data.setCustClass("34");
             isLeasingBr = true;
           }
+
+          // CreatCMR-6681 - Predefined enterprise value for BR local scenarios
+          String vat = soldToAddr.getVat();
+          if ("LOCAL".equals(data.getCustGrp()) && StringUtils.isNotBlank(vat)) {
+            if (soldToAddr.getVat().length() >= 8) {
+              data.setVat(soldToAddr.getVat());
+              LOG.debug("Setting VAT in DATA table : " + soldToAddr.getVat());
+
+              data.setEnterprise(soldToAddr.getVat().substring(0, 8));
+              LOG.debug("Setting ENTERPRISE in DATA table : " + soldToAddr.getVat().substring(0, 8));
+            }
+          }
         }
       }
     }
@@ -2216,7 +2253,6 @@ public class LAHandler extends GEOHandler {
         }
       }
     }
-
   }
 
   @Override
@@ -2333,7 +2369,6 @@ public class LAHandler extends GEOHandler {
       if (addr.getId().getAddrType().equals("ZS01")) {
         addrService.updateDataForBRCreate(entityManager, null, addr);
       }
-
     }
   }
 
@@ -3405,6 +3440,15 @@ public class LAHandler extends GEOHandler {
         entityManager.persist(addrzi01);
         LOG.debug("ZI01 address for req id= " + reqId + " successfully created.");
 
+      }
+
+      // CreatCMR-6681 - Predefined enterprise value for BR local scenarios
+      String vat = v2Model.getVat();
+      if ("C".equals(v2Model.getReqType()) && "LOCAL".equals(data.getCustGrp()) && StringUtils.isNotBlank(vat)) {
+        if (v2Model.getVat().length() >= 8) {
+          LOG.debug("Setting ENTERPRISE in DATA table to : " + v2Model.getVat().substring(0, 8));
+          data.setEnterprise(v2Model.getVat().substring(0, 8));
+        }
       }
     }
 
