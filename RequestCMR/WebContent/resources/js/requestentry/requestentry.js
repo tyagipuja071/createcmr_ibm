@@ -169,6 +169,8 @@ function processRequestAction() {
           }
         } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
           matchDnBForAutomationCountries();
+        } else if (checkIfFinalDnBCheckRequired() && reqType == 'U' && cmrCntry == SysLoc.SINGAPORE) {
+          matchDnBForAutomationCountries();
         } else {
           if (cmrCntry == SysLoc.SINGAPORE) {
             executeBeforeSubmit();
@@ -1663,10 +1665,10 @@ function checkIfFinalDnBCheckRequired() {
     // currently Enabled Only For US
     return true;
   }
-  if (cmrCntry == '641') {
+  if (cmrCntry == '641' || cmrCntry == '834') {
     if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
-        && matchOverrideIndc != 'Y') {
-      // currently Enabled Only For CN
+    && matchOverrideIndc != 'Y') {
+      // currently Enabled Only For CN and SG
       return true;
     }
   }
