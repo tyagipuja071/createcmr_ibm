@@ -38,7 +38,6 @@
       </cmr:column>
     </cmr:row>
   </div>
-  </cmr:view>
   <div id="bpIBMDirectCMRWR" style="display:none">
     <cmr:row>
       <cmr:column span="1" width="200">
@@ -49,6 +48,7 @@
       </cmr:column>
     </cmr:row>
   </div>
+  </cmr:view>
   <div id="rejectReasonBlock" style="display:none">
     <cmr:row>
       <cmr:column span="1" width="200">
