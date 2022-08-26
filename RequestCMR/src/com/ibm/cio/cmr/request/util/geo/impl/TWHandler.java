@@ -262,41 +262,60 @@ public class TWHandler extends GEOHandler {
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "CommercialFinanced", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
-      results.add(update);
-    }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCsBo(), newData.getCsBo())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "CSBOCd", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getCsBo(), "CSBOCd", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getCsBo(), "CSBOCd", cmrCountry));
-      results.add(update);
-    }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getContactName2(), newData.getContactName2())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "ContactName2", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getContactName2(), "ContactName2", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getContactName2(), "ContactName2", cmrCountry));
-      results.add(update);
-    }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmail1(), newData.getEmail1())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "Email1", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getEmail1(), "Email1", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getEmail1(), "Email1", cmrCountry));
-      results.add(update);
-    }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getContactName1(), newData.getContactName1())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "ContactName1", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getContactName1(), "ContactName1", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getContactName1(), "ContactName1", cmrCountry));
-      results.add(update);
-    }
+    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+    // !equals(oldData.getCommercialFinanced(),
+    // newData.getCommercialFinanced())) {
+    // update = new UpdatedDataModel();
+    // update.setDataField(PageManager.getLabel(cmrCountry,
+    // "CommercialFinanced", "-"));
+    // update.setNewData(service.getCodeAndDescription(newData.getCommercialFinanced(),
+    // "CommercialFinanced", cmrCountry));
+    // update.setOldData(service.getCodeAndDescription(oldData.getCommercialFinanced(),
+    // "CommercialFinanced", cmrCountry));
+    // results.add(update);
+    // }
+    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+    // !equals(oldData.getCsBo(), newData.getCsBo())) {
+    // update = new UpdatedDataModel();
+    // update.setDataField(PageManager.getLabel(cmrCountry, "CSBOCd", "-"));
+    // update.setNewData(service.getCodeAndDescription(newData.getCsBo(),
+    // "CSBOCd", cmrCountry));
+    // update.setOldData(service.getCodeAndDescription(oldData.getCsBo(),
+    // "CSBOCd", cmrCountry));
+    // results.add(update);
+    // }
+    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+    // !equals(oldData.getContactName2(), newData.getContactName2())) {
+    // update = new UpdatedDataModel();
+    // update.setDataField(PageManager.getLabel(cmrCountry, "ContactName2",
+    // "-"));
+    // update.setNewData(service.getCodeAndDescription(newData.getContactName2(),
+    // "ContactName2", cmrCountry));
+    // update.setOldData(service.getCodeAndDescription(oldData.getContactName2(),
+    // "ContactName2", cmrCountry));
+    // results.add(update);
+    // }
+    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+    // !equals(oldData.getEmail1(), newData.getEmail1())) {
+    // update = new UpdatedDataModel();
+    // update.setDataField(PageManager.getLabel(cmrCountry, "Email1", "-"));
+    // update.setNewData(service.getCodeAndDescription(newData.getEmail1(),
+    // "Email1", cmrCountry));
+    // update.setOldData(service.getCodeAndDescription(oldData.getEmail1(),
+    // "Email1", cmrCountry));
+    // results.add(update);
+    // }
+    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+    // !equals(oldData.getContactName1(), newData.getContactName1())) {
+    // update = new UpdatedDataModel();
+    // update.setDataField(PageManager.getLabel(cmrCountry, "ContactName1",
+    // "-"));
+    // update.setNewData(service.getCodeAndDescription(newData.getContactName1(),
+    // "ContactName1", cmrCountry));
+    // update.setOldData(service.getCodeAndDescription(oldData.getContactName1(),
+    // "ContactName1", cmrCountry));
+    // results.add(update);
+    // }
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getContactName3(), newData.getContactName3())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "ContactName3", "-"));
@@ -304,34 +323,46 @@ public class TWHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getContactName3(), "ContactName3", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBpName(), newData.getBpName())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "BPName", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getBpName(), "BPName", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getBpName(), "BPName", cmrCountry));
-      results.add(update);
-    }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmail2(), newData.getEmail2())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "Email2", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getEmail2(), "Email2", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getEmail2(), "Email2", cmrCountry));
-      results.add(update);
-    }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBusnType(), newData.getBusnType())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "BusnType", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getBusnType(), "BusnType", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getBusnType(), "BusnType", cmrCountry));
-      results.add(update);
-    }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getAffiliate(), newData.getAffiliate())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "Affiliate", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getAffiliate(), "Affiliate", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getAffiliate(), "Affiliate", cmrCountry));
-      results.add(update);
-    }
+    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+    // !equals(oldData.getBpName(), newData.getBpName())) {
+    // update = new UpdatedDataModel();
+    // update.setDataField(PageManager.getLabel(cmrCountry, "BPName", "-"));
+    // update.setNewData(service.getCodeAndDescription(newData.getBpName(),
+    // "BPName", cmrCountry));
+    // update.setOldData(service.getCodeAndDescription(oldData.getBpName(),
+    // "BPName", cmrCountry));
+    // results.add(update);
+    // }
+    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+    // !equals(oldData.getEmail2(), newData.getEmail2())) {
+    // update = new UpdatedDataModel();
+    // update.setDataField(PageManager.getLabel(cmrCountry, "Email2", "-"));
+    // update.setNewData(service.getCodeAndDescription(newData.getEmail2(),
+    // "Email2", cmrCountry));
+    // update.setOldData(service.getCodeAndDescription(oldData.getEmail2(),
+    // "Email2", cmrCountry));
+    // results.add(update);
+    // }
+    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+    // !equals(oldData.getBusnType(), newData.getBusnType())) {
+    // update = new UpdatedDataModel();
+    // update.setDataField(PageManager.getLabel(cmrCountry, "BusnType", "-"));
+    // update.setNewData(service.getCodeAndDescription(newData.getBusnType(),
+    // "BusnType", cmrCountry));
+    // update.setOldData(service.getCodeAndDescription(oldData.getBusnType(),
+    // "BusnType", cmrCountry));
+    // results.add(update);
+    // }
+    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+    // !equals(oldData.getAffiliate(), newData.getAffiliate())) {
+    // update = new UpdatedDataModel();
+    // update.setDataField(PageManager.getLabel(cmrCountry, "Affiliate", "-"));
+    // update.setNewData(service.getCodeAndDescription(newData.getAffiliate(),
+    // "Affiliate", cmrCountry));
+    // update.setOldData(service.getCodeAndDescription(oldData.getAffiliate(),
+    // "Affiliate", cmrCountry));
+    // results.add(update);
+    // }
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmail3(), newData.getEmail3())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Email3", "-"));
