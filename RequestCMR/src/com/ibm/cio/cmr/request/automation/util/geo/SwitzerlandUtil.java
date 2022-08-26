@@ -60,7 +60,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_PAYGO_BILLING);
 
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Department", "PostBox", "Attention to/Building/Floor/Office",
-      "Phone #", "FAX", "Customer Name 4");
+      "Att. Person", "Phone #", "FAX", "Customer Name 4");
 
   // private static List<ChMubotyMapping> mubotyMappings = new
   // ArrayList<ChMubotyMapping>();
