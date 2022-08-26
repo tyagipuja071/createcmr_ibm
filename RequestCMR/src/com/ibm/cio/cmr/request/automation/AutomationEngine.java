@@ -550,7 +550,7 @@ public class AutomationEngine {
             createHistory(entityManager, admin, strCmtUsEntCompToPpn, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false,
                 null);
             // CREATCMR-5447
-          }else if (sccIsValid){
+          }else if (sccIsValid && ("U".equals(admin.getReqType()) || "C".equals(admin.getReqType()))){
         	  LOG.debug("Moving Request " + reqId + " to PPN");
               String cmt = "SCC is invalid , please correct SCC value. ";
               admin.setReqStatus("PPN");
