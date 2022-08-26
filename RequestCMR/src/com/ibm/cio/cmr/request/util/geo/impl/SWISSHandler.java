@@ -793,7 +793,7 @@ public class SWISSHandler extends GEOHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "POST_CD",
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "CITY2", "POST_CD",
         "LAND_CNTRY", "PO_BOX", "ADDR_TXT", "CUST_PHONE", "CUST_LANG_CD", "HW_INSTL_MSTR_FLG"));
     return fields;
   }
