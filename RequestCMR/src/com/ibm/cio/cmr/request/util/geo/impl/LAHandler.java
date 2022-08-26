@@ -667,6 +667,9 @@ public class LAHandler extends GEOHandler {
       data.setCountryUse("000");
       data.setSalesTeamCd(CmrConstants.DEFAULT_TEAM_CD);// T
       data.setInstallTeamCd(CmrConstants.DEFAULT_TEAM_CD);// T
+
+      // CreatCMR-6683 - MX Predefined additional contact values
+      createRecordTreatmentFunc(entityManager, "Sr.", ".", data.getId().getReqId(), issuingCntry, "LE");
     } else if (isSSAIssuingCountry(issuingCntry)) {
       data.setTerritoryCd(CmrConstants.DEFAULT_TERRITORY_CD);// 001
       data.setSalesTerritoryCd(CmrConstants.DEFAULT_TERRITORY_CD); // 001
