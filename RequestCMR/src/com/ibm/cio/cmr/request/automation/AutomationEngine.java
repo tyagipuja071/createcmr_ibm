@@ -215,14 +215,6 @@ public class AutomationEngine {
       }
     }
     
-    boolean sccIsValid = false;
-    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
-    	String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
-    	if ("N".equals(setPPNFlag)) {
-    		sccIsValid = true;
-          } 
-    }
-    
     for (AutomationElement<?> element : this.elements) {
       // determine if element is to be skipped
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
@@ -329,6 +321,14 @@ public class AutomationEngine {
         LOG.trace("Skipping element " + element.getProcessDesc() + " for request type " + reqType);
       }
       lastElementIndex++;
+    }
+    
+    boolean sccIsValid = false;
+    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+    	String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
+    	if ("N".equals(setPPNFlag)) {
+    		sccIsValid = true;
+          } 
     }
 
     LOG.debug("Automation elements executed for Request " + reqId);
