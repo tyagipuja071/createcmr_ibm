@@ -422,7 +422,7 @@ public class NordicsUtil extends AutomationUtil {
                 ("702LT".equals(countryUse) && NORDX_LITHUNIA_VKBUR.equals(result[0].toString())) || 
                 ("702".equals(countryUse) && NORDX_FINLAND_VKBUR.equals(result[0].toString())) || 
                 ("678IS".equals(countryUse) && NORDX_ICELAND_VKBUR.equals(result[0].toString())) || 
-                (!"678IS".equals(countryUse) && cmrIssuingCountry.contains("678") && NORDX_DENMARK_VKBUR.equals(result[0].toString()))) {
+                (!"678IS".equals(countryUse) && cmrIssuingCountry.equals("678") && NORDX_DENMARK_VKBUR.equals(result[0].toString()))) {
               subScenarioMatches.add(res);
             }
           }
