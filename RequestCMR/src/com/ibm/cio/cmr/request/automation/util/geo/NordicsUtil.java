@@ -416,12 +416,13 @@ public class NordicsUtil extends AutomationUtil {
 
         if (results != null) {
           String countryUse = requestData.getData().getCountryUse();
+          String cmrIssuingCountry = requestData.getData().getCmrIssuingCntry();
           for (Object[] result : results) {
             if (!StringUtils.isBlank(countryUse) && ("702EE".equals(countryUse) && NORDX_ESTONIA_VKBUR.equals(result[0].toString())) ||
                 ("702LT".equals(countryUse) && NORDX_LITHUNIA_VKBUR.equals(result[0].toString())) || 
                 ("702".equals(countryUse) && NORDX_FINLAND_VKBUR.equals(result[0].toString())) || 
                 ("678IS".equals(countryUse) && NORDX_ICELAND_VKBUR.equals(result[0].toString())) || 
-                (!"678IS".equals(countryUse) && countryUse.startsWith("678") && NORDX_DENMARK_VKBUR.equals(result[0].toString()))) {
+                (!"678IS".equals(countryUse) && "678".equals(cmrIssuingCountry) && NORDX_DENMARK_VKBUR.equals(result[0].toString()))) {
               subScenarioMatches.add(res);
             }
           }
