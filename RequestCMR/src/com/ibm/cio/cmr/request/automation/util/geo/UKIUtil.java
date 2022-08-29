@@ -703,7 +703,6 @@ public class UKIUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
 
     if (!SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
-
       if (!isCoverageCalculated) {
         details.setLength(0);
         overrides.clearOverrides();
