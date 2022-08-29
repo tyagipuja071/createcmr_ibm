@@ -79,7 +79,6 @@ public class SingaporeUtil extends AutomationUtil {
     long reqId = requestData.getAdmin().getId().getReqId();
     LOG.debug("Executing doCountryFieldComputations() for reqId=" + reqId);
     Data data = requestData.getData();
-    Admin admin = requestData.getAdmin();
     boolean ifDefaultCluster = false;
     String cluster = data.getApCustClusterId();
     String govType = data.getGovType();
@@ -138,13 +137,6 @@ public class SingaporeUtil extends AutomationUtil {
     } else {
       // eleResults.append("Non Government Customer" + "\n");
       details.append("Customer is a non government organization" + "\n");
-    }
-
-    // CREATCMR-6844
-    Addr landAddr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-    if ("TH".equalsIgnoreCase(landAddr.getLandCntry()) && "C".equalsIgnoreCase(admin.getReqType())) {
-      details.append("Processor review is needed as customer is from Thailand" + "\n");
-      engineData.addNegativeCheckStatus("ISTHA", "Customer is from Thailand");
     }
 
     // CMR-2034 fix
@@ -207,6 +199,7 @@ public class SingaporeUtil extends AutomationUtil {
      * Arrays.asList(scnarioList), false);
      */
     Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
     String scenario = data.getCustSubGrp();
     String[] scnarioList = { "ASLOM", "NRML" };
     Addr soldTo = requestData.getAddress("ZS01");
@@ -217,6 +210,8 @@ public class SingaporeUtil extends AutomationUtil {
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
 
     processSkipCompanyChecks(engineData, requestData, details);
+
+    landedCountryRequiresCMDEReview(engineData, details, soldTo, admin);
 
     // CMR - 4507
     if ("SPOFF".equalsIgnoreCase(data.getCustSubGrp())) {
@@ -822,5 +817,13 @@ public class SingaporeUtil extends AutomationUtil {
       res = false;
     }
     return res;
+  }
+
+  private static void landedCountryRequiresCMDEReview(AutomationEngineData engineData, StringBuilder details, Addr soldTo, Admin admin) {
+    // CREATCMR-6844
+    if ("TH".equalsIgnoreCase(soldTo.getLandCntry()) && "C".equalsIgnoreCase(admin.getReqType())) {
+      details.append("Processor review is needed as customer is from Thailand" + "\n");
+      engineData.addNegativeCheckStatus("ISTHA", "Customer is from Thailand");
+    }
   }
 }
