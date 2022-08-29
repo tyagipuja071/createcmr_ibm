@@ -596,40 +596,40 @@ public class SpainUtil extends AutomationUtil {
     Data data = requestData.getData();
     Addr addr = requestData.getAddress("ZS01");
 
-    if ((!isCoverageCalculated)) {
+    if (!isCoverageCalculated) {
       details.setLength(0);
       overrides.clearOverrides();
-
-      HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr, data.getIsuCd(), data.getClientTier(),
-          data.getCustSubGrp());
-
-      if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
-        LOG.debug("Calculated Enterprise: " + response.get(ENTP));
-        LOG.debug("Calculated Sales Rep: " + response.get(SALES_REP));
-        details.append("Coverage calculated successfully using 34Q logic mapping.").append("\n");
-        details.append("Sales Rep : " + response.get(SALES_REP)).append("\n");
-        details.append("Enterprise : " + response.get(ENTP)).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), response.get(ENTP));
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(),
-            response.get(SALES_REP));
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
-          && StringUtils.isNotBlank(data.getEnterprise())) {
-        details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
-        details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
-        details.append("Enterprise : " + data.getEnterprise()).append("\n");
-        details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else {
-        String msg = "Coverage cannot be calculated. No valid 34Q mapping found from request data.";
-        details.append(msg);
-        results.setResults("Cannot Calculate");
-        results.setDetails(details.toString());
-        engineData.addNegativeCheckStatus("_esCoverage", msg);
-      }
     }
+
+    HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr, data.getIsuCd(), data.getClientTier(),
+        data.getCustSubGrp());
+
+    if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
+      LOG.debug("Calculated Enterprise: " + response.get(ENTP));
+      LOG.debug("Calculated Sales Rep: " + response.get(SALES_REP));
+      details.append("Coverage calculated successfully using 34Q logic mapping.").append("\n");
+      details.append("Sales Rep : " + response.get(SALES_REP)).append("\n");
+      details.append("Enterprise : " + response.get(ENTP)).append("\n");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), response.get(ENTP));
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), response.get(SALES_REP));
+      results.setResults("Calculated");
+      results.setDetails(details.toString());
+    } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
+        && StringUtils.isNotBlank(data.getEnterprise())) {
+      details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
+      details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
+      details.append("Enterprise : " + data.getEnterprise()).append("\n");
+      details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
+      results.setResults("Calculated");
+      results.setDetails(details.toString());
+    } else {
+      String msg = "Coverage cannot be calculated. No valid 34Q mapping found from request data.";
+      details.append(msg);
+      results.setResults("Cannot Calculate");
+      results.setDetails(details.toString());
+      engineData.addNegativeCheckStatus("_esCoverage", msg);
+    }
+
     return true;
   }
 
@@ -673,10 +673,9 @@ public class SpainUtil extends AutomationUtil {
           scenariosList = Arrays.asList(scenarios);
 
           if (isuCd.concat(clientTier).equalsIgnoreCase(postalMapping.getIsuCTC()) && scenariosList.contains(scenario)
-              && "None".equalsIgnoreCase(postalMapping.getIsicBelongs())
-              || (!postalCodes.isEmpty() && postalCodes.contains(postCdtStrt))
+              && ("None".equalsIgnoreCase(postalMapping.getIsicBelongs()) || ((!postalCodes.isEmpty() && postalCodes.contains(postCdtStrt))
                   && (("Yes".equalsIgnoreCase(postalMapping.getIsicBelongs()) && isicCds.contains(subIndCd))
-                      || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(subIndCd)))) {
+                      || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(subIndCd)))))) {
             response.put(ENTP, postalMapping.getEnterprise());
             response.put(SALES_REP, postalMapping.getSaleRep());
             response.put(MATCHING, "Match Found.");
