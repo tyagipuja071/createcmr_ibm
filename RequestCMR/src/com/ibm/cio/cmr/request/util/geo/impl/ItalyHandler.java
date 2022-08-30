@@ -854,10 +854,12 @@ public class ItalyHandler extends BaseSOFHandler {
         customerType = cust.getCustType();
       }
     }
-    // Defect 1517492: ISU & CTC should be copied from imported company number
-    if (isuClientTier != null) {
-      data.setIsuCd(isuClientTier.substring(0, 2));
-      data.setClientTier(isuClientTier.substring(2));
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      String isu = mainRecord != null && mainRecord.getIsuCode() != null ? mainRecord.getIsuCode() : "";
+      String ctc = mainRecord != null && mainRecord.getCmrTier() != null ? mainRecord.getCmrTier() : "";
+
+      data.setIsuCd(isu);
+      data.setClientTier(ctc);
     }
     if (sbo != null && sbo.length() == 7) {
       sbo = sbo.substring(1, 3);
@@ -1821,7 +1823,8 @@ public class ItalyHandler extends BaseSOFHandler {
         if ((!StringUtils.isEmpty(fiscalCode) || !StringUtils.isEmpty(identClient) || !StringUtils.isEmpty(vatNumPartitaIVA)
             || !StringUtils.isEmpty(enterpriseNumber)) && (!StringUtils.isEmpty(taxCodeIVACode) || !StringUtils.isEmpty(collectionCode))) {
           LOG.trace("Company level fields and Billing level fields can not be filled at the same time");
-          error.addError((row.getRowNum() + 1), "Company [Fiscal code, Vat#, Ident. Cliente, Enterprise number] | Billing [Tax Code/ Code IVA, Collection Code]",
+          error.addError((row.getRowNum() + 1),
+              "Company [Fiscal code, Vat#, Ident. Cliente, Enterprise number] | Billing [Tax Code/ Code IVA, Collection Code]",
               "Company level fields and Billing level fields can not be filled at the same time");
         }
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -1860,7 +1863,8 @@ public class ItalyHandler extends BaseSOFHandler {
           Matcher matcher = upperCaseNumeric.matcher(collectionCode);
           if (!matcher.matches()) {
             LOG.trace("Collection Code should contain only upper-case latin and numeric characters.");
-            error.addError((row.getRowNum() + 1), "Collection Code.", "Collection Code should contain only upper-case latin and numeric characters. ");
+            error.addError((row.getRowNum() + 1), "Collection Code.",
+                "Collection Code should contain only upper-case latin and numeric characters. ");
           }
         }
 
