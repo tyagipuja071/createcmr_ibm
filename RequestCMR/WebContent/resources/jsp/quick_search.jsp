@@ -259,7 +259,7 @@ form.ibm-column-form .dijitTextBox INPUT {
   <cmr:tabs />
 
  <cmr:section>
-  <form:form method="POST" action="${contextPath}/quick_search/process" name="frmCMR" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="POST" action="${contextPath}/quick_search/process" name="frmCMR" class="ibm-column-form ibm-styled-form"
     modelAttribute="search" id="frmCMR">
     
       <cmr:row>
@@ -611,13 +611,14 @@ form.ibm-column-form .dijitTextBox INPUT {
         </cmr:row>
           </div>
       </div>
-  </form:form>
+  </cmr:form>
   <cmr:model model="search" />
 </cmr:section>
 </cmr:boxContent>
-<form name="frmPDF" id="frmPDF" action="${contextPath}/request/pdf" method="POST" target="attachDlFrame">
+<form _csrf="GhtjeYhfngleOImde2" name="frmPDF" id="frmPDF" action="${contextPath}/request/pdf" method="POST" target="attachDlFrame">
   <input type="hidden" id="pdfReqId" name="reqId">
   <input type="hidden" id="pdfTokenId" name="tokenId">
+  <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
 </form>
 <iframe id="attachDlFrame" style="display:none" name="attachDlFrame"></iframe>
 

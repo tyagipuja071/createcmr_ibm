@@ -6,6 +6,7 @@
 
 var _usSicmenHandler = null;
 var _usIsuHandler = null;
+var _usTaxcd1Handler = null;
 var _usSicm = "";
 var _kukla = "";
 var _enterpriseHandler = null;
@@ -535,11 +536,18 @@ function afterConfigForUS() {
 
   if (reqType == 'U') {
     FormManager.readOnly('custType');
+    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
   }
 
   if (_usIsuHandler == null && FormManager.getField('isuCd')) {
     _usIsuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValuesUS();
+    });
+  }
+  // CREATCMR-6777
+  if (_usTaxcd1Handler == null && FormManager.getField('taxCd1')) {
+    _usTaxcd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
+      setTaxcd1Status();
     });
   }
 
@@ -737,51 +745,70 @@ function checkSCCValidate() {
 
     var numeric = /^[0-9]*$/;
 
-    if (cnty != '') {
-      if (numeric.test(cnty)) {
+    if (landCntry == 'US') {
+      if (cnty != '') {
+        if (numeric.test(cnty)) {
 
-        var role = null;
-        if (typeof (_pagemodel) != 'undefined') {
-          role = _pagemodel.userRole;
-        }
+          var role = null;
+          if (typeof (_pagemodel) != 'undefined') {
+            role = _pagemodel.userRole;
+          }
 
-        if (role == 'Processor') {
-          var ret = cmr.query('US_CMR_SCC.GET_SCC_MULTIPLE_BY_LAND_CNTRY_ST_CITY', {
-            _qall : 'Y',
+          if (role == 'Processor') {
+            var ret = cmr.query('US_CMR_SCC.GET_SCC_MULTIPLE_BY_LAND_CNTRY_ST_CITY', {
+              _qall : 'Y',
+              LAND_CNTRY : landCntry,
+              N_ST : st,
+              N_CITY : city
+            });
+
+            if (ret.length > 1) {
+              $("#addressTabSccInfo").html('');
+              $('#sccMultipleWarn').show();
+            }
+          }
+
+          var ret1 = cmr.query('US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY', {
             LAND_CNTRY : landCntry,
             N_ST : st,
+            C_CNTY : cnty,
             N_CITY : city
           });
 
-          if (ret.length > 1) {
-            $("#addressTabSccInfo").html('');
-            $('#sccMultipleWarn').show();
+          var sccValue = '';
+
+          if (ret1 && ret1.ret1 && ret1.ret1 != '') {
+            sccValue = ret1.ret1;
+            // CREATCMR-5447
+            $("#addressTabSccInfo").html(sccValue);
+            $("#scc").val(sccValue);
+          } else {
+            $('#sccWarn').show();
           }
-        }
 
-        var ret1 = cmr.query('US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY', {
-          LAND_CNTRY : landCntry,
-          N_ST : st,
-          C_CNTY : cnty,
-          N_CITY : city
-        });
-
-        var sccValue = '';
-
-        if (ret1 && ret1.ret1 && ret1.ret1 != '') {
-          sccValue = ret1.ret1;
-          // CREATCMR-5447
-          $("#addressTabSccInfo").html(sccValue);
-          $("#scc").val(sccValue);
         } else {
           $('#sccWarn').show();
         }
-
       } else {
         $('#sccWarn').show();
       }
     } else {
-      $('#sccWarn').show();
+      var ret1 = cmr.query('US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY_NON_US', {
+        LAND_CNTRY : landCntry,
+        N_CITY : city
+      });
+
+      var sccValue = '';
+
+      if (ret1 && ret1.ret1 && ret1.ret1 != '') {
+        sccValue = ret1.ret1;
+        // CREATCMR-5447
+        $("#addressTabSccInfo").html(sccValue);
+        $("#scc").val(sccValue);
+      } else {
+        $('#sccWarn').show();
+      }
+
     }
   }
 }
@@ -1208,6 +1235,24 @@ function setAffiliateNumber() {
   }
 }
 // CREATCMR-6587
+// CREATCMR-6777
+function setTaxcd1Status() {
+  var taxCd1 = FormManager.getActualValue('taxCd1');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if ((reqType == 'C' || reqType == 'U') && (role == 'REQUESTER' || role == 'PROCESSOR')) {
+    if (taxCd1.indexOf("000") != -1) {
+      FormManager.setValue('specialTaxCd', 'X');
+    } else if (FormManager.getActualValue('specialTaxCd') != '') {
+      FormManager.setValue('specialTaxCd', '');
+    }
+  }
+
+}
 
 /* Register US Javascripts */
 dojo.addOnLoad(function() {

@@ -56,7 +56,7 @@
   })();
 </script>
 
-<form:form method="POST" action="#" name="frmCMR" class="ibm-column-form ibm-styled-form"
+<cmr:form method="POST" action="#" name="frmCMR" class="ibm-column-form ibm-styled-form"
   modelAttribute="us_ibm_org" id="frmCMR">
   <cmr:boxContent>
     <cmr:tabs />
@@ -112,7 +112,7 @@
       
     </cmr:section>
 </cmr:boxContent>
-</form:form>
+</cmr:form>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>
     <cmr:button label="Add US IBM ORG" onClick="actions.add()" highlight="true" />

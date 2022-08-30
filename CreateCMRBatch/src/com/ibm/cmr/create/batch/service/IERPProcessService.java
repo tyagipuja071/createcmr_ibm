@@ -3,6 +3,7 @@ package com.ibm.cmr.create.batch.service;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Queue;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
@@ -42,6 +44,7 @@ import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
+import com.ibm.cmr.create.batch.util.ProfilerLogger;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ProcessClient;
 import com.ibm.cmr.services.client.process.ProcessRequest;
@@ -347,6 +350,7 @@ public class IERPProcessService extends BaseBatchService {
 
       // start processing
       for (CompoundEntity entity : reqIdList) {
+        long start = new Date().getTime();
         Admin admin = entity.getEntity(Admin.class);
         if (BatchUtil.excludeForEnvironment(this.context, em, admin)) {
           // exclude data created from a diff env
@@ -560,10 +564,11 @@ public class IERPProcessService extends BaseBatchService {
               }
               if (admin.getReqStatus() != null && CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
                 LOG.debug("no Of Working days before check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
-                noOFWorkingDays = IERPRequestUtils.checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
+                noOFWorkingDays = IERPRequestUtils.checkNoOfWorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
                 LOG.debug("no Of Working days after check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
               }
-              if (noOFWorkingDays >= 3) {
+              int tempReactThres = SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) ? 2 : 3;
+              if (noOFWorkingDays >= tempReactThres) {
                 LOG.debug("Processing 2nd time ,no Of Working days = " + noOFWorkingDays);
                 createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
                 data.setCustAcctType(rdcOrderBlk);
@@ -889,6 +894,8 @@ public class IERPProcessService extends BaseBatchService {
             LOG.error("ERROR: " + e.getMessage());
           }
         }
+        ProfilerLogger.LOG.trace("After monitorCreqcmr for Request ID: " + admin.getId().getReqId() + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       }
     }
 
@@ -1497,14 +1504,16 @@ public class IERPProcessService extends BaseBatchService {
   }
 
   public List<Long> gatherDRPending(EntityManager entityManager) {
+    long start = new Date().getTime();
     String sqlPendingDrReq = ExternalizedQuery.getSql("BATCH.MULTI.GET_DR_PENDING_REQIDS");
     PreparedQuery query = new PreparedQuery(entityManager, sqlPendingDrReq);
     List<Long> reqIds = query.getResults(Long.class);
-
+    ProfilerLogger.LOG.trace("After gatherDRPending " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return reqIds;
   }
 
   private List<CompoundEntity> getPendingRequest(EntityManager em) {
+    long start = new Date().getTime();
     // DTN: 1) Get the list of DR type countries
     String sql1 = ExternalizedQuery.getSql("BATCH.GET_DR_COUNTRIES");
     PreparedQuery query = new PreparedQuery(em, sql1);
@@ -1520,11 +1529,12 @@ public class IERPProcessService extends BaseBatchService {
     query = new PreparedQuery(em, sql2);
     List<CompoundEntity> pendingReqList = query.getCompundResults(Admin.class, Admin.BATCH_MASS_CREATE_GET_RECORD);
     LOG.debug("Size of REQ_ID list : " + pendingReqList.size());
-
+    ProfilerLogger.LOG.trace("After getPendingRequest " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return pendingReqList;
   }
 
   private List<CompoundEntity> getPendingRequestByReqIds(EntityManager em, List<Long> pendingReqIds) {
+    long start = new Date().getTime();
     List<CompoundEntity> pendingReqList = null;
 
     if (pendingReqIds != null && pendingReqIds.size() > 0) {
@@ -1534,7 +1544,7 @@ public class IERPProcessService extends BaseBatchService {
       PreparedQuery query = new PreparedQuery(em, sqlPendingDRReq);
       pendingReqList = query.getCompundResults(Admin.class, Admin.BATCH_MASS_CREATE_GET_RECORD);
     }
-
+    ProfilerLogger.LOG.trace("After getPendingRequestByReqIds " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return pendingReqList;
   }
 

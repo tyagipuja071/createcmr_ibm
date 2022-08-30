@@ -5,7 +5,6 @@
 var _vatExemptHandler = null;
 var _scenarioSubTypeHandler = null;
 var _deClientTierHandler = null;
-var _reqReasonHandler = null;
 var _ISUHandler = null;
 var _IMSHandler = null;
 var _deIsuCdHandler = null;
@@ -76,13 +75,6 @@ function afterConfigForDE() {
       lockCtcFieldOnIsu();
     });
   }
-
-  if (_reqReasonHandler == null) {
-    _reqReasonHandler = dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
-      checkOrderBlk();
-    });
-  }
-  _reqReasonHandler[0].onChange();
 
   if (!PageManager.isReadOnly() && FormManager.getActualValue('reqType') == 'C') {
     if (role == 'REQUESTER') {
@@ -1109,7 +1101,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateAddressTypeForScenario, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(addSoldToAddressValidator, GEOHandler.DE);
   GEOHandler.registerValidator(addOrderBlockValidator, GEOHandler.DE, null, true);
-  GEOHandler.registerValidator(addReqReasonValidator, GEOHandler.DE, null, true);
+//  GEOHandler.registerValidator(addReqReasonValidator, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);

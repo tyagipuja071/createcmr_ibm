@@ -83,7 +83,7 @@
 <cmr:boxContent>
 	<cmr:tabs />
 
-	<form:form method="POST" action="${contextPath}/code/cnaedetails"
+	<cmr:form method="POST" action="${contextPath}/code/cnaedetails"
 		id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"  title="<%=title%>"
 		modelAttribute="cnae">
 		<cmr:modelAction formName="frmCMR" />
@@ -169,7 +169,7 @@
 				</cmr:column>
 			</cmr:row>
 		</cmr:section>
-	</form:form>
+	</cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
 	<cmr:buttonsRow>

@@ -12,7 +12,7 @@
 <script src="${resourcesPath}/js/auto/automation.js?${cmrv}" type="text/javascript"></script>
 
 <cmr:window>
-    <form:form method="POST" action="<%=actionUrl%>" name="frmCMRAuto" class="ibm-column-form ibm-styled-form" modelAttribute="record">
+    <cmr:form method="POST" action="<%=actionUrl%>" name="frmCMRAuto" class="ibm-column-form ibm-styled-form" modelAttribute="record">
     <cmr:row>
       <cmr:column span="6" >
         <h3>Results of Automated Checks for Request <%=reqId%></h3>
@@ -41,7 +41,7 @@
         </cmr:grid>
       </cmr:column>
     </cmr:row>
-  </form:form>
+  </cmr:form>
   <jsp:include page="results_match_import.jsp" />
   <cmr:windowClose>
   </cmr:windowClose>

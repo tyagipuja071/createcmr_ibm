@@ -196,6 +196,10 @@ function addAfterConfigAP() {
     FormManager.readOnly('postCd');
   }
 
+  if (reqType == 'U' && cntry == '834') {
+	  FormManager.readOnly('isicCd');
+	}
+
   if (reqType == 'C' && custGrp == 'CROSS' && cntry == '736') {
     FormManager.enable('postCd');
   }
@@ -4021,6 +4025,102 @@ function addVatValidationforSingapore() {
 }
 // CREATCMR-5258
 
+function executeBeforeSubmit() {
+  var reqType = FormManager.getActualValue('reqType');
+  var action = FormManager.getActualValue('yourAction');
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == SysLoc.SINGAPORE || cntry == SysLoc.INDIA) {
+    if (reqType == 'U') {
+      var errMsg = checkAnyChangesOnCustNameAddrGST();
+      if (errMsg != '' && action == 'SFP') {
+        cmr.showConfirm('showVerificationModal()', errMsg, 'Warning', null, {
+          OK : 'Yes',
+          CANCEL : 'No'
+        });
+      } else {
+        showVerificationModal();
+      }
+    } else {
+      showVerificationModal();
+    }
+  }
+}
+
+function showVerificationModal() {
+  cmr.showModal('addressVerificationModal');
+}
+
+function checkAnyChangesOnCustNameAddrGST() {
+  var errorMsg = '';
+  var isUpdated = false;
+  
+  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+    var record = null;
+    var updateInd = null;
+    
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      updateInd = record.updateInd;
+      if (typeof (updateInd) == 'object') {
+        updateInd = updateInd[0];
+        if(updateInd == 'U' || updateInd == 'N') {
+          isUpdated = true;
+          break;
+        }
+      }
+    }
+  }
+  if (!isUpdated) {
+    var currentGst = FormManager.getActualValue('vat'); 
+    var qParams = {
+        REQ_ID : FormManager.getActualValue('reqId'),
+    };
+    
+    var result = cmr.query('GET.OLD_VAT_BY_REQID', qParams);
+    var oldGst = result.ret1;
+    oldGst = oldGst == undefined ? '' : oldGst;
+    
+    if (result != null && oldGst != null && oldGst != currentGst) {
+      isUpdated = true;
+    }
+  }
+  if (!isUpdated) {
+    errorMsg = 'You haven\'t updated anything on customer name/address or GST#, please check and take relevant edit operation before submit this Update request. Proceed?';
+  }
+  return errorMsg;
+}
+
+// CREATCMR-6398
+function businessParterValidator() {
+  console.log("running businessParterValidator...");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (typeof (_pagemodel) != 'undefined') {
+          if (cmrIssuingCntry == '834' && reqType == 'C' && (custSubType == 'BUSPR' || custSubType == 'XBUSP')) {
+            var id = FormManager.getActualValue('reqId');
+            var ret = cmr.query('CHECK_BUSP_MATCH_ATTACHMENT', {
+              ID : id
+            });
+
+            if (ret == null || ret.ret1 == null || ret.ret1 == 0) {
+              return new ValidationResult(null, false, 'Business Partner Proof attachment is required for Scenario Sub-type \'Business Partner\'.');
+            } else {
+              return new ValidationResult(null, true);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4131,6 +4231,9 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addFormatForCMRNumValidator, [ SysLoc.SINGAPORE ], null, true);
 
+  // CREATCMR-6398
+  GEOHandler.registerValidator(businessParterValidator, [ SysLoc.SINGAPORE ], null, true);
+  
   GEOHandler.addAddrFunction(lockCustMainNames, GEOHandler.AP);
   // Story - 1781935 -> AR Code for Singapore
   GEOHandler.addAddrFunction(setCollCdFrSGOnAddrSave, [ SysLoc.SINGAPORE ]);

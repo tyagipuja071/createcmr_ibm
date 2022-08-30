@@ -15,6 +15,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
@@ -46,6 +47,7 @@ import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.DebugUtil;
+import com.ibm.cmr.create.batch.util.ProfilerLogger;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ProcessClient;
@@ -59,7 +61,7 @@ import com.ibm.cmr.services.client.process.mass.RequestValueRecord;
 public class ATService extends TransConnService {
   // private static final String BATCH_SERVICES_URL =
   // SystemConfiguration.getValue("BATCH_SERVICES_URL");
-  //private ProcessClient serviceClient;
+  // private ProcessClient serviceClient;
   private static final String COMMENT_LOGGER = "AT Service";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   private boolean massServiceMode;
@@ -128,6 +130,7 @@ public class ATService extends TransConnService {
   public void monitorCreqcmr(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
     LOG.info("Initializing Country Map..");
+    long start = new Date().getTime();
     LandedCountryMap.init(entityManager);
     // Retrieve the PCP records
     LOG.info("Retreiving pending records for processing..");
@@ -189,6 +192,8 @@ public class ATService extends TransConnService {
           }
         }
         partialCommit(entityManager);
+        ProfilerLogger.LOG.trace("After monitorCreqcmr for Request ID: " + admin.getId().getReqId() + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
@@ -198,7 +203,7 @@ public class ATService extends TransConnService {
   }
 
   public void monitorAbortedRecords(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
-
+    long start = new Date().getTime();
     // search the aborted records from Admin table
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR_ABORTED_REC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -258,6 +263,8 @@ public class ATService extends TransConnService {
           WfHist hist = createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
         }
         partialCommit(entityManager);
+        ProfilerLogger.LOG.trace("After monitorAbortedRecords for Request ID: " + admin.getId().getReqId() + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         LOG.error("Error in processing Aborted Record " + admin.getId().getReqId() + " for Request ID " + admin.getId().getReqId() + " ["
             + e.getMessage() + "]", e);
@@ -268,6 +275,7 @@ public class ATService extends TransConnService {
 
   public void monitorCreqcmrMassUpd(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
     LOG.info("Initializing Country Map..");
+    long start = new Date().getTime();
     LandedCountryMap.init(entityManager);
     List<Admin> pending = getPendingRecordsMassUpd(entityManager);
 
@@ -306,6 +314,8 @@ public class ATService extends TransConnService {
           createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
         }
         partialCommit(entityManager);
+        ProfilerLogger.LOG.trace("After monitorCreqcmrMassUpd for Request ID: " + admin.getId().getReqId() + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);

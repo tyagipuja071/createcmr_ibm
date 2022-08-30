@@ -47,7 +47,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 </style>
 <cmr:window>
   <div class="cmr-summary">
-    <form:form method="GET" action="${contextPath}/window/summary/massupdate" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="summary">
+    <cmr:form method="GET" action="${contextPath}/window/summary/massupdate" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="summary">
       <!--  Main Details Section -->
       <jsp:include page="summary_dpl.jsp" />
       <cmr:row addBackground="true" topPad="10">
@@ -63,7 +63,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           </cmr:grid>
         </cmr:column>
       </cmr:row>     
-    </form:form>
+    </cmr:form>
   </div>
   <cmr:windowClose>
     <cmr:button label="${ui.btn.refresh}" onClick="window.location = window.location.href" pad="true" highlight="true" />

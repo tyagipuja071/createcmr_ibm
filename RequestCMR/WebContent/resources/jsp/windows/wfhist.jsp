@@ -44,7 +44,7 @@
   String statusettsHeader =title+"<img src=\""+contextPath+"/resources/images/info-bubble-icon.png\" title=\""+infoTxt+"\" class=\"cmr-info-bubble\">";
 %> 
 <cmr:window>
-  <form:form method="GET" action="${contextPath}/window/wfhist" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="wfhist">
+  <cmr:form method="GET" action="${contextPath}/window/wfhist" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="wfhist">
     <input type="hidden" name="reqId" value="1129" id="reqId">
     <cmr:row>
       <cmr:column span="1">
@@ -92,6 +92,6 @@
         </cmr:grid>
       </cmr:column>
     </cmr:row>
-  </form:form>
+  </cmr:form>
   <cmr:windowClose />
 </cmr:window>

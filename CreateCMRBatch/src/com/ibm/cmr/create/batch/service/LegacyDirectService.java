@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -74,6 +75,7 @@ import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.DebugUtil;
+import com.ibm.cmr.create.batch.util.ProfilerLogger;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.impl.SOFMessageHandler;
@@ -123,7 +125,7 @@ public class LegacyDirectService extends TransConnService {
   private static final String ADDRESS_USE_COUNTRY_H = "H";
   private static final String ADDRESS_USE_EXISTS = "Y";
   private static final String ADDRESS_USE_NOT_EXISTS = "N";
-  private CMRRequestContainer cmrObjects;
+  // private CMRRequestContainer cmrObjects;
   private static final String MASS_UPDATE_FAIL = "FAIL";
   private static final String MASS_UPDATE_DONE = "DONE";
   private static final String MASS_UDPATE_LEGACY_FAIL_MSG = "Errors happened in legacy mass updates. Pleaes see request summary for details.";
@@ -147,7 +149,9 @@ public class LegacyDirectService extends TransConnService {
     LOG.info("Multi Mode: " + this.multiMode);
 
     LOG.info("Initializing Country Map..");
+    long start = new Date().getTime();
     LandedCountryMap.init(entityManager);
+    ProfilerLogger.LOG.trace("After Landed country init " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     // Retrieve the PCP records and create in the Legacy DB
     LOG.info("Retreiving pending records for processing..");
     List<Long> pending = gatherPendingRecords(entityManager);
@@ -170,6 +174,7 @@ public class LegacyDirectService extends TransConnService {
     LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
     // pending = new ArrayList<Admin>();
     for (Long id : pending) {
+      long start = new Date().getTime();
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -214,6 +219,8 @@ public class LegacyDirectService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
       partialCommit(entityManager);
+      ProfilerLogger.LOG.trace(
+          "After processPendingLegacy for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     }
   }
 
@@ -223,6 +230,7 @@ public class LegacyDirectService extends TransConnService {
     Data data = null;
     ProcessRequest request = null;
     for (Long id : pending) {
+      long start = new Date().getTime();
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -232,8 +240,8 @@ public class LegacyDirectService extends TransConnService {
       }
       try {
 
-        this.cmrObjects = prepareRequest(entityManager, admin, true);
-        data = this.cmrObjects.getData();
+        CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin, true);
+        data = cmrObjects.getData();
 
         request = new ProcessRequest();
         request.setCmrNo(data.getCmrNo());
@@ -280,6 +288,8 @@ public class LegacyDirectService extends TransConnService {
           WfHist hist = createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
         }
         partialCommit(entityManager);
+        ProfilerLogger.LOG.trace(
+            "After processPendingRDC for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
@@ -302,6 +312,7 @@ public class LegacyDirectService extends TransConnService {
   }
 
   protected List<Long> gatherPendingRecords(EntityManager entityManager) {
+    long start = new Date().getTime();
     String sql = ExternalizedQuery.getSql("LEGACYD.GET_PENDING");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     List<Admin> pendingRecords = query.getResults(Admin.class);
@@ -310,6 +321,7 @@ public class LegacyDirectService extends TransConnService {
     for (Admin admin : pendingRecords) {
       queue.add(admin.getId().getReqId());
     }
+    ProfilerLogger.LOG.trace("After gatherPendingRecords " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return queue;
   }
 
@@ -328,6 +340,7 @@ public class LegacyDirectService extends TransConnService {
   }
 
   protected List<Long> gatherPendingRecordsRDC(EntityManager entityManager) {
+    long start = new Date().getTime();
     String sql = ExternalizedQuery.getSql("LEGACYD.GET_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     List<Admin> pendingRecords = query.getResults(Admin.class);
@@ -336,6 +349,7 @@ public class LegacyDirectService extends TransConnService {
     for (Admin admin : pendingRecords) {
       queue.add(admin.getId().getReqId());
     }
+    ProfilerLogger.LOG.trace("After gatherPendingRecordsRDC " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return queue;
   }
 
@@ -1113,16 +1127,20 @@ public class LegacyDirectService extends TransConnService {
     WfHist hist = createHistory(entityManager, message, "PCO", "Legacy Processing", admin.getId().getReqId());
     createComment(entityManager, message, admin.getId().getReqId());
     RequestUtils.sendEmailNotifications(entityManager, admin, hist, false, true);
-
-    String mailFlag = transformer.getMailSendingFlag(cmrObjects.getData(), admin, entityManager);
-    if (!"NA".equals(mailFlag)) {
-      String mailTemplate = transformer.getEmailTemplateName(mailFlag);
-      String statusForMailSend = transformer.getReqStatusForSendingMail(mailFlag);
-      if (statusForMailSend != null && "PCO".equals(statusForMailSend)) {
-        BatchEmailModel mailParams = transformer.getMailFormatParams(entityManager, cmrObjects, mailFlag);
-        LegacyCommonUtil.sendfieldUpdateEmailNotification(entityManager, mailParams, mailTemplate);
-      }
-    }
+    // CREATCMR-2625,6677
+    // String mailFlag = transformer.getMailSendingFlag(cmrObjects.getData(),
+    // admin, entityManager);
+    // if (!"NA".equals(mailFlag)) {
+    // String mailTemplate = transformer.getEmailTemplateName(mailFlag);
+    // String statusForMailSend =
+    // transformer.getReqStatusForSendingMail(mailFlag);
+    // if (statusForMailSend != null && "PCO".equals(statusForMailSend)) {
+    // BatchEmailModel mailParams =
+    // transformer.getMailFormatParams(entityManager, cmrObjects, mailFlag);
+    // LegacyCommonUtil.sendfieldUpdateEmailNotification(entityManager,
+    // mailParams, mailTemplate);
+    // }
+    // }
 
     partialCommit(entityManager);
   }
@@ -1942,7 +1960,8 @@ public class LegacyDirectService extends TransConnService {
           custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
           custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
           legacyObjects.setCustomerExt(custExt);
-        } else if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()) || SystemLocation.KENYA.equals(data.getCmrIssuingCntry())) {
+        } else if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())
+            || SystemLocation.KENYA.equals(data.getCmrIssuingCntry())) {
           CmrtCustExtPK custExtPk = null;
           LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
           // Initialize the object
@@ -2732,6 +2751,7 @@ public class LegacyDirectService extends TransConnService {
     long reqId = admin.getId().getReqId();
     // String rdcEmbargoCd = getEmbargoCdFromDataRdc(entityManager, admin);
     DataRdc dataRdc = getDataRdcRecords(entityManager, data);
+    CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin, true);
     if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
         && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())
         && (dataRdc.getEmbargoCd() != null && !StringUtils.isBlank(dataRdc.getEmbargoCd())) && EMBARGO_LIST.contains(dataRdc.getEmbargoCd())
@@ -2742,7 +2762,7 @@ public class LegacyDirectService extends TransConnService {
         LOG.info("Temporary Reactivate Embargo process: Batch 1st run for Req Id :" + admin.getId().getReqId());
         try {
 
-          List<Addr> addresses = this.cmrObjects.getAddresses();
+          List<Addr> addresses = cmrObjects.getAddresses();
 
           List<String> statusCodes = new ArrayList<String>();
 
@@ -2966,7 +2986,7 @@ public class LegacyDirectService extends TransConnService {
           LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setProcessedTs(SystemUtil.getCurrentTimestamp());
-            List<Addr> addresses = this.cmrObjects.getAddresses();
+            List<Addr> addresses = cmrObjects.getAddresses();
 
             List<String> statusCodes = new ArrayList<String>();
 
@@ -3178,7 +3198,7 @@ public class LegacyDirectService extends TransConnService {
     } else { // Normal Update Process
       try {
 
-        List<Addr> addresses = this.cmrObjects.getAddresses();
+        List<Addr> addresses = cmrObjects.getAddresses();
 
         List<String> statusCodes = new ArrayList<String>();
 

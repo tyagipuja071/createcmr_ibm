@@ -71,7 +71,7 @@ var CntryGeoDefService = (function() {
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/cntrygeodefmain" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="cntrygeodefmain">
+  <cmr:form method="POST" action="${contextPath}/code/cntrygeodefmain" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="cntrygeodefmain">
     <cmr:modelAction formName="frmCMR" />
     <cmr:section>
       <cmr:row topPad="8">
@@ -280,7 +280,7 @@ var CntryGeoDefService = (function() {
       </cmr:row>
 
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>
