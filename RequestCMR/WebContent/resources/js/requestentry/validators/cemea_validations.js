@@ -4029,7 +4029,7 @@ function customVATMandatoryForAT() {
   if (custSubType != null
       && custSubType != ''
       && (custSubType == 'COMME' || custSubType == 'BUSPR' || custSubType == 'XBP' || custSubType == 'XCOM' || custSubType == 'XGOV'
-          || custSubType == 'XISO' || custSubType == 'XINT')) {
+          || custSubType == 'XISO' || custSubType == 'XINT' ||  custSubType == 'THDPT')) {
     if (!dijit.byId('vatExempt').get('checked')) {
       // Make Vat Mandatory
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
