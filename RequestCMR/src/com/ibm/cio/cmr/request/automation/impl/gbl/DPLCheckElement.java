@@ -180,8 +180,7 @@ public class DPLCheckElement extends ValidatingElement {
           } else {
             Boolean isPrivate = false;
             if (StringUtils.isNotEmpty(data.getIsicCd()) && "9500".equals(data.getIsicCd())) {
-              
-             isPrivate = true;
+            isPrivate = true;
             }
 
             Boolean errorStatus = false;
