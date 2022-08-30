@@ -809,12 +809,39 @@ var _templateHandler = null;
 var defaultLandCntry = null;
 var _rejSupplInfoHandler = null;
 var _dnbSearchHandler = null;
+var _vatIndHandler = null;
 
 /**
  * Executed after PageManager loads all the scripts. Place here code that needs
  * to be executed to override the PageManager configurable fields' settings
  */
 function afterConfigChange() {
+
+  // VAT indicator
+  var value = FormManager.getActualValue('vatInd');
+  if (_vatIndHandler == null) {
+    _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(value) {
+      if (value && dojo.string.trim(value) == 'T') {
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'N');
+      } else if (value && dojo.string.trim(value) == 'N') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.readOnly('vat');
+        FormManager.setValue('vat', '');
+        FormManager.setValue('vatExempt', 'N');
+      } else if (value && dojo.string.trim(value) == 'E') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'Y');
+      }
+    });
+
+  }
+  if (_vatIndHandler && _vatIndHandler[0]) {
+    _vatIndHandler[0].onChange();
+  }
+
   // add special INAC value validator
   // if INAC Type = I, the code should be a number
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
