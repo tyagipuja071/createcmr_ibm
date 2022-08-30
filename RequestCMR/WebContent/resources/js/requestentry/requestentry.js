@@ -564,8 +564,7 @@ function doSaveChangeComments() {
           if (kunnr1 != null || kunnr1 != undefined) {
             dojo.byId('rejSupplInfo2').value = kunnr1;
             console.log(dojo.byId('rejSupplInfo2').value);
-	            }
-	            else{
+          } else {
             cmr.showAlert('No Sold-To Kunnr found for ' + rejInfo1 + ".");
             return;
           }
@@ -578,8 +577,7 @@ function doSaveChangeComments() {
           cmr.showAlert('The CMR Number is not correct');
           return;
         }
-	        }
-	        else{
+      } else {
         cmr.showAlert('Please specify ' + dojo.byId('rejInfo1Label').innerText + ".");
         return;
       }
@@ -695,7 +693,8 @@ function commentImgFormatter(value, rowIndex) {
   }
   if (value.indexOf('@') > 0) {
     if (value.indexOf('ibm.com') > 0) {
-      return '<img title="'+value+'" src="https://unified-profile-api.us-south-k8s.intranet.ibm.com/v3/image/'+value+'" class="cmt-img" onerror="this.onerror=null; this.src=\''+cmr.CONTEXT_ROOT+'/resources/images/person.jpg\'">';
+      return '<img title="' + value + '" src="https://unified-profile-api.us-south-k8s.intranet.ibm.com/v3/image/' + value + '" class="cmt-img" onerror="this.onerror=null; this.src=\''
+          + cmr.CONTEXT_ROOT + '/resources/images/person.jpg\'">';
     } else {
       return '<img title="' + value + '" src="' + cmr.CONTEXT_ROOT + '/resources/images/person.jpg" class="cmt-img">';
     }
@@ -730,12 +729,39 @@ var _templateHandler = null;
 var defaultLandCntry = null;
 var _rejSupplInfoHandler = null;
 var _dnbSearchHandler = null;
+var _vatIndHandler = null;
 
 /**
  * Executed after PageManager loads all the scripts. Place here code that needs
  * to be executed to override the PageManager configurable fields' settings
  */
 function afterConfigChange() {
+
+  // VAT indicator
+  var value = FormManager.getActualValue('vatInd');
+  if (_vatIndHandler == null) {
+    _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(value) {
+      if (value && dojo.string.trim(value) == 'T') {
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'N');
+      } else if (value && dojo.string.trim(value) == 'N') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.readOnly('vat');
+        FormManager.setValue('vat', '');
+        FormManager.setValue('vatExempt', 'N');
+      } else if (value && dojo.string.trim(value) == 'E') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'Y');
+      }
+    });
+
+  }
+  if (_vatIndHandler && _vatIndHandler[0]) {
+    _vatIndHandler[0].onChange();
+  }
+
   // add special INAC value validator
   // if INAC Type = I, the code should be a number
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -1557,7 +1583,8 @@ function isSkipDnbMatching() {
         }
       }
       return false;
-    } else return true;
+    } else
+      return true;
   } else {
     return true;
   }
@@ -1596,8 +1623,8 @@ function checkIfFinalDnBCheckRequired() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
-  if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester'
-      && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
+  if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+      && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US
     return true;
   }
@@ -1620,8 +1647,7 @@ function checkIfDnBCheckReqForIndia() {
   if (reqType == 'C' && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS')) {
     if (result && result.ret1) {
       return false;
-   }
-   else {
+    } else {
       return true;
     }
   }
@@ -1704,7 +1730,9 @@ function matchDnBForAutomationCountries() {
                 FormManager.setValue('matchOverrideIndc', 'Y');
               }
               // Cmr-2755_India_no_match_found
-              else if(cntry == SysLoc.INDIA && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS') && !flag){      
+              else if (cntry == SysLoc.INDIA
+                  && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS')
+                  && !flag) {
                 cmr.showAlert('Please attach company proof as no matches found in dnb.');
                 checkNoMatchingAttachmentValidator();
               } else if (cntry == SysLoc.CANADA) {
@@ -1712,7 +1740,7 @@ function matchDnBForAutomationCountries() {
                     .showAlert('This action will override the D&B Matching Process. By overriding the D&B matching, you\'re obliged to provide either one of the following documentation '
                         + 'as backup-client\'s official website, business registration proof, government issued documents, client\'s confirmation email and signed PO, attach it under the file content of Company Proof. '
                         + 'Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.');
-                FormManager.setValue('matchOverrideIndc', 'Y');                
+                FormManager.setValue('matchOverrideIndc', 'Y');
               } else {
                 cmr.showModal('addressVerificationModal');
               }
@@ -1721,8 +1749,7 @@ function matchDnBForAutomationCountries() {
             // continue
             console.log("An error occurred while matching dnb.");
             if (cntry == '641') {
-              cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?',
-                  'Warning', null, {
+              cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
                 OK : 'Yes',
                 CANCEL : 'No'
               });
@@ -1751,8 +1778,7 @@ function matchDnBForIndia() {
     return;
   }
   cmr.showProgress('Checking request data with D&B...');
-  dojo
-      .xhrGet({
+  dojo.xhrGet({
     url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
     handleAs : 'json',
     method : 'GET',
@@ -1803,8 +1829,7 @@ function matchDnBForIndia() {
       } else {
         // continue
         console.log("An error occurred while matching dnb.");
-            cmr.showConfirm("cmr.showModal('addressVerificationModal')",
-                'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+        cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
           OK : 'Yes',
           CANCEL : 'No'
         });
@@ -2029,12 +2054,8 @@ function checkNoMatchingAttachmentValidator() {
 }
 
 function showDocTypeConfirmDialog() {
-	cmr
-	.showConfirm(
-		'doChangeDocType()',
-		'There are Legal Name Confirmation and/or Address Confirmation attachment(s) attached with the request. '+
-		'These attachment types are not supported anymore and will be sunset. Do you want to use <strong>Company Proof</strong> instead?',
-		'Warning', null, null);
+  cmr.showConfirm('doChangeDocType()', 'There are Legal Name Confirmation and/or Address Confirmation attachment(s) attached with the request. '
+      + 'These attachment types are not supported anymore and will be sunset. Do you want to use <strong>Company Proof</strong> instead?', 'Warning', null, null);
 }
 
 function doChangeDocType() {
