@@ -802,14 +802,6 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
             if (SystemLocation.CHINA.equals(model.getCmrIssuingCntry()) && StringUtils.isNotBlank(model.getDisableAutoProc())
                 && model.getDisableAutoProc().equalsIgnoreCase("Y")) {
               // transrec.setNewReqStatus("PPN");// set to PPN for CHINA
-            } else if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry())) {
-              String setPPNFlag = USHandler.validateForSCC(entityManager, model.getReqId());
-              if ("N".equals(setPPNFlag)) {
-                // set NewReqStatus value PPN for US
-              } else {
-                this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
-                transrec.setNewReqStatus("AUT"); // set to automated processing
-              }
             } else {
               this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
               transrec.setNewReqStatus("AUT"); // set to automated processing

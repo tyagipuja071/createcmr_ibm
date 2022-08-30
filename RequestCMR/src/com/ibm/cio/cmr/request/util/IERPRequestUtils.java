@@ -160,8 +160,8 @@ public class IERPRequestUtils extends RequestUtils {
   }
 
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history, String siteIds, String emailCmt) {
-    List<String> reqStatusFrMailNotif = Arrays.asList("PRJ", "COM");
-    if (!reqStatusFrMailNotif.contains(admin.getReqStatus())) {
+    if (!"PRJ".equals(admin.getReqStatus()) && !"COM".equals(admin.getReqStatus())) {
+      // CREATCMR-2625,6677
       return;
     }
     String cmrno = "";

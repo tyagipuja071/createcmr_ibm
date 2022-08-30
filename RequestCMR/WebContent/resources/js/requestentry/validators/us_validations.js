@@ -536,6 +536,7 @@ function afterConfigForUS() {
 
   if (reqType == 'U') {
     FormManager.readOnly('custType');
+    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
   }
 
   if (_usIsuHandler == null && FormManager.getField('isuCd')) {
@@ -1251,6 +1252,7 @@ function setTaxcd1Status() {
       FormManager.setValue('specialTaxCd', '');
     }
   }
+
 }
 
 /* Register US Javascripts */
@@ -1301,7 +1303,4 @@ dojo.addOnLoad(function() {
   // CREATCMR-5447
   GEOHandler.registerValidator(TaxTeamUpdateDataValidation, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(TaxTeamUpdateAddrValidation, [ SysLoc.USA ], null, true);
-  // CREATCMR-6777
-  // GEOHandler.addAfterTemplateLoad(setTaxcd1Status, [ SysLoc.USA ]);
-  // GEOHandler.addAfterConfig(setTaxcd1Status, [ SysLoc.USA ]);
 });
