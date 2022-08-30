@@ -209,6 +209,11 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       }
       sb.append(" TXT from ").append(bds.getSchema() + "." + bds.getTbl());
       sb.append(" where length(" + bds.getCd() + ") > 0 ");
+      // if ("897".equals((String) params.getParam("cmrIssuingCntry"))) {
+      if ("County".equals(fieldId)) {
+        sb.setLength(0);
+      }
+      // }
       // new REFT tables do not have MANDT. removing this for all.
       // if (!BDS_NO_MANDT.contains(bds.getTbl())) {
       // sb.append(" and MANDT = :MANDT");
@@ -224,15 +229,19 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       }
 
       if (!StringUtils.isEmpty(bds.getOrderByField())) {
-        if ("CMRIssuingCountry".equalsIgnoreCase(fieldId) && "Y".equals(params.getParam("newRequest"))) {
-          // special handling
-          bdsQuery.append(" order by CD asc");
-        } else if ("Cluster".equals(fieldId) && PageManager.fromGeo("AP", (String) params.getParam("cmrIssuingCntry"))) {
-          bdsQuery.append(" order by case when CLUSTER_DESC LIKE 'DEFAULT%' then 5 when CLUSTER_DESC LIKE 'Kyndryl%' then 4 when CLUSTER_DESC LIKE '%Ecosystem%' then 3 when CLUSTER_DESC LIKE 'ISA Select Core%' then 2 else 1 end");
-        } else {
-          bdsQuery.append(" order by " + bds.getOrderByField() + " asc");
+        if (!"897".equals((String) params.getParam("cmrIssuingCntry"))) {
+          if ("CMRIssuingCountry".equalsIgnoreCase(fieldId) && "Y".equals(params.getParam("newRequest"))) {
+            // special handling
+            bdsQuery.append(" order by CD asc");
+          } else if ("Cluster".equals(fieldId) && PageManager.fromGeo("AP", (String) params.getParam("cmrIssuingCntry"))) {
+            bdsQuery.append(
+                " order by case when CLUSTER_DESC LIKE 'DEFAULT%' then 5 when CLUSTER_DESC LIKE 'Kyndryl%' then 4 when CLUSTER_DESC LIKE '%Ecosystem%' then 3 when CLUSTER_DESC LIKE 'ISA Select Core%' then 2 else 1 end");
+          } else {
+            if (!"County".equals(fieldId)) {
+              bdsQuery.append(" order by " + bds.getOrderByField() + " asc");
+            }
+          }
         }
-
       }
 
       // bdsQuery.append(" ) a");
@@ -365,11 +374,19 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
     }
     if ("County".equalsIgnoreCase(fieldId)) {
       // support only US for now
-      query.append("  and 'US' = :LAND1 ");
+      // query.append(" and 'US' = :LAND1 ");
+      // query.append(
+      // " and REFT_STATE_PROV_KEY = (select REFT_STATE_PROV_KEY from
+      // CMMA.REFT_STATE_PROV_W where STATE_PROV_CD = :REGIO and
+      // REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W
+      // where COUNTRY_CD = :LAND1)) ");
+      // query.setParameter("REGIO", params.getParam("stateProv"));
+      // query.setParameter("LAND1", params.getParam("landCntry"));
+
       query.append(
-          "  and REFT_STATE_PROV_KEY = (select REFT_STATE_PROV_KEY from CMMA.REFT_STATE_PROV_W where STATE_PROV_CD = :REGIO and REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W where COUNTRY_CD = :LAND1)) ");
-      query.setParameter("REGIO", params.getParam("stateProv"));
+          "SELECT trim(LPAD(C_CNTY,3,0)) TXT, trim(N_CNTY) CD FROM CREQCMR.US_CMR_SCC WHERE LAND_CNTRY = :LAND1 AND N_ST = :N_ST GROUP BY N_CNTY, C_CNTY ORDER BY N_CNTY, C_CNTY ");
       query.setParameter("LAND1", params.getParam("landCntry"));
+      query.setParameter("N_ST", params.getParam("stateProv"));
     }
     if ("Subindustry".equalsIgnoreCase(fieldId)) {
       String geo = "WW";
