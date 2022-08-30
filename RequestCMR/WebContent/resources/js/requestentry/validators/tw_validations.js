@@ -459,8 +459,8 @@ function addSingleByteValidatorTW(cntry, details) {
   // Officer Email' ], 'MAIN_CUST_TAB');
   // FormManager.addValidator('commercialFinanced', Validators.LATIN, [ 'Chief
   // Information Officer Fax' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('footnoteTxt1', Validators.NO_SINGLE_BYTE, [ 'Goods Receiver Chinese Name' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('contactName3', Validators.NO_SINGLE_BYTE, [ 'Goods Receiver Job Title' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('footnoteTxt1', Validators.NO_SINGLE_BYTE, [ 'Contact Name' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('contactName3', Validators.NO_SINGLE_BYTE, [ 'Contact Job Title' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('email3', Validators.LATIN, [ 'Goods Receiver Telephone Number' ], 'MAIN_CUST_TAB');
 
   FormManager.addValidator('orgNo', Validators.LATIN, [ 'Customer Telephone Number' ], 'MAIN_CUST_TAB');
