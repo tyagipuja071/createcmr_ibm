@@ -247,6 +247,7 @@ function addAfterConfigAP() {
     setInacByCluster();
   }
   if (cntry == '834') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
     addVatValidationforSingapore();
   }
   if (cntry != SysLoc.HONG_KONG && cntry !=  SysLoc.MACAO && reqType == 'U') {
@@ -4409,6 +4410,56 @@ function addressNameSameValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+// CREATCMR-6358
+function addCompanyProofForSG() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var hasAdditionalAddr = false;
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+         return new ValidationResult(null, true);  
+         }
+        for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i).addrType != 'ZS01') {
+            hasAdditionalAddr = true;
+            break;
+          }
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 ) {
+          var record = null;
+          var name = null;
+          var count = 0;
+          var updateInd = null;
+                    
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            name = record.custNm1;
+            updateInd = record.updateInd;
+                          
+            if (typeof (type) == 'object') {
+              updateInd = updateInd[0];
+            }
+            
+            if((updateInd == 'U' || updateInd == 'N')){
+              count ++;
+            }
+            
+          }         
+          if ((count > 0 || hasAdditionalAddr) &&  checkForCompanyProofAttachment() ) {
+            return new ValidationResult(null, false, 'Company proof is mandatory since address has been updated or added.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4461,6 +4512,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCompanyProofAttachValidation, [ SysLoc.INDIA]);
   GEOHandler.registerValidator(addressNameSimilarValidator, [ SysLoc.INDIA]);
   GEOHandler.registerValidator(addressNameSameValidator, [ SysLoc.SINGAPORE]);
+  GEOHandler.registerValidator(addCompanyProofForSG, [ SysLoc.SINGAPORE]);  
   
   GEOHandler.addAfterConfig(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
   GEOHandler.addAfterTemplateLoad(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);

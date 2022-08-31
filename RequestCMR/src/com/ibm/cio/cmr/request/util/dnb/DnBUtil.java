@@ -21,7 +21,6 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
-import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -690,81 +689,65 @@ public class DnBUtil {
     // Name/TradestyleName close matching - END
 
     // Address close matching - BEGIN
+    String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
+    address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
+    address = address.trim();
 
-    // CREATCMR-6358 Address close matching for Singapore
-    AutomationUtil countryUtil = null;
-    try {
-      countryUtil = AutomationUtil.getNewCountryUtil(country);
-    } catch (Exception e) {
-      LOG.error("Unable to get countryUtil", e);
+    if (handler != null) {
+      String handlerAddress = handler.buildAddressForDnbMatching(country, addr);
+      if (handler != null && !StringUtils.isBlank(handlerAddress)) {
+        address = handlerAddress;
+      }
     }
-    Boolean matched = true;
-    if (countryUtil != null && countryUtil instanceof SingaporeUtil && SystemLocation.SINGAPORE.equals(country)) {
-      SingaporeUtil singaporeUtil = (SingaporeUtil) countryUtil;
-      matched = singaporeUtil.addrCloselyMatchesDnb(country, admin, dnbRecord, nameToUse, useTradestyleName, allowLongNameAddress);
-      return matched;
+    LOG.debug("Address used for matching: " + address);
+
+    String dnbAddress = dnbRecord.getDnbStreetLine1() != null ? dnbRecord.getDnbStreetLine1() : "";
+    if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
+      dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
+    }
+    dnbAddress = dnbAddress.trim();
+    Boolean matchWithDnbMailingAddr = false;
+    if (handler != null) {
+      matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
+    }
+    LOG.debug("DNB match country =  " + country);
+    Boolean isReshuffledAddr = false;
+    if ("897".equals(country) || "US".equals(country)) {
+      isReshuffledAddr = USHandler.compareUSReshuffledAddress(dnbAddress, address, country);
+      LOG.debug("US isReshuffledAddr =  " + isReshuffledAddr);
     } else {
+      isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
+      LOG.debug("isReshuffledAddr =  " + isReshuffledAddr);
+    }
 
-      String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
-      address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
-      address = address.trim();
+    // Boolean isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress,
+    // address, country);
+    if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
+        && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
+        && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr
+        && !matchWithDnbMailingAddr) {
+      return false;
+    }
 
-      if (handler != null) {
-        String handlerAddress = handler.buildAddressForDnbMatching(country, addr);
-        if (handler != null && !StringUtils.isBlank(handlerAddress)) {
-          address = handlerAddress;
+    if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())) {
+      String currentPostalCode = addr.getPostCd();
+      String dnbPostalCode = dnbRecord.getDnbPostalCode();
+      if (currentPostalCode.length() != dnbPostalCode.length()) {
+        if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
+          return false;
         }
       }
-      LOG.debug("Address used for matching: " + address);
-
-      String dnbAddress = dnbRecord.getDnbStreetLine1() != null ? dnbRecord.getDnbStreetLine1() : "";
-      if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
-        dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
-      }
-      dnbAddress = dnbAddress.trim();
-      Boolean matchWithDnbMailingAddr = false;
-      if (handler != null) {
-        matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
-      }
-      LOG.debug("DNB match country =  " + country);
-      Boolean isReshuffledAddr = false;
-      if ("897".equals(country) || "US".equals(country)) {
-        isReshuffledAddr = USHandler.compareUSReshuffledAddress(dnbAddress, address, country);
-        LOG.debug("US isReshuffledAddr =  " + isReshuffledAddr);
-      } else {
-        isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
-        LOG.debug("isReshuffledAddr =  " + isReshuffledAddr);
-      }
-
-      // Boolean isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress,
-      // address, country);
-      if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
-          && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
-          && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr
-          && !matchWithDnbMailingAddr) {
-        return false;
-      }
-
-      if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())) {
-        String currentPostalCode = addr.getPostCd();
-        String dnbPostalCode = dnbRecord.getDnbPostalCode();
-        if (currentPostalCode.length() != dnbPostalCode.length()) {
-          if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
-            return false;
-          }
-        }
-        if (currentPostalCode.length() == dnbPostalCode.length()) {
-          if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
-            return false;
-          }
+      if (currentPostalCode.length() == dnbPostalCode.length()) {
+        if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
+          return false;
         }
       }
+    }
 
-      if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
+    if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
           && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6
           && !matchWithDnbMailingAddr) {
-        return false;
-      }
+      return false;
     }
 
     // Address close matching - END
@@ -882,64 +865,57 @@ public class DnBUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
-    // CREATCMR-6358
-    if (countryUtil != null && countryUtil instanceof SingaporeUtil && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
-      SingaporeUtil singaporeUtil = (SingaporeUtil) countryUtil;
-      response = singaporeUtil.getAddrListDnbMatches(requestData, engineData, admin, data);
-      return response;
-    } else {
 
-      addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
-      Addr addr = requestData.getAddress(addrType);
-      boolean isTaxCdMatch = false;
-      // AutomationUtil countryUtil =
-      // AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
-      if (countryUtil != null) {
-        isTaxCdMatch = countryUtil.useTaxCd1ForDnbMatch(requestData);
-      }
-      GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
-      GBGFinderRequest request = new GBGFinderRequest();
-      request.setMandt(SystemConfiguration.getValue("MANDT"));
-      if (addr != null) {
-        if (isTaxCdMatch && StringUtils.isNotBlank(data.getTaxCd1())) {
-          request.setOrgId(data.getTaxCd1());
-        } else if (!isTaxCdMatch) {
-          if (StringUtils.isNotBlank(data.getVat())) {
-            request.setOrgId(data.getVat());
-          } else if (StringUtils.isNotBlank(addr.getVat())) {
-            request.setOrgId(addr.getVat());
-          }
-        }
-
-        request.setCity(addr.getCity1());
-        request.setCustomerName(getCustomerName(handler, admin, addr));
-        request.setStreetLine1(addr.getAddrTxt());
-        request.setStreetLine2(addr.getAddrTxt2());
-        request.setLandedCountry(addr.getLandCntry());
-        request.setPostalCode(addr.getPostCd());
-        request.setStateProv(addr.getStateProv());
-        request.setMinConfidence("4");
-
-        if (countryUtil != null) {
-          // Allow flexibility to tweak the request before matching
-          countryUtil.tweakDnBMatchingRequest(request, requestData, engineData);
-        }
-
-        MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-            MatchingServiceClient.class);
-        client.setReadTimeout(1000 * 60 * 5);
-        LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-        MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(rawResponse);
-
-        TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
-        };
-
-        response = mapper.readValue(json, ref);
-      }
-      return response;
+    addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
+    Addr addr = requestData.getAddress(addrType);
+    boolean isTaxCdMatch = false;
+    // AutomationUtil countryUtil =
+    // AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+    if (countryUtil != null) {
+      isTaxCdMatch = countryUtil.useTaxCd1ForDnbMatch(requestData);
     }
+    GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+    if (addr != null) {
+      if (isTaxCdMatch && StringUtils.isNotBlank(data.getTaxCd1())) {
+        request.setOrgId(data.getTaxCd1());
+      } else if (!isTaxCdMatch) {
+        if (StringUtils.isNotBlank(data.getVat())) {
+          request.setOrgId(data.getVat());
+        } else if (StringUtils.isNotBlank(addr.getVat())) {
+          request.setOrgId(addr.getVat());
+        }
+      }
+
+      request.setCity(addr.getCity1());
+      request.setCustomerName(getCustomerName(handler, admin, addr));
+      request.setStreetLine1(addr.getAddrTxt());
+      request.setStreetLine2(addr.getAddrTxt2());
+      request.setLandedCountry(addr.getLandCntry());
+      request.setPostalCode(addr.getPostCd());
+      request.setStateProv(addr.getStateProv());
+      request.setMinConfidence("4");
+
+      if (countryUtil != null) {
+        // Allow flexibility to tweak the request before matching
+        countryUtil.tweakDnBMatchingRequest(request, requestData, engineData);
+      }
+
+      MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+          MatchingServiceClient.class);
+      client.setReadTimeout(1000 * 60 * 5);
+      LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+      MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+      ObjectMapper mapper = new ObjectMapper();
+      String json = mapper.writeValueAsString(rawResponse);
+
+      TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+      };
+
+      response = mapper.readValue(json, ref);
+    }
+    return response;
   }
 
   private static boolean calAlignPostalCodeLength(String currPostalCd, String dnBPostalCd) {
