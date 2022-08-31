@@ -74,7 +74,6 @@ import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
-import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -1502,8 +1501,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               }
               log.debug("ISIC Match : " + isicMatch);
               if (record.getConfidenceCode() >= 8 && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
-                  && (StringUtils.isBlank(data.getCustSubGrp()) && "CN".equalsIgnoreCase(addr.getLandCntry())
-                      || !data.getCustSubGrp().equals("CROSS"))) {
+                  && ("U".equals(admin.getReqType()) && StringUtils.isBlank(data.getCustSubGrp()) && "CN".equalsIgnoreCase(addr.getLandCntry())
+                      || "C".equals(admin.getReqType()) && !"CROSS".equals(data.getCustSubGrp()))) {
                 match = true;
                 break;
               }
