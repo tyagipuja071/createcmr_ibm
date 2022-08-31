@@ -570,7 +570,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     // data.setIsicCd(record.getCmrIsic());
     data.setIsicCd(!StringUtils.isEmpty(record.getCmrIsic())
         ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim()) : "");
-
+    data.setUsSicmen(!StringUtils.isEmpty(record.getCmrIsic())
+        ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim()) : "");
     data.setIsuCd(record.getCmrIsu());
     data.setSearchTerm(record.getCmrSortl());
     data.setSitePartyId(record.getCmrSitePartyID());
