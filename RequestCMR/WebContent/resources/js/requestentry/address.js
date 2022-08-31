@@ -592,15 +592,16 @@ function doAddToAddressList() {
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var asean_isa_cntries = [ '643', '744', '736', '738', '796', '778', '749', '834', '818', '852', '856', '616', '652', '615' ];
-  if (GEOHandler.isTGMERequired(cntry)) {
-    var tgmeResult = tgmePreSave();
-    if (tgmeResult > 0) {
-      performAddressStandardization(true);
-      return;
-    }
-  } else {
-    saveNotSupportedTGME();
-  }
+  // CREATCMR-5741 no TGME Addr Std
+//  if (GEOHandler.isTGMERequired(cntry)) {
+//    var tgmeResult = tgmePreSave();
+//    if (tgmeResult > 0) {
+//      performAddressStandardization(true);
+//      return;
+//    }
+//  } else {
+//    saveNotSupportedTGME();
+//  }
 
   cmr.currentModalId = 'addEditAddressModal';
   cmr.addressReqId = FormManager.getActualValue('reqId');
@@ -1001,13 +1002,13 @@ function addEditAddressModal_onLoad() {
     FormManager.readOnly('ierpSitePrtyId');
 
     FormManager.setValue('addrStdAcceptInd', '');
-    FormManager.setValue('addr_addrStdResult', '');
+    FormManager.setValue('addr_addrStdResult', 'X');
     FormManager.setValue('addr_addrStdRejReason', '');
     dojo.query('#addEditAddressModal #addrStdRejReason_modal')[0].innerHTML = '';
     FormManager.setValue('addr_addrStdRejCmt', '');
     FormManager.setValue('addrStdTsString', '');
     dojo.query('#addEditAddressModal #addrStdTsString_modal')[0].innerHTML = '';
-    dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Done';
+    dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Required';
 
     if (dojo.byId('addrCreateDt_updt')) {
       dojo.byId('addrCreateDt_updt').innerHTML = '-';
