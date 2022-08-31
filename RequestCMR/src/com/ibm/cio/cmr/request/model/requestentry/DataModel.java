@@ -194,6 +194,8 @@ public class DataModel extends BaseModel {
 
   private String vatExempt;
 
+  private String vatInd;
+
   private String denialCusInd;
 
   private String privIndc;
@@ -1232,5 +1234,13 @@ public class DataModel extends BaseModel {
 
   public void setCustomerIdCd(String customerIdCd) {
     this.customerIdCd = customerIdCd;
+  }
+
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
   }
 }
