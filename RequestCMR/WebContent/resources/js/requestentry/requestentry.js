@@ -825,15 +825,17 @@ function afterConfigChange() {
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
         FormManager.enable('vat');
         FormManager.setValue('vatExempt', 'N');
+        FormManager.setValue('taxCd2', 'N');
       } else if (value && dojo.string.trim(value) == 'N') {
         FormManager.removeValidator('vat', Validators.REQUIRED);
         FormManager.readOnly('vat');
         FormManager.setValue('vat', '');
-        FormManager.setValue('vatExempt', 'N');
+        FormManager.setValue('taxCd2', 'N');
       } else if (value && dojo.string.trim(value) == 'E') {
         FormManager.removeValidator('vat', Validators.REQUIRED);
         FormManager.enable('vat');
         FormManager.setValue('vatExempt', 'Y');
+        FormManager.setValue('taxCd2', 'Y');
       }
     });
 
