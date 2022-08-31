@@ -2175,7 +2175,7 @@ public class LAHandler extends GEOHandler {
           String vat = soldToAddr.getVat();
           if ("LOCAL".equals(data.getCustGrp())
               && !(CmrConstants.CUST_TYPE_PRIPE.equals(data.getCustSubGrp()) || CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp()))
-              && StringUtils.isNotBlank(vat)) {
+              && "ZS01".equals(soldToAddr.getId().getAddrType()) && StringUtils.isNotBlank(vat)) {
             if (soldToAddr.getVat().length() >= 8) {
               data.setVat(soldToAddr.getVat());
               LOG.debug("Setting VAT in DATA table : " + soldToAddr.getVat());
@@ -2183,9 +2183,6 @@ public class LAHandler extends GEOHandler {
               data.setEnterprise(soldToAddr.getVat().substring(0, 8));
               LOG.debug("Setting ENTERPRISE in DATA table : " + soldToAddr.getVat().substring(0, 8));
             }
-          } else if ("CROSS".equals(data.getCustGrp()) || CmrConstants.CUST_TYPE_PRIPE.equals(data.getCustSubGrp())
-              || CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())) {
-            data.setVat(soldToAddr.getVat());
           }
         }
       }
