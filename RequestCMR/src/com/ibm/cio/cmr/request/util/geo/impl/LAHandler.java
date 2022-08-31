@@ -2186,7 +2186,6 @@ public class LAHandler extends GEOHandler {
           } else if ("CROSS".equals(data.getCustGrp()) || CmrConstants.CUST_TYPE_PRIPE.equals(data.getCustSubGrp())
               || CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())) {
             data.setVat(soldToAddr.getVat());
-            data.setEnterprise(data.getCmrNo());
           }
         }
       }
@@ -3461,10 +3460,6 @@ public class LAHandler extends GEOHandler {
             LOG.debug("Setting ENTERPRISE in DATA table to : " + v2Model.getVat().substring(0, 8));
             data.setEnterprise(v2Model.getVat().substring(0, 8));
           }
-        } else if ("CROSS".equals(data.getCustGrp()) || CmrConstants.CUST_TYPE_PRIPE.equals(data.getCustSubGrp())
-            || CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())) {
-          LOG.debug("Setting ENTERPRISE in DATA table to : " + v2Model.getCmrNo());
-          data.setEnterprise(v2Model.getCmrNo());
         }
       }
     }
