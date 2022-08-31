@@ -805,6 +805,8 @@ public class IsraelHandler extends EMEAHandler {
           address.setAddrStdResult("X");
         }
 
+        // CREATCMR-5741 - no addr std
+        address.setAddrStdResult("X");
         address.setPairedAddrSeq(currentRecord.getTransAddrNo());
         address.setVat(currentRecord.getCmrTaxNumber());
         address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());

@@ -1941,6 +1941,8 @@ public class TurkeyHandler extends BaseSOFHandler {
         address.setAddrStdResult("X");
       }
 
+      // CREATCMR-5741 - no addr std
+      address.setAddrStdResult("X");
       address.setPairedAddrSeq(currentRecord.getTransAddrNo());
 
       address.setVat(currentRecord.getCmrTaxNumber());
@@ -4381,7 +4383,7 @@ public class TurkeyHandler extends BaseSOFHandler {
   }
 
   private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType, String reqType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZS01")) {
@@ -4402,7 +4404,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 
   // START -- missing code greece code
   private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZP01")) {

@@ -266,6 +266,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
       }
 
+      addr.setAddrStdResult("X");
       createEntity(addr, entityManager);
 
       if (LAHandler.isBRIssuingCountry(model.getCmrIssuingCntry())) {
@@ -376,6 +377,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         changed = geoHandler.isAddressChanged(entityManager, addr, model.getCmrIssuingCntry(), changed);
       }
       addr.setChangedIndc(changed ? "Y" : null);
+      addr.setAddrStdResult("X");
       updateEntity(addr, entityManager);
 
       if (LAHandler.isBRIssuingCountry(model.getCmrIssuingCntry())) {
