@@ -25,15 +25,15 @@
   <form:hidden path="sitePartyId" />
   <form:hidden path="searchTerm" />
 
-  <cmr:view forCountry="851">
-  	<cmr:row addBackground="true">
+   	<cmr:row addBackground="true">
   	  <cmr:column span="2" containerForField="LocalTax1">
         <p>
           <cmr:label fieldId="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />: </cmr:label>
           <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-      <!--<c:if test="${reqentry.reqType != 'U'}">
+      <cmr:view forCountry="X">      
+      <c:if test="${reqentry.reqType != 'U'}">
       <cmr:column span="2" containerForField="LocalTax2">
         <p>
        	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
@@ -43,9 +43,10 @@
           </cmr:label>
         </p>
       </cmr:column>
-      </c:if>-->
+      </c:if>
+      </cmr:view>
   	</cmr:row>
-  </cmr:view>
+  
 	<cmr:view forCountry="764">
 	  <cmr:row addBackground="true">
 		<cmr:column span="2" containerForField="LocalTax1">
@@ -59,7 +60,7 @@
 		</cmr:column>
 	  </cmr:row>
 	</cmr:view>
-	<cmr:view forCountry="700">
+	<cmr:view forCountry="X">
   	<cmr:row addBackground="true">
   	  <cmr:column span="2" containerForField="BusinessType">
         <p>
@@ -67,7 +68,7 @@
           <cmr:field path="busnType" id="busnType" fieldId="BusinessType" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-      <!--<c:if test="${reqentry.reqType != 'U'}">
+      <c:if test="${reqentry.reqType != 'U'}">
       <cmr:column span="2" containerForField="LocalTax2">
         <p>
        	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
@@ -77,7 +78,7 @@
           </cmr:label>
         </p>
       </cmr:column>
-      </c:if>-->
+      </c:if>
   	</cmr:row>
   </cmr:view>
   	<cmr:row addBackground="false">
