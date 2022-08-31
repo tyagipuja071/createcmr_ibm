@@ -1238,6 +1238,12 @@ public class USHandler extends GEOHandler {
       }
       // CREATCMR-6081
 
+      if ("END USER".equals(data.getCustSubGrp())
+          || ("E".equals(data.getBpAcctTyp()) && ("BPQS".equals(data.getRestrictTo()) || "IRCSO".equals(data.getRestrictTo())))) {
+        data.setAbbrevNm("");
+        data.setSearchTerm("");
+      }
+
     }
 
     data.setTaxExemptStatus1(data.getSpecialTaxCd());
@@ -1274,6 +1280,12 @@ public class USHandler extends GEOHandler {
     Data currentData = dataService.getCurrentRecordById(addr.getId().getReqId(), entityManager);
     String scc = getSCCByReqId(entityManager, currentData.getId().getReqId());
     currentData.setCompanyNm(scc);
+
+    if ("END USER".equals(currentData.getCustSubGrp())
+        || ("E".equals(currentData.getBpAcctTyp()) && ("BPQS".equals(currentData.getRestrictTo()) || "IRCSO".equals(currentData.getRestrictTo())))) {
+      currentData.setAbbrevNm("");
+      currentData.setSearchTerm("");
+    }
 
     RequestEntryService service = new RequestEntryService();
     service.updateEntity(currentData, entityManager);
@@ -2239,9 +2251,9 @@ public class USHandler extends GEOHandler {
   public Boolean compareReshuffledAddress(String dnbAddress, String address, String country) {
     return false;
   }
-  
+
   public static Boolean compareUSReshuffledAddress(String dnbAddress, String address, String country) {
-	    return false;
+    return false;
   }
 
 }
