@@ -60,7 +60,7 @@
 		</cmr:column>
 	  </cmr:row>
 	</cmr:view>
-	
+	<cmr:view forCountry="700">
   	<cmr:row addBackground="true">
   	  <cmr:column span="2" containerForField="BusinessType">
         <p>
@@ -82,7 +82,7 @@
       </c:if>
       </cmr:view>
   	</cmr:row>
-  
+    </cmr:view>
   	<cmr:row addBackground="false">
 		<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
