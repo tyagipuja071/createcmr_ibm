@@ -196,7 +196,12 @@ public class NordicsUtil extends AutomationUtil {
       // register vat service of Norway
       AutomationResponse<NorwayVatResponse> resp = getMVAVatInfo(admin, data);
       if (resp.isSuccess() && resp.getRecord().isMva()) {
-        String newVAT = data.getVat() + "MVA";
+        String newVAT = "";
+        if (StringUtils.isNotBlank(data.getVat()) && data.getVat().contains("MVA")) {
+          newVAT = data.getVat();
+        } else {
+          newVAT = data.getVat() + "MVA";
+        }
         details.append("Appending VAT with suffix MVA.").append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "VAT", data.getVat(), newVAT);
         results.setResults("Calculated.");
