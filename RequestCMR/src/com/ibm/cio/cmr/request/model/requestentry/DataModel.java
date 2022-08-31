@@ -1266,4 +1266,12 @@ public class DataModel extends BaseModel {
   public void setMrktChannelInd(String mrktChannelInd) {
     this.mrktChannelInd = mrktChannelInd;
   }
+
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
+  }   
 }
