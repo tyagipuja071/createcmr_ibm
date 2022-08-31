@@ -306,6 +306,7 @@ public class RequestEntryModel extends BaseModel {
 
   private String economicCd;
   private String vatExempt;
+  private String vatInd;
   private String billingPstlAddr;
   private String ibmBankNumber;
   private String proxiLocnNo;
@@ -3189,6 +3190,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setOverrideReqId(long overrideReqId) {
     this.overrideReqId = overrideReqId;
+  }
+
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
   }
 
 }
