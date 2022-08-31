@@ -194,6 +194,8 @@ public class DataModel extends BaseModel {
 
   private String vatExempt;
 
+  private String vatInd;
+
   private String denialCusInd;
 
   private String privIndc;
