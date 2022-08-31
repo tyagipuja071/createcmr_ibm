@@ -146,6 +146,9 @@ public class MassChangeTemplate {
             String clientTier = "";
             List<String> isuBlankCtc = Arrays.asList("5K", "18", "28", "21", "8B");
             for (Row row : sheet) {
+              if (row.getRowNum() < 1) {
+                continue;
+              }
               TemplateValidation error = new TemplateValidation(name);
               currCell = (XSSFCell) row.getCell(5);
               isuCd = validateColValFromCell(currCell);
