@@ -60,7 +60,7 @@
 		</cmr:column>
 	  </cmr:row>
 	</cmr:view>
-	<cmr:view forCountry="X">
+	
   	<cmr:row addBackground="true">
   	  <cmr:column span="2" containerForField="BusinessType">
         <p>
@@ -68,6 +68,7 @@
           <cmr:field path="busnType" id="busnType" fieldId="BusinessType" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
+      <cmr:view forCountry="X">
       <c:if test="${reqentry.reqType != 'U'}">
       <cmr:column span="2" containerForField="LocalTax2">
         <p>
@@ -79,8 +80,9 @@
         </p>
       </cmr:column>
       </c:if>
+      </cmr:view>
   	</cmr:row>
-  </cmr:view>
+  
   	<cmr:row addBackground="false">
 		<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
