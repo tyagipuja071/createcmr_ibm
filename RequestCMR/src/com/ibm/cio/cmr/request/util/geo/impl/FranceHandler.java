@@ -1424,7 +1424,7 @@ public class FranceHandler extends GEOHandler {
                         ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                     validations.add(error);
                   }
-                } else if ("@QY".contains(ctc)) {
+                } else if (!"@QY".contains(ctc)) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
