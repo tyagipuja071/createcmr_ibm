@@ -36,7 +36,6 @@
       <cmr:field fieldId="SocialCreditCd" id="busnType" path="busnType" />
     </p>
   </cmr:column>
-  <cmr:view forCountry="X">
    <cmr:column span="2" >
      <p>
        <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
@@ -47,7 +46,6 @@
        </cmr:label>
      </p>
    </cmr:column>
-   </cmr:view>
   </cmr:row>
   
   <cmr:row>
