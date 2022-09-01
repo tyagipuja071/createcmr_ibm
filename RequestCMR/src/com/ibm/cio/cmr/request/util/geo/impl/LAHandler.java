@@ -2175,7 +2175,7 @@ public class LAHandler extends GEOHandler {
           String vat = soldToAddr.getVat();
           if ("LOCAL".equals(data.getCustGrp())
               && !(CmrConstants.CUST_TYPE_PRIPE.equals(data.getCustSubGrp()) || CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp()))
-              && "ZS01".equals(soldToAddr.getId().getAddrType()) && StringUtils.isNotBlank(vat)) {
+              && StringUtils.isNotBlank(vat)) {
             if (soldToAddr.getVat().length() >= 8) {
               data.setVat(soldToAddr.getVat());
               LOG.debug("Setting VAT in DATA table : " + soldToAddr.getVat());
