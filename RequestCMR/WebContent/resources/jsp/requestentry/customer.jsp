@@ -323,8 +323,7 @@
         </p>
       </cmr:column>
       </cmr:view>
-      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,FR" exceptForCountry="755">
-      <cmr:column span="2" containerForField="VATInd">
+      <cmr:column span="2" containerForField="VATInd" exceptForCountry="897,649">
        <p>                  	
        		 <label for="vatInd">
             <cmr:fieldLabel fieldId="VATInd" />:
@@ -333,45 +332,6 @@
           <cmr:field fieldId="VATInd" id="vatInd" path="vatInd" tabId="MAIN_CUST_TAB" />         
         </p>
       </cmr:column>
-      </cmr:view>
-      <cmr:view forGEO="MCO1,MCO2">
-      <c:if test="${reqentry.reqType != 'U'}">
-      <cmr:column span="2" containerForField="VATInd">
-       <p>                  	
-       		 <label for="vatInd">
-            <cmr:fieldLabel fieldId="VATInd" />:
-            <cmr:delta text="${rdcdata.vatInd}" oldValue="${reqentry.vatInd}"/>
-             </label>
-          <cmr:field fieldId="VATInd" id="vatInd" path="vatInd" tabId="MAIN_CUST_TAB" />         
-        </p>
-      </cmr:column>
-      </c:if>
-    </cmr:view>
-    <cmr:view forCountry="724,619,755">
-      <c:if test="${reqentry.reqType != 'U'}">
-    <cmr:column span="2" containerForField="VATInd">
-       <p>                  	
-       		 <label for="vatInd">
-            <cmr:fieldLabel fieldId="VATInd" />:
-            <cmr:delta text="${rdcdata.vatInd}" oldValue="${reqentry.vatInd}"/>
-             </label>
-          <cmr:field fieldId="VATInd" id="vatInd" path="vatInd" tabId="MAIN_CUST_TAB" />         
-        </p>
-      </cmr:column>
-      </c:if>
-    </cmr:view>
-     <cmr:view forCountry="744">
-     <cmr:column span="2" containerForField="VATInd">
-       <p>                  	
-       		 <label for="vatInd">
-            <cmr:fieldLabel fieldId="VATInd" />:
-            <cmr:delta text="${rdcdata.vatInd}" oldValue="${reqentry.vatInd}"/>
-             </label>
-          <cmr:field fieldId="VATInd" id="vatInd" path="vatInd" tabId="MAIN_CUST_TAB" />         
-        </p>
-      </cmr:column>
-      
-    </cmr:view>
       <cmr:column span="4" containerForField="VAT" exceptForCountry="897,649">
         <p>
           <label for="vat"> <cmr:fieldLabel fieldId="VAT" />: <cmr:delta text="${rdcdata.vat}" oldValue="${reqentry.vat}" /> <cmr:view
