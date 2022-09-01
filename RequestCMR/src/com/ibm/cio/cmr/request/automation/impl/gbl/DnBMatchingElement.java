@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
@@ -125,8 +126,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
           } else if (payGoAddredited && !hasValidMatches) {
             LOG.debug("DnB Matches not found for PayGo.");
-            
-            result.setOnError(false); 
+
+            result.setOnError(false);
             result.setResults("DnB Matches not found for PayGo.");
             result.setDetails("DnB Matches not found for PayGo.");
           }
@@ -192,7 +193,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
 
           }
-          
+
           Boolean processDnbFlag = false;
           // assess the matches here
           if (perfectMatch != null) {
@@ -345,6 +346,12 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         } else {
           result.setOnError(false);
         }
+      }
+
+      AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+      if (automationUtil != null && automationUtil instanceof SingaporeUtil && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
+        SingaporeUtil singaporeUtil = (SingaporeUtil) automationUtil;
+        result = singaporeUtil.checkAllAddrDnbMatches(entityManager, requestData, engineData, result);
       }
     } else {
       result.setDetails("Missing main address on the request.");
