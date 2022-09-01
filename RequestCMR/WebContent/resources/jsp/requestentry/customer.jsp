@@ -301,7 +301,7 @@
   	<cmr:view forCountry="781">
       <cmr:column span="2" containerForField="BillingName">
         <p>
-          <label for="mexicoBillingName"> <cmr:fieldLabel fieldId="BillingName" />: </label>
+          <label for="mexicoBillingName"> <cmr:fieldLabel fieldId="BillingName" />:<cmr:delta text="${rdcdata.mexicoBillingName}" oldValue="${reqentry.mexicoBillingName}"/></label>
           <cmr:field path="mexicoBillingName" id="mexicoBillingName" fieldId="BillingName" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>

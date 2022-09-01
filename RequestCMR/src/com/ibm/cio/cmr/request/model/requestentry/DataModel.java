@@ -258,6 +258,16 @@ public class DataModel extends BaseModel {
 
   private String customerIdCd;
 
+  private String mexicoBillingName;
+
+  public String getMexicoBillingName() {
+    return mexicoBillingName;
+  }
+
+  public void setMexicoBillingName(String mexicoBillingName) {
+    this.mexicoBillingName = mexicoBillingName;
+  }
+
   public String getCreditCd() {
     return creditCd;
   }

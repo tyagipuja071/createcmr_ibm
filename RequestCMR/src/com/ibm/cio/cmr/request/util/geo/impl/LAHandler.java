@@ -95,6 +95,8 @@ public class LAHandler extends GEOHandler {
 
   private static final String[] BRAZIL_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Division", "LocalTax1" };
 
+  private static final String[] LA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Enterprise", "PPSCEID", "SitePartyID" };
+
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
@@ -2173,7 +2175,9 @@ public class LAHandler extends GEOHandler {
 
           // CreatCMR-6681 - Predefined enterprise value for BR local scenarios
           String vat = soldToAddr.getVat();
-          if ("LOCAL".equals(data.getCustGrp()) && StringUtils.isNotBlank(vat)) {
+          if ("LOCAL".equals(data.getCustGrp())
+              && !(CmrConstants.CUST_TYPE_PRIPE.equals(data.getCustSubGrp()) || CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp()))
+              && StringUtils.isNotBlank(vat)) {
             if (soldToAddr.getVat().length() >= 8) {
               data.setVat(soldToAddr.getVat());
               LOG.debug("Setting VAT in DATA table : " + soldToAddr.getVat());
@@ -2253,6 +2257,15 @@ public class LAHandler extends GEOHandler {
           || SystemLocation.COLOMBIA.equals(cmrIssuingCntry)) {
         if ("GD".equals(data.getCrosSubTyp())) {
           data.setCustClass("13");
+        }
+      }
+    }
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+      if (StringUtils.isEmpty(data.getPpsceid())) {
+        DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
+        if (dataRdc != null) {
+          data.setPpsceid(dataRdc.getPpsceid());
         }
       }
     }
@@ -2680,10 +2693,11 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public boolean skipOnSummaryUpdate(String cntry, String field) {
+    boolean skipUpdate = Arrays.asList(LA_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     if (SystemLocation.BRAZIL.equals(cntry)) {
-      return Arrays.asList(BRAZIL_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
+      return skipUpdate || Arrays.asList(BRAZIL_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     }
-    return false;
+    return skipUpdate;
   }
 
   @Override
@@ -3447,10 +3461,14 @@ public class LAHandler extends GEOHandler {
 
       // CreatCMR-6681 - Predefined enterprise value for BR local scenarios
       String vat = v2Model.getVat();
-      if ("C".equals(v2Model.getReqType()) && "LOCAL".equals(data.getCustGrp()) && StringUtils.isNotBlank(vat)) {
-        if (v2Model.getVat().length() >= 8) {
-          LOG.debug("Setting ENTERPRISE in DATA table to : " + v2Model.getVat().substring(0, 8));
-          data.setEnterprise(v2Model.getVat().substring(0, 8));
+      if ("C".equals(v2Model.getReqType())) {
+        if ("LOCAL".equals(data.getCustGrp())
+            && !(CmrConstants.CUST_TYPE_PRIPE.equals(data.getCustSubGrp()) || CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp()))
+            && StringUtils.isNotBlank(vat)) {
+          if (v2Model.getVat().length() >= 8) {
+            LOG.debug("Setting ENTERPRISE in DATA table to : " + v2Model.getVat().substring(0, 8));
+            data.setEnterprise(v2Model.getVat().substring(0, 8));
+          }
         }
       }
     }
