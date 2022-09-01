@@ -152,18 +152,20 @@
         <div id="dplChkInfoEdit">-</div>
       </cmr:column>
     </cmr:row>
+    <div style="display:none">
     <cmr:row addBackground="true">
-      <cmr:column span="1" width="170">
-        <p>
-          <label for="addrStdResult">${ui.addrStdStat}: <cmr:info text="${ui.info.addrStdInfo}" /> </label>
-        </p>
-      </cmr:column>
-      <cmr:column span="2" width="250">
-        <div id="addrStdResult_modal"></div>
-        <form:hidden id="addrStdAcceptInd" path="addrStdAcceptInd" />
-        <form:hidden id="addr_addrStdResult" path="addrStdResult" />
-        <input type="hidden" id="tgmeCompare" name="tgmeCompare" value="">
-      </cmr:column>
+      
+        <cmr:column span="1" width="170">
+          <p>
+            <label for="addrStdResult">${ui.addrStdStat}: <cmr:info text="${ui.info.addrStdInfo}" /> </label>
+          </p>
+        </cmr:column>
+        <cmr:column span="2" width="250">
+          <div id="addrStdResult_modal"></div>
+          <form:hidden id="addrStdAcceptInd" path="addrStdAcceptInd" />
+          <form:hidden id="addr_addrStdResult" path="addrStdResult" />
+          <input type="hidden" id="tgmeCompare" name="tgmeCompare" value="">
+        </cmr:column>
     </cmr:row>
     <cmr:row addBackground="true">
       <cmr:column span="1" width="170">
@@ -205,6 +207,7 @@
         </p>
       </cmr:column>
     </cmr:row>
+  </div>
 
 
     <cmr:buttonsRow>
