@@ -247,7 +247,7 @@ function addAfterConfigAP() {
     setInacByCluster();
   }
   if (cntry == '834') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    // FormManager.removeValidator('clientTier', Validators.REQUIRED);
     addVatValidationforSingapore();
   }
   if (cntry != SysLoc.HONG_KONG && cntry !=  SysLoc.MACAO && reqType == 'U') {
