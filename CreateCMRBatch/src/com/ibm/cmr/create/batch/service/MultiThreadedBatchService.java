@@ -112,7 +112,7 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
 
     // continue checking pending items and requeue
     int rolloverTries = 0;
-    while (rollover && rolloverTries < 3) {
+    while (rollover) {
       try {
         if (rolloverTries == 0) {
           Thread.sleep(1000 * 60 * 2);
@@ -145,6 +145,7 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
         }
       } else {
         rolloverTries++;
+        rollover = rolloverTries < 3;
       }
     }
 
