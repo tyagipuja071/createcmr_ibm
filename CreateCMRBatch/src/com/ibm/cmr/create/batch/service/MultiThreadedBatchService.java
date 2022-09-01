@@ -145,7 +145,8 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
         }
       } else {
         rolloverTries++;
-        rollover = rolloverTries < 3;
+        // temp disable
+        // rollover = rolloverTries < 3;
       }
     }
 

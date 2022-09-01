@@ -301,7 +301,7 @@ function AddressDetailsModal_onLoad() {
         CD : FormManager.getActualValue('landCntry')
       });
       if (validTest && validTest.ret1 == FormManager.getActualValue('landCntry')) {
-        _assignDetailsValue('#AddressDetailsModal #addressStdResult_view', 'Not Done');
+        _assignDetailsValue('#AddressDetailsModal #addressStdResult_view', 'Not Required');
       } else {
         _assignDetailsValue('#AddressDetailsModal #addressStdResult_view', 'Not Required');
       }
@@ -573,8 +573,8 @@ function tgmePreSave() {
   }
   if (isTgmeNeeded()) {
     FormManager.setValue('addrStdAcceptInd', '');
-    dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Done';
-    FormManager.setValue('addr_addrStdResult', '');
+    dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Required';
+    FormManager.setValue('addr_addrStdResult', 'X');
     FormManager.setValue('addrStdTsString', '');
     dojo.query('#addEditAddressModal #addrStdTsString_modal')[0].innerHTML = '';
     FormManager.setValue('addr_addrStdRejReason', '');
@@ -1120,7 +1120,7 @@ function addEditAddressModal_onLoad() {
             CD : details.ret13
           });
           if (validTest && validTest.ret1 == details.ret13) {
-            dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Done';
+            dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Required';
           } else {
             dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Required';
           }
@@ -1359,7 +1359,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('addr_addrStdRejCmt', '');
       FormManager.setValue('addrStdTsString', '');
       dojo.query('#addEditAddressModal #addrStdRejReason_modal')[0].innerHTML = '';
-      dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Done';
+      dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Required';
       dojo.query('#addEditAddressModal #addrStdTsString_modal')[0].innerHTML = '';
     }
     if (cmr.addressMode == 'copyAddress') {
