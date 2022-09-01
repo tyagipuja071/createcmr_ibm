@@ -36,8 +36,7 @@
       <cmr:field fieldId="SocialCreditCd" id="busnType" path="busnType" />
     </p>
   </cmr:column>
-  <cmr:view forCountry="X">
-   <cmr:column span="2" >
+   <!--<cmr:column span="2" >
      <p>
        <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
        <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
@@ -46,8 +45,7 @@
          <cmr:delta text="${rdcdata.vatExempt}" oldValue="${reqentry.vatExempt == 'Y' ? 'Yes' : 'No'}" />
        </cmr:label>
      </p>
-   </cmr:column>
-   </cmr:view>
+   </cmr:column>-->
   </cmr:row>
   
   <cmr:row>
