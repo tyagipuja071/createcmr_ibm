@@ -95,6 +95,8 @@ public class LAHandler extends GEOHandler {
 
   private static final String[] BRAZIL_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Division", "LocalTax1" };
 
+  private static final String[] LA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Enterprise", "PPSCEID", "SitePartyID" };
+
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
@@ -2256,6 +2258,15 @@ public class LAHandler extends GEOHandler {
         }
       }
     }
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+      if (StringUtils.isEmpty(data.getPpsceid())) {
+        DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
+        if (dataRdc != null) {
+          data.setPpsceid(dataRdc.getPpsceid());
+        }
+      }
+    }
   }
 
   @Override
@@ -2680,10 +2691,11 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public boolean skipOnSummaryUpdate(String cntry, String field) {
+    boolean skipUpdate = Arrays.asList(LA_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     if (SystemLocation.BRAZIL.equals(cntry)) {
-      return Arrays.asList(BRAZIL_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
+      return skipUpdate || Arrays.asList(BRAZIL_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     }
-    return false;
+    return skipUpdate;
   }
 
   @Override
