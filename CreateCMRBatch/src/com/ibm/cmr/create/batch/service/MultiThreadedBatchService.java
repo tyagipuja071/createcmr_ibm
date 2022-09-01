@@ -104,10 +104,21 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
       LOG.debug("-Rolling over queueing of requests-");
     }
 
+    // if there are no items on current queue, on rollover and let it end
+    if (allocatedRequests == null || allocatedRequests.isEmpty()) {
+      LOG.debug("No items for this run, skipping roll-over");
+      rollover = false;
+    }
+
     // continue checking pending items and requeue
+    int rolloverTries = 0;
     while (rollover) {
       try {
-        Thread.sleep(1000 * 60 * 2);
+        if (rolloverTries == 0) {
+          Thread.sleep(1000 * 60 * 2);
+        } else {
+          Thread.sleep(1000 * 30);
+        }
       } catch (InterruptedException e) {
       }
       Queue<T> newPendingItems = preparePendingItems();
@@ -122,7 +133,8 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
       LOG.debug(" - " + truePendingItems.size() + " NEW items gathered.");
 
       rollover = !truePendingItems.isEmpty();
-      if (!truePendingItems.isEmpty()) {
+      if (rollover) {
+        rolloverTries = 0;
         List<List<T>> newAllocatedRequests = allocateRequests(truePendingItems, threads);
         for (List<T> requestBatch : newAllocatedRequests) {
           worker = new BatchThreadWorker(this, requestBatch);
@@ -131,6 +143,9 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
           }
           workers.add(worker);
         }
+      } else {
+        rolloverTries++;
+        rollover = rolloverTries < 3;
       }
     }
 

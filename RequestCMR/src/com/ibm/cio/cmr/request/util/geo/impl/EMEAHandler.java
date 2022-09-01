@@ -1975,6 +1975,8 @@ public class EMEAHandler extends BaseSOFHandler {
         address.setAddrStdResult("X");
       }
 
+      // CREATCMR-5741 - no addr std
+      address.setAddrStdResult("X");
       address.setPairedAddrSeq(currentRecord.getTransAddrNo());
 
       address.setVat(currentRecord.getCmrTaxNumber());
@@ -2015,8 +2017,9 @@ public class EMEAHandler extends BaseSOFHandler {
             && "ZS01".equalsIgnoreCase(address.getId().getAddrType()) && SystemLocation.TURKEY.equals(country)) {
           address.getId().setAddrSeq("00003");
         }
-         if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
-            && "ZS01".equalsIgnoreCase(address.getId().getAddrType()) && (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country))) {
+        if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
+            && "ZS01".equalsIgnoreCase(address.getId().getAddrType())
+            && (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country))) {
           String addrSeq = "1";
           addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
           address.getId().setAddrSeq(addrSeq);
@@ -2217,11 +2220,12 @@ public class EMEAHandler extends BaseSOFHandler {
           data.setSpecialTaxCd(rdcData.getSpecialTaxCd());
         }
 
-        //storing blankout of ctc
-      /*  if (StringUtils.isEmpty(data.getClientTier()) && !StringUtils.isEmpty(rdcData.getClientTier())) {
-          data.setClientTier(rdcData.getClientTier());
-        }
-       */
+        // storing blankout of ctc
+        /*
+         * if (StringUtils.isEmpty(data.getClientTier()) &&
+         * !StringUtils.isEmpty(rdcData.getClientTier())) {
+         * data.setClientTier(rdcData.getClientTier()); }
+         */
         // sales rep
         if (StringUtils.isEmpty(data.getRepTeamMemberNo()) && !StringUtils.isEmpty(rdcData.getRepTeamMemberNo())) {
           data.setRepTeamMemberNo(rdcData.getRepTeamMemberNo());
@@ -4513,7 +4517,7 @@ public class EMEAHandler extends BaseSOFHandler {
   }
 
   private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZS01")) {
@@ -4529,7 +4533,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
   // START -- missing code greece code
   private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZP01")) {

@@ -37,6 +37,8 @@ import com.ibm.cmr.services.client.tgme.AddressStdResponse;
 
 public class USAddrStdElement extends OverridingElement {
 
+  private static final String DUMMY_COUNTRY = "XXX";
+
   public USAddrStdElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
     // TODO Auto-generated constructor stub
@@ -69,6 +71,10 @@ public class USAddrStdElement extends OverridingElement {
     List<Addr> a = requestData.getAddresses();
     boolean hasIssues = false;
     for (Addr addr : a) {
+
+      // CREATCMR-5741 - remove addr std
+      // this flow is not executed now, keeping for reference
+      if (DUMMY_COUNTRY.equals(data.getCmrIssuingCntry())) {
       String key = addr.getId().getReqId() + "_" + addr.getId().getAddrType() + "_"
           + (addr.getId().getAddrSeq() != null ? addr.getId().getAddrSeq() : "");
       // Calling Address Std Service
@@ -196,6 +202,7 @@ public class USAddrStdElement extends OverridingElement {
       // overrides.addOverride(getProcessCode(), addr.getId().getAddrType(),
       // "", addr.getStateProv(), data1.getStateProvinceCode());
       // }
+      }
 
       AddressModel addrModel = new AddressModel();
       PropertyUtils.copyProperties(addrModel, addr);
@@ -416,6 +423,10 @@ public class USAddrStdElement extends OverridingElement {
   // CREATCMR-6342
   private String resetForSCC(EntityManager entityManager, String landCntry, String stateProv, String city1, String county) {
     String scc = "";
+
+    if (StringUtils.isBlank(county) || !StringUtils.isNumeric(county)) {
+      county = "0";
+    }
 
     String sql = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
     PreparedQuery query = new PreparedQuery(entityManager, sql);

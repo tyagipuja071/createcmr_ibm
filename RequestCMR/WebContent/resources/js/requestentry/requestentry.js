@@ -1174,8 +1174,8 @@ function connectToCmrServices() {
         dojo.byId('geoLocDescCont').innerHTML = data.glcDesc != null ? data.glcDesc : '(no description available)';
       }
       if (data.dunsError) {
-        errorMsg += (showError ? ', ' : '') + 'DUNS No.';
-        showError = true;
+        //errorMsg += (showError ? ', ' : '') + 'DUNS No.';
+        //showError = true;
       } else {
         // var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
         // var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA,
@@ -1211,7 +1211,7 @@ function connectToCmrServices() {
     FormManager.setValue('covId', '');
     FormManager.setValue('bgId', '');
     FormManager.setValue('geoLocationCd', '');
-    FormManager.setValue('dunsNo', '');
+    //FormManager.setValue('dunsNo', '');
   }
   FormManager.setValue('covBgRetrievedInd', 'Y');
 }
