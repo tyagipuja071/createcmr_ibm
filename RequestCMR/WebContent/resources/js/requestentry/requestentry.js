@@ -746,16 +746,19 @@ function afterConfigChange() {
         FormManager.enable('vat');
         FormManager.setValue('vatExempt', 'N');
         FormManager.setValue('taxCd2', 'N');
+        FormManager.setValue('vatInd', 'T');
       } else if (value && dojo.string.trim(value) == 'N') {
         FormManager.removeValidator('vat', Validators.REQUIRED);
         FormManager.readOnly('vat');
         FormManager.setValue('vat', '');
         FormManager.setValue('taxCd2', 'N');
+        FormManager.setValue('vatInd', 'N');
       } else if (value && dojo.string.trim(value) == 'E') {
         FormManager.removeValidator('vat', Validators.REQUIRED);
         FormManager.enable('vat');
         FormManager.setValue('vatExempt', 'Y');
         FormManager.setValue('taxCd2', 'Y');
+        FormManager.setValue('vatInd', 'E');
       }
     });
 
