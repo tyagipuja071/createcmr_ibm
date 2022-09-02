@@ -49,7 +49,7 @@
     <cmr:column span="2" containerForField="SalRepNameNo">
       <p>
         <cmr:label fieldId="repTeamMemberNo">
-          <cmr:fieldLabel fieldId="SalRepNameNo" />:
+          <cmr:fieldLabel fieldId="SalRepNameNo" />:<cmr:info text="No impact on CMR/account owner, just AP CMR legacy system(WTAAS) requirement. "></cmr:info>
            <cmr:delta text="${rdcdata.repTeamMemberNo}" oldValue="${reqentry.repTeamMemberNo}" id="delta-repTeamMemberNo" />
         </cmr:label>
         <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
