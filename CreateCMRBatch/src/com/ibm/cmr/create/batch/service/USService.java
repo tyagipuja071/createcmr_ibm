@@ -653,6 +653,10 @@ public class USService extends TransConnService {
       // Data data = entity.getEntity(Data.class);
       data.setCmrNo(response.getCmrNo());
       updateEntity(data, entityManager);
+    }else{
+    	data.setCmrNo("");
+        updateEntity(data, entityManager);
+        LOG.debug("*** Response CMR_No >> " + response.getCmrNo());
     }
 
     // update addr

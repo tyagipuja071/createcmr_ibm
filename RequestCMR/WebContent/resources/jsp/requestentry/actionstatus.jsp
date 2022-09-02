@@ -27,6 +27,28 @@
       </cmr:column>
     </cmr:row>
   </div>
+  <cmr:view forCountry="897">
+  <div id="bpIBMDirectCMR" style="display:none">
+    <cmr:row>
+      <cmr:column span="1" width="200">
+        <cmr:label fieldId="ChildIbmDrCMR">${ui.ibmDrCMR}:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="childIbmDrCMR">-</div>
+      </cmr:column>
+    </cmr:row>
+  </div>
+  <div id="bpIBMDirectCMRWR" style="display:none">
+    <cmr:row>
+      <cmr:column span="1" width="200">
+        <cmr:label fieldId="IbmDrCMR">${ui.ibmDrCMR}:<span style="color:red">* </span></cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+      <form:textarea path="cmrNo2" rows="1" cols="20"/>
+      </cmr:column>
+    </cmr:row>
+  </div>
+  </cmr:view>
   <div id="rejectReasonBlock" style="display:none">
     <cmr:row>
       <cmr:column span="1" width="200">

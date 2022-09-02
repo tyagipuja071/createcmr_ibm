@@ -592,6 +592,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       geoHandler.doBeforeDataSave(entityManager, admin, data, model.getCmrIssuingCntry());
     } else if (geoHandler != null) {
       geoHandler.doBeforeDataSave(entityManager, admin, data, model.getCmrIssuingCntry());
+      if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry()) && "CreateCMR-BP".equals(admin.getSourceSystId())
+          && StringUtils.isNotEmpty(model.getStatusChgCmt()) && model.getStatusChgCmt().length() >= 20
+          && model.getStatusChgCmt().startsWith("IBMDIRECT_CMR")) {
+        data.setCmrNo2(model.getStatusChgCmt().substring(13, 20));
+        model.setStatusChgCmt(model.getStatusChgCmt().substring(20));
+      }
     }
     updateEntity(data, entityManager);
 
@@ -793,14 +799,6 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
             if (SystemLocation.CHINA.equals(model.getCmrIssuingCntry()) && StringUtils.isNotBlank(model.getDisableAutoProc())
                 && model.getDisableAutoProc().equalsIgnoreCase("Y")) {
               // transrec.setNewReqStatus("PPN");// set to PPN for CHINA
-            } else if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry())) {
-              String setPPNFlag = USHandler.validateForSCC(entityManager, model.getReqId());
-              if ("N".equals(setPPNFlag)) {
-                // set NewReqStatus value PPN for US
-              } else {
-                this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
-                transrec.setNewReqStatus("AUT"); // set to automated processing
-              }
             } else {
               this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
               transrec.setNewReqStatus("AUT"); // set to automated processing
