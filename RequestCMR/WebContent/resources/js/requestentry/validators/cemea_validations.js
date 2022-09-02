@@ -5226,6 +5226,28 @@ function retainVatValueAT() {
     }
 }
 
+//CREATCMR- 6896
+function addSoltToAddressValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var zs01ReqId = FormManager.getActualValue('reqId');
+        var addrType = FormManager.getActualValue('addrType');
+        qParams = {
+          REQ_ID : zs01ReqId,
+        };
+        var record = cmr.query('GETZS01VALRECORDS', qParams);
+        var zs01Reccount = record.ret1;
+        if (addrType == 'ZS01' && Number(zs01Reccount) == 1 && cmr.addressMode != 'updateAddress') {
+          return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
+        } else {
+          return new ValidationResult(null, true); 
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 dojo
     .addOnLoad(function() {
       GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695',
@@ -5335,7 +5357,7 @@ dojo
       GEOHandler.addAfterTemplateLoad(setPreferredLang, GEOHandler.CEMEA);
 
       GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.AUSTRIA ], null, true);
-
+      GEOHandler.registerValidator(addSoltToAddressValidator,[ SysLoc.AUSTRIA ], null, true); 
       GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.CEMEA_EXCLUDE_CEE, null, true);
       GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.CEMEA, null, true);
       GEOHandler.registerValidator(addCrossBorderValidatorForCEMEA, [ '707', '762', '808', '620', '767', '805', '823', '677', '680', '832' ], null,
