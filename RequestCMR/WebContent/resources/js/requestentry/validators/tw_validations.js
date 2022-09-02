@@ -507,6 +507,14 @@ function autoSetAbbrevNmLocnLogic() {
   FormManager.setValue('abbrevNm', _abbrevNm);
 
 }
+// CREATCMR-6825
+function setRepTeamMemberNo() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.readOnly('repTeamMemberNo');
+  }
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
@@ -544,6 +552,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValuesTW, GEOHandler.TW);
   GEOHandler.addAfterConfig(handleExpiredClusterTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(handleExpiredClusterTW, GEOHandler.TW);
+  // CREATCMR-6825
+  GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.TW);
 
   // skip byte checks
   // FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4',

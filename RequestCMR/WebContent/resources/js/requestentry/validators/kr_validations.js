@@ -10,7 +10,7 @@ function afterConfigKR() {
       setClientTierValues();
     });
   }
-  
+
   reqType = FormManager.getActualValue('reqType');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -27,7 +27,8 @@ function afterConfigKR() {
   FormManager.addValidator('installRep', Validators.REQUIRED, [ 'Tax Invoice Type' ], 'MAIN_CUST_TAB');
 
   FormManager.addValidator('contactName3', Validators.REQUIRED, [ 'Product Type' ], 'MAIN_IBM_TAB');
-  //FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
+  // FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market
+  // Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('commercialFinanced', Validators.REQUIRED, [ 'ROL Code' ], 'MAIN_IBM_TAB');
 
   FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
@@ -39,10 +40,10 @@ function afterConfigKR() {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('cmrNoPrefix');
   }
-  
+
   if (reqType == 'C') {
-  FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
-	  }
+    FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
+  }
 
   // story: attachment Company Proof required
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -187,8 +188,7 @@ function addKRChecklistValidator() {
           REQID : reqId
         });
         if (!record || !record.sectionA1) {
-          return new ValidationResult(null, false,
-              'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+          return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
         }
         return new ValidationResult(null, true);
       }
@@ -345,6 +345,14 @@ function autoSetAbbrevNmLocnLogic() {
   // break;
   // }
 }
+// CREATCMR-6825
+function setRepTeamMemberNo() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.readOnly('repTeamMemberNo');
+  }
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
@@ -368,4 +376,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.KR);
+  // CREATCMR-6825
+  GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.KR);
+  GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.KR);
 });
