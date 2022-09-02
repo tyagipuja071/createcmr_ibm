@@ -31,16 +31,7 @@
 		</cmr:column>
 	</cmr:row>
 	<cmr:row>
-	 <cmr:column span="2" containerForField="VATInd">
-       <p>                  	
-       		 <label for="vatInd">
-            <cmr:fieldLabel fieldId="VATInd" />:
-            <cmr:delta text="${rdcdata.vatInd}" oldValue="${reqentry.vatInd}"/>
-             </label>
-          <cmr:field fieldId="VATInd" id="vatInd" path="vatInd" tabId="MAIN_CUST_TAB" />         
-        </p>
-      </cmr:column>
-		<cmr:column span="4" containerForField="VAT">
+		<cmr:column span="2" containerForField="VAT">
 			<p>
 				<label for="vat"> <cmr:fieldLabel fieldId="VAT" />: <cmr:delta
 						text="${rdcdata.vat}" oldValue="${reqentry.vat}" /> <cmr:view>
@@ -50,7 +41,6 @@
 				<cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
 			</p>
 		</cmr:column>
-		<cmr:view forCountry="X">
 		<cmr:column span="1" containerForField="VATExempt">
 			<p>
 				<cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
@@ -63,7 +53,6 @@
 				</cmr:label>
 			</p>
 		</cmr:column>
-		</cmr:view>
 	</cmr:row>
 	<cmr:row addBackground="false">
 		<cmr:column span="2" containerForField="CustClass">
