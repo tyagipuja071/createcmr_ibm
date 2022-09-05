@@ -34,7 +34,8 @@ function addHandlersForAP() {
       setIsuOnIsic();
     });
   }
-}
+  handleObseleteExpiredDataForUpdate();
+  }
 
 function addHandlersForANZ() {
   if (_clusterHandlerANZ == null && FormManager.getActualValue('reqType') != 'U') {
@@ -249,7 +250,10 @@ function addAfterConfigAP() {
   if (cntry == '834') {
     addVatValidationforSingapore();
   }
-  // CREATCMR-5258
+  // CREATCMR-5269
+    if (cntry != SysLoc.HONG_KONG && cntry !=  SysLoc.MACAO && reqType == 'U') {
+    handleObseleteExpiredDataForUpdate();
+  }
 }
 
 function setInacByCluster() {
@@ -1937,6 +1941,7 @@ function setCtcOnIsuCdChangeANZ(isuCd) {
   } else {
     FormManager.enable('clientTier');
   }
+    handleObseleteExpiredDataForUpdate();  
 }
 
 function setCtcOnIsuCdChangeGCG() {
@@ -1966,6 +1971,7 @@ function setCtcOnIsuCdChangeISA() {
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
       FormManager.enable('clientTier');
   }
+  handleObseleteExpiredDataForUpdate();
 }
 
 function onIsuCdChangeAseanAnzIsa() {
@@ -3435,6 +3441,54 @@ function addStreetValidationChkReq() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function validateContractAddrAU() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custNm1 = FormManager.getActualValue('custNm1').toUpperCase();;
+        var custNm2 = FormManager.getActualValue('custNm2').toUpperCase();;
+        var dept = FormManager.getActualValue('dept').toUpperCase();;
+        var addrTxt1= FormManager.getActualValue('addrTxt').toUpperCase();;
+        var addrTxt2 = FormManager.getActualValue('addrTxt2').toUpperCase();;
+        var city1 = FormManager.getActualValue('city1').toUpperCase();;
+        var addrType = FormManager.getActualValue('addrType');
+        var address = custNm1 + custNm2 + dept + addrTxt1 + addrTxt2 + city1 ;
+        if ((address.includes("PO BOX") || address.includes("POBOX")) && addrType == "ZS01") {
+          return new ValidationResult(null, false, 'Contract address can not contain wording PO BOX');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function validateCustNameForNonContractAddrs() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custNm1 = FormManager.getActualValue('custNm1').toUpperCase();
+        var custNm2 = FormManager.getActualValue('custNm2').toUpperCase();
+        var custNm = custNm1+custNm2 ;
+        var reqId = FormManager.getActualValue('reqId');
+        var addrType = FormManager.getActualValue('addrType');
+        var reqType = FormManager.getActualValue('reqType');
+        var contractCustNm = cmr.query('GET.CUSTNM_ADDR', {
+          REQ_ID : reqId,
+          ADDR_TYPE : 'ZS01'
+        });
+        if (contractCustNm != undefined) {
+          zs01CustName = contractCustNm.ret1.toUpperCase() + contractCustNm.ret2.toUpperCase();
+        }
+        
+        if (zs01CustName != custNm &&  addrType != "ZS01" && _pagemodel.reqType == 'U') {
+          return new ValidationResult(null, false, 'customer name of additional address must be the same as the customer name of contract address');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 function validateStreetAddrCont2() {
   FormManager.addFormValidator((function() {
     return {
@@ -3526,6 +3580,80 @@ function validateGSTForIndia() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+// API call for validating ABN for Australia on Save Request and Send for
+// Processing
+function validateABNForAU() {
+
+FormManager.addFormValidator((function() {
+ return {
+   validate : function() {
+     var cntry = FormManager.getActualValue('cmrIssuingCntry');
+     var reqTyp = FormManager.getActualValue('reqType');
+     var vat = FormManager.getActualValue('vat');
+     var reqId = FormManager.getActualValue('reqId');
+     var formerAbn = getFormerVatAU(reqId);
+     if (reqTyp == 'C') {
+       return new ValidationResult(null, true);
+     }
+     var country = "";
+     if (SysLoc.AUSTRALIA == FormManager.getActualValue('cmrIssuingCntry')) {
+     country = "AU";
+     if (country != '') {
+       if (vat == '') {
+         return new ValidationResult(null, true);
+       } else {
+         if (reqId != null) {
+           reqParam = {
+             REQ_ID : reqId
+           };
+         }              
+         var abnRet = cmr.validateABN(vat, reqId, formerAbn);
+         if (!abnRet.success) {
+           return new ValidationResult({
+             id : 'vat',
+             type : 'text',
+             name : 'vat'
+           }, false, abnRet.errorMessage);
+         } else {
+           return new ValidationResult(null, true);
+         }
+       }
+     } else {
+       return new ValidationResult(null, true);
+     }
+   }
+   }
+ };
+})(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function getFormerVatAU(reqId) {
+  var formerVat = '';
+  var qParams = {
+    REQ_ID : reqId,
+  };
+  var result = cmr.query('GET.VAT_DATA_RDC', qParams);
+  if (result != null) {
+    formerVat = result.ret1;
+  }
+  return formerVat;
+}
+
+function getFormerCustNameAU(reqId) {
+  var custNm1 = '';
+  var custNM2 = '';
+  var formerCustNm = '';
+  var qParams = {
+    REQ_ID : reqId,
+    ADDR_TYPE : "ZS01"
+  };
+  var result = cmr.query('GET.CUSTNM_DATA_RDC', qParams);
+  if (result != null) {
+    formerCustNm = result.ret1.toUpperCase() + " " + result.ret2.toUpperCase();
+  }
+  return formerCustNm;
 }
 
 function lockFieldsForIndia(){
@@ -4024,6 +4152,59 @@ function addVatValidationforSingapore() {
   }
 }
 // CREATCMR-5258
+// CREATCMR -5269
+function handleObseleteExpiredDataForUpdate() {
+ var reqType = FormManager.getActualValue('reqType');
+ var cntry = FormManager.getActualValue('cmrIssuingCntry');
+ if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' || cntry == SysLoc.HONG_KONG || cntry ==  SysLoc.MACAO) {
+   return;
+ }
+ // lock all the coverage fields and remove validator
+ if (reqType == 'U') {
+   FormManager.readOnly('apCustClusterId');
+   FormManager.readOnly('clientTier');
+   FormManager.readOnly('mrcCd');
+   FormManager.readOnly('inacType');
+   FormManager.readOnly('isuCd');
+   FormManager.readOnly('inacCd');
+   FormManager.readOnly('repTeamMemberNo');
+   FormManager.readOnly('repTeamMemberName');
+   FormManager.readOnly('isbuCd');
+   FormManager.readOnly('covId');
+   FormManager.readOnly('cmrNoPrefix');
+   FormManager.readOnly('collectionCd');
+   FormManager.readOnly('engineeringBo');
+   FormManager.readOnly('commercialFinanced');
+   FormManager.readOnly('creditCd');
+   FormManager.readOnly('contactName2');
+   FormManager.readOnly('contactName3');
+   FormManager.readOnly('busnType');
+   FormManager.readOnly('taxCd2');
+   FormManager.readOnly('cmrOwner');
+
+// setting all fields as not Mandt for update Req
+   FormManager.removeValidator('apCustClusterId', Validators.REQUIRED);
+   FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+   FormManager.removeValidator('taxCd2', Validators.REQUIRED);
+   FormManager.removeValidator('cmrOwner', Validators.REQUIRED);
+   FormManager.removeValidator('clientTier', Validators.REQUIRED);
+   FormManager.removeValidator('isuCd', Validators.REQUIRED);
+   FormManager.removeValidator('mrcCd', Validators.REQUIRED);
+   FormManager.removeValidator('inacType', Validators.REQUIRED);
+   FormManager.removeValidator('inacCd', Validators.REQUIRED);   
+   FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+   FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
+   FormManager.removeValidator('isbuCd', Validators.REQUIRED);
+   FormManager.removeValidator('covId', Validators.REQUIRED);
+   FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+   FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
+   FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
+   FormManager.removeValidator('creditCd', Validators.REQUIRED);
+   FormManager.removeValidator('contactName2', Validators.REQUIRED);
+   FormManager.removeValidator('contactName3', Validators.REQUIRED);
+   FormManager.removeValidator('busnType', Validators.REQUIRED);
+ } 
+}
 
 function executeBeforeSubmit() {
   var reqType = FormManager.getActualValue('reqType');
@@ -4154,6 +4335,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa, GEOHandler.ISA);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.AP);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.AP);
+  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.AP);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.AP);
   // GEOHandler.addAddrFunction(addMandateCmrNoForSG, [ SysLoc.SINGAPORE ]);
 
@@ -4240,6 +4422,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCollCdFrSingapore, [ SysLoc.SINGAPORE ]);
   GEOHandler.registerValidator(addAddressLengthValidators, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(addStreetValidationChkReq, [ SysLoc.AUSTRALIA ], null, true);
+  GEOHandler.registerValidator(validateContractAddrAU, [ SysLoc.AUSTRALIA ], null, true);
+  GEOHandler.registerValidator(validateCustNameForNonContractAddrs, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(validateStreetAddrCont2, [ SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
       SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ], null, true);
   // isic validation for Singapore and Australia
@@ -4253,6 +4437,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForANZ, GEOHandler.ANZ);
   GEOHandler.addAfterTemplateLoad(setInacByClusterHKMO, GEOHandler.GCG);
   GEOHandler.registerValidator(validateGSTForIndia, [ SysLoc.INDIA ], null, true);
+  GEOHandler.registerValidator(validateABNForAU, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.addAfterConfig(afterConfigForIndia, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForIndia, SysLoc.INDIA);
   GEOHandler.addAfterConfig(resetGstExempt, [ SysLoc.INDIA ]);
@@ -4283,5 +4468,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateClusterBaseOnScenario, [ SysLoc.SINGAPORE ], null, true);  
   GEOHandler.addAfterConfig(lockInacCodeForIGF, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, SysLoc.INDIA);
+   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate,  GEOHandler.AP );
+  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.AP );
   // India Handler
 });
