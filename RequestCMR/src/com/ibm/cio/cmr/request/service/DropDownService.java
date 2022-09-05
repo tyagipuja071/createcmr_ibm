@@ -209,13 +209,11 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       }
       sb.append(" TXT from ").append(bds.getSchema() + "." + bds.getTbl());
       sb.append(" where length(" + bds.getCd() + ") > 0 ");
-
       // if ("897".equals((String) params.getParam("cmrIssuingCntry"))) {
       if ("County".equals(fieldId)) {
         sb.setLength(0);
       }
       // }
-
       // new REFT tables do not have MANDT. removing this for all.
       // if (!BDS_NO_MANDT.contains(bds.getTbl())) {
       // sb.append(" and MANDT = :MANDT");
