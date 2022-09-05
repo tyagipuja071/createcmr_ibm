@@ -178,8 +178,10 @@ public class GBGMatchingElement extends MatchingElement {
         if (!domesticGBGFound) {
           if (("616".equals(data.getCmrIssuingCntry()) || "834".equals(data.getCmrIssuingCntry()) || "744".equals(data.getCmrIssuingCntry()))
               && StringUtils.isBlank(data.getInacCd())) {
-            result.setDetails("No Local GBG was found using DUNS hierarchy matching.");
-            result.setResults("No Matches");
+            details = new StringBuilder();
+            details.append(
+                "Non-Local gbg found, no available rule(INAC/NAC) found for the country. Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.\n");
+            result.setResults("Matches Found");
             result.setOnError(false);
           } else {
             LOG.debug("Non-Local gbg found");
