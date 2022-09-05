@@ -540,6 +540,7 @@ function afterConfigForLA() {
       autoSetFieldsForCustScenariosSSAMX();
       setCrosTypSubTypSSAMXOnSecnarios();
       setAbbrevNameRequiredForProcessors();
+      setPredefinedScenarioValues();
     });
   }
 
@@ -2651,6 +2652,30 @@ function setTaxRegimeMX() {
   }
 }
 
+// note: set here if unable to handle via creqcmr.cust_scenarios
+function setPredefinedScenarioValues() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if (reqType == 'C') {
+    if(custSubGrp == 'IBMEM') {
+      setMrcCdIBMEM(role);
+    }
+  }
+}
+
+function setMrcCdIBMEM(role) {
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('mrcCd');
+  } else {
+    FormManager.enable('mrcCd');
+  }
+}
 
 /* Register LA Validators */
 dojo.addOnLoad(function() {
@@ -2734,4 +2759,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
 
   
+  GEOHandler.addAfterTemplateLoad(setPredefinedScenarioValues, GEOHandler.LA);
+  GEOHandler.setRevertIsicBehavior(false);
 });
