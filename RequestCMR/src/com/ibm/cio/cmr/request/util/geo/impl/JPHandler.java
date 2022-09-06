@@ -1242,7 +1242,7 @@ public class JPHandler extends GEOHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
     setProdTypeOnSave(data);
-    updateBillToCustomerNoAfterImport(data);
+    // updateBillToCustomerNoAfterImport(data);
     setSalesRepTmDateOfAssign(data, admin, entityManager);
     updateCSBOBeforeDataSave(entityManager, admin, data);
     setAccountAbbNmOnSaveForBP(admin, data);
@@ -1901,7 +1901,7 @@ public class JPHandler extends GEOHandler {
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
     setCSBOAfterImport(entityManager, admin, data);
     setAccountAbbNmAfterImport(entityManager, admin, data);
-    updateBillToCustomerNoAfterImport(data);
+    // updateBillToCustomerNoAfterImport(data);
   }
 
   private void updateBillToCustomerNoAfterImport(Data data) {

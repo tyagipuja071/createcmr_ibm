@@ -5402,6 +5402,44 @@ function replaceAndSymbol(value) {
   }
   return modifiedVal;
 };
+
+function resetBPWPQValue() {
+
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var _role = null;
+
+  if (typeof (_pagemodel) != 'undefined') {
+    _role = _pagemodel.userRole;
+  }
+
+  if (custSubGrp == 'BPWPQ') {
+    if (reqType == 'C' && (_role == 'Requester' || _role == 'Processor')) {
+      FormManager.setValue('salesTeamCd', _pagemodel.salesTeamCd == '' ? '' : _pagemodel.salesTeamCd);
+      FormManager.readOnly('salesTeamCd');
+
+      FormManager.setValue('tier2', _pagemodel.clientTier == '' ? '' : _pagemodel.clientTier);
+      FormManager.readOnly('tier2');
+
+      FormManager.setValue('billToCustNo', _pagemodel.billToCustNo == '' ? '' : _pagemodel.billToCustNo);
+      FormManager.enable('billToCustNo');
+
+      FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
+    }
+  } else {
+    // FormManager.setValue('salesTeamCd', '');
+    // FormManager.enable('salesTeamCd');
+
+    // FormManager.setValue('tier2', '');
+    // FormManager.readOnly('tier2');
+
+    // FormManager.setValue('billToCustNo', '');
+    // FormManager.readOnly('billToCustNo');
+
+    // FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -5419,7 +5457,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(showHideCMRPrefix, GEOHandler.JP);
   GEOHandler.addAfterConfig(showHideJSIC, GEOHandler.JP);
   GEOHandler.addAfterConfig(showHideSubindustry, GEOHandler.JP);
-  GEOHandler.addAfterConfig(updateBillToCustomerNo, GEOHandler.JP);
+  // CREATCMR-6854
+  // GEOHandler.addAfterConfig(updateBillToCustomerNo, GEOHandler.JP);
   GEOHandler.addAfterConfig(accountAbbNmUpperCase, GEOHandler.JP);
   GEOHandler.addAfterConfig(disableFieldsForUpdate, GEOHandler.JP);
   GEOHandler.addAfterConfig(setEnterCMRNoForupdate, GEOHandler.JP);
@@ -5444,6 +5483,10 @@ dojo.addOnLoad(function() {
   // CREATCMR-6694
   GEOHandler.addAfterConfig(setAdminDeptOptional, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setAdminDeptOptional, GEOHandler.JP);
+
+  // CREATCMR-6854
+  GEOHandler.addAfterConfig(resetBPWPQValue, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(resetBPWPQValue, GEOHandler.JP);
 
   // 1686132: Special requirement for Subscenario = BQ - IBM Japan Credit LLC
   // under the scenario of Subsidiary
