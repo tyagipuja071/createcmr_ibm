@@ -539,6 +539,9 @@ public class RequestEntryController extends BaseController {
         MessageUtil.setInfoMessage(mv, MessageUtil.VERIFY_SCENARIO_SUCCESS);
       } else if (CmrConstants.OVERRIDE_DNB.equalsIgnoreCase(action)) {
         MessageUtil.setInfoMessage(mv, MessageUtil.OVERRIDE_DNB_SUCCESS);
+      } else if ("RECREATE".equalsIgnoreCase(action)) {
+        mv = new ModelAndView("redirect:/request/" + model.getReqId(), "reqentry", new RequestEntryModel());
+        MessageUtil.setInfoMessage(mv, MessageUtil.INFO_RECREATE);
       }
 
       if (!StringUtils.isEmpty(model.getDplMessage())) {
