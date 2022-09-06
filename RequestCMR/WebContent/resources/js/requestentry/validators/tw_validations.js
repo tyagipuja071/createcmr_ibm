@@ -117,6 +117,7 @@ function afterConfigTW() {
   }
 
   setVatValidator();
+  handleObseleteExpiredDataForUpdate();
 }
 
 /**
@@ -153,6 +154,55 @@ function addHandlersForTW() {
   }
 }
 
+// CREATCMR -5269
+function handleObseleteExpiredDataForUpdate() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  // lock all the coverage fields and remove validator
+  if (reqType == 'U') {
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('mrcCd');
+    FormManager.readOnly('inacType');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('collectionCd');
+    FormManager.readOnly('cmrNoPrefix');
+    FormManager.readOnly('dupCmrIndc');
+    FormManager.readOnly('sitePartyId');
+    FormManager.readOnly('bgId');
+    FormManager.readOnly('gbgId');
+    FormManager.readOnly('bgRuleId');
+    FormManager.readOnly('geoLocationCd');
+    FormManager.readOnly('dunsNo');
+    FormManager.readOnly('customerIdCd');
+
+    FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.removeValidator('isuCd', Validators.REQUIRED);
+    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
+    FormManager.removeValidator('inacType', Validators.REQUIRED);
+    FormManager.removeValidator('inacCd', Validators.REQUIRED);
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    FormManager.removeValidator('dupCmrIndc', Validators.REQUIRED);
+    FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+    FormManager.removeValidator('covId', Validators.REQUIRED);
+    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+    FormManager.removeValidator('sitePartyId', Validators.REQUIRED);
+    FormManager.removeValidator('bgId', Validators.REQUIRED);
+    FormManager.removeValidator('gbgId', Validators.REQUIRED);
+    FormManager.removeValidator('geoLocationId', Validators.REQUIRED);
+    FormManager.removeValidator('dunsNo', Validators.REQUIRED);
+    FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
+    FormManager.removeValidator('customerIdCd', Validators.REQUIRED);
+  }
+}
+
 /*
  * Set CMR Double Creation warning when its value is Y
  */
@@ -177,6 +227,9 @@ function setDupCmrIndcWarning() {
 }
 
 function setClientTierValuesTW() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
@@ -185,6 +238,7 @@ function setClientTierValuesTW() {
   } else {
     FormManager.enable('clientTier');
   }
+  handleObseleteExpiredDataForUpdate();
 }
 
 /*
@@ -423,6 +477,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW);
   GEOHandler.addAfterConfig(setClientTierValuesTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(setClientTierValuesTW, GEOHandler.TW);
+  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
+  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4', 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',
