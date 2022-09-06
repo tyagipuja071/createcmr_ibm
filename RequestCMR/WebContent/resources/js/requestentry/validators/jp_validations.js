@@ -5428,15 +5428,15 @@ function resetBPWPQValue() {
     }
   } else {
     // FormManager.setValue('salesTeamCd', '');
-    FormManager.enable('salesTeamCd');
+    // FormManager.enable('salesTeamCd');
 
     // FormManager.setValue('tier2', '');
-    FormManager.readOnly('tier2');
+    // FormManager.readOnly('tier2');
 
     // FormManager.setValue('billToCustNo', '');
-    FormManager.readOnly('billToCustNo');
+    // FormManager.readOnly('billToCustNo');
 
-    FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
+    // FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
   }
 }
 
