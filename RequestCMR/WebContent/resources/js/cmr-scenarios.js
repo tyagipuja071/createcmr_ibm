@@ -14,24 +14,22 @@ var TemplateService = (function() {
   var READONLY_CLEARVALUE = '$';
   var EDITABLE_CLEARVALUE = '@';
   var BLANK_CUSTOMIZABLE = "~";
-  var ADDRESS_TYPES = [ 'ZS01', 'ZI01', 'ZP01', 'ZD01', 'ZS02', 'ZP02', 'CTYA', 'CTYB', 'CTYC', 'CTYD', 'CTYE', 'CTYF', 'CTYG', 'CTYH', 'EDUC',
-      'MAIL', 'PUBB', 'PUBS', 'STAT', 'ZF01', 'ZH01' ];
+  var ADDRESS_TYPES = [ 'ZS01', 'ZI01', 'ZP01', 'ZD01', 'ZS02', 'ZP02', 'CTYA', 'CTYB', 'CTYC', 'CTYD', 'CTYE', 'CTYF', 'CTYG', 'CTYH', 'EDUC', 'MAIL', 'PUBB', 'PUBS', 'STAT', 'ZF01', 'ZH01' ];
 
   // CREATCMR-4293
-  var CMR_ISSUING_CNTRY_ARRAY = [ '358', '359', '363', '373', '382', '383', '603', '607', '610', '618', '620', '624', '626', '635', '636', '637',
-      '642', '644', '645', '651', '656', '662', '666', '667', '668', '669', '670', '675', '677', '678', '680', '691', '692', '693', '694', '695',
-      '698', '699', '700', '702', '704', '705', '706', '707', '708', '717', '718', '724', '725', '726', '729', '740', '741', '745', '752', '753',
-      '754', '755', '758', '762', '764', '767', '768', '769', '770', '772', '780', '782', '787', '788', '804', '805', '806', '808', '810', '820',
-      '821', '822', '823', '825', '826', '827', '831', '832', '833', '835', '838', '840', '841', '842', '846', '848', '849', '850', '851', '857',
-      '862', '864', '865', '866', '876', '879', '880', '881', '883', '889' ];
+  var CMR_ISSUING_CNTRY_ARRAY = [ '358', '359', '363', '373', '382', '383', '603', '607', '610', '618', '620', '624', '626', '635', '636', '637', '642', '644', '645', '651', '656', '662', '666',
+      '667', '668', '669', '670', '675', '677', '678', '680', '691', '692', '693', '694', '695', '698', '699', '700', '702', '704', '705', '706', '707', '708', '717', '718', '724', '725', '726',
+      '729', '740', '741', '745', '752', '753', '754', '755', '758', '762', '764', '767', '768', '769', '770', '772', '780', '782', '787', '788', '804', '805', '806', '808', '810', '820', '821',
+      '822', '823', '825', '826', '827', '831', '832', '833', '835', '838', '840', '841', '842', '846', '848', '849', '850', '851', '857', '862', '864', '865', '866', '876', '879', '880', '881',
+      '883', '889' ];
 
-  var CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY = [ 'AFBP', 'BEBUS', 'BUSPR', 'BUSSM', 'BUSVA', 'CBBUS', 'CHBUS', 'CRBUS', 'CROBP', 'CSBP', 'DKBUS',
-      'EEBUS', 'ELBP', 'EXBP', 'FIBUS', 'FOBUS', 'GLBUS', 'ISBUS', 'JOBP', 'JOXBP', 'LIBUS', 'LSBP', 'LSXBP', 'LTBUS', 'LUBUS', 'LVBUS', 'MEBP',
-      'NABP', 'NAXBP', 'PKBP', 'PKXBP', 'PSBP', 'RSBP', 'RSXBP', 'SZBP', 'SZXBP', 'XBP', 'XBUSP', 'ZABP', 'ZAXBP' ];
+  var CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY = [ 'AFBP', 'BEBUS', 'BUSPR', 'BUSSM', 'BUSVA', 'CBBUS', 'CHBUS', 'CRBUS', 'CROBP', 'CSBP', 'DKBUS', 'EEBUS', 'ELBP', 'EXBP', 'FIBUS', 'FOBUS', 'GLBUS',
+      'ISBUS', 'JOBP', 'JOXBP', 'LIBUS', 'LSBP', 'LSXBP', 'LTBUS', 'LUBUS', 'LVBUS', 'MEBP', 'NABP', 'NAXBP', 'PKBP', 'PKXBP', 'PSBP', 'RSBP', 'RSXBP', 'SZBP', 'SZXBP', 'XBP', 'XBUSP', 'ZABP',
+      'ZAXBP' ];
 
-  var CUST_SUB_GRP_FOR_INTERNAL_ARRAY = [ 'AFINT', 'BEINT', 'CBINT', 'CBTER', 'CHINT', 'CRINT', 'CROIN', 'CSINT', 'DKINT', 'EEINT', 'FIINT', 'FOINT',
-      'GLINT', 'INTER', 'INTIN', 'INTSM', 'INTVA', 'ISINT', 'JOINT', 'JOXIN', 'LIINT', 'LSINT', 'LSXIN', 'LTINT', 'LUINT', 'LVINT', 'MEINT', 'NAINT',
-      'NAXIN', 'PKINT', 'PKXIN', 'PSINT', 'RSINT', 'RSXIN', 'SZINT', 'SZXIN', 'XINT', 'XINTE', 'XINTR', 'ZAINT', 'ZAXIN' ];
+  var CUST_SUB_GRP_FOR_INTERNAL_ARRAY = [ 'AFINT', 'BEINT', 'CBINT', 'CBTER', 'CHINT', 'CRINT', 'CROIN', 'CSINT', 'DKINT', 'EEINT', 'FIINT', 'FOINT', 'GLINT', 'INTER', 'INTIN', 'INTSM', 'INTVA',
+      'ISINT', 'JOINT', 'JOXIN', 'LIINT', 'LSINT', 'LSXIN', 'LTINT', 'LUINT', 'LVINT', 'MEINT', 'NAINT', 'NAXIN', 'PKINT', 'PKXIN', 'PSINT', 'RSINT', 'RSXIN', 'SZINT', 'SZXIN', 'XINT', 'XINTE',
+      'XINTR', 'ZAINT', 'ZAXIN' ];
   // CREATCMR-4293
 
   var getUserRole = function() {
@@ -283,8 +281,7 @@ var TemplateService = (function() {
 
               FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
 
-            } else if (name == 'isicCd'
-                && (values[0].indexOf('%') >= 0 || values[0].indexOf('LOV') == 0 || values[0].indexOf('^') >= 0 || values[0].indexOf('-') > 0)) {
+            } else if (name == 'isicCd' && (values[0].indexOf('%') >= 0 || values[0].indexOf('LOV') == 0 || values[0].indexOf('^') >= 0 || values[0].indexOf('-') > 0)) {
 
               // has wildcard, LOV, exclusions, or range, dirty dirty fix for
               // ISIC/subindustry :( grr
@@ -300,8 +297,7 @@ var TemplateService = (function() {
               // 2. load isic,
               FormManager.setValue(name, '');
               FilteringDropdown['val_isicCd'] = null;
-              FilteringDropdown.loadItems('isicCd', 'isicCd_spinner', 'bds', 'fieldId=ISIC&cmrIssuingCntry=_cmrIssuingCntry&isicCd=' + values[0]
-                  + '&nocache=y');
+              FilteringDropdown.loadItems('isicCd', 'isicCd_spinner', 'bds', 'fieldId=ISIC&cmrIssuingCntry=_cmrIssuingCntry&isicCd=' + values[0] + '&nocache=y');
 
               FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
               FormManager.enable(name);
@@ -311,8 +307,7 @@ var TemplateService = (function() {
               limitDropdownValues(FormManager.getField('subIndustryCd'), []);
               FormManager.setValue('subIndustryCd', '');
               FilteringDropdown['val_subIndustryCd'] = null;
-              FilteringDropdown.loadOnChange('subIndustryCd', 'subIndustryCd_spinner', 'bds',
-                  'fieldId=Subindustry&cmrIssuingCntry=_cmrIssuingCntry&nocache=y&isicCd=_isicCd', 'isicCd');
+              FilteringDropdown.loadOnChange('subIndustryCd', 'subIndustryCd_spinner', 'bds', 'fieldId=Subindustry&cmrIssuingCntry=_cmrIssuingCntry&nocache=y&isicCd=_isicCd', 'isicCd');
 
               subIndLabel = dojo.byId('cmr-fld-lbl-Subindustry') ? dojo.byId('cmr-fld-lbl-Subindustry').innerHTML : 'Subindustry';
               FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ subIndLabel ], field.parentTab);
@@ -550,9 +545,8 @@ var TemplateService = (function() {
               }
             } else {
               if (dojo.byId('templatevalue-' + name) == null) {
-                var button = '<input title="Select a value from the list" type="button" id="templatevalue-' + name
-                    + '" class="templateButton" fieldId="' + name + '" field="' + id + '" values="' + values
-                    + '"onclick="TemplateService.openChoices(this)" value="..." />';
+                var button = '<input title="Select a value from the list" type="button" id="templatevalue-' + name + '" class="templateButton" fieldId="' + name + '" field="' + id + '" values="'
+                    + values + '"onclick="TemplateService.openChoices(this)" value="..." />';
                 var widget = dojo.byId('widget_' + name);
                 if (!widget) {
                   widget = dojo.byId(name);
@@ -642,9 +636,7 @@ var TemplateService = (function() {
 
         }
         if (scenarioChanged) {
-          cmr.showAlert(
-              "Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten.",
-              "Warning");
+          cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten.", "Warning");
         }
 
         if ((typeof GEOHandler) != 'undefined') {
@@ -661,8 +653,7 @@ var TemplateService = (function() {
 
         if (scenarioChanged == true) {
           if (CMR_ISSUING_CNTRY_ARRAY.includes(FormManager.getActualValue('cmrIssuingCntry'))) {
-            if (CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY.includes(FormManager.getActualValue('custSubGrp'))
-                || CUST_SUB_GRP_FOR_INTERNAL_ARRAY.includes(FormManager.getActualValue('custSubGrp'))) {
+            if (CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY.includes(FormManager.getActualValue('custSubGrp')) || CUST_SUB_GRP_FOR_INTERNAL_ARRAY.includes(FormManager.getActualValue('custSubGrp'))) {
               var isuCd = FormManager.getActualValue('isuCd');
               if (isuCd == '8B' || isuCd == '21') {
                 FormManager.setValue('clientTier', '');
@@ -854,9 +845,8 @@ var TemplateService = (function() {
               }
             } else {
               if (dojo.byId('templatevalue-' + name) == null) {
-                var button = '<input title="Select a value from the list" type="button" id="templatevalue-' + name
-                    + '" class="templateButton" fieldId="' + name + '" field="' + id + '" values="' + values
-                    + '"onclick="TemplateService.openChoices(this)" value="..." />';
+                var button = '<input title="Select a value from the list" type="button" id="templatevalue-' + name + '" class="templateButton" fieldId="' + name + '" field="' + id + '" values="'
+                    + values + '"onclick="TemplateService.openChoices(this)" value="..." />';
                 var widget = dojo.byId('widget_' + name);
                 if (!widget) {
                   widget = dojo.byId(name);
@@ -959,7 +949,7 @@ var TemplateService = (function() {
       if (fields && fields.length > 0) {
         for (var i = 0; i < fields.length; i++) {
           if (fields[i].fieldName == fieldName) {
-            var retain = FormManager.getActualValue('reqType') != 'C' && fields[i].retainValue;
+            var retain = FormManager.getActualValue('reqType') != 'U' && fields[i].retainValue;
             if (fields[i].addressField) {
               if (!fields[i].valueMap) {
                 return false;
@@ -973,12 +963,14 @@ var TemplateService = (function() {
               var isicFilter = false;
               if (fields[i].fieldName == 'isicCd') {
                 if (fields[i].values && fields[i].values.length > 0) {
-                  isicFilter = fields[i].values[0].indexOf('%') >= 0 || fields[i].values[0].indexOf('LOV') == 0
-                      || fields[i].values[0].indexOf('-') > 0 || fields[i].values[0].indexOf('^') >= 0;
+                  isicFilter = fields[i].values[0].indexOf('%') >= 0 || fields[i].values[0].indexOf('LOV') == 0 || fields[i].values[0].indexOf('-') > 0 || fields[i].values[0].indexOf('^') >= 0;
+                }
+
+                if (fields[i].lockInd == 'Y' || (fields[i].lockInd == 'R' && getUserRole() == 'Requester')) {
+                  return true;
                 }
               }
-              return fields[i].values && fields[i].values.length > 0 && fields[i].values[0] != '*' && fields[i].values[0] != '@'
-                  && fields[i].values[0].indexOf('%') < 0 && !isicFilter && !retain;
+              return fields[i].values && fields[i].values.length > 0 && fields[i].values[0] != '*' && fields[i].values[0] != '@' && fields[i].values[0].indexOf('%') < 0 && !isicFilter && !retain;
             }
           }
         }
@@ -1043,7 +1035,6 @@ function revertISICBehavior() {
     FilteringDropdown['val_subIndustryCd'] = null;
     FilteringDropdown['val_isicCd'] = null;
     FilteringDropdown.loadItems('subIndustryCd', 'subIndustryCd_spinner', 'bds', 'fieldId=Subindustry&cmrIssuingCntry=_cmrIssuingCntry');
-    FilteringDropdown.loadOnChange('isicCd', 'isicCd_spinner', 'bds', 'fieldId=ISIC&cmrIssuingCntry=_cmrIssuingCntry&subIndustryCd=_subIndustryCd',
-        'subIndustryCd');
+    FilteringDropdown.loadOnChange('isicCd', 'isicCd_spinner', 'bds', 'fieldId=ISIC&cmrIssuingCntry=_cmrIssuingCntry&subIndustryCd=_subIndustryCd', 'subIndustryCd');
   }
 }
