@@ -839,6 +839,23 @@ function RomaniaFiscalCdMandatory() {
   }
 }
 
+function setVatValidatorCEMEA() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+    FormManager.resetValidations('vat');
+    if (FormManager.getActualValue('custSubGrp').includes('IBM')) {
+      FormManager.readOnly('vat');
+    }
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+    }
+    if (!dijit.byId('vatExempt').get('checked')) {
+//      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
+    }
+  }
+}
+
 function validateFiscalCdForRomania() {
   // validate fiscal length for Romania
   FormManager.addFormValidator((function() {
