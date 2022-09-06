@@ -950,7 +950,6 @@ public class LAHandler extends GEOHandler {
     }
 
     if (taxService.getTaxInfoCountByReqId(entityManager, reqId) <= 4 && reqAdmin.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_CREATE)) {
-
       taxInfoPK.setReqId(reqId);
       taxInfoPK.setGeoTaxInfoId(taxService.generateGeoTaxInfoID(entityManager, reqId));
 
@@ -975,7 +974,6 @@ public class LAHandler extends GEOHandler {
       }
 
       taxInfo.setTaxNum(dataTaxCd);
-
       /* default to requester */
       taxInfo.setCreateById(reqAdmin.getRequesterId());
       taxInfo.setCreateTs(SystemUtil.getCurrentTimestamp());
@@ -993,8 +991,7 @@ public class LAHandler extends GEOHandler {
     query.setParameter("REQ_ID", data.getId().getReqId());
     List<GeoTaxInfo> results = query.getResults(GeoTaxInfo.class);
 
-    // this will delete any predefined entries
-    // as it creates a new predefined entries based on CREATCMR-6813
+    // deletes any predefined entries
     if (results != null && !results.isEmpty() && results.size() > 0) {
       taxService.deleteAllTaxInfoById(results, entityManager, data.getId().getReqId());
     }
