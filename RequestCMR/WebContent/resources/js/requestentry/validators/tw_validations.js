@@ -209,113 +209,6 @@ function handleObseleteExpiredDataForUpdate() {
   }
 }
 
-function checkClusterExpired(clusterDataRdc) {
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var qParams = {
-    ISSUING_CNTRY : cntry,
-    AP_CUST_CLUSTER_ID : clusterDataRdc,
-  };
-  var results = cmr.query('CHECK.CLUSTER', qParams);
-  if (results != null && results.ret1 == '1') {
-    return false;
-  }
-  return true;
-}
-
-function getAPClusterDataRdc() {
-  var clusterDataRdc = '';
-  var reqId = FormManager.getActualValue('reqId');
-  var qParams = {
-    REQ_ID : reqId,
-  };
-  var result = cmr.query('GET.CLUSTER_DATA_RDC', qParams);
-  if (result != null) {
-    clusterDataRdc = result.ret1;
-  }
-  return clusterDataRdc;
-}
-
-function handleExpiredClusterTW() {
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  var clusterDataRdc = getAPClusterDataRdc();
-  if (clusterDataRdc != null && clusterDataRdc != undefined && clusterDataRdc != '') {
-    var clusterExpired = checkClusterExpired(clusterDataRdc);
-    if (clusterExpired) {
-      handleObseleteExpiredDataForUpdate();
-    }
-  }
-}
-
-// CREATCMR -5269
-function handleObseleteExpiredDataForUpdate() {
-  // var isSuperUserMode = isSuperUserMode();
-  var reqType = FormManager.getActualValue('reqType');
-  // lock all the coverage fields and remove validator
-  if (reqType == 'U') {
-    FormManager.readOnly('searchTerm');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('inacCd');
-    FormManager.readOnly('repTeamMemberNo');
-    FormManager.readOnly('repTeamMemberName');
-    FormManager.readOnly('isbuCd');
-    FormManager.readOnly('covId');
-    FormManager.readOnly('stateProv');
-    FormManager.readOnly('collectionCd');
-    FormManager.readOnly('engineeringBo');
-    // FormManager.readOnly('commercialFinanced');
-    FormManager.readOnly('creditCd');
-    // FormManager.readOnly('contactName2');
-    FormManager.readOnly('contactName3');
-    // FormManager.readOnly('busnType');
-
-    FormManager.removeValidator('searchTerm', Validators.REQUIRED);
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.removeValidator('isuCd', Validators.REQUIRED);
-    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
-    FormManager.removeValidator('inacType', Validators.REQUIRED);
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
-    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
-    FormManager.removeValidator('isbuCd', Validators.REQUIRED);
-    FormManager.removeValidator('covId', Validators.REQUIRED);
-    FormManager.removeValidator('stateProv', Validators.REQUIRED);
-    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
-    FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
-    // FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
-    FormManager.removeValidator('creditCd', Validators.REQUIRED);
-    // FormManager.removeValidator('contactName2', Validators.REQUIRED);
-    FormManager.removeValidator('contactName3', Validators.REQUIRED);
-    // FormManager.removeValidator('busnType', Validators.REQUIRED);
-
-    FormManager.setValue('searchTerm', '');
-    FormManager.setValue('clientTier', '');
-    FormManager.setValue('isuCd', '');
-    FormManager.setValue('mrcCd', '');
-    FormManager.setValue('inacType', '');
-    FormManager.setValue('inacCd', '');
-    FormManager.setValue('repTeamMemberNo', '');
-    FormManager.setValue('repTeamMemberName', '');
-    FormManager.setValue('isbuCd', '');
-    FormManager.setValue('covId', '');
-    FormManager.setValue('stateProv', '');
-    FormManager.setValue('collectionCd', '');
-    FormManager.setValue('engineeringBo', '');
-    // FormManager.setValue('commercialFinanced', '');
-    FormManager.setValue('creditCd', '');
-    FormManager.setValue('contactName3', '');
-    // FormManager.setValue('contactName2', '');
-    // FormManager.setValue('busnType', '');
-
-  }
-}
-
 /*
  * Set CMR Double Creation warning when its value is Y
  */
@@ -595,7 +488,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
   GEOHandler.addAddrFunction(addSingleByteValidatorTW, GEOHandler.TW);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.TW);
-  GEOHandler.addAddrFunction(handleExpiredClusterTW, GEOHandler.TW);
 
   GEOHandler.registerValidator(addTWChecklistValidator, GEOHandler.TW_CHECKLIST);
   // GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW,
@@ -604,15 +496,12 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW);
   GEOHandler.addAfterConfig(setClientTierValuesTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(setClientTierValuesTW, GEOHandler.TW);
-  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
-  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
-  GEOHandler.addAfterConfig(handleExpiredClusterTW, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(handleExpiredClusterTW, GEOHandler.TW);
   // CREATCMR-6825
   GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.TW);
-
+  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
+  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
   // skip byte checks
   // FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4',
   // 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',
