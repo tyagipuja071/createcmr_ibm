@@ -1670,6 +1670,13 @@ function checkIfFinalDnBCheckRequired() {
       return true;
     }
   }
+
+  if (cmrCntry == '616') {
+    if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')) {
+      // currently Enabled Only For AU
+      return true;
+    }
+  }
   return false;
 }
 function checkIfDnBCheckReqForIndia() {
