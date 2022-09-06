@@ -1379,35 +1379,44 @@ public class JPHandler extends GEOHandler {
         return;
       }
 
-      if (tier2.length() + accountAbbNmInCris.length() + dealerNo.length() + 2 > 22) {
+      // CREATCMR-6854
+      // if (tier2.length() + accountAbbNmInCris.length() + dealerNo.length() +
+      // 2 > 22) {
+      //
+      // if (tier2.length() > 0) {
+      // int endInd = 22 - tier2.length() - dealerNo.length() - 2;
+      // accountAbbNmInCris = accountAbbNmInCris.substring(0, endInd);
+      // accountAbbNm = tier2 + " " + accountAbbNmInCris + " " + dealerNo;
+      // } else {
+      // int endInd = 22 - dealerNo.length() - 1;
+      // accountAbbNmInCris = accountAbbNmInCris.substring(0, endInd);
+      // accountAbbNm = accountAbbNmInCris + " " + dealerNo;
+      // }
+      //
+      // } else {
+      // if (tier2.length() > 0) {
+      // int blankSpaceLength = 22 - tier2.length() -
+      // accountAbbNmInCris.length() - dealerNo.length() - 2;
+      // String blankSpace = "";
+      // for (int i = 0; i < blankSpaceLength; i++) {
+      // blankSpace += " ";
+      // }
+      // accountAbbNm = tier2 + " " + accountAbbNmInCris + blankSpace + " " +
+      // dealerNo;
+      // } else {
+      // int blankSpaceLength = 22 - accountAbbNmInCris.length() -
+      // dealerNo.length() - 1;
+      // String blankSpace = "";
+      // for (int i = 0; i < blankSpaceLength; i++) {
+      // blankSpace += " ";
+      // }
+      // accountAbbNm = accountAbbNmInCris + blankSpace + " " + dealerNo;
+      // }
+      // }
 
-        if (tier2.length() > 0) {
-          int endInd = 22 - tier2.length() - dealerNo.length() - 2;
-          accountAbbNmInCris = accountAbbNmInCris.substring(0, endInd);
-          accountAbbNm = tier2 + " " + accountAbbNmInCris + " " + dealerNo;
-        } else {
-          int endInd = 22 - dealerNo.length() - 1;
-          accountAbbNmInCris = accountAbbNmInCris.substring(0, endInd);
-          accountAbbNm = accountAbbNmInCris + " " + dealerNo;
-        }
-
-      } else {
-        if (tier2.length() > 0) {
-          int blankSpaceLength = 22 - tier2.length() - accountAbbNmInCris.length() - dealerNo.length() - 2;
-          String blankSpace = "";
-          for (int i = 0; i < blankSpaceLength; i++) {
-            blankSpace += " ";
-          }
-          accountAbbNm = tier2 + " " + accountAbbNmInCris + blankSpace + " " + dealerNo;
-        } else {
-          int blankSpaceLength = 22 - accountAbbNmInCris.length() - dealerNo.length() - 1;
-          String blankSpace = "";
-          for (int i = 0; i < blankSpaceLength; i++) {
-            blankSpace += " ";
-          }
-          accountAbbNm = accountAbbNmInCris + blankSpace + " " + dealerNo;
-        }
-      }
+      accountAbbNm = accountAbbNmInCris.length() < 22 ? accountAbbNmInCris.substring(0, accountAbbNmInCris.length())
+          : accountAbbNmInCris.substring(0, 22);
+      // CREATCMR-6854
 
       if (accountAbbNm != null) {
         accountAbbNm = accountAbbNm.toUpperCase();
