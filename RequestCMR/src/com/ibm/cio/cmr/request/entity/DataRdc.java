@@ -427,14 +427,6 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   private String creditCd;
 
   @Column(
-      name = "COD_CONDITION")
-  private String codCondition;
-
-  @Column(
-      name = "COD_RSN")
-  private String codReason;
-
-  @Column(
       name = "DUP_SALES_REP_NO")
   private String dupSalesRepNo;
 
@@ -1780,22 +1772,6 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   public void setTaxCd3(String taxCd3) {
     this.taxCd3 = taxCd3;
-  }
-
-  public String getCodCondition() {
-    return codCondition;
-  }
-
-  public void setCodCondition(String codCondition) {
-    this.codCondition = codCondition;
-  }
-
-  public String getCodReason() {
-    return codReason;
-  }
-
-  public void setCodReason(String codReason) {
-    this.codReason = codReason;
   }
 
 }
