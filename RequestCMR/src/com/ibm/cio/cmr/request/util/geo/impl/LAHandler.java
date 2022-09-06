@@ -707,6 +707,21 @@ public class LAHandler extends GEOHandler {
           doCreateDefaultTaxRecord("", "1", data.getId().getReqId(), entityManager, true, false);
         } else if (SystemLocation.URUGUAY.equalsIgnoreCase(issuingCntry)) {
           doCreateDefaultTaxRecord("", "2", data.getId().getReqId(), entityManager, true, false);
+        } else if (SystemLocation.ARGENTINA.equals(issuingCntry)) {
+          // CREATCMR-6813 - AR Predefined tax info values
+          if ("LOCAL".equals(data.getCustGrp()) && CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())
+              && StringUtils.isNotBlank(data.getTaxCd1())) {
+            if (data.getTaxCd1().length() >= 11) {
+              deleteAllTaxInfoRecord(data, entityManager);
+              doCreateARDefaultTaxRecord("01", data.getTaxCd1().substring(3, 11), data.getId().getReqId(), entityManager, true, true, true);
+              doCreateARDefaultTaxRecord("11", data.getTaxCd1().substring(3, 11), data.getId().getReqId(), entityManager, false, false, false);
+              doCreateARDefaultTaxRecord("02", data.getTaxCd1().substring(3, 11), data.getId().getReqId(), entityManager, false, false, false);
+              doCreateARDefaultTaxRecord("07", data.getTaxCd1().substring(3, 11), data.getId().getReqId(), entityManager, false, false, false);
+              doCreateARDefaultTaxRecord("12", data.getTaxCd1().substring(3, 11), data.getId().getReqId(), entityManager, false, false, false);
+            }
+          } else {
+            doCreateDefaultTaxRecord("", "1", data.getId().getReqId(), entityManager, true, true);
+          }
         } else {
           doCreateDefaultTaxRecord("", "1", data.getId().getReqId(), entityManager, true, true);
         }
@@ -883,12 +898,14 @@ public class LAHandler extends GEOHandler {
     GeoTaxInfo taxInfo = new GeoTaxInfo();
     GeoTaxInfoPK taxInfoPK = new GeoTaxInfoPK();
     Admin reqAdmin = null;
+
     try {
       reqAdmin = new AdminService().getCurrentRecordById(reqId, entMan);
     } catch (Exception ex) {
       LOG.error("doCreateDefaultTaxRecord : " + ex.getMessage());
       reqAdmin = new Admin();
     }
+
     if (taxService.getTaxInfoCountByReqId(entMan, reqId) <= 0 && reqAdmin.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_CREATE)) {
       taxInfoPK.setReqId(reqId);
       taxInfoPK.setGeoTaxInfoId(taxService.generateGeoTaxInfoID(entMan, reqId));
@@ -914,6 +931,72 @@ public class LAHandler extends GEOHandler {
       taxInfo.setId(taxInfoPK);
       entMan.persist(taxInfo);
       entMan.flush();
+    }
+  }
+
+  // CREATCMR-6813 - AR Predefined tax info values
+  private void doCreateARDefaultTaxRecord(String defaultTaxcd, String dataTaxCd, long reqId, EntityManager entityManager, boolean taxSepIndc,
+      boolean contPntIndc, boolean cntryUse) {
+    TaxInfoService taxService = new TaxInfoService();
+    GeoTaxInfo taxInfo = new GeoTaxInfo();
+    GeoTaxInfoPK taxInfoPK = new GeoTaxInfoPK();
+    Admin reqAdmin = null;
+
+    try {
+      reqAdmin = new AdminService().getCurrentRecordById(reqId, entityManager);
+    } catch (Exception ex) {
+      LOG.error("doCreateARDefaultTaxRecord : " + ex.getMessage());
+      reqAdmin = new Admin();
+    }
+
+    if (taxService.getTaxInfoCountByReqId(entityManager, reqId) <= 4 && reqAdmin.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_CREATE)) {
+
+      taxInfoPK.setReqId(reqId);
+      taxInfoPK.setGeoTaxInfoId(taxService.generateGeoTaxInfoID(entityManager, reqId));
+
+      taxInfo.setTaxCd(defaultTaxcd); /* predefined value */
+
+      if (taxSepIndc) {
+        taxInfo.setTaxSeparationIndc("07"); /* predefined value */
+      } else {
+        taxInfo.setTaxSeparationIndc("N"); /* predefined value */
+      }
+
+      if (cntryUse) {
+        taxInfo.setCntryUse(""); /* predefined value */
+      } else {
+        taxInfo.setCntryUse("0000"); /* predefined value */
+      }
+
+      if (contPntIndc) {
+        taxInfo.setContractPrintIndc(""); /* predefined value */
+      } else {
+        taxInfo.setContractPrintIndc("N"); /* predefined value */
+      }
+
+      taxInfo.setTaxNum(dataTaxCd);
+
+      /* default to requester */
+      taxInfo.setCreateById(reqAdmin.getRequesterId());
+      taxInfo.setCreateTs(SystemUtil.getCurrentTimestamp());
+      taxInfo.setId(taxInfoPK);
+      entityManager.merge(taxInfo);
+      entityManager.flush();
+    }
+  }
+
+  // CREATCMR-6813 - AR Predefined tax info values
+  private void deleteAllTaxInfoRecord(Data data, EntityManager entityManager) {
+    TaxInfoService taxService = new TaxInfoService();
+
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("REQUESTENTRY.TAXINFO.SEARCH_BY_REQID"));
+    query.setParameter("REQ_ID", data.getId().getReqId());
+    List<GeoTaxInfo> results = query.getResults(GeoTaxInfo.class);
+
+    // this will delete any predefined entries
+    // as it creates a new predefined entries based on CREATCMR-6813
+    if (results != null && !results.isEmpty() && results.size() > 0) {
+      taxService.deleteAllTaxInfoById(results, entityManager, data.getId().getReqId());
     }
   }
 
@@ -2173,11 +2256,10 @@ public class LAHandler extends GEOHandler {
             isLeasingBr = true;
           }
 
-          // CreatCMR-6681 - Predefined enterprise value for BR local scenarios
-          String vat = soldToAddr.getVat();
+          // CreatCMR-6681 - BR Predefined enterprise value for local scenarios
           if ("LOCAL".equals(data.getCustGrp())
               && !(CmrConstants.CUST_TYPE_PRIPE.equals(data.getCustSubGrp()) || CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp()))
-              && StringUtils.isNotBlank(vat)) {
+              && StringUtils.isNotBlank(soldToAddr.getVat())) {
             if (soldToAddr.getVat().length() >= 8) {
               data.setVat(soldToAddr.getVat());
               LOG.debug("Setting VAT in DATA table : " + soldToAddr.getVat());
@@ -3459,12 +3541,11 @@ public class LAHandler extends GEOHandler {
 
       }
 
-      // CreatCMR-6681 - Predefined enterprise value for BR local scenarios
-      String vat = v2Model.getVat();
+      // CreatCMR-6681 - BR Predefined enterprise value for local scenarios
       if ("C".equals(v2Model.getReqType())) {
         if ("LOCAL".equals(data.getCustGrp())
             && !(CmrConstants.CUST_TYPE_PRIPE.equals(data.getCustSubGrp()) || CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp()))
-            && StringUtils.isNotBlank(vat)) {
+            && StringUtils.isNotBlank(v2Model.getVat())) {
           if (v2Model.getVat().length() >= 8) {
             LOG.debug("Setting ENTERPRISE in DATA table to : " + v2Model.getVat().substring(0, 8));
             data.setEnterprise(v2Model.getVat().substring(0, 8));
