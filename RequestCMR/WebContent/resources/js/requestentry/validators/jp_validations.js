@@ -5427,13 +5427,13 @@ function resetBPWPQValue() {
       FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     }
   } else {
-    FormManager.setValue('salesTeamCd', '');
+    // FormManager.setValue('salesTeamCd', '');
     FormManager.enable('salesTeamCd');
 
-    FormManager.setValue('tier2', '');
+    // FormManager.setValue('tier2', '');
     FormManager.readOnly('tier2');
 
-    FormManager.setValue('billToCustNo', '');
+    // FormManager.setValue('billToCustNo', '');
     FormManager.readOnly('billToCustNo');
 
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
