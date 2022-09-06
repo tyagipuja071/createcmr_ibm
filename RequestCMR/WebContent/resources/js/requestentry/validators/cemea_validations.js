@@ -1141,7 +1141,7 @@ function addAddressTypeValidatorCEE() {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var reqLocalAddr = new Set([ '832', '821', '820', '693' ]);
-
+        
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
           return new ValidationResult(null, false, 'Address types are mandatory.');
         }
