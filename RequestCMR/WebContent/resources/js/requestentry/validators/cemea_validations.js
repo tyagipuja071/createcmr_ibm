@@ -759,6 +759,13 @@ function addHandlersForCEMEA() {
       setSBOValuesForIsuCtc();// CMR-2101
     });
   }
+  
+  if (_vatExemptHandler == null) {
+    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      setVatValidatorCEMEA();
+      customVATMandatoryForAT();
+    });
+  }
 
 }
 
@@ -3994,7 +4001,7 @@ function customVATMandatoryForAT() {
   if (custSubType != null
       && custSubType != ''
       && (custSubType == 'COMME' || custSubType == 'BUSPR' || custSubType == 'XBP' || custSubType == 'XCOM' || custSubType == 'XGOV'
-          || custSubType == 'XISO' || custSubType == 'XINT')) {
+          || custSubType == 'XISO' || custSubType == 'XINT' ||  custSubType == 'THDPT')) {
     if (!dijit.byId('vatExempt').get('checked')) {
       // Make Vat Mandatory
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
@@ -5365,6 +5372,7 @@ dojo
       // CEE
       GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
       GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
+      GEOHandler.addAfterTemplateLoad(setVatValidatorCEMEA, GEOHandler.CEE);
       GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
       GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
       GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
