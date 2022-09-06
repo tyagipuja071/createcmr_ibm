@@ -19,11 +19,27 @@ var globalSaveAll = function(){
 app.controller('CorrectionsController', [ '$scope', '$document', '$http', '$timeout', function($scope, $document, $http, $timeout) {
 
   
+  $scope.countries = [];
   $scope.model = {
       reqId : '',
       cmrNo : '',
       cmrIssuingCntry : ''
   };
+  
+  $scope.getCountries = function() {
+    var ret = cmr.query('LEGACY.SEARCH.CNTRY', {
+      _qall : 'Y'
+    });
+    if (ret && ret.length > 0) {
+      ret.forEach(function(item, i) {
+        $scope.countries.push({
+          id : item.ret1,
+          name : item.ret2
+        });
+      });
+    }
+  };
+
   $scope.loadAnother = function() {
     $scope.current = null;
   }
@@ -64,8 +80,18 @@ app.controller('CorrectionsController', [ '$scope', '$document', '$http', '$time
         $scope.fieldMap = data.fieldMap;
         $scope.current = data.model;
         if ($scope.model.correctionType == 'R') {
+          if (!data.model.admin){
+            cmr.showAlert('Request '+$scope.model.reqId+' does not exist.');
+            $scope.current = null;
+            return;
+          }
           $scope.layoutRequest();
         } else {
+          if (!data.model.cust){
+            cmr.showAlert('CMR '+$scope.model.cmrNo+' does not exist.');
+            $scope.current = null;
+            return;
+          }
           $scope.layoutCMR();
         }
       } else {
@@ -317,6 +343,7 @@ app.controller('CorrectionsController', [ '$scope', '$document', '$http', '$time
   
   globalSaveAll = $scope.saveAll;
 
+  $scope.getCountries();
 } ]);
 
 function confirmSave(){

@@ -101,8 +101,11 @@ button.action:hover {
 div.buttons {
  float:right;
 }
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
 </style>
-<div ng-app="CorrectionsApp" ng-controller="CorrectionsController">
+<div ng-app="CorrectionsApp" ng-controller="CorrectionsController" ng-cloak>
 
   <cmr:boxContent>
     <cmr:tabs />
@@ -114,6 +117,7 @@ div.buttons {
           text="This function should only be used by CMDE Administrators to do minor tweaks on request or CMR data. Please exercise caution when modifying values on the selected records. Note that knowledge on the DB fields and actual values is needed since modifications here are all in PLAIN TEXT."></cmr:note>
 
       </cmr:row>
+      <div ng-show="!current">
       <cmr:row topPad="10">
         <cmr:column span="6">
           <div class="text">Please choose what type of record you want to do corrections for:</div>
@@ -141,13 +145,15 @@ div.buttons {
           </cmr:column>
           <cmr:column span="2">
             <button ng-show="!current" class="action" ng-click="retrieveDetails()">Retrieve Details</button>
-            <button ng-show="current" class="action" ng-click="loadAnother()">Load Another Record</button>
           </cmr:column>
         </div>
         <div ng-show="model.correctionType == 'L'">
-          <cmr:column span="1" width="320">
+          <cmr:column span="1" width="400">
             <div class="lbl">Issuing Country:</div>
-            <input ng-model="model.cmrIssuingCntry">
+                <select ng-model="model.cmrIssuingCntry" value=""  style="width:252px">
+                  <option value=""></option>
+                  <option ng-repeat="country in countries"  value="{{country.id}}" >{{country.id}} - {{country.name}}</option>
+                </select>
           </cmr:column>
           <cmr:column span="1" width="280">
             <div class="lbl">CMR No.:</div>
@@ -155,13 +161,14 @@ div.buttons {
           </cmr:column>
           <cmr:column span="2">
             <button ng-show="!current" class="action" ng-click="retrieveDetails()">Retrieve Details</button>
-            <button ng-show="current" class="action" ng-click="loadAnother()">Load Another Record</button>
           </cmr:column>
         </div>
       </cmr:row>
 
+      </div>
       <cmr:row addBackground="true">
-                 &nbsp;
+             &nbsp;
+            <button ng-show="current" class="action" ng-click="loadAnother()">Load Another Record</button>
       </cmr:row>
     </cmr:section>
 
