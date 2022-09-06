@@ -2939,7 +2939,7 @@ function validateCnNameAndAddr4Update() {
               }
             }
             
-          } else if (addrList != null && addrList.length == 1) {
+          } else if (addrList != null && addrList.length > 1) {
             // case 2, multiple addresses logic
             if($.isEmptyObject(tycResultByBusnType) && !$.isEmptyObject(tycResultByCnNm)) {
               var apiName = '';
