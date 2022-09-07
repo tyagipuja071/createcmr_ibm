@@ -125,6 +125,7 @@ function getDescription(fieldId) {
   return field.displayedValue;
 }
 
+var _taxCd1Handler = null;
 var _mrcCdHandler = null;
 var _custNameHandler = null;
 var _salesBranchOffHandler = null;
@@ -486,7 +487,7 @@ function afterConfigForLA() {
   // var _country = FormManager.getActualValue('cmrIssuingCntry');
   // CREATCMR-531
   setIERPSitePartyIDForLA()
-
+  
   if (dojo.byId('isuCd')) {
     // FormManager.disable('isuCd');
     FormManager.readOnly('isuCd');
@@ -553,6 +554,13 @@ function afterConfigForLA() {
       autoSetAbbrevNameForBrazil();
     });
   }
+  
+  // CREATCMR-6813 - AR Predefined tax info values
+  if (_taxCd1Handler == null) {
+    _taxCd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
+      showVatNotifForArgentina();
+      });
+    }
 
   // if(_subindustryHandler == null){
   // _subindustryHandler = dojo.connect(FormManager.getField('custType'),
@@ -2676,6 +2684,19 @@ function setMrcCdIBMEM(role) {
     FormManager.enable('mrcCd');
   }
 }
+
+// CREATCMR-6813 - AR Predefined tax info values
+function showVatNotifForArgentina() {
+  var _custGrp = FormManager.getActualValue('custGrp');
+  var _custSubGrp = FormManager.getActualValue('custSubGrp');
+  var _custType = FormManager.getActualValue('custType');
+  
+  if (FormManager.getActualValue('cmrIssuingCntry') == '613') {
+    if (_custGrp == "LOCAL" && _custType == 'IBMEM') {
+      cmr.showAlert("Please do a Save action to create the predefined entries in Tax Info tab.", "Notice");
+      }
+    }
+  }
 
 /* Register LA Validators */
 dojo.addOnLoad(function() {
