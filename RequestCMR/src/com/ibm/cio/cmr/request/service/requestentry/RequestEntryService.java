@@ -1740,7 +1740,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         throw new CmrException(new Exception("Reprocess can only be done by Administrators"));
       }
       StringBuilder comments = new StringBuilder();
-      comments.append("*Forced Recreation of CMR*\n");
+      comments.append("** Forced Recreation of CMR **\n");
       this.log.debug("Retreiving Request " + reqId + " for Reprocess..");
       RequestData requestData = new RequestData(entityManager, reqId);
 
