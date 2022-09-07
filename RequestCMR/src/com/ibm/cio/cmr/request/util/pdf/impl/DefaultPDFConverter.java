@@ -2,9 +2,14 @@ package com.ibm.cio.cmr.request.util.pdf.impl;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
@@ -14,7 +19,11 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.MassUpdt;
+import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
+import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.window.RequestSummaryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
@@ -115,6 +124,73 @@ public class DefaultPDFConverter implements PDFConverter {
               addDeleteReactivateDetails(admin, entityManager, document);
             }
 
+          } finally {
+            document.close();
+          }
+        } finally {
+          pdf.close();
+        }
+      } finally {
+        writer.close();
+      }
+      return true;
+    } catch (IOException io) {
+      LOG.warn("IO Error in Generating PDF for Request ID " + admin.getId().getReqId() + ":" + io.getMessage());
+      return true;
+    } catch (Exception e) {
+      LOG.error("Error in Generating PDF for Request ID " + admin.getId().getReqId(), e);
+      return false;
+    }
+  }
+
+  public boolean exportToPdfForMassUpdate(EntityManager entityManager, Admin admin, Data data, OutputStream os, String sysLoc) throws IOException {
+
+    try {
+      PdfWriter writer = new PdfWriter(os);
+      try {
+        PdfDocument pdf = new PdfDocument(writer);
+        try {
+          Document document = new Document(pdf);
+          try {
+            document.add(createHeader("Details for Request ID " + admin.getId().getReqId()));
+            document.add(blankLine());
+            addMainDetails(admin, data, document);
+            document.add(blankLine());
+
+            // get MassUpdate Request Details
+            Map<String, MassUpdtData> dataMap = getMassUpdtDataList(entityManager, admin);
+
+            // get All Addresses
+            List<MassUpdtAddr> addressList = getMassUpdtAddressList(entityManager, admin);
+
+            for (Map.Entry<String, MassUpdtData> massdata : dataMap.entrySet()) {
+
+              String cmrNo = massdata.getKey();
+              document.add(createHeader("Details for CMR Number: " + cmrNo));
+
+              if ("MASS UPDATE".equals(admin.getReqType().toUpperCase())) {
+                document.add(blankLine());
+
+                List<MassUpdtAddr> addressListPerCmr = null;
+                if (addressList != null) {
+                  addressListPerCmr = (List<MassUpdtAddr>) addressList.stream().filter(addr -> addr.getCmrNo().equals(cmrNo))
+                      .collect(Collectors.toList());
+
+                }
+                if (addressListPerCmr != null) {
+                  MassUpdtAddr soldTo = addAddressDetailsForMassUpdt(admin, data, addressListPerCmr, entityManager, document);
+                }
+                document.add(blankLine());
+                addCustomerDetailsForMassUpdt(entityManager, massdata.getValue(), document);
+
+                document.add(blankLine());
+                addIBMDetailsForMassUpdt(entityManager, massdata.getValue(), document);
+                document.add(blankLine());
+
+                // addExtraSections(entityManager, admin, data, sysLoc, soldTo,
+                // document);
+              }
+            }
           } finally {
             document.close();
           }
@@ -532,4 +608,202 @@ public class DefaultPDFConverter implements PDFConverter {
     return line;
   }
 
+  protected Map<String, MassUpdtData> getMassUpdtDataList(EntityManager entityManager, Admin admin)
+      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("PDF.GET_MASS_UPDT_DATA"));
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setParameter("ITERATION_ID", admin.getIterationId());
+
+    List<CompoundEntity> results = query.getCompundResults(Admin.class, Admin.BATCH_UPDATE_DATA_MAPPING);
+    Map<String, MassUpdtData> map = new HashMap<>();
+    for (CompoundEntity entity : results) {
+      MassUpdtData massUpdtData = entity.getEntity(MassUpdtData.class);
+      MassUpdt massUpdt = entity.getEntity(MassUpdt.class);
+      map.put(massUpdt.getCmrNo(), massUpdtData);
+
+    }
+    return map;
+
+  }
+
+  protected void addCustomerDetailsForMassUpdt(EntityManager entityManager, MassUpdtData data, Document document) {
+    document.add(createSubHeader("Customer Information"));
+    Table customer = createDetailsTable();
+    customer.addCell(createLabelCell("Abbreviated Name:"));
+    customer.addCell(createValueCell(data.getAbbrevNm()));
+    // customer.addCell(createLabelCell("Preferred Language:"));
+    // customer.addCell(createValueCell(data.getCustPrefLang()));
+
+    customer.addCell(createLabelCell("Subindustry:"));
+    customer.addCell(createValueCell(data.getSubIndustryCd()));
+    customer.addCell(createLabelCell("ISIC:"));
+    customer.addCell(createValueCell(data.getIsicCd(), 1, 3));
+
+    // addConverterCustomerDetails(entityManager, customer, data);
+
+    document.add(customer);
+  }
+
+  protected void addIBMDetailsForMassUpdt(EntityManager entityManager, MassUpdtData data, Document document) {
+    document.add(createSubHeader("IBM Information"));
+    Table ibm = createDetailsTable();
+
+    ibm.addCell(createLabelCell("Enterprise No.:"));
+    ibm.addCell(createValueCell(data.getEnterprise()));
+    ibm.addCell(createLabelCell("Company No.:"));
+    ibm.addCell(createValueCell(data.getCompany()));
+    ibm.addCell(createLabelCell("Affiliate No.:"));
+    ibm.addCell(createValueCell(data.getAffiliate(), 1, 3));
+
+    ibm.addCell(createLabelCell("Search Term (SORTL):"));
+    ibm.addCell(createValueCell(data.getSearchTerm()));
+    ibm.addCell(createLabelCell("ISU Code:"));
+    ibm.addCell(createValueCell(data.getIsuCd()));
+
+    /*
+     * ibm.addCell(createLabelCell("INAC Type:"));
+     * ibm.addCell(createValueCell(data.getInacType()));
+     */
+
+    ibm.addCell(createLabelCell("INAC Code:"));
+    ibm.addCell(createValueCell(data.getInacCd()));
+
+    /*
+     * ibm.addCell(createLabelCell("Coverage:")); if (data.getCovId() != null) {
+     * ibm.addCell(createValueCell(data.getCovId() + (data.getCovDesc() != null
+     * ? " - " + data.getCovDesc() : ""))); } else {
+     * ibm.addCell(createValueCell(null)); }
+     */
+    ibm.addCell(createLabelCell("Client Tier:"));
+    ibm.addCell(createValueCell(data.getClientTier()));
+
+    /*
+     * ibm.addCell(createLabelCell("Buying Group:")); if
+     * (!StringUtils.isEmpty(data.getBgId())) {
+     * ibm.addCell(createValueCell(data.getBgId() + " - " + data.getBgDesc()));
+     * } else { ibm.addCell(createValueCell(null)); }
+     */
+
+    /*
+     * ibm.addCell(createLabelCell("Global Buying Group:")); if
+     * (!StringUtils.isEmpty(data.getGbgId())) {
+     * ibm.addCell(createValueCell(data.getGbgId() + " - " +
+     * data.getGbgDesc())); } else { ibm.addCell(createValueCell(null)); }
+     */
+
+    /*
+     * ibm.addCell(createLabelCell("GEO Location Code:")); if
+     * (!StringUtils.isEmpty(data.getGeoLocationCd())) {
+     * ibm.addCell(createValueCell(data.getGeoLocationCd() + " - " +
+     * data.getGeoLocDesc())); } else { ibm.addCell(createValueCell(null)); }
+     */
+
+    /*
+     * ibm.addCell(createLabelCell("DUNS:"));
+     * ibm.addCell(createValueCell(data.getDunsNo()));
+     */
+
+    // addConverterIBMDetails(entityManager, ibm, data);
+
+    document.add(ibm);
+  }
+
+  protected MassUpdtAddr addAddressDetailsForMassUpdt(Admin admin, Data data, List<MassUpdtAddr> addressListPerCmr, EntityManager entityManager,
+      Document document) {
+    document.add(createSubHeader("Address Information"));
+
+    MassUpdtAddr soldTo = null;
+    for (MassUpdtAddr addr : addressListPerCmr) {
+      Table address = createDetailsTable();
+
+      GEOHandler handler = RequestUtils.getGEOHandler(this.cmrIssuingCntry);
+
+      if (handler.customerNamesOnAddress()) {
+        address.addCell(createLabelCell("Customer Name:"));
+        address.addCell(createValueCell(addr.getCustNm1(), 1, 3));
+        address.addCell(createLabelCell("Customer Name Con't:"));
+        address.addCell(createValueCell(addr.getCustNm2(), 1, 3));
+      }
+      address.addCell(createLabelCell("Address Type:"));
+      address.addCell(createValueCell(addr.getId().getAddrType()));
+      address.addCell(createLabelCell("Landed Country:"));
+      address.addCell(createValueCell(addr.getLandCntry()));
+
+      String lbl = "Address";
+      address.addCell(createLabelCell(lbl + ":"));
+      address.addCell(createValueCell(addr.getAddrTxt() + (StringUtils.isBlank(addr.getAddrTxt2()) ? "" : " " + addr.getAddrTxt2()), 1, 3));
+
+      lbl = PageManager.getLabel(data.getCmrIssuingCntry(), "StateProv", "State/Province");
+      address.addCell(createLabelCell(lbl + ":"));
+      address.addCell(createValueCell(addr.getStateProv()));
+      lbl = PageManager.getLabel(data.getCmrIssuingCntry(), "PostalCode", "Postal Code");
+      address.addCell(createLabelCell(lbl + ":"));
+      address.addCell(createValueCell(addr.getPostCd()));
+
+      lbl = PageManager.getLabel(data.getCmrIssuingCntry(), "Department", "Department");
+      address.addCell(createLabelCell(lbl + ":"));
+      address.addCell(createValueCell(addr.getDept()));
+      lbl = PageManager.getLabel(data.getCmrIssuingCntry(), "Division", "Division");
+      address.addCell(createLabelCell(lbl + ":"));
+      address.addCell(createValueCell(addr.getDivn()));
+
+      address.addCell(createLabelCell("DPL Check Result:"));
+      String dplCheck = addr.getDplChkResult();
+      String dplCheckText = "";
+      if ("P".equals(dplCheck)) {
+        dplCheckText = "Passed";
+      } else if ("F".equals(dplCheck)) {
+        dplCheckText = "FAILED";
+      } else if ("N".equals(dplCheck)) {
+        dplCheckText = "Not Required";
+      } else {
+        dplCheckText = "Not Done";
+      }
+      Cell dplCell = createValueCell(dplCheckText, 1, 3);
+      if ("F".equals(dplCheck)) {
+        dplCell.setFontColor(ColorConstants.RED);
+      }
+      address.addCell(dplCell);
+
+      if ("P".equals(dplCheck) || "F".equals(dplCheck)) {
+        address.addCell(createLabelCell("DPL Check Date:"));
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+        // address.addCell(createValueCell(addr.getDplChkTs() != null ?
+        // sdf.format(addr.getDplChkTs()) : ""));
+        if ("F".equals(dplCheck)) {
+          address.addCell(createLabelCell("DPL Error Information:"));
+          // address.addCell(createValueCell(addr.getDplChkInfo()));
+        } else {
+          address.addCell(createValueCell(null));
+          address.addCell(createValueCell(null));
+        }
+      }
+
+      // addConverterAddressDetails(entityManager, address, addr);
+
+      document.add(address);
+      document.add(blankLine());
+
+      if (addr.getId() != null && addr.getId().getAddrType() != null && addr.getId().getAddrType().contains("(ZS01)")) {
+        soldTo = addr;
+      }
+    }
+    return soldTo;
+  }
+
+  protected List<MassUpdtAddr> getMassUpdtAddressList(EntityManager entityManager, Admin admin) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("PDF.MASS_UPDATE_ADDR_RECORDS"));
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setParameter("ITERATION_ID", admin.getIterationId());
+
+    List<CompoundEntity> results = query.getCompundResults(Admin.class, Admin.BATCH_UPDATE_ADDR_MAPPING);
+    MassUpdtAddr addr = null;
+    List<MassUpdtAddr> addressList = new ArrayList<>();
+    LOG.debug("Size of Mass Upadte Addr Record list : " + results.size());
+    for (CompoundEntity entity : results) {
+      addr = entity.getEntity(MassUpdtAddr.class);
+      addressList.add(addr);
+    }
+    return addressList;
+  }
 }
