@@ -337,7 +337,7 @@
           <cmr:field fieldId="VATInd" id="vatInd" path="vatInd" tabId="MAIN_CUST_TAB" />         
         </p>
       </cmr:column>      
-      <cmr:column span="4" containerForField="VAT" exceptForCountry="897,649">
+      <cmr:column span="4" containerForField="VAT">
         <p>
           <label for="vat"> <cmr:fieldLabel fieldId="VAT" />: <cmr:delta text="${rdcdata.vat}" oldValue="${reqentry.vat}" /> <cmr:view
               forCountry="755">

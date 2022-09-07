@@ -1125,6 +1125,18 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update.setOldData(addr.getVatOld());
           results.add(update);
         }
+        // vatInd
+        if (!equals(addr.getVatInd(), addr.getVatIndOld())) {
+          update = new UpdatedNameAddrModel();
+          update.setAddrTypeCode(addrType);
+          update.setAddrSeq(seqNo);
+          update.setAddrType(DropdownListController.getDescription("AddressType", addrType, cmrCountry));
+          update.setSapNumber(sapNumber);
+          update.setDataField(PageManager.getLabel(cmrCountry, "VATInd", "-"));
+          update.setNewData(addr.getVatInd());
+          update.setOldData(addr.getVatIndOld());
+          results.add(update);
+        }
 
         // ExtWalletId
         if (!equals(addr.getExtWalletId(), addr.getExtWalletIdOld())) {

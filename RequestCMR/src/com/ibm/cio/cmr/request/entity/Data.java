@@ -920,6 +920,14 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
     this.vatExempt = vatExempt;
   }
 
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
+  }
+
   public String getCrosSubTyp() {
     return crosSubTyp;
   }
