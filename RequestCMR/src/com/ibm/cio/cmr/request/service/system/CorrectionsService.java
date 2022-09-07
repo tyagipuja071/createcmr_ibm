@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -36,6 +37,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 
@@ -55,6 +57,13 @@ public class CorrectionsService extends BaseSimpleService<CorrectionsModel> {
   private static final String CORRECTION_TYPE_REQUEST = "R";
   private static final String CORRECTION_TYPE_LEGACY = "L";
   private static final String CLEAR_CHARACTER = "#";
+
+  public static void main(String[] args) {
+    DecimalFormat f = new DecimalFormat("00");
+    for (int i = 1; i < 60; i += 2) {
+      System.out.print(f.format(i) + ",");
+    }
+  }
 
   @Override
   protected CorrectionsModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
@@ -227,6 +236,13 @@ public class CorrectionsService extends BaseSimpleService<CorrectionsModel> {
         entityManager.merge(oldAddr);
       }
     }
+
+    // add a comment on the request about the correction
+    String comment = "** Request Corrections Applied **\n\n";
+    comment += "Field values on the request were corrected and modified. Please check the request change log for details.";
+
+    LOG.debug("Adding comment log for corrections..");
+    RequestUtils.createCommentLogFromBatch(entityManager, user.getIntranetId(), reqId, comment);
 
     entityManager.flush();
     return out;
