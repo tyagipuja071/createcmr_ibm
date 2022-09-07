@@ -431,6 +431,14 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getVat());
               results.add(update);
             }
+            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getVatInd(), newData.getVatInd())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "VATInd"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "VATInd", "-"));
+              update.setNewData(newData.getVatInd());
+              update.setOldData(oldData.getVatInd());
+              results.add(update);
+            }
             if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxPayerCustCd(), newData.getTaxPayerCustCd())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "PSTExemptLicNum"))) {
               update = new UpdatedDataModel();
@@ -1113,6 +1121,18 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update.setDataField(PageManager.getLabel(cmrCountry, "VAT", "-"));
           update.setNewData(addr.getVat());
           update.setOldData(addr.getVatOld());
+          results.add(update);
+        }
+        // vatInd
+        if (!equals(addr.getVatInd(), addr.getVatIndOld())) {
+          update = new UpdatedNameAddrModel();
+          update.setAddrTypeCode(addrType);
+          update.setAddrSeq(seqNo);
+          update.setAddrType(DropdownListController.getDescription("AddressType", addrType, cmrCountry));
+          update.setSapNumber(sapNumber);
+          update.setDataField(PageManager.getLabel(cmrCountry, "VATInd", "-"));
+          update.setNewData(addr.getVatInd());
+          update.setOldData(addr.getVatIndOld());
           results.add(update);
         }
 
