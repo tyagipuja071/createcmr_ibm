@@ -152,9 +152,7 @@ public class DefaultPDFConverter implements PDFConverter {
         try {
           Document document = new Document(pdf);
           try {
-
             document.add(createHeader("Details for Request ID " + admin.getId().getReqId()));
-
             document.add(blankLine());
             addMainDetails(admin, data, document);
             document.add(blankLine());
@@ -195,9 +193,7 @@ public class DefaultPDFConverter implements PDFConverter {
         } finally {
           pdf.close();
         }
-      } finally
-
-      {
+      } finally {
         writer.close();
       }
       return true;
