@@ -615,10 +615,8 @@ public class DefaultPDFConverter implements PDFConverter {
     query.setParameter("ITERATION_ID", admin.getIterationId());
 
     List<CompoundEntity> results = query.getCompundResults(Admin.class, Admin.BATCH_UPDATE_DATA_MAPPING);
-    List<MassUpdtData> dataList = new ArrayList<MassUpdtData>();
     Map<String, MassUpdtData> map = new HashMap<>();
     for (CompoundEntity entity : results) {
-
       MassUpdtData massUpdtData = entity.getEntity(MassUpdtData.class);
       MassUpdt massUpdt = entity.getEntity(MassUpdt.class);
       map.put(massUpdt.getCmrNo(), massUpdtData);
@@ -806,7 +804,6 @@ public class DefaultPDFConverter implements PDFConverter {
       addr = entity.getEntity(MassUpdtAddr.class);
       addressList.add(addr);
     }
-
     return addressList;
   }
 }
