@@ -4934,6 +4934,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIBMTabFields, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(setKukalValuesByCustSubGrp, GEOHandler.NORDX);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);
