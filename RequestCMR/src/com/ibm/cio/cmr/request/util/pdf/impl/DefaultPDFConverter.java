@@ -171,11 +171,15 @@ public class DefaultPDFConverter implements PDFConverter {
               if ("MASS UPDATE".equals(admin.getReqType().toUpperCase())) {
                 document.add(blankLine());
 
-                List<MassUpdtAddr> addressListPerCmr = (List<MassUpdtAddr>) addressList.stream().filter(addr -> addr.getCmrNo().equals(cmrNo))
-                    .collect(Collectors.toList());
+                List<MassUpdtAddr> addressListPerCmr = null;
+                if (addressList != null) {
+                  addressListPerCmr = (List<MassUpdtAddr>) addressList.stream().filter(addr -> addr.getCmrNo().equals(cmrNo))
+                      .collect(Collectors.toList());
 
-                MassUpdtAddr soldTo = addAddressDetailsForMassUpdt(admin, data, addressListPerCmr, entityManager, document);
-
+                }
+                if (addressListPerCmr != null) {
+                  MassUpdtAddr soldTo = addAddressDetailsForMassUpdt(admin, data, addressListPerCmr, entityManager, document);
+                }
                 document.add(blankLine());
                 addCustomerDetailsForMassUpdt(entityManager, massdata.getValue(), document);
 
