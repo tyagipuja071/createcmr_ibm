@@ -10,11 +10,11 @@
     </Console>
 
     <Console name="logdna" target="SYSTEM_OUT">
-      <PatternLayout pattern="%-5p (%13F:%L) : %m%n" charset="UTF-8"/>
+      <PatternLayout pattern="[%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p [%t] (%13F:%L) : %m%n" charset="UTF-8"/>
     </Console>
 
     <RollingFile name="rollingFile" fileName="/ci/shared/data/applogs/createcmr/CreateCMR.log" filePattern="/ci/shared/data/applogs/createcmr/CreateCMR.log-%d{yyyy-MM-dd}-%i.log.gz">
-      <PatternLayout pattern="[%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p (%13F:%L) : %m%n" charset="UTF-8"/>
+      <PatternLayout pattern="[%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p [%t] (%13F:%L) : %m%n" charset="UTF-8"/>
       <Policies>
         <TimeBasedTriggeringPolicy interval="1" modulate="true" />
       </Policies>
