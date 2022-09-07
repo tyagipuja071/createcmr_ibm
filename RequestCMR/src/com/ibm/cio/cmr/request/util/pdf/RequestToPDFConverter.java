@@ -40,8 +40,8 @@ public class RequestToPDFConverter {
 
     EntityManager em = JpaManager.getEntityManager();
     try {
-      try (FileOutputStream fos = new FileOutputStream("C:\\Users\\JeffZAMORA\\Downloads\\test.pdf")) {
-        RequestToPDFConverter.exportToPdf(em, 19468, fos);
+      try (FileOutputStream fos = new FileOutputStream("C:\\Users\\0033HO744\\Downloads\\test.pdf")) {
+        RequestToPDFConverter.exportToPdf(em, 294048, fos);
       }
     } finally {
       em.close();
@@ -72,12 +72,16 @@ public class RequestToPDFConverter {
     Admin admin = compound.getEntity(Admin.class);
     Data data = compound.getEntity(Data.class);
     String sysLoc = (String) compound.getValue("SYS_LOC");
-    if (!Arrays.asList("CREATE", "UPDATE", "REACTIVATE", "DELETE").contains(admin.getReqType().toUpperCase())) {
+    if (!Arrays.asList("CREATE", "UPDATE", "REACTIVATE", "DELETE", "MASS UPDATE").contains(admin.getReqType().toUpperCase())) {
       LOG.debug("Request Type not supported for PDF generation.");
       return false;
     }
     PDFConverter converter = getConverter(sysLoc);
-    return converter.exportToPdf(entityManager, admin, data, os, sysLoc);
+    if ("MASS UPDATE".equals((admin.getReqType().toUpperCase()))) {
+      return converter.exportToPdfForMassUpdate(entityManager, admin, data, os, sysLoc);
+    } else {
+      return converter.exportToPdf(entityManager, admin, data, os, sysLoc);
+    }
   }
 
   /**
