@@ -14,7 +14,7 @@ function afterConfigTW() {
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
   FormManager.readOnly('isuCd');
-  FormManager.removeValidator('affiliate', Validators.DIGIT);
+  // FormManager.removeValidator('affiliate', Validators.DIGIT);
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -312,8 +312,7 @@ function addTWChecklistValidator() {
             REQID : reqId
           });
           if (!record || !record.sectionA1) {
-            return new ValidationResult(null, false,
-                'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+            return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
           }
         }
         return new ValidationResult(null, true);
