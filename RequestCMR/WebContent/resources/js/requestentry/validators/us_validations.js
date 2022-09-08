@@ -1275,6 +1275,7 @@ function setMainName1ForKYN() {
   if (reqType == 'C') {
     if ((custGrp == '3' && custSubGrp == 'KYN') || (custGrp == '14' && custSubGrp == 'BYMODEL' && restrictTo == 'KYN')) {
       FormManager.setValue('mainCustNm1', 'KYNDRYL INC');
+      FormManager.setValue('mainCustNm2', '');
     }
   }
 
