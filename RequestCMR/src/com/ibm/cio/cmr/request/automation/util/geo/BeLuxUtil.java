@@ -156,25 +156,23 @@ public class BeLuxUtil extends AutomationUtil {
       details.append("Processor Review will be required for Third Party Scenario/Data Center.\n");
       engineData.addNegativeCheckStatus("Scenario_Validation", "3rd Party/Data Center request will require CMDE review before proceeding.\n");
       break;
-    case SCENARIO_IBMEM_LU :
-    case SCENARIO_IBMEM_BE :
+    case SCENARIO_IBMEM_LU:
+    case SCENARIO_IBMEM_BE:
       Person person = null;
       if (StringUtils.isNotBlank(zs01.getCustNm1())) {
         try {
           String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-          person = BluePagesHelper.getPersonByName(mainCustName);
+          person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
           if (person == null) {
             engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
             details.append("Employee details not found in IBM BluePages.").append("\n");
             return false;
           } else {
-            details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
-                .append("\n");
+            details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
           }
         } catch (Exception e) {
           LOG.error("Not able to check name against bluepages", e);
-          engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED",
-              "Not able to check name against bluepages for scenario IBM Employee.");
+          engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check name against bluepages for scenario IBM Employee.");
           return false;
         }
       } else {
@@ -183,9 +181,8 @@ public class BeLuxUtil extends AutomationUtil {
         return false;
       }
       break;
-      
+
     }
-      
 
     return true;
   }

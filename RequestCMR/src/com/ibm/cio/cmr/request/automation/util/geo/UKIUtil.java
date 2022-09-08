@@ -178,7 +178,7 @@ public class UKIUtil extends AutomationUtil {
       if (StringUtils.isNotBlank(zs01.getCustNm1())) {
         try {
           String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-          person = BluePagesHelper.getPersonByName(mainCustName);
+          person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
           if (person == null) {
             engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
             details.append("Employee details not found in IBM BluePages.").append("\n");

@@ -1405,7 +1405,7 @@ public class FranceUtil extends AutomationUtil {
       LOG.debug("Checking against BluePages..");
       Person person = null;
       try {
-        person = BluePagesHelper.getPersonByName(name);
+        person = BluePagesHelper.getPersonByName(name, data.getCmrIssuingCntry());
         if (person == null) {
           LOG.debug("NO BluePages record found");
           return new PrivatePersonCheckResult(PrivatePersonCheckStatus.NoIBMRecord);

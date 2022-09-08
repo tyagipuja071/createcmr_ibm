@@ -115,13 +115,13 @@ public class NetherlandsUtil extends AutomationUtil {
     case SCENARIO_PRIVATE_CUSTOMER:
       String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
-      
+
     case SCENARIO_IBM_EMPLOYEE:
       Person person = null;
       if (StringUtils.isNotBlank(zs01.getCustNm1())) {
         try {
           String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-          person = BluePagesHelper.getPersonByName(mainCustName);
+          person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
           if (person == null) {
             engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
             details.append("Employee details not found in IBM BluePages.").append("\n");
@@ -141,7 +141,7 @@ public class NetherlandsUtil extends AutomationUtil {
       }
       break;
     }
-      
+
     return true;
   }
 
@@ -174,10 +174,10 @@ public class NetherlandsUtil extends AutomationUtil {
       overrides.clearOverrides(); // clear existing overrides
 
       NLFieldsContainer fields = calculate32SValuesFromIMSNL(entityManager, requestData.getData());
-  
-        String commercialFinanced = calculateSortlByRepTeamCd(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(), data.getIsuCd(),
-            data.getClientTier());
-        if (StringUtils.isNotBlank(commercialFinanced)) {
+
+      String commercialFinanced = calculateSortlByRepTeamCd(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(), data.getIsuCd(),
+          data.getClientTier());
+      if (StringUtils.isNotBlank(commercialFinanced)) {
         details.append("Coverage calculated successfully using Sortl logic.").append("\n");
         details.append("SORTL : " + data.getCommercialFinanced()).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SORTL", data.getCommercialFinanced(), commercialFinanced);
@@ -194,7 +194,7 @@ public class NetherlandsUtil extends AutomationUtil {
         results.setResults("Cannot Calculate");
         results.setDetails(details.toString());
       }
-        
+
       if (fields != null) {
         details.append("Coverage calculated successfully using 32S logic.").append("\n");
         if (StringUtils.isNotBlank(fields.getEngineeringBO())) {
@@ -495,7 +495,8 @@ public class NetherlandsUtil extends AutomationUtil {
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
     Addr zs01 = requestData.getAddress("ZS01");
-//    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
+    // boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager,
+    // requestData.getAdmin().getSourceSystId());
     LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
@@ -527,7 +528,7 @@ public class NetherlandsUtil extends AutomationUtil {
                 // check against D&B
                 matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
               }
-             
+
               if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                 resultCodes.add("D");
@@ -590,14 +591,13 @@ public class NetherlandsUtil extends AutomationUtil {
                       checkDetails
                           .append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing Bill-To address.\n");
                       resultCodes.add("D");
-                    } 
-                    else {
+                    } else {
                       LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                       checkDetails.append(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")" + "with same attentionTo");
                       checkDetails
                           .append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ") validated in the checks.\n");
 
-                   }
+                    }
                   } else {
                     checkDetails
                         .append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ") validated in the checks.\n");
@@ -748,7 +748,7 @@ public class NetherlandsUtil extends AutomationUtil {
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M", "D", "R");
   }
-  
+
   public String calculateSortlByRepTeamCd(EntityManager entityManager, String cmrIssuingctry, String countryUse, String isuCd, String clientTier) {
     List<Object[]> commercialFinancedResults = new ArrayList<>();
     String commercialFinanced = "";
