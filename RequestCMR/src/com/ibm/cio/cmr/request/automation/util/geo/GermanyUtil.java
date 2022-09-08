@@ -66,8 +66,7 @@ public class GermanyUtil extends AutomationUtil {
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
       "Phone #", "PostBox", "State/Province");
   private static final List<String> ZS01_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Street name and number", "Customer legal name");
-  private static final List<String> ZS01_NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention To/Building/Floor/Office","Division/Department");
-  
+  private static final List<String> ZS01_NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention To/Building/Floor/Office", "Division/Department");
 
   @SuppressWarnings("unchecked")
   public GermanyUtil() {
@@ -180,7 +179,7 @@ public class GermanyUtil extends AutomationUtil {
                 if (StringUtils.isNotBlank(zs01.getCustNm1())) {
                   try {
                     String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-                    person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName));
+                    person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName), data.getCmrIssuingCntry());
                     if (person == null) {
                       engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
                       details.append("Employee details not found in IBM BluePages.").append("\n");
@@ -731,7 +730,7 @@ public class GermanyUtil extends AutomationUtil {
     Addr billTo = requestData.getAddress("ZP01");
     Addr shipTo = requestData.getAddress("ZD01");
     Addr payGoBillTo = requestData.getAddress("PG01");
-    Addr soldTo=requestData.getAddress("ZS01");
+    Addr soldTo = requestData.getAddress("ZS01");
     String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
     StringBuilder detail = new StringBuilder(details);
     long reqId = requestData.getAdmin().getId().getReqId();
@@ -825,26 +824,26 @@ public class GermanyUtil extends AutomationUtil {
           return true;
         }
       }
-      
+
       if (CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && isRelevantZS01AddressFieldUpdated(changes, soldTo)) {
-          // Check if address closely matches DnB
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, false);
-          if (matches != null) {
-            isSoldToMatchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-            if (!isSoldToMatchesDnb) {
-              isNegativeCheckNeedeed = true;
-              detail.append("Updates to Sold To address need verification as it does not matches D&B");
-              LOG.debug("Updates to Sold To address need verification as it does not matches D&B");
-            } else {
-              detail.append("Updated address ZS01 (" + soldTo.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-              for (DnBMatchingResponse dnb : matches) {
-                detail.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                detail.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                detail.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                    + dnb.getDnbCountry() + "\n\n");
-              }
+        // Check if address closely matches DnB
+        List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, false);
+        if (matches != null) {
+          isSoldToMatchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+          if (!isSoldToMatchesDnb) {
+            isNegativeCheckNeedeed = true;
+            detail.append("Updates to Sold To address need verification as it does not matches D&B");
+            LOG.debug("Updates to Sold To address need verification as it does not matches D&B");
+          } else {
+            detail.append("Updated address ZS01 (" + soldTo.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+            for (DnBMatchingResponse dnb : matches) {
+              detail.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+              detail.append(" - Name.:  " + dnb.getDnbName() + " \n");
+              detail.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                  + dnb.getDnbCountry() + "\n\n");
             }
           }
+        }
       }
       if (isNegativeCheckNeedeed || isShipToExistOnReq || isInstallAtExistOnReq || isBillToExistOnReq || isPayGoBillToExistOnReq) {
         validation.setSuccess(false);
@@ -873,7 +872,8 @@ public class GermanyUtil extends AutomationUtil {
                   LOG.debug("Updates to PG01 addresses fields is found.Updates verified.");
                   detail.append("Updates to PG01 addresses found but have been marked as Verified.");
                   isNegativeCheckNeedeed = false;
-                } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && soldTo != null && (isNonRelevantZS01AddressFieldUpdated(changes, soldTo) || isRelevantZS01AddressFieldUpdated(changes, soldTo))) {
+                } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && soldTo != null
+                    && (isNonRelevantZS01AddressFieldUpdated(changes, soldTo) || isRelevantZS01AddressFieldUpdated(changes, soldTo))) {
                   validation.setSuccess(true);
                   LOG.debug("Updates to relevant addresses is found.Updates verified.");
                   detail.append("Updates to relevant addresses found but have been marked as Verified.");
@@ -1003,7 +1003,7 @@ public class GermanyUtil extends AutomationUtil {
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M");
   }
-  
+
   private boolean isRelevantZS01AddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
     List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
     if (addrChanges == null) {

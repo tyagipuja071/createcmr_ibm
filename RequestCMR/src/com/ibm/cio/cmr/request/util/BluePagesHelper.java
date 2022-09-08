@@ -209,6 +209,60 @@ public class BluePagesHelper {
   }
 
   /**
+   * Gets the Person details like Name, Country Code, Company code, CNUM by name
+   * per country.
+   * 
+   * @param name
+   * @return First and Last name as a single String
+   */
+  public static Map<String, String> getBluePagesDetailsByName(String name, String country) {
+
+    List<BPResults> allResults = new ArrayList<BPResults>();
+
+    BPResults resultsNormal = BluePages.getPersonsByNameFuzzy(name);
+    allResults.add(resultsNormal);
+
+    List<String> nameCombinations = getRearrangedNames(name);
+
+    BPResults rearrangedNameResuls = BluePages.getPersonsByNameFuzzy(nameCombinations.get(0));
+    allResults.add(rearrangedNameResuls);
+
+    rearrangedNameResuls = BluePages.getPersonsByName(nameCombinations.get(1));
+    allResults.add(rearrangedNameResuls);
+
+    Map<String, String> returnMap = new HashMap<String, String>();
+
+    LOG.debug("Status for normal Name search: " + resultsNormal.getStatusCode() + " = " + resultsNormal.getStatusMsg());
+    LOG.debug("Status for rearranged Name search: " + resultsNormal.getStatusCode() + " = " + resultsNormal.getStatusMsg());
+
+    for (BPResults bpresults : allResults) {
+      if (bpresults.succeeded() && returnMap.size() == 0) {
+        for (int i = 0; i < bpresults.rows(); i++) {
+          if (country.equals(bpresults.getRow(i).get(BLUEPAGES_KEY_EMP_COUNTRY_CODE))) {
+            returnMap.put(BLUEPAGES_KEY_EMP_NAME, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_NAME));
+            returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, bpresults.getRow(i).get(BLUEPAGES_KEY_EMP_COUNTRY_CODE));
+            returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, bpresults.getRow(i).get(BLUEPAGES_KEY_EMP_COMPANY_CODE));
+            returnMap.put(BLUEPAGES_KEY_EMP_CNUM, bpresults.getRow(i).get(BLUEPAGES_KEY_EMP_CNUM));
+            returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, bpresults.getRow(i).get(BLUEPAGES_KEY_EMP_INTERNET_ID));
+            returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, bpresults.getRow(i).get(BLUEPAGES_KEY_NOTES_MAIL));
+            break;
+          }
+        }
+      }
+    }
+    if (!resultsNormal.succeeded() && !rearrangedNameResuls.succeeded()) {
+      LOG.error("Error while doing Blue Pages look up ");
+      returnMap.put(BLUEPAGES_KEY_EMP_NAME, name);
+      returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_CNUM, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, name);
+      returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, name);
+    }
+    return returnMap;
+  }
+
+  /**
    * Gets the Person details like Name, Country Code, Company code, CNUM by
    * intranet addr.
    * 
@@ -446,8 +500,8 @@ public class BluePagesHelper {
    * @return
    * @throws CmrException
    */
-  public static Person getPersonByName(String name) throws CmrException {
-    Map<String, String> bpPersonDetails = BluePagesHelper.getBluePagesDetailsByName(name);
+  public static Person getPersonByName(String name, String country) throws CmrException {
+    Map<String, String> bpPersonDetails = BluePagesHelper.getBluePagesDetailsByName(name, country);
     if (bpPersonDetails != null) {
       Person p = new Person();
       p.setEmail(bpPersonDetails.get(BLUEPAGES_KEY_EMP_INTERNET_ID));
@@ -566,6 +620,53 @@ public class BluePagesHelper {
       }
     }
     return false;
+  }
+
+  /**
+   * Return an array of possible name arrangements of how names are stored in
+   * BluePages. This list can be extended in future if more possible
+   * arrangements are detected.
+   * 
+   * @param name
+   * @return
+   */
+  public static List<String> getRearrangedNames(String name) {
+    String[] splitName = name.trim().replaceAll(" +", " ").split(" ");
+    if (splitName.length < 2) {
+      return null;
+    }
+    List<String> rearrangedNames = new ArrayList<String>();
+    String rearrangedName = "";
+
+    // First arrangement
+    for (int i = 1; i < splitName.length; i++) {
+      rearrangedName = rearrangedName + splitName[i];
+      if (i != splitName.length - 1)
+        rearrangedName = rearrangedName + " ";
+    }
+    rearrangedName = rearrangedName + ", " + splitName[0];
+    rearrangedNames.add(rearrangedName);
+    rearrangedName = "";
+
+    // Second arrangement
+    if (splitName.length > 3) {
+      for (int i = 2; i < splitName.length; i++) {
+        rearrangedName = rearrangedName + splitName[i] + " ";
+      }
+      rearrangedName = rearrangedName.trim() + ", ";
+      for (int i = 0; i < 2; i++) {
+        rearrangedName = rearrangedName + splitName[i] + " ";
+      }
+    } else {
+      for (int i = 0; i < splitName.length - 1; i++) {
+        rearrangedName = rearrangedName + splitName[i];
+        if (i != splitName.length - 2)
+          rearrangedName = rearrangedName + " ";
+      }
+      rearrangedName = splitName[splitName.length - 1] + ", " + rearrangedName;
+    }
+    rearrangedNames.add(rearrangedName.trim());
+    return rearrangedNames;
   }
 
 }

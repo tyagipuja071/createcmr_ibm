@@ -721,7 +721,7 @@ public abstract class AutomationUtil {
       LOG.debug("Checking against BluePages..");
       Person person = null;
       try {
-        person = BluePagesHelper.getPersonByName(name);
+        person = BluePagesHelper.getPersonByName(name, country);
         if (person == null) {
           LOG.debug("NO BluePages record found");
           return new PrivatePersonCheckResult(PrivatePersonCheckStatus.NoIBMRecord);
