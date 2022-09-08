@@ -1088,6 +1088,8 @@ function addAddressTypeValidator() {
             if (zs01Cnt == 0) {
               // CMR-3389
               return new ValidationResult(null, false, 'Sold-to address is mandatory for CMR creation.');
+            } else if (zs01Cnt > 1) {
+              return new ValidationResult(null, false, 'Only one Sold-To address is allowed.');
             }
           } else if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
             return new ValidationResult(null, false, 'All address types are mandatory except G Address.');
