@@ -208,7 +208,14 @@ function processRequestAction() {
         // if there are no errors, show the Address Verification modal window
         cmr.showModal('addressVerificationModal');
       }
-    } else {
+    }
+    if((FormManager.getActualValue('vatInd')=='N')&&
+ 		   ((GEOHandler.LA.includes(FormManager.getActualValue('cmrIssuingCntry'))) || 
+ 				   (GEOHandler.EMEA.includes(FormManager.getActualValue('cmrIssuingCntry')))))
+     	{
+     		findVatInd();
+     	}
+    else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
 
