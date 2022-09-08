@@ -1842,7 +1842,7 @@ function updateIsbuCd() {
   if (_mrcCd == '3' && FormManager.getActualValue('isbuCd') == '') {
     _isbuCd = 'GMB' + _industryClass;
     FormManager.setValue('isbuCd', _isbuCd);
-  } else if (_mrcCd == '2') {
+  } else if (_mrcCd == '2' && _sectorCd != '') {
     _isbuCd = _sectorCd + _industryClass;
     FormManager.setValue('isbuCd', _isbuCd);
   }
