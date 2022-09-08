@@ -73,6 +73,7 @@ function afterConfigKR() {
   RemoveCrossAddressMandatory();
   setChecklistStatus();
   addKRChecklistValidator();
+  handleObseleteExpiredDataForUpdate();
 }
 
 function setClientTierValues() {
@@ -92,6 +93,7 @@ function setClientTierValues() {
     }
     FormManager.enable('clientTier');
   }
+  handleObseleteExpiredDataForUpdate();
 }
 
 function setChecklistStatus() {
@@ -349,6 +351,60 @@ function autoSetAbbrevNmLocnLogic() {
   // }
 }
 
+// CREATCMR -5269
+function handleObseleteExpiredDataForUpdate() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  // lock all the coverage fields and remove validator
+  if (reqType == 'U') {
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('mrcCd');
+    FormManager.readOnly('inacType');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('commercialFinanced');
+    FormManager.readOnly('contactName2');
+    FormManager.readOnly('contactName3');
+    FormManager.readOnly('cmrNoPrefix');
+    FormManager.readOnly('bgId');
+    FormManager.readOnly('gbgId');
+    FormManager.readOnly('bgRuleId');
+    FormManager.readOnly('geoLocationCd');
+    FormManager.readOnly('dunsNo');
+    FormManager.readOnly('orgNo');
+    FormManager.readOnly('creditCd');
+    FormManager.readOnly('dealerNo');
+
+    FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.removeValidator('isuCd', Validators.REQUIRED);
+    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
+    FormManager.removeValidator('inacType', Validators.REQUIRED);
+    FormManager.removeValidator('inacCd', Validators.REQUIRED);
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+    FormManager.removeValidator('covId', Validators.REQUIRED);
+    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
+    FormManager.removeValidator('contactName2', Validators.REQUIRED);
+    FormManager.removeValidator('contactName3', Validators.REQUIRED);
+    FormManager.removeValidator('bgId', Validators.REQUIRED);
+    FormManager.removeValidator('gbgId', Validators.REQUIRED);
+    FormManager.removeValidator('geoLocationId', Validators.REQUIRED);
+    FormManager.removeValidator('dunsNo', Validators.REQUIRED);
+    FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
+    FormManager.removeValidator('orgNo', Validators.REQUIRED);
+    FormManager.removeValidator('creditCd', Validators.REQUIRED);
+    FormManager.removeValidator('dealerNo', Validators.REQUIRED);
+
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
   console.log('adding KOREA functions...');
@@ -371,4 +427,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.KR);
+  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.KR);
+  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.KR);
+  GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.KR);
 });
