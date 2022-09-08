@@ -174,7 +174,7 @@ public class SpainUtil extends AutomationUtil {
       if (StringUtils.isNotBlank(soldTo.getCustNm1())) {
         try {
           String mainCustName = soldTo.getCustNm1() + (StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "");
-          person = BluePagesHelper.getPersonByName(mainCustName);
+          person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
           if (person == null) {
             engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
             details.append("Employee details not found in IBM BluePages.").append("\n");
