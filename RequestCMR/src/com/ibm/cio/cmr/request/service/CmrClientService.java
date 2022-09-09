@@ -120,7 +120,7 @@ public class CmrClientService extends BaseSimpleService<Object> {
       } else if ("ALL".equals(serviceType)) {
         getGlc(entityManager, mainAddr, data, response);
         getBuyingGroup(entityManager, mainAddr, data, response);
-        getLHDuns(entityManager, mainAddr, data, response);
+        // getLHDuns(entityManager, mainAddr, data, response);
         getCoverage(entityManager, mainAddr, data, response);
       }
 

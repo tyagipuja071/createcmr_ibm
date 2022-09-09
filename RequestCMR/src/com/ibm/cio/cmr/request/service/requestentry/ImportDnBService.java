@@ -554,7 +554,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       CNHandler cnHandler = (CNHandler) converter;
       cnHandler.convertChinaStateNameToStateCode(addr, cmr, entityManager);
     }
-    if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3 && (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()))) {
+    if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3
+        && (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()))) {
       convertStateNameToStateCode(addr, cmr, entityManager);
     }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {
@@ -729,17 +730,18 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     addr.setCustPhone(cmr.getCmrCustPhone());
     addr.setCustFax(cmr.getCmrCustFax());
 
-    if ("U".equals(reqModel.getReqType())) {
-      addr.setAddrStdResult("X");
-    } else {
-      // CMR-3994 - county
-      if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && !StringUtils.isBlank(addr.getCounty())) {
-        addr.setAddrStdResult("C");
-        addr.setAddrStdAcceptInd("Y");
-        addr.setAddrStdTs(SystemUtil.getCurrentTimestamp());
-      }
-    }
+    // CREATCMR-5741 - no addr std
+    /*
+     * if ("U".equals(reqModel.getReqType())) { addr.setAddrStdResult("X"); }
+     * else { // CMR-3994 - county if
+     * (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) &&
+     * !StringUtils.isBlank(addr.getCounty())) { addr.setAddrStdResult("C");
+     * addr.setAddrStdAcceptInd("Y");
+     * addr.setAddrStdTs(SystemUtil.getCurrentTimestamp()); } }
+     */
 
+    // CREATCMR-5741 - no addr std
+    addr.setAddrStdResult("X");
     cmr.setCmrIssuedBy(reqModel.getCmrIssuingCntry());
 
     if (converter != null) {
@@ -1030,7 +1032,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     reqCmtLog.setUpdateTs(reqCmtLog.getCreateTs());
     service.createEntity(reqCmtLog, entityManager);
   }
-  
+
   public void convertStateNameToStateCode(Addr addr, FindCMRRecordModel cmr, EntityManager entityManager) {
     LOG.debug("Convert  StateName to StateCode Begin >>>");
     String stateCode = null;

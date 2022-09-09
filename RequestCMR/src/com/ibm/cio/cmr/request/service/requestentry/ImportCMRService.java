@@ -730,6 +730,9 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp()); // placeholder
                                                                  // for now
       }
+
+      // CREATCMR-5741 - no addr std
+      addr.setAddrStdResult("X");
       addr.setCounty(cmr.getCmrCountyCode());
       addr.setCountyName(cmr.getCmrCounty());
       // addr.setCustNm1(cmr.getCmrName1Plain());

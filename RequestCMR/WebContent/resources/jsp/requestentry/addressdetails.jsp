@@ -1846,52 +1846,53 @@
     <br>
   </cmr:row>
 
-
-  <cmr:row topPad="8">
-    <cmr:column span="1">
-      <cmr:label fieldId="addressStdResult_view">${ui.addrStdResult}:</cmr:label>
-    </cmr:column>
-    <cmr:column span="2">
-      <div id="addressStdResult_view">-</div>
-    </cmr:column>
-  </cmr:row>
-
-
-  <cmr:row>
-    <cmr:column span="1">
-      <cmr:label fieldId="addressStdTs_view">${ui.addrStdTs}:</cmr:label>
-    </cmr:column>
-    <cmr:column span="2">
-      <div id="addressStdTs_view">-</div>
-    </cmr:column>
-  </cmr:row>
-
-
-  <cmr:row>
-    <cmr:column span="1" width="250">
-      <cmr:label fieldId="addressStdRejReason_view">${ui.addrStdRejReason}:</cmr:label>
-    </cmr:column>
-    <cmr:column span="2">
-      <div id="addressStdRejReason_view">-</div>
-    </cmr:column>
-  </cmr:row>
-
-
-  <cmr:row>
-    <cmr:column span="1" width="250">
-      <cmr:label fieldId="addressStdRejCmt_view">${ui.addrStdRejCmt}:</cmr:label>
-    </cmr:column>
-    <br>
-  </cmr:row>
-
-
-  <cmr:row>
-    <cmr:column span="1">
-      <p>
-        <textarea id="addressStdRejCmt_view" readonly="true" rows="5" cols="70">-</textarea>
-      </p>
-    </cmr:column>
-  </cmr:row>
+  <div style="display:none">
+    <cmr:row topPad="8">
+      <cmr:column span="1">
+        <cmr:label fieldId="addressStdResult_view">${ui.addrStdResult}:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="addressStdResult_view">-</div>
+      </cmr:column>
+    </cmr:row>
+  
+  
+    <cmr:row>
+      <cmr:column span="1">
+        <cmr:label fieldId="addressStdTs_view">${ui.addrStdTs}:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="addressStdTs_view">-</div>
+      </cmr:column>
+    </cmr:row>
+  
+  
+    <cmr:row>
+      <cmr:column span="1" width="250">
+        <cmr:label fieldId="addressStdRejReason_view">${ui.addrStdRejReason}:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="addressStdRejReason_view">-</div>
+      </cmr:column>
+    </cmr:row>
+  
+  
+    <cmr:row>
+      <cmr:column span="1" width="250">
+        <cmr:label fieldId="addressStdRejCmt_view">${ui.addrStdRejCmt}:</cmr:label>
+      </cmr:column>
+      <br>
+    </cmr:row>
+  
+  
+    <cmr:row>
+      <cmr:column span="1">
+        <p>
+          <textarea id="addressStdRejCmt_view" readonly="true" rows="5" cols="70">-</textarea>
+        </p>
+      </cmr:column>
+    </cmr:row>
+  </div>
 
 
   <cmr:buttonsRow>
