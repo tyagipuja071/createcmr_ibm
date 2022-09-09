@@ -713,9 +713,20 @@ function addAttachmentValidator() {
               return new ValidationResult(null, false, 'Company Proof in Attachment tab is required.');
             } else {
               return new ValidationResult(null, true);
-            }
-           }
-            else {                         
+              }
+           } 
+          if ((cmrIssuingCntry == '616' && custSubType == 'ESOSW') || (cmrIssuingCntry == '834' && custSubType == 'ASLOM')) {
+             // For AU/SG ESA Enrollment Form
+             var id = FormManager.getActualValue('reqId');
+             var ret = cmr.query('CHECK_ESA_MATCH_ATTACHMENT', {
+               ID : id
+             });
+             if (ret == null || ret.ret1 == null) {
+               return new ValidationResult(null, false, 'ESA Enrollment Form Attachment tab is required.');
+             } else {
+               return new ValidationResult(null, true);
+             }
+           } else {                         
             var id = FormManager.getActualValue('reqId');
             var ret = cmr.query('CHECK_TERRITORY_ATTACHMENT', {
               ID : id
@@ -4617,7 +4628,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.AP, GEOHandler.REQUESTER, true);
   GEOHandler.registerValidator(similarAddrCheckValidator, GEOHandler.AP, null, true);
 
-  GEOHandler.registerValidator(addAttachmentValidator, [SysLoc.SRI_LANKA, SysLoc.BANGLADESH, SysLoc.NEPAL], GEOHandler.REQUESTER, false, false);
+  GEOHandler.registerValidator(addAttachmentValidator, [SysLoc.SRI_LANKA, SysLoc.BANGLADESH, SysLoc.NEPAL, SysLoc.AUSTRALIA, SysLoc.SINGAPORE], GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(setAttachmentOnCluster, [ SysLoc.INDIA, SysLoc.SRI_LANKA, SysLoc.BANGLADESH], GEOHandler.REQUESTER, false, false);
   
   // double creates
