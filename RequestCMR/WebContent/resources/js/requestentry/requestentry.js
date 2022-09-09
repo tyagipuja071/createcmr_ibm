@@ -209,9 +209,8 @@ function processRequestAction() {
         cmr.showModal('addressVerificationModal');
       }
     }
-    if((FormManager.getActualValue('vatInd')=='N')&&
- 		   ((GEOHandler.LA.includes(FormManager.getActualValue('cmrIssuingCntry'))) || 
- 				   (GEOHandler.EMEA.includes(FormManager.getActualValue('cmrIssuingCntry')))))
+    if((GEOHandler.LA.includes(FormManager.getActualValue('cmrIssuingCntry'))) || 
+ 				   (GEOHandler.EMEA.includes(FormManager.getActualValue('cmrIssuingCntry'))))
      	{
      		findVatInd();
      	}
