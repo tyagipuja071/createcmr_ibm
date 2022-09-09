@@ -998,27 +998,27 @@ function afterConfigForEMEA(){
     });
   }
 }
+
 function findVatInd() {
 	  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 	  var reqId = FormManager.getActualValue('reqId');
 	  var vatInd = FormManager.getActualValue('vatInd');
-
 	    if (vatInd == 'N') {
 	      console.log("Test");
 	     cmr.showConfirm('markSendForProcessing()',
 	          '<div align="center"><strong><i><u><b><p style="font-size:25px"> Warning Message</p></u><br><br><p style="font-size:15px">Please note, if you choose not to provide the company VAT ID, IBM will not be able to include VAT ID in the customer address section. As a consequence the IBM invoice may not be eligible to recover the VAT charged to the client which can cause a delay on payment in countries that is required. However, at any moment business can submit VAT ID update whenever VAT ID is collected needed.</p><br><br> <p style="font-size:17px">Would you like  to proceed?</p></i></strong></div>', 'Warning', null, {
 	    		OK : 'Ok',
 	    CANCEL : 'Cancel'
-	    
-	  });
+	    	  });
 	    }
 }
-
 
 function markSendForProcessing() {
 	  var sendForProcess = YourActions.Send_for_Processing;
 	  FormManager.doAction('frmCMR', sendForProcess, true);
 	}
+
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');

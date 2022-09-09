@@ -226,12 +226,11 @@ function processRequestAction() {
         cmr.showModal('addressVerificationModal');
       }
     }
-    if((FormManager.getActualValue('vatInd')=='N')&&
- 		   ((GEOHandler.LA.includes(FormManager.getActualValue('cmrIssuingCntry'))) || 
- 				   (GEOHandler.EMEA.includes(FormManager.getActualValue('cmrIssuingCntry')))))
-     	{
+
+    if((GEOHandler.LA.includes(FormManager.getActualValue('cmrIssuingCntry'))) || 
+ 				   (GEOHandler.EMEA.includes(FormManager.getActualValue('cmrIssuingCntry'))))	{
      		findVatInd();
-     	}
+     }
     else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
