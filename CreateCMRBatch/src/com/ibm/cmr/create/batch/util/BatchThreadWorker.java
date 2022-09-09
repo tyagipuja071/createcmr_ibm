@@ -69,6 +69,7 @@ public class BatchThreadWorker<T> implements Runnable {
           this.batchService.executeBatchForRequests(entityManager, this.requestIds);
 
           if (this.batchService.isTransactional() && transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
+            LOG.debug("Batch thread commit..");
             transaction.commit();
           }
 
@@ -83,6 +84,7 @@ public class BatchThreadWorker<T> implements Runnable {
             ChangeLogListener.clearManager();
           }
           if (this.batchService.isTransactional() && transaction != null && transaction.isActive()) {
+            LOG.debug("Batch thread ROLLBACK..");
             transaction.rollback();
           }
           // empty the manager

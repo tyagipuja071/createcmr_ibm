@@ -130,4 +130,9 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     return "US - Business Partner Process";
   }
 
+  @Override
+  public void resetWaitingStatus() {
+    this.waiting = false;
+  }
+
 }
