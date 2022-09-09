@@ -137,6 +137,12 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
           workers.add(worker);
         }
       }
+      if (truePendingItems.size() < threads) {
+        // if the pending items is less than the thread count, stop on next
+        // execution to ensure requeueing of previous pending records
+        LOG.debug("Added items less than thread count (" + truePendingItems.size() + "/" + threads + "), rollover will stop");
+        rollover = false;
+      }
     }
 
     LOG.debug("Initiating shutdown of executor...");
