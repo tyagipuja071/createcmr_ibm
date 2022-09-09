@@ -966,22 +966,52 @@ function addIsuCdObsoleteValidator(){
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+// CREATCMR-6244
+function vatOptionalForLandedUK() {
+  var _reqId = FormManager.getActualValue('reqId');
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01"
+  };
+
+  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+  landCntry = landCntryResult.ret1;
+
+  if (reqType == 'C') {
+    if (landCntry == 'GB') {
+      if ((issuingCntry != '866' && custGrp == 'CROSS') || (issuingCntry == '866' && custGrp == 'LOCAL')) {
+        FormManager.resetValidations('vat');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+      }
+    }
+  }
+}
+
+function afterConfigForEMEA(){
+// 6244
+  if (_scenarioTypeHandler == null && FormManager.getField('custGrp')) {
+    _scenarioTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      vatOptionalForLandedUK();
+    });
+  }
+}
+
 function findVatInd() {
 	  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 	  var reqId = FormManager.getActualValue('reqId');
 	  var vatInd = FormManager.getActualValue('vatInd');
-
 	    if (vatInd == 'N') {
 	      console.log("Test");
 	     cmr.showConfirm('markSendForProcessing()',
 	          '<div align="center"><strong><i><u><b><p style="font-size:25px"> Warning Message</p></u><br><br><p style="font-size:15px">Please note, if you choose not to provide the company VAT ID, IBM will not be able to include VAT ID in the customer address section. As a consequence the IBM invoice may not be eligible to recover the VAT charged to the client which can cause a delay on payment in countries that is required. However, at any moment business can submit VAT ID update whenever VAT ID is collected needed.</p><br><br> <p style="font-size:17px">Would you like  to proceed?</p></i></strong></div>', 'Warning', null, {
 	    		OK : 'Ok',
 	    CANCEL : 'Cancel'
-	    
-	  });
+	    	  });
 	    }
 }
-
 
 function markSendForProcessing() {
 	  var sendForProcess = YourActions.Send_for_Processing;
