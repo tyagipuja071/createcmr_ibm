@@ -700,19 +700,20 @@ function addAttachmentValidator() {
               return new ValidationResult(null, false, 'Company Proof in Attachment tab is required.');
             } else {
               return new ValidationResult(null, true);
-            }
-           }if((cmrIssuingCntry == '616' && custSubType == 'ESOSW') || (cmrIssuingCntry == '834' && custSubType == 'ASLOM')){
-             // For AU/SG ESA Enrollment Form 
+              }
+           } 
+          if ((cmrIssuingCntry == '616' && custSubType == 'ESOSW') || (cmrIssuingCntry == '834' && custSubType == 'ASLOM')) {
+             // For AU/SG ESA Enrollment Form
              var id = FormManager.getActualValue('reqId');
              var ret = cmr.query('CHECK_ESA_MATCH_ATTACHMENT', {
                ID : id
-             });   
-             if(ret == null || ret.ret1 == null){
-               return new ValidationResult(null, false, ' ESA Enrollment Form Attachment tab is required.');
+             });
+             if (ret == null || ret.ret1 == null) {
+               return new ValidationResult(null, false, 'ESA Enrollment Form Attachment tab is required.');
              } else {
                return new ValidationResult(null, true);
              }
-            } else {                         
+           } else {                         
             var id = FormManager.getActualValue('reqId');
             var ret = cmr.query('CHECK_TERRITORY_ATTACHMENT', {
               ID : id
