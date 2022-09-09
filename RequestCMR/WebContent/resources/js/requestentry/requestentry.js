@@ -150,6 +150,15 @@ function processRequestAction() {
         } else {
           executeBeforeSubmit();
         }
+      } else if (cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
+        // Cmr-3176- Dnb match
+        var checkCompProof = checkForCompanyProofAttachment();
+        if (checkIfFinalDnBCheckRequired() && reqType == 'U' && checkCompProof) {
+          // CustNm check and Addresses Dnb Check
+          matchCustNmAUUpdate();
+        } else {
+          cmr.showModal('addressVerificationModal');
+        }
       } else if (cmrCntry == SysLoc.SINGAPORE || cmrCntry == SysLoc.AUSTRALIA) {
         // Cmr-1701 for isic Dnb match acc to scenario
         if (findDnbResult == 'Accepted') {
@@ -201,6 +210,14 @@ function processRequestAction() {
         // if there are no errors, show the Address Verification modal window
         cmr.showModal('addressVerificationModal');
       }
+    } else if (comp_proof_INAUSG && cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
+      // Cmr-3176- Dnb match
+      var checkCompProof = checkForCompanyProofAttachment();
+      if (checkIfFinalDnBCheckRequired() && reqType == 'U' && checkCompProof) {
+        matchCustNmAUUpdate();
+      } else {
+        cmr.showModal('addressVerificationModal');
+      }
     } else if (comp_proof_INAUSG && (cmrCntry == SysLoc.SINGAPORE || cmrCntry == SysLoc.AUSTRALIA)) {
       if (checkIfDnBCheckReqForAUSG() && findDnbResult == 'Accepted') {
         matchDnbForAUSG();
@@ -209,11 +226,11 @@ function processRequestAction() {
         cmr.showModal('addressVerificationModal');
       }
     }
+
     if((GEOHandler.LA.includes(FormManager.getActualValue('cmrIssuingCntry'))) || 
- 				   (GEOHandler.EMEA.includes(FormManager.getActualValue('cmrIssuingCntry'))))
-     	{
+ 				   (GEOHandler.EMEA.includes(FormManager.getActualValue('cmrIssuingCntry'))))	{
      		findVatInd();
-     	}
+     }
     else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
@@ -1166,8 +1183,8 @@ function connectToCmrServices() {
         dojo.byId('geoLocDescCont').innerHTML = data.glcDesc != null ? data.glcDesc : '(no description available)';
       }
       if (data.dunsError) {
-        errorMsg += (showError ? ', ' : '') + 'DUNS No.';
-        showError = true;
+        //errorMsg += (showError ? ', ' : '') + 'DUNS No.';
+        //showError = true;
       } else {
         // var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
         // var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA,
@@ -1203,7 +1220,7 @@ function connectToCmrServices() {
     FormManager.setValue('covId', '');
     FormManager.setValue('bgId', '');
     FormManager.setValue('geoLocationCd', '');
-    FormManager.setValue('dunsNo', '');
+    //FormManager.setValue('dunsNo', '');
   }
   FormManager.setValue('covBgRetrievedInd', 'Y');
 }
@@ -1459,11 +1476,22 @@ function overrideDnBMatch() {
   var cntry = FormManager.getActualValue('landCntry');
   var loc = FormManager.getActualValue('cmrIssuingCntry');
   if (cntry == 'CN' || loc == '641') {
-    cmr
-        .showConfirm(
-            'doOverrideDnBMatch()',
-            'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
-            'Warning', null, null);
+    var reqType = FormManager.getActualValue('reqType');
+    var custSubGroup = FormManager.getActualValue('custSubGrp');
+
+    if(loc == '641' && (custSubGroup == 'CROSS' && reqType == 'C' || reqType == 'U' && cntry != 'CN')){
+      cmr
+      .showConfirm(
+          'doOverrideDnBMatch()',
+          'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+          'Warning', null, null);
+    }else{
+      cmr
+      .showConfirm(
+          'doOverrideDnBMatch()',
+          'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+          'Warning', null, null);
+    }
   } else {
     cmr
         .showConfirm(
@@ -1679,6 +1707,14 @@ function checkIfFinalDnBCheckRequired() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+  if (cmrCntry == '834') {
+    var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+      ID : reqId
+    });
+    if (ret && ret.ret1 && ret.ret1 != '') {
+      return false;
+    }
+  }
   if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
       && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US
@@ -1688,6 +1724,13 @@ function checkIfFinalDnBCheckRequired() {
     if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
         && matchOverrideIndc != 'Y') {
       // currently Enabled Only For CN
+      return true;
+    }
+  }
+
+  if (cmrCntry == '616') {
+    if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')) {
+      // currently Enabled Only For AU
       return true;
     }
   }
@@ -1796,6 +1839,9 @@ function matchDnBForAutomationCountries() {
                     .showAlert('This action will override the D&B Matching Process. By overriding the D&B matching, you\'re obliged to provide either one of the following documentation '
                         + 'as backup-client\'s official website, business registration proof, government issued documents, client\'s confirmation email and signed PO, attach it under the file content of Company Proof. '
                         + 'Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.');
+                FormManager.setValue('matchOverrideIndc', 'Y');
+              } else if (data.cnCrossFlag) {
+                cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');
                 FormManager.setValue('matchOverrideIndc', 'Y');
               } else {
                 cmr.showModal('addressVerificationModal');
@@ -1942,7 +1988,7 @@ function matchDnbForAUSG() {
               } else {
                 cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
               }
-            } else if (data.match && !data.isicMatch) {
+            } else if (data.match && !data.isicMatch && !(reqType == 'U' && cntry == SysLoc.AUSTRALIA)) {
               comp_proof_INAUSG = false;
               console.log("ISIC validation failed by Dnb.");
               cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");
@@ -1977,6 +2023,224 @@ function matchDnbForAUSG() {
         error : function(error, ioargs) {
         }
       });
+}
+
+function matchCustNmAUUpdate() {
+  // Get Fields
+  var reqId = FormManager.getActualValue('reqId');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  var formerCustNm = getFormerCustNameAU(reqId);
+  formerCustNm = formerCustNm.trim();
+  var vat = FormManager.getActualValue('vat');
+  var custNm = '';
+  var dataAPI = {};
+  // dataAPI.success = false;
+  var contractCustNm = cmr.query('GET.CUSTNM_ADDR', {
+    REQ_ID : reqId,
+    ADDR_TYPE : 'ZS01'
+  });
+  if (contractCustNm != undefined) {
+    custNm = contractCustNm.ret1.toUpperCase() + " " + contractCustNm.ret2.toUpperCase();
+  }
+  custNm = custNm.trim();
+  console.log("Checking if the request matches D&B...");
+  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
+  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
+  var isicCd = FormManager.getActualValue('isicCd');
+  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
+    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
+    return;
+  }
+  if (custNm == formerCustNm) {
+    comp_proof_INAUSG = false;
+    matchDnbForAUUpdate();
+    return;
+  }
+  // match with API
+  if (vat != '' && reqId != '' && formerCustNm != '' && custNm != '') {
+    dataAPI = cmr.validateCustNmFromVat(vat, reqId, formerCustNm, custNm);
+  } else {
+    dataAPI.success = false;
+  }
+
+  if (dataAPI.success && dataAPI.custNmMatch) {
+    if (dataAPI.formerCustNmMatch) {
+      comp_proof_INAUSG = true;
+      checkDnBMatchingAttachmentValidator();
+      if (FormManager.validate('frmCMR')) {
+        MessageMgr.clearMessages();
+        doValidateRequest();
+        matchDnbForAUUpdate();
+        return;
+      } else {
+        cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
+      }
+
+    } else {
+      console.log("Name matches found in API but former Name doesn't match with Historical/trading/business name in API");
+      comp_proof_INAUSG = false;
+      cmr.showAlert("Please attach company proof as Name validation failed by API.");
+    }
+  } else if (dataAPI.success && dataAPI.formerCustNmMatch && !dataAPI.custNmMatch) {
+    comp_proof_INAUSG = false;
+    console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");
+    cmr.showAlert("Please attach company proof as Name validation failed by API.");
+  } else {
+    // match it with AU customerNm API
+    if (reqId != '' && formerCustNm != '' && custNm != '') {
+      dataAPI = cmr.validateCustNmFromAPI(reqId, formerCustNm, custNm);
+    } else {
+      dataAPI.success = false;
+    }
+
+    if (dataAPI.success && dataAPI.custNmMatch) {
+      if (dataAPI.formerCustNmMatch) {
+        comp_proof_INAUSG = true;
+        checkDnBMatchingAttachmentValidator();
+        if (FormManager.validate('frmCMR')) {         
+          matchDnbForAUUpdate();
+          return;
+        } else {
+          cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
+        }
+
+      } else {
+        console.log("Name matches found in API but former Name doesn't match with Historical/trading/business name in API");
+        comp_proof_INAUSG = false;
+        cmr.showAlert("Please attach company proof as Name validation failed by API.");
+      }
+    } else if (dataAPI.success && dataAPI.formerCustNmMatch && !dataAPI.custNmMatch) {
+      comp_proof_INAUSG = false;
+      console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");   
+      cmr.showAlert("Please attach company proof as Name validation failed by API.");
+    } else {
+      cmr.showProgress('Customer Name match with API failed . Now Checking Customer Name with Dnb...');
+      // API match failed for CustomerName now checking for Dnb Match Start
+      dojo.xhrGet({
+        url : cmr.CONTEXT_ROOT + '/request//dnb/custNmUpdate.json',
+        handleAs : 'json',
+        method : 'GET',
+        content : {
+          'reqId' : reqId,
+          'custNm' : custNm,
+          'formerCustNm' : formerCustNm
+        },
+        timeout : 50000,
+        sync : true,
+        load : function(data, ioargs) {
+          cmr.hideProgress();
+          console.log(data);
+          console.log(data.success);
+          console.log(data.match);
+          console.log(data.custNmMatch);
+          console.log(data.formerCustNmMatch);
+          if (data && data.success) {
+            if (data.custNmMatch && data.formerCustNmMatch) {
+              comp_proof_INAUSG = true;
+              checkDnBMatchingAttachmentValidator();
+              if (FormManager.validate('frmCMR')) {             
+                matchDnbForAUUpdate();
+                return;
+              } else {
+                cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
+              }
+            } else if (data.custNmMatch && !data.formerCustNmMatch) {
+              console.log("Customer name matched with Dnb But Former Customer name match failed by Tradestyle Name");
+              comp_proof_INAUSG = false;
+              cmr.showAlert("Please attach company proof as Former Customer Name match failed by Dnb.");
+            } else if (!data.custNmMatch && data.formerCustNmMatch) {
+              console.log("Former Customer name matched with Dnb Tradestyle name But Customer name match failed by Dnb");
+              comp_proof_INAUSG = false;
+              cmr.showAlert("Please attach company proof as Former Customer Name match failed by Dnb.");
+            } else {
+              comp_proof_INAUSG = false;
+              console.log("Name validation failed by dnb and API ");
+              cmr.showAlert("Please attach company proof as Name validation failed by Dnb.");
+            }
+            checkDnBMatchingAttachmentValidator();
+            var checkCompProof = checkForCompanyProofAttachment();
+            if (!checkCompProof) {
+              matchDnbForAUUpdate
+            }
+          } else {
+            // continue
+            console.log("An error occurred while matching dnb.");
+            cmr.showConfirm("return;", 'An error occurred while matching Customer Name. Do you want to proceed with this request?', 'Warning', null, {
+              OK : 'Yes',
+              CANCEL : 'No'
+            });
+          }
+        },
+        error : function(error, ioargs) {
+        }
+      });
+      // Dnb Match end
+    }
+  }
+
+}
+
+function matchDnbForAUUpdate() {
+  var reqId = FormManager.getActualValue('reqId');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  console.log("Checking if the request matches D&B...");
+  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
+  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
+  var isicCd = FormManager.getActualValue('isicCd');
+  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
+    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
+    return;
+  }
+  cmr.showProgress('Checking request data with D&B...');
+  dojo.xhrGet({
+    url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatchUpdate.json',
+    handleAs : 'json',
+    method : 'GET',
+    content : {
+      'reqId' : reqId,
+      'isicCd' : isicCd
+    },
+    timeout : 50000,
+    sync : false,
+    load : function(data, ioargs) {
+      cmr.hideProgress();
+      console.log(data);
+      console.log(data.success);
+      console.log(data.match);
+      console.log(data.isicMatch);
+      console.log(data.validate);
+      if (data && data.success) {
+        if (data.match) {
+          comp_proof_INAUSG = true;
+          checkDnBMatchingAttachmentValidator();
+          if (FormManager.validate('frmCMR')) {
+            MessageMgr.clearMessages();
+            doValidateRequest();
+            cmr.showModal('addressVerificationModal');
+          } else {
+            cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
+          }
+        } else {
+          comp_proof_INAUSG = false;
+          console.log("Name/Address validation failed by dnb");
+          cmr.showAlert("Please attach company proof as Address validation failed by Dnb.");
+        }
+        checkDnBMatchingAttachmentValidator();
+      } else {
+        // continue
+        console.log("An error occurred while matching dnb.");
+        cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+          OK : 'Yes',
+          CANCEL : 'No'
+        });
+      }
+    },
+    error : function(error, ioargs) {
+    }
+  });
 }
 
 function checkIfUpfrontUpdateChecksRequired() {
@@ -2132,3 +2396,14 @@ function autoSaveRequest() {
   }
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }
+
+
+function recreateCMR(){
+  var msg = '<strong>WARNING: Use this function with caution!</strong><br><br>This will recreate a <strong>NEW CMR</strong> for this request. Please ensure that any invalid records in RDC have been marked as logically deleted and there is an actual need to create a new CMR for this request. Proceed?';
+  cmr.showConfirm('executeRecreateCMR()', msg, 'Warning', null);
+}
+
+function executeRecreateCMR() {
+  FormManager.doAction('frmCMR', 'RECREATE', true, 'Setting up request for recreation of CMR...');
+}
+

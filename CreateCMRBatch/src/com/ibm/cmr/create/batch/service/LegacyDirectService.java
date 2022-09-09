@@ -239,7 +239,6 @@ public class LegacyDirectService extends TransConnService {
         continue;
       }
       try {
-
         CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin, true);
         data = cmrObjects.getData();
 

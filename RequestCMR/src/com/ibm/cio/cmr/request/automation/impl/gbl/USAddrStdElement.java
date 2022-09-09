@@ -37,6 +37,8 @@ import com.ibm.cmr.services.client.tgme.AddressStdResponse;
 
 public class USAddrStdElement extends OverridingElement {
 
+  private static final String DUMMY_COUNTRY = "XXX";
+
   public USAddrStdElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
     // TODO Auto-generated constructor stub
@@ -69,6 +71,10 @@ public class USAddrStdElement extends OverridingElement {
     List<Addr> a = requestData.getAddresses();
     boolean hasIssues = false;
     for (Addr addr : a) {
+
+      // CREATCMR-5741 - remove addr std
+      // this flow is not executed now, keeping for reference
+      if (DUMMY_COUNTRY.equals(data.getCmrIssuingCntry())) {
       String key = addr.getId().getReqId() + "_" + addr.getId().getAddrType() + "_"
           + (addr.getId().getAddrSeq() != null ? addr.getId().getAddrSeq() : "");
       // Calling Address Std Service
@@ -180,15 +186,15 @@ public class USAddrStdElement extends OverridingElement {
         }
       }
 
-      if (!StringUtils.isBlank(tgmeData.getStateProvinceCode())) {
-        LOG.debug("State is : " + tgmeData.getStateProvinceCode());
-        details.append("State/Province Code: " + tgmeData.getStateProvinceCode() + "\n");
-        if (!tgmeData.getStateProvinceCode().toUpperCase().equals(addr.getStateProv().toUpperCase())) {
-          // overrides.addOverride(getProcessCode(),
-          // addr.getId().getAddrType(), "STATE_PROV", addr.getStateProv(),
-          // data1.getStateProvinceCode());
-        }
-      }
+//      if (!StringUtils.isBlank(tgmeData.getStateProvinceCode())) {
+//        LOG.debug("State is : " + tgmeData.getStateProvinceCode());
+//        details.append("State/Province Code: " + tgmeData.getStateProvinceCode() + "\n");
+//        if (!tgmeData.getStateProvinceCode().toUpperCase().equals(addr.getStateProv().toUpperCase())) {
+//          // overrides.addOverride(getProcessCode(),
+//          // addr.getId().getAddrType(), "STATE_PROV", addr.getStateProv(),
+//          // data1.getStateProvinceCode());
+//        }
+//      }
 
       // if (!StringUtils.isBlank(data1.getStateProvinceCode())) {
       // LOG.debug("State Code determined from TGME: " +
@@ -196,6 +202,7 @@ public class USAddrStdElement extends OverridingElement {
       // overrides.addOverride(getProcessCode(), addr.getId().getAddrType(),
       // "", addr.getStateProv(), data1.getStateProvinceCode());
       // }
+      }
 
       AddressModel addrModel = new AddressModel();
       PropertyUtils.copyProperties(addrModel, addr);

@@ -1941,6 +1941,8 @@ public class TurkeyHandler extends BaseSOFHandler {
         address.setAddrStdResult("X");
       }
 
+      // CREATCMR-5741 - no addr std
+      address.setAddrStdResult("X");
       address.setPairedAddrSeq(currentRecord.getTransAddrNo());
 
       address.setVat(currentRecord.getCmrTaxNumber());
@@ -4053,9 +4055,10 @@ public class TurkeyHandler extends BaseSOFHandler {
               clientTier = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
               isuCd = validateColValFromCell(currCell);
- if (StringUtils.isEmpty(cmrNo)) {
+              if (StringUtils.isEmpty(cmrNo)) {
                 LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
+                // validations.add(error);
               }
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
@@ -4084,7 +4087,7 @@ public class TurkeyHandler extends BaseSOFHandler {
               localPostal = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               cbPostal = validateColValFromCell(currCell);
-  
+
               currCell = (XSSFCell) row.getCell(12);
               district = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(14);
@@ -4093,14 +4096,15 @@ public class TurkeyHandler extends BaseSOFHandler {
               streetCont = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
               name4 = validateColValFromCell(currCell);
-  
+
               if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
-                LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
+                LOG.trace(
+                    "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
                 error.addError((row.getRowNum() + 1), "Local City",
                     "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
                 validations.add(error);
               }
-  
+
               if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
                 LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                     + "If one is populated, the other must be empty. >>");
@@ -4109,21 +4113,21 @@ public class TurkeyHandler extends BaseSOFHandler {
                         + "If one is populated, the other must be empty.");
                 validations.add(error);
               }
-  
+
               if (!StringUtils.isEmpty(name4) && !StringUtils.isEmpty(streetCont)) {
                 LOG.trace("Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty. >>");
                 error.addError((row.getRowNum() + 1), "Name4",
                     "Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty.");
                 validations.add(error);
               }
-  
+
               if ((!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
                 if ("@".equals(district)) {
                   LOG.trace("Local address must not be populate District with @. ");
                   error.addError((row.getRowNum() + 1), "District", "Local address must not be populate District with @. ");
                   validations.add(error);
                 }
-  
+
                 if ("@".equals(taxOffice)) {
                   LOG.trace("Local address must not be populate Tax Office with @. ");
                   error.addError((row.getRowNum() + 1), "Tax Office", "Local address must not be populate Tax Office with @. ");
@@ -4379,7 +4383,7 @@ public class TurkeyHandler extends BaseSOFHandler {
   }
 
   private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType, String reqType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZS01")) {
@@ -4400,7 +4404,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 
   // START -- missing code greece code
   private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZP01")) {

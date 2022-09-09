@@ -463,8 +463,17 @@ public class RequestEntryModel extends BaseModel {
 
   // korea fields
   private String installRep;
+  private String mexicoBillingName;
 
   private long overrideReqId;
+
+  public String getMexicoBillingName() {
+    return mexicoBillingName;
+  }
+
+  public void setMexicoBillingName(String mexicoBillingName) {
+    this.mexicoBillingName = mexicoBillingName;
+  }
 
   public String getMatchIndc() {
     return matchIndc;

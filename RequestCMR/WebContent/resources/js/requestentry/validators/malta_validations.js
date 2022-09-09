@@ -626,6 +626,10 @@ function setClientTierValuesMT(isuCd) {
   } else {
     FormManager.enable('clientTier');
   }
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  }
 }
 
 function enterpriseValidation() {
@@ -714,7 +718,7 @@ function addAfterConfigMalta() {
   enterpriseMalta();
   cmrNoforProspect();
   classFieldBehaviour();
-  setVatValidatorMalta();
+//  setVatValidatorMalta();
   setVatExemptValidatorMalta();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
@@ -733,6 +737,7 @@ function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
   hidePpsceidExceptBP();
   setVatValidatorMalta();
   setVatExemptValidatorMalta();
+  lockFieldsIBMEM();
 }
 
 function canCopyAddress(value, rowIndex, grid) {
@@ -826,8 +831,15 @@ function setVatValidatorMalta() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
+    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+      FormManager.readOnly('vat');
+    }
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+    }
     if (!dijit.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
     }
   }
 }
@@ -844,8 +856,8 @@ function addISICValidatorForScenario() {
           reqType = FormManager.getActualValue('reqType');
         }
         if ("C" == reqType) {
-          if ((_custType != null && _isicCd != null) && _custType != 'PRICU' && _isicCd == '9500') {
-            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60 (Private Person).');
+          if ((_custType != null && _isicCd != null) && (_custType != 'PRICU' || _custType != 'IBMEM') && _isicCd == '9500') {
+            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60/71 (Private Person/IBM Employee).');
           } else {
             return new ValidationResult(null, true);
           }
@@ -869,12 +881,12 @@ function addIsicClassificationCodeValidator() {
           var field = FormManager.getField('custClass');
           var value = FormManager.getActualValue('isicCd');
 
-          if (value == '9500' && field == '60') {
+          if (value == '9500' && (field == '60' || field == '71')) {
             return new ValidationResult(null, true);
-          } else if (value != '9500' && field == '60') {
-            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60 (Private Person)');
-          } else if (value == '9500' && field != '60') {
-            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60 (Private Person)');
+          } else if (value != '9500' && (field == '60' || field == '71')) {
+            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60/71 (Private Person/IBM Employee).');
+          } else if (value == '9500' && (field != '60' && field != '71')) {
+            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60/71 (Private Person/IBM Employee).');
           } else {
             return new ValidationResult(null, true);
           }
@@ -1028,6 +1040,21 @@ function setCTCValues() {
     }
   }
 
+}
+
+function lockFieldsIBMEM() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('dunsNo');
+    return;
+  }
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('dunsNo');
+  } else {
+    FormManager.enable('inacCd');
+    FormManager.enable('dunsNo');
+  }
 }
 
 function clientTierCodeValidator() {

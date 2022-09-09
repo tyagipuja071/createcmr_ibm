@@ -17,11 +17,13 @@ import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.ibm.cio.cmr.request.entity.listeners.AutoTrimStrings;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogDetails;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.entity.listeners.NoLog;
+import com.ibm.cio.cmr.request.entity.listeners.NullValue;
 import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
 
 /**
@@ -125,19 +127,20 @@ public class Addr extends BaseEntity<AddrPK> implements Serializable {
   @Column(name = "TRANSPORT_ZONE")
   private String transportZone;
 
-  @Column(name = "ADDR_STD_RESULT")
+  @Column(name = "ADDR_STD_RESULT", updatable = false)
+  @NullValue("X")
   private String addrStdResult;
 
-  @Column(name = "ADDR_STD_ACCEPT_IND")
+  @Column(name = "ADDR_STD_ACCEPT_IND", updatable = false)
   private String addrStdAcceptInd;
 
-  @Column(name = "ADDR_STD_REJ_REASON")
+  @Column(name = "ADDR_STD_REJ_REASON", updatable = false)
   private String addrStdRejReason;
 
-  @Column(name = "ADDR_STD_REJ_CMT")
+  @Column(name = "ADDR_STD_REJ_CMT", updatable = false)
   private String addrStdRejCmt;
 
-  @Column(name = "ADDR_STD_TS")
+  @Column(name = "ADDR_STD_TS", updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @NoLog
   private Date addrStdTs;
@@ -261,6 +264,9 @@ public class Addr extends BaseEntity<AddrPK> implements Serializable {
 
   @Column(name = "EXT_WALLET_ID")
   private String extWalletId;
+
+  @Transient
+  private String newAddrSeq;
 
   public String getCustNm1() {
     return this.custNm1;
@@ -748,6 +754,14 @@ public class Addr extends BaseEntity<AddrPK> implements Serializable {
 
   public void setExtWalletId(String extWalletId) {
     this.extWalletId = extWalletId;
+  }
+
+  public String getNewAddrSeq() {
+    return newAddrSeq;
+  }
+
+  public void setNewAddrSeq(String newAddrSeq) {
+    this.newAddrSeq = newAddrSeq;
   }
 
 }

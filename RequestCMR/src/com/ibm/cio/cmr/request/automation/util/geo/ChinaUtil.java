@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 
 public class ChinaUtil extends AutomationUtil {
@@ -113,9 +114,13 @@ public class ChinaUtil extends AutomationUtil {
     // }
     // break;
     case SCENARIO_CROSS_CROSS:
-      details.append("This Foreign Request will be routed to CMDE.\n");
-      engineData.addRejectionComment("OTH", "This Foreign Request will be routed to CMDE.", "", "");
-      result.setOnError(true);
+      boolean companyProofProvided = DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId());
+      if (companyProofProvided) {
+        details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
+        details.append("This Foreign Request will be routed to CMDE.\n");
+        engineData.addRejectionComment("OTH", "This Foreign Request will be routed to CMDE.", "", "");
+        result.setOnError(true);
+      }
       break;
     case SCENARIO_LOCAL_BLUMX:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
@@ -479,6 +484,7 @@ public class ChinaUtil extends AutomationUtil {
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
 
+    Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     StringBuilder details = new StringBuilder();
     CNHandler handler = (CNHandler) RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
@@ -489,6 +495,15 @@ public class ChinaUtil extends AutomationUtil {
     if (addrs.size() > 0) {
       for (int i = 0; i < addrs.size(); i++) {
         Addr addr = addrs.get(i);
+        if ("ZS01".equals(addr.getId().getAddrType()) && !"CN".equals(addr.getLandCntry())) {
+          boolean companyProofProvided = DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId());
+          if (companyProofProvided) {
+            details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
+            details.append("This Foreign Request will be routed to CMDE.\n");
+            engineData.addRejectionComment("OTH", "This Foreign Request will be routed to CMDE.", "", "");
+            return false;
+          }
+        }
         addr.setCustNm1(zs01addr.getCustNm1());
         addr.setCustNm2(zs01addr.getCustNm2());
         addr.setCustNm3(zs01addr.getCustNm3());

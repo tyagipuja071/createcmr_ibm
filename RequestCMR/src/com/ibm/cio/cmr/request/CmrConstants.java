@@ -125,6 +125,7 @@ public class CmrConstants {
     ZVAT
   }
 
+  public static final String DNBSEARCH_NOT_DONE = "Not Done";
   public static final String RESULT_ACCEPTED = "Accepted";
   public static final String RESULT_REJECTED = "Rejected";
   public static final String RESULT_NO_RESULT = "No Results";

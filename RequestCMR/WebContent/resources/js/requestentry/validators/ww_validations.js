@@ -5,6 +5,7 @@
  */
 
 var _GBL_NO_INIT = false;
+var _scenarioTypeHandler = null;
 /**
  * Validator for Address Standardization completion
  */
@@ -101,7 +102,12 @@ function addDnBSearchValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('dnbPrimary') != 'Y') {
+        var ifProspect = FormManager.getActualValue('prospLegalInd');
+        if (dijit.byId('prospLegalInd')) {
+          ifProspect = dijit.byId('prospLegalInd').get('value');
+        }
+       
+        if (FormManager.getActualValue('dnbPrimary') != 'Y' && ifProspect != 'Y') {
           return new ValidationResult(null, true);
         }
         var reqType = FormManager.getActualValue('reqType');
@@ -112,7 +118,7 @@ function addDnBSearchValidator() {
         if (reqStatus != 'DRA') {
           return new ValidationResult(null, true);
         }
-        if (isSkipDnbMatching()) {
+        if (isSkipDnbMatching() && ifProspect != 'Y') {
           return new ValidationResult(null, true);
         }
         var result = FormManager.getActualValue('findDnbResult');
@@ -141,7 +147,8 @@ function addDnBMatchingAttachmentValidator() {
           // FOR CN
           var cntry = FormManager.getActualValue('landCntry');
           var loc = FormManager.getActualValue('cmrIssuingCntry');
-          if(cntry == 'CN' || loc == '641') {
+          var custSubGroup = FormManager.getActualValue('custSubGrp');
+          if(cntry == 'CN' || loc == '641' && custSubGroup != 'CROSS') {
             var id = FormManager.getActualValue('reqId');
             var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
               ID : id
@@ -959,6 +966,39 @@ function addIsuCdObsoleteValidator(){
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+// CREATCMR-6244
+function vatOptionalForLandedUK() {
+  var _reqId = FormManager.getActualValue('reqId');
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01"
+  };
+
+  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+  landCntry = landCntryResult.ret1;
+
+  if (reqType == 'C') {
+    if (landCntry == 'GB') {
+      if ((issuingCntry != '866' && custGrp == 'CROSS') || (issuingCntry == '866' && custGrp == 'LOCAL')) {
+        FormManager.resetValidations('vat');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+      }
+    }
+  }
+}
+
+function afterConfigForEMEA(){
+// 6244
+  if (_scenarioTypeHandler == null && FormManager.getField('custGrp')) {
+    _scenarioTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      vatOptionalForLandedUK();
+    });
+  }
+}
+
 function findVatInd() {
 	  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 	  var reqId = FormManager.getActualValue('reqId');
@@ -980,6 +1020,7 @@ function markSendForProcessing() {
 	  var sendForProcess = YourActions.Send_for_Processing;
 	  FormManager.doAction('frmCMR', sendForProcess, true);
 	}
+
 
 /* Register WW Validators */
 dojo.addOnLoad(function() {
@@ -1057,6 +1098,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerWWValidator(addGenericZIPValidator);
   // GEOHandler.registerValidator(addGenericZIPValidator,
   // GEOHandler.NO_ME_CEMEA, null, true);
+  GEOHandler.NEW_EMEA = [ '624', '788', '706', SysLoc.Switzerland, SysLoc.Sweden, SysLoc.FINLAND, SysLoc.NORWAY, SysLoc.AUSTRIA, SysLoc.GERMANY, SysLoc.SPAIN ];
+  GEOHandler.addAfterConfig(afterConfigForEMEA, GEOHandler.NEW_EMEA);
+  GEOHandler.addAfterTemplateLoad(afterConfigForEMEA, GEOHandler.NEW_EMEA);
 
   // Postal Code validation for Ireland as Landed Country - CMR - 6033
   GEOHandler.addAddrFunction(addGenericPostalCodeValidator, GEOHandler.GROUP1);

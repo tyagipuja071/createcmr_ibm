@@ -278,6 +278,9 @@ function autoSetDataCrosTypSubTypeSSAMX() {
 
 // Story :1278109- By Mukesh Kumar
 function autoSetSBOAndSalesTMNo() {
+  if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
+    return;
+  }
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var _custType = FormManager.getActualValue('custType');
   console.log(">>> Process _custSubGrp >> " + _custSubGrp);
@@ -489,7 +492,9 @@ function afterConfigForLA() {
 
   if (dojo.byId('isuCd')) {
     // FormManager.disable('isuCd');
-    FormManager.readOnly('isuCd');
+    if(!checkForProspect()){
+      FormManager.readOnly('isuCd');
+    }
   }
   if (dojo.byId('collBoId' && _reqType != 'U')) {
     dojo.byId('collBoId').readOnly = true;
@@ -540,6 +545,7 @@ function afterConfigForLA() {
       autoSetFieldsForCustScenariosSSAMX();
       setCrosTypSubTypSSAMXOnSecnarios();
       setAbbrevNameRequiredForProcessors();
+      setPredefinedScenarioValues();
     });
   }
 
@@ -2113,7 +2119,8 @@ function setFieldRequiredSSAMXOnSecnarios() {
       if (role == 'Processor' || role == 'Requester') {
         FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
         FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
-        FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
+        // FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [
+        // 'SalRepNameNo' ], 'MAIN_IBM_TAB');
       }
     } else {
       FormManager.resetValidations('isicCd');
@@ -2524,14 +2531,21 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
 /* 1640462 - MRC should be optional for requester for SSA&MX */
 function setMrcCdRequiredForProcessors() {
   var _country = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
   console.log('****Executiing setMrcCdRequiredForProcessors for country ' + _country);
   if (_country != '631') {
     if (typeof (_pagemodel) != 'undefined') {
       if (_pagemodel.userRole == 'Processor') {
         var lblMrcCd = FormManager.getLabel('MrcCd');
         FormManager.addValidator('mrcCd', Validators.REQUIRED, [ lblMrcCd ], 'MAIN_IBM_TAB');
+          if(reqType == 'C') {
+            FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term/Sales Branch Office' ], 'MAIN_IBM_TAB');
+            FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep No' ], 'MAIN_IBM_TAB'); 
+          }               
       } else {
         FormManager.resetValidations('mrcCd');
+        FormManager.resetValidations('salesBusOffCd');
+        FormManager.resetValidations('repTeamMemberNo');
       }
     }
   }
@@ -2630,19 +2644,68 @@ function setTaxRegimeMX() {
     } else {
       taxGrp = '2';
     }
-  
+
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
       CMT: '%' + taxGrp + '%'
     };
-  
+
     var taxDropDown = cmr.query('GET.MX_TAX_CODE', qParams);
     var arr =  taxDropDown.map(taxDropDown => taxDropDown.ret1);
     FormManager.limitDropdownValues(FormManager.getField('taxCd3'), arr);
   }
 }
 
+// CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
+function makeMrcSboOptionalForProspectLA() {
+  ifProspect = checkForProspect();
+    if('Y' == ifProspect){
+      if (typeof (_pagemodel) != 'undefined') {
+        if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
+                FormManager.resetValidations('mrcCd');
+                FormManager.resetValidations('salesBusOffCd');
+                FormManager.setValue('isuCd', '');
+                FormManager.setValue('mrcCd', '');
+                FormManager.setValue('salesBusOffCd', '');
+                FormManager.enable('isuCd');
+                }
+        }
+      }
+    console.log('SBO & MRC are non mandatory for Prospect');
+}
+
+function checkForProspect(){
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  return ifProspect;
+}
+// note: set here if unable to handle via creqcmr.cust_scenarios
+function setPredefinedScenarioValues() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if (reqType == 'C') {
+    if(custSubGrp == 'IBMEM') {
+      setMrcCdIBMEM(role);
+    }
+  }
+}
+
+function setMrcCdIBMEM(role) {
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('mrcCd');
+  } else {
+    FormManager.enable('mrcCd');
+  }
+}
 
 /* Register LA Validators */
 dojo.addOnLoad(function() {
@@ -2725,5 +2788,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
 
-  
+  // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
+  GEOHandler.addAfterConfig(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(setPredefinedScenarioValues, GEOHandler.LA);
+  GEOHandler.setRevertIsicBehavior(false);
 });

@@ -301,7 +301,7 @@ function AddressDetailsModal_onLoad() {
         CD : FormManager.getActualValue('landCntry')
       });
       if (validTest && validTest.ret1 == FormManager.getActualValue('landCntry')) {
-        _assignDetailsValue('#AddressDetailsModal #addressStdResult_view', 'Not Done');
+        _assignDetailsValue('#AddressDetailsModal #addressStdResult_view', 'Not Required');
       } else {
         _assignDetailsValue('#AddressDetailsModal #addressStdResult_view', 'Not Required');
       }
@@ -336,7 +336,11 @@ function AddressDetailsModal_onLoad() {
   _assignDetailsValue('#AddressDetailsModal #addressType_view', details.ret35 && details.ret35 != '' ? details.ret35 : details.ret2);
 
   _assignDetailsValue('#AddressDetailsModal #stateProv_view', details.ret11 + '-' + details.ret36);
-  _assignDetailsValue('#AddressDetailsModal #county_view', details.ret37);
+  if (FormManager.getActualValue('cmrIssuingCntry') == '897') {
+    _assignDetailsValue('#AddressDetailsModal #county_view', details.ret45);
+  } else {
+    _assignDetailsValue('#AddressDetailsModal #county_view', details.ret37);
+  }
   _assignDetailsValue('#AddressDetailsModal #landCntry_view', details.ret13 + '-' + details.ret38);
   _assignDetailsValue('#AddressDetailsModal #transportZone_view', details.ret24);
 
@@ -573,8 +577,8 @@ function tgmePreSave() {
   }
   if (isTgmeNeeded()) {
     FormManager.setValue('addrStdAcceptInd', '');
-    dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Done';
-    FormManager.setValue('addr_addrStdResult', '');
+    dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Required';
+    FormManager.setValue('addr_addrStdResult', 'X');
     FormManager.setValue('addrStdTsString', '');
     dojo.query('#addEditAddressModal #addrStdTsString_modal')[0].innerHTML = '';
     FormManager.setValue('addr_addrStdRejReason', '');
@@ -592,15 +596,16 @@ function doAddToAddressList() {
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var asean_isa_cntries = [ '643', '744', '736', '738', '796', '778', '749', '834', '818', '852', '856', '616', '652', '615' ];
-  if (GEOHandler.isTGMERequired(cntry)) {
-    var tgmeResult = tgmePreSave();
-    if (tgmeResult > 0) {
-      performAddressStandardization(true);
-      return;
-    }
-  } else {
-    saveNotSupportedTGME();
-  }
+  // CREATCMR-5741 no TGME Addr Std
+//  if (GEOHandler.isTGMERequired(cntry)) {
+//    var tgmeResult = tgmePreSave();
+//    if (tgmeResult > 0) {
+//      performAddressStandardization(true);
+//      return;
+//    }
+//  } else {
+//    saveNotSupportedTGME();
+//  }
 
   cmr.currentModalId = 'addEditAddressModal';
   cmr.addressReqId = FormManager.getActualValue('reqId');
@@ -1001,13 +1006,13 @@ function addEditAddressModal_onLoad() {
     FormManager.readOnly('ierpSitePrtyId');
 
     FormManager.setValue('addrStdAcceptInd', '');
-    FormManager.setValue('addr_addrStdResult', '');
+    FormManager.setValue('addr_addrStdResult', 'X');
     FormManager.setValue('addr_addrStdRejReason', '');
     dojo.query('#addEditAddressModal #addrStdRejReason_modal')[0].innerHTML = '';
     FormManager.setValue('addr_addrStdRejCmt', '');
     FormManager.setValue('addrStdTsString', '');
     dojo.query('#addEditAddressModal #addrStdTsString_modal')[0].innerHTML = '';
-    dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Done';
+    dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Required';
 
     if (dojo.byId('addrCreateDt_updt')) {
       dojo.byId('addrCreateDt_updt').innerHTML = '-';
@@ -1119,7 +1124,7 @@ function addEditAddressModal_onLoad() {
             CD : details.ret13
           });
           if (validTest && validTest.ret1 == details.ret13) {
-            dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Done';
+            dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Required';
           } else {
             dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Required';
           }
@@ -1358,7 +1363,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('addr_addrStdRejCmt', '');
       FormManager.setValue('addrStdTsString', '');
       dojo.query('#addEditAddressModal #addrStdRejReason_modal')[0].innerHTML = '';
-      dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Done';
+      dojo.query('#addEditAddressModal #addrStdResult_modal')[0].innerHTML = 'Not Required';
       dojo.query('#addEditAddressModal #addrStdTsString_modal')[0].innerHTML = '';
     }
     if (cmr.addressMode == 'copyAddress') {

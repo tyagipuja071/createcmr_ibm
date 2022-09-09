@@ -17,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -32,6 +33,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -216,6 +218,10 @@ public abstract class APHandler extends GEOHandler {
 
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      admin.setOldCustNm1(currentRecord.getCmrName1Plain());
+      admin.setOldCustNm2(currentRecord.getCmrName2Plain());
+    }
   }
 
   @Override
@@ -314,7 +320,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(oldData.getAbbrevLocn());
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "SalRepNameNo", "-"));
@@ -322,7 +327,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getRepTeamMemberNo(), "SalRepNameNo", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CollectionCd", "-"));
@@ -330,7 +334,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getCollectionCd(), "CollectionCd", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getEngineeringBo(), newData.getEngineeringBo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "EngineeringBo", "-"));
@@ -338,7 +341,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEngineeringBo(), "EngineeringBo", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getApCustClusterId(), newData.getApCustClusterId())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Cluster", "-"));
@@ -346,6 +348,29 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(oldData.getApCustClusterId());
       results.add(update);
     }
+  }
+
+  public String getCodeAndDescription(String code, String fieldId, String cntry) {
+    String desc = DropdownListController.getDescription(fieldId, code, cntry);
+    if (!StringUtils.isEmpty(desc)) {
+      return desc;
+    }
+    return code;
+  }
+
+  public DataRdc getAPClusterDataRdc(long reqId) {
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    List<DataRdc> records = query.getResults(DataRdc.class);
+    if (records != null && records.size() > 0) {
+      for (DataRdc oldData : records) {
+        return oldData;
+      }
+    }
+    return null;
   }
 
   @Override

@@ -614,6 +614,18 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
       name = "TAX_PAYER_CUST_CD")
   private String taxPayerCustCd;
 
+  @Column(
+      name = "MEXICO_BILLING_NAME")
+  private String mexicoBillingName;
+
+  public String getMexicoBillingName() {
+    return mexicoBillingName;
+  }
+
+  public void setMexicoBillingName(String mexicoBillingName) {
+    this.mexicoBillingName = mexicoBillingName;
+  }
+
   public String getCusInvoiceCopies() {
     return cusInvoiceCopies;
   }

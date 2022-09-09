@@ -34,6 +34,9 @@
     <div class="cmtlog">
       <div class="section-header">Comments:</div>
       <div class="add-cmt">
+      <%if ((user.isAdmin() || user.isCmde()) && "C".equals(reqentry.getReqType()) && "COM".equals(reqentry.getReqStatus())){%>
+        <input type="button" id="recreateCMR" class="cmr-grid-btn-r" style="margin-left: 20px" onclick="recreateCMR()" value="RECREATE CMR">
+      <%} %>
       <%if (user.isProcessor() && !readOnly && "PVA".equals(reqentry.getReqStatus())
         && ("C".equals(reqentry.getReqType()) || "U".equals(reqentry.getReqType())) 
         && ("A".equals(reqentry.getRdcProcessingStatus()) || "N".equals(reqentry.getRdcProcessingStatus())) ){ %>

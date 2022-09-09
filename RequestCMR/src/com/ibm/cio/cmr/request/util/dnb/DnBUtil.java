@@ -285,7 +285,8 @@ public class DnBUtil {
     if (SystemLocation.CHINA.equalsIgnoreCase(issuingCntry)) {
       cmrRecord.setCmrState(StringUtils.isNotBlank(company.getPrimaryStateName()) ? company.getPrimaryStateName() : company.getMailingStateName());
     }
-    if (cmrRecord.getCmrState() == null && (SystemLocation.AUSTRIA.equalsIgnoreCase(issuingCntry) || SystemLocation.SWITZERLAND.equalsIgnoreCase(issuingCntry))) {
+    if (cmrRecord.getCmrState() == null
+        && (SystemLocation.AUSTRIA.equalsIgnoreCase(issuingCntry) || SystemLocation.SWITZERLAND.equalsIgnoreCase(issuingCntry))) {
       cmrRecord.setCmrState(StringUtils.isNotBlank(company.getPrimaryStateName()) ? company.getPrimaryStateName() : company.getMailingStateName());
     }
     cmrRecord.setCmrPostalCode(company.getPrimaryPostalCode() != null ? company.getPrimaryPostalCode() : company.getMailingPostalCode());
@@ -705,7 +706,10 @@ public class DnBUtil {
       dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
     }
     dnbAddress = dnbAddress.trim();
-    
+    Boolean matchWithDnbMailingAddr = false;
+    if (handler != null) {
+      matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
+    }
     LOG.debug("DNB match country =  " + country);
     Boolean isReshuffledAddr = false;
     if ("897".equals(country) || "US".equals(country)) {
@@ -720,7 +724,8 @@ public class DnBUtil {
     // address, country);
     if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
         && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
-        && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr) {
+        && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr
+        && !matchWithDnbMailingAddr) {
       return false;
     }
 
@@ -728,19 +733,20 @@ public class DnBUtil {
       String currentPostalCode = addr.getPostCd();
       String dnbPostalCode = dnbRecord.getDnbPostalCode();
       if (currentPostalCode.length() != dnbPostalCode.length()) {
-        if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode)) {
+        if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
           return false;
         }
       }
       if (currentPostalCode.length() == dnbPostalCode.length()) {
-        if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode)) {
+        if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
           return false;
         }
       }
     }
 
     if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
-        && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6) {
+          && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6
+          && !matchWithDnbMailingAddr) {
       return false;
     }
 
@@ -858,10 +864,13 @@ public class DnBUtil {
     MatchingResponse<DnBMatchingResponse> response = new MatchingResponse<DnBMatchingResponse>();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+
     addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
     Addr addr = requestData.getAddress(addrType);
     boolean isTaxCdMatch = false;
-    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+    // AutomationUtil countryUtil =
+    // AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
     if (countryUtil != null) {
       isTaxCdMatch = countryUtil.useTaxCd1ForDnbMatch(requestData);
     }

@@ -27,8 +27,8 @@ import com.ibm.cio.cmr.request.util.approval.ChecklistItem;
 import com.ibm.cio.cmr.request.util.approval.ChecklistUtil;
 import com.ibm.cio.cmr.request.util.approval.ChecklistUtil.ChecklistResponse;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
@@ -351,50 +351,50 @@ public class TWPDFConverter extends DefaultPDFConverter {
 
     customer.addCell(createLabelCell("Customer Fax Number:"));
     customer.addCell(createValueCell(data.getRestrictTo()));
+    // CREATCMR-6823
+    // customer.addCell(createLabelCell("CEO Name:"));
+    // customer.addCell(createValueCell(data.getFootnoteTxt2()));
 
-    customer.addCell(createLabelCell("CEO Name:"));
-    customer.addCell(createValueCell(data.getFootnoteTxt2()));
+    // customer.addCell(createLabelCell("CEO Gender:"));
+    // customer.addCell(createValueCell(data.getCsBo()));
 
-    customer.addCell(createLabelCell("CEO Gender:"));
-    customer.addCell(createValueCell(data.getCsBo()));
+    // customer.addCell(createLabelCell("CEO Job Title:"));
+    // customer.addCell(createValueCell(data.getBusnType()));
 
-    customer.addCell(createLabelCell("CEO Job Title:"));
-    customer.addCell(createValueCell(data.getBusnType()));
+    // customer.addCell(createLabelCell("CEO Telephone:"));
+    // customer.addCell(createValueCell(data.getBioChemMissleMfg()));
 
-    customer.addCell(createLabelCell("CEO Telephone:"));
-    customer.addCell(createValueCell(data.getBioChemMissleMfg()));
+    // customer.addCell(createLabelCell("CEO Fax:"));
+    // customer.addCell(createValueCell(data.getContactName2()));
 
-    customer.addCell(createLabelCell("CEO Fax:"));
-    customer.addCell(createValueCell(data.getContactName2()));
+    // customer.addCell(createLabelCell("CEO Email:"));
+    // customer.addCell(createValueCell(data.getEmail1()));
 
-    customer.addCell(createLabelCell("CEO Email:"));
-    customer.addCell(createValueCell(data.getEmail1()));
+    // customer.addCell(createLabelCell("CIO Name:"));
+    // customer.addCell(createValueCell(data.getContactName1()));
 
-    customer.addCell(createLabelCell("CIO Name:"));
-    customer.addCell(createValueCell(data.getContactName1()));
+    // customer.addCell(createLabelCell("CIO Gender:"));
+    // customer.addCell(createValueCell(data.getSectorCd()));
 
-    customer.addCell(createLabelCell("CIO Gender:"));
-    customer.addCell(createValueCell(data.getSectorCd()));
+    // customer.addCell(createLabelCell("CIO Job Title:"));
+    // customer.addCell(createValueCell(data.getBpName()));
 
-    customer.addCell(createLabelCell("CIO Job Title:"));
-    customer.addCell(createValueCell(data.getBpName()));
+    // customer.addCell(createLabelCell("CIO Telephone:"));
+    // customer.addCell(createValueCell(data.getAffiliate()));
 
-    customer.addCell(createLabelCell("CIO Telephone:"));
-    customer.addCell(createValueCell(data.getAffiliate()));
+    // customer.addCell(createLabelCell("CIO Fax:"));
+    // customer.addCell(createValueCell(data.getCommercialFinanced()));
 
-    customer.addCell(createLabelCell("CIO Fax:"));
-    customer.addCell(createValueCell(data.getCommercialFinanced()));
+    // customer.addCell(createLabelCell("CIO Email:"));
+    // customer.addCell(createValueCell(data.getEmail2()));
 
-    customer.addCell(createLabelCell("CIO Email:"));
-    customer.addCell(createValueCell(data.getEmail2()));
-
-    customer.addCell(createLabelCell("Goods Receiver Chinese Name:"));
+    customer.addCell(createLabelCell("Contact Name:"));
     customer.addCell(createValueCell(data.getFootnoteTxt1()));
 
-    customer.addCell(createLabelCell("Goods Receiver Job Title:"));
+    customer.addCell(createLabelCell("Contact Job Title:"));
     customer.addCell(createValueCell(data.getContactName3()));
 
-    customer.addCell(createLabelCell("Goods Receiver Telephone Number:"));
+    customer.addCell(createLabelCell("Contact Telephone Number:"));
     customer.addCell(createValueCell(data.getEmail3()));
 
   }

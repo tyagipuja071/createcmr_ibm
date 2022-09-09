@@ -878,6 +878,18 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
       name = "TAX_EXEMPT_STATUS_3")
   private String taxExemptStatus3;
 
+  @Column(
+      name = "MEXICO_BILLING_NAME")
+  private String mexicoBillingName;
+
+  public String getMexicoBillingName() {
+    return mexicoBillingName;
+  }
+
+  public void setMexicoBillingName(String mexicoBillingName) {
+    this.mexicoBillingName = mexicoBillingName;
+  }
+
   public String getTaxExemptStatus1() {
     return taxExemptStatus1;
   }

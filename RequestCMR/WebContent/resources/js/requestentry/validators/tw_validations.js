@@ -14,7 +14,7 @@ function afterConfigTW() {
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
   FormManager.readOnly('isuCd');
-  FormManager.removeValidator('affiliate', Validators.DIGIT);
+  // FormManager.removeValidator('affiliate', Validators.DIGIT);
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -47,21 +47,21 @@ function afterConfigTW() {
       FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
       FormManager.removeValidator('orgNo', Validators.REQUIRED);
       FormManager.removeValidator('restrictTo', Validators.REQUIRED);
-      FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
-      FormManager.removeValidator('csBo', Validators.REQUIRED);
-      FormManager.removeValidator('sectorCd', Validators.REQUIRED);
-      FormManager.removeValidator('busnType', Validators.REQUIRED);
+      // FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
+      // FormManager.removeValidator('csBo', Validators.REQUIRED);
+      // FormManager.removeValidator('sectorCd', Validators.REQUIRED);
+      // FormManager.removeValidator('busnType', Validators.REQUIRED);
 
       FormManager.removeValidator('footnoteTxt1', Validators.REQUIRED);
-      FormManager.removeValidator('bioChemMissleMfg', Validators.REQUIRED);
-      FormManager.removeValidator('contactName2', Validators.REQUIRED);
-      FormManager.removeValidator('email1', Validators.REQUIRED);
-      FormManager.removeValidator('contactName1', Validators.REQUIRED);
-      FormManager.removeValidator('footnoteTxt2', Validators.REQUIRED);
+      // FormManager.removeValidator('bioChemMissleMfg', Validators.REQUIRED);
+      // FormManager.removeValidator('contactName2', Validators.REQUIRED);
+      // FormManager.removeValidator('email1', Validators.REQUIRED);
+      // FormManager.removeValidator('contactName1', Validators.REQUIRED);
+      // FormManager.removeValidator('footnoteTxt2', Validators.REQUIRED);
       FormManager.removeValidator('contactName3', Validators.REQUIRED);
-      FormManager.removeValidator('email2', Validators.REQUIRED);
+      // FormManager.removeValidator('email2', Validators.REQUIRED);
       FormManager.removeValidator('company', Validators.REQUIRED);
-      FormManager.removeValidator('affiliate', Validators.REQUIRED);
+      // FormManager.removeValidator('affiliate', Validators.REQUIRED);
       FormManager.removeValidator('email3', Validators.REQUIRED);
       FormManager.removeValidator('customerIdCd', Validators.REQUIRED);
       FormManager.removeValidator('inacType', Validators.REQUIRED);
@@ -69,7 +69,7 @@ function afterConfigTW() {
       FormManager.removeValidator('covId', Validators.REQUIRED);
       FormManager.removeValidator('dunsNo', Validators.REQUIRED);
       FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
-      FormManager.removeValidator('bpName', Validators.REQUIRED);
+      // FormManager.removeValidator('bpName', Validators.REQUIRED);
       FormManager.removeValidator('collectionCd', Validators.REQUIRED);
       FormManager.removeValidator('mrcCd', Validators.REQUIRED);
 
@@ -84,6 +84,12 @@ function afterConfigTW() {
       FormManager.removeValidator('clientTier', Validators.REQUIRED);
       FormManager.removeValidator('searchTerm', Validators.REQUIRED);
     }
+    // CREATCMR-6823
+    FormManager.removeValidator('footnoteTxt1', Validators.REQUIRED);
+    FormManager.removeValidator('contactName3', Validators.REQUIRED);
+    FormManager.removeValidator('email3', Validators.REQUIRED);
+    FormManager.removeValidator('orgNo', Validators.REQUIRED);
+    FormManager.removeValidator('restrictTo', Validators.REQUIRED);
   }
 
   if (custSubGrp == 'LOECO' || custSubGrp == 'LOINT' || custSubGrp == 'LOBLU' || custSubGrp == 'LOMAR' || custSubGrp == 'LOOFF') {
@@ -117,6 +123,7 @@ function afterConfigTW() {
   }
 
   setVatValidator();
+  handleObseleteExpiredDataForUpdate();
 }
 
 /**
@@ -153,6 +160,55 @@ function addHandlersForTW() {
   }
 }
 
+// CREATCMR -5269
+function handleObseleteExpiredDataForUpdate() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  // lock all the coverage fields and remove validator
+  if (reqType == 'U') {
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('mrcCd');
+    FormManager.readOnly('inacType');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('collectionCd');
+    FormManager.readOnly('cmrNoPrefix');
+    FormManager.readOnly('dupCmrIndc');
+    FormManager.readOnly('sitePartyId');
+    FormManager.readOnly('bgId');
+    FormManager.readOnly('gbgId');
+    FormManager.readOnly('bgRuleId');
+    FormManager.readOnly('geoLocationCd');
+    FormManager.readOnly('dunsNo');
+    FormManager.readOnly('customerIdCd');
+
+    FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.removeValidator('isuCd', Validators.REQUIRED);
+    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
+    FormManager.removeValidator('inacType', Validators.REQUIRED);
+    FormManager.removeValidator('inacCd', Validators.REQUIRED);
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    FormManager.removeValidator('dupCmrIndc', Validators.REQUIRED);
+    FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+    FormManager.removeValidator('covId', Validators.REQUIRED);
+    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+    FormManager.removeValidator('sitePartyId', Validators.REQUIRED);
+    FormManager.removeValidator('bgId', Validators.REQUIRED);
+    FormManager.removeValidator('gbgId', Validators.REQUIRED);
+    FormManager.removeValidator('geoLocationId', Validators.REQUIRED);
+    FormManager.removeValidator('dunsNo', Validators.REQUIRED);
+    FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
+    FormManager.removeValidator('customerIdCd', Validators.REQUIRED);
+  }
+}
+
 /*
  * Set CMR Double Creation warning when its value is Y
  */
@@ -177,14 +233,16 @@ function setDupCmrIndcWarning() {
 }
 
 function setClientTierValuesTW() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
   } else {
     FormManager.enable('clientTier');
   }
+  handleObseleteExpiredDataForUpdate();
 }
 
 /*
@@ -306,8 +364,7 @@ function addTWChecklistValidator() {
             REQID : reqId
           });
           if (!record || !record.sectionA1) {
-            return new ValidationResult(null, false,
-                'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+            return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
           }
         }
         return new ValidationResult(null, true);
@@ -329,20 +386,28 @@ function addSingleByteValidatorTW(cntry, details) {
   FormManager.addValidator('bldg', Validators.NO_SINGLE_BYTE, [ 'Customer Chinese Address Con' + '\'' + 't' ]);
 
   /* Customer */
-  FormManager.addValidator('footnoteTxt2', Validators.NO_SINGLE_BYTE, [ 'Chief Executive Officer Name' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('busnType', Validators.NO_SINGLE_BYTE, [ 'Chief Executive Officer Job Title' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('bioChemMissleMfg', Validators.LATIN, [ 'Chief Executive Officer Telephone' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('email1', Validators.LATIN, [ 'Chief Executive Officer Email' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('contactName2', Validators.LATIN, [ 'Chief Executive Officer Fax' ], 'MAIN_CUST_TAB');
-
-  FormManager.addValidator('contactName1', Validators.NO_SINGLE_BYTE, [ 'Chief Information Officer Name' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('bpName', Validators.NO_SINGLE_BYTE, [ 'Chief Information Officer Job Title' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('affiliate', Validators.LATIN, [ 'Chief Information Officer Telephone' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('email2', Validators.LATIN, [ 'Chief Information Officer Email' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('commercialFinanced', Validators.LATIN, [ 'Chief Information Officer Fax' ], 'MAIN_CUST_TAB');
-
-  FormManager.addValidator('footnoteTxt1', Validators.NO_SINGLE_BYTE, [ 'Goods Receiver Chinese Name' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('contactName3', Validators.NO_SINGLE_BYTE, [ 'Goods Receiver Job Title' ], 'MAIN_CUST_TAB');
+  // FormManager.addValidator('footnoteTxt2', Validators.NO_SINGLE_BYTE, [
+  // 'Chief Executive Officer Name' ], 'MAIN_CUST_TAB');
+  // FormManager.addValidator('busnType', Validators.NO_SINGLE_BYTE, [ 'Chief
+  // Executive Officer Job Title' ], 'MAIN_CUST_TAB');
+  // FormManager.addValidator('bioChemMissleMfg', Validators.LATIN, [ 'Chief
+  // Executive Officer Telephone' ], 'MAIN_CUST_TAB');
+  // FormManager.addValidator('email1', Validators.LATIN, [ 'Chief Executive
+  // Officer Email' ], 'MAIN_CUST_TAB');
+  // FormManager.addValidator('contactName2', Validators.LATIN, [ 'Chief
+  // Executive Officer Fax' ], 'MAIN_CUST_TAB');
+  // FormManager.addValidator('contactName1', Validators.NO_SINGLE_BYTE, [
+  // 'Chief Information Officer Name' ], 'MAIN_CUST_TAB');
+  // FormManager.addValidator('bpName', Validators.NO_SINGLE_BYTE, [ 'Chief
+  // Information Officer Job Title' ], 'MAIN_CUST_TAB');
+  // FormManager.addValidator('affiliate', Validators.LATIN, [ 'Chief
+  // Information Officer Telephone' ], 'MAIN_CUST_TAB');
+  // FormManager.addValidator('email2', Validators.LATIN, [ 'Chief Information
+  // Officer Email' ], 'MAIN_CUST_TAB');
+  // FormManager.addValidator('commercialFinanced', Validators.LATIN, [ 'Chief
+  // Information Officer Fax' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('footnoteTxt1', Validators.NO_SINGLE_BYTE, [ 'Contact Name' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('contactName3', Validators.NO_SINGLE_BYTE, [ 'Contact Job Title' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('email3', Validators.LATIN, [ 'Goods Receiver Telephone Number' ], 'MAIN_CUST_TAB');
 
   FormManager.addValidator('orgNo', Validators.LATIN, [ 'Customer Telephone Number' ], 'MAIN_CUST_TAB');
@@ -389,6 +454,14 @@ function autoSetAbbrevNmLocnLogic() {
   FormManager.setValue('abbrevNm', _abbrevNm);
 
 }
+// CREATCMR-6825
+function setRepTeamMemberNo() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.readOnly('repTeamMemberNo');
+  }
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
@@ -423,9 +496,16 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW);
   GEOHandler.addAfterConfig(setClientTierValuesTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(setClientTierValuesTW, GEOHandler.TW);
-
+  // CREATCMR-6825
+  GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.TW);
+  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
+  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
   // skip byte checks
-  FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4', 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',
-      'contactName3' ]);
+  // FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4',
+  // 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',
+  // 'contactName3' ]);
+  FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4', 'footnoteTxt1', 'contactName3' ]);
 
 });
