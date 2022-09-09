@@ -509,6 +509,9 @@ function afterConfigForLA() {
   if (_mrcCdHandler == null) {
     _mrcCdHandler = dojo.connect(FormManager.getField('mrcIsu'), 'onChange', function(value) {
       autoSetMrcIsuCov2018();
+      if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MEXICO) {
+        setMrcCdToReadOnly();
+      }
     });
   }
 
@@ -540,7 +543,7 @@ function afterConfigForLA() {
       autoSetFieldsForCustScenariosSSAMX();
       setCrosTypSubTypSSAMXOnSecnarios();
       setAbbrevNameRequiredForProcessors();
-      setPredefinedScenarioValues();
+      setMrcCdToReadOnly();
     });
   }
 
@@ -2652,8 +2655,7 @@ function setTaxRegimeMX() {
   }
 }
 
-// note: set here if unable to handle via creqcmr.cust_scenarios
-function setPredefinedScenarioValues() {
+function setMrcCdToReadOnly() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
     return;
@@ -2664,16 +2666,12 @@ function setPredefinedScenarioValues() {
 
   if (reqType == 'C') {
     if(custSubGrp == 'IBMEM') {
-      setMrcCdIBMEM(role);
+      if (role == 'REQUESTER') {
+        FormManager.readOnly('mrcCd');
+      } else {
+        FormManager.enable('mrcCd');
+      }
     }
-  }
-}
-
-function setMrcCdIBMEM(role) {
-  if (role == 'REQUESTER') {
-    FormManager.readOnly('mrcCd');
-  } else {
-    FormManager.enable('mrcCd');
   }
 }
 
@@ -2757,8 +2755,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
-
   
-  GEOHandler.addAfterTemplateLoad(setPredefinedScenarioValues, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
 });
