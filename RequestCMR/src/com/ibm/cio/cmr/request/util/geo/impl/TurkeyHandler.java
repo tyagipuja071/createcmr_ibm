@@ -4058,6 +4058,7 @@ public class TurkeyHandler extends BaseSOFHandler {
               if (StringUtils.isEmpty(cmrNo)) {
                 LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
+                // validations.add(error);
               }
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {

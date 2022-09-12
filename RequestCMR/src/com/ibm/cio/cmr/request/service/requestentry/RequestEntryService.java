@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.service.requestentry;
 
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +75,6 @@ import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
-import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -120,6 +120,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       performSave(model, entityManager, request, true);
     } else if ("CONFIRM_DOC_UPD".equalsIgnoreCase(action)) {
       updateDeprecatedAttachmentTypes(model, entityManager, request);
+    } else if ("RECREATE".equalsIgnoreCase(action)) {
+      recreateCMR(model, entityManager, request);
     } else {
       // Claim conditionally approved request (Edit Request)
       /*
@@ -1483,6 +1485,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         DnBMatchingResponse tradeStyleName = null;
         boolean isicMatch = false;
         boolean confidenceCd = false;
+        boolean cnCrossFlag = false;
         boolean checkTradestyleNames = ("R".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry()))
             || "O".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry())));
         MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, addrType);
@@ -1501,8 +1504,14 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
                 isicMatch = dnbCompny.getIbmIsic().equals(model.getIsicCd());
               }
               log.debug("ISIC Match : " + isicMatch);
+              if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
+                  && ("ZS01".equals(addr.getId().getAddrType()) && "U".equals(admin.getReqType()) && StringUtils.isBlank(data.getCustSubGrp())
+                      && !"CN".equalsIgnoreCase(addr.getLandCntry()) || "C".equals(admin.getReqType()) && "CROSS".equals(data.getCustSubGrp()))) {
+                cnCrossFlag = true;
+              }
               if (record.getConfidenceCode() >= 8 && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
-                  && (StringUtils.isBlank(data.getCustSubGrp()) || !data.getCustSubGrp().equals("CROSS"))) {
+                  && ("U".equals(admin.getReqType()) && StringUtils.isBlank(data.getCustSubGrp()) && "CN".equalsIgnoreCase(addr.getLandCntry())
+                      || "C".equals(admin.getReqType()) && !"CROSS".equals(data.getCustSubGrp()))) {
                 match = true;
                 break;
               }
@@ -1523,6 +1532,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           map.put("match", match);
           map.put("isicMatch", isicMatch);
           map.put("confidenceCd", confidenceCd);
+          map.put("cnCrossFlag", cnCrossFlag);
           if (!match && tradeStyleName != null) {
             map.put("tradeStyleMatch", true);
             map.put("legalName", tradeStyleName.getDnbName());
@@ -1531,6 +1541,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         } else {
           map.put("success", false);
           map.put("match", false);
+          map.put("cnCrossFlag", false);
           String message = "An error occurred while matching with DnB.";
           if (response != null) {
             message = response.getMessage();
@@ -1871,4 +1882,86 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     return false;
   }
+
+  /**
+   * Reprocesses a single CREATE request. The process:<br>
+   * <ul>
+   * <li>Clears DATA.CMR_NO</li>
+   * <li>Clears DATA.SITE_ID</li>
+   * <li>Clears all ADDR.SAP_NO</li>
+   * <li>Clears all ADDR.IERP_SITE_PRTY_ID</li>
+   * <li>Clears ADMIN.RDC_PROCESSING_STATUS</li>
+   * <li>Sets ADMIN.PROCESSED_FLAG = ''</li>
+   * <li>Sets ADMIN.LOCK_IND = 'N'</li>
+   * <li>Sets ADMIN.LOCK_BY = null</li>
+   * <li>Sets ADMIN.LOCK_TS = null</li>
+   * <li>Sets ADMIN.LOCK_BY_NM = null</li>
+   * <li>Sets ADMIN.DISABLE_AUTO_PROC = 'N'</li>
+   * <li>Sets ADMIN.REQ_STATUS = 'PCP'</li>
+   * </ul>
+   * The process also creates corresponding comment logs and workflow histories.
+   * The function was added as part of CREATCMR-6971
+   * 
+   * @param model
+   * @param entityManager
+   * @param request
+   * @throws CmrException
+   * @throws SQLException
+   */
+  private void recreateCMR(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException, SQLException {
+
+    long reqId = model.getReqId();
+    if (reqId > 0) {
+
+      AppUser user = AppUser.getUser(request);
+      if (!user.isCmde() && !user.isAdmin()) {
+        throw new CmrException(new Exception("Reprocess can only be done by Administrators"));
+      }
+      StringBuilder comments = new StringBuilder();
+      comments.append("** Forced Recreation of CMR **\n");
+      this.log.debug("Retreiving Request " + reqId + " for Reprocess..");
+      RequestData requestData = new RequestData(entityManager, reqId);
+
+      Admin admin = requestData.getAdmin();
+      if (!CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        throw new CmrException(new Exception("Reprocess can only be done for Create requests."));
+      }
+
+      Data data = requestData.getData();
+      comments.append("Previous CMR No.: " + data.getCmrNo()).append("\n");
+      data.setCmrNo(null);
+      data.setSitePartyId(null);
+      this.log.debug("Saving data..");
+      updateEntity(data, entityManager);
+
+      List<Addr> addresses = requestData.getAddresses();
+      for (Addr addr : addresses) {
+        comments.append("Previous Address " + addr.getId().getAddrType() + "/" + addr.getId().getAddrSeq() + " KUNNR: " + addr.getSapNo())
+            .append("\n");
+        addr.setSapNo(null);
+        addr.setIerpSitePrtyId(null);
+        this.log.debug("Saving address..");
+        updateEntity(addr, entityManager);
+      }
+
+      admin.setDisableAutoProc("N");
+      admin.setLockInd("N");
+      admin.setLockBy(null);
+      admin.setLockByNm(null);
+      admin.setLockTs(null);
+      admin.setProcessedFlag("N");
+      admin.setRdcProcessingStatus("");
+      admin.setReqStatus("PCP");
+
+      this.log.debug("Saving admin..");
+      updateEntity(admin, entityManager);
+
+      // create the workflow history of the status change
+      RequestUtils.createWorkflowHistory(this, entityManager, user.getIntranetId(), admin, comments.toString(), "Recreate", null, null, true, null,
+          null);
+      RequestUtils.createCommentLog(this, entityManager, user, reqId, comments.toString());
+    }
+
+  }
+
 }

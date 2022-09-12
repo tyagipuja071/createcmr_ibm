@@ -276,12 +276,12 @@
       <cmr:label fieldId="postCd">
         <cmr:fieldLabel fieldId="PostalCode" />:
              <cmr:delta text="-" id="delta-postCd" />
-<%--              <cmr:view exceptForCountry="755,726,666,862,758,754"> --%>
-<%--                 <cmr:info text="${ui.info.postalCodeFormat}" /> --%>
-<%--              </cmr:view> --%>
-<%--              <cmr:view forCountry="754"> --%>
-<%--                 <cmr:info text="${ui.info.postalCodeFormatIE}" /> --%>
-<%--              </cmr:view> --%>
+            <!--  <cmr:view exceptForCountry="755,726,666,862,758,754">
+                <cmr:info text="${ui.info.postalCodeFormat}" />
+             </cmr:view>
+             <cmr:view forCountry="754">
+                <cmr:info text="${ui.info.postalCodeFormatIE}" />
+             </cmr:view>--> 
       </cmr:label>
       <cmr:field fieldId="PostalCode" id="postCd" path="postCd" />
     </p>

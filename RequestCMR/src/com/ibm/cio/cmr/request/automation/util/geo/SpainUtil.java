@@ -38,6 +38,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -69,6 +70,7 @@ public class SpainUtil extends AutomationUtil {
   public static final String SCENARIO_CROSSBORDER_IGS = "XIGS";
   public static final String SCENARIO_GOVERNMENT = "GOVRN";
   public static final String SCENARIO_GOVERNMENT_IGS = "GOVIG";
+  public static final String SCENARIO_IBM_EMPLOYEE = "IBMEM";
 
   private static SpainISICPostalMapping esIsicPostalMapping = new SpainISICPostalMapping();
   private static List<ESPostalMapping> postalMappings = new ArrayList<ESPostalMapping>();
@@ -129,6 +131,16 @@ public class SpainUtil extends AutomationUtil {
     String customerName = getCustomerFullName(soldTo);
     Addr installAt = requestData.getAddress("ZI01");
     String customerNameZI01 = getCustomerFullName(installAt);
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if(soldTo != null){
+    	String landCntry = soldTo.getLandCntry();
+    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
+                && ("CROSS".equals(custGrp))){
+        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+        }
+    }
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
@@ -166,6 +178,30 @@ public class SpainUtil extends AutomationUtil {
     case SCENARIO_INTERNAL_SO:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      break;
+    case SCENARIO_IBM_EMPLOYEE:
+      Person person = null;
+      if (StringUtils.isNotBlank(soldTo.getCustNm1())) {
+        try {
+          String mainCustName = soldTo.getCustNm1() + (StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "");
+          person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
+          if (person == null) {
+            engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+            details.append("Employee details not found in IBM BluePages.").append("\n");
+            return false;
+          } else {
+            details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
+          }
+        } catch (Exception e) {
+          LOG.error("Not able to check name against bluepages", e);
+          engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check name against bluepages for scenario IBM Employee.");
+          return false;
+        }
+      } else {
+        LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
+        engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
+        return false;
+      }
       break;
     }
     return true;
@@ -297,35 +333,42 @@ public class SpainUtil extends AutomationUtil {
       boolean requesterFromTeam = false;
       switch (change.getDataField()) {
       case "VAT #":
-        if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
-          // ADD
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-          }
-          if (!matchesDnb) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
-            details.append("VAT # on the request did not match D&B\n");
-          } else {
-            details.append("VAT # on the request matches D&B\n");
-          }
-        }
-        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
-            && !(change.getOldData().equals(change.getNewData()))) {
-          // UPDATE
-          String oldData = change.getOldData().substring(3, 11);
-          String newData = change.getNewData().substring(3, 11);
-          if (!(oldData.equals(newData))) {
-            resultCodes.add("D");// Reject
-            details.append("VAT # on the request has characters updated other than the first character. Create New CMR. \n");
-          } else {
-            details.append("VAT # on the request differs only in the first Character\n");
-          }
-        }
+    	  if(requestData.getAddress("ZS01").getLandCntry().equals("GB")){
+    		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
+                  engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+                  details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+                  }
+            }else{
+            	if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+                    // ADD
+                    Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+                    List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+                    boolean matchesDnb = false;
+                    if (matches != null) {
+                      // check against D&B
+                      matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+                    }
+                    if (!matchesDnb) {
+                      cmdeReview = true;
+                      engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
+                      details.append("VAT # on the request did not match D&B\n");
+                    } else {
+                      details.append("VAT # on the request matches D&B\n");
+                    }
+                  }
+                  if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
+                      && !(change.getOldData().equals(change.getNewData()))) {
+                    // UPDATE
+                    String oldData = change.getOldData().substring(3, 11);
+                    String newData = change.getNewData().substring(3, 11);
+                    if (!(oldData.equals(newData))) {
+                      resultCodes.add("D");// Reject
+                      details.append("VAT # on the request has characters updated other than the first character. Create New CMR. \n");
+                    } else {
+                      details.append("VAT # on the request differs only in the first Character\n");
+                    }
+                  }
+            }
         break;
       case "SBO":
         if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
@@ -430,7 +473,7 @@ public class SpainUtil extends AutomationUtil {
     }
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
-    Set<String> resultCodes = new HashSet<String>();// R - review
+    Set<String> resultCodes = new HashSet<String>();// R - review, D-Reject
     for (String addrType : RELEVANT_ADDRESSES) {
       if (changes.isAddressChanged(addrType)) {
         if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
@@ -441,7 +484,13 @@ public class SpainUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           if ("N".equals(addr.getImportInd())) {
             // new address
-            if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
+            // CREATCMR-6649
+            LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+            if (addressExists(entityManager, addr, requestData)) {
+              LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
+              resultCodes.add("D");
+            } else if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Addition of new ZD01 and ZS02(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getAddressChange(addrType, "Customer Name")
@@ -503,7 +552,12 @@ public class SpainUtil extends AutomationUtil {
         }
       }
     }
-    if (resultCodes.contains("R")) {
+    if (resultCodes.contains("D")) {
+      output.setOnError(true);
+      engineData.addRejectionComment("DUPADDR", "Add or update on the address is rejected", "", "");
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
+    } else if (resultCodes.contains("R")) {
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
       engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
@@ -559,40 +613,40 @@ public class SpainUtil extends AutomationUtil {
     Data data = requestData.getData();
     Addr addr = requestData.getAddress("ZS01");
 
-    if ((!isCoverageCalculated)) {
+    if (!isCoverageCalculated) {
       details.setLength(0);
       overrides.clearOverrides();
-
-      HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr, data.getIsuCd(), data.getClientTier(),
-          data.getCustSubGrp());
-
-      if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
-        LOG.debug("Calculated Enterprise: " + response.get(ENTP));
-        LOG.debug("Calculated Sales Rep: " + response.get(SALES_REP));
-        details.append("Coverage calculated successfully using 34Q logic mapping.").append("\n");
-        details.append("Sales Rep : " + response.get(SALES_REP)).append("\n");
-        details.append("Enterprise : " + response.get(ENTP)).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), response.get(ENTP));
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(),
-            response.get(SALES_REP));
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
-          && StringUtils.isNotBlank(data.getEnterprise())) {
-        details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
-        details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
-        details.append("Enterprise : " + data.getEnterprise()).append("\n");
-        details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else {
-        String msg = "Coverage cannot be calculated. No valid 34Q mapping found from request data.";
-        details.append(msg);
-        results.setResults("Cannot Calculate");
-        results.setDetails(details.toString());
-        engineData.addNegativeCheckStatus("_esCoverage", msg);
-      }
     }
+
+    HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr, data.getIsuCd(), data.getClientTier(),
+        data.getCustSubGrp());
+
+    if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
+      LOG.debug("Calculated Enterprise: " + response.get(ENTP));
+      LOG.debug("Calculated Sales Rep: " + response.get(SALES_REP));
+      details.append("Coverage calculated successfully using 34Q logic mapping.").append("\n");
+      details.append("Sales Rep : " + response.get(SALES_REP)).append("\n");
+      details.append("Enterprise : " + response.get(ENTP)).append("\n");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), response.get(ENTP));
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), response.get(SALES_REP));
+      results.setResults("Calculated");
+      results.setDetails(details.toString());
+    } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
+        && StringUtils.isNotBlank(data.getEnterprise())) {
+      details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
+      details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
+      details.append("Enterprise : " + data.getEnterprise()).append("\n");
+      details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
+      results.setResults("Calculated");
+      results.setDetails(details.toString());
+    } else {
+      String msg = "Coverage cannot be calculated. No valid 34Q mapping found from request data.";
+      details.append(msg);
+      results.setResults("Cannot Calculate");
+      results.setDetails(details.toString());
+      engineData.addNegativeCheckStatus("_esCoverage", msg);
+    }
+
     return true;
   }
 
@@ -636,10 +690,9 @@ public class SpainUtil extends AutomationUtil {
           scenariosList = Arrays.asList(scenarios);
 
           if (isuCd.concat(clientTier).equalsIgnoreCase(postalMapping.getIsuCTC()) && scenariosList.contains(scenario)
-              && "None".equalsIgnoreCase(postalMapping.getIsicBelongs())
-              || (!postalCodes.isEmpty() && postalCodes.contains(postCdtStrt))
+              && ("None".equalsIgnoreCase(postalMapping.getIsicBelongs()) || ((!postalCodes.isEmpty() && postalCodes.contains(postCdtStrt))
                   && (("Yes".equalsIgnoreCase(postalMapping.getIsicBelongs()) && isicCds.contains(subIndCd))
-                      || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(subIndCd)))) {
+                      || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(subIndCd)))))) {
             response.put(ENTP, postalMapping.getEnterprise());
             response.put(SALES_REP, postalMapping.getSaleRep());
             response.put(MATCHING, "Match Found.");
@@ -657,7 +710,7 @@ public class SpainUtil extends AutomationUtil {
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M", "D", "R");
   }
-  
+
   public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
       CoverageContainer container, boolean isCoverageCalculated) throws Exception {

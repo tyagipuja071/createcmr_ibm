@@ -176,11 +176,20 @@ public class GBGMatchingElement extends MatchingElement {
           }
         }
         if (!domesticGBGFound) {
-          LOG.debug("Non-Local gbg found");
-          details.append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.\n");
-          engineData.addRejectionComment("GBG",
-              "Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.", "", "");
-          result.setOnError(true);
+          if (("616".equals(data.getCmrIssuingCntry()) || "834".equals(data.getCmrIssuingCntry()) || "744".equals(data.getCmrIssuingCntry()))
+              && StringUtils.isBlank(data.getInacCd())) {
+            details = new StringBuilder();
+            details.append(
+                "Non-Local gbg found, no available rule(INAC/NAC) found for the country. Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.\n");
+            result.setResults("Matches Found");
+            result.setOnError(false);
+          } else {
+            LOG.debug("Non-Local gbg found");
+            details.append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.\n");
+            engineData.addRejectionComment("GBG",
+                "Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.", "", "");
+            result.setOnError(true);
+          }
         }
 
         int itemNo = 0;

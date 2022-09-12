@@ -194,6 +194,8 @@ public class DataModel extends BaseModel {
 
   private String vatExempt;
 
+  private String vatInd;
+
   private String denialCusInd;
 
   private String privIndc;
@@ -255,6 +257,16 @@ public class DataModel extends BaseModel {
   private String custAcctType;
 
   private String customerIdCd;
+
+  private String mexicoBillingName;
+
+  public String getMexicoBillingName() {
+    return mexicoBillingName;
+  }
+
+  public void setMexicoBillingName(String mexicoBillingName) {
+    this.mexicoBillingName = mexicoBillingName;
+  }
 
   public String getCreditCd() {
     return creditCd;
@@ -1232,5 +1244,13 @@ public class DataModel extends BaseModel {
 
   public void setCustomerIdCd(String customerIdCd) {
     this.customerIdCd = customerIdCd;
+  }
+
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
   }
 }

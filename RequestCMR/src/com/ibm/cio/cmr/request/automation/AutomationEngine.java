@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.impl.DuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.ProcessWaitingElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DnBMatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationOutput;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
@@ -198,6 +199,9 @@ public class AutomationEngine {
     boolean isUsEntCompToPpn = false;
     String strCmtUsEntCompToPpn = "";
 
+    // CREATCMR-6987
+    Boolean isKynDataFlag = false;
+
     if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
       if ("U".equals(requestData.getAdmin().getReqType())) {
         // CREATCMR-5447
@@ -213,6 +217,10 @@ public class AutomationEngine {
           isUsEntCompToPpn = true;
         }
       }
+      // CREATCMR-6987
+      if ("C".equals(requestData.getAdmin().getReqType())) {
+        isKynDataFlag = USHandler.isKynDataSkipDnB(requestData.getAdmin(), requestData.getData());
+      }
     }
 
     for (AutomationElement<?> element : this.elements) {
@@ -224,6 +232,8 @@ public class AutomationEngine {
 
       boolean skipVerification = scenarioExceptions != null && scenarioExceptions.isSkipCompanyVerification();
       skipVerification = skipVerification && (element instanceof CompanyVerifier);
+      // CREATCMR-6987
+      boolean isKynSkipDnB = element instanceof DnBMatchingElement;
 
       // CREATCMR-4872
       if (isUsTaxSkipToPcp) {
@@ -242,6 +252,9 @@ public class AutomationEngine {
           result = element.createSkippedResult(reqId, "Checks skipped because of scenario exceptions and/or previous element results.");
         } else if (skipVerification) {
           result = element.createSkippedResult(reqId, "Company verification skipped for this request scenario.");
+        } else if (isKynDataFlag && isKynSkipDnB) {
+          // CREATCMR-6987
+          result = element.createSkippedResult(reqId, "DnBMatchingElement skipped for this request scenario.");
         } else {
           try {
             result = element.executeAutomationElement(entityManager, requestData, engineData.get());
@@ -414,15 +427,15 @@ public class AutomationEngine {
 
         if ("U".equals(admin.getReqType())) {
           if ("PG".equals(data.getOrdBlk())) {
-            admin.setPaygoProcessIndc("Y");
+            // admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited) {
-            admin.setPaygoProcessIndc("Y");
+            // admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           }
         }
 
-        if (moveForPayGo) {
+        if ("C".equals(admin.getReqType()) && moveForPayGo) {
           createComment(entityManager, "Pay-Go accredited partner. Request passed all other checks, moving to processing.", reqId, appUser);
           admin.setPaygoProcessIndc("Y");
           // data.setIsicCd("8888");

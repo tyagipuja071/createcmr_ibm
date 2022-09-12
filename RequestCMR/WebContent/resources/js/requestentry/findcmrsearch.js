@@ -206,6 +206,7 @@ window.addEventListener("message", function(e) {
           if (ordBlk == '93') {
             cmr.showAlert('Addresses can only be imported from active CMRs. The chosen CMR is an Inactive record.');
           }
+          importCMRConfirm(result);
         } else {
           if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SWITZERLAND) {
             var reqType = FormManager.getActualValue('reqType');

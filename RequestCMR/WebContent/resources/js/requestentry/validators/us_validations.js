@@ -10,6 +10,7 @@ var _usTaxcd1Handler = null;
 var _usSicm = "";
 var _kukla = "";
 var _enterpriseHandler = null;
+var _usRestrictToHandler = null;
 var affiliateArray = {
   9001 : '0089800',
   9002 : '0084800',
@@ -556,6 +557,12 @@ function afterConfigForUS() {
       updateBOForEntp();
     });
   }
+  // CREATCMR-6987
+  if (_usRestrictToHandler == null && FormManager.getField('restrictTo')) {
+    _usRestrictToHandler = dojo.connect(FormManager.getField('restrictTo'), 'onChange', function(value) {
+      setMainName1ForKYN();
+    });
+  }
 
 }
 
@@ -1012,6 +1019,7 @@ function orderBlockValidation() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 // CREATCMR-5447
 function TaxTeamUpdateAddrValidation() {
   FormManager.addFormValidator((function() {
@@ -1253,6 +1261,25 @@ function setTaxcd1Status() {
   }
 
 }
+// CREATCMR-6987
+function setMainName1ForKYN() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var restrictTo = FormManager.getActualValue('restrictTo');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (reqType == 'C') {
+    if ((custGrp == '3' && custSubGrp == 'KYN') || (custGrp == '14' && custSubGrp == 'BYMODEL' && restrictTo == 'KYN')) {
+      FormManager.setValue('mainCustNm1', 'KYNDRYL INC');
+      FormManager.setValue('mainCustNm2', '');
+    }
+  }
+
+}
 
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
@@ -1263,6 +1290,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(clientTierValidator, [ SysLoc.USA ], null,
+  // true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(initUSTemplateHandler, [ SysLoc.USA ]);
@@ -1278,7 +1307,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
   // CREATCMR-4466
   GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA ], null, true);
-  // ], null, true);
   GEOHandler.addAfterConfig(lockOrdBlk, [ SysLoc.USA ]);
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.USA ], null, true);
 
@@ -1301,4 +1329,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-5447
   GEOHandler.registerValidator(TaxTeamUpdateDataValidation, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(TaxTeamUpdateAddrValidation, [ SysLoc.USA ], null, true);
+  // CREATCMR-6987
+  GEOHandler.addAfterTemplateLoad(setMainName1ForKYN, [ SysLoc.USA ]);
+  GEOHandler.addAfterConfig(setMainName1ForKYN, [ SysLoc.USA ]);
 });

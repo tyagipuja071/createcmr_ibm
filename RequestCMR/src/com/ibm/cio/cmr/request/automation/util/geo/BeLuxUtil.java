@@ -31,6 +31,8 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
@@ -49,6 +51,7 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_INTERNAL = "BEINT";
   public static final String SCENARIO_INTERNAL_SO = "BEISO";
   public static final String SCENARIO_DATA_CENTER = "BEDAT";
+  public static final String SCENARIO_IBMEM_BE = "IBMEM";
 
   // Lux
   public static final String SCENARIO_CROSS_LU = "LUCRO";
@@ -60,6 +63,7 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_THIRD_PARTY_LU = "LU3PA";
   public static final String SCENARIO_BP_LOCAL_LU = "LUBUS";
   public static final String SCENARIO_DATA_CENTER_LU = "LUDAT";
+  public static final String SCENARIO_IBMEM_LU = "LUIBM";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO, CmrConstants.RDC_PAYGO_BILLING);
@@ -78,6 +82,16 @@ public class BeLuxUtil extends AutomationUtil {
     Addr zp01 = requestData.getAddress("ZP01");
     String customerNameZP01 = "";
     String landedCountryZP01 = "";
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if(zs01 != null){
+    	String landCntry = zs01.getLandCntry();
+    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
+                && ("CROSS".equals(custGrp))){
+        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+        }
+    }
     if (zp01 != null) {
       customerNameZP01 = StringUtils.isBlank(zp01.getCustNm1()) ? "" : zp01.getCustNm1();
       landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
@@ -142,6 +156,32 @@ public class BeLuxUtil extends AutomationUtil {
       details.append("Processor Review will be required for Third Party Scenario/Data Center.\n");
       engineData.addNegativeCheckStatus("Scenario_Validation", "3rd Party/Data Center request will require CMDE review before proceeding.\n");
       break;
+    case SCENARIO_IBMEM_LU:
+    case SCENARIO_IBMEM_BE:
+      Person person = null;
+      if (StringUtils.isNotBlank(zs01.getCustNm1())) {
+        try {
+          String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
+          person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
+          if (person == null) {
+            engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+            details.append("Employee details not found in IBM BluePages.").append("\n");
+            return false;
+          } else {
+            details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
+          }
+        } catch (Exception e) {
+          LOG.error("Not able to check name against bluepages", e);
+          engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check name against bluepages for scenario IBM Employee.");
+          return false;
+        }
+      } else {
+        LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
+        engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
+        return false;
+      }
+      break;
+
     }
 
     return true;
@@ -374,43 +414,49 @@ public class BeLuxUtil extends AutomationUtil {
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
       case "VAT #":
-        if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
-          // ADD
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-          }
-          if (!matchesDnb) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
-            details.append("VAT # on the request did not match D&B\n");
-          } else {
-            details.append("VAT # on the request matches D&B\n");
-          }
-        }
+    	  if(requestData.getAddress("ZS01").getLandCntry().equals("GB")){
+    		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
+                  engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+                  details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+                  }
+            }else{
+            	if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+                    // ADD
+                    Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+                    List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+                    boolean matchesDnb = false;
+                    if (matches != null) {
+                      // check against D&B
+                      matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+                    }
+                    if (!matchesDnb) {
+                      cmdeReview = true;
+                      engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
+                      details.append("VAT # on the request did not match D&B\n");
+                    } else {
+                      details.append("VAT # on the request matches D&B\n");
+                    }
+                  }
 
-        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
-            && !(change.getOldData().equals(change.getNewData()))) {
-          // UPDATE
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-          }
-          if (!matchesDnb) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
-            details.append("VAT # on the request did not match D&B\n");
-          } else {
-            details.append("VAT # on the request matches D&B\n");
-          }
-        }
-
+                  if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
+                      && !(change.getOldData().equals(change.getNewData()))) {
+                    // UPDATE
+                    Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+                    List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+                    boolean matchesDnb = false;
+                    if (matches != null) {
+                      // check against D&B
+                      matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+                    }
+                    if (!matchesDnb) {
+                      cmdeReview = true;
+                      engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
+                      details.append("VAT # on the request did not match D&B\n");
+                    } else {
+                      details.append("VAT # on the request matches D&B\n");
+                    }
+                  }
+            }
         break;
       case "ISIC":
       case "INAC/NAC Code":

@@ -444,7 +444,7 @@ function afterConfigForCEMEA() {
     } else {
       FormManager.enable('custClass');
     }
-    // CREATCMR-6378
+ // CREATCMR-6378
     retainVatValueAT();
   }
 
@@ -697,6 +697,7 @@ function addHandlersForCEMEA() {
         setClientTierValuesAT(value);
         setSBOValuesForIsuCtcAT();
       }
+      disableFieldsIBMEm();
     });
   }
 
@@ -756,6 +757,15 @@ function addHandlersForCEMEA() {
 
 }
 
+function disableFieldsIBMEm() {
+  var scenario = FormManager.getActualValue('custSubGrp');
+  if (!scenario.includes('IBM')) {
+    return;
+  }
+  FormManager.setValue('clientTier', '');
+  FormManager.readOnly('clientTier');
+}
+
 function setClientTierValuesAT(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -802,6 +812,7 @@ function addFiscalExemptHandler() {
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       RomaniaFiscalCdMandatory();
+      setVatValidatorCEMEA();
     });
   }
 }
@@ -4266,6 +4277,8 @@ function setClassificationCodeCEE() {
       FormManager.setValue('custClass', '81');
     } else if (_custType == 'PRICU' || _custType == 'CSPC' || _custType == 'MEPC' || _custType == 'RSPC' || _custType == 'RSXPC') {
       FormManager.setValue('custClass', '60');
+    } else if (_custType.includes('IBM')) {
+      FormManager.setValue('custClass', '71');
     } else if (isicCds.has(isicCd)) {
       FormManager.setValue('custClass', '13');
     } else {
@@ -4742,6 +4755,10 @@ function setCEESBOValuesForIsuCtc() {
   }
 
   if ('U' == FormManager.getActualValue('reqType')) {
+    return;
+  }
+
+  if (FormManager.getActualValue('custSubGrp').includes('IBM')) {
     return;
   }
 
@@ -5236,7 +5253,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setPreferredLang, GEOHandler.CEMEA);
 
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.AUSTRIA ], null, true);
-
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.CEMEA_EXCLUDE_CEE, null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.CEMEA, null, true);
   GEOHandler.registerValidator(addCrossBorderValidatorForCEMEA, [ '707', '762', '808', '620', '767', '805', '823', '677', '680', '832' ], null, true);
@@ -5376,6 +5392,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, SysLoc.AUSTRIA);
   GEOHandler.addAfterTemplateLoad(togglePPSCeidCEE, GEOHandler.CEMEA);
+  GEOHandler.addAfterTemplateLoad(disableFieldsIBMEm, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setClassificationCodeCEE, GEOHandler.CEMEA);
 
 });

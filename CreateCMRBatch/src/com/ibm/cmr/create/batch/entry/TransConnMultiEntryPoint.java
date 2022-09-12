@@ -16,6 +16,10 @@ import com.ibm.cmr.create.batch.service.TransConnMultiService.Mode;
 public class TransConnMultiEntryPoint extends BatchEntryPoint {
 
   public static void main(String[] args) throws CmrException {
+    boolean delete = false;
+    if (args != null && args.length > 0 && "DELETE".equalsIgnoreCase(args[0].trim())) {
+      delete = true;
+    }
     BatchEntryPoint.initContext("TransConnMulti", true);
 
     FillSapNoService fill = new FillSapNoService();
@@ -24,6 +28,8 @@ public class TransConnMultiEntryPoint extends BatchEntryPoint {
 
     TransConnMultiService service = new TransConnMultiService();
     service.setSkipExit(true);
+    service.setDeleteMode(delete);
+
     service.setMode(Mode.Aborted);
     service.execute();
 

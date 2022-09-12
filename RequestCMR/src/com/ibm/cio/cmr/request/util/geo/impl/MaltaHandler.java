@@ -1121,32 +1121,30 @@ public class MaltaHandler extends BaseSOFHandler {
                 LOG.trace("Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), rowNumber + "Order block",
                     "Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
-                // validations.add(error);
               }
-
-              if (!StringUtils.isBlank(isuCd)) {
-                if ("5K".equals(isuCd)) {
-                  if (!"@".equals(clientTier)) {
-                    LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                    error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
-                  }
-                } else if ("21,8B".contains(isuCd) && !"@".equals(clientTier)) {
+              List<String> isuBlankCtc = Arrays.asList("5K", "21", "8B");
+              if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+              } else if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+                if (isuBlankCtc.contains(isuCd) && !clientTier.equalsIgnoreCase("@")) {
                   LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                  error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
-                } else if ("34".equals(isuCd)) {
+                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
+                } else if (isuCd.startsWith("34")) {
                   if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
-                    LOG.trace("The row " + row.getRowNum()
+                    LOG.trace("The row " + (row.getRowNum() + 1)
                         + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                    error.addError(row.getRowNum(), "Client Tier",
+                    error.addError((row.getRowNum() + 1), "Client Tier",
                         ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                   }
+                } else if (!"@QY".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
                 }
-              }
-              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
-                LOG.trace(
-                    "The row " + row.getRowNum() + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Client Tier",
-                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
               }
             }
 

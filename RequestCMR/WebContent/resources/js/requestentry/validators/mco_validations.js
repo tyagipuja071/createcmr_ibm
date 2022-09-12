@@ -808,6 +808,9 @@ function setEnterpriseValues34Q() {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    return;
+  }
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
@@ -838,7 +841,6 @@ function setEnterpriseValues34Q() {
     } else {
       entp = '985107'
     }
-
     FormManager.setValue('enterprise', entp);
     return;
   }
@@ -881,6 +883,9 @@ function setEnterpriseValues(scenarioChanged) {
     return;
   }
   if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  if (FormManager.getActualValue('custSubGrp' == 'IBMEM')) {
     return;
   }
 
@@ -1071,6 +1076,9 @@ function setSBOAndEBO() {
 
       // CREATCMR-4293
       // isuCtc == '217'
+      if (FormManager.getActualValue('custSubGrp') == 'IBMEM' || FormManager.getActualValue('custSubGrp') == '') {
+        return;
+      }
       if (isuCtc == '32B' || isuCtc == '32T' || isuCtc == '21') {
         if (ent == undefined) {
           FormManager.setValue('enterprise', '');
@@ -1136,8 +1144,8 @@ function setVatValidatorPTES() {
     };
     var results = cmr.query('ADDR.GET.ZS01LANDCNTRY.BY_REQID', reqParam);
     var zs01LandCntry = results.ret2;
-    if (!dijit.byId('vatExempt').get('checked') && zs01LandCntry != 'US') {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    if (!dijit.byId('vatExempt').get('checked') && zs01LandCntry != 'US' && zs01LandCntry != 'GB') {
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
   }
 }
@@ -1746,6 +1754,8 @@ function forceLockScenariosSpain() {
   } else if (custSubGroup == 'XINTR') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
+  } else if (custSubGroup == 'IBMEM') {
+    fieldsToDisable.push('isicCd');
   }
 
   // common to all scenarios
@@ -2295,7 +2305,7 @@ function lockRequireFieldsSpain() {
     if (result && result.ret1 && result.ret1 != '') {
       zs01Cntry = result.ret1;
     }
-    if (zs01Cntry != 'US') {
+    if (zs01Cntry != 'US' && zs01Cntry != 'GB') {
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     } else {
       FormManager.removeValidator('vat', Validators.REQUIRED);
@@ -2973,7 +2983,7 @@ function validateExistingCMRNo() {
 
 // CREATCMR-4293
 function setCTCValues() {
-
+  
   FormManager.removeValidator('clientTier', Validators.REQUIRED);
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');

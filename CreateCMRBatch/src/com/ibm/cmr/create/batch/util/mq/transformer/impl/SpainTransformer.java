@@ -208,7 +208,7 @@ public class SpainTransformer extends MessageTransformer {
 
     // fiscal address
     if (MQMsgConstants.ADDR_ZP02.equals(addrData.getId().getAddrType())) {
-      if (MQMsgConstants.CUSTSUBGRP_PRICU.equals(cmrData.getCustSubGrp())) {
+      if (MQMsgConstants.CUSTSUBGRP_PRICU.equals(cmrData.getCustSubGrp()) || MQMsgConstants.CUSTSUBGRP_IBMEM.equals(cmrData.getCustSubGrp())) {
         line1 = "F" + addrData.getCustNm1();
       } else {
         line1 = "J" + addrData.getCustNm1();

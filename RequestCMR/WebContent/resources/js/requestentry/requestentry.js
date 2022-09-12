@@ -225,7 +225,13 @@ function processRequestAction() {
         // if there are no errors, show the Address Verification modal window
         cmr.showModal('addressVerificationModal');
       }
-    } else {
+    }
+
+    if((GEOHandler.LA.includes(FormManager.getActualValue('cmrIssuingCntry'))) || 
+ 				   (GEOHandler.EMEA.includes(FormManager.getActualValue('cmrIssuingCntry'))))	{
+     		findVatInd();
+     }
+    else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
 
@@ -791,12 +797,44 @@ var _templateHandler = null;
 var defaultLandCntry = null;
 var _rejSupplInfoHandler = null;
 var _dnbSearchHandler = null;
+var _vatIndHandler = null;
 
 /**
  * Executed after PageManager loads all the scripts. Place here code that needs
  * to be executed to override the PageManager configurable fields' settings
  */
 function afterConfigChange() {
+
+  // VAT indicator
+  var value = FormManager.getActualValue('vatInd');
+  if (_vatIndHandler == null) {
+    _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(value) {
+      if (value && dojo.string.trim(value) == 'T') {
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'N');
+        FormManager.setValue('taxCd2', 'N');
+        FormManager.setValue('vatInd', 'T');
+      } else if (value && dojo.string.trim(value) == 'N') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.readOnly('vat');
+        FormManager.setValue('vat', '');
+        FormManager.setValue('taxCd2', 'N');
+        FormManager.setValue('vatInd', 'N');
+      } else if (value && dojo.string.trim(value) == 'E') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'Y');
+        FormManager.setValue('taxCd2', 'Y');
+        FormManager.setValue('vatInd', 'E');
+      }
+    });
+
+  }
+  if (_vatIndHandler && _vatIndHandler[0]) {
+    _vatIndHandler[0].onChange();
+  }
+
   // add special INAC value validator
   // if INAC Type = I, the code should be a number
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -1438,11 +1476,22 @@ function overrideDnBMatch() {
   var cntry = FormManager.getActualValue('landCntry');
   var loc = FormManager.getActualValue('cmrIssuingCntry');
   if (cntry == 'CN' || loc == '641') {
-    cmr
-        .showConfirm(
-            'doOverrideDnBMatch()',
-            'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
-            'Warning', null, null);
+    var reqType = FormManager.getActualValue('reqType');
+    var custSubGroup = FormManager.getActualValue('custSubGrp');
+
+    if(loc == '641' && (custSubGroup == 'CROSS' && reqType == 'C' || reqType == 'U' && cntry != 'CN')){
+      cmr
+      .showConfirm(
+          'doOverrideDnBMatch()',
+          'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+          'Warning', null, null);
+    }else{
+      cmr
+      .showConfirm(
+          'doOverrideDnBMatch()',
+          'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+          'Warning', null, null);
+    }
   } else {
     cmr
         .showConfirm(
@@ -1658,6 +1707,14 @@ function checkIfFinalDnBCheckRequired() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+  if (cmrCntry == '834') {
+    var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+      ID : reqId
+    });
+    if (ret && ret.ret1 && ret.ret1 != '') {
+      return false;
+    }
+  }
   if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
       && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US
@@ -1781,6 +1838,9 @@ function matchDnBForAutomationCountries() {
                     .showAlert('This action will override the D&B Matching Process. By overriding the D&B matching, you\'re obliged to provide either one of the following documentation '
                         + 'as backup-client\'s official website, business registration proof, government issued documents, client\'s confirmation email and signed PO, attach it under the file content of Company Proof. '
                         + 'Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.');
+                FormManager.setValue('matchOverrideIndc', 'Y');
+              } else if (data.cnCrossFlag) {
+                cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');
                 FormManager.setValue('matchOverrideIndc', 'Y');
               } else {
                 cmr.showModal('addressVerificationModal');
@@ -1927,7 +1987,7 @@ function matchDnbForAUSG() {
               } else {
                 cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
               }
-            } else if (data.match && !data.isicMatch) {
+            } else if (data.match && !data.isicMatch && !(reqType == 'U' && cntry == SysLoc.AUSTRALIA)) {
               comp_proof_INAUSG = false;
               console.log("ISIC validation failed by Dnb.");
               cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");
@@ -2335,3 +2395,14 @@ function autoSaveRequest() {
   }
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }
+
+
+function recreateCMR(){
+  var msg = '<strong>WARNING: Use this function with caution!</strong><br><br>This will recreate a <strong>NEW CMR</strong> for this request. Please ensure that any invalid records in RDC have been marked as logically deleted and there is an actual need to create a new CMR for this request. Proceed?';
+  cmr.showConfirm('executeRecreateCMR()', msg, 'Warning', null);
+}
+
+function executeRecreateCMR() {
+  FormManager.doAction('frmCMR', 'RECREATE', true, 'Setting up request for recreation of CMR...');
+}
+
