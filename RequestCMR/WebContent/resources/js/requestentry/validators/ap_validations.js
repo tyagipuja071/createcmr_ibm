@@ -1946,6 +1946,7 @@ function setCtcOnIsuCdChangeANZ(isuCd) {
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   }
+    handleObseleteExpiredDataForUpdate();  
 }
 
 function setCtcOnIsuCdChangeGCG() {
@@ -4164,27 +4165,7 @@ function addVatValidationforSingapore() {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'UEN#' ], 'MAIN_CUST_TAB');
   }
 }
-
-// function handleExpiredClusterAP() {
-// var reqType = FormManager.getActualValue('reqType');
-// var cntry = FormManager.getActualValue('cmrIssuingCntry');
-//
-// if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' ||
-// cntry == SysLoc.HONG_KONG || cntry == SysLoc.MACAO) {
-// return;
-// }
-// var gbSegment = FormManager.getField('clientTier');
-// var isu = FormManager.getField('isuCd');
-// var clusterDataRdc = getAPClusterDataRdc();
-// if (clusterDataRdc != null && clusterDataRdc != undefined && clusterDataRdc
-// != '') {
-// var clusterExpired = checkClusterExpired(clusterDataRdc);
-// if (clusterExpired) {
-// handleObseleteExpiredDataForUpdate();
-// }
-// }
-// }
-
+// CREATCMR-5258
 // CREATCMR -5269
 function handleObseleteExpiredDataForUpdate() {
  var reqType = FormManager.getActualValue('reqType');
