@@ -357,6 +357,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       Admin admin = entity.getEntity(Admin.class);
       admin.setLastUpdtBy(user.getIntranetId());
       admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+      admin.setWarnMsgSentDt(null);
 
       if (StringUtils.isEmpty(admin.getLockInd())) {
         admin.setLockInd(CmrConstants.YES_NO.N.toString());
@@ -522,6 +523,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     admin = entity.getEntity(Admin.class);
     admin.setLastUpdtBy(user.getIntranetId());
     admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+    admin.setWarnMsgSentDt(null);
 
     lockedBy = admin.getLockBy();
     lockedByNm = admin.getLockByNm();
