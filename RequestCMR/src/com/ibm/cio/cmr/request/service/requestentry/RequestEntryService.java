@@ -71,7 +71,6 @@ import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
-import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -352,6 +351,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       Admin admin = entity.getEntity(Admin.class);
       admin.setLastUpdtBy(user.getIntranetId());
       admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+      admin.setWarnMsgSentDt(null);
 
       if (StringUtils.isEmpty(admin.getLockInd())) {
         admin.setLockInd(CmrConstants.YES_NO.N.toString());
@@ -517,6 +517,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     admin = entity.getEntity(Admin.class);
     admin.setLastUpdtBy(user.getIntranetId());
     admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+    admin.setWarnMsgSentDt(null);
 
     lockedBy = admin.getLockBy();
     lockedByNm = admin.getLockByNm();

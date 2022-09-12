@@ -18,6 +18,8 @@ if ("DRA".equals(reqentry.getReqStatus())){
     extraClass= " cmr-overall-status-rej";
 } else if ("COM".equals(reqentry.getReqStatus())){
   extraClass= " cmr-overall-status-com";
+} else if ("CLO".equals(reqentry.getReqStatus())){
+  extraClass= " cmr-overall-status-clo";
 }
 %><cmr:row topPad="10">
   <cmr:column span="1" width="170">
