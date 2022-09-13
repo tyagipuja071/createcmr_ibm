@@ -677,11 +677,6 @@ public class DefaultPDFConverter implements PDFConverter {
 
   protected void addCustomerDetailsForMassUpdt(EntityManager entityManager, MassUpdtData data, Document document)
       throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-    DataModel DATA1 = new DataModel();
-    Data d = new Data();
-
-    copyValuesFromEntity(data, DATA1);
-    copyValuesToEntity(DATA1, d);
     document.add(createSubHeader("Customer Information"));
     Table customer = createDetailsTable();
     customer.addCell(createLabelCell("Abbreviated Name:"));
@@ -894,7 +889,6 @@ public class DefaultPDFConverter implements PDFConverter {
   public void copyValuesToEntity(Object from, Object to) {
     try {
       PropertyUtils.copyProperties(to, from);
-
       if (to instanceof BaseEntity<?>) {
         BaseEntity<?> ent = (BaseEntity<?>) to;
         BaseEntityPk id = ent.getId();
@@ -911,12 +905,10 @@ public class DefaultPDFConverter implements PDFConverter {
 
     DataModel dataModel = new DataModel();
     Data data = new Data();
-
     copyValuesFromEntity(massUpdtData, dataModel);
     copyValuesToEntity(dataModel, data);
     data.setEmbargoCd(massUpdtData.getMiscBillCd());
     data.setSalesBusOffCd(massUpdtData.getCustNm1());
-
     return data;
   }
 
