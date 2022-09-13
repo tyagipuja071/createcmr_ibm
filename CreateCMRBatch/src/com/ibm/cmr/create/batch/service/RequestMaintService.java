@@ -160,6 +160,8 @@ public class RequestMaintService extends BaseBatchService {
       content.append("<a href=\"").append(applicationUrl).append(admin.getId().getReqId()).append("\">")
           .append(admin.getId().getReqId() + " - " + name).append("</a><br>");
     }
+    content.append(
+        "<br><br>If you need to reactivate an Auto-Closed request, please reach out to <strong>CI Operations</strong> via their <a href=\"https://chiefdataoffice.slack.com/archives/CRVNPAF17\">Slack Channel</a>");
     content.append("<br><br>CreateCMR Admin");
     content.append("</body>");
     content.append("</html>");
@@ -167,7 +169,7 @@ public class RequestMaintService extends BaseBatchService {
     // send the mail
     String host = SystemConfiguration.getValue("MAIL_HOST");
     String from = SystemConfiguration.getValue("MAIL_FROM");
-    String subject = "For Your Action: Your have inactive requests in CreateCMR";
+    String subject = "For Your Action: You have inactive requests in CreateCMR";
 
     Email mail = new Email();
     mail.setTo(requesterId);
