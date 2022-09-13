@@ -510,6 +510,9 @@ function afterConfigForLA() {
   if (_mrcCdHandler == null) {
     _mrcCdHandler = dojo.connect(FormManager.getField('mrcIsu'), 'onChange', function(value) {
       autoSetMrcIsuCov2018();
+      if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MEXICO) {
+        setMrcCdToReadOnly();
+      }
     });
   }
 
@@ -541,7 +544,7 @@ function afterConfigForLA() {
       autoSetFieldsForCustScenariosSSAMX();
       setCrosTypSubTypSSAMXOnSecnarios();
       setAbbrevNameRequiredForProcessors();
-      setPredefinedScenarioValues();
+      setMrcCdToReadOnly();
     });
   }
 
@@ -2131,8 +2134,10 @@ function setFieldRequiredSSAMXOnSecnarios() {
       FormManager.resetValidations('repTeamMemberNo');
     }
     if (_cmrCntry == '781' && (_custSubGrp == '5PRIP' || _custSubGrp == '5COMP' || _custSubGrp == 'IBMEM' || _custSubGrp == 'PRIPE')) {
-      FormManager.resetValidations('isicCd');
-      FormManager.resetValidations('subIndustryCd');
+      if(_custSubGrp != 'IBMEM' ) {
+        FormManager.resetValidations('isicCd');
+        FormManager.resetValidations('subIndustryCd');
+      }
       FormManager.resetValidations('salesBusOffCd');
       FormManager.resetValidations('collBoId');
     }
@@ -2660,8 +2665,7 @@ function setTaxRegimeMX() {
   }
 }
 
-// note: set here if unable to handle via creqcmr.cust_scenarios
-function setPredefinedScenarioValues() {
+function setMrcCdToReadOnly() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
     return;
@@ -2672,31 +2676,14 @@ function setPredefinedScenarioValues() {
 
   if (reqType == 'C') {
     if(custSubGrp == 'IBMEM') {
-      setMrcCdIBMEM(role);
-    }
-  }
-}
-
-function setMrcCdIBMEM(role) {
-  if (role == 'REQUESTER') {
-    FormManager.readOnly('mrcCd');
-  } else {
-    FormManager.enable('mrcCd');
-  }
-}
-
-// CREATCMR-6813 - AR Predefined tax info values
-function showVatNotifForArgentina() {
-  var _custGrp = FormManager.getActualValue('custGrp');
-  var _custSubGrp = FormManager.getActualValue('custSubGrp');
-  var _custType = FormManager.getActualValue('custType');
-  
-  if (FormManager.getActualValue('cmrIssuingCntry') == '613') {
-    if (_custGrp == "LOCAL" && _custType == 'IBMEM') {
-      cmr.showAlert("Please do a Save action to create the predefined entries in Tax Info tab.", "Notice");
+      if (role == 'REQUESTER') {
+        FormManager.readOnly('mrcCd');
+      } else {
+        FormManager.enable('mrcCd');
       }
     }
   }
+}
 
 /* Register LA Validators */
 dojo.addOnLoad(function() {
@@ -2778,8 +2765,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
-
   
-  GEOHandler.addAfterTemplateLoad(setPredefinedScenarioValues, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
 });
