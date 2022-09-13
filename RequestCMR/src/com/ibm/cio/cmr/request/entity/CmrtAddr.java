@@ -261,6 +261,9 @@ public class CmrtAddr extends BaseEntity<CmrtAddrPK> implements Serializable {
   @Transient
   private boolean forSharedSeq;
 
+  @Transient
+  private String newAddrSeq;
+
   public String getAddrLine1() {
     return addrLine1;
   }
@@ -627,6 +630,14 @@ public class CmrtAddr extends BaseEntity<CmrtAddrPK> implements Serializable {
 
   public void setAddrLineN(String addrLineN) {
     this.addrLineN = addrLineN;
+  }
+
+  public String getNewAddrSeq() {
+    return newAddrSeq;
+  }
+
+  public void setNewAddrSeq(String newAddrSeq) {
+    this.newAddrSeq = newAddrSeq;
   }
 
 }

@@ -763,6 +763,11 @@
     <put-attribute name="body" value="/resources/jsp/home/dashboard.jsp" />
   </definition>
 
-  
+  <definition name="corrections" extends="base">
+    <put-attribute name="title" value="CreateCMR | Corrections" />
+    <put-attribute name="body" value="/resources/jsp/system/corrections.jsp" />
+  </definition>
+
+ 
    <!-- Single Reactivation End -->
 </tiles-definitions>

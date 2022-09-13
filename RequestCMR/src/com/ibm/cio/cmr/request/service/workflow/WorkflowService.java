@@ -184,10 +184,12 @@ public class WorkflowService extends BaseService<WorkflowRequestsModel, Admin> {
     } else if ("all".equals(type)) {
       sql = ExternalizedQuery.getSql("WORKFLOW.ALL_REQ_LIST");
       sql += " order by a.REQ_ID " + order;
-      sql += " limit 1000";
+      sql += " limit 500";
     }
     if (user.getDefaultNoOfRecords() <= 0) {
-      sql += " limit 200";
+      if (!sql.contains(" limit ")) {
+        sql += " limit 200";
+      }
     }
     // order by a.REQ_ID desc
     // String sql = ExternalizedQuery.getSql("WORKFLOW.OPEN_REQ_LIST");
