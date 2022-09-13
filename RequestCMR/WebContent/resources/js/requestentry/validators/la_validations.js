@@ -2131,8 +2131,10 @@ function setFieldRequiredSSAMXOnSecnarios() {
       FormManager.resetValidations('repTeamMemberNo');
     }
     if (_cmrCntry == '781' && (_custSubGrp == '5PRIP' || _custSubGrp == '5COMP' || _custSubGrp == 'IBMEM' || _custSubGrp == 'PRIPE')) {
-      FormManager.resetValidations('isicCd');
-      FormManager.resetValidations('subIndustryCd');
+      if(_custSubGrp != 'IBMEM' ) {
+        FormManager.resetValidations('isicCd');
+        FormManager.resetValidations('subIndustryCd');
+      }
       FormManager.resetValidations('salesBusOffCd');
       FormManager.resetValidations('collBoId');
     }
