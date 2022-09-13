@@ -560,10 +560,10 @@ function afterConfigForLA() {
   
   // CREATCMR-6813 - AR Predefined tax info values
   if (_taxCd1Handler == null) {
-    _taxCd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
+    _taxCd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function (value) {
       showVatNotifForArgentina();
-      });
-    }
+    });
+  }
 
   // if(_subindustryHandler == null){
   // _subindustryHandler = dojo.connect(FormManager.getField('custType'),
@@ -2681,6 +2681,18 @@ function setMrcCdToReadOnly() {
       } else {
         FormManager.enable('mrcCd');
       }
+    }
+  }
+}
+
+// CREATCMR-6813 - AR Predefined tax info values
+function showVatNotifForArgentina() {
+  var _custGrp = FormManager.getActualValue('custGrp');
+  var _custType = FormManager.getActualValue('custType');
+
+  if (FormManager.getActualValue('cmrIssuingCntry') == '613') {
+    if (_custGrp == "LOCAL" && _custType == 'IBMEM') {
+      cmr.showAlert("Please do a Save action to create the predefined entries or update the Tax Number fields in Tax Info tab.", "Notice");
     }
   }
 }
