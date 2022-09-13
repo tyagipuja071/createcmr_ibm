@@ -69,7 +69,7 @@ public class AutomationReviews {
     cat.addReason("No data/address changes made on request");
     group.add(cat);
 
-    cat = new ReviewCategory("Invalid VAT");
+    cat = new ReviewCategory("VAT Mismatch");
     cat.addReason("VAT is invalid");
     cat.addReason("VAT value did not match");
     cat.addReason("State fiscal code is empty");

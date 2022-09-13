@@ -7,7 +7,10 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.geo.impl.APHandler;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
@@ -40,6 +43,7 @@ public abstract class ASEANTransformer extends APTransformer {
   @Override
   protected void handleDataDefaults(MQMessageHandler handler) {
     super.handleDataDefaults(handler);
+    APHandler aphandler = (APHandler) RequestUtils.getGEOHandler(handler.cmrData.getCmrIssuingCntry());
     handler.messageHash.put("RegionCode", handler.cmrData.getMiscBillCd());
     if (MQMsgConstants.CUSTGRP_BLUEMIX.equalsIgnoreCase(handler.cmrData.getCustGrp())
         || MQMsgConstants.CUSTGRP_MKPLA.equalsIgnoreCase(handler.cmrData.getCustGrp())) {
@@ -72,10 +76,36 @@ public abstract class ASEANTransformer extends APTransformer {
       handler.messageHash.put("ISU", "5K7");
     }
     String clusterID = handler.cmrData.getApCustClusterId();
-    if (clusterID.contains("BLAN")) {
+    if (clusterID != null && clusterID.contains("BLAN")) {
       handler.messageHash.put("ClusterNo", "");
     } else {
       handler.messageHash.put("ClusterNo", clusterID);
+    }
+    // Handling obsolete data
+    DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
+    String reqType = handler.adminData.getReqType();
+    if (StringUtils.equalsIgnoreCase(reqType, "U")) {
+      if (StringUtils.isBlank(handler.cmrData.getApCustClusterId())) {
+        handler.messageHash.put("ClusterNo", oldDataRdc.getApCustClusterId());
+      }
+      if (StringUtils.isBlank(handler.cmrData.getClientTier())) {
+        handler.messageHash.put("GB_SegCode", oldDataRdc.getClientTier());
+      }
+      if (StringUtils.isBlank(handler.cmrData.getIsuCd())) {
+        handler.messageHash.put("ISU", oldDataRdc.getIsuCd());
+      }
+      if (StringUtils.isBlank(handler.cmrData.getInacType())) {
+        handler.messageHash.put("inacType", oldDataRdc.getInacType());
+      }
+      if (StringUtils.isBlank(handler.cmrData.getInacCd())) {
+        handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
+      }
+      if (StringUtils.isBlank(handler.cmrData.getCollectionCd())) {
+        handler.messageHash.put("IBMCode", oldDataRdc.getCollectionCd());
+      }
+      if (StringUtils.isBlank(handler.cmrData.getEngineeringBo())) {
+        handler.messageHash.put("EngrBrnchOff", oldDataRdc.getEngineeringBo());
+      }
     }
 
   }

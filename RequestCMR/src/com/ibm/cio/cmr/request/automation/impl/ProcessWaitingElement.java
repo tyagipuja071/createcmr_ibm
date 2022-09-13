@@ -20,4 +20,10 @@ public interface ProcessWaitingElement {
    * @return
    */
   public boolean isWaiting();
+
+  /**
+   * Resets the waiting status of the element. Called once the waiting check is
+   * done.
+   */
+  public void resetWaitingStatus();
 }

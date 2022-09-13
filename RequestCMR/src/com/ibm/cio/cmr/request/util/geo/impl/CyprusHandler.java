@@ -1720,6 +1720,8 @@ public class CyprusHandler extends BaseSOFHandler {
         address.setAddrStdResult("X");
       }
 
+      // CREATCMR-5741 - no addr std
+      address.setAddrStdResult("X");
       address.setPairedAddrSeq(currentRecord.getTransAddrNo());
 
       address.setVat(currentRecord.getCmrTaxNumber());
@@ -3740,7 +3742,7 @@ public class CyprusHandler extends BaseSOFHandler {
 
   // START -- missing code greece code
   private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZP01")) {
@@ -3754,7 +3756,7 @@ public class CyprusHandler extends BaseSOFHandler {
   // END -- missing code greece code
 
   private void saveAddrCopyForCy(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZI01") || addrType.equals("ZD01") || addrType.equals("ZS02")) {
