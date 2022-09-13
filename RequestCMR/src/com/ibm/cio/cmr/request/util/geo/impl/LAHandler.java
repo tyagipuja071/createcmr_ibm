@@ -709,17 +709,28 @@ public class LAHandler extends GEOHandler {
           doCreateDefaultTaxRecord("", "2", data.getId().getReqId(), entityManager, true, false);
         } else if (SystemLocation.ARGENTINA.equals(issuingCntry)) {
           // CREATCMR-6813 - AR Predefined tax info values
-          if ("LOCAL".equals(data.getCustGrp()) && CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())
-              && StringUtils.isNotBlank(data.getTaxCd1())) {
-            if (data.getTaxCd1().length() >= 11) {
-              deleteAllTaxInfoRecord(data, entityManager);
-              doCreateARDefaultTaxRecord("01", data.getTaxCd1().substring(3, 11), data.getId().getReqId(), entityManager, true, true, true);
-              doCreateARDefaultTaxRecord("11", data.getTaxCd1().substring(3, 11), data.getId().getReqId(), entityManager, false, false, false);
-              doCreateARDefaultTaxRecord("02", data.getTaxCd1().substring(3, 11), data.getId().getReqId(), entityManager, false, false, false);
-              doCreateARDefaultTaxRecord("07", data.getTaxCd1().substring(3, 11), data.getId().getReqId(), entityManager, false, false, false);
-              doCreateARDefaultTaxRecord("12", data.getTaxCd1().substring(3, 11), data.getId().getReqId(), entityManager, false, false, false);
+          String sql = ExternalizedQuery.getSql("AR.GET_GEOTAXINFORECORDS");
+          PreparedQuery query = new PreparedQuery(entityManager, sql);
+          query.setParameter("REQ_ID", data.getId().getReqId());
+          GeoTaxInfo geoTaxInfoRecords = query.getSingleResult(GeoTaxInfo.class);
+
+          String taxCd1 = data.getTaxCd1();
+          if ("LOCAL".equals(data.getCustGrp()) && CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())) {
+            if (StringUtils.isNotBlank(taxCd1) && taxCd1.length() >= 11) {
+              String taxCd1Subtr = taxCd1.substring(3, 11);
+              if (StringUtils.isEmpty(geoTaxInfoRecords.getTaxNum())) {
+                deleteAllTaxInfoRecord(data, entityManager);
+                doCreateARDefaultTaxRecord("01", taxCd1Subtr, data.getId().getReqId(), entityManager, true, true, true);
+                doCreateARDefaultTaxRecord("11", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
+                doCreateARDefaultTaxRecord("02", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
+                doCreateARDefaultTaxRecord("07", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
+                doCreateARDefaultTaxRecord("12", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
+              } else {
+                doUpdateARDefaultTaxRecord(taxCd1Subtr, data.getId().getReqId(), entityManager, data);
+              }
             }
           } else {
+            deleteAllTaxInfoRecord(data, entityManager);
             doCreateDefaultTaxRecord("", "1", data.getId().getReqId(), entityManager, true, true);
           }
         } else {
@@ -934,7 +945,7 @@ public class LAHandler extends GEOHandler {
     }
   }
 
-  // CREATCMR-6813 - AR Predefined tax info values
+  // CREATCMR-6813
   private void doCreateARDefaultTaxRecord(String defaultTaxcd, String dataTaxCd, long reqId, EntityManager entityManager, boolean taxSepIndc,
       boolean contPntIndc, boolean cntryUse) {
     TaxInfoService taxService = new TaxInfoService();
@@ -983,7 +994,35 @@ public class LAHandler extends GEOHandler {
     }
   }
 
-  // CREATCMR-6813 - AR Predefined tax info values
+  // CREATCMR-6813
+  private void doUpdateARDefaultTaxRecord(String dataTaxCd, long reqId, EntityManager entityManager, Data data) {
+    Admin reqAdmin = null;
+
+    try {
+      reqAdmin = new AdminService().getCurrentRecordById(reqId, entityManager);
+    } catch (Exception ex) {
+      LOG.error("doUpdateARDefaultTaxRecord : " + ex.getMessage());
+      reqAdmin = new Admin();
+    }
+
+    if (reqAdmin.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_CREATE)) {
+
+      String sql = ExternalizedQuery.getSql("AR.GET_GEOTAXINFORECORDS");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", data.getId().getReqId());
+      List<GeoTaxInfo> geoTaxInfoRecords = query.getResults(GeoTaxInfo.class);
+
+      if (geoTaxInfoRecords != null) {
+        for (GeoTaxInfo geoTaxInfoRecord : geoTaxInfoRecords) {
+          geoTaxInfoRecord.setTaxNum(dataTaxCd);
+          entityManager.merge(geoTaxInfoRecord);
+          entityManager.flush();
+        }
+      }
+    }
+  }
+
+  // CREATCMR-6813
   private void deleteAllTaxInfoRecord(Data data, EntityManager entityManager) {
     TaxInfoService taxService = new TaxInfoService();
 
