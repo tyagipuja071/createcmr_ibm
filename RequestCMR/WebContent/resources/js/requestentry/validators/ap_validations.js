@@ -101,7 +101,13 @@ function afterConfigForIndia() {
         }
     });
   }
+  
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if(custSubGrp == 'CROSS'){
+    FormManager.readOnly('vat');
   }
+  
+}
 
 function resetGstExempt() {
   if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
