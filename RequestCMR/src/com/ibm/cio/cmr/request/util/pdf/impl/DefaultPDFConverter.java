@@ -9,22 +9,27 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.BaseEntity;
+import com.ibm.cio.cmr.request.entity.BaseEntityPk;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.model.requestentry.DataModel;
 import com.ibm.cio.cmr.request.model.window.RequestSummaryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
@@ -152,16 +157,17 @@ public class DefaultPDFConverter implements PDFConverter {
         try {
           Document document = new Document(pdf);
           try {
-            document.add(createHeader("Details for Request ID " + admin.getId().getReqId()));
-            document.add(blankLine());
-            addMainDetails(admin, data, document);
-            document.add(blankLine());
 
             // get MassUpdate Request Details
             Map<String, MassUpdtData> dataMap = getMassUpdtDataList(entityManager, admin);
 
             // get All Addresses
             List<MassUpdtAddr> addressList = getMassUpdtAddressList(entityManager, admin);
+
+            document.add(createHeader("Details for Request ID " + admin.getId().getReqId()));
+            document.add(blankLine());
+            addMainDetailsForMassUpdt(admin, data, document, dataMap.keySet());
+            document.add(blankLine());
 
             for (Map.Entry<String, MassUpdtData> massdata : dataMap.entrySet()) {
 
@@ -181,14 +187,18 @@ public class DefaultPDFConverter implements PDFConverter {
                   MassUpdtAddr soldTo = addAddressDetailsForMassUpdt(admin, data, addressListPerCmr, entityManager, document);
                 }
                 document.add(blankLine());
-                addCustomerDetailsForMassUpdt(entityManager, massdata.getValue(), document);
+                Data covertedData = convertMassUpdtDataToData(massdata.getValue());
+                addCustomerDetails(entityManager, covertedData, document);
 
                 document.add(blankLine());
-                addIBMDetailsForMassUpdt(entityManager, massdata.getValue(), document);
+                addIBMDetails(entityManager, covertedData, document);
                 document.add(blankLine());
 
                 // addExtraSections(entityManager, admin, data, sysLoc, soldTo,
                 // document);
+
+                addUpdatedDataSection(entityManager, admin, data, sysLoc, document);
+
               }
             }
           } finally {
@@ -208,6 +218,45 @@ public class DefaultPDFConverter implements PDFConverter {
       LOG.error("Error in Generating PDF for Request ID " + admin.getId().getReqId(), e);
       return false;
     }
+  }
+
+  protected void addMainDetailsForMassUpdt(Admin admin, Data data, Document document, Set<String> cmrs) {
+    document.add(createSubHeader("General Information"));
+    Table main = createDetailsTable();
+
+    main.addCell(createLabelCell("Request ID:"));
+    main.addCell(createValueCell(admin.getId().getReqId() + ""));
+    main.addCell(createLabelCell("Request Type:"));
+    if ("Y".equals(admin.getProspLegalInd())) {
+      main.addCell(createValueCell(admin.getReqType() + " (Prospect to Legal Conversion)"));
+    } else {
+      main.addCell(createValueCell(admin.getReqType()));
+    }
+
+    main.addCell(createLabelCell("Requester:"));
+    main.addCell(createValueCell(admin.getRequesterNm()));
+    main.addCell(createLabelCell("Originator:"));
+    main.addCell(createValueCell(admin.getOriginatorNm()));
+
+    main.addCell(createLabelCell("CMR Issuing Country:"));
+    main.addCell(createValueCell(data.getCmrIssuingCntry()));
+    main.addCell(createLabelCell("CMR Numbers:"));
+    String allCmrs = String.join(", ", cmrs);
+    main.addCell(createValueCell(allCmrs));
+
+    main.addCell(createLabelCell("Customer Name:"));
+    String customerName = StringUtils.isBlank(admin.getMainCustNm1()) ? "" : admin.getMainCustNm1();
+    if (!StringUtils.isBlank(admin.getMainCustNm2())) {
+      customerName += " " + admin.getMainCustNm2();
+    }
+    main.addCell(createValueCell(customerName, 1, 3));
+
+    main.addCell(createLabelCell("Requesting LOB:"));
+    main.addCell(createValueCell(admin.getRequestingLob()));
+    main.addCell(createLabelCell("Request Reason:"));
+    main.addCell(createValueCell(admin.getReqReason()));
+    document.add(main);
+
   }
 
   protected void addDeleteReactivateDetails(Admin admin, EntityManager entityManager, Document document) {
@@ -626,7 +675,8 @@ public class DefaultPDFConverter implements PDFConverter {
 
   }
 
-  protected void addCustomerDetailsForMassUpdt(EntityManager entityManager, MassUpdtData data, Document document) {
+  protected void addCustomerDetailsForMassUpdt(EntityManager entityManager, MassUpdtData data, Document document)
+      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     document.add(createSubHeader("Customer Information"));
     Table customer = createDetailsTable();
     customer.addCell(createLabelCell("Abbreviated Name:"));
@@ -792,6 +842,17 @@ public class DefaultPDFConverter implements PDFConverter {
   }
 
   protected List<MassUpdtAddr> getMassUpdtAddressList(EntityManager entityManager, Admin admin) {
+
+    // check if address details exists
+    String sql = ExternalizedQuery.getSql("GET.MASS.UPDATE.ADDR.COUNT");
+    PreparedQuery qury = new PreparedQuery(entityManager, sql);
+    qury.setParameter("REQ_ID", admin.getId().getReqId());
+    qury.setParameter("ITERATION_ID", admin.getIterationId());
+    int count = qury.getSingleResult(Integer.class);
+    if (count == 0) {
+      return null;
+    }
+
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("PDF.MASS_UPDATE_ADDR_RECORDS"));
     query.setParameter("REQ_ID", admin.getId().getReqId());
     query.setParameter("ITERATION_ID", admin.getIterationId());
@@ -806,4 +867,42 @@ public class DefaultPDFConverter implements PDFConverter {
     }
     return addressList;
   }
+
+  public void copyValuesFromEntity(Object from, Object to) {
+    try {
+      PropertyUtils.copyProperties(to, from);
+      if (from instanceof BaseEntity<?>) {
+        BaseEntity<?> ent = (BaseEntity<?>) from;
+        BaseEntityPk id = ent.getId();
+        PropertyUtils.copyProperties(to, id);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      // noop
+    }
+  }
+
+  public void copyValuesToEntity(Object from, Object to) {
+    try {
+      PropertyUtils.copyProperties(to, from);
+      if (to instanceof BaseEntity<?>) {
+        BaseEntity<?> ent = (BaseEntity<?>) to;
+        BaseEntityPk id = ent.getId();
+        PropertyUtils.copyProperties(id, from);
+      }
+    } catch (Exception e) {
+
+    }
+  }
+
+  public Data convertMassUpdtDataToData(MassUpdtData massUpdtData) {
+    DataModel dataModel = new DataModel();
+    Data data = new Data();
+    copyValuesFromEntity(massUpdtData, dataModel);
+    copyValuesToEntity(dataModel, data);
+    data.setEmbargoCd(massUpdtData.getMiscBillCd());
+    data.setSalesBusOffCd(massUpdtData.getCustNm1());
+    return data;
+  }
+
 }
