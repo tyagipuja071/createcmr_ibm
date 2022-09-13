@@ -849,7 +849,6 @@ public class DefaultPDFConverter implements PDFConverter {
     qury.setParameter("REQ_ID", admin.getId().getReqId());
     qury.setParameter("ITERATION_ID", admin.getIterationId());
     int count = qury.getSingleResult(Integer.class);
-
     if (count == 0) {
       return null;
     }
@@ -872,14 +871,11 @@ public class DefaultPDFConverter implements PDFConverter {
   public void copyValuesFromEntity(Object from, Object to) {
     try {
       PropertyUtils.copyProperties(to, from);
-
       if (from instanceof BaseEntity<?>) {
         BaseEntity<?> ent = (BaseEntity<?>) from;
         BaseEntityPk id = ent.getId();
-
         PropertyUtils.copyProperties(to, id);
       }
-
     } catch (Exception e) {
       e.printStackTrace();
       // noop
@@ -892,17 +888,14 @@ public class DefaultPDFConverter implements PDFConverter {
       if (to instanceof BaseEntity<?>) {
         BaseEntity<?> ent = (BaseEntity<?>) to;
         BaseEntityPk id = ent.getId();
-
         PropertyUtils.copyProperties(id, from);
       }
-
     } catch (Exception e) {
 
     }
   }
 
   public Data convertMassUpdtDataToData(MassUpdtData massUpdtData) {
-
     DataModel dataModel = new DataModel();
     Data data = new Data();
     copyValuesFromEntity(massUpdtData, dataModel);
