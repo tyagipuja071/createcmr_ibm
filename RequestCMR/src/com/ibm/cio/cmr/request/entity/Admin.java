@@ -316,6 +316,9 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
   @Temporal(TemporalType.TIMESTAMP)
   private Date warnMsgSentDt;
 
+  @Transient
+  private boolean useParentManager;
+
   public String getRequesterId() {
     return this.requesterId;
   }
@@ -778,6 +781,14 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
 
   public void setWarnMsgSentDt(Date warnMsgSentDt) {
     this.warnMsgSentDt = warnMsgSentDt;
+  }
+
+  public boolean isUseParentManager() {
+    return useParentManager;
+  }
+
+  public void setUseParentManager(boolean useParentManager) {
+    this.useParentManager = useParentManager;
   }
 
 }
