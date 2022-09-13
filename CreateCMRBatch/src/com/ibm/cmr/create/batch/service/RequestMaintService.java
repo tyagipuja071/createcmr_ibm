@@ -179,4 +179,9 @@ public class RequestMaintService extends BaseBatchService {
     return true;
   }
 
+  @Override
+  protected boolean terminateOnLongExecution() {
+    return false;
+  }
+
 }
