@@ -266,6 +266,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
       }
 
+      addr.setAddrStdResult("X");
       createEntity(addr, entityManager);
 
       if (LAHandler.isBRIssuingCountry(model.getCmrIssuingCntry())) {
@@ -376,6 +377,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         changed = geoHandler.isAddressChanged(entityManager, addr, model.getCmrIssuingCntry(), changed);
       }
       addr.setChangedIndc(changed ? "Y" : null);
+      addr.setAddrStdResult("X");
       updateEntity(addr, entityManager);
 
       if (LAHandler.isBRIssuingCountry(model.getCmrIssuingCntry())) {
@@ -1146,14 +1148,14 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         errorInfo = null;
         if (addr.getDplChkResult() == null) {
           Boolean errorStatus = false;
-          Boolean isPrivate=false;
+          Boolean isPrivate = false;
           if ("PRIV".equals(data.getCustSubGrp()) || "PRICU".equals(data.getCustSubGrp())) {
             isPrivate = true;
 
           }
           try {
             dplResult = dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
-                geoHandler != null ? !geoHandler.customerNamesOnAddress() : false,isPrivate);
+                geoHandler != null ? !geoHandler.customerNamesOnAddress() : false, isPrivate);
           } catch (Exception e) {
             log.error("Error in performing DPL Check when call EVS on Request ID " + reqId + " Addr " + addr.getId().getAddrType() + "/"
                 + addr.getId().getAddrSeq(), e);
@@ -1309,8 +1311,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
    * @return
    * @throws Exception
    */
-  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, String soldToLandedCountry, String issuingCountry, boolean useNameOnMain, boolean isPrivate)
-      throws Exception {
+  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, String soldToLandedCountry, String issuingCountry, boolean useNameOnMain,
+      boolean isPrivate) throws Exception {
     String servicesUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String appId = SystemConfiguration.getSystemProperty("evs.appID");
     DPLCheckClient dplClient = CmrServicesFactory.getInstance().createClient(servicesUrl, DPLCheckClient.class);

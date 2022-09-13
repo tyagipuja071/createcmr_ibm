@@ -60,6 +60,7 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -1107,5 +1108,10 @@ public abstract class GEOHandler {
       throws CmrException, SQLException {
     // TODO Auto-generated method stub
     return recipients.getId().getIntranetId();
+  }
+
+  public boolean matchDnbMailingAddr(DnBMatchingResponse dnbRecord, Addr addr, String issuingCountry, Boolean allowLongNameAddress) {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

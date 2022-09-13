@@ -269,6 +269,8 @@ public class AutomationEngine {
           LOG.debug("Element is waiting on external processes. No action for this run");
           stopExecution = true;
           processWaiting = true;
+          // ensure to reset waiting status as elements are cached
+          ((ProcessWaitingElement) element).resetWaitingStatus();
           break;
         } else if (result.isOnError()) {
           if (!(element instanceof CompanyVerifier)) {
