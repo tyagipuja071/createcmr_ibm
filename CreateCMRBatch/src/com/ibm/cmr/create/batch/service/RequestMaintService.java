@@ -83,6 +83,7 @@ public class RequestMaintService extends BaseBatchService {
       }
       admin.setWarnMsgSentDt(ts);
       LOG.debug("Setting warn date for Request " + admin.getId().getReqId());
+      admin.setUseParentManager(true);
       entityManager.merge(admin);
       currCount++;
       if (currCount % 200 == 0 && currCount > 0) {
@@ -127,6 +128,7 @@ public class RequestMaintService extends BaseBatchService {
       admin.setLockTs(null);
       admin.setLastUpdtBy(BATCH_USER_ID);
       LOG.debug("Closing Request " + admin.getId().getReqId());
+      admin.setUseParentManager(true);
       updateEntity(admin, entityManager);
 
       RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment, "Auto-Close", null, null, true, false, null);
