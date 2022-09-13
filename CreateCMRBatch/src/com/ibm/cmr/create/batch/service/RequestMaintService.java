@@ -73,6 +73,7 @@ public class RequestMaintService extends BaseBatchService {
     // map first all requests under same requester, minimize mails
     Timestamp ts = SystemUtil.getActualTimestamp();
     LOG.debug(warnList.size() + " requests to send warnings to.");
+    int currCount = 0;
     for (Admin admin : warnList) {
       boolean ibmer = admin.getRequesterId() != null && admin.getRequesterId().toLowerCase().endsWith("ibm.com");
       boolean external = !StringUtils.isBlank(admin.getSourceSystId());
@@ -82,7 +83,12 @@ public class RequestMaintService extends BaseBatchService {
       }
       admin.setWarnMsgSentDt(ts);
       LOG.debug("Setting warn date for Request " + admin.getId().getReqId());
-      updateEntity(admin, entityManager);
+      entityManager.merge(admin);
+      currCount++;
+      if (currCount % 200 == 0 && currCount > 0) {
+        LOG.debug("Flushing at " + currCount + " records.");
+        entityManager.flush();
+      }
     }
 
     for (String requesterId : reqIdMap.keySet()) {

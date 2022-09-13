@@ -171,7 +171,7 @@ public class ChangeLogListener {
       EntityManager entityManager = currentEntityManager.get();
       if (entityManager != null) {
         ownTransaction = false;
-        LOG.debug("Using thread local entity manager..");
+        LOG.trace("Using thread local entity manager..");
       } else {
         LOG.debug("Opening own changelog entity manager..");
         entityManager = JpaManager.getEntityManager();
