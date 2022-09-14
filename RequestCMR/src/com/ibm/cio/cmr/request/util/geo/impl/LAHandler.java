@@ -730,7 +730,6 @@ public class LAHandler extends GEOHandler {
               }
             }
           } else {
-            deleteAllTaxInfoRecord(data, entityManager);
             doCreateDefaultTaxRecord("", "1", data.getId().getReqId(), entityManager, true, true);
           }
         } else {
