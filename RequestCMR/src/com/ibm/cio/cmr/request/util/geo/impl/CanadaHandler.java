@@ -586,7 +586,18 @@ public class CanadaHandler extends GEOHandler {
         data.setSalesTeamCd("000");
       } else {
         if (mainAddr.getPostCd() != null && mainAddr.getPostCd().length() >= 3) {
-          // data.setSalesTeamCd(mainAddr.getPostCd().substring(0, 3));
+          List<Object[]> results = new ArrayList<Object[]>();
+          String sql = ExternalizedQuery.getSql("QUERY.GET.CA.CSBRANCH.LOVTXT");
+          PreparedQuery query = new PreparedQuery(entityManager, sql);
+          query.setParameter("CMR_ISSUING_CNTRY", data.getCmrIssuingCntry());
+          query.setParameter("CD", mainAddr.getPostCd().substring(0, 3));
+          results = query.getResults();
+          if (results != null && !results.isEmpty()) {
+            Object[] sResult = results.get(0);
+            String csBranch = sResult[0].toString();
+            LOG.debug("CSBranch : " + csBranch);
+            data.setSalesTeamCd(csBranch);
+          }
         }
       }
     }
