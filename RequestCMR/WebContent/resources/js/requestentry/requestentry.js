@@ -135,7 +135,11 @@ function processRequestAction() {
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
-      if (checkForConfirmationAttachments()) {
+    	 if(GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')))
+    	  	{
+    	  		findVatInd();
+    	  	}
+    	 else  if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
       } else if (cmrCntry == SysLoc.INDIA) {
         // Cmr-2340- For India Dnb import
