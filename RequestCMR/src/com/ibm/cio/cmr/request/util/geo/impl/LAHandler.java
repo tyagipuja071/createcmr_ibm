@@ -967,7 +967,7 @@ public class LAHandler extends GEOHandler {
       taxInfo.setTaxCd(defaultTaxcd); /* predefined value */
 
       if (taxSepIndc) {
-        taxInfo.setTaxSeparationIndc("07"); /* predefined value */
+        taxInfo.setTaxSeparationIndc("0"); /* predefined value */
       } else {
         taxInfo.setTaxSeparationIndc("N"); /* predefined value */
       }
