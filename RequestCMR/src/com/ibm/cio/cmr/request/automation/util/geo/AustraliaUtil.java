@@ -171,7 +171,8 @@ public class AustraliaUtil extends AutomationUtil {
     String custNm2 = StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "";
     String customerName = custNm1 + custNm2;
 
-    allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scenarioList));
+    // allowDuplicatesForScenario(engineData, requestData,
+    // Arrays.asList(scenarioList));
     processSkipCompanyChecks(engineData, requestData, details);
     switch (scenario) {
     // CREATCMR - 2031
