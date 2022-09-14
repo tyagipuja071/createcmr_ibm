@@ -12,7 +12,7 @@ function retrieveRequest() {
  */
 function changeStatus() {
   if (FormManager.validate('frmCMR')) {
-    cmr.showConfirm('actualChangeStatus()', 'Are you sure?');
+    cmr.showConfirm('actualChangeStatus()', 'The status of the specified Request ID(s) will be changed. Please ensure you have checked each request and there is a need to force change the status of each request.<br>Proceed?');
   }
 }
 

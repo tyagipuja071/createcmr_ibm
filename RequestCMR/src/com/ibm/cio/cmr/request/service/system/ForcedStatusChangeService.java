@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.service.system;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class ForcedStatusChangeService extends BaseService<ForcedStatusChangeMod
 
     String action = model.getAction();
     if ("FORCE_CHANGE".equals(action)) {
+      Timestamp ts = SystemUtil.getCurrentTimestamp();
       if (!StringUtils.isBlank(model.getSearchReqId())) {
         model.setSearchReqId(model.getSearchReqId().replaceAll("\\s+", ""));
       }
@@ -64,7 +66,7 @@ public class ForcedStatusChangeService extends BaseService<ForcedStatusChangeMod
         if (CmrConstants.YES_NO.Y.toString().equals(model.getNewLockedInd())) {
           admin.setLockBy(model.getNewLockedById().toLowerCase());
           admin.setLockByNm(model.getNewLockedByNm());
-          admin.setLockTs(SystemUtil.getCurrentTimestamp());
+          admin.setLockTs(ts);
         } else {
           admin.setLockInd(CmrConstants.YES_NO.N.toString());
           admin.setLockBy(null);
@@ -110,7 +112,7 @@ public class ForcedStatusChangeService extends BaseService<ForcedStatusChangeMod
         if (null != model.getCmt() && !model.getCmt().isEmpty()) {
           String statusDesc = getstatusDescription(model.getNewReqStatus(), entityManager);
           String cmt = FORCE_STATUS_CHG_CMT_PRE_PREFIX + statusDesc + FORCE_STATUS_CHG_CMT_POST_PREFIX + model.getCmt();
-          RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), cmt);
+          RequestUtils.createCommentLog(this, entityManager, user, admin.getId().getReqId(), cmt);
         }
       }
       ChangeLogListener.clean();
