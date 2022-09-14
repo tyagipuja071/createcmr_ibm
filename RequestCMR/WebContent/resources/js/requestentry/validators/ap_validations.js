@@ -717,18 +717,17 @@ function addAttachmentValidator() {
              } else {
                return new ValidationResult(null, true);
              }
-           } else {                         
-            var id = FormManager.getActualValue('reqId');
-            var ret = cmr.query('CHECK_TERRITORY_ATTACHMENT', {
-              ID : id
-            });
-
-            if (ret == null || ret.ret1 == null) {
-              return new ValidationResult(null, false, 'TERRITORY Manager Approval in Attachment tab is required.');
-            } else {
-              return new ValidationResult(null, true);
-            }
-          }
+           } else if (cmrIssuingCntry != '616' && cmrIssuingCntry != '834') {
+             var id = FormManager.getActualValue('reqId');
+             var ret = cmr.query('CHECK_TERRITORY_ATTACHMENT', {
+               ID : id
+             });
+             if (ret == null || ret.ret1 == null) {
+               return new ValidationResult(null, false, 'TERRITORY Manager Approval in Attachment tab is required.');
+             } else {
+               return new ValidationResult(null, true);
+             }
+           }
          } else {
             return new ValidationResult(null, true);
           }
