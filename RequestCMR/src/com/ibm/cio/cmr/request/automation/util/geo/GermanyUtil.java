@@ -184,34 +184,36 @@ public class GermanyUtil extends AutomationUtil {
               } else {
                 details.append("No Duplicate CMRs were found.").append("\n");
               }
-              if (StringUtils.isBlank(duplicateCMRNo) && scenario.equals("IBMEM")) {
-                Person person = null;
-                if (StringUtils.isNotBlank(zs01.getCustNm1())) {
-                  try {
-                    String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-                    person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName), data.getCmrIssuingCntry());
-                    if (person == null) {
-                      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-                      details.append("Employee details not found in IBM BluePages.").append("\n");
-                      valid = false;
-                    } else {
-                      details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
-                          .append("\n");
-                    }
-                  } catch (Exception e) {
-                    LOG.error("Not able to check name against bluepages", e);
-                    engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED",
-                        "Not able to check name against bluepages for scenario IBM Employee.");
-                  }
-                } else {
-                  LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
-                  engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
-                }
-              }
             }
           } catch (Exception e) {
             details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
             engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+          }
+
+          if (scenario.equals("IBMEM")) {
+            Person person = null;
+            if (StringUtils.isNotBlank(zs01.getCustNm1())) {
+              try {
+                String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
+                person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName), data.getCmrIssuingCntry());
+                if (person == null) {
+                  engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+                  details.append("Employee details not found in IBM BluePages.").append("\n");
+                  valid = false;
+                } else {
+                  details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
+                      .append("\n");
+                }
+              } catch (Exception e) {
+                LOG.error("Not able to check name against bluepages", e);
+                engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check name against bluepages for scenario IBM Employee.");
+                valid = false;
+              }
+            } else {
+              LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
+              engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
+              valid = false;
+            }
           }
         }
         break;
