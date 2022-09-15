@@ -2687,13 +2687,13 @@ function setMrcCdToReadOnly() {
 
 // CREATCMR-6813 - AR Predefined tax info values
 function showVatNotifForArgentina() {
-  var _reqType = FormManager.getActualValue('reqType');
-  var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var _custGrp = FormManager.getActualValue('custGrp');
-  var _custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-  if (_cmrIssuingCntry == '613' && _reqType == 'C') {
-    if (_custGrp == "LOCAL" && _custSubGrp == 'IBMEM') {
+  if (reqType == 'C' && cmrIssuingCntry == '613') {
+    if (custGrp == "LOCAL" && custSubGrp == 'IBMEM') {
       cmr.showAlert("Do a Save action to create the predefined entries or update the Tax Number fields in Tax Info tab.", "Warning");
     }
   }
@@ -2701,10 +2701,9 @@ function showVatNotifForArgentina() {
 
 var currentChosenScenarioAR = '';
 function showDeleteNotifForArgentinaIBMEM() {
-  var _reqType = FormManager.getActualValue('reqType');
-  var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var _custGrp = FormManager.getActualValue('custGrp')
-  var scenario = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custGrp = FormManager.getActualValue('custGrp')
   var scenario = FormManager.getActualValue('custSubGrp');
 
   var scenarioChanged = false;
@@ -2714,10 +2713,11 @@ function showDeleteNotifForArgentinaIBMEM() {
   }
 
   scenarioChanged = scenarioChanged || (currentChosenScenarioAR != '' && currentChosenScenarioAR != scenario);
-  
-  if (_cmrIssuingCntry == '613' && _reqType == 'C' && _custGrp == "LOCAL") {
+
+  if (reqType == 'C' && cmrIssuingCntry == '613' && custGrp == "LOCAL") {
     if (currentChosenScenarioAR == 'IBMEM' && scenarioChanged) {
-      cmr.showAlert("Manually delete the predefined Tax Info values after changing from IBM Employee to other Scenario Sub-type, if there are any created.", "Warning");
+      cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten." +
+        "<br><br><strong>Manually delete the predefined Tax Info values after changing from IBM Employee to other Scenario Sub-type, if there are any created.</strong>", "Warning");
     }
   }
   currentChosenScenarioAR = scenario;
