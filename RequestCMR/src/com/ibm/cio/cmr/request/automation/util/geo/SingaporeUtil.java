@@ -189,6 +189,7 @@ public class SingaporeUtil extends AutomationUtil {
      */
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+    Admin admin = requestData.getAdmin();
     String[] scnarioList = { "ASLOM", "NRML" };
     Addr soldTo = requestData.getAddress("ZS01");
     String custNm1 = soldTo.getCustNm1();
@@ -198,6 +199,8 @@ public class SingaporeUtil extends AutomationUtil {
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
 
     processSkipCompanyChecks(engineData, requestData, details);
+
+    landedCountryRequiresCMDEReview(engineData, details, soldTo, admin);
 
     // CMR - 4507
     if ("SPOFF".equalsIgnoreCase(data.getCustSubGrp())) {
@@ -643,4 +646,12 @@ public class SingaporeUtil extends AutomationUtil {
     return Arrays.asList("PTY LTD", "LTD", "company", "limited", "PT", "SDN BHD", "berhad", "CO. LTD", "company limited", "JSC", "JOINT STOCK",
         "INC.", "PTE LTD", "PVT LTD", "private limited", "CORPORATION", "hospital", "university");
   }
+
+  private void landedCountryRequiresCMDEReview(AutomationEngineData engineData, StringBuilder details, Addr soldTo, Admin admin) {
+    if ("TH".equalsIgnoreCase(soldTo.getLandCntry()) && "C".equalsIgnoreCase(admin.getReqType())) {
+      details.append("Processor review is needed as customer is from Thailand" + "\n");
+      engineData.addNegativeCheckStatus("ISTHA", "Customer is from Thailand");
+    }
+  }
+
 }
