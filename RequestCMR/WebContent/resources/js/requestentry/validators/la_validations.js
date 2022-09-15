@@ -2687,14 +2687,42 @@ function setMrcCdToReadOnly() {
 
 // CREATCMR-6813 - AR Predefined tax info values
 function showVatNotifForArgentina() {
+  var _reqType = FormManager.getActualValue('reqType');
+  var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var _custGrp = FormManager.getActualValue('custGrp');
-  var _custType = FormManager.getActualValue('custType');
+  var _custSubGrp = FormManager.getActualValue('custSubGrp');
 
-  if (FormManager.getActualValue('cmrIssuingCntry') == '613') {
-    if (_custGrp == "LOCAL" && _custType == 'IBMEM') {
-      cmr.showAlert("Please do a Save action to create the predefined entries or update the Tax Number fields in Tax Info tab.", "Notice");
+  if (_cmrIssuingCntry == '613' && _reqType == 'C') {
+    if (_custGrp == "LOCAL" && _custSubGrp == 'IBMEM') {
+      cmr.showAlert("Do a Save action to create the predefined entries or update the Tax Number fields in Tax Info tab.", "Warning");
     }
   }
+}
+
+var currentChosenScenarioAR = '';
+function showDeleteNotifForArgentinaIBMEM() {
+  var _reqType = FormManager.getActualValue('reqType');
+  var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var _custGrp = FormManager.getActualValue('custGrp')
+  var scenario = FormManager.getActualValue('custSubGrp');
+  var scenario = FormManager.getActualValue('custSubGrp');
+
+  var scenarioChanged = false;
+
+  if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario) {
+    scenarioChanged = true;
+  }
+
+  scenarioChanged = scenarioChanged || (currentChosenScenarioAR != '' && currentChosenScenarioAR != scenario);
+  
+  if (_cmrIssuingCntry == '613' && _reqType == 'C' && _custGrp == "LOCAL") {
+    if (currentChosenScenarioAR == 'IBMEM' && scenarioChanged) {
+      cmr.showAlert("Manually delete the predefined tax info values after changing from IBM Employee to other Scenario sub-type, if there are any created.", "Warning");
+    } else {
+      cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten.", "Warning");
+    }
+  }
+  currentChosenScenarioAR = scenario;
 }
 
 /* Register LA Validators */
@@ -2780,4 +2808,6 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
+
+  GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
 });
