@@ -292,6 +292,11 @@ public class MassChangeTemplate {
         }
       } else if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
         LegacyDirectUtil.checkIsraelMassTemplate(this.tabs, book, country);
+        // CREATCMR-2673
+        if (SystemLocation.DENMARK.equals(country) || SystemLocation.NORWAY.equals(country) || SystemLocation.SWEDEN.equals(country)
+            || SystemLocation.FINLAND.equals(country)) {
+          LegacyDirectUtil.checkNordxlMassTemplate(this.tabs, book, country);
+        }
         LegacyDirectUtil.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validate(entityManager, book, country, maxRows));
