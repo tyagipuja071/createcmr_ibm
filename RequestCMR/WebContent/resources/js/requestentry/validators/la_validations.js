@@ -2717,9 +2717,7 @@ function showDeleteNotifForArgentinaIBMEM() {
   
   if (_cmrIssuingCntry == '613' && _reqType == 'C' && _custGrp == "LOCAL") {
     if (currentChosenScenarioAR == 'IBMEM' && scenarioChanged) {
-      cmr.showAlert("Manually delete the predefined tax info values after changing from IBM Employee to other Scenario sub-type, if there are any created.", "Warning");
-    } else {
-      cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten.", "Warning");
+      cmr.showAlert("Manually delete the predefined tax info values after changing from IBM Employee to other Scenario Sub-type, if there are any created.", "Warning");
     }
   }
   currentChosenScenarioAR = scenario;
