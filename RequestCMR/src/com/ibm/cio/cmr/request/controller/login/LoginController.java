@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -132,10 +133,17 @@ public class LoginController extends BaseController {
    */
   @RequestMapping(value = "/timeout")
   public ModelAndView showTimeoutPage(HttpServletRequest request, ModelMap model) {
+    LogInUserModel newModel = new LogInUserModel();
     MessageUtil.setErrorMessage(model, MessageUtil.ERROR_TIMEOUT);
     Object reqId = request.getAttribute("r");
+    String findcmrparams = (String) request.getAttribute("c");
     if (reqId != null && !"0".equals(reqId.toString().trim())) {
       model.addAttribute("r", reqId.toString());
+      newModel.setR(Long.parseLong(reqId.toString()));
+    }
+    if (!StringUtils.isBlank(findcmrparams)) {
+      model.addAttribute("c", findcmrparams);
+      newModel.setC(findcmrparams);
     }
     return new ModelAndView("redirect:/login", "loginUser", new LogInUserModel());
   }
@@ -341,6 +349,17 @@ public class LoginController extends BaseController {
           if (appUser.isPreferencesSet()) {
             if (loginUser.getR() > 0) {
               mv = new ModelAndView("redirect:/request/" + loginUser.getR(), "appUser", appUser);
+            } else if (!StringUtils.isBlank(loginUser.getC())) {
+              String c = loginUser.getC();
+              String decoded = new String(Base64.getDecoder().decode(c));
+              String params = decoded.substring(2);
+              if (decoded.startsWith("f")) {
+                mv = new ModelAndView("redirect:/findcmr?" + params, "appUser", appUser);
+              } else if (decoded.startsWith("r")) {
+                mv = new ModelAndView("redirect:/request?" + params, "appUser", appUser);
+              } else {
+                mv = new ModelAndView("redirect:/home", "appUser", appUser);
+              }
             } else if (appUser.isApprover()) {
               mv = new ModelAndView("redirect:/myappr", "approval", new MyApprovalsModel());
             } else {
