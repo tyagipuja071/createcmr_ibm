@@ -1,3 +1,7 @@
+<%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="com.ibm.cio.cmr.request.model.system.ForcedStatusChangeModel"%>
+<%@page import="java.util.List"%>
 <%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@page import="org.codehaus.jackson.map.ObjectMapper"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
@@ -7,6 +11,17 @@
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
+<%
+List list = (List) request.getAttribute("stat");
+if (list == null){
+  list = new ArrayList();
+}
+ForcedStatusChangeModel model = new ForcedStatusChangeModel();
+if (!list.isEmpty()){
+  model = (ForcedStatusChangeModel) list.get(0);
+} 
+request.setAttribute("status", model);
+%>
 <script src="${resourcesPath}/js/system/system.js?${cmrv}" type="text/javascript"></script>
 <script>
   dojo.addOnLoad(function() {
@@ -29,7 +44,7 @@
       }
     });
     if (FormManager) {
-      FormManager.addValidator('searchReqId', Validators.NUMBER, [ '${ui.requestId}' ]);
+      //FormManager.addValidator('searchReqId', Validators.NUMBER, [ '${ui.requestId}' ]);
       FormManager.addValidator('newReqStatus', Validators.REQUIRED, [ '${ui.newreqstatus}' ]);
       FormManager.addValidator('newLockedInd', Validators.REQUIRED, [ '${ui.newlockstate}' ]);
       FormManager.addValidator('newProcessedFlag', Validators.REQUIRED, [ 'New Processing Status' ]);
@@ -43,13 +58,18 @@
 
 
 </script>
+<style>
+label {
+  word-wrap: break-word;
+}
+</style>
 <cmr:boxContent>
   <cmr:tabs />
 
   <cmr:form method="POST" action="${contextPath}/statuschange" name="frmCMRSearch" class="ibm-column-form ibm-styled-form" modelAttribute="status">
     <cmr:section>
       <cmr:row topPad="10" addBackground="true">
-        <cmr:column span="3">
+        <cmr:column span="6">
           <cmr:note text="${ui.note.statuschangenote}" />
         </cmr:column>
       </cmr:row>
@@ -60,12 +80,12 @@
             ${ui.requestId}:
           </cmr:label>
           </p>
-          <form:input path="searchReqId" size="30" />
+          <form:textarea path="searchReqId" cols="20" rows="5"/>
         </cmr:column>
       </cmr:row>
       <cmr:row topPad="10" addBackground="true">
         <cmr:column span="3">
-          <cmr:button label="${ui.btn.retrieverecord}" onClick="retrieveRequest()" highlight="true" />
+          <cmr:button label="${ui.btn.retrieverecord}(s)" onClick="retrieveRequest()" highlight="true" />
         </cmr:column>
       </cmr:row>
       <cmr:row addBackground="true">
@@ -74,10 +94,11 @@
 
     </cmr:section>
   </cmr:form>
-  <c:if test="${status.reqId > 0}">
+  <%if (!list.isEmpty() && ((ForcedStatusChangeModel)list.get(0)).getState() == BaseModel.STATE_EXISTING) { %>
     <cmr:form method="POST" action="${contextPath}/statuschange/process" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="status">
       <cmr:modelAction formName="frmCMR" />
       <form:hidden path="reqId" />
+      <form:hidden path="searchReqId" />
       <cmr:section>
         <cmr:row topPad="10">
           <cmr:column span="3">
@@ -94,8 +115,9 @@
         </span>
           </cmr:column>
           </cmr:row>
+        <%if (list.size() == 1){%>
         <cmr:row>
-          <cmr:column span="3">
+          <cmr:column span="6">
             <p>
               <cmr:label fieldId="reqId">${ui.requestId}: <a title="Open Request Details" href="${contextPath}/request/${status.reqId}">${status.reqId}</a>
             </cmr:label>
@@ -116,6 +138,16 @@
             </p>
           </cmr:column>
         </cmr:row>
+        <%} else if (list.size() > 1){%>
+          <cmr:row>
+            <cmr:column span="3">
+              <p>
+                <cmr:label fieldId="reqId">${ui.requestId}s [<%=list.size()%> requests]: ${status.searchReqId}
+              </cmr:label>
+              </p>
+            </cmr:column>
+          </cmr:row>
+        <%} %>
         <cmr:row>
           <cmr:column span="2">
             <p>
@@ -145,6 +177,7 @@
             </p>
           </cmr:column>
         </cmr:row>
+        <%if (list.size() == 1){ %>
         <cmr:row addBackground="true">
           <cmr:column span="2">
             <p>
@@ -153,6 +186,7 @@
             </p>
           </cmr:column>
         </cmr:row>
+        <%} %>
         <cmr:row addBackground="true">
           <cmr:column span="2">
             <p>
@@ -179,7 +213,7 @@
         </cmr:row>
       </cmr:section>
     </cmr:form>
-  </c:if>
+  <%} %>
 </cmr:boxContent>
 <c:if test="${status.reqId > 0}">
   <cmr:section alwaysShown="true">
