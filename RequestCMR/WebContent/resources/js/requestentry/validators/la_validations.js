@@ -125,6 +125,7 @@ function getDescription(fieldId) {
   return field.displayedValue;
 }
 
+var _taxCd1Handler = null;
 var _mrcCdHandler = null;
 var _custNameHandler = null;
 var _salesBranchOffHandler = null;
@@ -489,7 +490,7 @@ function afterConfigForLA() {
   // var _country = FormManager.getActualValue('cmrIssuingCntry');
   // CREATCMR-531
   setIERPSitePartyIDForLA()
-
+  
   if (dojo.byId('isuCd')) {
     // FormManager.disable('isuCd');
     if(!checkForProspect()){
@@ -559,6 +560,13 @@ function afterConfigForLA() {
   if (_custNameHandler == null) {
     _custNameHandler = dojo.connect(FormManager.getField('mainCustNm1'), 'onChange', function(value) {
       autoSetAbbrevNameForBrazil();
+    });
+  }
+  
+  // CREATCMR-6813 - AR Predefined tax info values
+  if (_taxCd1Handler == null) {
+    _taxCd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function (value) {
+      showVatNotifForArgentina();
     });
   }
 
@@ -2707,6 +2715,44 @@ function setMrcCdToReadOnly() {
   }
 }
 
+// CREATCMR-6813 - AR Predefined tax info values
+function showVatNotifForArgentina() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (reqType == 'C' && cmrIssuingCntry == '613') {
+    if (custGrp == "LOCAL" && custSubGrp == 'IBMEM') {
+      cmr.showAlert("Do a Save action to create the predefined entries or update the Tax Number fields in Tax Info tab.", "Warning");
+    }
+  }
+}
+
+var currentChosenScenarioAR = '';
+function showDeleteNotifForArgentinaIBMEM() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custGrp = FormManager.getActualValue('custGrp')
+  var scenario = FormManager.getActualValue('custSubGrp');
+
+  var scenarioChanged = false;
+
+  if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario) {
+    scenarioChanged = true;
+  }
+
+  scenarioChanged = scenarioChanged || (currentChosenScenarioAR != '' && currentChosenScenarioAR != scenario);
+
+  if (reqType == 'C' && cmrIssuingCntry == '613' && custGrp == "LOCAL") {
+    if (currentChosenScenarioAR == 'IBMEM' && scenarioChanged) {
+      cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten." +
+        "<br><br><strong>Manually delete the predefined Tax Info values after changing from IBM Employee to other Scenario Sub-type, if there are any created.</strong>", "Warning");
+    }
+  }
+  currentChosenScenarioAR = scenario;
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2793,4 +2839,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
+
+  GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
 });
