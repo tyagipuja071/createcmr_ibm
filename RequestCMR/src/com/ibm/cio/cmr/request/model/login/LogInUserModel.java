@@ -8,6 +8,8 @@ public class LogInUserModel {
 
   private long r;
 
+  private String c;
+
   public String getUsername() {
     return username;
   }
@@ -30,6 +32,14 @@ public class LogInUserModel {
 
   public void setR(long r) {
     this.r = r;
+  }
+
+  public String getC() {
+    return c;
+  }
+
+  public void setC(String c) {
+    this.c = c;
   }
 
 }
