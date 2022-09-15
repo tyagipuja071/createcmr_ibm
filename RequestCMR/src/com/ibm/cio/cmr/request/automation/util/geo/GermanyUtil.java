@@ -183,6 +183,7 @@ public class GermanyUtil extends AutomationUtil {
                     if (person == null) {
                       engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
                       details.append("Employee details not found in IBM BluePages.").append("\n");
+                      valid = false;
                     } else {
                       details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
                           .append("\n");

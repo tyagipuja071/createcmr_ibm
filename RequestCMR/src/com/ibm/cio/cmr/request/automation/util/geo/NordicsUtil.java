@@ -288,25 +288,27 @@ public class NordicsUtil extends AutomationUtil {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     case DK_PRIPE_LOCAL:
-    case DK_IBMEM_LOCAL:
     case FI_PRIPE_LOCAL:
-    case FI_IBMEM_LOCAL:
     case PRIPE_LOCAL:
-    case IBMEM_LOCAL:
     case FO_PRIPE_LOCAL:
-    case FO_IBME_LOCAL:
     case GL_PRIPE_LOCAL:
-    case GL_IBME_LOCAL:
     case IS_PRIPE_LOCAL:
-    case IS_IBME_LOCAL:
     case EE_PRIPE_LOCAL:
-    case EE_IBME_LOCAL:
     case LT_PRIPE_LOCAL:
-    case LT_IBME_LOCAL:
     case LV_PRIPE_LOCAL:
-    case LV_IBME_LOCAL:
     case CROSS_PRIPE:
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false, requestData);
+
+    case DK_IBMEM_LOCAL:
+    case FI_IBMEM_LOCAL:
+    case IBMEM_LOCAL:
+    case FO_IBME_LOCAL:
+    case GL_IBME_LOCAL:
+    case IS_IBME_LOCAL:
+    case EE_IBME_LOCAL:
+    case LT_IBME_LOCAL:
+    case LV_IBME_LOCAL:
+      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, true, requestData);
 
     case FO_GOV_LOCAL:
     case FO_INTSO_LOCAL:
@@ -423,11 +425,11 @@ public class NordicsUtil extends AutomationUtil {
           String countryUse = requestData.getData().getCountryUse();
           String cmrIssuingCountry = requestData.getData().getCmrIssuingCntry();
           for (Object[] result : results) {
-            if (!StringUtils.isBlank(countryUse) && ("702EE".equals(countryUse) && NORDX_ESTONIA_VKBUR.equals(result[0].toString())) ||
-                ("702LT".equals(countryUse) && NORDX_LITHUNIA_VKBUR.equals(result[0].toString())) || 
-                ("702".equals(countryUse) && NORDX_FINLAND_VKBUR.equals(result[0].toString())) || 
-                ("678IS".equals(countryUse) && NORDX_ICELAND_VKBUR.equals(result[0].toString())) || 
-                (!"678IS".equals(countryUse) && "678".equals(cmrIssuingCountry) && NORDX_DENMARK_VKBUR.equals(result[0].toString()))) {
+            if (!StringUtils.isBlank(countryUse) && ("702EE".equals(countryUse) && NORDX_ESTONIA_VKBUR.equals(result[0].toString()))
+                || ("702LT".equals(countryUse) && NORDX_LITHUNIA_VKBUR.equals(result[0].toString()))
+                || ("702".equals(countryUse) && NORDX_FINLAND_VKBUR.equals(result[0].toString()))
+                || ("678IS".equals(countryUse) && NORDX_ICELAND_VKBUR.equals(result[0].toString()))
+                || (!"678IS".equals(countryUse) && "678".equals(cmrIssuingCountry) && NORDX_DENMARK_VKBUR.equals(result[0].toString()))) {
               subScenarioMatches.add(res);
             }
           }
