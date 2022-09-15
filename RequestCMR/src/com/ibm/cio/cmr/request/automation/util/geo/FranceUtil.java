@@ -254,7 +254,7 @@ public class FranceUtil extends AutomationUtil {
       case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
       case SCENARIO_IBM_EMPLOYEE:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, false, requestData);
+        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, true, requestData);
 
       case SCENARIO_INTERNAL:
       case SCENARIO_CROSSBORDER_INTERNAL:
