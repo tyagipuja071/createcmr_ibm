@@ -1183,8 +1183,8 @@ function connectToCmrServices() {
         dojo.byId('geoLocDescCont').innerHTML = data.glcDesc != null ? data.glcDesc : '(no description available)';
       }
       if (data.dunsError) {
-        //errorMsg += (showError ? ', ' : '') + 'DUNS No.';
-        //showError = true;
+        // errorMsg += (showError ? ', ' : '') + 'DUNS No.';
+        // showError = true;
       } else {
         // var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
         // var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA,
@@ -1220,7 +1220,7 @@ function connectToCmrServices() {
     FormManager.setValue('covId', '');
     FormManager.setValue('bgId', '');
     FormManager.setValue('geoLocationCd', '');
-    //FormManager.setValue('dunsNo', '');
+    // FormManager.setValue('dunsNo', '');
   }
   FormManager.setValue('covBgRetrievedInd', 'Y');
 }
@@ -2097,7 +2097,7 @@ function matchCustNmAUUpdate() {
       if (dataAPI.formerCustNmMatch) {
         comp_proof_INAUSG = true;
         checkDnBMatchingAttachmentValidator();
-        if (FormManager.validate('frmCMR')) {         
+        if (FormManager.validate('frmCMR')) {
           matchDnbForAUUpdate();
           return;
         } else {
@@ -2111,7 +2111,7 @@ function matchCustNmAUUpdate() {
       }
     } else if (dataAPI.success && dataAPI.formerCustNmMatch && !dataAPI.custNmMatch) {
       comp_proof_INAUSG = false;
-      console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");   
+      console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");
       cmr.showAlert("Please attach company proof as Name validation failed by API.");
     } else {
       cmr.showProgress('Customer Name match with API failed . Now Checking Customer Name with Dnb...');
@@ -2138,7 +2138,7 @@ function matchCustNmAUUpdate() {
             if (data.custNmMatch && data.formerCustNmMatch) {
               comp_proof_INAUSG = true;
               checkDnBMatchingAttachmentValidator();
-              if (FormManager.validate('frmCMR')) {             
+              if (FormManager.validate('frmCMR')) {
                 matchDnbForAUUpdate();
                 return;
               } else {
@@ -2252,7 +2252,7 @@ function checkIfUpfrontUpdateChecksRequired() {
     VALUE : '%' + cntry + '%'
   });
 
-  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && result && result.ret1) {
+  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA') {
     return true;
   } else {
     return false;
