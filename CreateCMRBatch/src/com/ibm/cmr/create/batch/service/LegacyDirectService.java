@@ -174,6 +174,7 @@ public class LegacyDirectService extends TransConnService {
     LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
     // pending = new ArrayList<Admin>();
     for (Long id : pending) {
+      Thread.currentThread().setName("REQ-" + id);
       long start = new Date().getTime();
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
@@ -230,6 +231,7 @@ public class LegacyDirectService extends TransConnService {
     Data data = null;
     ProcessRequest request = null;
     for (Long id : pending) {
+      Thread.currentThread().setName("REQ-" + id);
       long start = new Date().getTime();
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
