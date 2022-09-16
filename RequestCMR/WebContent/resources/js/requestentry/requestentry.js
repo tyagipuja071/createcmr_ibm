@@ -133,10 +133,12 @@ function processRequestAction() {
   } else if (action == YourActions.Send_for_Processing) {
     var findDnbResult = FormManager.getActualValue('findDnbResult');
     var reqType = FormManager.getActualValue('reqType');
+    var vatInd = FormManager.getActualValue('vatInd');
+    var custGrp = FormManager.getActualValue('custGrp');
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
-    	 if(GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry'))||NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')))
+    	 if((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry'))||NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')))&&(vatInd == 'N')&&(custGrp!='CROSS'))
     	  	{
     	  		findVatInd();
     	  	}
