@@ -195,7 +195,8 @@ public class SingaporeUtil extends AutomationUtil {
     String custNm2 = StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "";
     String customerName = custNm1 + custNm2;
 
-    allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
+    // allowDuplicatesForScenario(engineData, requestData,
+    // Arrays.asList(scnarioList));
 
     processSkipCompanyChecks(engineData, requestData, details);
 

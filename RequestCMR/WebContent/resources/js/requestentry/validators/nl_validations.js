@@ -91,7 +91,7 @@ function afterConfigForNL() {
   };
   var paygoUser = cmr.query('PAYGO.CHECK.CRN', qParams);
   var countpaygo = paygoUser.ret1;
-  if ((custSubScnrio == 'PUBCU' && role == 'Processor') || custSubScnrio == 'PRICU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS'
+  if ((custSubScnrio == 'PUBCU' && role == 'Processor') || custSubScnrio == 'PRICU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS' || custSubScnrio == 'IBMEM'
       || (custSubScnrio == 'INTER' && vatExempt && vatExemptChecked) || viewOnlyPage == 'true' || (Number(countpaygo) == 1 && role == 'Processor')) {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   } else if (reqType != 'U') {
