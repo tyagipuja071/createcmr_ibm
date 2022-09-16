@@ -1003,6 +1003,7 @@ function findVatInd() {
 	  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 	  var reqId = FormManager.getActualValue('reqId');
 	  var vatInd = FormManager.getActualValue('vatInd');
+	  var custGrp = FormManager.getActualValue('custGrp');
 	    if (vatInd == 'N' && custGrp!='CROSS') {
 	      console.log("Test");
 	     cmr.showConfirm('markSendForProcessing()',
