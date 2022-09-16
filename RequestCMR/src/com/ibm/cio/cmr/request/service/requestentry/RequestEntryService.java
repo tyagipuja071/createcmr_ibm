@@ -325,7 +325,10 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         score.setFindCmrResult(CmrConstants.Scorecard_Not_Done);
         score.setFindDnbResult(CmrConstants.Scorecard_Not_Done);
       }
-
+//      if (StringUtils.isNotEmpty(data.getVatInd()) && "N".equals(data.getVatInd()))
+//        score.setVatAcknowledge(CmrConstants.Scorecard_YES);
+//      else
+//        score.setVatAcknowledge(CmrConstants.Scorecard_NA);
       createEntity(score, entityManager);
 
       if (geoHandler != null && geoHandler.hasChecklist(model.getCmrIssuingCntry())) {
@@ -606,6 +609,16 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     updateEntity(data, entityManager);
 
+    // Scorecard vat acknowledge initialize, if the data.vatInd=N,
+    // then set scorecard.vatAcknowledge=Yes
+    if (CmrConstants.Send_for_Processing().equals(model.getAction())
+        && CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())) {
+
+      Scorecard scorecard = entity.getEntity(Scorecard.class);
+      if ("N".equals(data.getVatInd())) {
+        scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+      }
+    }
     // CREATCMR-3144 - CN 2.0 special
     if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
       CNHandler.doBeforeSendForProcessing(entityManager, admin, data, model);
@@ -1834,7 +1847,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
           cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic())
-              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
+              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim())
+              : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");
