@@ -38,6 +38,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -69,6 +70,7 @@ public class SpainUtil extends AutomationUtil {
   public static final String SCENARIO_CROSSBORDER_IGS = "XIGS";
   public static final String SCENARIO_GOVERNMENT = "GOVRN";
   public static final String SCENARIO_GOVERNMENT_IGS = "GOVIG";
+  public static final String SCENARIO_IBM_EMPLOYEE = "IBMEM";
 
   private static SpainISICPostalMapping esIsicPostalMapping = new SpainISICPostalMapping();
   private static List<ESPostalMapping> postalMappings = new ArrayList<ESPostalMapping>();
@@ -166,6 +168,30 @@ public class SpainUtil extends AutomationUtil {
     case SCENARIO_INTERNAL_SO:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      break;
+    case SCENARIO_IBM_EMPLOYEE:
+      Person person = null;
+      if (StringUtils.isNotBlank(soldTo.getCustNm1())) {
+        try {
+          String mainCustName = soldTo.getCustNm1() + (StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "");
+          person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
+          if (person == null) {
+            engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+            details.append("Employee details not found in IBM BluePages.").append("\n");
+            return false;
+          } else {
+            details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
+          }
+        } catch (Exception e) {
+          LOG.error("Not able to check name against bluepages", e);
+          engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check name against bluepages for scenario IBM Employee.");
+          return false;
+        }
+      } else {
+        LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
+        engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
+        return false;
+      }
       break;
     }
     return true;
