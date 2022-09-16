@@ -106,7 +106,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                 custName = custName.replaceAll(regex, "");
                 cmrRecCustName = cmrRecCustName.replaceAll(regex, "");
                 if (custName.equalsIgnoreCase(cmrRecCustName) && cmrCheckRecord.getCmrNo() != null && cmrCheckRecord.getCmrNo().startsWith("P")
-                    && "75".equals(cmrCheckRecord.getOrdBlk())) {
+                    && "75".equals(cmrCheckRecord.getOrderBlk())) {
                   // rejection code && "75".equals(cmrCheckRecord.getOrdBlk())
                   result.setDetails(
                       "There is an existing CMR PXXXX, please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR.");
