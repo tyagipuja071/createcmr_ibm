@@ -34,6 +34,7 @@ public class RequestEntryModel extends BaseModel {
   private String findDnbDate;
   private String dplChkDate;
   private String addrStdDate;
+  private String vatAcknowledge;
 
   // field matching to ADMIN entity
   private long reqId;
@@ -3198,6 +3199,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setVatInd(String vatInd) {
     this.vatInd = vatInd;
+  }
+
+  public String getVatAcknowledge() {
+    return vatAcknowledge;
+  }
+
+  public void setVatAcknowledge(String vatAcknowledge) {
+    this.vatAcknowledge = vatAcknowledge;
   }
 
 }
