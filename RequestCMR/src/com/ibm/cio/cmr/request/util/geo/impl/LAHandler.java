@@ -712,13 +712,14 @@ public class LAHandler extends GEOHandler {
           String sql = ExternalizedQuery.getSql("AR.GET_GEOTAXINFORECORDS");
           PreparedQuery query = new PreparedQuery(entityManager, sql);
           query.setParameter("REQ_ID", data.getId().getReqId());
-          GeoTaxInfo geoTaxInfoRecords = query.getSingleResult(GeoTaxInfo.class);
+          List<GeoTaxInfo> geoTaxInfoRecords = query.getResults(GeoTaxInfo.class);
 
           String taxCd1 = data.getTaxCd1();
           if ("LOCAL".equals(data.getCustGrp()) && CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())) {
             if (StringUtils.isNotBlank(taxCd1) && taxCd1.length() >= 11) {
               String taxCd1Subtr = taxCd1.substring(3, 11);
-              if (StringUtils.isEmpty(geoTaxInfoRecords.getTaxNum())) {
+              GeoTaxInfo taxInfoRecord = query.getSingleResult(GeoTaxInfo.class);
+              if (geoTaxInfoRecords.isEmpty() || taxInfoRecord.getTaxNum().isEmpty()) {
                 deleteAllTaxInfoRecord(data, entityManager);
                 doCreateARDefaultTaxRecord("01", taxCd1Subtr, data.getId().getReqId(), entityManager, true, true, true);
                 doCreateARDefaultTaxRecord("11", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
@@ -945,7 +946,7 @@ public class LAHandler extends GEOHandler {
   }
 
   // CREATCMR-6813
-  private void doCreateARDefaultTaxRecord(String defaultTaxcd, String dataTaxCd, long reqId, EntityManager entityManager, boolean taxSepIndc,
+  private void doCreateARDefaultTaxRecord(String defaultTaxCd, String dataTaxCd, long reqId, EntityManager entityManager, boolean taxSepIndc,
       boolean contPntIndc, boolean cntryUse) {
     TaxInfoService taxService = new TaxInfoService();
     GeoTaxInfo taxInfo = new GeoTaxInfo();
@@ -963,7 +964,7 @@ public class LAHandler extends GEOHandler {
       taxInfoPK.setReqId(reqId);
       taxInfoPK.setGeoTaxInfoId(taxService.generateGeoTaxInfoID(entityManager, reqId));
 
-      taxInfo.setTaxCd(defaultTaxcd); /* predefined value */
+      taxInfo.setTaxCd(defaultTaxCd); /* predefined value */
 
       if (taxSepIndc) {
         taxInfo.setTaxSeparationIndc("7"); /* predefined value */
