@@ -370,6 +370,9 @@ public class NordicsUtil extends AutomationUtil {
 
     if (Arrays.asList(bpScenariosToBeChecked).contains(scenario)) {
       for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
         if (StringUtils.isNotBlank(match.getCustClass())) {
           String kukla = match.getCustClass() != null ? match.getCustClass() : "";
           if (Arrays.asList(kuklaBUSPR).contains(kukla) || isuCTCMatch(match.getCmrNo(), entityManager, cntry)) {
@@ -409,6 +412,9 @@ public class NordicsUtil extends AutomationUtil {
     if (response.getMatches() != null) {
       for (DuplicateCMRCheckResponse res : response.getMatches()) {
         List<Object[]> results = null;
+        if (res.getCmrNo() != null && res.getCmrNo().startsWith("P") && "75".equals(res.getOrderBlk())) {
+          subScenarioMatches.add(res);
+        }
         try {
           String sql = ExternalizedQuery.getSql("NORDX.KNVV.GETVKBUR");
           PreparedQuery query = new PreparedQuery(entityManager, sql);

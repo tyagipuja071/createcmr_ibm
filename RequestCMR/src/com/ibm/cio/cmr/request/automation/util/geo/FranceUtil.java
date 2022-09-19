@@ -862,6 +862,9 @@ public class FranceUtil extends AutomationUtil {
       List<DuplicateCMRCheckResponse> matches = response.getMatches();
       List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
       for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
         if (StringUtils.isNotBlank(match.getCustClass())) {
           String kukla = match.getCustClass() != null ? match.getCustClass() : "";
           if (Arrays.asList(kuklaComme).contains(kukla) && ("COMME".equals(scenario) || "CBMME".equals(scenario))) {
