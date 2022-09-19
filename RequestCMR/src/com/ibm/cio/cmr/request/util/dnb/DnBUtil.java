@@ -611,6 +611,7 @@ public class DnBUtil {
       boolean useTradestyleName, boolean allowLongNameAddress) {
     GEOHandler handler = RequestUtils.getGEOHandler(country);
     int maxLength = 60;
+    String regex = "\\s+$";
     if (handler != null) {
       maxLength = handler.getName1Length() + handler.getName2Length();
     }
@@ -630,6 +631,8 @@ public class DnBUtil {
       dnbName = dnbName.trim();
       String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
       String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
+      dnbName = dnbName.replaceAll(regex, "");
+      compareName = compareName.replaceAll(regex, "");
       if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbName)) {
         if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbName.toUpperCase()) >= 12
             && (altCompareName == null || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbName.toUpperCase()) >= 12)) {
