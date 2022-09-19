@@ -16,7 +16,7 @@ function afterConfigForNORDX() {
   reqType = FormManager.getActualValue('reqType');
   var role = null;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var vat = FormManager.getActualValue('vat');
+  var vat = FormManager.getActualValue('vat');  
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;

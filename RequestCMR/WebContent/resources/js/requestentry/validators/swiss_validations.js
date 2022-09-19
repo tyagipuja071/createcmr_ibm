@@ -7,13 +7,13 @@ function addAfterConfigForSWISS() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var impIndc = getImportedIndcForSwiss();
+  var impIndc = getImportedIndcForSwiss();  
   if (role == 'REQUESTER') {
     FormManager.removeValidator('custLangCd', Validators.REQUIRED);
   } else {
     FormManager.addValidator('custLangCd', Validators.REQUIRED, [ 'Prefered Langauge' ], null);
   }
-
+ 
   if (role == 'REQUESTER') {
     FormManager.readOnly('subIndustryCd');
   } else {
@@ -158,7 +158,7 @@ function addAfterConfigForSWISS() {
         setVatValidatorSWISS();
       }
     }
-  }
+  }  
 }
 
 function resetAddrTypeValidation() {
@@ -451,6 +451,7 @@ function setVatValidatorSWISS() {
     if (!dijit.byId('vatExempt').get('checked')) {
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
+  
   }
 }
 

@@ -482,8 +482,7 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
           }
-          console.log('ZS01 VAT Country: ' + zs01Cntry);
-
+          console.log('ZS01 VAT Country: ' + zs01Cntry);          
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
             if (result.errorPattern == null) {
@@ -934,16 +933,36 @@ function addDPLAssessmentValidator() {
 function resetVATValidationsForPayGo(){
   var systemId = FormManager.getActualValue('sourceSystId');
   var cntry= FormManager.getActualValue('cmrIssuingCntry');
-  var vat = FormManager.getActualValue('vat');
+  var vat = FormManager.getActualValue('vat'); 
+  var vatInd = FormManager.getActualValue('vatInd');
   var results = cmr.query('GET_PARTNER_VAT_EXCEPTIONS', {
     COUNTRY : cntry,
     SERVICE_ID : systemId
   });
   if(results!= null && results!= undefined && results.ret1!='' && results.ret1 == 'Y' && vat == ''){
-    FormManager.resetValidations('vat');
+    if (vatInd && dojo.string.trim(vatInd) == 'T') {
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      FormManager.enable('vat');
+      FormManager.setValue('vatExempt', 'N');      
+      FormManager.setValue('vatInd', 'T');
+    } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.readOnly('vat');
+      FormManager.setValue('vat', '');      
+      FormManager.setValue('vatInd', 'N');
+    } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.enable('vat');
+      FormManager.setValue('vatExempt', 'Y');
+      FormManager.setValue('vatInd', 'E');
+    }
+   // FormManager.resetValidations('vat');
     // FormManager.getField('vatExempt').checked = true;
     console.log('VAT is non mandatory for PayGO');
-  }
+  } 
+  
+  
+   
 }
 
 function addIsuCdObsoleteValidator(){

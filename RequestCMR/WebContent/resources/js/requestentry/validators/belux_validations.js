@@ -8,7 +8,7 @@ function afterConfigForBELUX() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
-  var custLang = FormManager.getActualValue('custPrefLang');
+  var custLang = FormManager.getActualValue('custPrefLang');  
   FormManager.readOnly('capInd');
   FormManager.readOnly('sensitiveFlag');
   FormManager.setValue('capInd', true);
