@@ -102,10 +102,12 @@ function afterConfigForIndia() {
     });
   }
   
+  // CREATCMR-7005
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if(custSubGrp == 'CROSS'){
     FormManager.readOnly('vat');
   }
+  // CREATCMR-7005
   
 }
 
