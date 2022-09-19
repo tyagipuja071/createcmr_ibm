@@ -797,7 +797,40 @@ var _dnbSearchHandler = null;
  * to be executed to override the PageManager configurable fields' settings
  */
 function afterConfigChange() {
-  // add special INAC value validator
+
+  // VAT indicator
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  //onchange
+  if (_vatIndHandler == null) {
+    _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(vatInd) {
+      if (vatInd && dojo.string.trim(vatInd) == 'T') {
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'N');
+        //FormManager.setValue('taxCd2', 'N');
+        FormManager.setValue('vatInd', 'T');
+      } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.readOnly('vat');
+        FormManager.setValue('vat', '');
+        //FormManager.setValue('taxCd2', 'N');
+        FormManager.setValue('vatInd', 'N');
+      } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'Y');
+       // FormManager.setValue('taxCd2', 'Y');
+        FormManager.setValue('vatInd', 'E');
+      }
+    });
+
+  }
+  if (_vatIndHandler && _vatIndHandler[0]) {
+    _vatIndHandler[0].onChange();
+  }
+    
+    // add special INAC value validator
   // if INAC Type = I, the code should be a number
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (_inacHandler == null) {
@@ -900,7 +933,7 @@ function afterConfigChange() {
       }
       FormManager.disable('func');
       FormManager.readOnly('cmrNo');
-    }
+    } 
   }
 
   // populate the country name field when the county code is chosen

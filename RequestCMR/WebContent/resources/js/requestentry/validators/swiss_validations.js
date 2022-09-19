@@ -7,13 +7,13 @@ function addAfterConfigForSWISS() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var impIndc = getImportedIndcForSwiss();
+  var impIndc = getImportedIndcForSwiss();  
   if (role == 'REQUESTER') {
     FormManager.removeValidator('custLangCd', Validators.REQUIRED);
   } else {
     FormManager.addValidator('custLangCd', Validators.REQUIRED, [ 'Prefered Langauge' ], null);
   }
-
+ 
   if (role == 'REQUESTER') {
     FormManager.readOnly('subIndustryCd');
   } else {
@@ -160,7 +160,7 @@ function addAfterConfigForSWISS() {
         setVatValidatorSWISS();
       }
     }
-  }
+  }  
 }
 
 function resetAddrTypeValidation() {
@@ -452,8 +452,25 @@ function addVatSuffixForCustLangCdScrtch() {
 function setVatValidatorSWISS() {
   var vatInd = FormManager.getActualValue('vatInd');
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
-    FormManager.resetValidations('vat');
+  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {    
+    //FormManager.resetValidations('vat');
+    if (vatInd && dojo.string.trim(vatInd) == 'T') {
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      FormManager.enable('vat');
+      FormManager.setValue('vatExempt', 'N');      
+      FormManager.setValue('vatInd', 'T');
+    } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.readOnly('vat');
+      FormManager.setValue('vat', '');     
+      FormManager.setValue('vatInd', 'N');
+    } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.enable('vat');
+      FormManager.setValue('vatExempt', 'Y');     
+      FormManager.setValue('vatInd', 'E');
+    }
+    
     if (!dijit.byId('vatExempt').get('checked')) {
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
