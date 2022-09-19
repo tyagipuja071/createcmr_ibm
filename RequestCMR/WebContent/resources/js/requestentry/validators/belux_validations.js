@@ -8,7 +8,7 @@ function afterConfigForBELUX() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
-  var custLang = FormManager.getActualValue('custPrefLang');
+  var custLang = FormManager.getActualValue('custPrefLang');  
   FormManager.readOnly('capInd');
   FormManager.readOnly('sensitiveFlag');
   FormManager.setValue('capInd', true);
@@ -133,6 +133,26 @@ function afterConfigForBELUX() {
   addAccTemNumValidate();
   disableSBO();
   disableIBMTab();
+  
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  } 
+  
 }
 
 function checkCmrUpdateBeforeImport() {
@@ -801,7 +821,7 @@ function setVatValidatorBELUX() {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
       FormManager.enable('vat');
     }
-  }
+  } 
 }
 
 /**
