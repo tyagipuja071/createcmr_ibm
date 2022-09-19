@@ -1944,6 +1944,11 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
     // Defect: 1461349 - For Lock and unlocked
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
+		// CREATCMR-622
+    FormManager.readOnly('icmsInd');
+    FormManager.readOnly('hwSvcsRepTeamNo');
+    FormManager.readOnly('email2');
+    FormManager.readOnly('email3');
     FormManager.resetValidations('abbrevNm');
     FormManager.resetValidations('salesBusOffCd');
 
@@ -1986,6 +1991,11 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
       FormManager.resetValidations('identClient');
       FormManager.enable('collectionCd');
     }
+    	// CREATCMR-622
+    FormManager.enable('icmsInd');
+    FormManager.enable('hwSvcsRepTeamNo');
+    FormManager.enable('email2');
+    FormManager.enable('email3');
   }
 }
 

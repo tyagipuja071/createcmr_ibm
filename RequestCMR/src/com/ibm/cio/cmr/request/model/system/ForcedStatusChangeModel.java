@@ -29,6 +29,7 @@ public class ForcedStatusChangeModel extends BaseModel {
 
   private String processedFlag;
   private String newProcessedFlag;
+  private String multiple;
 
   @Override
   public boolean allKeysAssigned() {
@@ -136,6 +137,14 @@ public class ForcedStatusChangeModel extends BaseModel {
 
   public void setNewProcessedFlag(String newProcessedFlag) {
     this.newProcessedFlag = newProcessedFlag;
+  }
+
+  public String getMultiple() {
+    return multiple;
+  }
+
+  public void setMultiple(String multiple) {
+    this.multiple = multiple;
   }
 
 }

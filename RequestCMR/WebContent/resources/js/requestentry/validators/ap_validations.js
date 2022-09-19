@@ -101,7 +101,13 @@ function afterConfigForIndia() {
         }
     });
   }
+  
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if(custSubGrp == 'CROSS'){
+    FormManager.readOnly('vat');
   }
+  
+}
 
 function resetGstExempt() {
   if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
@@ -690,7 +696,6 @@ function addFieldFormatValidator() {
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
-
 function addAttachmentValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -700,6 +705,15 @@ function addAttachmentValidator() {
         var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         // var docContent = FormManager.getActualValue('docContent');
         if (typeof (_pagemodel) != 'undefined') {
+          if ( reqType == 'C' && (cmrIssuingCntry == '616' && custSubType == 'ESOSW') || (cmrIssuingCntry == '834' && custSubType == 'ASLOM')) {
+            var id = FormManager.getActualValue('reqId');
+            var ret = cmr.query('CHECK_ESA_MATCH_ATTACHMENT', {
+            ID : id
+            });
+            if(ret == null || ret.ret1 == null){
+              return new ValidationResult(null, false, 'ESA Enrollment Form Attachment tab is required.');
+            }
+          }
           if (reqType == 'C'
               && (custSubType != 'INTER' && custSubType != 'XINT' && custSubType != 'DUMMY' && custSubType != 'XDUMM' && custSubType != 'BLUMX' && custSubType != 'XBLUM' && custSubType != 'MKTPC'
                   && custSubType != 'XMKTP' && custSubType != 'IGF' && custSubType != 'XIGF')) {
@@ -715,12 +729,11 @@ function addAttachmentValidator() {
               return new ValidationResult(null, true);
             }
            }
-            else {                         
+          else if(cmrIssuingCntry != '616' && cmrIssuingCntry != '834') {                         
             var id = FormManager.getActualValue('reqId');
             var ret = cmr.query('CHECK_TERRITORY_ATTACHMENT', {
               ID : id
             });
-
             if (ret == null || ret.ret1 == null) {
               return new ValidationResult(null, false, 'TERRITORY Manager Approval in Attachment tab is required.');
             } else {
@@ -1852,10 +1865,10 @@ function updateIsbuCd() {
     console.log(">>>> Error, _mrcCd is null");
   }
   // FormManager.setValue('isbuCd', '');
-  if (_mrcCd == '3' && FormManager.getActualValue('isbuCd') == '') {
+  if (_mrcCd == '3' && _industryClass != '') {
     _isbuCd = 'GMB' + _industryClass;
     FormManager.setValue('isbuCd', _isbuCd);
-  } else if (_mrcCd == '2' && _sectorCd != '') {
+  } else if (_mrcCd == '2' && _sectorCd != '' && _industryClass != '') {
     _isbuCd = _sectorCd + _industryClass;
     FormManager.setValue('isbuCd', _isbuCd);
   }
@@ -3866,7 +3879,7 @@ function addValidatorBasedOnCluster() {
         if(FormManager.getActualValue('reqType') != 'C') {
           return new ValidationResult(null, true);
         }
-        if ((custSubType != 'ECSYS' && custSubType != 'XECO' ) && (cluster == '08039' || cluster == '08037' || cluster == '08038' || cluster == '08040' || cluster == '08042' ||cluster == '08044' || cluster == '08047'|| cluster == '08046')) {
+        if ((custSubType != 'ECSYS' && custSubType != 'XECO' && custSubType != 'ASLOM' && custSubType != 'ESOSW' ) && (cluster == '08039' || cluster == '08037' || cluster == '08038' || cluster == '08040' || cluster == '08042' ||cluster == '08044' || cluster == '08047'|| cluster == '08046')) {
           return new ValidationResult(null, false, 'Ecosystem Partners Cluster is not allowed for selected scenario.');
         } else {
           return new ValidationResult(null, true);
@@ -4598,7 +4611,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.AP, GEOHandler.REQUESTER, true);
   GEOHandler.registerValidator(similarAddrCheckValidator, GEOHandler.AP, null, true);
 
-  GEOHandler.registerValidator(addAttachmentValidator, [SysLoc.SRI_LANKA, SysLoc.BANGLADESH, SysLoc.NEPAL], GEOHandler.REQUESTER, false, false);
+  GEOHandler.registerValidator(addAttachmentValidator, [ SysLoc.SRI_LANKA, SysLoc.BANGLADESH, SysLoc.NEPAL, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ], GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(setAttachmentOnCluster, [ SysLoc.INDIA, SysLoc.SRI_LANKA, SysLoc.BANGLADESH], GEOHandler.REQUESTER, false, false);
   
   // double creates

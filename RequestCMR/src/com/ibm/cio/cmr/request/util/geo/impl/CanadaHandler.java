@@ -582,15 +582,26 @@ public class CanadaHandler extends GEOHandler {
     setLocationNumber(data, mainAddr.getLandCntry(), mainAddr.getStateProv());
 
     // set CS Branch to first 3 digits of postal code
-    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp())) {
-        data.setSalesTeamCd("000");
-      } else {
-        if (mainAddr.getPostCd() != null && mainAddr.getPostCd().length() >= 3) {
-          // data.setSalesTeamCd(mainAddr.getPostCd().substring(0, 3));
+    if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setSalesTeamCd("000");
+    } else {
+      LOG.debug("Setting CSBranch via postal code-lov mapping...");
+      if (mainAddr.getPostCd() != null && mainAddr.getPostCd().length() >= 3) {
+        List<Object[]> results = new ArrayList<Object[]>();
+        String sql = ExternalizedQuery.getSql("QUERY.GET.CA.CSBRANCH.LOVTXT");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("CMR_ISSUING_CNTRY", data.getCmrIssuingCntry());
+        query.setParameter("CD", mainAddr.getPostCd().substring(0, 3));
+        results = query.getResults();
+        if (results != null && !results.isEmpty()) {
+          Object[] sResult = results.get(0);
+          String csBranch = sResult[0].toString();
+          LOG.debug("CSBranch : " + csBranch);
+          data.setSalesTeamCd(csBranch);
         }
       }
     }
+
     if (mainAddr.getCity1() != null) {
       data.setAbbrevLocn(mainAddr.getCity1().length() > 12 ? mainAddr.getCity1().substring(0, 12) : mainAddr.getCity1());
     }
