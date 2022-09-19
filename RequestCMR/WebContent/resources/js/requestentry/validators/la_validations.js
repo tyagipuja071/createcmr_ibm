@@ -2730,19 +2730,14 @@ function showVatNotifForArgentina() {
 }
 
 var currentChosenScenarioAR = '';
-function showDeleteNotifForArgentinaIBMEM() {
+function showDeleteNotifForArgentinaIBMEM(fromAddress, scenario, scenarioChanged) {
+  if(fromAddress || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
   var reqType = FormManager.getActualValue('reqType');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var custGrp = FormManager.getActualValue('custGrp')
-  var scenario = FormManager.getActualValue('custSubGrp');
-
-  var scenarioChanged = false;
-
-  if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario) {
-    scenarioChanged = true;
-  }
-
-  scenarioChanged = scenarioChanged || (currentChosenScenarioAR != '' && currentChosenScenarioAR != scenario);
 
   if (reqType == 'C' && cmrIssuingCntry == '613' && custGrp == "LOCAL") {
     if (currentChosenScenarioAR == 'IBMEM' && scenarioChanged) {
