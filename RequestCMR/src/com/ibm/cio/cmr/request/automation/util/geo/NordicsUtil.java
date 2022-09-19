@@ -273,25 +273,27 @@ public class NordicsUtil extends AutomationUtil {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     case DK_PRIPE_LOCAL:
-    case DK_IBMEM_LOCAL:
     case FI_PRIPE_LOCAL:
-    case FI_IBMEM_LOCAL:
     case PRIPE_LOCAL:
-    case IBMEM_LOCAL:
     case FO_PRIPE_LOCAL:
-    case FO_IBME_LOCAL:
     case GL_PRIPE_LOCAL:
-    case GL_IBME_LOCAL:
     case IS_PRIPE_LOCAL:
-    case IS_IBME_LOCAL:
     case EE_PRIPE_LOCAL:
-    case EE_IBME_LOCAL:
     case LT_PRIPE_LOCAL:
-    case LT_IBME_LOCAL:
     case LV_PRIPE_LOCAL:
-    case LV_IBME_LOCAL:
     case CROSS_PRIPE:
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false, requestData);
+
+    case DK_IBMEM_LOCAL:
+    case FI_IBMEM_LOCAL:
+    case IBMEM_LOCAL:
+    case FO_IBME_LOCAL:
+    case GL_IBME_LOCAL:
+    case IS_IBME_LOCAL:
+    case EE_IBME_LOCAL:
+    case LT_IBME_LOCAL:
+    case LV_IBME_LOCAL:
+      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, true, requestData);
 
     case FO_GOV_LOCAL:
     case FO_INTSO_LOCAL:
@@ -323,7 +325,6 @@ public class NordicsUtil extends AutomationUtil {
     case CROSS_INTER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-     
     }
 
     return true;
