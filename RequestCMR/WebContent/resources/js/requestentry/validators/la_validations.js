@@ -2673,9 +2673,9 @@ function setTaxRegimeMX() {
 // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
 function makeMrcSboOptionalForProspectLA() {
   var ifProspect = FormManager.getActualValue('prospLegalInd');
-    if (dijit.byId('prospLegalInd')) {
-      ifProspect = checkForProspect();
-    }
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = checkForProspect();
+  }
     if('Y' == ifProspect){
       if (typeof (_pagemodel) != 'undefined') {
         if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
