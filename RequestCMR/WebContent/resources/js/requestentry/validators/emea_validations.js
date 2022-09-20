@@ -491,9 +491,10 @@ function afterConfigForUKI() {
       }
     });
   }
-/*  if (_customerTypeHandler && _customerTypeHandler[0]) {
-    _customerTypeHandler[0].onChange();
-  }*/
+  /*
+   * if (_customerTypeHandler && _customerTypeHandler[0]) {
+   * _customerTypeHandler[0].onChange(); }
+   */
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
 
@@ -554,9 +555,8 @@ function afterConfigForUKI() {
     });
   }
 
-  /*if (_isuCdHandlerIE && _isuCdHandlerIE[0]) {
-    _isuCdHandlerIE[0].onChange();
-  }
+  /*
+   * if (_isuCdHandlerIE && _isuCdHandlerIE[0]) { _isuCdHandlerIE[0].onChange(); }
    */
   if (_isicHandler == null) {
     _oldIsicCd = FormManager.getActualValue('isicCd');
@@ -580,9 +580,9 @@ function addHandlersForUK() {
       setSboValueBasedOnIsuCtcUK();
     });
   }
-/*  if (_isuCdHandler && _isuCdHandler[0]) {
-    _isuCdHandler[0].onChange();
-  }*/
+  /*
+   * if (_isuCdHandler && _isuCdHandler[0]) { _isuCdHandler[0].onChange(); }
+   */
   if (_clientTierHandler == null && FormManager.getField('clientTier')) {
     _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       autoSetSBO(value, _pagemodel.clientTier);
@@ -591,9 +591,10 @@ function addHandlersForUK() {
       setSboValueBasedOnIsuCtcUK();
     });
   }
- /* if (_clientTierHandler && _clientTierHandler[0]) {
-    _clientTierHandler[0].onChange();
-  }*/
+  /*
+   * if (_clientTierHandler && _clientTierHandler[0]) {
+   * _clientTierHandler[0].onChange(); }
+   */
   if (_isicCdHandler == null && FormManager.getField('isicCd')) {
     _oldIsicCd = FormManager.getActualValue('isicCd');
     _isicCdHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -603,18 +604,19 @@ function addHandlersForUK() {
       }
     });
   }
-/* if (_isicCdHandler && _isicCdHandler[0]) {
-    _isicCdHandler[0].onChange();
-  }*/
+  /*
+   * if (_isicCdHandler && _isicCdHandler[0]) { _isicCdHandler[0].onChange(); }
+   */
   if (_postCdHandlerUK == null && FormManager.getField('postCd')) {
     _postCdHandlerUK = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
       autoSetSBO(value, _pagemodel.postCd);
       autoSetSboSrOnAddrSaveUK(value, _pagemodel.postCd);
     });
   }
- /* if (_postCdHandlerUK && _postCdHandlerUK[0]) {
-    _postCdHandlerUK[0].onChange();
-  }*/
+  /*
+   * if (_postCdHandlerUK && _postCdHandlerUK[0]) {
+   * _postCdHandlerUK[0].onChange(); }
+   */
 }
 
 function configureCRNForUKI() {
@@ -1942,7 +1944,7 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
     // Defect: 1461349 - For Lock and unlocked
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
-		// CREATCMR-622
+    // CREATCMR-622
     FormManager.readOnly('icmsInd');
     FormManager.readOnly('hwSvcsRepTeamNo');
     FormManager.readOnly('email2');
@@ -1989,7 +1991,7 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
       FormManager.resetValidations('identClient');
       FormManager.enable('collectionCd');
     }
-    	// CREATCMR-622
+    // CREATCMR-622
     FormManager.enable('icmsInd');
     FormManager.enable('hwSvcsRepTeamNo');
     FormManager.enable('email2');
@@ -4849,7 +4851,7 @@ function setSboValueBasedOnIsuCtcUK() {
   var reqType = FormManager.getActualValue('reqType');
   var isuList = [ '34', '5K', '05', '11', '4F' ];
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  
+
   if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     return;
   }
@@ -6499,7 +6501,7 @@ function doValidateFiscalDataModal() {
   var fiscalCd = FormManager.getActualValue('taxCd1');
   if (!vat && !fiscalCd) {
     FormManager.setValue('fiscalDataStatus', 'F');
-    cmr.showAlert("No company addresses with this fiscal data found.", null, null, null);
+    cmr.showAlert("No company addresses with this fiscal data found.", 'Warning');
   } else {
     var qParams = {
       VAT : vat,
@@ -6513,7 +6515,7 @@ function doValidateFiscalDataModal() {
       loadFiscalDataModal(result);
     } else {
       FormManager.setValue('fiscalDataStatus', 'F');
-      cmr.showAlert("No company addresses with this fiscal data found.", null, null, null);
+      cmr.showAlert("No company addresses with this fiscal data found.", 'Warning');
     }
   }
 }
@@ -7528,7 +7530,7 @@ function lockRequireFieldsUKI() {
     FormManager.enable('abbrevNm');
     FormManager.enable('abbrevLocn');
   }
-  
+
   if (reqType == 'C' && role == 'PROCESSOR') {
     if (custSubGroup == 'IBMEM') {
       FormManager.readOnly('clientTier');
@@ -9585,7 +9587,7 @@ function autoSetUIFieldsOnScnrioUKI() {
     FormManager.readOnly('custClass');
     FormManager.setValue('custClass', '33');
   }
-  
+
   if (issuingCntry == '754') {
     if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
       FormManager.setValue('clientTier', '');
@@ -10329,7 +10331,8 @@ dojo.addOnLoad(function() {
   // UKI Specific
   GEOHandler.addAfterConfig(afterConfigForUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(defaultCapIndicatorUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  //GEOHandler.addAfterConfig(setClientTierValuesUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
+  // GEOHandler.addAfterConfig(setClientTierValuesUKI, [ SysLoc.UK,
+  // SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(setAbbrevNmLocationLockAndMandatoryUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(lockCmrOwner, [ SysLoc.TURKEY ]);
