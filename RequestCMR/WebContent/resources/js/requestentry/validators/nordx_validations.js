@@ -122,7 +122,7 @@ function afterConfigForNORDX() {
   if (landCntry != '') {
     FormManager.setValue('defaultLandedCountry', landCntry);
   }
-  FormManager.hide('StateProv', 'stateProv');
+ // FormManager.hide('StateProv', 'stateProv');
   // setVatValidatorNORDX();
   // setTaxCdValuesCROSS();
   setSBOForFinlandSubRegion();
@@ -4942,6 +4942,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockIBMTabFields, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(lockIBMTabFields, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(setKukalValuesByCustSubGrp, GEOHandler.NORDX);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);
