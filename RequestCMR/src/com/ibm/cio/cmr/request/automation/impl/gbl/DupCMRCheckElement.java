@@ -370,11 +370,21 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
 
   private void updateMatches(MatchingResponse<DuplicateCMRCheckResponse> global, MatchingResponse<DuplicateCMRCheckResponse> iteration) {
     List<DuplicateCMRCheckResponse> updated = new ArrayList<DuplicateCMRCheckResponse>();
-    for (DuplicateCMRCheckResponse resp1 : global.getMatches()) {
-      for (DuplicateCMRCheckResponse resp2 : iteration.getMatches()) {
-        if (resp1.getCmrNo().equals(resp2.getCmrNo())) {
-          updated.add(resp1);
-          break;
+    for (DuplicateCMRCheckResponse match : global.getMatches()) {
+      if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+        updated.add(match);
+      }
+      for (DuplicateCMRCheckResponse match2 : iteration.getMatches()) {
+        if (match2.getCmrNo() != null && match2.getCmrNo().startsWith("P") && "75".equals(match2.getOrderBlk())) {
+          updated.add(match);
+        }
+      }
+      for (DuplicateCMRCheckResponse resp1 : global.getMatches()) {
+        for (DuplicateCMRCheckResponse resp2 : iteration.getMatches()) {
+          if (resp1.getCmrNo().equals(resp2.getCmrNo())) {
+            updated.add(resp1);
+            break;
+          }
         }
       }
     }
