@@ -134,6 +134,9 @@ function processRequestAction() {
     var reqType = FormManager.getActualValue('reqType');
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
+    }
+    if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
+      cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
       if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
@@ -2192,7 +2195,7 @@ function checkIfUpfrontUpdateChecksRequired() {
     VALUE : '%' + cntry + '%'
   });
 
-  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA') {
+  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && result && result.ret1) {
     return true;
   } else {
     return false;
@@ -2334,4 +2337,62 @@ function autoSaveRequest() {
     }
   }
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
+}
+
+function checkIfDataOrAddressFieldsUpdated(frmCMR) {
+  console.log("checkIfDataOrAddressFieldsUpdated..............");
+  var reqType = FormManager.getActualValue('reqType');
+  var isNoDataUpdated = false;
+  if (checkIfUpdateChecksRequiredOnUI()) {
+    console.log('Running Update Checks Element...');
+    cmr.showProgress('Validating requested updates...');
+    var formData = dojo.formToObject(frmCMR);
+    formData.capInd = FormManager.getActualValue('capInd');
+    dojo.xhrPost({
+      url : cmr.CONTEXT_ROOT + '/auto/element/updateCheck.json',
+      handleAs : 'json',
+      method : 'POST',
+      content : formData,
+      timeout : 500000,
+      sync : true,
+      load : function(data, ioargs) {
+        cmr.hideProgress();
+        if (data != '' && data != undefined) {
+          if (data.rejectionMsg != null && data.rejectionMsg.includes('No data/address changes made on request.')) {
+            console.log('UpdateChecks Element Executed Successfully.');
+            isNoDataUpdated = true;
+          }
+        }
+      },
+      error : function(error, ioargs) {
+        success = false;
+        console.log('An error occurred while running UpdateSwitchElement. Please contact your system administrator');
+        reject('Error occurred in Update Checks.');
+      }
+    });
+  }
+  return isNoDataUpdated;
+}
+
+function checkIfUpdateChecksRequiredOnUI() {
+  console.log('checkIfUpdateChecksRequiredOnUI..');
+  // var CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI = [ '624', '624', '788', '724', '848',
+  // '618', '706', '838', '866', '754', '846', '702', '806', '678' ];
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA') {
+    var result = cmr.query('IS_AUTOMATED_PROCESSING', {
+      CNTRY : cntry
+    });
+    if (result && result.ret1 == 'P') {
+      console.log("checkIfUpdateChecksRequiredOnUI.. update checks are required");
+      return true;
+    } else {
+      console.log("checkIfUpdateChecksRequiredOnUI.. update checks are not required");
+      return false;
+    }
+  }
+
 }
