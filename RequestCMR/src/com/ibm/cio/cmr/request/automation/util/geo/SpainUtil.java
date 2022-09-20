@@ -302,6 +302,9 @@ public class SpainUtil extends AutomationUtil {
       List<DuplicateCMRCheckResponse> matches = response.getMatches();
       List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
       for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
         if (StringUtils.isNotBlank(match.getSortl())) {
           String sortl = match.getSortl().length() > 3 ? match.getSortl().substring(0, 3) : match.getSortl();
           if (Arrays.asList(sboValuesToCheck).contains(sortl)) {
