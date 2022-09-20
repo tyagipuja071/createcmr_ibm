@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.controller.system;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +39,9 @@ public class ForceStatusChangeController extends BaseController {
   @RequestMapping(value = "/statuschange")
   public ModelAndView showForcedStatusChangePage(HttpServletRequest request, HttpServletResponse response, ForcedStatusChangeModel model)
       throws CmrException {
-    ModelAndView mv = new ModelAndView("statuschange", "status", model);
+    ArrayList<ForcedStatusChangeModel> blank = new ArrayList<>();
+    blank.add(model);
+    ModelAndView mv = new ModelAndView("statuschange", "stat", blank);
 
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin() && !user.isCmde()) {
@@ -48,12 +51,16 @@ public class ForceStatusChangeController extends BaseController {
     }
 
     if (!StringUtils.isEmpty(model.getSearchReqId())) {
-      model.setReqId(Long.parseLong(model.getSearchReqId()));
+      if (StringUtils.isNumeric(model.getSearchReqId())) {
+        model.setReqId(Long.parseLong(model.getSearchReqId()));
+      } else {
+        model.setReqId(-2);
+      }
       List<ForcedStatusChangeModel> records = service.search(model, request);
       if (records != null && records.size() > 0) {
-        mv = new ModelAndView("statuschange", "status", records.get(0));
+        mv = new ModelAndView("statuschange", "stat", records);
       } else {
-        mv = new ModelAndView("redirect:/statuschange", "status", new ForcedStatusChangeModel());
+        mv = new ModelAndView("redirect:/statuschange", "stat", blank);
         MessageUtil.setErrorMessage(mv, MessageUtil.ERROR_INVALID_REQ_ID, model.getSearchReqId());
       }
     }
@@ -64,13 +71,19 @@ public class ForceStatusChangeController extends BaseController {
   @RequestMapping(value = "/statuschange/process")
   public ModelAndView processForceChange(HttpServletRequest request, HttpServletResponse response, ForcedStatusChangeModel model) {
     ModelAndView mv = null;
+    String searchIds = model.getSearchReqId();
+    if (!StringUtils.isBlank(searchIds)) {
+      searchIds = searchIds.replaceAll("\\s+", "");
+    }
+    List<ForcedStatusChangeModel> list = new ArrayList<ForcedStatusChangeModel>();
+    list.add(model);
     try {
       service.processTransaction(model, request);
-      mv = new ModelAndView("redirect:/statuschange?searchReqId=" + model.getReqId(), "status", new ForcedStatusChangeModel());
+      mv = new ModelAndView("redirect:/statuschange?searchReqId=" + searchIds, "stat", list);
       setPageKeys("ADMIN", "FORCE_CHANGE", mv);
       MessageUtil.setInfoMessage(mv, MessageUtil.INFO_FORCE_CHANGE_STATUS_OK, model.getReqId() + "");
     } catch (Exception e) {
-      mv = new ModelAndView("redirect:/statuschange?searchReqId=" + model.getReqId(), "status", model);
+      mv = new ModelAndView("redirect:/statuschange?searchReqId=" + searchIds, "stat", list);
       MessageUtil.setErrorMessage(mv, MessageUtil.ERROR_CANNOT_FORCE_CHANGE_STATUS);
     }
     return mv;

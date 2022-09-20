@@ -181,15 +181,11 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      String efc = mainRecord.getCmrEstabFnInd();
-      if (StringUtils.isNotBlank(efc) && ArrayUtils.contains(new String[] { "8", "R", "Z", "7", "P" }, efc)) {
-        data.setIccTaxExemptStatus(efc);
-      }
-      data.setTaxCd1(efc);
-    } else {
-      data.setTaxCd1(mainRecord.getCmrEstabFnInd());
+    String efc = mainRecord.getCmrEstabFnInd();
+    if (StringUtils.isNotBlank(efc) && ArrayUtils.contains(new String[] { "8", "R", "Z", "7", "P" }, efc)) {
+      data.setIccTaxExemptStatus(efc);
     }
+    data.setTaxCd1(efc);
 
     data.setSalesBusOffCd(mainRecord.getCmrSellBoNum());
     data.setInstallBranchOff(mainRecord.getCmrInstlBoNum());
