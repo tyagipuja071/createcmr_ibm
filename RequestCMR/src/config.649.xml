@@ -26,7 +26,6 @@
 					<width>40</width>
 					<length>20</length>
 				</column>
-
 				<column>
 					<label>Abbraviated location</label>
 					<dbColumn>ABBREV_LOCN</dbColumn>
@@ -83,7 +82,7 @@
 				</column>
 				<column>
 					<label>Credit Code</label>
-					<!--NOTE: TEMPORARY DB MAPPING waiting for CREDIT_CODE-->
+					<!--NOTE: TEMPORARY DB MAPPING waiting for CREDIT_CODE -->
 					<dbColumn>CUST_CLASS</dbColumn>
 					<width>15</width>
 					<length>2</length>
@@ -138,7 +137,7 @@
 					<dbColumn>TAX_CD1</dbColumn>
 					<width>25</width>
 					<lovId>LocalTax1</lovId>
-				</column>				
+				</column>
 			</columns>
 		</tab>
 		<tab name="Sold-To" type="Address" typeCode="ZS01">
@@ -155,20 +154,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -231,7 +229,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="Invoice-To" type="Address" typeCode="ZP02">
 			<columns>
 				<column exactLength="true">
@@ -246,20 +244,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -322,7 +319,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="Maint Bill-To" type="Address" typeCode="ZP01">
 			<columns>
 				<column exactLength="true">
@@ -337,20 +334,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -413,7 +409,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="Ship-To" type="Address" typeCode="ZD01">
 			<columns>
 				<column exactLength="true">
@@ -428,20 +424,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -504,7 +499,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="Install-At" type="Address" typeCode="ZI01">
 			<columns>
 				<column exactLength="true">
@@ -519,20 +514,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -595,7 +589,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="(A R) Bill-To" type="Address" typeCode="ZP03">
 			<columns>
 				<column exactLength="true">
@@ -610,20 +604,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -686,7 +679,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="BBS Bill-To" type="Address" typeCode="ZP04">
 			<columns>
 				<column exactLength="true">
@@ -701,20 +694,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -777,7 +769,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="I In Bill-To" type="Address" typeCode="ZP05">
 			<columns>
 				<column exactLength="true">
@@ -792,20 +784,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -868,7 +859,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="CS Per Call Bill-To" type="Address" typeCode="ZP06">
 			<columns>
 				<column exactLength="true">
@@ -883,20 +874,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -959,7 +949,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="TLA Rentals Bill-To" type="Address" typeCode="ZP07">
 			<columns>
 				<column exactLength="true">
@@ -974,20 +964,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -1050,7 +1039,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="Education" type="Address" typeCode="ZE01">
 			<columns>
 				<column exactLength="true">
@@ -1065,20 +1054,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -1141,7 +1129,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="Publ Bill-To" type="Address" typeCode="ZP08">
 			<columns>
 				<column exactLength="true">
@@ -1156,20 +1144,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -1232,7 +1219,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="Software Bill-To" type="Address" typeCode="ZP09">
 			<columns>
 				<column exactLength="true">
@@ -1247,20 +1234,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
@@ -1323,7 +1309,7 @@
 				</column>
 			</columns>
 		</tab>
-		
+
 		<tab name="Publ Ship-To" type="Address" typeCode="ZD02">
 			<columns>
 				<column exactLength="true">
@@ -1338,20 +1324,19 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-					
 				</column>
 				<column>
-		          <label>Customer Name</label>
-		          <dbColumn>CUST_NM1</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
-		        <column>
-		          <label>Customer Name Con't</label>
-		          <dbColumn>CUST_NM2</dbColumn>
-		          <width>40</width>
-		          <length>30</length>
-		        </column>
+					<label>Customer Name</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Customer Name Con't</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
 				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
