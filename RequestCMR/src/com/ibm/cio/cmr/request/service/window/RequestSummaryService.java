@@ -256,7 +256,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update.setOldData(getCodeAndDescription(oldData.getBpRelType(), "BPRelationType", cmrCountry));
             results.add(update);
           }
-          if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getCapInd(), newData.getCapInd())
+          if (TYPE_CUSTOMER.equals(type) && (StringUtils.isNotBlank(newData.getCapInd()) && !equals(oldData.getCapInd(), newData.getCapInd()))
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CAP"))) {
             update = new UpdatedDataModel();
             update.setDataField(PageManager.getLabel(cmrCountry, "CAP", "-"));

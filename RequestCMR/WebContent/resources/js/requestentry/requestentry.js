@@ -137,12 +137,13 @@ function processRequestAction() {
     var custGrp = FormManager.getActualValue('custGrp');
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
+    }
+    if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
+      cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
-    	 if((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry'))||NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')))&&(vatInd == 'N')&&(custGrp!='CROSS'))
-    	  	{
-    	  		findVatInd();
-    	  	}
-    	 else  if (checkForConfirmationAttachments()) {
+      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry'))) && (vatInd == 'N') && (custGrp != 'CROSS')) {
+        findVatInd();
+      } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
       } else if (cmrCntry == SysLoc.INDIA) {
         // Cmr-2340- For India Dnb import
@@ -810,27 +811,27 @@ function afterConfigChange() {
 
   // VAT indicator
   var vatInd = FormManager.getActualValue('vatInd');
-  
-  //onchange
+
+  // onchange
   if (_vatIndHandler == null) {
     _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(vatInd) {
       if (vatInd && dojo.string.trim(vatInd) == 'T') {
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
         FormManager.enable('vat');
         FormManager.setValue('vatExempt', 'N');
-        //FormManager.setValue('taxCd2', 'N');
+        // FormManager.setValue('taxCd2', 'N');
         FormManager.setValue('vatInd', 'T');
       } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
         FormManager.removeValidator('vat', Validators.REQUIRED);
         FormManager.readOnly('vat');
         FormManager.setValue('vat', '');
-        //FormManager.setValue('taxCd2', 'N');
+        // FormManager.setValue('taxCd2', 'N');
         FormManager.setValue('vatInd', 'N');
       } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
         FormManager.removeValidator('vat', Validators.REQUIRED);
         FormManager.enable('vat');
         FormManager.setValue('vatExempt', 'Y');
-       // FormManager.setValue('taxCd2', 'Y');
+        // FormManager.setValue('taxCd2', 'Y');
         FormManager.setValue('vatInd', 'E');
       }
     });
@@ -839,8 +840,8 @@ function afterConfigChange() {
   if (_vatIndHandler && _vatIndHandler[0]) {
     _vatIndHandler[0].onChange();
   }
-    
-    // add special INAC value validator
+
+  // add special INAC value validator
   // if INAC Type = I, the code should be a number
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (_inacHandler == null) {
@@ -943,7 +944,7 @@ function afterConfigChange() {
       }
       FormManager.disable('func');
       FormManager.readOnly('cmrNo');
-    } 
+    }
   }
 
   // populate the country name field when the county code is chosen
@@ -1484,18 +1485,18 @@ function overrideDnBMatch() {
     var reqType = FormManager.getActualValue('reqType');
     var custSubGroup = FormManager.getActualValue('custSubGrp');
 
-    if(loc == '641' && (custSubGroup == 'CROSS' && reqType == 'C' || reqType == 'U' && cntry != 'CN')){
+    if (loc == '641' && (custSubGroup == 'CROSS' && reqType == 'C' || reqType == 'U' && cntry != 'CN')) {
       cmr
-      .showConfirm(
-          'doOverrideDnBMatch()',
-          'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
-          'Warning', null, null);
-    }else{
+          .showConfirm(
+              'doOverrideDnBMatch()',
+              'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+              'Warning', null, null);
+    } else {
       cmr
-      .showConfirm(
-          'doOverrideDnBMatch()',
-          'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
-          'Warning', null, null);
+          .showConfirm(
+              'doOverrideDnBMatch()',
+              'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+              'Warning', null, null);
     }
   } else {
     cmr
@@ -2257,7 +2258,7 @@ function checkIfUpfrontUpdateChecksRequired() {
     VALUE : '%' + cntry + '%'
   });
 
-  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA') {
+  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && result && result.ret1) {
     return true;
   } else {
     return false;
@@ -2401,8 +2402,7 @@ function autoSaveRequest() {
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }
 
-
-function recreateCMR(){
+function recreateCMR() {
   var msg = '<strong>WARNING: Use this function with caution!</strong><br><br>This will recreate a <strong>NEW CMR</strong> for this request. Please ensure that any invalid records in RDC have been marked as logically deleted and there is an actual need to create a new CMR for this request. Proceed?';
   cmr.showConfirm('executeRecreateCMR()', msg, 'Warning', null);
 }
@@ -2411,3 +2411,60 @@ function executeRecreateCMR() {
   FormManager.doAction('frmCMR', 'RECREATE', true, 'Setting up request for recreation of CMR...');
 }
 
+function checkIfDataOrAddressFieldsUpdated(frmCMR) {
+  console.log("checkIfDataOrAddressFieldsUpdated..............");
+  var reqType = FormManager.getActualValue('reqType');
+  var isNoDataUpdated = false;
+  if (checkIfUpdateChecksRequiredOnUI()) {
+    console.log('Running Update Checks Element...');
+    cmr.showProgress('Validating requested updates...');
+    var formData = dojo.formToObject(frmCMR);
+    formData.capInd = FormManager.getActualValue('capInd');
+    dojo.xhrPost({
+      url : cmr.CONTEXT_ROOT + '/auto/element/updateCheck.json',
+      handleAs : 'json',
+      method : 'POST',
+      content : formData,
+      timeout : 500000,
+      sync : true,
+      load : function(data, ioargs) {
+        cmr.hideProgress();
+        if (data != '' && data != undefined) {
+          if (data.rejectionMsg != null && data.rejectionMsg.includes('No data/address changes made on request.')) {
+            console.log('UpdateChecks Element Executed Successfully.');
+            isNoDataUpdated = true;
+          }
+        }
+      },
+      error : function(error, ioargs) {
+        success = false;
+        console.log('An error occurred while running UpdateSwitchElement. Please contact your system administrator');
+        reject('Error occurred in Update Checks.');
+      }
+    });
+  }
+  return isNoDataUpdated;
+}
+
+function checkIfUpdateChecksRequiredOnUI() {
+  console.log('checkIfUpdateChecksRequiredOnUI..');
+  // var CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI = [ '624', '624', '788', '724', '848',
+  // '618', '706', '838', '866', '754', '846', '702', '806', '678' ];
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA') {
+    var result = cmr.query('IS_AUTOMATED_PROCESSING', {
+      CNTRY : cntry
+    });
+    if (result && result.ret1 == 'P') {
+      console.log("checkIfUpdateChecksRequiredOnUI.. update checks are required");
+      return true;
+    } else {
+      console.log("checkIfUpdateChecksRequiredOnUI.. update checks are not required");
+      return false;
+    }
+  }
+
+}
