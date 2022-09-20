@@ -17,6 +17,7 @@ package com.ibm.cio.cmr.request.filter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -200,6 +201,10 @@ public class SessionInactivityFilter implements Filter {
           if (reqId > 0) {
             req.setAttribute("r", reqId);
           }
+          String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
+          if (!StringUtils.isBlank(findCmrParams)) {
+            req.setAttribute("c", findCmrParams);
+          }
           req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
           return;
         }
@@ -211,6 +216,10 @@ public class SessionInactivityFilter implements Filter {
           long reqId = extractRequestId((HttpServletRequest) request);
           if (reqId > 0) {
             req.setAttribute("r", reqId);
+          }
+          String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
+          if (!StringUtils.isBlank(findCmrParams)) {
+            req.setAttribute("c", findCmrParams);
           }
           req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
           return;
@@ -224,6 +233,10 @@ public class SessionInactivityFilter implements Filter {
         long reqId = extractRequestId((HttpServletRequest) request);
         if (reqId > 0) {
           req.setAttribute("r", reqId);
+        }
+        String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
+        if (!StringUtils.isBlank(findCmrParams)) {
+          req.setAttribute("c", findCmrParams);
         }
         req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
         return;
@@ -258,6 +271,24 @@ public class SessionInactivityFilter implements Filter {
     }
 
     return 0;
+  }
+
+  private String extractFindCMRParams(HttpServletRequest request) {
+    String url = request.getRequestURI();
+    if (url.endsWith("findcmr")) {
+      String cmrNo = request.getParameter("cmrNo");
+      String cntry = request.getParameter("cntry");
+      if (!StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(cntry)) {
+        return Base64.getEncoder().encodeToString(("f&cmrNo=" + cmrNo + "&cntry=" + cntry).getBytes());
+      }
+    } else {
+      String reqType = request.getParameter("reqType");
+      String cntry = request.getParameter("cmrIssuingCntry");
+      if (!StringUtils.isBlank(reqType) && !StringUtils.isBlank(cntry)) {
+        return Base64.getEncoder().encodeToString(("r&cmrIssuingCntry=" + cntry + "&reqType=" + reqType).getBytes());
+      }
+    }
+    return null;
   }
 
   /**

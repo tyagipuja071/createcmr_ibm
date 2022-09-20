@@ -25,8 +25,7 @@ public class ConnectController {
   @Autowired
   private ConnectService service;
 
-  @RequestMapping(
-      value = "/connect")
+  @RequestMapping(value = "/connect")
   public ModelAndView showConnectPage(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
     ParamContainer params = new ParamContainer();
@@ -38,6 +37,11 @@ public class ConnectController {
     ModelAndView mv = new ModelAndView("connect");
     mv.addObject("request", detailString);
     return mv;
+  }
+
+  @RequestMapping(value = "/findcmr")
+  public ModelAndView showFindCmrPage(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    return new ModelAndView("findcmr");
   }
 
 }
