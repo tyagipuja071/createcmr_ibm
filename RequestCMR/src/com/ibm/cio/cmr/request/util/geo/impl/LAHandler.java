@@ -718,8 +718,17 @@ public class LAHandler extends GEOHandler {
           if ("LOCAL".equals(data.getCustGrp()) && CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())) {
             if (StringUtils.isNotBlank(taxCd1) && taxCd1.length() >= 11) {
               String taxCd1Subtr = taxCd1.substring(3, 11);
-              GeoTaxInfo taxInfoRecord = query.getSingleResult(GeoTaxInfo.class);
-              if (geoTaxInfoRecords.isEmpty() || taxInfoRecord.getTaxNum().isEmpty()) {
+              boolean createNewTaxRecords = false;
+
+              if (geoTaxInfoRecords == null || geoTaxInfoRecords.isEmpty()) {
+                createNewTaxRecords = true;
+              } else {
+                if (geoTaxInfoRecords.get(0) != null && StringUtils.isBlank(geoTaxInfoRecords.get(0).getTaxNum())) {
+                  createNewTaxRecords = true;
+                }
+              }
+
+              if (createNewTaxRecords) {
                 deleteAllTaxInfoRecord(data, entityManager);
                 doCreateARDefaultTaxRecord("01", taxCd1Subtr, data.getId().getReqId(), entityManager, true, true, true);
                 doCreateARDefaultTaxRecord("11", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
