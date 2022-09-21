@@ -2454,11 +2454,17 @@ function checkIfUpdateChecksRequiredOnUI() {
   var reqId = FormManager.getActualValue('reqId');
   var reqType = FormManager.getActualValue('reqType');
   var reqStatus = FormManager.getActualValue('reqStatus');
+  var requesterId = FormManager.getActualValue('requesterId');
+
   if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA') {
     var result = cmr.query('IS_AUTOMATED_PROCESSING', {
       CNTRY : cntry
     });
-    if (result && result.ret1 == 'P') {
+    /*
+     * var isCmde = cmr.query('CHECK_CMDE', { CNTRY : cntry, REQUESTER_ID :
+     * requesterId });
+     */
+    if (result && (result.ret1 == 'P' || result.ret1 == 'R' || result.ret1 == 'B')) {
       console.log("checkIfUpdateChecksRequiredOnUI.. update checks are required");
       return true;
     } else {

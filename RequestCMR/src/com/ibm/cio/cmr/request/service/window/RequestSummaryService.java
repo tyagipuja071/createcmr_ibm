@@ -431,7 +431,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getVat());
               results.add(update);
             }
-            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getVatInd(), newData.getVatInd())
+            if (TYPE_CUSTOMER.equals(type) && (StringUtils.isNoneBlank(oldData.getVatInd()) && !equals(oldData.getVatInd(), newData.getVatInd()))
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "VATInd"))) {
               update = new UpdatedDataModel();
               update.setDataField(PageManager.getLabel(cmrCountry, "VATInd", "-"));

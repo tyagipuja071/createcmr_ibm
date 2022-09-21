@@ -1003,7 +1003,7 @@ public class CanadaUtil extends AutomationUtil {
       throws Exception {
     Data data = requestData.getData();
     String updatedValue = updatedDataModel.getNewData();
-    String error = "This CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle. Thank you. \nJira link https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
+    String error = "This CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle. Thank you. \nJira link https://jsw.ibm.com/projects/CMDE/summary";
     String sql = ExternalizedQuery.getSql("AUTO.CA.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
