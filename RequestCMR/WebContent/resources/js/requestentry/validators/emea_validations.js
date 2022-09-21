@@ -6501,7 +6501,7 @@ function doValidateFiscalDataModal() {
   var fiscalCd = FormManager.getActualValue('taxCd1');
   if (!vat && !fiscalCd) {
     FormManager.setValue('fiscalDataStatus', 'F');
-    cmr.showAlert("No company addresses with this fiscal data found.", 'Warning');
+    cmr.showAlert("No company addresses with this fiscal data found.", null, null, true);
   } else {
     var qParams = {
       VAT : vat,
@@ -6515,7 +6515,7 @@ function doValidateFiscalDataModal() {
       loadFiscalDataModal(result);
     } else {
       FormManager.setValue('fiscalDataStatus', 'F');
-      cmr.showAlert("No company addresses with this fiscal data found.", 'Warning');
+      cmr.showAlert("No company addresses with this fiscal data found.", null, null, true);
     }
   }
 }
