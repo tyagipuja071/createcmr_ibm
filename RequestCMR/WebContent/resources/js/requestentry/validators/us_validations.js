@@ -1277,6 +1277,10 @@ function setMainName1ForKYN() {
       FormManager.setValue('mainCustNm1', 'KYNDRYL INC');
       FormManager.setValue('mainCustNm2', '');
     }
+    if (custGrp == '3' && custSubGrp == 'KYN') {
+      FormManager.setValue('custType', '1');
+      FormManager.readOnly('custType');
+    }
   }
 
 }
