@@ -124,6 +124,8 @@ function afterConfigTW() {
 
   setVatValidator();
   handleObseleteExpiredDataForUpdate();
+  // CREATCMR-788
+  addressQuotationValidator();
 }
 
 /**
@@ -462,7 +464,19 @@ function setRepTeamMemberNo() {
     FormManager.readOnly('repTeamMemberNo');
   }
 }
+function addressQuotationValidator() {
+  // CREATCMR-788
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer English Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer English Name Con\'t' ]);
+  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Customer Chinese Name' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Customer Chinese Name Con\'t' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Customer English Address' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Customer English Address Con\'t' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Customer Chinese Address' ]);
+  FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Customer Chinese Address Con\'t' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
 
+}
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];

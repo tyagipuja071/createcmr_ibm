@@ -104,6 +104,8 @@ function afterConfigForJP() {
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
   }
+  // CREATCMR-788
+  addressQuotationValidator();
 }
 function addScenarioDriven() {
   var custType = FormManager.getActualValue('custType');
@@ -5439,7 +5441,27 @@ function resetBPWPQValue() {
     // FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
   }
 }
+function addressQuotationValidator() {
+  // CREATCMR-788
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name-KANJI' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Name-KANJI Continue' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Katakana' ]);
+  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Full English Name' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Address' ]);
 
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Department' ]);
+  FormManager.addValidator('office', Validators.NO_QUOTATION, [ 'Branch/Office' ]);
+  FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Building' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Tel No' ]);
+
+  FormManager.addValidator('custFax', Validators.NO_QUOTATION, [ 'Fax No' ]);
+  FormManager.addValidator('divn', Validators.NO_QUOTATION, [ 'Estab No' ]);
+  FormManager.addValidator('city2', Validators.NO_QUOTATION, [ 'Company No' ]);
+  FormManager.addValidator('companySize', Validators.NO_QUOTATION, [ 'Company Size' ]);
+  FormManager.addValidator('contact', Validators.NO_QUOTATION, [ 'Contact' ]);
+
+}
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
