@@ -193,7 +193,6 @@ public class SingaporeUtil extends AutomationUtil {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     String scenario = data.getCustSubGrp();
-    Admin admin = requestData.getAdmin();
     String[] scnarioList = { "ASLOM", "NRML" };
     Addr soldTo = requestData.getAddress("ZS01");
     String custNm1 = soldTo.getCustNm1();
