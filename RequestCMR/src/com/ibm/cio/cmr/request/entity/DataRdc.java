@@ -323,6 +323,10 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   private String vatExempt;
 
   @Column(
+      name = "VAT_IND")
+  private String vatInd;
+
+  @Column(
       name = "REP_TEAM_MEMBER_NO")
   private String repTeamMemberNo;
 
@@ -813,6 +817,14 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   public void setVat(String vat) {
     this.vat = vat;
+  }
+
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
   }
 
   public String getCovId() {
