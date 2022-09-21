@@ -277,10 +277,10 @@ function setVatValidatorNL() {
       FormManager.readOnly('vat');
     }
     //FormManager.resetValidations('vat');
-    if (!dojo.byId('vatExempt').checked) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    //if (!dojo.byId('vatExempt').checked) {
+      //checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
       //FormManager.enable('vat');
-    }
+    //}
   }
 }
 
