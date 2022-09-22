@@ -8789,6 +8789,8 @@ function afterConfigForTR() {
       addTurkishCharValidator();
     });
   }
+  // CREATCMR-788
+  addressQuotationValidatorTR();
 }
 
 var _isScenarioChanged = false;
@@ -9070,6 +9072,18 @@ function vatValidatorTR() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+function addressQuotationValidatorTR() {
+  // CREATCMR-788
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Con\'t' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'District' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  FormManager.addValidator('taxOffice', Validators.NO_QUOTATION, [ 'Tax Office' ]);
 }
 
 dojo.addOnLoad(function() {

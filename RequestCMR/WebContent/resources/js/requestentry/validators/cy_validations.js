@@ -1175,6 +1175,8 @@ function setFieldsToReadOnlyGRCYTR() {
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('salesTeamCd');
   }
+  // CREATCMR-788
+  addressQuotationValidatorCY();
 }
 
 function updateAbbrevNmLocnGRCYTR(cntry, addressMode, saving, finalSave, force) {
@@ -2884,7 +2886,18 @@ function setValuesWRTIsuCtc(ctc){
     FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
   }
 }
-
+function addressQuotationValidatorCY() {
+  // CREATCMR-788
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Att Person' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address Con\'t/Occupation' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+}
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');

@@ -569,7 +569,7 @@ function afterConfigForUKI() {
       }
     });
   }
-
+  addressQuotationValidatorUKI();
 }
 
 function addHandlersForUK() {
@@ -9268,6 +9268,8 @@ function addAfterConfigItaly() {
   ibmFieldsBehaviourInCreateByScratchIT();
   disableProcpectCmrIT();
   getOldValuesIT();
+  // CREATCMR-788
+  addressQuotationValidatorIT();
 }
 
 function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
@@ -10390,7 +10392,32 @@ function addCmrNoValidatorForUKI() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 // CREATCMR-1727
+function addressQuotationValidatorIT() {
+  // CREATCMR-788
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Continuation' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
 
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('addrAbbrevName', Validators.NO_QUOTATION, [ 'Abbreviated Name' ]);
+  FormManager.addValidator('streetAbbrev', Validators.NO_QUOTATION, [ 'Street Abbreviation' ]);
+  FormManager.addValidator('addrAbbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ]);
+
+}
+
+function addressQuotationValidatorUKI() {
+  // CREATCMR-788
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Cont' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Attn' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+}
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
