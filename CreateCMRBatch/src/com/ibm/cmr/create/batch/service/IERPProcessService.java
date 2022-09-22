@@ -346,12 +346,20 @@ public class IERPProcessService extends BaseBatchService {
 
     if (reqIdList != null && !reqIdList.isEmpty()) {
       // lock records for processing
-      lockAdminRecordsForProcessing(reqIdList, em);
+      // lockAdminRecordsForProcessing(reqIdList, em);
 
       // start processing
       for (CompoundEntity entity : reqIdList) {
         long start = new Date().getTime();
+        // lock record - start
         Admin admin = entity.getEntity(Admin.class);
+        admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_WAITING);
+        admin.setRdcProcessingMsg("Waiting for completion.");
+        admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
+        updateEntity(admin, em);
+        LOG.debug("Locking Request ID " + admin.getId().getReqId() + " for processing.");
+        partialCommit(em);
+        // lock record - end
         if (BatchUtil.excludeForEnvironment(this.context, em, admin)) {
           // exclude data created from a diff env
           continue;
