@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.entity.GeoContactInfoPK;
 import com.ibm.cio.cmr.request.entity.GeoTaxInfo;
 import com.ibm.cio.cmr.request.entity.GeoTaxInfoPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.entity.TaxData;
 import com.ibm.cio.cmr.request.model.auto.BaseV2RequestModel;
 import com.ibm.cio.cmr.request.model.auto.BrazilV2ReqModel;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
@@ -70,7 +71,6 @@ import com.ibm.cmr.services.client.cros.CROSContact;
 import com.ibm.cmr.services.client.cros.CROSQueryRequest;
 import com.ibm.cmr.services.client.cros.CROSQueryResponse;
 import com.ibm.cmr.services.client.cros.CROSRecord;
-import com.ibm.cmr.services.client.cros.CROSTax;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
@@ -203,7 +203,15 @@ public class LAHandler extends GEOHandler {
 
     if (isMXIssuingCountry(issuingCountry)) {
       data.setMexicoBillingName(mexicoBillingName);
+      data.setTaxCd3(mainRecord.getCmrMexFiscalRegime());
     }
+
+    if (isBRIssuingCountry(issuingCountry)) {
+      data.setProxiLocnNo(mainRecord.getCmrProxiLocn());
+    }
+
+    data.setCollectorNameNo(mainRecord.getCmrCollectorNo());
+    data.setCollBoId(mainRecord.getCmrCollBo());
 
     // Defect 1267371 :Municipal Fiscal Code/ Tax Code 2 wrongly imported
     // from
@@ -315,6 +323,71 @@ public class LAHandler extends GEOHandler {
       boolean laReactivateCapable = PageManager.laReactivateEnabled(issuingCountry, "U");
       if (laReactivateCapable)
         data.setFunc("R");
+    }
+  }
+
+  private void importTaxInfo(EntityManager entityManager, Data data, long reqId, String sapNumber, String requesterId) {
+    if (entityManager != null && sapNumber != null) {
+      List<TaxData> taxDataList = getTaxDataByKunnr(entityManager, sapNumber);
+      if (taxDataList != null && taxDataList.size() > 0) {
+        PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("REQUESTENTRY.TAXINFO.SEARCH_BY_REQID"));
+        query.setParameter("REQ_ID", reqId);
+        List<GeoTaxInfo> taxInfoResults = query.getResults(GeoTaxInfo.class);
+        TaxInfoService taxService = new TaxInfoService();
+
+        if (taxInfoResults != null && !taxInfoResults.isEmpty() && taxInfoResults.size() > 0) {
+          taxService.deleteAllTaxInfoById(taxInfoResults, entityManager, reqId);
+        }
+
+        int contactId = 1;
+        for (TaxData taxData : taxDataList) {
+          LOG.debug("***BEGIN PRINT RDC TAX INFO***");
+          LOG.debug("taxData.getContractPrintIndc() >> " + taxData.getContractPrintIndc());
+          LOG.debug("taxData.getCntryUse() >>" + taxData.getCntryUse());
+          LOG.debug("taxData.getId().getTaxCd() >> " + taxData.getId().getTaxCd());
+          LOG.debug("taxData.getTaxSeparationIndc() >> " + taxData.getTaxSeparationIndc());
+          LOG.debug("taxData.getBillingPrintIndc() >> " + taxData.getBillingPrintIndc());
+          LOG.debug("taxData.getTaxNum() >> " + taxData.getTaxNum());
+          LOG.debug("***END PRINT RDC TAX INFO***");
+
+          if (isBRIssuingCountry(data.getCmrIssuingCntry())) {
+            if ("40".equals(taxData.getId().getTaxCd())) {
+              setIcmsData(data, taxData.getTaxSeparationIndc());
+
+              entityManager.merge(data);
+              entityManager.flush();
+              continue;
+            }
+          }
+
+          GeoTaxInfo geoTaxInfo = new GeoTaxInfo();
+          GeoTaxInfoPK geoTaxInfoPK = new GeoTaxInfoPK();
+
+          geoTaxInfo.setContractPrintIndc(taxData.getContractPrintIndc());
+          geoTaxInfo.setCntryUse(taxData.getCntryUse());
+          geoTaxInfo.setTaxCd(taxData.getId().getTaxCd());
+          geoTaxInfo.setTaxSeparationIndc(taxData.getTaxSeparationIndc());
+          geoTaxInfo.setBillingPrintIndc(taxData.getBillingPrintIndc());
+          geoTaxInfo.setTaxNum(taxData.getTaxNum());
+          geoTaxInfoPK.setGeoTaxInfoId(contactId);
+          geoTaxInfoPK.setReqId(reqId);
+          geoTaxInfo.setId(geoTaxInfoPK);
+          geoTaxInfo.setCreateTs(SystemUtil.getCurrentTimestamp());
+          geoTaxInfo.setCreateById(requesterId);
+
+          entityManager.persist(geoTaxInfo);
+          entityManager.flush();
+          contactId++;
+        }
+      }
+    }
+  }
+
+  private void setIcmsData(Data data, String taxSepIndc) {
+    if (CmrConstants.YES_NO.N.equals(taxSepIndc)) {
+      data.setIcmsInd("1");
+    } else if (CmrConstants.YES_NO.Y.equals(taxSepIndc)) {
+      data.setIcmsInd("2");
     }
   }
 
@@ -498,7 +571,7 @@ public class LAHandler extends GEOHandler {
         address.setTaxCd1("");// avoid NULL
       }
 
-      String munFiscalCode = getBahnsValue(currentRecord.getCmrSapNumber());
+      String munFiscalCode = currentRecord.getCmrFiscalCd();
       address.setTaxCd2(StringUtils.isEmpty(munFiscalCode) ? "ISENTO" : munFiscalCode);
       assignLocationCodeOnImport(address, issuingCountry);
 
@@ -2899,16 +2972,12 @@ public class LAHandler extends GEOHandler {
         CROSQueryResponse response = client.executeAndWrap(CROSServiceClient.QUERY_APP_ID, request, CROSQueryResponse.class);
         if (response.isSuccess()) {
           CROSRecord record = response.getData();
-          data.setCollectorNameNo(record.getCollectorNo());
           data.setRepTeamMemberNo(record.getSalesRep());
           data.setAbbrevNm(record.getAbbrevName());
-          data.setCollBoId(record.getCollectorBO());
           data.setInstallTeamCd(record.getInstallTeamCode());
           data.setSalesTeamCd(record.getSalesTeamCode());
           data.setGovType(record.getGovernment());
-          data.setProxiLocnNo(record.getProxyLoc());
           data.setMrcCd(record.getMrcCode());
-          data.setTaxCd3(record.getFiscalRegime());
 
           if (!StringUtils.isEmpty(record.getDplValidCode())) {
             if ("DENIAL".equalsIgnoreCase(record.getDplValidCode())) {
@@ -2934,7 +3003,6 @@ public class LAHandler extends GEOHandler {
           qry.executeSql();
           List<CROSContact> crossCntlist = record.getContacts();
           List<CROSAddress> crosAddrList = record.getAddress();
-          List<CROSTax> crosTaxList = record.getTaxCodes();
 
           DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
 
@@ -2952,50 +3020,6 @@ public class LAHandler extends GEOHandler {
           }
 
           int contactId = 1;
-          int taxId = 0;
-
-          if (crosTaxList != null && crosTaxList.size() > 0) {
-            PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("REQUESTENTRY.TAXINFO.SEARCH_BY_REQID"));
-            query.setParameter("REQ_ID", data.getId().getReqId());
-            List<GeoTaxInfo> results = query.getResults(GeoTaxInfo.class);
-            TaxInfoService taxService = new TaxInfoService();
-
-            /* DTN: IF THERE ARE RESULTS, MUST DELETE */
-            if (results != null && !results.isEmpty() && results.size() > 0) {
-              taxService.deleteAllTaxInfoById(results, entityManager, data.getId().getReqId());
-            }
-
-            for (CROSTax cTax : crosTaxList) {
-              LOG.debug("***BEGIN PRINT CROS TAX INFO***");
-              LOG.debug("cTax.getContractPrintInd() >> " + cTax.getContractPrintInd());
-              LOG.debug("cTax.getCountryUse >>" + cTax.getCountryUse());
-              LOG.debug("cTax.getTaxCode() >> " + cTax.getTaxCode());
-              LOG.debug("getTaxSepInd() >> " + cTax.getTaxSepInd());
-              LOG.debug("cTax.getTaxNumber() >> " + cTax.getTaxNumber());
-              LOG.debug("cTax.getBillingPrintInd() >> " + cTax.getBillingPrintInd());
-
-              GeoTaxInfo geoTaxInfo = new GeoTaxInfo();
-              GeoTaxInfoPK geoTaxInfoPK = new GeoTaxInfoPK();
-
-              geoTaxInfo.setContractPrintIndc(cTax.getContractPrintInd());
-              geoTaxInfo.setCntryUse(cTax.getCountryUse());
-              geoTaxInfo.setTaxCd(cTax.getTaxCode());
-              geoTaxInfo.setTaxSeparationIndc(cTax.getTaxSepInd());
-              geoTaxInfo.setBillingPrintIndc(cTax.getBillingPrintInd());
-              geoTaxInfo.setTaxNum(cTax.getTaxNumber());
-              geoTaxInfoPK.setGeoTaxInfoId(contactId);
-              geoTaxInfoPK.setReqId(data.getId().getReqId());
-              geoTaxInfo.setId(geoTaxInfoPK);
-              geoTaxInfo.setCreateTs(SystemUtil.getCurrentTimestamp());
-              geoTaxInfo.setCreateById(admin.getRequesterId());
-
-              entityManager.persist(geoTaxInfo);
-              entityManager.flush();
-              contactId++;
-
-            }
-          }
-
           if (crosAddrList != null && crosAddrList.size() > 0) {
             for (int i = 0; i < crosAddrList.size(); i++) {
               CROSAddress cAddr = crosAddrList.get(i);
@@ -3069,27 +3093,15 @@ public class LAHandler extends GEOHandler {
         LOG.error("An error has occured in setting values coming from the CROS query service.", e);
         throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, e);
       }
-    }
 
-    // DTN - Regardless if create or update, we should format the VAT
-    // if (!StringUtils.isEmpty(data.getVat())) {
-    // Addr addrSoldTo = getCurrentRecordSoldTo(admin, entityManager);
-    //
-    // if (addrSoldTo != null) {
-    // InputValidation validation = VatUtil.validate(data.getVat(),
-    // addrSoldTo.getLandCntry());
-    //
-    // if (!validation.isSuccess()) {
-    // if ("ISENTO".equalsIgnoreCase(data.getVat())) {
-    //
-    // } else {
-    // // DTN - Not ISENTO so we assume numerics
-    // }
-    // }
-    //
-    // }
-    //
-    // }
+      if (data.getId() != null) {
+        String reqId = String.valueOf(data.getId().getReqId());
+        // NOTE: As of MVP2 - no stories for secondary sold to
+        // we only have one ZS01 (main sold-to)
+        String sapNumber = addrSvc.getAddressSapNo(entityManager, reqId, "ZS01");
+        importTaxInfo(entityManager, data, data.getId().getReqId(), sapNumber, admin.getRequesterId());
+      }
+    }
   }
 
   @Override
@@ -4119,4 +4131,14 @@ public class LAHandler extends GEOHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
+
+  private List<TaxData> getTaxDataByKunnr(EntityManager entityManager, String kunnr) {
+    String sql = ExternalizedQuery.getSql("LA.GET_LAINTERIM_TAXDATA_BY_KUNNR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KUNNR", kunnr);
+
+    return query.getResults(TaxData.class);
+  }
+
 }

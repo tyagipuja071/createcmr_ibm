@@ -308,9 +308,14 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   private String usCmrCompanyNm;
 
+  // LA fields
   private String cmrMexFiscalRegime;
-	private String cmrMexBillingName;
-	
+  private String cmrMexBillingName;
+  private String cmrProxiLocn;
+  private String cmrCollBo;
+  private String cmrCollectorNo;
+  private String cmrFiscalCd;
+
   public String getCmrMexFiscalRegime() {
     return cmrMexFiscalRegime;
   }
@@ -326,8 +331,6 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   public void setCmrMexBillingName(String cmrMexBillingName) {
     this.cmrMexBillingName = cmrMexBillingName;
   }
-
-  
 
   public String getUsCmrCompanyNm() {
     return usCmrCompanyNm;
@@ -2438,6 +2441,38 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setUsCmrBpType(String usCmrBpType) {
     this.usCmrBpType = usCmrBpType;
+  }
+
+  public String getCmrProxiLocn() {
+    return cmrProxiLocn;
+  }
+
+  public void setCmrProxiLocn(String cmrProxiLocn) {
+    this.cmrProxiLocn = cmrProxiLocn;
+  }
+
+  public String getCmrCollBo() {
+    return cmrCollBo;
+  }
+
+  public void setCmrCollBo(String cmrCollBo) {
+    this.cmrCollBo = cmrCollBo;
+  }
+
+  public String getCmrCollectorNo() {
+    return cmrCollectorNo;
+  }
+
+  public void setCmrCollectorNo(String cmrCollectorNo) {
+    this.cmrCollectorNo = cmrCollectorNo;
+  }
+
+  public String getCmrFiscalCd() {
+    return cmrFiscalCd;
+  }
+
+  public void setCmrFiscalCd(String cmrFiscalCd) {
+    this.cmrFiscalCd = cmrFiscalCd;
   }
 
 }
