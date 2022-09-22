@@ -86,6 +86,9 @@ var DB_DATA_FIELDS = [ {
   id : 'Vat',
   name : 'VAT'
 }, {
+  id : 'VATInd',
+  name : 'VAT_IND'
+}, {
   id : 'CovId',
   name : 'COV_ID'
 }, {
