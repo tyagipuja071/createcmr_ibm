@@ -223,7 +223,10 @@ function addAfterConfigAP() {
   if ((role == 'PROCESSOR' || role == 'VIEWER') && (custSubGrp.includes('DUM') || custSubGrp.includes('INT')) && aseanCntries.includes(cntry)) {
     FormManager.readOnly('mrcCd');
   }
-
+  // CREATCMR-788
+  if(cntry == '738' || cntry == '736'){
+    addressQuotationValidatorGCG();
+  }
   var streetAddressCont1 = FormManager.getActualValue('addrTxt2');
   if ((cntry == '738' || cntry == '736') && (streetAddressCont1 == '' || streetAddressCont1 == null)) {
     return new ValidationResult({
@@ -271,6 +274,8 @@ function addAfterConfigAP() {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('inacCd');
   }
+  // CREATCMR-788
+  addressQuotationValidatorAP();
 }
 
 function setInacByCluster() {
@@ -4513,7 +4518,50 @@ function additionalAddrNmValidator(){
     };
   })(), null, 'frmCMR_addressModal');
 }
+// CREATCMR-788
+function addressQuotationValidatorAP() {
+  
+  var cntry = FormManager.getActualValue('cmrIssuingCntry')
+  var AP01 = [ SysLoc.BRUNEI ,SysLoc.SRI_LANKA ,SysLoc.INDIA ,SysLoc.INDONESIA,SysLoc.MALASIA,SysLoc.PHILIPPINES,SysLoc.BANGLADESH,SysLoc.SINGAPORE,SysLoc.VIETNAM,SysLoc.THAILAND];
+  if (AP01.indexOf(cntry) > -1) {
+    FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+    FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+    FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Address.(Flr,Bldg,lvl,Unit.)' ]);
+    FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address.Cont1(Street Name, Street No.)' ]);
+    FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Address.Cont2(District,Town,Region)' ]);
+    FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+    if (cntry == SysLoc.INDONESIA || cntry == SysLoc.MALASIA  || cntry == SysLoc.PHILIPPINES) {
+      FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City/State/Province' ]);
+    } else if(cntry == SysLoc.THAILAND) {
+      FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'Street Address Cont\'2' ]);
+    } else {
+      FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+    }
+  } else if (cntry == SysLoc.AUSTRALIA || cntry == SysLoc.NEW_ZEALAND) {
+    FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+    FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+    FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Attn' ]);
+    FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
+    FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Address Con\'t' ]);
+    FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'Suburb' ]);
+    FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  }
+}
+function addressQuotationValidatorGCG() {
+  
+  var cntry = FormManager.getActualValue('cmrIssuingCntry')
+  switch (cntry) {
+  case SysLoc.MACAO: case SysLoc.HONG_KONG:
+    FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+    FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+    FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Address.(Flr,Bldg,lvl,Unit.)' ]);
+    FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address. Cont1(Street Name, Street No.)' ]);
+    FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'Address. Cont2(District,Town,Region)' ]);
+    FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+    break;
+  }
 
+}
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];

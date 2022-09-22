@@ -38,6 +38,8 @@ function afterConfigForCND() {
       setClientTierValues();
     });
   }
+  // CREATCMR-788
+  addressQuotationValidatorCND();
 }
 
 function setClientTierValues() {
@@ -249,7 +251,27 @@ function clientTierValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+function addressQuotationValidatorCND() {
+  // CREATCMR-788
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name 1' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name 2' ]);
+  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Customer Name 3' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Customer Name 4' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Department' ]);
 
+  FormManager.addValidator('floor', Validators.NO_QUOTATION, [ 'Floor' ]);
+  FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Building' ]);
+  FormManager.addValidator('office', Validators.NO_QUOTATION, [ 'Office' ]);
+  FormManager.addValidator('city2', Validators.NO_QUOTATION, [ 'District' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
+
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PostBox' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  FormManager.addValidator('transportZone', Validators.NO_QUOTATION, [ 'Transport Zone' ]);
+
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.CND = [ SysLoc.BAHAMAS, SysLoc.BARBADOS, SysLoc.BERMUDA, SysLoc.CAYMAN_ISLANDS, SysLoc.GUYANA , SysLoc.JAMAICA, SysLoc.SAINT_LUCIA, SysLoc.NETH_ANTILLES, SysLoc.SURINAME, SysLoc.TRINIDAD_TOBAGO ];
