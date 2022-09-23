@@ -2714,7 +2714,7 @@ function showDeleteNotifForArgentinaIBMEM(fromAddress, scenario, scenarioChanged
       cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten." +
         "<br><br><strong>Manually delete the predefined Tax Info values after changing from IBM Employee to other Scenario Sub-type, if there are any created.</strong>" +
         "<br><br><i>Any deleted predefined Tax Info values will not be reinstated. For that to happen, all entries must be deleted.</i>", "Warning");
-    } else if (scenario == 'IBMEM') {
+    } else if (scenario == 'IBMEM' && scenarioChanged) {
       cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten." +
         "<br><br><i>Any deleted predefined Tax Info values will not be reinstated. For that to happen, all entries must be deleted.</i>", "Warning");
     }
