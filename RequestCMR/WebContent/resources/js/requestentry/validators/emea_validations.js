@@ -10364,14 +10364,27 @@ function addCmrNoValidatorForUKI() {
           } else if (cmrNo != '' && custSubType != '' && custSubType != 'INTER' && cmrNo.startsWith('99')) {
             return new ValidationResult(null, false, 'Non Internal CMR Number should not be in 99XXXX for scenarios.');
           } else {
-            var qParams = {
+            var results1 = cmr.query('GET.CMR_BY_CNTRY_CUSNO_SAPR3_FOR_UKI', {
               CMRNO : cmrNo,
-              CNTRY : cntry,
               MANDT : cmr.MANDT
-            };
-            var results = cmr.query('GET.CMR_BY_CNTRY_CUSNO_SAPR3', qParams);
-            if (results.ret1 != null) {
-              return new ValidationResult(null, false, 'The CMR Number already exists.');
+            });
+
+            var results2 = cmr.query('GET.CHECK_EXISTS_CMR_NO_FOR_UKI', {
+              CMR_NO : cmrNo
+            });
+
+            if (results1.ret1 != null) {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'The CMR Number already exists.');
+            } else if (results2.ret1 != null) {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'The CMR Number already exists.');
             } else {
               results = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
                 COUNTRY : cntry,
