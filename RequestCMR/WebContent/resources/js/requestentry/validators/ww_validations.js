@@ -976,29 +976,36 @@ function resetVATValidationsForPayGo(){
   var vatInd = FormManager.getActualValue('vatInd');
   var results = cmr.query('GET_PARTNER_VAT_EXCEPTIONS', {
     COUNTRY : cntry,
-    SERVICE_ID : systemId
+    SERVICE_ID : systemId   
+    
   });
+  
   if(results!= null && results!= undefined && results.ret1!='' && results.ret1 == 'Y' && vat == ''){
-    if (vatInd && dojo.string.trim(vatInd) == 'T') {
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      FormManager.enable('vat');
-      FormManager.setValue('vatExempt', 'N');      
-      FormManager.setValue('vatInd', 'T');
-    } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-      FormManager.readOnly('vat');
-      FormManager.setValue('vat', '');      
-      FormManager.setValue('vatInd', 'N');
-    } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-      FormManager.enable('vat');
-      FormManager.setValue('vatExempt', 'Y');
-      FormManager.setValue('vatInd', 'E');
-    }
-   // FormManager.resetValidations('vat');
-    // FormManager.getField('vatExempt').checked = true;
+    
+   FormManager.resetValidations('vat');
+   //FormManager.getField('vatExempt').checked = true;
     console.log('VAT is non mandatory for PayGO');
-  } 
+  }  
+  
+  FormManager.resetValidations('vat');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  }
+  
   
   
    
