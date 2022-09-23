@@ -10334,7 +10334,9 @@ function cmrNoEnableForUKI() {
   if (role != "PROCESSOR" || FormManager.getActualValue('viewOnlyPage') == 'true' || reqType == 'U') {
     FormManager.readOnly('cmrNo');
   } else {
-    FormManager.enable('cmrNo');
+    if (!cmrNo.startsWith('P')) {
+      FormManager.enable('cmrNo');
+    }
   }
 }
 
@@ -10350,7 +10352,7 @@ function addCmrNoValidatorForUKI() {
           return new ValidationResult(null, true);
         }
 
-        if (cmrNo != '' && cmrNo != null) {
+        if (cmrNo != '' && cmrNo != null  && !cmrNo.startsWith('P')) {
           if (cmrNo.length != 6) {
             return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
           } else if (isNaN(cmrNo)) {
