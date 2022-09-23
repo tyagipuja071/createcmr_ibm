@@ -1041,11 +1041,13 @@ function vatOptionalForLandedUK() {
   if (reqType == 'C') {
     if (landCntry == 'GB') {
       if ((issuingCntry != '866' && custGrp == 'CROSS') || (issuingCntry == '866' && custGrp == 'LOCAL')) {
-        FormManager.resetValidations('vat');
-        FormManager.removeValidator('vat', Validators.REQUIRED);
+        //FormManager.resetValidations('vat');
+        //FormManager.removeValidator('vat', Validators.REQUIRED);
       }
     }
   }
+  
+  
 }
 
 function afterConfigForEMEA(){
