@@ -496,7 +496,7 @@ function setVatValidatorSWISS() {
     
     if (!dijit.byId('vatExempt').get('checked') && landCntry != 'GB') {
 
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    //  FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
   
   }
