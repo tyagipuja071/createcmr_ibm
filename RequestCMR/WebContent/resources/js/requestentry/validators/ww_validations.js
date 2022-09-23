@@ -1047,6 +1047,24 @@ function vatOptionalForLandedUK() {
     }
   }
   
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  }  
   
 }
 
