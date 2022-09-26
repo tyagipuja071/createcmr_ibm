@@ -19,6 +19,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
+import com.ibm.cio.cmr.request.entity.IntlAddrPK;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -509,6 +510,18 @@ public class ChinaUtil extends AutomationUtil {
         addr.setCustNm3(zs01addr.getCustNm3());
         addr.setCustNm4(zs01addr.getCustNm4());
         IntlAddr intlAddr = handler.getIntlAddrById(addr, entityManager);
+        if (intlAddr == null) {
+          intlAddr = new IntlAddr();
+          IntlAddrPK intlAddrPK = new IntlAddrPK();
+          intlAddrPK.setAddrSeq(addr.getId().getAddrSeq());
+          intlAddrPK.setAddrType(addr.getId().getAddrType());
+          intlAddrPK.setReqId(addr.getId().getReqId());
+          intlAddr.setId(intlAddrPK);
+          intlAddr.setLangCd("1");
+          intlAddr.setAddrTxt(intlZS01Addr.getAddrTxt());
+          intlAddr.setCity1(intlZS01Addr.getCity1());
+          intlAddr.setCity2(intlZS01Addr.getCity2());
+        }
         intlAddr.setIntlCustNm1(intlZS01Addr.getIntlCustNm1());
         intlAddr.setIntlCustNm2(intlZS01Addr.getIntlCustNm2());
         intlAddr.setIntlCustNm3(intlZS01Addr.getIntlCustNm3());
