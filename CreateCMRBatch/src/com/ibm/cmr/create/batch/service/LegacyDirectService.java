@@ -1428,7 +1428,8 @@ public class LegacyDirectService extends TransConnService {
         legacyAddr.setStreet(addr.getAddrTxt());
 
         // Turkey not store phone on Address level
-        if (!SystemLocation.TURKEY.equals(cntry)) {
+        //CREATCMR-3314 UKI not store phone on Address level
+        if (!SystemLocation.TURKEY.equals(cntry) && !SystemLocation.UNITED_KINGDOM.equals(cntry) && !SystemLocation.IRELAND.equals(cntry)) {
           if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
             legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
           }
