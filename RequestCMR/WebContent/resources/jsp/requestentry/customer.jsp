@@ -585,6 +585,19 @@
         </p>
       </cmr:column>
       </cmr:view>  
+     <div id="vatRegisterStatus"> 
+      <cmr:view forCountry="834">
+      <cmr:column span="2" containerForField="LocalTax1">
+      <p>
+        <label for="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />:
+          <cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}" />
+        </label>
+        <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1"
+          tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
+    </cmr:view>     
+    </div>
   </cmr:row>
 
   <!-- Include Here Customer Specific fields for GEOs -->
