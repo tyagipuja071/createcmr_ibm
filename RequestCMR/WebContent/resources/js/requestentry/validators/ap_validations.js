@@ -9,6 +9,7 @@ var  _isuHandler = null;
 var _clusterHandlerANZ = null;
 var _inacCdHandlerIN = null;
 var _importIndIN = null;
+var _vatRegisterHandlerSG = null;
 
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
@@ -34,8 +35,18 @@ function addHandlersForAP() {
       setIsuOnIsic();
     });
   }
-  handleObseleteExpiredDataForUpdate();
-  }
+  if (_vatRegisterHandlerSG == null) {
+    _vatRegisterHandlerSG = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
+    cmr
+    .showAlert(
+        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of “VAT Registration Status” is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ‘N/A’, you are confirming that this customer has no VAT# then “VAT Registration Status” is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
+          OK : 'I confirm',
+        });
+        });
+        }
+          handleObseleteExpiredDataForUpdate();
+    }
+
 
 function addHandlersForANZ() {
   if (_clusterHandlerANZ == null && FormManager.getActualValue('reqType') != 'U') {
@@ -4287,6 +4298,66 @@ function checkAnyChangesOnCustNameAddrGST() {
   return errorMsg;
 }
 
+// CREATCMR-6880
+function vatRegistrationForSG() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var reqId = FormManager.getActualValue('reqId');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var addrType = FormManager.getActualValue('addrType');
+  var landCntry ='';
+  if (addrType == 'ZS01') {
+    landCntry = FormManager.getActualValue('landCntry'); 
+  }
+  if (landCntry == '') {
+  var params = {
+      REQ_ID : reqId,
+      ADDR_TYPE : "ZS01"
+    };
+    var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+    landCntry = landCntryResult.ret1;
+  }
+  if (cntry != '834' && landCntry != 'TH') {
+    return;
+  }
+  FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Vat Registration Status' ], 'MAIN_IBM_TAB');
+  var isVatRegistered =  FormManager.getActualValue('taxCd1');
+  if (isVatRegistered == 'NA') {
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_IBM_TAB');
+    FormManager.enable('vat');
+  }
+}
+
+function displayVatRegistrartionStatus() {
+  console.log(">>> Executing displayVatRegistrationStatus");
+  var reqId = FormManager.getActualValue('reqId');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var addrType = FormManager.getActualValue('addrType');
+  var landCntry ='';
+  if (addrType == 'ZS01') {
+    landCntry = FormManager.getActualValue('landCntry'); 
+  }
+  if (landCntry == '') {
+  var params = {
+      REQ_ID : reqId,
+      ADDR_TYPE : "ZS01"
+    };
+    var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+    landCntry = landCntryResult.ret1;
+  }
+  if (cntry == '834' && landCntry == 'TH') {
+    cmr.showNode('vatRegisterStatus');
+  } else {
+    cmr.hideNode('vatRegisterStatus');
+  }
+  vatRegistrationForSG();
+}
+
 // CREATCMR-6398
 function businessParterValidator() {
   console.log("running businessParterValidator...");
@@ -4486,4 +4557,7 @@ dojo.addOnLoad(function() {
    GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate,  GEOHandler.AP );
   GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.AP );
   // India Handler
+  GEOHandler.addAddrFunction(displayVatRegistrartionStatus, [ SysLoc.SINGAPORE ]);
+  GEOHandler.addAfterConfig(displayVatRegistrartionStatus,  [ SysLoc.SINGAPORE ] );
+  GEOHandler.addAfterTemplateLoad(displayVatRegistrartionStatus,   [ SysLoc.SINGAPORE ] );
 });
