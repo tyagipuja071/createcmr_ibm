@@ -360,7 +360,7 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     formatAddressLinesLD(dummyHandler, legacyAddr);
     if (("ZD01".equals(currAddr.getId().getAddrType()) || "ZS01".equals(currAddr.getId().getAddrType()))
         && !StringUtils.isEmpty(currAddr.getCustPhone())) {
-      legacyAddr.setAddrPhone(currAddr.getCustPhone().trim());
+      // legacyAddr.setAddrPhone(currAddr.getCustPhone().trim());
     }
     String poBox = currAddr.getPoBox();
     if (!StringUtils.isEmpty(poBox) && ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType()))) {
@@ -417,12 +417,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
           }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
 
         }
         // mailing,installing and EPL(Software Update)-name con't OR Att. Person
@@ -517,12 +519,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
           }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
         }
         // mailing,installing and EPL(Software Update)-name con't OR Att. Person
         if (MQMsgConstants.ADDR_ZP01.equals(addrType) || MQMsgConstants.ADDR_ZI01.equals(addrType) || MQMsgConstants.ADDR_ZS02.equals(addrType)) {
@@ -578,12 +582,15 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
-          } else if (!StringUtils.isEmpty(addrData.getPoBox())) {
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
+          else if (!StringUtils.isEmpty(addrData.getPoBox())) {
             line2 = "PO BOX " + addrData.getPoBox().trim();
           }
         }
@@ -607,12 +614,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
           }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
         }
 
         if (StringUtils.isEmpty(line2)) {
@@ -674,12 +683,15 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
               line3 = "ATT " + line3;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line3 += (line3.length() > 0 ? " " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line3 = addrData.getCustPhone();
-          } else if (!StringUtils.isEmpty(addrData.getPoBox())) {
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line3 += (line3.length() > 0 ? " " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line3 = addrData.getCustPhone();
+          // }
+          else if (!StringUtils.isEmpty(addrData.getPoBox())) {
             line3 = "PO BOX " + addrData.getPoBox().trim();
           }
         }
@@ -703,12 +715,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
               line3 = "ATT " + line3;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line3 += (line3.length() > 0 ? " " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line3 = addrData.getCustPhone();
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line3 += (line3.length() > 0 ? " " : "") +
+            // addrData.getCustPhone();
+            // }
           }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line3 = addrData.getCustPhone();
+          // }
         }
 
         if (StringUtils.isBlank(line3)) {
@@ -767,12 +781,16 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
-          } else if (!StringUtils.isEmpty(addrData.getPoBox())) {
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
+
+          else if (!StringUtils.isEmpty(addrData.getPoBox())) {
             line2 = "PO BOX " + addrData.getPoBox().trim();
           }
         }
@@ -792,12 +810,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
           }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
         }
         // street
         line3 = addrData.getAddrTxt();
@@ -1306,7 +1326,7 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       cust.setIsuCd(muData.getIsuCd() + "7");
     } else {
       String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-        + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
       if (isuClientTier != null && isuClientTier.endsWith("@")) {
         cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
       } else if (isuClientTier != null && isuClientTier.length() == 3) {
@@ -1445,6 +1465,8 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
   public boolean isPG01Supported() {
     return true;
   }
+
+  @Override
   public void getTargetCountryId(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, String cntry, String cmrNo) {
     LOG.debug("Set LOC1 = 866 in case of IssuingCntry = 754");
     if (cntry.equals("754")) {
@@ -1459,7 +1481,7 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     }
     return false;
   }
-  
+
   private boolean isSharedSequence(CMRRequestContainer cmrObjects, Addr currAddr) {
     Map<String, Integer> sequences = new HashMap<String, Integer>();
     String zs01Seq = "";
