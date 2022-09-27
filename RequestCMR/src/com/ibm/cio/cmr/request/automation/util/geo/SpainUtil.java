@@ -604,8 +604,8 @@ public class SpainUtil extends AutomationUtil {
       overrides.clearOverrides();
     }
 
-    HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr, data.getIsuCd(), data.getClientTier(),
-        data.getCustSubGrp());
+    HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr, container.getIsuCd(),
+        container.getClientTierCd(), data.getCustSubGrp());
 
     if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
       LOG.debug("Calculated Enterprise: " + response.get(ENTP));
