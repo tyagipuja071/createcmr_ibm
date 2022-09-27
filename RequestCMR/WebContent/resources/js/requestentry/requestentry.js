@@ -1916,9 +1916,10 @@ function matchDnbForAUSG() {
           console.log(data.success);
           console.log(data.match);
           console.log(data.isicMatch);
+          console.log(data.orgIdMatch);
           console.log(data.validate);
           if (data && data.success) {
-            if (data.match && data.isicMatch) {
+            if (data.match && data.isicMatch && data.orgIdMatch) {
               comp_proof_INAUSG = true;
               if (!data.validate) {
                 checkDnBMatchingAttachmentValidator();
@@ -1934,6 +1935,10 @@ function matchDnbForAUSG() {
               comp_proof_INAUSG = false;
               console.log("ISIC validation failed by Dnb.");
               cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");
+            } else if (data.match && !data.orgIdMatch && cntry == '834') {
+              comp_proof_INAUSG = false;
+              console.log("UEN validation failed by Dnb.");
+              cmr.showAlert("Please attach company proof as UEN validation failed by Dnb.");
             } else if (data.tradeStyleMatch && data.isicMatch) {
               cmr
                   .showConfirm(

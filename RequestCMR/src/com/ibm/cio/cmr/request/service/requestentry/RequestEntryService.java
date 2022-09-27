@@ -77,6 +77,7 @@ import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
+import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
@@ -1486,6 +1487,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         Addr addr = requestData.getAddress(addrType);
         DnBMatchingResponse tradeStyleName = null;
         boolean isicMatch = false;
+        boolean isOrgIdMatched = false;
         boolean confidenceCd = false;
         boolean checkTradestyleNames = ("R".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry()))
             || "O".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry())));
@@ -1500,6 +1502,20 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               if (record.getConfidenceCode() >= 8) {
                 confidenceCd = true;
               }
+              if (!(SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry()) && "TH".equals(requestData.getAddress("ZS01").getLandCntry())
+                  && !"NA".equals(data.getTaxCd1()))) {
+                isOrgIdMatched = true;
+              } else {
+                List<DnbOrganizationId> dnbOrgIdList = record.getOrgIdDetails();
+                for (DnbOrganizationId orgId : dnbOrgIdList) {
+                  String dnbOrgId = orgId.getOrganizationIdCode();
+                  String dnbOrgType = orgId.getOrganizationIdType();
+                  if (data.getVat().equals(dnbOrgId) && "Registration Number (TH)".equals(dnbOrgType)) {
+                    isOrgIdMatched = true;
+                  }
+                }
+              }
+              log.debug("orgId Match : " + isOrgIdMatched);
               DnBCompany dnbCompny = getDnBDetailsUI(record.getDunsNo());
               if (dnbCompny != null) {
                 isicMatch = dnbCompny.getIbmIsic().equals(model.getIsicCd());
@@ -1526,6 +1542,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           }
           map.put("match", match);
           map.put("isicMatch", isicMatch);
+          map.put("orgIdMatch", isOrgIdMatched);
           map.put("confidenceCd", confidenceCd);
           if (!match && tradeStyleName != null) {
             map.put("tradeStyleMatch", true);
