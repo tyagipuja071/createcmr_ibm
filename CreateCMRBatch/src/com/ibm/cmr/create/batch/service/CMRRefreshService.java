@@ -92,6 +92,7 @@ public class CMRRefreshService extends BaseBatchService {
     sql += "and ( ";
     sql += "  k.SHAD_UPDATE_TS > :TS or ";
     sql += "  x.CHG_TS > :TS or ";
+    sql += "  x.CREATE_DATE > date(:TS) or ";
     sql += "  bg.UPDATE_TS > :TS or ";
     sql += "  bg.CREATE_TS > :TS or ";
     sql += "  duns.UPDATE_TS > :TS or ";
