@@ -300,6 +300,12 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
+		<isicBelongs>
+			None
+		</isicBelongs>
 	</postalMapping>
 	
 	<postalMapping>
@@ -312,6 +318,12 @@
 		<salesRep>
 			012540
 		</salesRep>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
+		<isicBelongs>
+			None
+		</isicBelongs>
 	</postalMapping>
 	
 	<postalMapping>
@@ -324,5 +336,11 @@
 		<salesRep>
 			985129
 		</salesRep>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
+		<isicBelongs>
+			None
+		</isicBelongs>
 	</postalMapping>
 </mappings>  
