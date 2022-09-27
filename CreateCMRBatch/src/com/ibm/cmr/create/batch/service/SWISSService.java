@@ -591,8 +591,9 @@ public class SWISSService extends BaseBatchService {
               if (red.getSeqNo() != null && red.getSeqNo() != "") {
                 addrSeqs = red.getSeqNo().split(",");
               }
-              
-              if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+
+
+              if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[0].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                 LOG.debug("Address matched");
                 addr.setPairedAddrSeq(addrSeqs[0]);
                 addr.setSapNo(red.getSapNo());
