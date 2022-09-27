@@ -2358,7 +2358,8 @@ function checkIfDataOrAddressFieldsUpdated(frmCMR) {
       load : function(data, ioargs) {
         cmr.hideProgress();
         if (data != '' && data != undefined) {
-          if (data.rejectionMsg != null && data.rejectionMsg.includes('No data/address changes made on request.')) {
+          if ((data.rejectionMsg != null && data.rejectionMsg.includes('No data/address changes made on request.'))
+              || (data.negativeChksMsg != null && data.negativeChksMsg.includes('No data/address changes made on request.'))) {
             console.log('UpdateChecks Element Executed Successfully.');
             isNoDataUpdated = true;
           }
@@ -2376,23 +2377,24 @@ function checkIfDataOrAddressFieldsUpdated(frmCMR) {
 
 function checkIfUpdateChecksRequiredOnUI() {
   console.log('checkIfUpdateChecksRequiredOnUI..');
-  // var CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI = [ '624', '624', '788', '724', '848',
-  // '618', '706', '838', '866', '754', '846', '702', '806', '678' ];
+  var CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI = [ '897', '724', '618', '848', '631', '866', '754', '649', '641', '624', '788', '678', '702', '806', '846', '706', '744', '838', '616', '834' ];
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqId = FormManager.getActualValue('reqId');
   var reqType = FormManager.getActualValue('reqType');
   var reqStatus = FormManager.getActualValue('reqStatus');
-  var requesterId = FormManager.getActualValue('requesterId');
+  // var requesterId = FormManager.getActualValue('requesterId');
 
   if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA') {
-    var result = cmr.query('IS_AUTOMATED_PROCESSING', {
-      CNTRY : cntry
-    });
     /*
+     * var result = cmr.query('IS_AUTOMATED_PROCESSING', { CNTRY : cntry });
+     * 
      * var isCmde = cmr.query('CHECK_CMDE', { CNTRY : cntry, REQUESTER_ID :
      * requesterId });
+     * 
+     * if (result && (result.ret1 == 'P' || result.ret1 == 'R' || result.ret1 ==
+     * 'B')) {
      */
-    if (result && (result.ret1 == 'P' || result.ret1 == 'R' || result.ret1 == 'B')) {
+    if (CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI.includes(cntry)) {
       console.log("checkIfUpdateChecksRequiredOnUI.. update checks are required");
       return true;
     } else {

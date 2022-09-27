@@ -230,6 +230,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
       GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrCountry);
       UpdatedDataModel update = null;
       List<DataRdc> records = query.getResults(DataRdc.class);
+
+      transformCheckbox(newData);
       if (records != null && records.size() > 0) {
         for (DataRdc oldData : records) {
           if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getAbbrevNm(), newData.getAbbrevNm())
@@ -1765,6 +1767,28 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
         massData.setDplChkTS(String.valueOf(massUpdtAddr.getDplChkTimestamp()));
         results.add(massData);
+      }
+    }
+  }
+
+  private void transformCheckbox(Data data) throws Exception {
+
+    String cmrCountry = data.getCmrIssuingCntry();
+
+    if (SystemLocation.UNITED_STATES.equals(cmrCountry)) {
+      if (!StringUtils.isEmpty(data.getRestrictTo())) {
+        data.setRestrictInd(CmrConstants.YES_NO.Y.toString());
+      } else {
+        data.setRestrictInd(CmrConstants.YES_NO.N.toString());
+      }
+      if (!CmrConstants.YES_NO.Y.toString().equals(data.getFedSiteInd())) {
+        data.setFedSiteInd(CmrConstants.YES_NO.N.toString());
+      }
+      if (!CmrConstants.YES_NO.Y.toString().equals(data.getOemInd())) {
+        data.setOemInd(CmrConstants.YES_NO.N.toString());
+      }
+      if (!CmrConstants.YES_NO.Y.toString().equals(data.getOutCityLimit())) {
+        data.setOutCityLimit(CmrConstants.YES_NO.N.toString());
       }
     }
   }
