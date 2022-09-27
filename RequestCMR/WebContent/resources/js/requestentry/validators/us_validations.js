@@ -1276,6 +1276,8 @@ function setMainName1ForKYN() {
     if ((custGrp == '3' && custSubGrp == 'KYN') || (custGrp == '14' && custSubGrp == 'BYMODEL' && restrictTo == 'KYN')) {
       FormManager.setValue('mainCustNm1', 'KYNDRYL INC');
       FormManager.setValue('mainCustNm2', '');
+      // CREATCMR-7173
+      FormManager.setValue('isuCd', '5K');
     }
     if (custGrp == '3' && custSubGrp == 'KYN') {
       FormManager.setValue('custType', '1');
