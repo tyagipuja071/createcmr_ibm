@@ -2030,8 +2030,9 @@ public class EMEAHandler extends BaseSOFHandler {
           address.getId().setAddrSeq(seq);
         }
       }
-      if (currentRecord.getCmrAddrType() != null && "Ship To".equalsIgnoreCase(currentRecord.getCmrAddrType())
-          && "ZD01".equalsIgnoreCase(currentRecord.getCmrAddrTypeCode()) && (SystemLocation.UNITED_KINGDOM.equals(currentRecord.getCmrIssuedBy())
+      if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && currentRecord.getCmrAddrType() != null
+          && "ZD01".equalsIgnoreCase(address.getId().getAddrType()) && "Ship To".equalsIgnoreCase(currentRecord.getCmrAddrType())
+          && (SystemLocation.UNITED_KINGDOM.equals(currentRecord.getCmrIssuedBy())
               || SystemLocation.IRELAND.equals(currentRecord.getCmrIssuedBy()))) {
         setTelf2fromRDC(address, currentRecord);
       }
