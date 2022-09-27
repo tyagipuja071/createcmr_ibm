@@ -2339,6 +2339,15 @@ function autoSaveRequest() {
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }
 
+function recreateCMR() {
+  var msg = '<strong>WARNING: Use this function with caution!</strong><br><br>This will recreate a <strong>NEW CMR</strong> for this request. Please ensure that any invalid records in RDC have been marked as logically deleted and there is an actual need to create a new CMR for this request. Proceed?';
+  cmr.showConfirm('executeRecreateCMR()', msg, 'Warning', null);
+}
+
+function executeRecreateCMR() {
+  FormManager.doAction('frmCMR', 'RECREATE', true, 'Setting up request for recreation of CMR...');
+}
+
 function checkIfDataOrAddressFieldsUpdated(frmCMR) {
   console.log("checkIfDataOrAddressFieldsUpdated..............");
   var reqType = FormManager.getActualValue('reqType');
@@ -2404,13 +2413,3 @@ function checkIfUpdateChecksRequiredOnUI() {
   }
 
 }
-
-function recreateCMR(){
-  var msg = '<strong>WARNING: Use this function with caution!</strong><br><br>This will recreate a <strong>NEW CMR</strong> for this request. Please ensure that any invalid records in RDC have been marked as logically deleted and there is an actual need to create a new CMR for this request. Proceed?';
-  cmr.showConfirm('executeRecreateCMR()', msg, 'Warning', null);
-}
-
-function executeRecreateCMR() {
-  FormManager.doAction('frmCMR', 'RECREATE', true, 'Setting up request for recreation of CMR...');
-}
-
