@@ -160,7 +160,7 @@ boolean approver = user != null && user.isApprover();
 
 						<!-- LEADSPACE_END -->
 						<div style="position:fixed;right:5px;bottom:5px;">
-							<img src="${resourcesPath}/images/cedp.png" style = "width: 70px;height: 70px;">
+							<img src="${resourcesPath}/images/cedp.jpg" style = "width: 70px;height: 70px;">
 					    </div>
 						
 					</div>

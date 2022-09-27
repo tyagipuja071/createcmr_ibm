@@ -88,7 +88,7 @@ public class UserPrefCountryService extends BaseService<UserPrefCountryModel, Us
     query.setParameter("USER", model.getRequesterId());
     query.setForReadOnly(true);
 
-    List<UserPrefCountries> rs = query.getResults(50, UserPrefCountries.class);
+    List<UserPrefCountries> rs = query.getResults(UserPrefCountries.class);
     UserPrefCountryModel cntryModel = null;
     for (UserPrefCountries cntry : rs) {
       cntryModel = new UserPrefCountryModel();
