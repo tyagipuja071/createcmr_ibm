@@ -124,6 +124,8 @@ function afterConfigTW() {
 
   setVatValidator();
   handleObseleteExpiredDataForUpdate();
+  // CREATCMR-788
+  addressQuotationValidator();
 }
 
 /**
@@ -239,8 +241,6 @@ function setClientTierValuesTW() {
   isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
   } else {
     FormManager.enable('clientTier');
   }
@@ -456,7 +456,27 @@ function autoSetAbbrevNmLocnLogic() {
   FormManager.setValue('abbrevNm', _abbrevNm);
 
 }
+// CREATCMR-6825
+function setRepTeamMemberNo() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.readOnly('repTeamMemberNo');
+  }
+}
+function addressQuotationValidator() {
+  // CREATCMR-788
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer English Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer English Name Con\'t' ]);
+  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Customer Chinese Name' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Customer Chinese Name Con\'t' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Customer English Address' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Customer English Address Con\'t' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Customer Chinese Address' ]);
+  FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Customer Chinese Address Con\'t' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
 
+}
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];
@@ -490,10 +510,12 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW);
   GEOHandler.addAfterConfig(setClientTierValuesTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(setClientTierValuesTW, GEOHandler.TW);
+  // CREATCMR-6825
+  GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.TW);
   GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
   GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
-
   // skip byte checks
   // FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4',
   // 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',

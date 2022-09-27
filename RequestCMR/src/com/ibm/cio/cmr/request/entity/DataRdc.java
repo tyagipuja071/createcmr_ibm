@@ -323,6 +323,10 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   private String vatExempt;
 
   @Column(
+      name = "VAT_IND")
+  private String vatInd;
+
+  @Column(
       name = "REP_TEAM_MEMBER_NO")
   private String repTeamMemberNo;
 
@@ -342,10 +346,12 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
     this.taxExempt1 = taxExempt1;
   }
 
-  @Column(name = "TAX_EXEMPT_STATUS_2")
+  @Column(
+      name = "TAX_EXEMPT_STATUS_2")
   private String taxExempt2;
 
-  @Column(name = "TAX_EXEMPT_STATUS_3")
+  @Column(
+      name = "TAX_EXEMPT_STATUS_3")
   private String taxExempt3;
 
   public String getTaxExempt2() {
@@ -604,8 +610,21 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
       name = "LOCN_NO")
   private String locationNumber;
 
-  @Column(name = "TAX_PAYER_CUST_CD")
+  @Column(
+      name = "TAX_PAYER_CUST_CD")
   private String taxPayerCustCd;
+
+  @Column(
+      name = "MEXICO_BILLING_NAME")
+  private String mexicoBillingName;
+
+  public String getMexicoBillingName() {
+    return mexicoBillingName;
+  }
+
+  public void setMexicoBillingName(String mexicoBillingName) {
+    this.mexicoBillingName = mexicoBillingName;
+  }
 
   public String getCusInvoiceCopies() {
     return cusInvoiceCopies;
@@ -813,6 +832,14 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   public void setVat(String vat) {
     this.vat = vat;
+  }
+
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
   }
 
   public String getCovId() {

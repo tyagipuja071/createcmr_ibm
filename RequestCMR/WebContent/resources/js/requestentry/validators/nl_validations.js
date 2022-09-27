@@ -45,7 +45,9 @@ function afterConfigForNL() {
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    if (FormManager.getActualValue('custSubGrp') != 'IBMEM') {
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    }
     FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'BO Team' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('isuCd', Validators.REQUIRED);
@@ -89,7 +91,7 @@ function afterConfigForNL() {
   };
   var paygoUser = cmr.query('PAYGO.CHECK.CRN', qParams);
   var countpaygo = paygoUser.ret1;
-  if ((custSubScnrio == 'PUBCU' && role == 'Processor') || custSubScnrio == 'PRICU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS'
+  if ((custSubScnrio == 'PUBCU' && role == 'Processor') || custSubScnrio == 'PRICU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS' || custSubScnrio == 'IBMEM'
       || (custSubScnrio == 'INTER' && vatExempt && vatExemptChecked) || viewOnlyPage == 'true' || (Number(countpaygo) == 1 && role == 'Processor')) {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   } else if (reqType != 'U') {
@@ -111,6 +113,27 @@ function afterConfigForNL() {
     setBOTeamValues(clientTier);
   }
   lockDunsNo();
+  disableIBMTab();
+  
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  } 
+  
 }
 
 function lockDunsNo() {
@@ -121,6 +144,50 @@ function lockDunsNo() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (role == 'REQUESTER') {
     FormManager.readOnly('dunsNo');
+  }
+}
+
+function disableIBMTab() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntryUse = FormManager.getActualValue('countryUse');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'C' && role == 'Requester') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('enterprise');
+
+    FormManager.readOnly('bgId');
+    FormManager.readOnly('gbgId');
+    FormManager.readOnly('bgRuleId');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('geoLocationCd');
+    FormManager.readOnly('dunsNo');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.readOnly('economicCd');
+  } else if (reqType == 'C' && role == 'Processor') {
+    FormManager.enable('cmrNo');
+  }
+  if (custSubGrp.includes('IBM')) {
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('dunsNo');
+    FormManager.readOnly('cmrNo');
+  } else {
+    FormManager.enable('enterprise');
+    FormManager.enable('inacCd');
+    FormManager.enable('searchTerm');
+    if (role == 'Processor') {
+      FormManager.enable('cmrNo');
+      FormManager.enable('dunsNo');
+    }
   }
 }
 
@@ -204,10 +271,35 @@ function setVatValidatorNL() {
       FormManager.readOnly('vat');
       return;
     }
-    FormManager.resetValidations('vat');
-    if (!dojo.byId('vatExempt').checked) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    if (custSubGrp == 'IBMEM' && dojo.byId('vatExempt').checked) {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
     }
+    
+    var vatInd = FormManager.getActualValue('vatInd');
+    
+    if (vatInd && dojo.string.trim(vatInd) == 'T') {
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      FormManager.enable('vat');
+      FormManager.setValue('vatExempt', 'N');    
+      FormManager.setValue('vatInd', 'T');
+    } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.readOnly('vat');
+      FormManager.setValue('vat', '');    
+      FormManager.setValue('vatInd', 'N');
+    } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.enable('vat');
+      FormManager.setValue('vatExempt', 'Y');   
+      FormManager.setValue('vatInd', 'E');
+    } 
+    //FormManager.resetValidations('vat');
+    //if (!dojo.byId('vatExempt').checked) {
+      //checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      //FormManager.enable('vat');
+    //}
   }
 }
 
@@ -373,10 +465,10 @@ function addHandlersForNL() {
   }
   
   if (_SubSceanrioHandler == null) {
-	  _SubSceanrioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-	      setEcoCodeBasedOnSubScenario();
-	    });
-	  }
+    _SubSceanrioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+        setEcoCodeBasedOnSubScenario();
+      });
+    }
 }
 
 function setExpediteReason() {
@@ -1057,6 +1149,25 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
       };
     })(), tabName, formName);
   };
+var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  } 
+  
 }
 
 function addAddressFieldValidators() {
@@ -1626,7 +1737,8 @@ function addIGFZP02Validator() {
 }
 
 function setSORTLBasedOnIsuCtc() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U'
+    || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
@@ -1661,7 +1773,7 @@ function setSORTLBasedOnIsuCtc() {
 
 function setClientTierValuesForUpdate() {
   var reqType = FormManager.getActualValue('reqType');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     return;
   }
   var isuList = [ '15', '4A', '04', '28' ];
@@ -1677,7 +1789,7 @@ function setClientTierValuesForUpdate() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-	var reqType = FormManager.getActualValue('reqType');
+  var reqType = FormManager.getActualValue('reqType');
 
   if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
@@ -1784,29 +1896,28 @@ function setPPSCEIDRequired() {
 /*
  * CREATECMR-6379 NL - Economic Code based on Customer Sub Scenario Values
  */
-function setEcoCodeBasedOnSubScenario(){
-	var reqType = FormManager.getActualValue('reqType');
-	var custSubScnrio = FormManager.getActualValue('custSubGrp');
-	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-	    return;
-	  }
-
-	  if (FormManager.getActualValue('reqType') != 'C') {
-	    return;
-	  }else{
-		  if (custSubScnrio == ''){
-			  FormManager.setValue('economicCd', '');
-		  }else if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
-			  FormManager.setValue('economicCd', 'K49');
-		  }else if (custSubScnrio == 'PRICU') {
-	          FormManager.setValue('economicCd', 'K60');
-	        }
-		  else if (custSubScnrio == 'INTER') {
-	          FormManager.setValue('economicCd', 'K81');
-	        }else{
-	        	FormManager.setValue('economicCd', 'K11');
-	        }
-	  }
+function setEcoCodeBasedOnSubScenario() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  if (custSubScnrio == '') {
+    FormManager.setValue('economicCd', '');
+  } else if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
+    FormManager.setValue('economicCd', 'K49');
+  } else if (custSubScnrio == 'PRICU') {
+    FormManager.setValue('economicCd', 'K60');
+  } else if (custSubScnrio == 'INTER') {
+    FormManager.setValue('economicCd', 'K81');
+  } else if (custSubScnrio == 'IBMEM') {
+    FormManager.setValue('economicCd', 'K71');
+  } else {
+    FormManager.setValue('economicCd', 'K11');
+  }
 }
 
 dojo.addOnLoad(function() {

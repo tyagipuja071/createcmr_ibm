@@ -107,7 +107,7 @@
 					<length>16</length>
 				</column>
 				<column>
-					<label>Preferred Language</label>
+					<label>Preferred Language(FI)</label>
 					<dbColumn>SVC_AR_OFFICE</dbColumn>
 					<width>20</width>
 					<length>1</length>

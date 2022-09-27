@@ -8,6 +8,7 @@
  * 
  */
 var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
+var NORDX = [ '846', '806', '702', '678' ];
 var comp_proof_INAUSG = false;
 var flag = false;
 dojo.require("dojo.io.iframe");
@@ -32,6 +33,25 @@ function switchTabs(showId, noCheck) {
 
   if (typeof (openTabDetails) != 'undefined') {
     openTabDetails(showId);
+  }
+  
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
   }
 
   // show the address tab for some cases
@@ -132,10 +152,17 @@ function processRequestAction() {
   } else if (action == YourActions.Send_for_Processing) {
     var findDnbResult = FormManager.getActualValue('findDnbResult');
     var reqType = FormManager.getActualValue('reqType');
+    var vatInd = FormManager.getActualValue('vatInd');
+    var custGrp = FormManager.getActualValue('custGrp');
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
+    }
+    if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
+      cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
-      if (checkForConfirmationAttachments()) {
+      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry'))) && (vatInd == 'N') && (custGrp != 'CROSS')) {
+        findVatInd();
+      } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
       } else if (cmrCntry == SysLoc.INDIA) {
         // Cmr-2340- For India Dnb import
@@ -225,7 +252,9 @@ function processRequestAction() {
         // if there are no errors, show the Address Verification modal window
         cmr.showModal('addressVerificationModal');
       }
-    } else {
+    }
+
+    else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
 
@@ -791,12 +820,46 @@ var _templateHandler = null;
 var defaultLandCntry = null;
 var _rejSupplInfoHandler = null;
 var _dnbSearchHandler = null;
+var _vatIndHandler = null;
 
 /**
  * Executed after PageManager loads all the scripts. Place here code that needs
  * to be executed to override the PageManager configurable fields' settings
  */
 function afterConfigChange() {
+
+  // VAT indicator
+  var vatInd = FormManager.getActualValue('vatInd');
+
+  // onchange
+  if (_vatIndHandler == null) {
+    _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(vatInd) {
+      if (vatInd && dojo.string.trim(vatInd) == 'T') {
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'N');
+        // FormManager.setValue('taxCd2', 'N');
+        FormManager.setValue('vatInd', 'T');
+      } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.readOnly('vat');
+        FormManager.setValue('vat', '');
+        // FormManager.setValue('taxCd2', 'N');
+        FormManager.setValue('vatInd', 'N');
+      } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'Y');
+        // FormManager.setValue('taxCd2', 'Y');
+        FormManager.setValue('vatInd', 'E');
+      }
+    });
+
+  }
+  if (_vatIndHandler && _vatIndHandler[0]) {
+    _vatIndHandler[0].onChange();
+  }
+
   // add special INAC value validator
   // if INAC Type = I, the code should be a number
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -977,7 +1040,24 @@ function afterConfigChange() {
   }
   // check if dnbManadatory
   handleRequiredDnBSearch();
-
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  }
+  
   FormManager.ready();
 }
 
@@ -1145,8 +1225,8 @@ function connectToCmrServices() {
         dojo.byId('geoLocDescCont').innerHTML = data.glcDesc != null ? data.glcDesc : '(no description available)';
       }
       if (data.dunsError) {
-        //errorMsg += (showError ? ', ' : '') + 'DUNS No.';
-        //showError = true;
+        // errorMsg += (showError ? ', ' : '') + 'DUNS No.';
+        // showError = true;
       } else {
         // var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
         // var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA,
@@ -1182,7 +1262,7 @@ function connectToCmrServices() {
     FormManager.setValue('covId', '');
     FormManager.setValue('bgId', '');
     FormManager.setValue('geoLocationCd', '');
-    //FormManager.setValue('dunsNo', '');
+    // FormManager.setValue('dunsNo', '');
   }
   FormManager.setValue('covBgRetrievedInd', 'Y');
 }
@@ -1438,11 +1518,22 @@ function overrideDnBMatch() {
   var cntry = FormManager.getActualValue('landCntry');
   var loc = FormManager.getActualValue('cmrIssuingCntry');
   if (cntry == 'CN' || loc == '641') {
-    cmr
-        .showConfirm(
-            'doOverrideDnBMatch()',
-            'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
-            'Warning', null, null);
+    var reqType = FormManager.getActualValue('reqType');
+    var custSubGroup = FormManager.getActualValue('custSubGrp');
+
+    if (loc == '641' && (custSubGroup == 'CROSS' && reqType == 'C' || reqType == 'U' && cntry != 'CN')) {
+      cmr
+          .showConfirm(
+              'doOverrideDnBMatch()',
+              'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+              'Warning', null, null);
+    } else {
+      cmr
+          .showConfirm(
+              'doOverrideDnBMatch()',
+              'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+              'Warning', null, null);
+    }
   } else {
     cmr
         .showConfirm(
@@ -1658,6 +1749,14 @@ function checkIfFinalDnBCheckRequired() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+  if (cmrCntry == '834') {
+    var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+      ID : reqId
+    });
+    if (ret && ret.ret1 && ret.ret1 != '') {
+      return false;
+    }
+  }
   if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
       && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US
@@ -1781,6 +1880,9 @@ function matchDnBForAutomationCountries() {
                     .showAlert('This action will override the D&B Matching Process. By overriding the D&B matching, you\'re obliged to provide either one of the following documentation '
                         + 'as backup-client\'s official website, business registration proof, government issued documents, client\'s confirmation email and signed PO, attach it under the file content of Company Proof. '
                         + 'Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.');
+                FormManager.setValue('matchOverrideIndc', 'Y');
+              } else if (data.cnCrossFlag) {
+                cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');
                 FormManager.setValue('matchOverrideIndc', 'Y');
               } else {
                 cmr.showModal('addressVerificationModal');
@@ -1927,7 +2029,7 @@ function matchDnbForAUSG() {
               } else {
                 cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
               }
-            } else if (data.match && !data.isicMatch) {
+            } else if (data.match && !data.isicMatch && !(reqType == 'U' && cntry == SysLoc.AUSTRALIA)) {
               comp_proof_INAUSG = false;
               console.log("ISIC validation failed by Dnb.");
               cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");
@@ -2037,7 +2139,7 @@ function matchCustNmAUUpdate() {
       if (dataAPI.formerCustNmMatch) {
         comp_proof_INAUSG = true;
         checkDnBMatchingAttachmentValidator();
-        if (FormManager.validate('frmCMR')) {         
+        if (FormManager.validate('frmCMR')) {
           matchDnbForAUUpdate();
           return;
         } else {
@@ -2051,7 +2153,7 @@ function matchCustNmAUUpdate() {
       }
     } else if (dataAPI.success && dataAPI.formerCustNmMatch && !dataAPI.custNmMatch) {
       comp_proof_INAUSG = false;
-      console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");   
+      console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");
       cmr.showAlert("Please attach company proof as Name validation failed by API.");
     } else {
       cmr.showProgress('Customer Name match with API failed . Now Checking Customer Name with Dnb...');
@@ -2078,7 +2180,7 @@ function matchCustNmAUUpdate() {
             if (data.custNmMatch && data.formerCustNmMatch) {
               comp_proof_INAUSG = true;
               checkDnBMatchingAttachmentValidator();
-              if (FormManager.validate('frmCMR')) {             
+              if (FormManager.validate('frmCMR')) {
                 matchDnbForAUUpdate();
                 return;
               } else {
@@ -2336,8 +2438,7 @@ function autoSaveRequest() {
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }
 
-
-function recreateCMR(){
+function recreateCMR() {
   var msg = '<strong>WARNING: Use this function with caution!</strong><br><br>This will recreate a <strong>NEW CMR</strong> for this request. Please ensure that any invalid records in RDC have been marked as logically deleted and there is an actual need to create a new CMR for this request. Proceed?';
   cmr.showConfirm('executeRecreateCMR()', msg, 'Warning', null);
 }
@@ -2346,3 +2447,68 @@ function executeRecreateCMR() {
   FormManager.doAction('frmCMR', 'RECREATE', true, 'Setting up request for recreation of CMR...');
 }
 
+function checkIfDataOrAddressFieldsUpdated(frmCMR) {
+  console.log("checkIfDataOrAddressFieldsUpdated..............");
+  var reqType = FormManager.getActualValue('reqType');
+  var isNoDataUpdated = false;
+  if (checkIfUpdateChecksRequiredOnUI()) {
+    console.log('Running Update Checks Element...');
+    cmr.showProgress('Validating requested updates...');
+    var formData = dojo.formToObject(frmCMR);
+    formData.capInd = FormManager.getActualValue('capInd');
+    dojo.xhrPost({
+      url : cmr.CONTEXT_ROOT + '/auto/element/updateCheck.json',
+      handleAs : 'json',
+      method : 'POST',
+      content : formData,
+      timeout : 500000,
+      sync : true,
+      load : function(data, ioargs) {
+        cmr.hideProgress();
+        if (data != '' && data != undefined) {
+          if ((data.rejectionMsg != null && data.rejectionMsg.includes('No data/address changes made on request.'))
+              || (data.negativeChksMsg != null && data.negativeChksMsg.includes('No data/address changes made on request.'))) {
+            console.log('UpdateChecks Element Executed Successfully.');
+            isNoDataUpdated = true;
+          }
+        }
+      },
+      error : function(error, ioargs) {
+        success = false;
+        console.log('An error occurred while running UpdateSwitchElement. Please contact your system administrator');
+        reject('Error occurred in Update Checks.');
+      }
+    });
+  }
+  return isNoDataUpdated;
+}
+
+function checkIfUpdateChecksRequiredOnUI() {
+  console.log('checkIfUpdateChecksRequiredOnUI..');
+  var CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI = [ '897', '724', '618', '848', '631', '866', '754', '649', '641', '624', '788', '678', '702', '806', '846', '706', '744', '838', '616', '834' ];
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  // var requesterId = FormManager.getActualValue('requesterId');
+
+  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA') {
+    /*
+     * var result = cmr.query('IS_AUTOMATED_PROCESSING', { CNTRY : cntry });
+     * 
+     * var isCmde = cmr.query('CHECK_CMDE', { CNTRY : cntry, REQUESTER_ID :
+     * requesterId });
+     * 
+     * if (result && (result.ret1 == 'P' || result.ret1 == 'R' || result.ret1 ==
+     * 'B')) {
+     */
+    if (CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI.includes(cntry)) {
+      console.log("checkIfUpdateChecksRequiredOnUI.. update checks are required");
+      return true;
+    } else {
+      console.log("checkIfUpdateChecksRequiredOnUI.. update checks are not required");
+      return false;
+    }
+  }
+
+}

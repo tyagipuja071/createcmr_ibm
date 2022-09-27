@@ -372,6 +372,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       // query.append(" and LAND1 = :LAND1 ");
       // query.setParameter("LAND1", params.getParam("landCntry"));
     }
+
     if ("County".equalsIgnoreCase(fieldId)) {
       // support only US for now
       // query.append(" and 'US' = :LAND1 ");
@@ -388,6 +389,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       query.setParameter("LAND1", params.getParam("landCntry"));
       query.setParameter("N_ST", params.getParam("stateProv"));
     }
+
     if ("Subindustry".equalsIgnoreCase(fieldId)) {
       String geo = "WW";
       if (SystemLocation.UNITED_STATES.equals(cntry)) {

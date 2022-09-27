@@ -81,6 +81,16 @@ public class UKIUtil extends AutomationUtil {
     custNm1 = zi01.getCustNm1();
     custNm2 = !StringUtils.isBlank(zi01.getCustNm2()) ? " " + zi01.getCustNm2() : "";
     String customerNameZI01 = custNm1 + custNm2;
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if(zs01 != null){
+    	String landCntry = zs01.getLandCntry();
+    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
+                && ("CROSS".equals(custGrp))){
+        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+        }
+    }
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
@@ -88,15 +98,24 @@ public class UKIUtil extends AutomationUtil {
     }
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
     LOG.debug("Scenario to check: " + scenario);
-   if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario))
+    if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario))
         && (!customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
-      details.append("This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities." + " \n" + 
-      "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."  + " \n" + 
-    		  "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.").append("\n");
-      engineData.addRejectionComment("OTH", "This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities." + " \n" + 
-      "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."  + " \n" + 
-    		  "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.", "", "");
-       return false;
+      details
+          .append(
+              "This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities."
+                  + " \n"
+                  + "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."
+                  + " \n"
+                  + "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.")
+          .append("\n");
+      engineData.addRejectionComment("OTH",
+          "This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities."
+              + " \n"
+              + "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."
+              + " \n"
+              + "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.",
+          "", "");
+      return false;
     } else if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_CROSSBORDER.equals(scenario)
         || SCENARIO_CROSS_GOVERNMENT.equals(scenario)) && !addressEquals(zs01, zi01)) {
       details.append("Billing and Installing addresses are not same. Request will require CMDE review before proceeding.").append("\n");
@@ -233,8 +252,13 @@ public class UKIUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "VAT #":
-        // noop, for switch handling only
-        break;
+    	  if(requestData.getAddress("ZS01").getLandCntry().equals("GB") && !data.getCmrIssuingCntry().equals("866")){
+    		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
+                  engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+                  details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+                  }
+    		  }
+    	  break;
       case "INAC/NAC Code":
       case "ISU Code":
       case "Client Tier":
@@ -332,42 +356,53 @@ public class UKIUtil extends AutomationUtil {
           boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(addrType) && "PG".equals(data.getOrdBlk()));
           if ("N".equals(addr.getImportInd())) {
             // new address
-
-            if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)
-                || CmrConstants.RDC_PAYGO_BILLING.equals(addrType)) {
-              if (addressExists(entityManager, addr, requestData)) {
-                LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
-                resultCodes.add("R");
-              } else {
-                LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
-              }
+            // CREATCMR-6586 checking duplicate for all addresses
+            /*
+             * if (CmrConstants.RDC_SHIP_TO.equals(addrType) ||
+             * CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType) ||
+             * CmrConstants.RDC_PAYGO_BILLING.equals(addrType)) {
+             */
+            if (addressExists(entityManager, addr, requestData)) {
+              LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
+              resultCodes.add("R");
+            } else {
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") validated.\n");
             }
-            if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
-              String installAtName = getCustomerFullName(addr);
-              String billToName = "";
-              Addr zs01 = requestData.getAddress("ZS01");
-              if (zs01 != null) {
-                billToName = getCustomerFullName(zs01);
-              }
-              if (installAtName.equals(billToName)) {
-
-                if (addressExists(entityManager, addr, requestData)) {
-
-                  LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
-                  resultCodes.add("R");
-                } else {
-                  LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                  checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") validated.\n");
-                }
-              } else {
-                LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
-                checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") has different customer name than sold-to.\n");
-                resultCodes.add("D");
-              }
-            }
+            /*
+             * else { LOG.debug("Addition of " + addrType + "(" +
+             * addr.getId().getAddrSeq() + ")");
+             * checkDetails.append("Addition of new address (" +
+             * addr.getId().getAddrSeq() +
+             * ") address skipped in the checks.\n"); } }
+             */
+            // CREATCMR-6586 Already checking duplicate address with sold to as
+            // well
+            /*
+             * if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) { String
+             * installAtName = getCustomerFullName(addr); String billToName =
+             * ""; Addr zs01 = requestData.getAddress("ZS01"); if (zs01 != null)
+             * { billToName = getCustomerFullName(zs01); } if
+             * (installAtName.equals(billToName)) {
+             * 
+             * if (addressExists(entityManager, addr, requestData)) {
+             * 
+             * LOG.debug(" - Duplicates found for " + addrType + "(" +
+             * addr.getId().getAddrSeq() + ")"); checkDetails.append("Address "
+             * + addrType + "(" + addr.getId().getAddrSeq() +
+             * ") provided matches an existing address.\n");
+             * resultCodes.add("R"); } else { LOG.debug("Addition of " +
+             * addrType + "(" + addr.getId().getAddrSeq() + ")");
+             * checkDetails.append("Addition of new address (" +
+             * addr.getId().getAddrSeq() + ") validated.\n"); } } else {
+             * LOG.debug("New address " + addrType + "(" +
+             * addr.getId().getAddrSeq() + ") needs to be verified");
+             * checkDetails.append("New address " + addrType + "(" +
+             * addr.getId().getAddrSeq() +
+             * ") has different customer name than sold-to.\n");
+             * resultCodes.add("D"); } }
+             */
           } else if ("Y".equals(addr.getChangedIndc())) {
             // update address
             if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
@@ -452,71 +487,55 @@ public class UKIUtil extends AutomationUtil {
     output.setProcessOutput(validation);
     return true;
   }
-
-  @Override
-  public boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
-    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
-    String sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
-    query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
-    query.setParameter("NAME1", addrToCheck.getCustNm1());
-    query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
-    query.setParameter("CITY", addrToCheck.getCity1());
-    query.setParameter("ADDR_TYPE", addrToCheck.getId().getAddrType());
-    if (addrToCheck.getAddrTxt() != null) {
-      query.append(" and lower(ADDR_TXT) like lower(:ADDR_TXT)");
-      query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt());
-    }
-    if (addrToCheck.getCustNm2() != null) {
-      query.append(" and lower(CUST_NM2) like lower(:NAME2)");
-      query.setParameter("NAME2", addrToCheck.getCustNm2());
-    }
-    if (addrToCheck.getDept() != null) {
-      query.append(" and lower(DEPT) like lower(:DEPT)");
-      query.setParameter("DEPT", addrToCheck.getDept());
-    }
-    if (addrToCheck.getFloor() != null) {
-      query.append(" and lower(FLOOR) like lower(:FLOOR)");
-      query.setParameter("FLOOR", addrToCheck.getFloor());
-    }
-    if (addrToCheck.getBldg() != null) {
-      query.append(" and lower(BLDG) like lower(:BLDG)");
-      query.setParameter("BLDG", addrToCheck.getBldg());
-    }
-    if (addrToCheck.getOffice() != null) {
-      query.append(" and lower(OFFICE) like lower(:OFFICE)");
-      query.setParameter("OFFICE", addrToCheck.getOffice());
-    }
-    if (addrToCheck.getStateProv() != null) {
-      query.append(" and lower(STATE_PROV) like lower(:STATE)");
-      query.setParameter("STATE", addrToCheck.getStateProv());
-    }
-    if (addrToCheck.getPoBox() != null) {
-      query.append(" and PO_BOX = :PO_BOX");
-      query.setParameter("PO_BOX", addrToCheck.getPoBox());
-    }
-    if (addrToCheck.getPostCd() != null) {
-      query.append(" and POST_CD= :POST_CD");
-      query.setParameter("POST_CD", addrToCheck.getPostCd());
-    }
-    if (addrToCheck.getCustPhone() != null) {
-      query.append(" and CUST_PHONE = :PHONE");
-      query.setParameter("PHONE", addrToCheck.getCustPhone());
-    }
-    if (addrToCheck.getCounty() != null) {
-      query.append(" and COUNTY= :COUNTY");
-      query.setParameter("COUNTY", addrToCheck.getCounty());
-    }
-
-    if (payGoAddredited) {
-      if (addrToCheck.getExtWalletId() != null) {
-        query.append(" and EXT_WALLET_ID = :EXT_WALLET_ID");
-        query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId());
-      }
-    }
-    return query.exists();
-  }
+  // exact same implementation available in AutomationUTIL hence removing
+  /*
+   * @Override public boolean addressExists(EntityManager entityManager, Addr
+   * addrToCheck, RequestData requestData) { boolean payGoAddredited =
+   * RequestUtils.isPayGoAccredited(entityManager,
+   * requestData.getAdmin().getSourceSystId()); String sql =
+   * ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST"); PreparedQuery
+   * query = new PreparedQuery(entityManager, sql); query.setParameter("REQ_ID",
+   * addrToCheck.getId().getReqId()); query.setParameter("ADDR_SEQ",
+   * addrToCheck.getId().getAddrSeq()); query.setParameter("NAME1",
+   * addrToCheck.getCustNm1()); query.setParameter("LAND_CNTRY",
+   * addrToCheck.getLandCntry()); query.setParameter("CITY",
+   * addrToCheck.getCity1()); query.setParameter("ADDR_TYPE",
+   * addrToCheck.getId().getAddrType()); if (addrToCheck.getAddrTxt() != null) {
+   * query.append(" and lower(ADDR_TXT) like lower(:ADDR_TXT)");
+   * query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt()); } if
+   * (addrToCheck.getCustNm2() != null) {
+   * query.append(" and lower(CUST_NM2) like lower(:NAME2)");
+   * query.setParameter("NAME2", addrToCheck.getCustNm2()); } if
+   * (addrToCheck.getDept() != null) {
+   * query.append(" and lower(DEPT) like lower(:DEPT)");
+   * query.setParameter("DEPT", addrToCheck.getDept()); } if
+   * (addrToCheck.getFloor() != null) {
+   * query.append(" and lower(FLOOR) like lower(:FLOOR)");
+   * query.setParameter("FLOOR", addrToCheck.getFloor()); } if
+   * (addrToCheck.getBldg() != null) {
+   * query.append(" and lower(BLDG) like lower(:BLDG)");
+   * query.setParameter("BLDG", addrToCheck.getBldg()); } if
+   * (addrToCheck.getOffice() != null) {
+   * query.append(" and lower(OFFICE) like lower(:OFFICE)");
+   * query.setParameter("OFFICE", addrToCheck.getOffice()); } if
+   * (addrToCheck.getStateProv() != null) {
+   * query.append(" and lower(STATE_PROV) like lower(:STATE)");
+   * query.setParameter("STATE", addrToCheck.getStateProv()); } if
+   * (addrToCheck.getPoBox() != null) { query.append(" and PO_BOX = :PO_BOX");
+   * query.setParameter("PO_BOX", addrToCheck.getPoBox()); } if
+   * (addrToCheck.getPostCd() != null) { query.append(" and POST_CD= :POST_CD");
+   * query.setParameter("POST_CD", addrToCheck.getPostCd()); } if
+   * (addrToCheck.getCustPhone() != null) {
+   * query.append(" and CUST_PHONE = :PHONE"); query.setParameter("PHONE",
+   * addrToCheck.getCustPhone()); } if (addrToCheck.getCounty() != null) {
+   * query.append(" and COUNTY= :COUNTY"); query.setParameter("COUNTY",
+   * addrToCheck.getCounty()); }
+   * 
+   * if (payGoAddredited) { if (addrToCheck.getExtWalletId() != null) {
+   * query.append(" and EXT_WALLET_ID = :EXT_WALLET_ID");
+   * query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId()); } }
+   * return query.exists(); }
+   */
 
   /**
    * Checks if relevant fields were updated
@@ -668,6 +687,9 @@ public class UKIUtil extends AutomationUtil {
       List<DuplicateCMRCheckResponse> matches = response.getMatches();
       List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
       for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
         if (StringUtils.isNotBlank(match.getCustClass())) {
           String custClass = match.getCustClass();
           if (Arrays.asList(custClassValuesToCheck).contains(custClass)) {
@@ -698,16 +720,24 @@ public class UKIUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
 
-    if ((!isCoverageCalculated || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario))
-        && (engineData.get("ZI01_DNB_MATCH") == null || CalculateCoverageElement.COV_VAT.equals(covFrom))))
-        && !SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
-      details.setLength(0);
-      overrides.clearOverrides();
+    if (!SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
+      if (!isCoverageCalculated) {
+        details.setLength(0);
+        overrides.clearOverrides();
+      }
       UkiFieldsContainer fields = null;
       if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
-        fields = calculate32SValuesForUK(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), requestData);
+        if (isCoverageCalculated) {
+          fields = getSBOSalesRepForUK(entityManager, data.getIsuCd(), data.getClientTier(), null, requestData);
+        } else {
+          fields = getSBOSalesRepForUK(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), requestData);
+        }
       } else if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
-        fields = calculate32SValuesForIE(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), data.getCmrIssuingCntry());
+        if (isCoverageCalculated) {
+          fields = getSBOSalesRepForUK(entityManager, data.getIsuCd(), data.getClientTier(), null, requestData);
+        } else {
+          fields = getSBOSalesRepForIE(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), data.getCmrIssuingCntry());
+        }
       }
       if (fields != null) {
         details.append("Coverage calculated successfully using 34Q logic.").append("\n");
@@ -735,12 +765,18 @@ public class UKIUtil extends AutomationUtil {
 
   }
 
-  private UkiFieldsContainer calculate32SValuesForUK(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
+  private UkiFieldsContainer getSBOSalesRepForUK(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
       RequestData requestData) {
 
-    Addr zi01 = requestData.getAddress("ZI01");
+    String scenario = requestData.getData().getCustSubGrp();
+    Addr addr;
+    if ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario))) {
+      addr = requestData.getAddress("ZI01");
+    } else {
+      addr = requestData.getAddress("ZS01");
+    }
 
-    String PostCd = zi01.getPostCd();
+    String PostCd = addr.getPostCd();
 
     if (PostCd != null && PostCd.length() > 2) {
       PostCd = PostCd.substring(0, 2);
@@ -778,7 +814,8 @@ public class UKIUtil extends AutomationUtil {
       String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
       String repTeamCd = "";
       String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
-    //2P0 in repTeamCd refers to 2.0 for distinguishing and fetching the values according to CREATCMR-4530 logic.
+      // 2P0 in repTeamCd refers to 2.0 for distinguishing and fetching the
+      // values according to CREATCMR-4530 logic.
       repTeamCd = isuCtc + "2P0";
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("ISU_CD", "%" + isuCd + "%");
@@ -798,8 +835,7 @@ public class UKIUtil extends AutomationUtil {
 
   }
 
-  private UkiFieldsContainer calculate32SValuesForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
-      String issuingCntry) {
+  private UkiFieldsContainer getSBOSalesRepForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd, String issuingCntry) {
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
     if (isuCtc.equals("34Y") || isuCtc.equals("5K")) {
       UkiFieldsContainer container = new UkiFieldsContainer();

@@ -344,10 +344,12 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     for (CompoundEntity entity : resultsMain) {
       mass_create = entity.getEntity(MassCreate.class);
       massCrtData = entity.getEntity(MassCreateData.class);
-      //if (USCMRNumGen.cmrNumMapMassCrt == null || USCMRNumGen.cmrNumMapMassCrt.isEmpty()) {
-	   //   LOG.info("there is no CMR number stored for Mass Create in cache, so init...");
-	   //   USCMRNumGen.initMassCrt(em);
-	   // }
+      // if (USCMRNumGen.cmrNumMapMassCrt == null ||
+      // USCMRNumGen.cmrNumMapMassCrt.isEmpty()) {
+      // LOG.info("there is no CMR number stored for Mass Create in cache, so
+      // init...");
+      // USCMRNumGen.initMassCrt(em);
+      // }
 
       String issuingCntrySql = "BATCH.GET_DATA";
       PreparedQuery dataQuery = new PreparedQuery(em, ExternalizedQuery.getSql(issuingCntrySql));
@@ -378,6 +380,12 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
           String cmrNum = USCMRNumGen.genCMRNumMassCrt(em, cmrType);
           massCrtData.setCmrNo(cmrNum);
           mass_create.setCmrNo(cmrNum);
+          // CREATCMR-6987
+          if ("KYN".equalsIgnoreCase(massCrtData.getCustSubGrp())
+              || ("BYMODEL".equalsIgnoreCase(massCrtData.getCustSubGrp()) && "KYN".equalsIgnoreCase(massCrtData.getRestrictTo()))) {
+            massCrtData.setCustNm1("KYNDRYL INC");
+            massCrtData.setCustNm2("");
+          }
           updateEntity(mass_create, em);
           updateEntity(massCrtData, em);
           partialCommit(em);

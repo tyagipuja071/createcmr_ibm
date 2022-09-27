@@ -230,6 +230,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
       GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrCountry);
       UpdatedDataModel update = null;
       List<DataRdc> records = query.getResults(DataRdc.class);
+
+      transformCheckbox(newData);
       if (records != null && records.size() > 0) {
         for (DataRdc oldData : records) {
           if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getAbbrevNm(), newData.getAbbrevNm())
@@ -256,7 +258,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update.setOldData(getCodeAndDescription(oldData.getBpRelType(), "BPRelationType", cmrCountry));
             results.add(update);
           }
-          if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getCapInd(), newData.getCapInd())
+          if (TYPE_CUSTOMER.equals(type) && (StringUtils.isNotBlank(newData.getCapInd()) && !equals(oldData.getCapInd(), newData.getCapInd()))
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CAP"))) {
             update = new UpdatedDataModel();
             update.setDataField(PageManager.getLabel(cmrCountry, "CAP", "-"));
@@ -429,6 +431,14 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setDataField(PageManager.getLabel(cmrCountry, "VAT", "-"));
               update.setNewData(newData.getVat());
               update.setOldData(oldData.getVat());
+              results.add(update);
+            }
+            if (TYPE_CUSTOMER.equals(type) && (StringUtils.isNoneBlank(oldData.getVatInd()) && !equals(oldData.getVatInd(), newData.getVatInd()))
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "VATInd"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "VATInd", "-"));
+              update.setNewData(newData.getVatInd());
+              update.setOldData(oldData.getVatInd());
               results.add(update);
             }
             if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxPayerCustCd(), newData.getTaxPayerCustCd())
@@ -1115,6 +1125,18 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update.setOldData(addr.getVatOld());
           results.add(update);
         }
+        // vatInd
+        if (!equals(addr.getVatInd(), addr.getVatIndOld())) {
+          update = new UpdatedNameAddrModel();
+          update.setAddrTypeCode(addrType);
+          update.setAddrSeq(seqNo);
+          update.setAddrType(DropdownListController.getDescription("AddressType", addrType, cmrCountry));
+          update.setSapNumber(sapNumber);
+          update.setDataField(PageManager.getLabel(cmrCountry, "VATInd", "-"));
+          update.setNewData(addr.getVatInd());
+          update.setOldData(addr.getVatIndOld());
+          results.add(update);
+        }
 
         // ExtWalletId
         if (!equals(addr.getExtWalletId(), addr.getExtWalletIdOld())) {
@@ -1757,6 +1779,28 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
         massData.setDplChkTS(String.valueOf(massUpdtAddr.getDplChkTimestamp()));
         results.add(massData);
+      }
+    }
+  }
+
+  private void transformCheckbox(Data data) throws Exception {
+
+    String cmrCountry = data.getCmrIssuingCntry();
+
+    if (SystemLocation.UNITED_STATES.equals(cmrCountry)) {
+      if (!StringUtils.isEmpty(data.getRestrictTo())) {
+        data.setRestrictInd(CmrConstants.YES_NO.Y.toString());
+      } else {
+        data.setRestrictInd(CmrConstants.YES_NO.N.toString());
+      }
+      if (!CmrConstants.YES_NO.Y.toString().equals(data.getFedSiteInd())) {
+        data.setFedSiteInd(CmrConstants.YES_NO.N.toString());
+      }
+      if (!CmrConstants.YES_NO.Y.toString().equals(data.getOemInd())) {
+        data.setOemInd(CmrConstants.YES_NO.N.toString());
+      }
+      if (!CmrConstants.YES_NO.Y.toString().equals(data.getOutCityLimit())) {
+        data.setOutCityLimit(CmrConstants.YES_NO.N.toString());
       }
     }
   }

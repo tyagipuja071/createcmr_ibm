@@ -40,6 +40,8 @@ function addAfterConfigGR() {
 
   FormManager.readOnly('salesTeamCd');
   FormManager.readOnly('subIndustryCd');
+  // CREATCMR-788
+  addressQuotationValidatorGR();
 }
 
 function addISUHandler() {
@@ -220,6 +222,10 @@ function addVATDisabler() {
     var role = FormManager.getActualValue('userRole').toUpperCase();
     var req = FormManager.getActualValue('reqType').toUpperCase();
     var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+    
+    if (req == 'C') {
+      return;
+    }
 
     FormManager.enable('vat');
 
@@ -884,6 +890,9 @@ function setClientTierForCreates(isuCd) {
     FormManager.readOnly('clientTier');
   } else if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'XBP' || custSubGrp == 'XINTR') {
     FormManager.readOnly('clientTier');
+  } else if (custSubGrp == 'IBMEM') {
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
   } else {
     FormManager.enable('clientTier');
   }
@@ -957,8 +966,15 @@ function setVatValidatorGRCYTR() {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
+    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+      FormManager.readOnly('vat');
+    }
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+    }
     if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
     }
   }
 }
@@ -2295,6 +2311,18 @@ function addPpsCeidValidator() {
     }
   }
 }
+function addressQuotationValidatorGR() {
+  // CREATCMR-788
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address Con\'t/Occupation' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Att. Person' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
@@ -2344,7 +2372,7 @@ dojo.addOnLoad(function() {
 
   // common greece/cyprus/turkey
   GEOHandler.addAfterConfig(viewOnlyAddressDetails, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setVatValidatorGRCYTR, [ SysLoc.GREECE, SysLoc.TURKEY, ]);
+  GEOHandler.addAfterTemplateLoad(setVatValidatorGRCYTR, [ SysLoc.GREECE, SysLoc.TURKEY, ]);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);

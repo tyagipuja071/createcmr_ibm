@@ -325,7 +325,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         score.setFindCmrResult(CmrConstants.Scorecard_Not_Done);
         score.setFindDnbResult(CmrConstants.Scorecard_Not_Done);
       }
-
+      // if (StringUtils.isNotEmpty(data.getVatInd()) &&
+      // "N".equals(data.getVatInd()))
+      // score.setVatAcknowledge(CmrConstants.Scorecard_YES);
+      // else
+      // score.setVatAcknowledge(CmrConstants.Scorecard_NA);
       createEntity(score, entityManager);
 
       if (geoHandler != null && geoHandler.hasChecklist(model.getCmrIssuingCntry())) {
@@ -608,6 +612,18 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     updateEntity(data, entityManager);
 
+    // Scorecard vat acknowledge initialize, if the data.vatInd=N,
+    // then set scorecard.vatAcknowledge=Yes
+    if (CmrConstants.Send_for_Processing().equals(model.getAction())
+        && CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())) {
+
+      Scorecard scorecard = entity.getEntity(Scorecard.class);
+      if ("N".equals(data.getVatInd())) {
+        scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+      } else
+        scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
+
+    }
     // CREATCMR-3144 - CN 2.0 special
     if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
       CNHandler.doBeforeSendForProcessing(entityManager, admin, data, model);
@@ -1487,6 +1503,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         DnBMatchingResponse tradeStyleName = null;
         boolean isicMatch = false;
         boolean confidenceCd = false;
+        boolean cnCrossFlag = false;
         boolean checkTradestyleNames = ("R".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry()))
             || "O".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry())));
         MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, addrType);
@@ -1505,8 +1522,14 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
                 isicMatch = dnbCompny.getIbmIsic().equals(model.getIsicCd());
               }
               log.debug("ISIC Match : " + isicMatch);
+              if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
+                  && ("ZS01".equals(addr.getId().getAddrType()) && "U".equals(admin.getReqType()) && StringUtils.isBlank(data.getCustSubGrp())
+                      && !"CN".equalsIgnoreCase(addr.getLandCntry()) || "C".equals(admin.getReqType()) && "CROSS".equals(data.getCustSubGrp()))) {
+                cnCrossFlag = true;
+              }
               if (record.getConfidenceCode() >= 8 && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
-                  && (StringUtils.isBlank(data.getCustSubGrp()) || !data.getCustSubGrp().equals("CROSS"))) {
+                  && ("U".equals(admin.getReqType()) && StringUtils.isBlank(data.getCustSubGrp()) && "CN".equalsIgnoreCase(addr.getLandCntry())
+                      || "C".equals(admin.getReqType()) && !"CROSS".equals(data.getCustSubGrp()))) {
                 match = true;
                 break;
               }
@@ -1527,6 +1550,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           map.put("match", match);
           map.put("isicMatch", isicMatch);
           map.put("confidenceCd", confidenceCd);
+          map.put("cnCrossFlag", cnCrossFlag);
           if (!match && tradeStyleName != null) {
             map.put("tradeStyleMatch", true);
             map.put("legalName", tradeStyleName.getDnbName());
@@ -1535,6 +1559,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         } else {
           map.put("success", false);
           map.put("match", false);
+          map.put("cnCrossFlag", false);
           String message = "An error occurred while matching with DnB.";
           if (response != null) {
             message = response.getMessage();
@@ -1827,7 +1852,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
           cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic())
-              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
+              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim())
+              : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");

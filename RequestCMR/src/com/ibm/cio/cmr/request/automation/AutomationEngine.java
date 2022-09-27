@@ -414,15 +414,15 @@ public class AutomationEngine {
 
         if ("U".equals(admin.getReqType())) {
           if ("PG".equals(data.getOrdBlk())) {
-            admin.setPaygoProcessIndc("Y");
+            // admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited) {
-            admin.setPaygoProcessIndc("Y");
+            // admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           }
         }
 
-        if (moveForPayGo) {
+        if ("C".equals(admin.getReqType()) && moveForPayGo) {
           createComment(entityManager, "Pay-Go accredited partner. Request passed all other checks, moving to processing.", reqId, appUser);
           admin.setPaygoProcessIndc("Y");
           // data.setIsicCd("8888");

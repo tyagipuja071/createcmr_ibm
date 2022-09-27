@@ -125,6 +125,7 @@ function getDescription(fieldId) {
   return field.displayedValue;
 }
 
+var _taxCd1Handler = null;
 var _mrcCdHandler = null;
 var _custNameHandler = null;
 var _salesBranchOffHandler = null;
@@ -278,6 +279,9 @@ function autoSetDataCrosTypSubTypeSSAMX() {
 
 // Story :1278109- By Mukesh Kumar
 function autoSetSBOAndSalesTMNo() {
+  if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
+    return;
+  }
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var _custType = FormManager.getActualValue('custType');
   console.log(">>> Process _custSubGrp >> " + _custSubGrp);
@@ -486,7 +490,7 @@ function afterConfigForLA() {
   // var _country = FormManager.getActualValue('cmrIssuingCntry');
   // CREATCMR-531
   setIERPSitePartyIDForLA()
-
+  
   if (dojo.byId('isuCd')) {
     // FormManager.disable('isuCd');
     if(!checkForProspect()){
@@ -511,6 +515,9 @@ function afterConfigForLA() {
   if (_mrcCdHandler == null) {
     _mrcCdHandler = dojo.connect(FormManager.getField('mrcIsu'), 'onChange', function(value) {
       autoSetMrcIsuCov2018();
+      if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MEXICO) {
+        setMrcCdToReadOnly();
+      }
     });
   }
 
@@ -542,6 +549,7 @@ function afterConfigForLA() {
       autoSetFieldsForCustScenariosSSAMX();
       setCrosTypSubTypSSAMXOnSecnarios();
       setAbbrevNameRequiredForProcessors();
+      setMrcCdToReadOnly();
     });
   }
 
@@ -552,6 +560,13 @@ function afterConfigForLA() {
   if (_custNameHandler == null) {
     _custNameHandler = dojo.connect(FormManager.getField('mainCustNm1'), 'onChange', function(value) {
       autoSetAbbrevNameForBrazil();
+    });
+  }
+  
+  // CREATCMR-6813 - AR Predefined tax info values
+  if (_taxCd1Handler == null) {
+    _taxCd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function (value) {
+      showVatNotifForArgentina();
     });
   }
 
@@ -2115,7 +2130,8 @@ function setFieldRequiredSSAMXOnSecnarios() {
       if (role == 'Processor' || role == 'Requester') {
         FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
         FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
-        FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
+        // FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [
+        // 'SalRepNameNo' ], 'MAIN_IBM_TAB');
       }
     } else {
       FormManager.resetValidations('isicCd');
@@ -2123,8 +2139,10 @@ function setFieldRequiredSSAMXOnSecnarios() {
       FormManager.resetValidations('repTeamMemberNo');
     }
     if (_cmrCntry == '781' && (_custSubGrp == '5PRIP' || _custSubGrp == '5COMP' || _custSubGrp == 'IBMEM' || _custSubGrp == 'PRIPE')) {
-      FormManager.resetValidations('isicCd');
-      FormManager.resetValidations('subIndustryCd');
+      if(_custSubGrp != 'IBMEM' ) {
+        FormManager.resetValidations('isicCd');
+        FormManager.resetValidations('subIndustryCd');
+      }
       FormManager.resetValidations('salesBusOffCd');
       FormManager.resetValidations('collBoId');
     }
@@ -2526,14 +2544,21 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
 /* 1640462 - MRC should be optional for requester for SSA&MX */
 function setMrcCdRequiredForProcessors() {
   var _country = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
   console.log('****Executiing setMrcCdRequiredForProcessors for country ' + _country);
   if (_country != '631') {
     if (typeof (_pagemodel) != 'undefined') {
       if (_pagemodel.userRole == 'Processor') {
         var lblMrcCd = FormManager.getLabel('MrcCd');
         FormManager.addValidator('mrcCd', Validators.REQUIRED, [ lblMrcCd ], 'MAIN_IBM_TAB');
+          if(reqType == 'C') {
+            FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term/Sales Branch Office' ], 'MAIN_IBM_TAB');
+            FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep No' ], 'MAIN_IBM_TAB'); 
+          }               
       } else {
         FormManager.resetValidations('mrcCd');
+        FormManager.resetValidations('salesBusOffCd');
+        FormManager.resetValidations('repTeamMemberNo');
       }
     }
   }
@@ -2632,13 +2657,13 @@ function setTaxRegimeMX() {
     } else {
       taxGrp = '2';
     }
-  
+
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
       CMT: '%' + taxGrp + '%'
     };
-  
+
     var taxDropDown = cmr.query('GET.MX_TAX_CODE', qParams);
     var arr =  taxDropDown.map(taxDropDown => taxDropDown.ret1);
     FormManager.limitDropdownValues(FormManager.getField('taxCd3'), arr);
@@ -2648,19 +2673,19 @@ function setTaxRegimeMX() {
 // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
 function makeMrcSboOptionalForProspectLA() {
   var ifProspect = FormManager.getActualValue('prospLegalInd');
-    if (dijit.byId('prospLegalInd')) {
-      ifProspect = checkForProspect();
-    }
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = checkForProspect();
+  }
     if('Y' == ifProspect){
       if (typeof (_pagemodel) != 'undefined') {
         if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
-          FormManager.resetValidations('mrcCd');
-          FormManager.resetValidations('salesBusOffCd');
-          FormManager.setValue('isuCd', '');
-          FormManager.setValue('mrcCd', '');
-          FormManager.setValue('salesBusOffCd', '');
-          FormManager.enable('isuCd');
-          }
+                FormManager.resetValidations('mrcCd');
+                FormManager.resetValidations('salesBusOffCd');
+                FormManager.setValue('isuCd', '');
+                FormManager.setValue('mrcCd', '');
+                FormManager.setValue('salesBusOffCd', '');
+                FormManager.enable('isuCd');
+                }
         }
       }
     console.log('SBO & MRC are non mandatory for Prospect');
@@ -2673,7 +2698,62 @@ function checkForProspect(){
   }
   return ifProspect;
 }
+function setMrcCdToReadOnly() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
 
+  if (reqType == 'C') {
+    if(custSubGrp == 'IBMEM') {
+      if (role == 'REQUESTER') {
+        FormManager.readOnly('mrcCd');
+      } else {
+        FormManager.enable('mrcCd');
+      }
+    }
+  }
+}
+
+// CREATCMR-6813 - AR Predefined tax info values
+function showVatNotifForArgentina() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (reqType == 'C' && cmrIssuingCntry == '613') {
+    if (custGrp == "LOCAL" && custSubGrp == 'IBMEM') {
+      cmr.showAlert("Do a Save action to create the predefined entries or update the Tax Number fields in Tax Info tab.", "Warning");
+    }
+  }
+}
+
+var currentChosenScenarioAR = '';
+function showDeleteNotifForArgentinaIBMEM(fromAddress, scenario, scenarioChanged) {
+  if (fromAddress || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custGrp = FormManager.getActualValue('custGrp')
+
+  if (reqType == 'C' && cmrIssuingCntry == '613' && custGrp == "LOCAL") {
+    if (currentChosenScenarioAR == 'IBMEM' && scenarioChanged) {
+      cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten." +
+        "<br><br><strong>Manually delete the predefined Tax Info values after changing from IBM Employee to other Scenario Sub-type, if there are any created.</strong>" +
+        "<br><br><i>Any deleted predefined Tax Info values will not be reinstated. For that to happen, all entries must be deleted.</i>", "Warning");
+    } else if (scenario == 'IBMEM' && scenarioChanged) {
+      cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten." +
+        "<br><br><i>Any deleted predefined Tax Info values will not be reinstated. For that to happen, all entries must be deleted.</i>", "Warning");
+    }
+  }
+  currentChosenScenarioAR = scenario;
+}
 
 /* Register LA Validators */
 dojo.addOnLoad(function() {
@@ -2755,7 +2835,12 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
+
   // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
   GEOHandler.addAfterConfig(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
+  GEOHandler.setRevertIsicBehavior(false);
+
+  GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
 });

@@ -144,7 +144,11 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
             scorecard.setFindDnbRejCmt("CMR Results from Quick Search did not contain the required company details.");
             entityManager.merge(scorecard);
           } else if (model.getMatchGrade() != null && Arrays.asList("F4", "F5", "VAT").contains(model.getMatchGrade())) {
-            scorecard.setFindDnbResult(CmrConstants.RESULT_NO_RESULT);
+            if (model.getCmrNo() != null && model.getCmrNo().startsWith("P")) {
+              scorecard.setFindDnbResult(CmrConstants.DNBSEARCH_NOT_DONE);
+            } else {
+              scorecard.setFindDnbResult(CmrConstants.RESULT_NO_RESULT);
+            }
           } else {
             scorecard.setFindDnbResult("Not Required");
           }
@@ -316,7 +320,11 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     scorecard.setFindCmrUsrNm(user.getBluePagesName());
 
     if (!model.isHasDnb()) {
-      scorecard.setFindDnbResult(CmrConstants.RESULT_NO_RESULT);
+      if (model.getCmrNo() != null && model.getCmrNo().startsWith("P")) {
+        scorecard.setFindDnbResult(CmrConstants.DNBSEARCH_NOT_DONE);
+      } else {
+        scorecard.setFindDnbResult(CmrConstants.RESULT_NO_RESULT);
+      }
     } else {
       scorecard.setFindDnbResult(CmrConstants.RESULT_REJECTED);
       scorecard.setFindDnbRejReason("Record Not Found");

@@ -916,7 +916,7 @@ public class USUtil extends AutomationUtil {
       throws Exception {
     Data data = requestData.getData();
     String updatedValue = updatedDataModel.getNewData();
-    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle .\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle .\nLink:- https://jsw.ibm.com/projects/CMDE/summary";
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
@@ -991,7 +991,7 @@ public class USUtil extends AutomationUtil {
    */
   private String performEnterpriseAffiliateCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
     Data data = requestData.getData();
-    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jsw.ibm.com/projects/CMDE/summary";
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
@@ -1062,7 +1062,7 @@ public class USUtil extends AutomationUtil {
         String creationCapChanged = (String) results.get(0)[2];
         String sicValidation = (String) results.get(0)[3];
         String revenue = (String) results.get(0)[4];
-        String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
+        String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jsw.ibm.com/projects/CMDE/summary";
         if (!"Ok".equals(creationCapChanged) || !"Ok".equals(sicValidation) || !"Ok".equals(revenue)) {
           if (!"Ok".equals(revenue)) {
             error += "\n- CMR with revenue";
@@ -1325,65 +1325,70 @@ public class USUtil extends AutomationUtil {
             validation.setSuccess(true);
           } else {
             // company proof
-            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-              validation.setMessage("Validated");
-              details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
-              details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
-              validation.setSuccess(true);
-            } else {
-              validation.setMessage("Rejected");
-              validation.setSuccess(false);
-              details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
-              details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
-              engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
-              output.setOnError(true);
-              output.setDetails(details.toString());
-              if (payGoAddredited) {
-                admin.setPaygoProcessIndc("Y");
-              }
-              LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
-            }
+            // if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager,
+            // admin.getId().getReqId())) {
+            validation.setMessage("Validated");
+            details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
+            details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+            validation.setSuccess(true);
+            /*
+             * } else { validation.setMessage("Rejected");
+             * validation.setSuccess(false);
+             * details.append("High confidence D&B matches did not match the " +
+             * addrDesc + " address data.").append("\n"); details.
+             * append("\nNo supporting documentation is provided by the requester for "
+             * + addrDesc + " address."); engineData.addRejectionComment("OTH",
+             * "No supporting documentation is provided by the requester for " +
+             * addrDesc + " address.", "", ""); output.setOnError(true);
+             * output.setDetails(details.toString()); if (payGoAddredited) {
+             * admin.setPaygoProcessIndc("Y"); } LOG.
+             * debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed"
+             * ); }
+             */
           }
         } else {
           // company proof
-          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-            validation.setMessage("Validated");
-            details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
-            details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
-            validation.setSuccess(true);
-          } else {
-            validation.setMessage("Rejected");
-            validation.setSuccess(false);
-            details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
-            details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
-            engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
-            output.setOnError(true);
-            output.setDetails(details.toString());
-            if (payGoAddredited) {
-              admin.setPaygoProcessIndc("Y");
-            }
-            LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
-          }
+          // if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager,
+          // admin.getId().getReqId())) {
+          validation.setMessage("Validated");
+          details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+          details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+          validation.setSuccess(true);
+          /*
+           * } else { validation.setMessage("Rejected");
+           * validation.setSuccess(false);
+           * details.append("No High Quality D&B Matches were found for " +
+           * addrDesc + " address.").append("\n"); details.
+           * append("\nNo supporting documentation is provided by the requester for "
+           * + addrDesc + " address."); engineData.addRejectionComment("OTH",
+           * "No supporting documentation is provided by the requester for " +
+           * addrDesc + " address.", "", ""); output.setOnError(true);
+           * output.setDetails(details.toString()); if (payGoAddredited) {
+           * admin.setPaygoProcessIndc("Y"); } LOG.
+           * debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed"
+           * ); }
+           */
         }
       } else {
         // company proof
-        if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-          validation.setMessage("Validated");
-          details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
-          details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
-          validation.setSuccess(true);
-        } else {
-          validation.setMessage("Rejected");
-          validation.setSuccess(false);
-          details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
-          engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
-          output.setOnError(true);
-          output.setDetails(details.toString());
-          if (payGoAddredited) {
-            admin.setPaygoProcessIndc("Y");
-          }
-          LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
-        }
+        // if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager,
+        // admin.getId().getReqId())) {
+        validation.setMessage("Validated");
+        details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+        details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+        validation.setSuccess(true);
+        /*
+         * } else { validation.setMessage("Rejected");
+         * validation.setSuccess(false);
+         * details.append("No D&B Matches were found for " + addrDesc +
+         * " address.").append("\n"); engineData.addRejectionComment("OTH",
+         * "No supporting documentation is provided by the requester for " +
+         * addrDesc + " address.", "", ""); output.setOnError(true);
+         * output.setDetails(details.toString()); if (payGoAddredited) {
+         * admin.setPaygoProcessIndc("Y"); } LOG.
+         * debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed"
+         * ); }
+         */
       }
     } else {
       engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + "ZS01", "D&B Matching couldn't be performed for " + addrDesc + " address.");

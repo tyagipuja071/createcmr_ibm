@@ -144,8 +144,11 @@ public class MassChangeTemplate {
           if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
             String isuCd = "";
             String clientTier = "";
-            List<String> isuBlankCtc = Arrays.asList("5K", "18", "28");
+            List<String> isuBlankCtc = Arrays.asList("5K", "18", "28", "21", "8B");
             for (Row row : sheet) {
+              if (row.getRowNum() < 1) {
+                continue;
+              }
               TemplateValidation error = new TemplateValidation(name);
               currCell = (XSSFCell) row.getCell(5);
               isuCd = validateColValFromCell(currCell);
@@ -154,26 +157,27 @@ public class MassChangeTemplate {
               clientTier = validateColValFromCell(currCell);
 
               isuCd = !StringUtils.isBlank(isuCd) ? isuCd.substring(0, 2) : "";
-
-              if (!"Client Tier".equals(clientTier)) {
-                if (isuBlankCtc.contains(isuCd)) {
-                  if (!"@".equals(clientTier)) {
-                    LOG.trace("Client Tier should be '@' for the selected ISU Code: " + isuCd + ".");
-                    error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code: " + isuCd + ".<br>");
-                  }
-                } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(clientTier)) {
-                  LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
-                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.<br>");
-                } else if ("34".equals(isuCd)) {
-                  if (!"QY".contains(clientTier) || StringUtils.isBlank(clientTier)) {
-                    LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code.");
+              if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+              } else if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+                if (isuBlankCtc.contains(isuCd) && !clientTier.equalsIgnoreCase("@")) {
+                  LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
+                } else if (isuCd.startsWith("34")) {
+                  if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+                    LOG.trace("The row " + (row.getRowNum() + 1)
+                        + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
                     error.addError((row.getRowNum() + 1), "Client Tier",
-                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code.<br>");
+                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                   }
-                } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
-                    || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
-                  LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values.");
-                  error.addError((row.getRowNum() + 1), "Client Tier", "Note that Client Tier only accept @,Q,Y values.<br>");
+                } else if (!"@QY".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
                 }
               }
               validations.add(error);
@@ -288,6 +292,11 @@ public class MassChangeTemplate {
         }
       } else if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
         LegacyDirectUtil.checkIsraelMassTemplate(this.tabs, book, country);
+        // CREATCMR-2673
+        if (SystemLocation.DENMARK.equals(country) || SystemLocation.NORWAY.equals(country) || SystemLocation.SWEDEN.equals(country)
+            || SystemLocation.FINLAND.equals(country)) {
+          LegacyDirectUtil.checkNordxlMassTemplate(this.tabs, book, country);
+        }
         LegacyDirectUtil.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validate(entityManager, book, country, maxRows));
@@ -311,7 +320,7 @@ public class MassChangeTemplate {
           if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
             String isuCd = "";
             String clientTier = "";
-            List<String> isuBlankCtc = Arrays.asList("5K", "04");
+            List<String> isuBlankCtc = Arrays.asList("5K", "04", "21", "8B");
             for (Row row : sheet) {
               TemplateValidation error = new TemplateValidation(name);
               if (row.getRowNum() < 1) {
@@ -322,29 +331,29 @@ public class MassChangeTemplate {
 
               currCell = (XSSFCell) row.getCell(6);
               clientTier = validateColValFromCell(currCell);
-
               isuCd = !StringUtils.isBlank(isuCd) ? isuCd.substring(0, 2) : "";
-              if (isuBlankCtc.contains(isuCd)) {
-                if (!"@".equals(clientTier)) {
-                  LOG.trace("Client Tier should be '@' for the selected ISU Code: " + isuCd + ".");
-                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code: " + isuCd + ". ");
-                }
-              } else if ("34".equals(isuCd)) {
-                if (!"QY".contains(clientTier) || StringUtils.isBlank(clientTier)) {
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
-                }
-              } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(clientTier)) {
-                LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
-                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
-              } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
-                  || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
+              if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Client Tier",
                     ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+              } else if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+                if (isuBlankCtc.contains(isuCd) && !clientTier.equalsIgnoreCase("@")) {
+                  LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
+                } else if (isuCd.startsWith("34")) {
+                  if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+                    LOG.trace("The row " + (row.getRowNum() + 1)
+                        + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                    error.addError((row.getRowNum() + 1), "Client Tier",
+                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                  }
+                } else if (!"@QY".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+                }
               }
               validations.add(error);
             }
