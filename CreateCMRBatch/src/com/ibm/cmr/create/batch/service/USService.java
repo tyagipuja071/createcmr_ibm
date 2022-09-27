@@ -608,11 +608,11 @@ public class USService extends TransConnService {
     createCommentLog(entityManager, admin, statusMessage.toString());
 
     String disableAutoProc = "N";
-    if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)) {
-      disableAutoProc = CmrConstants.YES_NO.Y.toString();
-    } else {
-      disableAutoProc = CmrConstants.YES_NO.N.toString();
-    }
+    //if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)) {
+    //  disableAutoProc = CmrConstants.YES_NO.Y.toString();
+    //} else {
+    //  disableAutoProc = CmrConstants.YES_NO.N.toString();
+    //}
 
     // update admin status
     admin.setDisableAutoProc(disableAutoProc);
@@ -1355,11 +1355,11 @@ public class USService extends TransConnService {
           RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, reqId, statusMessage.toString().trim());
 
           String disableAutoProc = "N";
-          if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)) {
-            disableAutoProc = CmrConstants.YES_NO.Y.toString();
-          } else {
-            disableAutoProc = CmrConstants.YES_NO.N.toString();
-          }
+          //if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)) {
+          //  disableAutoProc = CmrConstants.YES_NO.Y.toString();
+          //} else {
+          //  disableAutoProc = CmrConstants.YES_NO.N.toString();
+          //}
 
           // update admin status
           admin.setDisableAutoProc(disableAutoProc);
