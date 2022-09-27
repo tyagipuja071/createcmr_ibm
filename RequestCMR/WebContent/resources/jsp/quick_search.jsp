@@ -25,6 +25,7 @@ form.ibm-column-form .dijitTextBox INPUT {
 </style>
 <script>
   var _furl = '<%=SystemConfiguration.getValue("FIND_CMR_URL")%>';
+  var bypassqs = false;
   dojo.addOnLoad(function() {
     dojo.byId('quick_search_btn').style.display = 'none';
     // load dropdown values
