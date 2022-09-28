@@ -2757,6 +2757,10 @@ public class LAHandler extends GEOHandler {
           List<CROSAddress> crosAddrList = record.getAddress();
           List<CROSTax> crosTaxList = record.getTaxCodes();
 
+          if (!StringUtils.isEmpty(record.getCollectorNo())) {
+            data.setCollectorNameNo(record.getCollectorNo());
+          }
+
           DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
 
           if (dataRdc != null) {
