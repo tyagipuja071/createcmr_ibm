@@ -882,7 +882,9 @@ public class DnBUtil {
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (addr != null) {
-      if (isTaxCdMatch && StringUtils.isNotBlank(data.getTaxCd1())) {
+      if (isTaxCdMatch && StringUtils.isNotBlank(data.getVat()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
+        request.setOrgId(data.getVat());
+      } else if (isTaxCdMatch && StringUtils.isNotBlank(data.getTaxCd1())) {
         request.setOrgId(data.getTaxCd1());
       } else if (!isTaxCdMatch) {
         if (StringUtils.isNotBlank(data.getVat())) {
