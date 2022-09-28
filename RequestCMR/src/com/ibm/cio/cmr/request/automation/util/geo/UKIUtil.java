@@ -83,13 +83,13 @@ public class UKIUtil extends AutomationUtil {
     String customerNameZI01 = custNm1 + custNm2;
     String custGrp = data.getCustGrp();
     // CREATCMR-6244 LandCntry UK(GB)
-    if(zs01 != null){
-    	String landCntry = zs01.getLandCntry();
-    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
-                && ("CROSS".equals(custGrp))){
-        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
-        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
-        }
+    if (zs01 != null) {
+      String landCntry = zs01.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
     }
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
@@ -122,8 +122,8 @@ public class UKIUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("BILL_INSTALL_DIFF", "Billing and Installing addresses are not same.");
     }
 
-    if (!(SCENARIO_PRIVATE_PERSON.equals(scenario) || "CROSS".equals(data.getCustGrp()) || SCENARIO_INTERNAL_FSL.equals(scenario)
-        || SCENARIO_INTERNAL.equals(scenario)) && "Y".equals(data.getRestrictInd())) {
+    if (!(SCENARIO_PRIVATE_PERSON.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario) || "CROSS".equals(data.getCustGrp())
+        || SCENARIO_INTERNAL_FSL.equals(scenario) || SCENARIO_INTERNAL.equals(scenario)) && "Y".equals(data.getRestrictInd())) {
       details.append("Request has been marked as CRN Exempt. Processor Review will be required.\n");
       engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
     }
@@ -252,13 +252,13 @@ public class UKIUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "VAT #":
-    	  if(requestData.getAddress("ZS01").getLandCntry().equals("GB") && !data.getCmrIssuingCntry().equals("866")){
-    		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
-                  engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
-                  details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
-                  }
-    		  }
-    	  break;
+        if (requestData.getAddress("ZS01").getLandCntry().equals("GB") && !data.getCmrIssuingCntry().equals("866")) {
+          if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)) {
+            engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+            details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+          }
+        }
+        break;
       case "INAC/NAC Code":
       case "ISU Code":
       case "Client Tier":
