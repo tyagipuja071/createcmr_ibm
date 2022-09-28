@@ -886,7 +886,12 @@ var FormManager = (function() {
       var inputs = document.getElementsByName(id);
       if (inputs && inputs.length) {
         for (var i = 0; i < inputs.length; i++) {
-          if (inputs[i].tagName == 'INPUT' && (inputs[i].type == 'radio' || inputs[i].type == 'checkbox')) {
+          if (inputs[i].tagName == 'INPUT' && (inputs[i].type == 'radio')) {
+            if (inputs[i].checked) {
+              value = inputs[i].value;
+              break;
+            } 
+          } else if (inputs[i].tagName == 'INPUT' && (inputs[i].type == 'checkbox')) {
             if (inputs[i].checked) {
               value = inputs[i].value;
               return value;
