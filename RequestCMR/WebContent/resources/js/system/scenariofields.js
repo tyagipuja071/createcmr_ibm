@@ -646,13 +646,7 @@ var SCENARIO_FIELDS = [ {
   name : 'adminDeptCd',
   tab : 'MAIN_CUST_TAB',
   address : false
-}, {
-  id : '##BillingName',
-  lbl : 'Billing Name',
-  name : 'mexicoBillingName',
-  tab : 'MAIN_CUST_TAB',
-  address : false
-},
+}
   ];
 
 function scenariofieldSort(field1, field2) {
