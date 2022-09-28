@@ -171,7 +171,18 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
                 isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
                 if (isTaxCdMatch) {
-                  orgIdFound = StringUtils.isNotBlank(DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
+                  if ((SystemLocation.SINGAPORE).equals(data.getCmrIssuingCntry()) && "TH".equals(soldTo.getLandCntry())
+                      && !("NA".equals(data.getTaxCd1()))) {
+                    List<DnbOrganizationId> dnbOrgIdList = dnbRecord.getOrgIdDetails();
+                    for (DnbOrganizationId orgId : dnbOrgIdList) {
+                      String dnbOrgId = orgId.getOrganizationIdCode();
+                      String dnbOrgType = orgId.getOrganizationIdType();
+                      if (data.getVat().equals(dnbOrgId) && "Registration Number (TH)".equals(dnbOrgType)) {
+                        orgIdFound = true;
+                      }
+                    }
+                  } else
+                    orgIdFound = StringUtils.isNotBlank(DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
                 } else {
                   orgIdFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
                 }

@@ -678,6 +678,17 @@ public class SingaporeUtil extends AutomationUtil {
         "INC.", "PTE LTD", "PVT LTD", "private limited", "CORPORATION", "hospital", "university");
   }
 
+  @Override
+  public boolean useTaxCd1ForDnbMatch(RequestData requestData) {
+    String landedCntry = requestData.getAddress("ZS01").getLandCntry();
+    String cmrIssuingCntry = requestData.getData().getCmrIssuingCntry();
+    String vatRegistrationStatus = requestData.getData().getTaxCd1();
+    if ((SystemLocation.SINGAPORE).equals(cmrIssuingCntry) && "TH".equals(landedCntry) && !("NA".equals(vatRegistrationStatus))) {
+      return true;
+    } else
+      return super.useTaxCd1ForDnbMatch(requestData);
+  }
+
   private static void landedCountryRequiresCMDEReview(AutomationEngineData engineData, StringBuilder details, Addr soldTo, Admin admin) {
     // CREATCMR-6844
     if ("TH".equalsIgnoreCase(soldTo.getLandCntry()) && "C".equalsIgnoreCase(admin.getReqType())) {

@@ -3004,6 +3004,10 @@ public class LAHandler extends GEOHandler {
           List<CROSContact> crossCntlist = record.getContacts();
           List<CROSAddress> crosAddrList = record.getAddress();
 
+          if (!StringUtils.isEmpty(record.getCollectorNo())) {
+            data.setCollectorNameNo(record.getCollectorNo());
+          }
+
           DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
 
           if (dataRdc != null) {
