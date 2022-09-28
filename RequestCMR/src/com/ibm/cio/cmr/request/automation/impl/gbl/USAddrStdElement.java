@@ -337,7 +337,7 @@ public class USAddrStdElement extends OverridingElement {
           
           if(sccIsValid){
         	  details.append("\n").append("SCC code for the address is not mapped to SCC table.").append("\n");
-              hasIssues = true;
+              //hasIssues = true;
           }
       }
 
