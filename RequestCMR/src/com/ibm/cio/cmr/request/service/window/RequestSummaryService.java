@@ -651,7 +651,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               String dataField = PageManager.getLabel(cmrCountry, "CodFlag", "-");
               if (!StringUtils.isEmpty(dataField) && !"-".equals(dataField)) {
                 update = new UpdatedDataModel();
-                update.setDataField(PageManager.getLabel(cmrCountry, "CodFlag", "-"));
+                update.setDataField(dataField);
                 update.setNewData(newData.getCreditCd());
                 update.setOldData(oldData.getCreditCd());
                 results.add(update);
