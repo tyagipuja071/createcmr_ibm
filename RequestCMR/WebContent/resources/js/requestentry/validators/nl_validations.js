@@ -78,8 +78,7 @@ function afterConfigForNL() {
   setVatValidatorNL();
 
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
-  var vatExempt = dojo.byId('vatExempt');
-  var vatExemptChecked = dojo.byId('vatExempt').checked;
+  var vatInd = FormManager.getActualValue('vatInd');
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -92,7 +91,7 @@ function afterConfigForNL() {
   var paygoUser = cmr.query('PAYGO.CHECK.CRN', qParams);
   var countpaygo = paygoUser.ret1;
   if ((custSubScnrio == 'PUBCU' && role == 'Processor') || custSubScnrio == 'PRICU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS' || custSubScnrio == 'IBMEM'
-      || (custSubScnrio == 'INTER' && vatExempt && vatExemptChecked) || viewOnlyPage == 'true' || (Number(countpaygo) == 1 && role == 'Processor')) {
+      || (custSubScnrio == 'INTER' && dojo.string.trim(vatInd) == 'N') || viewOnlyPage == 'true' || (Number(countpaygo) == 1 && role == 'Processor')) {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   } else if (reqType != 'U') {
     FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
@@ -120,7 +119,7 @@ function afterConfigForNL() {
   if (vatInd && dojo.string.trim(vatInd) == 'T') {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatExempt', 'N');
     FormManager.setValue('vatInd', 'T');
   } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
@@ -266,16 +265,6 @@ function setVatValidatorNL() {
     return;
   }
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
-    if (custSubGrp == 'PRICU') {
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-      FormManager.readOnly('vat');
-      return;
-    }
-    if (custSubGrp == 'IBMEM' && dojo.byId('vatExempt').checked) {
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-      FormManager.clearValue('vat');
-      FormManager.readOnly('vat');
-    }
     
     var vatInd = FormManager.getActualValue('vatInd');
     
@@ -295,11 +284,16 @@ function setVatValidatorNL() {
       FormManager.setValue('vatExempt', 'Y');   
       FormManager.setValue('vatInd', 'E');
     } 
-    //FormManager.resetValidations('vat');
-    //if (!dojo.byId('vatExempt').checked) {
-      //checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-      //FormManager.enable('vat');
-    //}
+    
+    if (custSubGrp == 'IBMEM' || custSubGrp == 'PRICU') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
+      FormManager.setValue('vatInd', 'N');
+      FormManager.readOnly('vatInd');
+    } else {
+      FormManager.enable('vatInd');
+    }
   }
 }
 
@@ -313,8 +307,7 @@ function setKVKValidatorNL() {
     return;
   }
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
-  var vatExempt = dojo.byId('vatExempt');
-  var vatExemptChecked = dojo.byId('vatExempt').checked;
+  var vatInd = FormManager.getActualValue('vatInd');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
@@ -323,7 +316,7 @@ function setKVKValidatorNL() {
     return;
   }
   if (custSubScnrio == 'INTER') {
-    if (vatExempt && vatExemptChecked) {
+    if (vatInd == 'N') {
       FormManager.removeValidator('taxCd2', Validators.REQUIRED);
     } else {
       FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
