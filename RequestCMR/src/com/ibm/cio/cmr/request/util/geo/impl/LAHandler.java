@@ -3487,6 +3487,7 @@ public class LAHandler extends GEOHandler {
     map.put("##MembLevel", "memLvl");
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
+    map.put("##BillingName", "mexicoBillingName");
     return map;
   }
 
