@@ -1726,12 +1726,9 @@ public class LAHandler extends GEOHandler {
     if (isMXIssuingCountry(cmrCountry)) {
       if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getMexicoBillingName(), newData.getMexicoBillingName())) {
         update = new UpdatedDataModel();
-        String cntry = null;
-        update.setDataField(PageManager.getLabel(cntry, "BillingName", "-"));
-        update.setNewData(service.getCodeAndDescription(newData.getMexicoBillingName(), "BillingName", cmrCountry));
-        update.setOldData(service.getCodeAndDescription(oldData.getMexicoBillingName(), "BillingName", cmrCountry));
-        // update.setNewData(newData.getMexicoBillingName());
-        // update.setOldData(oldData.getMexicoBillingName());
+        update.setDataField(PageManager.getLabel(cmrCountry, "BillingName", "-"));
+        update.setNewData(newData.getMexicoBillingName());
+        update.setOldData(oldData.getMexicoBillingName());
         results.add(update);
       }
     }
