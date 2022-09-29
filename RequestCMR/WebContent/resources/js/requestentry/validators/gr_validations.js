@@ -973,7 +973,7 @@ function setVatValidatorGRCYTR() {
     if (vatInd == 'N') {
       FormManager.clearValue('vat');
     }
-    if (undefined != vatInd && vatInd != 'N' && cntry == SysLoc.GREECE) {
+    if (undefined != vatInd && vatInd != '' && vatInd != 'N' && cntry == SysLoc.GREECE) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
       FormManager.enable('vat');
     }
