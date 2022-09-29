@@ -963,16 +963,17 @@ function addPOBoxValidatorGR() {
 function setVatValidatorGRCYTR() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var vatInd = FormManager.getActualValue('vatInd');
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
     if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
       FormManager.readOnly('vat');
     }
-    if (dijit.byId('vatExempt').get('checked')) {
+    if (vatInd == 'N') {
       FormManager.clearValue('vat');
     }
-    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
+    if (undefined != vatInd && vatInd != 'N' && cntry == SysLoc.GREECE) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
       FormManager.enable('vat');
     }
