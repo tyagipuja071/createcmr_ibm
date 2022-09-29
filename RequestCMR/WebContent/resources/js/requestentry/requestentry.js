@@ -1669,6 +1669,14 @@ function checkIfFinalDnBCheckRequired() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+  if (cmrCntry == '834') {
+    var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+      ID : reqId
+    });
+    if (ret && ret.ret1 && ret.ret1 != '') {
+      return false;
+    }
+  }
   if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
       && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US

@@ -626,6 +626,7 @@ public class DnBUtil {
       dnbNames.add(dnbRecord.getDnbName());
     }
     for (String dnbName : dnbNames) {
+      dnbName = dnbName.trim();
       String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
       String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
       if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbName)) {
