@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
@@ -345,6 +346,12 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         } else {
           result.setOnError(false);
         }
+      }
+      
+      AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+      if (automationUtil != null && automationUtil instanceof SingaporeUtil && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
+        SingaporeUtil singaporeUtil = (SingaporeUtil) automationUtil;
+        result = singaporeUtil.checkAllAddrDnbMatches(entityManager, requestData, engineData, result);
       }
     } else {
       result.setDetails("Missing main address on the request.");
