@@ -141,7 +141,8 @@ function addDnBMatchingAttachmentValidator() {
           // FOR CN
           var cntry = FormManager.getActualValue('landCntry');
           var loc = FormManager.getActualValue('cmrIssuingCntry');
-          if(cntry == 'CN' || loc == '641') {
+          var custSubGroup = FormManager.getActualValue('custSubGrp');
+          if(cntry == 'CN' || loc == '641' && custSubGroup != 'CROSS') {
             var id = FormManager.getActualValue('reqId');
             var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
               ID : id
