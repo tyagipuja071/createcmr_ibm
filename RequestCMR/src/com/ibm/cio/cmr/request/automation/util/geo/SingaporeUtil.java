@@ -464,8 +464,6 @@ public class SingaporeUtil extends AutomationUtil {
       case "INAC/NAC Code":
       case "Sales Rep No":
       case "AR Code":
-        cmdeReview = true;
-        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
