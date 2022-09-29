@@ -2555,7 +2555,7 @@ public class LegacyDirectService extends TransConnService {
             response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
           } else {
             try {
-              this.serviceClient.setReadTimeout(60 * 30 * 1000); // 30 mins
+              this.serviceClient.setReadTimeout(60 * 60 * 1000); // 60 mins
               response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
 
               if (response != null && response.getStatus().equals("A")
