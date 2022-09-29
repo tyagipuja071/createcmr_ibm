@@ -4337,9 +4337,7 @@ function vatRegistrationForSG() {
     var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
     landCntry = landCntryResult.ret1;
   }
-  if (cntry != '834' && landCntry != 'TH') {
-    return;
-  }
+  if (cntry == '834' && landCntry == 'TH') {
   FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Vat Registration Status' ], 'MAIN_IBM_TAB');
   var isVatRegistered =  FormManager.getActualValue('taxCd1');
   if (isVatRegistered == 'NA') {
@@ -4349,6 +4347,7 @@ function vatRegistrationForSG() {
   } else {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_IBM_TAB');
     FormManager.enable('vat');
+  }
   }
 }
 
