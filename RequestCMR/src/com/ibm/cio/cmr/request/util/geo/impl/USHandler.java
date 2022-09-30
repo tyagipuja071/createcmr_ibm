@@ -1211,7 +1211,6 @@ public class USHandler extends GEOHandler {
           || ("BYMODEL".equalsIgnoreCase(data.getCustSubGrp()) && "KYN".equalsIgnoreCase(data.getRestrictTo()))) {
         admin.setMainCustNm1("KYNDRYL INC");
       }
-      data.setVatInd("N");
     }
 
     if (admin != null && "CSP".equals(admin.getReqReason())) {
