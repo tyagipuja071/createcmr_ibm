@@ -288,6 +288,14 @@ public class MassCreateProcessService extends BaseBatchService {
           String cmrNum = USCMRNumGen.genCMRNumMassCrt(em, cmrType);
           massCrtData.setCmrNo(cmrNum);
           mass_create.setCmrNo(cmrNum);
+          // CREATCMR-6987
+          if ("KYN".equalsIgnoreCase(massCrtData.getCustSubGrp())
+              || ("BYMODEL".equalsIgnoreCase(massCrtData.getCustSubGrp()) && "KYN".equalsIgnoreCase(massCrtData.getRestrictTo()))) {
+            massCrtData.setCustNm1("KYNDRYL INC");
+            massCrtData.setCustNm2("");
+            // CREATCMR-7173
+            massCrtData.setIsuCd("5K");
+          }
           request.setCmrNo(mass_create.getCmrNo());
           updateEntity(mass_create, em);
           updateEntity(massCrtData, em);
