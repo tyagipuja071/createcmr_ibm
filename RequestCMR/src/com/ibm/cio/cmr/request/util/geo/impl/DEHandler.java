@@ -103,6 +103,9 @@ public class DEHandler extends GEOHandler {
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
             FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+            if ("ZS01".equalsIgnoreCase(tempRec.getCmrAddrTypeCode()) && ("90".equalsIgnoreCase(tempRec.getCmrOrderBlock()))) {
+              tempRec.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZS02.toString());
+            }
             if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(tempRec.getCmrAddrTypeCode()) && "598".equals(tempRec.getCmrAddrSeq())) {
               tempRec.setCmrAddrTypeCode("ZD02");
             }
