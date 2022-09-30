@@ -423,6 +423,9 @@ function addCtcObsoleteValidator() {
 /**
  * After configuration for US
  */
+
+var resetIsicFlag = -1;
+
 function afterConfigForUS() {
 
   var reqType = FormManager.getActualValue('reqType');
@@ -525,7 +528,14 @@ function afterConfigForUS() {
           if (_usSicm.length > 4) {
             _usSicm = _usSicm.substring(0, 4);
           }
-          FormManager.setValue('isicCd', _usSicm);
+
+          if (resetIsicFlag > 0) {
+            FormManager.setValue('isicCd', _usSicm);
+          } else {
+            FormManager.setValue('isicCd', _pagemodel.isicCd);
+            resetIsicFlag++;
+          }
+
           // CREATCMR-6587
           setAffiliateNumber();
         }
