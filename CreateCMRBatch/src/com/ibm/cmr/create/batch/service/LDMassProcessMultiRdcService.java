@@ -227,9 +227,19 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
         List<LDMassUpdtRdcMultiWorker> workers = new ArrayList<LDMassUpdtRdcMultiWorker>();
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
         for (MassUpdt sMassUpdt : results) {
-          LDMassUpdtRdcMultiWorker worker = new LDMassUpdtRdcMultiWorker(this, admin, sMassUpdt);
-          executor.schedule(worker, 5, TimeUnit.SECONDS);
-          workers.add(worker);
+          // check number of active records
+          int recordsSet = checkActiveRecords(entityManager, sMassUpdt.getCmrNo(), data.getCmrIssuingCntry(), request.getMandt());
+          if (recordsSet > 0) {
+            for (int i = 0; i <= recordsSet; i++) {
+              LDMassUpdtRdcMultiWorker worker = new LDMassUpdtRdcMultiWorker(this, admin, sMassUpdt, i);
+              executor.schedule(worker, 5, TimeUnit.SECONDS);
+              workers.add(worker);
+            }
+          } else {
+            LDMassUpdtRdcMultiWorker worker = new LDMassUpdtRdcMultiWorker(this, admin, sMassUpdt);
+            executor.schedule(worker, 5, TimeUnit.SECONDS);
+            workers.add(worker);
+          }
         }
 
         executor.shutdown();
@@ -364,6 +374,24 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
 
   }
 
+  public int checkActiveRecords(EntityManager entityManager, String cmrNo, String issuingCountry, String mandt) {
+    // query the active records
+    int cmrLimit = 0;
+    String sql = ExternalizedQuery.getSql("BATCH.MA.GET.CMR_ACTIVE_RECORDS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setParameter("KATR6", issuingCountry);
+    query.setParameter("MANDT", mandt);
+
+    Integer result = (Integer) query.getSingleResult(Object.class);
+
+    if (result > 1000) {
+      cmrLimit = (int) Math.floor(result / 1000.00);
+    }
+
+    return cmrLimit;
+  }
+
   /**
    * Processes errors that happened during execution. Updates the status of the
    * {@link Admin} record and creates relevant {@link WfHist} and
@@ -416,6 +444,11 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
   @Override
   protected boolean useServicesConnections() {
     return true;
+  }
+
+  @Override
+  protected int getTerminatorWaitTime() {
+    return 60;
   }
 
 }
