@@ -444,6 +444,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               results.add(update);
             }
             if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxPayerCustCd(), newData.getTaxPayerCustCd())
+                && !CmrConstants.REQ_TYPE_UPDATE.equals(reqType)
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "PSTExemptLicNum"))) {
               update = new UpdatedDataModel();
               update.setDataField(PageManager.getLabel(cmrCountry, "PSTExemptLicNum", "-"));
