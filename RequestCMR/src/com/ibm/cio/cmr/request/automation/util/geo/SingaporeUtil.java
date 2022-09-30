@@ -71,6 +71,8 @@ public class SingaporeUtil extends AutomationUtil {
     long reqId = requestData.getAdmin().getId().getReqId();
     LOG.debug("Executing doCountryFieldComputations() for reqId=" + reqId);
     Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+
     boolean ifDefaultCluster = false;
     String cluster = data.getApCustClusterId();
     String govType = data.getGovType();
@@ -129,6 +131,13 @@ public class SingaporeUtil extends AutomationUtil {
     } else {
       // eleResults.append("Non Government Customer" + "\n");
       details.append("Customer is a non government organization" + "\n");
+    }
+
+    // CREATCMR-6844
+    Addr landAddr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+    if ("TH".equalsIgnoreCase(landAddr.getLandCntry()) && "C".equalsIgnoreCase(admin.getReqType())) {
+      details.append("Processor review is needed as customer is from Thailand" + "\n");
+      engineData.addNegativeCheckStatus("ISTHA", "Customer is from Thailand");
     }
 
     // CMR-2034 fix
