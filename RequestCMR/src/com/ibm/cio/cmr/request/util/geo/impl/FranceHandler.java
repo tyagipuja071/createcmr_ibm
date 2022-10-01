@@ -1402,33 +1402,36 @@ public class FranceHandler extends GEOHandler {
               currCell = (XSSFCell) row.getCell(6);
               ctc = validateColValFromCell(currCell);
 
-              if (isuCd.equalsIgnoreCase("5K | 5K-Comp Int Sys Design") && !ctc.equalsIgnoreCase("@")) {
-                TemplateValidation error = new TemplateValidation(name);
-                LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
-                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
-                validations.add(error);
-              } else if (!StringUtils.isEmpty(isuCd) && (isuCd.startsWith("21") || isuCd.startsWith("8B")) && !"@".equals(ctc)) {
-                TemplateValidation error = new TemplateValidation(name);
-                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
-                validations.add(error);
-              } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("34")) {
-                if (StringUtils.isBlank(ctc) || !"QY".contains(ctc)) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
-                  validations.add(error);
-                }
-              } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(ctc) || !"@QY".contains(ctc)))
-                  || (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc))) {
+              if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Client Tier",
                     ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
                 validations.add(error);
+              } else if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
+                if ((isuCd.startsWith("5K") || isuCd.startsWith("21") || isuCd.startsWith("8B")) && !ctc.equalsIgnoreCase("@")) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
+                  validations.add(error);
+                } else if (isuCd.startsWith("34")) {
+                  if (StringUtils.isBlank(ctc) || !"QY".contains(ctc)) {
+                    TemplateValidation error = new TemplateValidation(name);
+                    LOG.trace("The row " + (row.getRowNum() + 1)
+                        + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                    error.addError((row.getRowNum() + 1), "Client Tier",
+                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                    validations.add(error);
+                  }
+                } else if (!"@QY".contains(ctc)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
               }
 
               // String vat = "";// 12
