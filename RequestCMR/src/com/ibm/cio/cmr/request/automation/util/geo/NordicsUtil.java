@@ -190,13 +190,29 @@ public class NordicsUtil extends AutomationUtil {
 
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getVat()) && SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
+    String custType = data.getCustGrp();
+    if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getVat()) && SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())
+        && "LOCAL".equalsIgnoreCase(custType)) {
       LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
       // register vat service of Norway
       AutomationResponse<NorwayVatResponse> resp = getMVAVatInfo(admin, data);
       if (resp.isSuccess() && resp.getRecord().isMva()) {
-        String newVAT = data.getVat() + "MVA";
+        String newVAT = "";
+        if (StringUtils.isNotBlank(data.getVat()) && data.getVat().contains("MVA")) {
+          newVAT = data.getVat();
+        } else {
+          newVAT = data.getVat() + "MVA";
+        }
         details.append("Appending VAT with suffix MVA.").append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "VAT", data.getVat(), newVAT);
+        results.setResults("Calculated.");
+        results.setProcessOutput(overrides);
+      } else if (resp.isSuccess() && !resp.getRecord().isMva()) {
+        String newVAT = data.getVat();
+        if (StringUtils.isNotBlank(newVAT) && newVAT.contains("MVA")) {
+          newVAT = newVAT.replaceAll("MVA", "").trim();
+        }
+        details.append("MVA will not be appeneded to VAT.").append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "VAT", data.getVat(), newVAT);
         results.setResults("Calculated.");
         results.setProcessOutput(overrides);
@@ -652,8 +668,13 @@ public class NordicsUtil extends AutomationUtil {
     client.setReadTimeout(1000 * 60 * 5);
     client.setRequestMethod(Method.Get);
 
+    String vat = data.getVat();
+    if (StringUtils.isNotBlank(vat) && SystemLocation.NORWAY.equalsIgnoreCase(data.getCmrIssuingCntry()) && vat.contains("MVA")) {
+      vat = vat.replaceAll("MVA", "").trim();
+    }
+
     NorwayVatRequest request = new NorwayVatRequest();
-    String vatReq = StringUtils.isNumeric(data.getVat()) ? data.getVat() : data.getVat().substring(2);
+    String vatReq = StringUtils.isNumeric(vat) ? vat : vat.substring(2);
     request.setVat(vatReq);
     System.out.println(request + request.getVat());
 
@@ -697,6 +718,9 @@ public class NordicsUtil extends AutomationUtil {
     Data data = requestData.getData();
     if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.SWEDEN.equalsIgnoreCase(data.getCmrIssuingCntry())) {
       request.setOrgId(data.getVat().substring(2, 12));
+    }
+    if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.NORWAY.equalsIgnoreCase(data.getCmrIssuingCntry()) && data.getVat().contains("MVA")) {
+      request.setOrgId(data.getVat().replaceAll("MVA", "").trim());
     }
   }
 
