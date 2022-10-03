@@ -1308,10 +1308,7 @@ function limitCustomerClassValues(value) {
     var kuklaValues = [ '11', '33', '35' ];
     break;
   case 'CROSS':
-    var kuklaValues = [ '11', '33', '35' ];
-    break;
-  case 'CROSS':
-    var kuklaValues = [ '71' ];
+    var kuklaValues = [ '11', '33', '35', '71' ];
     break;
   default:
     break;
