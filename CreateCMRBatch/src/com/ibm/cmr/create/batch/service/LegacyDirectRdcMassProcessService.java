@@ -662,6 +662,7 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public void capsAndFillNulls(Object entity, boolean capitalize) throws Exception {
     try {
       Class<?> entityClass = entity.getClass();
@@ -831,16 +832,18 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
     try {
       // 1. Get request to process
       String sqlName = "";
-
+      PreparedQuery query;
       if (SystemLocation.ITALY.equals(data.getCmrIssuingCntry())) {
         sqlName = "BATCH.LD.GET.MASS_UPDT_RDC_IT";
       } else {
         sqlName = "BATCH.LD.GET.MASS_UPDT_RDC";
       }
 
-      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql(sqlName));
+      query = new PreparedQuery(entityManager, ExternalizedQuery.getSql(sqlName));
       query.setParameter("REQ_ID", admin.getId().getReqId());
       query.setParameter("ITER_ID", admin.getIterationId());
+      query.setParameter("MANDT", request.getMandt());
+      query.setParameter("CNTRY", data.getCmrIssuingCntry());
 
       List<MassUpdt> results = query.getResults(MassUpdt.class);
       List<String> statusCodes = new ArrayList<String>();
