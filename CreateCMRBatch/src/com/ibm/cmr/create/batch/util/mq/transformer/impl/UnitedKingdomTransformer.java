@@ -187,9 +187,9 @@ public class UnitedKingdomTransformer extends EMEATransformer {
       if (!StringUtils.isBlank(addrData.getDept())) {
         line1 += (line1.length() > 0 ? ", " : "") + addrData.getDept();
       }
-      if (!StringUtils.isBlank(addrData.getCustPhone())) {
-        line1 += (line1.length() > 0 ? ", " : "") + addrData.getCustPhone();
-      }
+      // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+      // line1 += (line1.length() > 0 ? ", " : "") + addrData.getCustPhone();
+      // }
       messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "Address1", line1);
 
       String line2 = "";
@@ -234,10 +234,10 @@ public class UnitedKingdomTransformer extends EMEATransformer {
       if (!StringUtils.isBlank(addrData.getDept())) {
         line1 += (line1.length() > 0 ? ", " : "") + addrData.getDept();
       }
-      //CREATCMR-3314
-     // if (!StringUtils.isBlank(addrData.getCustPhone())) {
-        // line1 += (line1.length() > 0 ? " " : "") + addrData.getCustPhone();
-     // }
+      // CREATCMR-3314
+      // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+      // line1 += (line1.length() > 0 ? " " : "") + addrData.getCustPhone();
+      // }
 
       String line2 = "";
       if (StringUtils.isBlank(addrData.getAddrTxt())) {
@@ -330,16 +330,16 @@ public class UnitedKingdomTransformer extends EMEATransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-             //CREATCMR-3314
-           // if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              // line2 += (line2.length() > 0 ? ", " : "") +
-              // addrData.getCustPhone();
-           // }
-          } 
-           //CREATCMR-3314
-          //else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            // line2 = addrData.getCustPhone();
-          //}
+            // CREATCMR-3314
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // CREATCMR-3314
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
 
         }
         // mailing,installing and EPL(Software Update)-name con't OR Att. Person
@@ -433,16 +433,16 @@ public class UnitedKingdomTransformer extends EMEATransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-             //CREATCMR-3314
-           // if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              // line2 += (line2.length() > 0 ? ", " : "") +
-              // addrData.getCustPhone();
-           // }
-          } 
-           //CREATCMR-3314
-          //else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            // line2 = addrData.getCustPhone();
-         // }
+            // CREATCMR-3314
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // CREATCMR-3314
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
 
         }
         // mailing,installing and EPL(Software Update)-name con't OR Att. Person
@@ -500,16 +500,16 @@ public class UnitedKingdomTransformer extends EMEATransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-             //CREATCMR-3314
-           // if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              // line2 += (line2.length() > 0 ? ", " : "") +
-              // addrData.getCustPhone();
-           // }
-          } 
-           //CREATCMR-3314
-          //else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            // line2 = addrData.getCustPhone();
-          //} 
+            // CREATCMR-3314
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // CREATCMR-3314
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
           else if (!StringUtils.isEmpty(addrData.getPoBox())) {
             line2 = "PO BOX " + addrData.getPoBox().trim();
           }
@@ -534,16 +534,16 @@ public class UnitedKingdomTransformer extends EMEATransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-             //CREATCMR-3314
-           // if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              // line2 += (line2.length() > 0 ? ", " : "") +
-              // addrData.getCustPhone();
-            //}
-          } 
-           //CREATCMR-3314
-          //else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            // line2 = addrData.getCustPhone();
-          //}
+            // CREATCMR-3314
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // CREATCMR-3314
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
         }
 
         if (StringUtils.isEmpty(line2)) {
@@ -605,16 +605,16 @@ public class UnitedKingdomTransformer extends EMEATransformer {
             if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
               line3 = "ATT " + line3;
             }
-             //CREATCMR-3314
-           // if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              // line3 += (line3.length() > 0 ? " " : "") +
-              // addrData.getCustPhone();
-            //}
+            // CREATCMR-3314
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line3 += (line3.length() > 0 ? " " : "") +
+            // addrData.getCustPhone();
+            // }
           }
-           //CREATCMR-3314
+          // CREATCMR-3314
           // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            // line3 = addrData.getCustPhone();
-         // } 
+          // line3 = addrData.getCustPhone();
+          // }
           else if (!StringUtils.isEmpty(addrData.getPoBox())) {
             line3 = "PO BOX " + addrData.getPoBox().trim();
           }
@@ -639,16 +639,16 @@ public class UnitedKingdomTransformer extends EMEATransformer {
             if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
               line3 = "ATT " + line3;
             }
-             //CREATCMR-3314
-            //if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              // line3 += (line3.length() > 0 ? " " : "") +
-              // addrData.getCustPhone();
-           // }
+            // CREATCMR-3314
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line3 += (line3.length() > 0 ? " " : "") +
+            // addrData.getCustPhone();
+            // }
           }
-           //CREATCMR-3314
+          // CREATCMR-3314
           // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            // line3 = addrData.getCustPhone();
-          //}
+          // line3 = addrData.getCustPhone();
+          // }
         }
 
         if (StringUtils.isBlank(line3)) {
@@ -709,16 +709,16 @@ public class UnitedKingdomTransformer extends EMEATransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-             //CREATCMR-3314
-           // if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              // line2 += (line2.length() > 0 ? ", " : "") +
-              // addrData.getCustPhone();
-           // }
-          } 
-           //CREATCMR-3314
-          //else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            // line2 = addrData.getCustPhone();
-          //} 
+            // CREATCMR-3314
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // CREATCMR-3314
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
           else if (!StringUtils.isEmpty(addrData.getPoBox())) {
             line2 = "PO BOX " + addrData.getPoBox().trim();
           }
@@ -739,16 +739,16 @@ public class UnitedKingdomTransformer extends EMEATransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-             //CREATCMR-3314
-          //  if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              // line2 += (line2.length() > 0 ? ", " : "") +
-              // addrData.getCustPhone();
-            //}
-          } 
-           //CREATCMR-3314
-          //else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            // line2 = addrData.getCustPhone();
-          //}
+            // CREATCMR-3314
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // CREATCMR-3314
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
         }
 
         // street
@@ -904,7 +904,7 @@ public class UnitedKingdomTransformer extends EMEATransformer {
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
-          legacyCust.setTelNoOrVat(addr.getCustPhone());
+          legacyCust.setTelNoOrVat(getTrimed(addr.getCustPhone()));
           landedCntry = addr.getLandCntry();
           break;
         }
@@ -923,9 +923,7 @@ public class UnitedKingdomTransformer extends EMEATransformer {
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
-          if (!StringUtils.isEmpty(addr.getCustPhone())) {
-            legacyCust.setTelNoOrVat(addr.getCustPhone());
-          }
+          legacyCust.setTelNoOrVat(getTrimed(addr.getCustPhone()));
           landedCntry = addr.getLandCntry();
           break;
         }
@@ -1071,10 +1069,10 @@ public class UnitedKingdomTransformer extends EMEATransformer {
     }
 
     formatAddressLinesLD(dummyHandler, legacyAddr);
-    if (("ZD01".equals(currAddr.getId().getAddrType()) || "ZS01".equals(currAddr.getId().getAddrType()))
-        && !StringUtils.isEmpty(currAddr.getCustPhone())) {
-         //CREATCMR-3314
-      // legacyAddr.setAddrPhone(currAddr.getCustPhone().trim());
+    if ("ZD01".equals(currAddr.getId().getAddrType()) && !StringUtils.isEmpty(currAddr.getCustPhone())) {
+      legacyAddr.setAddrPhone(currAddr.getCustPhone().trim());
+    } else if ("ZD01".equals(currAddr.getId().getAddrType()) && StringUtils.isEmpty(currAddr.getCustPhone())) {
+      legacyAddr.setAddrPhone("");
     }
     String poBox = currAddr.getPoBox();
     if (!StringUtils.isEmpty(poBox) && ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType()))) {
@@ -1209,6 +1207,15 @@ public class UnitedKingdomTransformer extends EMEATransformer {
         legacyAddr.setPoBox("");
       } else {
         legacyAddr.setPoBox(addr.getPoBox());
+      }
+
+    }
+
+    if (!StringUtils.isEmpty(addr.getCustPhone()) && "ZD01".equals(addr.getId().getAddrType())) {
+      if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+        legacyAddr.setAddrPhone("");
+      } else {
+        legacyAddr.setAddrPhone(addr.getCustPhone());
       }
 
     }
@@ -1649,6 +1656,18 @@ public class UnitedKingdomTransformer extends EMEATransformer {
         cust.setMailingCond(muData.getOutCityLimit());
       }
     }
+    
+ 
+    for (MassUpdtAddr addr : cmrObjects.getMassUpdateAddresses() ) {
+        if (!StringUtils.isBlank(addr.getCustPhone()) && "ZS01".equals(addr.getId().getAddrType())) {
+          if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+            cust.setTelNoOrVat("");
+          } else {
+            cust.setTelNoOrVat(getTrimed(addr.getCustPhone()));
+          }
+          break;
+        }
+    }
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       String subInd = muData.getSubIndustryCd();
@@ -1694,6 +1713,15 @@ public class UnitedKingdomTransformer extends EMEATransformer {
   @Override
   public boolean isPG01Supported() {
     return true;
+  }
+
+  protected String getTrimed(String str) {
+    if (StringUtils.isEmpty(str)) {
+      str = "";
+    } else {
+      str = str.trim();
+    }
+    return str;
   }
 
 }
