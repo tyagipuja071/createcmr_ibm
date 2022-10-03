@@ -18,4 +18,6 @@ import com.ibm.cio.cmr.request.entity.Data;
 public interface PDFConverter {
 
   public boolean exportToPdf(EntityManager entityManager, Admin admin, Data data, OutputStream os, String sysLoc) throws IOException;
+
+  public boolean exportToPdfForMassUpdate(EntityManager entityManager, Admin admin, Data data, OutputStream os, String sysLoc) throws IOException;
 }

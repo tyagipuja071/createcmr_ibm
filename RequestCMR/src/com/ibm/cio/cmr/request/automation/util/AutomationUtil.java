@@ -151,6 +151,9 @@ public abstract class AutomationUtil {
 
   private static final List<String> VAT_CHECK_COUNTRIES = Arrays.asList(SystemLocation.BRAZIL);
 
+  private static final List<String> DUP_ADDR_CHECK_COUNTRIES = Arrays.asList(SystemLocation.FRANCE, SystemLocation.SPAIN,
+      SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.GERMANY, SystemLocation.AUSTRIA, SystemLocation.SWITZERLAND);
+
   /**
    * returns an instance of
    *
@@ -875,6 +878,8 @@ public abstract class AutomationUtil {
         || SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry()) || SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())
         || SystemLocation.FINLAND.equals(data.getCmrIssuingCntry()) || SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
+    } else if (DUP_ADDR_CHECK_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+      sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE_OR_SOLDTO");
     } else {
       sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
     }

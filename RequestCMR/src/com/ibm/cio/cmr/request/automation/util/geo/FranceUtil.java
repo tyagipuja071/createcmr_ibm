@@ -1003,42 +1003,12 @@ public class FranceUtil extends AutomationUtil {
             if (!CmrConstants.RDC_SOLD_TO.equals(addrType) && !CmrConstants.RDC_BILL_TO.equals(addrType)) {
               engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
             }
-            if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_PAYGO_BILLING.equals(addrType)) {
 
-              if (addressExists(entityManager, addr, requestData)) {
-                LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
-                resultCodes.add("R");
-              } else {
-                LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
-              }
-            }
-            if (CmrConstants.RDC_INSTALL_AT.equals(addrType) || CmrConstants.RDC_BILL_TO.equals(addrType)) {
-              String addrName = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
-              String soldToName = "";
-              Addr zs01 = requestData.getAddress("ZS01");
-              if (zs01 != null) {
-                soldToName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
-              }
-
-              if (addrName.equals(soldToName)) {
-                if (addressExists(entityManager, addr, requestData)) {
-                  LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
-                  resultCodes.add("R");
-                } else {
-                  LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                  checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") validated.\n");
-                }
-              } else {
-                LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
-                checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") has different customer name than sold-to.\n");
-                resultCodes.add("D");
-              }
-            }
-
-            if (CmrConstants.RDC_BILL_TO.equals(addrType)) {
+            if (addressExists(entityManager, addr, requestData)) {
+              LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
+              resultCodes.add("R");
+            } else if (CmrConstants.RDC_BILL_TO.equals(addrType)) {
 
               // CMR - 1606
               // if bill-to has been updated , validate Bill-To with
