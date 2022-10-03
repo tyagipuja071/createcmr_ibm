@@ -2716,6 +2716,7 @@ function showDeleteNotifForArgentinaIBMEM(fromAddress, scenario, scenarioChanged
         "<br><br><i>Any deleted predefined Tax Info values will not be reinstated. For that to happen, all entries must be deleted.</i>", "Warning");
     } else if (scenario == 'IBMEM' && scenarioChanged) {
       cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten." +
+        "<br><br>Do a Save action to create the predefined entries or update the Tax Number fields in Tax Info tab." +
         "<br><br><i>Any deleted predefined Tax Info values will not be reinstated. For that to happen, all entries must be deleted.</i>", "Warning");
     }
   }
