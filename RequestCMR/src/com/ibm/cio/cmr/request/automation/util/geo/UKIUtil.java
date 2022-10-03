@@ -103,8 +103,8 @@ public class UKIUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("BILL_INSTALL_DIFF", "Billing and Installing addresses are not same.");
     }
 
-    if (!(SCENARIO_PRIVATE_PERSON.equals(scenario) || "CROSS".equals(data.getCustGrp()) || SCENARIO_INTERNAL_FSL.equals(scenario)
-        || SCENARIO_INTERNAL.equals(scenario)) && "Y".equals(data.getRestrictInd())) {
+    if (!(SCENARIO_PRIVATE_PERSON.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario) || "CROSS".equals(data.getCustGrp())
+        || SCENARIO_INTERNAL_FSL.equals(scenario) || SCENARIO_INTERNAL.equals(scenario)) && "Y".equals(data.getRestrictInd())) {
       details.append("Request has been marked as CRN Exempt. Processor Review will be required.\n");
       engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
     }

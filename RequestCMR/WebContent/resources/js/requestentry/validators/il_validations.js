@@ -1272,7 +1272,7 @@ function showHideKuklaField() {
    * scenarios
    */
   if (reqType == 'C') {
-    if (custSubGrp == 'COMME' || custSubGrp == 'CROSS' || custSubGrp == 'BUSPR') {
+    if (custSubGrp == 'COMME' || custSubGrp == 'CROSS' || custSubGrp == 'BUSPR' || custSubGrp == 'IBMEM') {
       FormManager.show('CustClass', 'custClass');
       if (viewOnlyPage) {
         FormManager.readOnly('custClass');
@@ -1310,6 +1310,9 @@ function limitCustomerClassValues(value) {
   case 'CROSS':
     var kuklaValues = [ '11', '33', '35' ];
     break;
+  case 'CROSS':
+    var kuklaValues = [ '71' ];
+    break;
   default:
     break;
   }
@@ -1336,6 +1339,8 @@ function lockCustomerClassByLob(_custType) {
     }
   } else if (_custType == 'BUSPR') {
     FormManager.enable('custClass');
+  } else if (_custType == 'IBMEM') {
+    FormManager.readOnly('custClass');
   }
 }
 
@@ -1416,9 +1421,9 @@ function addISICKUKLAValidator() {
         if (reqType == 'C') {
           var custType = FormManager.getActualValue('custSubGrp');
           
-          if (custType != 'PRIPE' && isicCD == '9500') {
-            if (isicCD == '9500' || kukla == '60') {
-              errMessage = 'Invalid value for ISIC. ISIC 9500 can only be used in Private Person scenario.';
+          if ((custType != 'PRIPE' && custType != 'IBMEM') && isicCD == '9500') {
+            if (isicCD == '9500' || kukla == '60' || kukla == '71') {
+              errMessage = 'Invalid value for ISIC. ISIC 9500 can only be used in Private Person or IBM Employee scenario.';
             }
           }
        } else {
@@ -1438,9 +1443,9 @@ function addISICKUKLAValidator() {
             oldISIC = result.ret1 != null ? result.ret1 : '';
             oldKukla = result.ret2 != null ? result.ret2 : '';
           }
-          if ((currentISIC == '9500' && currentKukla != '60') || (currentISIC != '9500' && currentKukla == '60')) {
+          if ((currentISIC == '9500' && (currentKukla != '60' && currentKukla != '71')) || (currentISIC != '9500' && (currentKukla == '60' || currentKukla =='71'))) {
             if (currentISIC != oldISIC || currentKukla != oldKukla) {
-              errMessage = 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.';
+              errMessage = 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60/71 should be linked together.';
             }
           }
         }
@@ -2194,7 +2199,7 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
   }
   if (reqType == 'C' && scenarioChanged && !fromAddress) {
 
-    if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO') {
+    if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'IBMEM') {
       FormManager.setValue('repTeamMemberNo', '000993');
       FormManager.setValue('enterprise', '985999');
       FormManager.setValue('salesBusOffCd', '009');
@@ -2217,7 +2222,7 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
       requireSalesRepEnterpriseSBOByRole();
     }
   } else if (reqType == 'C' && !scenarioChanged) {
-      if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE') {
+      if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE' || scenario == 'IBMEM') {
         FormManager.readOnly('repTeamMemberNo');
         FormManager.readOnly('enterprise');
         FormManager.readOnly('salesBusOffCd');
@@ -2462,7 +2467,7 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
       FormManager.setValue('clientTier', 'Q');
     }
   }
-  if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE') {
+  if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE' || scenario == 'IBMEM') {
     FormManager.readOnly('clientTier');
   }
 }

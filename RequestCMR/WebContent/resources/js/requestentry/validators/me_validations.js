@@ -675,6 +675,7 @@ var _SalesRep2Handler = null;
 var _ExpediteHandler = null;
 var _IMSHandler = null;
 var _landCntryHandler = null;
+var _vatExempthandler = null;
 function addHandlersForCEMEA() {
   for (var i = 0; i < _addrTypesForCEMEA.length; i++) {
     _addrTypeHandler[i] = null;
@@ -691,6 +692,12 @@ function addHandlersForCEMEA() {
       if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidME();
       }
+    });
+  }
+  
+  if (_vatExemptHandler == null) {
+    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      setVatValidatorCEMEA();
     });
   }
 
@@ -741,6 +748,23 @@ function setISUCTCOnIMSChange() {
       FormManager.setValue('clientTier', 'N');
     } else if ('32' == isuCd && 'N' == clientTier && !subIndustryCd.startsWith('B')) {
       FormManager.setValue('clientTier', 'S');
+    }
+  }
+}
+
+function setVatValidatorCEMEA() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+    FormManager.resetValidations('vat');
+    if (FormManager.getActualValue('custSubGrp').includes('IBM')) {
+      FormManager.readOnly('vat');
+    }
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+    }
+    if (!dijit.byId('vatExempt').get('checked')) {
+//      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
     }
   }
 }
@@ -1256,11 +1280,15 @@ function setClientTierValues(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  isuCd = FormManager.getActualValue('isuCd');
+  var scenario = FormManager.getActualValue('custSubGrp');
+  var isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
     FormManager.enable('clientTier');
+  }
+  if (scenario.includes('IBM')) {
+    FormManager.readOnly('clientTier');
   }
 }
 
@@ -3860,6 +3888,8 @@ function setClassificationCodeME() {
       FormManager.setValue('custClass', '81');
     } else if (_custType == 'PRICU' || _custType.includes('PC')) {
       FormManager.setValue('custClass', '60');
+    } else if (_custType.includes('IBM')) {
+      FormManager.setValue('custClass', '71');
     } else if (isicCds.has(isicCd)) {
       FormManager.setValue('custClass', '13');
     } else {
@@ -4357,7 +4387,7 @@ function setIsuCtcOnScenarioChange() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (scenario.includes('IN')) {
+  } else if (scenario.includes('IN') || scenario.includes('IBM')) {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
@@ -4397,7 +4427,7 @@ function setIsuCtcOnScenarioChange() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (scenario.includes('IN')) {
+  } else if (scenario.includes('IN') || scenario.includes('IBM')) {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
@@ -4768,6 +4798,7 @@ dojo
       GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
       GEOHandler.registerValidator(validateIsicMEValidator, GEOHandler.ME, null, true);
       GEOHandler.registerValidator(addAddressTypeValidatorME, GEOHandler.ME, null, true);
+      GEOHandler.addAfterTemplateLoad(setVatValidatorCEMEA, GEOHandler.ME);
       // CMR-5993
       GEOHandler.registerValidator(validateMESBO, GEOHandler.ME, GEOHandler.ROLE_PROCESSOR, true);
       GEOHandler.addAfterConfig(setMESBO, GEOHandler.ME);
