@@ -110,11 +110,13 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
       rollover = false;
     }
 
+    int rolloverCount = 0;
     while (rollover) {
       try {
-        Thread.sleep(1000 * 60);
+        Thread.sleep(1000 * (rolloverCount == 0 ? 50 : 30));
       } catch (InterruptedException e) {
       }
+      rolloverCount++;
       Queue<T> newPendingItems = preparePendingItems();
       LOG.debug(newPendingItems.size() + " items gathered on rollover..");
       Queue<T> truePendingItems = new LinkedList<>();
@@ -125,6 +127,16 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
         }
       }
       LOG.debug(" - " + truePendingItems.size() + " NEW items gathered.");
+
+      boolean workersDone = true;
+      // before ending, check if any worker is still being executed. rollover if
+      // yes. this prevents single long running requests from holding the batch
+      for (BatchThreadWorker<?> currWorker : workers) {
+        if (!currWorker.isFinished()) {
+          workersDone = false;
+          break;
+        }
+      }
 
       rollover = !truePendingItems.isEmpty();
       if (rollover) {
@@ -137,7 +149,10 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
           workers.add(worker);
         }
       }
-      if (truePendingItems.size() < threads) {
+      if (!workersDone) {
+        LOG.debug("Worker threads are still running. Rolling over..");
+        rollover = true;
+      } else if (truePendingItems.size() < threads) {
         // if the pending items is less than the thread count, stop on next
         // execution to ensure requeueing of previous pending records
         LOG.debug("Added items less than thread count (" + truePendingItems.size() + "/" + threads + "), rollover will stop");
