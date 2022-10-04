@@ -55,7 +55,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/defaultappr/process" name="frmCMR" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="POST" action="${contextPath}/code/defaultappr/process" name="frmCMR" class="ibm-column-form ibm-styled-form"
     modelAttribute="appr" id="frmCMR">
     <cmr:model model="appr" />
     <cmr:modelAction formName="frmCMR" />
@@ -86,7 +86,7 @@
       <cmr:row topPad="10">
       </cmr:row>
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

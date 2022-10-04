@@ -76,7 +76,7 @@ StatusActModel statusActModel = (StatusActModel) request.getAttribute("statusAct
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/addStatusAct" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="statusActModel">
+  <cmr:form method="POST" action="${contextPath}/code/addStatusAct" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="statusActModel">
     <cmr:modelAction formName="frmCMR" />
     <cmr:section>
       <cmr:row topPad="8">
@@ -188,7 +188,7 @@ StatusActModel statusActModel = (StatusActModel) request.getAttribute("statusAct
         }
       %>        
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

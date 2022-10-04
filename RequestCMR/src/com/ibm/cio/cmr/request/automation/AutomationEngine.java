@@ -214,6 +214,7 @@ public class AutomationEngine {
         }
       }
     }
+
     for (AutomationElement<?> element : this.elements) {
       // determine if element is to be skipped
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
@@ -268,6 +269,8 @@ public class AutomationEngine {
           LOG.debug("Element is waiting on external processes. No action for this run");
           stopExecution = true;
           processWaiting = true;
+          // ensure to reset waiting status as elements are cached
+          ((ProcessWaitingElement) element).resetWaitingStatus();
           break;
         } else if (result.isOnError()) {
           if (!(element instanceof CompanyVerifier)) {
@@ -320,6 +323,14 @@ public class AutomationEngine {
         LOG.trace("Skipping element " + element.getProcessDesc() + " for request type " + reqType);
       }
       lastElementIndex++;
+    }
+
+    boolean sccIsValid = false;
+    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+      String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
+      if ("N".equals(setPPNFlag)) {
+        sccIsValid = true;
+      }
     }
 
     LOG.debug("Automation elements executed for Request " + reqId);
@@ -541,6 +552,12 @@ public class AutomationEngine {
             createHistory(entityManager, admin, strCmtUsEntCompToPpn, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false,
                 null);
             // CREATCMR-5447
+          } else if (sccIsValid && ("U".equals(admin.getReqType()) || "C".equals(admin.getReqType()))) {
+            LOG.debug("Moving Request " + reqId + " to PPN");
+            String cmt = "SCC is invalid , please correct SCC value. ";
+            admin.setReqStatus("PPN");
+            createComment(entityManager, cmt, reqId, appUser);
+            createHistory(entityManager, admin, cmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false, null);
           } else if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {

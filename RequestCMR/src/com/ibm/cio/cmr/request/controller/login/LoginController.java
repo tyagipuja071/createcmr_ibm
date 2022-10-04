@@ -15,7 +15,6 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -337,8 +336,7 @@ public class LoginController extends BaseController {
 
           request.getSession().setMaxInactiveInterval(60 * 60 * 3);
 
-          Cookie cookie = new Cookie("countryCode", appUser.getCountryCode());
-          response.addCookie(cookie);
+          response.addHeader("Set-Cookie", "countryCode=" + appUser.getCountryCode() + "; HttpOnly; Secure; SameSite=Strict");
 
           if (appUser.isPreferencesSet()) {
             if (loginUser.getR() > 0) {

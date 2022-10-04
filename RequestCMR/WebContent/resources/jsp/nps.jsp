@@ -39,7 +39,7 @@ div.progress {
    Sending your feedback...
    <a class="ibm-spinner-large" href="#" onclick="return false" title="Dialog overlay content">&nbsp;</a>
   </div>
-  <form id="npsform" action="https://cdoclientsurvey.w3ibm.mybluemix.net/create_record" method="POST">
+  <form _csrf="GhtjeYhfngleOImde2" id="npsform" action="https://cdoclientsurvey.w3ibm.mybluemix.net/create_record" method="POST">
     <input type="hidden" name="market" value="<%=market%>" />
     <input type="hidden" name="tribe" value="<%=tribe%>" /> 
     <input type="hidden" name="squad" value="<%=squad%>" /> 
@@ -48,6 +48,7 @@ div.progress {
     <input type="hidden" name="note" value="<%=note%>" /> 
     <input type="hidden" name="user_email" value="<%=email%>" /> 
     <input type="hidden" name="_method" value="put" /> 
+    <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
   </form>
 </body>
 <script>

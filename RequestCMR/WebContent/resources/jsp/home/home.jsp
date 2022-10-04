@@ -28,12 +28,12 @@ dojo.addOnLoad(function(){
   if (!BrowserCheck.isFirefox() && !BrowserCheck.isChrome()){
     var msg = 'You are using an unsupported browser. The functions on the pages may not work properly.<br>';
     msg += 'Please use either Firefox or Chrome to access the tool to ensure all functions work correctly.';
-    cmr.showAlert(msg);
+    //cmr.showAlert(msg);
   }
   if (BrowserCheck.isFirefox() && BrowserCheck.getFirefoxVersion() < 52){
     var msg = 'You are using an older version of Firefox.  It is recommended to use at least Firefox v52.<br>';
     msg += 'Some functions of the application may not work correctly until you update to the required version.';
-    cmr.showAlert(msg);
+    //cmr.showAlert(msg);
   }
   window.setTimeout('generateCharts()', 150);
 });

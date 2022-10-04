@@ -205,7 +205,7 @@ if (readOnly){
                 </td>
                 <td>${reqentry.dplChkDate}</td>
               </tr>
-              <tr>
+              <tr style="display:none">
                 <td>Address Std &nbsp;<span class="ibm-required">
                     <%boolean laFlage = false;
                       

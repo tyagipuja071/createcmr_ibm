@@ -29,7 +29,7 @@ var role = "${reqentry.userRole}";
 </script>
 
 <cmr:section id="APPROVALS_REQ_TAB" hidden="true">
-<form:form method="POST" action="${contextPath}/approvals/action" name="frmCMRApproval" class="ibm-column-form ibm-styled-form" modelAttribute="approval" id="frmCMRApproval">
+<cmr:form method="POST" action="${contextPath}/approvals/action" name="frmCMRApproval" class="ibm-column-form ibm-styled-form" modelAttribute="approval" id="frmCMRApproval">
   <jsp:include page="detailstrip.jsp" />
   <cmr:row addBackground="true" topPad="10">
       <cmr:column  span="1" width="120">
@@ -97,7 +97,7 @@ var role = "${reqentry.userRole}";
           </div>
         <br><br>
       </cmr:row>
-</form:form>
+</cmr:form>
 <style>
 div.approval-notif {
   border-radius : 5px;

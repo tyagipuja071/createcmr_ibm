@@ -1127,16 +1127,20 @@ public class LegacyDirectService extends TransConnService {
     WfHist hist = createHistory(entityManager, message, "PCO", "Legacy Processing", admin.getId().getReqId());
     createComment(entityManager, message, admin.getId().getReqId());
     RequestUtils.sendEmailNotifications(entityManager, admin, hist, false, true);
-
-    String mailFlag = transformer.getMailSendingFlag(cmrObjects.getData(), admin, entityManager);
-    if (!"NA".equals(mailFlag)) {
-      String mailTemplate = transformer.getEmailTemplateName(mailFlag);
-      String statusForMailSend = transformer.getReqStatusForSendingMail(mailFlag);
-      if (statusForMailSend != null && "PCO".equals(statusForMailSend)) {
-        BatchEmailModel mailParams = transformer.getMailFormatParams(entityManager, cmrObjects, mailFlag);
-        LegacyCommonUtil.sendfieldUpdateEmailNotification(entityManager, mailParams, mailTemplate);
-      }
-    }
+    // CREATCMR-2625,6677
+    // String mailFlag = transformer.getMailSendingFlag(cmrObjects.getData(),
+    // admin, entityManager);
+    // if (!"NA".equals(mailFlag)) {
+    // String mailTemplate = transformer.getEmailTemplateName(mailFlag);
+    // String statusForMailSend =
+    // transformer.getReqStatusForSendingMail(mailFlag);
+    // if (statusForMailSend != null && "PCO".equals(statusForMailSend)) {
+    // BatchEmailModel mailParams =
+    // transformer.getMailFormatParams(entityManager, cmrObjects, mailFlag);
+    // LegacyCommonUtil.sendfieldUpdateEmailNotification(entityManager,
+    // mailParams, mailTemplate);
+    // }
+    // }
 
     partialCommit(entityManager);
   }
@@ -1956,7 +1960,8 @@ public class LegacyDirectService extends TransConnService {
           custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
           custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
           legacyObjects.setCustomerExt(custExt);
-        } else if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()) || SystemLocation.KENYA.equals(data.getCmrIssuingCntry())) {
+        } else if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())
+            || SystemLocation.KENYA.equals(data.getCmrIssuingCntry())) {
           CmrtCustExtPK custExtPk = null;
           LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
           // Initialize the object
@@ -2746,7 +2751,7 @@ public class LegacyDirectService extends TransConnService {
     long reqId = admin.getId().getReqId();
     // String rdcEmbargoCd = getEmbargoCdFromDataRdc(entityManager, admin);
     DataRdc dataRdc = getDataRdcRecords(entityManager, data);
-    CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
+    CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin, true);
     if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
         && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())
         && (dataRdc.getEmbargoCd() != null && !StringUtils.isBlank(dataRdc.getEmbargoCd())) && EMBARGO_LIST.contains(dataRdc.getEmbargoCd())

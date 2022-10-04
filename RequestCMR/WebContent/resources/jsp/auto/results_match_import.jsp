@@ -14,7 +14,7 @@
 	type="text/javascript"></script>
 <cmr:modal id="result_match_modal" title="${processNm} Results"
 	widthId="570">
-	<form:form method="POST" action="<%=actionUrlMatching%>" id="frmCMRAutoImportMatch"
+	<cmr:form method="POST" action="<%=actionUrlMatching%>" id="frmCMRAutoImportMatch"
 		name="frmCMRAutoImportMatch" class="ibm-column-form ibm-styled-form"
 		modelAttribute="matchedRecord">
 			<cmr:grid url="/auto/results/matches/import/matching_list.json"
@@ -40,5 +40,5 @@
 				onClick="cmr.hideModal('result_match_modal')" highlight="false"
 				pad="true" />
 		</cmr:buttonsRow>
-	</form:form>
+	</cmr:form>
 </cmr:modal>

@@ -50,7 +50,7 @@ div.ibm-columns {
 }
 </style>
 <cmr:window>
-  <form:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="crit">
+  <cmr:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="crit">
     <!-- Company  -->
     <cmr:row>
       <cmr:column span="6">
@@ -301,7 +301,7 @@ div.ibm-columns {
     </cmr:row>
 
 
-  </form:form>
+  </cmr:form>
   <cmr:windowClose>
     <cmr:button label="Search" onClick="searchCRIS()" highlight="true" pad="true"/>
     <cmr:button label="Clear Search Criteria" onClick="window.location = 'crissearch?clear=Y'" highlight="false" pad="true"/>

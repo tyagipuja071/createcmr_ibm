@@ -66,7 +66,7 @@ function backToCodeMaintHome() {
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/lovs" name="frmCMRLov" class="ibm-column-form ibm-styled-form" modelAttribute="lovs">
+  <cmr:form method="POST" action="${contextPath}/code/lovs" name="frmCMRLov" class="ibm-column-form ibm-styled-form" modelAttribute="lovs">
     <cmr:section>
      <cmr:row topPad="8" addBackground="true">
         <cmr:column span="1">
@@ -111,7 +111,7 @@ function backToCodeMaintHome() {
       <cmr:row topPad="10">
       </cmr:row>
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

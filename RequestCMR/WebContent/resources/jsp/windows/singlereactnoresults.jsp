@@ -26,7 +26,7 @@ div.ibm-columns {
 }
 </style>
 <cmr:window>
-  <form:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="sreact">
+  <cmr:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="sreact">
     <jsp:include page="singlereactcriteria.jsp" />
     <cmr:row>
       <cmr:column span="6">
@@ -37,7 +37,7 @@ div.ibm-columns {
           </strong>
       </cmr:column>
     </cmr:row>
-  </form:form>
+  </cmr:form>
   <cmr:windowClose>
     <cmr:button label="Search Again" onClick="backToSearch()" highlight="true" pad="true"/> 
   </cmr:windowClose>

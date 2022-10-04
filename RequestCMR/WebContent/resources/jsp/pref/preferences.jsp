@@ -55,7 +55,7 @@ _profilecomplete = true;
   <cmr:tabs />
 
   <cmr:section>
-    <form:form method="POST" action="${contextPath}/preferences" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="pref">
+    <cmr:form method="POST" action="${contextPath}/preferences" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="pref">
       <cmr:modelAction formName="frmCMR" />
       <form:hidden path="managerName" />
       <%
@@ -274,14 +274,14 @@ _profilecomplete = true;
       <cmr:row addBackground="true">
         &nbsp;
       </cmr:row>
-    </form:form>
+    </cmr:form>
   </cmr:section>
 </cmr:boxContent>
 
 <cmr:boxContent>
   <cmr:tabs />
   <cmr:section>
-    <form:form method="POST" action="${contextPath}/preferences/delegate" name="frmCMRDel" class="ibm-column-form ibm-styled-form" modelAttribute="del" id="frmCMRDel">
+    <cmr:form method="POST" action="${contextPath}/preferences/delegate" name="frmCMRDel" class="ibm-column-form ibm-styled-form" modelAttribute="del" id="frmCMRDel">
       <form:hidden path="userId" />
       <cmr:modelAction formName="frmCMRDel" />
       <cmr:row>
@@ -335,7 +335,7 @@ _profilecomplete = true;
           </p>
         </cmr:column>
       </cmr:row>
-    </form:form>
+    </cmr:form>
   </cmr:section>
 </cmr:boxContent>
     
@@ -346,7 +346,7 @@ _profilecomplete = true;
 <cmr:boxContent>
   <cmr:tabs />
   <cmr:section>
-    <form:form method="POST" action="${contextPath}/preferences/country" name="frmCMRCntry" class="ibm-column-form ibm-styled-form" modelAttribute="cntry" id="frmCMRCntry">
+    <cmr:form method="POST" action="${contextPath}/preferences/country" name="frmCMRCntry" class="ibm-column-form ibm-styled-form" modelAttribute="cntry" id="frmCMRCntry">
       <form:hidden path="requesterId" />
       <form:hidden path="removeCntry" />
       <cmr:modelAction formName="frmCMRCntry" />
@@ -385,7 +385,7 @@ _profilecomplete = true;
           </p>
         </cmr:column>
       </cmr:row>
-    </form:form>
+    </cmr:form>
   </cmr:section>
 </cmr:boxContent>
 

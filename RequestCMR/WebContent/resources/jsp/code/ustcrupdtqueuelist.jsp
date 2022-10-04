@@ -45,7 +45,7 @@
   })();
 </script>
 
-<form:form method="POST" action="#" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="us_tcr_updt_queue" id="frmCMR">
+<cmr:form method="POST" action="#" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="us_tcr_updt_queue" id="frmCMR">
   <cmr:boxContent>
     <cmr:tabs />
     <cmr:section>
@@ -115,7 +115,7 @@
       
     </cmr:section>
 </cmr:boxContent>
-</form:form>
+</cmr:form>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>
     <cmr:button label="Back to Code Maintenance Home" onClick="backToCodeMaintHome()" />

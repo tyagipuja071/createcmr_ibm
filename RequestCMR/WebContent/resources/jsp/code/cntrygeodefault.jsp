@@ -35,7 +35,7 @@ function backToCodeMaintHome() {
 <cmr:boxContent>
   <cmr:tabs />
   
-  <form:form method="POST" action="${contextPath}/code/cntrygeodef" name="frmCMRCntryGeoDef" class="ibm-column-form ibm-styled-form" modelAttribute="cntrygeodef">
+  <cmr:form method="POST" action="${contextPath}/code/cntrygeodef" name="frmCMRCntryGeoDef" class="ibm-column-form ibm-styled-form" modelAttribute="cntrygeodef">
     <cmr:section>
       <cmr:row topPad="8">
         <cmr:column span="6">
@@ -57,7 +57,7 @@ function backToCodeMaintHome() {
       <cmr:row topPad="10">
       </cmr:row>
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

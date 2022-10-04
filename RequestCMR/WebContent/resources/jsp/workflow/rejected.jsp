@@ -46,7 +46,7 @@ div.cmr-sub {
 }
 </style>
 
-<form:form method="POST" action="${contextPath}/workflow/rejected" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="wfreq">
+<cmr:form method="POST" action="${contextPath}/workflow/rejected" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="wfreq">
 
   <form:hidden path="reqId" id="mainReqId" />
 
@@ -110,6 +110,6 @@ div.cmr-sub {
 <input type="hidden" id="newReqCntry_h" name="newReqCntry" value="" />
 <input type="hidden" id="newReqType_h" name="newReqType" value="" />
 
-</form:form>
+</cmr:form>
 <cmr:model model="rejectedReqModel" />
 <jsp:include page="../massrequestentry/file_dl.jsp" />

@@ -114,6 +114,9 @@ boolean isTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(user.getIntranetId())
             <li id="USER_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/users')">User Maintenance</a></li>
           <%} %>
           <li id="CODE_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/code')">Code Maintenance</a></li>
+          <%if (user.isCmde()){ %>
+           <li id="CORRECTIONS_TAB"><a href="javascript: goToUrl('${contextPath}/corrections')">Corrections</a></li>
+          <%} %>
 				</c:if>
         <c:if test="${primaryTabId ==  'METRICS'}">
             <li id="METRICS_STATS_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/stats')">Request Statistics</a></li>

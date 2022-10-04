@@ -4,8 +4,10 @@
 package com.ibm.cio.cmr.request.service.requestentry;
 
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,6 +25,7 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -53,6 +56,7 @@ import com.ibm.cio.cmr.request.model.requestentry.NotifyListModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.requestentry.SubindustryIsicSearchModel;
 import com.ibm.cio.cmr.request.model.requestentry.ValidationUrlModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
@@ -71,7 +75,6 @@ import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
-import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -117,6 +120,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       performSave(model, entityManager, request, true);
     } else if ("CONFIRM_DOC_UPD".equalsIgnoreCase(action)) {
       updateDeprecatedAttachmentTypes(model, entityManager, request);
+    } else if ("RECREATE".equalsIgnoreCase(action)) {
+      recreateCMR(model, entityManager, request);
     } else {
       // Claim conditionally approved request (Edit Request)
       /*
@@ -352,6 +357,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       Admin admin = entity.getEntity(Admin.class);
       admin.setLastUpdtBy(user.getIntranetId());
       admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+      admin.setWarnMsgSentDt(null);
 
       if (StringUtils.isEmpty(admin.getLockInd())) {
         admin.setLockInd(CmrConstants.YES_NO.N.toString());
@@ -517,6 +523,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     admin = entity.getEntity(Admin.class);
     admin.setLastUpdtBy(user.getIntranetId());
     admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+    admin.setWarnMsgSentDt(null);
 
     lockedBy = admin.getLockBy();
     lockedByNm = admin.getLockByNm();
@@ -592,6 +599,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       geoHandler.doBeforeDataSave(entityManager, admin, data, model.getCmrIssuingCntry());
     } else if (geoHandler != null) {
       geoHandler.doBeforeDataSave(entityManager, admin, data, model.getCmrIssuingCntry());
+      if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry()) && "CreateCMR-BP".equals(admin.getSourceSystId())
+          && StringUtils.isNotEmpty(model.getStatusChgCmt()) && model.getStatusChgCmt().length() >= 20
+          && model.getStatusChgCmt().startsWith("IBMDIRECT_CMR")) {
+        data.setCmrNo2(model.getStatusChgCmt().substring(13, 20));
+        model.setStatusChgCmt(model.getStatusChgCmt().substring(20));
+      }
     }
     updateEntity(data, entityManager);
 
@@ -793,14 +806,6 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
             if (SystemLocation.CHINA.equals(model.getCmrIssuingCntry()) && StringUtils.isNotBlank(model.getDisableAutoProc())
                 && model.getDisableAutoProc().equalsIgnoreCase("Y")) {
               // transrec.setNewReqStatus("PPN");// set to PPN for CHINA
-            } else if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry())) {
-              String setPPNFlag = USHandler.validateForSCC(entityManager, model.getReqId());
-              if ("N".equals(setPPNFlag)) {
-                // set NewReqStatus value PPN for US
-              } else {
-                this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
-                transrec.setNewReqStatus("AUT"); // set to automated processing
-              }
             } else {
               this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
               transrec.setNewReqStatus("AUT"); // set to automated processing
@@ -1468,7 +1473,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
    * @param reqId
    * @return
    */
-  public ModelMap isDnBMatch(AutoDNBDataModel model, long reqId) {
+  public ModelMap isDnBMatch(AutoDNBDataModel model, long reqId, String addrType) {
     ModelMap map = new ModelMap();
     EntityManager entityManager = null;
     try {
@@ -1478,18 +1483,18 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         Data data = requestData.getData();
         Admin admin = requestData.getAdmin();
         Scorecard scorecard = requestData.getScorecard();
-        Addr zs01 = requestData.getAddress("ZS01");
+        Addr addr = requestData.getAddress(addrType);
         DnBMatchingResponse tradeStyleName = null;
         boolean isicMatch = false;
         boolean confidenceCd = false;
         boolean checkTradestyleNames = ("R".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry()))
             || "O".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry())));
-        MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
+        MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, addrType);
         if (response != null && response.getSuccess()) {
           map.put("success", true);
           boolean match = false;
-          if (response.getMatched() && (("Accepted".equals(scorecard.getFindDnbResult()) && !StringUtils.isBlank(requestData.getData().getDunsNo()))
-              || "Rejected".equals(scorecard.getFindDnbResult()))) {
+          if (response.getMatched() && ((("Accepted".equals(scorecard.getFindDnbResult()) && !StringUtils.isBlank(requestData.getData().getDunsNo()))
+              || "Rejected".equals(scorecard.getFindDnbResult())) || "U".equals(admin.getReqType()))) {
             for (DnBMatchingResponse record : response.getMatches()) {
               // ISIC on request is compared to IBM ISIC
               if (record.getConfidenceCode() >= 8) {
@@ -1505,11 +1510,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
                 match = true;
                 break;
               }
-              if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, false, true)) {
+              if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addr, admin, record, null, false, true)) {
                 match = true;
                 break;
               } else if (checkTradestyleNames && record.getConfidenceCode() >= 8 && record.getTradeStyleNames() != null && tradeStyleName == null
-                  && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, true)) {
+                  && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addr, admin, record, null, true)) {
                 tradeStyleName = record;
               }
             }
@@ -1555,6 +1560,172 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     return map;
 
+  }
+
+  public ModelMap isDnBMatchAddrsUpdateAU(AutoDNBDataModel model, long reqId) {
+    ModelMap dnbmatchmap = new ModelMap();
+    ModelMap map = new ModelMap();
+    List<ModelMap> maps = new ArrayList<ModelMap>();
+    EntityManager entityManager = null;
+    try {
+      if (reqId > 0) {
+        entityManager = JpaManager.getEntityManager();
+        RequestData requestData = new RequestData(entityManager, reqId);
+        Data data = requestData.getData();
+        Admin admin = requestData.getAdmin();
+        RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, requestData);
+        List<Addr> addresses = null;
+        ArrayList<String> RELEVANT_ADDRESSES = new ArrayList<String>(Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
+            CmrConstants.RDC_INSTALL_AT, "STAT", "MAIL", "ZF01", "PUBS", "PUBB", "EDUC", "CTYG", "CTYH"));
+
+        for (String addrType : RELEVANT_ADDRESSES) {
+          if (changes.isAddressChanged(addrType)) {
+            addresses = requestData.getAddresses(addrType);
+
+            if (addresses != null) {
+              for (Addr addr : addresses) {
+                if ("Y".equals(addr.getChangedIndc())) {
+                  // update address
+                  if (RELEVANT_ADDRESSES.contains(addr.getId().getAddrType())) {
+                    if (isRelevantAddressFieldUpdated(changes, addr)) {
+                      // dnb match
+                      dnbmatchmap = isDnBMatch(model, reqId, addr.getId().getAddrType());
+                      maps.add(dnbmatchmap);
+                      // dnbmatchmap.clear();
+                    } else {
+                      // No Dnb match required for update if no changes
+                      dnbmatchmap.put("success", true);
+                      dnbmatchmap.put("match", true);
+                      dnbmatchmap.put("isicMatch", true);
+                      maps.add(dnbmatchmap);
+                    }
+                  }
+                } else if ("N".equals(addr.getImportInd())) {
+                  // dnbMatch
+                  dnbmatchmap = isDnBMatch(model, reqId, addr.getId().getAddrType());
+                  maps.add(dnbmatchmap);
+                  // dnbmatchmap.clear();
+                }
+              }
+            } else {
+              // No Dnb match required for update if no changes
+              dnbmatchmap.put("success", true);
+              dnbmatchmap.put("match", true);
+              dnbmatchmap.put("isicMatch", true);
+              maps.add(dnbmatchmap);
+            }
+          }
+        }
+
+        if (maps != null) {
+          for (ModelMap dnbMap : maps) {
+            if (!dnbMap.isEmpty() && (Boolean) dnbMap.get("success") && (Boolean) dnbMap.get("match") && (Boolean) dnbMap.get("isicMatch")) {
+              continue;
+            } else {
+              map = dnbMap;
+              break;
+              // return map;
+            }
+          }
+          if (map.isEmpty()) {
+            map.put("success", true);
+            map.put("match", true);
+            map.put("isicMatch", true);
+          }
+        }
+      } else {
+        map.put("success", false);
+        map.put("match", false);
+        String message = "Invalid request Id";
+        map.put("message", message);
+      }
+    } catch (Exception e) {
+      log.debug("Error occurred while checking DnB Matches." + e);
+      map.put("success", false);
+      map.put("match", false);
+      String message = "An error occurred while matching with DnB.";
+      map.put("message", message);
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+    return map;
+
+  }
+
+  public ModelMap isCustNmMatch(AutoDNBDataModel model, long reqId, String custNm, String formerCustNm) {
+
+    ModelMap map = new ModelMap();
+    EntityManager entityManager = null;
+    try {
+      if (reqId > 0) {
+        entityManager = JpaManager.getEntityManager();
+        RequestData requestData = new RequestData(entityManager, reqId);
+        List<String> dnbTradestyleNames = new ArrayList<String>();
+        boolean dnbCustNmMatch = false;
+        boolean dnbFormerCustNmMatch = false;
+        boolean dnbSuccess = false;
+        boolean dnbMatch = false;
+
+        MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
+        if (response != null && response.getMatched()) {
+          dnbSuccess = true;
+          List<DnBMatchingResponse> dnbMatches = response.getMatches();
+          for (DnBMatchingResponse dnbRecord : dnbMatches) {
+            dnbMatch = true;
+            String dnbCustNm = StringUtils.isBlank(dnbRecord.getDnbName()) ? "" : dnbRecord.getDnbName().replaceAll("\\s+$", "");
+            if (custNm.equalsIgnoreCase(dnbCustNm)) {
+              dnbCustNmMatch = true;
+              dnbTradestyleNames = dnbRecord.getTradeStyleNames();
+              if (dnbTradestyleNames != null) {
+                for (String tradestyleNm : dnbTradestyleNames) {
+                  tradestyleNm = tradestyleNm.replaceAll("\\s+$", "");
+                  if (tradestyleNm.equalsIgnoreCase(formerCustNm)) {
+                    dnbFormerCustNmMatch = true;
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }
+        map.put("match", dnbMatch);
+        map.put("success", dnbSuccess);
+        map.put("formerCustNmMatch", dnbFormerCustNmMatch);
+        map.put("custNmMatch", dnbCustNmMatch);
+      } else {
+        map.put("success", false);
+        map.put("match", false);
+        String message = "Invalid request Id";
+        map.put("message", message);
+      }
+    } catch (Exception e) {
+      log.debug("Error occurred while checking DnB Matches." + e);
+      map.put("success", false);
+      map.put("match", false);
+      String message = "An error occurred while matching with DnB.";
+      map.put("message", message);
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+    return map;
+  }
+
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    List<String> NON_RELEVANT_ADDRESS_FIELDS_AU = Arrays.asList("Attn", "Phone #");
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (!NON_RELEVANT_ADDRESS_FIELDS_AU.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -1704,4 +1875,86 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     return false;
   }
+
+  /**
+   * Reprocesses a single CREATE request. The process:<br>
+   * <ul>
+   * <li>Clears DATA.CMR_NO</li>
+   * <li>Clears DATA.SITE_ID</li>
+   * <li>Clears all ADDR.SAP_NO</li>
+   * <li>Clears all ADDR.IERP_SITE_PRTY_ID</li>
+   * <li>Clears ADMIN.RDC_PROCESSING_STATUS</li>
+   * <li>Sets ADMIN.PROCESSED_FLAG = ''</li>
+   * <li>Sets ADMIN.LOCK_IND = 'N'</li>
+   * <li>Sets ADMIN.LOCK_BY = null</li>
+   * <li>Sets ADMIN.LOCK_TS = null</li>
+   * <li>Sets ADMIN.LOCK_BY_NM = null</li>
+   * <li>Sets ADMIN.DISABLE_AUTO_PROC = 'N'</li>
+   * <li>Sets ADMIN.REQ_STATUS = 'PCP'</li>
+   * </ul>
+   * The process also creates corresponding comment logs and workflow histories.
+   * The function was added as part of CREATCMR-6971
+   * 
+   * @param model
+   * @param entityManager
+   * @param request
+   * @throws CmrException
+   * @throws SQLException
+   */
+  private void recreateCMR(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException, SQLException {
+
+    long reqId = model.getReqId();
+    if (reqId > 0) {
+
+      AppUser user = AppUser.getUser(request);
+      if (!user.isCmde() && !user.isAdmin()) {
+        throw new CmrException(new Exception("Reprocess can only be done by Administrators"));
+      }
+      StringBuilder comments = new StringBuilder();
+      comments.append("** Forced Recreation of CMR **\n");
+      this.log.debug("Retreiving Request " + reqId + " for Reprocess..");
+      RequestData requestData = new RequestData(entityManager, reqId);
+
+      Admin admin = requestData.getAdmin();
+      if (!CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        throw new CmrException(new Exception("Reprocess can only be done for Create requests."));
+      }
+
+      Data data = requestData.getData();
+      comments.append("Previous CMR No.: " + data.getCmrNo()).append("\n");
+      data.setCmrNo(null);
+      data.setSitePartyId(null);
+      this.log.debug("Saving data..");
+      updateEntity(data, entityManager);
+
+      List<Addr> addresses = requestData.getAddresses();
+      for (Addr addr : addresses) {
+        comments.append("Previous Address " + addr.getId().getAddrType() + "/" + addr.getId().getAddrSeq() + " KUNNR: " + addr.getSapNo())
+            .append("\n");
+        addr.setSapNo(null);
+        addr.setIerpSitePrtyId(null);
+        this.log.debug("Saving address..");
+        updateEntity(addr, entityManager);
+      }
+
+      admin.setDisableAutoProc("N");
+      admin.setLockInd("N");
+      admin.setLockBy(null);
+      admin.setLockByNm(null);
+      admin.setLockTs(null);
+      admin.setProcessedFlag("N");
+      admin.setRdcProcessingStatus("");
+      admin.setReqStatus("PCP");
+
+      this.log.debug("Saving admin..");
+      updateEntity(admin, entityManager);
+
+      // create the workflow history of the status change
+      RequestUtils.createWorkflowHistory(this, entityManager, user.getIntranetId(), admin, comments.toString(), "Recreate", null, null, true, null,
+          null);
+      RequestUtils.createCommentLog(this, entityManager, user, reqId, comments.toString());
+    }
+
+  }
+
 }

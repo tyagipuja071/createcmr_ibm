@@ -77,7 +77,7 @@
 <cmr:boxContent>
 	<cmr:tabs />
 
-	<form:form method="POST" action="${contextPath}/code/apCluster"
+	<cmr:form method="POST" action="${contextPath}/code/apCluster"
 		name="frmCMRLov" class="ibm-column-form ibm-styled-form"
 		modelAttribute="apClusterModel" id="frmCMR">
 
@@ -124,7 +124,7 @@
 			<cmr:row topPad="10">
 			</cmr:row>
 		</cmr:section>
-	</form:form>
+	</cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
 	<cmr:buttonsRow>
