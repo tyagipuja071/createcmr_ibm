@@ -215,25 +215,28 @@ public class BluePagesHelper {
    * @param name
    * @return First and Last name as a single String
    */
-  public static Map<String, String> getBluePagesDetailsByName(String name, String country) {
+    public static Map<String, String> getBluePagesDetailsByName(String name, String country) {
 
     List<BPResults> allResults = new ArrayList<BPResults>();
+    BPResults rearrangedNameResuls = null;
 
     BPResults resultsNormal = BluePages.getPersonsByNameFuzzy(name);
     allResults.add(resultsNormal);
+    LOG.debug("Status for normal Name search: " + resultsNormal.getStatusCode() + " = " + resultsNormal.getStatusMsg());
 
     List<String> nameCombinations = getRearrangedNames(name);
 
-    BPResults rearrangedNameResuls = BluePages.getPersonsByNameFuzzy(nameCombinations.get(0));
-    allResults.add(rearrangedNameResuls);
+    if (nameCombinations.size() > 0) {
+      rearrangedNameResuls = BluePages.getPersonsByNameFuzzy(nameCombinations.get(0));
+      allResults.add(rearrangedNameResuls);
 
-    rearrangedNameResuls = BluePages.getPersonsByName(nameCombinations.get(1));
-    allResults.add(rearrangedNameResuls);
+      rearrangedNameResuls = BluePages.getPersonsByName(nameCombinations.get(1));
+      allResults.add(rearrangedNameResuls);
+
+      LOG.debug("Status for rearranged Name search: " + rearrangedNameResuls.getStatusCode() + " = " + rearrangedNameResuls.getStatusMsg());
+    }
 
     Map<String, String> returnMap = new HashMap<String, String>();
-
-    LOG.debug("Status for normal Name search: " + resultsNormal.getStatusCode() + " = " + resultsNormal.getStatusMsg());
-    LOG.debug("Status for rearranged Name search: " + resultsNormal.getStatusCode() + " = " + resultsNormal.getStatusMsg());
 
     for (BPResults bpresults : allResults) {
       if (bpresults.succeeded() && returnMap.size() == 0) {
@@ -261,7 +264,6 @@ public class BluePagesHelper {
     }
     return returnMap;
   }
-
   /**
    * Gets the Person details like Name, Country Code, Company code, CNUM by
    * intranet addr.
@@ -632,10 +634,10 @@ public class BluePagesHelper {
    */
   public static List<String> getRearrangedNames(String name) {
     String[] splitName = name.trim().replaceAll(" +", " ").split(" ");
-    if (splitName.length < 2) {
-      return null;
-    }
     List<String> rearrangedNames = new ArrayList<String>();
+    if (splitName.length < 2) {
+      return rearrangedNames;
+    }
     String rearrangedName = "";
 
     // First arrangement
