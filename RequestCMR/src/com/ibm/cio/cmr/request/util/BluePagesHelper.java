@@ -218,22 +218,25 @@ public class BluePagesHelper {
   public static Map<String, String> getBluePagesDetailsByName(String name, String country) {
 
     List<BPResults> allResults = new ArrayList<BPResults>();
+    BPResults rearrangedNameResuls = null;
 
     BPResults resultsNormal = BluePages.getPersonsByNameFuzzy(name);
     allResults.add(resultsNormal);
+    LOG.debug("Status for normal Name search: " + resultsNormal.getStatusCode() + " = " + resultsNormal.getStatusMsg());
 
     List<String> nameCombinations = getRearrangedNames(name);
 
-    BPResults rearrangedNameResuls = BluePages.getPersonsByNameFuzzy(nameCombinations.get(0));
-    allResults.add(rearrangedNameResuls);
+    if (nameCombinations.size() > 0) {
+      rearrangedNameResuls = BluePages.getPersonsByNameFuzzy(nameCombinations.get(0));
+      allResults.add(rearrangedNameResuls);
 
-    rearrangedNameResuls = BluePages.getPersonsByName(nameCombinations.get(1));
-    allResults.add(rearrangedNameResuls);
+      rearrangedNameResuls = BluePages.getPersonsByName(nameCombinations.get(1));
+      allResults.add(rearrangedNameResuls);
+
+      LOG.debug("Status for rearranged Name search: " + rearrangedNameResuls.getStatusCode() + " = " + rearrangedNameResuls.getStatusMsg());
+    }
 
     Map<String, String> returnMap = new HashMap<String, String>();
-
-    LOG.debug("Status for normal Name search: " + resultsNormal.getStatusCode() + " = " + resultsNormal.getStatusMsg());
-    LOG.debug("Status for rearranged Name search: " + resultsNormal.getStatusCode() + " = " + resultsNormal.getStatusMsg());
 
     for (BPResults bpresults : allResults) {
       if (bpresults.succeeded() && returnMap.size() == 0) {
