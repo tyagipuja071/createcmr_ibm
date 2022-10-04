@@ -204,6 +204,15 @@ public class CEMEAHandler extends BaseSOFHandler {
     } else {
       String cmrIssueCd = reqEntry.getCmrIssuingCntry();
       String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
+      List<FindCMRRecordModel> recordsFromSearch = source.getItems();
+      List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
+
+      if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0 && "618".equals(reqEntry.getCmrIssuingCntry())) {
+        doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
+        if (!filteredRecords.isEmpty() && filteredRecords.size() > 0 && filteredRecords != null) {
+          source.setItems(filteredRecords);
+        }
+      }
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
         if (source.getItems() != null) {
           String addrType = null;
@@ -2676,4 +2685,23 @@ public class CEMEAHandler extends BaseSOFHandler {
     return addrSeq;
   }
 
+  @SuppressWarnings("unchecked")
+  public static void doFilterAddresses(RequestEntryModel reqEntry, Object mainRecords, Object filteredRecords) {
+    if (mainRecords instanceof java.util.List<?> && filteredRecords instanceof java.util.List<?>) {
+      // during convertFrom
+      if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(reqEntry.getReqType())) {
+        List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
+        List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
+        for (Object tempRecObj : recordsToCheck) {
+          if (tempRecObj instanceof FindCMRRecordModel) {
+            FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+            if ("ZS01".equalsIgnoreCase(tempRec.getCmrAddrTypeCode()) && ("90".equalsIgnoreCase(tempRec.getCmrOrderBlock()))) {
+              tempRec.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZS03.toString());
+            }
+            recordsToReturn.add(tempRec);
+          }
+        }
+      }
+    }
+  }
 }
