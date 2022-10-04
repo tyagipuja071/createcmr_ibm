@@ -59,82 +59,9 @@
       <cmr:column span="1" width="240">
         ${summary.data.abbrevLocn}
       </cmr:column>
-      <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="CSBOCd" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="200">
-        ${summary.data.csBo}
-      </cmr:column>
-    </cmr:row>
-  </cmr:view>
-
-  <cmr:view>
-    <cmr:row addBackground="true">
-      <cmr:column span="1" width="127">
-      </cmr:column>
-            <cmr:column span="1" width="130">
-      <label><cmr:fieldLabel fieldId="BusnType" />: </label>
-    </cmr:column>
-    <cmr:column span="1" width="240">
-      ${summary.data.busnType}
-    </cmr:column>
-          <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="Email1" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="180">
-        ${summary.data.email1}
-      </cmr:column> 
     </cmr:row>
   </cmr:view>
   <cmr:view>
-    <cmr:row addBackground="true">
-      <cmr:column span="1" width="127">
-      </cmr:column>
-      <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="ContactName2" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="200">
-        ${summary.data.contactName2}
-      </cmr:column>
-            <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="ContactName1" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="200">
-        ${summary.data.contactName1}
-      </cmr:column>
-    </cmr:row>
-     <cmr:row addBackground="true">
-      <cmr:column span="1" width="127">
-      </cmr:column>
-      <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="BPName" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="200">
-        ${summary.data.bpName}
-      </cmr:column>
-            <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="Affiliate" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="200">
-        ${summary.data.affiliate}
-      </cmr:column>
-    </cmr:row>
-    <cmr:row addBackground="true">
-      <cmr:column span="1" width="127">
-      </cmr:column>
-      <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="CommercialFinanced" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="200">
-        ${summary.data.commercialFinanced}
-      </cmr:column>
-            <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="Email2" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="200">
-        ${summary.data.email2}
-      </cmr:column>
-    </cmr:row>
     <cmr:row addBackground="true">
       <cmr:column span="1" width="127">
       </cmr:column>

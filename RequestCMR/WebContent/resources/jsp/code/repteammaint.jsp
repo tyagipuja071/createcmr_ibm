@@ -93,7 +93,7 @@ var countries= {};
 <cmr:boxContent>
 	<cmr:tabs />
 
-	<form:form method="POST" action="${contextPath}/code/repTeam"
+	<cmr:form method="POST" action="${contextPath}/code/repTeam"
 		name="frmCMRRt" class="ibm-column-form ibm-styled-form"
 		modelAttribute="repTeamModel" id="frmCMR">
 
@@ -138,7 +138,7 @@ var countries= {};
 			<cmr:row topPad="10">
 			</cmr:row>
 		</cmr:section>
-	</form:form>
+	</cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
 	<cmr:buttonsRow>

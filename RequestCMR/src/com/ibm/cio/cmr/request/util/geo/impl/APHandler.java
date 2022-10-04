@@ -32,6 +32,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -216,6 +217,10 @@ public abstract class APHandler extends GEOHandler {
 
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      admin.setOldCustNm1(currentRecord.getCmrName1Plain());
+      admin.setOldCustNm2(currentRecord.getCmrName2Plain());
+    }
   }
 
   @Override
@@ -346,6 +351,21 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(oldData.getApCustClusterId());
       results.add(update);
     }
+  }
+
+  public DataRdc getAPClusterDataRdc(long reqId) {
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    List<DataRdc> records = query.getResults(DataRdc.class);
+    if (records != null && records.size() > 0) {
+      for (DataRdc oldData : records) {
+        return oldData;
+      }
+    }
+    return null;
   }
 
   @Override

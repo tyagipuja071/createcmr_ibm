@@ -490,7 +490,9 @@ function afterConfigForLA() {
   
   if (dojo.byId('isuCd')) {
     // FormManager.disable('isuCd');
-    FormManager.readOnly('isuCd');
+    if(!checkForProspect()){
+      FormManager.readOnly('isuCd');
+    }
   }
   if (dojo.byId('collBoId' && _reqType != 'U')) {
     dojo.byId('collBoId').readOnly = true;
@@ -2665,6 +2667,35 @@ function setTaxRegimeMX() {
   }
 }
 
+// CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
+function makeMrcSboOptionalForProspectLA() {
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+    if (dijit.byId('prospLegalInd')) {
+      ifProspect = checkForProspect();
+    }
+    if('Y' == ifProspect){
+      if (typeof (_pagemodel) != 'undefined') {
+        if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
+          FormManager.resetValidations('mrcCd');
+          FormManager.resetValidations('salesBusOffCd');
+          FormManager.setValue('isuCd', '');
+          FormManager.setValue('mrcCd', '');
+          FormManager.setValue('salesBusOffCd', '');
+          FormManager.enable('isuCd');
+          }
+        }
+      }
+    console.log('SBO & MRC are non mandatory for Prospect');
+}
+
+function checkForProspect(){
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  return ifProspect;
+}
+
 function setMrcCdToReadOnly() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
@@ -2803,9 +2834,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
-  
+    // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
+  GEOHandler.addAfterConfig(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
-
   GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
 });

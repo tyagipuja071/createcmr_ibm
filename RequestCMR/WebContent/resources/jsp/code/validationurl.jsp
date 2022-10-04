@@ -84,7 +84,7 @@
 <cmr:boxContent>
   <cmr:tabs />
 
-  <form:form method="POST" action="${contextPath}/code/validationurlsmain" name="frmCMR" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="POST" action="${contextPath}/code/validationurlsmain" name="frmCMR" class="ibm-column-form ibm-styled-form"
     modelAttribute="validationurl">
     <cmr:modelAction formName="frmCMR" />
     <cmr:section>
@@ -198,7 +198,7 @@
       <form:hidden id="updtBy" path="updtBy" />
 
     </cmr:section>
-  </form:form>
+  </cmr:form>
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
   <cmr:buttonsRow>

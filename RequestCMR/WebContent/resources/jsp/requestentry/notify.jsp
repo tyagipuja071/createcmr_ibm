@@ -40,7 +40,7 @@ if (readOnly == null){
     FormManager.ready();
   }
 </script>
-<form:form method="POST" action="${contextPath}/request/notify/process" name="frmCMRNotif" class="ibm-column-form ibm-styled-form" modelAttribute="notif" id="frmCMRNotif">
+<cmr:form method="POST" action="${contextPath}/request/notify/process" name="frmCMRNotif" class="ibm-column-form ibm-styled-form" modelAttribute="notif" id="frmCMRNotif">
   <cmr:modelAction formName="frmCMRNotif" />
   <cmr:section id="NOTIFY_REQ_TAB" hidden="true">
     <jsp:include page="detailstrip.jsp" />
@@ -100,4 +100,4 @@ if (readOnly == null){
     </cmr:row>
 <%} %>
   </cmr:section>
-</form:form>
+</cmr:form>

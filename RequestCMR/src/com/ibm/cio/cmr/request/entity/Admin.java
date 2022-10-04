@@ -311,6 +311,14 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
   @Column(name = "POOL_CMR_INDC")
   private String poolCmrIndc;
 
+  @NoLog
+  @Column(name = "WARN_MSG_SENT_DT")
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date warnMsgSentDt;
+
+  @Transient
+  private boolean useParentManager;
+
   public String getRequesterId() {
     return this.requesterId;
   }
@@ -765,6 +773,22 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
 
   public void setPoolCmrIndc(String poolCmrIndc) {
     this.poolCmrIndc = poolCmrIndc;
+  }
+
+  public Date getWarnMsgSentDt() {
+    return warnMsgSentDt;
+  }
+
+  public void setWarnMsgSentDt(Date warnMsgSentDt) {
+    this.warnMsgSentDt = warnMsgSentDt;
+  }
+
+  public boolean isUseParentManager() {
+    return useParentManager;
+  }
+
+  public void setUseParentManager(boolean useParentManager) {
+    this.useParentManager = useParentManager;
   }
 
 }

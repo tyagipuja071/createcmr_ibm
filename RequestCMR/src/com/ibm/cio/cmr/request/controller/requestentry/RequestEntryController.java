@@ -539,6 +539,9 @@ public class RequestEntryController extends BaseController {
         MessageUtil.setInfoMessage(mv, MessageUtil.VERIFY_SCENARIO_SUCCESS);
       } else if (CmrConstants.OVERRIDE_DNB.equalsIgnoreCase(action)) {
         MessageUtil.setInfoMessage(mv, MessageUtil.OVERRIDE_DNB_SUCCESS);
+      } else if ("RECREATE".equalsIgnoreCase(action)) {
+        mv = new ModelAndView("redirect:/request/" + model.getReqId(), "reqentry", new RequestEntryModel());
+        MessageUtil.setInfoMessage(mv, MessageUtil.INFO_RECREATE);
       }
 
       if (!StringUtils.isEmpty(model.getDplMessage())) {
@@ -871,7 +874,38 @@ public class RequestEntryController extends BaseController {
     try {
       String reqIdString = request.getParameter("reqId");
       long reqId = reqIdString != null ? Long.parseLong(reqIdString) : 0L;
-      map = service.isDnBMatch(model, reqId);
+      map = service.isDnBMatch(model, reqId, "ZS01");
+    } catch (Exception e) {
+      LOG.error("Error occured in D&B matching", e);
+      map.put("success", false);
+    }
+    return map;
+  }
+
+  @RequestMapping(value = "/request/dnb/checkMatchUpdate")
+  public ModelMap checkIfMatchesDnBUpdate(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
+    ModelMap map = new ModelMap();
+    try {
+      String reqIdString = request.getParameter("reqId");
+      long reqId = reqIdString != null ? Long.parseLong(reqIdString) : 0L;
+      map = service.isDnBMatchAddrsUpdateAU(model, reqId);
+    } catch (Exception e) {
+      LOG.error("Error occured in D&B matching", e);
+      map.put("success", false);
+    }
+    return map;
+  }
+
+  @RequestMapping(
+      value = "/request/dnb/custNmUpdate")
+  public ModelMap checkIfCustNMMatchesDnBUpdate(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
+    ModelMap map = new ModelMap();
+    try {
+      String reqIdString = request.getParameter("reqId");
+      String custNm = request.getParameter("custNm");
+      String formerCustNm = request.getParameter("formerCustNm");
+      long reqId = reqIdString != null ? Long.parseLong(reqIdString) : 0L;
+      map = service.isCustNmMatch(model, reqId, custNm, formerCustNm);
     } catch (Exception e) {
       LOG.error("Error occured in D&B matching", e);
       map.put("success", false);

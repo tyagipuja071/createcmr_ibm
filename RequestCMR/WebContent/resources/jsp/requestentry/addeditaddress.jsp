@@ -17,7 +17,7 @@
 </style>
 <!--  Modal for the Add/Edit Screen -->
 <cmr:modal title="${ui.title.addEditAddress}" id="addEditAddressModal" widthId="750">
-  <form:form method="GET" action="${contextPath}/request/address/process" name="frmCMR_addressModal" class="ibm-column-form ibm-styled-form"
+  <cmr:form method="GET" action="${contextPath}/request/address/process" name="frmCMR_addressModal" class="ibm-column-form ibm-styled-form"
     modelAttribute="addressModal" id="frmCMR_addressModal">
     <cmr:modelAction formName="frmCMR_addressModal" />
     <form:hidden path="cmrIssuingCntry" id="addr_cmrIssuingCntry" value="${reqentry.cmrIssuingCntry}" />
@@ -152,18 +152,20 @@
         <div id="dplChkInfoEdit">-</div>
       </cmr:column>
     </cmr:row>
+    <div style="display:none">
     <cmr:row addBackground="true">
-      <cmr:column span="1" width="170">
-        <p>
-          <label for="addrStdResult">${ui.addrStdStat}: <cmr:info text="${ui.info.addrStdInfo}" /> </label>
-        </p>
-      </cmr:column>
-      <cmr:column span="2" width="250">
-        <div id="addrStdResult_modal"></div>
-        <form:hidden id="addrStdAcceptInd" path="addrStdAcceptInd" />
-        <form:hidden id="addr_addrStdResult" path="addrStdResult" />
-        <input type="hidden" id="tgmeCompare" name="tgmeCompare" value="">
-      </cmr:column>
+      
+        <cmr:column span="1" width="170">
+          <p>
+            <label for="addrStdResult">${ui.addrStdStat}: <cmr:info text="${ui.info.addrStdInfo}" /> </label>
+          </p>
+        </cmr:column>
+        <cmr:column span="2" width="250">
+          <div id="addrStdResult_modal"></div>
+          <form:hidden id="addrStdAcceptInd" path="addrStdAcceptInd" />
+          <form:hidden id="addr_addrStdResult" path="addrStdResult" />
+          <input type="hidden" id="tgmeCompare" name="tgmeCompare" value="">
+        </cmr:column>
     </cmr:row>
     <cmr:row addBackground="true">
       <cmr:column span="1" width="170">
@@ -205,6 +207,7 @@
         </p>
       </cmr:column>
     </cmr:row>
+  </div>
 
 
     <cmr:buttonsRow>
@@ -217,5 +220,5 @@
       </cmr:view>
       <cmr:button label="${ui.btn.cancel}" onClick="cancelAddressModal()" highlight="false" pad="true" />
     </cmr:buttonsRow>
-  </form:form>
+  </cmr:form>
 </cmr:modal>

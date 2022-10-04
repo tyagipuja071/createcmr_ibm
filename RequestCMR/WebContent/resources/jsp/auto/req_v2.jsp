@@ -79,7 +79,7 @@ function enableSupportal(){
 
 <!-- Main Contents -->
 <cmr:boxContent>
-	<form:form method="POST" action="./auto/process" name="frmCMR"
+	<cmr:form method="POST" action="./auto/process" name="frmCMR"
 		id="frmCMR" class="ibm-column-form ibm-styled-form"
 		modelAttribute="reqentry">
 		<input type="hidden" value="<%=mandt%>" id="mandt">
@@ -201,7 +201,7 @@ function enableSupportal(){
 
 		<jsp:include page="dup_cmr_chk.jsp" />
 		<jsp:include page="dup_req_chk.jsp" />
-	</form:form>
+	</cmr:form>
 </cmr:boxContent>
 
 <!-- Buttons -->

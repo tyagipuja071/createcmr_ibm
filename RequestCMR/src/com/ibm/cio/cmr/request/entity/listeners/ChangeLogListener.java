@@ -171,15 +171,17 @@ public class ChangeLogListener {
       EntityManager entityManager = currentEntityManager.get();
       if (entityManager != null) {
         ownTransaction = false;
-        LOG.debug("Using thread local entity manager..");
+        LOG.trace("Using thread local entity manager..");
       } else {
         LOG.debug("Opening own changelog entity manager..");
         entityManager = JpaManager.getEntityManager();
       }
 
       // for now, use own transaction all the time
-      entityManager = JpaManager.getEntityManager();
-      ownTransaction = true;
+      if (!(entity instanceof Admin) || ((entity instanceof Admin) && !((Admin) entity).isUseParentManager())) {
+        entityManager = JpaManager.getEntityManager();
+        ownTransaction = true;
+      }
       try {
         EntityTransaction txn = entityManager.getTransaction();
         try {

@@ -570,7 +570,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     // data.setIsicCd(record.getCmrIsic());
     data.setIsicCd(!StringUtils.isEmpty(record.getCmrIsic())
         ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim()) : "");
-
+    data.setUsSicmen(!StringUtils.isEmpty(record.getCmrIsic())
+        ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim()) : "");
     data.setIsuCd(record.getCmrIsu());
     data.setSearchTerm(record.getCmrSortl());
     data.setSitePartyId(record.getCmrSitePartyID());
@@ -729,6 +730,9 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp()); // placeholder
                                                                  // for now
       }
+
+      // CREATCMR-5741 - no addr std
+      addr.setAddrStdResult("X");
       addr.setCounty(cmr.getCmrCountyCode());
       addr.setCountyName(cmr.getCmrCounty());
       // addr.setCustNm1(cmr.getCmrName1Plain());

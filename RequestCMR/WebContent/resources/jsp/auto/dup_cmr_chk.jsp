@@ -23,7 +23,7 @@
 <cmr:view forCountry="631">
 
 	<cmr:modal id="dupCMR_modal" title="Matches found." widthId="570">
-		<form:form method="POST" action="<%=actionUrl%>" id="frmDupCMR"
+		<cmr:form method="POST" action="<%=actionUrl%>" id="frmDupCMR"
 			name="frmDupCMR" class="ibm-column-form ibm-styled-form"
 			modelAttribute="dupChkModel">
 			<cmr:grid url="/auto/duplicate/cmrslist.json" id="dupCMRMatchGrid"
@@ -52,7 +52,7 @@
 				looks good,cancel the request creation.</a>
 			<br>
 
-		</form:form>
+		</cmr:form>
 	</cmr:modal>
 
 

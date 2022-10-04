@@ -156,6 +156,22 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
             // admin.setCompInfoSrc("Business Number Validation");
             if (SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry())) {
               engineData.setCompanySource("ABN");
+              if (response.getRecord().getStatus().equalsIgnoreCase("Cancelled")) {
+                validation.setMessage("Cancelled Business Number provided ");
+                // company proof
+                if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                  details.append("Cancelled Business Number provided").append("\n");
+                  details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
+                } else {
+                  details.append("Cancelled Business Number provided").append("\n");
+                  details.append("\nNo supporting documentation is provided by the requester for address.").append("\n");
+                }
+                output.setOnError(false);
+                validation.setMessage("Cancelled ABN");
+                validation.setSuccess(false);
+                engineData.addNegativeCheckStatus("OTH", "Cancelled Business Number provided.");
+                log.debug("The Business Number on the request had been cancelled in API");
+              }
             } else if (SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())) {
               engineData.setCompanySource("NZBN");
             }

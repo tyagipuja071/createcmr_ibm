@@ -23,7 +23,7 @@ readOnly = false;
 </style>
 <!--  Modal for the Add/Edit Screen -->
 <cmr:modal title="${ui.title.addEditTaxInfo}" id="addEditTaxInfoModal" widthId="750">
-  <form:form method="GET" action="${contextPath}/request/taxinfo/process" name="frmCMR_taxInfoModal" class="ibm-column-form ibm-styled-form" modelAttribute="taxInfoModal" id="frmCMR_taxInfoModal">
+  <cmr:form method="GET" action="${contextPath}/request/taxinfo/process" name="frmCMR_taxInfoModal" class="ibm-column-form ibm-styled-form" modelAttribute="taxInfoModal" id="frmCMR_taxInfoModal">
     <cmr:modelAction formName="frmCMR_taxInfoModal" />
     <form:hidden path="reqId" id="taxinfo_reqId" value="${reqentry.reqId}" />
     <form:hidden path="geoTaxInfoId" id="geoTaxInfoId" />
@@ -102,5 +102,5 @@ readOnly = false;
       <cmr:button label="${ui.btn.addTaxInfoButton}" onClick="doAddToTaxInfoList()" highlight="true" pad="true" id="taxInfoBtn"/>
       <cmr:button label="${ui.btn.cancel}" onClick="cancelTaxInfoModal()" highlight="false" pad="true" />
     </cmr:buttonsRow>
-  </form:form>
+  </cmr:form>
 </cmr:modal>

@@ -33,7 +33,7 @@ div.cmr-sub {
 }
 </style>
 
-<form:form method="POST" action="${contextPath}/workflow/results" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="requestSearchCriteriaModel">
+<cmr:form method="POST" action="${contextPath}/workflow/results" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="requestSearchCriteriaModel">
 
   <form:hidden path="reqId" id="mainReqId" />
 
@@ -169,6 +169,6 @@ div.cmr-sub {
 <input type="hidden" id="newReqCntry_h" name="newReqCntry" value="" />
 <input type="hidden" id="newReqType_h" name="newReqType" value="" />
 
-</form:form>
+</cmr:form>
 <cmr:model model="requestSearchCriteriaModel" />
 <jsp:include page="../massrequestentry/file_dl.jsp" />

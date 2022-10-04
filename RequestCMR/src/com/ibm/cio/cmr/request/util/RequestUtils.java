@@ -313,8 +313,10 @@ public class RequestUtils {
     String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
     String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
     boolean skip = false;
-
-    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+    String reqStatus = admin.getReqStatus();
+    List<String> reqStatusFrMailNotif = Arrays.asList("PRJ", "COM");
+    // CREATCMR - 2625 -> WW Status Change notifications in CreateCMR
+    if ((StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) || (!reqStatusFrMailNotif.contains(reqStatus))) {
       skip = true;
     }
 
@@ -334,6 +336,10 @@ public class RequestUtils {
    */
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history, boolean excludeRequester,
       boolean legacyDirect) {
+    List<String> reqStatusFrMailNotif = Arrays.asList("PRJ", "COM");
+    if (!reqStatusFrMailNotif.contains(admin.getReqStatus())) {
+      return;
+    }
     String cmrno = "";
     String siteId = "";
     String rejectReason = history.getRejReason();
