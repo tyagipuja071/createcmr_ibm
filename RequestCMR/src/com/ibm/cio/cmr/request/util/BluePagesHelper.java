@@ -635,10 +635,10 @@ public class BluePagesHelper {
    */
   public static List<String> getRearrangedNames(String name) {
     String[] splitName = name.trim().replaceAll(" +", " ").split(" ");
-    if (splitName.length < 2) {
-      return null;
-    }
     List<String> rearrangedNames = new ArrayList<String>();
+    if (splitName.length < 2) {
+      return rearrangedNames;
+    }
     String rearrangedName = "";
 
     // First arrangement
