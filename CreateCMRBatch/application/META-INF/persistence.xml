@@ -176,6 +176,8 @@
     <class>com.ibm.cio.cmr.request.entity.ScAccountCmrStgPK</class>
     <class>com.ibm.cio.cmr.request.entity.USTCRUpdtQueue</class>
     <class>com.ibm.cio.cmr.request.entity.USTCRUpdtQueuePK</class>
+    <class>com.ibm.cio.cmr.request.entity.TaxData</class>
+    <class>com.ibm.cio.cmr.request.entity.TaxDataPK</class>
 
     <properties>
       

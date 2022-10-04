@@ -29,6 +29,9 @@ if (readOnly == null){
       <p>
         <cmr:label fieldId="taxinfoList">
               ${ui.taxinfoList}:
+        	<cmr:view forCountry="613">
+      			<cmr:info text="${ui.taxinfotab}" />
+			</cmr:view>
         </cmr:label>
       </p>
     </cmr:column>
