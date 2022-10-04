@@ -189,7 +189,6 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
 
   public void processMassUpdateRequest(EntityManager entityManager, ProcessRequest request, Admin admin, Data data, String histMessage)
       throws Exception {
-
     String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
     long reqId = admin.getId().getReqId();
     boolean isIndexNotUpdated = false;
@@ -207,6 +206,8 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
       PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql(sqlName));
       query.setParameter("REQ_ID", admin.getId().getReqId());
       query.setParameter("ITER_ID", admin.getIterationId());
+      query.setParameter("MANDT", request.getMandt());
+      query.setParameter("CNTRY", data.getCmrIssuingCntry());
 
       List<MassUpdt> results = query.getResults(MassUpdt.class);
       List<String> statusCodes = new ArrayList<String>();
