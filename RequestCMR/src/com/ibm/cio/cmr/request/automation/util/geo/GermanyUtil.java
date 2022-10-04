@@ -787,7 +787,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
         // Check If Address same as Sold To address
-        isInstallAtSameAsSoldTo = addressExistsOnSoldTo(entityManager, installAt, requestData);
+        isInstallAtSameAsSoldTo = addressExists(entityManager, installAt, requestData);
         if (isInstallAtSameAsSoldTo) {
           detail.append("Install At details provided matches an existing Sold To address.");
           engineData.addRejectionComment("OTH", "Install At details provided matches an existing Sold To address.", "", "");
