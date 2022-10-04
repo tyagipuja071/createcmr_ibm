@@ -636,9 +636,11 @@ public class CanadaUtil extends AutomationUtil {
           }
           break;
         case "NAT/INAC":
-          details.append("\nUpdate of NAC/INAT should be done via JIRA. Please submit the request in JIRA.\n");
-          engineData.addRejectionComment("NAC", "Update of NAC/INAT should be done via JIRA. Please submit the request in JIRA.",
-              "Update of NAC/INAT should be done via JIRA. Please submit the request in JIRA.", "");
+          details.append(
+              "\nUpdate of NAC/INAC should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary");
+          engineData.addRejectionComment("NAC",
+              "Update of NAC/INAT should be done via JIRA. Please submit the request in JIRA. \nLink:- https://jsw.ibm.com/projects/CMDE/summary",
+              "Update of NAC/INAC should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary", "");
           output.setOnError(true);
           // String error = performInacCheck(cedpManager, entityManager,
           // requestData);
@@ -695,15 +697,21 @@ public class CanadaUtil extends AutomationUtil {
           }
           break;
         case "Client Tier":
-          details.append("\nUpdate of Client Tier should be done via JIRA. Please submit the request in JIRA.\n");
-          engineData.addRejectionComment("CTC", "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.",
-              "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.", "");
+          details.append(
+              "\nUpdate of Client Tier should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary");
+          engineData.addRejectionComment("CTC",
+              "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
+              "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
+              "");
           output.setOnError(true);
           break;
         case "ISU Code":
-          details.append("\nUpdate of ISU Code should be done via JIRA. Please submit the request in JIRA.\n");
-          engineData.addRejectionComment("ISU", "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.",
-              "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.", "");
+          details.append(
+              "\nUpdate of ISU Code should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary");
+          engineData.addRejectionComment("ISU",
+              "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
+              "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
+              "");
           output.setOnError(true);
           break;
         case "SORTL":
@@ -922,7 +930,7 @@ public class CanadaUtil extends AutomationUtil {
    */
   private String performInacCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
     Data data = requestData.getData();
-    String error = "This CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle. Thank you. \nJira link https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
+    String error = "This CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle. Thank you. \nJira link https://jsw.ibm.com/projects/CMDE/summary";
     String sql = ExternalizedQuery.getSql("AUTO.CA.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
@@ -981,7 +989,7 @@ public class CanadaUtil extends AutomationUtil {
    */
   private String performCMRNewCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
     Data data = requestData.getData();
-    String error = "This CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle. Thank you. \nJira link https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
+    String error = "This CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle. Thank you. \nJira link https://jsw.ibm.com/projects/CMDE/summary";
     String sql = ExternalizedQuery.getSql("AUTO.CA.CHECK_CMR_NEW");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
@@ -1003,7 +1011,7 @@ public class CanadaUtil extends AutomationUtil {
       throws Exception {
     Data data = requestData.getData();
     String updatedValue = updatedDataModel.getNewData();
-    String error = "This CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle. Thank you. \nJira link https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
+    String error = "This CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle. Thank you. \nJira link https://jsw.ibm.com/projects/CMDE/summary";
     String sql = ExternalizedQuery.getSql("AUTO.CA.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
