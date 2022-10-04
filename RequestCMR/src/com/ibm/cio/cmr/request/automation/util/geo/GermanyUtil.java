@@ -771,9 +771,9 @@ public class GermanyUtil extends AutomationUtil {
         // Check If Address same as Sold To address
         isInstallAtSameAsSoldTo = addressExists(entityManager, installAt, requestData);
         if (isInstallAtSameAsSoldTo) {
-          detail.append("Install At details provided matches an existing Sold To address.");
-          engineData.addRejectionComment("OTH", "Install At details provided matches an existing Sold To address.", "", "");
-          LOG.debug("Install At details provided matches an existing  Sold To address.");
+          detail.append("Install At details provided matches an existing address.");
+          engineData.addRejectionComment("OTH", "Install At details provided matches an existing address.", "", "");
+          LOG.debug("Install At details provided matches an existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
           validation.setMessage("Not validated");
