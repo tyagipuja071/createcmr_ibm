@@ -2688,7 +2688,7 @@ public class CEMEAHandler extends BaseSOFHandler {
   public static void doFilterAddresses(RequestEntryModel reqEntry, Object mainRecords, Object filteredRecords) {
     if (mainRecords instanceof java.util.List<?> && filteredRecords instanceof java.util.List<?>) {
       // during convertFrom
-      if (reqEntry.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_UPDATE)) {
+      if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(reqEntry.getReqType())) {
         List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
         List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
         for (Object tempRecObj : recordsToCheck) {
