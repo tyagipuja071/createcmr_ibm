@@ -1210,6 +1210,65 @@ public class CanadaUtil extends AutomationUtil {
         setDefaultSBO(details, overrides, coverageId, data, sbo);
       }
     }
+
+    // ISU CTC Based on Coverage
+    if (StringUtils.isNotBlank(coverageId)) {
+      String isu = "";
+      String ctc = "";
+
+      String firstChar = coverageId.substring(0, 1);
+
+      List<String> ECOSYSTEM_LIST = Arrays.asList("T0007992", "T0007993", "T0007994", "T0008059");
+
+      if (("T").equalsIgnoreCase(firstChar) && !ECOSYSTEM_LIST.contains(coverageId)) {
+        isu = "34";
+        ctc = "Q";
+        setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
+      } else if (ECOSYSTEM_LIST.contains(coverageId)) {
+        isu = "34";
+        ctc = "Y";
+        setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
+      } else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
+        isu = ""; // apply logic to set isu based on sub industry code
+        ctc = "";
+        String subIndustryCd = data != null && data.getSubIndustryCd() != null ? data.getSubIndustryCd() : "";
+        String firstCharSubIndustry = StringUtils.isNotEmpty(subIndustryCd) ? subIndustryCd.substring(0, 1) : "";
+
+        Map<String, String> industryCodeISUMap = new HashMap<String, String>();
+
+        industryCodeISUMap.put("A", "3T");
+        industryCodeISUMap.put("U", "12");
+        industryCodeISUMap.put("K", "05");
+        industryCodeISUMap.put("R", "1R");
+        industryCodeISUMap.put("D", "18");
+
+        industryCodeISUMap.put("W", "18");
+        industryCodeISUMap.put("T", "19");
+        industryCodeISUMap.put("F", "04");
+        industryCodeISUMap.put("S", "4F");
+        industryCodeISUMap.put("N", "31");
+
+        industryCodeISUMap.put("J", "4A");
+        industryCodeISUMap.put("V", "14");
+        industryCodeISUMap.put("L", "5E");
+        industryCodeISUMap.put("P", "15");
+        industryCodeISUMap.put("M", "4D");
+
+        industryCodeISUMap.put("Y", "28");
+        industryCodeISUMap.put("G", "28");
+        industryCodeISUMap.put("E", "40");
+        industryCodeISUMap.put("H", "11");
+        industryCodeISUMap.put("X", "8C");
+
+        industryCodeISUMap.put("B", "5B");
+        industryCodeISUMap.put("C", "5B");
+
+        if (industryCodeISUMap.containsKey(firstCharSubIndustry)) {
+          isu = industryCodeISUMap.get(firstCharSubIndustry);
+        }
+        setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
+      }
+    }
     return true;
   }
 
