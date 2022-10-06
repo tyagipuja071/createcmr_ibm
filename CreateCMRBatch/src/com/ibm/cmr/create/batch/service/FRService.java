@@ -873,6 +873,7 @@ public class FRService extends TransConnService {
             }
 
             usedSequences.add(addr.getId().getAddrSeq());
+            keepAlive();
 
           }
           comment = comment.append("\nTemporary Reactivate Embargo process in RDc started.");
@@ -1092,6 +1093,7 @@ public class FRService extends TransConnService {
               }
 
               usedSequences.add(addr.getId().getAddrSeq());
+              keepAlive();
 
             }
 
