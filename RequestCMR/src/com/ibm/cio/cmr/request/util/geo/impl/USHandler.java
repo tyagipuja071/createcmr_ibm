@@ -1253,6 +1253,11 @@ public class USHandler extends GEOHandler {
         data.setSearchTerm("");
       }
 
+      // CREATCMR-7145
+      if ("KYN".equals(data.getCustSubGrp())) {
+        data.setCustClass("11");
+      }
+
     }
 
     data.setTaxExemptStatus1(data.getSpecialTaxCd());
