@@ -227,7 +227,7 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
           }
         }
         if (processError != null) {
-          throw new Exception(processError);
+          throw new Exception(processError.getMessage());
         }
 
         admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
@@ -239,6 +239,7 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
     } catch (Exception e) {
       LOG.error("Error in processing mass Update Request " + admin.getId().getReqId(), e);
       addError("Mass Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+      processError(entityManager, admin, e.getMessage());
     }
   }
 
@@ -408,8 +409,8 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
         custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
         custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
         legacyObjects.setCustomerExt(custExt);
-      } else if (transformer != null
-          && (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()) || SystemLocation.KENYA.equals(data.getCmrIssuingCntry()))) {
+      } else if (transformer != null && (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())
+          || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()) || SystemLocation.KENYA.equals(data.getCmrIssuingCntry()))) {
         CmrtCustExtPK custExtPk = null;
         LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
         // Initialize the object
