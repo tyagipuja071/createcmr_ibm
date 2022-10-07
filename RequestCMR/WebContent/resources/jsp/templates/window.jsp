@@ -29,7 +29,7 @@ request.setAttribute("cmrv", SystemConfiguration.getSystemProperty("BUILD"));
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="schema.DC" href="//purl.org/DC/elements/1.0/" />
-<link rel="SHORTCUT ICON" href="//w3.ibm.com/favicon.ico" />
+<link rel="icon" type="image/x-icon" href="${resourcesPath}/favicons.ico">
 <meta name="DC.Rights" content="© Copyright IBM Corp. 2011" />
 <meta name="DC.Date" scheme="iso8601" content="2011-07-12" />
 <meta name="Source" content="v17 Template Generator, Template 17.02" />
