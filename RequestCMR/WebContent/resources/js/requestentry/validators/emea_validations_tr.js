@@ -9017,7 +9017,7 @@ function clientTierValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
-// creatcmr-6032
+//creatcmr-6032
 function vatValidatorTR() {
   console.log('>>Running VAT validation for Turkey.');
   FormManager.addFormValidator((function() {
@@ -9049,17 +9049,19 @@ function vatValidatorTR() {
           vatPattern = /^[0-9]{9}$/;
           if (vat.match(vatPattern) != null && vat.match(vatPattern).length > 0) {
             return new ValidationResult(null, true);
-          } else {
+          }
+          if (vat != '') {
             return new ValidationResult({
               id : 'vat',
               type : 'text',
               name : 'vat'
             }, false, 'Format for VAT is incorrect. Correct format is 999999999.');
           }
-        } else {
+        } else { 
           if (vat.match(/^[0-9]{10}$/) || vat.match(/^[0-9]{11}$/)) {
             return new ValidationResult(null, true);
-          } else {
+          }
+          if (vat != '') {
             return new ValidationResult({
               id : 'vat',
               type : 'text',
@@ -9071,7 +9073,6 @@ function vatValidatorTR() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
-
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
