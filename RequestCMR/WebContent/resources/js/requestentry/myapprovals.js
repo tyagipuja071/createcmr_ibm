@@ -87,6 +87,8 @@ function approvalStatusFormatter(value, rowIndex) {
     return 'Override Approved';
   case 'CAN':
     return '<em>Cancelled</em>';
+  case 'CCAN':
+    return '<em>Cond. Cancelled</em>';
   case 'DRA':
     return 'Draft';
   case 'OBSLT':

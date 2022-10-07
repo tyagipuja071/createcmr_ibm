@@ -961,19 +961,23 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       }
 
     }
-    
-    if (!StringUtils.isEmpty(addr.getCustPhone()) && "ZD01".equals(addr.getId().getAddrType())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
-        legacyAddr.setAddrPhone("");
-      } else {
-        legacyAddr.setAddrPhone(addr.getCustPhone());
 
-      }
+    if (!StringUtils.isEmpty(addr.getCustPhone())) {
+      setAddrPhoneForMassUpdate(legacyAddr, addr);
+
     }
 
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
 
+  }
+
+  private void setAddrPhoneForMassUpdate(CmrtAddr legacyAddr, MassUpdtAddr addr) {
+    if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+      legacyAddr.setAddrPhone("");
+    } else if ("ZD01".equals(addr.getId().getAddrType())) {
+      legacyAddr.setAddrPhone(addr.getCustPhone());
+    }
   }
 
   @Override

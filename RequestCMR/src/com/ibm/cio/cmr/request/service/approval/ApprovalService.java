@@ -1106,7 +1106,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         List<String> noneStats = Arrays.asList("DRA", "OBSLT");
         List<String> pendingStats = Arrays.asList("PMAIL", "PAPR", "OVERP", "PREM");
         List<String> approvedStats = Arrays.asList("APR", "OVERA", "OBSLT", "CAN", "PCAN", "DRA");
-        List<String> condApprovedStats = Arrays.asList("CAPR", "APR", "OVERA", "OBSLT", "CAN", "PCAN", "DRA");
+        List<String> condApprovedStats = Arrays.asList("CAPR", "APR", "OVERA", "OBSLT", "CAN", "PCAN", "DRA", "CCAN");
         // List<String> rejectedStats = Arrays.asList("REJ", "DFNCT", "OBSLT",
         // "CAN", "PCAN", "DRA");
         List<String> cancelledStats = Arrays.asList("CAN", "PCAN", "OBSLT", "DRA");
@@ -1130,6 +1130,8 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
           model.setApprovalResult(CmrConstants.APPROVAL_RESULT_APPROVED);
           model.setApprovalDateStr(lastUpdtStr);
         } else if (containsOnly(statuses, condApprovedStats) && statuses.contains(CmrConstants.APPROVAL_CONDITIONALLY_APPROVED)) {
+          model.setApprovalResult(CmrConstants.APPROVAL_RESULT_COND_APPROVED);
+        } else if (statuses.contains(CmrConstants.APPROVAL_CONDITIONALLY_CANCELLED)) {
           model.setApprovalResult(CmrConstants.APPROVAL_RESULT_COND_APPROVED);
         } else if (statuses.contains(CmrConstants.APPROVAL_REJECTED)) {
           model.setApprovalResult(CmrConstants.APPROVAL_RESULT_REJECTED);

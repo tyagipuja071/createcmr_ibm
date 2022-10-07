@@ -1211,18 +1211,22 @@ public class UnitedKingdomTransformer extends EMEATransformer {
 
     }
 
-    if (!StringUtils.isEmpty(addr.getCustPhone()) && "ZD01".equals(addr.getId().getAddrType())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
-        legacyAddr.setAddrPhone("");
-      } else {
-        legacyAddr.setAddrPhone(addr.getCustPhone());
-      }
+    if (!StringUtils.isEmpty(addr.getCustPhone())) {
+      setAddrPhoneForMassUpdate(legacyAddr, addr);
 
     }
 
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
 
+  }
+
+  private void setAddrPhoneForMassUpdate(CmrtAddr legacyAddr, MassUpdtAddr addr) {
+    if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+      legacyAddr.setAddrPhone("");
+    } else if ("ZD01".equals(addr.getId().getAddrType())) {
+      legacyAddr.setAddrPhone(addr.getCustPhone());
+    }
   }
 
   @Override
@@ -1656,17 +1660,16 @@ public class UnitedKingdomTransformer extends EMEATransformer {
         cust.setMailingCond(muData.getOutCityLimit());
       }
     }
-    
- 
-    for (MassUpdtAddr addr : cmrObjects.getMassUpdateAddresses() ) {
-        if (!StringUtils.isBlank(addr.getCustPhone()) && "ZS01".equals(addr.getId().getAddrType())) {
-          if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
-            cust.setTelNoOrVat("");
-          } else {
-            cust.setTelNoOrVat(getTrimed(addr.getCustPhone()));
-          }
-          break;
+
+    for (MassUpdtAddr addr : cmrObjects.getMassUpdateAddresses()) {
+      if (!StringUtils.isBlank(addr.getCustPhone()) && "ZS01".equals(addr.getId().getAddrType())) {
+        if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+          cust.setTelNoOrVat("");
+        } else {
+          cust.setTelNoOrVat(getTrimed(addr.getCustPhone()));
         }
+        break;
+      }
     }
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {

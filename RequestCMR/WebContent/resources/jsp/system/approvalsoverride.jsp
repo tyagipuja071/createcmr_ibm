@@ -76,6 +76,8 @@ ApprovalResponseModel approval = (ApprovalResponseModel) request.getAttribute("a
                 <form:option value="CAPR">Conditionally Approved</form:option>
                 <form:option value="PAPR">Pending Approval</form:option>
                 <form:option value="PMAIL">Pending Mail</form:option>
+                <form:option value="CAN">Cancelled</form:option>
+                <form:option value="CCAN">Conditionally Cancelled</form:option>              
               </form:select>
           </p>
         </cmr:column>      
