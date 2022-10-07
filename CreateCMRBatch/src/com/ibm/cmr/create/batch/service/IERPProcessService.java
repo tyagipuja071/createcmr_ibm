@@ -1112,6 +1112,7 @@ public class IERPProcessService extends BaseBatchService {
         for (Addr addr : addresses) {
           response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
           respStatuses.add(response.getStatus());
+          keepAlive();
         }
       }
 
@@ -1141,6 +1142,7 @@ public class IERPProcessService extends BaseBatchService {
           } else {
             notProcessed.add(addr);
           }
+          keepAlive();
         }
       }
 
@@ -1171,6 +1173,7 @@ public class IERPProcessService extends BaseBatchService {
           response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
           respStatuses.add(response.getStatus());
         }
+        keepAlive();
       }
 
       if (!isDataUpdated && !addrUpdateFlag && notProcessed != null && notProcessed.size() > 0
@@ -1178,6 +1181,7 @@ public class IERPProcessService extends BaseBatchService {
         for (Addr addr : notProcessed) {
           response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
           respStatuses.add(response.getStatus());
+          keepAlive();
         }
       }
 
