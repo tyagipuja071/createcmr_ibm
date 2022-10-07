@@ -122,7 +122,7 @@ public class CmrConstants {
     /**
      * VAT Address
      */
-    ZVAT, ZS03
+    ZVAT
   }
 
   public static final String DNBSEARCH_NOT_DONE = "Not Done";

@@ -52,9 +52,18 @@ public class LDMassUpdtDb2MultiWorker extends MassUpdateMultiWorker {
     LOG.debug("BEGIN PROCESSING CMR# >> " + this.parentRow.getCmrNo());
     CMRRequestContainer cmrObjects = service.prepareRequest(entityManager, this.parentRow, this.parentAdmin);
     Data data = cmrObjects.getData();
+    StringBuffer errTxt = new StringBuffer(this.parentRow.getErrorTxt());
 
     if (!isOwnerCorrect(entityManager, this.parentRow.getCmrNo(), data.getCmrIssuingCntry())) {
-      throw new Exception("Some CMRs on the request are not owned by IBM. Please check input CMRs");
+      String errorMsg = "The CMR " + this.parentRow.getCmrNo() + " is not owned by IBM. Please remove it and reupload the spreadsheet.";
+      if (!errTxt.toString().contains(errorMsg))
+        errTxt.append(errorMsg);
+      this.parentRow.setErrorTxt(errTxt.toString());
+      this.parentRow.setRowStatusCd(MASS_UPDATE_FAIL);
+      entityManager.merge(this.parentRow);
+      this.setError(true);
+      this.setErrorMsg(new Throwable("Some CMRs on the request are not owned by IBM. Please check the Summary for more details."));
+      return;
     }
 
     // for every mass update data
@@ -82,7 +91,6 @@ public class LDMassUpdtDb2MultiWorker extends MassUpdateMultiWorker {
 
     if (legacyCust == null) {
       this.parentRow.setRowStatusCd(MASS_UPDATE_FAIL);
-      StringBuffer errTxt = new StringBuffer(this.parentRow.getErrorTxt());
 
       if (!StringUtils.isEmpty(errTxt.toString())) {
         errTxt.append("<br/>");
