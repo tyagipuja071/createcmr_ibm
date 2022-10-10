@@ -115,8 +115,8 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(true);
                   result.setResults(
                       "There is an existing CMR PXXXX, please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR");
+                  return result;
                 }
-                return result;
               }
               if (cmrCheckMatches.size() != 0) {
                 result.setResults("Matches Found");
