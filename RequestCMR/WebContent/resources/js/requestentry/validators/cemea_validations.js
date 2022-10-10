@@ -444,7 +444,7 @@ function afterConfigForCEMEA() {
     } else {
       FormManager.enable('custClass');
     }
-    // CREATCMR-6378
+ // CREATCMR-6378
     retainVatValueAT();
   }
 
@@ -5253,7 +5253,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setPreferredLang, GEOHandler.CEMEA);
 
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.AUSTRIA ], null, true);
-
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.CEMEA_EXCLUDE_CEE, null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.CEMEA, null, true);
   GEOHandler.registerValidator(addCrossBorderValidatorForCEMEA, [ '707', '762', '808', '620', '767', '805', '823', '677', '680', '832' ], null, true);

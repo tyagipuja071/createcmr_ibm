@@ -65,6 +65,7 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+import com.ibm.cmr.services.client.matching.request.ReqCheckResponse;
 import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -967,19 +968,19 @@ public abstract class AutomationUtil {
     while (it.hasNext()) {
       Addr addr = it.next();
       if (!payGoAddredited) {
-      if (!"ZS01".equals(addr.getId().getAddrType())) {
-        if (compareCustomerNames(zs01, addr) && 
-            (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
-            && (StringUtils.isNotBlank(addr.getCity1()) && addr.getCity1().trim().toUpperCase().equals(mainCity)) 
-            && (StringUtils.isNotBlank(addr.getPostCd()) && addr.getPostCd().trim().equals(mainPostalCd))) {
-          details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-          Addr merged = entityManager.merge(addr);
-          if (merged != null) {
-            entityManager.remove(merged);
+        if (!"ZS01".equals(addr.getId().getAddrType())) {
+          if (compareCustomerNames(zs01, addr)
+              && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
+              && (StringUtils.isNotBlank(addr.getCity1()) && addr.getCity1().trim().toUpperCase().equals(mainCity))
+              && (StringUtils.isNotBlank(addr.getPostCd()) && addr.getPostCd().trim().equals(mainPostalCd))) {
+            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+            Addr merged = entityManager.merge(addr);
+            if (merged != null) {
+              entityManager.remove(merged);
+            }
+            it.remove();
+            removed = true;
           }
-          it.remove();
-          removed = true;
-        }
         }
       } else {
         if (!"ZS01".equals(addr.getId().getAddrType())) {
@@ -1218,6 +1219,12 @@ public abstract class AutomationUtil {
     // NOOP
   }
 
+  public void filterDuplicateReqMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<ReqCheckResponse> response) {
+    LOG.debug("No Country Specific Filter for Duplicate Req Checks Defined.");
+    // NOOP
+  }
+
   public boolean addressEquals(Addr addr1, Addr addr2) {
     String addr1Details = null;
     String addr2Details = null;
@@ -1397,4 +1404,29 @@ public abstract class AutomationUtil {
     }
     return query.exists();
   }
- }
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong> return true if there are country specific logic
+   * 
+   * @param entityManager
+   * @param engineData
+   * @param requestData
+   * @param return
+   * @throws Exception
+   */
+  public static boolean isTaxManagerEmeaUpdateCheck(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData) throws Exception {
+	  Data data = requestData.getData();
+	  Admin admin = requestData.getAdmin();
+	  String cmrIssuingCntry = data.getCmrIssuingCntry();
+	  if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(admin.getReqType())) {
+		  String sql =  ExternalizedQuery.getSql("QUERY.GET.TAX_MANAGER.BY_ISSUING_CNTRY");
+		  PreparedQuery query = new PreparedQuery(entityManager, sql);
+	      query.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
+	      List<String> taxManagers = query.getResults(String.class);
+	      if(taxManagers != null){
+	    	  return taxManagers.stream().anyMatch(res -> res.equalsIgnoreCase(admin.getRequesterId()));
+	      }
+	  }
+	  return false ;
+  }
+}

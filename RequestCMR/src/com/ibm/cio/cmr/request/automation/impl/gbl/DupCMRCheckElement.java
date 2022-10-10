@@ -60,6 +60,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       throws Exception {
     Addr soldTo = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     boolean matchDepartment = false;
@@ -96,6 +97,26 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                   }
                 }
                 Collections.copy(cmrCheckMatches, cmrCheckMatchesDept);
+              }
+              // cmr - 4512 match dupc prospect cmr
+              for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+                String regex = "\\s+$";
+                String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
+                String cmrRecCustName = StringUtils.isBlank(cmrCheckRecord.getCustomerName()) ? "" : cmrCheckRecord.getCustomerName();
+                custName = custName.replaceAll(regex, "");
+                cmrRecCustName = cmrRecCustName.replaceAll(regex, "");
+                if (custName.equalsIgnoreCase(cmrRecCustName) && cmrCheckRecord.getCmrNo() != null && cmrCheckRecord.getCmrNo().startsWith("P")
+                    && "75".equals(cmrCheckRecord.getOrderBlk())) {
+                  // rejection code && "75".equals(cmrCheckRecord.getOrdBlk())
+                  result.setDetails(
+                      "There is an existing CMR PXXXX, please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR.");
+                  engineData.addRejectionComment("OTH",
+                      "There is an existing CMR PXXXX, please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR", "", "");
+                  result.setOnError(true);
+                  result.setResults(
+                      "There is an existing CMR PXXXX, please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR");
+                }
+                return result;
               }
               if (cmrCheckMatches.size() != 0) {
                 result.setResults("Matches Found");

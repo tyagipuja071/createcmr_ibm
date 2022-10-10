@@ -2283,7 +2283,7 @@ public class BELUXHandler extends BaseSOFHandler {
       currCell = row.getCell(6);
       isuCd = validateColValFromCell(currCell);
 
-            if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+      if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
         error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
       } else if (!StringUtils.isBlank(isuCd) || !StringUtils.isBlank(ctc)) {

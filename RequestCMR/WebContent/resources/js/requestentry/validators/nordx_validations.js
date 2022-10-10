@@ -16,7 +16,7 @@ function afterConfigForNORDX() {
   reqType = FormManager.getActualValue('reqType');
   var role = null;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var vat = FormManager.getActualValue('vat');
+  var vat = FormManager.getActualValue('vat');  
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -122,7 +122,7 @@ function afterConfigForNORDX() {
   if (landCntry != '') {
     FormManager.setValue('defaultLandedCountry', landCntry);
   }
-  FormManager.hide('StateProv', 'stateProv');
+ // FormManager.hide('StateProv', 'stateProv');
   // setVatValidatorNORDX();
   // setTaxCdValuesCROSS();
   setSBOForFinlandSubRegion();
@@ -170,7 +170,26 @@ function afterConfigForNORDX() {
   setSortlLength();
   lockSalesRepAndSortl();
   hideACAdminDSC();
-
+  
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  }
+  
 }
 
 function disableLandCntry() {
@@ -376,6 +395,7 @@ function setExpediteReason() {
 
 /* Vat Handler */
 function resetVatRequired(zs01Cntry, vatExemptChangedFlag) {
+  var landCntry = FormManager.getActualValue('landCntry');
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
@@ -384,7 +404,7 @@ function resetVatRequired(zs01Cntry, vatExemptChangedFlag) {
     }
     var custType = FormManager.getActualValue('custGrp');
     if (dijit.byId('vatExempt') != undefined && !dijit.byId('vatExempt').get('checked')
-        && (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 || (custType != '' && custType.includes('LOC')))) {
+        && (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 && landCntry != 'GB' || (custType != '' && custType.includes('LOC')))) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
       FormManager.enable('vat');
     }
@@ -3530,6 +3550,16 @@ function setInacCd() {
   }
 }
 
+function setAddressDetailsForView() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage == 'true') {
+    $('label[for="custNm1_view"]').text('Customer Name:');
+    $('label[for="custNm2_view"]').text('Customer Name Con\'t:');
+    $('label[for="custNm3_view"]').text('Additional Info');
+    $('label[for="custNm4_view"]').text(' Att. Person');
+  }
+}
+
 function setSensitiveFlag() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -4765,7 +4795,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') { 
+    if (clientTierCode == '') {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
@@ -4807,23 +4837,23 @@ function clientTierValidator() {
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
         var valResult = null;
-        
+
         var oldClientTier = null;
         var oldISU = null;
         var requestId = FormManager.getActualValue('reqId');
-        
+
         if (reqType == 'C') {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-              REQ_ID : requestId,
+            REQ_ID : requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-          
+
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU =  result.ret3 != null ? result.ret3 : '';
-            
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
             if (clientTier != oldClientTier || isuCd != oldISU) {
               valResult = clientTierCodeValidator();
             }
@@ -4923,6 +4953,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockIBMTabFields, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(lockIBMTabFields, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(setKukalValuesByCustSubGrp, GEOHandler.NORDX);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);

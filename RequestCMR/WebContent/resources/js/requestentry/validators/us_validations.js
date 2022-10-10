@@ -1029,6 +1029,7 @@ function orderBlockValidation() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 // CREATCMR-5447
 function TaxTeamUpdateAddrValidation() {
   FormManager.addFormValidator((function() {
@@ -1305,6 +1306,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(clientTierValidator, [ SysLoc.USA ], null,
+  // true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(initUSTemplateHandler, [ SysLoc.USA ]);
@@ -1320,7 +1323,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
   // CREATCMR-4466
   GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA ], null, true);
-  // ], null, true);
   GEOHandler.addAfterConfig(lockOrdBlk, [ SysLoc.USA ]);
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.USA ], null, true);
 

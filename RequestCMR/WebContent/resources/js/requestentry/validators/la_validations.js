@@ -279,6 +279,9 @@ function autoSetDataCrosTypSubTypeSSAMX() {
 
 // Story :1278109- By Mukesh Kumar
 function autoSetSBOAndSalesTMNo() {
+  if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
+    return;
+  }
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var _custType = FormManager.getActualValue('custType');
   console.log(">>> Process _custSubGrp >> " + _custSubGrp);
@@ -2654,13 +2657,13 @@ function setTaxRegimeMX() {
     } else {
       taxGrp = '2';
     }
-  
+
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
       CMT: '%' + taxGrp + '%'
     };
-  
+
     var taxDropDown = cmr.query('GET.MX_TAX_CODE', qParams);
     var arr =  taxDropDown.map(taxDropDown => taxDropDown.ret1);
     FormManager.limitDropdownValues(FormManager.getField('taxCd3'), arr);

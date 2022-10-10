@@ -174,6 +174,8 @@ public class LegacyDirectService extends TransConnService {
     LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
     // pending = new ArrayList<Admin>();
     for (Long id : pending) {
+      String tName = Thread.currentThread().getName();
+      Thread.currentThread().setName("REQ-" + id);
       long start = new Date().getTime();
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
@@ -219,6 +221,7 @@ public class LegacyDirectService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
       partialCommit(entityManager);
+      Thread.currentThread().setName(tName);
       ProfilerLogger.LOG.trace(
           "After processPendingLegacy for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     }
@@ -230,6 +233,8 @@ public class LegacyDirectService extends TransConnService {
     Data data = null;
     ProcessRequest request = null;
     for (Long id : pending) {
+      String tName = Thread.currentThread().getName();
+      Thread.currentThread().setName("REQ-" + id);
       long start = new Date().getTime();
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
@@ -239,7 +244,6 @@ public class LegacyDirectService extends TransConnService {
         continue;
       }
       try {
-
         CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin, true);
         data = cmrObjects.getData();
 
@@ -288,6 +292,7 @@ public class LegacyDirectService extends TransConnService {
           WfHist hist = createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
         }
         partialCommit(entityManager);
+        Thread.currentThread().setName(tName);
         ProfilerLogger.LOG.trace(
             "After processPendingRDC for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {

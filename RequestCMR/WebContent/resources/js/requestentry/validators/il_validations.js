@@ -33,7 +33,7 @@ function addHandlersForIL() {
       setEnterpriseSalesRepSBO(value);
     });
   }
-  
+
   if (_streetHandler == null) {
     _streetHandler = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
       setStreetContBehavior();
@@ -1309,6 +1309,9 @@ function limitCustomerClassValues(value) {
     break;
   case 'CROSS':
     var kuklaValues = [ '11', '33', '35', '71' ];
+    break;
+  case 'CROSS':
+    var kuklaValues = [ '71' ];
     break;
   default:
     break;

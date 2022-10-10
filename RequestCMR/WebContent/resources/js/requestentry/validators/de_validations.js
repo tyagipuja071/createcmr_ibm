@@ -938,7 +938,7 @@ function setCTCValues() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-	var reqType = FormManager.getActualValue('reqType');
+  var reqType = FormManager.getActualValue('reqType');
 
   if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
@@ -1052,6 +1052,17 @@ function validateEnterpriseNum() {
 	    };
 	  })(), 'MAIN_IBM_TAB', 'frmCMR');
 	}
+// CREATCMR-1815
+function addLandedCountryHandler(cntry, addressMode, saving, finalSave) {
+  if (!saving) {
+    if (addressMode == 'newAddress') {
+      FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
+      FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+    } else {
+      FilteringDropdown['val_landCntry'] = null;
+    }
+  }
+}
 
 // CREATCMR-1815
 function addLandedCountryHandler(cntry, addressMode, saving, finalSave) {

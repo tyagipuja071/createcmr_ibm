@@ -590,6 +590,10 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
   private String vatExempt;
 
   @Column(
+      name = "VAT_IND")
+  private String vatInd;
+
+  @Column(
       name = "PROSPECT_SEQ_NO")
   private String prospectSeqNo;
 
@@ -918,6 +922,14 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
 
   public void setVatExempt(String vatExempt) {
     this.vatExempt = vatExempt;
+  }
+
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
   }
 
   public String getCrosSubTyp() {

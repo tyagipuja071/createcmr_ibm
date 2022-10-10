@@ -1492,18 +1492,18 @@ function setCustSubTypeBpGRTRCY(fromAddress, scenario, scenarioChanged) {
       FormManager.setValue('clientTier', 'Q');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '34');
-      if(scenarioChanged){
+      if(scenarioChanged) {
         FormManager.resetValidations('vat');
         FormManager.setValue('vatExempt', 'Y');
       }
-     }else if (custType == 'PRICU') {
+    } else if (custType == 'PRICU') {
        FormManager.enable('clientTier');
        FormManager.enable('isuCd');
        if(scenarioChanged){
          FormManager.resetValidations('vat');
          FormManager.setValue('vatExempt', 'Y');
        }
-     }else {
+    } else {
       FormManager.enable('clientTier');
       FormManager.enable('isuCd');
       if(scenarioChanged){
@@ -2858,6 +2858,7 @@ function clientTierValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 
 function setValuesWRTIsuCtc(ctc){
   var role = FormManager.getActualValue('userRole').toUpperCase();

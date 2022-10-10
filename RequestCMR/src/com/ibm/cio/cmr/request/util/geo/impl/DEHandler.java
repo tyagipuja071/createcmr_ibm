@@ -91,7 +91,6 @@ public class DEHandler extends GEOHandler {
         }
       }
     }
-
   }
 
   @SuppressWarnings("unchecked")
@@ -200,6 +199,7 @@ public class DEHandler extends GEOHandler {
 
   @Override
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = null;
     if (!StringUtils.isEmpty(addrType)) {
       if ("ZD02".equals(addrType)) {
         return "598";
@@ -207,11 +207,8 @@ public class DEHandler extends GEOHandler {
         return "599";
       }
     }
-
-    // CREATCMR-6139
     // return super.generateAddrSeq(entityManager, addrType, reqId,
     // cmrIssuingCntry);
-    String newAddrSeq = null;
     int addrSeq = 0;
     String maxAddrSeq = null;
     String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_CEE");
@@ -239,8 +236,6 @@ public class DEHandler extends GEOHandler {
 
     newAddrSeq = Integer.toString(addrSeq);
     return newAddrSeq;
-    // CREATCMR-6139
-
   }
 
   @Override

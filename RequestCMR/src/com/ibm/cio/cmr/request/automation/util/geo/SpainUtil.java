@@ -131,6 +131,16 @@ public class SpainUtil extends AutomationUtil {
     String customerName = getCustomerFullName(soldTo);
     Addr installAt = requestData.getAddress("ZI01");
     String customerNameZI01 = getCustomerFullName(installAt);
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if(soldTo != null){
+    	String landCntry = soldTo.getLandCntry();
+    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
+                && ("CROSS".equals(custGrp))){
+        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+        }
+    }
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
@@ -323,35 +333,42 @@ public class SpainUtil extends AutomationUtil {
       boolean requesterFromTeam = false;
       switch (change.getDataField()) {
       case "VAT #":
-        if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
-          // ADD
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-          }
-          if (!matchesDnb) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
-            details.append("VAT # on the request did not match D&B\n");
-          } else {
-            details.append("VAT # on the request matches D&B\n");
-          }
-        }
-        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
-            && !(change.getOldData().equals(change.getNewData()))) {
-          // UPDATE
-          String oldData = change.getOldData().substring(3, 11);
-          String newData = change.getNewData().substring(3, 11);
-          if (!(oldData.equals(newData))) {
-            resultCodes.add("D");// Reject
-            details.append("VAT # on the request has characters updated other than the first character. Create New CMR. \n");
-          } else {
-            details.append("VAT # on the request differs only in the first Character\n");
-          }
-        }
+    	  if(requestData.getAddress("ZS01").getLandCntry().equals("GB")){
+    		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
+                  engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+                  details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+                  }
+            }else{
+            	if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+                    // ADD
+                    Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+                    List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+                    boolean matchesDnb = false;
+                    if (matches != null) {
+                      // check against D&B
+                      matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+                    }
+                    if (!matchesDnb) {
+                      cmdeReview = true;
+                      engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
+                      details.append("VAT # on the request did not match D&B\n");
+                    } else {
+                      details.append("VAT # on the request matches D&B\n");
+                    }
+                  }
+                  if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
+                      && !(change.getOldData().equals(change.getNewData()))) {
+                    // UPDATE
+                    String oldData = change.getOldData().substring(3, 11);
+                    String newData = change.getNewData().substring(3, 11);
+                    if (!(oldData.equals(newData))) {
+                      resultCodes.add("D");// Reject
+                      details.append("VAT # on the request has characters updated other than the first character. Create New CMR. \n");
+                    } else {
+                      details.append("VAT # on the request differs only in the first Character\n");
+                    }
+                  }
+            }
         break;
       case "SBO":
         if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
@@ -456,7 +473,7 @@ public class SpainUtil extends AutomationUtil {
     }
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
-    Set<String> resultCodes = new HashSet<String>();// R - review
+    Set<String> resultCodes = new HashSet<String>();// R - review, D-Reject
     for (String addrType : RELEVANT_ADDRESSES) {
       if (changes.isAddressChanged(addrType)) {
         if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
@@ -596,40 +613,40 @@ public class SpainUtil extends AutomationUtil {
     Data data = requestData.getData();
     Addr addr = requestData.getAddress("ZS01");
 
-    if ((!isCoverageCalculated)) {
+    if (!isCoverageCalculated) {
       details.setLength(0);
       overrides.clearOverrides();
-
-      HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr, data.getIsuCd(), data.getClientTier(),
-          data.getCustSubGrp());
-
-      if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
-        LOG.debug("Calculated Enterprise: " + response.get(ENTP));
-        LOG.debug("Calculated Sales Rep: " + response.get(SALES_REP));
-        details.append("Coverage calculated successfully using 34Q logic mapping.").append("\n");
-        details.append("Sales Rep : " + response.get(SALES_REP)).append("\n");
-        details.append("Enterprise : " + response.get(ENTP)).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), response.get(ENTP));
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(),
-            response.get(SALES_REP));
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
-          && StringUtils.isNotBlank(data.getEnterprise())) {
-        details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
-        details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
-        details.append("Enterprise : " + data.getEnterprise()).append("\n");
-        details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else {
-        String msg = "Coverage cannot be calculated. No valid 34Q mapping found from request data.";
-        details.append(msg);
-        results.setResults("Cannot Calculate");
-        results.setDetails(details.toString());
-        engineData.addNegativeCheckStatus("_esCoverage", msg);
-      }
     }
+
+    HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr, data.getIsuCd(), data.getClientTier(),
+        data.getCustSubGrp());
+
+    if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
+      LOG.debug("Calculated Enterprise: " + response.get(ENTP));
+      LOG.debug("Calculated Sales Rep: " + response.get(SALES_REP));
+      details.append("Coverage calculated successfully using 34Q logic mapping.").append("\n");
+      details.append("Sales Rep : " + response.get(SALES_REP)).append("\n");
+      details.append("Enterprise : " + response.get(ENTP)).append("\n");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), response.get(ENTP));
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), response.get(SALES_REP));
+      results.setResults("Calculated");
+      results.setDetails(details.toString());
+    } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
+        && StringUtils.isNotBlank(data.getEnterprise())) {
+      details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
+      details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
+      details.append("Enterprise : " + data.getEnterprise()).append("\n");
+      details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
+      results.setResults("Calculated");
+      results.setDetails(details.toString());
+    } else {
+      String msg = "Coverage cannot be calculated. No valid 34Q mapping found from request data.";
+      details.append(msg);
+      results.setResults("Cannot Calculate");
+      results.setDetails(details.toString());
+      engineData.addNegativeCheckStatus("_esCoverage", msg);
+    }
+
     return true;
   }
 
@@ -673,10 +690,9 @@ public class SpainUtil extends AutomationUtil {
           scenariosList = Arrays.asList(scenarios);
 
           if (isuCd.concat(clientTier).equalsIgnoreCase(postalMapping.getIsuCTC()) && scenariosList.contains(scenario)
-              && "None".equalsIgnoreCase(postalMapping.getIsicBelongs())
-              || (!postalCodes.isEmpty() && postalCodes.contains(postCdtStrt))
+              && ("None".equalsIgnoreCase(postalMapping.getIsicBelongs()) || ((!postalCodes.isEmpty() && postalCodes.contains(postCdtStrt))
                   && (("Yes".equalsIgnoreCase(postalMapping.getIsicBelongs()) && isicCds.contains(subIndCd))
-                      || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(subIndCd)))) {
+                      || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(subIndCd)))))) {
             response.put(ENTP, postalMapping.getEnterprise());
             response.put(SALES_REP, postalMapping.getSaleRep());
             response.put(MATCHING, "Match Found.");

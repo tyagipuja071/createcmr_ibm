@@ -115,6 +115,25 @@ function afterConfigForNL() {
   lockDunsNo();
   disableIBMTab();
   
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  } 
+  
 }
 
 function lockDunsNo() {
@@ -253,10 +272,35 @@ function setVatValidatorNL() {
       FormManager.readOnly('vat');
       return;
     }
-    FormManager.resetValidations('vat');
-    if (!dojo.byId('vatExempt').checked) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    if (custSubGrp == 'IBMEM' && dojo.byId('vatExempt').checked) {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
     }
+    
+    var vatInd = FormManager.getActualValue('vatInd');
+    
+    if (vatInd && dojo.string.trim(vatInd) == 'T') {
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      FormManager.enable('vat');
+      FormManager.setValue('vatExempt', 'N');    
+      FormManager.setValue('vatInd', 'T');
+    } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.readOnly('vat');
+      FormManager.setValue('vat', '');    
+      FormManager.setValue('vatInd', 'N');
+    } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.enable('vat');
+      FormManager.setValue('vatExempt', 'Y');   
+      FormManager.setValue('vatInd', 'E');
+    } 
+    //FormManager.resetValidations('vat');
+    //if (!dojo.byId('vatExempt').checked) {
+      //checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      //FormManager.enable('vat');
+    //}
   }
 }
 
@@ -422,10 +466,10 @@ function addHandlersForNL() {
   }
   
   if (_SubSceanrioHandler == null) {
-	  _SubSceanrioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-	      setEcoCodeBasedOnSubScenario();
-	    });
-	  }
+    _SubSceanrioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+        setEcoCodeBasedOnSubScenario();
+      });
+    }
 }
 
 function setExpediteReason() {
@@ -1106,6 +1150,25 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
       };
     })(), tabName, formName);
   };
+var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  } 
+  
 }
 
 function addAddressFieldValidators() {
@@ -1727,7 +1790,7 @@ function setClientTierValuesForUpdate() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-	var reqType = FormManager.getActualValue('reqType');
+  var reqType = FormManager.getActualValue('reqType');
 
   if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {

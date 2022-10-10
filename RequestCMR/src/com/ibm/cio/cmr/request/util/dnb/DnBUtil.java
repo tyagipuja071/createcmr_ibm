@@ -285,7 +285,8 @@ public class DnBUtil {
     if (SystemLocation.CHINA.equalsIgnoreCase(issuingCntry)) {
       cmrRecord.setCmrState(StringUtils.isNotBlank(company.getPrimaryStateName()) ? company.getPrimaryStateName() : company.getMailingStateName());
     }
-    if (cmrRecord.getCmrState() == null && (SystemLocation.AUSTRIA.equalsIgnoreCase(issuingCntry) || SystemLocation.SWITZERLAND.equalsIgnoreCase(issuingCntry))) {
+    if (cmrRecord.getCmrState() == null
+        && (SystemLocation.AUSTRIA.equalsIgnoreCase(issuingCntry) || SystemLocation.SWITZERLAND.equalsIgnoreCase(issuingCntry))) {
       cmrRecord.setCmrState(StringUtils.isNotBlank(company.getPrimaryStateName()) ? company.getPrimaryStateName() : company.getMailingStateName());
     }
     cmrRecord.setCmrPostalCode(company.getPrimaryPostalCode() != null ? company.getPrimaryPostalCode() : company.getMailingPostalCode());
@@ -610,6 +611,7 @@ public class DnBUtil {
       boolean useTradestyleName, boolean allowLongNameAddress) {
     GEOHandler handler = RequestUtils.getGEOHandler(country);
     int maxLength = 60;
+    String regex = "\\s+$";
     if (handler != null) {
       maxLength = handler.getName1Length() + handler.getName2Length();
     }
@@ -629,6 +631,8 @@ public class DnBUtil {
       dnbName = dnbName.trim();
       String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
       String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
+      dnbName = dnbName.replaceAll(regex, "");
+      compareName = compareName.replaceAll(regex, "");
       if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbName)) {
         if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbName.toUpperCase()) >= 12
             && (altCompareName == null || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbName.toUpperCase()) >= 12)) {
@@ -864,10 +868,13 @@ public class DnBUtil {
     MatchingResponse<DnBMatchingResponse> response = new MatchingResponse<DnBMatchingResponse>();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+
     addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
     Addr addr = requestData.getAddress(addrType);
     boolean isTaxCdMatch = false;
-    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+    // AutomationUtil countryUtil =
+    // AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
     if (countryUtil != null) {
       isTaxCdMatch = countryUtil.useTaxCd1ForDnbMatch(requestData);
     }

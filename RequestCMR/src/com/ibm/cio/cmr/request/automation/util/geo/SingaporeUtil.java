@@ -59,9 +59,9 @@ public class SingaporeUtil extends AutomationUtil {
   public static final String SCENARIO_CROSS_BLUEMIX = "XBLUM";
   public static final String SCENARIO_CROSS_MARKETPLACE = "XMKTP";
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
-  private static final String SCENARIO_CROSS_PRIVATE_CUSTOMER = "XPRIV";
-  private static final String SCENARIO_INTERNAL = "INTER";
   private static final String SCENARIO_DUMMY = "DUMMY";
+  private static final String SCENARIO_INTERNAL = "INTER";
+  private static final String SCENARIO_CROSS_PRIVATE_CUSTOMER = "XPRIV";
   private static final String SCENARIO_ECOSYS = "ECSYS";
   private static final String SCENARIO_CROSS_ECOSYS = "XECO";
 
@@ -191,8 +191,8 @@ public class SingaporeUtil extends AutomationUtil {
      * Arrays.asList(scnarioList), false);
      */
     Data data = requestData.getData();
-    String scenario = data.getCustSubGrp();
     Admin admin = requestData.getAdmin();
+    String scenario = data.getCustSubGrp();    
     String[] scnarioList = { "ASLOM", "NRML" };
     Addr soldTo = requestData.getAddress("ZS01");
     String custNm1 = soldTo.getCustNm1();
@@ -502,6 +502,7 @@ public class SingaporeUtil extends AutomationUtil {
     // List<DnBMatchingResponse> matches = new ArrayList<DnBMatchingResponse>();
     // boolean matchesDnb = false;
     boolean cmdeReview = false;
+    // boolean cmdeReviewCustNme = false;
     for (String addrType : RELEVANT_ADDRESSES) {
       // if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
       // Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
@@ -667,7 +668,8 @@ public class SingaporeUtil extends AutomationUtil {
         "INC.", "PTE LTD", "PVT LTD", "private limited", "CORPORATION", "hospital", "university");
   }
 
-  private void landedCountryRequiresCMDEReview(AutomationEngineData engineData, StringBuilder details, Addr soldTo, Admin admin) {
+  private static void landedCountryRequiresCMDEReview(AutomationEngineData engineData, StringBuilder details, Addr soldTo, Admin admin) {
+    // CREATCMR-6844
     if ("TH".equalsIgnoreCase(soldTo.getLandCntry()) && "C".equalsIgnoreCase(admin.getReqType())) {
       details.append("Processor review is needed as customer is from Thailand" + "\n");
       engineData.addNegativeCheckStatus("ISTHA", "Customer is from Thailand");

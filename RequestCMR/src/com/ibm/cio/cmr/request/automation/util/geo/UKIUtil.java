@@ -81,6 +81,16 @@ public class UKIUtil extends AutomationUtil {
     custNm1 = zi01.getCustNm1();
     custNm2 = !StringUtils.isBlank(zi01.getCustNm2()) ? " " + zi01.getCustNm2() : "";
     String customerNameZI01 = custNm1 + custNm2;
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if(zs01 != null){
+    	String landCntry = zs01.getLandCntry();
+    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
+                && ("CROSS".equals(custGrp))){
+        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+        }
+    }
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
@@ -242,8 +252,13 @@ public class UKIUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "VAT #":
-        // noop, for switch handling only
-        break;
+    	  if(requestData.getAddress("ZS01").getLandCntry().equals("GB") && !data.getCmrIssuingCntry().equals("866")){
+    		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
+                  engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+                  details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+                  }
+    		  }
+    	  break;
       case "INAC/NAC Code":
       case "ISU Code":
       case "Client Tier":
@@ -615,16 +630,24 @@ public class UKIUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
 
-    if ((!isCoverageCalculated || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario))
-        && (engineData.get("ZI01_DNB_MATCH") == null || CalculateCoverageElement.COV_VAT.equals(covFrom))))
-        && !SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
-      details.setLength(0);
-      overrides.clearOverrides();
+    if (!SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
+      if (!isCoverageCalculated) {
+        details.setLength(0);
+        overrides.clearOverrides();
+      }
       UkiFieldsContainer fields = null;
       if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
-        fields = calculate32SValuesForUK(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), requestData);
+        if (isCoverageCalculated) {
+          fields = getSBOSalesRepForUK(entityManager, data.getIsuCd(), data.getClientTier(), null, requestData);
+        } else {
+          fields = getSBOSalesRepForUK(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), requestData);
+        }
       } else if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
-        fields = calculate32SValuesForIE(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), data.getCmrIssuingCntry());
+        if (isCoverageCalculated) {
+          fields = getSBOSalesRepForUK(entityManager, data.getIsuCd(), data.getClientTier(), null, requestData);
+        } else {
+          fields = getSBOSalesRepForIE(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), data.getCmrIssuingCntry());
+        }
       }
       if (fields != null) {
         details.append("Coverage calculated successfully using 34Q logic.").append("\n");
@@ -652,12 +675,18 @@ public class UKIUtil extends AutomationUtil {
 
   }
 
-  private UkiFieldsContainer calculate32SValuesForUK(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
+  private UkiFieldsContainer getSBOSalesRepForUK(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
       RequestData requestData) {
 
-    Addr zi01 = requestData.getAddress("ZI01");
+    String scenario = requestData.getData().getCustSubGrp();
+    Addr addr;
+    if ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario))) {
+      addr = requestData.getAddress("ZI01");
+    } else {
+      addr = requestData.getAddress("ZS01");
+    }
 
-    String PostCd = zi01.getPostCd();
+    String PostCd = addr.getPostCd();
 
     if (PostCd != null && PostCd.length() > 2) {
       PostCd = PostCd.substring(0, 2);
@@ -716,8 +745,7 @@ public class UKIUtil extends AutomationUtil {
 
   }
 
-  private UkiFieldsContainer calculate32SValuesForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
-      String issuingCntry) {
+  private UkiFieldsContainer getSBOSalesRepForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd, String issuingCntry) {
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
     if (isuCtc.equals("34Y") || isuCtc.equals("5K")) {
       UkiFieldsContainer container = new UkiFieldsContainer();

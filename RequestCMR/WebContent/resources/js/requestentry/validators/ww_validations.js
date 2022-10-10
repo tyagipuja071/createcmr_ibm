@@ -5,6 +5,7 @@
  */
 
 var _GBL_NO_INIT = false;
+var _scenarioTypeHandler = null;
 /**
  * Validator for Address Standardization completion
  */
@@ -101,7 +102,12 @@ function addDnBSearchValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('dnbPrimary') != 'Y') {
+        var ifProspect = FormManager.getActualValue('prospLegalInd');
+        if (dijit.byId('prospLegalInd')) {
+          ifProspect = dijit.byId('prospLegalInd').get('value');
+        }
+       
+        if (FormManager.getActualValue('dnbPrimary') != 'Y' && ifProspect != 'Y') {
           return new ValidationResult(null, true);
         }
         var reqType = FormManager.getActualValue('reqType');
@@ -112,7 +118,7 @@ function addDnBSearchValidator() {
         if (reqStatus != 'DRA') {
           return new ValidationResult(null, true);
         }
-        if (isSkipDnbMatching()) {
+        if (isSkipDnbMatching() && ifProspect != 'Y') {
           return new ValidationResult(null, true);
         }
         var result = FormManager.getActualValue('findDnbResult');
@@ -476,8 +482,7 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
           }
-          console.log('ZS01 VAT Country: ' + zs01Cntry);
-
+          console.log('ZS01 VAT Country: ' + zs01Cntry);          
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
             if (result.errorPattern == null) {
@@ -501,6 +506,26 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
       };
     })(), tabName, formName);
   };
+  
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  } 
+  
 }
 
 // TODO VAT is required for some cross landCntry
@@ -547,6 +572,25 @@ function requireVATForCrossBorder() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+  
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  } 
 }
 
 /**
@@ -928,16 +972,43 @@ function addDPLAssessmentValidator() {
 function resetVATValidationsForPayGo(){
   var systemId = FormManager.getActualValue('sourceSystId');
   var cntry= FormManager.getActualValue('cmrIssuingCntry');
-  var vat = FormManager.getActualValue('vat');
+  var vat = FormManager.getActualValue('vat'); 
+  var vatInd = FormManager.getActualValue('vatInd');
   var results = cmr.query('GET_PARTNER_VAT_EXCEPTIONS', {
     COUNTRY : cntry,
-    SERVICE_ID : systemId
+    SERVICE_ID : systemId   
+    
   });
+  
   if(results!= null && results!= undefined && results.ret1!='' && results.ret1 == 'Y' && vat == ''){
-    FormManager.resetValidations('vat');
-    // FormManager.getField('vatExempt').checked = true;
+    
+   FormManager.resetValidations('vat');
+   //FormManager.getField('vatExempt').checked = true;
     console.log('VAT is non mandatory for PayGO');
+  }  
+  
+  FormManager.resetValidations('vat');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
   }
+  
+  
+  
+   
 }
 
 function addIsuCdObsoleteValidator(){
@@ -959,6 +1030,80 @@ function addIsuCdObsoleteValidator(){
     }
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
+// CREATCMR-6244
+function vatOptionalForLandedUK() {
+  var _reqId = FormManager.getActualValue('reqId');
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01"
+  };
+
+  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+  landCntry = landCntryResult.ret1;
+
+  if (reqType == 'C') {
+    if (landCntry == 'GB') {
+      if ((issuingCntry != '866' && custGrp == 'CROSS') || (issuingCntry == '866' && custGrp == 'LOCAL')) {
+        //FormManager.resetValidations('vat');
+        //FormManager.removeValidator('vat', Validators.REQUIRED);
+      }
+    }
+  }
+  
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vatInd && dojo.string.trim(vatInd) == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'N');    
+    FormManager.setValue('vatInd', 'T');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');    
+    FormManager.setValue('vatInd', 'N');
+  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+    FormManager.setValue('vatExempt', 'Y');   
+    FormManager.setValue('vatInd', 'E');
+  }  
+  
+}
+
+function afterConfigForEMEA(){
+// 6244
+  if (_scenarioTypeHandler == null && FormManager.getField('custGrp')) {
+    _scenarioTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      vatOptionalForLandedUK();
+    });
+  }
+}
+
+function findVatInd() {
+	  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+	  var reqId = FormManager.getActualValue('reqId');
+	  var vatInd = FormManager.getActualValue('vatInd');
+	  var custGrp = FormManager.getActualValue('custGrp');
+	    if (vatInd == 'N' && custGrp!='CROSS') {
+	      console.log("Test");
+	     cmr.showConfirm('markSendForProcessing()',
+	          '<div align="center"><strong><i><u><b><p style="font-size:25px"> Warning Message</p></u><br><br><p style="font-size:15px">Please note, if you choose not to provide the company VAT ID, IBM will not be able to include VAT ID in the customer address section. As a consequence the IBM invoice may not be eligible to recover the VAT charged to the client which can cause a delay on payment in countries that is required. However, at any moment business can submit VAT ID update whenever VAT ID is collected needed.</p><br><br> <p style="font-size:17px">Would you like  to proceed?</p></i></strong></div>', 'Warning', null, {
+	    		OK : 'Ok',
+	    CANCEL : 'Cancel'
+	    	  });
+	    }
+}
+
+function markSendForProcessing() {
+	  var sendForProcess = YourActions.Send_for_Processing;
+	  FormManager.doAction('frmCMR', sendForProcess, true);
+	}
+
 
 /* Register WW Validators */
 dojo.addOnLoad(function() {
@@ -1036,6 +1181,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerWWValidator(addGenericZIPValidator);
   // GEOHandler.registerValidator(addGenericZIPValidator,
   // GEOHandler.NO_ME_CEMEA, null, true);
+  GEOHandler.NEW_EMEA = [ '624', '788', '706', SysLoc.Switzerland, SysLoc.Sweden, SysLoc.FINLAND, SysLoc.NORWAY, SysLoc.AUSTRIA, SysLoc.GERMANY, SysLoc.SPAIN ];
+  GEOHandler.addAfterConfig(afterConfigForEMEA, GEOHandler.NEW_EMEA);
+  GEOHandler.addAfterTemplateLoad(afterConfigForEMEA, GEOHandler.NEW_EMEA);
 
   // Postal Code validation for Ireland as Landed Country - CMR - 6033
   GEOHandler.addAddrFunction(addGenericPostalCodeValidator, GEOHandler.GROUP1);

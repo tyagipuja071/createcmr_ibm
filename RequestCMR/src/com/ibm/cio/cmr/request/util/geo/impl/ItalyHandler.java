@@ -861,6 +861,7 @@ public class ItalyHandler extends BaseSOFHandler {
       data.setIsuCd(isu);
       data.setClientTier(ctc);
     }
+
     if (sbo != null && sbo.length() == 7) {
       sbo = sbo.substring(1, 3);
     }

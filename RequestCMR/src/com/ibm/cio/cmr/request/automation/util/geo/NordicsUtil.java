@@ -47,6 +47,7 @@ import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+import com.ibm.cmr.services.client.matching.request.ReqCheckResponse;
 
 /**
  * 
@@ -238,6 +239,16 @@ public class NordicsUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     Addr zp01 = requestData.getAddress("ZP01");
     String customerName = getCustomerFullName(zs01);
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if (zs01 != null) {
+      String landCntry = zs01.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
+    }
 
     if (zp01 != null && !compareCustomerNames(zs01, zp01)) {
       details.append("Sold-to and Bill-to name are not identical. Request will require CMDE review before proceeding.").append("\n");
@@ -357,10 +368,16 @@ public class NordicsUtil extends AutomationUtil {
     String scenario = requestData.getData().getCustSubGrp();
     String[] kuklaBUSPR = { "43", "44", "45" };
     String[] kuklaISO = { "81", "85" };
+    String NORDX_DENMARK_VKBUR = "0036";
+    String NORDX_ICELAND_VKBUR = "0503";
+    String NORDX_ESTONIA_VKBUR = "0393";
+    String NORDX_LITHUNIA_VKBUR = "0081";
+    String NORDX_FINLAND_VKBUR = "0047";
     String cntry = requestData.getData().getCmrIssuingCntry();
 
     List<DuplicateCMRCheckResponse> matches = response.getMatches();
     List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+    List<DuplicateCMRCheckResponse> subScenarioMatches = new ArrayList<DuplicateCMRCheckResponse>();
 
     if (Arrays.asList(bpScenariosToBeChecked).contains(scenario)) {
       for (DuplicateCMRCheckResponse match : matches) {
@@ -399,6 +416,65 @@ public class NordicsUtil extends AutomationUtil {
       // set filtered matches in response
       response.setMatches(filteredMatches);
     }
+
+    if (response.getMatches() != null) {
+      for (DuplicateCMRCheckResponse res : response.getMatches()) {
+        List<Object[]> results = null;
+        try {
+          String sql = ExternalizedQuery.getSql("NORDX.KNVV.GETVKBUR");
+          PreparedQuery query = new PreparedQuery(entityManager, sql);
+          query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+          query.setParameter("CMRNO", res.getCmrNo());
+          query.setParameter("CNTRY", requestData.getData().getCmrIssuingCntry());
+          query.setParameter("ADDR_TYPE", res.getAddrType());
+          results = query.getResults();
+        } catch (Exception e) {
+          LOG.debug("An error occurred while retrieving RDc results.");
+        }
+
+        if (results != null) {
+          String countryUse = requestData.getData().getCountryUse();
+          String cmrIssuingCountry = requestData.getData().getCmrIssuingCntry();
+          for (Object[] result : results) {
+            if (!StringUtils.isBlank(countryUse) && ("702EE".equals(countryUse) && NORDX_ESTONIA_VKBUR.equals(result[0].toString()))
+                || ("702LT".equals(countryUse) && NORDX_LITHUNIA_VKBUR.equals(result[0].toString()))
+                || ("702".equals(countryUse) && NORDX_FINLAND_VKBUR.equals(result[0].toString()))
+                || ("678IS".equals(countryUse) && NORDX_ICELAND_VKBUR.equals(result[0].toString()))
+                || (!"678IS".equals(countryUse) && "678".equals(cmrIssuingCountry) && NORDX_DENMARK_VKBUR.equals(result[0].toString()))) {
+              subScenarioMatches.add(res);
+            }
+          }
+        }
+      }
+    }
+    response.setMatches(subScenarioMatches);
+  }
+
+  @Override
+  public void filterDuplicateReqMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<ReqCheckResponse> response) {
+    Data matchedData = new Data();
+    Data data = requestData.getData();
+    List<ReqCheckResponse> filteredMatches = new ArrayList<ReqCheckResponse>();
+    for (ReqCheckResponse res : response.getMatches()) {
+      try {
+        String sql = ExternalizedQuery.getSql("REQUESTENTRY.DATA.SEARCH_BY_REQID");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", res.getReqId());
+        query.setForReadOnly(true);
+        matchedData = query.getSingleResult(Data.class);
+      } catch (Exception e) {
+        LOG.error("An error occurred while trying to retrieve CREQCMR data.");
+      }
+
+      if (matchedData != null) {
+        if (!StringUtils.isEmpty(matchedData.getCountryUse()) && !StringUtils.isEmpty(data.getCountryUse())
+            && matchedData.getCountryUse().equals(data.getCountryUse())) {
+          filteredMatches.add(res);
+        }
+      }
+    }
+    response.setMatches(filteredMatches);
   }
 
   private boolean isuCTCMatch(String cmr, EntityManager entityManager, String cntry) {
@@ -488,22 +564,29 @@ public class NordicsUtil extends AutomationUtil {
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
       case "VAT #":
-        if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
-          // ADD
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+        if (requestData.getAddress("ZS01").getLandCntry().equals("GB")) {
+          if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)) {
+            engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+            details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
           }
-          if (!matchesDnb) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
-            details.append("VAT # on the request did not match D&B\n");
-          } else {
-            details.append("VAT # on the request matches D&B\n");
-            engineData.setVatVerified(true, "VAT Verified");
+        } else {
+          if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+            // ADD
+            Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+            }
+            if (!matchesDnb) {
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
+              details.append("VAT # on the request did not match D&B\n");
+            } else {
+              details.append("VAT # on the request matches D&B\n");
+              engineData.setVatVerified(true, "VAT Verified");
+            }
           }
         }
         break;

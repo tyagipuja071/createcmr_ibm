@@ -772,7 +772,6 @@
     <put-attribute name="title" value="CreateCMR | Update Request" />
     <put-attribute name="body" value="/resources/jsp/findcmr.jsp" />
   </definition>
-
  
    <!-- Single Reactivation End -->
 </tiles-definitions>

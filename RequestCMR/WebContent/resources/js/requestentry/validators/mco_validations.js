@@ -841,7 +841,6 @@ function setEnterpriseValues34Q() {
     } else {
       entp = '985107'
     }
-
     FormManager.setValue('enterprise', entp);
     return;
   }
@@ -1145,8 +1144,8 @@ function setVatValidatorPTES() {
     };
     var results = cmr.query('ADDR.GET.ZS01LANDCNTRY.BY_REQID', reqParam);
     var zs01LandCntry = results.ret2;
-    if (!dijit.byId('vatExempt').get('checked') && zs01LandCntry != 'US') {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    if (!dijit.byId('vatExempt').get('checked') && zs01LandCntry != 'US' && zs01LandCntry != 'GB') {
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
   }
 }
@@ -2984,7 +2983,7 @@ function validateExistingCMRNo() {
 
 // CREATCMR-4293
 function setCTCValues() {
-
+  
   FormManager.removeValidator('clientTier', Validators.REQUIRED);
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');

@@ -101,31 +101,37 @@ public class AustraliaUtil extends AutomationUtil {
       LOG.debug("Salesman check skipped for private and allowed scenarios.");
       // eleResults.append("\nValid cluster and Salesman No. used.\n");
       details.append("\nSalesman check skipped for this scenario (Private/Marketplace/Bluemix).\n");
-    } else {
+    } // else {
 
-      // b. check cluster and salesman no. combination
-      if ("VALID".equalsIgnoreCase(validCode)) {
-        LOG.debug("The combination of Salesman No. and Cluster is valid.");
-        // eleResults.append("\nValid cluster and Salesman No. used.\n");
-        details.append("\nThe combination of Salesman No. and Cluster is valid.\n");
-      } else if ("INVALID".equalsIgnoreCase(validCode)) {
-        LOG.debug("The combination of Salesman No. and Cluster is INVALID.");
-        engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is invalid.", "", "");
-        results.setOnError(true);
-        // eleResults.append("Invalid Cluster and Salesman No. combination.\n");
-        details.append("\nThe combination of Salesman No. and Cluster is invalid.\n");
-      } else {
-        LOG.debug("Salesman No.-Cluster combination not present.");
-        /*
-         * engineData.addRejectionComment("OTH",
-         * "No combination of Salesman No. and Cluster is present.", "", "");
-         * results.setOnError(true);
-         */
-        // eleResults.append("No combination of Salesman No. and Cluster
-        // present.\n");
-        details.append("\nNo combination of Salesman No. and Cluster is present.\n");
-      }
-    }
+    // CREATCMR-6825
+    // b. check cluster and salesman no. combination
+    // if ("VALID".equalsIgnoreCase(validCode)) {
+    // LOG.debug("The combination of Salesman No. and Cluster is valid.");
+    // // eleResults.append("\nValid cluster and Salesman No. used.\n");
+    // details.append("\nThe combination of Salesman No. and Cluster is
+    // valid.\n");
+    // } else if ("INVALID".equalsIgnoreCase(validCode)) {
+    // LOG.debug("The combination of Salesman No. and Cluster is INVALID.");
+    // engineData.addRejectionComment("OTH", "The combination of Salesman No.
+    // and Cluster is invalid.", "", "");
+    // results.setOnError(true);
+    // // eleResults.append("Invalid Cluster and Salesman No.
+    // combination.\n");
+    // details.append("\nThe combination of Salesman No. and Cluster is
+    // invalid.\n");
+    // } else {
+    // LOG.debug("Salesman No.-Cluster combination not present.");
+    // /*
+    // * engineData.addRejectionComment("OTH",
+    // * "No combination of Salesman No. and Cluster is present.", "", "");
+    // * results.setOnError(true);
+    // */
+    // // eleResults.append("No combination of Salesman No. and Cluster
+    // // present.\n");
+    // details.append("\nNo combination of Salesman No. and Cluster is
+    // present.\n");
+    // }
+    // }
     isIsicInvalid = isISICValidForScenario(requestData, Arrays.asList(isicScenarioList));
 
     if (isIsicInvalid) {
@@ -425,7 +431,6 @@ public class AustraliaUtil extends AutomationUtil {
     case SCENARIO_INTERNAL:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
-
     case SCENARIO_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);

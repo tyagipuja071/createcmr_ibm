@@ -437,7 +437,6 @@ function afterConfigForUKI() {
   var isicCd = FormManager.getActualValue('isicCd');
   var custSubType = FormManager.getActualValue('custSubGrp');
   var zs01LandCntry = getZS01LandCntry();
-
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
     role = _pagemodel.userRole;
@@ -510,7 +509,7 @@ function afterConfigForUKI() {
         FormManager.readOnly('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
-        if ("C" == FormManager.getActualValue('reqType')) {
+        if ("C" == FormManager.getActualValue('reqType') && getZS01LandCntry() != 'GB') {
           FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
         }
         FormManager.enable('vat');
@@ -986,6 +985,9 @@ function autoSetVAT() {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');
+  } else if (getZS01LandCntry() == 'GB') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
   } else {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     FormManager.enable('vat');
@@ -4814,6 +4816,8 @@ function afterConfigForIT() {
   }
 }
 
+//CREATCMR-5089 ITALY - coverage 2H22 updates sbo should not be set based on isu/ctc
+/**
 function setSboValueBasedOnIsuCtcIT() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -4845,13 +4849,17 @@ function setSboValueBasedOnIsuCtcIT() {
     FormManager.readOnly('clientTier');
   }
 }
-
+**/
 function setSboValueBasedOnIsuCtcUK() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
   var isuList = [ '34', '5K', '05', '11', '4F' ];
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    return;
+  }
 
   if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     return;
@@ -7531,7 +7539,6 @@ function lockRequireFieldsUKI() {
     FormManager.enable('abbrevNm');
     FormManager.enable('abbrevLocn');
   }
-
   if (reqType == 'C' && role == 'PROCESSOR') {
     if (custSubGroup == 'IBMEM') {
       FormManager.readOnly('clientTier');
@@ -10411,7 +10418,6 @@ dojo.addOnLoad(function() {
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [ SysLoc.ISRAEL, SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(emeaPpsCeidValidator, GEOHandler.EMEA);
-
   // UKI Specific
   GEOHandler.addAfterConfig(afterConfigForUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(defaultCapIndicatorUKI, [ SysLoc.IRELAND, SysLoc.UK ]);

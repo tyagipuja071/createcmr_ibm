@@ -691,7 +691,6 @@ function addFieldHandlers() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
-      setIsuCtcFor5k();
     });
   }
 
@@ -747,25 +746,6 @@ function addPSTExemptHandler() {
         dojo.byId('ast-PSTExemptLicNum').style.display = 'none';
       }
     });
-  }
-}
-
-function setIsuCtcFor5k() {
-  isuCd = FormManager.getActualValue('isuCd');
-  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (viewOnlyPage == 'true') {
-    return;
-  }
-  if (custSubGrp == 'ECO') {
-    return;
-  }
-  if (isuCd == '5K') {
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    var reqType = FormManager.getActualValue('reqType');
-    FormManager.enable('clientTier');
   }
 }
 
@@ -1448,8 +1428,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
   // ]);
   GEOHandler.addToggleAddrTypeFunction(addPostlCdLogic, [ SysLoc.CANADA ]);
-  GEOHandler.addAfterConfig(setIsuCtcFor5k, [ SysLoc.CANADA ]);
-  GEOHandler.addAfterTemplateLoad(setIsuCtcFor5k, [ SysLoc.CANADA ]);
 
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress([ SysLoc.CANADA ], validateCACopy, [ 'ZP01', 'ZP02' ]);
@@ -1467,4 +1445,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addStateProvHandler, [ SysLoc.CANADA ]);
+
 });
