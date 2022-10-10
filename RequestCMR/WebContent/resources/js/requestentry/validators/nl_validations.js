@@ -2,6 +2,7 @@
 var _addrTypesForNL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZP02' ];
 var _poBOXHandler = [];
 var _reqReasonHandler = null;
+
 function afterConfigForNL() {
   var reqType = FormManager.getActualValue('reqType');
   var role = null;
@@ -112,27 +113,7 @@ function afterConfigForNL() {
     setBOTeamValues(clientTier);
   }
   lockDunsNo();
-  disableIBMTab();
-  
-  var vatInd = FormManager.getActualValue('vatInd');
-  
-  if (vatInd && dojo.string.trim(vatInd) == 'T') {
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'N');
-    FormManager.setValue('vatInd', 'T');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.readOnly('vat');
-    FormManager.setValue('vat', '');    
-    FormManager.setValue('vatInd', 'N');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'Y');   
-    FormManager.setValue('vatInd', 'E');
-  } 
-  
+  disableIBMTab();  
 }
 
 function lockDunsNo() {
@@ -265,35 +246,23 @@ function setVatValidatorNL() {
     return;
   }
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
-    
-    var vatInd = FormManager.getActualValue('vatInd');
-    
-    if (vatInd && dojo.string.trim(vatInd) == 'T') {
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      FormManager.enable('vat');
-      FormManager.setValue('vatExempt', 'N');    
-      FormManager.setValue('vatInd', 'T');
-    } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-      FormManager.readOnly('vat');
-      FormManager.setValue('vat', '');    
-      FormManager.setValue('vatInd', 'N');
-    } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-      FormManager.enable('vat');
-      FormManager.setValue('vatExempt', 'Y');   
-      FormManager.setValue('vatInd', 'E');
-    } 
-    
     if (custSubGrp == 'IBMEM' || custSubGrp == 'PRICU') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.clearValue('vat');
       FormManager.readOnly('vat');
-      FormManager.setValue('vatInd', 'N');
-      FormManager.readOnly('vatInd');
-    } else {
-      FormManager.enable('vatInd');
+      return;
     }
+    if (custSubGrp == 'IBMEM' && dojo.byId('vatExempt').checked) {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
+    }
+    
+    //FormManager.resetValidations('vat');
+    //if (!dojo.byId('vatExempt').checked) {
+      //checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      //FormManager.enable('vat');
+    //}
   }
 }
 
@@ -1141,26 +1110,7 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
         }
       };
     })(), tabName, formName);
-  };
-var vatInd = FormManager.getActualValue('vatInd');
-  
-  if (vatInd && dojo.string.trim(vatInd) == 'T') {
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'N');    
-    FormManager.setValue('vatInd', 'T');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.readOnly('vat');
-    FormManager.setValue('vat', '');    
-    FormManager.setValue('vatInd', 'N');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'Y');   
-    FormManager.setValue('vatInd', 'E');
-  } 
-  
+  }; 
 }
 
 function addAddressFieldValidators() {
@@ -1913,6 +1863,55 @@ function setEcoCodeBasedOnSubScenario() {
   }
 }
 
+function addVatIndValidator(){
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  
+ if ((reqStatus == 'PRJ' || reqStatus == 'PCO' || reqStatus == 'COM' || reqStatus == 'CAN' || reqStatus == 'CLO') && reqStatus != null ){   
+   FormManager.resetValidations('vat');
+   FormManager.readOnly('vat');
+ } else {
+   
+  var cntry= FormManager.getActualValue('cmrIssuingCntry');
+  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+    ISSUING_CNTRY : cntry
+  });
+  
+  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'O' && vat == ''){    
+    FormManager.setValue('vatInd', 'N');
+  } else if((results!= null || results!= undefined || results.ret1!='') && vat != ''){      
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');              
+  } else if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'R' && vat == ''){    
+    FormManager.setValue('vat', '');   
+    FormManager.setValue('vatInd', '');
+  } else if (vat && dojo.string.trim(vat) != '') {
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');    
+  } else if (vat && dojo.string.trim(vat) == '') {
+    FormManager.setValue('vatInd', 'N'); 
+  }
+    
+  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
+    FormManager.resetValidations('vat');
+  }
+}
+}
+
+function setVatIndFields(){
+  var _vatHandler = null;  
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vat != '' && vatInd == ''){
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -1970,4 +1969,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addIGFZP02Validator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.NL, null, true);
+  
+  GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NL, null, true);
+  GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.NL);
 });

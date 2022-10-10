@@ -159,25 +159,6 @@ function addAfterConfigForSWISS() {
       }
     }
   }
-  var vatInd = FormManager.getActualValue('vatInd');
-  
-  if (vatInd && dojo.string.trim(vatInd) == 'T') {
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'N');    
-    FormManager.setValue('vatInd', 'T');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.readOnly('vat');
-    FormManager.setValue('vat', '');    
-    FormManager.setValue('vatInd', 'N');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'Y');   
-    FormManager.setValue('vatInd', 'E');
-  } 
-  
 }
 
 function resetAddrTypeValidation() {
@@ -383,7 +364,7 @@ function addHandlersForSWISS() {
     _vatHandler = dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
       if (value.length >= 15) {
         addVatSuffixForCustLangCdScrtch();
-      }
+      }           
     });
   }
 
@@ -462,8 +443,7 @@ function addVatSuffixForCustLangCdScrtch() {
 }
 
 /* Vat Exempt Handler */
-function setVatValidatorSWISS() {
-  var vatInd = FormManager.getActualValue('vatInd');
+function setVatValidatorSWISS() {  
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
 
   var _reqId = FormManager.getActualValue('reqId');
@@ -476,23 +456,8 @@ function setVatValidatorSWISS() {
   landCntry = landCntryResult.ret1;
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {    
-    //FormManager.resetValidations('vat');
-    if (vatInd && dojo.string.trim(vatInd) == 'T') {
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      FormManager.enable('vat');
-      FormManager.setValue('vatExempt', 'N');      
-      FormManager.setValue('vatInd', 'T');
-    } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-      FormManager.readOnly('vat');
-      FormManager.setValue('vat', '');     
-      FormManager.setValue('vatInd', 'N');
-    } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-      FormManager.enable('vat');
-      FormManager.setValue('vatExempt', 'Y');     
-      FormManager.setValue('vatInd', 'E');
-    }
+    
+    FormManager.resetValidations('vat');   
     
     if (!dijit.byId('vatExempt').get('checked') && landCntry != 'GB') {
 
@@ -989,29 +954,7 @@ function addVatSuffixForCustLangCd() {
         FormManager.setValue('vat', vatOnly.concat(" TVA"));
       }
     }
-  } else {
-    FormManager.readOnly('vat');
-    FormManager.setValue('vat', '');
   }
-  
-  var vatInd = FormManager.getActualValue('vatInd');
-  
-  if (vatInd && dojo.string.trim(vatInd) == 'T') {
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'N');    
-    FormManager.setValue('vatInd', 'T');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.readOnly('vat');
-    FormManager.setValue('vat', '');    
-    FormManager.setValue('vatInd', 'N');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'Y');   
-    FormManager.setValue('vatInd', 'E');
-  } 
 }
 
 function setCurrencyCd() {
@@ -1885,6 +1828,54 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function addVatIndValidator(){
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+ 
+ if ((reqStatus == 'PRJ' || reqStatus == 'PCO' || reqStatus == 'COM' || reqStatus == 'CAN' || reqStatus == 'CLO') && reqStatus != null ){
+   FormManager.resetValidations('vat');
+   FormManager.readOnly('vat');
+ } else {
+   
+  var cntry= FormManager.getActualValue('cmrIssuingCntry');
+  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+    ISSUING_CNTRY : cntry
+  });
+  
+  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'O' && vat == ''){    
+    FormManager.setValue('vatInd', 'N'); 
+  } else if((results!= null || results!= undefined || results.ret1!='') && vat != ''){      
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  } else if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'R' && vat == ''){
+    FormManager.setValue('vat', '');   
+    FormManager.setValue('vatInd', '');
+  } else if (vat && dojo.string.trim(vat) != '') {    
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');    
+  } else if (vat && dojo.string.trim(vat) == '') {
+    FormManager.setValue('vatInd', 'N'); 
+  }
+    
+  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
+    FormManager.resetValidations('vat');
+  }
+}
+}
+
+function setVatIndFields(){
+  var _vatHandler = null;  
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vat != '' && vatInd == ''){
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  }
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
@@ -1951,5 +1942,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.SWISS);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.SWISS, null, true);
+
+  GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.SWISS);
   
 });

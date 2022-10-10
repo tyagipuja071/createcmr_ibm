@@ -60,8 +60,8 @@ public class SWISSHandler extends GEOHandler {
   private static final Logger LOG = Logger.getLogger(DEHandler.class);
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("848");
 
-  private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "Division", "POBoxCity", "Affiliate",
-      "Company", "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode", "BPRelationType", "MembLevel" };
+  private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "Division", "POBoxCity", "Affiliate", "Company",
+      "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode", "BPRelationType", "MembLevel" };
 
   public static final String SWISS_MASSCHANGE_TEMPLATE_ID = "SWISS";
 
@@ -479,17 +479,18 @@ public class SWISSHandler extends GEOHandler {
       query.setParameter("ADDR_TYPE", "ZS01");
       List<Object[]> results = query.getResults();
       if (!results.isEmpty() && results.get(0) != null) {
+        int postCd = Integer.parseInt((String) results.get(0)[0]);
         String landCntry = (String) results.get(0)[1];
         if ("CH".equalsIgnoreCase(landCntry) || "LI".equalsIgnoreCase(landCntry)) {
-        	int postCd = Integer.parseInt((String) results.get(0)[0]);
-            if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
-            	data.setCustPrefLang("D");
-            	} else if (postCd >= 6500 && postCd <= 6999) {
-            		data.setCustPrefLang("I");
-            		} else if (postCd >= 0000 && postCd <= 3000) {
-            			data.setCustPrefLang("F");
-            			}
-            } else {
+
+          if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+            data.setCustPrefLang("D");
+          } else if (postCd >= 6500 && postCd <= 6999) {
+            data.setCustPrefLang("I");
+          } else if (postCd >= 0000 && postCd <= 3000) {
+            data.setCustPrefLang("F");
+          }
+        } else {
           data.setCustPrefLang("E");
         }
 
@@ -791,17 +792,16 @@ public class SWISSHandler extends GEOHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "CITY2", "POST_CD",
-        "LAND_CNTRY", "PO_BOX", "ADDR_TXT", "CUST_PHONE", "CUST_LANG_CD", "HW_INSTL_MSTR_FLG"));
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "CITY2",
+        "POST_CD", "LAND_CNTRY", "PO_BOX", "ADDR_TXT", "CUST_PHONE", "CUST_LANG_CD", "HW_INSTL_MSTR_FLG"));
     return fields;
   }
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(
-        Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD", "SUB_INDUSTRY_CD",
-            "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO",
-            "ORD_BLK"));
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
+        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
+        "DUNS_NO", "ORD_BLK"));
     return fields;
   }
 

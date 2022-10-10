@@ -215,7 +215,7 @@ public class BluePagesHelper {
    * @param name
    * @return First and Last name as a single String
    */
-  public static Map<String, String> getBluePagesDetailsByName(String name, String country) {
+    public static Map<String, String> getBluePagesDetailsByName(String name, String country) {
 
     List<BPResults> allResults = new ArrayList<BPResults>();
     BPResults rearrangedNameResuls = null;
@@ -264,7 +264,6 @@ public class BluePagesHelper {
     }
     return returnMap;
   }
-
   /**
    * Gets the Person details like Name, Country Code, Company code, CNUM by
    * intranet addr.

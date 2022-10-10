@@ -370,7 +370,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           result.setOnError(false);
         }
       }
-
+      
       AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
       if (automationUtil != null && automationUtil instanceof SingaporeUtil && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
         SingaporeUtil singaporeUtil = (SingaporeUtil) automationUtil;
