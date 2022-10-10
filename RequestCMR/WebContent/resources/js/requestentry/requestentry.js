@@ -11,6 +11,7 @@ var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
 var NORDX = [ '846', '806', '702', '678' ];
 var comp_proof_INAUSG = false;
 var flag = false;
+
 dojo.require("dojo.io.iframe");
 
 /**
@@ -33,25 +34,6 @@ function switchTabs(showId, noCheck) {
 
   if (typeof (openTabDetails) != 'undefined') {
     openTabDetails(showId);
-  }
-  
-  var vatInd = FormManager.getActualValue('vatInd');
-  
-  if (vatInd && dojo.string.trim(vatInd) == 'T') {
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'N');    
-    FormManager.setValue('vatInd', 'T');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.readOnly('vat');
-    FormManager.setValue('vat', '');    
-    FormManager.setValue('vatInd', 'N');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'Y');   
-    FormManager.setValue('vatInd', 'E');
   }
 
   // show the address tab for some cases
@@ -837,47 +819,13 @@ var _templateHandler = null;
 var defaultLandCntry = null;
 var _rejSupplInfoHandler = null;
 var _dnbSearchHandler = null;
-var _vatIndHandler = null;
-
 /**
  * Executed after PageManager loads all the scripts. Place here code that needs
  * to be executed to override the PageManager configurable fields' settings
  */
 function afterConfigChange() {
-
-  // VAT indicator
-  var vatInd = FormManager.getActualValue('vatInd');
   
-  //onchange
-  if (_vatIndHandler == null) {
-    _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(vatInd) {
-      if (vatInd && dojo.string.trim(vatInd) == 'T') {
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-        FormManager.enable('vat');
-        FormManager.setValue('vatExempt', 'N');
-        //FormManager.setValue('taxCd2', 'N');
-        FormManager.setValue('vatInd', 'T');
-      } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
-        FormManager.removeValidator('vat', Validators.REQUIRED);
-        FormManager.readOnly('vat');
-        FormManager.setValue('vat', '');
-        //FormManager.setValue('taxCd2', 'N');
-        FormManager.setValue('vatInd', 'N');
-      } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
-        FormManager.removeValidator('vat', Validators.REQUIRED);
-        FormManager.enable('vat');
-        FormManager.setValue('vatExempt', 'Y');
-       // FormManager.setValue('taxCd2', 'Y');
-        FormManager.setValue('vatInd', 'E');
-      }
-    });
-
-  }
-  if (_vatIndHandler && _vatIndHandler[0]) {
-    _vatIndHandler[0].onChange();
-  }
-    
-    // add special INAC value validator
+      // add special INAC value validator
   // if INAC Type = I, the code should be a number
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (_inacHandler == null) {
@@ -1058,24 +1006,8 @@ function afterConfigChange() {
   // check if dnbManadatory
   handleRequiredDnBSearch();
   
-  if (vatInd && dojo.string.trim(vatInd) == 'T') {
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'N');    
-    FormManager.setValue('vatInd', 'T');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.readOnly('vat');
-    FormManager.setValue('vat', '');    
-    FormManager.setValue('vatInd', 'N');
-  } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'Y');   
-    FormManager.setValue('vatInd', 'E');
-  }
-  
   FormManager.ready();
+  
 }
 
 /**
