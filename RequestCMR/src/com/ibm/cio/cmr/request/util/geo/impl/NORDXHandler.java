@@ -178,18 +178,17 @@ public class NORDXHandler extends BaseSOFHandler {
             String legacyseqNoformat = StringUtils.leftPad(seqNo, 5, '0');
             String legacyAddressSeq = getLegacyAddressSeq(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), legacyseqNoformat);
 
-            if (StringUtils.isBlank(legacyAddressSeq)) {
-              continue;
-            }
+            /*
+             * if (StringUtils.isBlank(legacyAddressSeq)) { continue; }
+             */
 
-            // if (StringUtils.isBlank(legacyAddressSeq)) {
-            // if ("ZP01".equals(record.getCmrAddrTypeCode()) &&
-            // "PG".equals(record.getCmrOrderBlock())) {
-            // record.setCmrAddrTypeCode("PG01");
-            // } else {
-            // continue;
-            // }
-            // }
+            if (StringUtils.isBlank(legacyAddressSeq)) {
+              if ("ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
+                record.setCmrAddrTypeCode("PG01");
+              } else {
+                continue;
+              }
+            }
 
             // if
             // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
@@ -1198,7 +1197,7 @@ public class NORDXHandler extends BaseSOFHandler {
               ctc = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
               isu = validateColValFromCell(currCell);
-                if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isu))) {
+              if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isu))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
