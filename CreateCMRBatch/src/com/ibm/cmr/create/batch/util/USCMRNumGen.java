@@ -267,7 +267,7 @@ public class USCMRNumGen {
       for (String missCmrNo : records) {
         if (missCmrNo != null) {
           // cndCMR = String.valueOf(Integer.valueOf(missCmrNo) + 1);
-          cndCMR = String.valueOf(Integer.valueOf(missCmrNo) );
+          cndCMR = String.valueOf(Integer.valueOf(missCmrNo));
           cndCMRList.add(cndCMR);
         }
       }

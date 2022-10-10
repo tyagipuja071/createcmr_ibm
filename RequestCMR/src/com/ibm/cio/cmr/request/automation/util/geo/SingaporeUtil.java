@@ -571,19 +571,11 @@ public class SingaporeUtil extends AutomationUtil {
                       + dnb.getDnbCountry() + "\n\n");
                 }
               }
-
-              // } else {
-              // checkDetails.append("Updates to non-address fields for " +
-              // addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the
-              // checks.")
-              // .append("\n");
-              // }
             } else {
               // proceed
               LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
               checkDetails.append("Updates to Address (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
             }
-
           } else if ("N".equals(addr.getImportInd())) {
             // new address addition
 

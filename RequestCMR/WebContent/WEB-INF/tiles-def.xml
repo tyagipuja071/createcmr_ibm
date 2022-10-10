@@ -768,7 +768,7 @@
     <put-attribute name="body" value="/resources/jsp/system/corrections.jsp" />
   </definition>
 
-   <definition name="findcmr" extends="base">
+  <definition name="findcmr" extends="base">
     <put-attribute name="title" value="CreateCMR | Update Request" />
     <put-attribute name="body" value="/resources/jsp/findcmr.jsp" />
   </definition>

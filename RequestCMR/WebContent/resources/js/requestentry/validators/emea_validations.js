@@ -4863,6 +4863,10 @@ function setSboValueBasedOnIsuCtcUK() {
     return;
   }
 
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    return;
+  }
+
   if (isuCd == '34' && clientTier == 'Y') {
     FormManager.setValue('salesBusOffCd', '015');
     FormManager.setValue('repTeamMemberNo', 'SPA015');
@@ -7537,7 +7541,6 @@ function lockRequireFieldsUKI() {
     FormManager.enable('abbrevNm');
     FormManager.enable('abbrevLocn');
   }
-
   if (reqType == 'C' && role == 'PROCESSOR') {
     if (custSubGroup == 'IBMEM') {
       FormManager.readOnly('clientTier');
@@ -10766,4 +10769,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-1727
   GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
 
+  // CREATCMR-1727
+  GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  
 });

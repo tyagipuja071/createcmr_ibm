@@ -325,7 +325,7 @@ public class USAddrStdElement extends OverridingElement {
         hasIssues = true;
       }
 
-      if (!hasIssues && "ZS01".equals(addr.getId().getAddrType())) {
+      if ("ZS01".equals(addr.getId().getAddrType())) {
         // only check SCC for ZS01 address
     	  boolean sccIsValid = false;
           if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
@@ -344,7 +344,7 @@ public class USAddrStdElement extends OverridingElement {
 
     }
     if (hasIssues) {
-      String msg = "City and/or County Name for one or more addresses cannot be determined.";
+      String msg = "City and/or County Name/or SCC for one or more addresses cannot be determined.";
       engineData.addNegativeCheckStatus("_usstdcity", msg);
       details.append("\n").append(msg).append("\n");
     }
