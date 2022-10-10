@@ -3344,7 +3344,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCMRNumberForSpain, [ SysLoc.SPAIN ], GEOHandler.ROLE_PROCESSOR, true);
 
   // CREATCMR-4293
-  //GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO);
+  GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.SPAIN ]);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.MCO, null, true);
   GEOHandler.registerValidator(validateInacForSpain, [ SysLoc.SPAIN ], null, true);
   GEOHandler.addAfterTemplateLoad(addISUHandlerPt, [ SysLoc.PORTUGAL ]);
