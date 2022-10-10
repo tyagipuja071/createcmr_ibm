@@ -53,15 +53,22 @@ public class AddressController extends BaseController {
   @RequestMapping(value = "/request/address/list")
   public ModelMap doSearch(HttpServletRequest request, HttpServletResponse response, AddressModel model) throws CmrException {
 
+    if (model.getReqId() > 0) {
+      Thread.currentThread().setName("REQ-" + model.getReqId());
+    }
     List<AddressModel> results = service.search(model, request);
     ModelMap map = new ModelMap();
     map.addAttribute("items", results);
+    Thread.currentThread().setName("Executor-" + Thread.currentThread().getId());
     return map;
   }
 
   @RequestMapping(value = "/request/address/process", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap processAddressModal(HttpServletRequest request, HttpServletResponse response, AddressModel model) throws CmrException {
 
+    if (model.getReqId() > 0) {
+      Thread.currentThread().setName("REQ-" + model.getReqId());
+    }
     ProcessResultModel result = new ProcessResultModel();
     try {
       SimpleDateFormat dateFormat = CmrConstants.DATE_FORMAT();
@@ -96,11 +103,16 @@ public class AddressController extends BaseController {
       result.setMessage(e.getMessage());
     }
 
+    Thread.currentThread().setName("Executor-" + Thread.currentThread().getId());
     return wrapAsProcessResult(result);
   }
 
   @RequestMapping(value = "/request/address/copydata", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap copyAddressData(HttpServletRequest request, HttpServletResponse response, CopyAddressModel model) throws CmrException {
+
+    if (model.getReqId() > 0) {
+      Thread.currentThread().setName("REQ-" + model.getReqId());
+    }
 
     ProcessResultModel result = new ProcessResultModel();
     try {
@@ -115,11 +127,13 @@ public class AddressController extends BaseController {
       result.setDisplayMsg(true);
     }
 
+    Thread.currentThread().setName("Executor-" + Thread.currentThread().getId());
     return wrapAsProcessResult(result);
   }
 
   @RequestMapping(value = "/dpl/{reqId1}")
   public ModelMap performDPLCheck(HttpServletRequest request, HttpServletResponse response, @PathVariable("reqId1") long reqId) throws Exception {
+    Thread.currentThread().setName("REQ-" + reqId);
     ProcessResultModel result = new ProcessResultModel();
     try {
       AppUser user = AppUser.getUser(request);
@@ -132,6 +146,7 @@ public class AddressController extends BaseController {
       result.setMessage(e.getMessage());
     }
 
+    Thread.currentThread().setName("Executor-" + Thread.currentThread().getId());
     return wrapAsProcessResult(result);
   }
 

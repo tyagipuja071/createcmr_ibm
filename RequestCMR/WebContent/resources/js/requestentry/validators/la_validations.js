@@ -2673,19 +2673,19 @@ function setTaxRegimeMX() {
 // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
 function makeMrcSboOptionalForProspectLA() {
   var ifProspect = FormManager.getActualValue('prospLegalInd');
-  if (dijit.byId('prospLegalInd')) {
-    ifProspect = checkForProspect();
-  }
+    if (dijit.byId('prospLegalInd')) {
+      ifProspect = checkForProspect();
+    }
     if('Y' == ifProspect){
       if (typeof (_pagemodel) != 'undefined') {
         if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
-                FormManager.resetValidations('mrcCd');
-                FormManager.resetValidations('salesBusOffCd');
-                FormManager.setValue('isuCd', '');
-                FormManager.setValue('mrcCd', '');
-                FormManager.setValue('salesBusOffCd', '');
-                FormManager.enable('isuCd');
-                }
+          FormManager.resetValidations('mrcCd');
+          FormManager.resetValidations('salesBusOffCd');
+          FormManager.setValue('isuCd', '');
+          FormManager.setValue('mrcCd', '');
+          FormManager.setValue('salesBusOffCd', '');
+          FormManager.enable('isuCd');
+          }
         }
       }
     console.log('SBO & MRC are non mandatory for Prospect');
@@ -2698,6 +2698,7 @@ function checkForProspect(){
   }
   return ifProspect;
 }
+
 function setMrcCdToReadOnly() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
@@ -2734,7 +2735,7 @@ function showVatNotifForArgentina() {
 
 var currentChosenScenarioAR = '';
 function showDeleteNotifForArgentinaIBMEM(fromAddress, scenario, scenarioChanged) {
-  if(fromAddress || FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (fromAddress || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
 
@@ -2745,7 +2746,12 @@ function showDeleteNotifForArgentinaIBMEM(fromAddress, scenario, scenarioChanged
   if (reqType == 'C' && cmrIssuingCntry == '613' && custGrp == "LOCAL") {
     if (currentChosenScenarioAR == 'IBMEM' && scenarioChanged) {
       cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten." +
-        "<br><br><strong>Manually delete the predefined Tax Info values after changing from IBM Employee to other Scenario Sub-type, if there are any created.</strong>", "Warning");
+        "<br><br><strong>Manually delete the predefined Tax Info values after changing from IBM Employee to other Scenario Sub-type, if there are any created.</strong>" +
+        "<br><br><i>Any deleted predefined Tax Info values will not be reinstated. For that to happen, all entries must be deleted.</i>", "Warning");
+    } else if (scenario == 'IBMEM' && scenarioChanged) {
+      cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten." +
+        "<br><br>Do a Save action to create the predefined entries or update the Tax Number fields in Tax Info tab." +
+        "<br><br><i>Any deleted predefined Tax Info values will not be reinstated. For that to happen, all entries must be deleted.</i>", "Warning");
     }
   }
   currentChosenScenarioAR = scenario;
@@ -2831,12 +2837,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
-
-  // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
+    // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
   GEOHandler.addAfterConfig(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
-
   GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
 });

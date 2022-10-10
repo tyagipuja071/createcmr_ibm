@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.ws.TgmeAddrStdService;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.TgmeClient;
 import com.ibm.cmr.services.client.stdcity.County;
@@ -324,21 +325,27 @@ public class USAddrStdElement extends OverridingElement {
         hasIssues = true;
       }
 
-      if (!hasIssues && "ZS01".equals(addr.getId().getAddrType())) {
+      if ("ZS01".equals(addr.getId().getAddrType())) {
         // only check SCC for ZS01 address
-        String setREJFlag = validateForSCC(entityManager, addr.getLandCntry(), addr.getStateProv(), cityToUse, countyCodeToUse);
-
-        if ("N".equals(setREJFlag)) {
-          details.append("\n").append("SCC code for the " + addr.getId() + " address is not mapped to SCC table.").append("\n");
-          hasIssues = true;
-        }
+    	  boolean sccIsValid = false;
+          if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+            String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
+            if ("N".equals(setPPNFlag)) {
+              sccIsValid = true;
+            }
+          }
+          
+          if(sccIsValid){
+        	  details.append("\n").append("SCC code for the address is not mapped to SCC table.").append("\n");
+              //hasIssues = true;
+          }
       }
 
       details.append("\n");
 
     }
     if (hasIssues) {
-      String msg = "City and/or County Name for one or more addresses cannot be determined.";
+      String msg = "City and/or County Name/or SCC for one or more addresses cannot be determined.";
       engineData.addNegativeCheckStatus("_usstdcity", msg);
       details.append("\n").append(msg).append("\n");
     }

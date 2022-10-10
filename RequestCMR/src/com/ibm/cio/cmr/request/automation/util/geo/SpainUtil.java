@@ -484,7 +484,7 @@ public class SpainUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           if ("N".equals(addr.getImportInd())) {
             // new address
-            // CREATCMR-6649
+            // CREATCMR-6586
             LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
             if (addressExists(entityManager, addr, requestData)) {
               LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");

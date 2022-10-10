@@ -385,6 +385,8 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
               || ("BYMODEL".equalsIgnoreCase(massCrtData.getCustSubGrp()) && "KYN".equalsIgnoreCase(massCrtData.getRestrictTo()))) {
             massCrtData.setCustNm1("KYNDRYL INC");
             massCrtData.setCustNm2("");
+            // CREATCMR-7173
+            massCrtData.setIsuCd("5K");
           }
           updateEntity(mass_create, em);
           updateEntity(massCrtData, em);

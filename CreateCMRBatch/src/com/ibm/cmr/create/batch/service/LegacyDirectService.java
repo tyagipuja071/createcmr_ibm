@@ -518,6 +518,7 @@ public class LegacyDirectService extends TransConnService {
             } else if (legacyAddr.isForCreate()) {
               createEntity(legacyAddr, entityManager);
             }
+            keepAlive();
           }
 
           // CMR-2279:there should be some Data updated, so update Data
@@ -619,6 +620,7 @@ public class LegacyDirectService extends TransConnService {
           } else if (legacyAddr.isForCreate()) {
             createEntity(legacyAddr, entityManager);
           }
+          keepAlive();
         }
 
         // CMR-2279:there should be some Data updated, so update Data
@@ -2920,6 +2922,7 @@ public class LegacyDirectService extends TransConnService {
             }
 
             usedSequences.add(addr.getId().getAddrSeq());
+            keepAlive();
 
           }
           comment = comment.append("\nTemporary Reactivation - Embargo removal process done in RDc.");

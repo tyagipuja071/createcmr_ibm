@@ -4603,6 +4603,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setISBUforBPscenario, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setISBUforBPscenario, GEOHandler.ASEAN);
   GEOHandler.addAfterConfig(addVatValidationforSingapore, [ SysLoc.SINGAPORE ]);
+  GEOHandler.registerValidator(addressNameSameValidator, [ SysLoc.SINGAPORE]);
+  GEOHandler.registerValidator(addCompanyProofForSG, [ SysLoc.SINGAPORE]);
+  GEOHandler.registerValidator(additionalAddrNmValidator, [ SysLoc.SINGAPORE ]);
+
 
   // checklist
   GEOHandler.registerValidator(addChecklistValidator, [ SysLoc.VIETNAM, SysLoc.LAOS, SysLoc.CAMBODIA, SysLoc.HONG_KONG, SysLoc.SINGAPORE, SysLoc.MACAO, SysLoc.MYANMAR ]);

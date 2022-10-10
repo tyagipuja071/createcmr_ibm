@@ -424,6 +424,9 @@ function addCtcObsoleteValidator() {
 /**
  * After configuration for US
  */
+
+var resetIsicFlag = -1;
+
 function afterConfigForUS() {
 
   var reqType = FormManager.getActualValue('reqType');
@@ -526,7 +529,14 @@ function afterConfigForUS() {
           if (_usSicm.length > 4) {
             _usSicm = _usSicm.substring(0, 4);
           }
-          FormManager.setValue('isicCd', _usSicm);
+
+          if (resetIsicFlag > 0) {
+            FormManager.setValue('isicCd', _usSicm);
+          } else {
+            FormManager.setValue('isicCd', _pagemodel.isicCd);
+            resetIsicFlag++;
+          }
+
           // CREATCMR-6587
           setAffiliateNumber();
         }
@@ -1276,6 +1286,12 @@ function setMainName1ForKYN() {
     if ((custGrp == '3' && custSubGrp == 'KYN') || (custGrp == '14' && custSubGrp == 'BYMODEL' && restrictTo == 'KYN')) {
       FormManager.setValue('mainCustNm1', 'KYNDRYL INC');
       FormManager.setValue('mainCustNm2', '');
+      // CREATCMR-7173
+      FormManager.setValue('isuCd', '5K');
+    }
+    if (custGrp == '3' && custSubGrp == 'KYN') {
+      FormManager.setValue('custType', '1');
+      FormManager.readOnly('custType');
     }
   }
 

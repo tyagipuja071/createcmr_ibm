@@ -266,8 +266,9 @@ function setVatValidatorNL() {
     return;
   }
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
-    if (custSubGrp == 'PRICU') {
+    if (custSubGrp == 'IBMEM' || custSubGrp == 'PRICU') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.clearValue('vat');
       FormManager.readOnly('vat');
       return;
     }

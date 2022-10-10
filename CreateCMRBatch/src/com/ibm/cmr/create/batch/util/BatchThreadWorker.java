@@ -34,6 +34,7 @@ public class BatchThreadWorker<T> implements Runnable {
 
   private boolean error;
   private String errorMessage;
+  private boolean finished;
 
   public BatchThreadWorker(MultiThreadedBatchService<T> batchService, List<T> requestIds) {
     this.batchService = batchService;
@@ -99,6 +100,8 @@ public class BatchThreadWorker<T> implements Runnable {
       this.error = true;
       this.errorMessage = "Unexpected error when processing record. " + e.getMessage();
       LOG.error("Unexpected error when processing record. ", e);
+    } finally {
+      this.finished = true;
     }
   }
 
@@ -116,5 +119,13 @@ public class BatchThreadWorker<T> implements Runnable {
 
   public void setErrorMessage(String errorMessage) {
     this.errorMessage = errorMessage;
+  }
+
+  public boolean isFinished() {
+    return finished;
+  }
+
+  public void setFinished(boolean finished) {
+    this.finished = finished;
   }
 }

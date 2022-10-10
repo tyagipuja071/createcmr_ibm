@@ -1888,6 +1888,7 @@ public class TransConnService extends BaseBatchService {
             continueUpdate = false;
             ignoreWfhistory = true;
           }
+          keepAlive();
         }
       }
 

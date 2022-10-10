@@ -122,8 +122,8 @@ public class UKIUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("BILL_INSTALL_DIFF", "Billing and Installing addresses are not same.");
     }
 
-    if (!(SCENARIO_PRIVATE_PERSON.equals(scenario) || "CROSS".equals(data.getCustGrp()) || SCENARIO_INTERNAL_FSL.equals(scenario)
-        || SCENARIO_INTERNAL.equals(scenario)) && "Y".equals(data.getRestrictInd())) {
+    if (!(SCENARIO_PRIVATE_PERSON.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario) || "CROSS".equals(data.getCustGrp())
+        || SCENARIO_INTERNAL_FSL.equals(scenario) || SCENARIO_INTERNAL.equals(scenario)) && "Y".equals(data.getRestrictInd())) {
       details.append("Request has been marked as CRN Exempt. Processor Review will be required.\n");
       engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
     }
@@ -357,11 +357,6 @@ public class UKIUtil extends AutomationUtil {
           if ("N".equals(addr.getImportInd())) {
             // new address
             // CREATCMR-6586 checking duplicate for all addresses
-            /*
-             * if (CmrConstants.RDC_SHIP_TO.equals(addrType) ||
-             * CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType) ||
-             * CmrConstants.RDC_PAYGO_BILLING.equals(addrType)) {
-             */
             if (addressExists(entityManager, addr, requestData)) {
               LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
@@ -370,39 +365,6 @@ public class UKIUtil extends AutomationUtil {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") validated.\n");
             }
-            /*
-             * else { LOG.debug("Addition of " + addrType + "(" +
-             * addr.getId().getAddrSeq() + ")");
-             * checkDetails.append("Addition of new address (" +
-             * addr.getId().getAddrSeq() +
-             * ") address skipped in the checks.\n"); } }
-             */
-            // CREATCMR-6586 Already checking duplicate address with sold to as
-            // well
-            /*
-             * if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) { String
-             * installAtName = getCustomerFullName(addr); String billToName =
-             * ""; Addr zs01 = requestData.getAddress("ZS01"); if (zs01 != null)
-             * { billToName = getCustomerFullName(zs01); } if
-             * (installAtName.equals(billToName)) {
-             * 
-             * if (addressExists(entityManager, addr, requestData)) {
-             * 
-             * LOG.debug(" - Duplicates found for " + addrType + "(" +
-             * addr.getId().getAddrSeq() + ")"); checkDetails.append("Address "
-             * + addrType + "(" + addr.getId().getAddrSeq() +
-             * ") provided matches an existing address.\n");
-             * resultCodes.add("R"); } else { LOG.debug("Addition of " +
-             * addrType + "(" + addr.getId().getAddrSeq() + ")");
-             * checkDetails.append("Addition of new address (" +
-             * addr.getId().getAddrSeq() + ") validated.\n"); } } else {
-             * LOG.debug("New address " + addrType + "(" +
-             * addr.getId().getAddrSeq() + ") needs to be verified");
-             * checkDetails.append("New address " + addrType + "(" +
-             * addr.getId().getAddrSeq() +
-             * ") has different customer name than sold-to.\n");
-             * resultCodes.add("D"); } }
-             */
           } else if ("Y".equals(addr.getChangedIndc())) {
             // update address
             if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
@@ -487,55 +449,6 @@ public class UKIUtil extends AutomationUtil {
     output.setProcessOutput(validation);
     return true;
   }
-  // exact same implementation available in AutomationUTIL hence removing
-  /*
-   * @Override public boolean addressExists(EntityManager entityManager, Addr
-   * addrToCheck, RequestData requestData) { boolean payGoAddredited =
-   * RequestUtils.isPayGoAccredited(entityManager,
-   * requestData.getAdmin().getSourceSystId()); String sql =
-   * ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST"); PreparedQuery
-   * query = new PreparedQuery(entityManager, sql); query.setParameter("REQ_ID",
-   * addrToCheck.getId().getReqId()); query.setParameter("ADDR_SEQ",
-   * addrToCheck.getId().getAddrSeq()); query.setParameter("NAME1",
-   * addrToCheck.getCustNm1()); query.setParameter("LAND_CNTRY",
-   * addrToCheck.getLandCntry()); query.setParameter("CITY",
-   * addrToCheck.getCity1()); query.setParameter("ADDR_TYPE",
-   * addrToCheck.getId().getAddrType()); if (addrToCheck.getAddrTxt() != null) {
-   * query.append(" and lower(ADDR_TXT) like lower(:ADDR_TXT)");
-   * query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt()); } if
-   * (addrToCheck.getCustNm2() != null) {
-   * query.append(" and lower(CUST_NM2) like lower(:NAME2)");
-   * query.setParameter("NAME2", addrToCheck.getCustNm2()); } if
-   * (addrToCheck.getDept() != null) {
-   * query.append(" and lower(DEPT) like lower(:DEPT)");
-   * query.setParameter("DEPT", addrToCheck.getDept()); } if
-   * (addrToCheck.getFloor() != null) {
-   * query.append(" and lower(FLOOR) like lower(:FLOOR)");
-   * query.setParameter("FLOOR", addrToCheck.getFloor()); } if
-   * (addrToCheck.getBldg() != null) {
-   * query.append(" and lower(BLDG) like lower(:BLDG)");
-   * query.setParameter("BLDG", addrToCheck.getBldg()); } if
-   * (addrToCheck.getOffice() != null) {
-   * query.append(" and lower(OFFICE) like lower(:OFFICE)");
-   * query.setParameter("OFFICE", addrToCheck.getOffice()); } if
-   * (addrToCheck.getStateProv() != null) {
-   * query.append(" and lower(STATE_PROV) like lower(:STATE)");
-   * query.setParameter("STATE", addrToCheck.getStateProv()); } if
-   * (addrToCheck.getPoBox() != null) { query.append(" and PO_BOX = :PO_BOX");
-   * query.setParameter("PO_BOX", addrToCheck.getPoBox()); } if
-   * (addrToCheck.getPostCd() != null) { query.append(" and POST_CD= :POST_CD");
-   * query.setParameter("POST_CD", addrToCheck.getPostCd()); } if
-   * (addrToCheck.getCustPhone() != null) {
-   * query.append(" and CUST_PHONE = :PHONE"); query.setParameter("PHONE",
-   * addrToCheck.getCustPhone()); } if (addrToCheck.getCounty() != null) {
-   * query.append(" and COUNTY= :COUNTY"); query.setParameter("COUNTY",
-   * addrToCheck.getCounty()); }
-   * 
-   * if (payGoAddredited) { if (addrToCheck.getExtWalletId() != null) {
-   * query.append(" and EXT_WALLET_ID = :EXT_WALLET_ID");
-   * query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId()); } }
-   * return query.exists(); }
-   */
 
   /**
    * Checks if relevant fields were updated
