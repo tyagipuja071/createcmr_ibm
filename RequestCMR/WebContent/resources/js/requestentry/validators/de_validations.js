@@ -1114,6 +1114,54 @@ function setVatIndFields(){
   }
 }
 
+function addVatIndValidator(){
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+ 
+ if ((reqStatus == 'PRJ' || reqStatus == 'PCO' || reqStatus == 'COM' || reqStatus == 'CAN' || reqStatus == 'CLO') && reqStatus != null ){
+   FormManager.resetValidations('vat');
+   FormManager.readOnly('vat');
+ } else {
+  var cntry= FormManager.getActualValue('cmrIssuingCntry');
+  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+    ISSUING_CNTRY : cntry
+  });
+  
+  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'O' && vat == ''){    
+    FormManager.setValue('vatInd', 'N'); 
+  } else if((results!= null || results!= undefined || results.ret1!='') && vat != ''){      
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  } else if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'R' && vat == ''){
+    FormManager.setValue('vat', '');   
+    FormManager.setValue('vatInd', '');
+  } else if (vat && dojo.string.trim(vat) != '') {    
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');    
+  } else if (vat && dojo.string.trim(vat) == '') {
+    FormManager.setValue('vatInd', 'N');
+  }
+    
+  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
+    FormManager.resetValidations('vat');    
+  }
+}
+}
+
+function setVatIndFields(){
+  var _vatHandler = null;  
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vat != '' && vatInd == ''){
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
