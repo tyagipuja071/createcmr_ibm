@@ -177,6 +177,12 @@
           <width>18</width>
           <length>20</length>
         </column>
+         <column>
+          <label>Phone</label>
+          <dbColumn>CUST_PHONE</dbColumn>
+          <width>20</width>
+          <length>11</length>
+        </column>
         <column>
           <label>Att. Person</label>
           <dbColumn>COUNTY</dbColumn>
@@ -265,6 +271,12 @@
           <dbColumn>PO_BOX</dbColumn>
           <width>18</width>
           <length>20</length>
+        </column>
+         <column>
+          <label>Phone</label>
+          <dbColumn>CUST_PHONE</dbColumn>
+          <width>20</width>
+          <length>11</length>
         </column>
         <column>
           <label>Att. Person</label>
@@ -355,6 +367,12 @@
           <width>18</width>
           <length>20</length>
         </column>
+         <column>
+          <label>Phone</label>
+          <dbColumn>CUST_PHONE</dbColumn>
+          <width>20</width>
+          <length>11</length>
+        </column>
         <column>
           <label>Att. Person</label>
           <dbColumn>COUNTY</dbColumn>
@@ -443,6 +461,12 @@
           <dbColumn>PO_BOX</dbColumn>
           <width>18</width>
           <length>20</length>
+        </column>
+         <column>
+          <label>Phone</label>
+          <dbColumn>CUST_PHONE</dbColumn>
+          <width>20</width>
+          <length>11</length>
         </column>
         <column>
           <label>Att. Person</label>
@@ -533,6 +557,12 @@
           <width>18</width>
           <length>20</length>
         </column>
+         <column>
+          <label>Phone</label>
+          <dbColumn>CUST_PHONE</dbColumn>
+          <width>20</width>
+          <length>11</length>
+        </column>
         <column>
           <label>Att. Person</label>
           <dbColumn>COUNTY</dbColumn>
@@ -602,6 +632,12 @@
           <dbColumn>PO_BOX</dbColumn>
           <width>18</width>
           <length>20</length>
+        </column>
+         <column>
+          <label>Phone</label>
+          <dbColumn>CUST_PHONE</dbColumn>
+          <width>20</width>
+          <length>11</length>
         </column>
         <column>
           <label>Att. Person</label>
