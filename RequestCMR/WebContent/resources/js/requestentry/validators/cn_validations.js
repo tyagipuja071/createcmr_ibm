@@ -3621,8 +3621,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addCityRequiredOnUpdateValidatorAddrList, GEOHandler.CN, null, true);
   GEOHandler.registerValidator(addSocialCreditCdLengthValidator, GEOHandler.CN, GEOHandler.REQUESTER, true);
-  GEOHandler.registerValidator(addAddrUpdateValidator, GEOHandler.CN, null, true);
-  GEOHandler.registerValidator(validateCnNameAndAddr, GEOHandler.CN, null, false);
+  // GEOHandler.registerValidator(addAddrUpdateValidator, GEOHandler.CN, null, true);
+  // GEOHandler.registerValidator(validateCnNameAndAddr, GEOHandler.CN, null, false);
+  GEOHandler.registerValidator(validateCnNameAndAddr4Create, GEOHandler.CN, null, false);
+  GEOHandler.registerValidator(validateCnNameAndAddr4Update, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(addCNDnBMatchingAttachmentValidator, GEOHandler.CN, null, false);
   // GEOHandler.registerValidator(foreignValidator, GEOHandler.CN, null,
   // false,false);
