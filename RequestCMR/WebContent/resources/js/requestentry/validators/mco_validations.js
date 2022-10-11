@@ -316,7 +316,8 @@ function afterConfigForMCO() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.readOnly('cmrOwner');
-
+  // CREATCMR-788
+  addressQuotationValidatorMCO;
 }
 
 function addAddressTypeValidator() {
@@ -3229,7 +3230,21 @@ function checkCmrUpdateBeforeImport() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+// CREATCMR-788
+function addressQuotationValidatorMCO() {
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Attention Person' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Department' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address Con\'t' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  FormManager.addValidator('prefSeqNo', Validators.NO_QUOTATION, [ 'Sequence Number' ]);
 
+}
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -3243,6 +3258,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
 
   GEOHandler.addAfterConfig(afterConfigForMCO, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  // CREATCMR-788
+  GEOHandler.addAfterConfig(addressQuotationValidatorMCO, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(addHandlersForPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setClientTierValues, [ SysLoc.PORTUGAL]);
   GEOHandler.addAfterConfig(setSalesRepValues, [ SysLoc.PORTUGAL]);
