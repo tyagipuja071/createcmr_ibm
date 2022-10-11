@@ -1067,26 +1067,26 @@ function addVatIndValidator(){
   
   if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
     FormManager.resetValidations('vat');
-  }  
+  }
+  
 }
 
 function setToReadOnly() {
  
-  var reqStatus = FormManager.getActualValue('reqStatus'); 
+ var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
    
- if ((reqStatus == 'PRJ' || reqStatus == 'PCO' || reqStatus == 'COM' || reqStatus == 'CAN' || reqStatus == 'CLO' || reqStatus == 'REP') && reqStatus != null ){
-   
+ if (viewOnlyPage == 'true') {  
    FormManager.resetValidations('vat');
    FormManager.resetValidations('vatInd');
    FormManager.readOnly('vat');
    FormManager.readOnly('vatInd');
  } 
+ 
 }
 
 function vatIndOnChange() {
   
   var _vatIndHandler = null;
-  
     
     if (_vatIndHandler == null) {
     _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(value) {
@@ -1116,19 +1116,16 @@ function vatIndOnChange() {
   
 var _vatHandler = null;
   
-  if (_vatHandler == null){
-    _vatHandler = dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
+  if (_vatHandler == null){   
+    
+    dojo.byId('vat').onkeyup = function() {
       var vat = FormManager.getActualValue('vat');
       if (vat == '') {
         FormManager.enable('vatInd');
         FormManager.setValue('vatInd', 'N'); 
-      }        
-    });
+      }
     }
-  
-  if (_vatHandler && _vatHandler[0]) {
-    _vatHandler[0].onChange();
-  }  
+    }
 }
 /* Register WW Validators */
 dojo.addOnLoad(function() {

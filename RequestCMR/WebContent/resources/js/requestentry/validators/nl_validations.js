@@ -1876,10 +1876,10 @@ function addVatIndValidator(){
   var _vatHandler = null;
   var _vatIndHandler = null;
   var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');
-  var reqStatus = FormManager.getActualValue('reqStatus');
+  var vatInd = FormManager.getActualValue('vatInd');  
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   
- if ((reqStatus == 'PRJ' || reqStatus == 'PCO' || reqStatus == 'COM' || reqStatus == 'CAN' || reqStatus == 'CLO') && reqStatus != null ){   
+  if (viewOnlyPage == 'true'){
    FormManager.resetValidations('vat');
    FormManager.readOnly('vat');
  } else {
