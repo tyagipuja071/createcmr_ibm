@@ -1006,7 +1006,6 @@ function addTaxCode1ValidatorForOtherLACntries() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
-
 function addSalesRepNameNoValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -2756,6 +2755,43 @@ function showDeleteNotifForArgentinaIBMEM(fromAddress, scenario, scenarioChanged
   currentChosenScenarioAR = scenario;
 }
 
+// CREATCMR-7166
+function vatValidatorUY() {
+  console.log('>>Running VAT validation for URUGUAY.');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var taxCd1 = FormManager.getActualValue('taxCd1');
+        var _custGrp = FormManager.getActualValue('custGrp');
+        var reqType = FormManager.getActualValue('reqType');
+        
+        if(FormManager.getActualValue('cmrIssuingCntry') == '869' && reqType == 'C'){
+          if(_custGrp == 'LOCAL' && taxCd1 !=' '){
+            if (taxCd1.length > 0 && taxCd1.length <= 12 && !taxCd1.match("/^[a-zA-Z0-9]+$/")) {
+              return new ValidationResult(null, true);
+            }
+            return new ValidationResult({
+              id : 'taxCd1',
+              type : 'text',
+              name : 'taxCd1'
+            }, false, 'Invalid VAT for URUGUAY. Only 12 digits, alphanumeric combinations are allowed.');
+          } else {
+            if(_custGrp == 'CROSS' && taxCd1 !=' '){
+             if (taxCd1.length > 12 && !taxCd1.match("/^[a-zA-Z0-9]+$/")) {  
+                return new ValidationResult(null, true);
+              }
+              return new ValidationResult({
+                id : 'taxCd1',
+                type : 'text',
+                name : 'taxCd1'
+              }, false, 'Invalid VAT for URUGUAY. More than 12 digits, alphanumeric combinations are allowed.');
+            }       
+          }
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2843,4 +2879,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
+  GEOHandler.registerValidator(vatValidatorUY, [ SysLoc.URUGUAY ], null, true);
 });
