@@ -967,7 +967,7 @@ function setVatValidatorGRCYTR() {
     if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
       FormManager.readOnly('vat');
     }
-    if (dijit.byId('vatExempt').get('checked')) {
+    if (vatInd == 'N') {
       FormManager.clearValue('vat');
     }
     if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {

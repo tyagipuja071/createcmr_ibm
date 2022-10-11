@@ -6,6 +6,8 @@ import java.util.Queue;
 
 import javax.persistence.EntityManager;
 
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+
 /**
  * 
  * @author Joseph Ramos
@@ -14,6 +16,7 @@ import javax.persistence.EntityManager;
 
 public class IERPProcessMultiService extends MultiThreadedBatchService<Long> {
 
+  private static final String COMMENT_LOGGER = "IERP Process Service";
   private IERPProcessService service = new IERPProcessService();
 
   @Override
@@ -23,10 +26,12 @@ public class IERPProcessMultiService extends MultiThreadedBatchService<Long> {
 
   @Override
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
+    ChangeLogListener.setUser(COMMENT_LOGGER);
+    this.service.initClient();
 
     this.service.setMultiMode(true);
-    this.service.setPendingReqIds(requests);
-    this.service.executeBatch(entityManager);
+    // this.service.setPendingReqIds(requests);
+    this.service.monitorCreqcmr(entityManager, requests);
     keepAlive();
 
     return true;

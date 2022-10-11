@@ -802,7 +802,7 @@ function setVatValidatorBELUX() {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
       FormManager.enable('vat');
     }
-  }
+  } 
 }
 
 /**

@@ -100,6 +100,7 @@ public class MassRequestEntryController extends BaseController {
     if (model.getReqId() == 0) {
       model.setReqId(reqId);
     }
+    Thread.currentThread().setName("REQ-" + model.getReqId());
     request.getSession().setAttribute("lastReqId", reqId);
     String fromUrl = model.getFromUrl();
     String redirectUrl = model.getRedirectUrl();
@@ -146,6 +147,7 @@ public class MassRequestEntryController extends BaseController {
             if (!StringUtils.isEmpty(reqModel.getReqType())
                 && ("C".equals(reqModel.getReqType().trim()) || "U".equals(reqModel.getReqType().trim()))) {
               mv = new ModelAndView("redirect:/request/" + reqId, "reqentry", reqModel);
+              Thread.currentThread().setName("Executor-" + Thread.currentThread().getId());
               return mv;
             }
             Admin admin = service.getCurrentRecordById(reqId);
@@ -172,6 +174,7 @@ public class MassRequestEntryController extends BaseController {
     setPageKeys("REQUEST", "REQUEST", mv);
     addExtraModelEntries(mv, model);
 
+    Thread.currentThread().setName("Executor-" + Thread.currentThread().getId());
     return mv;
   }
 

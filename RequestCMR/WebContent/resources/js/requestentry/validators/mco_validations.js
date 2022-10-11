@@ -2306,7 +2306,7 @@ function lockRequireFieldsSpain() {
     if (result && result.ret1 && result.ret1 != '') {
       zs01Cntry = result.ret1;
     }
-    if (zs01Cntry != 'US') {
+    if (zs01Cntry != 'US' && zs01Cntry != 'GB') {
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     } else {
       FormManager.removeValidator('vat', Validators.REQUIRED);

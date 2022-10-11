@@ -98,6 +98,7 @@ public class RequestEntryController extends BaseController {
     if (model.getReqId() == 0) {
       model.setReqId(reqId);
     }
+    Thread.currentThread().setName("REQ-" + model.getReqId());
     request.getSession().setAttribute("lastReqId", reqId);
     String fromUrl = model.getFromUrl();
     String redirectUrl = model.getRedirectUrl();
@@ -152,6 +153,7 @@ public class RequestEntryController extends BaseController {
               // If mass request, redirect to Mass Request page...
               if (!StringUtils.isEmpty(reqModel.getReqType()) && CmrConstants.MASS_CHANGE_REQUESTS_TYPES.contains(reqModel.getReqType().trim())) {
                 mv = new ModelAndView("redirect:/massrequest/" + reqId, "reqentry", reqModel);
+                Thread.currentThread().setName("Executor-" + Thread.currentThread().getId());
                 return mv;
               }
               List<ValidationUrlModel> validations = service.getValidationUrls(reqModel.getCmrIssuingCntry());
@@ -183,6 +185,7 @@ public class RequestEntryController extends BaseController {
     // 20191018 end
     setPageKeys("REQUEST", "REQUEST", mv);
     addExtraModelEntries(mv, model);
+    Thread.currentThread().setName("Executor-" + Thread.currentThread().getId());
 
     return mv;
   }
@@ -896,8 +899,7 @@ public class RequestEntryController extends BaseController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/request/dnb/custNmUpdate")
+  @RequestMapping(value = "/request/dnb/custNmUpdate")
   public ModelMap checkIfCustNMMatchesDnBUpdate(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
     ModelMap map = new ModelMap();
     try {

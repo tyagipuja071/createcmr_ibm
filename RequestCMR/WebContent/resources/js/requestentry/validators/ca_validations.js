@@ -461,8 +461,8 @@ function cmrNoAlreadyExistValidator() {
 
           if (cmrNo.length >= 1 && cmrNo.length != 6) {
             return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
-          } 
-       // prod issue: skip validation for prospect request
+          }
+          // prod issue: skip validation for prospect request
           var ifProspect = FormManager.getActualValue('prospLegalInd');
           if (dijit.byId('prospLegalInd')) {
             ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
@@ -470,8 +470,7 @@ function cmrNoAlreadyExistValidator() {
           console.log("validateCMRNumber ifProspect:" + ifProspect);
           if ('Y' == ifProspect) {
             return new ValidationResult(null, true);
-          }          
-          else if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+          } else if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
@@ -1177,14 +1176,17 @@ function limitDropdownOnScenarioChange(fromAddress, scenario, scenarioChanged) {
 
 function setCSBranchValue(fromAddress, scenario, scenarioChanged) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+  if (FormManager.getActualValue('reqType') == 'C') {
     if (scenario == 'USA' || scenario == 'CND') {
       FormManager.setValue('salesTeamCd', '000');
       // FormManager.readOnly('salesTeamCd');
     } else {
       var postCd = getSoldToPostalCode();
       if (postCd != null && postCd.length >= 3) {
-        FormManager.setValue('salesTeamCd', postCd.substring(0, 3));
+        var csBranch = getCsBranchFromPostalCode(postCd.substring(0, 3));
+        if (csBranch != null) {
+          FormManager.setValue('salesTeamCd', csBranch);
+        }
       }
       FormManager.enable('salesTeamCd');
     }
@@ -1335,7 +1337,7 @@ function setAddrFieldsValues() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-	 var reqType = FormManager.getActualValue('reqType');
+  var reqType = FormManager.getActualValue('reqType');
 
   if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
     if (clientTierCode == '') {
@@ -1362,23 +1364,23 @@ function clientTierValidator() {
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
         var valResult = null;
-        
+
         var oldClientTier = null;
         var oldISU = null;
         var requestId = FormManager.getActualValue('reqId');
-        
+
         if (reqType == 'C') {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-              REQ_ID : requestId,
+            REQ_ID : requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-          
+
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU =  result.ret3 != null ? result.ret3 : '';
-            
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
             if (clientTier != oldClientTier || isuCd != oldISU) {
               valResult = clientTierCodeValidator();
             }
@@ -1408,6 +1410,16 @@ function setCustClassByEfc(efcValue) {
     FormManager.setValue('custClass', result[0].ret1);
   }
 
+}
+
+function getCsBranchFromPostalCode(postCd) {
+  var csBranchParams = {
+    CMR_ISSUING_CNTRY : '649',
+    CD : postCd,
+  };
+  var csBranchResult = cmr.query('GET.CA.CSBRANCH.LOVTXT', csBranchParams);
+  var csBranch = csBranchResult.ret1;
+  return csBranch;
 }
 
 /* Register CA Javascripts */

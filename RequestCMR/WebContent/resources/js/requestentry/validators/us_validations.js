@@ -10,6 +10,7 @@ var _usTaxcd1Handler = null;
 var _usSicm = "";
 var _kukla = "";
 var _enterpriseHandler = null;
+var _usRestrictToHandler = null;
 var affiliateArray = {
   9001 : '0089800',
   9002 : '0084800',
@@ -423,6 +424,9 @@ function addCtcObsoleteValidator() {
 /**
  * After configuration for US
  */
+
+var resetIsicFlag = -1;
+
 function afterConfigForUS() {
 
   var reqType = FormManager.getActualValue('reqType');
@@ -525,7 +529,14 @@ function afterConfigForUS() {
           if (_usSicm.length > 4) {
             _usSicm = _usSicm.substring(0, 4);
           }
-          FormManager.setValue('isicCd', _usSicm);
+
+          if (resetIsicFlag > 0) {
+            FormManager.setValue('isicCd', _usSicm);
+          } else {
+            FormManager.setValue('isicCd', _pagemodel.isicCd);
+            resetIsicFlag++;
+          }
+
           // CREATCMR-6587
           setAffiliateNumber();
         }
@@ -554,6 +565,12 @@ function afterConfigForUS() {
   if (_enterpriseHandler == null) {
     _enterpriseHandler = dojo.connect(FormManager.getField('enterprise'), 'onChange', function(value) {
       updateBOForEntp();
+    });
+  }
+  // CREATCMR-6987
+  if (_usRestrictToHandler == null && FormManager.getField('restrictTo')) {
+    _usRestrictToHandler = dojo.connect(FormManager.getField('restrictTo'), 'onChange', function(value) {
+      setMainName1ForKYN();
     });
   }
 
@@ -1253,6 +1270,31 @@ function setTaxcd1Status() {
   }
 
 }
+// CREATCMR-6987
+function setMainName1ForKYN() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var restrictTo = FormManager.getActualValue('restrictTo');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (reqType == 'C') {
+    if ((custGrp == '3' && custSubGrp == 'KYN') || (custGrp == '14' && custSubGrp == 'BYMODEL' && restrictTo == 'KYN')) {
+      FormManager.setValue('mainCustNm1', 'KYNDRYL INC');
+      FormManager.setValue('mainCustNm2', '');
+      // CREATCMR-7173
+      FormManager.setValue('isuCd', '5K');
+    }
+    if (custGrp == '3' && custSubGrp == 'KYN') {
+      FormManager.setValue('custType', '1');
+      FormManager.readOnly('custType');
+    }
+  }
+
+}
 
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
@@ -1301,4 +1343,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-5447
   GEOHandler.registerValidator(TaxTeamUpdateDataValidation, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(TaxTeamUpdateAddrValidation, [ SysLoc.USA ], null, true);
+  // CREATCMR-6987
+  GEOHandler.addAfterTemplateLoad(setMainName1ForKYN, [ SysLoc.USA ]);
+  GEOHandler.addAfterConfig(setMainName1ForKYN, [ SysLoc.USA ]);
 });

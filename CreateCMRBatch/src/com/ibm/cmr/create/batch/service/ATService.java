@@ -889,6 +889,7 @@ public class ATService extends TransConnService {
             }
 
             usedSequences.add(addr.getId().getAddrSeq());
+            keepAlive();
 
           }
           comment = comment.append("\nTemporary Reactivate Embargo process in RDc started.");
@@ -1105,6 +1106,7 @@ public class ATService extends TransConnService {
               }
 
               usedSequences.add(addr.getId().getAddrSeq());
+              keepAlive();
 
             }
 

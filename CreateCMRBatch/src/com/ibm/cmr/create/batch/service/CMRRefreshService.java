@@ -75,14 +75,31 @@ public class CMRRefreshService extends BaseBatchService {
     LOG.debug("Timestamp to use: " + cal.getTime());
 
     LOG.debug("Getting CMR Nos. updated within the given timeframe..");
-    sql = "select distinct KATR6, ZZKV_CUSNO ";
-    sql += "from SAPR3.KNA1 ";
-    sql += "where MANDT = :MANDT  ";
-    sql += "and LOEVM <> 'X'  ";
-    sql += "and KATR10 <> 'GTS'  ";
-    sql += "and SHAD_UPDATE_TS >= :TS ";
+    sql = "select distinct k.KATR6, k.ZZKV_CUSNO ";
+    sql += "from SAPR3.KNA1 k ";
+    sql += "left outer join SAPR3.KNA1EXT x ";
+    sql += "  on k.MANDT = x.MANDT ";
+    sql += "  and k.KUNNR = x.KUNNR ";
+    sql += "left outer join SAPR3.BUYING_GROUP_EXT bg ";
+    sql += "  on k.MANDT = bg.MANDT ";
+    sql += "  and k.KUNNR = bg.KUNNR ";
+    sql += "left outer join SAPR3.KDUNS_NEW duns ";
+    sql += "  on k.MANDT = duns.MANDT ";
+    sql += "  and k.KUNNR = duns.KUNNR ";
+    sql += "where k.MANDT = :MANDT ";
+    sql += "and k.LOEVM <> 'X' ";
+    sql += "and k.KATR10 <> 'GTS' ";
+    sql += "and ( ";
+    sql += "  k.SHAD_UPDATE_TS > :TS or ";
+    sql += "  x.CHG_TS > :TS or ";
+    sql += "  x.CREATE_DATE > date(:TS) or ";
+    sql += "  bg.UPDATE_TS > :TS or ";
+    sql += "  bg.CREATE_TS > :TS or ";
+    sql += "  duns.UPDATE_TS > :TS or ";
+    sql += "  duns.CREATE_TS > :TS ";
+    sql += ") ";
     if (this.country != null) {
-      sql += " and KATR6 = :KATR6";
+      sql += " and k.KATR6 = :KATR6";
     }
     query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", mandt);

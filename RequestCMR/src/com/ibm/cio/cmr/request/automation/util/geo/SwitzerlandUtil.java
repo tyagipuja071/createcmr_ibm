@@ -59,8 +59,8 @@ public class SwitzerlandUtil extends AutomationUtil {
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_PAYGO_BILLING);
 
-  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Department", "PostBox", "Attention to/Building/Floor/Office",
-      "Att. Person", "Phone #", "FAX", "Customer Name 4");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Department", "PostBox",
+      "Attention to/Building/Floor/Office", "Att. Person", "Phone #", "FAX", "Customer Name 4");
 
   // private static List<ChMubotyMapping> mubotyMappings = new
   // ArrayList<ChMubotyMapping>();
@@ -208,7 +208,6 @@ public class SwitzerlandUtil extends AutomationUtil {
 
           if ("N".equals(addr.getImportInd())) {
             // new address
-
             LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
 
             boolean duplicate = addressExists(entityManager, addr, requestData);
@@ -395,57 +394,6 @@ public class SwitzerlandUtil extends AutomationUtil {
     return true;
   }
 
-  // same implementation available in Automation UTIL
-  /*
-   * @Override public boolean addressExists(EntityManager entityManager, Addr
-   * addrToCheck, RequestData requestData) {
-   * 
-   * Admin admin = requestData.getAdmin(); boolean payGoAddredited =
-   * RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
-   * String sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
-   * PreparedQuery query = new PreparedQuery(entityManager, sql);
-   * query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
-   * query.setParameter("ADDR_TYPE", addrToCheck.getId().getAddrType());
-   * query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
-   * query.setParameter("NAME1", addrToCheck.getCustNm1());
-   * query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
-   * query.setParameter("CITY", addrToCheck.getCity1()); if
-   * (addrToCheck.getAddrTxt() != null) {
-   * query.append(" and lower(ADDR_TXT) like lower(:ADDR_TXT)");
-   * query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt()); } if
-   * (addrToCheck.getCustNm2() != null) {
-   * query.append(" and lower(CUST_NM2) like lower(:NAME2)");
-   * query.setParameter("NAME2", addrToCheck.getCustNm2()); } if
-   * (addrToCheck.getDept() != null) {
-   * query.append(" and lower(DEPT) like lower(:DEPT)");
-   * query.setParameter("DEPT", addrToCheck.getDept()); } if
-   * (addrToCheck.getFloor() != null) {
-   * query.append(" and lower(FLOOR) like lower(:FLOOR)");
-   * query.setParameter("FLOOR", addrToCheck.getFloor()); } if
-   * (addrToCheck.getBldg() != null) {
-   * query.append(" and lower(BLDG) like lower(:BLDG)");
-   * query.setParameter("BLDG", addrToCheck.getBldg()); } if
-   * (addrToCheck.getOffice() != null) {
-   * query.append(" and lower(OFFICE) like lower(:OFFICE)");
-   * query.setParameter("OFFICE", addrToCheck.getOffice()); } if
-   * (addrToCheck.getStateProv() != null) {
-   * query.append(" and lower(STATE_PROV) like lower(:STATE)");
-   * query.setParameter("STATE", addrToCheck.getStateProv()); } if
-   * (addrToCheck.getPoBox() != null) { query.append(" and PO_BOX = :PO_BOX");
-   * query.setParameter("PO_BOX", addrToCheck.getPoBox()); } if
-   * (addrToCheck.getPostCd() != null) { query.append(" and POST_CD= :POST_CD");
-   * query.setParameter("POST_CD", addrToCheck.getPostCd()); } if
-   * (addrToCheck.getCustPhone() != null) {
-   * query.append(" and CUST_PHONE = :PHONE"); query.setParameter("PHONE",
-   * addrToCheck.getCustPhone()); } if (addrToCheck.getCounty() != null) {
-   * query.append(" and COUNTY= :COUNTY"); query.setParameter("COUNTY",
-   * addrToCheck.getCounty()); } if (payGoAddredited) { if
-   * (addrToCheck.getExtWalletId() != null) {
-   * query.append(" and EXT_WALLET_ID = :EXT_WALLET_ID");
-   * query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId()); } }
-   * 
-   * return query.exists(); }
-   */
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {

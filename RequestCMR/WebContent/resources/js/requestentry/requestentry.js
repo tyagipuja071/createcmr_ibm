@@ -1441,11 +1441,22 @@ function overrideDnBMatch() {
   var cntry = FormManager.getActualValue('landCntry');
   var loc = FormManager.getActualValue('cmrIssuingCntry');
   if (cntry == 'CN' || loc == '641') {
-    cmr
-        .showConfirm(
-            'doOverrideDnBMatch()',
-            'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
-            'Warning', null, null);
+    var reqType = FormManager.getActualValue('reqType');
+    var custSubGroup = FormManager.getActualValue('custSubGrp');
+
+    if (loc == '641' && (custSubGroup == 'CROSS' && reqType == 'C' || reqType == 'U' && cntry != 'CN')) {
+      cmr
+          .showConfirm(
+              'doOverrideDnBMatch()',
+              'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+              'Warning', null, null);
+    } else {
+      cmr
+          .showConfirm(
+              'doOverrideDnBMatch()',
+              'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+              'Warning', null, null);
+    }
   } else {
     cmr
         .showConfirm(
@@ -1661,6 +1672,14 @@ function checkIfFinalDnBCheckRequired() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+  if (cmrCntry == '834') {
+    var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+      ID : reqId
+    });
+    if (ret && ret.ret1 && ret.ret1 != '') {
+      return false;
+    }
+  }
   if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
       && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US
@@ -1784,6 +1803,9 @@ function matchDnBForAutomationCountries() {
                     .showAlert('This action will override the D&B Matching Process. By overriding the D&B matching, you\'re obliged to provide either one of the following documentation '
                         + 'as backup-client\'s official website, business registration proof, government issued documents, client\'s confirmation email and signed PO, attach it under the file content of Company Proof. '
                         + 'Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.');
+                FormManager.setValue('matchOverrideIndc', 'Y');
+              } else if (data.cnCrossFlag) {
+                cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');
                 FormManager.setValue('matchOverrideIndc', 'Y');
               } else {
                 cmr.showModal('addressVerificationModal');
