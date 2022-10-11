@@ -1419,24 +1419,31 @@ function addDnBSearchValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var ifProspect = FormManager.getActualValue('prospLegalInd');
+        if (dijit.byId('prospLegalInd')) {
+          ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+        }
+        var reqType = FormManager.getActualValue('reqType');
+        var result = FormManager.getActualValue('findDnbResult');
+        var reqStatus = FormManager.getActualValue('reqStatus');
+        if ((result == '' || result.toUpperCase() == 'NOT DONE') && reqType == 'C' && reqStatus == 'DRA' && ifProspect == 'Y') {
+          return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
+        }
         if (FormManager.getActualValue('dnbPrimary') != 'Y') {
           return new ValidationResult(null, true);
         }
-        var reqType = FormManager.getActualValue('reqType');
         if (reqType == 'U') {
           return new ValidationResult(null, true);
         }
         if (reqType == 'C') {
           return new ValidationResult(null, true);
         }
-        var reqStatus = FormManager.getActualValue('reqStatus');
         if (reqStatus != 'DRA') {
           return new ValidationResult(null, true);
         }
         if (isSkipDnbMatching()) {
           return new ValidationResult(null, true);
         }
-        var result = FormManager.getActualValue('findDnbResult');
         if (result == '' || result.toUpperCase() == 'NOT DONE') {
           return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
         }
@@ -1970,7 +1977,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NL, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.NL, null, true);
-  GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(rdcDupZP01Check, GEOHandler.NL, null, true);
