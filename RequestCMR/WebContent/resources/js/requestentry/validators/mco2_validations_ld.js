@@ -247,6 +247,8 @@ function afterConfigForMCO2() {
       }
     }
   }
+  // CREATCMR-788
+  addressQuotationValidatorMCO2();
 }
 
 /**
@@ -2308,7 +2310,19 @@ function checkCmrUpdateBeforeImport() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+// CREATCMR-788
+function addressQuotationValidatorMCO2() {
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Continuation' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Additional Name or Address Information' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Continuation' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
+}
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717',
       '718', '725', '745', '753', '764', '769', '770', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857',
