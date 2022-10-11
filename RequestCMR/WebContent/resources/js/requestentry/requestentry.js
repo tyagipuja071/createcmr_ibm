@@ -181,7 +181,7 @@ function processRequestAction() {
         }
       } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
-      } else if (checkIfUpfrontUpdateChecksRequired()) {
+      } else if (cmrCntry == '897' || cmrCntry == '649') {
         // CREATCMR-6074
         // addUpdateChecksExecution(frmCMR);
         if (cmrCntry == '897') {
