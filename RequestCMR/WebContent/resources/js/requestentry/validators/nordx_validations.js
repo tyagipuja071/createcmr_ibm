@@ -171,7 +171,9 @@ function afterConfigForNORDX() {
   setSortlLength();
   lockSalesRepAndSortl();
   hideACAdminDSC();
-  
+
+  // CREATCMR-788
+  addressQuotationValidatorNORS();
 }
 
 function disableLandCntry() {
@@ -4895,6 +4897,20 @@ function setVatIndFields(){
   }
 }
 
+// CREATCMR-788
+function addressQuotationValidatorNORS() {
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Additional Info' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Att. Person' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Con\'t' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+
+}
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 
