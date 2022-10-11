@@ -479,6 +479,7 @@ public class SWISSHandler extends GEOHandler {
       query.setParameter("ADDR_TYPE", "ZS01");
       List<Object[]> results = query.getResults();
       if (!results.isEmpty() && results.get(0) != null) {
+        int postCd = Integer.parseInt((String) results.get(0)[0]);
         String landCntry = (String) results.get(0)[1];
         if ("CH".equalsIgnoreCase(landCntry) || "LI".equalsIgnoreCase(landCntry)) {
 
