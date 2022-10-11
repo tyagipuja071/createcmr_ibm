@@ -64,7 +64,7 @@ public class IERPProcessService extends BaseBatchService {
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
   protected static final String ACTION_RDC_UPDATE = "System Action:RDc Update";
   private boolean multiMode;
-  private List<Long> pendingReqIds;
+  // private List<Long> pendingReqIds;
 
   @Override
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
@@ -73,7 +73,9 @@ public class IERPProcessService extends BaseBatchService {
       ChangeLogListener.setUser(COMMENT_LOGGER);
       initClient();
 
-      monitorCreqcmr(entityManager);
+      List<Long> reqIds = gatherDRPending(entityManager);
+
+      monitorCreqcmr(entityManager, reqIds);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -332,13 +334,13 @@ public class IERPProcessService extends BaseBatchService {
   }
 
   @SuppressWarnings("unchecked")
-  public void monitorCreqcmr(EntityManager em) throws JsonGenerationException, JsonMappingException, IOException, Exception {
+  public void monitorCreqcmr(EntityManager em, List<Long> pending) throws JsonGenerationException, JsonMappingException, IOException, Exception {
     String actionRdc = "";
     StringBuffer siteIds = new StringBuffer();
     List<CompoundEntity> reqIdList = null;
 
     if (multiMode) {
-      reqIdList = getPendingRequestByReqIds(em, pendingReqIds);
+      reqIdList = getPendingRequestByReqIds(em, pending);
     } else {
       reqIdList = getPendingRequest(em);
     }
@@ -346,7 +348,7 @@ public class IERPProcessService extends BaseBatchService {
 
     if (reqIdList != null && !reqIdList.isEmpty()) {
       // lock records for processing
-      lockAdminRecordsForProcessing(reqIdList, em);
+      // lockAdminRecordsForProcessing(reqIdList, em);
 
       // start processing
       for (CompoundEntity entity : reqIdList) {
@@ -1110,6 +1112,7 @@ public class IERPProcessService extends BaseBatchService {
         for (Addr addr : addresses) {
           response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
           respStatuses.add(response.getStatus());
+          keepAlive();
         }
       }
 
@@ -1139,6 +1142,7 @@ public class IERPProcessService extends BaseBatchService {
           } else {
             notProcessed.add(addr);
           }
+          keepAlive();
         }
       }
 
@@ -1169,6 +1173,7 @@ public class IERPProcessService extends BaseBatchService {
           response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
           respStatuses.add(response.getStatus());
         }
+        keepAlive();
       }
 
       if (!isDataUpdated && !addrUpdateFlag && notProcessed != null && notProcessed.size() > 0
@@ -1176,6 +1181,7 @@ public class IERPProcessService extends BaseBatchService {
         for (Addr addr : notProcessed) {
           response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
           respStatuses.add(response.getStatus());
+          keepAlive();
         }
       }
 
@@ -1320,7 +1326,7 @@ public class IERPProcessService extends BaseBatchService {
     partialCommit(em);
   }
 
-  private void initClient() throws Exception {
+  protected void initClient() throws Exception {
     if (this.serviceClient == null) {
       this.serviceClient = CmrServicesFactory.getInstance().createClient(BATCH_SERVICES_URL, ProcessClient.class);
     }
@@ -1556,12 +1562,12 @@ public class IERPProcessService extends BaseBatchService {
     this.multiMode = multiMode;
   }
 
-  public List<Long> getPendingReqIds() {
-    return pendingReqIds;
-  }
-
-  public void setPendingReqIds(List<Long> pendingReqIds) {
-    this.pendingReqIds = pendingReqIds;
-  }
+  // public List<Long> getPendingReqIds() {
+  // return pendingReqIds;
+  // }
+  //
+  // public void setPendingReqIds(List<Long> pendingReqIds) {
+  // this.pendingReqIds = pendingReqIds;
+  // }
 
 }

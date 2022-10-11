@@ -126,6 +126,18 @@
     </cmr:column>
   </cmr:row>
 
+  <cmr:row addBackground="true">
+    <cmr:column span="2" containerForField="BillingName" forCountry="781">
+      <p>
+        <cmr:label fieldId="mexicoBillingName">
+          <cmr:fieldLabel fieldId="BillingName" />:
+          <cmr:delta text="${rdcdata.mexicoBillingName}" oldValue="${reqentry.mexicoBillingName}" />
+        </cmr:label>
+        <cmr:field path="mexicoBillingName" id="mexicoBillingName" fieldId="BillingName" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
+  </cmr:row>
+
   <c:if test="${reqentry.reqType != 'U'}">
     <cmr:row addBackground="true">
       <cmr:column span="2" containerForField="GovernmentType" forCountry="631">

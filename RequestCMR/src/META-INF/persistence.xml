@@ -234,6 +234,9 @@
     <class>com.ibm.cio.cmr.request.entity.dashboard.AutomationMonitor</class>
     <class>com.ibm.cio.cmr.request.entity.dashboard.ProcessingMonitor</class>
     
+    <class>com.ibm.cio.cmr.request.entity.TaxData</class>
+    <class>com.ibm.cio.cmr.request.entity.TaxDataPK</class>
+    
     <properties>
     <!-- ORIGINAL -->
       <property name="openjpa.ConnectionFactoryMode" value="managed" />

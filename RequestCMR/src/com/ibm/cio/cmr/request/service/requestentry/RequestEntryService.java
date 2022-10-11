@@ -1489,6 +1489,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         boolean isicMatch = false;
         boolean isOrgIdMatched = false;
         boolean confidenceCd = false;
+        boolean cnCrossFlag = false;
         boolean checkTradestyleNames = ("R".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry()))
             || "O".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry())));
         MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, addrType);
@@ -1521,8 +1522,14 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
                 isicMatch = dnbCompny.getIbmIsic().equals(model.getIsicCd());
               }
               log.debug("ISIC Match : " + isicMatch);
+              if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
+                  && ("ZS01".equals(addr.getId().getAddrType()) && "U".equals(admin.getReqType()) && StringUtils.isBlank(data.getCustSubGrp())
+                      && !"CN".equalsIgnoreCase(addr.getLandCntry()) || "C".equals(admin.getReqType()) && "CROSS".equals(data.getCustSubGrp()))) {
+                cnCrossFlag = true;
+              }
               if (record.getConfidenceCode() >= 8 && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
-                  && (StringUtils.isBlank(data.getCustSubGrp()) || !data.getCustSubGrp().equals("CROSS"))) {
+                  && ("U".equals(admin.getReqType()) && StringUtils.isBlank(data.getCustSubGrp()) && "CN".equalsIgnoreCase(addr.getLandCntry())
+                      || "C".equals(admin.getReqType()) && !"CROSS".equals(data.getCustSubGrp()))) {
                 match = true;
                 break;
               }
@@ -1544,6 +1551,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           map.put("isicMatch", isicMatch);
           map.put("orgIdMatch", isOrgIdMatched);
           map.put("confidenceCd", confidenceCd);
+          map.put("cnCrossFlag", cnCrossFlag);
           if (!match && tradeStyleName != null) {
             map.put("tradeStyleMatch", true);
             map.put("legalName", tradeStyleName.getDnbName());
@@ -1552,6 +1560,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         } else {
           map.put("success", false);
           map.put("match", false);
+          map.put("cnCrossFlag", false);
           String message = "An error occurred while matching with DnB.";
           if (response != null) {
             message = response.getMessage();

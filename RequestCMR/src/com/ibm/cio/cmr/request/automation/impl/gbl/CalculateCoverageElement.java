@@ -505,13 +505,22 @@ public class CalculateCoverageElement extends OverridingElement {
         }
       }
       if (StringUtils.isNotBlank(coverageContainer.getIsuCd())) {
-        details.append("\nOverrides based on CMR data:").append("\n");
-        details.append(" - ISU Code = " + coverageContainer.getIsuCd()).append("\n");
-        details.append(" - Client Tier = " + coverageContainer.getClientTierCd()).append("\n");
-        if (createOverrides) {
-          output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), coverageContainer.getIsuCd());
-          output.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", requestData.getData().getClientTier(),
-              StringUtils.isNotBlank(coverageContainer.getClientTierCd()) ? coverageContainer.getClientTierCd() : "");
+        // CREATCMR-7173
+        boolean isKynScenarioSubType = false;
+        if ("C".equals(requestData.getAdmin().getReqType()) && SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())
+            && ("KYN".equals(data.getCustSubGrp())
+                || "BYMODEL".equalsIgnoreCase(data.getCustSubGrp()) && "KYN".equalsIgnoreCase(data.getRestrictTo()))) {
+          isKynScenarioSubType = true;
+        }
+        if (!isKynScenarioSubType) {
+          details.append("\nOverrides based on CMR data:").append("\n");
+          details.append(" - ISU Code = " + coverageContainer.getIsuCd()).append("\n");
+          details.append(" - Client Tier = " + coverageContainer.getClientTierCd()).append("\n");
+          if (createOverrides) {
+            output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), coverageContainer.getIsuCd());
+            output.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", requestData.getData().getClientTier(),
+                StringUtils.isNotBlank(coverageContainer.getClientTierCd()) ? coverageContainer.getClientTierCd() : "");
+          }
         }
       }
 

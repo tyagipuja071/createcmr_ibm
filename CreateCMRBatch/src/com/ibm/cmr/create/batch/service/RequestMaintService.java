@@ -90,10 +90,12 @@ public class RequestMaintService extends BaseBatchService {
         LOG.debug("Flushing at " + currCount + " records.");
         entityManager.flush();
       }
+      keepAlive();
     }
 
     for (String requesterId : reqIdMap.keySet()) {
       sendEmailWarning(requesterId, reqIdMap.get(requesterId));
+      keepAlive();
     }
   }
 
@@ -133,6 +135,7 @@ public class RequestMaintService extends BaseBatchService {
 
       RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment, "Auto-Close", null, null, true, false, null);
       RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), comment);
+      keepAlive();
 
     }
 
@@ -187,11 +190,6 @@ public class RequestMaintService extends BaseBatchService {
   @Override
   protected boolean isTransactional() {
     return true;
-  }
-
-  @Override
-  protected boolean terminateOnLongExecution() {
-    return false;
   }
 
 }

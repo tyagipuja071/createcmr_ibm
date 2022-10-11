@@ -154,7 +154,7 @@ function addAfterConfigForSWISS() {
       FormManager.readOnly('vat');
       FormManager.setValue('vat', '');
     } else {
-      FormManager.enable('vat');
+      //FormManager.enable('vat');      
       if (!dijit.byId('vatExempt').get('checked')) {
         dijit.byId('vatExempt').set('checked', false);
         setVatValidatorSWISS();
@@ -450,6 +450,7 @@ function addVatSuffixForCustLangCdScrtch() {
 
 /* Vat Exempt Handler */
 function setVatValidatorSWISS() {
+  var vatInd = FormManager.getActualValue('vatInd');
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
