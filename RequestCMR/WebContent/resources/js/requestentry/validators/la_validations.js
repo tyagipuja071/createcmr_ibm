@@ -2774,7 +2774,7 @@ function vatValidatorUY() {
               id : 'taxCd1',
               type : 'text',
               name : 'taxCd1'
-            }, false, 'Invalid VAT for URUGUAY. Only 12 digits, alphanumeric combinations are allowed.');
+            }, false, 'Please note that VAT ID should be MAX 12 characters.');
           } else {
             if(_custGrp == 'CROSS' && taxCd1 !=' '){
              if (taxCd1.length > 12 && !taxCd1.match("/^[a-zA-Z0-9]+$/")) {  
