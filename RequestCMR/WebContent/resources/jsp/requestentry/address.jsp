@@ -46,14 +46,8 @@ visibility: hidden !IMPORTANT;
   }
   
   function toggleRemoveButtonLA(noRepeat){
-  	var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  	
-  	if(typeof (LAHandler) != 'undefined' && LAHandler.isLAIssuingCountry(cntry) && FormManager.getActualValue('reqType') == 'U'){
-  		cmr.hideNode('removeAddressesButton');
-  	} else{
-  	  if (dojo.byId('removeAddressesButton')) {
-  	    dojo.byId('removeAddressesButton').style.display = 'inline';
-  	  }
+  	if (dojo.byId('removeAddressesButton')) {
+  	  dojo.byId('removeAddressesButton').style.display = 'inline';
   	}
   }
   
