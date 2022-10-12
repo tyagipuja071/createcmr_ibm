@@ -263,7 +263,6 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
             <label>${ui.title.contactInfoDetails}:</label>
           </cmr:column>
           <cmr:column span="5" width="750">
-            <cmr:row>
             	<cmr:grid url="/summary/origAddlcontacts.json" id="summaryUpdateOrigContactGrid" span="6" width="750" height="200" innerWidth="750" usePaging="false" useFilter="false">
 	              <cmr:gridParam fieldId="cmr" value="${summary.data.cmrNo}" />
 	              <cmr:gridParam fieldId="issuingCntry" value="${summary.data.cmrIssuingCntry}" />	    
@@ -275,7 +274,6 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 	              <cmr:gridCol width="200px" field="contactEmail" header="${ui.grid.contactEmailHeader}" />
 	              <cmr:gridCol width="200px" field="contactPhone" header="${ui.grid.contactPhoneHeader}" />
 	            </cmr:grid>
-          	</cmr:row>
           	<cmr:row>
           	&nbsp;
           	</cmr:row>
@@ -283,7 +281,6 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           	<cmr:row>
           		Current Contact Detail Values
           	</cmr:row>
-            <cmr:row>
             	<cmr:grid url="/summary/addlcontacts.json" id="summaryUpdateCurrContactGrid" span="6" width="750" height="200" innerWidth="750" usePaging="false" useFilter="false">
 	              <cmr:gridParam fieldId="reqId" value="${summary.admin.id.reqId}" />
 	              <cmr:gridParam fieldId="issuingCntry" value="${summary.data.cmrIssuingCntry}" />
@@ -293,7 +290,6 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 	              <cmr:gridCol width="200px" field="contactEmail" header="${ui.grid.contactEmailHeader}" />
 	              <cmr:gridCol width="200px" field="contactPhone" header="${ui.grid.contactPhoneHeader}" />
 	            </cmr:grid>
-          	</cmr:row>
           	--%>
           </cmr:column>
         </cmr:row>
@@ -307,7 +303,6 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           	<cmr:row>
           		Original Tax Info Values
           	</cmr:row>
-            <cmr:row>
             	<cmr:grid url="/summary/origtaxinfo.json" id="summaryUpdateOrigTaxInfoGrid" span="6" width="750" height="200" innerWidth="750" usePaging="false" useFilter="false">
 	              <cmr:gridParam fieldId="cmr" value="${summary.data.cmrNo}" />
 	              <cmr:gridParam fieldId="issuingCntry" value="${summary.data.cmrIssuingCntry}" />
@@ -320,14 +315,12 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 			      <cmr:gridCol width="90px" field="contractPrintIndc" header="${ui.grid.contractPrintInd}" />
 			      <cmr:gridCol width="250px" field="cntryUse" header="${ui.grid.cntryUse}" />
 	            </cmr:grid>
-          	</cmr:row>
           	<cmr:row>
           	&nbsp;
           	</cmr:row>
           	<cmr:row>
           		Current Tax Info Values
           	</cmr:row>
-            <cmr:row>
             	<cmr:grid url="/summary/currtaxinfo.json" id="summaryUpdateCurrTaxInfoGrid" span="6" width="750" height="200" innerWidth="750" usePaging="false" useFilter="false">
 	              <cmr:gridParam fieldId="reqId" value="${summary.admin.id.reqId}" />
 	              <cmr:gridParam fieldId="issuingCntry" value="${summary.data.cmrIssuingCntry}" />
@@ -340,7 +333,6 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 			      <cmr:gridCol width="90px" field="contractPrintIndc" header="${ui.grid.contractPrintInd}" />
 			      <cmr:gridCol width="250px" field="cntryUse" header="${ui.grid.cntryUse}" />
 	            </cmr:grid>
-          	</cmr:row>
           </cmr:column>
         </cmr:row>
       </cmr:view>
