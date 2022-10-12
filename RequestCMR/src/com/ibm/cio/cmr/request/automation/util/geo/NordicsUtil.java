@@ -756,12 +756,10 @@ public class NordicsUtil extends AutomationUtil {
         AutomationServiceClient.class);
     client.setReadTimeout(1000 * 60 * 5);
     client.setRequestMethod(Method.Get);
-
     String vat = data.getVat();
     if (StringUtils.isNotBlank(vat) && SystemLocation.NORWAY.equalsIgnoreCase(data.getCmrIssuingCntry()) && vat.contains("MVA")) {
       vat = vat.replaceAll("MVA", "").trim();
     }
-
     NorwayVatRequest request = new NorwayVatRequest();
     String vatReq = StringUtils.isNumeric(vat) ? vat : vat.substring(2);
     request.setVat(vatReq);
