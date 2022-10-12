@@ -446,8 +446,8 @@ function setIsuOnIsic(){
     };
   
     var clusterDesc = cmr.query('GET.DESC_BY_CLUSTER', qParams);
-    if(((cmrIssuingCntry == '616' || cmrIssuingCntry == '796' ) &&(clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S2') || clusterDesc[0].ret1.includes('Default') || 
-        clusterDesc[0].ret1.includes('EC') || clusterDesc[0].ret1.includes('Kyndryl')))) || (cmrIssuingCntry == '616' && (clusterDesc[0].ret2.includes('05221') || clusterDesc[0].ret2.includes('04500') || clusterDesc[0].ret2.includes('08039'))) || (cmrIssuingCntry == '796' && (clusterDesc[0].ret2.includes('08037')))) {
+    if((( cmrIssuingCntry == '796' ) &&(clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S2') || clusterDesc[0].ret1.includes('Default') || 
+        clusterDesc[0].ret1.includes('EC') || clusterDesc[0].ret1.includes('Kyndryl')))) || (cmrIssuingCntry == '796' && (clusterDesc[0].ret2.includes('08037')))) {
       FormManager.setValue('repTeamMemberNo', '000000');
       FormManager.readOnly('repTeamMemberNo');
     } 
@@ -4445,6 +4445,15 @@ function addCompanyProofForSG() {
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
 
+// CREATCMR-6825
+function setRepTeamMemberNo() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.readOnly('repTeamMemberNo');
+  }
+}
+
 // CREATCMR-6358
 function additionalAddrNmValidator(){
   FormManager.addFormValidator((function() {
@@ -4499,7 +4508,9 @@ dojo.addOnLoad(function() {
   GEOHandler.ASEAN = [ SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.LAOS, SysLoc.MALASIA, SysLoc.CAMBODIA ];
   GEOHandler.ANZ = [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ];
   GEOHandler.GCG = [ SysLoc.HONG_KONG, SysLoc.MACAO ];
-
+  // CREATCMR-6825
+  GEOHandler.APAC = [ SysLoc.SINGAPORE, SysLoc.PHILIPPINES, SysLoc.THAILAND, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.BRUNEI, SysLoc.VIETNAM, SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA, 
+      SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.HONG_KONG, SysLoc.MACAO  ];
   console.log('adding AP functions...');
   console.log('the value of person full id is ' + localStorage.getItem("pID"));
   GEOHandler.setRevertIsicBehavior(false);
@@ -4665,4 +4676,7 @@ dojo.addOnLoad(function() {
    GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate,  GEOHandler.AP );
   GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.AP );
   // India Handler
+  // CREATCMR-6825
+  GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.APAC);
+  GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.APAC);
 });
