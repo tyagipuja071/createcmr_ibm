@@ -242,6 +242,8 @@ public class DataModel extends BaseModel {
 
   private String collectorNameNo;
 
+  private String MrktChannelInd;
+
   // CH Specific
   private String custLangCd;
   private String hwInstlMstrFlg;
@@ -1253,5 +1255,13 @@ public class DataModel extends BaseModel {
 
   public void setCollectorNameNo(String collectorNameNo) {
     this.collectorNameNo = collectorNameNo;
+  }
+
+  public String getMrktChannelInd() {
+    return MrktChannelInd;
+  }
+
+  public void setMrktChannelInd(String mrktChannelInd) {
+    MrktChannelInd = mrktChannelInd;
   }
 }
