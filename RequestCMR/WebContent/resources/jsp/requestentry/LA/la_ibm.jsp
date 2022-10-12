@@ -21,6 +21,7 @@
       <p>
         <cmr:label fieldId="mrktChannelInd">
           <cmr:fieldLabel fieldId="MrktChannelInd" />: 
+          <cmr:delta text="${rdcdata.mrktChannelInd}" oldValue="${reqentry.mrktChannelInd}" />
           </cmr:label>
         <cmr:field fieldId="MrktChannelInd" id="mrktChannelInd" path="mrktChannelInd" tabId="MAIN_IBM_TAB" />
     </cmr:column>
