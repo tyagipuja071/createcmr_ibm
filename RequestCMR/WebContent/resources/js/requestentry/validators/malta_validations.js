@@ -1,8 +1,6 @@
 /* Register Malta Javascripts */
-var fstCEWA = [ "373", "382", "383", "635", "637", "656", "662", "667", "670", "691", "692", "700", "717", "718", "753", "810", "840", "841", "876",
-    "879", "880", "881" ];
-var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851",
-    "857", "883", "780" ];
+var fstCEWA = [ "373", "382", "383", "635", "637", "656", "662", "667", "670", "691", "692", "700", "717", "718", "753", "810", "840", "841", "876", "879", "880", "881" ];
+var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851", "857", "883", "780" ];
 var _vatExemptHandler = null;
 
 function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
@@ -718,7 +716,7 @@ function addAfterConfigMalta() {
   enterpriseMalta();
   cmrNoforProspect();
   classFieldBehaviour();
-//  setVatValidatorMalta();
+  // setVatValidatorMalta();
   setVatExemptValidatorMalta();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
@@ -1028,8 +1026,7 @@ function setCTCValues() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   // Business Partner
-  var custSubGrpArray = [ 'BUSPR', 'LSBP', 'LSXBP', 'NABP', 'NAXBP', 'SZBP', 'SZXBP', 'XBP', 'ZABP', 'ZAXBP', 'INTER', 'LSINT', 'LSXIN', 'NAINT',
-      'NAXIN', 'SZINT', 'SZXIN', 'XINTE', 'ZAINT', 'ZAXIN' ];
+  var custSubGrpArray = [ 'BUSPR', 'LSBP', 'LSXBP', 'NABP', 'NAXBP', 'SZBP', 'SZXBP', 'XBP', 'ZABP', 'ZAXBP', 'INTER', 'LSINT', 'LSXIN', 'NAINT', 'NAXIN', 'SZINT', 'SZXIN', 'XINTE', 'ZAINT', 'ZAXIN' ];
 
   // Business Partner OR Internal
   if (custSubGrpArray.includes(custSubGrp)) {
@@ -1077,7 +1074,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') { 
+    if (clientTierCode == '') {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
@@ -1119,23 +1116,23 @@ function clientTierValidator() {
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
         var valResult = null;
-        
+
         var oldClientTier = null;
         var oldISU = null;
         var requestId = FormManager.getActualValue('reqId');
-        
+
         if (reqType == 'C') {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-              REQ_ID : requestId,
+            REQ_ID : requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-          
+
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU =  result.ret3 != null ? result.ret3 : '';
-            
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
             if (clientTier != oldClientTier || isuCd != oldISU) {
               valResult = clientTierCodeValidator();
             }
@@ -1196,19 +1193,7 @@ function checkCmrUpdateBeforeImport() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
-// CREATCMR-788
-function addressQuotationValidatorMalta() {
-  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
-  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Name 2' ]);
-  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Name 3' ]);
-  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
-  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Name 4' ]);
-  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
-  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
-  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
-}
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '780' ];
   console.log('adding MALTA functions...');

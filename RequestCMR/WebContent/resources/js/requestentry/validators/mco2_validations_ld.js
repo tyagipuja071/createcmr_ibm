@@ -1,10 +1,8 @@
 /* Register MCO Javascripts */
-var fstCEWA = [ "373", "382", "383", "635", "637", "656", "662", "667", "670", "691", "692", "700", "717", "718", "753", "810", "840", "841", "876",
-    "879", "880", "881" ];
-var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851",
-    "857", "883" ];
-var validGmllcCntry = [ 'MU', 'ML', 'GQ', 'SN', 'CI', 'GA', 'CD', 'CG', 'DJ', 'GN', 'CM', 'MG', 'MR', 'TG', 'GM', 'CF', 'BJ', 'BF', 'SC', 'GW', 'NE',
-    'TD', 'AO', 'BW', 'BI', 'CV', 'ET', 'GH', 'ER', 'MW', 'LR', 'MZ', 'NG', 'ZW', 'ST', 'RW', 'SL', 'SO', 'SS', 'TZ', 'UG', 'ZM', 'NA', 'LS', 'SZ' ];
+var fstCEWA = [ "373", "382", "383", "635", "637", "656", "662", "667", "670", "691", "692", "700", "717", "718", "753", "810", "840", "841", "876", "879", "880", "881" ];
+var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851", "857", "883" ];
+var validGmllcCntry = [ 'MU', 'ML', 'GQ', 'SN', 'CI', 'GA', 'CD', 'CG', 'DJ', 'GN', 'CM', 'MG', 'MR', 'TG', 'GM', 'CF', 'BJ', 'BF', 'SC', 'GW', 'NE', 'TD', 'AO', 'BW', 'BI', 'CV', 'ET', 'GH', 'ER',
+    'MW', 'LR', 'MZ', 'NG', 'ZW', 'ST', 'RW', 'SL', 'SO', 'SS', 'TZ', 'UG', 'ZM', 'NA', 'LS', 'SZ' ];
 function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -725,9 +723,8 @@ function addAttachmentValidator() {
                   currentPoBox = record.poBox[0] != null ? record.poBox[0] : '';
                   currentPhone = record.custPhone[0] != null ? record.custPhone[0] : '';
 
-                  if (oldCustName == currentCustName && oldCustNameCon == currentCustNameCon && oldAddlName == currentAddlName
-                      && oldStreet == currentStreet && oldStreetCont == currentStreetCont && oldCity == currentCity && oldPostCd == currentPostCd
-                      && oldLandedCntry == currentLandedCntry && oldPoBox == currentPoBox) {
+                  if (oldCustName == currentCustName && oldCustNameCon == currentCustNameCon && oldAddlName == currentAddlName && oldStreet == currentStreet && oldStreetCont == currentStreetCont
+                      && oldCity == currentCity && oldPostCd == currentPostCd && oldLandedCntry == currentLandedCntry && oldPoBox == currentPoBox) {
                     if (type == 'ZP01' && oldPhone != currentPhone) {
                       if (attachmentCount > 0) {
                         return new ValidationResult(null, true);
@@ -926,8 +923,7 @@ function diplayTinNumberforTZ() {
           // setTinNumber();
         });
       } else {
-        if (FormManager.getField('addrType_ZP01').checked
-            && ((cmr.currentRequestType == 'C' && scenario == 'LOCAL') || cmr.currentRequestType == 'U'))
+        if (FormManager.getField('addrType_ZP01').checked && ((cmr.currentRequestType == 'C' && scenario == 'LOCAL') || cmr.currentRequestType == 'U'))
           cmr.showNode('tin');
       }
     }
@@ -1078,8 +1074,7 @@ function addAdditionalNameStreetContPOBoxValidator() {
         }
 
         if (isAddlNameFilled && isStreetContPOBOXFilled) {
-          return new ValidationResult(null, false,
-              'Please fill-out either \'Additional Name or Address Information\' or \'Street Continuation\' and/or \'PO Box\' only.');
+          return new ValidationResult(null, false, 'Please fill-out either \'Additional Name or Address Information\' or \'Street Continuation\' and/or \'PO Box\' only.');
         }
 
         return new ValidationResult(null, true);
@@ -1137,60 +1132,57 @@ function clearPOBoxFromGrid() {
 
 function addAddressGridValidatorStreetPOBox() {
   console.log("addAddressGridValidatorStreetPOBox..............");
-  FormManager.addFormValidator(
-      (function() {
-        return {
-          validate : function() {
-            if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-              var record = null;
-              var type = null;
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
 
-              var missingPOBoxStreetAddrs = '';
-              for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-                record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-                if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-                  record = _allAddressData[i];
-                }
-                type = record.addrType;
-                if (typeof (type) == 'object') {
-                  type = type[0];
-                }
+          var missingPOBoxStreetAddrs = '';
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
 
-                var addrIsNewOrUpdated = null;
-                var reqType = FormManager.getActualValue('reqType');
+            var addrIsNewOrUpdated = null;
+            var reqType = FormManager.getActualValue('reqType');
 
-                if (reqType == 'U') {
-                  if (record.updateInd[0] == 'U' || record.updateInd[0] == 'N') {
-                    addrIsNewOrUpdated = true;
-                  } else {
-                    addrIsNewOrUpdated = false;
-                  }
-                } else {
-                  addrIsNewOrUpdated = true;
-                }
-
-                var isPOBoxOrStreetFilled = (record.poBox[0] != null && record.poBox[0] != '')
-                    || (record.addrTxt[0] != null && record.addrTxt[0] != '');
-                if (!isPOBoxOrStreetFilled && addrIsNewOrUpdated) {
-                  if (missingPOBoxStreetAddrs != '') {
-                    missingPOBoxStreetAddrs += ', ' + record.addrTypeText[0];
-                  } else {
-                    missingPOBoxStreetAddrs += record.addrTypeText[0];
-                  }
-                }
+            if (reqType == 'U') {
+              if (record.updateInd[0] == 'U' || record.updateInd[0] == 'N') {
+                addrIsNewOrUpdated = true;
+              } else {
+                addrIsNewOrUpdated = false;
               }
+            } else {
+              addrIsNewOrUpdated = true;
+            }
 
+            var isPOBoxOrStreetFilled = (record.poBox[0] != null && record.poBox[0] != '') || (record.addrTxt[0] != null && record.addrTxt[0] != '');
+            if (!isPOBoxOrStreetFilled && addrIsNewOrUpdated) {
               if (missingPOBoxStreetAddrs != '') {
-                return new ValidationResult(null, false, 'Please fill-out either Street or PO BOX for the following address: '
-                    + missingPOBoxStreetAddrs);
+                missingPOBoxStreetAddrs += ', ' + record.addrTypeText[0];
+              } else {
+                missingPOBoxStreetAddrs += record.addrTypeText[0];
               }
-
-              return new ValidationResult(null, true);
-
             }
           }
-        };
-      })(), 'MAIN_NAME_TAB', 'frmCMR');
+
+          if (missingPOBoxStreetAddrs != '') {
+            return new ValidationResult(null, false, 'Please fill-out either Street or PO BOX for the following address: ' + missingPOBoxStreetAddrs);
+          }
+
+          return new ValidationResult(null, true);
+
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 function addInternalDeptNumberValidator() {
@@ -1297,7 +1289,7 @@ function addTinNumberValidationKn() {
             name : 'taxCd1'
           }, false, 'Invalid format of TIN Number. It should be 11 characters long containing only upper-case latin and numeric characters.');
         }
-        
+
         return new ValidationResult(null, true);
       }
     };
@@ -1428,8 +1420,7 @@ function validateCMRForMCO2GMLLCScenario() {
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
-            }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed
-                + ' to create new CMR under both ' + targetCntry + ' and ' + landed);
+            }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both ' + targetCntry + ' and ' + landed);
           } else {
             exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
               COUNTRY : cntry,
@@ -1441,8 +1432,7 @@ function validateCMRForMCO2GMLLCScenario() {
                 id : 'cmrNo',
                 type : 'text',
                 name : 'cmrNo'
-              }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed
-                  + ' to create new CMR under both Kenya and ' + landed);
+              }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both Kenya and ' + landed);
             }
           }
         }
@@ -1502,8 +1492,7 @@ function gmllcExistingCustomerAdditionalValidations() {
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
-            }, false, 'CMR does not exist in either ' + landed + ' or Kenya. Please use GM LLC under ' + landed
-                + '. Processors are able to enter specific CMR if needed.');
+            }, false, 'CMR does not exist in either ' + landed + ' or Kenya. Please use GM LLC under ' + landed + '. Processors are able to enter specific CMR if needed.');
           }
           // 2A - All Cewa except kenya
           if (!existInLandedCntry && cmrStatusDupl == 'C' && cntry != kenyaCntryCd) {
@@ -1511,9 +1500,8 @@ function gmllcExistingCustomerAdditionalValidations() {
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
-            }, false,
-                'Please note CMR in Kenya is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both '
-                    + landed + ' and Kenya using GM LLC scenario under ' + landed + '.');
+            }, false, 'Please note CMR in Kenya is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed
+                + ' and Kenya using GM LLC scenario under ' + landed + '.');
           }
 
           // 2B - For Kenya only
@@ -1522,11 +1510,9 @@ function gmllcExistingCustomerAdditionalValidations() {
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
-            }, false, 'Please note CMR in ' + landed
-                + ' is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed
+            }, false, 'Please note CMR in ' + landed + ' is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed
                 + ' country and Kenya using GM LLC scenario under ' + landed + '.');
-          } else if ((cmrStatusLanded == 'C' && existInDuplCntry && cntry != kenyaCntryCd)
-              || (cmrStatusDupl == 'C' && existInLandedCntry && cntry == kenyaCntryCd)) {
+          } else if ((cmrStatusLanded == 'C' && existInDuplCntry && cntry != kenyaCntryCd) || (cmrStatusDupl == 'C' && existInLandedCntry && cntry == kenyaCntryCd)) {
             var issuingCd = landed;
             if (cntry == kenyaCntryCd && cmrStatusDupl == 'C' && cmrStatusLanded != 'C') {
               issuingCd = 'KE';
@@ -1535,15 +1521,14 @@ function gmllcExistingCustomerAdditionalValidations() {
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
-            }, false, 'Please note CMR in ' + issuingCd + ' is Cancelled. It needs to be either reactivated, or you can create a new CMR under both '
-                + landed + ' country and Kenya using GM LLC scenario under ' + landed + '.');
+            }, false, 'Please note CMR in ' + issuingCd + ' is Cancelled. It needs to be either reactivated, or you can create a new CMR under both ' + landed
+                + ' country and Kenya using GM LLC scenario under ' + landed + '.');
           } else if ((cmrStatusLanded == 'C' && !existInDuplCntry) || (cmrStatusDupl == 'C' && cntry == kenyaCntryCd && !existInLandedCntry)) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
-            }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed
-                + ' to create new CMR under both ' + targetCntry + ' and ' + landed);
+            }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both ' + targetCntry + ' and ' + landed);
           }
         }
         return new ValidationResult({
@@ -2017,60 +2002,58 @@ function isVatRequired() {
 
 function addAddressGridValidatorGMLLC() {
   console.log("addAddressGridValidatorGMLLC..............");
-  FormManager
-      .addFormValidator(
-          (function() {
-            return {
-              validate : function() {
-                var custSubGrp = FormManager.getActualValue('custSubGrp');
-                var isGmllcScenario = custSubGrp == 'LLC' || custSubGrp == 'LLCBP' || custSubGrp == 'LLCEX';
-                var kenyaCntryCd = '764';
-                var isIssuingCntryKenya = FormManager.getActualValue('cmrIssuingCntry') == kenyaCntryCd;
-                var isKenyaLocalGmllc = isIssuingCntryKenya && (custSubGrp == 'LLC' || custSubGrp == 'LLCBP');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var isGmllcScenario = custSubGrp == 'LLC' || custSubGrp == 'LLCBP' || custSubGrp == 'LLCEX';
+        var kenyaCntryCd = '764';
+        var isIssuingCntryKenya = FormManager.getActualValue('cmrIssuingCntry') == kenyaCntryCd;
+        var isKenyaLocalGmllc = isIssuingCntryKenya && (custSubGrp == 'LLC' || custSubGrp == 'LLCBP');
 
-                if (!isGmllcScenario || isKenyaLocalGmllc) {
-                  return new ValidationResult(null, true);
-                }
-                if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-                  var record = null;
-                  var type = null;
+        if (!isGmllcScenario || isKenyaLocalGmllc) {
+          return new ValidationResult(null, true);
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
 
-                  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-                    record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-                    if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-                      record = _allAddressData[i];
-                    }
-                    type = record.addrType;
-                    if (typeof (type) == 'object') {
-                      type = type[0];
-                    }
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
 
-                    if (type != 'ZS01') {
-                      continue;
-                    }
+            if (type != 'ZS01') {
+              continue;
+            }
 
-                    var streetCont;
-                    var isAddlNameFilled = false;
-                    var isStreetContPOBOXFilled = false;
+            var streetCont;
+            var isAddlNameFilled = false;
+            var isStreetContPOBOXFilled = false;
 
-                    if ((record.custNm4[0] != '' && record.custNm4[0] != null)) {
-                      isAddlNameFilled = true;
-                    }
+            if ((record.custNm4[0] != '' && record.custNm4[0] != null)) {
+              isAddlNameFilled = true;
+            }
 
-                    if ((record.addrTxt2[0] != '' && record.addrTxt2[0] != null) || (record.poBox[0] != '' && record.poBox[0] != null)) {
-                      isStreetContPOBOXFilled = true;
-                    }
+            if ((record.addrTxt2[0] != '' && record.addrTxt2[0] != null) || (record.poBox[0] != '' && record.poBox[0] != null)) {
+              isStreetContPOBOXFilled = true;
+            }
 
-                    if (isAddlNameFilled && isStreetContPOBOXFilled) {
-                      return new ValidationResult(null, false,
-                          'Please update Sold-to (Main) Address. Fill-out either \'Additional Name or Address Information\' or \'Street Continuation\' and/or \'PO Box\' only.');
-                    }
-                  }
-                  return new ValidationResult(null, true);
-                }
-              }
-            };
-          })(), 'MAIN_NAME_TAB', 'frmCMR');
+            if (isAddlNameFilled && isStreetContPOBOXFilled) {
+              return new ValidationResult(null, false,
+                  'Please update Sold-to (Main) Address. Fill-out either \'Additional Name or Address Information\' or \'Street Continuation\' and/or \'PO Box\' only.');
+            }
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 /* End 1430539 */
@@ -2144,7 +2127,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') { 
+    if (clientTierCode == '') {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
@@ -2186,23 +2169,23 @@ function clientTierValidator() {
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
         var valResult = null;
-        
+
         var oldClientTier = null;
         var oldISU = null;
         var requestId = FormManager.getActualValue('reqId');
-        
+
         if (reqType == 'C') {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-              REQ_ID : requestId,
+            REQ_ID : requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-          
+
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU =  result.ret3 != null ? result.ret3 : '';
-            
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
             if (clientTier != oldClientTier || isuCd != oldISU) {
               valResult = clientTierCodeValidator();
             }
@@ -2305,23 +2288,10 @@ function checkCmrUpdateBeforeImport() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
-// CREATCMR-788
-function addressQuotationValidatorMCO2() {
-  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
-  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Continuation' ]);
-  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Additional Name or Address Information' ]);
-  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
-  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Continuation' ]);
-  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
-  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
-  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
-}
 dojo.addOnLoad(function() {
-  GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717',
-      '718', '725', '745', '753', '764', '769', '770', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857',
-      '876', '879', '880', '881', '883' ];
+  GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
+      '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
   console.log('adding MCO2 functions...');
   GEOHandler.addAddrFunction(addMCO1LandedCountryHandler, GEOHandler.MCO2);
   GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01', 'ZI01' ]);
@@ -2419,9 +2389,9 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO2);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.MCO2, null, true);
-  
+
   GEOHandler.addAfterConfig(enableTinNumber, SysLoc.KENYA);
   GEOHandler.addAfterTemplateLoad(enableTinNumber, SysLoc.KENYA);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.MCO2, null, true);
-  
+
 });
