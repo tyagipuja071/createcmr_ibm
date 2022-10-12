@@ -2256,6 +2256,68 @@ function getSoldToLanded() {
   return countryCd;
 }
 
+function checkCmrUpdateBeforeImport() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var uptsrdc = '';
+        var lastupts = '';
+
+        if (reqType == 'C') {
+          // console.log('reqType = ' + reqType);
+          return new ValidationResult(null, true);
+        }
+
+        var resultsCC = cmr.query('GETUPTSRDC', {
+          COUNTRY : cntry,
+          CMRNO : cmrNo,
+          MANDT : cmr.MANDT
+        });
+
+        if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
+          uptsrdc = resultsCC.ret1;
+          // console.log('lastupdatets in RDC = ' + uptsrdc);
+        }
+
+        var results11 = cmr.query('GETUPTSADDR', {
+          REQ_ID : reqId
+        });
+        if (results11 != null && results11 != undefined && results11.ret1 != '') {
+          lastupts = results11.ret1;
+          // console.log('lastupdatets in CreateCMR = ' + lastupts);
+        }
+
+        if (lastupts != '' && uptsrdc != '') {
+          if (uptsrdc > lastupts) {
+            return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+// CREATCMR-788
+function addressQuotationValidatorMCO2() {
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Continuation' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Additional Name or Address Information' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Continuation' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+
+}
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717',
       '718', '725', '745', '753', '764', '769', '770', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857',
@@ -2360,4 +2422,6 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterConfig(enableTinNumber, SysLoc.KENYA);
   GEOHandler.addAfterTemplateLoad(enableTinNumber, SysLoc.KENYA);
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.MCO2, null, true);
+  
 });

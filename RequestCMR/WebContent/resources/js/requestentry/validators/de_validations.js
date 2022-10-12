@@ -1065,6 +1065,104 @@ function addLandedCountryHandler(cntry, addressMode, saving, finalSave) {
   }
 }
 
+function checkCmrUpdateBeforeImport() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var uptsrdc = '';
+        var lastupts = '';
+
+        if (reqType == 'C') {
+          // console.log('reqType = ' + reqType);
+          return new ValidationResult(null, true);
+        }
+
+        var resultsCC = cmr.query('GETUPTSRDC', {
+          COUNTRY : cntry,
+          CMRNO : cmrNo,
+          MANDT : cmr.MANDT
+        });
+
+        if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
+          uptsrdc = resultsCC.ret1;
+          // console.log('lastupdatets in RDC = ' + uptsrdc);
+        }
+
+        var results11 = cmr.query('GETUPTSADDR', {
+          REQ_ID : reqId
+        });
+        if (results11 != null && results11 != undefined && results11.ret1 != '') {
+          lastupts = results11.ret1;
+          // console.log('lastupdatets in CreateCMR = ' + lastupts);
+        }
+
+        if (lastupts != '' && uptsrdc != '') {
+          if (uptsrdc > lastupts) {
+            return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function addVatIndValidator(){
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');   
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage'); 
+   
+   if (viewOnlyPage =='true'){ 
+     FormManager.resetValidations('vat');
+     FormManager.readOnly('vat');
+   } else {
+  var cntry= FormManager.getActualValue('cmrIssuingCntry');
+  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+    ISSUING_CNTRY : cntry
+  });
+  
+  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'O' && vat == ''){    
+    FormManager.setValue('vatInd', 'N'); 
+  } else if((results!= null || results!= undefined || results.ret1!='') && vat != ''){      
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  } else if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'R' && vat == ''){
+    FormManager.setValue('vat', '');   
+    FormManager.setValue('vatInd', '');
+  } else if (vat && dojo.string.trim(vat) != '') {    
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');    
+  } else if (vat && dojo.string.trim(vat) == '') {
+    FormManager.setValue('vatInd', 'N');
+  }
+    
+  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
+    FormManager.resetValidations('vat');    
+  }
+}
+}
+
+function setVatIndFields(){
+  var _vatHandler = null;  
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vat != '' && vatInd == ''){
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -1119,4 +1217,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.registerValidator(validateEnterpriseNum, GEOHandler.DE, null, true);  
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.DE, null, true);
   });
