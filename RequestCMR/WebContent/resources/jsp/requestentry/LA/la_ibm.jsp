@@ -76,6 +76,7 @@
       <p>
         <cmr:label fieldId="collectorNameNo">
           <cmr:fieldLabel fieldId="CollectorNameNo" />:
+          <cmr:delta text="${rdcdata.collectorNameNo}" oldValue="${reqentry.collectorNameNo}" />
           </cmr:label>
         <cmr:field fieldId="CollectorNameNo" id="collectorNameNo" path="collectorNameNo" tabId="MAIN_IBM_TAB" />
       </p>
@@ -89,6 +90,7 @@
       <p>
         <cmr:label fieldId="salesBusOffCd">
           <cmr:fieldLabel fieldId="SalesBusOff" />:
+          <cmr:delta text="${rdcdata.salesBusOffCd}" oldValue="${reqentry.salesBusOffCd}" />
           </cmr:label>
         <cmr:field fieldId="SalesBusOff" id="salesBusOffCd" path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
       </p>
@@ -98,6 +100,7 @@
       <p>
         <cmr:label fieldId="mrcCd">
           <cmr:fieldLabel fieldId="MrcCd" />:
+          <cmr:delta text="${rdcdata.mrcCd}" oldValue="${reqentry.mrcCd}" />
           </cmr:label>
         <cmr:field fieldId="MrcCd" id="mrcCd" path="mrcCd" tabId="MAIN_IBM_TAB" />
       </p>
@@ -135,6 +138,7 @@
       <p>
         <cmr:label fieldId="repTeamMemberNo">
           <cmr:fieldLabel fieldId="SalRepNameNo" />:
+          <cmr:delta text="${rdcdata.repTeamMemberNo}" oldValue="${reqentry.repTeamMemberNo}" />
             <cmr:info text="${ui.info.salRepNameNo}" />
         </cmr:label>
         <%--Mukesh:Defect 1301380: Sales Rep field --%>
