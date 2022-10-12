@@ -492,6 +492,8 @@ function afterConfigForCEMEA() {
   setAustriaUIFields();
   setExpediteReason();
   setTypeOfCustomerRequiredProcessor();
+  // CREATCMR-788
+  addressQuotationValidatorCEMEA();
 }
 
 function setAustriaUIFields() {
@@ -3763,6 +3765,8 @@ function handleLocalLangCountryName(type) {
     FormManager.mandatory('landCntry', 'LocalLangCountryName', null);
     lockLandCntry();
   }
+  // CREATCMR-788
+  FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Country Name (Local Language)' ]);
 }
 
 /**
@@ -4215,6 +4219,8 @@ function afterConfigForME() {
   isicCdOnChangeME();
   // reqReasonOnChange();
   hideDisableAutoProcessingCheckBox();
+  // CREATCMR-788
+  addressQuotationValidatorCEMEA();
 
 }
 
@@ -4583,7 +4589,19 @@ function clientTierCodeValidator() {
   }
 }
 // CREATCMR-4293
+// CREATCMR-788
+function addressQuotationValidatorCEMEA() {
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name (1)' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name (2)' ]);
+  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Customer Name (3)' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Attention Person' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Country Name (Local Language)' ]);
 
+}
 function clientTierValidator() {
   FormManager.addFormValidator((function() {
     return {
