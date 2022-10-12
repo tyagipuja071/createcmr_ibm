@@ -2514,24 +2514,13 @@ function disableFieldsForBrazil() {
 }
 
 function canRemoveAddress(value, rowIndex, grid) {
-  console.log("Remove address button..");
-  var rowData = grid.getItem(0);
-  if (rowData == null) {
-    return '';
-  }
   var rowData = grid.getItem(rowIndex);
-  var importInd = rowData.importInd;
-
+  var importInd = rowData.importInd[0];
   var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'U') {
+  if ('U' == reqType && ('Y' == importInd)) {
     return false;
-  } else {
-    // var addrType = rowData.addrType;
-    // if (addrType == 'ZS01') {
-    // return false;
-    // }
-    return true;
   }
+  return true;
 }
 
 function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
