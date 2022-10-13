@@ -280,36 +280,24 @@ public class AustraliaUtil extends AutomationUtil {
                   : response.getRecord().getOtherTradingName().replaceAll(regex, "");
               String responseBusinessNm = StringUtils.isBlank(response.getRecord().getBusinessName()) ? ""
                   : response.getRecord().getBusinessName().replaceAll(regex, "");
-              List<String> historicalNameList = new ArrayList<String>();
-              historicalNameList = StringUtils.isBlank(response.getRecord().getBusinessName()) ? "" : response.getRecord().getHistoricalNameList();
-              for (String historicalNm : historicalNameList) {
-                historicalNm = historicalNm.replaceAll(regex, "");
-                if (response.getRecord().isValid() && customerName.equalsIgnoreCase(responseCustNm)
-                    && formerCustName.equalsIgnoreCase(historicalNm)) {
-                  custNmMatch = true;
-                  formerCustNmMatch = true;
-                }
-              }
-              if (!(custNmMatch && formerCustNmMatch)) {
-                if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
-                    && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
-                        || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
-                  custNmMatch = true;
-                  formerCustNmMatch = true;
-                } else if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
-                    && !((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
-                        || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
-                  custNmMatch = true;
-                  formerCustNmMatch = false;
-                } else if (response.getRecord().isValid() && !(customerName.equalsIgnoreCase(responseCustNm))
-                    && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
-                        || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
-                  custNmMatch = false;
-                  formerCustNmMatch = true;
-                } else {
-                  custNmMatch = false;
-                  formerCustNmMatch = false;
-                }
+              if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
+                  && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
+                custNmMatch = true;
+                formerCustNmMatch = true;
+              } else if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
+                  && !((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
+                custNmMatch = true;
+                formerCustNmMatch = false;
+              } else if (response.getRecord().isValid() && !(customerName.equalsIgnoreCase(responseCustNm))
+                  && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
+                custNmMatch = false;
+                formerCustNmMatch = true;
+              } else {
+                custNmMatch = false;
+                formerCustNmMatch = false;
               }
             }
           }

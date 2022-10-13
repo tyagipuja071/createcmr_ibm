@@ -467,39 +467,27 @@ public class VatUtilController {
               : abnResponse.getRecord().getOtherTradingName().replaceAll(regex, "");
           String responseBusinessNm = StringUtils.isBlank(abnResponse.getRecord().getBusinessName()) ? ""
               : abnResponse.getRecord().getBusinessName().replaceAll(regex, "");
-          List<String> historicalNameList = new ArrayList<String>();
-          historicalNameList = StringUtils.isBlank(abnResponse.getRecord().getBusinessName()) ? "" : abnResponse.getRecord().getHistoricalNameList();
-          for (String historicalNm : historicalNameList) {
-            historicalNm = historicalNm.replaceAll(regex, "");
-            if (abnResponse.getRecord().isValid() && custNm.equalsIgnoreCase(responseCustNm) && formerCustNm.equalsIgnoreCase(historicalNm)) {
-              success = true;
-              custNmMatch = true;
-              formerCustNmMatch = true;
-            }
-          }
-          if (!(success && custNmMatch && formerCustNmMatch)) {
-            if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm)) && ((formerCustNm.equalsIgnoreCase(responseTradingNm))
-                || (formerCustNm.equalsIgnoreCase(responseOthTradingNm)) || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
-              success = true;
-              custNmMatch = true;
-              formerCustNmMatch = true;
-            } else if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm))
-                && !((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
-                    || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
-              success = true;
-              custNmMatch = true;
-              formerCustNmMatch = false;
-            } else if (abnResponse.getRecord().isValid() && !(custNm.equalsIgnoreCase(responseCustNm))
-                && ((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
-                    || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
-              success = true;
-              custNmMatch = false;
-              formerCustNmMatch = true;
-            } else {
-              success = true;
-              custNmMatch = false;
-              formerCustNmMatch = false;
-            }
+          if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm)) && ((formerCustNm.equalsIgnoreCase(responseTradingNm))
+              || (formerCustNm.equalsIgnoreCase(responseOthTradingNm)) || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            success = true;
+            custNmMatch = true;
+            formerCustNmMatch = true;
+          } else if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm))
+              && !((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
+                  || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            success = true;
+            custNmMatch = true;
+            formerCustNmMatch = false;
+          } else if (abnResponse.getRecord().isValid() && !(custNm.equalsIgnoreCase(responseCustNm))
+              && ((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
+                  || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            success = true;
+            custNmMatch = false;
+            formerCustNmMatch = true;
+          } else {
+            success = true;
+            custNmMatch = false;
+            formerCustNmMatch = false;
           }
         }
       } else {
