@@ -3234,13 +3234,17 @@ function checkCmrUpdateBeforeImport() {
 function addressQuotationValidatorMCO() {
   FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
   FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
-  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Attention Person' ]);
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
+    FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Att. Person' ]);
+  } else {
+    FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Attention Person' ]);
+  }
   FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
   FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Department' ]);
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
   FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address Con\'t' ]);
   FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
-  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PostBox' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
   FormManager.addValidator('prefSeqNo', Validators.NO_QUOTATION, [ 'Sequence Number' ]);
 

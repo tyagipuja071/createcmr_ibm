@@ -434,9 +434,11 @@ function vatAndVatExemptOnScenario(value) {
         }
       }
     } else {
-      FormManager.getField('vatExempt').set('checked', false);
-      FormManager.hide('VATExempt', 'vatExempt');
-      FormManager.removeValidator('vat', Validators.REQUIRED);
+      if (FormManager.getField('vatExempt') != null) {
+        FormManager.getField('vatExempt').set('checked', false);
+        FormManager.hide('VATExempt', 'vatExempt');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+      }
     }
     resetVatRequired(zs01Cntry, false);
   } else if (FormManager.getActualValue('reqType') == 'U') {
