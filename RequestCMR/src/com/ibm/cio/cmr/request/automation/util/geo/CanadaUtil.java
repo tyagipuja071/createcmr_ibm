@@ -621,8 +621,7 @@ public class CanadaUtil extends AutomationUtil {
               "\nUpdate of ISIC Code should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary");
           engineData.addRejectionComment("ISIC",
               "Update of ISIC Code should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
-              "Update of ISIC Code should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
-              "");
+              "", "");
           /*
            * if (!isicCheckDone) { String error = performISICCheck(cedpManager,
            * entityManager, requestData, change); if
@@ -642,8 +641,8 @@ public class CanadaUtil extends AutomationUtil {
           details.append(
               "\nUpdate of NAC/INAC should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary");
           engineData.addRejectionComment("NAC",
-              "Update of NAC/INAT should be done via JIRA. Please submit the request in JIRA. \nLink:- https://jsw.ibm.com/projects/CMDE/summary",
-              "Update of NAC/INAC should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary", "");
+              "Update of NAC/INAT should be done via JIRA. Please submit the request in JIRA. \nLink:- https://jsw.ibm.com/projects/CMDE/summary", "",
+              "");
           output.setOnError(true);
           // String error = performInacCheck(cedpManager, entityManager,
           // requestData);
@@ -704,16 +703,14 @@ public class CanadaUtil extends AutomationUtil {
               "\nUpdate of Client Tier should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary");
           engineData.addRejectionComment("CTC",
               "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
-              "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
-              "");
+              "", "");
           output.setOnError(true);
           break;
         case "ISU Code":
           details.append(
               "\nUpdate of ISU Code should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary");
           engineData.addRejectionComment("ISU",
-              "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
-              "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
+              "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary", "",
               "");
           output.setOnError(true);
           break;
