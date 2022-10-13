@@ -2694,7 +2694,6 @@ function checkForProspect(){
   }
   return ifProspect;
 }
-
 function setMrcCdToReadOnly() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
@@ -2790,6 +2789,7 @@ function vatValidatorUY() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
