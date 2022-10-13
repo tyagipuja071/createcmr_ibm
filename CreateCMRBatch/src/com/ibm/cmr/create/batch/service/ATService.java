@@ -65,7 +65,7 @@ public class ATService extends TransConnService {
   private static final String COMMENT_LOGGER = "AT Service";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   private boolean massServiceMode;
-  private CMRRequestContainer cmrObjects;
+  // private CMRRequestContainer cmrObjects;
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02", "ZD02", "ZS03" };
   private long reQId;
   private static final String MASS_UPDATE_FAIL = "FAIL";
@@ -148,8 +148,8 @@ public class ATService extends TransConnService {
       // continue;
       // }
       try {
-        this.cmrObjects = prepareRequest(entityManager, admin);
-        data = this.cmrObjects.getData();
+        CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
+        data = cmrObjects.getData();
 
         request = new ProcessRequest();
         request.setCmrNo(data.getCmrNo());
@@ -289,8 +289,8 @@ public class ATService extends TransConnService {
         // if (admin.getId().getReqId() != reQId) {
         // continue;
         // }
-        this.cmrObjects = prepareRequest(entityManager, admin);
-        data = this.cmrObjects.getData();
+        CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
+        data = cmrObjects.getData();
 
         request = new ProcessRequest();
         request.setCmrNo(data.getCmrNo());
@@ -753,7 +753,9 @@ public class ATService extends TransConnService {
         LOG.info("Temporary Reactivate Embargo process: Batch First run for Req Id :" + admin.getId().getReqId());
         try {
 
-          List<Addr> addresses = this.cmrObjects.getAddresses();
+          CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
+
+          List<Addr> addresses = cmrObjects.getAddresses();
 
           List<String> statusCodes = new ArrayList<String>();
 
@@ -968,7 +970,8 @@ public class ATService extends TransConnService {
           LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
-            List<Addr> addresses = this.cmrObjects.getAddresses();
+            CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
+            List<Addr> addresses = cmrObjects.getAddresses();
 
             List<String> statusCodes = new ArrayList<String>();
 
