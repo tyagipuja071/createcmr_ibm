@@ -513,6 +513,7 @@ public class LegacyDirectService extends TransConnService {
             } else if (legacyAddr.isForCreate()) {
               createEntity(legacyAddr, entityManager);
             }
+            keepAlive();
           }
 
           // CMR-2279:there should be some Data updated, so update Data
@@ -614,6 +615,7 @@ public class LegacyDirectService extends TransConnService {
           } else if (legacyAddr.isForCreate()) {
             createEntity(legacyAddr, entityManager);
           }
+          keepAlive();
         }
 
         // CMR-2279:there should be some Data updated, so update Data
@@ -1428,8 +1430,7 @@ public class LegacyDirectService extends TransConnService {
         legacyAddr.setStreet(addr.getAddrTxt());
 
         // Turkey not store phone on Address level
-        //CREATCMR-3314 UKI not store phone on Address level
-        if (!SystemLocation.TURKEY.equals(cntry) && !SystemLocation.UNITED_KINGDOM.equals(cntry) && !SystemLocation.IRELAND.equals(cntry)) {
+        if (!SystemLocation.TURKEY.equals(cntry)) {
           if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
             legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
           }
@@ -2555,7 +2556,7 @@ public class LegacyDirectService extends TransConnService {
             response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
           } else {
             try {
-              this.serviceClient.setReadTimeout(60 * 30 * 1000); // 30 mins
+              this.serviceClient.setReadTimeout(60 * 60 * 1000); // 60 mins
               response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
 
               if (response != null && response.getStatus().equals("A")
@@ -2916,6 +2917,7 @@ public class LegacyDirectService extends TransConnService {
             }
 
             usedSequences.add(addr.getId().getAddrSeq());
+            keepAlive();
 
           }
           comment = comment.append("\nTemporary Reactivation - Embargo removal process done in RDc.");

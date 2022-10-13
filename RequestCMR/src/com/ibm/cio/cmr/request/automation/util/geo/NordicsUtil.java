@@ -191,7 +191,9 @@ public class NordicsUtil extends AutomationUtil {
 
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getVat()) && SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
+    String custType = data.getCustGrp();
+    if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getVat()) && SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())
+        && "LOCAL".equalsIgnoreCase(custType)) {
       LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
       // register vat service of Norway
       AutomationResponse<NorwayVatResponse> resp = getMVAVatInfo(admin, data);
@@ -340,7 +342,6 @@ public class NordicsUtil extends AutomationUtil {
     case CROSS_INTER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-
     }
 
     return true;
@@ -787,6 +788,9 @@ public class NordicsUtil extends AutomationUtil {
     Data data = requestData.getData();
     if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.SWEDEN.equalsIgnoreCase(data.getCmrIssuingCntry())) {
       request.setOrgId(data.getVat().substring(2, 12));
+    }
+    if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.NORWAY.equalsIgnoreCase(data.getCmrIssuingCntry()) && data.getVat().contains("MVA")) {
+      request.setOrgId(data.getVat().replaceAll("MVA", "").trim());
     }
   }
 

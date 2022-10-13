@@ -194,7 +194,7 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
-          legacyCust.setTelNoOrVat(addr.getCustPhone());
+          legacyCust.setTelNoOrVat(getTrimed(addr.getCustPhone()));
           landedCntry = addr.getLandCntry();
           break;
         }
@@ -213,9 +213,7 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
-          if (!StringUtils.isEmpty(addr.getCustPhone())) {
-            legacyCust.setTelNoOrVat(addr.getCustPhone());
-          }
+          legacyCust.setTelNoOrVat(addr.getCustPhone());
           landedCntry = addr.getLandCntry();
           break;
         }
@@ -358,9 +356,10 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       legacyAddr.getId().setAddrNo(StringUtils.isEmpty(currAddr.getPrefSeqNo()) ? legacyAddr.getId().getAddrNo() : currAddr.getPrefSeqNo());
     }
     formatAddressLinesLD(dummyHandler, legacyAddr);
-    if (("ZD01".equals(currAddr.getId().getAddrType()) || "ZS01".equals(currAddr.getId().getAddrType()))
-        && !StringUtils.isEmpty(currAddr.getCustPhone())) {
-      // legacyAddr.setAddrPhone(currAddr.getCustPhone().trim());
+    if ("ZD01".equals(currAddr.getId().getAddrType()) && !StringUtils.isEmpty(currAddr.getCustPhone())) {
+      legacyAddr.setAddrPhone(currAddr.getCustPhone().trim());
+    } else if ("ZD01".equals(currAddr.getId().getAddrType()) && StringUtils.isEmpty(currAddr.getCustPhone())) {
+      legacyAddr.setAddrPhone("");
     }
     String poBox = currAddr.getPoBox();
     if (!StringUtils.isEmpty(poBox) && ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType()))) {
@@ -963,9 +962,22 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
 
     }
 
+    if (!StringUtils.isEmpty(addr.getCustPhone())) {
+      setAddrPhoneForMassUpdate(legacyAddr, addr);
+
+    }
+
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
 
+  }
+
+  private void setAddrPhoneForMassUpdate(CmrtAddr legacyAddr, MassUpdtAddr addr) {
+    if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+      legacyAddr.setAddrPhone("");
+    } else if ("ZD01".equals(addr.getId().getAddrType())) {
+      legacyAddr.setAddrPhone(addr.getCustPhone());
+    }
   }
 
   @Override

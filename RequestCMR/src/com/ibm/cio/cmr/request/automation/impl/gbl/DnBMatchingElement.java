@@ -27,11 +27,14 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
 import com.ibm.cio.cmr.request.service.requestentry.RequestEntryService;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -147,8 +150,18 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
           for (DnBMatchingResponse dnbRecord : dnbMatches) {
 
-            if (dnbRecord.getConfidenceCode() > 7) {
-              // check if the record closely matches D&B. This really validates
+            // CREATCMR-6958
+            if (dnbRecord.getConfidenceCode() >= 9 && isHighConfidenceCntry(entityManager, data)) {
+              LOG.debug("Confidence Code " + dnbRecord.getConfidenceCode());
+              LOG.debug("DUNS " + dnbRecord.getDunsNo() + " matches the request data.");
+              if (highestCloseMatch == null) {
+                highestCloseMatch = dnbRecord;
+                perfectMatch = dnbRecord;
+                break;
+              }
+            } else if (dnbRecord.getConfidenceCode() > 7) {
+              // check if the record closely matches D&B. This really
+              // validates
               // input against record
               boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
               if (closelyMatches) {
@@ -357,6 +370,12 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           result.setOnError(false);
         }
       }
+      
+      AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+      if (automationUtil != null && automationUtil instanceof SingaporeUtil && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
+        SingaporeUtil singaporeUtil = (SingaporeUtil) automationUtil;
+        result = singaporeUtil.checkAllAddrDnbMatches(entityManager, requestData, engineData, result);
+      }
     } else {
       result.setDetails("Missing main address on the request.");
       engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
@@ -365,6 +384,16 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     }
 
     return result;
+  }
+
+  private boolean isHighConfidenceCntry(EntityManager entityManager, Data data) {
+    String sql = ExternalizedQuery.getSql("AUTOMATION.HIGH_CONF_CNTY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", data.getCmrIssuingCntry());
+    query.setForReadOnly(true);
+    List<String> result = query.getResults(String.class);
+
+    return "Y".contains(result.get(0));
   }
 
   /**

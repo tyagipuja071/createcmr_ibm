@@ -18,6 +18,7 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
+import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
@@ -33,11 +34,13 @@ import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
 import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
@@ -68,6 +71,8 @@ public class SingaporeUtil extends AutomationUtil {
     long reqId = requestData.getAdmin().getId().getReqId();
     LOG.debug("Executing doCountryFieldComputations() for reqId=" + reqId);
     Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+
     boolean ifDefaultCluster = false;
     String cluster = data.getApCustClusterId();
     String govType = data.getGovType();
@@ -126,6 +131,13 @@ public class SingaporeUtil extends AutomationUtil {
     } else {
       // eleResults.append("Non Government Customer" + "\n");
       details.append("Customer is a non government organization" + "\n");
+    }
+
+    // CREATCMR-6844
+    Addr landAddr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+    if ("TH".equalsIgnoreCase(landAddr.getLandCntry()) && "C".equalsIgnoreCase(admin.getReqType())) {
+      details.append("Processor review is needed as customer is from Thailand" + "\n");
+      engineData.addNegativeCheckStatus("ISTHA", "Customer is from Thailand");
     }
 
     // CMR-2034 fix
@@ -464,8 +476,6 @@ public class SingaporeUtil extends AutomationUtil {
       case "INAC/NAC Code":
       case "Sales Rep No":
       case "AR Code":
-        cmdeReview = true;
-        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -498,18 +508,19 @@ public class SingaporeUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     StringBuilder checkDetails = new StringBuilder();
-    List<DnBMatchingResponse> matches = new ArrayList<DnBMatchingResponse>();
-    boolean matchesDnb = false;
+    // List<DnBMatchingResponse> matches = new ArrayList<DnBMatchingResponse>();
+    // boolean matchesDnb = false;
     boolean cmdeReview = false;
     for (String addrType : RELEVANT_ADDRESSES) {
-      if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
-        Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-        matches = getMatches(requestData, engineData, soldTo, false);
-        if (matches != null) {
-          // check against D&B
-          matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-        }
-      }
+      // if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+      // Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+      // matches = getMatches(requestData, engineData, soldTo, false);
+      // if (matches != null) {
+      // // check against D&B
+      // matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin,
+      // data.getCmrIssuingCntry());
+      // }
+      // }
       if (changes.isAddressChanged(addrType)) {
         if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
           addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
@@ -517,16 +528,41 @@ public class SingaporeUtil extends AutomationUtil {
           addresses = requestData.getAddresses(addrType);
         }
         for (Addr addr : addresses) {
-          if (CmrConstants.RDC_SOLD_TO.equals(addrType) && ("Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()))) {
-            if (null == changes.getAddressChange(addrType, "Customer Name") && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
+          Addr addressToChk = requestData.getAddress(addrType);
+          if ("Y".equals(addr.getChangedIndc())) {
+            if (RELEVANT_ADDRESSES.contains(addrType)) {
+              // if (isRelevantAddressFieldUpdated(changes, addr)) {
+              // if customer name has been updated on any address , simply
+              // send to CMDE
+
+              List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+              for (UpdatedNameAddrModel change : addrChanges) {
+                if ("Customer Name".equals(change.getDataField()) && CmrConstants.RDC_SOLD_TO.equalsIgnoreCase(addr.getId().getAddrType())) {
+                  // CMDE Review
+                  cmdeReview = true;
+                  checkDetails.append("Update of Customer Name for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified.\n");
+                }
+              }
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
+              boolean matchesDnb = false;
+              if (matches != null) {
+                // check against D&B
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+              }
+
               if (!matchesDnb) {
                 // CMDE Review
-                checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.").append("\n");
+                LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                 cmdeReview = true;
-                break;
+                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                // company proof
+                if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                  checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
+                } else {
+                  checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
+                }
               } else {
-                // proceed
-                checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.").append("\n");
+                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
                 for (DnBMatchingResponse dnb : matches) {
                   checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
                   checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
@@ -535,47 +571,39 @@ public class SingaporeUtil extends AutomationUtil {
                 }
               }
             } else {
-              // CMDE Review
-              checkDetails.append("Customer Name Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified")
-                  .append("\n");
-              cmdeReview = true;
-              break;
+              // proceed
+              LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
+              checkDetails.append("Updates to Address (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
             }
-          }
+          } else if ("N".equals(addr.getImportInd())) {
+            // new address addition
 
-          if (!CmrConstants.RDC_SOLD_TO.equals(addrType) && ("Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()))) {
-            if (null == changes.getAddressChange(addrType, "Customer Name") && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
-              if (addressEquals(requestData.getAddress("ZS01"), requestData.getAddress(addrType))) {
-                // proceed
-                if (!matchesDnb) {
-                  // CMDE Review
-                  checkDetails.append("Updates to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.")
-                      .append("\n");
-                  cmdeReview = true;
-                  break;
-                } else {
-                  // proceed
-                  checkDetails.append("Updates to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.").append("\n");
-                  for (DnBMatchingResponse dnb : matches) {
-                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                        + dnb.getDnbCountry() + "\n\n");
-                  }
-                }
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+            }
+
+            if (!matchesDnb) {
+              // CMDE Review
+              LOG.debug("New address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+              cmdeReview = true;
+              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B.\n");
+              // company proof
+              if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
               } else {
-                // CMDE Review
-                checkDetails.append("Updates Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match Sold To Address. ")
-                    .append("\n");
-                cmdeReview = true;
-                break;
+                checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
               }
             } else {
-              // CMDE Review
-              checkDetails.append("Customer name Updates Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified. ")
-                  .append("\n");
-              cmdeReview = true;
-              break;
+              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+              for (DnBMatchingResponse dnb : matches) {
+                checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                    + dnb.getDnbCountry() + "\n\n");
+              }
             }
           }
         }
@@ -666,4 +694,127 @@ public class SingaporeUtil extends AutomationUtil {
     }
   }
 
+  public AutomationResult<MatchingOutput> checkAllAddrDnbMatches(EntityManager entityManager, RequestData requestData,
+      AutomationEngineData engineData, AutomationResult<MatchingOutput> result) throws Exception {
+
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    StringBuilder checkDetails = new StringBuilder();
+    boolean cmdeReview = false;
+    List<Addr> addresses = requestData.getAddresses();
+    boolean hasAdditionalAddress = false;
+    // StringBuilder details = new StringBuilder();
+    if (addresses != null && addresses.size() > 0) {
+      for (Addr addr : addresses) {
+        if (!"ZS01".equals(addr.getId().getAddrType())) {
+          hasAdditionalAddress = true;
+          break;
+        }
+      }
+    }
+
+    if (!hasAdditionalAddress) {
+      // no processing if there is only Mailing Address
+      return result;
+    } else {
+
+      for (String addrType : RELEVANT_ADDRESSES) {
+        // if (changes.isAddressChanged(addrType)) {
+        if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+        } else {
+          addresses = requestData.getAddresses(addrType);
+        }
+        for (Addr addr : addresses) {
+          Addr addressToChk = requestData.getAddress(addrType);
+          if ("Y".equals(addr.getChangedIndc())) {
+            if (RELEVANT_ADDRESSES.contains(addrType)) {
+              // if customer name has been updated on any address , simply
+              // send to CMDE
+
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
+              boolean matchesDnb = false;
+              if (matches != null) {
+                // check against D&B
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+              }
+
+              if (!matchesDnb) {
+                // CMDE Review
+                LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                cmdeReview = true;
+                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                // company proof
+                if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                  checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
+                } else {
+                  checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
+                }
+              } else {
+                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                for (DnBMatchingResponse dnb : matches) {
+                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                      + dnb.getDnbCountry() + "\n\n");
+                }
+              }
+
+              // } else {
+              // checkDetails.append("Updates to non-address fields for " +
+              // addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the
+              // checks.")
+              // .append("\n");
+              // }
+            } else {
+              // proceed
+              LOG.debug("Update to address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
+              checkDetails.append("Update to address (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
+            }
+
+          } else if ("N".equals(addr.getImportInd())) {
+            // new address addition
+
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+            }
+
+            if (!matchesDnb) {
+              // CMDE Review
+              LOG.debug("New address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+              cmdeReview = true;
+              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B.\n");
+              // company proof
+              if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
+              } else {
+                checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
+              }
+            } else {
+              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+              for (DnBMatchingResponse dnb : matches) {
+                checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                    + dnb.getDnbCountry() + "\n\n");
+              }
+            }
+          }
+        }
+        // }
+      }
+      if (cmdeReview) {
+        // String detail = result.getDetails().length() > 0 ?
+        // result.getDetails() + "\n" + checkDetails.toString().trim()
+        // : checkDetails.toString().trim();
+        result.setOnError(true);
+        result.setDetails(checkDetails.toString().trim());
+        result.setResults("Not Matched");
+      }
+      return result;
+    }
+  }
 }

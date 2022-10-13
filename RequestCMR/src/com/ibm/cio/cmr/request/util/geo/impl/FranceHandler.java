@@ -166,6 +166,9 @@ public class FranceHandler extends GEOHandler {
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
             FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+            if ("ZS01".equalsIgnoreCase(tempRec.getCmrAddrTypeCode()) && ("90".equalsIgnoreCase(tempRec.getCmrOrderBlock()))) {
+              tempRec.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZS02.toString());
+            }
             if ("ZS01".equalsIgnoreCase(tempRec.getCmrAddrTypeCode()) && "".equalsIgnoreCase(tempRec.getCmrOrderBlock())) {
               // RETURN ONLY THE SOLD-TO(with min kunnr) ADDRESS FOR CREATES
               recordsToReturn.add(tempRec);

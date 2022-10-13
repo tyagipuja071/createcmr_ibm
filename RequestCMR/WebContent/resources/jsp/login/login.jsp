@@ -4,7 +4,6 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
-
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
 <style>
@@ -35,6 +34,7 @@ div#ibm-top {
           </div>
           <div class="ibm-col-2-1">
             <form:hidden path="r" />
+            <input type="hidden" name="c" value="<%=request.getParameter("c")%>">
             <!-- Username Field -->
             <p>
               <form:label path="username" for="username">User Name:</form:label>

@@ -66,7 +66,7 @@ public class ATService extends TransConnService {
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   private boolean massServiceMode;
   private CMRRequestContainer cmrObjects;
-  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02", "ZD02" };
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02", "ZD02", "ZS03" };
   private long reQId;
   private static final String MASS_UPDATE_FAIL = "FAIL";
   private static final String MASS_UPDATE_DONE = "DONE";
@@ -889,6 +889,7 @@ public class ATService extends TransConnService {
             }
 
             usedSequences.add(addr.getId().getAddrSeq());
+            keepAlive();
 
           }
           comment = comment.append("\nTemporary Reactivate Embargo process in RDc started.");
@@ -1105,6 +1106,7 @@ public class ATService extends TransConnService {
               }
 
               usedSequences.add(addr.getId().getAddrSeq());
+              keepAlive();
 
             }
 

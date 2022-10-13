@@ -41,6 +41,7 @@ public class LDMassUpdtRdcMultiWorker extends MassUpdateMultiWorker {
 
   private static final Logger LOG = Logger.getLogger(LDMassUpdtRdcMultiWorker.class);
   private boolean indexNotUpdated;
+  private Integer cmrLimit;
 
   /**
    * @param parentAdmin
@@ -49,6 +50,11 @@ public class LDMassUpdtRdcMultiWorker extends MassUpdateMultiWorker {
   public LDMassUpdtRdcMultiWorker(MultiThreadedBatchService<?> parentService, Admin parentAdmin, MassUpdt parentEntity) {
     super(parentService, parentAdmin, parentEntity);
 
+  }
+
+  public LDMassUpdtRdcMultiWorker(MultiThreadedBatchService<?> parentService, Admin parentAdmin, MassUpdt parentEntity, Integer cmrLimit) {
+    super(parentService, parentAdmin, parentEntity);
+    this.cmrLimit = cmrLimit;
   }
 
   @Override
@@ -100,6 +106,10 @@ public class LDMassUpdtRdcMultiWorker extends MassUpdateMultiWorker {
     request.setAddrType("");
     request.setSeqNo("");
 
+    if (this.cmrLimit != null) {
+      request.setCmrLimit(this.cmrLimit);
+    }
+
     // call the create cmr service
     LOG.info("Sending request to Process Service [Request ID: " + request.getReqId() + " Type: " + request.getReqType() + "]");
 
@@ -124,7 +134,7 @@ public class LDMassUpdtRdcMultiWorker extends MassUpdateMultiWorker {
         if (isForErrorTests(entityManager, this.parentAdmin)) {
           response = processMassUpdateError(this.parentAdmin, request.getCmrNo());
         } else {
-          serviceClient.setReadTimeout(60 * 30 * 1000); // 30 mins
+          serviceClient.setReadTimeout(60 * 60 * 1000); // 30 mins
           response = serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
         }
 

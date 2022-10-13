@@ -1205,6 +1205,14 @@ public class USHandler extends GEOHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+    // CREATCMR-6987
+    if ("C".equals(admin.getReqType())) {
+      if ("KYN".equalsIgnoreCase(data.getCustSubGrp())
+          || ("BYMODEL".equalsIgnoreCase(data.getCustSubGrp()) && "KYN".equalsIgnoreCase(data.getRestrictTo()))) {
+        admin.setMainCustNm1("KYNDRYL INC");
+      }
+    }
+
     if (admin != null && "CSP".equals(admin.getReqReason())) {
       data.setIsuCd("32");
       data.setClientTier("N");
@@ -1242,6 +1250,11 @@ public class USHandler extends GEOHandler {
           || ("E".equals(data.getBpAcctTyp()) && ("BPQS".equals(data.getRestrictTo()) || "IRCSO".equals(data.getRestrictTo())))) {
         data.setAbbrevNm("");
         data.setSearchTerm("");
+      }
+
+      // CREATCMR-7145
+      if ("KYN".equals(data.getCustSubGrp())) {
+        data.setCustClass("11");
       }
 
     }
@@ -2256,4 +2269,15 @@ public class USHandler extends GEOHandler {
     return false;
   }
 
+  // CREATCMR-6987
+  public static boolean isKynDataSkipDnB(Admin admin, Data data) {
+    Boolean isKynDataFlag = false;
+    if ("C".equals(admin.getReqType()) && "KYNDRYL INC".equalsIgnoreCase(admin.getMainCustNm1())) {
+      if ("KYN".equalsIgnoreCase(data.getCustSubGrp())
+          || ("BYMODEL".equalsIgnoreCase(data.getCustSubGrp()) && "KYN".equalsIgnoreCase(data.getRestrictTo()))) {
+        isKynDataFlag = true;
+      }
+    }
+    return isKynDataFlag;
+  }
 }
