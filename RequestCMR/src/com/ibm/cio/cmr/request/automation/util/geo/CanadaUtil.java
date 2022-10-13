@@ -675,23 +675,26 @@ public class CanadaUtil extends AutomationUtil {
           break;
         case "ISIC":
         case "Subindustry":
-          if (!isicCheckDone) {
-            String error = performISICCheck(cedpManager, entityManager, requestData, change);
-            if (StringUtils.isNotBlank(error)) {
-              LOG.debug(error);
-              output.setDetails(error);
-              validation.setMessage("Validation Failed");
-              validation.setSuccess(false);
-              if (StringUtils.isBlank(admin.getSourceSystId())) {
-                engineData.addRejectionComment("OTH", error, "", "");
-                output.setOnError(false);
-              } else {
-                engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
-              }
-              return true;
-            }
-            isicCheckDone = true;
-          }
+          details.append(
+              "\nUpdate of ISIC Code should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary");
+          engineData.addRejectionComment("ISIC",
+              "Update of ISIC Code should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
+              "Update of ISIC Code should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
+              "");
+          /*
+           * if (!isicCheckDone) { String error = performISICCheck(cedpManager,
+           * entityManager, requestData, change); if
+           * (StringUtils.isNotBlank(error)) { LOG.debug(error);
+           * output.setDetails(error);
+           * validation.setMessage("Validation Failed");
+           * validation.setSuccess(false); if
+           * (StringUtils.isBlank(admin.getSourceSystId())) {
+           * engineData.addRejectionComment("OTH", error, "", "");
+           * output.setOnError(false); } else {
+           * engineData.addNegativeCheckStatus("BP_" + change.getDataField(),
+           * error); } return true; } isicCheckDone = true; }
+           */
+          output.setOnError(true);
           break;
         case "NAT/INAC":
           details.append(
