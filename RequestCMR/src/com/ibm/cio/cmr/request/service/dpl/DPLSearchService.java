@@ -57,7 +57,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
   private static final MimetypesFileTypeMap MIME_TYPES = new MimetypesFileTypeMap();
 
   @Override
-  protected Object doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
+  public Object doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     String processType = (String) params.getParam("processType");
     if (StringUtils.isBlank(processType)) {
       throw new Exception("Process Type is not defined.");
@@ -119,6 +119,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         resultCount += result.getDeniedPartyRecords().size();
       }
     }
+
     ScorecardPK scorecardPk = new ScorecardPK();
     scorecardPk.setReqId(reqId);
     Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
@@ -129,6 +130,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       scorecard.setDplAssessmentResult("N");
       scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
       entityManager.merge(scorecard);
+      entityManager.flush();
     }
 
     AttachmentService attachmentService = new AttachmentService();
@@ -414,6 +416,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     scorecard.setDplAssessmentCmt(cmt);
 
     entityManager.merge(scorecard);
+    entityManager.flush();
 
     return reqData;
   }
