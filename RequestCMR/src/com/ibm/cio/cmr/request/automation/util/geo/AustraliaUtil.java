@@ -226,7 +226,7 @@ public class AustraliaUtil extends AutomationUtil {
               String responseBusinessNm = StringUtils.isBlank(response.getRecord().getBusinessName()) ? ""
                   : response.getRecord().getBusinessName().replaceAll(regex, "");
               List<String> historicalNameList = new ArrayList<String>();
-              historicalNameList = StringUtils.isBlank(response.getRecord().getBusinessName()) ? "" : response.getRecord().getHistoricalNameList();
+              historicalNameList = response.getRecord().getHistoricalNameList();
               for (String historicalNm : historicalNameList) {
                 historicalNm = historicalNm.replaceAll(regex, "");
                 if (response.getRecord().isValid() && customerName.equalsIgnoreCase(responseCustNm)

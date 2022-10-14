@@ -372,7 +372,7 @@ public class VatUtilController {
           String responseBusinessNm = StringUtils.isBlank(abnResponse.getRecord().getBusinessName()) ? ""
               : abnResponse.getRecord().getBusinessName().replaceAll(regex, "");
           List<String> historicalNameList = new ArrayList<String>();
-          historicalNameList = StringUtils.isBlank(abnResponse.getRecord().getBusinessName()) ? "" : abnResponse.getRecord().getHistoricalNameList();
+          historicalNameList = abnResponse.getRecord().getHistoricalNameList();
           for (String historicalNm : historicalNameList) {
             historicalNm = historicalNm.replaceAll(regex, "");
             if (abnResponse.getRecord().isValid() && custNm.equalsIgnoreCase(responseCustNm) && formerCustNm.equalsIgnoreCase(historicalNm)) {
