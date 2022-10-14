@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
@@ -59,9 +60,8 @@ import com.ibm.cmr.services.client.process.mass.MassUpdateRecord;
 import com.ibm.cmr.services.client.process.mass.RequestValueRecord;
 
 public class ATService extends TransConnService {
-  // private static final String BATCH_SERVICES_URL =
-  // SystemConfiguration.getValue("BATCH_SERVICES_URL");
-  // private ProcessClient serviceClient;
+  private static final String BATCH_SERVICES_URL = SystemConfiguration.getValue("BATCH_SERVICES_URL");
+  private ProcessClient serviceClient;
   private static final String COMMENT_LOGGER = "AT Service";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   private boolean massServiceMode;
@@ -102,14 +102,18 @@ public class ATService extends TransConnService {
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
     try {
       initClientAT();
+      LOG.info("Initializing Country Map..");
+      LandedCountryMap.init(entityManager);
       if (isMassServiceMode()) {
-        monitorCreqcmrMassUpd(entityManager);
+        List<Long> pending = getPendingRecordsMassUpd(entityManager);
+        monitorCreqcmrMassUpd(entityManager, pending);
       } else {
         // LOG.info("Processing Aborted records (retry)...");
         // monitorAbortedRecords(entityManager);
 
         LOG.info("Processing New records...");
-        monitorCreqcmr(entityManager);
+        List<Long> pending = getPendingRecords(entityManager);
+        monitorCreqcmr(entityManager, pending);
       }
 
     } catch (Exception e) {
@@ -120,25 +124,23 @@ public class ATService extends TransConnService {
     return true;
   }
 
-  private void initClientAT() throws Exception {
+  protected void initClientAT() throws Exception {
     if (this.serviceClient == null) {
       this.serviceClient = CmrServicesFactory.getInstance().createClient(BATCH_SERVICES_URL, ProcessClient.class);
     }
   }
 
   @SuppressWarnings("unused")
-  public void monitorCreqcmr(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
+  public void monitorCreqcmr(EntityManager entityManager, List<Long> requests)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
-    LOG.info("Initializing Country Map..");
     long start = new Date().getTime();
-    LandedCountryMap.init(entityManager);
-    // Retrieve the PCP records
-    LOG.info("Retreiving pending records for processing..");
-    List<Admin> pending = getPendingRecords(entityManager);
-    LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
     Data data = null;
     ProcessRequest request = null;
-    for (Admin admin : pending) {
+    for (Long id : requests) {
+      AdminPK pk = new AdminPK();
+      pk.setReqId(id);
+      Admin admin = entityManager.find(Admin.class, pk);
       if ("M".equals(admin.getReqType())) {
         continue;
       }
@@ -202,21 +204,21 @@ public class ATService extends TransConnService {
     }
   }
 
-  public void monitorAbortedRecords(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
+  @Override
+  public void monitorAbortedRecords(EntityManager entityManager, List<Long> requests)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
     long start = new Date().getTime();
-    // search the aborted records from Admin table
-    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_ABORTED_REC");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    List<Admin> abortedRecords = query.getResults(Admin.class);
-    LOG.debug("Size of Aborted Records : " + abortedRecords.size());
 
     // lockAdminRecordsForProcessing(abortedRecords, entityManager);
 
-    for (Admin admin : abortedRecords) {
+    for (Long id : requests) {
+      AdminPK pk = new AdminPK();
+      pk.setReqId(id);
+      Admin admin = entityManager.find(Admin.class, pk);
       LOG.info("Processing Aborted Record " + admin.getId().getReqId() + " [Request ID: " + admin.getId().getReqId() + "]");
       // get the data
-      sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
-      query = new PreparedQuery(entityManager, sql);
+      String sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQ_ID", admin.getId().getReqId());
 
       Data data = query.getSingleResult(Data.class);
@@ -273,17 +275,15 @@ public class ATService extends TransConnService {
 
   }
 
-  public void monitorCreqcmrMassUpd(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
-    LOG.info("Initializing Country Map..");
+  public void monitorCreqcmrMassUpd(EntityManager entityManager, List<Long> requests)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
     long start = new Date().getTime();
-    LandedCountryMap.init(entityManager);
-    List<Admin> pending = getPendingRecordsMassUpd(entityManager);
-
-    LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
-
     Data data = null;
     ProcessRequest request = null;
-    for (Admin admin : pending) {
+    for (Long id : requests) {
+      AdminPK pk = new AdminPK();
+      pk.setReqId(id);
+      Admin admin = entityManager.find(Admin.class, pk);
       try {
         // hard-coding to debug specific request
         // if (admin.getId().getReqId() != reQId) {
@@ -331,10 +331,29 @@ public class ATService extends TransConnService {
    * @param entityManager
    * @return
    */
-  List<Admin> getPendingRecords(EntityManager entityManager) {
+  List<Long> getPendingRecords(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("AT.GET_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    return query.getResults(Admin.class);
+    List<Admin> pendingRecords = query.getResults(Admin.class);
+    LOG.debug("Size of AT Pending Records : " + pendingRecords.size());
+    List<Long> queue = new ArrayList<>();
+    for (Admin admin : pendingRecords) {
+      queue.add(admin.getId().getReqId());
+    }
+    return queue;
+  }
+
+  List<Long> getPendingRecordsAborted(EntityManager entityManager) {
+    // search the aborted records from Admin table
+    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_ABORTED_REC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    List<Admin> abortedRecords = query.getResults(Admin.class);
+    LOG.debug("Size of AT Aborted Records : " + abortedRecords.size());
+    List<Long> queue = new ArrayList<>();
+    for (Admin admin : abortedRecords) {
+      queue.add(admin.getId().getReqId());
+    }
+    return queue;
   }
 
   /**
@@ -344,10 +363,16 @@ public class ATService extends TransConnService {
    * @param entityManager
    * @return
    */
-  List<Admin> getPendingRecordsMassUpd(EntityManager entityManager) {
+  List<Long> getPendingRecordsMassUpd(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("AT.GET_MASS_PROCESS_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    return query.getResults(Admin.class);
+    List<Admin> pendingRecords = query.getResults(Admin.class);
+    LOG.debug("Size of AT Pending Mass Updt Records : " + pendingRecords.size());
+    List<Long> queue = new ArrayList<>();
+    for (Admin admin : pendingRecords) {
+      queue.add(admin.getId().getReqId());
+    }
+    return queue;
   }
 
   /**
@@ -968,6 +993,7 @@ public class ATService extends TransConnService {
           LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
+
             List<Addr> addresses = this.cmrObjects.getAddresses();
 
             List<String> statusCodes = new ArrayList<String>();
