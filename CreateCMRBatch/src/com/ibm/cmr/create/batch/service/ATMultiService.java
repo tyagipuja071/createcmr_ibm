@@ -6,14 +6,13 @@ import java.util.Queue;
 
 import javax.persistence.EntityManager;
 
-import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 
 /*
  * Multi-threaded service for {@link ATService}
  */
-public class ATMultiService extends MultiThreadedBatchService<Admin> {
+public class ATMultiService extends MultiThreadedBatchService<Long> {
 
   private ATService service = new ATService();
   private boolean countryMapInit = false;
@@ -30,7 +29,7 @@ public class ATMultiService extends MultiThreadedBatchService<Admin> {
   }
 
   @Override
-  public Boolean executeBatchForRequests(EntityManager entityManager, List<Admin> requests) throws Exception {
+  public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
     this.service.initClientAT();
     ChangeLogListener.setUser(BATCH_USER_ID);
     synchronized (this) {
@@ -41,13 +40,13 @@ public class ATMultiService extends MultiThreadedBatchService<Admin> {
     }
     switch (mode) {
     case Aborted:
-      this.service.monitorAbortedRecords(entityManager);
+      this.service.monitorAbortedRecords(entityManager, requests);
       break;
     case Normal:
-      this.service.monitorCreqcmr(entityManager);
+      this.service.monitorCreqcmr(entityManager, requests);
       break;
     case Mass:
-      this.service.monitorCreqcmrMassUpd(entityManager);
+      this.service.monitorCreqcmrMassUpd(entityManager, requests);
       break;
 
     default:
@@ -59,12 +58,15 @@ public class ATMultiService extends MultiThreadedBatchService<Admin> {
   }
 
   @Override
-  protected Queue<Admin> getRequestsToProcess(EntityManager entityManager) {
-    List<Admin> records = null;
+  protected Queue<Long> getRequestsToProcess(EntityManager entityManager) {
+    List<Long> records = null;
     switch (mode) {
 
     case Normal:
       records = this.service.getPendingRecords(entityManager);
+      break;
+    case Aborted:
+      records = this.service.getPendingRecordsAborted(entityManager);
       break;
     case Mass:
       records = this.service.getPendingRecordsMassUpd(entityManager);
@@ -74,7 +76,7 @@ public class ATMultiService extends MultiThreadedBatchService<Admin> {
       break;
     }
 
-    Queue<Admin> queue = new LinkedList<>();
+    Queue<Long> queue = new LinkedList<>();
     if (records != null && !records.isEmpty()) {
       queue.addAll(records);
     }
