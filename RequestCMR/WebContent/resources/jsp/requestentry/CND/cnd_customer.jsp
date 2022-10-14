@@ -25,13 +25,13 @@
         <cmr:field fieldId="PrivacyIndc" id="privIndc" path="privIndc" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-   <cmr:column span="2" containerForField="OrderBlock">
+    <cmr:column span="2" containerForField="OrderBlock">
       <p>
-        <cmr:label fieldId="ordBlk">
-				<cmr:fieldLabel fieldId="OrderBlock" />:
-				<cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}" />
-			</cmr:label>
-        <cmr:field fieldId="OrderBlock" id="ordBlk" path="ordBlk" tabId="MAIN_CUST_TAB" />
+        <label for="ordBlk"> 
+          <cmr:fieldLabel fieldId="OrderBlock" />: 
+          <cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}" />
+        </label>
+        <cmr:field path="ordBlk" id="ordBlk" fieldId="OrderBlock" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
     <cmr:column span="2" containerForField="CreditCd">
