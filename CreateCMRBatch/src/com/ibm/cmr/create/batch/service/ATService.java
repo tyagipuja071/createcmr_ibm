@@ -59,13 +59,12 @@ import com.ibm.cmr.services.client.process.mass.MassUpdateRecord;
 import com.ibm.cmr.services.client.process.mass.RequestValueRecord;
 
 public class ATService extends TransConnService {
-  // private static final String BATCH_SERVICES_URL =
-  // SystemConfiguration.getValue("BATCH_SERVICES_URL");
-  // private ProcessClient serviceClient;
+  private static final String BATCH_SERVICES_URL = SystemConfiguration.getValue("BATCH_SERVICES_URL");
+  private ProcessClient serviceClient;
   private static final String COMMENT_LOGGER = "AT Service";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   private boolean massServiceMode;
-  // private CMRRequestContainer cmrObjects;
+  private CMRRequestContainer cmrObjects;
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02", "ZD02" };
   private long reQId;
   private static final String MASS_UPDATE_FAIL = "FAIL";
@@ -102,6 +101,8 @@ public class ATService extends TransConnService {
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
     try {
       initClientAT();
+      LOG.info("Initializing Country Map..");
+      LandedCountryMap.init(entityManager);
       if (isMassServiceMode()) {
         monitorCreqcmrMassUpd(entityManager);
       } else {
@@ -120,7 +121,7 @@ public class ATService extends TransConnService {
     return true;
   }
 
-  private void initClientAT() throws Exception {
+  protected void initClientAT() throws Exception {
     if (this.serviceClient == null) {
       this.serviceClient = CmrServicesFactory.getInstance().createClient(BATCH_SERVICES_URL, ProcessClient.class);
     }
@@ -129,9 +130,7 @@ public class ATService extends TransConnService {
   @SuppressWarnings("unused")
   public void monitorCreqcmr(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
-    LOG.info("Initializing Country Map..");
     long start = new Date().getTime();
-    LandedCountryMap.init(entityManager);
     // Retrieve the PCP records
     LOG.info("Retreiving pending records for processing..");
     List<Admin> pending = getPendingRecords(entityManager);
@@ -148,8 +147,8 @@ public class ATService extends TransConnService {
       // continue;
       // }
       try {
-        CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
-        data = cmrObjects.getData();
+        this.cmrObjects = prepareRequest(entityManager, admin);
+        data = this.cmrObjects.getData();
 
         request = new ProcessRequest();
         request.setCmrNo(data.getCmrNo());
@@ -289,8 +288,8 @@ public class ATService extends TransConnService {
         // if (admin.getId().getReqId() != reQId) {
         // continue;
         // }
-        CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
-        data = cmrObjects.getData();
+        this.cmrObjects = prepareRequest(entityManager, admin);
+        data = this.cmrObjects.getData();
 
         request = new ProcessRequest();
         request.setCmrNo(data.getCmrNo());
@@ -753,9 +752,7 @@ public class ATService extends TransConnService {
         LOG.info("Temporary Reactivate Embargo process: Batch First run for Req Id :" + admin.getId().getReqId());
         try {
 
-          CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
-
-          List<Addr> addresses = cmrObjects.getAddresses();
+          List<Addr> addresses = this.cmrObjects.getAddresses();
 
           List<String> statusCodes = new ArrayList<String>();
 
@@ -970,8 +967,8 @@ public class ATService extends TransConnService {
           LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
-            CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
-            List<Addr> addresses = cmrObjects.getAddresses();
+
+            List<Addr> addresses = this.cmrObjects.getAddresses();
 
             List<String> statusCodes = new ArrayList<String>();
 
