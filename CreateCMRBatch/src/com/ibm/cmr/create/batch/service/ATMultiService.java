@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 
 /*
  * Multi-threaded service for {@link ATService}
@@ -15,6 +16,7 @@ import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 public class ATMultiService extends MultiThreadedBatchService<Admin> {
 
   private ATService service = new ATService();
+  private boolean countryMapInit = false;
 
   public enum Mode {
     Aborted, Normal, Mass
@@ -29,9 +31,14 @@ public class ATMultiService extends MultiThreadedBatchService<Admin> {
 
   @Override
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Admin> requests) throws Exception {
-    this.service.initClient();
+    this.service.initClientAT();
     ChangeLogListener.setUser(BATCH_USER_ID);
-
+    synchronized (this) {
+      if (!this.countryMapInit) {
+        LandedCountryMap.init(entityManager);
+        this.countryMapInit = true;
+      }
+    }
     switch (mode) {
     case Aborted:
       this.service.monitorAbortedRecords(entityManager);
