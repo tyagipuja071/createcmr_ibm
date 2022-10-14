@@ -1295,6 +1295,24 @@ function setMainName1ForKYN() {
   }
 
 }
+// CREATCMR-7213
+function federalIsicCheck() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custGrp = FormManager.getActualValue('custGrp');
+        var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+        var fedIsic = [ '9', '10', '11' ];
+        if (reqType == 'C' && !fedIsic.includes(custGrp) && subIndustryCd.startsWith('Y')) {
+          genericMsg = 'Federal ISIC cannot be used with Non-Federal sceanrios.';
+          return new ValidationResult(null, false, genericMsg);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
 
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
@@ -1346,4 +1364,6 @@ dojo.addOnLoad(function() {
   // CREATCMR-6987
   GEOHandler.addAfterTemplateLoad(setMainName1ForKYN, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(setMainName1ForKYN, [ SysLoc.USA ]);
+  // CREATCMR-7213
+  GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
 });
