@@ -220,7 +220,10 @@ function afterConfigForCN() {
   }
 
   if (FormManager.getActualValue('reqType') == 'U') {
-
+    FormManager.disable('dnbSearchBtn');
+    dojo.removeClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-pri');
+    dojo.addClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-disabled');
+    
     FormManager.hide('IbmDeptCostCenter', 'ibmDeptCostCenter');
     if (_pagemodel.userRole.toUpperCase() == "REQUESTER") {
       /*
