@@ -1707,7 +1707,7 @@ function resetVatRequired() {
   }
   var vatRequired = isVatRequired();
   if (vatRequired) {
-    if (!dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
+    if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
       FormManager.clearValue('vat');
       FormManager.readOnly('vat');
       FormManager.removeValidator('vat', Validators.REQUIRED);
