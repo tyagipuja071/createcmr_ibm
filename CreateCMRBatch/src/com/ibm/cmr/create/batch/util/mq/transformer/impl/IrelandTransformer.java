@@ -1428,6 +1428,17 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       }
     }
 
+    for (MassUpdtAddr addr : cmrObjects.getMassUpdateAddresses()) {
+      if (!StringUtils.isBlank(addr.getCustPhone()) && "ZS01".equals(addr.getId().getAddrType())) {
+        if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+          cust.setTelNoOrVat("");
+        } else {
+          cust.setTelNoOrVat(getTrimed(addr.getCustPhone()));
+        }
+        break;
+      }
+    }
+
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       String subInd = muData.getSubIndustryCd();
       cust.setImsCd(subInd);
