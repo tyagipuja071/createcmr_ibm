@@ -1704,7 +1704,7 @@ function resetVatRequired() {
   }
   var vatRequired = isVatRequired();
   if (vatRequired) {
-    if (dijit.byId('vatExempt').get('checked')) {
+    if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
       FormManager.clearValue('vat');
       FormManager.readOnly('vat');
       FormManager.removeValidator('vat', Validators.REQUIRED);
@@ -2549,6 +2549,12 @@ function limitMODValues() {
   }
 }
 
+function requiredSearchTerm(){
+  if(FormManager.getActualValue('reqType') == 'C'){
+    FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+  }
+}
+
 function validateExistingCMRNo() {
   FormManager.addFormValidator((function() {
     return {
@@ -2783,6 +2789,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showVatInfoOnLocal, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(requireCtcByISU, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(setChecklistStatus, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(requiredSearchTerm, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addCollectionValidator, [ SysLoc.ISRAEL ], null, true);
