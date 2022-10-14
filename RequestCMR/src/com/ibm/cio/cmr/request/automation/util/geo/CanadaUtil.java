@@ -617,25 +617,23 @@ public class CanadaUtil extends AutomationUtil {
           break;
         case "ISIC":
         case "Subindustry":
-          details.append(
-              "\nUpdate of ISIC Code or Subindustry should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary");
-          engineData.addRejectionComment("ISIC",
-              "Update of ISIC Code or Subindustry should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
-              "", "");
-          /*
-           * if (!isicCheckDone) { String error = performISICCheck(cedpManager,
-           * entityManager, requestData, change); if
-           * (StringUtils.isNotBlank(error)) { LOG.debug(error);
-           * output.setDetails(error);
-           * validation.setMessage("Validation Failed");
-           * validation.setSuccess(false); if
-           * (StringUtils.isBlank(admin.getSourceSystId())) {
-           * engineData.addRejectionComment("OTH", error, "", "");
-           * output.setOnError(false); } else {
-           * engineData.addNegativeCheckStatus("BP_" + change.getDataField(),
-           * error); } return true; } isicCheckDone = true; }
-           */
-          output.setOnError(true);
+          if (!isicCheckDone) {
+            String error = "Update of ISIC Code should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary";
+            if (StringUtils.isNotBlank(error)) {
+              LOG.debug(error);
+              output.setDetails(error);
+              validation.setMessage("Validation Failed");
+              validation.setSuccess(false);
+              if (StringUtils.isBlank(admin.getSourceSystId())) {
+                engineData.addRejectionComment("OTH", error, "", "");
+                output.setOnError(true);
+              } else {
+                engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
+              }
+              return true;
+            }
+            isicCheckDone = true;
+          }
           break;
         case "NAT/INAC":
           details.append(
@@ -772,77 +770,78 @@ public class CanadaUtil extends AutomationUtil {
     // D - duplicates, R - review
     Set<String> resultCodes = new HashSet<String>();
 
-    for (String addrType : RELEVANT_ADDRESSES) {
-      if (changes.isAddressChanged(addrType)) {
-        if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
-          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
-        } else {
-          addresses = requestData.getAddresses(addrType);
-        }
-        for (Addr addr : addresses) {
-          if ("N".equals(addr.getImportInd())) {
-            // new address
-            // LOG.debug("Checking duplicates for " + addrType + "(" +
-            // addr.getId().getAddrSeq() + ")");
-            // boolean duplicate = addressExists(entityManager, addr);
-            // if (duplicate) {
-            // LOG.debug(" - Duplicates found for " + addrType + "(" +
-            // addr.getId().getAddrSeq() + ")");
-            // duplicateDetails.append("Address " + addrType + "(" +
-            // addr.getId().getAddrSeq() + ") provided matches an existing
-            // address.\n");
-            // resultCodes.add("D");
-            // } else {
-            // LOG.debug(" - NO duplicates found for " + addrType + "(" +
-            // addr.getId().getAddrSeq() + ")");
-            if (addrType.startsWith("ZP")) {
-              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Addition of new " + addrType + "(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
-            } else {
-              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
-              boolean matchesDnb = false;
-              boolean companyProofProvided = DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId());
-              if (matches != null) {
-                // check against D&B
-                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
-              }
-              if (!matchesDnb) {
-                LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                if (companyProofProvided) {
-                  checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
-                  checkDetails.append(
-                      "Supporting documentation is provided by the requester as attachment for " + addrType + "(" + addr.getId().getAddrSeq() + ")")
-                      .append("\n");
+    String sqlKey = ExternalizedQuery.getSql("AUTO.US.CHECK_CMDE");
+    PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
+    query.setParameter("EMAIL", admin.getRequesterId());
+    query.setForReadOnly(true);
+    if (query.exists()) {
+      // skip checks if requester is from Canada CMDE team
+      admin.setScenarioVerifiedIndc("Y");
+      LOG.debug("Requester is from CA CMDE team, skipping update checks.");
+      output.setDetails("Requester is from CA CMDE team, skipping update checks.\n");
+      validation.setMessage("Skipped");
+      validation.setSuccess(true);
+    } else {
+
+      for (String addrType : RELEVANT_ADDRESSES) {
+        if (changes.isAddressChanged(addrType)) {
+          if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+            addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+          } else {
+            addresses = requestData.getAddresses(addrType);
+          }
+          for (Addr addr : addresses) {
+            if ("N".equals(addr.getImportInd())) {
+              // new address
+              if (addrType.startsWith("ZP")) {
+                LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Addition of new " + addrType + "(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              } else {
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
+                boolean matchesDnb = false;
+                boolean companyProofProvided = DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId());
+                if (matches != null) {
+                  // check against D&B
+                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+                }
+                if (!matchesDnb) {
+                  LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                  if (companyProofProvided) {
+                    checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                    checkDetails.append(
+                        "Supporting documentation is provided by the requester as attachment for " + addrType + "(" + addr.getId().getAddrSeq() + ")")
+                        .append("\n");
+                  } else {
+                    resultCodes.add("R");
+                    checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                  }
                 } else {
-                  resultCodes.add("R");
-                  checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                  checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
                 }
-              } else {
-                checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-                for (DnBMatchingResponse dnb : matches) {
-                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                      + dnb.getDnbCountry() + "\n\n");
-                }
+                // }
               }
-              // }
-            }
-          } else if ("Y".equals(addr.getChangedIndc())) {
-            // updated addresses
-            if (CmrConstants.RDC_SHIP_TO.equals(addrType) || addrType.startsWith("ZP")) {
-              // just proceed for billing and shipping updates
-              LOG.debug("Update to " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Updates to (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
-            } else {
-              // update to other relevant addresses
-              if (isRelevantAddressFieldUpdated(changes, addr)) {
-                checkDetails.append("Updates to address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") need to be verified.")
-                    .append("\n");
-                resultCodes.add("R");
+            } else if ("Y".equals(addr.getChangedIndc())) {
+              // updated addresses
+              if (CmrConstants.RDC_SHIP_TO.equals(addrType) || addrType.startsWith("ZP")) {
+                // just proceed for billing and shipping updates
+                LOG.debug("Update to " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Updates to (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
               } else {
-                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
-                    .append("\n");
+                // update to other relevant addresses
+                if (isRelevantAddressFieldUpdated(changes, addr)) {
+                  checkDetails.append("Updates to address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") need to be verified.")
+                      .append("\n");
+                  resultCodes.add("R");
+                } else {
+                  checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                      .append("\n");
+                }
               }
             }
           }
