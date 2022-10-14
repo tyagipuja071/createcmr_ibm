@@ -185,7 +185,7 @@ public class NORDXHandler extends BaseSOFHandler {
             if (StringUtils.isBlank(legacyAddressSeq)) {
               if ("ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
                 record.setCmrAddrTypeCode("PG01");
-              } else {
+              } else if (!"ZP01".equals(record.getCmrAddrTypeCode())) {
                 continue;
               }
             }
