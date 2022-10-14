@@ -618,9 +618,9 @@ public class CanadaUtil extends AutomationUtil {
         case "ISIC":
         case "Subindustry":
           details.append(
-              "\nUpdate of ISIC Code should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary");
+              "\nUpdate of ISIC Code or Subindustry should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary");
           engineData.addRejectionComment("ISIC",
-              "Update of ISIC Code should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
+              "Update of ISIC Code or Subindustry should be done via JIRA. Please submit the request in JIRA.\n Link:- https://jsw.ibm.com/projects/CMDE/summary",
               "", "");
           /*
            * if (!isicCheckDone) { String error = performISICCheck(cedpManager,
