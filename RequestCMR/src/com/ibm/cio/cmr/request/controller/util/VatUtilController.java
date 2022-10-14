@@ -3,6 +3,9 @@
  */
 package com.ibm.cio.cmr.request.controller.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -330,7 +333,9 @@ public class VatUtilController {
     String reqId = request.getParameter("reqId");
     String formerCustNm = request.getParameter("formerCustNm").replaceAll(regex, "");
     String custNm = request.getParameter("custNm").replaceAll(regex, "");
-    ;
+    Boolean success = false;
+    Boolean custNmMatch = false;
+    Boolean formerCustNmMatch = false;
     if (map.isEmpty() && !StringUtils.isBlank(abn) && !StringUtils.isBlank(reqId)) {
 
       LOG.debug("Validating Customer Name  " + custNm + " and Former Customer Name " + formerCustNm + " for Australia");
@@ -366,33 +371,45 @@ public class VatUtilController {
               : abnResponse.getRecord().getOtherTradingName().replaceAll(regex, "");
           String responseBusinessNm = StringUtils.isBlank(abnResponse.getRecord().getBusinessName()) ? ""
               : abnResponse.getRecord().getBusinessName().replaceAll(regex, "");
-          if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm)) && ((formerCustNm.equalsIgnoreCase(responseTradingNm))
-              || (formerCustNm.equalsIgnoreCase(responseOthTradingNm)) || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
-            map.put("success", true);
-            map.put("custNmMatch", true);
-            map.put("formerCustNmMatch", true);
-          } else if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm))
-              && !((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
-                  || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
-            map.put("success", true);
-            map.put("custNmMatch", true);
-            map.put("formerCustNmMatch", false);
-          } else if (abnResponse.getRecord().isValid() && !(custNm.equalsIgnoreCase(responseCustNm))
-              && ((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
-                  || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
-            map.put("success", true);
-            map.put("custNmMatch", false);
-            map.put("formerCustNmMatch", true);
-          } else {
-            map.put("success", true);
-            map.put("custNmMatch", false);
-            map.put("formerCustNmMatch", false);
+          List<String> historicalNameList = new ArrayList<String>();
+          historicalNameList = abnResponse.getRecord().getHistoricalNameList();
+          for (String historicalNm : historicalNameList) {
+            historicalNm = historicalNm.replaceAll(regex, "");
+            if (abnResponse.getRecord().isValid() && custNm.equalsIgnoreCase(responseCustNm) && formerCustNm.equalsIgnoreCase(historicalNm)) {
+              success = true;
+              custNmMatch = true;
+              formerCustNmMatch = true;
+            }
+          }
+          if (!(success && custNmMatch && formerCustNmMatch)) {
+            if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm)) && ((formerCustNm.equalsIgnoreCase(responseTradingNm))
+                || (formerCustNm.equalsIgnoreCase(responseOthTradingNm)) || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+              success = true;
+              custNmMatch = true;
+              formerCustNmMatch = true;
+            } else if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm))
+                && !((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
+                    || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+              success = true;
+              custNmMatch = true;
+              formerCustNmMatch = false;
+            } else if (abnResponse.getRecord().isValid() && !(custNm.equalsIgnoreCase(responseCustNm))
+                && ((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
+                    || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+              success = true;
+              custNmMatch = false;
+              formerCustNmMatch = true;
+            } else {
+              success = true;
+              custNmMatch = false;
+              formerCustNmMatch = false;
+            }
           }
         }
       } else {
-        map.put("success", false);
-        map.put("custNmMatch", false);
-        map.put("formerCustNmMatch", false);
+        success = false;
+        custNmMatch = false;
+        formerCustNmMatch = false;
         String message = "ABN Validation Failed.Failed to connect to ABN Service. Checking ABN and Company Name with D&B.";
         if (abnResponse != null) {
           message = abnResponse.getMessage();
@@ -400,6 +417,9 @@ public class VatUtilController {
         map.put("message", message);
       }
     }
+    map.put("success", success);
+    map.put("custNmMatch", custNmMatch);
+    map.put("formerCustNmMatch", formerCustNmMatch);
     return map;
   }
 
@@ -411,7 +431,9 @@ public class VatUtilController {
     String reqId = request.getParameter("reqId");
     String formerCustNm = request.getParameter("formerCustNm").replaceAll(regex, "");
     String custNm = request.getParameter("custNm").replaceAll(regex, "");
-    ;
+    Boolean success = false;
+    Boolean custNmMatch = false;
+    Boolean formerCustNmMatch = false;
     if (map.isEmpty() && !StringUtils.isBlank(reqId) && !StringUtils.isBlank(custNm)) {
 
       LOG.debug("Validating Customer Name  " + custNm + " and Former Customer Name " + formerCustNm + " for Australia");
@@ -447,31 +469,31 @@ public class VatUtilController {
               : abnResponse.getRecord().getBusinessName().replaceAll(regex, "");
           if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm)) && ((formerCustNm.equalsIgnoreCase(responseTradingNm))
               || (formerCustNm.equalsIgnoreCase(responseOthTradingNm)) || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
-            map.put("success", true);
-            map.put("custNmMatch", true);
-            map.put("formerCustNmMatch", true);
+            success = true;
+            custNmMatch = true;
+            formerCustNmMatch = true;
           } else if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm))
               && !((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
                   || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
-            map.put("success", true);
-            map.put("custNmMatch", true);
-            map.put("formerCustNmMatch", false);
+            success = true;
+            custNmMatch = true;
+            formerCustNmMatch = false;
           } else if (abnResponse.getRecord().isValid() && !(custNm.equalsIgnoreCase(responseCustNm))
               && ((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
                   || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
-            map.put("success", true);
-            map.put("custNmMatch", false);
-            map.put("formerCustNmMatch", true);
+            success = true;
+            custNmMatch = false;
+            formerCustNmMatch = true;
           } else {
-            map.put("success", true);
-            map.put("custNmMatch", false);
-            map.put("formerCustNmMatch", false);
+            success = true;
+            custNmMatch = false;
+            formerCustNmMatch = false;
           }
         }
       } else {
-        map.put("success", false);
-        map.put("custNmMatch", false);
-        map.put("formerCustNmMatch", false);
+        success = false;
+        custNmMatch = false;
+        formerCustNmMatch = false;
         String message = "ABN Validation Failed.Failed to connect to ABN Service. Checking ABN and Company Name with D&B.";
         if (abnResponse != null) {
           message = abnResponse.getMessage();
@@ -479,6 +501,9 @@ public class VatUtilController {
         map.put("message", message);
       }
     }
+    map.put("success", success);
+    map.put("custNmMatch", custNmMatch);
+    map.put("formerCustNmMatch", formerCustNmMatch);
     return map;
   }
 
