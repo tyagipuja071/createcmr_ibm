@@ -2031,8 +2031,7 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && currentRecord.getCmrAddrType() != null
-          && "ZD01".equalsIgnoreCase(address.getId().getAddrType()) && "Ship To".equalsIgnoreCase(currentRecord.getCmrAddrType())
-          && (SystemLocation.UNITED_KINGDOM.equals(currentRecord.getCmrIssuedBy())
+          && "ZD01".equalsIgnoreCase(address.getId().getAddrType()) && (SystemLocation.UNITED_KINGDOM.equals(currentRecord.getCmrIssuedBy())
               || SystemLocation.IRELAND.equals(currentRecord.getCmrIssuedBy()))) {
         setTelf2fromRDC(address, currentRecord);
       }
@@ -4878,6 +4877,8 @@ public class EMEAHandler extends BaseSOFHandler {
 
     if (results != null && !results.isEmpty()) {
       addr.setCustPhone(results);
+    } else {
+      addr.setCustPhone("");
     }
 
   }
