@@ -1166,19 +1166,16 @@ public class CanadaUtil extends AutomationUtil {
     return true;
   }
 
-  /*
+  /**
    * * Validates if address closely matches with DnB records matched.
    * 
+   * @param entityManager
    * @param requestData
-   * 
    * @param engineData
-   * 
    * @param addrType
-   * 
    * @param details
-   * 
    * @param validation
-   * 
+   * @param output
    * @throws Exception
    */
   private void closelyMatchAddressWithDnbRecords(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
