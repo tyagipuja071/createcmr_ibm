@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +31,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.GeoContactInfo;
 import com.ibm.cio.cmr.request.entity.GeoContactInfoPK;
@@ -116,33 +119,6 @@ public class LAHandler extends GEOHandler {
     // #1308992
     String issuingCntry = reqEntry.getCmrIssuingCntry();
     if (isSSAMXBRIssuingCountry(issuingCntry) && (mainRecords instanceof java.util.List<?> && filteredRecords instanceof java.util.List<?>)) {
-      // during convertFrom
-      if (reqEntry.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_UPDATE)) {
-        List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
-        List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
-        for (Object tempRecObj : recordsToCheck) {
-          if (tempRecObj instanceof FindCMRRecordModel) {
-            FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
-
-            if (isBRIssuingCountry(issuingCntry)) {
-              if (CmrConstants.CUST_CLASS_33.equals(tempRec.getCmrClass()) || CmrConstants.CUST_CLASS_34.equals(tempRec.getCmrClass())) {
-                if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01") || tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZI01")) {
-                  // add current record
-                  recordsToReturn.add(tempRec);
-                }
-              } else {
-                if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")) {
-                  // not LEASI
-                  recordsToReturn.add(tempRec);
-                }
-              }
-            } else {
-              recordsToReturn.add(tempRec);
-            }
-          }
-        }
-      }
-
       if (reqEntry.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_CREATE)) {
         List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
         List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
@@ -152,15 +128,6 @@ public class LAHandler extends GEOHandler {
             if (isBRIssuingCountry(issuingCntry)) {
               if (!StringUtils.isEmpty(reqEntry.getCustType())) {
                 if (reqEntry.getCustType().equalsIgnoreCase(CmrConstants.CUST_TYPE_LEASI)) {
-                  // if
-                  // (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")
-                  // ||
-                  // tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZI01"))
-                  // {
-                  // // add current record
-                  // recordsToReturn.add(tempRec);
-                  // }
-
                   if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01") || tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZI01")) {
                     // add current record
                     recordsToReturn.add(tempRec);
@@ -177,9 +144,6 @@ public class LAHandler extends GEOHandler {
                 }
               }
             } else {
-              // if
-              // (tempRec.getAddrType().equalsIgnoreCase("ZS01"))
-              // {
               if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")) {
                 // FOR SSA MX RETURN ONLY THE LE ADDRESS
                 recordsToReturn.add(tempRec);
@@ -1746,21 +1710,6 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
-    if (LAHandler.isBRIssuingCountry(cmrIssuingCntry)) {
-      // if
-      // (CmrConstants.CUST_TYPE_PRIPE.equalsIgnoreCase(admin.getCustType())
-      // ||
-      // CmrConstants.CUST_TYPE_IBMEM.equalsIgnoreCase(admin.getCustType()))
-      // {// PRIPE,IBMEM
-      // admin.setDisableAutoProc(CmrConstants.CMT_LOCK_IND_YES);
-      // }
-
-      if ("C".equalsIgnoreCase(admin.getReqType())) {
-        if ("Y".equalsIgnoreCase(admin.getSaveIndAftrTempLoad())) {
-          deleteFilteredAddresses(admin.getId().getReqId(), admin.getCustType(), entityManager);
-        }
-      }
-    }
 
     if (LAHandler.isMXIssuingCountry(cmrIssuingCntry) && "PPN".equalsIgnoreCase(admin.getReqStatus())
         && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
@@ -1875,19 +1824,6 @@ public class LAHandler extends GEOHandler {
         admin.setProcessedFlag(processedFlag);
         throw new CmrException(MessageUtil.ERROR_DPL_NOT_DONE);
       }
-    }
-  }
-
-  private void deleteFilteredAddresses(long reqId, String custType, EntityManager entityManager) {
-    CmrClientService cmrClient = new CmrClientService();
-    boolean isLeasi = "LEASI".equalsIgnoreCase(custType);
-    List<String> addrTypeToDelete = null;
-    if (isLeasi) {
-      addrTypeToDelete = Arrays.asList("ZI01", "ZS01");
-      cmrClient.doActualDeleteOnFirstSaveAfterTempLoad(reqId, addrTypeToDelete, "BR.DELETE.FILTERED.FOR.LEASI", entityManager);
-    } else {
-      addrTypeToDelete = Arrays.asList("ZS01");
-      cmrClient.doActualDeleteOnFirstSaveAfterTempLoad(reqId, addrTypeToDelete, "BR.DELETE.FILTERED.NOT.LEASI", entityManager);
     }
   }
 
@@ -4146,4 +4082,172 @@ public class LAHandler extends GEOHandler {
     return query.getResults(TaxData.class);
   }
 
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String addrSeqNum = null;
+
+    AdminPK adminPK = new AdminPK();
+    adminPK.setReqId(reqId);
+    Admin admin = entityManager.find(Admin.class, adminPK);
+
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      addrSeqNum = getAddrSeqForCreate(entityManager, reqId, addrType, cmrIssuingCntry);
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      addrSeqNum = getAddrSeqForUpdate(entityManager, reqId, addrType, cmrIssuingCntry);
+    }
+    return addrSeqNum;
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    return generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+  }
+
+  private String getAddrSeqForCreate(EntityManager entityManager, long reqId, String addrType, String cmrIssuingCntry) {
+    int startingSeqNum = 0;
+    String addrSeqNum = null;
+    if (!StringUtils.isEmpty(addrType)) {
+
+      if (SystemLocation.BRAZIL.equals(cmrIssuingCntry)) {
+        startingSeqNum = getFixedStartingSeqNewAddrBR(addrType);
+      } else {
+        startingSeqNum = getFixedStartingSeqNewAddr(addrType);
+      }
+
+      addrSeqNum = getAvailableAddrSeqNum(entityManager, reqId, startingSeqNum);
+    }
+
+    return addrSeqNum;
+  }
+
+  private String getAddrSeqForUpdate(EntityManager entityManager, long reqId, String addrType, String cmrIssuingCntry) {
+    int startingSeqNum = 0;
+    int maxSeqNum = 0;
+    if (SystemLocation.BRAZIL.equals(cmrIssuingCntry)) {
+      startingSeqNum = getFixedStartingSeqNewAddrBR(addrType);
+      maxSeqNum = getMaxSeqBR(addrType);
+    } else {
+      startingSeqNum = getFixedStartingSeqNewAddr(addrType);
+      maxSeqNum = getMaxSeq(addrType);
+    }
+    return getAvailAddrSeqNumInclRdc(entityManager, reqId, startingSeqNum, maxSeqNum);
+  }
+
+  private String getAvailAddrSeqNumInclRdc(EntityManager entityManager, long reqId, int startingSeqNum, int maxSeqNum) {
+    DataPK pk = new DataPK();
+    pk.setReqId(reqId);
+    Data data = entityManager.find(Data.class, pk);
+
+    String cmrNo = data.getCmrNo();
+    Set<Integer> allAddrSeqFromAddr = getAllSavedSeqFromAddr(entityManager, reqId);
+    Set<Integer> allAddrSeqFromRdc = getAllSavedSeqFromRdc(entityManager, cmrNo, data.getCmrIssuingCntry());
+
+    Set<Integer> mergedAddrSet = new HashSet<>();
+    mergedAddrSet.addAll(allAddrSeqFromAddr);
+    mergedAddrSet.addAll(allAddrSeqFromRdc);
+
+    int availSeqNum = startingSeqNum;
+    if (mergedAddrSet.contains(availSeqNum)) {
+      while (mergedAddrSet.contains(availSeqNum)) {
+        availSeqNum++;
+        if (availSeqNum > maxSeqNum) {
+          availSeqNum = startingSeqNum;
+        }
+      }
+    }
+    return String.valueOf(availSeqNum);
+  }
+
+  private int getFixedStartingSeqNewAddrBR(String addrType) {
+    int startSeq = 0;
+    if ("ZS01".equals(addrType)) {
+      startSeq = 100001;
+    } else if ("ZP01".equals(addrType)) {
+      startSeq = 200001;
+    } else if ("ZI01".equals(addrType)) {
+      startSeq = 300001;
+    } else if ("ZD01".equals(addrType)) {
+      startSeq = 400001;
+    }
+    return startSeq;
+  }
+
+  private int getMaxSeqBR(String addrType) {
+    int maxSeq = 0;
+    if ("ZS01".equals(addrType)) {
+      maxSeq = 199999;
+    } else if ("ZP01".equals(addrType)) {
+      maxSeq = 299999;
+    } else if ("ZI01".equals(addrType)) {
+      maxSeq = 399999;
+    } else if ("ZD01".equals(addrType)) {
+      maxSeq = 499999;
+    }
+    return maxSeq;
+  }
+
+  private int getFixedStartingSeqNewAddr(String addrType) {
+    int startSeq = 0;
+    if ("ZS01".equals(addrType)) {
+      startSeq = 10000001;
+    } else if ("ZP01".equals(addrType)) {
+      startSeq = 20000001;
+    } else if ("ZI01".equals(addrType)) {
+      startSeq = 30000001;
+    } else if ("ZD01".equals(addrType)) {
+      startSeq = 40000001;
+    }
+    return startSeq;
+  }
+
+  private int getMaxSeq(String addrType) {
+    int maxSeq = 0;
+    if ("ZS01".equals(addrType)) {
+      maxSeq = 19999999;
+    } else if ("ZP01".equals(addrType)) {
+      maxSeq = 29999999;
+    } else if ("ZI01".equals(addrType)) {
+      maxSeq = 39999999;
+    } else if ("ZD01".equals(addrType)) {
+      maxSeq = 49999999;
+    }
+    return maxSeq;
+  }
+
+  private String getAvailableAddrSeqNum(EntityManager entityManager, long reqId, int startingSeqNum) {
+    int availSeqNum = startingSeqNum;
+    Set<Integer> allAddrSeq = getAllSavedSeqFromAddr(entityManager, reqId);
+    if (allAddrSeq.contains(availSeqNum)) {
+      while (allAddrSeq.contains(availSeqNum)) {
+        availSeqNum++;
+      }
+    }
+    return String.valueOf(availSeqNum);
+  }
+
+  private Set<Integer> getAllSavedSeqFromAddr(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("LA.GET.ADDRSEQ.BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Integer> results = query.getResults(Integer.class);
+
+    Set<Integer> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(results);
+
+    return addrSeqSet;
+  }
+
+  private Set<Integer> getAllSavedSeqFromRdc(EntityManager entityManager, String cmrNo, String cmrIssuingCntry) {
+    String sql = ExternalizedQuery.getSql("GET.KNA1_ZZKV_SEQNO_DISTINCT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", cmrIssuingCntry);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<Integer> resultsRDC = query.getResults(Integer.class);
+    Set<Integer> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(resultsRDC);
+
+    return addrSeqSet;
+  }
 }

@@ -1607,46 +1607,6 @@ function addStreetAddress2FormValidatorAddrList() {
 } // func end
 
 function toggleAddrTypesForBR(cntry, addressMode, details) {
-  if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-    if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-      var fRecord = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0);
-      var ttype = fRecord.addrType;
-      if (typeof (ttype) == 'object') {
-        ttype = ttype[0];
-      }
-      if (ttype == 'ZS01') {
-        if (FormManager.getActualValue('reqType') == 'C') {
-          if (FormManager.getActualValue('custType') && FormManager.getActualValue('custType') == 'LEASI') {
-            FormManager.setValue('addrType', 'ZI01');
-            cmr.showNode('radiocont_ZI01');
-            cmr.hideNode('radiocont_ZS01');
-          } else {
-            FormManager.setValue('addrType', 'ZS01');
-            cmr.showNode('radiocont_ZS01');
-            cmr.hideNode('radiocont_ZI01');
-          }
-        } else {
-
-        }
-        cmr.hideNode('radiocont_ZD01');
-        cmr.hideNode('radiocont_ZP01');
-      } else if (ttype == 'ZI01') {
-        FormManager.setValue('addrType', 'ZS01');
-        cmr.showNode('radiocont_ZS01');
-        cmr.hideNode('radiocont_ZI01');
-        cmr.hideNode('radiocont_ZD01');
-        cmr.hideNode('radiocont_ZP01');
-      } else {
-
-      }
-    } else {
-      FormManager.setValue('addrType', 'ZS01');
-      cmr.showNode('radiocont_ZS01');
-      cmr.hideNode('radiocont_ZI01');
-      cmr.hideNode('radiocont_ZD01');
-      cmr.hideNode('radiocont_ZP01');
-    }
-  }
   if (addressMode == 'updateAddress' || addressMode == 'copyAddress') {
     // 1164561
     if (details.ret50 != '' && details.ret50 != null) {
@@ -2516,24 +2476,13 @@ function disableFieldsForBrazil() {
 }
 
 function canRemoveAddress(value, rowIndex, grid) {
-  console.log("Remove address button..");
-  var rowData = grid.getItem(0);
-  if (rowData == null) {
-    return '';
-  }
   var rowData = grid.getItem(rowIndex);
-  var importInd = rowData.importInd;
-
+  var importInd = rowData.importInd[0];
   var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'U') {
+  if ('U' == reqType && ('Y' == importInd)) {
     return false;
-  } else {
-    // var addrType = rowData.addrType;
-    // if (addrType == 'ZS01') {
-    // return false;
-    // }
-    return true;
   }
+  return true;
 }
 
 function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
@@ -2798,6 +2747,7 @@ dojo.addOnLoad(function() {
       SysLoc.MEXICO, SysLoc.NICARAGUA, SysLoc.PANAMA, SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY, SysLoc.VENEZUELA ];
   console.log(GEOHandler.LA);
   console.log('adding LA scripts...');
+  GEOHandler.enableCopyAddress(GEOHandler.LA);
   // GEOHandler.registerValidator(addTaxInfoValidator, [ SysLoc.ARGENTINA ],
   // null, false, false);
   GEOHandler.registerValidator(addTaxInfoValidator, [ SysLoc.ARGENTINA /* 613 */], GEOHandler.ROLE_PROCESSOR, false, false);
