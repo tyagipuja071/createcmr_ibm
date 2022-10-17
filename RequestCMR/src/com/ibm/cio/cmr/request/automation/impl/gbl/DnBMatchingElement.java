@@ -47,6 +47,7 @@ import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+
 /**
  * {@link AutomationElement} implementation for the advanced D&B matching
  *
@@ -157,6 +158,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               if (highestCloseMatch == null) {
                 highestCloseMatch = dnbRecord;
                 perfectMatch = dnbRecord;
+                engineData.setVatVerified(true, "VAT Verified");
+                LOG.debug("VAT verified");
                 break;
               }
             } else if (dnbRecord.getConfidenceCode() > 7) {
