@@ -221,6 +221,8 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     VatLayerRequest request = new VatLayerRequest();
     request.setVat(data.getVat());
     request.setCountry(landCntryForVies);
+    LOG.debug("=== data.getVat(): " + data.getVat());
+    LOG.debug("=== landCntryForVies: " + landCntryForVies);
 
     LOG.debug("Connecting to the EU VAT Layer Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
     AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.EU_VAT_SERVICE_ID, request, AutomationResponse.class);
