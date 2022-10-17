@@ -597,9 +597,10 @@ form.ibm-column-form .dijitTextBox INPUT {
                    </tr>
                    <tr>
                      <td colspan="7">
-                       <input ng-show="!cmrNo && issuingCtry != '760' && issuingCntry != '641' && !orgIdSearch" type="button" value="Request CMR with Address" title="Request for a new CMR using the information specified under the search criteria." class="search-btn" ng-click="createNewCmr()">
-                       <input ng-show="records && records.length > 0" type="button" value="Request CMR with blank data" title="Request for a new CMR with only CMR Issuing Country specified." class="search-btn" ng-click="confirmCreateNew()">
-                       <span ng-show= "cmrNo && records.length == 0 " style="font-weight:bold;color:red">CMR {{cmrNo}} doesn't exist under issuing country {{issuingCntryText}}, please either use different CMR or search by name and address details.</span>
+<!--                        <input ng-show=" !cmrNo && issuingCtry != '760' && issuingCntry != '641' && !orgIdSearch" type="button" value="Request CMR with Address" title="Request for a new CMR using the information specified under the search criteria." class="search-btn" ng-click="createNewCmr()"> -->
+                      <input ng-hide="cmrNo || records.length > 0" type="button" value="Request CMR with Address" title="Request for a new CMR using the information specified under the search criteria." class="search-btn" ng-click="createNewCmr()">
+                      <input ng-hide="records || !records" type="button" value="Request CMR with blank data" title="Request for a new CMR with only CMR Issuing Country specified." class="search-btn" ng-click="confirmCreateNew()">
+                      <span ng-show= "cmrNo && records.length == 0 " style="font-weight:bold;color:red">CMR {{cmrNo}} doesn't exist under issuing country {{issuingCntryText}}, please either use different CMR or search by name and address details.</span>
                      </td>
                    </tr>
                  </tbody>
