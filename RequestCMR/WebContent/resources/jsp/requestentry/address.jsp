@@ -65,17 +65,6 @@ visibility: hidden !IMPORTANT;
         }
       }
       break;
-    case '631':
-      if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 1){
-        cmr.hideNode('addAddressButton');
-      } else if (FormManager.getActualValue('reqType') == 'U'){
-        cmr.hideNode('addAddressButton');
-      } else {
-        if (dojo.byId('addAddressButton')){
-          dojo.byId('addAddressButton').style.display = 'inline';
-        }
-      }
-      break;
     case '758': //Defect 1509289 :Mukesh
     	console.log("Italy address rowCount="+CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount);
       if (FormManager.getActualValue('reqType') == 'C' && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 2){

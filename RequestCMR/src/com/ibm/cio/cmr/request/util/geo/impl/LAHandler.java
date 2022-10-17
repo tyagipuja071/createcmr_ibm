@@ -1710,21 +1710,6 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
-    if (LAHandler.isBRIssuingCountry(cmrIssuingCntry)) {
-      // if
-      // (CmrConstants.CUST_TYPE_PRIPE.equalsIgnoreCase(admin.getCustType())
-      // ||
-      // CmrConstants.CUST_TYPE_IBMEM.equalsIgnoreCase(admin.getCustType()))
-      // {// PRIPE,IBMEM
-      // admin.setDisableAutoProc(CmrConstants.CMT_LOCK_IND_YES);
-      // }
-
-      if ("C".equalsIgnoreCase(admin.getReqType())) {
-        if ("Y".equalsIgnoreCase(admin.getSaveIndAftrTempLoad())) {
-          deleteFilteredAddresses(admin.getId().getReqId(), admin.getCustType(), entityManager);
-        }
-      }
-    }
 
     if (LAHandler.isMXIssuingCountry(cmrIssuingCntry) && "PPN".equalsIgnoreCase(admin.getReqStatus())
         && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
@@ -1839,19 +1824,6 @@ public class LAHandler extends GEOHandler {
         admin.setProcessedFlag(processedFlag);
         throw new CmrException(MessageUtil.ERROR_DPL_NOT_DONE);
       }
-    }
-  }
-
-  private void deleteFilteredAddresses(long reqId, String custType, EntityManager entityManager) {
-    CmrClientService cmrClient = new CmrClientService();
-    boolean isLeasi = "LEASI".equalsIgnoreCase(custType);
-    List<String> addrTypeToDelete = null;
-    if (isLeasi) {
-      addrTypeToDelete = Arrays.asList("ZI01", "ZS01");
-      cmrClient.doActualDeleteOnFirstSaveAfterTempLoad(reqId, addrTypeToDelete, "BR.DELETE.FILTERED.FOR.LEASI", entityManager);
-    } else {
-      addrTypeToDelete = Arrays.asList("ZS01");
-      cmrClient.doActualDeleteOnFirstSaveAfterTempLoad(reqId, addrTypeToDelete, "BR.DELETE.FILTERED.NOT.LEASI", entityManager);
     }
   }
 
