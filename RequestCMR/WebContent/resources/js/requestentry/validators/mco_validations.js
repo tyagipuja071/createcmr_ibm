@@ -603,11 +603,11 @@ function addHandlersForPTES() {
     });
   }
 
-  if (_CTCHandler == null) { 
+  if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-        setSalesRepValues(value);
-        setEnterpriseValues(false);
-        setEnterpriseValues34Q();
+      setSalesRepValues(value);
+      setEnterpriseValues(false);
+      setEnterpriseValues34Q();
     });
   }
 
@@ -878,7 +878,7 @@ function setEnterpriseValues34Q() {
 
 }
 
-function setEnterpriseValues(scenarioChanged) {  
+function setEnterpriseValues(scenarioChanged) {
   console.log('setEnterpriseValues.......');
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1096,6 +1096,7 @@ function disableAddrFieldsPTES() {
   var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
+  var reqType = FormManager.getActualValue('reqType');
   var checkImportIndc = getImportedIndcForPT();
 
   // Sequence Number - enable for additional shipping
@@ -1106,7 +1107,7 @@ function disableAddrFieldsPTES() {
     FormManager.readOnly('prefSeqNo');
   }
 
-  if (custType != 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+  if ((custType != 'CROSS' || reqType == 'U') && FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
@@ -3023,7 +3024,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') { 
+    if (clientTierCode == '') {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
@@ -3065,23 +3066,23 @@ function clientTierValidator() {
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
         var valResult = null;
-        
+
         var oldClientTier = null;
         var oldISU = null;
         var requestId = FormManager.getActualValue('reqId');
-        
+
         if (reqType == 'C') {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-              REQ_ID : requestId,
+            REQ_ID : requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-          
+
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU =  result.ret3 != null ? result.ret3 : '';
-            
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
             if (clientTier != oldClientTier || isuCd != oldISU) {
               valResult = clientTierCodeValidator();
             }
@@ -3245,10 +3246,10 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(afterConfigForMCO, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(addHandlersForPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
-  GEOHandler.addAfterConfig(setClientTierValues, [ SysLoc.PORTUGAL]);
-  GEOHandler.addAfterConfig(setSalesRepValues, [ SysLoc.PORTUGAL]);
-  GEOHandler.addAfterConfig(setEnterpriseValues, [ SysLoc.PORTUGAL]);
-  GEOHandler.addAfterConfig(setEnterpriseValues34Q, [ SysLoc.PORTUGAL]);
+  GEOHandler.addAfterConfig(setClientTierValues, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterConfig(setSalesRepValues, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterConfig(setEnterpriseValues, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterConfig(setEnterpriseValues34Q, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setFieldMandatoryForProcessorPT, [ SysLoc.PORTUGAL ]);
   // GEOHandler.addAfterConfig(setLocationNumber, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setCollectionCode, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
@@ -3284,10 +3285,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setFieldsCharForScenarios, [ SysLoc.SPAIN ]);
 
   GEOHandler.addAfterTemplateLoad(setFieldMandatoryForProcessorPT, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
-  GEOHandler.addAfterTemplateLoad(setClientTierValues, [ SysLoc.PORTUGAL]);
-  GEOHandler.addAfterTemplateLoad(setSalesRepValues, [ SysLoc.PORTUGAL]);
-  GEOHandler.addAfterTemplateLoad(setEnterpriseValues, [ SysLoc.PORTUGAL]);
-  //GEOHandler.addAfterTemplateLoad(setEnterpriseValues34Q, [ SysLoc.SPAIN ]);
+  GEOHandler.addAfterTemplateLoad(setClientTierValues, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(setSalesRepValues, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(setEnterpriseValues, [ SysLoc.PORTUGAL ]);
+  // GEOHandler.addAfterTemplateLoad(setEnterpriseValues34Q, [ SysLoc.SPAIN ]);
 
   GEOHandler.addAfterTemplateLoad(setDPCEBObasedOnCntry, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setVatValidatorPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
@@ -3338,7 +3339,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAbbrevLocationValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorPT, [ SysLoc.PORTUGAL ], null, true);
   GEOHandler.registerValidator(addTypeOfCustomerValidatorPT, [ SysLoc.PORTUGAL ], null, true);
-  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.PORTUGAL]);
+  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setEnterpriseBasedOnSubIndustry, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.SPAIN ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.SPAIN ]);
