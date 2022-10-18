@@ -241,6 +241,10 @@ public class DataModel extends BaseModel {
   private String rdcComment;
   private String abbrevLocn;
 
+  private String collectorNameNo;
+
+  private String mrktChannelInd;
+
   // CH Specific
   private String custLangCd;
   private String hwInstlMstrFlg;
@@ -1253,4 +1257,21 @@ public class DataModel extends BaseModel {
   public void setVatInd(String vatInd) {
     this.vatInd = vatInd;
   }
+
+  public String getCollectorNameNo() {
+    return collectorNameNo;
+  }
+
+  public void setCollectorNameNo(String collectorNameNo) {
+    this.collectorNameNo = collectorNameNo;
+  }
+
+  public String getMrktChannelInd() {
+    return mrktChannelInd;
+  }
+
+  public void setMrktChannelInd(String mrktChannelInd) {
+    this.mrktChannelInd = mrktChannelInd;
+  }
+
 }
