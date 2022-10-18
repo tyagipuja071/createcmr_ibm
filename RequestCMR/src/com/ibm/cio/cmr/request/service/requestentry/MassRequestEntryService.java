@@ -5558,6 +5558,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(cmrIssuingCntry);
       List<TemplateTab> tabs = template.getTabs();
 
+      Map<String, String> cmrPhoneMap = new HashMap<>();
+
       InputStream mfStream = new FileInputStream(filepath);
 
       // 2. loop through all the tabs returned by the config
@@ -5588,6 +5590,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   model.setRowStatusCd("");
                   // 4. then for every sheet, get the fields
                   model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+                  if (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND)) {
+                    setCMRPhoneInMap(cmrRow, cmrPhoneMap, model.getCmrNo());
+                  }
 
                   if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
                     models.add(model);
@@ -5609,7 +5614,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   addrModel.setIterationId(newIterId);
                   addrModel.setAddrType(tab.getTypeCode());
                   addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
-
+                  if (addrModel.getAddrType() != null && !"ZD01".equals(addrModel.getAddrType())
+                      && (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND))) {
+                    addrModel.setCustPhone(cmrPhoneMap.get(addrModel.getCmrNo()));
+                  }
                   if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
                     addrModels.add(addrModel);
                   }
@@ -5624,6 +5632,14 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  private void setCMRPhoneInMap(Row cmrRow, Map<String, String> cmrPhoneMap, String cmrNo) {
+    DataFormatter df = new DataFormatter();
+    String phone = df.formatCellValue(cmrRow.getCell(14));
+
+    cmrPhoneMap.put(cmrNo, phone);
+
   }
 
   // CMR-800
