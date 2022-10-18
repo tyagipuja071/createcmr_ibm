@@ -20,6 +20,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.ibm.cio.cmr.request.entity.listeners.AutoTrimStrings;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogDetails;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
@@ -32,59 +34,227 @@ import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
  * @author Jeffrey Zamora
  */
 @Entity
-@Table(name = "ADMIN", schema = "CREQCMR")
-@SqlResultSetMappings({ @SqlResultSetMapping(name = "MQRequestsMapping", columns = { @ColumnResult(name = "REQ_ID"), @ColumnResult(name = "REQ_TYPE"),
-    @ColumnResult(name = "LAST_UPDT_TS"), @ColumnResult(name = "LAST_UPDT_BY"), @ColumnResult(name = "CMR_NO"),
-    @ColumnResult(name = "CMR_ISSUING_CNTRY") }),
+@Table(
+    name = "ADMIN",
+    schema = "CREQCMR")
+@SqlResultSetMappings({ @SqlResultSetMapping(
+    name = "MQRequestsMapping",
+    columns = { @ColumnResult(
+        name = "REQ_ID"),
+        @ColumnResult(
+            name = "REQ_TYPE"),
+        @ColumnResult(
+            name = "LAST_UPDT_TS"),
+        @ColumnResult(
+            name = "LAST_UPDT_BY"),
+        @ColumnResult(
+            name = "CMR_NO"),
+        @ColumnResult(
+            name = "CMR_ISSUING_CNTRY") }),
 
-    @SqlResultSetMapping(name = "WorkflowRequestsMapping", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = Data.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS"), @ColumnResult(name = "REQ_TYPE_TEXT"),
-            @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "OWNER_DESC"), @ColumnResult(name = "COUNTRY_DESC"),
-            @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"), @ColumnResult(name = "CAN_CLAIM_ALL"),
-            @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "PENDING_APPROVALS"), @ColumnResult(name = "C_REQ_ID"),
-            @ColumnResult(name = "C_REQ_STATUS") }),
+    @SqlResultSetMapping(
+        name = "WorkflowRequestsMapping",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = Data.class) },
+        columns = { @ColumnResult(
+            name = "OVERALL_STATUS"),
+            @ColumnResult(
+                name = "REQ_TYPE_TEXT"),
+            @ColumnResult(
+                name = "CLAIM_FIELD"),
+            @ColumnResult(
+                name = "OWNER_DESC"),
+            @ColumnResult(
+                name = "COUNTRY_DESC"),
+            @ColumnResult(
+                name = "PROCESSING_STATUS"),
+            @ColumnResult(
+                name = "CAN_CLAIM"),
+            @ColumnResult(
+                name = "CAN_CLAIM_ALL"),
+            @ColumnResult(
+                name = "TYPE_DESCRIPTION"),
+            @ColumnResult(
+                name = "PENDING_APPROVALS"),
+            @ColumnResult(
+                name = "C_REQ_ID"),
+            @ColumnResult(
+                name = "C_REQ_STATUS") }),
 
-    @SqlResultSetMapping(name = "WorkflowRejectedRequestsMapping", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = Data.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS"), @ColumnResult(name = "REQ_TYPE_TEXT"),
-            @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "OWNER_DESC"), @ColumnResult(name = "COUNTRY_DESC"),
-            @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"), @ColumnResult(name = "CAN_CLAIM_ALL"),
-            @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "PENDING_APPROVALS"), @ColumnResult(name = "REJ_REASON"),
-            @ColumnResult(name = "C_REQ_ID"), @ColumnResult(name = "C_REQ_STATUS") }),
-    @SqlResultSetMapping(name = "SearchWithCustomerMapping", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = Data.class), @EntityResult(entityClass = Addr.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS"),
-            @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "REQ_TYPE_TEXT"), @ColumnResult(name = "OWNER_DESC"),
-            @ColumnResult(name = "COUNTRY_DESC"), @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"),
-            @ColumnResult(name = "CAN_CLAIM_ALL"), @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "C_REQ_ID"),
-            @ColumnResult(name = "C_REQ_STATUS") }),
-    @SqlResultSetMapping(name = "BatchServiceMapping", entities = { @EntityResult(entityClass = Admin.class), @EntityResult(entityClass = Data.class),
-        @EntityResult(entityClass = WfHist.class, fields = { @FieldResult(column = "REQ_STATUS1", name = "reqStatus"),
-            @FieldResult(column = "CMT1", name = "cmt") }) }, columns = {}),
-    @SqlResultSetMapping(name = "BatchUpdateAddrServiceMapping", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = MassUpdt.class), @EntityResult(entityClass = MassUpdtAddr.class), }),
-    @SqlResultSetMapping(name = "PDFMapping", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = Data.class) }, columns = @ColumnResult(name = "SYS_LOC")),
-    @SqlResultSetMapping(name = "BatchUpdateDataServiceMapping", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = MassUpdt.class), @EntityResult(entityClass = MassUpdtData.class), }),
-    @SqlResultSetMapping(name = "BatchCreateDataServiceMapping", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = MassCreate.class), @EntityResult(entityClass = MassCreateData.class), }),
-    @SqlResultSetMapping(name = "BatchCMRDataServiceMapping", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = MassCreate.class), @EntityResult(entityClass = MassCreateData.class), }),
-    @SqlResultSetMapping(name = "BatchReactDelServiceMapping", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = MassUpdt.class), }),
-    @SqlResultSetMapping(name = "BatchServiceMappingForceUpdate", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = Data.class), }),
-    @SqlResultSetMapping(name = "BatchMassCreateGetRecord", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = Data.class), }),
-    @SqlResultSetMapping(name = "BatchEmailEngineGetRecord", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = Data.class) }),
-    @SqlResultSetMapping(name = "RequestEntryServiceMapping", entities = { @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = Data.class), @EntityResult(entityClass = Scorecard.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS"),
-            @ColumnResult(name = "CLAIM_ROLE"), @ColumnResult(name = "SUB_INDUSTRY_DESC"), @ColumnResult(name = "ISIC_DESC"),
-            @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"), @ColumnResult(name = "CAN_CLAIM_ALL"),
-            @ColumnResult(name = "AUTO_PROCESSING") }), })
+    @SqlResultSetMapping(
+        name = "WorkflowRejectedRequestsMapping",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = Data.class) },
+        columns = { @ColumnResult(
+            name = "OVERALL_STATUS"),
+            @ColumnResult(
+                name = "REQ_TYPE_TEXT"),
+            @ColumnResult(
+                name = "CLAIM_FIELD"),
+            @ColumnResult(
+                name = "OWNER_DESC"),
+            @ColumnResult(
+                name = "COUNTRY_DESC"),
+            @ColumnResult(
+                name = "PROCESSING_STATUS"),
+            @ColumnResult(
+                name = "CAN_CLAIM"),
+            @ColumnResult(
+                name = "CAN_CLAIM_ALL"),
+            @ColumnResult(
+                name = "TYPE_DESCRIPTION"),
+            @ColumnResult(
+                name = "PENDING_APPROVALS"),
+            @ColumnResult(
+                name = "REJ_REASON"),
+            @ColumnResult(
+                name = "C_REQ_ID"),
+            @ColumnResult(
+                name = "C_REQ_STATUS") }),
+    @SqlResultSetMapping(
+        name = "SearchWithCustomerMapping",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = Data.class),
+            @EntityResult(
+                entityClass = Addr.class) },
+        columns = { @ColumnResult(
+            name = "OVERALL_STATUS"),
+            @ColumnResult(
+                name = "CLAIM_FIELD"),
+            @ColumnResult(
+                name = "REQ_TYPE_TEXT"),
+            @ColumnResult(
+                name = "OWNER_DESC"),
+            @ColumnResult(
+                name = "COUNTRY_DESC"),
+            @ColumnResult(
+                name = "PROCESSING_STATUS"),
+            @ColumnResult(
+                name = "CAN_CLAIM"),
+            @ColumnResult(
+                name = "CAN_CLAIM_ALL"),
+            @ColumnResult(
+                name = "TYPE_DESCRIPTION"),
+            @ColumnResult(
+                name = "C_REQ_ID"),
+            @ColumnResult(
+                name = "C_REQ_STATUS") }),
+    @SqlResultSetMapping(
+        name = "BatchServiceMapping",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = Data.class),
+            @EntityResult(
+                entityClass = WfHist.class,
+                fields = { @FieldResult(
+                    column = "REQ_STATUS1",
+                    name = "reqStatus"),
+                    @FieldResult(
+                        column = "CMT1",
+                        name = "cmt") }) },
+        columns = {}),
+    @SqlResultSetMapping(
+        name = "BatchUpdateAddrServiceMapping",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = MassUpdt.class),
+            @EntityResult(
+                entityClass = MassUpdtAddr.class), }),
+    @SqlResultSetMapping(
+        name = "PDFMapping",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = Data.class) },
+        columns = @ColumnResult(
+            name = "SYS_LOC")),
+    @SqlResultSetMapping(
+        name = "BatchUpdateDataServiceMapping",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = MassUpdt.class),
+            @EntityResult(
+                entityClass = MassUpdtData.class), }),
+    @SqlResultSetMapping(
+        name = "BatchCreateDataServiceMapping",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = MassCreate.class),
+            @EntityResult(
+                entityClass = MassCreateData.class), }),
+    @SqlResultSetMapping(
+        name = "BatchCMRDataServiceMapping",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = MassCreate.class),
+            @EntityResult(
+                entityClass = MassCreateData.class), }),
+    @SqlResultSetMapping(
+        name = "BatchReactDelServiceMapping",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = MassUpdt.class), }),
+    @SqlResultSetMapping(
+        name = "BatchServiceMappingForceUpdate",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = Data.class), }),
+    @SqlResultSetMapping(
+        name = "BatchMassCreateGetRecord",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = Data.class), }),
+    @SqlResultSetMapping(
+        name = "BatchEmailEngineGetRecord",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = Data.class) }),
+    @SqlResultSetMapping(
+        name = "RequestEntryServiceMapping",
+        entities = { @EntityResult(
+            entityClass = Admin.class),
+            @EntityResult(
+                entityClass = Data.class),
+            @EntityResult(
+                entityClass = Scorecard.class) },
+        columns = { @ColumnResult(
+            name = "OVERALL_STATUS"),
+            @ColumnResult(
+                name = "CLAIM_ROLE"),
+            @ColumnResult(
+                name = "SUB_INDUSTRY_DESC"),
+            @ColumnResult(
+                name = "ISIC_DESC"),
+            @ColumnResult(
+                name = "PROCESSING_STATUS"),
+            @ColumnResult(
+                name = "CAN_CLAIM"),
+            @ColumnResult(
+                name = "CAN_CLAIM_ALL"),
+            @ColumnResult(
+                name = "AUTO_PROCESSING") }), })
 @EntityListeners({ TrimListener.class, ChangeLogListener.class })
 @AutoTrimStrings
-@ChangeLogDetails(reqId = "id.reqId", userId = "lastUpdtBy", reqStatus = "reqStatus", childTable = false)
+@ChangeLogDetails(
+    reqId = "id.reqId",
+    userId = "lastUpdtBy",
+    reqStatus = "reqStatus",
+    childTable = false)
 public class Admin extends BaseEntity<AdminPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -117,202 +287,259 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
     this.id = id;
   }
 
-  @Column(name = "REQUESTER_ID")
+  @Column(
+      name = "REQUESTER_ID")
   private String requesterId;
 
   @NoLog
-  @Column(name = "REQUESTER_NM")
+  @Column(
+      name = "REQUESTER_NM")
   private String requesterNm;
 
-  @Column(name = "ORIGINATOR_ID")
+  @Column(
+      name = "ORIGINATOR_ID")
   private String originatorId;
 
   @NoLog
-  @Column(name = "ORIGINATOR_NM")
+  @Column(
+      name = "ORIGINATOR_NM")
   private String originatorNm;
 
-  @Column(name = "REQUESTING_LOB")
+  @Column(
+      name = "REQUESTING_LOB")
   private String requestingLob;
 
-  @Column(name = "EXPEDITE_IND")
+  @Column(
+      name = "EXPEDITE_IND")
   private String expediteInd;
 
-  @Column(name = "EXPEDITE_REASON")
+  @Column(
+      name = "EXPEDITE_REASON")
   private String expediteReason;
 
-  @Column(name = "REQ_SRC")
+  @Column(
+      name = "REQ_SRC")
   private String reqSrc;
 
-  @Column(name = "REQ_STATUS")
+  @Column(
+      name = "REQ_STATUS")
   private String reqStatus;
 
-  @Column(name = "LOCK_IND")
+  @Column(
+      name = "LOCK_IND")
   private String lockInd;
 
-  @Column(name = "LOCK_BY")
+  @Column(
+      name = "LOCK_BY")
   private String lockBy;
 
-  @Column(name = "LOCK_TS")
+  @Column(
+      name = "LOCK_TS")
   @Temporal(TemporalType.TIMESTAMP)
   @NoLog
   private Date lockTs;
 
   @NoLog
-  @Column(name = "WAIT_INFO_IND", updatable = false)
+  @Column(
+      name = "WAIT_INFO_IND",
+      updatable = false)
   private String waitInfoInd;
 
   @NoLog
-  @Column(name = "WAIT_REV_IND")
+  @Column(
+      name = "WAIT_REV_IND")
   private String waitRevInd;
 
-  @Column(name = "REQ_TYPE")
+  @Column(
+      name = "REQ_TYPE")
   private String reqType;
 
-  @Column(name = "REQ_REASON")
+  @Column(
+      name = "REQ_REASON")
   private String reqReason;
 
-  @Column(name = "CUST_TYPE")
+  @Column(
+      name = "CUST_TYPE")
   private String custType;
 
-  @Column(name = "SOE_REQ_NO")
+  @Column(
+      name = "SOE_REQ_NO")
   private String soeReqNo;
 
   @NoLog
   private String cmt;
 
   @NoLog
-  @Column(name = "CREATE_TS")
+  @Column(
+      name = "CREATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date createTs;
 
   @NoLog
-  @Column(name = "LAST_UPDT_BY")
+  @Column(
+      name = "LAST_UPDT_BY")
   private String lastUpdtBy;
 
   @NoLog
-  @Column(name = "LAST_UPDT_TS")
+  @Column(
+      name = "LAST_UPDT_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date lastUpdtTs;
 
   @NoLog
-  @Column(name = "DEL_IND")
+  @Column(
+      name = "DEL_IND")
   private String delInd;
 
   @NoLog
-  @Column(name = "LOCK_BY_NM")
+  @Column(
+      name = "LOCK_BY_NM")
   private String lockByNm;
 
-  @Column(name = "MAIN_CUST_NM1")
+  @Column(
+      name = "MAIN_CUST_NM1")
   private String mainCustNm1;
 
-  @Column(name = "MAIN_CUST_NM2")
+  @Column(
+      name = "MAIN_CUST_NM2")
   private String mainCustNm2;
 
   @NoLog
-  @Column(name = "MAIN_ADDR_TYPE")
+  @Column(
+      name = "MAIN_ADDR_TYPE")
   private String mainAddrType;
 
   @NoLog
-  @Column(name = "LAST_PROC_CENTER_NM")
+  @Column(
+      name = "LAST_PROC_CENTER_NM")
   private String lastProcCenterNm;
 
-  @Column(name = "PROSP_LEGAL_IND")
+  @Column(
+      name = "PROSP_LEGAL_IND")
   private String prospLegalInd;
 
-  @Column(name = "INTERNAL_TYP")
+  @Column(
+      name = "INTERNAL_TYP")
   private String internalTyp;
 
   @NoLog
-  @Column(name = "SEP_VAL_IND")
+  @Column(
+      name = "SEP_VAL_IND")
   private String sepValInd;
 
-  @Column(name = "PROCESSED_FLAG")
+  @Column(
+      name = "PROCESSED_FLAG")
   private String processedFlag;
 
   @NoLog
-  @Column(name = "PROCESSED_TS")
+  @Column(
+      name = "PROCESSED_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date processedTs;
 
-  @Column(name = "DISABLE_AUTO_PROC")
+  @Column(
+      name = "DISABLE_AUTO_PROC")
   private String disableAutoProc;
 
-  @Column(name = "RDC_PROCESSING_STATUS")
+  @Column(
+      name = "RDC_PROCESSING_STATUS")
   private String rdcProcessingStatus;
 
   @NoLog
-  @Column(name = "RDC_PROCESSING_TS")
+  @Column(
+      name = "RDC_PROCESSING_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date rdcProcessingTs;
 
-  @Column(name = "COV_BG_RETRIEVED_IND")
+  @Column(
+      name = "COV_BG_RETRIEVED_IND")
   private String covBgRetrievedInd;
 
-  @Column(name = "RDC_PROCESSING_MSG")
+  @Column(
+      name = "RDC_PROCESSING_MSG")
   private String rdcProcessingMsg;
 
-  @Column(name = "ITERATION_ID")
+  @Column(
+      name = "ITERATION_ID")
   private int iterationId;
 
-  @Column(name = "FILE_NAME")
+  @Column(
+      name = "FILE_NAME")
   private String fileName;
 
   @NoLog
-  @Column(name = "MASS_UPDT_RDC_ONLY")
+  @Column(
+      name = "MASS_UPDT_RDC_ONLY")
   private String massUpdtRdcOnly;
 
   @NoLog
-  @Column(name = "OLD_CUST_NM1")
+  @Column(
+      name = "OLD_CUST_NM1")
   private String oldCustNm1;
 
   @NoLog
-  @Column(name = "OLD_CUST_NM2")
+  @Column(
+      name = "OLD_CUST_NM2")
   private String oldCustNm2;
 
-  @Column(name = "MODEL_CMR_NO")
+  @Column(
+      name = "MODEL_CMR_NO")
   private String modelCmrNo;
 
-  @Column(name = "CUST_SUB_TYP_VAL")
+  @Column(
+      name = "CUST_SUB_TYP_VAL")
   private String custSubType;
 
-  @Column(name = "SOURCE_SYST_ID")
+  @Column(
+      name = "SOURCE_SYST_ID")
   private String sourceSystId;
 
-  @Column(name = "DUPLICATE_CMR_RSN")
+  @Column(
+      name = "DUPLICATE_CMR_RSN")
   private String dupCmrReason;
 
-  @Column(name = "COMP_VERIFIED_INDC")
+  @Column(
+      name = "COMP_VERIFIED_INDC")
   private String compVerifiedIndc;
 
-  @Column(name = "SCENARIO_VERIFIED_INDC")
+  @Column(
+      name = "SCENARIO_VERIFIED_INDC")
   private String scenarioVerifiedIndc;
 
-  @Column(name = "COMP_INFO_SRC")
+  @Column(
+      name = "COMP_INFO_SRC")
   private String compInfoSrc;
 
-  @Column(name = "MATCH_INDC")
+  @Column(
+      name = "MATCH_INDC")
   private String matchIndc;
 
-  @Column(name = "MATCH_OVERRIDE_INDC")
+  @Column(
+      name = "MATCH_OVERRIDE_INDC")
   private String matchOverrideIndc;
 
-  @Column(name = "REVIEW_REQUIRED_INDC")
+  @Column(
+      name = "REVIEW_REQUIRED_INDC")
   private String reviewReqIndc;
 
   @Transient
   private String saveIndAftrTempLoad;
 
-  @Column(name = "CHILD_REQ_ID")
+  @Column(
+      name = "CHILD_REQ_ID")
   private long childReqId;
 
-  @Column(name = "PAYGO_PROCESS_INDC")
+  @Column(
+      name = "PAYGO_PROCESS_INDC")
   private String paygoProcessIndc;
 
-  @Column(name = "POOL_CMR_INDC")
+  @Column(
+      name = "POOL_CMR_INDC")
   private String poolCmrIndc;
 
   @NoLog
-  @Column(name = "WARN_MSG_SENT_DT")
+  @Column(
+      name = "WARN_MSG_SENT_DT")
   @Temporal(TemporalType.TIMESTAMP)
   private Date warnMsgSentDt;
 
@@ -692,7 +919,9 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
   }
 
   public void setSourceSystId(String sourceSystId) {
-    this.sourceSystId = sourceSystId;
+    if (StringUtils.isNotBlank(sourceSystId)) {
+      this.sourceSystId = sourceSystId;
+    }
   }
 
   public String getDupCmrReason() {
