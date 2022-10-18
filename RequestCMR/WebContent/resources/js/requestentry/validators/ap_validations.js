@@ -4616,10 +4616,15 @@ function addressQuotationValidatorAP() {
     FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'Suburb' ]);
     FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
   }
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ]);
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ]);
 }
 function addressQuotationValidatorGCG() {
   
   var cntry = FormManager.getActualValue('cmrIssuingCntry')
+  
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ]);
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ]);
   switch (cntry) {
   case SysLoc.MACAO: case SysLoc.HONG_KONG:
     FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
