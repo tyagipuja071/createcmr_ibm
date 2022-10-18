@@ -1584,7 +1584,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
         try {
           DPLSearchService dplService = new DPLSearchService();
-          dplService.process(null, params);
+          // dplService.process(null, params);
+          dplService.doProcess(entityManager, null, params);
         } catch (Exception e) {
           this.log.warn("DPL results not attached to the request", e);
         }
