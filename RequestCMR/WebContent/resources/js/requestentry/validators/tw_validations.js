@@ -466,6 +466,8 @@ function setRepTeamMemberNo() {
 }
 function addressQuotationValidator() {
   // CREATCMR-788
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Customer Abbreviated Name' ]);
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Customer Location' ]);
   FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer English Name' ]);
   FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer English Name Con\'t' ]);
   FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Customer Chinese Name' ]);

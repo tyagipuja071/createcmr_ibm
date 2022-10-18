@@ -1403,6 +1403,8 @@ function getCsBranchFromPostalCode(postCd) {
 }
 function addressQuotationValidator() {
   // CREATCMR-788
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ]);
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ]);
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Number + Street' ]);
   FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street con\'t' ]);
   FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
