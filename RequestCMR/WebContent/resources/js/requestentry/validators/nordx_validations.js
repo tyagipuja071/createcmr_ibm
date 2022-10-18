@@ -4901,6 +4901,8 @@ function setVatIndFields(){
 
 // CREATCMR-788
 function addressQuotationValidatorNORS() {
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ]);
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ]);
   FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
   FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
   FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Additional Info' ]);
