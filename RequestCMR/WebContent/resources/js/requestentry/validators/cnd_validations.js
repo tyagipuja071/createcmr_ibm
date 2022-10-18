@@ -45,7 +45,6 @@ function creditCdAndOrderBlockCdHandling() {
   if (reqType == 'U') {
     FormManager.addValidator('creditCd', Validators.REQUIRED, [ 'Credit Code' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('ordBlk', Validators.REQUIRED, [ 'Order Block Code' ], 'MAIN_CUST_TAB');
-    FormManager.enable('ordBlk');
   } else {
     FormManager.resetValidations('clientTier');
     FormManager.resetValidations('ordBlk');
