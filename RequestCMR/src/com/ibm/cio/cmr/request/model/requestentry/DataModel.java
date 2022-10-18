@@ -1258,10 +1258,10 @@ public class DataModel extends BaseModel {
   }
 
   public String getMrktChannelInd() {
-    return MrktChannelInd;
+    return mrktChannelInd;
   }
 
   public void setMrktChannelInd(String mrktChannelInd) {
-    MrktChannelInd = mrktChannelInd;
+    this.mrktChannelInd = mrktChannelInd;
   }
 }
