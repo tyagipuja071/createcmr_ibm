@@ -1578,6 +1578,8 @@ function abbrvLocMandatory() {
   interval = setInterval(function() {
     var role = FormManager.getActualValue('userRole').toUpperCase();
     var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+    FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ]);
+    FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ]);
 
     if (viewOnlyPage != 'true') {
       if (role != 'REQUESTER') {
@@ -1592,6 +1594,8 @@ function abbrvLocMandatory() {
 
 function abbrvLocMandatoryOnChange() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ]);
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ]);
   dojo.connect(FormManager.getField('abbrevLocn'), 'onChange', function(value) {
     if (role != 'REQUESTER') {
       FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'AbbrevLocation' ], 'MAIN_CUST_TAB');
