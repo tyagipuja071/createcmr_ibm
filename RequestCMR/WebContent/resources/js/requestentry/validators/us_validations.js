@@ -1312,8 +1312,28 @@ function addressQuotationValidator() {
   FormManager.addValidator('transportZone', Validators.NO_QUOTATION, [ 'Transport Zone' ]);
   FormManager.addValidator('mainCustNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
   FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name 2' ]);
-
 }
+
+// CREATCMR-7213
+function federalIsicCheck() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custGrp = FormManager.getActualValue('custGrp');
+        var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+        var fedIsic = [ '9', '10', '11' ];
+        if (reqType == 'C' && !fedIsic.includes(custGrp) && subIndustryCd.startsWith('Y')) {
+          genericMsg = 'Federal ISIC cannot be used with Non-Federal sceanrios.';
+          return new ValidationResult(null, false, genericMsg);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
@@ -1368,4 +1388,6 @@ dojo.addOnLoad(function() {
   // CREATCMR-788
   GEOHandler.addAddrFunction(addressQuotationValidator, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.USA ]);
+  // CREATCMR-7213
+  GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
 });
