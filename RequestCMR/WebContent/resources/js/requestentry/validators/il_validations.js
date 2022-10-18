@@ -2715,6 +2715,8 @@ function hasDuplicates(array) {
 
 function addressQuotationValidatorIsrael() {
   // CREATCMR-788
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ]);
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ]);
   FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
   FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
