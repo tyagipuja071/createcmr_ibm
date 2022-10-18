@@ -13,6 +13,9 @@ var Validators = (function() {
           value = input.checked;
         }
       }
+      if (input.type == 'hidden' && input.name == 'searchTerm' && value == '' && value.length == 0) {
+        return new ValidationResult(input, true);
+      }
       if (!value || value == '' || value.length == 0) {
         return new ValidationResult(input, false, MessageMgr.MESSAGES.REQUIRED);
       } else {
@@ -882,7 +885,7 @@ var FormManager = (function() {
               if (inputs[i].checked) {
                 value = inputs[i].value;
                 break;
-              } 
+              }
             } else if (inputs[i].tagName == 'INPUT' && (inputs[i].type == 'checkbox')) {
               if (inputs[i].checked) {
                 value = inputs[i].value;
