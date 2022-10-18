@@ -10463,6 +10463,8 @@ function addCmrNoValidatorForUKI() {
 // CREATCMR-1727
 function addressQuotationValidatorIT() {
   // CREATCMR-788
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
   FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Continuation' ]);
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
@@ -10477,6 +10479,8 @@ function addressQuotationValidatorIT() {
 
 function addressQuotationValidatorUKI() {
   // CREATCMR-788
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
   FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
