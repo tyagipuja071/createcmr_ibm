@@ -41,16 +41,18 @@ function afterConfigForCND() {
 }
 
 function creditCdAndOrderBlockCdHandling() {
-	  var reqType = FormManager.getActualValue('reqType');
-	  if (reqType == 'U') {
-	    FormManager.addValidator('creditCd', Validators.REQUIRED, [ 'Credit Code' ], 'MAIN_CUST_TAB');
-	    FormManager.addValidator('ordBlk', Validators.REQUIRED, [ 'Order Block Code' ], 'MAIN_CUST_TAB');
-	  } else {
-	    FormManager.resetValidations('clientTier');
-	    FormManager.resetValidations('ordBlk');
-	    // FormManager.readOnly('ordBlk');
-	  }
+	var reqType = FormManager.getActualValue('reqType');
+	if (reqType == 'U') {
+		FormManager.addValidator('creditCd', Validators.REQUIRED,
+				[ 'Credit Code' ], 'MAIN_CUST_TAB');
+		FormManager.addValidator('ordBlk', Validators.REQUIRED,
+				[ 'Order Block Code' ], 'MAIN_CUST_TAB');
+	} else {
+		FormManager.resetValidations('clientTier');
+		FormManager.resetValidations('ordBlk');
+		// FormManager.readOnly('ordBlk');
 	}
+}
 
 function setClientTierValues() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
