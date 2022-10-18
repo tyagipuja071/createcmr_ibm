@@ -2096,6 +2096,8 @@ function checkCmrUpdateBeforeImport() {
 }
 // CREATCMR-788
 function addressQuotationValidatorZA() {
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ]);
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ]);
   FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
   FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
   FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Att. Person' ]);
