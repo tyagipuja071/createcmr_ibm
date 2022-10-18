@@ -242,7 +242,7 @@ public class DataModel extends BaseModel {
 
   private String collectorNameNo;
 
-  private String MrktChannelInd;
+  private String mrktChannelInd;
 
   // CH Specific
   private String custLangCd;
