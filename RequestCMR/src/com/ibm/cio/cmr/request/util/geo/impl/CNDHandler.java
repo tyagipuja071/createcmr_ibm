@@ -49,6 +49,8 @@ public class CNDHandler extends GEOHandler {
 
   private static final List<String> CND_ISSUING_COUNTRY_VAL = Arrays.asList("619", "621", "627", "647", "791", "640", "759", "839", "843", "859");
 
+  private EntityManager entityManager;
+
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
@@ -58,6 +60,27 @@ public class CNDHandler extends GEOHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
+    }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setOrdBlk("");
+    } else {
+      data.setOrdBlk(mainRecord.getCmrOrderBlock());
+    }
+
+    try {
+
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+        // retrieve from knvv zterm data on import
+        String creditCd = getRdcCreditCd(mainRecord.getCmrSapNumber());
+
+        if (creditCd != null) {
+          // Miscellaneous Credit Code
+          data.setCreditCd(creditCd);
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("Error occured on setting Credit Code on import.");
+      e.printStackTrace();
     }
   }
 
@@ -263,6 +286,40 @@ public class CNDHandler extends GEOHandler {
     }
 
     return spid;
+  }
+
+  public String getRdcCreditCd(String kunnr) throws Exception {
+
+    String creditCd = "";
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+
+    if (StringUtils.isEmpty(mandt) || StringUtils.isEmpty(kunnr)) {
+      return null;
+    }
+
+    String sql = ExternalizedQuery.getSql("GET.IERP.CREDIT_CD");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("ZTERM");
+    query.addField("MANDT");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing CREDIT_CD value from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      creditCd = record.get("ZTERM") != null ? record.get("ZTERM").toString() : "";
+    }
+
+    return creditCd;
   }
 
   @Override
