@@ -186,6 +186,7 @@ public class GermanyUtil extends AutomationUtil {
               try {
                 String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
                 person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName), data.getCmrIssuingCntry());
+                person = (person == null) ? BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry()) : person;
                 if (person == null) {
                   engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
                   details.append("Employee details not found in IBM BluePages.").append("\n");
