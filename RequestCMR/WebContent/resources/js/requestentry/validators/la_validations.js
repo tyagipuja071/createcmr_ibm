@@ -2709,7 +2709,7 @@ dojo.addOnLoad(function() {
       SysLoc.MEXICO, SysLoc.NICARAGUA, SysLoc.PANAMA, SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY, SysLoc.VENEZUELA ];
   console.log(GEOHandler.LA);
   console.log('adding LA scripts...');
-  GEOHandler.enableCopyAddress(GEOHandler.LA);
+  GEOHandler.enableCopyAddress(GEOHandler.LA, null, [ 'ZP01', 'ZD01', 'ZI01' ]);
   // GEOHandler.registerValidator(addTaxInfoValidator, [ SysLoc.ARGENTINA ],
   // null, false, false);
   GEOHandler.registerValidator(addTaxInfoValidator, [ SysLoc.ARGENTINA /* 613 */], GEOHandler.ROLE_PROCESSOR, false, false);
