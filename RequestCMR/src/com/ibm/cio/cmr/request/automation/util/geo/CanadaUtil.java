@@ -796,6 +796,10 @@ public class CanadaUtil extends AutomationUtil {
               if (addrType.startsWith("ZP")) {
                 LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Addition of new " + addrType + "(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              } else if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+                closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", checkDetails, validation, output);
+              } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+                closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", checkDetails, validation, output);
               } else {
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
                 boolean matchesDnb = false;
@@ -1180,7 +1184,7 @@ public class CanadaUtil extends AutomationUtil {
    */
   private void closelyMatchAddressWithDnbRecords(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       String addrType, StringBuilder details, ValidationOutput validation, AutomationResult<ValidationOutput> output) throws Exception {
-    String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
+    String addrDesc = "ZS01".equals(addrType) ? "Sold-To" : "Install-at";
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
