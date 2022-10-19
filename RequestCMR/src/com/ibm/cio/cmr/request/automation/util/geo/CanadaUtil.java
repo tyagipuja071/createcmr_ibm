@@ -676,7 +676,7 @@ public class CanadaUtil extends AutomationUtil {
         case "ISIC":
         case "Subindustry":
           if (!isicCheckDone) {
-            String error = "Update of ISIC Code should be done via JIRA. Please submit the request in JIRA.\nLink:- https://jsw.ibm.com/projects/CMDE/summary";
+            String error = "This CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle. Thank you. \nJira link https://jsw.ibm.com/projects/CMDE/summary";
             if (StringUtils.isNotBlank(error)) {
               LOG.debug(error);
               output.setDetails(error);
