@@ -319,7 +319,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     scorecard.setFindCmrUsrNm(user.getBluePagesName());
 
     if (!model.isHasDnb()) {
-      if (model.getCmrNo() != null && model.getCmrNo().startsWith("P")) {
+      if ((model.getCmrNo() != null && model.getCmrNo().startsWith("P")) && !SystemLocation.CHINA.equals(model.getIssuingCntry())) {
         scorecard.setFindDnbResult(CmrConstants.DNBSEARCH_NOT_DONE);
       } else {
         scorecard.setFindDnbResult(CmrConstants.RESULT_NO_RESULT);
