@@ -121,8 +121,9 @@ function addDnBSearchValidator() {
         if (isSkipDnbMatching() && ifProspect != 'Y') {
           return new ValidationResult(null, true);
         }
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var result = FormManager.getActualValue('findDnbResult');
-        if (result == '' || result.toUpperCase() == 'NOT DONE') {
+        if ((result == '' || result.toUpperCase() == 'NOT DONE') && cntry != SysLoc.CHINA) {
           return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
         }
         return new ValidationResult(null, true);
