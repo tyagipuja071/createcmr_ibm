@@ -1756,7 +1756,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
   private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
     List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
-    List<String> NON_RELEVANT_ADDRESS_FIELDS_AU = Arrays.asList("Attn", "Phone #", "Customer Name 1", "Customer Name 2");
+    List<String> NON_RELEVANT_ADDRESS_FIELDS_AU = Arrays.asList("Attn", "Phone #", "Customer Name", "Customer Name Con't");
     if (addrChanges == null) {
       return false;
     }
