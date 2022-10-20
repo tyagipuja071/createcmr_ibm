@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -75,46 +76,44 @@ public class CompanyFinder {
     List<CompanyRecordModel> matches = new ArrayList<CompanyRecordModel>();
     if (!StringUtils.isBlank(searchModel.getCmrNo())) {
       matches.addAll(findCMRsViaService(searchModel.getIssuingCntry(), searchModel.getCmrNo(), 3, null));
-    } else {
+    } else if (!isEnglish(searchModel.getName())) {
+      matches.addAll(findCMRs(searchModel));
+      boolean searchDnb = isLowLevelMatched(matches);
+      matches.addAll(findRequests(searchModel));
 
-      if (isLatin(searchModel.getName())) {
-        matches.addAll(findCMRs(searchModel));
-        boolean searchDnb = false;
-        List<String> lowLevelMatches = Arrays.asList("F3", "F4", "F5", "VAT", "DUNS");
-        if (!matches.isEmpty()) {
-          for (CompanyRecordModel cmrMatch : matches) {
-            if (lowLevelMatches.contains(cmrMatch.getMatchGrade())) {
-              searchDnb = true;
-              break;
-            }
-          }
-        }
-        matches.addAll(findRequests(searchModel));
+      if (matches.isEmpty() || searchDnb || "Y".equals(searchModel.getAddDnBMatches())) {
+        matches.addAll(searchDnB(searchModel));
+      }
 
-        if ("Y".equals(searchModel.getAddDnBMatches())) {
-          // make the dnb append available for processors
-          searchDnb = true;
-        }
-        if (matches.isEmpty() || searchDnb) {
-          matches.addAll(searchDnB(searchModel));
-        }
-
-        if (matches.isEmpty() && !StringUtils.isBlank(searchModel.getName())) {
-          // try non latin if country has local lang data
-          if (LOCAL_LANG_COUNTRIES.contains(searchModel.getIssuingCntry())) {
-            LOG.debug("Trying non-latin search on inputs..");
-            matches.addAll(findCMRsNonLatin(searchModel));
-          }
-        }
-
-      } else {
-        LOG.debug("Finding CMRs using local language..");
+      if (matches.isEmpty() && !StringUtils.isBlank(searchModel.getName()) && LOCAL_LANG_COUNTRIES.contains(searchModel.getIssuingCntry())) {
+        // try non latin if country has local lang data
+        LOG.debug("Trying non-latin search on inputs..");
         matches.addAll(findCMRsNonLatin(searchModel));
       }
 
+    } else {
+      LOG.debug("Finding CMRs using local language..");
+      matches.addAll(findCMRsNonLatin(searchModel));
+      if ("Y".equals(searchModel.getAddDnBMatches())) {
+        matches.addAll(searchDnB(searchModel));
+      }
     }
+
     Collections.sort(matches);
     return matches;
+  }
+
+  private static boolean isLowLevelMatched(List<CompanyRecordModel> matches) {
+    List<String> lowLevelMatches = Arrays.asList("F3", "F4", "F5", "VAT", "DUNS");
+
+    return Optional.ofNullable(matches).orElseGet(Collections::emptyList).parallelStream()
+        .anyMatch(cmrMatch -> lowLevelMatches.contains(cmrMatch.getMatchGrade()));
+  }
+
+  private static boolean isEnglish(String text) {
+    CharsetEncoder asciiEncoder = Charset.forName("US-ASCII").newEncoder();
+    CharsetEncoder isoEncoder = Charset.forName("ISO-8859-1").newEncoder();
+    return asciiEncoder.canEncode(text) || isoEncoder.canEncode(text);
   }
 
   /**
