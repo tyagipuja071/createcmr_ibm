@@ -132,6 +132,16 @@ public class UpdateSwitchElement extends ValidatingElement {
         validation.setSuccess(true);
       }
 
+      // CREATCMR-7234
+      if (AutomationUtil.isLegalNameChanged(admin) && !payGoAddredited) {
+        validation.setSuccess(false);
+        validation.setMessage("Review required");
+        String msg = "The request needs further review: Legal name change should be validated.";
+        output.setDetails(msg);
+        engineData.addNegativeCheckStatus(AutomationEngineData.NON_PAYGO_LEGAL_NAME_CHANGE, msg);
+        log.debug(msg);
+      }
+
       log.debug("Validation after data checks: " + validation.isSuccess());
 
       if (!output.isOnError() && changes.hasAddressChanges()) {

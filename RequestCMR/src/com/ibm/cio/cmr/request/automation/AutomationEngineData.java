@@ -48,6 +48,9 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String REQ_MATCH_SCENARIO = "REQ_MATCH_SCENARIO";
   public static final String SKIP_DNB_ORGID_VAL = "_skipDnBOrgIdVald";
   public static final String SKIP_RETRIEVE_VALUES = "_skipRetrieveValues";
+
+  public static final String NON_PAYGO_LEGAL_NAME_CHANGE = "nonPayGoLegalNameChange";
+
   private int trackedNegativeCheckCount;
   private boolean trackNegativeChecks;
   /**
