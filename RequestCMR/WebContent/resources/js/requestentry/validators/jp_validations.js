@@ -5443,7 +5443,7 @@ function resetBPWPQValue() {
 }
 function addressQuotationValidator() {
   // CREATCMR-788
-  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Account Abbreviated Name' ]);
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name-KANJI' ]);
   FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Name-KANJI Continue' ]);
   FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Katakana' ]);
