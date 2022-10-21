@@ -178,23 +178,6 @@ public class GBGMatchingElement extends MatchingElement {
         }
         List<String> emeaCntries = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL, SystemLocation.TURKEY,
             SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
-        if (!domesticGBGFound) {
-          if ((emeaCntries.contains(data.getCmrIssuingCntry()) || SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()))
-              && StringUtils.isBlank(data.getInacCd())) {
-            details.append("Request need to be send to CMDE queue for review.");
-            details.append(
-                "Non-Local gbg found, no available rule(INAC/NAC) found for the country. Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.\n");
-            result.setResults("Matches Found");
-            result.setOnError(true);
-          } else if (StringUtils.isBlank(data.getInacCd())) {
-            details = new StringBuilder();
-            details.append(
-                "Non-Local gbg found, no available rule(INAC/NAC) found for the country. Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.\n");
-            result.setResults("Matches Found");
-            result.setOnError(false);
-          }
-        }
-
         int itemNo = 0;
         for (GBGResponse gbg : gbgMatches) {
           if (gbg.isDomesticGBG()) {
@@ -238,6 +221,28 @@ public class GBGMatchingElement extends MatchingElement {
                 }
               }
               engineData.put(AutomationEngineData.GBG_MATCH, gbg);
+            }
+          } else {
+            itemNo++;
+            details.append("\n");
+            if (gbg.isDnbMatch()) {
+              LOG.debug("Matches found via D&B matching..");
+              details.append("\n").append("Found via DUNS matching:");
+              output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "DUNS-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
+                  itemNo);
+              output.addMatch(getProcessCode(), "BG_ID", gbg.getBgId(), "Derived", "Derived", "GBG", itemNo);
+              output.addMatch(getProcessCode(), "GBG_ID", gbg.getGbgId(), "Derived", "Derived", "GBG", itemNo);
+              output.addMatch(getProcessCode(), "BG_NAME", gbg.getBgName(), "Derived", "Derived", "GBG", itemNo);
+              output.addMatch(getProcessCode(), "GBG_NAME", gbg.getGbgName(), "Derived", "Derived", "GBG", itemNo);
+              details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
+              details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
+              details.append("\n").append("Country: " + gbg.getCountry());
+              details.append("\n").append("CMR Count: " + gbg.getCmrCount());
+              details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
+              details.append("\n").append("IA Account: " + (gbg.getIntAcctType() != null ? gbg.getIntAcctType() : "-"));
+              if (gbg.isDnbMatch()) {
+                details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
+              }
             }
           }
         }
