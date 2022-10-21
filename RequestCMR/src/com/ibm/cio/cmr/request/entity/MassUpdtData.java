@@ -21,9 +21,16 @@ import com.ibm.cio.cmr.request.entity.listeners.NoLog;
  * @author Jeffrey Zamora
  */
 @Entity
-@Table(name = "MASS_UPDT_DATA", schema = "CREQCMR")
+@Table(
+    name = "MASS_UPDT_DATA",
+    schema = "CREQCMR")
 @EntityListeners(ChangeLogListener.class)
-@ChangeLogDetails(childTable = true, reqId = "id.parReqId", logForRequestType = { "E" }, logInserts = true, logDeletes = false)
+@ChangeLogDetails(
+    childTable = true,
+    reqId = "id.parReqId",
+    logForRequestType = { "E" },
+    logInserts = true,
+    logDeletes = false)
 public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -41,64 +48,84 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
     this.id = id;
   }
 
-  @Column(name = "ABBREV_NM")
+  @Column(
+      name = "ABBREV_NM")
   private String abbrevNm;
 
-  @Column(name = "ISIC_CD")
+  @Column(
+      name = "ISIC_CD")
   private String isicCd;
 
-  @Column(name = "OUT_CITY_LIMIT")
+  @Column(
+      name = "OUT_CITY_LIMIT")
   private String outCityLimit;
 
-  @Column(name = "PCC_AR_DEPT")
+  @Column(
+      name = "PCC_AR_DEPT")
   private String pccArDept;
 
-  @Column(name = "RESTRICT_IND")
+  @Column(
+      name = "RESTRICT_IND")
   private String restrictInd;
 
-  @Column(name = "SVC_AR_OFFICE")
+  @Column(
+      name = "SVC_AR_OFFICE")
   private String svcArOffice;
 
-  @Column(name = "AFFILIATE")
+  @Column(
+      name = "AFFILIATE")
   private String affiliate;
 
-  @Column(name = "CSO_SITE")
+  @Column(
+      name = "CSO_SITE")
   private String csoSite;
 
-  @Column(name = "MKTG_DEPT")
+  @Column(
+      name = "MKTG_DEPT")
   private String mktgDept;
 
-  @Column(name = "MISC_BILL_CD")
+  @Column(
+      name = "MISC_BILL_CD")
   private String miscBillCd;
 
-  @Column(name = "ICC_TAX_CLASS")
+  @Column(
+      name = "ICC_TAX_CLASS")
   private String iccTaxClass;
 
-  @Column(name = "ICC_TAX_EXEMPT_STATUS")
+  @Column(
+      name = "ICC_TAX_EXEMPT_STATUS")
   private String iccTaxExemptStatus;
 
-  @Column(name = "TAX_CD1")
+  @Column(
+      name = "TAX_CD1")
   private String taxCd1;
 
-  @Column(name = "TAX_CD2")
+  @Column(
+      name = "TAX_CD2")
   private String taxCd2;
 
-  @Column(name = "TAX_CD3")
+  @Column(
+      name = "TAX_CD3")
   private String taxCd3;
 
-  @Column(name = "TAX_EXEMPT_STATUS_1")
+  @Column(
+      name = "TAX_EXEMPT_STATUS_1")
   private String taxExemptStatus;
 
-  @Column(name = "TAX_EXEMPT_STATUS_2")
+  @Column(
+      name = "TAX_EXEMPT_STATUS_2")
   private String taxExemptStatus2;
 
-  @Column(name = "TAX_EXEMPT_STATUS_3")
+  @Column(
+      name = "TAX_EXEMPT_STATUS_3")
   private String taxExemptStatus3;
 
-  @Column(name = "BP_ACCT_TYP")
+  @Column(
+      name = "BP_ACCT_TYP")
   private String bpAcctTyp;
 
-  @Column(name = "BP_NAME")
+  @Column(
+      name = "BP_NAME")
   private String bpName;
 
   public String getTaxExemptStatus2() {
@@ -125,101 +152,153 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
     this.taxExemptStatus = taxExemptStatus;
   }
 
-  @Column(name = "ISU_CD")
+  @Column(
+      name = "ISU_CD")
   private String isuCd;
 
-  @Column(name = "INAC_CD")
+  @Column(
+      name = "INAC_CD")
   private String inacCd;
 
-  @Column(name = "CLIENT_TIER")
+  @Column(
+      name = "CLIENT_TIER")
   private String clientTier;
 
-  @Column(name = "MKTG_AR_DEPT")
+  @Column(
+      name = "MKTG_AR_DEPT")
   private String mktgArDept;
 
-  @Column(name = "CUST_NM1")
+  @Column(
+      name = "CUST_NM1")
   private String custNm1;
 
-  @Column(name = "CUST_NM2")
+  @Column(
+      name = "CUST_NM2")
   private String custNm2;
 
-  @Column(name = "RESTRICT_TO")
+  @Column(
+      name = "RESTRICT_TO")
   private String restrictTo;
 
-  @Column(name = "ENTERPRISE")
+  @Column(
+      name = "ENTERPRISE")
   private String enterprise;
 
-  @Column(name = "NEW_ENTP")
+  @Column(
+      name = "NEW_ENTP")
   private String newEntp;
 
-  @Column(name = "NEW_ENTP_NAME1")
+  @Column(
+      name = "NEW_ENTP_NAME1")
   private String newEntpName1;
 
-  @Column(name = "NEW_ENTP_NAME2")
+  @Column(
+      name = "NEW_ENTP_NAME2")
   private String newEntpName2;
 
-  @Column(name = "ENTP_UPDT_TYP")
+  @Column(
+      name = "ENTP_UPDT_TYP")
   private String entpUpdtTyp;
 
-  @Column(name = "COMPANY")
+  @Column(
+      name = "COMPANY")
   private String company;
 
-  @Column(name = "VAT")
+  @Column(
+      name = "VAT")
   private String vat;
 
-  @Column(name = "ORD_BLK")
+  @Column(
+      name = "ORD_BLK")
   private String ordBlk;
 
-  @Column(name = "REP_TEAM_MEMBER_NO")
+  @Column(
+      name = "REP_TEAM_MEMBER_NO")
   private String repTeamMemberNo;
 
-  @Column(name = "SALES_BO_CD")
+  @Column(
+      name = "SALES_BO_CD")
   private String salesBoCd;
 
-  @Column(name = "INSTALL_BRANCH_OFF")
+  @Column(
+      name = "INSTALL_BRANCH_OFF")
   private String installBranchOff;
 
-  @Column(name = "MODE_OF_PAYMENT")
+  @Column(
+      name = "MODE_OF_PAYMENT")
   private String modeOfPayment;
 
-  @Column(name = "SPECIAL_TAX_CD")
+  @Column(
+      name = "SPECIAL_TAX_CD")
   private String specialTaxCd;
 
-  @Column(name = "ENGINEERING_BO")
+  @Column(
+      name = "ENGINEERING_BO")
   private String engineeringBo;
 
-  @Column(name = "COLLECTION_CD")
+  @Column(
+      name = "COLLECTION_CD")
   private String collectionCd;
 
-  @Column(name = "ABBREV_LOCN")
+  @Column(
+      name = "ABBREV_LOCN")
   private String abbrevLocn;
 
-  @Column(name = "SUB_INDUSTRY_CD")
+  @Column(
+      name = "SUB_INDUSTRY_CD")
   private String subIndustryCd;
 
-  @Column(name = "CUST_CLASS")
+  @Column(
+      name = "CUST_CLASS")
   private String custClass;
 
-  @Column(name = "CURRENCY_CD")
+  @Column(
+      name = "CURRENCY_CD")
   private String currencyCd;
 
-  @Column(name = "SEARCH_TERM")
+  @Column(
+      name = "SEARCH_TERM")
   private String searchTerm;
 
-  @Column(name = "EMAIL1")
+  @Column(
+      name = "EMAIL1")
   private String email1;
 
-  @Column(name = "EMAIL2")
+  @Column(
+      name = "EMAIL2")
   private String email2;
 
-  @Column(name = "EMAIL3")
+  @Column(
+      name = "EMAIL3")
   private String email3;
 
-  @Column(name = "MILITARY")
+  @Column(
+      name = "MILITARY")
   private String military;
 
-  @Column(name = "EDUC_ALLOW_CD")
+  @Column(
+      name = "EDUC_ALLOW_CD")
   private String educAllowCd;
+
+  @Column(
+      name = "CREDIT_CD")
+  private String creditCode;
+
+  @Column(
+      name = "COLLECTOR_NO")
+  private String collectorNameNo;
+
+  @Column(
+      name = "IBM_BANK_NO")
+  private String ibmBankNumber;
+
+  @Column(
+      name = "COD_CONDITION")
+  private String codCondition;
+
+  @Column(
+      name = "COD_RSN")
+  private String codReason;
 
   public String getAbbrevNm() {
     return this.abbrevNm;
@@ -611,6 +690,46 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
 
   public void setBpName(String bpName) {
     this.bpName = bpName;
+  }
+
+  public String getCreditCode() {
+    return creditCode;
+  }
+
+  public void setCreditCode(String creditCode) {
+    this.creditCode = creditCode;
+  }
+
+  public String getCollectorNameNo() {
+    return collectorNameNo;
+  }
+
+  public void setCollectorNameNo(String collectorNameNo) {
+    this.collectorNameNo = collectorNameNo;
+  }
+
+  public String getIbmBankNumber() {
+    return ibmBankNumber;
+  }
+
+  public void setIbmBankNumber(String ibmBankNumber) {
+    this.ibmBankNumber = ibmBankNumber;
+  }
+
+  public String getCodCondition() {
+    return codCondition;
+  }
+
+  public void setCodCondition(String codCondition) {
+    this.codCondition = codCondition;
+  }
+
+  public String getCodReason() {
+    return codReason;
+  }
+
+  public void setCodReason(String codReason) {
+    this.codReason = codReason;
   }
 
 }

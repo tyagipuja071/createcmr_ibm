@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -39,6 +42,7 @@ import com.ibm.cio.cmr.request.entity.GeoTaxInfo;
 import com.ibm.cio.cmr.request.entity.GeoTaxInfoPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.TaxData;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.auto.BaseV2RequestModel;
 import com.ibm.cio.cmr.request.model.auto.BrazilV2ReqModel;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
@@ -4066,7 +4070,7 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
   }
 
   private List<TaxData> getTaxDataByKunnr(EntityManager entityManager, String kunnr) {
@@ -4246,4 +4250,29 @@ public class LAHandler extends GEOHandler {
 
     return addrSeqSet;
   }
+
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    LOG.debug("inside LA validateMassUpdateTemplateDupFills handler...");
+    XSSFSheet sheet = book.getSheet("Data");
+    if (sheet != null) {
+      TemplateValidation error = new TemplateValidation("Data");
+      XSSFRow row = null;
+      for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+        row = sheet.getRow(rowIndex);
+        if (row != null) {
+          // Validate CMR No
+          String cmrNo = validateColValFromCell(row.getCell(0));
+          if (StringUtils.isBlank(cmrNo)) {
+            error.addError(rowIndex + 1, "<br>CMR No.", "CMR Number is required.");
+          }
+          LOG.debug("validateMassUpdateTemplateDupFills - validating mass update file....");
+        }
+      }
+      if (error.hasErrors()) {
+        validations.add(error);
+      }
+    }
+  }
+
 }
