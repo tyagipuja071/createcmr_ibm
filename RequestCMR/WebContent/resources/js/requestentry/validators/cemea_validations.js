@@ -5163,7 +5163,7 @@ function addressQuotationValidatorCEMEA() {
   var cmrIssueCntry = FormManager.getActualValue('cmrIssuingCntry');
   FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
   if (cmrIssueCntry == '618') {
-    FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Legal name' ]);
     FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Legal Name Continued' ]);
     FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Division/Department' ]);
