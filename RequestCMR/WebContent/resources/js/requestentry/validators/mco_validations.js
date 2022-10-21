@@ -3234,8 +3234,8 @@ function checkCmrUpdateBeforeImport() {
 function addressQuotationValidatorMCO() {
   FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
   FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
-  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ]);
-  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ]);
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
     FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Att. Person' ]);
   } else {
