@@ -128,6 +128,30 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
       name = "BP_NAME")
   private String bpName;
 
+  public String getTaxExemptStatus2() {
+    return taxExemptStatus2;
+  }
+
+  public void setTaxExemptStatus2(String taxExemptStatus2) {
+    this.taxExemptStatus2 = taxExemptStatus2;
+  }
+
+  public String getTaxExemptStatus3() {
+    return taxExemptStatus3;
+  }
+
+  public void setTaxExemptStatus3(String taxExemptStatus3) {
+    this.taxExemptStatus3 = taxExemptStatus3;
+  }
+
+  public String getTaxExemptStatus() {
+    return taxExemptStatus;
+  }
+
+  public void setTaxExemptStatus(String taxExemptStatus) {
+    this.taxExemptStatus = taxExemptStatus;
+  }
+
   @Column(
       name = "ISU_CD")
   private String isuCd;
@@ -275,30 +299,6 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
   @Column(
       name = "COD_RSN")
   private String codReason;
-
-  public String getTaxExemptStatus2() {
-    return taxExemptStatus2;
-  }
-
-  public void setTaxExemptStatus2(String taxExemptStatus2) {
-    this.taxExemptStatus2 = taxExemptStatus2;
-  }
-
-  public String getTaxExemptStatus3() {
-    return taxExemptStatus3;
-  }
-
-  public void setTaxExemptStatus3(String taxExemptStatus3) {
-    this.taxExemptStatus3 = taxExemptStatus3;
-  }
-
-  public String getTaxExemptStatus() {
-    return taxExemptStatus;
-  }
-
-  public void setTaxExemptStatus(String taxExemptStatus) {
-    this.taxExemptStatus = taxExemptStatus;
-  }
 
   public String getAbbrevNm() {
     return this.abbrevNm;
