@@ -357,6 +357,9 @@ public class AutomationEngine {
       admin.setScenarioVerifiedIndc(scenarioVerifiedIndc);
     }
 
+    // CREATCMR-7234
+    String nonPaygoLegalNameChangeStatus = engineData.get().getNegativeCheckStatus(AutomationEngineData.NON_PAYGO_LEGAL_NAME_CHANGE);
+
     if (processWaiting) {
       if (requestData.getAdmin().getChildReqId() > 0) {
         LOG.debug("Adding process waiting comment log.");
@@ -553,45 +556,54 @@ public class AutomationEngine {
                 null);
             // CREATCMR-5447
           } else if (sccIsValid && ("U".equals(admin.getReqType()) || "C".equals(admin.getReqType()))) {
-              String cmt = null;
-              admin.setReqStatus("PPN");
-              StringBuilder rejCmtBuilder = new StringBuilder();
-              rejectInfo = (List<RejectionContainer>) engineData.get().get("rejections");
-              // add comments if request rejected or if pending checks
-              if ((rejectInfo != null && !rejectInfo.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
-                rejCmtBuilder.append("The request needs further review due to some issues found during automated checks");
-                rejCmtBuilder.append(":");
-                rejCmtBuilder.append("\nSCC code for the address is not mapped to SCC table.");
-                for (RejectionContainer rejCont : rejectInfo) {
-                  rejCmtBuilder.append("\n" + rejCont.getRejComment());
-                }
-                // append pending checks
-                for (String pendingCheck : pendingChecks.values()) {
-                  rejCmtBuilder.append("\n ");
-                  rejCmtBuilder.append(pendingCheck);
-                }
-                cmt = rejCmtBuilder.toString();
+            LOG.debug("Moving Request " + reqId + " to PPN");
+            String cmt = null;
+            admin.setReqStatus("PPN");
+            StringBuilder rejCmtBuilder = new StringBuilder();
+            rejectInfo = (List<RejectionContainer>) engineData.get().get("rejections");
+            // add comments if request rejected or if pending checks
+            if ((rejectInfo != null && !rejectInfo.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
+              rejCmtBuilder.append("The request needs further review due to some issues found during automated checks");
+              rejCmtBuilder.append(":");
+              rejCmtBuilder.append("\nSCC code for the address is not mapped to SCC table.");
+              for (RejectionContainer rejCont : rejectInfo) {
+                rejCmtBuilder.append("\n" + rejCont.getRejComment());
+              }
+              // append pending checks
+              for (String pendingCheck : pendingChecks.values()) {
+                rejCmtBuilder.append("\n ");
+                rejCmtBuilder.append(pendingCheck);
+              }
+              cmt = rejCmtBuilder.toString();
 
-                if (cmt.length() > 1930) {
-                  cmt = cmt.substring(0, 1920) + "...";
-                }
-                cmt += "\n\nPlease view system processing results for more details.";
-              } else {
-                cmt = "Automated checks completed successfully.";
+              if (cmt.length() > 1930) {
+                cmt = cmt.substring(0, 1920) + "...";
               }
-              if ("N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
-                createComment(entityManager, "Processing error encountered as data is not company verified.", reqId, appUser);
-              }
-              if (stopExecution) {
-                cmt = "Automated checks stopped execution due to an error reported by one of the processes.";
-              } else {
-                createComment(entityManager, cmt, reqId, appUser);
-              }
-              String histCmt = cmt;
-              if (cmt.length() > 1000) {
-                histCmt = "The request needs further review due to some issues found during automated checks. Check the request comment log and system processing results for details.";
-              }
-              createHistory(entityManager, admin, histCmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false, null);
+              cmt += "\n\nPlease view system processing results for more details.";
+            } else {
+              cmt = "Automated checks completed successfully.";
+            }
+            if ("N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
+              createComment(entityManager, "Processing error encountered as data is not company verified.", reqId, appUser);
+            }
+            if (stopExecution) {
+              cmt = "Automated checks stopped execution due to an error reported by one of the processes.";
+            } else {
+              createComment(entityManager, cmt, reqId, appUser);
+            }
+            String histCmt = cmt;
+            if (cmt.length() > 1000) {
+              histCmt = "The request needs further review due to some issues found during automated checks. Check the request comment log and system processing results for details.";
+            }
+            createHistory(entityManager, admin, histCmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false, null);
+
+          } else if (nonPaygoLegalNameChangeStatus != null) { // CREATCMR-7234
+            LOG.debug("Moving Request " + reqId + " to PPN");
+            admin.setReqStatus("PPN");
+            createComment(entityManager, nonPaygoLegalNameChangeStatus, reqId, appUser);
+            createHistory(entityManager, admin, nonPaygoLegalNameChangeStatus, "PPN", "Automated Processing", reqId, appUser, processingCenter, null,
+                false, null);
+
           } else if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {
