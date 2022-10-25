@@ -2714,8 +2714,8 @@ function vatValidatorUY() {
         var _custGrp = FormManager.getActualValue('custGrp');
         var reqType = FormManager.getActualValue('reqType');
         
-        if(FormManager.getActualValue('cmrIssuingCntry') == '869' && reqType == 'C'){
-          if(_custGrp == 'LOCAL' && taxCd1 !=' '){
+        if(FormManager.getActualValue('cmrIssuingCntry') == '869' && reqType == 'C' || reqType == 'U'){
+          if(_custGrp == 'LOCAL' || _custGrp == '' && taxCd1 !=''){
             if (taxCd1.length > 0 && taxCd1.length <= 12 && !taxCd1.match("/^[a-zA-Z0-9]+$/")) {
               return new ValidationResult(null, true);
             }
@@ -2725,7 +2725,7 @@ function vatValidatorUY() {
               name : 'taxCd1'
             }, false, 'Please note that VAT ID should be MAX 12 characters.');
           } else {
-            if(_custGrp == 'CROSS' && taxCd1 !=' '){
+            if(_custGrp == 'CROSS' && taxCd1 !=''){
              if (taxCd1.length > 12 && !taxCd1.match("/^[a-zA-Z0-9]+$/")) {  
                 return new ValidationResult(null, true);
               }
