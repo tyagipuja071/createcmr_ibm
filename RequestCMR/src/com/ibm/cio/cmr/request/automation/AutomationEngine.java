@@ -527,24 +527,16 @@ public class AutomationEngine {
             pendingChecks.clear();
           }
           // CREATCMR-4872
-          // if (processOnCompletion && (pendingChecks == null ||
-          // pendingChecks.isEmpty())) {
           if (isUsTaxSkipToPpn) {
-            LOG.debug("Moving Request " + reqId + " to PPN");
-            String cmt = "A member outside tax team has updated the Tax fields.";
-            admin.setReqStatus("PPN");
-            createComment(entityManager, cmt, reqId, appUser);
-            createHistory(entityManager, admin, cmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false, null);
+            pendingChecks.put("_ustaxerr", "A member outside tax team has updated the Tax fields.");
             // CREATCMR-5447
-          } else if (isUsEntCompToPpn) {
+          }
+          if (isUsEntCompToPpn) {
             // CREATCMR-6331
-            LOG.debug("Moving Request " + reqId + " to PPN");
-            admin.setReqStatus("PPN");
-            createComment(entityManager, strCmtUsEntCompToPpn, reqId, appUser);
-            createHistory(entityManager, admin, strCmtUsEntCompToPpn, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false,
-                null);
+            pendingChecks.put("_usenttocomp", strCmtUsEntCompToPpn);
             // CREATCMR-5447
-          } else if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
+          }
+          if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {
               // move to PCP
