@@ -118,8 +118,6 @@ function afterConfigForIndia() {
   if(custSubGrp == 'CROSS'){
     FormManager.readOnly('vat');
   }
-  // CREATCMR-7005
-  
 }
 
 function resetGstExempt() {
@@ -258,6 +256,10 @@ function addAfterConfigAP() {
         FormManager.readOnly('clientTier');
         FormManager.setValue('isuCd', '34');
         FormManager.readOnly('isuCd');
+    }
+    var addCustGrpHandler = [ '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '858', '766' ];
+    if (custGrp == 'CROSS' && addCustGrpHandler.includes(cntry)) {
+      FormManager.setValue('custSubGrp', 'CROSS');
     }
   }
   if (reqType == 'C') {
