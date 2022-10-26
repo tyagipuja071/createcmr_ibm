@@ -43,6 +43,7 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cio.cmr.request.util.swiss.SwissUtil;
 
@@ -270,7 +271,7 @@ public class MassChangeTemplate {
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validateSwiss(entityManager, book, country, maxRows, hwFlagMap));
         }
-      } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
+      } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)) {
         if (SystemLocation.GERMANY.equals(country)) {
           XSSFSheet dataSheet = book.getSheet("Data");
           int cmrRecords = 0;

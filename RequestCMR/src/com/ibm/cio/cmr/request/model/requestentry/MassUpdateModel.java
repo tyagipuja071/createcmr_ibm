@@ -183,6 +183,14 @@ public class MassUpdateModel extends BaseModel {
 
   private String bpName;
 
+  private String ibmBankNumber;
+
+  private String codCondition;
+
+  private String codReason;
+
+  private String creditCode;
+
   public String getBpAcctTyp() {
     return bpAcctTyp;
   }
@@ -851,6 +859,38 @@ public class MassUpdateModel extends BaseModel {
 
   public void setEducAllowCd(String educAllowCd) {
     this.educAllowCd = educAllowCd;
+  }
+
+  public String getIbmBankNumber() {
+    return ibmBankNumber;
+  }
+
+  public void setIbmBankNumber(String ibmBankNumber) {
+    this.ibmBankNumber = ibmBankNumber;
+  }
+
+  public String getCodCondition() {
+    return codCondition;
+  }
+
+  public void setCodCondition(String codCondition) {
+    this.codCondition = codCondition;
+  }
+
+  public String getCodReason() {
+    return codReason;
+  }
+
+  public void setCodReason(String codReason) {
+    this.codReason = codReason;
+  }
+
+  public String getCreditCode() {
+    return creditCode;
+  }
+
+  public void setCreditCode(String creditCode) {
+    this.creditCode = creditCode;
   }
 
 }
