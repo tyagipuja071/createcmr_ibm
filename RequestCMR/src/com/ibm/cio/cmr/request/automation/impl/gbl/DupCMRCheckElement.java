@@ -108,13 +108,13 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                 if (custName.equalsIgnoreCase(cmrRecCustName) && cmrCheckRecord.getCmrNo() != null && cmrCheckRecord.getCmrNo().startsWith("P")
                     && "75".equals(cmrCheckRecord.getOrderBlk())) {
                   // rejection code && "75".equals(cmrCheckRecord.getOrdBlk())
-                  result.setDetails(
-                      "There is an existing CMR PXXXX, please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR.");
-                  engineData.addRejectionComment("OTH",
-                      "There is an existing CMR PXXXX, please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR", "", "");
+                  result.setDetails("There is an existing CMR " + cmrCheckRecord.getCmrNo()
+                      + " , please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR.");
+                  engineData.addRejectionComment("OTH", "There is an existing CMR " + cmrCheckRecord.getCmrNo()
+                      + " , please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR", "", "");
                   result.setOnError(true);
-                  result.setResults(
-                      "There is an existing CMR PXXXX, please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR");
+                  result.setResults("There is an existing CMR  " + cmrCheckRecord.getCmrNo()
+                      + " ,  please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR");
                   return result;
                 }
               }
