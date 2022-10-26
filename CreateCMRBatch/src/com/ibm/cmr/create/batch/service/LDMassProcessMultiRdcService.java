@@ -77,6 +77,7 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
   @Override
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
     for (long reqId : requests) {
+      trackRequestLogs(reqId);
       AdminPK pk = new AdminPK();
       pk.setReqId(reqId);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -118,6 +119,7 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
         processError(entityManager, admin, e.getMessage());
       }
     }
+    resetThreadName();
     return null;
   }
 

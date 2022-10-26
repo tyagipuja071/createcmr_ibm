@@ -359,6 +359,7 @@ public class IERPProcessService extends BaseBatchService {
           continue;
         }
         Data data = entity.getEntity(Data.class);
+        Thread.currentThread().setName("REQ-" + data.getId().getReqId());
         // create a entry in request's comment log re_cmt_log table
         if (admin != null && !CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
           createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
@@ -899,6 +900,7 @@ public class IERPProcessService extends BaseBatchService {
         ProfilerLogger.LOG.trace("After monitorCreqcmr for Request ID: " + admin.getId().getReqId() + " "
             + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       }
+      Thread.currentThread().setName("IERPProcess-" + Thread.currentThread().getId());
     }
 
   }

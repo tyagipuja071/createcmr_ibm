@@ -148,6 +148,7 @@ public class MassCreateValidatorService extends BaseBatchService {
     request = qResult.getEntity(Admin.class);
     data = qResult.getEntity(Data.class);
     entityManager.detach(data);
+    Thread.currentThread().setName("REQ-" + request.getId().getReqId());
 
     LOG.debug("Checking latest values for the request..");
     refresh(entityManager, request);
@@ -188,8 +189,7 @@ public class MassCreateValidatorService extends BaseBatchService {
           // For US no need approval
           defaultApprovalResult = "";
         } else {
-          defaultApprovalResult = approvalService.processDefaultApproval(entityManager, request.getId().getReqId(),
-              CmrConstants.REQ_TYPE_MASS_CREATE,
+          defaultApprovalResult = approvalService.processDefaultApproval(entityManager, request.getId().getReqId(), CmrConstants.REQ_TYPE_MASS_CREATE,
               dummyUser, new RequestEntryModel());
           LOG.debug("Default Approval Response Code " + defaultApprovalResult);
         }
@@ -284,9 +284,10 @@ public class MassCreateValidatorService extends BaseBatchService {
 
       partialCommit(entityManager);
     }
-    if("897".equals(data.getCmrIssuingCntry())){
-    	cleanMassCrtPreData(entityManager, request.getId().getReqId(), request.getIterationId());
+    if ("897".equals(data.getCmrIssuingCntry())) {
+      cleanMassCrtPreData(entityManager, request.getId().getReqId(), request.getIterationId());
     }
+    Thread.currentThread().setName("MCValidate-" + Thread.currentThread().getId());
 
   }
 
@@ -370,13 +371,13 @@ public class MassCreateValidatorService extends BaseBatchService {
     query.setParameter("ITER_ID", iterationId);
     return query.exists();
   }
-  
+
   private void cleanMassCrtPreData(EntityManager entityManager, long reqId, int itertionId) {
-	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("US.MASSCRT.CLEANOLDITER"));
-	    query.setParameter("REQ_ID", reqId);
-	    query.setParameter("ITERATION_ID", itertionId);
-	    query.executeSql();
-	  }
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("US.MASSCRT.CLEANOLDITER"));
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ITERATION_ID", itertionId);
+    query.executeSql();
+  }
 
   @Override
   protected boolean isTransactional() {

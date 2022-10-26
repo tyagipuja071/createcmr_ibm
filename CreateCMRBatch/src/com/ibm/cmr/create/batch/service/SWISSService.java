@@ -148,6 +148,7 @@ public class SWISSService extends BaseBatchService {
     Data data = null;
     ProcessRequest request = null;
     for (Long id : requests) {
+      Thread.currentThread().setName("REQ-" + id);
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -213,6 +214,7 @@ public class SWISSService extends BaseBatchService {
       }
       keepAlive();
     }
+    Thread.currentThread().setName("SWISSService-" + Thread.currentThread().getId());
   }
 
   protected List<Long> gatherMassUpdateRequests(EntityManager entityManager) {
@@ -232,6 +234,8 @@ public class SWISSService extends BaseBatchService {
     Data data = null;
     ProcessRequest request = null;
     for (Long id : requests) {
+      Thread.currentThread().setName("REQ-" + id);
+
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -270,6 +274,7 @@ public class SWISSService extends BaseBatchService {
       }
       keepAlive();
     }
+    Thread.currentThread().setName("SWISSService-" + Thread.currentThread().getId());
   }
 
   /**
