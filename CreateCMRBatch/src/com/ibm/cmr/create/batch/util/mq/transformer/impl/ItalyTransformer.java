@@ -1385,7 +1385,7 @@ public class ItalyTransformer extends EMEATransformer {
         crossBorder = isCrossBorder(addr);
         if (crossBorder) {
           landedCountry = addr.getLandCntry();
-          legacyCustExt.setiTaxCode(landedCountry + "" + (!StringUtils.isBlank(data.getVat()) ? data.getVat().substring(2) : ""));
+          legacyCustExt.setiTaxCode((!StringUtils.isBlank(data.getVat()) ? data.getVat() : ""));
         }
       }
     }
@@ -1396,7 +1396,9 @@ public class ItalyTransformer extends EMEATransformer {
     legacyCustExt.setItCodeSSV(!StringUtils.isBlank(data.getCollectionCd()) ? data.getCollectionCd() : "");
 
     // Customer Tab
-    legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
+    if (!"CROSS".equals(data.getCustGrp())) {
+      legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
+    }
     legacyCustExt.setItIVA(!StringUtils.isBlank(data.getSpecialTaxCd()) ? data.getSpecialTaxCd() : "");
     legacyCustExt.setItIdentClient(!StringUtils.isBlank(data.getIdentClient()) ? data.getIdentClient() : "");
 
@@ -1577,7 +1579,7 @@ public class ItalyTransformer extends EMEATransformer {
         cust.setIsuCd(muData.getIsuCd() + "7");
       } else {
         String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+            + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
         if (isuClientTier != null && isuClientTier.endsWith("@")) {
           cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
         } else if (isuClientTier != null && isuClientTier.length() == 3) {
