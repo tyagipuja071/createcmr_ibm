@@ -119,6 +119,52 @@ public class IERPMassProcessService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
+
+    List<Admin> pendingLA = getPendingRecordsRDCLA(entityManager);
+
+    LOG.debug((pendingLA != null ? pendingLA.size() : 0) + " LA records to process to RDc.");
+
+    Data dataLA = null;
+    ProcessRequest requestLA = null;
+    for (Admin admin : pendingLA) {
+
+      try {
+        this.cmrObjects = prepareRequest(entityManager, admin);
+        dataLA = this.cmrObjects.getData();
+
+        requestLA = new ProcessRequest();
+        requestLA.setCmrNo(dataLA.getCmrNo());
+        requestLA.setMandt(SystemConfiguration.getValue("MANDT"));
+        requestLA.setReqId(admin.getId().getReqId());
+        requestLA.setReqType(admin.getReqType());
+        requestLA.setUserId(BATCH_USER_ID);
+
+        switch (admin.getReqType()) {
+        case CmrConstants.REQ_TYPE_MASS_UPDATE:
+          processMassUpdateRequest(entityManager, requestLA, admin, dataLA);
+          break;
+        }
+
+        if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
+          admin.setReqStatus("PPN");
+          admin.setProcessedFlag("E"); // set requestLA status to error.
+          createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin.getId().getReqId());
+        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
+            && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+          admin.setReqStatus("COM");
+          admin.setProcessedFlag("Y"); // set requestLA status to processed
+          createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
+        }
+        partialCommit(entityManager);
+      } catch (Exception e) {
+        partialRollback(entityManager);
+        LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
+        processError(entityManager, admin, e.getMessage());
+      }
+    }
+
     return true;
   }
 
@@ -854,6 +900,12 @@ public class IERPMassProcessService extends TransConnService {
     if (cmrList.size() > 0) {
       RequestUtils.sendMassCreateCMRNotifications(em, cmrList, adminData);
     }
+  }
+
+  private List<Admin> getPendingRecordsRDCLA(EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("LA.GET_MASS_PROCESS_PENDING.RDC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    return query.getResults(Admin.class);
   }
 
 }
