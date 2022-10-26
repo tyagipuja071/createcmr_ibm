@@ -314,6 +314,7 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
     Data data = null;
     ProcessRequest request = null;
     for (Long reqId : idList) {
+      trackRequestLogs(reqId);
       AdminPK pk = new AdminPK();
       pk.setReqId(reqId);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -356,6 +357,7 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
         processError(entityManager, admin, e.getMessage());
       }
     }
+    resetThreadName();
   }
 
   /**

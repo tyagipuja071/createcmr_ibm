@@ -91,10 +91,12 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoResponse;
 
 /**
+ * @deprecated - pls do not use
  * @author PriyRanjan
  * 
  */
 
+@Deprecated
 public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQueue> {
 
   private static final Logger LOG = Logger.getLogger(CloningProcessService.class);

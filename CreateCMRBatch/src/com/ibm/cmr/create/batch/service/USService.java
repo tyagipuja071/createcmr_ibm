@@ -164,6 +164,7 @@ public class USService extends TransConnService {
     Data data = null;
     ProcessRequest request = null;
     for (Long id : requests) {
+      Thread.currentThread().setName("REQ-" + id);
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -231,6 +232,7 @@ public class USService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
+    Thread.currentThread().setName("USService-" + Thread.currentThread().getId());
   }
 
   @Override
@@ -246,6 +248,7 @@ public class USService extends TransConnService {
 
     for (Admin admin : abortedRecords) {
       LOG.info("Processing Aborted Record " + admin.getId().getReqId() + " [Request ID: " + admin.getId().getReqId() + "]");
+      Thread.currentThread().setName("REQ-" + admin.getId().getReqId());
       // get the data
       sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
       query = new PreparedQuery(entityManager, sql);
@@ -303,6 +306,7 @@ public class USService extends TransConnService {
             + e.getMessage() + "]", e);
       }
     }
+    Thread.currentThread().setName("USService-" + Thread.currentThread().getId());
 
   }
 
@@ -319,6 +323,8 @@ public class USService extends TransConnService {
     Data data = null;
     ProcessRequest request = null;
     for (Long id : requests) {
+      Thread.currentThread().setName("REQ-" + id);
+
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -360,6 +366,7 @@ public class USService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
+    Thread.currentThread().setName(getThreadName() + "-" + Thread.currentThread().getId());
   }
 
   /**
@@ -608,11 +615,11 @@ public class USService extends TransConnService {
     createCommentLog(entityManager, admin, statusMessage.toString());
 
     String disableAutoProc = "N";
-    //if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)) {
-    //  disableAutoProc = CmrConstants.YES_NO.Y.toString();
-    //} else {
-    //  disableAutoProc = CmrConstants.YES_NO.N.toString();
-    //}
+    // if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)) {
+    // disableAutoProc = CmrConstants.YES_NO.Y.toString();
+    // } else {
+    // disableAutoProc = CmrConstants.YES_NO.N.toString();
+    // }
 
     // update admin status
     admin.setDisableAutoProc(disableAutoProc);
@@ -653,10 +660,10 @@ public class USService extends TransConnService {
       // Data data = entity.getEntity(Data.class);
       data.setCmrNo(response.getCmrNo());
       updateEntity(data, entityManager);
-    }else{
-    	data.setCmrNo("");
-        updateEntity(data, entityManager);
-        LOG.debug("*** Response CMR_No >> " + response.getCmrNo());
+    } else {
+      data.setCmrNo("");
+      updateEntity(data, entityManager);
+      LOG.debug("*** Response CMR_No >> " + response.getCmrNo());
     }
 
     // update addr
@@ -1355,11 +1362,11 @@ public class USService extends TransConnService {
           RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, reqId, statusMessage.toString().trim());
 
           String disableAutoProc = "N";
-          //if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)) {
-          //  disableAutoProc = CmrConstants.YES_NO.Y.toString();
-          //} else {
-          //  disableAutoProc = CmrConstants.YES_NO.N.toString();
-          //}
+          // if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)) {
+          // disableAutoProc = CmrConstants.YES_NO.Y.toString();
+          // } else {
+          // disableAutoProc = CmrConstants.YES_NO.N.toString();
+          // }
 
           // update admin status
           admin.setDisableAutoProc(disableAutoProc);

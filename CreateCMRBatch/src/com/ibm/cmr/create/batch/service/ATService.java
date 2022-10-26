@@ -138,6 +138,8 @@ public class ATService extends TransConnService {
     Data data = null;
     ProcessRequest request = null;
     for (Long id : requests) {
+      Thread.currentThread().setName("REQ-" + id);
+
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -202,6 +204,8 @@ public class ATService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
+    Thread.currentThread().setName("ATService-" + Thread.currentThread().getId());
+
   }
 
   @Override
@@ -212,6 +216,7 @@ public class ATService extends TransConnService {
     // lockAdminRecordsForProcessing(abortedRecords, entityManager);
 
     for (Long id : requests) {
+      Thread.currentThread().setName("REQ-" + id);
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -272,6 +277,7 @@ public class ATService extends TransConnService {
             + e.getMessage() + "]", e);
       }
     }
+    Thread.currentThread().setName("ATService-" + Thread.currentThread().getId());
 
   }
 
@@ -281,6 +287,7 @@ public class ATService extends TransConnService {
     Data data = null;
     ProcessRequest request = null;
     for (Long id : requests) {
+      Thread.currentThread().setName("REQ-" + id);
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -322,6 +329,7 @@ public class ATService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
+    Thread.currentThread().setName("ATService-" + Thread.currentThread().getId());
   }
 
   /**
