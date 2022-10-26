@@ -4541,6 +4541,15 @@ function setRepTeamMemberNo() {
   }
 }
 
+// CREATCMR-6825
+function setRepTeamMemberNo() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.readOnly('repTeamMemberNo');
+  }
+}
+
 // CREATCMR-6358
 function additionalAddrNmValidator(){
   FormManager.addFormValidator((function() {

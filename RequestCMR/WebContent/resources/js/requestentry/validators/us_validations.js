@@ -338,51 +338,49 @@ function addCreateByModelValidator() {
  * Invoice-to
  */
 function addAddressRecordTypeValidator() {
-  FormManager.addFormValidator(
-      (function() {
-        return {
-          validate : function() {
-            if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.USA) {
-              return new ValidationResult(null, true);
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.USA) {
+          return new ValidationResult(null, true);
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+          return new ValidationResult(null, false, 'Please add an Install At and optionally an Invoice To address to this request.');
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var invoiceToCnt = 0;
+          var installAtCnt = 0;
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
             }
-            if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-              return new ValidationResult(null, false, 'Please add an Install At and optionally an Invoice To address to this request.');
-            }
-            if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-              var record = null;
-              var type = null;
-              var invoiceToCnt = 0;
-              var installAtCnt = 0;
-              for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-                record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-                type = record.addrType;
-                if (typeof (type) == 'object') {
-                  type = type[0];
-                }
-                if (type == 'ZS01') {
-                  installAtCnt++;
-                } else if (type == 'ZI01') {
-                  invoiceToCnt++;
-                }
-              }
-              // if (installAtCnt != 1 ||
-              // CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount >
-              // 2) {
-              // return new ValidationResult(null, false, 'The request should
-              // contain exactly one Install At address and one optional Invoice
-              // To
-              // address.');
-              // }
-              if (installAtCnt != 1 || invoiceToCnt > 1) {
-                return new ValidationResult(null, false,
-                    'The request should contain exactly one Install At address and one optional Invoice To address.');
-              } else {
-                return new ValidationResult(null, true);
-              }
+            if (type == 'ZS01') {
+              installAtCnt++;
+            } else if (type == 'ZI01') {
+              invoiceToCnt++;
             }
           }
-        };
-      })(), 'MAIN_NAME_TAB', 'frmCMR');
+          // if (installAtCnt != 1 ||
+          // CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount >
+          // 2) {
+          // return new ValidationResult(null, false, 'The request should
+          // contain exactly one Install At address and one optional Invoice
+          // To
+          // address.');
+          // }
+          if (installAtCnt != 1 || invoiceToCnt > 1) {
+            return new ValidationResult(null, false, 'The request should contain exactly one Install At address and one optional Invoice To address.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 
 }
 
@@ -404,14 +402,14 @@ function addCtcObsoleteValidator() {
         }
 
         if (reqType == 'C'
-            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z"
-                || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" || clientTier == "0")) {
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S"
+                || clientTier == "N" || clientTier == "C" || clientTier == "0")) {
           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
         } else if (reqType == 'U'
             && oldCtc != null
             && oldCtc != clientTier
-            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z"
-                || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" || clientTier == "0")) {
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S"
+                || clientTier == "N" || clientTier == "C" || clientTier == "0")) {
           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
         } else {
           return new ValidationResult(null, true);
@@ -480,8 +478,7 @@ function afterConfigForUS() {
   var custTypeHandler = null;
   if (custTypeHandler == null) {
     var custTypeHandler = dojo.connect(FormManager.getField('custType'), 'onChange', function(value) {
-      if (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' && FormManager.getActualValue('reqType') == 'C'
-          && FormManager.getActualValue('custType') == '7') {
+      if (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' && FormManager.getActualValue('reqType') == 'C' && FormManager.getActualValue('custType') == '7') {
         FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
       } else {
         FormManager.removeValidator('enterprise', Validators.REQUIRED);
@@ -958,8 +955,8 @@ function addDivStreetCountValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('addrType') != 'ZP01' && FormManager.getActualValue('addrType') != 'ZS01'
-            && FormManager.getActualValue('addrType') != 'ZI01' || FormManager.getActualValue('bpAcctTyp') == 'E') {
+        if (FormManager.getActualValue('addrType') != 'ZP01' && FormManager.getActualValue('addrType') != 'ZS01' && FormManager.getActualValue('addrType') != 'ZI01'
+            || FormManager.getActualValue('bpAcctTyp') == 'E') {
           return new ValidationResult(null, true);
         }
         var count = 0;
@@ -1332,7 +1329,6 @@ function federalIsicCheck() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
-
 
 /* Register US Javascripts */
 dojo.addOnLoad(function() {

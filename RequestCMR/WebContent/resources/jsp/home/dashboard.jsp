@@ -240,7 +240,7 @@
             <a href="<%=SystemConfiguration.getValue("BATCH_CI_SERVICES_URL")+"/service/ping"%>" target="_blank">Ping URL</a>
           </td>
         </tr>
-        <tr>
+          <tr>
           <td>US CMR (US Legacy)</td>
           <td>Secondary</td>
           <td>Retrieves US CMR values and primary point of creation and updates</td>
