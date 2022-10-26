@@ -166,7 +166,7 @@
 					<label>Address Seq. No.</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>17</width>
-					<length>5</length>
+					<length>8</length>
 				</column>
 				<column>
 					<label>Name</label>
@@ -230,7 +230,7 @@
 					<label>Address Seq. No.</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>17</width>
-					<length>5</length>
+					<length>8</length>
 				</column>
 				<column>
 					<label>Name</label>
@@ -294,7 +294,7 @@
 					<label>Address Seq. No.</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>17</width>
-					<length>5</length>
+					<length>8</length>
 				</column>
 				<column>
 					<label>Name</label>
@@ -358,7 +358,7 @@
 					<label>Address Seq. No.</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>17</width>
-					<length>5</length>
+					<length>8</length>
 				</column>
 				<column>
 					<label>Name</label>
