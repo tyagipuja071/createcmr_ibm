@@ -773,12 +773,13 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
         if (service.containsKey("DatabaseService")) {
           JSONObject db = (JSONObject) service.get("DatabaseService");
           JSONObject databases = (JSONObject) db.get("databases");
-          if (databases.containsKey("USCMR")) {
-            String uscmr = (String) databases.get("USCMR");
-            if ("connected".equals(uscmr)) {
-              model.setUsCmr(true);
-            }
-          }
+          // USCMR sunset, remove check
+          // if (databases.containsKey("USCMR")) {
+          // String uscmr = (String) databases.get("USCMR");
+          // if ("connected".equals(uscmr)) {
+          // model.setUsCmr(true);
+          // }
+          // }
           if (databases.containsKey("CRIS")) {
             String cris = (String) databases.get("CRIS");
             if ("connected".equals(cris)) {
@@ -808,6 +809,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
         }
       }
       LOG.debug("CMR Services ping successful");
+      model.setUsCmr(true);
       model.setCmrServices(true);
       return true;
     } catch (Exception e) {

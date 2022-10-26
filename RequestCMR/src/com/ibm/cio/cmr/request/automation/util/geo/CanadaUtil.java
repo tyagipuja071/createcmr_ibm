@@ -914,7 +914,6 @@ public class CanadaUtil extends AutomationUtil {
         }
       }
     }
-
     if (resultCodes.contains("D")) {
       // prioritize duplicates, set error
       output.setOnError(true);
