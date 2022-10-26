@@ -401,6 +401,7 @@ public class MQInterfaceService extends BaseBatchService {
               } else {
                 mqIntfReqQueue = getQueueRecordById(entityManager, uniqueNum);
                 if (mqIntfReqQueue != null) {
+                  Thread.currentThread().setName("MQREQ-" + mqIntfReqQueue.getReqId() + "-" + mqIntfReqQueue.getId().getQueryReqId());
                   LOG.debug("Processing MQ ID " + mqIntfReqQueue.getId().getQueryReqId());
                   msgHandler = MessageHandlerFactory.createMessageHandler(entityManager, mqIntfReqQueue);
                   try {
@@ -431,6 +432,7 @@ public class MQInterfaceService extends BaseBatchService {
       }
       return collectCount;
     }
+    Thread.currentThread().setName("MQService-" + Thread.currentThread().getId());
 
   }
 

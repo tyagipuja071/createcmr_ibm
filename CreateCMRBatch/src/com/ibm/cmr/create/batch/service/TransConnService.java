@@ -234,6 +234,8 @@ public class TransConnService extends BaseBatchService {
 
     for (Long id : abortedRecords) {
       try {
+        Thread.currentThread().setName("REQ-" + id);
+
         long start = new Date().getTime();
         AdminPK pk = new AdminPK();
         pk.setReqId(id);
@@ -269,6 +271,8 @@ public class TransConnService extends BaseBatchService {
         LOG.error("Error in processing Aborted Record wit Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
+    Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
+
   }
 
   /**
@@ -308,6 +312,7 @@ public class TransConnService extends BaseBatchService {
 
     for (Long id : notifyList) {
       try {
+        Thread.currentThread().setName("REQ-" + id);
         long start = new Date().getTime();
         NotifyReqPK pk = new NotifyReqPK();
         pk.setNotifyId(id);
@@ -374,6 +379,8 @@ public class TransConnService extends BaseBatchService {
         LOG.error("Error in processing TransConn Record with Notify ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
+    Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
+
   }
 
   /**
@@ -414,6 +421,8 @@ public class TransConnService extends BaseBatchService {
 
     boolean isError = false;
     for (Long id : mqIntfList) {
+      Thread.currentThread().setName("REQ-" + id);
+
       long start = new Date().getTime();
       MqIntfReqQueuePK pk = new MqIntfReqQueuePK();
       pk.setQueryReqId(id);
@@ -501,6 +510,8 @@ public class TransConnService extends BaseBatchService {
             + e.getMessage() + "]", e);
       }
     }
+    Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
+
   }
 
   /**
@@ -537,6 +548,8 @@ public class TransConnService extends BaseBatchService {
 
     for (Long id : manualRecList) {
       try {
+        Thread.currentThread().setName("REQ-" + id);
+
         long start = new Date().getTime();
         AdminPK pk = new AdminPK();
         pk.setReqId(id);
@@ -564,6 +577,7 @@ public class TransConnService extends BaseBatchService {
         LOG.error("Error in processing Manual Record with Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
+    Thread.currentThread().setName(getThreadName() + "-" + Thread.currentThread().getId());
   }
 
   /**
@@ -603,6 +617,8 @@ public class TransConnService extends BaseBatchService {
     // info CreateCMR, DISABLE_AUTO_PROC = 'Y'
     for (Long id : pvcRecords) {
       try {
+        Thread.currentThread().setName("REQ-" + id);
+
         long start = new Date().getTime();
         AdminPK pk = new AdminPK();
         pk.setReqId(id);
@@ -906,6 +922,7 @@ public class TransConnService extends BaseBatchService {
         LOG.error("Error in processing PVC Record with Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
+    Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
   }
 
   /**
@@ -2983,6 +3000,7 @@ public class TransConnService extends BaseBatchService {
           String sql1 = ExternalizedQuery.getSql("BATCH.FIND_KUNNR");
           PreparedQuery findKunnr = new PreparedQuery(entityManager, sql1);
           Long reqId = (Long) obj[0];
+          Thread.currentThread().setName("REQ-" + reqId);
           findKunnr.setParameter("ZZKV_CUSNO", obj[4]);
           findKunnr.setParameter("KTOKD", mappedAddrType);
           findKunnr.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
@@ -3036,6 +3054,7 @@ public class TransConnService extends BaseBatchService {
             }
 
           }
+          Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
         } else {
           LOG.debug("NO RECORD Fetch For Update KUNNR in Kna1 Table");
         }
@@ -3050,6 +3069,7 @@ public class TransConnService extends BaseBatchService {
 
     for (Long id : reprocessRecords) {
       try {
+        Thread.currentThread().setName("REQ-" + id);
         AdminPK pk = new AdminPK();
         pk.setReqId(id);
         Admin admin = entityManager.find(Admin.class, pk);
@@ -3076,6 +3096,7 @@ public class TransConnService extends BaseBatchService {
         LOG.error("Error in processing Reprocess RDC Record with Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
+    Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
   }
 
   private void setLAAdminToCompleted(Admin admin, Data data) {

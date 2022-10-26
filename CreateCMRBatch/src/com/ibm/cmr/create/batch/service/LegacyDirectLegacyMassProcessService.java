@@ -113,6 +113,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
     // pending = new ArrayList<Admin>();
     for (Admin admin : pending) {
       try {
+        Thread.currentThread().setName("REQ-" + admin.getId().getReqId());
         switch (admin.getReqType()) {
         case CmrConstants.REQ_TYPE_MASS_UPDATE:
           processMassUpdate(entityManager, admin);
@@ -128,6 +129,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
       }
       partialCommit(entityManager);
     }
+    Thread.currentThread().setName("LDMassService-" + Thread.currentThread().getId());
     return true;
   }
 
@@ -1129,8 +1131,8 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
         custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
         custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
         legacyObjects.setCustomerExt(custExt);
-      } else if (transformer != null
-          && (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()) || SystemLocation.KENYA.equals(data.getCmrIssuingCntry()))) {
+      } else if (transformer != null && (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())
+          || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()) || SystemLocation.KENYA.equals(data.getCmrIssuingCntry()))) {
         CmrtCustExtPK custExtPk = null;
         LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
         // Initialize the object

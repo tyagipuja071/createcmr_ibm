@@ -55,6 +55,7 @@ public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long
     Data data = null;
     ProcessRequest request = null;
     for (Long reqId : requests) {
+      trackRequestLogs(reqId);
       AdminPK pk = new AdminPK();
       pk.setReqId(reqId);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -95,6 +96,7 @@ public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long
         processError(entityManager, admin, e.getMessage());
       }
     }
+    resetThreadName();
     return true;
   }
 

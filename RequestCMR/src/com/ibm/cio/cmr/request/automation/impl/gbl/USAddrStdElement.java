@@ -27,7 +27,6 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.ws.TgmeAddrStdService;
 import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.TgmeClient;
 import com.ibm.cmr.services.client.stdcity.County;
@@ -76,133 +75,136 @@ public class USAddrStdElement extends OverridingElement {
       // CREATCMR-5741 - remove addr std
       // this flow is not executed now, keeping for reference
       if (DUMMY_COUNTRY.equals(data.getCmrIssuingCntry())) {
-      String key = addr.getId().getReqId() + "_" + addr.getId().getAddrType() + "_"
-          + (addr.getId().getAddrSeq() != null ? addr.getId().getAddrSeq() : "");
-      // Calling Address Std Service
-      AddressStdRequest requestadd = new AddressStdRequest();
-      requestadd.setSystemId("CreateCMR");
-      requestadd.setAddressId(key);
-      requestadd.setAddressType(addr.getId().getAddrType());
-      requestadd.setCity(addr.getCity1());
-      requestadd.setCountryCode(addr.getLandCntry());
-      requestadd.setCountyCode(addr.getCounty());
-      requestadd.setPostalCode(addr.getPostCd());
-      requestadd.setStateCode(addr.getStateProv());
-      // requestadd.setStateName(addr.getStdCityNm());
-      String street = addr.getAddrTxt();
-      String stateProvDesc = getStateProvDesc(entityManager, addr.getLandCntry(), addr.getStateProv());
-      if (stateProvDesc != null && stateProvDesc.contains(",")) {
-        stateProvDesc = stateProvDesc.split(",")[0];
-      }
-
-      String city = addr.getCity1();
-      if (!StringUtils.isEmpty(addr.getStdCityNm())) {
-        city = addr.getStdCityNm();
-      }
-      requestadd.setCity(city);
-
-      if (!StringUtils.isBlank(addr.getAddrTxt2())) {
-        street += " " + addr.getAddrTxt2();
-      }
-
-      if (!StringUtils.isBlank(street)) {
-        if (street.length() <= 70) {
-          requestadd.setStreet(street);
-        } else {
-          street = street.substring(0, 69);
+        String key = addr.getId().getReqId() + "_" + addr.getId().getAddrType() + "_"
+            + (addr.getId().getAddrSeq() != null ? addr.getId().getAddrSeq() : "");
+        // Calling Address Std Service
+        AddressStdRequest requestadd = new AddressStdRequest();
+        requestadd.setSystemId("CreateCMR");
+        requestadd.setAddressId(key);
+        requestadd.setAddressType(addr.getId().getAddrType());
+        requestadd.setCity(addr.getCity1());
+        requestadd.setCountryCode(addr.getLandCntry());
+        requestadd.setCountyCode(addr.getCounty());
+        requestadd.setPostalCode(addr.getPostCd());
+        requestadd.setStateCode(addr.getStateProv());
+        // requestadd.setStateName(addr.getStdCityNm());
+        String street = addr.getAddrTxt();
+        String stateProvDesc = getStateProvDesc(entityManager, addr.getLandCntry(), addr.getStateProv());
+        if (stateProvDesc != null && stateProvDesc.contains(",")) {
+          stateProvDesc = stateProvDesc.split(",")[0];
         }
-      }
-      requestadd.setStreet(street);
 
-      LOG.debug("Connecting to the AddressStd Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-      AddressStdData tgmeData = null;
-      boolean tgmeError = false;
-      try {
-        AddressStdResponse response = tgmeClient.executeAndWrap(TgmeClient.ADDRESS_STD_APP_ID, requestadd, AddressStdResponse.class);
-        LOG.debug("Response status is " + response.getStatus());
-        if (response.getStatus() != TgmeClient.STATUS_SUCCESSFUL) {
+        String city = addr.getCity1();
+        if (!StringUtils.isEmpty(addr.getStdCityNm())) {
+          city = addr.getStdCityNm();
+        }
+        requestadd.setCity(city);
+
+        if (!StringUtils.isBlank(addr.getAddrTxt2())) {
+          street += " " + addr.getAddrTxt2();
+        }
+
+        if (!StringUtils.isBlank(street)) {
+          if (street.length() <= 70) {
+            requestadd.setStreet(street);
+          } else {
+            street = street.substring(0, 69);
+          }
+        }
+        requestadd.setStreet(street);
+
+        LOG.debug("Connecting to the AddressStd Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+        AddressStdData tgmeData = null;
+        boolean tgmeError = false;
+        try {
+          AddressStdResponse response = tgmeClient.executeAndWrap(TgmeClient.ADDRESS_STD_APP_ID, requestadd, AddressStdResponse.class);
+          LOG.debug("Response status is " + response.getStatus());
+          if (response.getStatus() != TgmeClient.STATUS_SUCCESSFUL) {
+            tgmeError = true;
+          } else {
+            tgmeData = response.getData();
+          }
+        } catch (Exception e) {
+          LOG.warn("Error in connecting to address standardization.", e);
           tgmeError = true;
-        } else {
-          tgmeData = response.getData();
         }
-      } catch (Exception e) {
-        LOG.warn("Error in connecting to address standardization.", e);
-        tgmeError = true;
-      }
-      if (tgmeError) {
-        details.append("Cannot connect to address standardization service at the moment.");
-        tgmeData = new AddressStdData();
-        tgmeData.setTgmeResponseCode("U");
-      }
-      LOG.debug("Tgme Resonse code is : " + tgmeData.getTgmeResponseCode());
-
-      TgmeCodes codeDesc = getTgmeCode(entityManager, tgmeData.getTgmeResponseCode());
-      if (codeDesc != null) {
-        LOG.debug("Address Standardization result : " + codeDesc.getText());
-        details.append("Address Standardization result : " + codeDesc.getText() + "\n");
-      }
-
-      // create data elements for import for Street, City, and Postal Code.
-      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && !"US".equals(addr.getLandCntry())) {
-        details.append(" - Postal Code set to 00000 for Non-US landed country.\n");
-        overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), "00000");
-      } else if (!StringUtils.isBlank(tgmeData.getPostalCode())) {
-        LOG.debug(" Postal code is  : " + tgmeData.getPostalCode());
-        details.append("Postal Code: " + tgmeData.getPostalCode() + "\n");
-        if (tgmeData.getPostalCode().trim().length() > addr.getPostCd().length()) {
-          details.append(" - Postal Code overwritten on request.\n");
-          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), tgmeData.getPostalCode().trim());
+        if (tgmeError) {
+          details.append("Cannot connect to address standardization service at the moment.");
+          tgmeData = new AddressStdData();
+          tgmeData.setTgmeResponseCode("U");
         }
-      }
+        LOG.debug("Tgme Resonse code is : " + tgmeData.getTgmeResponseCode());
 
-      if (!StringUtils.isBlank(tgmeData.getCity())) {
-        LOG.debug("City is : " + tgmeData.getCity());
-        details.append("City: " + tgmeData.getCity() + "\n");
-        if (!tgmeData.getCity().toUpperCase().equals(addr.getCity1().toUpperCase())) {
-          // overrides.addOverride(getProcessCode(),
-          // addr.getId().getAddrType(), "CITY1", addr.getCity1(),
-          // data1.getCity());
+        TgmeCodes codeDesc = getTgmeCode(entityManager, tgmeData.getTgmeResponseCode());
+        if (codeDesc != null) {
+          LOG.debug("Address Standardization result : " + codeDesc.getText());
+          details.append("Address Standardization result : " + codeDesc.getText() + "\n");
         }
-      }
 
-      if (!StringUtils.isBlank(tgmeData.getStreetAddressLine1())) {
-        LOG.debug("Address is : " + tgmeData.getStreetAddressLine1());
-        details.append("Address Line 1: " + tgmeData.getStreetAddressLine1() + "\n");
+        // create data elements for import for Street, City, and Postal Code.
+        if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && !"US".equals(addr.getLandCntry())) {
+          details.append(" - Postal Code set to 00000 for Non-US landed country.\n");
+          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), "00000");
+        } else if (!StringUtils.isBlank(tgmeData.getPostalCode())) {
+          LOG.debug(" Postal code is  : " + tgmeData.getPostalCode());
+          details.append("Postal Code: " + tgmeData.getPostalCode() + "\n");
+          if (tgmeData.getPostalCode().trim().length() > addr.getPostCd().length()) {
+            details.append(" - Postal Code overwritten on request.\n");
+            overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), tgmeData.getPostalCode().trim());
+          }
+        }
+
+        if (!StringUtils.isBlank(tgmeData.getCity())) {
+          LOG.debug("City is : " + tgmeData.getCity());
+          details.append("City: " + tgmeData.getCity() + "\n");
+          if (!tgmeData.getCity().toUpperCase().equals(addr.getCity1().toUpperCase())) {
+            // overrides.addOverride(getProcessCode(),
+            // addr.getId().getAddrType(), "CITY1", addr.getCity1(),
+            // data1.getCity());
+          }
+        }
+
+        if (!StringUtils.isBlank(tgmeData.getStreetAddressLine1())) {
+          LOG.debug("Address is : " + tgmeData.getStreetAddressLine1());
+          details.append("Address Line 1: " + tgmeData.getStreetAddressLine1() + "\n");
+          // overrides.addOverride(getProcessCode(), addr.getId().getAddrType(),
+          // "CITY1", addr.getCity1(), data1.getCity());
+          if (!tgmeData.getStreetAddressLine1().toUpperCase().equals(addr.getAddrTxt().toUpperCase())) {
+            // overrides.addOverride(getProcessCode(),
+            // addr.getId().getAddrType(), "ADDR_TXT", addr.getAddrTxt(),
+            // data1.getStreetAddressLine1());
+          }
+        }
+
+        if (!StringUtils.isBlank(tgmeData.getStreetAddressLine2())) {
+          LOG.debug("Address is : " + tgmeData.getStreetAddressLine2());
+          details.append("AddressLine 2: " + tgmeData.getStreetAddressLine2() + "\n");
+          if (!tgmeData.getStreetAddressLine2().toUpperCase().equals(addr.getAddrTxt2() != null ? addr.getAddrTxt2().toUpperCase() : "")) {
+            // overrides.addOverride(getProcessCode(),
+            // addr.getId().getAddrType(), "ADDR_TXT_2", addr.getAddrTxt2(),
+            // data1.getStreetAddressLine2());
+          }
+        }
+
+        // if (!StringUtils.isBlank(tgmeData.getStateProvinceCode())) {
+        // LOG.debug("State is : " + tgmeData.getStateProvinceCode());
+        // details.append("State/Province Code: " +
+        // tgmeData.getStateProvinceCode() + "\n");
+        // if
+        // (!tgmeData.getStateProvinceCode().toUpperCase().equals(addr.getStateProv().toUpperCase()))
+        // {
+        // // overrides.addOverride(getProcessCode(),
+        // // addr.getId().getAddrType(), "STATE_PROV", addr.getStateProv(),
+        // // data1.getStateProvinceCode());
+        // }
+        // }
+
+        // if (!StringUtils.isBlank(data1.getStateProvinceCode())) {
+        // LOG.debug("State Code determined from TGME: " +
+        // data1.getStateProvinceCode());
         // overrides.addOverride(getProcessCode(), addr.getId().getAddrType(),
-        // "CITY1", addr.getCity1(), data1.getCity());
-        if (!tgmeData.getStreetAddressLine1().toUpperCase().equals(addr.getAddrTxt().toUpperCase())) {
-          // overrides.addOverride(getProcessCode(),
-          // addr.getId().getAddrType(), "ADDR_TXT", addr.getAddrTxt(),
-          // data1.getStreetAddressLine1());
-        }
-      }
-
-      if (!StringUtils.isBlank(tgmeData.getStreetAddressLine2())) {
-        LOG.debug("Address is : " + tgmeData.getStreetAddressLine2());
-        details.append("AddressLine 2: " + tgmeData.getStreetAddressLine2() + "\n");
-        if (!tgmeData.getStreetAddressLine2().toUpperCase().equals(addr.getAddrTxt2() != null ? addr.getAddrTxt2().toUpperCase() : "")) {
-          // overrides.addOverride(getProcessCode(),
-          // addr.getId().getAddrType(), "ADDR_TXT_2", addr.getAddrTxt2(),
-          // data1.getStreetAddressLine2());
-        }
-      }
-
-//      if (!StringUtils.isBlank(tgmeData.getStateProvinceCode())) {
-//        LOG.debug("State is : " + tgmeData.getStateProvinceCode());
-//        details.append("State/Province Code: " + tgmeData.getStateProvinceCode() + "\n");
-//        if (!tgmeData.getStateProvinceCode().toUpperCase().equals(addr.getStateProv().toUpperCase())) {
-//          // overrides.addOverride(getProcessCode(),
-//          // addr.getId().getAddrType(), "STATE_PROV", addr.getStateProv(),
-//          // data1.getStateProvinceCode());
-//        }
-//      }
-
-      // if (!StringUtils.isBlank(data1.getStateProvinceCode())) {
-      // LOG.debug("State Code determined from TGME: " +
-      // data1.getStateProvinceCode());
-      // overrides.addOverride(getProcessCode(), addr.getId().getAddrType(),
-      // "", addr.getStateProv(), data1.getStateProvinceCode());
-      // }
+        // "", addr.getStateProv(), data1.getStateProvinceCode());
+        // }
       }
 
       AddressModel addrModel = new AddressModel();
@@ -327,17 +329,17 @@ public class USAddrStdElement extends OverridingElement {
 
       if ("ZS01".equals(addr.getId().getAddrType())) {
         // only check SCC for ZS01 address
-    	  boolean sccIsValid = false;
-          if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
-            String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
-            if ("N".equals(setPPNFlag)) {
-              sccIsValid = true;
-            }
+        boolean invalidScc = false;
+        if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+          String setPPNFlag = validateForSCC(entityManager, addr.getLandCntry(), addr.getStateProv(), cityToUse, countyCodeToUse);
+          if ("N".equals(setPPNFlag)) {
+            invalidScc = true;
           }
+        }
 
-          if(sccIsValid){
-        	  details.append("\n").append("SCC code for the address is not mapped to SCC table.").append("\n");
-          }
+        if (invalidScc) {
+          hasIssues = true;
+        }
       }
 
       details.append("\n");
@@ -349,7 +351,7 @@ public class USAddrStdElement extends OverridingElement {
       details.append("\n").append(msg).append("\n");
     }
 
-    results.setResults(hasIssues ? "City/County Issu" : "Standardized");
+    results.setResults(hasIssues ? "City/County Issu" : "Validated");
     results.setDetails(details.toString());
     results.setProcessOutput(overrides);
     results.setOnError(false);
@@ -407,18 +409,33 @@ public class USAddrStdElement extends OverridingElement {
       county = "0";
     }
 
-    String sql2 = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
-    PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
-    query2.setParameter("LAND_CNTRY", landCntry);
-    query2.setParameter("N_ST", stateProv);
-    query2.setParameter("C_CNTY", county);
-    query2.setParameter("N_CITY", city1.toUpperCase());
+    if ("US".equals(landCntry)) {
+      String sql2 = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
+      PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+      query2.setParameter("LAND_CNTRY", landCntry);
+      query2.setParameter("N_ST", stateProv);
+      query2.setParameter("C_CNTY", county);
+      query2.setParameter("N_CITY", city1.toUpperCase());
 
-    List<Object[]> results2 = query2.getResults();
-    if (results2 != null && !results2.isEmpty()) {
-      Object[] result = results2.get(0);
-      if (!"".equals(result[0])) {
-        flag = "Y";
+      List<Object[]> results2 = query2.getResults();
+      if (results2 != null && !results2.isEmpty()) {
+        Object[] result = results2.get(0);
+        if (!"".equals(result[0])) {
+          flag = "Y";
+        }
+      }
+    } else {
+      String sql2 = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY_NON_US");
+      PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+      query2.setParameter("LAND_CNTRY", landCntry);
+      query2.setParameter("N_CITY", city1);
+
+      List<Object[]> results2 = query2.getResults();
+      if (results2 != null && !results2.isEmpty()) {
+        Object[] result = results2.get(0);
+        if (!"".equals(result[0])) {
+          flag = "Y";
+        }
       }
     }
 
