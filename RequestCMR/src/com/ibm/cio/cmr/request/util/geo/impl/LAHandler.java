@@ -19,7 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
@@ -64,10 +65,12 @@ import com.ibm.cio.cmr.request.service.requestentry.GeoContactInfoService;
 import com.ibm.cio.cmr.request.service.requestentry.TaxInfoService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CROSServiceClient;
@@ -103,6 +106,9 @@ public class LAHandler extends GEOHandler {
   private static final String[] BRAZIL_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Division", "LocalTax1" };
 
   private static final String[] LA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Enterprise", "PPSCEID", "SitePartyID" };
+
+  protected static final String[] LA_MASS_UPDATE_SHEET_NAMES = { "Sold-To", "Bill-To", "Ship-To", "Install-At", "Email", "AccountReceivable",
+      "Data" };
 
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
@@ -4252,25 +4258,169 @@ public class LAHandler extends GEOHandler {
   }
 
   @Override
-  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country, Admin admin) {
     LOG.debug("inside LA validateMassUpdateTemplateDupFills handler...");
-    XSSFSheet sheet = book.getSheet("Data");
-    if (sheet != null) {
-      TemplateValidation error = new TemplateValidation("Data");
-      XSSFRow row = null;
-      for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-        row = sheet.getRow(rowIndex);
-        if (row != null) {
-          // Validate CMR No
-          String cmrNo = validateColValFromCell(row.getCell(0));
-          if (StringUtils.isBlank(cmrNo)) {
-            error.addError(rowIndex + 1, "<br>CMR No.", "CMR Number is required.");
+
+    XSSFCell currCell = null;
+    boolean isDataFilled = false;
+    boolean isARFilled = false;
+    boolean isEmailFilled = false;
+    boolean requesterFromCmdeGsi = false;
+    boolean requesterFromAcctReciv = false;
+    Map<String, HashSet<String>> mapCmrSeq = new HashMap<String, HashSet<String>>();
+
+    String strRequesterId = admin.getRequesterId().toLowerCase();
+    String groups = SystemParameters.getString("LA_CME_GSI_LIST");
+    requesterFromCmdeGsi = BluePagesHelper.isUserInLaBlueGroup(strRequesterId, groups);
+    LOG.debug("requester from cmde/gsi : " + requesterFromCmdeGsi);
+
+    groups = SystemParameters.getString("LA_AR_LIST");
+    requesterFromAcctReciv = BluePagesHelper.isUserInLaBlueGroup(strRequesterId, groups);
+    LOG.debug("requester from acct receivable : " + requesterFromAcctReciv);
+
+    for (String name : LA_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);
+      LOG.debug("validating for sheet " + name);
+      if (sheet != null) {
+        TemplateValidation error = new TemplateValidation(name);
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            String cmrNo = "";
+            String abbrevname = "";
+            String subindustry = "";
+            String isic = "";
+            String inac = "";
+            String company = "";
+            String isu = "";
+            String clientTier = "";
+            String sbo = "";
+            String kukla = "";
+            String blockCode = "";
+            String vat = "";
+            String creditCode = "";
+            String codCondition = "";
+            String codReason = "";
+            String collection = "";
+            String collector = "";
+            String paymentMode = "";
+            String email1 = "";
+            String email2 = "";
+            String email3 = "";
+
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              abbrevname = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              subindustry = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              isic = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              inac = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              company = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              isu = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              clientTier = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              sbo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              kukla = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              blockCode = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(11);
+              vat = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(abbrevname) || StringUtils.isNotBlank(subindustry) || StringUtils.isNotBlank(isic)
+                  || StringUtils.isNotBlank(inac) || StringUtils.isNotBlank(company) || StringUtils.isNotBlank(isu)
+                  || StringUtils.isNotBlank(clientTier) || StringUtils.isNotBlank(sbo) || StringUtils.isNotBlank(kukla)
+                  || StringUtils.isNotBlank(blockCode) || StringUtils.isNotBlank(vat)) {
+                isDataFilled = true;
+              }
+
+              if (!requesterFromCmdeGsi) {
+                if (isDataFilled) {
+                  LOG.trace("User is not allowed to perform update on this tab.");
+                  error.addError(row.getRowNum() + 1, "", "User is not allowed to perform update on this tab." + "<br>");
+                }
+              }
+
+              if ((isDataFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              } else if (mapCmrSeq.containsKey(cmrNo)) {
+                error.addError(row.getRowNum() + 1, "<br>CMR No.", "Duplicate CMR No. It should be entered only once.");
+              } else {
+                mapCmrSeq.put(cmrNo, new HashSet<String>());
+              }
+            }
+
+            if ("AccountReceivable".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              creditCode = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              codCondition = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              codReason = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              collection = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              collector = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              paymentMode = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(creditCode) || StringUtils.isNotBlank(codCondition) || StringUtils.isNotBlank(codReason)
+                  || StringUtils.isNotBlank(collection) || StringUtils.isNotBlank(collector) || StringUtils.isNotBlank(paymentMode)) {
+                isARFilled = true;
+              }
+
+              if (!requesterFromAcctReciv) {
+                if (isARFilled) {
+                  LOG.trace("User is not allowed to perform update on this tab.");
+                  error.addError(row.getRowNum() + 1, "", "User is not allowed to perform update on this tab." + "<br>");
+                }
+              }
+
+              if ((isARFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+            }
+
+            if ("Email".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              email1 = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              email2 = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              email3 = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(email1) || StringUtils.isNotBlank(email2) || StringUtils.isNotBlank(email3)) {
+                isEmailFilled = true;
+              }
+
+              if ((isEmailFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+            }
+
           }
-          LOG.debug("validateMassUpdateTemplateDupFills - validating mass update file....");
+        } // end row loop
+
+        if (error.hasErrors()) {
+          validations.add(error);
         }
-      }
-      if (error.hasErrors()) {
-        validations.add(error);
       }
     }
   }
