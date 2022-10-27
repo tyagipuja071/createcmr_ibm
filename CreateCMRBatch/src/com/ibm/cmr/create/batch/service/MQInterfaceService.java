@@ -430,9 +430,9 @@ public class MQInterfaceService extends BaseBatchService {
           saveUnrecognizedMsg(xmlString);
         }
       }
+      Thread.currentThread().setName("MQService-" + Thread.currentThread().getId());
       return collectCount;
     }
-    Thread.currentThread().setName("MQService-" + Thread.currentThread().getId());
 
   }
 
