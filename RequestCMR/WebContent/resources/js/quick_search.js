@@ -71,6 +71,8 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
   };
 
   $scope.findCompanies = function() {
+    console.log(issuingCntry.value);
+    $scope.issuingCntryText = issuingCntry.value;
     if (!FormManager.validate('frmCMR')) {
       return;
     }
