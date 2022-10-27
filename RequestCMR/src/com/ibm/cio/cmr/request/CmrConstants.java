@@ -122,7 +122,11 @@ public class CmrConstants {
     /**
      * VAT Address
      */
-    ZVAT
+    ZVAT,
+    /**
+     * Secondary Sold-To (AT)
+     */
+    ZS03
   }
 
   public static final String RESULT_ACCEPTED = "Accepted";
