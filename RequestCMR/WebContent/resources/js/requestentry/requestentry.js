@@ -911,7 +911,7 @@ function afterConfigChange() {
       }
       FormManager.disable('func');
       FormManager.readOnly('cmrNo');
-    }
+    } 
   }
 
   // populate the country name field when the county code is chosen

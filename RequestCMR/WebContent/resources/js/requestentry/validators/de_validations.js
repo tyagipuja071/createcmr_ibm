@@ -1222,5 +1222,4 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.DE);
-
 });
