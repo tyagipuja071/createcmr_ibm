@@ -375,24 +375,6 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
 
   }
 
-  public int checkActiveRecords(EntityManager entityManager, String cmrNo, String issuingCountry, String mandt) {
-    // query the active records
-    int cmrLimit = 0;
-    String sql = ExternalizedQuery.getSql("BATCH.MA.GET.CMR_ACTIVE_RECORDS");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("CMR_NO", cmrNo);
-    query.setParameter("KATR6", issuingCountry);
-    query.setParameter("MANDT", mandt);
-
-    Integer result = (Integer) query.getSingleResult(Object.class);
-
-    if (result > 1000) {
-      cmrLimit = (int) Math.floor(result / 1000.00);
-    }
-
-    return cmrLimit;
-  }
-
   /**
    * Query the active records under that cmrNo and order them by kunnr
    * 
