@@ -158,7 +158,7 @@ function addAfterConfigForSWISS() {
         setVatValidatorSWISS();
       }
     }
-  }
+  }  
 }
 
 function resetAddrTypeValidation() {
@@ -1941,5 +1941,4 @@ dojo.addOnLoad(function() {
   
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.SWISS);
-  
 });

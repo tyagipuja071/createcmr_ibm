@@ -5,7 +5,7 @@ var _reqReasonHandler = null;
 
 function afterConfigForNL() {
   var reqType = FormManager.getActualValue('reqType');
-  var role = null;
+  var role = null;  
   FormManager.readOnly('capInd');
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
