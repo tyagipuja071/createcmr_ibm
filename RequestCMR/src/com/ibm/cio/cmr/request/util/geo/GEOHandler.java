@@ -829,6 +829,9 @@ public abstract class GEOHandler {
     // NO OP
   }
 
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country, Admin admin) {
+  }
+
   public void convertDnBImportValues(EntityManager entityManager, Admin admin, Data data) {
     // noop
   }

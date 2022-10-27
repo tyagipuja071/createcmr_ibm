@@ -215,7 +215,7 @@ public class BluePagesHelper {
    * @param name
    * @return First and Last name as a single String
    */
-    public static Map<String, String> getBluePagesDetailsByName(String name, String country) {
+  public static Map<String, String> getBluePagesDetailsByName(String name, String country) {
 
     List<BPResults> allResults = new ArrayList<BPResults>();
     BPResults rearrangedNameResuls = null;
@@ -669,6 +669,25 @@ public class BluePagesHelper {
     }
     rearrangedNames.add(rearrangedName.trim());
     return rearrangedNames;
+  }
+
+  public static boolean isUserInLaBlueGroup(String intranetId, String groups) {
+    cwa2 bpAPI = new cwa2();
+    if (!StringUtils.isEmpty(groups)) {
+      String[] blueGroups = groups.split(",");
+      ReturnCode retCode = null;
+      for (String blueGroup : blueGroups) {
+        if (bpAPI.groupExist(blueGroup.trim())) {
+          retCode = bpAPI.inAGroup(intranetId, blueGroup);
+          if (cwaapi.SUCCESS.equals(retCode)) {
+            return true;
+          }
+        } else {
+          LOG.debug("Group " + blueGroup + " does not exist. Skipping.");
+        }
+      }
+    }
+    return false;
   }
 
 }
