@@ -375,6 +375,15 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
 
   }
 
+  /**
+   * Query the active records under that cmrNo and order them by kunnr
+   * 
+   * @param entityManager
+   * @param cmrNo
+   * @param issuingCountry
+   * @param mandt
+   * @return
+   */
   public int checkActiveRecords(EntityManager entityManager, String cmrNo, String issuingCountry, String mandt) {
     // query the active records
     int cmrLimit = 0;

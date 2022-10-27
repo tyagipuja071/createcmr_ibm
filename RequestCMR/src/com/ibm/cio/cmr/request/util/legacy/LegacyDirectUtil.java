@@ -842,6 +842,48 @@ public class LegacyDirectUtil {
     }
   }
 
+  public static void checkNordxlMassTemplate(List<TemplateTab> tabs, XSSFWorkbook book, String country) throws Exception {
+    // CREATCMR-2673
+    String cmrCountry = "";
+    String errMsg = "";
+
+    switch (country) {
+    case (SystemLocation.DENMARK):
+      cmrCountry = "DK";
+      break;
+    case (SystemLocation.NORWAY):
+      cmrCountry = "NO";
+      break;
+    case (SystemLocation.SWEDEN):
+      cmrCountry = "SE";
+      break;
+    case (SystemLocation.FINLAND):
+      cmrCountry = "FI";
+      break;
+    }
+
+    if (!"".equals(cmrCountry)) {
+      errMsg = "Invalid Template. Only MassUpdateTemplateAuto" + cmrCountry + " is accepted.";
+    }
+
+    for (TemplateTab templateTab : tabs) {
+      XSSFSheet sheet = book.getSheet(templateTab.getName());
+      if (sheet == null) {
+        throw new Exception(errMsg);
+      } else {
+        if ("Data".equals(templateTab.getName())) {
+          if (!StringUtils.isEmpty(sheet.getRow(0).getCell(17).toString())) {
+            if (!sheet.getRow(0).getCell(17).toString().contains(cmrCountry)) {
+              throw new Exception(errMsg);
+            }
+          }
+        }
+        break;
+      }
+
+    }
+  }
+
   public static List<MassUpdtAddr> getMassUpdtAddrsForDPLCheck(EntityManager entityManager, String reqId, String iterId) {
     String sql = ExternalizedQuery.getSql("GET.LD_MASS_UPDT_FOR_DPL_CHECK");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1167,10 +1209,10 @@ public class LegacyDirectUtil {
     /*
      * fields covered
      */
-    // â€¢ Fiscal code >> NEW_ENTP_NAME1
-    // â€¢ Vat# >> VAT
-    // â€¢ Intent. Cliente >> OUT_CITY_LIMIT
-    // â€¢ Enterprise number >> ENTERPRISE
+    // â€?Fiscal code >> NEW_ENTP_NAME1
+    // â€?Vat# >> VAT
+    // â€?Intent. Cliente >> OUT_CITY_LIMIT
+    // â€?Enterprise number >> ENTERPRISE
     if (!StringUtils.isBlank(muData.getNewEntpName1()) || !StringUtils.isBlank(muData.getVat()) || !StringUtils.isBlank(muData.getOutCityLimit())
         || !StringUtils.isBlank(muData.getEnterprise())) {
       isITCompanyLevelMassUpdateEnabled = true;

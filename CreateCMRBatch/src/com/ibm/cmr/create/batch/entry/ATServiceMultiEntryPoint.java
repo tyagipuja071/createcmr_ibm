@@ -17,12 +17,15 @@ public class ATServiceMultiEntryPoint extends BatchEntryPoint {
     service.setMode(Mode.Aborted);
     service.execute();
 
+    service.setSkipExit(false);
     service.setMode(Mode.Normal);
     service.execute();
 
-    service.setSkipExit(false);
-    service.setMode(Mode.Mass);
-    service.execute();
+    if (args != null && args.length > 0 && "MASS".equals(args[0])) {
+      service.setSkipExit(false);
+      service.setMode(Mode.Mass);
+      service.execute();
+    }
 
   }
 }
