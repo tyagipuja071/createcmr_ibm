@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -35,6 +36,8 @@ public class RequestChangeContainer {
   private List<UpdatedNameAddrModel> addressUpdates;
   private long reqId;
   private Admin admin;
+
+  private static final Logger LOG = Logger.getLogger(RequestChangeContainer.class);
 
   private static final List<String> SKIP_RETRIEVE_VALUE_FIELDS_COUNTRIES = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND,
       SystemLocation.FRANCE, SystemLocation.GERMANY, SystemLocation.AUSTRIA, SystemLocation.SWITZERLAND, SystemLocation.SPAIN);
@@ -82,6 +85,8 @@ public class RequestChangeContainer {
       for (UpdatedDataModel data : ibmDataList) {
         if (!StringUtils.isBlank(data.getNewData()) || !StringUtils.isBlank(data.getOldData())) {
           this.dataUpdates.add(data);
+          LOG.debug("Changes for RequestId:-" + reqId + "Filed:-" + data.getDataField() + "Old value:-" + data.getOldData() + "New value:-"
+              + data.getNewData());
         }
       }
     }
@@ -90,6 +95,8 @@ public class RequestChangeContainer {
       for (UpdatedDataModel data : customerDataList) {
         if (!StringUtils.isBlank(data.getNewData()) || !StringUtils.isBlank(data.getOldData())) {
           this.dataUpdates.add(data);
+          LOG.debug("Changes for RequestId:-" + reqId + "Filed:-" + data.getDataField() + "Old value:-" + data.getOldData() + "New value:-"
+              + data.getNewData());
         }
       }
     }
@@ -101,6 +108,8 @@ public class RequestChangeContainer {
         if (!StringUtils.isBlank(addr.getNewData()) || !StringUtils.isBlank(addr.getOldData())
             || (!StringUtils.isBlank(addr.getSapNumber()) && ("[removed]".equals(addr.getSapNumber()) || "[new]".equals(addr.getSapNumber())))) {
           this.addressUpdates.add(addr);
+          LOG.debug("Changes for RequestId:-" + reqId + "Address Seq:-" + addr.getAddrSeq() + "Old value:-" + addr.getOldData() + "New value:-"
+              + addr.getNewData());
         }
       }
     }
