@@ -872,27 +872,35 @@ var FormManager = (function() {
       } catch (e) {
 
       }
-      if (!value) {
-        try {
-          value = dojo.byId(id).value;
-        } catch (e) {
-
-        }
-      }
-      // try radio or checkboxes
-      if (!value) {
-        var inputs = document.getElementsByName(id);
-        if (inputs && inputs.length) {
-          for (var i = 0; i < inputs.length; i++) {
-            if (inputs[i].tagName == 'INPUT' && (inputs[i].type == 'radio' || inputs[i].type == 'checkbox')) {
-              if (inputs[i].checked) {
-                value = inputs[i].value;
-                break;
-              }
+     // try radio or checkboxes
+     if (!value) {
+      var inputs = document.getElementsByName(id);
+      if (inputs && inputs.length) {
+        for (var i = 0; i < inputs.length; i++) {
+          if (inputs[i].tagName == 'INPUT' && (inputs[i].type == 'radio')) {
+            if (inputs[i].checked) {
+              value = inputs[i].value;
+              break;
+            } 
+          } else if (inputs[i].tagName == 'INPUT' && (inputs[i].type == 'checkbox')) {
+            if (inputs[i].checked) {
+              value = inputs[i].value;
+              return value;
+            } else {
+              value = '';
+              return value;
             }
           }
         }
       }
+    }
+    if (!value) {
+      try {
+        value = dojo.byId(id).value;
+      } catch (e) {
+
+      }
+    }
       if (value) {
         value = dojo.string.trim(value);
       } else {
