@@ -6723,6 +6723,20 @@ function setVATOnIdentClientChangeIT() {
     } else if ((ident == 'A' || ident == 'D' || ident == 'C') && checkImportIndc == 'Y') {
       FormManager.readOnly('vat');
     }
+    if (ident == 'N') {
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'vat' ], 'MAIN_CUST_TAB');
+      FormManager.enable('vat');
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      FormManager.setValue('taxCd1', '');
+      FormManager.readOnly('taxCd1');
+    } else if (ident == 'Y') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vat', '');
+      FormManager.readOnly('vat');
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      FormManager.setValue('taxCd1', '');
+      FormManager.readOnly('taxCd1');
+    }
 
   }
 
@@ -8955,10 +8969,16 @@ function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
       var checkImportIndc = getImportedIndcForItaly();
       FormManager.enable('identClient');
       if (ident == 'N') {
-        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Fiscal Code' ], 'MAIN_CUST_TAB');
-        FormManager.enable('taxCd1');
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'vat' ], 'MAIN_CUST_TAB');
+        FormManager.enable('vat');
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+        FormManager.setValue('taxCd1', '');
+        FormManager.readOnly('taxCd1');
       } else if (ident == 'Y') {
-        FormManager.resetValidations('taxCd1');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.setValue('vat', '');
+        FormManager.readOnly('vat');
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
         FormManager.setValue('taxCd1', '');
         FormManager.readOnly('taxCd1');
       }
@@ -10757,9 +10777,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.ITALY, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
-  // CREATCMR-1727
-  GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
-
   // CREATCMR-1727
   GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.UK, SysLoc.IRELAND ], null, true);

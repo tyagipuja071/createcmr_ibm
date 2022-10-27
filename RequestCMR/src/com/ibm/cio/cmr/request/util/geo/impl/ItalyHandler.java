@@ -963,12 +963,9 @@ public class ItalyHandler extends BaseSOFHandler {
     data.setCrosSubTyp(customerType);
 
     if (!"IT".equals(countryLanded)) {
-      data.setVat("");
-      if (!StringUtils.isEmpty(fiscalCode) && fiscalCode.length() > 2) {
-        if (fiscalCode.matches("^[A-Z]{2}.*"))
-          data.setTaxCd1(fiscalCode.substring(2));
-        else
-          data.setTaxCd1(fiscalCode);
+      data.setTaxCd1("");
+      if (!StringUtils.isEmpty(vat) && vat.length() > 2) {
+        data.setVat(vat);
       }
     }
 
