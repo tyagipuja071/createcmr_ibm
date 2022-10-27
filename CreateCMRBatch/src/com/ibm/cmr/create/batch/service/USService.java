@@ -366,7 +366,7 @@ public class USService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
-    Thread.currentThread().setName(getThreadName() + "-" + Thread.currentThread().getId());
+    Thread.currentThread().setName("USService-" + Thread.currentThread().getId());
   }
 
   /**

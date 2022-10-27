@@ -577,7 +577,7 @@ public class TransConnService extends BaseBatchService {
         LOG.error("Error in processing Manual Record with Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
-    Thread.currentThread().setName(getThreadName() + "-" + Thread.currentThread().getId());
+    Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
   }
 
   /**

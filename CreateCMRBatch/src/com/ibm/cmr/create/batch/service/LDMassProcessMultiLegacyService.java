@@ -134,8 +134,8 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
       partialCommit(entityManager);
     }
     ChangeLogListener.clean();
-    return true;
     resetThreadName();
+    return true;
   }
 
   /**
