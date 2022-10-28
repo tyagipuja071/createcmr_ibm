@@ -447,7 +447,7 @@ function afterConfigForUKI() {
     FormManager.resetValidations('collectionCd');
   }
 
-  optionalRuleForVatUK();
+  //optionalRuleForVatUK();
 
   // CREATCMR-1727
   cmrNoEnableForUKI();
@@ -487,7 +487,7 @@ function afterConfigForUKI() {
         autoSetSBO(_custType, custTypeinDB);
         autoSetAbbrevLocnOnChangeUKI();
         autoSetISUClientTierUK();
-        optionalRuleForVatUK();
+        //optionalRuleForVatUK();
         autoSetAbbrNameUKI();
         autoSetUIFieldsOnScnrioUKI();
       }
@@ -511,7 +511,7 @@ function afterConfigForUKI() {
       } else {
         console.log(">>> Process vatExempt add * >> ");
         if ("C" == FormManager.getActualValue('reqType') && getZS01LandCntry() != 'GB') {
-          FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+         // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
         }
         FormManager.enable('vat');
       }
