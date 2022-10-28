@@ -33,7 +33,6 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
-import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
@@ -76,7 +75,6 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CROSServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
-import com.ibm.cmr.services.client.cros.CROSAddress;
 import com.ibm.cmr.services.client.cros.CROSContact;
 import com.ibm.cmr.services.client.cros.CROSQueryRequest;
 import com.ibm.cmr.services.client.cros.CROSQueryResponse;
@@ -113,14 +111,22 @@ public class LAHandler extends GEOHandler {
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
-    List<FindCMRRecordModel> recordsFromSearch = source.getItems();
-    List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
+    List<FindCMRRecordModel> converted = new ArrayList<>();
+    List<FindCMRRecordModel> records = source.getItems();
 
-    if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0) {
-      doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
-      if (!filteredRecords.isEmpty() && filteredRecords.size() > 0 && filteredRecords != null) {
-        source.setItems(filteredRecords);
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+      for (FindCMRRecordModel record : records) {
+        if ("ZS01".equals(record.getCmrAddrTypeCode())) {
+
+          if (SystemLocation.BRAZIL.equals(record.getCmrIssuedBy())) {
+            record.setCmrAddrSeq(String.valueOf(getFixedStartingSeqNewAddrBR("ZS01")));
+          } else {
+            record.setCmrAddrSeq(String.valueOf(getFixedStartingSeqNewAddr("ZS01")));
+          }
+          converted.add(record);
+        }
       }
+      source.setItems(converted);
     }
   }
 
@@ -182,6 +188,10 @@ public class LAHandler extends GEOHandler {
 
     if (isBRIssuingCountry(issuingCountry)) {
       data.setProxiLocnNo(mainRecord.getCmrProxiLocn());
+    }
+
+    if (SystemLocation.CHILE.equalsIgnoreCase(issuingCountry)) {
+      data.setBusnType(mainRecord.getCmrChileBusnTyp());
     }
 
     data.setCollectorNameNo(mainRecord.getCmrCollectorNo());
@@ -386,24 +396,28 @@ public class LAHandler extends GEOHandler {
     String issuingCountry = currentRecord.getCmrIssuedBy();
     String streetAddr1 = address.getAddrTxt();
     address.setPostCd(postalCode);
+
+    // Street
+    address.setAddrTxt(currentRecord.getCmrStreetAddress());
+
+    // Street Cont
+    address.setAddrTxt2(currentRecord.getCmrName4());
+
+    // Street 3 - might be changed to RDC Name3
+    address.setCity2(currentRecord.getCmrCity2());
+
+    // City
+    address.setCity1(currentRecord.getCmrCity());
+
+    if (StringUtils.isNotBlank(currentRecord.getCmrState())) {
+      // State Prov - computation
+      address.setStateProv(getStateProvCd(issuingCountry, currentRecord.getCmrState(), currentRecord.getCmrCity()));
+    }
+
     // #1180221: Name4 field for LA countries should populate Street Address
     // 2
     String orgName4 = !StringUtils.isEmpty(currentRecord.getCmrName4()) ? currentRecord.getCmrName4() : "";
     LOG.debug(orgName4);
-    // CREATCMR-531
-    String spid = "";
-
-    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
-      address.getId().setAddrSeq(currentRecord.getCmrAddrSeq());
-      spid = getRDcIerpSitePartyId(currentRecord.getCmrSapNumber());
-      address.setIerpSitePrtyId(spid);
-
-    } else {
-      // String addrSeq = address.getId().getAddrSeq();
-      // addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
-      address.getId().setAddrSeq("1");
-      address.setIerpSitePrtyId(spid);
-    }
     if (isMXIssuingCountry(issuingCountry)) {
       /* #1164406 */
       if (!StringUtils.isEmpty(streetAddr1)) {
@@ -607,16 +621,14 @@ public class LAHandler extends GEOHandler {
     String strAdd1 = address.getAddrTxt();
     String strAdd2 = address.getAddrTxt2();
 
-    String[] strAddrs = splitName(strAdd1, strAdd2, 30, 30);
+    if (strAdd1.length() > 30) {
+      String[] strAddrs = splitName(strAdd1, strAdd2, 30, 30);
 
-    if (strAddrs != null && strAddrs.length > 0) {
-      address.setAddrTxt(strAddrs[0]);
-      address.setAddrTxt2(strAddrs[1]);
+      if (strAddrs != null && strAddrs.length > 0) {
+        address.setAddrTxt(strAddrs[0]);
+        address.setAddrTxt2(strAddrs[1]);
+      }
     }
-    /*
-     * End 1665374
-     */
-
   }
 
   @Override
@@ -2425,16 +2437,8 @@ public class LAHandler extends GEOHandler {
     String streetAddr3 = addr.getCity2();
 
     AdminPK adminPK = new AdminPK();
-    ArrayList<String> addrDetailsList = new ArrayList<String>();
     adminPK.setReqId(addr.getId().getReqId());
     Admin admin = entityManager.find(Admin.class, adminPK);
-    // CREATCMR-531
-    String sapNo = addr.getSapNo();
-    if (!StringUtils.isEmpty(sapNo) && "U".equals(admin.getReqType())) {
-      if (addr.getSapNo().length() > 1) {
-        addr.setIerpSitePrtyId("S".concat(addr.getSapNo().substring(1)));
-      }
-    }
 
     if (isMXIssuingCountry(cmrIssuingCntry) && !(addr.getImportInd() == "Y")) {
       /* #1164406 FOR MANUAL CREATION OF ADDRESS */
@@ -2630,36 +2634,6 @@ public class LAHandler extends GEOHandler {
     return name1Name2Val;
   }
 
-  /*
-   * Author: Dennis N. Defect 1457760: Provide city location code on import for
-   * SSA and MX requests during create and update requests.
-   */
-  private void assignLocationCodeonImportForSSA(Addr address, String issuingCntry) throws Exception {
-    String sql = ExternalizedQuery.getSql("GET_SSA_LOCATION_CD");
-
-    sql = sql.replace(":CITY_DESC", address.getCity1());
-    sql = sql.replace(":ISSUING_CNTRY", issuingCntry);
-    sql = sql.replace(":STATE_CD", address.getStateProv());
-
-    EntityManager em = JpaManager.getEntityManager();
-    PreparedQuery query = new PreparedQuery(em, sql);
-
-    LOG.debug("Getting existing SSA MX Location Code value from CREQCMR DB..");
-    List<Object[]> results = query.getResults();
-
-    if (results != null && results.size() != 0) {
-      Object[] result = results.get(0);
-      String tempLocCode = result[0] != null ? (String) result[0] : "";
-      String suffix = tempLocCode.substring(0, 2);
-      tempLocCode = tempLocCode.replace(suffix, "");
-      LOG.debug("Setting " + (StringUtils.isEmpty(tempLocCode) ? "EMPTY" : tempLocCode) + " as Location Code value");
-      address.setLocationCode(tempLocCode);
-      String tempCityDesc = result[1] != null ? (String) result[1] : "";
-      LOG.debug("Setting " + (StringUtils.isEmpty(tempCityDesc) ? "EMPTY" : tempCityDesc) + " as City desc value");
-      address.setCity1(tempCityDesc);
-    }
-  }
-
   private void assignLocationCodeOnImport(Addr address, String issuingCntry) throws Exception {
     EntityManager em = JpaManager.getEntityManager();
     AddressService addSvc = new AddressService();
@@ -2755,36 +2729,6 @@ public class LAHandler extends GEOHandler {
     return ret;
   }
 
-  // CREATCMR-531
-  private String getRDcIerpSitePartyId(String kunnr) throws Exception {
-    String spid = "";
-
-    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
-    String mandt = SystemConfiguration.getValue("MANDT");
-    String sql = ExternalizedQuery.getSql("GET.IERP.BRAN5");
-    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
-    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
-    String dbId = QueryClient.RDC_APP_ID;
-
-    QueryRequest query = new QueryRequest();
-    query.setSql(sql);
-    query.addField("BRAN5");
-    query.addField("MANDT");
-    query.addField("KUNNR");
-
-    LOG.debug("Getting existing BRAN5 value from RDc DB..");
-    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
-    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
-
-    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
-      List<Map<String, Object>> records = response.getRecords();
-      Map<String, Object> record = records.get(0);
-      spid = record.get("BRAN5") != null ? record.get("BRAN5").toString() : "";
-      LOG.debug("***RETURNING BRAN5 > " + spid + " WHERE KUNNR IS > " + kunnr);
-    }
-    return spid;
-  }
-
   /**
    * Performs validation if the issuing country is SSA, BR, MX
    * 
@@ -2850,64 +2794,6 @@ public class LAHandler extends GEOHandler {
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
     LOG.debug("Inside doAfterImport method");
 
-    AddressService addrSvc = new AddressService();
-
-    if (!isBRIssuingCountry(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
-        && !"Y".equalsIgnoreCase(admin.getProspLegalInd())) {
-
-      CROSQueryRequest request = new CROSQueryRequest();
-      request.setIssuingCntry(data.getCmrIssuingCntry());
-      request.setCmrNo(admin.getModelCmrNo());
-
-      try {
-        CROSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
-            CROSServiceClient.class);
-        CROSQueryResponse response = client.executeAndWrap(CROSServiceClient.QUERY_APP_ID, request, CROSQueryResponse.class);
-
-        if (response.isSuccess()) {
-          CROSRecord record = response.getData();
-          /*
-           * 1471493: As per this defect, ABBREV_NM on a create for SSA should
-           * come from the first 30 chars of the NAME1 field. Thereby, code
-           * below is overriding the previously set value.
-           */
-          // data.setAbbrevNm(record.getAbbrevName());
-          List<CROSAddress> crosAddrList = record.getAddress();
-
-          if (crosAddrList != null && crosAddrList.size() > 0) {
-            for (int i = 0; i < crosAddrList.size(); i++) {
-              CROSAddress cAddr = crosAddrList.get(i);
-              LOG.debug("***BEGIN PRINT CROS ADDR INFO***");
-              LOG.debug("useCode >> " + cAddr.getUseCode());
-              LOG.debug("seqNo >> " + cAddr.getSeqNo());
-              LOG.debug("stateCode >> " + cAddr.getStateCode());
-              LOG.debug("locnCd >> " + cAddr.getLocationCode());
-              String addrType = "";
-
-              if ("LE".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZS01.toString();
-              } else if ("BI".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZP01.toString();
-              } else if ("PP".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZD01.toString();
-              } else if ("US".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZI01.toString();
-              }
-
-              addrSvc.updateSSAStateProvLocnCode(entityManager, cAddr.getStateCode(), cAddr.getLocationCode(), Long.toString(data.getId().getReqId()),
-                  addrType);
-              LOG.debug("***END PRINT CROS ADDR INFO***");
-            }
-          }
-        } else {
-          throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
-        }
-      } catch (Exception e) {
-        LOG.error("An error has occured in setting values for ABBREV_NM coming from the CROS query service on a create request.", e);
-        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
-      }
-    }
-
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       CROSQueryRequest request = new CROSQueryRequest();
       request.setIssuingCntry(data.getCmrIssuingCntry());
@@ -2919,26 +2805,11 @@ public class LAHandler extends GEOHandler {
         if (response.isSuccess()) {
           CROSRecord record = response.getData();
           data.setRepTeamMemberNo(record.getSalesRep());
-          data.setAbbrevNm(record.getAbbrevName());
           data.setInstallTeamCd(record.getInstallTeamCode());
           data.setSalesTeamCd(record.getSalesTeamCode());
           data.setGovType(record.getGovernment());
           data.setMrcCd(record.getMrcCode());
 
-          if (!StringUtils.isEmpty(record.getDplValidCode())) {
-            if ("DENIAL".equalsIgnoreCase(record.getDplValidCode())) {
-              data.setDenialCusInd("Y");
-              data.setEmbargoCd("Y");
-            } else {
-              data.setDenialCusInd("N");
-              data.setEmbargoCd("N");
-            }
-          } else {
-            data.setDenialCusInd("N");
-            data.setEmbargoCd("N");
-          }
-
-          data.setIcmsInd(record.getTaxPayCustCode());
           String sql = ExternalizedQuery.getSql("UPDATE_DATA_RDC");
           PreparedQuery qry = new PreparedQuery(entityManager, sql);
           qry.setParameter("REQ_ID", data.getId().getReqId());
@@ -2947,8 +2818,6 @@ public class LAHandler extends GEOHandler {
           qry.setParameter("ABBREVNM", record.getAbbrevName());
           qry.setParameter("COLLBO", record.getCollectorBO());
           qry.executeSql();
-          List<CROSContact> crossCntlist = record.getContacts();
-          List<CROSAddress> crosAddrList = record.getAddress();
 
           DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
 
@@ -2961,37 +2830,11 @@ public class LAHandler extends GEOHandler {
             // code
             dataRdc.setGovType(record.getGovernment());
             dataRdc.setIsbuCd(record.getProxyLoc());
-            dataRdc.setIcmsInd(record.getTaxPayCustCode());
             entityManager.merge(dataRdc);
           }
 
           int contactId = 1;
-          if (crosAddrList != null && crosAddrList.size() > 0) {
-            for (int i = 0; i < crosAddrList.size(); i++) {
-              CROSAddress cAddr = crosAddrList.get(i);
-              LOG.debug("***BEGIN PRINT CROS ADDR INFO***");
-              LOG.debug("useCode >> " + cAddr.getUseCode());
-              LOG.debug("seqNo >> " + cAddr.getSeqNo());
-              LOG.debug("stateCode >> " + cAddr.getStateCode());
-              LOG.debug("locnCd >> " + cAddr.getLocationCode());
-              String addrType = "";
-
-              if ("LE".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZS01.toString();
-              } else if ("BI".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZP01.toString();
-              } else if ("PP".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZD01.toString();
-              } else if ("US".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZI01.toString();
-              }
-
-              addrSvc.updateSSAStateProvLocnCode(entityManager, cAddr.getStateCode(), cAddr.getLocationCode(), Long.toString(data.getId().getReqId()),
-                  addrType);
-              LOG.debug("***END PRINT CROS ADDR INFO***");
-            }
-          }
-
+          List<CROSContact> crossCntlist = record.getContacts();
           if (crossCntlist != null && crossCntlist.size() > 0) {
             PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CHECK.CONTACT.INFO.RECORD"));
             query.setParameter("REQ_ID", data.getId().getReqId());
@@ -3041,9 +2884,19 @@ public class LAHandler extends GEOHandler {
       }
 
       if (data.getId() != null) {
+
+        if ("88".equalsIgnoreCase(data.getOrdBlk())) {
+          data.setDenialCusInd("Y");
+          data.setEmbargoCd("Y");
+        } else {
+          data.setDenialCusInd("N");
+          data.setEmbargoCd("N");
+        }
+
         String reqId = String.valueOf(data.getId().getReqId());
         // NOTE: As of MVP2 - no stories for secondary sold to
         // we only have one ZS01 (main sold-to)
+        AddressService addrSvc = new AddressService();
         String sapNumber = addrSvc.getAddressSapNo(entityManager, reqId, "ZS01");
         importTaxInfo(entityManager, data, data.getId().getReqId(), sapNumber, admin.getRequesterId());
       }
@@ -3119,32 +2972,56 @@ public class LAHandler extends GEOHandler {
     }
   }
 
-  public static String getStateProvCROSMapping(String issuingCntry, String rdcStateProv) {
-    LOG.info("getting State Prov Mapping for rdcState=" + rdcStateProv);
-    String crosStateProv = "";
-    String sql = ExternalizedQuery.getSql("GETSTATEPROVCROSMAPPING");
-    EntityManager em = JpaManager.getEntityManager();
-    PreparedQuery query = new PreparedQuery(em, sql);
-    query.setParameter("CNTRY", issuingCntry);
-    query.setParameter("RDCSTATEPROV", rdcStateProv);
-    List<String> queryResults = query.getResults(String.class);
-    if (queryResults != null && !queryResults.isEmpty()) {
-      if (queryResults.size() > 1) {
-        // return blank if too many results
-        crosStateProv = queryResults.get(0);
-        LOG.debug("retrieved crosStateProv found on DB and have more than one values.So setting first option as cros value=" + rdcStateProv);
-      } else {
-        // return only one record
-        crosStateProv = queryResults.get(0);
-        LOG.debug("retrieved crosStateProv found on DB. will be set as value=" + crosStateProv);
-      }
+  private String getStateProvCd(String issuingCntry, String state, String city) {
+    LOG.debug("Get StateProv/Regio value...");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String txt = "";
+    String sql = ExternalizedQuery.getSql("GET.LOV.CD_BY_TXT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+    query.setParameter("FIELD_ID", "##StateProv");
+    query.setParameter("TXT", state);
+    List<String> results = query.getResults(String.class);
+
+    if (results != null && results.size() == 1) {
+      txt = results.get(0);
     } else {
-      // return empty if results is null or empty
-      crosStateProv = "";
-      LOG.debug("retrieved crosStateProv is not found on DB. will be set as blank for rdc state value=" + rdcStateProv);
+      txt = getStateProvByCity(entityManager, issuingCntry, results, city);
     }
 
-    return crosStateProv;
+    LOG.debug("Lov txt : " + txt);
+    return txt;
+  }
+
+  private String getStateProvByCity(EntityManager entityManager, String issuingCntry, List<String> stateProvResults, String city) {
+    String txt = "";
+    String sql = ExternalizedQuery.getSql("GET.GEO_CITIES.ID_BY_DESC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CITY_DESC", city);
+    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+    List<String> results = query.getResults(String.class);
+
+    // blank state/prov - determine state/prov value via cityId first 2 char
+    if (stateProvResults.isEmpty() && !results.isEmpty()) {
+      String cityId = results.get(0);
+      if (StringUtils.isNotBlank(cityId) && cityId.length() >= 2) {
+        txt = cityId.substring(0, 2);
+      }
+    } else if (!stateProvResults.isEmpty() && !results.isEmpty()) {
+      // multiple state prov results - determine which state/prov is correct via
+      // cityId
+      for (String res : results) {
+        if (StringUtils.isNotBlank(res) && res.length() >= 2) {
+          String cityId = res.substring(0, 2);
+          if (stateProvResults.contains(cityId)) {
+            txt = cityId;
+            break;
+          }
+        }
+      }
+    }
+
+    return txt;
   }
 
   public static boolean isClearDPL(AddressModel model, Addr addr, EntityManager entityManager) {
@@ -3199,34 +3076,6 @@ public class LAHandler extends GEOHandler {
     }
     return false;
 
-  }
-
-  private CompoundEntity getCurrentRecord(Admin admin, EntityManager entityManager) throws CmrException {
-    if (admin != null && admin.getId().getReqId() > 0) {
-      String sql = ExternalizedQuery.getSql("REQUESTENTRY.MAIN");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("REQ_ID", admin.getId().getReqId());
-      query.setParameter("REQUESTER_ID", admin.getRequesterId());
-      query.setParameter("PROC_CENTER", admin.getLastProcCenterNm());
-      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-      List<CompoundEntity> records = query.getCompundResults(1, Admin.class, Admin.REQUEST_ENTRY_SERVICE_MAPPING);
-      if (records != null && records.size() > 0) {
-        return records.get(0);
-      }
-    }
-    return null;
-  }
-
-  private Addr getCurrentRecordSoldTo(Admin admin, EntityManager entityManager) {
-    Addr addr = new Addr();
-    String qrySoldToAddr = ExternalizedQuery.getSql("RECORD.ADDRESSTGME");
-    PreparedQuery query = new PreparedQuery(entityManager, qrySoldToAddr);
-    query.setParameter("REQ_ID", String.valueOf(admin.getId().getReqId()));
-    query.setParameter("ADDR_TYPE", "ZS01");
-    query.setParameter("ADDR_SEQ", "1");
-    addr = query.getSingleResult(Addr.class);
-
-    return addr;
   }
 
   public void recomputeDPLResult(Admin admin, EntityManager entityManager, long reqId) {
