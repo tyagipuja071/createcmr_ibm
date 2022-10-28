@@ -590,6 +590,10 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
   private String vatExempt;
 
   @Column(
+      name = "VAT_IND")
+  private String vatInd;
+
+  @Column(
       name = "PROSPECT_SEQ_NO")
   private String prospectSeqNo;
 
