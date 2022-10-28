@@ -834,6 +834,7 @@ public class ItalyHandler extends BaseSOFHandler {
       if (cExt != null) {
         identClient = cExt.getItIdentClient();
         fiscalCode = cExt.getiTaxCode();
+        vat = cExt.getiTaxCode();
         taxCode = cExt.getItIVA();
         tipoClinte = cExt.getTipoCliente();
         coddes = cExt.getCoddes();
