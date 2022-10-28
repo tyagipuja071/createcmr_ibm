@@ -379,4 +379,20 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
   protected int fixedThreadCount(int currCount) {
     return 0;
   }
+
+  /**
+   * Updates the current thread name to add more tracking capabilities
+   * 
+   * @param reqId
+   */
+  protected void trackRequestLogs(long reqId) {
+    Thread.currentThread().setName("REQ-" + reqId);
+  }
+
+  /**
+   * Resets the thread name to the original
+   */
+  protected void resetThreadName() {
+    Thread.currentThread().setName(getThreadName() + "-" + Thread.currentThread().getId());
+  }
 }

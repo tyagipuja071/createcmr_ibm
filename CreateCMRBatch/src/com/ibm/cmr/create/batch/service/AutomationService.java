@@ -81,6 +81,7 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
 
     Timestamp current = SystemUtil.getActualTimestamp();
     for (Long id : requests) {
+      trackRequestLogs(id);
       long start = new Date().getTime();
       entityManager.clear();
       LOG.info("Processing request " + id);
@@ -143,7 +144,7 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
         partialRollback(entityManager);
       }
     }
-
+    resetThreadName();
     return true;
   }
 
