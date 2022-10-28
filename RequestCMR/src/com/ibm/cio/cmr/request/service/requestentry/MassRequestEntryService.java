@@ -6496,7 +6496,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         muModel.setCreditCode(tempVal);
         break;
       case "IBM_BANK_NO":
-        muModel.setSvcArOffice(tempVal);
+        muModel.setIbmBankNumber(tempVal);
         break;
       case "COLLECTOR_NO":
         muModel.setCollectorNameNo(tempVal);
