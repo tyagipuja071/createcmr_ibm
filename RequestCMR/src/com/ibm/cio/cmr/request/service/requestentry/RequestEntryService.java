@@ -608,6 +608,16 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     updateEntity(data, entityManager);
 
+    // Scorecard vat acknowledge initialize, if the data.vatInd=N,
+    // then set scorecard.vatAcknowledge=Yes
+
+    Scorecard scorecard = entity.getEntity(Scorecard.class);
+    if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())) {
+      if ("N".equals(data.getVatInd()) && (!data.getCustGrp().equals("CROSS"))) {
+        scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+      } else
+        scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
+    }
     // CREATCMR-3144 - CN 2.0 special
     if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
       CNHandler.doBeforeSendForProcessing(entityManager, admin, data, model);

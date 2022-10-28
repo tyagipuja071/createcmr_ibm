@@ -117,6 +117,10 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
       name = "RPA_MATCHING_RESULT")
   private String rpaMatchingResult;
 
+  @Column(
+      name = "VAT_ACKNOWLEDGE")
+  private String vatAcknowledge;
+
   public String getDplChkResult() {
     return this.dplChkResult;
   }
@@ -295,5 +299,13 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
 
   public void setRpaMatchingResult(String rpaMatchingResult) {
     this.rpaMatchingResult = rpaMatchingResult;
+  }
+
+  public String getVatAcknowledge() {
+    return vatAcknowledge;
+  }
+
+  public void setVatAcknowledge(String vatAcknowledge) {
+    this.vatAcknowledge = vatAcknowledge;
   }
 }
