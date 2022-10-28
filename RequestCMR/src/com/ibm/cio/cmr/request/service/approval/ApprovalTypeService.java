@@ -86,7 +86,7 @@ public class ApprovalTypeService extends BaseService<ApprovalTypeModel, Approval
   protected void doBeforeInsert(ApprovalTyp entity, EntityManager entityManager, HttpServletRequest request) throws CmrException {
     String sql = ExternalizedQuery.getSql("APPROVAL_TYP.GET_MAX_ID");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    Long id = query.getSingleResult(Long.class);
+    Long id = Long.valueOf((query.getSingleResult(Integer.class).longValue()));
     if (id == null) {
       id = new Long(0);
     }
