@@ -60,9 +60,10 @@ public class USBPEndUserHandler extends USBPHandler {
         output.setDetails("Non BP End User create by model scenario not supported.");
         return true;
       }
-    } else if (!TYPE_BUSINESS_PARTNER.equals(custGrp) || !SUB_TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp)) {
+    } else if ((!TYPE_BUSINESS_PARTNER.equals(custGrp) || !SUB_TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp))
+        && !SUB_TYPE_FSP_END_USER.equals(custSubGrp)) {
       output.setResults("Skipped");
-      output.setDetails("Non BP End User scenario not supported.");
+      output.setDetails("Non BP End User or Non FSP End User scenario not supported.");
       return true;
     }
 
