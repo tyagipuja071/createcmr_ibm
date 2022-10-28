@@ -10522,7 +10522,8 @@ function addVatIndValidator(){
     ISSUING_CNTRY : cntry
   });
   
-  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'O' && vat == ''){    
+  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'O' && vat == ''){
+    FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.setValue('vatInd', 'N'); 
   } else if((results!= null || results!= undefined || results.ret1!='') && vat != ''){      
     FormManager.setValue('vatInd', 'T');
@@ -10534,6 +10535,7 @@ function addVatIndValidator(){
     FormManager.setValue('vatInd', 'T');
     FormManager.readOnly('vatInd');    
   } else if (vat && dojo.string.trim(vat) == '') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.setValue('vatInd', 'N'); 
   }
     
@@ -10886,6 +10888,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   
   GEOHandler.addAfterConfig(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.registerValidator(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.addAfterTemplateLoad(setVatIndFields, [ SysLoc.UK, SysLoc.IRELAND ]);
   
 });
