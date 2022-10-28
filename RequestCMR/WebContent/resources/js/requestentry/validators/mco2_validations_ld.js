@@ -1166,8 +1166,7 @@ function addAddressGridValidatorStreetPOBox() {
               addrIsNewOrUpdated = true;
             }
 
-                var isPOBoxOrStreetFilled = (record.poBox[0] != null && record.poBox[0] != '')
-                    || (record.addrTxt[0] != null && record.addrTxt[0] != '');
+            var isPOBoxOrStreetFilled = (record.poBox[0] != null && record.poBox[0] != '') || (record.addrTxt[0] != null && record.addrTxt[0] != '');
             if (!isPOBoxOrStreetFilled && addrIsNewOrUpdated) {
               if (missingPOBoxStreetAddrs != '') {
                 missingPOBoxStreetAddrs += ', ' + record.addrTypeText[0];
@@ -1178,8 +1177,7 @@ function addAddressGridValidatorStreetPOBox() {
           }
 
           if (missingPOBoxStreetAddrs != '') {
-                return new ValidationResult(null, false, 'Please fill-out either Street or PO BOX for the following address: '
-                    + missingPOBoxStreetAddrs);
+            return new ValidationResult(null, false, 'Please fill-out either Street or PO BOX for the following address: ' + missingPOBoxStreetAddrs);
           }
 
           return new ValidationResult(null, true);
@@ -2007,9 +2005,7 @@ function isVatRequired() {
 
 function addAddressGridValidatorGMLLC() {
   console.log("addAddressGridValidatorGMLLC..............");
-  FormManager
-      .addFormValidator(
-          (function() {
+  FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');

@@ -59,8 +59,8 @@ public class USBPPoolHandler extends USBPHandler {
 
     if (StringUtils.isBlank(data.getPpsceid()) || !AutomationUtil.checkPPSCEID(data.getPpsceid())) {
       output.setResults("Invalid CEID");
-      output.setDetails("Only BP with valid CEID is allowed to setup a Pool record, please check and confirm.");
-      engineData.addRejectionComment("CEID", "Only BP with valid CEID is allowed to setup a Pool record, please check and confirm.", "", "");
+      output.setDetails("Only BP or FSP with valid CEID is allowed to setup a Pool record, please check and confirm.");
+      engineData.addRejectionComment("CEID", "Only BP or FSP with valid CEID is allowed to setup a Pool record, please check and confirm.", "", "");
       output.setOnError(true);
       return true;
     }

@@ -1397,5 +1397,4 @@ public class CanadaUtil extends AutomationUtil {
       validation.setSuccess(false);
     }
   }
-
 }
