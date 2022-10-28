@@ -1130,6 +1130,9 @@ function setClientTierValuesUKI() {
   }
   var reqType = FormManager.getActualValue('reqType');
   var isuCd = FormManager.getActualValue('isuCd');
+
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
+
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
@@ -1187,13 +1190,13 @@ function setClientTierValuesUKI() {
     if (clientTiers != null && clientTiers.length > 0) {
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
       if (clientTiers.length == 1) {
-        FormManager.setValue('clientTier', clientTiers[0]);
+        // FormManager.setValue('clientTier', clientTiers[0]);
         FormManager.resetValidations('clientTier');
         FormManager.readOnly('clientTier');
       }
     } else {
       FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-      FormManager.setValue('clientTier', '');
+      // FormManager.setValue('clientTier', '');
     }
   }
 
@@ -8628,10 +8631,6 @@ function setIBMFieldsMandtOptional() {
 
     } else {
       FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], null);
-      if (!('5K' == FormManager.getActualValue('isuCd'))) {
-        FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], null);
-      }
-
       FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep No' ], null);
       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], null);
       // setClientTierValuesUKI();
@@ -10189,11 +10188,12 @@ function clientTierValidatorIS() {
 }
 
 function clientTierCodeValidator() {
+  console.log("Inside clientTierCodeValidator......")
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
+  if (isuCode != '34') {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -10418,7 +10418,7 @@ function addCmrNoValidatorForUKI() {
           return new ValidationResult(null, true);
         }
 
-        if (cmrNo != '' && cmrNo != null  && !cmrNo.startsWith('P')) {
+        if (cmrNo != '' && cmrNo != null && !cmrNo.startsWith('P')) {
           if (cmrNo.length != 6) {
             return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
           } else if (isNaN(cmrNo)) {
@@ -10538,8 +10538,7 @@ dojo.addOnLoad(function() {
   // UKI Specific
   GEOHandler.addAfterConfig(afterConfigForUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(defaultCapIndicatorUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  // GEOHandler.addAfterConfig(setClientTierValuesUKI, [ SysLoc.UK,
-  // SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(setClientTierValuesUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(setAbbrevNmLocationLockAndMandatoryUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(lockCmrOwner, [ SysLoc.TURKEY ]);
@@ -10752,7 +10751,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCollectionCdIT, [ SysLoc.ITALY ], null, true);
   GEOHandler.addAfterConfig(setIBMFieldsMandtOptional, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterTemplateLoad(setIBMFieldsMandtOptional, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.addAfterConfig(setCtcFieldMandtUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
+  // GEOHandler.addAfterConfig(setCtcFieldMandtUKI, [ SysLoc.IRELAND, SysLoc.UK
+  // ]);
   GEOHandler.registerValidator(validateCMRNumberForIT, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorIT, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.ITALY ], null, true);
@@ -10806,4 +10806,4 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-1727
   GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
- });
+});
