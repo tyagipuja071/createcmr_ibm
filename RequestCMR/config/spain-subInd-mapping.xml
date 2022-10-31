@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-  <mappping-subInd>
-  <subIndCds>
-   F9,FA,FD,FF,FW,H9,HA,HB,HC,HD,HE,HW,GA,GB,GC,GD,GE,GF,GG,GH,GJ,GK,GL,GM,GN,GP,GR,GW,GZ,Y9,YA,YB,YC,YD,YE,
-   YF,YG,YW,N9,NA,NB,NI,NW,NZ,E9,EA,ER,EW,S9,SB,SE,SG,SW,XF,XW
-    </subIndCds>
-    </mappping-subInd>
+<mappping-subInd>
+	<subIndCds>
+		F9,FA,FD,FF,FW,H9,HA,HB,HC,HD,HE,HW,GA,GB,GC,GD,GE,GF,GG,GH,GJ,GK,GL,GM,GN,GP,GR,GW,GZ,Y9,YA,YB,YC,YD,YE,
+		YF,YG,YW,N9,NA,NB,NI,NW,NZ,E9,EA,ER,EW,S9,SB,SE,SG,SW,XF,XW
+	</subIndCds>
+</mappping-subInd>
