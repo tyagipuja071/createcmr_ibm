@@ -136,6 +136,7 @@ function processRequestAction() {
     var reqType = FormManager.getActualValue('reqType');
     var vatInd = FormManager.getActualValue('vatInd');
     var custGrp = FormManager.getActualValue('custGrp');
+    var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     }
@@ -202,7 +203,7 @@ function processRequestAction() {
       } else {
         if (cmrCntry == '821' || cmrCntry == '755') {
           executeBeforeSubmit();
-        } else if (cmrCntry == '858') {
+        } else if (personalInfoPrivacyNoticeCntryList.includes(cmrCntry)) {
           cmr.showNode('personalInformationDiv');
           cmr.showModal('addressVerificationModal');
 
@@ -328,8 +329,10 @@ function showAddressVerificationModal() {
  * Accept the address verification disclaimer
  */
 function doAcceptAddressVerification() {
+
+  var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (!dojo.byId('addrVerAgree').checked && cmrCntry == '858') {
+  if (!dojo.byId('addrVerAgree').checked && personalInfoPrivacyNoticeCntryList.includes(cmrCntry)) {
     cmr.showAlert('You must agree to the Address Verification and PI - Business Contact Rules to proceed.');
     return;
   } else if (!dojo.byId('addrVerAgree').checked) {
