@@ -618,7 +618,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
     Scorecard scorecard = entity.getEntity(Scorecard.class);
     if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())) {
-      if ("N".equals(data.getVatInd()) && (!data.getCustGrp().equals("CROSS"))) {
+
+      if ("N".equals(data.getVatInd()) && (!"CROSS".equals(data.getCustGrp()))) {
         scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
       } else
         scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
