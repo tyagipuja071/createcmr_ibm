@@ -373,6 +373,7 @@ public class NordicsUtil extends AutomationUtil {
     String NORDX_ESTONIA_VKBUR = "0393";
     String NORDX_LITHUNIA_VKBUR = "0081";
     String NORDX_FINLAND_VKBUR = "0047";
+    String NORDX_LATVIA_VKBUR = "0081";
     String cntry = requestData.getData().getCmrIssuingCntry();
 
     List<DuplicateCMRCheckResponse> matches = response.getMatches();
@@ -444,6 +445,7 @@ public class NordicsUtil extends AutomationUtil {
           for (Object[] result : results) {
             if (!StringUtils.isBlank(countryUse) && ("702EE".equals(countryUse) && NORDX_ESTONIA_VKBUR.equals(result[0].toString()))
                 || ("702LT".equals(countryUse) && NORDX_LITHUNIA_VKBUR.equals(result[0].toString()))
+                || ("702LV".equals(countryUse) && NORDX_LATVIA_VKBUR.equals(result[0].toString()))
                 || ("702".equals(countryUse) && NORDX_FINLAND_VKBUR.equals(result[0].toString()))
                 || ("678IS".equals(countryUse) && NORDX_ICELAND_VKBUR.equals(result[0].toString()))
                 || (!"678IS".equals(countryUse) && "678".equals(cmrIssuingCountry) && NORDX_DENMARK_VKBUR.equals(result[0].toString()))) {
