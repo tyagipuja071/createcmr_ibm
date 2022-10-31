@@ -46,7 +46,10 @@ import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
 import com.ibm.cmr.create.batch.util.ProfilerLogger;
 import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.GenerateCMRNoClient;
 import com.ibm.cmr.services.client.ProcessClient;
+import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
+import com.ibm.cmr.services.client.cmrno.GenerateCMRNoResponse;
 import com.ibm.cmr.services.client.process.ProcessRequest;
 import com.ibm.cmr.services.client.process.ProcessResponse;
 import com.ibm.cmr.services.client.process.RDcRecord;
@@ -1277,6 +1280,9 @@ public class IERPProcessService extends BaseBatchService {
       // cmrNo = data.getCmrNo();
       // }
       cmrNo = data.getCmrNo();
+      if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && StringUtils.isEmpty(cmrNo)) {
+        cmrNo = generateCMRNoForIERP(data);
+      }
     }
 
     String requestType = ((reqType) != null && (reqType).trim().length() > 0) ? (reqType) : "";
@@ -1290,6 +1296,39 @@ public class IERPProcessService extends BaseBatchService {
     cmrServiceInput.setInputUserId(SystemConfiguration.getValue("BATCH_USERID"));
 
     return cmrServiceInput;
+  }
+
+  /**
+   * Calls the Generate CMR no service to get the next available CMR no
+   * 
+   * @param handler
+   * @param targetSystem
+   * @return
+   */
+  protected String generateCMRNoForIERP(Data data) {
+
+    try {
+      GenerateCMRNoRequest request = new GenerateCMRNoRequest();
+      request.setLoc1(data.getCustClass());
+      request.setLoc2(data.getCmrIssuingCntry());
+      request.setMandt(SystemConfiguration.getValue("MANDT"));
+      request.setSystem("IERP");
+
+      GenerateCMRNoClient client = CmrServicesFactory.getInstance().createClient(BaseBatchService.BATCH_SERVICE_URL, GenerateCMRNoClient.class);
+
+      GenerateCMRNoResponse response = client.executeAndWrap(request, GenerateCMRNoResponse.class);
+
+      if (response.isSuccess()) {
+        return response.getCmrNo();
+      } else {
+        LOG.error("CMR No cannot be generated. Error: " + response.getMsg());
+        return null;
+      }
+    } catch (Exception e) {
+      LOG.error("Error in generating CMR no", e);
+      return null;
+    }
+
   }
 
   private void lockAdminRecordsForProcessing(List<CompoundEntity> forProcessing, EntityManager entityManager) {
