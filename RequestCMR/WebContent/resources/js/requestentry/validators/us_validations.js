@@ -1338,8 +1338,12 @@ function federalIsicCheck() {
         var custGrp = FormManager.getActualValue('custGrp');
         var subIndustryCd = FormManager.getActualValue('subIndustryCd');
         var fedIsic = [ '9', '10', '11' ];
-        if (reqType == 'C' && !fedIsic.includes(custGrp) && subIndustryCd.startsWith('Y')) {
-          genericMsg = 'Federal ISIC cannot be used with Non-Federal sceanrios.';
+        if (reqType == 'C' && !fedIsic.includes(custGrp) && custGrp != '15' && subIndustryCd.startsWith('Y')) {
+          genericMsg = 'Federal ISIC cannot be used with Non-Federal scenarios.';
+          return new ValidationResult(null, false, genericMsg);
+        }
+        if (reqType == 'C' && custGrp == '15' && !subIndustryCd.startsWith('Y')) {
+          genericMsg = 'Only Federal ISIC can be used with Federal Strategic Partner scenarios.';
           return new ValidationResult(null, false, genericMsg);
         }
         return new ValidationResult(null, true);
