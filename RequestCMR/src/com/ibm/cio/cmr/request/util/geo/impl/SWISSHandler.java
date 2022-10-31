@@ -631,6 +631,11 @@ public class SWISSHandler extends GEOHandler {
       data.setCurrencyCd("CHF");
     }
 
+    if (soldToAddr != null) {
+      admin.setOldCustNm1(soldToAddr.getCustNm1());
+      admin.setOldCustNm2(soldToAddr.getCustNm2());
+    }
+
   }
 
   private String getKunnrSapr3Kna1(String cmrNo, String ordBlk) throws Exception {
@@ -1250,7 +1255,7 @@ public class SWISSHandler extends GEOHandler {
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
     return true;
   }
-  
+
   @Override
   public boolean isAddressChanged(EntityManager entityManager, Addr addr, String cmrIssuingCntry, boolean computedChangeInd) {
     boolean city2Updated = false;
@@ -1260,10 +1265,10 @@ public class SWISSHandler extends GEOHandler {
     query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
     query.setParameter("ADDR_SEQ", addr.getId().getAddrSeq());
     Addr addrRdc = query.getSingleResult(Addr.class);
-    
+
     String addrRdcCity2 = !StringUtils.isBlank(addrRdc.getCity2()) ? addrRdc.getCity2() : "";
     String addrCity2 = !StringUtils.isBlank(addr.getCity2()) ? addr.getCity2() : "";
-    
+
     if (!addrRdcCity2.equals(addrCity2)) {
       city2Updated = true;
     }
