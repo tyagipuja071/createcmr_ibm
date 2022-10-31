@@ -354,6 +354,7 @@ public class IERPProcessService extends BaseBatchService {
       // lockAdminRecordsForProcessing(reqIdList, em);
 
       // start processing
+      ArrayList<String> cmrNoList = new ArrayList<String>();
       for (CompoundEntity entity : reqIdList) {
         long start = new Date().getTime();
         Admin admin = entity.getEntity(Admin.class);
@@ -367,7 +368,8 @@ public class IERPProcessService extends BaseBatchService {
         if (admin != null && !CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
           createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
         }
-        CmrServiceInput cmrServiceInput = getReqParam(em, admin.getId().getReqId(), admin.getReqType(), data);
+        CmrServiceInput cmrServiceInput = getReqParam(em, admin.getId().getReqId(), admin.getReqType(), data, admin, cmrNoList);
+
         GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
         boolean enableTempReact = cntryHandler.enableTempReactivateOnUpdate() && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason());
 
@@ -1270,22 +1272,30 @@ public class IERPProcessService extends BaseBatchService {
     return response;
   }
 
-  public CmrServiceInput getReqParam(EntityManager em, long reqId, String reqType, Data data) {
+  public CmrServiceInput getReqParam(EntityManager em, long reqId, String reqType, Data data, Admin admin, ArrayList<String> cmrNoList) {
     String cmrNo = "";
 
+    String requestType = ((reqType) != null && (reqType).trim().length() > 0) ? (reqType) : "";
     if (!StringUtils.isEmpty(reqType)) {
       // if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
       // cmrNo = "TEMP";
       // } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
       // cmrNo = data.getCmrNo();
-      // }
+      // }if (!StringUtils.isBlank(prospectCMR)) {
       cmrNo = data.getCmrNo();
-      if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && StringUtils.isEmpty(cmrNo)) {
+      boolean prospectConversion = CmrConstants.YES_NO.Y.equals(admin.getProspLegalInd()) ? true : false;
+      if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && ("C".equals(requestType) && StringUtils.isEmpty(cmrNo) || prospectConversion)) {
         cmrNo = generateCMRNoForIERP(data);
+        if (!StringUtils.isEmpty(cmrNo) && cmrNoList.contains(cmrNo)) {
+          cmrNo = generateCMRNoForIERP(data);
+          if (!StringUtils.isEmpty(cmrNo))
+            cmrNoList.add(cmrNo);
+        } else if (!StringUtils.isEmpty(cmrNo)) {
+          cmrNoList.add(cmrNo);
+        }
       }
     }
 
-    String requestType = ((reqType) != null && (reqType).trim().length() > 0) ? (reqType) : "";
     long requestId = reqId;
     CmrServiceInput cmrServiceInput = new CmrServiceInput();
 
