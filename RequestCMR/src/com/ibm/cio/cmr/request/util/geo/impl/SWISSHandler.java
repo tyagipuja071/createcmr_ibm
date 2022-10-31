@@ -632,8 +632,8 @@ public class SWISSHandler extends GEOHandler {
     }
 
     if (soldToAddr != null) {
-      admin.setMainCustNm1(soldToAddr.getCustNm1());
-      admin.setMainCustNm2(soldToAddr.getCustNm2());
+      admin.setOldCustNm1(soldToAddr.getCustNm1());
+      admin.setOldCustNm2(soldToAddr.getCustNm2());
     }
 
   }
