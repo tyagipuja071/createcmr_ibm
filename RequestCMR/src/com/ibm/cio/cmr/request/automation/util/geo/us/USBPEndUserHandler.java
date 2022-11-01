@@ -169,15 +169,14 @@ public class USBPEndUserHandler extends USBPHandler {
         details.append("\nCopying IBM Codes from IBM CMR " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName() + ": \n");
       }
 
-      String affiliate = ibmCmr.getCmrAffiliate();
+      String affiliate = ibmCmr.getCmrEnterpriseNumber();
       String isic = ibmCmr.getCmrIsic();
       boolean federalPoa = isic != null && (isic.startsWith("90") || isic.startsWith("91") || isic.startsWith("92"));
       if (federalPoa) {
         affiliate = ibmCmr.getCmrEnterpriseNumber();
       }
       if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
-        LOG.debug(" - copyAndFillIBMData: Affiliate: " + ibmCmr.getCmrAffiliate());
-        details.append(" - Affiliate: " + ibmCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
+        details.append(" - Affiliate: " + ibmCmr.getCmrEnterpriseNumber() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), affiliate);
       } else {
         updateAffiliate4Child(entityManager, childRequest, ibmCmr);
