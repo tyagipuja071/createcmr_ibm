@@ -458,6 +458,11 @@ function afterConfigForUS() {
     FormManager.setValue('clientTier', 'Y');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
+  } else if (reqType == 'C' && role == 'Requester' && custGrp == '15' && custSubGrp == 'FSP POOL') {
+    FormManager.setValue('isuCd', '28');
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
   } else {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
@@ -636,7 +641,7 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'N');
     FormManager.readOnly('isuCd');
-  } else {
+  } else if (scenario != 'FSP POOL') {
     FormManager.enable('isuCd');
   }
 }
