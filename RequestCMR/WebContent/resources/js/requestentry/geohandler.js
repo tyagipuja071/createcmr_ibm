@@ -114,7 +114,8 @@ var SysLoc = (function() {
     MADAGASCAR : '700',
     CANADA : '649',
     KOREA : '766',
-    KENYA: '764'
+    KENYA : '764',
+    TAIWAN : '858'
   };
 })();
 
