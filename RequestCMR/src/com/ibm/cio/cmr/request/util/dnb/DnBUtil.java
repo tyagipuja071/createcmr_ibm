@@ -124,7 +124,8 @@ public class DnBUtil {
     registerDnBVATCode("PE", 1382); // Peruvian Sole Commercial Registry Number
     // registerDnBVATCode("AU", 17890); // Business Registration Number
     // (Australia)
-    registerDnBVATCode("PL", 1385); // Polish Tax Identifier
+    // registerDnBVATCode("PL", 1385); // Polish Tax Identifier
+    registerDnBVATCode("PL", 1435); // Polish Tax Identifier
     registerDnBVATCode("PT", 11659); // Chamber Of Commerce Number
     registerDnBVATCode("PY", 1381); // Paraguayan Unique Tax Registration
     registerDnBVATCode("RO", 17278); // Tax Registration Number (Romania)
@@ -749,8 +750,7 @@ public class DnBUtil {
     }
 
     if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
-          && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6
-          && !matchWithDnbMailingAddr) {
+        && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6 && !matchWithDnbMailingAddr) {
       return false;
     }
 
