@@ -61,7 +61,7 @@ public class CNDHandler extends GEOHandler {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
-    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) && StringUtils.isBlank(mainRecord.getCmrOrderBlock())) {
       data.setOrdBlk("");
     } else {
       data.setOrdBlk(mainRecord.getCmrOrderBlock());
@@ -69,14 +69,12 @@ public class CNDHandler extends GEOHandler {
 
     try {
 
-      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-        // retrieve from knvv zterm data on import
-        String creditCd = getRdcCreditCd(mainRecord.getCmrSapNumber());
+      // retrieve from knvv zterm data on import
+      String creditCd = getRdcCreditCd(mainRecord.getCmrSapNumber());
 
-        if (creditCd != null) {
-          // Miscellaneous Credit Code
-          data.setCreditCd(creditCd);
-        }
+      if (creditCd != null) {
+        // Miscellaneous Credit Code
+        data.setCreditCd(creditCd);
       }
     } catch (Exception e) {
       LOG.error("Error occured on setting Credit Code on import.");
