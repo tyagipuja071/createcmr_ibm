@@ -497,7 +497,7 @@ form.ibm-column-form .dijitTextBox INPUT {
             <cmr:column span="6">
                <table cellspacing="0" cellpadding="0" border="0" summary="System Parameters" class="ibm-data-table ibm-sortable-table ibm-alternating search-results">
                  <caption>
-                   <em> Search Results
+                   <em> Search Results <cmr:info text="Type 'CMR' to filter CMR results and type 'DNB' to filter D&B results, or type any text part of the records' values"></cmr:info>
                      <div class="search-filter">
                        <input ng-model="recordsFilter" style="width:300px" placeholder="Filter Records">
                        <a ng-click="recordsFilter = ''" class="search-clear">Clear</a>
@@ -586,7 +586,7 @@ form.ibm-column-form .dijitTextBox INPUT {
                          <span ng-show="rec.operStatusCode == 'O'" style="font-weight:bold;color:red">Out of business</span>
                        </div>
                        <div ng-show="rec.recType == 'CMR'">
-                         <input ng-show="rec.cmrNo.indexOf('P') != 0" type="button" class="cmr-grid-btn" value="Create by Model" title="Request for a new CMR modeled after this record" ng-click="confirmImport(rec, false)">
+                         <input ng-show="rec.cmrNo.indexOf('P') != 0 && allowByModel" type="button" class="cmr-grid-btn" value="Create by Model" title="Request for a new CMR modeled after this record" ng-click="confirmImport(rec, false)">
                          <input ng-show="rec.cmrNo.indexOf('P') == 0" type="button" class="cmr-grid-btn" value="Convert to Legal CMR" title="Request for conversion of this Prospect to Legal CMR" ng-click="confirmImport(rec, false)">
                          <input ng-show="rec.cmrNo.indexOf('P') != 0" type="button" class="cmr-grid-btn" value="Update CMR" title="Request for an Update of this CMR" ng-click="confirmImport(rec, true)">
                        </div>

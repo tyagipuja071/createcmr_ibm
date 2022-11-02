@@ -40,6 +40,9 @@ app.filter('recFilter', function() {
       if (record.vat && record.vat.toUpperCase().indexOf(val) >= 0) {
         return true;
       }
+      if (record.recType && record.recType.toUpperCase() == val.toUpperCase()) {
+        return true;
+      }
       return false;
     });
 
@@ -52,6 +55,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
   $scope.orgIdSearch = false;
   $scope.records = [];
   $scope.cmrNo = '';
+  $scope.allowByModel = true;
 
   $scope.titles = {
     E1 : 'Exact matches against name, street line 1, street line 2, city, postal code, and country.',
@@ -88,6 +92,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     $scope.cmrNo = crit.cmrNo;
     $scope.records = [];
     cmr.showProgress('Searching for records, please wait..');
+    $scope.allowByModel = true;
     dojo.xhrPost({
       url : cmr.CONTEXT_ROOT + '/quick_search/find.json',
       handleAs : 'json',
@@ -97,14 +102,16 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       sync : false,
       load : function(data, ioargs) {
         cmr.hideProgress();
-        console.log(data);
         if (data && data.items) {
+          var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
+          if (byModel && byModel.ret1 == 'Y'){
+            $scope.allowByModel = false;
+          } 
           if (data.items.length > 50) {
             alert('The search resulted to more than 50 matches. Only the top 50 matches will be shown. Please try to change the search parameters to get the other records you need.');
             console.log('splicing from 50, removing ' + (data.items.length - 50) + ' items');
             data.items.splice(50, data.items.length - 50);
           }
-          console.log(data.items);
           data.items.forEach(function(item, i) {
             if (item.recType == 'DNB' && !item.countryCd) {
               item.countryCd = crit.countryCd;
