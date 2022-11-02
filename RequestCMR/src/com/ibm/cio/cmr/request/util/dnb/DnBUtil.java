@@ -132,7 +132,7 @@ public class DnBUtil {
     registerDnBVATCode("RS", 0); // Unknown
     registerDnBVATCode("RW", 9404); // Business Registration Number (Rwanda)
     registerDnBVATCode("SI", 1439); // Tax Registration Number (Slovenia)
-    registerDnBVATCode("SK", 0); // Unknown
+    registerDnBVATCode("SK", 1438); // Unknown
     registerDnBVATCode("TH", 1391); // Registration Number (Thailand)
     registerDnBVATCode("TJ", 14260); // Tax Registration Number (Tajikistan)
     registerDnBVATCode("TR", 1442); // Tax Registration Number (Turkey)
