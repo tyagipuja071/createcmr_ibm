@@ -1285,7 +1285,7 @@ public class IERPProcessService extends BaseBatchService {
       cmrNo = data.getCmrNo();
       if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && "C".equals(requestType)
           && (StringUtils.isEmpty(cmrNo) || cmrNo.startsWith("P"))) {
-        if (cmrNo.startsWith("P"))
+        if (cmrNo != null && cmrNo.startsWith("P"))
           cmrNo = "";
         cmrNo = generateCMRNoForIERP(data);
         if (!StringUtils.isEmpty(cmrNo) && cmrNoList.contains(cmrNo)) {
