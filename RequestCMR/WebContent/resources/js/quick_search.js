@@ -851,7 +851,7 @@ dojo.addOnLoad(function() {
   if (typeof(bypassqs) != 'undefined' && bypassqs){
     return;
   }
-  if (typeof(bypassqs) == 'undefined' || !_furl) {
+  if (typeof(_furl) == 'undefined' || !_furl) {
     return;
   }
   var findcmrUrl = _furl.substring(0, _furl.lastIndexOf('/')) + '/DnBSearch';
