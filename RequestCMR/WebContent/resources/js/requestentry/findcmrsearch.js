@@ -280,7 +280,7 @@ function importCMRConfirm(result) {
   }
   
   var allowByModel = true;
-  var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
+  var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : reqCmrIssuingCntry});
   if (byModel && byModel.ret1 == 'Y'){
     allowByModel = false;
   } 
