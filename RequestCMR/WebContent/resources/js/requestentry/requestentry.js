@@ -139,8 +139,7 @@ function processRequestAction() {
     var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
-    }
-    if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
+    } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
       cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
       if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry'))) && (vatInd == 'N') && (custGrp != 'CROSS')) {
