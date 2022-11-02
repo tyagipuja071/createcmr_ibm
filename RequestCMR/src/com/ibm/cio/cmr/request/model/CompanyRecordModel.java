@@ -64,12 +64,12 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
       return -1;
     }
 
-    // move CMR types up
+    // move CMR types down CREATCMR-7388
     if ("CMR".equals(this.recType) && !"CMR".equals(o.getRecType())) {
-      return -1;
+      return 1;
     }
     if (!"CMR".equals(this.recType) && "CMR".equals(o.getRecType())) {
-      return 1;
+      return -1;
     }
 
     if ("REQ".equals(this.recType) && !"REQ".equals(o.getRecType())) {

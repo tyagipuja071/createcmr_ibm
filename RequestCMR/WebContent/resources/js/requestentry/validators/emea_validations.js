@@ -4571,6 +4571,7 @@ function addFieldValidationForProcessorItaly() {
 }
 
 function addAddrValidationForProcItaly() {
+  console.log("Inside addAddrValidationForProcItaly")
   var requestType = null;
   requestType = FormManager.getActualValue('reqType');
   var addrType = FormManager.getActualValue('addrType');
@@ -6863,12 +6864,14 @@ function setStateProvReqdPostalCodeIT() {
     };
     var results = cmr.query('GETSPVALFORPOSTCDIT', qParams);
     if (results != null) {
-      if (role == 'REQUESTER' && results.length > 1 && (addrType != 'ZS01' || !FormManager.getField('addrType_ZS01').checked)) {
+      if (role == 'REQUESTER' && results.length >= 1) {
         FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
       }
-      if (results.length == 1 && role == 'REQUESTER' && (addrType != 'ZS01' || !FormManager.getField('addrType_ZS01').checked)) {
-        FormManager.resetValidations('stateProv');
-      }
+      /*
+       * if (results.length == 1 && role == 'REQUESTER' && (addrType != 'ZS01' ||
+       * !FormManager.getField('addrType_ZS01').checked)) {
+       * FormManager.resetValidations('stateProv'); }
+       */
     }
   }
 }
