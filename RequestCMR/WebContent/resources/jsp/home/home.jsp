@@ -84,17 +84,19 @@ dojo.addOnLoad(function(){
     background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%); /* Chrome10-25,Safari5.1-6 */
     background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
-    border-
+    padding-top: 20px;
   }
   div.home-btn {
     text-align : center;
     margin-auto;
     height: 80px;
     margin-top: 10px;
+    font-size:13px;
   }
   div.home-btn input.ibm-btn-small {
     width: 190px !important;
     margin-top: 5px;
+    font-size: 13px !important;
   }
   div.home-btn span {
     font-size: 13px;
@@ -178,6 +180,10 @@ dojo.addOnLoad(function(){
               <div class="home-btn">
                 <span>If you want to view your open requests:</span>
                 <cmr:button label="View Pending Requests" onClick="goToUrl('${contextPath}/workflow/open')" highlight="false" pad="true" />
+              </div>
+              <div class="home-btn">
+                You can also check out some <strong><a href="https://w3.ibm.com/w3publisher/cmde-cmr/tutorials/createcmr-tutorials" target="_blank">tutorials</a></strong> from the 
+                CMDE site for more information on how to create/update CMRs or watch a <strong><a href="https://video.ibm.com/embed/recorded/131988262" target="_blank">live demo</a></strong> of the tool.
               </div>
 						</div>
 					</div>
