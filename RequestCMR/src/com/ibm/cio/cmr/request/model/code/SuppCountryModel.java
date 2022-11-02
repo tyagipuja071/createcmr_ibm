@@ -30,6 +30,7 @@ public class SuppCountryModel extends BaseModel {
   private String dnbPrimaryIndc;
   private String startQuickSearch;
   private String tradestyleNmUsage;
+  private String disableCreateByModel;
 
   @Override
   public boolean allKeysAssigned() {
@@ -175,6 +176,14 @@ public class SuppCountryModel extends BaseModel {
 
   public void setTradestyleNmUsage(String tradestyleNmUsage) {
     this.tradestyleNmUsage = tradestyleNmUsage;
+  }
+
+  public String getDisableCreateByModel() {
+    return disableCreateByModel;
+  }
+
+  public void setDisableCreateByModel(String disableCreateByModel) {
+    this.disableCreateByModel = disableCreateByModel;
   }
 
 }
