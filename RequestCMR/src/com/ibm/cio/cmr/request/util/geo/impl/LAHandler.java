@@ -194,7 +194,12 @@ public class LAHandler extends GEOHandler {
       data.setBusnType(mainRecord.getCmrChileBusnTyp());
     }
 
-    data.setCollectorNameNo(mainRecord.getCmrCollectorNo());
+    if (StringUtils.isNotBlank(mainRecord.getCmrCollectorNo()) && mainRecord.getCmrCollectorNo().length() > 6) {
+      data.setCollectorNameNo(mainRecord.getCmrCollectorNo().substring(0, 6));
+    } else {
+      data.setCollectorNameNo(mainRecord.getCmrCollectorNo());
+    }
+
     data.setCollBoId(mainRecord.getCmrCollBo());
 
     // Defect 1267371 :Municipal Fiscal Code/ Tax Code 2 wrongly imported
@@ -2814,7 +2819,7 @@ public class LAHandler extends GEOHandler {
           PreparedQuery qry = new PreparedQuery(entityManager, sql);
           qry.setParameter("REQ_ID", data.getId().getReqId());
           qry.setParameter("SALES_REP", record.getSalesRep());
-          qry.setParameter("COLNAMENO", record.getCollectorNo());
+          qry.setParameter("COLNAMENO", data.getCollectorNameNo());
           qry.setParameter("ABBREVNM", record.getAbbrevName());
           qry.setParameter("COLLBO", record.getCollectorBO());
           qry.executeSql();
