@@ -1283,8 +1283,10 @@ public class IERPProcessService extends BaseBatchService {
       // cmrNo = data.getCmrNo();
       // }if (!StringUtils.isBlank(prospectCMR)) {
       cmrNo = data.getCmrNo();
-      boolean prospectConversion = CmrConstants.YES_NO.Y.equals(admin.getProspLegalInd()) ? true : false;
-      if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && ("C".equals(requestType) && StringUtils.isEmpty(cmrNo) || prospectConversion)) {
+      if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && "C".equals(requestType)
+          && (StringUtils.isEmpty(cmrNo) || cmrNo.startsWith("P"))) {
+        if (cmrNo.startsWith("P"))
+          cmrNo = "";
         cmrNo = generateCMRNoForIERP(data);
         if (!StringUtils.isEmpty(cmrNo) && cmrNoList.contains(cmrNo)) {
           cmrNo = generateCMRNoForIERP(data);
