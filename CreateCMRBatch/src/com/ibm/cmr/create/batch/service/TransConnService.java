@@ -1587,8 +1587,10 @@ public class TransConnService extends BaseBatchService {
         } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
           comment = comment.append("Create processing in RDc skipped: " + response.getMessage());
         }
-        SlackAlertsUtil.recordGenericAlert("TransConn", "Request " + admin.getId().getReqId(),
-            SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
+        if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
+          SlackAlertsUtil.recordGenericAlert("TransConn", "Request " + admin.getId().getReqId(),
+              SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
+        }
 
       }
 
@@ -1902,8 +1904,10 @@ public class TransConnService extends BaseBatchService {
               comment = comment.append("\nUpdate processing in RDc skipped: " + response.getMessage() + "\n");
             }
             rdcProcessingMsg.append("Error: " + response.getMessage() + "[KUNNR:" + addr.getSapNo() + "]\n");
-            SlackAlertsUtil.recordGenericAlert("TransConn", "Request " + admin.getId().getReqId(),
-                SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
+            if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
+              SlackAlertsUtil.recordGenericAlert("TransConn", "Request " + admin.getId().getReqId(),
+                  SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
+            }
           }
 
           if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
