@@ -134,8 +134,7 @@ function processRequestAction() {
     var reqType = FormManager.getActualValue('reqType');
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
-    }
-    if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
+    } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
       cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
       if (checkForConfirmationAttachments()) {
@@ -1148,8 +1147,8 @@ function connectToCmrServices() {
         dojo.byId('geoLocDescCont').innerHTML = data.glcDesc != null ? data.glcDesc : '(no description available)';
       }
       if (data.dunsError) {
-        //errorMsg += (showError ? ', ' : '') + 'DUNS No.';
-        //showError = true;
+        // errorMsg += (showError ? ', ' : '') + 'DUNS No.';
+        // showError = true;
       } else {
         // var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
         // var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA,
@@ -1185,7 +1184,7 @@ function connectToCmrServices() {
     FormManager.setValue('covId', '');
     FormManager.setValue('bgId', '');
     FormManager.setValue('geoLocationCd', '');
-    //FormManager.setValue('dunsNo', '');
+    // FormManager.setValue('dunsNo', '');
   }
   FormManager.setValue('covBgRetrievedInd', 'Y');
 }
@@ -2062,7 +2061,7 @@ function matchCustNmAUUpdate() {
       if (dataAPI.formerCustNmMatch) {
         comp_proof_INAUSG = true;
         checkDnBMatchingAttachmentValidator();
-        if (FormManager.validate('frmCMR')) {         
+        if (FormManager.validate('frmCMR')) {
           matchDnbForAUUpdate();
           return;
         } else {
@@ -2076,7 +2075,7 @@ function matchCustNmAUUpdate() {
       }
     } else if (dataAPI.success && dataAPI.formerCustNmMatch && !dataAPI.custNmMatch) {
       comp_proof_INAUSG = false;
-      console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");   
+      console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");
       cmr.showAlert("Please attach company proof as Name validation failed by API.");
     } else {
       cmr.showProgress('Customer Name match with API failed . Now Checking Customer Name with Dnb...');
@@ -2103,7 +2102,7 @@ function matchCustNmAUUpdate() {
             if (data.custNmMatch && data.formerCustNmMatch) {
               comp_proof_INAUSG = true;
               checkDnBMatchingAttachmentValidator();
-              if (FormManager.validate('frmCMR')) {             
+              if (FormManager.validate('frmCMR')) {
                 matchDnbForAUUpdate();
                 return;
               } else {
@@ -2361,8 +2360,7 @@ function autoSaveRequest() {
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }
 
-
-function recreateCMR(){
+function recreateCMR() {
   var msg = '<strong>WARNING: Use this function with caution!</strong><br><br>This will recreate a <strong>NEW CMR</strong> for this request. Please ensure that any invalid records in RDC have been marked as logically deleted and there is an actual need to create a new CMR for this request. Proceed?';
   cmr.showConfirm('executeRecreateCMR()', msg, 'Warning', null);
 }
