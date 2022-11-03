@@ -237,6 +237,9 @@
     <class>com.ibm.cio.cmr.request.entity.TaxData</class>
     <class>com.ibm.cio.cmr.request.entity.TaxDataPK</class>
     
+    <class>com.ibm.cio.cmr.request.entity.Stxl</class>
+    <class>com.ibm.cio.cmr.request.entity.StxlPK</class>
+    
     <properties>
     <!-- ORIGINAL -->
       <property name="openjpa.ConnectionFactoryMode" value="managed" />
