@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import com.ibm.cio.cmr.request.entity.GeoContactInfoPK;
 import com.ibm.cio.cmr.request.entity.GeoTaxInfo;
 import com.ibm.cio.cmr.request.entity.GeoTaxInfoPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.entity.Stxl;
 import com.ibm.cio.cmr.request.entity.TaxData;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.auto.BaseV2RequestModel;
@@ -72,13 +74,8 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.ibm.cmr.services.client.CROSServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
-import com.ibm.cmr.services.client.cros.CROSContact;
-import com.ibm.cmr.services.client.cros.CROSQueryRequest;
-import com.ibm.cmr.services.client.cros.CROSQueryResponse;
-import com.ibm.cmr.services.client.cros.CROSRecord;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
@@ -107,6 +104,8 @@ public class LAHandler extends GEOHandler {
 
   protected static final String[] LA_MASS_UPDATE_SHEET_NAMES = { "Sold-To", "Bill-To", "Ship-To", "Install-At", "Email", "AccountReceivable",
       "Data" };
+
+  private static final String DEFAULT_SALES_REP = "111111";
 
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
@@ -313,6 +312,10 @@ public class LAHandler extends GEOHandler {
       if (laReactivateCapable)
         data.setFunc("R");
     }
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      data.setRepTeamMemberNo(DEFAULT_SALES_REP);
+    }
   }
 
   private void importTaxInfo(EntityManager entityManager, Data data, long reqId, String sapNumber, String requesterId) {
@@ -417,6 +420,10 @@ public class LAHandler extends GEOHandler {
     if (StringUtils.isNotBlank(currentRecord.getCmrState())) {
       // State Prov - computation
       address.setStateProv(getStateProvCd(issuingCountry, currentRecord.getCmrState(), currentRecord.getCmrCity()));
+    }
+
+    if (StringUtils.isNotBlank(address.getCity1())) {
+      address.setLocationCode(getLocationCd(issuingCountry, address.getCity1(), address.getStateProv()));
     }
 
     // #1180221: Name4 field for LA countries should populate Street Address
@@ -2425,12 +2432,76 @@ public class LAHandler extends GEOHandler {
     }
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+      DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
       if (StringUtils.isEmpty(data.getPpsceid())) {
-        DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
         if (dataRdc != null) {
           data.setPpsceid(dataRdc.getPpsceid());
         }
       }
+      if (data != null && dataRdc != null) {
+        PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CHECK.CONTACT.INFO.RECORD"));
+        query.setParameter("REQ_ID", data.getId().getReqId());
+        List<GeoContactInfo> contacts = query.getResults(GeoContactInfo.class);
+
+        for (GeoContactInfo contact : contacts) {
+          if ("EM".equals(contact.getContactType())) {
+            String email = StringUtils.isNotBlank(contact.getContactEmail()) ? contact.getContactEmail() : "";
+
+            if ("001".equals(contact.getContactSeqNum())) {
+              processContactsUpdate(email, dataRdc.getEmail1(), entityManager, contacts, contact, data);
+            } else if ("002".equals(contact.getContactSeqNum())) {
+              processContactsUpdate(email, dataRdc.getEmail2(), entityManager, contacts, contact, data);
+            } else if ("003".equals(contact.getContactSeqNum())) {
+              processContactsUpdate(email, dataRdc.getEmail3(), entityManager, contacts, contact, data);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private void processContactsUpdate(String currentEmail, String oldEmail, EntityManager entityManager, List<GeoContactInfo> contacts,
+      GeoContactInfo contactEM, Data data) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    if (!currentEmail.equalsIgnoreCase(oldEmail)) {
+      saveOrUpdateAdditionalContactLE(entityManager, contacts, contactEM, data.getId().getReqId());
+    }
+  }
+
+  private void saveOrUpdateAdditionalContactLE(EntityManager entityManager, List<GeoContactInfo> contacts, GeoContactInfo contactEM, long reqId)
+      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    GeoContactInfoPK contactPk = new GeoContactInfoPK();
+
+    String contactSeqEM = contactEM.getContactSeqNum();
+    GeoContactInfo contactLE = contacts.stream().filter(r -> ("LE".equals(r.getContactType()) && contactSeqEM.equals(r.getContactSeqNum()))).findAny()
+        .orElse(null);
+
+    if (contactLE != null) {
+      contactLE.setContactName(contactEM.getContactName());
+      contactLE.setContactPhone(contactEM.getContactPhone());
+      contactLE.setContactEmail(contactEM.getContactEmail());
+      contactLE.setContactTreatment(contactEM.getContactTreatment());
+      contactLE.setContactFunc(contactEM.getContactFunc());
+
+      entityManager.merge(contactLE);
+      entityManager.flush();
+
+    } else {
+      contactLE = new GeoContactInfo();
+      PropertyUtils.copyProperties(contactLE, contactEM);
+      contactLE.setContactType("LE");
+
+      int contactId = 1;
+      try {
+        contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null, String.valueOf(reqId));
+        contactPk.setContactInfoId(contactId);
+      } catch (CmrException ex) {
+        LOG.debug("Exception while getting contactId : " + ex.getMessage(), ex);
+      }
+
+      contactPk.setReqId(reqId);
+      contactLE.setId(contactPk);
+      entityManager.persist(contactLE);
+      entityManager.flush();
     }
   }
 
@@ -2800,96 +2871,7 @@ public class LAHandler extends GEOHandler {
     LOG.debug("Inside doAfterImport method");
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      CROSQueryRequest request = new CROSQueryRequest();
-      request.setIssuingCntry(data.getCmrIssuingCntry());
-      request.setCmrNo(data.getCmrNo());
-      try {
-        CROSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
-            CROSServiceClient.class);
-        CROSQueryResponse response = client.executeAndWrap(CROSServiceClient.QUERY_APP_ID, request, CROSQueryResponse.class);
-        if (response.isSuccess()) {
-          CROSRecord record = response.getData();
-          data.setRepTeamMemberNo(record.getSalesRep());
-          data.setInstallTeamCd(record.getInstallTeamCode());
-          data.setSalesTeamCd(record.getSalesTeamCode());
-          data.setGovType(record.getGovernment());
-          data.setMrcCd(record.getMrcCode());
-
-          String sql = ExternalizedQuery.getSql("UPDATE_DATA_RDC");
-          PreparedQuery qry = new PreparedQuery(entityManager, sql);
-          qry.setParameter("REQ_ID", data.getId().getReqId());
-          qry.setParameter("SALES_REP", record.getSalesRep());
-          qry.setParameter("COLNAMENO", data.getCollectorNameNo());
-          qry.setParameter("ABBREVNM", record.getAbbrevName());
-          qry.setParameter("COLLBO", record.getCollectorBO());
-          qry.executeSql();
-
-          DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
-
-          if (dataRdc != null) {
-            dataRdc.setVatExempt(record.getSalesTeamCode()); // sales
-            // team
-            // code
-            dataRdc.setIdentClient(record.getInstallTeamCode()); // install
-            // team
-            // code
-            dataRdc.setGovType(record.getGovernment());
-            dataRdc.setIsbuCd(record.getProxyLoc());
-            entityManager.merge(dataRdc);
-          }
-
-          int contactId = 1;
-          List<CROSContact> crossCntlist = record.getContacts();
-          if (crossCntlist != null && crossCntlist.size() > 0) {
-            PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CHECK.CONTACT.INFO.RECORD"));
-            query.setParameter("REQ_ID", data.getId().getReqId());
-            List<GeoContactInfo> results = query.getResults(GeoContactInfo.class);
-            GeoContactInfoService contService = new GeoContactInfoService();
-
-            if (results != null && !results.isEmpty() && results.size() > 0) {
-              contService.deleteAllContactDetails(results, entityManager, data.getId().getReqId());
-            }
-
-            for (CROSContact d : crossCntlist) {
-
-              if (SystemLocation.PERU.equals(data.getCmrIssuingCntry()) && "LE".equalsIgnoreCase(d.getContactCode())) {
-                continue;
-              }
-
-              GeoContactInfo e = new GeoContactInfo();
-              GeoContactInfoPK ePk = new GeoContactInfoPK();
-              e.setContactType(d.getContactCode());
-              e.setContactSeqNum(d.getContactNo());
-              e.setContactName(d.getContactName());
-              e.setContactPhone(d.getContactPhone());
-              e.setContactEmail(d.getContactEmail());
-              e.setContactFunc(".");
-              e.setContactTreatment("Sr.");
-
-              e.setCreateById(admin.getRequesterId());
-              e.setCreateTs(SystemUtil.getCurrentTimestamp());
-              try {
-                contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null, String.valueOf(admin.getId().getReqId()));
-                ePk.setContactInfoId(contactId);
-              } catch (CmrException ex) {
-                LOG.debug("Exception while getting contactId : " + ex.getMessage(), ex);
-              }
-              ePk.setReqId(data.getId().getReqId());
-              e.setId(ePk);
-              entityManager.persist(e);
-              entityManager.flush();
-            }
-          }
-        } else {
-          throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
-        }
-      } catch (Exception e) {
-        LOG.error("An error has occured in setting values coming from the CROS query service.", e);
-        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, e);
-      }
-
       if (data.getId() != null) {
-
         if ("88".equalsIgnoreCase(data.getOrdBlk())) {
           data.setDenialCusInd("Y");
           data.setEmbargoCd("Y");
@@ -2904,8 +2886,81 @@ public class LAHandler extends GEOHandler {
         AddressService addrSvc = new AddressService();
         String sapNumber = addrSvc.getAddressSapNo(entityManager, reqId, "ZS01");
         importTaxInfo(entityManager, data, data.getId().getReqId(), sapNumber, admin.getRequesterId());
+        importAddtlContacts(entityManager, data, admin, reqId, sapNumber);
+
+        DataPK dataRdcPk = new DataPK();
+        dataRdcPk.setReqId(data.getId().getReqId());
+        DataRdc dataRdc = entityManager.find(DataRdc.class, dataRdcPk);
+
+        PropertyUtils.copyProperties(dataRdc, data);
+        dataRdc.setId(data.getId());
+        entityManager.merge(dataRdc);
+        entityManager.flush();
       }
     }
+  }
+
+  private void importAddtlContacts(EntityManager entityManager, Data data, Admin admin, String reqId, String sapNumber) {
+    int contactId = 1;
+    List<Stxl> stxlList = getStxlAddlContactsByKunnr(entityManager, sapNumber);
+    if (stxlList != null && stxlList.size() > 0) {
+      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CHECK.CONTACT.INFO.RECORD"));
+      query.setParameter("REQ_ID", data.getId().getReqId());
+      List<GeoContactInfo> results = query.getResults(GeoContactInfo.class);
+      GeoContactInfoService contService = new GeoContactInfoService();
+
+      if (results != null && !results.isEmpty() && results.size() > 0) {
+        contService.deleteAllContactDetails(results, entityManager, data.getId().getReqId());
+      }
+
+      for (Stxl d : stxlList) {
+        GeoContactInfo e = new GeoContactInfo();
+        GeoContactInfoPK ePk = new GeoContactInfoPK();
+        e.setContactType("EM");
+
+        String addlConSeq = "";
+        if ("ZOA1".equals(d.getId().getTdid())) {
+          addlConSeq = "001";
+          data.setEmail1(d.getClustd());
+        } else if ("ZOA2".equals(d.getId().getTdid())) {
+          addlConSeq = "002";
+          data.setEmail2(d.getClustd());
+        } else if ("ZOA3".equals(d.getId().getTdid())) {
+          addlConSeq = "003";
+          data.setEmail3(d.getClustd());
+        }
+
+        e.setContactSeqNum(addlConSeq);
+        e.setContactName("N");
+        e.setContactPhone(".");
+        e.setContactEmail(d.getClustd());
+        e.setContactFunc(".");
+        e.setContactTreatment("Sr.");
+
+        e.setCreateById(admin.getRequesterId());
+        e.setCreateTs(SystemUtil.getCurrentTimestamp());
+        try {
+          contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null, String.valueOf(admin.getId().getReqId()));
+          ePk.setContactInfoId(contactId);
+        } catch (CmrException ex) {
+          LOG.debug("Exception while getting contactId : " + ex.getMessage(), ex);
+        }
+        ePk.setReqId(data.getId().getReqId());
+        e.setId(ePk);
+        entityManager.persist(e);
+        entityManager.flush();
+      }
+    }
+  }
+
+  private List<Stxl> getStxlAddlContactsByKunnr(EntityManager entityManager, String kunnr) {
+    String tdname = kunnr + "%";
+    String sql = ExternalizedQuery.getSql("LA.GET_STXL_ADDL_CONTACTS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("TDNAME", tdname);
+
+    return query.getResults(Stxl.class);
   }
 
   @Override
@@ -3024,6 +3079,31 @@ public class LAHandler extends GEOHandler {
           }
         }
       }
+    }
+    return txt;
+  }
+
+  private String getLocationCd(String issuingCntry, String city, String stateProv) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String txt = "";
+    String sql = ExternalizedQuery.getSql("GET.GEO_CITIES.ID_BY_DESC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CITY_DESC", city);
+    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+    List<String> results = query.getResults(String.class);
+
+    if (results != null && results.size() == 1) {
+      txt = results.get(0);
+    } else if (results != null && results.size() > 1) {
+      for (String res : results) {
+        if (res.startsWith(stateProv)) {
+          txt = res;
+        }
+      }
+    }
+
+    if (txt != null && StringUtils.isNotEmpty(txt) && txt.length() >= 5) {
+      txt = txt.substring(2, 5);
     }
 
     return txt;
