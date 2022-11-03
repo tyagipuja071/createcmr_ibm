@@ -153,7 +153,7 @@
 					<width>25</width>
 				</column>
 			</columns>
-		</tab>
+		</tab>		
 		<tab name="TaxInfo" type="Data">
 			<columns>
 				<column exactLength="true">
@@ -199,7 +199,7 @@
 					<width>25</width>
 				</column>
 			</columns>
-		</tab>	
+		</tab>		
 		<tab name="Sold-To" type="Address" typeCode="ZS01">
 			<columns>
 				<column exactLength="true">
