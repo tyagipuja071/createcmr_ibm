@@ -65,6 +65,7 @@ import com.ibm.cio.cmr.request.service.QuickSearchService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -266,6 +267,7 @@ public class TransConnService extends BaseBatchService {
         ProfilerLogger.LOG.trace("After monitorAbortedRecords for Request ID: " + id + " "
             + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
+        SlackAlertsUtil.recordException("TransConn", "Request " + id, e);
         LOG.error("Error in processing Aborted Record wit Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
@@ -371,6 +373,7 @@ public class TransConnService extends BaseBatchService {
         ProfilerLogger.LOG.trace(
             "After monitorTransconn for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
+        SlackAlertsUtil.recordException("TransConn", "Notify ID " + id, e);
         LOG.error("Error in processing TransConn Record with Notify ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
@@ -497,6 +500,7 @@ public class TransConnService extends BaseBatchService {
         ProfilerLogger.LOG.trace("After monitorMQInterfaceRequests for Request ID: " + id + " "
             + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
+        SlackAlertsUtil.recordException("TransConn", "Query ID " + mqIntfReq.getId().getQueryReqId(), e);
         LOG.error("Error in processing TransConn Record " + mqIntfReq.getId().getQueryReqId() + " for Request ID " + mqIntfReq.getReqId() + " ["
             + e.getMessage() + "]", e);
       }
@@ -561,6 +565,7 @@ public class TransConnService extends BaseBatchService {
         ProfilerLogger.LOG.trace("After monitorDisAutoProcRec for Request ID: " + id + " "
             + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
+        SlackAlertsUtil.recordException("TransConn", "Request " + id, e);
         LOG.error("Error in processing Manual Record with Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
@@ -1565,6 +1570,9 @@ public class TransConnService extends BaseBatchService {
         } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
           comment = comment.append("Create processing in RDc skipped: " + response.getMessage());
         }
+        SlackAlertsUtil.recordGenericAlert("TransConn", "Request " + admin.getId().getReqId(),
+            SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
+
       }
 
       // only update Admin record once depending on the overall status of
@@ -1877,6 +1885,8 @@ public class TransConnService extends BaseBatchService {
               comment = comment.append("\nUpdate processing in RDc skipped: " + response.getMessage() + "\n");
             }
             rdcProcessingMsg.append("Error: " + response.getMessage() + "[KUNNR:" + addr.getSapNo() + "]\n");
+            SlackAlertsUtil.recordGenericAlert("TransConn", "Request " + admin.getId().getReqId(),
+                SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
           }
 
           if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
@@ -3073,6 +3083,7 @@ public class TransConnService extends BaseBatchService {
         partialCommit(entityManager);
 
       } catch (Exception e) {
+        SlackAlertsUtil.recordException("TransConn", "Request " + id, e);
         LOG.error("Error in processing Reprocess RDC Record with Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
