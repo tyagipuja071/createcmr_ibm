@@ -2828,10 +2828,6 @@ public class LAHandler extends GEOHandler {
             data.setCollectorNameNo(record.getCollectorNo());
           }
 
-          if (!StringUtils.isEmpty(record.getCollectorNo())) {
-            data.setCollectorNameNo(record.getCollectorNo());
-          }
-
           DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
 
           if (dataRdc != null) {
