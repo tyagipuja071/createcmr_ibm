@@ -15,11 +15,14 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -172,8 +175,16 @@ public class USBPEndUserHandler extends USBPHandler {
         affiliate = ibmCmr.getCmrEnterpriseNumber();
       }
       if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
+        LOG.debug(" - copyAndFillIBMData: Affiliate: " + ibmCmr.getCmrAffiliate());
         details.append(" - Affiliate: " + ibmCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), affiliate);
+      } else {
+        updateAffiliate4Child(entityManager, childRequest, ibmCmr);
+        if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
+          LOG.debug(" - copyAndFillIBMData: CmrAffiliate: " + ibmCmr.getCmrAffiliate());
+          details.append(" - Affiliate: " + ibmCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA )" : "") + "\n");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrAffiliate());
+        }
       }
 
       if (!StringUtils.isBlank(ibmCmr.getCmrIsu())) {
@@ -324,6 +335,25 @@ public class USBPEndUserHandler extends USBPHandler {
       engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
     }
 
+  }
+
+  private void updateAffiliate4Child(EntityManager entityManager, RequestData childRequest, FindCMRRecordModel ibmCmr) {
+    String konzs = "";
+    String sql = ExternalizedQuery.getSql("US.GET.KNA1.KONZS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("ZZKV_CUSNO", ibmCmr.getCmrNum());
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      konzs = (String) results.get(0)[0];
+    }
+    if (!StringUtils.isBlank(konzs)) {
+      Data data = childRequest.getData();
+      data.setAffiliate(konzs);
+      entityManager.merge(data);
+      ibmCmr.setCmrAffiliate(konzs);
+      LOG.debug(" - updateAffiliate4Child: CmrAffiliate: " + konzs);
+    }
   }
 
   @Override
