@@ -1694,7 +1694,11 @@ public class RequestUtils {
         reqId.setAccessible(true);
         Object value = reqId.get(model);
         if (value != null) {
-          return value.toString();
+          String sValue = value.toString();
+          if ("0".equals(sValue)) {
+            return "-Unknown-";
+          }
+          return sValue;
         }
       }
     } catch (Exception e) {
