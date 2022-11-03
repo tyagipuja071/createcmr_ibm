@@ -133,6 +133,14 @@ public class Kna1AddlBilling extends BaseEntity<Kna1AddlBillingPK> implements Se
       name = "UPDATE_TYPE")
   private String updateType;
 
+  @Column(
+      name = "CODCOND")
+  private String codCondition;
+
+  @Column(
+      name = "CODREAS")
+  private String codReason;
+
   public String getNoOfInvoices() {
     return this.noOfInvoices;
   }
@@ -245,4 +253,19 @@ public class Kna1AddlBilling extends BaseEntity<Kna1AddlBillingPK> implements Se
     this.updateType = updateType;
   }
 
+  public String getCodCondition() {
+    return codCondition;
+  }
+
+  public void setCodCondition(String codCondition) {
+    this.codCondition = codCondition;
+  }
+
+  public String getCodReason() {
+    return codReason;
+  }
+
+  public void setCodReason(String codReason) {
+    this.codReason = codReason;
+  }
 }
