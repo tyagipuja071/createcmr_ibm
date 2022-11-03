@@ -4259,15 +4259,15 @@ function executeBeforeSubmit() {
     if (reqType == 'U') {
       var errMsg = checkAnyChangesOnCustNameAddrGST();
       if (errMsg != '' && action == 'SFP') {
-        cmr.showConfirm('showVerificationModal()', errMsg, 'Warning', null, {
+        cmr.showConfirm('showAddressVerificationModal()', errMsg, 'Warning', null, {
           OK : 'Yes',
           CANCEL : 'No'
         });
       } else {
-        showVerificationModal();
+        showAddressVerificationModal();
       }
     } else {
-      showVerificationModal();
+      showAddressVerificationModal();
     }
   }
 }
