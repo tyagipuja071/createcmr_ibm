@@ -132,7 +132,6 @@ function processRequestAction() {
   } else if (action == YourActions.Send_for_Processing) {
     var findDnbResult = FormManager.getActualValue('findDnbResult');
     var reqType = FormManager.getActualValue('reqType');
-    var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
@@ -146,7 +145,8 @@ function processRequestAction() {
           if (checkIfDnBCheckReqForIndia()) {
             matchDnBForIndia();
           } else {
-            cmr.showModal('addressVerificationModal');
+            // cmr.showModal('addressVerificationModal');
+            showAddressVerificationModal();
           }
         } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
           matchDnBForAutomationCountries();
@@ -160,7 +160,8 @@ function processRequestAction() {
           // CustNm check and Addresses Dnb Check
           matchCustNmAUUpdate();
         } else {
-          cmr.showModal('addressVerificationModal');
+          // cmr.showModal('addressVerificationModal');
+          showAddressVerificationModal();
         }
       } else if (cmrCntry == SysLoc.SINGAPORE || cmrCntry == SysLoc.AUSTRALIA) {
         // Cmr-1701 for isic Dnb match acc to scenario
@@ -168,7 +169,8 @@ function processRequestAction() {
           if (checkIfDnBCheckReqForAUSG()) {
             matchDnbForAUSG();
           } else {
-            cmr.showModal('addressVerificationModal');
+            // cmr.showModal('addressVerificationModal');
+            showAddressVerificationModal();
           }
         } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
           matchDnBForAutomationCountries();
@@ -176,7 +178,8 @@ function processRequestAction() {
           if (cmrCntry == SysLoc.SINGAPORE) {
             executeBeforeSubmit();
           } else {
-            cmr.showModal('addressVerificationModal');
+            // cmr.showModal('addressVerificationModal');
+            showAddressVerificationModal();
           }
         }
       } else if (checkIfFinalDnBCheckRequired()) {
@@ -188,7 +191,8 @@ function processRequestAction() {
           if (FormManager.getActualValue('isTaxTeamFlg') != 'true') {
             addUpdateChecksExecution(frmCMR);
           } else {
-            cmr.showModal('addressVerificationModal');
+            // cmr.showModal('addressVerificationModal');
+            showAddressVerificationModal();
           }
         } else {
           addUpdateChecksExecution(frmCMR);
@@ -198,12 +202,14 @@ function processRequestAction() {
           executeBeforeSubmit();
         } else if (personalInfoPrivacyNoticeCntryList.includes(cmrCntry)) {
           cmr.showNode('personalInformationDiv');
-          cmr.showModal('addressVerificationModal');
+          // cmr.showModal('addressVerificationModal');
+          showAddressVerificationModal();
 
         } else {
           cmr.hideNode('personalInformationDiv');
           // if there are no errors, show the Address Verification modal window
-          cmr.showModal('addressVerificationModal');
+          // cmr.showModal('addressVerificationModal');
+          showAddressVerificationModal();
         }
       }
     } else if (comp_proof_INAUSG && cmrCntry == '744') {
@@ -211,7 +217,8 @@ function processRequestAction() {
         matchDnBForIndia();
       } else {
         // if there are no errors, show the Address Verification modal window
-        cmr.showModal('addressVerificationModal');
+        // cmr.showModal('addressVerificationModal');
+        showAddressVerificationModal();
       }
     } else if (comp_proof_INAUSG && cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
       // Cmr-3176- Dnb match
@@ -219,14 +226,16 @@ function processRequestAction() {
       if (checkIfFinalDnBCheckRequired() && reqType == 'U' && checkCompProof) {
         matchCustNmAUUpdate();
       } else {
-        cmr.showModal('addressVerificationModal');
+        // cmr.showModal('addressVerificationModal');
+        showAddressVerificationModal();
       }
     } else if (comp_proof_INAUSG && (cmrCntry == SysLoc.SINGAPORE || cmrCntry == SysLoc.AUSTRALIA)) {
       if (checkIfDnBCheckReqForAUSG() && findDnbResult == 'Accepted') {
         matchDnbForAUSG();
       } else {
         // if there are no errors, show the Address Verification modal window
-        cmr.showModal('addressVerificationModal');
+        // cmr.showModal('addressVerificationModal');
+        showAddressVerificationModal();
       }
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
@@ -312,8 +321,17 @@ function processRequestAction() {
 /**
  * Shows the prompt for the Address Verification disclaimer
  */
+// CREATCMR-7477
 function showAddressVerificationModal() {
-  cmr.showModal('addressVerificationModal');
+  var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (personalInfoPrivacyNoticeCntryList.includes(cmrCntry)) {
+    cmr.showNode('personalInformationDiv');
+    cmr.showModal('addressVerificationModal');
+  } else {
+    cmr.hideNode('personalInformationDiv');
+    cmr.showModal('addressVerificationModal');
+  }
 }
 
 /**
@@ -1777,7 +1795,8 @@ function matchDnBForAutomationCountries() {
           console.log(data);
           if (data && data.success) {
             if (data.match) {
-              cmr.showModal('addressVerificationModal');
+              // cmr.showModal('addressVerificationModal');
+              showAddressVerificationModal();
             } else if (data.tradeStyleMatch) {
               cmr
                   .showConfirm(
@@ -1810,7 +1829,7 @@ function matchDnBForAutomationCountries() {
                 cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');
                 FormManager.setValue('matchOverrideIndc', 'Y');
               } else {
-                cmr.showModal('addressVerificationModal');
+                // cmr.showModal('addressVerificationModal');
               }
             }
           } else {
@@ -1872,7 +1891,8 @@ function matchDnBForIndia() {
           if (FormManager.validate('frmCMR')) {
             MessageMgr.clearMessages();
             doValidateRequest();
-            cmr.showModal('addressVerificationModal');
+            // cmr.showModal('addressVerificationModal');
+            showAddressVerificationModal();
           } else {
             cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
           }
@@ -1884,7 +1904,8 @@ function matchDnBForIndia() {
             cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");
           } else if (data.match && !data.isicMatch && custSubGrp == 'IGF') {
             comp_proof_INAUSG = true;
-            cmr.showModal('addressVerificationModal');
+            // cmr.showModal('addressVerificationModal');
+            showAddressVerificationModal();
           } else {
             comp_proof_INAUSG = false;
             console.log("Name/Address validation failed by dnb");
@@ -1897,7 +1918,7 @@ function matchDnBForIndia() {
       } else {
         // continue
         console.log("An error occurred while matching dnb.");
-        cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+        cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
           OK : 'Yes',
           CANCEL : 'No'
         });
@@ -1951,7 +1972,8 @@ function matchDnbForAUSG() {
               if (FormManager.validate('frmCMR')) {
                 MessageMgr.clearMessages();
                 doValidateRequest();
-                cmr.showModal('addressVerificationModal');
+                // cmr.showModal('addressVerificationModal');
+                showAddressVerificationModal();
               } else {
                 cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
               }
@@ -1985,7 +2007,7 @@ function matchDnbForAUSG() {
           } else {
             // continue
             console.log("An error occurred while matching dnb.");
-            cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+            cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
               OK : 'Yes',
               CANCEL : 'No'
             });
@@ -2190,7 +2212,8 @@ function matchDnbForAUUpdate() {
           if (FormManager.validate('frmCMR')) {
             MessageMgr.clearMessages();
             doValidateRequest();
-            cmr.showModal('addressVerificationModal');
+            // cmr.showModal('addressVerificationModal');
+            showAddressVerificationModal();
           } else {
             cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
           }
@@ -2203,7 +2226,7 @@ function matchDnbForAUUpdate() {
       } else {
         // continue
         console.log("An error occurred while matching dnb.");
-        cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+        cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
           OK : 'Yes',
           CANCEL : 'No'
         });
@@ -2240,7 +2263,8 @@ function addUpdateChecksExecution(frmCMR) {
   var elementResData = "";
 
   if (reqType != 'U') {
-    cmr.showModal('addressVerificationModal');
+    // cmr.showModal('addressVerificationModal');
+    showAddressVerificationModal();
     return;
   }
   console.log('Running Update Checks Element...');
@@ -2261,7 +2285,7 @@ function addUpdateChecksExecution(frmCMR) {
         }
         // else if (data.negativeChksMsg != '' && data.negativeChksMsg != null)
         // {
-        // cmr.showConfirm('showAddrVerificationModal()', '<strong>' +
+        // cmr.showConfirm('showAddressVerificationModal()', '<strong>' +
         // data.negativeChksMsg + '</strong> <br/> The request will require CMDE
         // review. Do you want to proceed ?', 'Warning', null, {
         // OK : 'Ok',
@@ -2269,10 +2293,12 @@ function addUpdateChecksExecution(frmCMR) {
         // });
         // }
         else {
-          cmr.showModal('addressVerificationModal');
+          // cmr.showModal('addressVerificationModal');
+          showAddressVerificationModal();
         }
       } else {
-        cmr.showModal('addressVerificationModal');
+        // cmr.showModal('addressVerificationModal');
+        showAddressVerificationModal();
       }
     },
     error : function(error, ioargs) {
@@ -2281,10 +2307,6 @@ function addUpdateChecksExecution(frmCMR) {
       reject('Error occurred in Update Checks.');
     }
   });
-}
-
-function showAddrVerificationModal() {
-  cmr.showModal('addressVerificationModal');
 }
 
 function checkForConfirmationAttachments() {
