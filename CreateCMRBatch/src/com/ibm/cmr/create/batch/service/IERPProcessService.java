@@ -1283,17 +1283,19 @@ public class IERPProcessService extends BaseBatchService {
       // cmrNo = data.getCmrNo();
       // }if (!StringUtils.isBlank(prospectCMR)) {
       cmrNo = data.getCmrNo();
-      if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && "C".equals(requestType)
-          && (StringUtils.isEmpty(cmrNo) || cmrNo.startsWith("P"))) {
-        if (cmrNo != null && cmrNo.startsWith("P"))
-          cmrNo = "";
-        cmrNo = generateCMRNoForIERP(data);
-        if (!StringUtils.isEmpty(cmrNo) && cmrNoList.contains(cmrNo)) {
+      synchronized (IERPProcessService.class) {
+        if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && "C".equals(requestType)
+            && (StringUtils.isEmpty(cmrNo) || cmrNo.startsWith("P"))) {
+          if (cmrNo != null && cmrNo.startsWith("P"))
+            cmrNo = "";
           cmrNo = generateCMRNoForIERP(data);
-          if (!StringUtils.isEmpty(cmrNo))
+          if (!StringUtils.isEmpty(cmrNo) && cmrNoList.contains(cmrNo)) {
+            cmrNo = generateCMRNoForIERP(data);
+            if (!StringUtils.isEmpty(cmrNo))
+              cmrNoList.add(cmrNo);
+          } else if (!StringUtils.isEmpty(cmrNo)) {
             cmrNoList.add(cmrNo);
-        } else if (!StringUtils.isEmpty(cmrNo)) {
-          cmrNoList.add(cmrNo);
+          }
         }
       }
     }
