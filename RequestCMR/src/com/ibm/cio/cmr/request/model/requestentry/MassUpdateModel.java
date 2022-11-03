@@ -191,6 +191,8 @@ public class MassUpdateModel extends BaseModel {
 
   private String creditCode;
 
+  private String taxNum;
+
   public String getBpAcctTyp() {
     return bpAcctTyp;
   }
@@ -891,6 +893,14 @@ public class MassUpdateModel extends BaseModel {
 
   public void setCreditCode(String creditCode) {
     this.creditCode = creditCode;
+  }
+
+  public String getTaxNum() {
+    return taxNum;
+  }
+
+  public void setTaxNum(String taxNum) {
+    this.taxNum = taxNum;
   }
 
 }
