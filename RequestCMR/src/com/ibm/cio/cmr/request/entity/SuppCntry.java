@@ -12,7 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 
 /**
  * The persistent class for the SUPP_CNTRY database table.
@@ -90,8 +89,7 @@ public class SuppCntry extends BaseEntity<SuppCntryPK> implements Serializable {
   /**
    * Tradestyle Name Usage
    */
-  // @Column(name = "DISABLE_CREATE_BY_MODEL")
-  @Transient
+  @Column(name = "DISABLE_CREATE_BY_MODEL")
   private String disableCreateByModel;
 
   public String getNm() {
