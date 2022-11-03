@@ -2248,7 +2248,7 @@ function executeBeforeSubmit(action) {
   if (reqType == 'U') {
     var addrMismatchInUpdateErr = getAddrMismatchInUpdateMsg();
     if (addrMismatchInUpdateErr != '' && action != 'CRU') {
-      cmr.showConfirm('showVerificationModal()', addrMismatchInUpdateErr, 'Warning', null, {
+      cmr.showConfirm('showAddressVerificationModal()', addrMismatchInUpdateErr, 'Warning', null, {
         OK : 'Yes',
         CANCEL : 'No'
       });
@@ -2260,10 +2260,10 @@ function executeBeforeSubmit(action) {
     } else if(action == 'CRU') {
       doYourAction();
     } else {
-      showVerificationModal();
+      showAddressVerificationModal();
     }
   } else {
-    showVerificationModal();
+    showAddressVerificationModal();
   }
 }
 
