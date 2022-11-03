@@ -4922,6 +4922,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           model.setTaxCd1(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_CD1") - 1)));
           model.setTaxCd2(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_CD2") - 1)));
           model.setTaxCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_CD") - 1)));
+          model.setTaxNum(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_NUM") - 1)));
           model.setTaxSeparationIndc(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_SEPARATION_INDC") - 1)));
           model.setBillingPrintIndc(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("BILLING_PRINT_INDC") - 1)));
           model.setContractPrintIndc(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CONTRACT_PRINT_INDC") - 1)));
@@ -6081,6 +6082,41 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   }
                 }
               }
+            } else if ("TaxInfo".equals(tab.getName())) {
+              for (Row cmrRow : dataSheet) {
+                int seqNo = cmrRow.getRowNum() + 1;
+
+                if (seqNo > 1) {
+                  model = new MassUpdateModel();
+                  model.setParReqId(reqId);
+                  model.setSeqNo(seqNo);
+                  model.setIterationId(newIterId);
+                  model.setErrorTxt("");
+                  model.setRowStatusCd("");
+                  // 4. then for every sheet, get the fields
+                  model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+
+                  for (MassUpdateModel dataModel : modelList) {
+                    if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0
+                        && dataModel.getSeqNo() >= model.getSeqNo()) {
+                      if (!StringUtils.isEmpty(dataModel.getCmrNo()) && dataModel.getCmrNo().equals(model.getCmrNo())) {
+                        dataModel.setSeqNo(model.getSeqNo());
+                        dataModel.setTaxCd(model.getTaxCd());
+                        dataModel.setTaxNum(model.getTaxNum());
+                        dataModel.setTaxSeparationIndc(model.getTaxSeparationIndc());
+                        dataModel.setBillingPrintIndc(model.getBillingPrintIndc());
+                        dataModel.setContractPrintIndc(model.getContractPrintIndc());
+                        dataModel.setCountryUse(model.getCountryUse());
+
+                        models.set(model.getSeqNo() - 2, dataModel);
+                        break;
+                      } else {
+                        LOG.debug("skipping since no cmr no that is same in Data tab is found.");
+                      }
+                    }
+                  }
+                }
+              }
             } else {
 
               // if it is not Data, that means it is an address
@@ -6506,6 +6542,24 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "COD_RSN":
         muModel.setCodReason(tempVal);
+        break;
+      case "TAX_CD":
+        muModel.setTaxCd(tempVal);
+        break;
+      case "TAX_NUM":
+        muModel.setTaxNum(tempVal);
+        break;
+      case "TAX_SEPARATION_INDC":
+        muModel.setTaxSeparationIndc(tempVal);
+        break;
+      case "BILLING_PRINT_INDC":
+        muModel.setBillingPrintIndc(tempVal);
+        break;
+      case "CONTRACT_PRINT_INDC":
+        muModel.setContractPrintIndc(tempVal);
+        break;
+      case "CNTRY_USE":
+        muModel.setCountryUse(tempVal);
         break;
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());

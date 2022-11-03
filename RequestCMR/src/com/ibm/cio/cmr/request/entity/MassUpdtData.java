@@ -300,6 +300,30 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
       name = "COD_RSN")
   private String codReason;
 
+  @Column(
+      name = "TAX_CD")
+  private String taxCd;
+
+  @Column(
+      name = "TAX_NUM")
+  private String taxNum;
+
+  @Column(
+      name = "TAX_SEPARATION_INDC")
+  private String taxSeparationIndc;
+
+  @Column(
+      name = "BILLING_PRINT_INDC")
+  private String billingPrintIndc;
+
+  @Column(
+      name = "CONTRACT_PRINT_INDC")
+  private String contractPrintIndc;
+
+  @Column(
+      name = "CNTRY_USE")
+  private String countryUse;
+
   public String getAbbrevNm() {
     return this.abbrevNm;
   }
@@ -730,6 +754,54 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
 
   public void setCodReason(String codReason) {
     this.codReason = codReason;
+  }
+
+  public String getTaxCd() {
+    return taxCd;
+  }
+
+  public void setTaxCd(String taxCd) {
+    this.taxCd = taxCd;
+  }
+
+  public String getTaxNum() {
+    return taxNum;
+  }
+
+  public void setTaxNum(String taxNum) {
+    this.taxNum = taxNum;
+  }
+
+  public String getTaxSeparationIndc() {
+    return taxSeparationIndc;
+  }
+
+  public void setTaxSeparationIndc(String taxSeparationIndc) {
+    this.taxSeparationIndc = taxSeparationIndc;
+  }
+
+  public String getBillingPrintIndc() {
+    return billingPrintIndc;
+  }
+
+  public void setBillingPrintIndc(String billingPrintIndc) {
+    this.billingPrintIndc = billingPrintIndc;
+  }
+
+  public String getContractPrintIndc() {
+    return contractPrintIndc;
+  }
+
+  public void setContractPrintIndc(String contractPrintIndc) {
+    this.contractPrintIndc = contractPrintIndc;
+  }
+
+  public String getCountryUse() {
+    return countryUse;
+  }
+
+  public void setCountryUse(String countryUse) {
+    this.countryUse = countryUse;
   }
 
 }
