@@ -2289,7 +2289,7 @@ function validateAbbrevNmForCIS() {
 function executeBeforeSubmit() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'U' && dijit.byId('cisServiceCustIndc').get('checked')) {
-    cmr.showConfirm('proceedCIS()', 'You are updating record with duplicate, if you wish to continue click Yes, otherwise No.', null, 'cancelCIS()', {
+    cmr.showConfirm('showAddressVerificationModal()', 'You are updating record with duplicate, if you wish to continue click Yes, otherwise No.', null, 'cancelCIS()', {
       OK : 'Yes',
       CANCEL : 'No'
     });
@@ -2305,7 +2305,8 @@ function proceedCIS() {
 function cancelCIS() {
   FormManager.setValue('cisServiceCustIndc', false);
   setCountryDuplicateFields();
-  cmr.showModal('addressVerificationModal');
+  // cmr.showModal('addressVerificationModal');
+  showAddressVerificationModal();
 }
 
 function afterConfigForRussia() {
