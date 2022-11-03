@@ -32,6 +32,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
@@ -139,6 +140,7 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
             + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
         addError(e);
+        SlackAlertsUtil.recordException("Automation", "Request " + id, e);
         LOG.error("An error occurred during the execution of the automation engine for Request " + id, e);
         LOG.debug("Rolling back transactions for Request " + id);
         partialRollback(entityManager);

@@ -66,6 +66,7 @@ import com.ibm.cio.cmr.request.model.BatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
@@ -213,6 +214,7 @@ public class LegacyDirectService extends TransConnService {
         }
 
       } catch (Exception e) {
+        SlackAlertsUtil.recordException("LegacyDirectService", "Unexpected Error", e);
         if (!MASS_UDPATE_LEGACY_FAIL_MSG.equalsIgnoreCase(e.getMessage())) {
           partialRollback(entityManager);
         }
@@ -294,6 +296,7 @@ public class LegacyDirectService extends TransConnService {
         ProfilerLogger.LOG.trace(
             "After processPendingRDC for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
+        SlackAlertsUtil.recordException("LegacyDirectService", "Request " + admin.getId().getReqId(), e);
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
         processError(entityManager, admin, e.getMessage());
