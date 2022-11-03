@@ -247,7 +247,7 @@ public class AutomationEngine {
           try {
             result = element.executeAutomationElement(entityManager, requestData, engineData.get());
           } catch (Exception e) {
-            SlackAlertsUtil.recordException("Automation", "System Error Request " + reqId, e);
+            SlackAlertsUtil.recordException("Automation", element.getProcessDesc() + " - System Error Request " + reqId, e);
             LOG.warn("System error for element " + element.getProcessDesc(), e);
             result = new AutomationResult<>();
             result.setOnError(true);
