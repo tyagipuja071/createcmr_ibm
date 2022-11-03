@@ -52,7 +52,7 @@ public abstract class BaseSimpleService<R> {
         tx.rollback();
       }
       LOG.error("Error in processing.", e);
-      SlackAlertsUtil.recordException("CreateCMR", getClass().getSimpleName(), e);
+      SlackAlertsUtil.recordException("CreateCMR", getClass().getSimpleName(), e, params);
       // only wrap non CmrException errors
       if (e instanceof CmrException) {
         throw (CmrException) e;

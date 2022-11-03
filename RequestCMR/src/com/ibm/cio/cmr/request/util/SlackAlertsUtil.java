@@ -20,6 +20,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
 
@@ -34,10 +38,10 @@ public class SlackAlertsUtil {
   private static final Logger LOG = Logger.getLogger(SlackAlertsUtil.class);
 
   public static void main(String[] args) throws IOException {
-    Exception e = new Exception("This is an exception.");
-    recordException("Test Only", "Identifier", e);
-    System.out.println("Done");
-
+    ParamContainer params = new ParamContainer();
+    params.addParam("cmr", new ImportCMRModel());
+    params.addParam("admin", new Admin());
+    System.out.println(new ObjectMapper().writeValueAsString(params));
   }
 
   /**
@@ -54,14 +58,13 @@ public class SlackAlertsUtil {
   }
 
   /**
-   * Posts an exception alert to slack
    * 
    * @param application
    * @param identifier
    * @param e
-   * @throws IOException
+   * @param params
    */
-  public static void recordException(String application, String identifier, Throwable e) {
+  public static void recordException(String application, String identifier, Throwable e, Object params) {
     if (e == null) {
       return;
     }
@@ -86,8 +89,36 @@ public class SlackAlertsUtil {
       }
       sections.add(code(msgBody.toString()));
     }
+    if (params != null) {
+      try {
+        String oParams = null;
+        if (params instanceof JSONObject) {
+          oParams = ((JSONObject) params).toString();
+        } else {
+          oParams = new ObjectMapper().writeValueAsString(params);
+        }
+        if (oParams.length() > 2900) {
+          oParams = oParams.substring(0, 2900);
+        }
+        sections.add(code("Params: " + oParams));
+      } catch (Exception e1) {
+        LOG.warn("Cannot convert params to JSON: " + e1.getMessage());
+      }
+    }
     JSONObject jsonMsg = createAlertMessage(application, identifier, sections.toArray(new String[0]));
     postToSlack(jsonMsg);
+  }
+
+  /**
+   * Posts an exception alert to slack
+   * 
+   * @param application
+   * @param identifier
+   * @param e
+   * @throws IOException
+   */
+  public static void recordException(String application, String identifier, Throwable e) {
+    recordException(application, identifier, e, null);
   }
 
   /**
