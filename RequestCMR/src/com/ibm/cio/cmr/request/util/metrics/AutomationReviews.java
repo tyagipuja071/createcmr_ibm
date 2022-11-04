@@ -63,6 +63,8 @@ public class AutomationReviews {
     cat.addReason("Customer Name in all addresses should contain");
     cat.addReason("Customer Names on Sold-to");
     cat.addReason("Billing and Installing addresses are not same");
+    cat.addReason("member outside tax team");
+    cat.addReason("Customer Name must be filled in");
     group.add(cat);
 
     cat = new ReviewCategory("No Data Change");

@@ -27,7 +27,6 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.ws.TgmeAddrStdService;
 import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.TgmeClient;
 import com.ibm.cmr.services.client.stdcity.County;
@@ -327,18 +326,17 @@ public class USAddrStdElement extends OverridingElement {
 
       if ("ZS01".equals(addr.getId().getAddrType())) {
         // only check SCC for ZS01 address
-    	  boolean sccIsValid = false;
-          if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
-            String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
-            if ("N".equals(setPPNFlag)) {
-              sccIsValid = true;
-            }
+        boolean invalidScc = false;
+        if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+          String setPPNFlag = validateForSCC(entityManager, addr.getLandCntry(), addr.getStateProv(), cityToUse, countyCodeToUse);
+          if ("N".equals(setPPNFlag)) {
+            invalidScc = true;
           }
-          
-          if(sccIsValid){
-        	  details.append("\n").append("SCC code for the address is not mapped to SCC table.").append("\n");
-              //hasIssues = true;
-          }
+        }
+
+        if (invalidScc) {
+          hasIssues = true;
+        }
       }
 
       details.append("\n");
@@ -350,7 +348,7 @@ public class USAddrStdElement extends OverridingElement {
       details.append("\n").append(msg).append("\n");
     }
 
-    results.setResults(hasIssues ? "City/County Issu" : "Standardized");
+    results.setResults(hasIssues ? "City/County Issu" : "Validated");
     results.setDetails(details.toString());
     results.setProcessOutput(overrides);
     results.setOnError(false);
@@ -408,18 +406,33 @@ public class USAddrStdElement extends OverridingElement {
       county = "0";
     }
 
-    String sql2 = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
-    PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
-    query2.setParameter("LAND_CNTRY", landCntry);
-    query2.setParameter("N_ST", stateProv);
-    query2.setParameter("C_CNTY", county);
-    query2.setParameter("N_CITY", city1.toUpperCase());
+    if ("US".equals(landCntry)) {
+      String sql2 = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
+      PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+      query2.setParameter("LAND_CNTRY", landCntry);
+      query2.setParameter("N_ST", stateProv);
+      query2.setParameter("C_CNTY", county);
+      query2.setParameter("N_CITY", city1.toUpperCase());
 
-    List<Object[]> results2 = query2.getResults();
-    if (results2 != null && !results2.isEmpty()) {
-      Object[] result = results2.get(0);
-      if (!"".equals(result[0])) {
-        flag = "Y";
+      List<Object[]> results2 = query2.getResults();
+      if (results2 != null && !results2.isEmpty()) {
+        Object[] result = results2.get(0);
+        if (!"".equals(result[0])) {
+          flag = "Y";
+        }
+      }
+    } else {
+      String sql2 = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY_NON_US");
+      PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+      query2.setParameter("LAND_CNTRY", landCntry);
+      query2.setParameter("N_CITY", city1);
+
+      List<Object[]> results2 = query2.getResults();
+      if (results2 != null && !results2.isEmpty()) {
+        Object[] result = results2.get(0);
+        if (!"".equals(result[0])) {
+          flag = "Y";
+        }
       }
     }
 

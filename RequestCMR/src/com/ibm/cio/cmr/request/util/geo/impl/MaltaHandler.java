@@ -1342,6 +1342,5 @@ public class MaltaHandler extends BaseSOFHandler {
         }
       }
     }
-
   }
 }

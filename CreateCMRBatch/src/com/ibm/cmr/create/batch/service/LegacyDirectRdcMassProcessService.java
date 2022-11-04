@@ -124,6 +124,7 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
     ProcessRequest request = null;
     for (Admin admin : pending) {
       try {
+        Thread.currentThread().setName("REQ-" + admin.getId().getReqId());
         this.cmrObjects = prepareRequest(entityManager, admin);
         data = this.cmrObjects.getData();
 
@@ -163,6 +164,7 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
       }
     }
 
+    Thread.currentThread().setName("LDCRDCMassService-" + Thread.currentThread().getId());
     return true;
   }
 

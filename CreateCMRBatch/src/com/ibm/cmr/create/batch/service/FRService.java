@@ -139,6 +139,8 @@ public class FRService extends TransConnService {
       if ("M".equals(admin.getReqType())) {
         continue;
       }
+      Thread.currentThread().setName("REQ-" + admin.getId().getReqId());
+
       // System.out.println(">>>> Req ID >>> " + admin.getId().getReqId());
       // hard coding the req. id below
       // if (admin.getId().getReqId() != reQId) {
@@ -195,6 +197,7 @@ public class FRService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
+    Thread.currentThread().setName("FRService-" + Thread.currentThread().getId());
   }
 
   public void monitorAbortedRecords(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
