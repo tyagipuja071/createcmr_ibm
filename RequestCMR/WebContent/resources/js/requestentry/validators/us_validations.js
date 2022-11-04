@@ -1331,25 +1331,6 @@ function addressQuotationValidator() {
   FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name 2' ]);
 }
 
-// CREATCMR-7213
-function federalIsicCheck() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var reqType = FormManager.getActualValue('reqType');
-        var custGrp = FormManager.getActualValue('custGrp');
-        var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-        var fedIsic = [ '9', '10', '11', '14' ];
-        if (reqType == 'C' && !fedIsic.includes(custGrp) && subIndustryCd.startsWith('Y')) {
-          genericMsg = 'Federal ISIC cannot be used with Non-Federal sceanrios.';
-          return new ValidationResult(null, false, genericMsg);
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
-}
-
 //CREATCMR-7213
 function federalIsicCheck() {
   FormManager.addFormValidator((function() {
@@ -1358,7 +1339,7 @@ function federalIsicCheck() {
         var reqType = FormManager.getActualValue('reqType');
         var custGrp = FormManager.getActualValue('custGrp');
         var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-        var fedIsic = [ '9', '10', '11' ];
+        var fedIsic = [ '9', '10', '11', '14' ];
         if (reqType == 'C' && !fedIsic.includes(custGrp) && custGrp != '15' && subIndustryCd.startsWith('Y')) {
           genericMsg = 'Federal ISIC cannot be used with Non-Federal scenarios.';
           return new ValidationResult(null, false, genericMsg);

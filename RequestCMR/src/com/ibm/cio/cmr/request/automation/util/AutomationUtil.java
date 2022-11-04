@@ -643,11 +643,8 @@ public abstract class AutomationUtil {
       if (genericCmtCntries.contains(country)) {
         engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be " + commentGeneric, "", "");
         details.append("Scenario chosen is incorrect, should be " + commentGeneric).append("\n");
-      } else {
-        engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be " + commentSpecific, "", "");
-        details.append("Scenario chosen is incorrect, should be " + commentSpecific).append("\n");
+        return false;
       }
-      return false;
     }
 
     // Duplicate Request check with customer name
