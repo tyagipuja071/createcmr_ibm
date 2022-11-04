@@ -54,7 +54,8 @@ public class RequestSummaryController extends BaseWindowController {
    * @throws JsonMappingException
    * @throws JsonGenerationException
    */
-  @RequestMapping(value = WINDOW_URL + "/summary")
+  @RequestMapping(
+      value = WINDOW_URL + "/summary")
   public ModelAndView showSummary(@RequestParam("reqId") long reqId, HttpServletRequest request, HttpServletResponse response, ModelMap model)
       throws CmrException, JsonGenerationException, JsonMappingException, IOException {
     ParamContainer params = new ParamContainer();
@@ -86,7 +87,8 @@ public class RequestSummaryController extends BaseWindowController {
 
   }
 
-  @RequestMapping(value = WINDOW_URL + "/dplsummary")
+  @RequestMapping(
+      value = WINDOW_URL + "/dplsummary")
   public ModelAndView showDPLSummary(@RequestParam("reqId") long reqId, HttpServletRequest request, HttpServletResponse response, ModelMap model)
       throws CmrException, JsonGenerationException, JsonMappingException, IOException {
     ParamContainer params = new ParamContainer();
@@ -98,7 +100,9 @@ public class RequestSummaryController extends BaseWindowController {
     return getWindow(new ModelAndView("summarydplmass", "summary", summary), "Request Summary: Mass Update DPL Summary (" + reqId + ")");
   }
 
-  @RequestMapping(value = "/updated/nameaddr", method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(
+      value = "/updated/nameaddr",
+      method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap getUpdateNameAddressList(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId)
       throws CmrException {
 
@@ -107,7 +111,9 @@ public class RequestSummaryController extends BaseWindowController {
     return wrapAsPlainSearchResult(updatedList);
   }
 
-  @RequestMapping(value = "/updated/cust", method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(
+      value = "/updated/cust",
+      method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap getUpdateCustomerDataList(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId)
       throws CmrException {
 
@@ -122,7 +128,9 @@ public class RequestSummaryController extends BaseWindowController {
     return wrapAsPlainSearchResult(updatedList);
   }
 
-  @RequestMapping(value = "/updated/ibm", method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(
+      value = "/updated/ibm",
+      method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap getUpdateIBMDataList(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId)
       throws CmrException {
 
@@ -137,7 +145,9 @@ public class RequestSummaryController extends BaseWindowController {
     return wrapAsPlainSearchResult(updatedList);
   }
 
-  @RequestMapping(value = "/summary/massprocess", method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(
+      value = "/summary/massprocess",
+      method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap showMassRecord(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId,
       @RequestParam("reqType") String reqType) throws CmrException {
 
@@ -155,7 +165,9 @@ public class RequestSummaryController extends BaseWindowController {
     return wrapAsPlainSearchResult(massDataList);
   }
 
-  @RequestMapping(value = "/summary/dplsummarry", method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(
+      value = "/summary/dplsummarry",
+      method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap showDplSummaryRecord(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId,
       @RequestParam("reqType") String reqType) throws CmrException {
 
@@ -165,18 +177,19 @@ public class RequestSummaryController extends BaseWindowController {
     return wrapAsPlainSearchResult(massDataList);
   }
 
-  // @RequestMapping(value = "/summary/addlcontacts", method = {
-  // RequestMethod.GET, RequestMethod.POST })
-  // public ModelMap showAddtlConactDetails(HttpServletRequest request,
-  // HttpServletResponse response, @RequestParam("cmr") String cmr,
-  // @RequestParam("reqId") long reqId, @RequestParam("issuingCntry") String
-  // issuingCntry) throws CmrException {
-  // List<GeoContactInfoModel> contacts = new ArrayList<>();
-  // contacts = service.getAddlContactDetails(request, reqId, issuingCntry);
-  // return wrapAsPlainSearchResult(contacts);
-  // }
+  @RequestMapping(
+      value = "/summary/addlcontacts",
+      method = { RequestMethod.GET, RequestMethod.POST })
+  public ModelMap showAddtlConactDetails(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId,
+      @RequestParam("issuingCntry") String issuingCntry) throws CmrException {
+    List<GeoContactInfoModel> contacts = new ArrayList<>();
+    contacts = service.getAddlContactDetails(request, reqId, issuingCntry);
+    return wrapAsPlainSearchResult(contacts);
+  }
 
-  @RequestMapping(value = "/summary/origAddlcontacts", method = { RequestMethod.GET, RequestMethod.POST })
+  @RequestMapping(
+      value = "/summary/origAddlcontacts",
+      method = { RequestMethod.GET, RequestMethod.POST })
   public ModelMap showOrigContactDetails(HttpServletRequest request, HttpServletResponse response, @RequestParam("cmr") String cmr,
       @RequestParam("issuingCntry") String issuingCntry, @RequestParam("reqId") long reqId) throws CmrException {
     List<GeoContactInfoModel> contacts = new ArrayList<>();
@@ -184,7 +197,9 @@ public class RequestSummaryController extends BaseWindowController {
     return wrapAsPlainSearchResult(contacts);
   }
 
-  @RequestMapping(value = "/summary/currtaxinfo", method = { RequestMethod.GET, RequestMethod.POST })
+  @RequestMapping(
+      value = "/summary/currtaxinfo",
+      method = { RequestMethod.GET, RequestMethod.POST })
   public ModelMap showCurrTaxInfo(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId,
       @RequestParam("issuingCntry") String issuingCntry) throws CmrException {
     List<GeoTaxInfoModel> currTax = new ArrayList<>();
@@ -192,7 +207,9 @@ public class RequestSummaryController extends BaseWindowController {
     return wrapAsPlainSearchResult(currTax);
   }
 
-  @RequestMapping(value = "/summary/origtaxinfo", method = { RequestMethod.GET, RequestMethod.POST })
+  @RequestMapping(
+      value = "/summary/origtaxinfo",
+      method = { RequestMethod.GET, RequestMethod.POST })
   public ModelMap showOrigTaxInfo(HttpServletRequest request, HttpServletResponse response, @RequestParam("cmr") String cmr,
       @RequestParam("issuingCntry") String issuingCntry) throws CmrException {
     List<GeoTaxInfoModel> origTax = new ArrayList<>();
