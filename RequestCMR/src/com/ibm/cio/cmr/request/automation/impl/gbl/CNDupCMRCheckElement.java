@@ -204,7 +204,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                       nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                       if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                       }
 
                       log.debug("CNAPI retrieved name is <" + cnNameSingleByte + "> after trim Chinese Space is <"
@@ -303,7 +303,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                         nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                         if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                         }
 
                         if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
@@ -407,7 +407,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                           if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                           }
 
                           if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
@@ -517,7 +517,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                           if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                           }
 
                           if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
@@ -739,7 +739,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                       nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                       if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                       }
 
                       log.debug("CNAPI retrieved name is <" + cnNameSingleByte + "> after trim Chinese Space is <"
@@ -840,7 +840,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                         nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                         if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                         }
 
                         if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
@@ -937,7 +937,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                           if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                           }
 
                           if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
@@ -1039,7 +1039,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                           if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                           }
 
                           if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
@@ -1244,7 +1244,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                       nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                       if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                       }
 
                       log.debug("CNAPI retrieved name is <" + cnNameSingleByte + "> after trim Chinese Space is <"
@@ -1324,7 +1324,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                         nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                         if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                         }
 
                         if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
@@ -1404,7 +1404,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                           if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                           }
 
                           if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
@@ -1490,7 +1490,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                           if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                           }
 
                           if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
@@ -1721,7 +1721,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                       nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                       if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                       }
 
                       log.debug("CNAPI retrieved name is <" + cnNameSingleByte + "> after trim Chinese Space is <"
@@ -1861,7 +1861,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                         nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                         if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                         }
 
                         if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
@@ -2003,7 +2003,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                           if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                           }
 
                           if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
@@ -2153,7 +2153,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                           if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
-                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                           }
 
                           if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {

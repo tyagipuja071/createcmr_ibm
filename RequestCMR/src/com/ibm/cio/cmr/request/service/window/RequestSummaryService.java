@@ -230,6 +230,10 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
       GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrCountry);
       UpdatedDataModel update = null;
       List<DataRdc> records = query.getResults(DataRdc.class);
+
+      String reqType = getReqType(entityManager, reqId);
+
+      transformCheckbox(newData);
       if (records != null && records.size() > 0) {
         for (DataRdc oldData : records) {
           if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getAbbrevNm(), newData.getAbbrevNm())
@@ -256,7 +260,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update.setOldData(getCodeAndDescription(oldData.getBpRelType(), "BPRelationType", cmrCountry));
             results.add(update);
           }
-          if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getCapInd(), newData.getCapInd())
+          if (TYPE_CUSTOMER.equals(type) && (StringUtils.isNotBlank(newData.getCapInd()) && !equals(oldData.getCapInd(), newData.getCapInd()))
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CAP"))) {
             update = new UpdatedDataModel();
             update.setDataField(PageManager.getLabel(cmrCountry, "CAP", "-"));
@@ -431,7 +435,16 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getVat());
               results.add(update);
             }
+            /*if (TYPE_CUSTOMER.equals(type) && (StringUtils.isNoneBlank(oldData.getVatInd()) && !equals(oldData.getVatInd(), newData.getVatInd()))
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "VATInd"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "VATInd", "-"));
+              update.setNewData(newData.getVatInd());
+              update.setOldData(oldData.getVatInd());
+              results.add(update);
+            }*/
             if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxPayerCustCd(), newData.getTaxPayerCustCd())
+                && !CmrConstants.REQ_TYPE_UPDATE.equals(reqType)
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "PSTExemptLicNum"))) {
               update = new UpdatedDataModel();
               update.setDataField(PageManager.getLabel(cmrCountry, "PSTExemptLicNum", "-"));
@@ -533,7 +546,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update.setOldData(getCodeAndDescription(oldData.getIsicCd(), "ISIC", cmrCountry));
             results.add(update);
           }
-          if (TYPE_IBM.equals(type) && !equals(oldData.getSitePartyId(), newData.getSitePartyId())
+          if (TYPE_IBM.equals(type) && !equals(oldData.getSitePartyId(), newData.getSitePartyId()) && !CmrConstants.REQ_TYPE_UPDATE.equals(reqType)
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "SitePartyID"))) {
             update = new UpdatedDataModel();
             update.setDataField(PageManager.getLabel(cmrCountry, "SitePartyID", "-"));
@@ -586,7 +599,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             results.add(update);
           }
 
-          if (TYPE_IBM.equals(type) && !equals(oldData.getGeoLocCd(), newData.getGeoLocationCd())
+          if (TYPE_IBM.equals(type) && !equals(oldData.getGeoLocCd(), newData.getGeoLocationCd()) && !CmrConstants.REQ_TYPE_UPDATE.equals(reqType)
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "GeoLocationCode"))) {
             update = new UpdatedDataModel();
             update.setDataField(PageManager.getLabel(cmrCountry, "GeoLocationCode", "-"));
@@ -636,11 +649,14 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               || "649".equals(oldData.getCmrIssuingCntry()))) {
             if (TYPE_IBM.equals(type) && !equals(oldData.getCreditCd(), newData.getCreditCd())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CodFlag"))) {
-              update = new UpdatedDataModel();
-              update.setDataField(PageManager.getLabel(cmrCountry, "CodFlag", "-"));
-              update.setNewData(newData.getCreditCd());
-              update.setOldData(oldData.getCreditCd());
-              results.add(update);
+              String dataField = PageManager.getLabel(cmrCountry, "CodFlag", "-");
+              if (!StringUtils.isEmpty(dataField) && !"-".equals(dataField)) {
+                update = new UpdatedDataModel();
+                update.setDataField(dataField);
+                update.setNewData(newData.getCreditCd());
+                update.setOldData(oldData.getCreditCd());
+                results.add(update);
+              }
             }
           }
 
@@ -1759,5 +1775,40 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
         results.add(massData);
       }
     }
+  }
+
+  private void transformCheckbox(Data data) throws Exception {
+
+    String cmrCountry = data.getCmrIssuingCntry();
+
+    if (SystemLocation.UNITED_STATES.equals(cmrCountry)) {
+      if (!StringUtils.isEmpty(data.getRestrictTo())) {
+        data.setRestrictInd(CmrConstants.YES_NO.Y.toString());
+      } else {
+        data.setRestrictInd(CmrConstants.YES_NO.N.toString());
+      }
+      if (!CmrConstants.YES_NO.Y.toString().equals(data.getFedSiteInd())) {
+        data.setFedSiteInd(CmrConstants.YES_NO.N.toString());
+      }
+      if (!CmrConstants.YES_NO.Y.toString().equals(data.getOemInd())) {
+        data.setOemInd(CmrConstants.YES_NO.N.toString());
+      }
+      if (!CmrConstants.YES_NO.Y.toString().equals(data.getOutCityLimit())) {
+        data.setOutCityLimit(CmrConstants.YES_NO.N.toString());
+      }
+    }
+  }
+
+  public String getReqType(EntityManager entityManager, long reqId) {
+    String reqType = "";
+    String sql = ExternalizedQuery.getSql("ADMIN.GETREQTYPE.CA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<String> results = query.getResults(String.class);
+    if (results != null && results.size() > 0) {
+      reqType = results.get(0);
+    }
+    return reqType;
   }
 }

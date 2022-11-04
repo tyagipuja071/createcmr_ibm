@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.util.geo.ChinaUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -133,6 +134,19 @@ public class UpdateSwitchElement extends ValidatingElement {
       }
 
       log.debug("Validation after data checks: " + validation.isSuccess());
+
+      // handling of sbo
+      if ("838".equals(data.getCmrIssuingCntry()) && changes.hasDataChanges() && null != changes.getDataChange("SBO")) {
+
+        UpdatedDataModel updatedSBO = changes.getDataChange("SBO");
+        if (StringUtils.isBlank(updatedSBO.getNewData())) {
+          // check if CD is present in LOV
+          if (!checkIFCodeExistInLov(entityManager, "##SalesBusOff2", data.getCmrIssuingCntry(), updatedSBO.getOldData())) {
+            changes.getDataUpdates().remove(updatedSBO);
+          }
+        }
+
+      }
 
       if (!output.isOnError() && changes.hasAddressChanges()) {
         List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
@@ -348,5 +362,14 @@ public class UpdateSwitchElement extends ValidatingElement {
       return true;
     }
     return val1.trim().equals(val2.trim());
+  }
+
+  public boolean checkIFCodeExistInLov(EntityManager entityManager, String fieldId, String cmrIssuingCntry, String code) throws Exception {
+    String sql = ExternalizedQuery.getSql("SYSTEM.LOVMAINT");
+    PreparedQuery q = new PreparedQuery(entityManager, sql);
+    q.setParameter("FIELD_ID", fieldId);
+    q.setParameter("CMR_ISSUING_CNTRY", cmrIssuingCntry);
+    q.setParameter("CD", code);
+    return q.exists();
   }
 }

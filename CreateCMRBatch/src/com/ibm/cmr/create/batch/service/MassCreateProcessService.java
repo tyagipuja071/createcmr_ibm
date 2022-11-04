@@ -103,6 +103,7 @@ public class MassCreateProcessService extends BaseBatchService {
 
     for (NotifyReq notifyReq : notifyList) {
       try {
+        Thread.currentThread().setName("REQ-" + notifyReq.getReqId());
         LOG.info("Processing Notify Req " + notifyReq.getId().getNotifyId() + " [Request ID: " + notifyReq.getReqId() + "]");
         NotifyReqModel notifyReqModel = new NotifyReqModel();
         copyValuesFromEntity(notifyReq, notifyReqModel);
@@ -158,6 +159,7 @@ public class MassCreateProcessService extends BaseBatchService {
             + e.getMessage() + "]");
       }
     }
+    Thread.currentThread().setName("MassCreateService-" + Thread.currentThread().getId());
   }
 
   /**

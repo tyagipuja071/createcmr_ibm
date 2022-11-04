@@ -135,6 +135,8 @@ function processRequestAction() {
     var reqType = FormManager.getActualValue('reqType');
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
+    } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
+      cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
       if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
@@ -1147,8 +1149,8 @@ function connectToCmrServices() {
         dojo.byId('geoLocDescCont').innerHTML = data.glcDesc != null ? data.glcDesc : '(no description available)';
       }
       if (data.dunsError) {
-        //errorMsg += (showError ? ', ' : '') + 'DUNS No.';
-        //showError = true;
+        // errorMsg += (showError ? ', ' : '') + 'DUNS No.';
+        // showError = true;
       } else {
         // var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
         // var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA,
@@ -1184,7 +1186,7 @@ function connectToCmrServices() {
     FormManager.setValue('covId', '');
     FormManager.setValue('bgId', '');
     FormManager.setValue('geoLocationCd', '');
-    //FormManager.setValue('dunsNo', '');
+    // FormManager.setValue('dunsNo', '');
   }
   FormManager.setValue('covBgRetrievedInd', 'Y');
 }
@@ -2061,7 +2063,7 @@ function matchCustNmAUUpdate() {
       if (dataAPI.formerCustNmMatch) {
         comp_proof_INAUSG = true;
         checkDnBMatchingAttachmentValidator();
-        if (FormManager.validate('frmCMR')) {         
+        if (FormManager.validate('frmCMR')) {
           matchDnbForAUUpdate();
           return;
         } else {
@@ -2075,7 +2077,7 @@ function matchCustNmAUUpdate() {
       }
     } else if (dataAPI.success && dataAPI.formerCustNmMatch && !dataAPI.custNmMatch) {
       comp_proof_INAUSG = false;
-      console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");   
+      console.log("Former Name matched with Historical/trading/business name in API but name match failed in API");
       cmr.showAlert("Please attach company proof as Name validation failed by API.");
     } else {
       cmr.showProgress('Customer Name match with API failed . Now Checking Customer Name with Dnb...');
@@ -2102,7 +2104,7 @@ function matchCustNmAUUpdate() {
             if (data.custNmMatch && data.formerCustNmMatch) {
               comp_proof_INAUSG = true;
               checkDnBMatchingAttachmentValidator();
-              if (FormManager.validate('frmCMR')) {             
+              if (FormManager.validate('frmCMR')) {
                 matchDnbForAUUpdate();
                 return;
               } else {
@@ -2360,8 +2362,7 @@ function autoSaveRequest() {
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }
 
-
-function recreateCMR(){
+function recreateCMR() {
   var msg = '<strong>WARNING: Use this function with caution!</strong><br><br>This will recreate a <strong>NEW CMR</strong> for this request. Please ensure that any invalid records in RDC have been marked as logically deleted and there is an actual need to create a new CMR for this request. Proceed?';
   cmr.showConfirm('executeRecreateCMR()', msg, 'Warning', null);
 }
@@ -2370,5 +2371,68 @@ function executeRecreateCMR() {
   FormManager.doAction('frmCMR', 'RECREATE', true, 'Setting up request for recreation of CMR...');
 }
 
+function checkIfDataOrAddressFieldsUpdated(frmCMR) {
+  console.log("checkIfDataOrAddressFieldsUpdated..............");
+  var reqType = FormManager.getActualValue('reqType');
+  var isNoDataUpdated = false;
+  if (checkIfUpdateChecksRequiredOnUI()) {
+    console.log('Running Update Checks Element...');
+    cmr.showProgress('Validating requested updates...');
+    var formData = dojo.formToObject(frmCMR);
+    formData.capInd = FormManager.getActualValue('capInd');
+    dojo.xhrPost({
+      url : cmr.CONTEXT_ROOT + '/auto/element/updateCheck.json',
+      handleAs : 'json',
+      method : 'POST',
+      content : formData,
+      timeout : 500000,
+      sync : true,
+      load : function(data, ioargs) {
+        cmr.hideProgress();
+        if (data != '' && data != undefined) {
+          if ((data.rejectionMsg != null && data.rejectionMsg.includes('No data/address changes made on request.'))
+              || (data.negativeChksMsg != null && data.negativeChksMsg.includes('No data/address changes made on request.'))) {
+            console.log('UpdateChecks Element Executed Successfully.');
+            isNoDataUpdated = true;
+          }
+        }
+      },
+      error : function(error, ioargs) {
+        success = false;
+        console.log('An error occurred while running UpdateSwitchElement. Please contact your system administrator');
+        reject('Error occurred in Update Checks.');
+      }
+    });
+  }
+  return isNoDataUpdated;
+}
 
+function checkIfUpdateChecksRequiredOnUI() {
+  console.log('checkIfUpdateChecksRequiredOnUI..');
+  var CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI = [ '897', '724', '618', '848', '631', '866', '754', '649', '641', '624', '788', '678', '702', '806', '846', '706', '744', '838', '616', '834' ];
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  // var requesterId = FormManager.getActualValue('requesterId');
 
+  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA') {
+    /*
+     * var result = cmr.query('IS_AUTOMATED_PROCESSING', { CNTRY : cntry });
+     * 
+     * var isCmde = cmr.query('CHECK_CMDE', { CNTRY : cntry, REQUESTER_ID :
+     * requesterId });
+     * 
+     * if (result && (result.ret1 == 'P' || result.ret1 == 'R' || result.ret1 ==
+     * 'B')) {
+     */
+    if (CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI.includes(cntry)) {
+      console.log("checkIfUpdateChecksRequiredOnUI.. update checks are required");
+      return true;
+    } else {
+      console.log("checkIfUpdateChecksRequiredOnUI.. update checks are not required");
+      return false;
+    }
+  }
+
+}
