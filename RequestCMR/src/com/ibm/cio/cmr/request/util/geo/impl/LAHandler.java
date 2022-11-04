@@ -417,10 +417,8 @@ public class LAHandler extends GEOHandler {
     // City
     address.setCity1(currentRecord.getCmrCity());
 
-    if (StringUtils.isNotBlank(currentRecord.getCmrState())) {
-      // State Prov - computation
-      address.setStateProv(getStateProvCd(issuingCountry, currentRecord.getCmrState(), currentRecord.getCmrCity()));
-    }
+    // State Prov - computation
+    address.setStateProv(getStateProvCd(issuingCountry, currentRecord.getCmrState(), currentRecord.getCmrCity()));
 
     if (StringUtils.isNotBlank(address.getCity1())) {
       address.setLocationCode(getLocationCd(issuingCountry, address.getCity1(), address.getStateProv()));
