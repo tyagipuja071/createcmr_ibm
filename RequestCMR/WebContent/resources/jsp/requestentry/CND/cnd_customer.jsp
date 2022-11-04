@@ -34,13 +34,13 @@
         <cmr:field path="ordBlk" id="ordBlk" fieldId="OrderBlock" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="CreditCd">
+    <cmr:column span="2" containerForField="ModeOfPayment">
       <p>
-        <label for="creditCd"> 
-          <cmr:fieldLabel fieldId="CreditCd" />: 
-          <cmr:delta text="${rdcdata.creditCd}" oldValue="${reqentry.creditCd}" />
+        <label for="modeOfPayment"> 
+          <cmr:fieldLabel fieldId="ModeOfPayment" />: 
+          <cmr:delta text="${rdcdata.modeOfPayment}" oldValue="${reqentry.modeOfPayment}" />
         </label>
-        <cmr:field path="creditCd" id="creditCd" fieldId="CreditCd" tabId="MAIN_CUST_TAB" />
+        <cmr:field path="modeOfPayment" id="modeOfPayment" fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
   </cmr:row>
