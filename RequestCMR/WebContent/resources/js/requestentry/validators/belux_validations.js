@@ -1842,6 +1842,16 @@ function addDnBSearchValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var ifProspect = FormManager.getActualValue('prospLegalInd');
+        if (dijit.byId('prospLegalInd')) {
+          ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+        }
+        var reqType = FormManager.getActualValue('reqType');
+        var result = FormManager.getActualValue('findDnbResult');
+        var reqStatus = FormManager.getActualValue('reqStatus');
+        if ((result == '' || result.toUpperCase() == 'NOT DONE') && reqType == 'C' && reqStatus == 'DRA' && ifProspect == 'Y') {
+          return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
+        }
         return new ValidationResult(null, true);
       }
     };
@@ -2205,7 +2215,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.BELUX);
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.BELUX, null, true);
-  GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addDepartmentNumberValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addREALCTYValidator, GEOHandler.BELUX, null, true);

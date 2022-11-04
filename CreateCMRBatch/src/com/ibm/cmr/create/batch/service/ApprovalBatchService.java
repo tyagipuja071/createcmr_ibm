@@ -72,6 +72,8 @@ public class ApprovalBatchService extends BaseBatchService {
     for (ApprovalReq request : records) {
 
       try {
+        Thread.currentThread().setName("APPROVAL-" + request.getReqId() + "-" + request.getId().getApprovalId());
+
         LOG.debug("Processing Approval Request ID " + request.getId().getApprovalId());
 
         // get type and correct comment
@@ -206,6 +208,7 @@ public class ApprovalBatchService extends BaseBatchService {
         partialRollback(entityManager);
       }
     }
+    Thread.currentThread().setName("ApprovalService-" + Thread.currentThread().getId());
     return Boolean.TRUE;
   }
 

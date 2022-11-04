@@ -113,6 +113,7 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
     ChangeLogListener.setManager(entityManager);
     for (Long reqId : requests) {
+      trackRequestLogs(reqId);
       AdminPK pk = new AdminPK();
       pk.setReqId(reqId);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -133,6 +134,7 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
       partialCommit(entityManager);
     }
     ChangeLogListener.clean();
+    resetThreadName();
     return true;
   }
 

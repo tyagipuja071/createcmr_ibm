@@ -108,6 +108,16 @@ public class MaltaHandler extends BaseSOFHandler {
       // Import all address from RDC Main
       String reqType = reqEntry.getReqType();
       String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), reqType);
+      List<FindCMRRecordModel> recordsFromSearch = source.getItems();
+      List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
+
+      if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0) {
+        doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
+        if (!filteredRecords.isEmpty() && filteredRecords.size() > 0 && filteredRecords != null) {
+          source.setItems(filteredRecords);
+        }
+      }
+
       if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) {
         if (source.getItems() != null) {
           String addrType = null;
@@ -120,9 +130,10 @@ public class MaltaHandler extends BaseSOFHandler {
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               addrType = record.getCmrAddrTypeCode();
               if (!StringUtils.isEmpty(addrType)) {
-                if ("ZS01".equals(addrType) && "90".equals(record.getCmrOrderBlock())) {
-                  break;
-                }
+                // if ("ZS01".equals(addrType) &&
+                // "90".equals(record.getCmrOrderBlock())) {
+                // break;
+                // }
                 addr = cloneAddress(record, addrType);
                 LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
                 // addr.setCmrStreetAddressCont(record.getCmrName3());
@@ -1314,4 +1325,23 @@ public class MaltaHandler extends BaseSOFHandler {
 
   }
 
+  @SuppressWarnings("unchecked")
+  public static void doFilterAddresses(RequestEntryModel reqEntry, Object mainRecords, Object filteredRecords) {
+    if (mainRecords instanceof java.util.List<?> && filteredRecords instanceof java.util.List<?>) {
+      // during convertFrom
+      if (reqEntry.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_UPDATE)) {
+        List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
+        List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
+        for (Object tempRecObj : recordsToCheck) {
+          if (tempRecObj instanceof FindCMRRecordModel) {
+            FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+            if ("ZS01".equalsIgnoreCase(tempRec.getCmrAddrTypeCode()) && ("90".equalsIgnoreCase(tempRec.getCmrOrderBlock()))) {
+              tempRec.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZS02.toString());
+            }
+            recordsToReturn.add(tempRec);
+          }
+        }
+      }
+    }
+  }
 }

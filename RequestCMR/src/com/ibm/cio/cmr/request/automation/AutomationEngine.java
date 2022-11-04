@@ -325,14 +325,6 @@ public class AutomationEngine {
       lastElementIndex++;
     }
 
-    boolean sccIsValid = false;
-    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
-      String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
-      if ("N".equals(setPPNFlag)) {
-        sccIsValid = true;
-      }
-    }
-
     LOG.debug("Automation elements executed for Request " + reqId);
 
     Admin admin = requestData.getAdmin();
@@ -535,65 +527,16 @@ public class AutomationEngine {
             pendingChecks.clear();
           }
           // CREATCMR-4872
-          // if (processOnCompletion && (pendingChecks == null ||
-          // pendingChecks.isEmpty())) {
           if (isUsTaxSkipToPpn) {
-            LOG.debug("Moving Request " + reqId + " to PPN");
-            String cmt = "A member outside tax team has updated the Tax fields.";
-            admin.setReqStatus("PPN");
-            createComment(entityManager, cmt, reqId, appUser);
-            createHistory(entityManager, admin, cmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false, null);
+            pendingChecks.put("_ustaxerr", "A member outside tax team has updated the Tax fields.");
             // CREATCMR-5447
-          } else if (isUsEntCompToPpn) {
+          }
+          if (isUsEntCompToPpn) {
             // CREATCMR-6331
-            LOG.debug("Moving Request " + reqId + " to PPN");
-            admin.setReqStatus("PPN");
-            createComment(entityManager, strCmtUsEntCompToPpn, reqId, appUser);
-            createHistory(entityManager, admin, strCmtUsEntCompToPpn, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false,
-                null);
+            pendingChecks.put("_usenttocomp", strCmtUsEntCompToPpn);
             // CREATCMR-5447
-          } else if (sccIsValid && ("U".equals(admin.getReqType()) || "C".equals(admin.getReqType()))) {
-              LOG.debug("Moving Request " + reqId + " to PPN");
-              String cmt = null;
-              admin.setReqStatus("PPN");
-              StringBuilder rejCmtBuilder = new StringBuilder();
-              rejectInfo = (List<RejectionContainer>) engineData.get().get("rejections");
-              // add comments if request rejected or if pending checks
-              if ((rejectInfo != null && !rejectInfo.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
-                rejCmtBuilder.append("The request needs further review due to some issues found during automated checks");
-                rejCmtBuilder.append(":");
-                rejCmtBuilder.append("\nSCC code for the address is not mapped to SCC table.");
-                for (RejectionContainer rejCont : rejectInfo) {
-                  rejCmtBuilder.append("\n" + rejCont.getRejComment());
-                }
-                // append pending checks
-                for (String pendingCheck : pendingChecks.values()) {
-                  rejCmtBuilder.append("\n ");
-                  rejCmtBuilder.append(pendingCheck);
-                }
-                cmt = rejCmtBuilder.toString();
-
-                if (cmt.length() > 1930) {
-                  cmt = cmt.substring(0, 1920) + "...";
-                }
-                cmt += "\n\nPlease view system processing results for more details.";
-              } else {
-                cmt = "Automated checks completed successfully.";
-              }
-              if ("N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
-                createComment(entityManager, "Processing error encountered as data is not company verified.", reqId, appUser);
-              }
-              if (stopExecution) {
-                cmt = "Automated checks stopped execution due to an error reported by one of the processes.";
-              } else {
-                createComment(entityManager, cmt, reqId, appUser);
-              }
-              String histCmt = cmt;
-              if (cmt.length() > 1000) {
-                histCmt = "The request needs further review due to some issues found during automated checks. Check the request comment log and system processing results for details.";
-              }
-              createHistory(entityManager, admin, histCmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false, null);           
-            } else if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
+          }
+          if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {
               // move to PCP

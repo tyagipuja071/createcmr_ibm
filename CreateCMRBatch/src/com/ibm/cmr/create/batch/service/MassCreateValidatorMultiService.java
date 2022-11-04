@@ -84,7 +84,9 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
     LOG.debug("Executing validations for " + requests.size() + " requests..");
     ChangeLogListener.setUser(BATCH_USER_ID);
     for (Long reqId : requests) {
+      trackRequestLogs(reqId);
       processRecord(entityManager, reqId);
+      resetThreadName();
     }
     return true;
   }
@@ -260,8 +262,8 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
 
       partialCommit(entityManager);
     }
-    if("897".equals(data.getCmrIssuingCntry())){
-    	cleanMassCrtPreData(entityManager, request.getId().getReqId(), request.getIterationId());
+    if ("897".equals(data.getCmrIssuingCntry())) {
+      cleanMassCrtPreData(entityManager, request.getId().getReqId(), request.getIterationId());
     }
 
   }
@@ -421,13 +423,13 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
     query.setParameter("ITER_ID", iterationId);
     return query.exists();
   }
-  
+
   private void cleanMassCrtPreData(EntityManager entityManager, long reqId, int itertionId) {
-	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("US.MASSCRT.CLEANOLDITER"));
-	    query.setParameter("REQ_ID", reqId);
-	    query.setParameter("ITERATION_ID", itertionId);
-	    query.executeSql();
-	  }
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("US.MASSCRT.CLEANOLDITER"));
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ITERATION_ID", itertionId);
+    query.executeSql();
+  }
 
   private void lockAdminRecordsForProcessing(List<Admin> forProcessing, EntityManager entityManager) {
     for (Admin admin : forProcessing) {
