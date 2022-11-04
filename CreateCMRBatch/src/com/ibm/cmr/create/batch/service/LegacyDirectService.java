@@ -174,6 +174,7 @@ public class LegacyDirectService extends TransConnService {
     LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
     // pending = new ArrayList<Admin>();
     for (Long id : pending) {
+      Thread.currentThread().setName("REQ-" + id);
       long start = new Date().getTime();
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
@@ -222,6 +223,8 @@ public class LegacyDirectService extends TransConnService {
       ProfilerLogger.LOG.trace(
           "After processPendingLegacy for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     }
+    Thread.currentThread().setName("LDService-" + Thread.currentThread().getId());
+
   }
 
   protected void processPendingRDC(EntityManager entityManager, List<Long> pending) throws CmrException, SQLException {
@@ -230,6 +233,7 @@ public class LegacyDirectService extends TransConnService {
     Data data = null;
     ProcessRequest request = null;
     for (Long id : pending) {
+      Thread.currentThread().setName("REQ-" + id);
       long start = new Date().getTime();
       AdminPK pk = new AdminPK();
       pk.setReqId(id);
@@ -296,6 +300,7 @@ public class LegacyDirectService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
+    Thread.currentThread().setName("LDService-" + Thread.currentThread().getId());
   }
 
   /**

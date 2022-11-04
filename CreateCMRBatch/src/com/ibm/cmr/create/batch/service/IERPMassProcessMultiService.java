@@ -84,6 +84,7 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
 
     ChangeLogListener.setManager(entityManager);
     for (Long reqId : requests) {
+      trackRequestLogs(reqId);
       AdminPK pk = new AdminPK();
       pk.setReqId(reqId);
       Admin admin = entityManager.find(Admin.class, pk);
@@ -129,6 +130,7 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
         processError(entityManager, admin, e.getMessage());
       }
     }
+    resetThreadName();
     return true;
   }
 

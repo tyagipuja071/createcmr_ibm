@@ -128,7 +128,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     NotifyReq notifyReq = null;
     for (Long id : idList) {
       try {
-
+        trackRequestLogs(id);
         pk = new NotifyReqPK();
         pk.setNotifyId(id);
         notifyReq = em.find(NotifyReq.class, pk);
@@ -188,6 +188,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
             + e.getMessage() + "]");
       }
     }
+    resetThreadName();
   }
 
   /**
@@ -222,6 +223,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     lockAdminRecordsForProcessing(manualRecList, em);
 
     for (Admin manualRec : manualRecList) {
+      trackRequestLogs(manualRec.getId().getReqId());
       try {
         String batchAction = "MonitorAbortedRecords";
         LOG.info("Processing Aborted Record " + manualRec.getId().getReqId() + " [Request ID: " + manualRec.getId().getReqId() + "]");
@@ -257,6 +259,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
       }
 
     }
+    resetThreadName();
 
   }
 
@@ -344,10 +347,12 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     for (CompoundEntity entity : resultsMain) {
       mass_create = entity.getEntity(MassCreate.class);
       massCrtData = entity.getEntity(MassCreateData.class);
-      //if (USCMRNumGen.cmrNumMapMassCrt == null || USCMRNumGen.cmrNumMapMassCrt.isEmpty()) {
-	   //   LOG.info("there is no CMR number stored for Mass Create in cache, so init...");
-	   //   USCMRNumGen.initMassCrt(em);
-	   // }
+      // if (USCMRNumGen.cmrNumMapMassCrt == null ||
+      // USCMRNumGen.cmrNumMapMassCrt.isEmpty()) {
+      // LOG.info("there is no CMR number stored for Mass Create in cache, so
+      // init...");
+      // USCMRNumGen.initMassCrt(em);
+      // }
 
       String issuingCntrySql = "BATCH.GET_DATA";
       PreparedQuery dataQuery = new PreparedQuery(em, ExternalizedQuery.getSql(issuingCntrySql));
