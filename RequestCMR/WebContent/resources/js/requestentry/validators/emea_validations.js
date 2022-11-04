@@ -4997,6 +4997,7 @@ function showHideCityStateProvIT() {
   }
   if (landCntryVal == 'IT') {
     FormManager.show('StateProv', 'stateProv');
+    FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
   } else {
     FormManager.hide('StateProv', 'stateProv');
   }
