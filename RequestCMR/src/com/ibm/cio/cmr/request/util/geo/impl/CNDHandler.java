@@ -70,11 +70,11 @@ public class CNDHandler extends GEOHandler {
     try {
 
       // retrieve from knvv zterm data on import
-      String creditCd = getRdcCreditCd(mainRecord.getCmrSapNumber());
+      String modeOfPayment = getRdcModeOfPayment(mainRecord.getCmrSapNumber());
 
-      if (creditCd != null) {
-        // Miscellaneous Credit Code
-        data.setCreditCd(creditCd);
+      if (modeOfPayment != null) {
+        // Miscellaneous Mode Of Payment Term
+        data.setModeOfPayment(modeOfPayment);
       }
     } catch (Exception e) {
       LOG.error("Error occured on setting Credit Code on import.");
@@ -286,9 +286,9 @@ public class CNDHandler extends GEOHandler {
     return spid;
   }
 
-  public String getRdcCreditCd(String kunnr) throws Exception {
+  public String getRdcModeOfPayment(String kunnr) throws Exception {
 
-    String creditCd = "";
+    String modeOfPayment = "";
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String mandt = SystemConfiguration.getValue("MANDT");
 
@@ -296,7 +296,7 @@ public class CNDHandler extends GEOHandler {
       return null;
     }
 
-    String sql = ExternalizedQuery.getSql("GET.IERP.CREDIT_CD");
+    String sql = ExternalizedQuery.getSql("GET.IERP.MODE_OF_PAYMENT");
     sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
     String dbId = QueryClient.RDC_APP_ID;
@@ -314,10 +314,10 @@ public class CNDHandler extends GEOHandler {
     if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
       List<Map<String, Object>> records = response.getRecords();
       Map<String, Object> record = records.get(0);
-      creditCd = record.get("ZTERM") != null ? record.get("ZTERM").toString() : "";
+      modeOfPayment = record.get("ZTERM") != null ? record.get("ZTERM").toString() : "";
     }
 
-    return creditCd;
+    return modeOfPayment;
   }
 
   @Override
