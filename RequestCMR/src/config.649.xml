@@ -168,18 +168,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
@@ -256,18 +244,6 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-				</column>
-				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
 				</column>
 				<column>
 					<label>Customer Name</label>
@@ -372,18 +348,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
@@ -460,18 +424,6 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-				</column>
-				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
 				</column>
 				<column>
 					<label>Customer Name</label>
@@ -576,18 +528,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
@@ -664,18 +604,6 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-				</column>
-				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
 				</column>
 				<column>
 					<label>Customer Name</label>
@@ -780,18 +708,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
@@ -868,18 +784,6 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-				</column>
-				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
 				</column>
 				<column>
 					<label>Customer Name</label>
@@ -984,18 +888,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
@@ -1072,18 +964,6 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-				</column>
-				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
 				</column>
 				<column>
 					<label>Customer Name</label>
@@ -1188,18 +1068,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
@@ -1276,18 +1144,6 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-				</column>
-				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
 				</column>
 				<column>
 					<label>Customer Name</label>
@@ -1392,18 +1248,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
 					<label>Number + Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
@@ -1480,18 +1324,6 @@
 					<width>10</width>
 					<width>20</width>
 					<length>15</length>
-				</column>
-				<column>
-					<label>Customer Name</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name Con't</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
 				</column>
 				<column>
 					<label>Customer Name</label>
