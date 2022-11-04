@@ -42,10 +42,10 @@ function afterConfigForCND() {
   addressQuotationValidatorCND();
 }
 
-function creditCdAndOrderBlockCdHandling() {
+function modeOfPaymentAndOrderBlockCdHandling() {
 	var reqType = FormManager.getActualValue('reqType');
 	if (reqType == 'U') {
-		FormManager.addValidator('creditCd', Validators.REQUIRED,
+		FormManager.addValidator('modeOfPayment', Validators.REQUIRED,
 				[ 'Credit Code' ], 'MAIN_CUST_TAB');
 		FormManager.addValidator('ordBlk', Validators.REQUIRED,
 				[ 'Order Block Code' ], 'MAIN_CUST_TAB');
@@ -308,4 +308,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCtcObsoleteValidator,GEOHandler.CND , null, true);
   GEOHandler.registerValidator(clientTierValidator,GEOHandler.CND , null, true);
   GEOHandler.addAfterConfig(creditCdAndOrderBlockCdHandling, GEOHandler.CND);
+  GEOHandler.addAfterConfig(modeOfPaymentAndOrderBlockCdHandling, GEOHandler.CND);
 });
