@@ -10517,7 +10517,7 @@ function addVatIndValidator(){
     ISSUING_CNTRY : cntry
   });
   
-  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'O' && vat == ''){
+  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'O' && vat == '' && !vatInd == ''){
     FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.setValue('vatInd', 'N'); 
   } else if((results!= null || results!= undefined || results.ret1!='') && vat != ''){      
