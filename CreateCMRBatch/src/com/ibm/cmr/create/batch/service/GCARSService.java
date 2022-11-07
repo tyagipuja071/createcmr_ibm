@@ -322,12 +322,10 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
               LOG.debug(" - KUNNR " + record.getId().getKunnr() + " for CMR No. " + queue.getId().getCmrNo() + " done.");
 
               queue.setProcStatus(STATUS_COMPLETED);
-              queue.setProcMsg("CMR NO " + queue.getId().getCmrNo() + " with sequence no " + queue.getId().getSeqNo() + " (" + queue.getFileName()
-                  + ") successfully processed");
+              queue.setProcMsg("Successfully processed");
             } else {
               queue.setProcStatus(STATUS_NOT_REQUIRED);
-              queue.setProcMsg("Changes not required for cmr no " + queue.getId().getCmrNo() + " with sequence no " + queue.getId().getSeqNo() + " ("
-                  + queue.getFileName());
+              queue.setProcMsg("Not Required");
             }
 
           } else {
