@@ -6,9 +6,7 @@ app.filter('matchGradeFilter', function() {
   return function(input, search) {
     var out = [];
     for (var i = 0; i < input.length; i++) {
-      console.log("input.length  - " + input.length);
       if (input[i].recType == 'DNB') {
-        console.log("input[i].matchGrade  - " + input[i].matchGrade);
         out.push(input[i]);
       }
     }
