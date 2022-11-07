@@ -107,6 +107,7 @@
           <c:if test="${gcars_updt_queue.codCondition != '' && gcars_updt_queue.codRsn != ''}">
             <span style='color:blue'>CODCOND/CODREAS</span>
           </c:if>
+        </cmr:column>
       </cmr:row>
       
       <cmr:row>
