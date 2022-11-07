@@ -1840,6 +1840,7 @@ function matchDnBForAutomationCountries() {
                 FormManager.setValue('matchOverrideIndc', 'Y');
               } else {
                 // cmr.showModal('addressVerificationModal');
+                showAddressVerificationModal();
               }
             }
           } else {
