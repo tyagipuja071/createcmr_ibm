@@ -97,9 +97,6 @@ public class SlackAlertsUtil {
         } else {
           oParams = new ObjectMapper().writeValueAsString(params);
         }
-        if (oParams.length() > 2900) {
-          oParams = oParams.substring(0, 2900);
-        }
         try {
           JSONObject paramsJson = JSONObject.parse(oParams);
           List<Object> toRemove = new ArrayList<Object>();
@@ -111,6 +108,9 @@ public class SlackAlertsUtil {
           }
           for (Object o : toRemove) {
             paramsJson.remove(o);
+          }
+          if (oParams.length() > 2900) {
+            oParams = oParams.substring(0, 2900);
           }
           oParams = paramsJson.toString();
         } catch (Exception ex) {
