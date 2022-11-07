@@ -100,6 +100,22 @@ public class SlackAlertsUtil {
         if (oParams.length() > 2900) {
           oParams = oParams.substring(0, 2900);
         }
+        try {
+          JSONObject paramsJson = JSONObject.parse(oParams);
+          List<Object> toRemove = new ArrayList<Object>();
+          for (Object okey : paramsJson.keySet()) {
+            String key = okey.toString().toLowerCase();
+            if (key.contains("pass") || key.contains("pwd") || key.contains("secret")) {
+              toRemove.add(okey);
+            }
+          }
+          for (Object o : toRemove) {
+            paramsJson.remove(o);
+          }
+          oParams = paramsJson.toString();
+        } catch (Exception ex) {
+          // noop, ignore convert to json
+        }
         sections.add(code("Params: " + oParams));
       } catch (Exception e1) {
         LOG.warn("Cannot convert params to JSON: " + e1.getMessage());
