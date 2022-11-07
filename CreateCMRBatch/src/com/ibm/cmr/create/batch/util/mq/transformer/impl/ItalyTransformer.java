@@ -1052,7 +1052,7 @@ public class ItalyTransformer extends EMEATransformer {
       } catch (Exception e) {
         LOG.error("unable to fill nulls for legacy cust before double updates", e);
       }
-      updateFiscalDataForDoubleUpdates(entityManager, data);
+      updateFiscalDataForDoubleUpdates(entityManager, data, cmrObjects);
     }
 
     List<String> isuCdList = Arrays.asList("5K", "14", "19", "3T", "4A");
@@ -1075,7 +1075,7 @@ public class ItalyTransformer extends EMEATransformer {
     }
   }
 
-  private void updateFiscalDataForDoubleUpdates(EntityManager entityManager, Data data) {
+  private void updateFiscalDataForDoubleUpdates(EntityManager entityManager, Data data, CMRRequestContainer cmrObjects) {
 
     LOG.debug(">>> Into updateFiscalDataForDoubleUpdates method <<<");
 
@@ -1153,6 +1153,13 @@ public class ItalyTransformer extends EMEATransformer {
           custExt.setiTaxCode(fiscalCode);
         } else {
           custExt.setiTaxCode("");
+        }
+        boolean crossBorder = false;
+        for (Addr addr : cmrObjects.getAddresses()) {
+          crossBorder = isCrossBorder(addr);
+          if (crossBorder) {
+            custExt.setiTaxCode((!StringUtils.isBlank(data.getVat()) ? data.getVat() : ""));
+          }
         }
         if (StringUtils.isNotBlank(identClient)) {
           custExt.setItIdentClient(identClient);
@@ -1386,6 +1393,9 @@ public class ItalyTransformer extends EMEATransformer {
           landedCountry = addr.getLandCntry();
           legacyCustExt.setiTaxCode((!StringUtils.isBlank(data.getVat()) ? data.getVat() : ""));
         }
+        if (!crossBorder) {
+          legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
+        }
       }
     }
 
@@ -1394,10 +1404,6 @@ public class ItalyTransformer extends EMEATransformer {
     legacyCustExt.setAffiliate(!StringUtils.isBlank(data.getAffiliate()) ? data.getAffiliate() : "");
     legacyCustExt.setItCodeSSV(!StringUtils.isBlank(data.getCollectionCd()) ? data.getCollectionCd() : "");
 
-    // Customer Tab
-    if (!"CROSS".equals(data.getCustGrp())) {
-      legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
-    }
     legacyCustExt.setItIVA(!StringUtils.isBlank(data.getSpecialTaxCd()) ? data.getSpecialTaxCd() : "");
     legacyCustExt.setItIdentClient(!StringUtils.isBlank(data.getIdentClient()) ? data.getIdentClient() : "");
 
