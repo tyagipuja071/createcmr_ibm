@@ -109,12 +109,12 @@ public class SlackAlertsUtil {
           for (Object o : toRemove) {
             paramsJson.remove(o);
           }
-          if (oParams.length() > 2900) {
-            oParams = oParams.substring(0, 2900);
-          }
           oParams = paramsJson.toString();
         } catch (Exception ex) {
           // noop, ignore convert to json
+        }
+        if (oParams.length() > 2900) {
+          oParams = oParams.substring(0, 2900);
         }
         sections.add(code("Params: " + oParams));
       } catch (Exception e1) {
