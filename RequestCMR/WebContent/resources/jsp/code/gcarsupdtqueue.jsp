@@ -100,13 +100,14 @@
       <cmr:row>
         <cmr:column span="1" width="180">
           <p>
-            <cmr:label>Update Type: </cmr:label>
+            <cmr:label  fieldId="codCondition">Update Type: </cmr:label>
           </p>
         </cmr:column>
         <cmr:column span="2">
           <c:if test="${gcars_updt_queue.codCondition != '' && gcars_updt_queue.codRsn != ''}">
             <span style='color:blue'>CODCOND/CODREAS</span>
           </c:if>
+        </cmr:column>
       </cmr:row>
       
       <cmr:row>
