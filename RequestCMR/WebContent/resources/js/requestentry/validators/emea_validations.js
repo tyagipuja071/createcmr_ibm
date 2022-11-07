@@ -4723,8 +4723,8 @@ function afterConfigForIT() {
     });
 
     if (result != null && result.ret1 != '' && result.ret1 != undefined && result.ret1 != 'IT') {
-      FormManager.setValue('vat', '');
-      FormManager.readOnly('vat');
+      FormManager.setValue('taxCd1', '');
+      FormManager.readOnly('taxCd1');
     }
   }
 
