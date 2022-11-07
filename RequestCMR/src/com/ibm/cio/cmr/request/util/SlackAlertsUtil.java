@@ -97,6 +97,22 @@ public class SlackAlertsUtil {
         } else {
           oParams = new ObjectMapper().writeValueAsString(params);
         }
+        try {
+          JSONObject paramsJson = JSONObject.parse(oParams);
+          List<Object> toRemove = new ArrayList<Object>();
+          for (Object okey : paramsJson.keySet()) {
+            String key = okey.toString().toLowerCase();
+            if (key.contains("pass") || key.contains("pwd") || key.contains("secret")) {
+              toRemove.add(okey);
+            }
+          }
+          for (Object o : toRemove) {
+            paramsJson.remove(o);
+          }
+          oParams = paramsJson.toString();
+        } catch (Exception ex) {
+          // noop, ignore convert to json
+        }
         if (oParams.length() > 2900) {
           oParams = oParams.substring(0, 2900);
         }

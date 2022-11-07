@@ -120,7 +120,7 @@ public abstract class BaseService<M extends BaseModel, E extends BaseEntity<?>> 
       return newModel;
     } catch (Exception e) {
       String reqId = RequestUtils.extractRequestId(model);
-      SlackAlertsUtil.recordException("CreateCMR", "Request " + reqId, e, model);
+      SlackAlertsUtil.recordException("CreateCMR", getClass().getSimpleName() + " - Request " + reqId, e, model);
       if (e instanceof CmrException) {
         log.error("CMR Error:" + ((CmrException) e).getMessage());
       } else {
