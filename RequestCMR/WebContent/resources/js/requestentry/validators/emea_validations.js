@@ -937,7 +937,7 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
 
   if (finalSave || force || copyingToA) {
 
-    if ((addressTyp == 'ZI01') || (addressTyp == 'ZS01' && (FormManager.getActualValue('custGrp') == 'CROSS'))) {
+    if ((addressTyp == 'ZI01') || copyingToA || (addressTyp == 'ZS01' && (FormManager.getActualValue('custGrp') == 'CROSS'))) {
       autoSetAbbrevLocUKIOnAddrChange();
     }
   }
