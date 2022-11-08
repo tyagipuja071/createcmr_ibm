@@ -152,27 +152,32 @@ public class OverrideOutput implements AutomationOutput {
       for (FieldResultKey field : this.data.keySet()) {
         FieldResult result = this.data.get(field);
 
-        AutomationData data = new AutomationData();
         AutomationDataPK pk = new AutomationDataPK();
         pk.setAddrTyp(result.getAddrType());
         pk.setAutomationResultId(resultId);
         pk.setFieldName(result.getFieldName());
         pk.setProcessCd(result.getProcessCode());
-        data.setId(pk);
 
-        Timestamp ts = SystemUtil.getActualTimestamp();
-        data.setCreateBy(user.getIntranetId());
-        data.setCreateTs(ts);
-        data.setImportedIndc("N");
-        data.setLastUpdtBy(user.getIntranetId());
-        data.setLastUpdtTs(ts);
-        data.setNewValue(result.getNewValue());
-        data.setOldValue(result.getOldValue());
+        AutomationData existingData = entityManager.find(AutomationData.class, pk);
+        if (existingData != null) {
+          LOG.warn("AutomationData exists for " + result.getProcessCode() + "/" + result.getFieldName() + "/" + result.getAddrType());
+        } else {
+          AutomationData data = new AutomationData();
+          data.setId(pk);
+          Timestamp ts = SystemUtil.getActualTimestamp();
+          data.setCreateBy(user.getIntranetId());
+          data.setCreateTs(ts);
+          data.setImportedIndc("N");
+          data.setLastUpdtBy(user.getIntranetId());
+          data.setLastUpdtTs(ts);
+          data.setNewValue(result.getNewValue());
+          data.setOldValue(result.getOldValue());
 
-        LOG.trace("Creating data record for " + result.getFieldName() + " = " + result.getOldValue() + " - " + result.getNewValue());
-        entityManager.persist(data);
+          LOG.trace("Creating data record for " + result.getFieldName() + " = " + result.getOldValue() + " - " + result.getNewValue());
+          entityManager.persist(data);
 
-        this.recordedData.add(data);
+          this.recordedData.add(data);
+        }
       }
     }
 

@@ -68,4 +68,12 @@ public class ParamContainer {
     return getParameterNames((String[]) null);
   }
 
+  public Map<String, Object> getParams() {
+    return params;
+  }
+
+  public void setParams(Map<String, Object> params) {
+    this.params = params;
+  }
+
 }

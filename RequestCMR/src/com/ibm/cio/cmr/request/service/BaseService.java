@@ -26,6 +26,8 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 
 /**
@@ -117,6 +119,8 @@ public abstract class BaseService<M extends BaseModel, E extends BaseEntity<?>> 
       copyValuesFromEntity(current, newModel);
       return newModel;
     } catch (Exception e) {
+      String reqId = RequestUtils.extractRequestId(model);
+      SlackAlertsUtil.recordException("CreateCMR", getClass().getSimpleName() + " - Request " + reqId, e, model);
       if (e instanceof CmrException) {
         log.error("CMR Error:" + ((CmrException) e).getMessage());
       } else {
@@ -177,6 +181,8 @@ public abstract class BaseService<M extends BaseModel, E extends BaseEntity<?>> 
       log.debug(" - transaction committed.");
 
     } catch (Exception e) {
+      String reqId = RequestUtils.extractRequestId(model);
+      SlackAlertsUtil.recordException("CreateCMR", getClass().getSimpleName() + " - Request " + reqId, e, model);
       if (e instanceof CmrException) {
         log.error("CMR Error:" + ((CmrException) e).getMessage());
       } else {
