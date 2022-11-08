@@ -495,7 +495,7 @@ public class SWISSHandler extends GEOHandler {
             data.setCustPrefLang("E");
           }
         } catch (NumberFormatException nfe) {
-          data.setCustPrefLang("E");
+          LOG.debug("Can not calculate CustPrefLang due to alphanumeric Postal Code");
         }
       }
     }
