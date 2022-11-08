@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -31,6 +32,8 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.mail.Email;
+import com.ibm.cio.cmr.request.util.mail.MessageType;
 
 /**
  * for GCARS process
@@ -150,6 +153,11 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   private List<GCARSUpdtQueue> parseGCARSFile(String gcarsFile, String fileName, EntityManager entityManager) {
     LOG.debug("Parsing File: " + fileName);
 
+    String directory = SystemParameters.getString("GCARS.INPUT.DIR");
+    if (StringUtils.isBlank(directory)) {
+      directory = DEFAULT_DIR;
+    }
+
     List<GCARSUpdtQueue> gcarsList = new ArrayList<GCARSUpdtQueue>();
     if (gcarsFile == null || gcarsFile.equalsIgnoreCase("")) {
       LOG.error("ERROR: INVALID GCARS File!");
@@ -220,7 +228,26 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
         }
       }
     } catch (Exception e) {
-      LOG.debug("Error in parsing file " + fileName, e);
+      try {
+        LOG.debug("Error in parsing file " + fileName, e);
+        // Rename the file ERR-YYYY-MM-DD_filename
+        // then alert CI OPs and GCARS Ops
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Timestamp ts = SystemUtil.getActualTimestamp();
+
+        String dateStr = formatter.format(ts);
+
+        File source = new File(directory + File.separator + fileName);
+        File target = new File(directory + File.separator + "ERR-" + dateStr + "_" + fileName);
+
+        FileUtils.copyFile(source, target);
+        FileUtils.deleteQuietly(source);
+        StringBuilder details = new StringBuilder();
+        details.append("Hi, The batch interface from GCARS to CreateCMR via SFTP has failed, pls check " + target.getName());
+        sendEmailNotification(fileName, details);
+      } catch (Exception ex) {
+        LOG.debug("Error encountered in GCARS " + ex.getMessage());
+      }
     } finally {
       LineIterator.closeQuietly(it);
     }
@@ -411,10 +438,42 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
         LOG.debug("Removing file " + source.getAbsolutePath());
         boolean removed = FileUtils.deleteQuietly(source);
         LOG.debug(" - Deleted: " + removed);
+      } else {
+        LOG.debug("Number of records processed is " + processed + "/" + expected + " expected (" + fileName + ").");
       }
     }
     this.fileSizes.clear();
     this.processedSizes.clear();
+  }
+
+  private void sendEmailNotification(String fileName, StringBuilder details) {
+    String gcarsCiOps = null;
+
+    String host = SystemConfiguration.getValue("MAIL_HOST");
+    String subject = "Brazil GCARS to CCMR SFTP Interface Error Report";
+    String from = "GCARS_SFTP_Interface";
+    String email = details.toString();
+
+    try {
+      gcarsCiOps = SystemParameters.getString("GCARS.NOTIF.GCARS_CI_OPS");
+      if (StringUtils.isBlank(gcarsCiOps)) {
+        gcarsCiOps = "barcelj@ph.ibm.com";
+      }
+    } catch (Exception e) {
+      LOG.debug("Failed in getting emails (CI Ops/GCARS Ops)");
+      e.printStackTrace();
+    }
+
+    if (!StringUtils.isEmpty(gcarsCiOps) && !StringUtils.isEmpty(email)) {
+      LOG.debug("Sending email notification to CI Ops/GCARS Ops as batch interface from GCARS to CreateCMR via SFTP has failed (" + fileName + ")");
+      Email mail = new Email();
+      mail.setSubject(subject);
+      mail.setTo(gcarsCiOps);
+      mail.setFrom(from);
+      mail.setMessage(email);
+      mail.setType(MessageType.HTML);
+      mail.send(host);
+    }
   }
 
   @Override
