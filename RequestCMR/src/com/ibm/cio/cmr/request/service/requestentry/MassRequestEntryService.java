@@ -15,7 +15,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -5600,9 +5603,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       List<MassUpdateAddressModel> addrModels) {
     if (!cmrPhoneMap.isEmpty() && (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND))) {
       cmrPhoneMap.forEach((cmr, list) -> {
+        String addSeqNo = getAddSeqNoForMassUpdateUKI(cmrIssuingCntry, cmr);
         MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
         addrModel.setParReqId(reqId);
-        addrModel.setAddrSeqNo("00001");
+        addrModel.setAddrSeqNo(addSeqNo);
         addrModel.setCmrNo(cmr);
         addrModel.setCustPhone(list.get(0));
         addrModel.setSeqNo(Integer.valueOf(list.get(1)));
@@ -5612,6 +5616,23 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       });
 
     }
+  }
+
+  private String getAddSeqNoForMassUpdateUKI(String cmrIssuingCntry, String cmr) {
+    String addSeqNo = "";
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("QUERY.GET_SEQ_NO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmr);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    List<String> result = query.getResults(String.class);
+    List<String> addSeqNos = Optional.ofNullable(result).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
+        .filter(item -> !item.isEmpty()).collect(Collectors.toList());
+    if (!addSeqNos.isEmpty()) {
+      return addSeqNos.contains("00001") ? "00001" : addSeqNos.get(0);
+    }
+    return addSeqNo;
   }
 
   private void addressSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
@@ -5673,11 +5694,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
   private void setCMRPhoneInMap(Row cmrRow, Map<String, List<String>> cmrPhoneMap, MassUpdateModel model, String cmrIssuingCntry, int seqNo) {
     List<String> list = null;
-    if (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND)) {
-      DataFormatter df = new DataFormatter();
-      String phone = df.formatCellValue(cmrRow.getCell(14));
+    DataFormatter df = new DataFormatter();
+    String phoneNo = df.formatCellValue(cmrRow.getCell(14));
+    if ((cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND)) && !StringUtils.isEmpty(phoneNo)) {
       list = new ArrayList<>();
-      list.add(phone);
+      list.add(phoneNo);
       list.add(String.valueOf(seqNo));
       cmrPhoneMap.put(model.getCmrNo(), list);
 
