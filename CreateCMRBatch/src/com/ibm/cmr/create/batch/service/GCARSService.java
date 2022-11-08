@@ -127,6 +127,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
    * @return
    */
   private List<String> getFileNames(String path) {
+    LOG.debug("GCARS getFileNames from " + path);
     List<String> nameList = new ArrayList<String>();
     File f = new File(path);
     File fileList[] = f.listFiles();
@@ -167,6 +168,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
     try {
       it = FileUtils.lineIterator(new File(gcarsFile), "UTF-8");
       String sql = ExternalizedQuery.getSql("GCARS.GET_LAST_SEQ.QUEUE");
+      LOG.debug("GCARS get last sequence from mass ftp queue");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       GCARSUpdtQueue queue = query.getSingleResult(GCARSUpdtQueue.class);
       String lastSeq = null;
@@ -179,6 +181,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       }
       if (!StringUtils.isBlank(lastSeq)) {
         nextSeq = Integer.valueOf(lastSeq) + 1;
+        LOG.debug("GCARS next sequence is " + nextSeq);
       } else {
         nextSeq = 1;
       }
@@ -268,6 +271,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   private Queue<GCARSUpdtQueue> getPendingRecords(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("GCARS.GET_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
+    LOG.debug("GCARS getPendingRecords from ftp queue");
     List<GCARSUpdtQueue> list = query.getResults(GCARSUpdtQueue.class);
     Queue<GCARSUpdtQueue> queue = new LinkedList<GCARSUpdtQueue>();
     if (list != null && !list.isEmpty()) {
@@ -321,6 +325,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
           query.setParameter("ZZKV_CUSNO", queue.getId().getCmrNo());
           query.setParameter("KATR6", queue.getId().getCmrIssuingCntry());
           query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+          LOG.debug("GCARS Retrieve Kna1AddlBilling)");
           Kna1AddlBilling record = query.getSingleResult(Kna1AddlBilling.class);
 
           if (record != null) {
