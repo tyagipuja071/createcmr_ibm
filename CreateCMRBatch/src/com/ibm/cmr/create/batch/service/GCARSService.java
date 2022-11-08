@@ -216,7 +216,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
           gcars.setCodRsn(codReason);
           gcars.setCodEffDate(Date.valueOf(year + "-" + month + "-01"));
           gcars.setProcStatus(STATUS_PENDING);
-          gcars.setProcMsg("Processing line number " + lineNumber + " of file " + fileName);
+          gcars.setProcMsg("Pending");
           gcars.setCreatedBy(GCARS_USER);
           gcars.setCreateDt(ts);
           gcars.setUpdatedBy(GCARS_USER);
@@ -241,7 +241,12 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
         File target = new File(directory + File.separator + "ERR-" + dateStr + "_" + fileName);
 
         FileUtils.copyFile(source, target);
-        FileUtils.deleteQuietly(source);
+        LOG.debug(" - Renaming file: " + source);
+        LineIterator.closeQuietly(it);
+
+        boolean renamed = FileUtils.deleteQuietly(source);
+        LOG.debug(" - Renamed: " + renamed);
+
         StringBuilder details = new StringBuilder();
         details.append("Hi, The batch interface from GCARS to CreateCMR via SFTP has failed, pls check " + target.getName());
         sendEmailNotification(fileName, details);
