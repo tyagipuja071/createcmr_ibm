@@ -88,6 +88,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       }
     }
     $scope.cmrNo = crit.cmrNo;
+    $scope.highMatchGrade = false
     $scope.records = [];
     cmr.showProgress('Searching for records, please wait..');
     dojo.xhrPost({
@@ -110,6 +111,9 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
           data.items.forEach(function(item, i) {
             if (item.recType == 'DNB' && !item.countryCd) {
               item.countryCd = crit.countryCd;
+            }
+            if (item.recType == 'DNB' && !$scope.highMatchGrade && (item.matchGrade == '10' || item.matchGrade == '09')) {
+              $scope.highMatchGrade = true;
             }
             if (item.recType == 'CMR' && item.name) {
               item.name = item.name.replace(/@/g, ' ');
