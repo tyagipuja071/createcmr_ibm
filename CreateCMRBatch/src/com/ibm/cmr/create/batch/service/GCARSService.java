@@ -424,7 +424,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
     for (String fileName : this.fileSizes.keySet()) {
       int expected = this.fileSizes.get(fileName);
       int processed = this.processedSizes.get(fileName);
-      if (expected == processed) {
+      if (expected == processed && processed > 0) {
         // copy the file to archive first
         File source = new File(directory + File.separator + fileName);
         File target = new File(archive + File.separator + fileName);
