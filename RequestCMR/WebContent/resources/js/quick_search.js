@@ -1,6 +1,19 @@
 var app = angular.module('QuickSearchApp', [ 'ngSanitize' ]);
 var _inscp = null;
 var _currQuickDet = null;
+
+app.filter('matchGradeFilter', function() {
+  return function(input, search) {
+    var out = [];
+    for (var i = 0; i < input.length; i++) {
+      if (input[i].recType == 'DNB') {
+        out.push(input[i]);
+      }
+    }
+    return out;
+  }
+});
+
 app.filter('recFilter', function() {
   return function(items, search) {
     if (!search) {
@@ -844,7 +857,7 @@ var US_STATES = [ {
   name : 'Wyoming'
 } ]
 dojo.addOnLoad(function() {
-  if (bypassqs){
+  if (bypassqs) {
     return;
   }
   if (!_furl) {
@@ -969,65 +982,64 @@ dojo.addOnLoad(function() {
 });
 
 app.controller('FindCMRController', [ '$scope', '$document', '$http', '$timeout', '$sanitize', '$filter', function($scope, $document, $http, $timeout, $sanitize, $filter) {
-   $scope.hello = 'Update request from FindCMR';
-   $scope.getParameterByName = function(name, url) {
-     if (!url) {
-       url = window.location.href;
-     }
-     name = name.replace(/[\[\]]/g, '\\$&');
-     var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
-     var results = regex.exec(url);
-     if (!results) {
-       return null;
-     }
-     if (!results[2]) {
-       return '';
-     }
-     return decodeURIComponent(results[2].replace(/\+/g, ' '));
-   };
+  $scope.hello = 'Update request from FindCMR';
+  $scope.getParameterByName = function(name, url) {
+    if (!url) {
+      url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+    var results = regex.exec(url);
+    if (!results) {
+      return null;
+    }
+    if (!results[2]) {
+      return '';
+    }
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+  };
 
-   $scope.createRequest = function(){
-     var cmrNo = $scope.getParameterByName('cmrNo');
-     var cntry = $scope.getParameterByName('cntry');
-     if (cmrNo && cntry){
-       $scope.hello = 'Update request from FindCMR for CMR '+cmrNo;
-       cmr.showProgress('Creating new update request for CMR '+cmrNo+', please wait..');
-       var model = {
-           recType : 'CMR',
-           cmrNo : cmrNo,
-           issuingCntry : cntry,
-           reqType : 'U'
-       };
-       dojo.xhrPost({
-         url : cmr.CONTEXT_ROOT + '/quick_search/process.json',
-         handleAs : 'json',
-         method : 'POST',
-         content : model,
-         timeout : 7 * 60000,
-         sync : false,
-         load : function(data, ioargs) {
-           console.log(data);
-           if (data && data.success) {
-             var reqId = data.model.reqId;
-             window.location = cmr.CONTEXT_ROOT + '/request/' + reqId + '?qs=Y&infoMessage=' + encodeURIComponent('Request created successfully.');
-           } else {
-             cmr.hideProgress();
-             cmr.showAlert(data.msg ? data.msg : 'An unexpected error occurred during the processing, pls try again later.');
-           }
-         },
-         error : function(error, ioargs) {
-           cmr.hideProgress();
-           $scope.searched = false;
-           console.log('error');
-           console.log(error);
-           cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
-         }
-       });
-     } else {
-       cmr.showAlert('Please check the CMR input.');
-     }
-   }
-   
-   $scope.createRequest();
-}]);
+  $scope.createRequest = function() {
+    var cmrNo = $scope.getParameterByName('cmrNo');
+    var cntry = $scope.getParameterByName('cntry');
+    if (cmrNo && cntry) {
+      $scope.hello = 'Update request from FindCMR for CMR ' + cmrNo;
+      cmr.showProgress('Creating new update request for CMR ' + cmrNo + ', please wait..');
+      var model = {
+        recType : 'CMR',
+        cmrNo : cmrNo,
+        issuingCntry : cntry,
+        reqType : 'U'
+      };
+      dojo.xhrPost({
+        url : cmr.CONTEXT_ROOT + '/quick_search/process.json',
+        handleAs : 'json',
+        method : 'POST',
+        content : model,
+        timeout : 7 * 60000,
+        sync : false,
+        load : function(data, ioargs) {
+          console.log(data);
+          if (data && data.success) {
+            var reqId = data.model.reqId;
+            window.location = cmr.CONTEXT_ROOT + '/request/' + reqId + '?qs=Y&infoMessage=' + encodeURIComponent('Request created successfully.');
+          } else {
+            cmr.hideProgress();
+            cmr.showAlert(data.msg ? data.msg : 'An unexpected error occurred during the processing, pls try again later.');
+          }
+        },
+        error : function(error, ioargs) {
+          cmr.hideProgress();
+          $scope.searched = false;
+          console.log('error');
+          console.log(error);
+          cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
+        }
+      });
+    } else {
+      cmr.showAlert('Please check the CMR input.');
+    }
+  }
 
+  $scope.createRequest();
+} ]);
