@@ -42,6 +42,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -246,6 +247,7 @@ public class AutomationEngine {
           try {
             result = element.executeAutomationElement(entityManager, requestData, engineData.get());
           } catch (Exception e) {
+            SlackAlertsUtil.recordException("Automation", element.getProcessDesc() + " - System Error Request " + reqId, e);
             LOG.warn("System error for element " + element.getProcessDesc(), e);
             result = new AutomationResult<>();
             result.setOnError(true);
@@ -254,7 +256,6 @@ public class AutomationEngine {
             StringBuilder details = new StringBuilder();
             details.append("System error for element " + element.getProcessDesc() + " with Req ID -> " + requestData.getAdmin().getId().getReqId()
                 + " has occured. Please check concerned logs for the same.");
-            sendBlueSquadEmail(requestData.getAdmin(), requestData.getData(), details);
             break;
           }
         }
@@ -886,7 +887,16 @@ public class AutomationEngine {
     return rejectionReasons.get(code);
   }
 
-  private void sendBlueSquadEmail(Admin admin, Data data, StringBuilder details) {
+  /**
+   * 
+   * 
+   * @param admin
+   * @param data
+   * @param details
+   * @deprecated use {@link SlackAlertsUtil}
+   */
+  @Deprecated
+  protected void sendBlueSquadEmail(Admin admin, Data data, StringBuilder details) {
     String blueSquad = null;
     try {
       blueSquad = SystemParameters.getString("AUT_ENG_SYSTEM_ERR");
