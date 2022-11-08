@@ -2,18 +2,6 @@ var app = angular.module('QuickSearchApp', [ 'ngSanitize' ]);
 var _inscp = null;
 var _currQuickDet = null;
 
-app.filter('matchGradeFilter', function() {
-  return function(input, search) {
-    var out = [];
-    for (var i = 0; i < input.length; i++) {
-      if (input[i].recType == 'DNB') {
-        out.push(input[i]);
-      }
-    }
-    return out;
-  }
-});
-
 app.filter('recFilter', function() {
   return function(items, search) {
     if (!search) {
@@ -105,6 +93,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       }
     }
     $scope.cmrNo = crit.cmrNo;
+    $scope.highMatchGrade = false
     $scope.records = [];
     cmr.showProgress('Searching for records, please wait..');
     $scope.allowByModel = true;
@@ -130,6 +119,9 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
           data.items.forEach(function(item, i) {
             if (item.recType == 'DNB' && !item.countryCd) {
               item.countryCd = crit.countryCd;
+            }
+            if (item.recType == 'DNB' && !$scope.highMatchGrade && (item.matchGrade == '10' || item.matchGrade == '09')) {
+              $scope.highMatchGrade = true;
             }
             if (item.recType == 'CMR' && item.name) {
               item.name = item.name.replace(/@/g, ' ');
