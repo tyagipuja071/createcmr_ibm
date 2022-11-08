@@ -206,7 +206,11 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         }
       }
       if (!StringUtils.isBlank(mainRecord.getCmrVat()) && importAddress) {
-        data.setVat(mainRecord.getCmrVat());
+        if (LAHandler.isLACountry(reqModel.getCmrIssuingCntry())) {
+          data.setTaxCd1(mainRecord.getCmrVat());
+        } else {
+          data.setVat(mainRecord.getCmrVat());
+        }
       }
       if (!StringUtils.isBlank(mainRecord.getCmrBusinessReg()) && importAddress) {
         data.setTaxCd1(mainRecord.getCmrBusinessReg());
