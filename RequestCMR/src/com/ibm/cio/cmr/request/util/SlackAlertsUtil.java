@@ -202,8 +202,7 @@ public class SlackAlertsUtil {
     String alertUrl = SystemParameters.getString("SLACK.ALERTS.URL");
     if (StringUtils.isBlank(alertUrl)) {
       LOG.warn("Slack Alerts URL is missing");
-      alertUrl = "https://hooks.slack.com/services/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";
-      // return;
+      return;
     }
     try {
       URL url = new URL(alertUrl);
@@ -214,7 +213,6 @@ public class SlackAlertsUtil {
       conn.addRequestProperty("Content-Type", "application/json");
 
       try (OutputStream out = conn.getOutputStream()) {
-        System.out.println(slackInput.toString());
         try (ByteArrayInputStream bis = new ByteArrayInputStream(slackInput.toString().getBytes())) {
           LOG.debug("Writing to slack alert channel..");
           IOUtils.copy(bis, out);
