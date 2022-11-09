@@ -206,14 +206,4 @@ public class RequestSummaryController extends BaseWindowController {
     currTax = service.getCurrentTaxInfoDetails(reqId, issuingCntry);
     return wrapAsPlainSearchResult(currTax);
   }
-
-  @RequestMapping(
-      value = "/summary/origtaxinfo",
-      method = { RequestMethod.GET, RequestMethod.POST })
-  public ModelMap showOrigTaxInfo(HttpServletRequest request, HttpServletResponse response, @RequestParam("cmr") String cmr,
-      @RequestParam("issuingCntry") String issuingCntry) throws CmrException {
-    List<GeoTaxInfoModel> origTax = new ArrayList<>();
-    origTax = service.getOrigTaxInfoDetails(cmr, issuingCntry);
-    return wrapAsPlainSearchResult(origTax);
-  }
 }
