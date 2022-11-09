@@ -187,6 +187,16 @@ public class LAHandler extends GEOHandler {
 
     if (isBRIssuingCountry(issuingCountry)) {
       data.setProxiLocnNo(mainRecord.getCmrProxiLocn());
+
+      String govType = "";
+      if ("12".equals(mainRecord.getCmrClass())) {
+        govType = "PF";
+      } else if ("13".equals(mainRecord.getCmrClass())) {
+        govType = "PE";
+      } else {
+        govType = "OU";
+      }
+      data.setGovType(govType);
     }
 
     if (SystemLocation.CHILE.equalsIgnoreCase(issuingCountry)) {
@@ -345,6 +355,7 @@ public class LAHandler extends GEOHandler {
           if (isBRIssuingCountry(data.getCmrIssuingCntry())) {
             if ("40".equals(taxData.getId().getTaxCd())) {
               setIcmsData(data, taxData.getTaxSeparationIndc());
+              LOG.debug("BR ICMS ind: " + data.getIcmsInd());
 
               entityManager.merge(data);
               entityManager.flush();
@@ -376,9 +387,9 @@ public class LAHandler extends GEOHandler {
   }
 
   private void setIcmsData(Data data, String taxSepIndc) {
-    if (CmrConstants.YES_NO.N.equals(taxSepIndc)) {
+    if ("N".equals(taxSepIndc)) {
       data.setIcmsInd("1");
-    } else if (CmrConstants.YES_NO.Y.equals(taxSepIndc)) {
+    } else if ("Y".equals(taxSepIndc)) {
       data.setIcmsInd("2");
     }
   }
