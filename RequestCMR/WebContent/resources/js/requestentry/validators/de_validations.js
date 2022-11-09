@@ -53,6 +53,9 @@ function afterConfigForDE() {
   if (_subScenarioHandler == null) {
     _subScenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       setISUValues();
+      // CREATCMR-7424_7425
+      setAbbreviatedNameBasedOnAddressType();
+
     });
   }
 
@@ -232,8 +235,9 @@ function defaultCapIndicator() {
 
 function disableVatExemptForScenarios() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
+  var scenario3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
   if (FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '') {
-    if (_custSubGrp != 'COMME' && _custSubGrp != '3PADC' && _custSubGrp != 'GOVMT' && _custSubGrp != 'BROKR' && _custSubGrp != 'CROSS') {
+    if (_custSubGrp != 'COMME' && !scenario3PADC.includes(_custSubGrp) && _custSubGrp != 'GOVMT' && _custSubGrp != 'BROKR' && _custSubGrp != 'CROSS') {
       FormManager.disable('vatExempt');
     } else {
       FormManager.enable('vatExempt');
@@ -266,12 +270,12 @@ function setISUValues(value) {
   reqType = FormManager.getActualValue('reqType');
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var value = FormManager.getActualValue('clientTier');
-
+  var scenario3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
   if (reqType != 'C') {
     return;
   }
 
-  if (_custSubGrp != 'PRIPE' && _custSubGrp != 'COMME' && _custSubGrp != '3PADC' && _custSubGrp != 'IBMEM' && _custSubGrp != 'CROSS') {
+  if (_custSubGrp != 'PRIPE' && _custSubGrp != 'COMME' && !scenario3PADC.includes(_custSubGrp) && _custSubGrp != 'IBMEM' && _custSubGrp != 'CROSS') {
 
     if (!value) {
       value = FormManager.getField('clientTier');
@@ -331,13 +335,14 @@ function setISUValues(value) {
 
 function limitClientTierValuesOnCreate() {
   var reqType = null;
+  var scenario3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
   reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
     return;
   }
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   if (_custSubGrp != 'undefined' && _custSubGrp != '') {
-    if (_custSubGrp == 'COMME' || _custSubGrp == '3PADC' || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
+    if (_custSubGrp == 'COMME' || scenario3PADC.includes(_custSubGrp) || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
       var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', '7', 'T', 'S', 'C', 'N' ];
       if (clientTierValues != null) {
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTierValues);
@@ -541,6 +546,7 @@ function validateAddressTypeForScenario() {
         var reqType = FormManager.getActualValue('reqType');
         var scenarioType = FormManager.getActualValue('custSubGrp');
         var systemId = FormManager.getActualValue('sourceSystId');
+        var scenarioType3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
         if (reqType == 'C' && scenarioType != undefined && scenarioType != '' && (scenarioType == 'PRIPE' || scenarioType == 'IBMEM')) {
           var qParams = {
             REQ_ID : requestId,
@@ -567,6 +573,23 @@ function validateAddressTypeForScenario() {
             return new ValidationResult(null, false, 'Only Sold To Address is allowed for ' + scenarioDesc + ' scenario. Please remove other addresses.');
           } else {
             return new ValidationResult(null, true);
+          }
+        } else if (reqType == 'C' && scenarioType != undefined && scenarioType != '' && scenarioType3PADC.includes(scenarioType)) {
+          /*
+           * Mandatory addresses ZS01/ZI01 *Sold-to *Installing (Install at)
+           */
+          var qParams = {
+            REQ_ID : requestId,
+          };
+          var recordZs01 = cmr.query('GETZS01VALRECORDS', qParams);
+          var recordZi01 = cmr.query('GETZI01VALRECORDS', qParams);
+          var soldToCnt = recordZs01.ret1;
+          var installingCnt = recordZi01.ret1;
+          if (installingCnt == 0) {
+            return new ValidationResult(null, false, 'For Third Party sub-scenarios installing address is mandatory. Please add it.');
+          }
+          if (soldToCnt == 0) {
+            return new ValidationResult(null, false, 'Sold-to address is mandatory.');
           }
         }
         return new ValidationResult(null, true);
@@ -1163,6 +1186,37 @@ function setVatIndFields() {
   }
 }
 
+//CREATCMR-7424_7425
+function setAbbreviatedNameBasedOnAddressType() {
+  var _reqId = FormManager.getActualValue('reqId');
+  var subCustGrp = FormManager.getActualValue('custSubGrp');
+  var addrType = FormManager.getActualValue('addrType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'C') {
+    var custNm1Params = {
+      REQ_ID : _reqId,
+      ADDR_TYPE : "ZI01",
+    };
+    var custNm1Result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', custNm1Params);
+    var custNm1 = custNm1Result.ret1;
+
+    var custNm1Params2 = {
+      REQ_ID : _reqId,
+      ADDR_TYPE : "ZS01",
+    };
+    var custNm1Result2 = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', custNm1Params2);
+    var custNm2 = custNm1Result2.ret1;
+  }
+
+  if (custNm1 != undefined && custNm1 != '' && (subCustGrp == '3PA' || subCustGrp == 'X3PA')) {
+    FormManager.setValue('abbrevNm', "C/O " + custNm1.substring(0, 20) + " 3PA");
+  } else if (custNm2 != undefined && custNm2 != '' && (subCustGrp == 'DC' || subCustGrp == 'XDC')) {
+    FormManager.setValue('abbrevNm', custNm2.substring(0, 20) + " DC");
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -1172,7 +1226,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.DE);
   GEOHandler.addAddrFunction(setAbbrevNameDEUpdate, GEOHandler.DE);
   GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.DE);
-  // DENNIS: COMMENTED BECAUSE THIS IS IN DUPLICATE OF THE VALIDATOR REGISTERED
+  // DENNIS: COMMENTED BECAUSE THIS IS IN DUPLICATE OF THE VALIDATOR
+  // REGISTERED
   // ON WW
   // GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.DE,
   // GEOHandler.ROLE_PROCESSOR, false, false);
