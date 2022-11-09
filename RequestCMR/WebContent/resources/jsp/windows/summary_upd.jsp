@@ -300,6 +300,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
             <label>Tax Info:</label>
           </cmr:column>
           <cmr:column span="5" width="750">
+          <%-- 
           	<cmr:row>
           		Original Tax Info Values
           	</cmr:row>
@@ -315,6 +316,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 			      <cmr:gridCol width="90px" field="contractPrintIndc" header="${ui.grid.contractPrintInd}" />
 			      <cmr:gridCol width="250px" field="cntryUse" header="${ui.grid.cntryUse}" />
 	            </cmr:grid>
+	            --%>
           	<cmr:row>
           	&nbsp;
           	</cmr:row>
