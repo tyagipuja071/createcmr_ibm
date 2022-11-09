@@ -135,7 +135,9 @@ app.controller('ScenariosController', [ '$scope', '$document', '$http', '$timeou
             addrTyp : record.ret2 == 'XXX' ? '' : record.ret2,
             values : [],
             retainValInd : record.ret4 == 'Y' ? true : false,
-            reqInd : record.ret5 == 'Y' ? 'R' : (record.ret5 == 'N' ? 'O' : record.ret5),
+            // reqInd : record.ret5 == 'Y' ? 'R' : (record.ret5 == 'N' ? 'O' :
+            // record.ret5),
+            reqInd : record.ret5,
             lockedIndc : record.ret6,
             existing : true
           };
@@ -247,7 +249,7 @@ app.controller('ScenariosController', [ '$scope', '$document', '$http', '$timeou
       if (scenario.values[0] == '~') {
         return;
       }
-      scenario.reqInd = 'R';
+      // scenario.reqInd = 'R';
     } else {
       scenario.lockedIndc = '';
       scenario.retainValInd = false;
