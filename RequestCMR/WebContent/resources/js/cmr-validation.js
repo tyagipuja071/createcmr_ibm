@@ -1083,10 +1083,6 @@ var FormManager = (function() {
     },
     setValue : function(fieldId, value) {
       var field = dijit.byId(fieldId);
-      var userRole = FormManager.getActualValue('userRole');
-      if (userRole == 'Viewer') {
-        return;
-      }
       if (field) {
         field.set('value', value);
       } else {
