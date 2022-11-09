@@ -53,12 +53,6 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
-import com.ibm.cmr.services.client.CROSServiceClient;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.cros.CROSQueryRequest;
-import com.ibm.cmr.services.client.cros.CROSQueryResponse;
-import com.ibm.cmr.services.client.cros.CROSRecord;
-import com.ibm.cmr.services.client.cros.CROSTax;
 
 /**
  * @author Jeffrey Zamora
@@ -1435,44 +1429,6 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
       e.printStackTrace();
     }
 
-    return taxInfo;
-  }
-
-  public List<GeoTaxInfoModel> getOrigTaxInfoDetails(String cmr, String issuingCntry) {
-    List<GeoTaxInfoModel> taxInfo = new ArrayList<GeoTaxInfoModel>();
-    CROSQueryRequest request = new CROSQueryRequest();
-    request.setIssuingCntry(issuingCntry);
-    request.setCmrNo(cmr);
-    try {
-      CROSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
-          CROSServiceClient.class);
-      CROSQueryResponse response = client.executeAndWrap(CROSServiceClient.QUERY_APP_ID, request, CROSQueryResponse.class);
-
-      if (response.isSuccess()) {
-        CROSRecord record = response.getData();
-        List<CROSTax> crossTaxRecords = record.getTaxCodes();
-
-        if (crossTaxRecords != null && crossTaxRecords.size() > 0) {
-
-          for (CROSTax t : crossTaxRecords) {
-            GeoTaxInfoModel newTaxInfo = new GeoTaxInfoModel();
-            newTaxInfo.setBillingPrintIndc(t.getBillingPrintInd());
-            newTaxInfo.setCntryUse(t.getCountryUse());
-            newTaxInfo.setContractPrintIndc(t.getContractPrintInd());
-            newTaxInfo.setTaxCd(t.getTaxCode());
-            newTaxInfo.setTaxNum(t.getTaxNumber());
-            newTaxInfo.setTaxSeparationIndc(t.getTaxSepInd());
-
-            taxInfo.add(newTaxInfo);
-          }
-
-        }
-
-      }
-    } catch (Exception e) {
-      LOG.error("An error has occured in retrieving contact detail values coming from the CROS query service.");
-      e.printStackTrace();
-    }
     return taxInfo;
   }
 
