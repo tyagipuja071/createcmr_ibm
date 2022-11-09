@@ -296,16 +296,10 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   private String phone3;
 
-  @Column(
-      name = "EMAIL1")
   private String email1;
 
-  @Column(
-      name = "EMAIL2")
   private String email2;
 
-  @Column(
-      name = "EMAIL3")
   private String email3;
 
   @Column(
