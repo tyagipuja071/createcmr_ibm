@@ -1409,6 +1409,8 @@ function abbrvNmProcessorMandatory() {
         if (FormManager.getActualValue('reqType') != 'U') {
           FormManager.readOnly('abbrevNm');
           FormManager.readOnly('abbrevLocn');
+          FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+          FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
         }
       }
     }
@@ -1424,6 +1426,8 @@ function abbrvNmProcessorMandatoryOnChange() {
       if (FormManager.getActualValue('reqType') != 'U') {
         FormManager.readOnly('abbrevNm');
         FormManager.readOnly('abbrevLocn');
+        FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+        FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
       }
       FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
     }
