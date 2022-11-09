@@ -535,91 +535,63 @@ function autoSetAbbrevNmLogic() {
 }
 
 function validateAddressTypeForScenario() {
-	FormManager
-			.addFormValidator(
-					(function() {
-						return {
-							validate : function() {
-								var requestId = FormManager
-										.getActualValue('reqId');
-								var reqType = FormManager
-										.getActualValue('reqType');
-								var scenarioType = FormManager
-										.getActualValue('custSubGrp');
-								var systemId = FormManager
-										.getActualValue('sourceSystId');
-								var scenarioType3PADC = [ '3PA', 'DC', 'X3PA',
-										'XDC' ];
-								if (reqType == 'C'
-										&& scenarioType != undefined
-										&& scenarioType != ''
-										&& (scenarioType == 'PRIPE' || scenarioType == 'IBMEM')) {
-									var qParams = {
-										REQ_ID : requestId,
-									};
-									var record = cmr.query(
-											'COUNT_NON_SOLD_TO_ADDR', qParams);
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var requestId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var scenarioType = FormManager.getActualValue('custSubGrp');
+        var systemId = FormManager.getActualValue('sourceSystId');
+        var scenarioType3PADC = ['3PA', 'DC', 'X3PA', 'XDC'];
+        if (reqType == 'C' && scenarioType != undefined && scenarioType != '' && (scenarioType == 'PRIPE' || scenarioType == 'IBMEM')) {
+          var qParams = {
+            REQ_ID : requestId,
+          };
+          var record = cmr.query('COUNT_NON_SOLD_TO_ADDR', qParams);
 
-									// PayGo_check_DE_PrivateScenario
-									var qParams = {
-										SYST_ID : systemId,
-									};
-									var paygorecord = cmr.query(
-											'DE.PAYGO.CHECK', qParams);
-									var countpaygo = paygorecord.ret1;
-									if (Number(countpaygo) == 1) {
-										return new ValidationResult(null, true);
-									}
-									var count = record.ret1;
-									var scenarioDesc = "";
-									if (scenarioType == 'PRIPE') {
-										scenarioDesc = 'Private Person';
-									} else {
-										scenarioDesc = 'IBM Employee';
-									}
-									if (Number(count) >= 1) {
-										return new ValidationResult(
-												null,
-												false,
-												'Only Sold To Address is allowed for '
-														+ scenarioDesc
-														+ ' scenario. Please remove other addresses.');
-									} else {
-										return new ValidationResult(null, true);
-									}
-								} else if (reqType == 'C'
-										&& scenarioType != undefined
-										&& scenarioType != ''
-										&& scenarioType3PADC
-												.includes(scenarioType)) {
-									/*
-									 * Mandatory addresses ZS01/ZI01 *Sold-to
-									 * *Installing (Install at)
-									 */
-									var qParams = {
-										REQ_ID : requestId,
-									};
-									var recordZs01 = cmr.query(
-											'GETZS01VALRECORDS', qParams);
-									var recordZi01 = cmr.query(
-											'GETZI01VALRECORDS', qParams);
-									var soldToCnt = recordZs01.ret1;
-									var installingCnt = recordZi01.ret1;
-									if (installingCnt == 0) {
-										return new ValidationResult(null,
-												false,
-												'For Third Party sub-scenarios installing address is mandatory. Please add it.');
-									}
-									if (soldToCnt == 0) {
-										return new ValidationResult(null,
-												false,
-												'Sold-to address is mandatory.');
-									}
-								}
-								return new ValidationResult(null, true);
-							}
-						};
-					})(), 'MAIN_NAME_TAB', 'frmCMR');
+          // PayGo_check_DE_PrivateScenario
+          var qParams = {
+            SYST_ID : systemId,
+          };
+          var paygorecord = cmr.query('DE.PAYGO.CHECK', qParams);
+          var countpaygo = paygorecord.ret1;
+          if (Number(countpaygo) == 1) {
+            return new ValidationResult(null, true);
+          }
+          var count = record.ret1;
+          var scenarioDesc = "";
+          if (scenarioType == 'PRIPE') {
+            scenarioDesc = 'Private Person';
+          } else {
+            scenarioDesc = 'IBM Employee';
+          }
+          if (Number(count) >= 1) {
+            return new ValidationResult(null, false, 'Only Sold To Address is allowed for ' + scenarioDesc + ' scenario. Please remove other addresses.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else if (reqType == 'C' && scenarioType != undefined && scenarioType != '' && scenarioType3PADC.includes(scenarioType)){
+        	/*
+			 * Mandatory addresses ZS01/ZI01 *Sold-to *Installing (Install at)
+			 */
+        	var qParams = {
+                    REQ_ID : requestId,
+                  };
+        	var recordZs01 = cmr.query('GETZS01VALRECORDS', qParams);
+        	var recordZi01 = cmr.query('GETZI01VALRECORDS', qParams);
+        	var soldToCnt = recordZs01.ret1;
+        	var installingCnt = recordZi01.ret1;
+        	if(installingCnt == 0){
+        		return new ValidationResult(null, false, 'For Third Party sub-scenarios installing address is mandatory. Please add it.');
+        	}
+        	if(soldToCnt == 0){
+        		return new ValidationResult(null, false, 'Sold-to address is mandatory.');
+        	}
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 function addSoldToAddressValidator() {
