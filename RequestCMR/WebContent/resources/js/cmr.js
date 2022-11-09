@@ -289,7 +289,7 @@ var cmr = {
       dojo.byId(id).style.display = 'none';
     }
   },
-  showAlert : function(message, title, executeFunc, info) {
+  showAlert : function(message, title, executeFunc, info, buttonLabel) {
     if (!message) {
       return;
     }
@@ -310,6 +310,14 @@ var cmr = {
       cmr.hideNode('alertTitleContainer');
     } else {
       cmr.showNode('alertTitleContainer');
+    }
+    var btn = dojo.byId("messagesOverlayButtonOK");
+    if (btn) {
+      if (buttonLabel && buttonLabel.OK) {
+        btn.setAttribute('value', buttonLabel.OK);
+      } else {
+        btn.setAttribute('value', 'OK');
+      }
     }
     ibmweb.queue.push(function() {
       return dojo.query("div#dialog_messagesOverlay .dijitDialogCloseIcon").length == 1;
