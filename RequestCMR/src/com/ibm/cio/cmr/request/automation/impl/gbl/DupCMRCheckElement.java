@@ -61,6 +61,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     Addr soldTo = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    String isProspectCmr = admin.getProspLegalInd();
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     boolean matchDepartment = false;
@@ -105,7 +106,6 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                 String cmrRecCustName = StringUtils.isBlank(cmrCheckRecord.getCustomerName()) ? "" : cmrCheckRecord.getCustomerName();
                 custName = custName.replaceAll(regex, "");
                 cmrRecCustName = cmrRecCustName.replaceAll(regex, "");
-                String isProspectCmr = admin.getProspLegalInd();
                 if (!"Y".equals(isProspectCmr) && custName.equalsIgnoreCase(cmrRecCustName) && cmrCheckRecord.getCmrNo() != null
                     && cmrCheckRecord.getCmrNo().startsWith("P") && "75".equals(cmrCheckRecord.getOrderBlk())) {
                   // rejection code && "75".equals(cmrCheckRecord.getOrdBlk())
@@ -119,7 +119,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                   return result;
                 }
               }
-              if (cmrCheckMatches.size() != 0) {
+              if (cmrCheckMatches.size() != 0 && !"Y".equals(isProspectCmr)) {
                 result.setResults("Matches Found");
                 details.append(cmrCheckMatches.size() + " record(s) found.");
                 List<String> dupCMRNos = new ArrayList<>();
