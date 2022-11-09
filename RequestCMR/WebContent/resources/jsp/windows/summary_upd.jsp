@@ -300,23 +300,6 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
             <label>Tax Info:</label>
           </cmr:column>
           <cmr:column span="5" width="750">
-          <%-- 
-          	<cmr:row>
-          		Original Tax Info Values
-          	</cmr:row>
-            	<cmr:grid url="/summary/origtaxinfo.json" id="summaryUpdateOrigTaxInfoGrid" span="6" width="750" height="200" innerWidth="750" usePaging="false" useFilter="false">
-	              <cmr:gridParam fieldId="cmr" value="${summary.data.cmrNo}" />
-	              <cmr:gridParam fieldId="issuingCntry" value="${summary.data.cmrIssuingCntry}" />
-	              <cmr:gridCol width="90px" field="taxCd" header="${ui.grid.laTaxCd}" />
-	              <cmr:view exceptForCountry="631">
-			      <cmr:gridCol width="90px" field="taxNum" header="${ui.grid.taxNumber}" />
-			      </cmr:view>
-			      <cmr:gridCol width="90px" field="taxSeparationIndc" header="${ui.grid.taxSepInd}"/>
-			      <cmr:gridCol width="90px" field="billingPrintIndc" header="${ui.grid.billingPrintInd}" />
-			      <cmr:gridCol width="90px" field="contractPrintIndc" header="${ui.grid.contractPrintInd}" />
-			      <cmr:gridCol width="250px" field="cntryUse" header="${ui.grid.cntryUse}" />
-	            </cmr:grid>
-	            --%>
           	<cmr:row>
           	&nbsp;
           	</cmr:row>
