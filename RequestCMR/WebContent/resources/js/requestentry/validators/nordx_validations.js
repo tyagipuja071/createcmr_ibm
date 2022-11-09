@@ -53,6 +53,7 @@ function afterConfigForNORDX() {
     if (role == 'Requester') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('abbrevLocn');
+      FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     }
     if (role == 'Processor') {
       FormManager.enable('abbrevNm');
