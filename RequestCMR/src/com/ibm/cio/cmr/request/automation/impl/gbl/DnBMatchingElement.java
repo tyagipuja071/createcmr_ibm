@@ -33,6 +33,8 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
 import com.ibm.cio.cmr.request.service.requestentry.RequestEntryService;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -148,8 +150,20 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
           for (DnBMatchingResponse dnbRecord : dnbMatches) {
 
-            if (dnbRecord.getConfidenceCode() > 7) {
-              // check if the record closely matches D&B. This really validates
+            // CREATCMR-6958
+            if (dnbRecord.getConfidenceCode() >= 9 && isHighConfidenceCntry(entityManager, data)) {
+              LOG.debug("Confidence Code " + dnbRecord.getConfidenceCode());
+              LOG.debug("DUNS " + dnbRecord.getDunsNo() + " matches the request data.");
+              if (highestCloseMatch == null) {
+                highestCloseMatch = dnbRecord;
+                perfectMatch = dnbRecord;
+                engineData.setVatVerified(true, "VAT Verified");
+                LOG.debug("VAT verified");
+                break;
+              }
+            } else if (dnbRecord.getConfidenceCode() > 7) {
+              // check if the record closely matches D&B. This really
+              // validates
               // input against record
               boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
               if (closelyMatches) {
@@ -361,6 +375,16 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     }
 
     return result;
+  }
+
+  private boolean isHighConfidenceCntry(EntityManager entityManager, Data data) {
+    String sql = ExternalizedQuery.getSql("AUTOMATION.HIGH_CONF_CNTY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", data.getCmrIssuingCntry());
+    query.setForReadOnly(true);
+    List<String> result = query.getResults(String.class);
+
+    return "Y".contains(result.get(0));
   }
 
   /**
