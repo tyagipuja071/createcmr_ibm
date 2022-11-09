@@ -547,6 +547,7 @@ function afterConfigForLA() {
       setCrosTypSubTypSSAMXOnSecnarios();
       setAbbrevNameRequiredForProcessors();
       setMrcCdToReadOnly();
+      togglePPSCeid();
     });
   }
 
@@ -2703,6 +2704,34 @@ function showDeleteNotifForArgentinaIBMEM(fromAddress, scenario, scenarioChanged
   currentChosenScenarioAR = scenario;
 }
 
+function togglePPSCeid() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custType = FormManager.getActualValue('custType');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'C') {
+    
+    if(custSubGrp == '') {
+      custSubGrp = _pagemodel.custSubGrp;
+    }
+    
+    if (custSubGrp == 'CROSS' && custType == 'BUSPR') {
+      FormManager.show('PPSCEID', 'ppsceid');
+      FormManager.enable('ppsceid');
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.setValue('ppsceid', '');
+      FormManager.readOnly('ppsceid');
+      FormManager.hide('PPSCEID', 'ppsceid');
+      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+    }
+  }
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2790,4 +2819,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
+  GEOHandler.addAfterConfig(togglePPSCeid, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(togglePPSCeid, GEOHandler.LA);
 });
