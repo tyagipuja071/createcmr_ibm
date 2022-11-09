@@ -2818,7 +2818,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
-  GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
   GEOHandler.addAfterConfig(togglePPSCeid, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(togglePPSCeid, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
 });
