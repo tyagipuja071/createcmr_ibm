@@ -307,6 +307,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CND );
   GEOHandler.registerValidator(addCtcObsoleteValidator,GEOHandler.CND , null, true);
   GEOHandler.registerValidator(clientTierValidator,GEOHandler.CND , null, true);
-  GEOHandler.addAfterConfig(creditCdAndOrderBlockCdHandling, GEOHandler.CND);
   GEOHandler.addAfterConfig(modeOfPaymentAndOrderBlockCdHandling, GEOHandler.CND);
 });
