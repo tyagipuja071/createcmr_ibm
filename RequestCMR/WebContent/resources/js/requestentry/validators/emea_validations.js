@@ -475,15 +475,14 @@ function afterConfigForUKI() {
     var _custType = null;
     _customerTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       _custType = FormManager.getActualValue('custSubGrp');
-      checkScenarioChanged();
-      if (_custType != '' && _isScenarioChanged) {
-
+      // checkScenarioChanged();
+      autoSetSpecialTaxCdByScenario();
+      if (_custType != '') {
         var qParams = {
           REQ_ID : FormManager.getActualValue('reqId'),
         };
         var result = cmr.query('DATA.GET.CUSTSUBGRP.BY_REQID', qParams);
         var custTypeinDB = result.ret1;
-        autoSetSpecialTaxCdByScenario(_custType, custTypeinDB);
         autoSetCollectionCdByScenario(_custType);
         autoSetSBO(_custType, custTypeinDB);
         autoSetAbbrevLocnOnChangeUKI();
@@ -708,33 +707,28 @@ function setCustClassCd() {
   }
 }
 
-function autoSetSpecialTaxCdByScenario(_custType, custTypeinDB) {
+function autoSetSpecialTaxCdByScenario() {
   var reqType = FormManager.getActualValue('reqType');
   var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-
-  if (custTypeinDB != null && custTypeinDB == _custType) {
-    return;
-  }
-  if (reqType != 'C') {
-    return;
-  }
-  if (issuingCntry == SysLoc.UK || issuingCntry == SysLoc.IRELAND) {
-    if (_custType == 'INTER' || _custType == 'XINTR') {
+  var _custType = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var postCd = FormManager.getActualValue('postCd');
+  var exceptionPostCd = [ 'GX', 'GY', 'JE' ];
+  if (reqType == 'C' && (issuingCntry == SysLoc.UK || issuingCntry == SysLoc.IRELAND)) {
+    if (_custType == '') {
+      FormManager.setValue('specialTaxCd', '');
+    } else if (_custType == 'INTER' || _custType == 'XINTR' || _custType == 'INFSL') {
       FormManager.setValue('specialTaxCd', 'XX');
       FormManager.readOnly('specialTaxCd');
-    } else if (issuingCntry == SysLoc.UK && (_custType == 'CROSS' || _custType == 'XBSPR' || _custType == 'XPRIC' || _custType == 'XGOVR')) {
+    } else if (issuingCntry == SysLoc.UK
+        && ((_custType == 'CROSS' || _custType == 'XBSPR' || _custType == 'XPRIC' || _custType == 'XGOVR') || (exceptionPostCd.includes(postCd.substr(0, 2)) && _custType != 'INTER' && _custType != 'INFSL'))) {
       FormManager.setValue('specialTaxCd', '32');
       // FormManager.enable('specialTaxCd');
-    } else {
-      if (_custType == 'INFSL') {
-        FormManager.setValue('specialTaxCd', 'XX');
-        // FormManager.enable('specialTaxCd');
-      } else {
-        FormManager.setValue('specialTaxCd', 'Bl');
-        // FormManager.enable('specialTaxCd');
-      }
+    } else if (issuingCntry == SysLoc.UK && _custType != 'INTER' && _custType != 'INFSL' && custGrp == 'LOCAL' && !exceptionPostCd.includes(postCd.substr(0, 2))) {
+      FormManager.setValue('specialTaxCd', '20');
+    } else if (issuingCntry == SysLoc.IRELAND && _custType != 'INTER' && _custType != 'INFSL') {
+      FormManager.setValue('specialTaxCd', 'Bl');
     }
-    var custGrp = FormManager.getActualValue('custGrp');
     if (issuingCntry == SysLoc.UK && (custGrp != undefined && custGrp != '') && custGrp == 'CROSS') {
       var _reqId = FormManager.getActualValue('reqId');
       var params = {
@@ -749,14 +743,6 @@ function autoSetSpecialTaxCdByScenario(_custType, custTypeinDB) {
       if (landCntry != 'undefined' && landCntry == 'IM') {
         FormManager.setValue('specialTaxCd', 'Bl');
         // FormManager.enable('specialTaxCd');
-      } else {
-        if (custSubGrp != null && custSubGrp == 'XINTR') {
-          FormManager.setValue('specialTaxCd', 'XX');
-          FormManager.readOnly('specialTaxCd');
-        } else {
-          FormManager.setValue('specialTaxCd', '32');
-          // FormManager.enable('specialTaxCd');
-        }
       }
     }
   }
@@ -898,6 +884,7 @@ function setUKIAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, 
     if (_postalCdUKHandler == null) {
       _postalCdUKHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
         autoSetAbbrevLocUKI();
+        autoSetSpecialTaxCdByScenario();
       });
     }
 
