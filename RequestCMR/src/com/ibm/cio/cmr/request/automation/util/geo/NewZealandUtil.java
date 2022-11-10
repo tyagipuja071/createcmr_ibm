@@ -31,7 +31,6 @@ import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.AutomationServiceClient;
@@ -48,104 +47,125 @@ public class NewZealandUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(NewZealandUtil.class);
 
-  private static final List<String> ALLOW_DEFAULT_SCENARIOS = Arrays.asList("PRIV", "XPRIV", "BLUMX", "MKTPC", "XBLUM", "XMKTP");
+  // private static final List<String> ALLOW_DEFAULT_SCENARIOS =
+  // Arrays.asList("PRIV", "XPRIV", "BLUMX", "MKTPC", "XBLUM", "XMKTP");
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, "STAT", "MAIL", "ZF01", "PUBS", "PUBB", "EDUC", "CTYG", "CTYH");
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #", "Customer Name", "Customer Name Con't");
 
-  private static final String SCENARIO_ACQUISITION = "AQSTN";
+  private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
   private static final String SCENARIO_BLUEMIX = "BLUMX";
-  private static final String SCENARIO_ESOSW = "ESOSW";
-  private static final String SCENARIO_NORMAL = "NRML";
   private static final String SCENARIO_MARKETPLACE = "MKTPC";
-  private static final String SCENARIO_DUMMY = "DUMMY";
   private static final String SCENARIO_INTERNAL = "INTER";
+  private static final String SCENARIO_DUMMY = "DUMMY";
+  private static final String SCENARIO_ACQUISITION = "AQSTN";
+  private static final String SCENARIO_NORMAL = "NRML";
+  private static final String SCENARIO_ESOSW = "ESOSW";
   private static final String SCENARIO_ECOSYS = "ECSYS";
   private static final String SCENARIO_CROSS_FOREIGN = "CROSS";
 
-  private static final String SCENARIO_CROSS_ECOSYS = "CROSS";
-  private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
+  @Override
+  public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
+
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    // String scenarioList[] = { "NRML", "ESOSW" };
+    // Addr soldTo = requestData.getAddress("ZS01");
+    // String custNm1 = soldTo.getCustNm1();
+    // String custNm2 = StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " +
+    // soldTo.getCustNm2() : "";
+    // String customerName = custNm1 + custNm2;
+
+    processSkipCompanyChecks(engineData, requestData, details);
+    switch (scenario) {
+
+    case SCENARIO_PRIVATE_CUSTOMER:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      break;
+    case SCENARIO_BLUEMIX:
+    case SCENARIO_MARKETPLACE:
+    case SCENARIO_INTERNAL:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      break;
+    case SCENARIO_DUMMY:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      break;
+    case SCENARIO_ACQUISITION:
+    case SCENARIO_NORMAL:
+    case SCENARIO_ESOSW:
+    case SCENARIO_ECOSYS:
+    case SCENARIO_CROSS_FOREIGN:
+      addToNotifyListANZ(entityManager, data.getId().getReqId());
+    }
+    return true;
+  }
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     // get request admin and data
-    long reqId = requestData.getAdmin().getId().getReqId();
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
-    Addr soldTo = requestData.getAddress("ZS01");
+    // long reqId = requestData.getAdmin().getId().getReqId();
+    // Admin admin = requestData.getAdmin();
+    // Data data = requestData.getData();
+    // Addr soldTo = requestData.getAddress("ZS01");
     StringBuilder eleResults = new StringBuilder();
-    String[] isicScenarioList = { "NRML", "ESOSW", "IGF", "XIGF", "CROSS", "AQSTN", "XAQST", "SOFT" };
-    boolean isIsicInvalid = false;
-    LOG.debug("Australia : Performing field computations for req_id : " + reqId);
-    String defaultClusterCd = getDefaultCluster(entityManager, requestData, engineData);
-    String validCode = checkIfClusterSalesmanIsValid(entityManager, requestData);
-
-    // a. check cluster
-    if (defaultClusterCd.equalsIgnoreCase(data.getApCustClusterId())) {
-
-      if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
-        LOG.debug("Default Cluster used but allowed: ISIC=" + data.getIsicCd() + " Scenario=" + data.getCustSubGrp());
-        results.setOnError(false);
-        // eleResults.append("Default Cluster used.\n");
-        details.append("Default Cluster used but allowed for the request (Private Person/BlueMix/Marketplace).\n");
-      } else {
-        LOG.debug("Default Cluster used.");
-        engineData.addRejectionComment("OTH", "Cluster should not be the default cluster for the scenario.", "", "");
-        results.setOnError(true);
-        // eleResults.append("Default Cluster used.\n");
-        details.append("Cluster should not be the default cluster for the scenario.\n");
-      }
-    } else {
-      LOG.debug("Default Cluster NOT used.");
-      // eleResults.append("Default Cluster not used.\n");
-      details.append("Cluster used is not default.\n");
-    }
-
-    if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
-      LOG.debug("Salesman check skipped for private and allowed scenarios.");
-      // eleResults.append("\nValid cluster and Salesman No. used.\n");
-      details.append("\nSalesman check skipped for this scenario (Private/Marketplace/Bluemix).\n");
-    } // else {
-
-    // CREATCMR-6825
-    // b. check cluster and salesman no. combination
-    // if ("VALID".equalsIgnoreCase(validCode)) {
-    // LOG.debug("The combination of Salesman No. and Cluster is valid.");
-    // // eleResults.append("\nValid cluster and Salesman No. used.\n");
-    // details.append("\nThe combination of Salesman No. and Cluster is
-    // valid.\n");
-    // } else if ("INVALID".equalsIgnoreCase(validCode)) {
-    // LOG.debug("The combination of Salesman No. and Cluster is INVALID.");
-    // engineData.addRejectionComment("OTH", "The combination of Salesman No.
-    // and Cluster is invalid.", "", "");
-    // results.setOnError(true);
-    // // eleResults.append("Invalid Cluster and Salesman No.
-    // combination.\n");
-    // details.append("\nThe combination of Salesman No. and Cluster is
-    // invalid.\n");
+    // String[] isicScenarioList = { "NRML", "ESOSW", "IGF", "XIGF", "CROSS",
+    // "AQSTN", "XAQST", "SOFT" };
+    // boolean isIsicInvalid = false;
+    // LOG.debug("Australia : Performing field computations for req_id : " +
+    // reqId);
+    // String defaultClusterCd = getDefaultCluster(entityManager, requestData,
+    // engineData);
+    // String validCode = checkIfClusterSalesmanIsValid(entityManager,
+    // requestData);
+    //
+    // // a. check cluster
+    // if (defaultClusterCd.equalsIgnoreCase(data.getApCustClusterId())) {
+    //
+    // if ("9500".equals(data.getIsicCd()) ||
+    // ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
+    // LOG.debug("Default Cluster used but allowed: ISIC=" + data.getIsicCd() +
+    // " Scenario=" + data.getCustSubGrp());
+    // results.setOnError(false);
+    // // eleResults.append("Default Cluster used.\n");
+    // details.append("Default Cluster used but allowed for the request (Private
+    // Person/BlueMix/Marketplace).\n");
     // } else {
-    // LOG.debug("Salesman No.-Cluster combination not present.");
-    // /*
-    // * engineData.addRejectionComment("OTH",
-    // * "No combination of Salesman No. and Cluster is present.", "", "");
-    // * results.setOnError(true);
-    // */
-    // // eleResults.append("No combination of Salesman No. and Cluster
-    // // present.\n");
-    // details.append("\nNo combination of Salesman No. and Cluster is
-    // present.\n");
+    // LOG.debug("Default Cluster used.");
+    // engineData.addRejectionComment("OTH", "Cluster should not be the default
+    // cluster for the scenario.", "", "");
+    // results.setOnError(true);
+    // // eleResults.append("Default Cluster used.\n");
+    // details.append("Cluster should not be the default cluster for the
+    // scenario.\n");
     // }
+    // } else {
+    // LOG.debug("Default Cluster NOT used.");
+    // // eleResults.append("Default Cluster not used.\n");
+    // details.append("Cluster used is not default.\n");
     // }
-    isIsicInvalid = isISICValidForScenario(requestData, Arrays.asList(isicScenarioList));
 
-    if (isIsicInvalid) {
-      details.append("Invalid ISIC code, please choose another one based on industry.\n");
-      engineData.addRejectionComment("OTH", "Invalid ISIC code, please choose another one based on industry.", "", "");
-      results.setOnError(true);
-    } else {
-      details.append("ISIC is valid" + "\n");
-    }
+    // if ("9500".equals(data.getIsicCd()) ||
+    // ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
+    // LOG.debug("Salesman check skipped for private and allowed scenarios.");
+    // // eleResults.append("\nValid cluster and Salesman No. used.\n");
+    // details.append("\nSalesman check skipped for this scenario
+    // (Private/Marketplace/Bluemix).\n");
+    // } // else {
+    //
+    // isIsicInvalid = isISICValidForScenario(requestData,
+    // Arrays.asList(isicScenarioList));
+    //
+    // if (isIsicInvalid) {
+    // details.append("Invalid ISIC code, please choose another one based on
+    // industry.\n");
+    // engineData.addRejectionComment("OTH", "Invalid ISIC code, please choose
+    // another one based on industry.", "", "");
+    // results.setOnError(true);
+    // } else {
+    // details.append("ISIC is valid" + "\n");
+    // }
 
     if (results != null && !results.isOnError()) {
 
@@ -203,7 +223,7 @@ public class NewZealandUtil extends AutomationUtil {
     StringBuilder details = new StringBuilder();
     boolean CustNmChanged = changes.isLegalNameChanged();
     ChangeLogListener.setManager(entityManager);
-
+    CustNmChanged = false;
     if (CustNmChanged) {
       AutomationResponse<BNValidationResponse> response = null;
       Addr zs01 = requestData.getAddress("ZS01");
@@ -416,48 +436,6 @@ public class NewZealandUtil extends AutomationUtil {
     }
   }
 
-  @Override
-  public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
-      AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
-    // String[] scnarioList = { "XIGF", "CROSS", "MKTPC", "BLUMX", "DUMMY",
-    // "XDUMM", "INTER", "XINT", "AQSTN", "XAQST", "SOFT" };
-    // skipCompanyCheckForScenario(requestData, engineData,
-    // Arrays.asList(scnarioList), true);
-    // scenario check for normal and ESOSW
-    Data data = requestData.getData();
-    String scenario = data.getCustSubGrp();
-    String scenarioList[] = { "NRML", "ESOSW" };
-    Addr soldTo = requestData.getAddress("ZS01");
-    String custNm1 = soldTo.getCustNm1();
-    String custNm2 = StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "";
-    String customerName = custNm1 + custNm2;
-
-    // allowDuplicatesForScenario(engineData, requestData,
-    // Arrays.asList(scenarioList));
-    processSkipCompanyChecks(engineData, requestData, details);
-    switch (scenario) {
-    // CREATCMR - 2031
-    // case SCENARIO_BLUEMIX:
-    // case SCENARIO_MARKETPLACE:
-    // engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-    // break;
-    // CREATCMR - 5772
-    case SCENARIO_BLUEMIX:
-    case SCENARIO_MARKETPLACE:
-    case SCENARIO_DUMMY:
-    case SCENARIO_INTERNAL:
-      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-      break;
-    case SCENARIO_PRIVATE_CUSTOMER:
-      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-      return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
-    case SCENARIO_ECOSYS:
-    case SCENARIO_CROSS_ECOSYS:
-      addToNotifyListANZ(entityManager, data.getId().getReqId());
-    }
-    return true;
-  }
-
   private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
     List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
     if (addrChanges == null) {
@@ -469,26 +447,6 @@ public class NewZealandUtil extends AutomationUtil {
       }
     }
     return false;
-  }
-
-  private AutomationResponse<BNValidationResponse> getBNInfo(Admin admin, Data data) throws Exception {
-    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        AutomationServiceClient.class);
-    client.setReadTimeout(1000 * 60 * 5);
-    client.setRequestMethod(Method.Get);
-
-    BNValidationRequest request = new BNValidationRequest();
-    request.setBusinessNumber(data.getVat());
-    System.out.println(request + request.getBusinessNumber());
-
-    LOG.debug("Connecting to the BNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.AU_ABN_VALIDATION_SERVICE_ID, request,
-        AutomationResponse.class);
-    ObjectMapper mapper = new ObjectMapper();
-    String json = mapper.writeValueAsString(rawResponse);
-    TypeReference<AutomationResponse<BNValidationResponse>> ref = new TypeReference<AutomationResponse<BNValidationResponse>>() {
-    };
-    return mapper.readValue(json, ref);
   }
 
   public static void addToNotifyListANZ(EntityManager entityManager, long reqId) {
@@ -511,6 +469,7 @@ public class NewZealandUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     boolean cmdeReview = false;
+    boolean poboxReview = false;
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
@@ -526,6 +485,13 @@ public class NewZealandUtil extends AutomationUtil {
         }
         for (Addr addr : addresses) {
           Addr addressToChk = requestData.getAddress(addrType);
+          if (CmrConstants.RDC_SOLD_TO.equals(addressToChk.getId().getAddrType())) {
+            String addressStr = addressToChk.getCustNm1() + addressToChk.getCustNm2() == null ? ""
+                : addressToChk.getCustNm2() + addressToChk.getAddrTxt() + addressToChk.getAddrTxt2() == null ? "" : addressToChk.getAddrTxt2();
+            if (addressStr.contains("PO BOX")) {
+              poboxReview = true;
+            }
+          }
           if ("Y".equals(addr.getChangedIndc())) {
             // update address
             if (RELEVANT_ADDRESSES.contains(addrType)) {
@@ -605,6 +571,10 @@ public class NewZealandUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("_auCheckFailed", "Updates to addresses cannot be checked automatically.");
     } else if (cmdeReview) {
       engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_", "Updates to addresses cannot be checked automatically.");
+      validation.setSuccess(false);
+      validation.setMessage("Review Required.");
+    } else if (poboxReview) {
+      engineData.addNegativeCheckStatus("_POBOXCheckFailed", "NZ Installing address can't contain 'PO BOX'.");
       validation.setSuccess(false);
       validation.setMessage("Review Required.");
     } else {
