@@ -135,6 +135,10 @@ function afterConfigForBELUX() {
   addAccTemNumValidate();
   disableSBO();
   disableIBMTab();
+
+  // CREATCMR-788
+  addressQuotationValidatorBELUX();
+
 }
 
 function checkCmrUpdateBeforeImport() {
@@ -2103,6 +2107,20 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+// CREATCMR-788
+function addressQuotationValidatorBELUX() {
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name 1' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name 2' ]);
+  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Customer Name 3' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Attention Person' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+}
 dojo.addOnLoad(function() {
   GEOHandler.BELUX = [ '624' ];
 

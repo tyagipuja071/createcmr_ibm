@@ -290,6 +290,8 @@ function afterConfigForZA() {
   enterpriseValidation();
   clearPoBoxPhoneAddrGridItems();
   showDeptNoForInternalsOnly();
+// CREATCMR-788
+  addressQuotationValidatorZA();
 }
 
 function onLobchange() {
@@ -2091,7 +2093,21 @@ function checkCmrUpdateBeforeImport() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+// CREATCMR-788
+function addressQuotationValidatorZA() {
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Att. Person' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Con\'t' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
+}
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
   console.log('adding MCO1 functions...');

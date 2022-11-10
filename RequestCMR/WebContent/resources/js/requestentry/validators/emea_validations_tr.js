@@ -4408,6 +4408,8 @@ function abbrvLocMandatory() {
   interval = setInterval(function() {
     var role = FormManager.getActualValue('userRole').toUpperCase();
     var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+    FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
 
     if (viewOnlyPage != 'true') {
       if (role != 'REQUESTER') {
@@ -4422,6 +4424,8 @@ function abbrvLocMandatory() {
 
 function abbrvLocMandatoryOnChange() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
   dojo.connect(FormManager.getField('abbrevLocn'), 'onChange', function(value) {
     if (role != 'REQUESTER') {
       FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'AbbrevLocation' ], 'MAIN_CUST_TAB');
@@ -8791,6 +8795,8 @@ function afterConfigForTR() {
       addTurkishCharValidator();
     });
   }
+  // CREATCMR-788
+  addressQuotationValidatorTR();
 }
 
 var _isScenarioChanged = false;
@@ -9018,6 +9024,20 @@ function clientTierValidator() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+function addressQuotationValidatorTR() {
+  // CREATCMR-788
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Con\'t' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'District' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  FormManager.addValidator('taxOffice', Validators.NO_QUOTATION, [ 'Tax Office' ]);
 }
 
 dojo.addOnLoad(function() {

@@ -74,6 +74,8 @@ function afterConfigKR() {
   setChecklistStatus();
   addKRChecklistValidator();
   handleObseleteExpiredDataForUpdate();
+  // CREATCMR-788
+  addressQuotationValidator();
 }
 
 function setClientTierValues() {
@@ -413,6 +415,38 @@ function handleObseleteExpiredDataForUpdate() {
   }
 }
 
+function addressQuotationValidator() {
+  // CREATCMR-788
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name 1' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Customer Name_Korean' ]);
+  FormManager.addValidator('billingPstlAddr', Validators.NO_QUOTATION, [ 'Customer Name_Korean Continue' ]);
+
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address 1' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address Con\'t' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Street address_Korean' ]);
+  FormManager.addValidator('divn', Validators.NO_QUOTATION, [ 'Street address_Korean Continue' ]);
+
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('city2', Validators.NO_QUOTATION, [ 'City Korean' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('transportZone', Validators.NO_QUOTATION, [ 'Transport Zone' ]);
+
+  FormManager.addValidator('contact', Validators.NO_QUOTATION, [ 'Name of person in charge of Invoice_1' ]);
+  FormManager.addValidator('countyName', Validators.NO_QUOTATION, [ 'Name of person in charge of Invoice_2' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Department Name_1' ]);
+  FormManager.addValidator('poBoxCity', Validators.NO_QUOTATION, [ 'Department Name_2' ]);
+
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'Telephone No_1' ]);
+  FormManager.addValidator('taxOffice', Validators.NO_QUOTATION, [ 'Telephone No_2' ]);
+  FormManager.addValidator('floor', Validators.NO_QUOTATION, [ 'E-mail_1' ]);
+  FormManager.addValidator('office', Validators.NO_QUOTATION, [ 'E-mail_2' ]);
+  FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'E-mail_3' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Company Phone #' ]);
+
+}
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
   console.log('adding KOREA functions...');
