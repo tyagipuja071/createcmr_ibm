@@ -168,6 +168,7 @@ var FilteringDropdown = (function() {
       content : queryParams,
       method : 'GET',
       timeout : 50000,
+      sync : true,
       load : function(data, ioargs) {
         if (spinner) {
           spinner.style.display = "none";
