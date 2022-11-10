@@ -241,16 +241,6 @@
           </td>
         </tr>
         <tr>
-          <td>CROS (LA Legacy)</td>
-          <td>Secondary</td>
-          <td>Retrieves LA CMR values and primary point of creation and updates</td>
-          <td style="text-align:center">
-            <img src="${resourcesPath}/images/approve.png" class="proc-img-m" ng-show="services.cros" title="Connection is successful">
-            <img src="${resourcesPath}/images/reject.png" class="proc-img-m" ng-show="!services.cros" title="Connection is DOWN">
-          </td>
-          <td>&nbsp;</td>
-        </tr>
-        <tr>
           <td>CRIS (Japan Legacy)</td>
           <td>Secondary</td>
           <td>Retrieves Japan CMR values and primary point of creation and updates</td>

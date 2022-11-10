@@ -23,6 +23,7 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.ui.UIMgr;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
+import com.ibm.cio.cmr.request.util.DashboardReporting;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
 import com.ibm.cio.cmr.request.util.MessageUtil;
@@ -43,6 +44,7 @@ public class CmrContextListener implements ServletContextListener, HttpSessionLi
 
   @Override
   public void contextDestroyed(ServletContextEvent arg0) {
+    DashboardReporting.keepRunning = false;
   }
 
   @Override
@@ -141,13 +143,9 @@ public class CmrContextListener implements ServletContextListener, HttpSessionLi
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
     logger.info("Current DB time: " + sdf.format(ts));
 
-    // disable for now
-    // logger.info("Starting refresh thread.. Last Refresh : " +
-    // SystemConfiguration.LAST_REFRESH_TIME);
-    // RefreshJob refresh = new RefreshJob();
-    // Thread tRefresh = new Thread(refresh);
-    // tRefresh.setName("Refresh");
-    // tRefresh.start();
+    DashboardReporting monitor = new DashboardReporting();
+    Thread tMonitor = new Thread(monitor);
+    tMonitor.start();
   }
 
   @Override

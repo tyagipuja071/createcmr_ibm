@@ -16,6 +16,10 @@ import com.ibm.cio.cmr.request.model.DropdownItemModel;
  */
 public class DashboardResult {
 
+  public static final String STATUS_DOWN = "RED";
+  public static final String STATUS_WARNING = "ORANGE";
+  public static final String STATUS_OK = "GREEN";
+
   private String overallStatus;
   private String alertMessage;
 

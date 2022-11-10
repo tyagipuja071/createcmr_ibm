@@ -44,6 +44,7 @@ public class DashboardController extends BaseController {
       params.addParam("CNTRY", request.getParameter("cntry"));
       params.addParam("PROC_TYPE", request.getParameter("procType"));
       params.addParam("LIST_RECORDS", request.getParameter("listRecords"));
+      params.addParam("INCL_AUTO_PERCENT", request.getParameter("inclAutoPercent"));
       result = this.service.process(request, params);
     } catch (Exception e) {
       LOG.error("Error in generating monitor results", e);
