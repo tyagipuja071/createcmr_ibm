@@ -4567,6 +4567,25 @@ function additionalAddrNmValidator(){
     };
   })(), null, 'frmCMR_addressModal');
 }
+var _customerTypeHandler = null;
+function addCustGrpHandler() {
+  if (_customerTypeHandler == null) {
+    var _custType = null;
+    _customerTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      _custType = value;
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
+      var custGrp = FormManager.getActualValue('custGrp');
+      var reqType = FormManager.getActualValue('reqType');
+      var apaCntry = [ '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '858', '766' ];
+      if (reqType == 'C' && custGrp == 'CROSS' && apaCntry.includes(cntry)) {
+        FormManager.setValue('custSubGrp', 'CROSS');
+      }
+    });
+  }
+  if (_customerTypeHandler && _customerTypeHandler[0]) {
+    _customerTypeHandler[0].onChange();
+  }
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
@@ -4575,6 +4594,7 @@ dojo.addOnLoad(function() {
   GEOHandler.ASEAN = [ SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.LAOS, SysLoc.MALASIA, SysLoc.CAMBODIA ];
   GEOHandler.ANZ = [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ];
   GEOHandler.GCG = [ SysLoc.HONG_KONG, SysLoc.MACAO ];
+  GEOHandler.APAC_1 = [SysLoc.SINGAPORE, SysLoc.PHILIPPINES, SysLoc.THAILAND, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.BRUNEI, SysLoc.VIETNAM, SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA, SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.CHINA, SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.TAIWAN,SysLoc.KOREA ];
   // CREATCMR-6825
   GEOHandler.APAC = [ SysLoc.SINGAPORE, SysLoc.PHILIPPINES, SysLoc.THAILAND, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.BRUNEI, SysLoc.VIETNAM, SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA, 
       SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.HONG_KONG, SysLoc.MACAO  ];
@@ -4746,6 +4766,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-6825
   GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.APAC);
   GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.APAC);
+  GEOHandler.addAfterConfig(addCustGrpHandler, GEOHandler.APAC_1);
   GEOHandler.addAddrFunction(displayVatRegistrartionStatus, [ SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(displayVatRegistrartionStatus,  [ SysLoc.SINGAPORE ] );
   GEOHandler.addAfterTemplateLoad(displayVatRegistrartionStatus,   [ SysLoc.SINGAPORE ] );
