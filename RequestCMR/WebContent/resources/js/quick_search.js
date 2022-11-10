@@ -40,6 +40,9 @@ app.filter('recFilter', function() {
       if (record.vat && record.vat.toUpperCase().indexOf(val) >= 0) {
         return true;
       }
+      if (record.recType && record.recType.toUpperCase() == val.toUpperCase()) {
+        return true;
+      }
       return false;
     });
 
@@ -52,6 +55,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
   $scope.orgIdSearch = false;
   $scope.records = [];
   $scope.cmrNo = '';
+  $scope.allowByModel = true;
 
   $scope.titles = {
     E1 : 'Exact matches against name, street line 1, street line 2, city, postal code, and country.',
@@ -91,6 +95,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     $scope.highMatchGrade = false
     $scope.records = [];
     cmr.showProgress('Searching for records, please wait..');
+    $scope.allowByModel = true;
     dojo.xhrPost({
       url : cmr.CONTEXT_ROOT + '/quick_search/find.json',
       handleAs : 'json',
@@ -100,14 +105,16 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       sync : false,
       load : function(data, ioargs) {
         cmr.hideProgress();
-        console.log(data);
         if (data && data.items) {
+          var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
+          if (byModel && byModel.ret1 == 'Y'){
+            $scope.allowByModel = false;
+          } 
           if (data.items.length > 50) {
             alert('The search resulted to more than 50 matches. Only the top 50 matches will be shown. Please try to change the search parameters to get the other records you need.');
             console.log('splicing from 50, removing ' + (data.items.length - 50) + ' items');
             data.items.splice(50, data.items.length - 50);
           }
-          console.log(data.items);
           data.items.forEach(function(item, i) {
             if (item.recType == 'DNB' && !item.countryCd) {
               item.countryCd = crit.countryCd;
@@ -244,7 +251,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       }
     });
 
-    console.log(model);
     cmr.showProgress('Creating new request from the record, please wait..');
     dojo.xhrPost({
       url : cmr.CONTEXT_ROOT + '/quick_search/process.json',
@@ -254,7 +260,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       timeout : 7 * 60000,
       sync : false,
       load : function(data, ioargs) {
-        console.log(data);
         if (data && data.success) {
           var reqId = data.model.reqId;
           window.location = cmr.CONTEXT_ROOT + '/request/' + reqId + '?qs=Y&infoMessage=' + encodeURIComponent('Request created successfully from the chosen record.');
@@ -411,7 +416,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     });
     cmr.showProgress('Creating new request from the specified details, please wait..');
     model.subRegion = $scope.getSubRegion(model.issuingCntry, model.countryCd);
-    console.log(model);
     dojo.xhrPost({
       url : cmr.CONTEXT_ROOT + '/quick_search/process.json',
       handleAs : 'json',
@@ -420,7 +424,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       timeout : 7 * 60000,
       sync : false,
       load : function(data, ioargs) {
-        console.log(data);
         if (data && data.success) {
           var reqId = data.model.reqId;
           window.location = cmr.CONTEXT_ROOT + '/request/' + reqId + '?qs=Y&infoMessage=' + encodeURIComponent('Request created successfully with address information.');
@@ -491,6 +494,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
 } ]);
 
 app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout', '$sanitize', function($scope, $document, $http, $timeout, $sanitize) {
+  $scope.allowByModel = true;
   $scope.getParameterByName = function(name, url) {
     if (!url) {
       url = window.location.href;
@@ -537,6 +541,10 @@ app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout'
   $scope.dunsNo = $scope.getParameterByName('dunsNo');
   $scope.issuingCountry = $scope.getParameterByName('issuingCountry');
   $scope.viewMode = 'S';
+  var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : $scope.issuingCountry});
+  if (byModel && byModel.ret1 == 'Y'){
+    $scope.allowByModel = false;
+  } 
 
   $scope.loadDetails = function() {
     if ($scope.cmrNo) {
@@ -550,7 +558,6 @@ app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout'
         sync : false,
         load : function(data, ioargs) {
           cmr.hideProgress();
-          console.log(data);
           if (data.success && data.data.items) {
             if (data.data.items.length > 50) {
               alert('The CMR contains more than 50 records. Only the top 50 records will be displayed.');
@@ -587,7 +594,6 @@ app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout'
         sync : false,
         load : function(data, ioargs) {
           cmr.hideProgress();
-          console.log(data);
           if (data.success && data.data.results) {
             $scope.dnb = data.data.results[0];
             $scope.$apply();
@@ -848,14 +854,13 @@ var US_STATES = [ {
   name : 'Wyoming'
 } ]
 dojo.addOnLoad(function() {
-  if (bypassqs){
+  if (typeof(bypassqs) != 'undefined' && bypassqs){
     return;
   }
-  if (!_furl) {
+  if (typeof(_furl) == 'undefined' || !_furl) {
     return;
   }
   var findcmrUrl = _furl.substring(0, _furl.lastIndexOf('/')) + '/DnBSearch';
-  console.log('furl: ' + findcmrUrl);
   // Bloodhound is used for the Twitter Typeahead suggestion engine
   var companies = new Bloodhound({
     datumTokenizer : function(datum) {
@@ -915,7 +920,6 @@ dojo.addOnLoad(function() {
           }
           toReturn.push(result);
         });
-        console.log(toReturn);
         return toReturn;
       }
     },
