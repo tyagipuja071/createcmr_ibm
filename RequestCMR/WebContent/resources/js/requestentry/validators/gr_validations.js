@@ -220,7 +220,7 @@ function addVATDisabler() {
     var role = FormManager.getActualValue('userRole').toUpperCase();
     var req = FormManager.getActualValue('reqType').toUpperCase();
     var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-    
+
     if (req == 'C') {
       return;
     }
@@ -1452,7 +1452,7 @@ function addrFunctionForGR(cntry, addressMode, saving) {
       FormManager.setValue('landCntry', cmr.oldlandcntry);
     }
     // for cross border
-    if (custType == 'CROSS' && cmr.currentRequestType == 'U') {
+    if ((custType == 'CROSS' || FormManager.getActualValue('addrType') == 'ZS01') && cmr.currentRequestType == 'U') {
       FormManager.readOnly('landCntry');
     }
     checkAndAddValidator('landCntry', Validators.REQUIRED, [ 'Country (Landed)' ]);
@@ -2186,7 +2186,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') { 
+    if (clientTierCode == '') {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
@@ -2228,23 +2228,23 @@ function clientTierValidator() {
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
         var valResult = null;
-        
+
         var oldClientTier = null;
         var oldISU = null;
         var requestId = FormManager.getActualValue('reqId');
-        
+
         if (reqType == 'C') {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-              REQ_ID : requestId,
+            REQ_ID : requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-          
+
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU =  result.ret3 != null ? result.ret3 : '';
-            
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
             if (clientTier != oldClientTier || isuCd != oldISU) {
               valResult = clientTierCodeValidator();
             }
@@ -2373,10 +2373,10 @@ dojo.addOnLoad(function() {
   // Greece
   GEOHandler.addAfterConfig(addAfterConfigGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(addHandlersForGR, [ SysLoc.GREECE ]);
-  GEOHandler.addAddrFunction(addrFunctionForGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE, SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(setTypeOfCustomerBehaviorForGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(disableAddrFieldsGR, [ SysLoc.GREECE ]);
+  GEOHandler.addAddrFunction(addrFunctionForGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addNonLatinCharValidator, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addPOBoxValidatorGR, [ SysLoc.GREECE ]);

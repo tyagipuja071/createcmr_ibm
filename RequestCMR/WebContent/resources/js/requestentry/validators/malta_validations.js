@@ -110,8 +110,8 @@ function classFieldBehaviour() {
 function disableAddrFieldsMT(cntry, addressMode, saving, finalSave, force) {
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
-
-  if (custType == 'LOCAL' && addrType == 'ZS01') {
+  var reqType = FormManager.getActualValue('reqType');
+  if ((custType == 'LOCAL' || reqType == 'U') && addrType == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     if (!saving && addressMode != 'updateAddress') {

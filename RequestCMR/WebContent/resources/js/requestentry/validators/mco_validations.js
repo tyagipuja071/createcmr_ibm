@@ -1093,6 +1093,7 @@ function disableAddrFieldsPTES() {
   var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
+  var reqType = FormManager.getActualValue('reqType');
   var checkImportIndc = getImportedIndcForPT();
 
   // Sequence Number - enable for additional shipping
@@ -1103,7 +1104,7 @@ function disableAddrFieldsPTES() {
     FormManager.readOnly('prefSeqNo');
   }
 
-  if (custType != 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+  if (FormManager.getActualValue('addrType') == 'ZS01' && (reqType == 'U' || custType != 'CROSS')) {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
