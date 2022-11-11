@@ -439,7 +439,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
     log.setAction("U");
     log.setChgpnt("Y");
     log.setLinenumber(queue.getId().getSeqNo() + "");
-    log.setLoadfilename(queue.getFileName());
+    log.setLoadfilename(queue.getId().getSourceName());
     log.setOld(oldValue);
     log.setNewValue(newValue);
     log.setTabkey1(kna1AddlBilling.getId().getKunnr());
