@@ -44,6 +44,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   private static final Logger LOG = Logger.getLogger(GCARSService.class);
   private static final String DEFAULT_DIR = "/ci/shared/data/gcars/";
   private static final String ARCHIVE_DIR = "/ci/shared/data/gcarsarchive/";
+  private static final String ERROR_DIR = "/ci/shared/data/gcarserror/";
   private Map<String, Integer> fileSizes = new HashMap<String, Integer>();
   private Map<String, Integer> processedSizes = new HashMap<String, Integer>();
 
@@ -234,14 +235,38 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       try {
         LOG.debug("Error in parsing file " + fileName, e);
         // Rename the file ERR-YYYY-MM-DD_filename
-        // then alert CI OPs and GCARS Ops
+        // then alert CI OPs and GCARS Ops thru email
+        File source = new File(directory + File.separator + fileName);
+        File target = null;
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         Timestamp ts = SystemUtil.getActualTimestamp();
-
         String dateStr = formatter.format(ts);
 
-        File source = new File(directory + File.separator + fileName);
-        File target = new File(directory + File.separator + "ERR-" + dateStr + "_" + fileName);
+        String error = SystemParameters.getString("GCARS.ERROR.DIR");
+        if (StringUtils.isBlank(error)) {
+          error = ERROR_DIR;
+        }
+
+        // check number of retries it was processed, max is 3
+        char firstChar = fileName.charAt(0);
+        Boolean isDigit = Character.isDigit(firstChar);
+        int retry = 0;
+
+        if (isDigit) {
+          retry = Character.getNumericValue(firstChar);
+          retry += 1;
+        }
+
+        if (retry >= 3) {
+          // move to error directory
+          target = new File(error + File.separator + "3ERR-" + dateStr + "_" + fileName.substring(fileName.indexOf("b")));
+        } else {
+          if (retry >= 1) {
+            target = new File(directory + File.separator + "2ERR-" + dateStr + "_" + fileName.substring(fileName.indexOf("b")));
+          } else {
+            target = new File(directory + File.separator + "1ERR-" + dateStr + "_" + fileName);
+          }
+        }
 
         FileUtils.copyFile(source, target);
         LOG.debug(" - Renaming file: " + source);
@@ -250,9 +275,12 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
         boolean renamed = FileUtils.deleteQuietly(source);
         LOG.debug(" - Renamed: " + renamed);
 
-        StringBuilder details = new StringBuilder();
-        details.append("Hi, The batch interface from GCARS to CreateCMR via SFTP has failed, pls check " + target.getName());
-        sendEmailNotification(fileName, details);
+        if (retry == 3) {
+          StringBuilder details = new StringBuilder();
+          details.append("Hi, The batch interface from GCARS to CreateCMR via SFTP has failed, pls check " + target.getName());
+          sendEmailNotification(fileName, details);
+        }
+
       } catch (Exception ex) {
         LOG.debug("Error encountered in GCARS " + ex.getMessage());
       }
