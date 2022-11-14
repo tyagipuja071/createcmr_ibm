@@ -176,7 +176,8 @@ public class USBPEndUserHandler extends USBPHandler {
         affiliate = ibmCmr.getCmrEnterpriseNumber();
       }
       if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
-        details.append(" - Affiliate: " + ibmCmr.getCmrEnterpriseNumber() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
+        LOG.debug(" - copyAndFillIBMData: Affiliate: " + ibmCmr.getCmrAffiliate());
+        details.append(" - Affiliate: " + ibmCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), affiliate);
       } else {
         updateAffiliate4Child(entityManager, childRequest, ibmCmr);
