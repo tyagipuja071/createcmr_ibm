@@ -67,8 +67,9 @@ public class GermanyUtil extends AutomationUtil {
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_PAYGO_BILLING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
       "Phone #", "PostBox", "State/Province");
-  private static final List<String> ZS01_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Street name and number", "Customer legal name");
-  private static final List<String> ZS01_NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention To/Building/Floor/Office", "Division/Department");
+  private static final List<String> RELEVANT_ADDRESS_FIELDS_ZS01_ZP01 = Arrays.asList("Street name and number", "Customer legal name");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS_ZS01_ZP01 = Arrays.asList("Attention To/Building/Floor/Office",
+      "Division/Department");
 
   @SuppressWarnings("unchecked")
   public GermanyUtil() {
@@ -939,7 +940,7 @@ public class GermanyUtil extends AutomationUtil {
           return true;
         }
 
-        if ((changes.isAddressChanged("ZP01") && isOnlyDnBRelevantFieldUpdated(changes, "ZP01")) || isAddressAdded(billTo)) {
+        if (isRelevantAddressFieldUpdatedZS01ZP01(changes, billTo) || isAddressAdded(billTo)) {
           // Check if address closely matches DnB
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billTo, false);
           if (matches != null) {
@@ -948,6 +949,14 @@ public class GermanyUtil extends AutomationUtil {
               isNegativeCheckNeedeed = true;
               detail.append("Updates to Bill To address need verification as it does not matches D&B");
               LOG.debug("Updates to Bill To address need verification as it does not matches D&B");
+            } else {
+              detail.append("Updated address ZP01 (" + billTo.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+              for (DnBMatchingResponse dnb : matches) {
+                detail.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                detail.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                detail.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                    + dnb.getDnbCountry() + "\n\n");
+              }
             }
           }
         }
@@ -969,7 +978,7 @@ public class GermanyUtil extends AutomationUtil {
         }
       }
 
-      if (CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && isRelevantZS01AddressFieldUpdated(changes, soldTo)) {
+      if (CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo)) {
         // Check if address closely matches DnB
         List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, false);
         if (matches != null) {
@@ -989,6 +998,7 @@ public class GermanyUtil extends AutomationUtil {
           }
         }
       }
+
       if (isNegativeCheckNeedeed || isShipToExistOnReq || isInstallAtExistOnReq || isBillToExistOnReq || isPayGoBillToExistOnReq) {
         validation.setSuccess(false);
         validation.setMessage("Not validated");
@@ -1017,7 +1027,16 @@ public class GermanyUtil extends AutomationUtil {
                   detail.append("Updates to PG01 addresses found but have been marked as Verified.");
                   isNegativeCheckNeedeed = false;
                 } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && soldTo != null
-                    && (isNonRelevantZS01AddressFieldUpdated(changes, soldTo) || isRelevantZS01AddressFieldUpdated(changes, soldTo))) {
+                    && (isNonRelevantAddressFieldUpdatedForZS01ZP01(changes, soldTo) || isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo))) {
+                  validation.setSuccess(true);
+                  LOG.debug("Updates to relevant addresses is found.Updates verified.");
+                  detail.append("Updates to relevant addresses found but have been marked as Verified.");
+                  validation.setMessage("Validated");
+                  isNegativeCheckNeedeed = false;
+                  break;
+
+                } else if (CmrConstants.RDC_BILL_TO.equals(addrType) && billTo != null
+                    && (isNonRelevantAddressFieldUpdatedForZS01ZP01(changes, billTo) || isRelevantAddressFieldUpdatedZS01ZP01(changes, billTo))) {
                   validation.setSuccess(true);
                   LOG.debug("Updates to relevant addresses is found.Updates verified.");
                   detail.append("Updates to relevant addresses found but have been marked as Verified.");
@@ -1148,26 +1167,26 @@ public class GermanyUtil extends AutomationUtil {
     return Arrays.asList("C", "U", "M");
   }
 
-  private boolean isRelevantZS01AddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+  private boolean isRelevantAddressFieldUpdatedZS01ZP01(RequestChangeContainer changes, Addr addr) {
     List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
     if (addrChanges == null) {
       return false;
     }
     for (UpdatedNameAddrModel change : addrChanges) {
-      if (ZS01_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+      if (RELEVANT_ADDRESS_FIELDS_ZS01_ZP01.contains(change.getDataField())) {
         return true;
       }
     }
     return false;
   }
 
-  private boolean isNonRelevantZS01AddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+  private boolean isNonRelevantAddressFieldUpdatedForZS01ZP01(RequestChangeContainer changes, Addr addr) {
     List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
     if (addrChanges == null) {
       return false;
     }
     for (UpdatedNameAddrModel change : addrChanges) {
-      if (ZS01_NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+      if (NON_RELEVANT_ADDRESS_FIELDS_ZS01_ZP01.contains(change.getDataField())) {
         return true;
       }
     }
