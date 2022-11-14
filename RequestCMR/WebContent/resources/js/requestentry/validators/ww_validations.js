@@ -1049,19 +1049,21 @@ function addVatIndValidator(){
   });
   
     
-  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'O' && vat == ''){    
-    FormManager.setValue('vatInd', 'N');       
-  } else if((results!= null || results!= undefined || results.ret1!='') && vat != ''){        
-    FormManager.setValue('vatInd', 'T');
-    FormManager.readOnly('vatInd');    
-  } else if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'R' && vat == ''){    
-    FormManager.setValue('vat', '');   
-    FormManager.setValue('vatInd', '');
-  } else if (results.ret1 == '' && vat != '' ){    
+  if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.setValue('vatInd', 'N');
+  } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
     FormManager.setValue('vatInd', 'T');
     FormManager.readOnly('vatInd');
-  } else if (results.ret1 == '' && vat == '' ){
-    FormManager.setValue('vatInd', 'N'); 
+  } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
+    FormManager.setValue('vat', '');
+    FormManager.setValue('vatInd', '');
+  } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.setValue('vatInd', 'N');
   }
   
   if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
