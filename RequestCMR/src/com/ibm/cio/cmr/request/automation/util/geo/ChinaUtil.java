@@ -233,6 +233,8 @@ public class ChinaUtil extends AutomationUtil {
       details.append("An attachment of type 'Name and Address Change(China Specific)' has been added. This Requester will be routed to CMDE.\n");
       engineData.addRejectionComment("OTH",
           "An attachment of type 'Name and Address Change(China Specific)' has been added. This Requester will be routed to CMDE", "", "");
+      engineData.addNegativeCheckStatus("OTH",
+          "An attachment of type 'Name and Address Change(China Specific)' has been added. This Requester will be routed to CMDE");
       result.setOnError(true);
     }
 
