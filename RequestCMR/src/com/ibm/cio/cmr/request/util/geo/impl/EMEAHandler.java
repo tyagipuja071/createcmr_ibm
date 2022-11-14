@@ -56,6 +56,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -2029,6 +2030,12 @@ public class EMEAHandler extends BaseSOFHandler {
           address.getId().setAddrSeq(seq);
         }
       }
+      if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && currentRecord.getCmrAddrType() != null
+          && "ZD01".equalsIgnoreCase(address.getId().getAddrType()) && (SystemLocation.UNITED_KINGDOM.equals(currentRecord.getCmrIssuedBy())
+              || SystemLocation.IRELAND.equals(currentRecord.getCmrIssuedBy()))) {
+        setTelf2fromRDC(address, currentRecord);
+      }
+
     }
   }
 
@@ -4854,6 +4861,26 @@ public class EMEAHandler extends BaseSOFHandler {
   @Override
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
     return true;
+  }
+
+  private void setTelf2fromRDC(Addr addr, FindCMRRecordModel cmr) {
+    String qry = ExternalizedQuery.getSql("GET_TELF2");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    PreparedQuery qrytelf2 = new PreparedQuery(entityManager, qry);
+    qrytelf2.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    qrytelf2.setParameter("CMR", cmr.getCmrNum());
+    qrytelf2.setParameter("KATR6", cmr.getCmrIssuedBy());
+    qrytelf2.setParameter("KTOKD", cmr.getCmrAddrTypeCode());
+    qrytelf2.setParameter("ZZKV_SEQNO", cmr.getCmrAddrSeq());
+
+    String results = qrytelf2.getSingleResult(String.class);
+
+    if (results != null && !results.isEmpty()) {
+      addr.setCustPhone(results);
+    } else {
+      addr.setCustPhone("");
+    }
+
   }
 
 }

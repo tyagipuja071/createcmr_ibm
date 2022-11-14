@@ -15,6 +15,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -5558,6 +5562,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(cmrIssuingCntry);
       List<TemplateTab> tabs = template.getTabs();
 
+      Map<String, List<String>> cmrPhoneMap = new ConcurrentHashMap<>();
+
       InputStream mfStream = new FileInputStream(filepath);
 
       // 2. loop through all the tabs returned by the config
@@ -5575,6 +5581,167 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
             // Check row for ISU_CD, INAC_CD, and/or CLIENT_TIER only
             if ("Data".equals(tab.getName())) {
+              // call method that will set to Data table
+              dataSheetIteration(entityManager, reqId, newIterId, cmrIssuingCntry, cmrPhoneMap, models, tab, dataSheet);
+            } else {
+              // if it is not Data, that means it is an address
+              addressSheetIteration(entityManager, reqId, newIterId, cmrIssuingCntry, cmrPhoneMap, addrModels, tab, dataSheet);
+            }
+          }
+        }
+        // if cmrIssuingCntry UKI then billing phone in data sheet
+        createAddrModelsFromMapForUKI(reqId, newIterId, cmrIssuingCntry, cmrPhoneMap, addrModels);
+        massUpdtCol.put("dataModels", models);
+        massUpdtCol.put("addrModels", addrModels);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void createAddrModelsFromMapForUKI(long reqId, int newIterId, String cmrIssuingCntry, Map<String, List<String>> cmrPhoneMap,
+      List<MassUpdateAddressModel> addrModels) {
+    if (!cmrPhoneMap.isEmpty() && (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND))) {
+      cmrPhoneMap.forEach((cmr, list) -> {
+        String addSeqNo = getAddSeqNoForMassUpdateUKI(cmrIssuingCntry, cmr);
+        MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+        addrModel.setParReqId(reqId);
+        addrModel.setAddrSeqNo(addSeqNo);
+        addrModel.setCmrNo(cmr);
+        addrModel.setCustPhone(list.get(0));
+        addrModel.setSeqNo(Integer.valueOf(list.get(1)));
+        addrModel.setIterationId(newIterId);
+        addrModel.setAddrType("ZS01");
+        addrModels.add(addrModel);
+      });
+
+    }
+  }
+
+  private String getAddSeqNoForMassUpdateUKI(String cmrIssuingCntry, String cmr) {
+    String addSeqNo = "";
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("QUERY.GET_SEQ_NO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmr);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    List<String> result = query.getResults(String.class);
+    List<String> addSeqNos = Optional.ofNullable(result).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
+        .filter(item -> !item.isEmpty()).collect(Collectors.toList());
+    if (!addSeqNos.isEmpty()) {
+      return addSeqNos.contains("00001") ? "00001" : addSeqNos.get(0);
+    }
+    return addSeqNo;
+  }
+
+  private void addressSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
+      Map<String, List<String>> cmrPhoneMap, List<MassUpdateAddressModel> addrModels, TemplateTab tab, Sheet dataSheet) throws Exception {
+    MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+
+    for (Row cmrRow : dataSheet) {
+      int seqNo = cmrRow.getRowNum() + 1;
+
+      if (seqNo > 1) {
+        // 4. then for every sheet, get the fields
+        addrModel = new MassUpdateAddressModel();
+        addrModel.setParReqId(reqId);
+        addrModel.setSeqNo(seqNo);
+        addrModel.setIterationId(newIterId);
+        addrModel.setAddrType(tab.getTypeCode());
+        addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
+        if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+          setAddrModelCustPhoneAndRemoveFromMap(cmrIssuingCntry, cmrPhoneMap, addrModel);
+          addrModels.add(addrModel);
+        }
+      }
+    }
+  }
+
+  private void dataSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
+      Map<String, List<String>> cmrPhoneMap, List<MassUpdateModel> models, TemplateTab tab, Sheet dataSheet) throws Exception {
+    MassUpdateModel model;
+    for (Row cmrRow : dataSheet) {
+      int seqNo = cmrRow.getRowNum() + 1;
+
+      if (seqNo > 1) {
+        model = new MassUpdateModel();
+        model.setParReqId(reqId);
+        model.setSeqNo(seqNo);
+        model.setIterationId(newIterId);
+        model.setErrorTxt("");
+        model.setRowStatusCd("");
+        // 4. then for every sheet, get the fields
+        model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+
+        if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
+          setCMRPhoneInMap(cmrRow, cmrPhoneMap, model, cmrIssuingCntry, seqNo);
+          models.add(model);
+        }
+      }
+    }
+  }
+
+  private void setAddrModelCustPhoneAndRemoveFromMap(String cmrIssuingCntry, Map<String, List<String>> cmrPhoneMap,
+      MassUpdateAddressModel addrModel) {
+    if (!"ZD01".equals(addrModel.getAddrType())
+        && (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND))) {
+      String custPhone = cmrPhoneMap.get(addrModel.getCmrNo()) != null ? cmrPhoneMap.get(addrModel.getCmrNo()).get(0) : "";
+      addrModel.setCustPhone(custPhone);
+      cmrPhoneMap.remove(addrModel.getCmrNo());
+    }
+  }
+
+  private void setCMRPhoneInMap(Row cmrRow, Map<String, List<String>> cmrPhoneMap, MassUpdateModel model, String cmrIssuingCntry, int seqNo) {
+    List<String> list = null;
+    DataFormatter df = new DataFormatter();
+    String phoneNo = df.formatCellValue(cmrRow.getCell(14));
+    if ((cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND)) && !StringUtils.isEmpty(phoneNo)) {
+      list = new ArrayList<>();
+      list.add(phoneNo);
+      list.add(String.valueOf(seqNo));
+      cmrPhoneMap.put(model.getCmrNo(), list);
+
+    }
+
+  }
+
+  // CMR-800
+  /**
+   * @param modelList
+   * @param mfStream
+   * @param reqId
+   * @param newIterId
+   * @param filePath
+   */
+  private void setMassUpdateListForAT(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
+      String filePath) throws Exception {
+
+    // 1. get the config file and get all the valid tabs
+    try {
+      MassChangeTemplateManager.initTemplatesAndValidators(SystemLocation.AUSTRIA);
+      // change to the ID of the config you are generating
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(SystemLocation.AUSTRIA);
+      List<TemplateTab> tabs = template.getTabs();
+
+      InputStream mfStream = new FileInputStream(filepath);
+
+      // 2. loop through all the tabs returned by the config
+      if (tabs != null && tabs.size() > 0) {
+        MassUpdateModel model = new MassUpdateModel();
+        List<MassUpdateAddressModel> addrModels = new ArrayList<MassUpdateAddressModel>();
+        List<MassUpdateModel> models = new ArrayList<MassUpdateModel>();
+
+        try (Workbook mfWb = new XSSFWorkbook(mfStream)) {
+          for (int i = 0; i < tabs.size(); i++) {
+            // 3. For every sheet, do: Sheet dataSheet =
+            // mfWb.getSheet(CMR_SHEET_NAME);
+            TemplateTab tab = tabs.get(i);
+            Sheet dataSheet = mfWb.getSheet(tab.getName());
+
+            // Check row for ISU_CD, INAC_CD, and/or CLIENT_TIER only
+            if ("Data".equals(tab.getName())) {
+
               // call method that will set to Data table
               for (Row cmrRow : dataSheet) {
                 int seqNo = cmrRow.getRowNum() + 1;
