@@ -488,7 +488,7 @@ public class NewZealandUtil extends AutomationUtil {
           if (CmrConstants.RDC_SOLD_TO.equals(addressToChk.getId().getAddrType())) {
             String addressStr = addressToChk.getCustNm1() + addressToChk.getCustNm2() == null ? ""
                 : addressToChk.getCustNm2() + addressToChk.getAddrTxt() + addressToChk.getAddrTxt2() == null ? "" : addressToChk.getAddrTxt2();
-            if (addressStr.contains("PO BOX")) {
+            if (addressStr != null && addressStr.contains("PO BOX")) {
               poboxReview = true;
             }
           }
