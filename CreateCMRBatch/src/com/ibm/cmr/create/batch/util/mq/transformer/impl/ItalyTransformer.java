@@ -1198,13 +1198,11 @@ public class ItalyTransformer extends EMEATransformer {
     String addrType = currAddr.getId().getAddrType();
     boolean crossBorder = isCrossBorder(currAddr);
 
-    // Billing Address or Company Address
-    if (MQMsgConstants.ADDR_ZP01.equals(addrType) || MQMsgConstants.ADDR_ZI01.equals(addrType)) {
-      if (crossBorder) {
-        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : "");
-      } else {
-        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : "");
-      }
+    // CREATCMR-7470 All Address Types
+    if (crossBorder) {
+      legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : "");
+    } else {
+      legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : "");
     }
     formatAddressLinesLD(dummyHandler, legacyAddr);
   }
@@ -1341,7 +1339,7 @@ public class ItalyTransformer extends EMEATransformer {
     if (addrData.getLandCntry().equals("IT")) {
       legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv()) ? addrData.getStateProv() : "");
     } else {
-      legacyAddr.setItCompanyProvCd("");
+      legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getLandCntry()) ? addrData.getLandCntry() : "");
     }
 
     legacyAddr.setAddrLine1(line1);
