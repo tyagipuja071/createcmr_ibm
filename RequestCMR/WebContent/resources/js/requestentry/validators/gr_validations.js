@@ -1446,7 +1446,7 @@ function addrFunctionForGR(cntry, addressMode, saving) {
       FormManager.setValue('landCntry', cmr.oldlandcntry);
     }
     // for cross border
-    if (custType == 'CROSS' && cmr.currentRequestType == 'U') {
+    if ((custType == 'CROSS' || FormManager.getActualValue('addrType') == 'ZS01') && cmr.currentRequestType == 'U') {
       FormManager.readOnly('landCntry');
     }
     checkAndAddValidator('landCntry', Validators.REQUIRED, [ 'Country (Landed)' ]);
@@ -2385,10 +2385,10 @@ dojo.addOnLoad(function() {
   // Greece
   GEOHandler.addAfterConfig(addAfterConfigGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(addHandlersForGR, [ SysLoc.GREECE ]);
-  GEOHandler.addAddrFunction(addrFunctionForGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE, SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(setTypeOfCustomerBehaviorForGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(disableAddrFieldsGR, [ SysLoc.GREECE ]);
+  GEOHandler.addAddrFunction(addrFunctionForGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addNonLatinCharValidator, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addPOBoxValidatorGR, [ SysLoc.GREECE ]);
