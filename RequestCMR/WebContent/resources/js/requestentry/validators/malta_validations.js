@@ -823,19 +823,18 @@ function addOrdBlkValidator() {
 }
 
 function setVatValidatorMalta() {
-  var custGrp = FormManager.getActualValue('custGrp');
-  if (custGrp == 'CROSS') {
-    return;
-  }
   console.log("setVatValidatorMalta for Malta..");
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C' && custGrp == 'LOCAL' || custGrp == 'CROSS') {
     FormManager.resetValidations('vat');
-    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    if (custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'PRICU' || custSubGrp == 'IBMEM' || custSubGrp == 'XGOV') {
       FormManager.readOnly('vat');
     }
     if (dijit.byId('vatExempt').get('checked')) {
       FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
     }
     if (!dijit.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
