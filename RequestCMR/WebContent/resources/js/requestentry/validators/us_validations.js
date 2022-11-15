@@ -1323,7 +1323,7 @@ function federalIsicCheck() {
         var custGrp = FormManager.getActualValue('custGrp');
         var subIndustryCd = FormManager.getActualValue('subIndustryCd');
         var fedIsic = [ '9', '10', '11', '14' ];
-        if (reqType == 'C' && !fedIsic.includes(custGrp) && subIndustryCd.startsWith('Y')) {
+        if (reqType == 'C' && !fedIsic.includes(custGrp) && custGrp != '5' && subIndustryCd.startsWith('Y')) {
           genericMsg = 'Federal ISIC cannot be used with Non-Federal sceanrios.';
           return new ValidationResult(null, false, genericMsg);
         }
