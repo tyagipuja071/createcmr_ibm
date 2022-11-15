@@ -88,9 +88,9 @@ public class MassChangeTemplateManager {
     configList.put("822", "config.822.xml");
     configList.put("666", "config.666.xml");
     configList.put("780", "config.780.xml");
-		configList.put("864", "config.864.xml");
+    configList.put("864", "config.864.xml");
     // configList.put("848", "config.SWISS.xml");
-    
+
     configList.put("706", "config.706.xml");
     configList.put("610", "config.CEWA.xml");
     configList.put("636", "config.CEWA.xml");
@@ -135,16 +135,36 @@ public class MassChangeTemplateManager {
     configList.put("879", "config.FST.xml");
     configList.put("880", "config.FST.xml");
     configList.put("881", "config.FST.xml");
-    
+
     configList.put("846", "config.846.xml");
     configList.put("702", "config.702.xml");
     configList.put("678", "config.678.xml");
     configList.put("806", "config.806.xml");
     configList.put("788", "config.788.xml");
     configList.put("624", "config.624.xml");
-    configList.put("724", "config.724.xml");   
+    configList.put("724", "config.724.xml");
     configList.put("649", "config.649.xml");
     configList.put("755", "config.755.xml");
+
+    configList.put("781", "config.LA.xml");
+    configList.put("613", "config.LA.xml");
+    configList.put("629", "config.LA.xml");
+    configList.put("655", "config.LA.xml");
+    configList.put("661", "config.LA.xml");
+    configList.put("683", "config.LA.xml");
+    configList.put("813", "config.LA.xml");
+    configList.put("815", "config.LA.xml");
+    configList.put("869", "config.LA.xml");
+    configList.put("871", "config.LA.xml");
+    configList.put("663", "config.LA.xml");
+    configList.put("681", "config.LA.xml");
+    configList.put("829", "config.LA.xml");
+    configList.put("731", "config.LA.xml");
+    configList.put("735", "config.LA.xml");
+    configList.put("799", "config.LA.xml");
+    configList.put("811", "config.LA.xml");
+    configList.put("631", "config.631.xml");
+
   }
 
   /**

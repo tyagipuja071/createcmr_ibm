@@ -364,6 +364,13 @@ var _allGroups = [ {
     "subType" : false,
     "parent" : "United States"
   }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/gcars_updt_queue',
+    "name" : "GCARS UPDT QUEUE",
+    "description" : "Maintains GCARS UPDT QUEUE Service (Brazil Only)",
+    "table" : "CREQCMR.MASS_FTP_QUEUE",
+    "subType" : false,
+    "parent" : "Brazil"
+  }, {
     "href" : null,
     "name" : "Latin America",
     "description" : null,
