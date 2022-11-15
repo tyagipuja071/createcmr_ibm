@@ -494,9 +494,10 @@ function afterConfigForUKI() {
       }
     });
   }
-/*  if (_customerTypeHandler && _customerTypeHandler[0]) {
-    _customerTypeHandler[0].onChange();
-  }*/
+  /*
+   * if (_customerTypeHandler && _customerTypeHandler[0]) {
+   * _customerTypeHandler[0].onChange(); }
+   */
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
 
@@ -4721,8 +4722,8 @@ function afterConfigForIT() {
     });
 
     if (result != null && result.ret1 != '' && result.ret1 != undefined && result.ret1 != 'IT') {
-      FormManager.setValue('vat', '');
-      FormManager.readOnly('vat');
+      FormManager.setValue('taxCd1', '');
+      FormManager.readOnly('taxCd1');
     }
   }
 
@@ -6729,6 +6730,20 @@ function setVATOnIdentClientChangeIT() {
       FormManager.resetValidations('vat');
     } else if ((ident == 'A' || ident == 'D' || ident == 'C') && checkImportIndc == 'Y') {
       FormManager.readOnly('vat');
+    }
+    if (ident == 'N') {
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'vat' ], 'MAIN_CUST_TAB');
+      FormManager.enable('vat');
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      FormManager.setValue('taxCd1', '');
+      FormManager.readOnly('taxCd1');
+    } else if (ident == 'Y') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vat', '');
+      FormManager.readOnly('vat');
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      FormManager.setValue('taxCd1', '');
+      FormManager.readOnly('taxCd1');
     }
 
   }
@@ -8965,10 +8980,16 @@ function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
       var checkImportIndc = getImportedIndcForItaly();
       FormManager.enable('identClient');
       if (ident == 'N') {
-        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Fiscal Code' ], 'MAIN_CUST_TAB');
-        FormManager.enable('taxCd1');
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'vat' ], 'MAIN_CUST_TAB');
+        FormManager.enable('vat');
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+        FormManager.setValue('taxCd1', '');
+        FormManager.readOnly('taxCd1');
       } else if (ident == 'Y') {
-        FormManager.resetValidations('taxCd1');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.setValue('vat', '');
+        FormManager.readOnly('vat');
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
         FormManager.setValue('taxCd1', '');
         FormManager.readOnly('taxCd1');
       }
@@ -9597,7 +9618,7 @@ function autoSetUIFieldsOnScnrioUKI() {
     FormManager.readOnly('custClass');
     FormManager.setValue('custClass', '33');
   }
-  
+
   if (issuingCntry == '754') {
     if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
       FormManager.setValue('clientTier', '');
