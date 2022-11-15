@@ -1271,8 +1271,6 @@ public class USHandler extends GEOHandler {
     //CREATCMR-7581
     if(!StringUtils.isEmpty(admin.getMainCustNm2())){
     	if(admin.getMainCustNm1().length() > 25){
-    		System.out.println("custNm1 = " + admin.getMainCustNm1());
-        	System.out.println("custNm1 length = " + admin.getMainCustNm1().length());
     		String custNm1 = admin.getMainCustNm1().substring(0, 25);
     		admin.setMainCustNm1(custNm1);
     	}
@@ -1280,10 +1278,6 @@ public class USHandler extends GEOHandler {
     		String custNm2 = admin.getMainCustNm2().substring(0, 24);
     		admin.setMainCustNm2(custNm2);
     	}
-    	System.out.println("custNm1 = " + admin.getMainCustNm1());
-    	System.out.println("custNm1 length = " + admin.getMainCustNm1().length());
-    	System.out.println("custNm2 = " + admin.getMainCustNm2());
-    	System.out.println("custNm2 length = " + admin.getMainCustNm2().length());
     }
 
   }
