@@ -494,9 +494,10 @@ function afterConfigForUKI() {
       }
     });
   }
-/*  if (_customerTypeHandler && _customerTypeHandler[0]) {
-    _customerTypeHandler[0].onChange();
-  }*/
+  /*
+   * if (_customerTypeHandler && _customerTypeHandler[0]) {
+   * _customerTypeHandler[0].onChange(); }
+   */
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
 
@@ -510,8 +511,8 @@ function afterConfigForUKI() {
         FormManager.readOnly('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
-        if ("C" == FormManager.getActualValue('reqType') && getZS01LandCntry() != 'GB') {
-         // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        if ("C" == FormManager.getActualValue('reqType')) {
+          FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
         }
         FormManager.enable('vat');
       }
@@ -986,9 +987,6 @@ function autoSetVAT() {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');
-  } else if (getZS01LandCntry() == 'GB') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.enable('vat');
   } else {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     FormManager.enable('vat');
@@ -9620,7 +9618,7 @@ function autoSetUIFieldsOnScnrioUKI() {
     FormManager.readOnly('custClass');
     FormManager.setValue('custClass', '33');
   }
-  
+
   if (issuingCntry == '754') {
     if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
       FormManager.setValue('clientTier', '');
