@@ -5713,6 +5713,128 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
   }
 
+  private void createAddrModelsFromMapForUKI(long reqId, int newIterId, String cmrIssuingCntry, Map<String, List<String>> cmrPhoneMap,
+      List<MassUpdateAddressModel> addrModels) {
+    if (!cmrPhoneMap.isEmpty() && (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND))) {
+      cmrPhoneMap.forEach((cmr, list) -> {
+        String addSeqNo = getAddSeqNoForMassUpdateUKI(cmrIssuingCntry, cmr);
+        MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+        addrModel.setParReqId(reqId);
+        addrModel.setAddrSeqNo(addSeqNo);
+        addrModel.setCmrNo(cmr);
+        addrModel.setCustPhone(list.get(0));
+        addrModel.setSeqNo(Integer.valueOf(list.get(1)));
+        addrModel.setIterationId(newIterId);
+        addrModel.setAddrType("ZS01");
+        addrModels.add(addrModel);
+      });
+
+    }
+  }
+
+  private String getAddSeqNoForMassUpdateUKI(String cmrIssuingCntry, String cmr) {
+    String addSeqNo = "";
+    EntityManager entityManager = JpaManager.getEntityManager();
+    PreparedQuery query = cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) ? getAddrSeqNosUK(cmrIssuingCntry, cmr, entityManager)
+        : getAddrSeqNosIE(cmrIssuingCntry, cmr, entityManager);
+    List<String> result = query.getResults(String.class);
+    List<String> addSeqNos = Optional.ofNullable(result).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
+        .filter(item -> !item.isEmpty()).collect(Collectors.toList());
+    if (!addSeqNos.isEmpty()) {
+      return addSeqNos.contains("00001") ? "00001" : addSeqNos.get(0);
+    }
+    return addSeqNo;
+  }
+
+  private PreparedQuery getAddrSeqNosUK(String cmrIssuingCntry, String cmr, EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("QUERY.GET_SEQ_NO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmr);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    return query;
+  }
+
+  private PreparedQuery getAddrSeqNosIE(String cmrIssuingCntry, String cmr, EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("QUERY.GET_SEQ_NO_IE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmr);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    return query;
+  }
+
+  private void addressSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
+      Map<String, List<String>> cmrPhoneMap, List<MassUpdateAddressModel> addrModels, TemplateTab tab, Sheet dataSheet) throws Exception {
+    MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+
+    for (Row cmrRow : dataSheet) {
+      int seqNo = cmrRow.getRowNum() + 1;
+
+      if (seqNo > 1) {
+        // 4. then for every sheet, get the fields
+        addrModel = new MassUpdateAddressModel();
+        addrModel.setParReqId(reqId);
+        addrModel.setSeqNo(seqNo);
+        addrModel.setIterationId(newIterId);
+        addrModel.setAddrType(tab.getTypeCode());
+        addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
+        if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+          setAddrModelCustPhoneAndRemoveFromMap(cmrIssuingCntry, cmrPhoneMap, addrModel);
+          addrModels.add(addrModel);
+        }
+      }
+    }
+  }
+
+  private void dataSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
+      Map<String, List<String>> cmrPhoneMap, List<MassUpdateModel> models, TemplateTab tab, Sheet dataSheet) throws Exception {
+    MassUpdateModel model;
+    for (Row cmrRow : dataSheet) {
+      int seqNo = cmrRow.getRowNum() + 1;
+
+      if (seqNo > 1) {
+        model = new MassUpdateModel();
+        model.setParReqId(reqId);
+        model.setSeqNo(seqNo);
+        model.setIterationId(newIterId);
+        model.setErrorTxt("");
+        model.setRowStatusCd("");
+        // 4. then for every sheet, get the fields
+        model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+
+        if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
+          setCMRPhoneInMap(cmrRow, cmrPhoneMap, model, cmrIssuingCntry, seqNo);
+          models.add(model);
+        }
+      }
+    }
+  }
+
+  private void setAddrModelCustPhoneAndRemoveFromMap(String cmrIssuingCntry, Map<String, List<String>> cmrPhoneMap,
+      MassUpdateAddressModel addrModel) {
+    if (!"ZD01".equals(addrModel.getAddrType())
+        && (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND))) {
+      String custPhone = cmrPhoneMap.get(addrModel.getCmrNo()) != null ? cmrPhoneMap.get(addrModel.getCmrNo()).get(0) : "";
+      addrModel.setCustPhone(custPhone);
+      cmrPhoneMap.remove(addrModel.getCmrNo());
+    }
+  }
+
+  private void setCMRPhoneInMap(Row cmrRow, Map<String, List<String>> cmrPhoneMap, MassUpdateModel model, String cmrIssuingCntry, int seqNo) {
+    List<String> list = null;
+    DataFormatter df = new DataFormatter();
+    String phoneNo = df.formatCellValue(cmrRow.getCell(14));
+    if ((cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND)) && !StringUtils.isEmpty(phoneNo)) {
+      list = new ArrayList<>();
+      list.add(phoneNo);
+      list.add(String.valueOf(seqNo));
+      cmrPhoneMap.put(model.getCmrNo(), list);
+
+    }
+
+  }
+
   // CMR-800
   /**
    * @param modelList
