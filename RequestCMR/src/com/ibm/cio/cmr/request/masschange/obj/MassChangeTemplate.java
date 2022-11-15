@@ -37,12 +37,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation.ValidationRow;
 import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cio.cmr.request.util.swiss.SwissUtil;
 
@@ -270,7 +272,7 @@ public class MassChangeTemplate {
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validateSwiss(entityManager, book, country, maxRows, hwFlagMap));
         }
-      } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
+      } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)) {
         if (SystemLocation.GERMANY.equals(country)) {
           XSSFSheet dataSheet = book.getSheet("Data");
           int cmrRecords = 0;
@@ -674,4 +676,26 @@ public class MassChangeTemplate {
   public void setType(String type) {
     this.type = type;
   }
+
+  public List<TemplateValidation> validate(EntityManager entityManager, InputStream is, Admin admin, String country, int maxRows) throws Exception {
+    ZipSecureFile.setMinInflateRatio(0);
+    XSSFWorkbook book = new XSSFWorkbook(is);
+    try {
+      List<TemplateValidation> validations = new ArrayList<TemplateValidation>();
+      if (LAHandler.isLACountry(country)) {
+        IERPRequestUtils.validateMassUpdateTemplateDupFills(validations, book, maxRows, country, admin);
+        for (TemplateTab tab : this.tabs) {
+          validations.add(tab.validate(entityManager, book, country, maxRows));
+        }
+      } else {
+        for (TemplateTab tab : this.tabs) {
+          validations.add(tab.validate(entityManager, book, country, maxRows));
+        }
+      }
+      return validations;
+    } finally {
+      book.close();
+    }
+  }
+
 }

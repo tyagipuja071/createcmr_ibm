@@ -246,7 +246,6 @@ function doImport() {
     _vat = result.ret2;
     _kukla = result.ret1;
     _aufsd = result.ret4;
-    console.log(result);
     // validate for leasing
     if (_kukla == '33' || _kukla == '34' || _kukla == '35') {
       FormManager.setValue('custClass', _kukla);
@@ -261,7 +260,6 @@ function doImport() {
         KTOKD : 'ZI01'
       });
       if (result2.ret2 != null) {
-        console.log(result2);
         _vatEndUser = result2.ret2;
         if (FormManager.getActualValue('updateReason') == 'UPCI' && _vat == _vatEndUser) {
           FormManager.enable('vatEndUser');
@@ -275,7 +273,7 @@ function doImport() {
       FormManager.readOnly('email1');
     }
     dojo.xhrGet({
-      url : cmr.CONTEXT_ROOT + '/cros.json',
+      url : cmr.CONTEXT_ROOT + '/getBRData.json',
       handleAs : 'json',
       method : 'GET',
       content : {
@@ -287,8 +285,8 @@ function doImport() {
       load : function(data, ioargs) {
         cmr.hideProgress();
         console.log(data);
-        if (!data.result.success) {
-          cmr.showAlert('An error was encountered during CROS Query', 'Error');
+        if (!data.success) {
+          cmr.showAlert('An error was encountered during BR CMR data retrieval.', 'Error');
           resetFields();
         } else {
 
@@ -297,13 +295,12 @@ function doImport() {
             FormManager.readOnly('updateReason');
           }
 
-          var record = data.result.data;
+          var record = data;
 
           // set RDC values
           FormManager.setValue('vat', _vat);
 
           // fiscal codes
-          console.log(record);
           if (record.muniFiscalCodeLE != null) {
             FormManager.setValue('municipalFiscalCode', record.muniFiscalCodeLE)
           }
@@ -314,36 +311,12 @@ function doImport() {
             }
           }
 
-          // contacts
-          if (Object.keys(record.contacts).length != 0) {
-            for (i in record.contacts) {
-              var contact = record.contacts[i];
-              if (contact.contactCode == 'EM') {
-                switch (contact.contactNo) {
-                case '001':
-                  FormManager.setValue('email1', contact.contactEmail);
-                  break;
-                case '002':
-                  FormManager.setValue('email2', contact.contactEmail);
-                  break;
-                case '003':
-                  FormManager.setValue('email3', contact.contactEmail);
-                  break;
-                }
-              }
-            }
-          }
+          FormManager.setValue('email1', record.email1);
+          FormManager.setValue('email2', record.email2);
+          FormManager.setValue('email3', record.email3);
+          FormManager.setValue('taxCode', record.taxSepInd);
+          FormManager.setValue('proxiLocnNo', record.proxiLocnNo);
 
-          // taxInfo
-          if (Object.keys(record.taxCodes).length != 0) {
-            for (i in record.taxCodes) {
-              var tax = record.taxCodes[i];
-              if (tax.taxCode == '30' && tax.taxSepInd != null && tax.taxSepInd != '') {
-                FormManager.setValue('taxCode', tax.taxSepInd);
-                break;
-              }
-            }
-          }
           _imported = true;
           _cmrNo = cmrNo;
         }

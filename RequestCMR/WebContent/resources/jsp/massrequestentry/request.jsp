@@ -79,7 +79,7 @@ dojo.addOnLoad(function() {
         addMassFileValidator();
         
    <%if( (reqentry.getCmrIssuingCntry().equalsIgnoreCase("631")) && reqentry.getUserRole().equalsIgnoreCase("Processor")){%>
-        addDplCheckValidator();
+        //addDplCheckValidator();
     <%}%>
        <%if( (reqentry.getCmrIssuingCntry().equalsIgnoreCase("706")) && reqentry.getUserRole().equalsIgnoreCase("Processor")){%>
         addDPLValidator();
