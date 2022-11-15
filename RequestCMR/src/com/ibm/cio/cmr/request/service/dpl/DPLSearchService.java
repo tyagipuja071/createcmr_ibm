@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -41,10 +42,11 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.pdf.impl.DPLSearchPDFConverter;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.DPLCheckClient;
+import com.ibm.cmr.services.client.dpl.DPLCheckRequest;
 import com.ibm.cmr.services.client.dpl.DPLRecord;
-import com.ibm.cmr.services.client.dpl.DPLSearchRequest;
 import com.ibm.cmr.services.client.dpl.DPLSearchResponse;
 import com.ibm.cmr.services.client.dpl.DPLSearchResults;
+import com.ibm.cmr.services.client.dpl.KycScreeningResponse;
 
 /**
  * @author JeffZAMORA
@@ -335,11 +337,14 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     DPLCheckClient client = CmrServicesFactory.getInstance().createClient(baseUrl, DPLCheckClient.class);
     for (String searchString : names) {
-      DPLSearchRequest request = new DPLSearchRequest();
+      DPLCheckRequest request = new DPLCheckRequest();
+      request.setId(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
       request.setCompanyName(searchString);
+      request.setIncludeScreening(true);
       try {
         LOG.debug("Performing DPL Search on " + searchString);
-        DPLSearchResponse resp = client.executeAndWrap(DPLCheckClient.DPL_SEARCH_APP_ID, request, DPLSearchResponse.class);
+        KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
+        DPLSearchResponse resp = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
         if (resp.isSuccess()) {
           DPLSearchResults result = resp.getResults();
           result.setSearchArgument(searchString);
@@ -612,11 +617,14 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     DPLCheckClient client = CmrServicesFactory.getInstance().createClient(baseUrl, DPLCheckClient.class);
     for (String searchString : names) {
-      DPLSearchRequest request = new DPLSearchRequest();
+      DPLCheckRequest request = new DPLCheckRequest();
+      request.setId(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
       request.setCompanyName(searchString);
+      request.setIncludeScreening(true);
       try {
         LOG.debug("Performing DPL Search on " + searchString);
-        DPLSearchResponse resp = client.executeAndWrap(DPLCheckClient.DPL_SEARCH_APP_ID, request, DPLSearchResponse.class);
+        KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
+        DPLSearchResponse resp = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
         if (resp.isSuccess()) {
           DPLSearchResults result = resp.getResults();
           result.setSearchArgument(searchString);

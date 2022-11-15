@@ -218,13 +218,13 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       // }
 
       if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry())) {
-        //if ("C".equals(admin.getReqType())) {
-          if ("ZS01".equals(model.getAddrType())) {
-            newAddrSeq = "001";
-          } else if ("ZI01".equals(model.getAddrType())) {
-            newAddrSeq = "002";
-          }
-        //}
+        // if ("C".equals(admin.getReqType())) {
+        if ("ZS01".equals(model.getAddrType())) {
+          newAddrSeq = "001";
+        } else if ("ZI01".equals(model.getAddrType())) {
+          newAddrSeq = "002";
+        }
+        // }
       }
       if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry()) || SystemLocation.GREECE.equals(model.getCmrIssuingCntry())) {
         if ("U".equals(admin.getReqType())) {
@@ -1351,7 +1351,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       request.setCompanyName(name);
     log.debug("Performing DPL Check (service) on Request ID " + admin.getId().getReqId() + " (" + id + ")");
     log.debug(" - Name: " + name);
-    DPLCheckResponse response = dplClient.executeAndWrap(DPLCheckClient.EVS_APP_ID, request, DPLCheckResponse.class);
+    DPLCheckResponse response = dplClient.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, DPLCheckResponse.class);
     if (!response.isSuccess()) {
       throw new Exception("Failed to connect to DPL check service: " + response.getMsg());
     } else {
