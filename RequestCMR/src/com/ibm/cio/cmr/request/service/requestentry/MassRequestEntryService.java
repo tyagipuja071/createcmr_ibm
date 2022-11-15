@@ -5628,11 +5628,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   private String getAddSeqNoForMassUpdateUKI(String cmrIssuingCntry, String cmr) {
     String addSeqNo = "";
     EntityManager entityManager = JpaManager.getEntityManager();
-    String sql = ExternalizedQuery.getSql("QUERY.GET_SEQ_NO");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("RCYAA", cmrIssuingCntry);
-    query.setParameter("RCUXA", cmr);
-    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    PreparedQuery query = cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) ? getAddrSeqNosUK(cmrIssuingCntry, cmr, entityManager)
+        : getAddrSeqNosIE(cmrIssuingCntry, cmr, entityManager);
     List<String> result = query.getResults(String.class);
     List<String> addSeqNos = Optional.ofNullable(result).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
         .filter(item -> !item.isEmpty()).collect(Collectors.toList());
@@ -5640,6 +5637,24 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       return addSeqNos.contains("00001") ? "00001" : addSeqNos.get(0);
     }
     return addSeqNo;
+  }
+
+  private PreparedQuery getAddrSeqNosUK(String cmrIssuingCntry, String cmr, EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("QUERY.GET_SEQ_NO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmr);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    return query;
+  }
+
+  private PreparedQuery getAddrSeqNosIE(String cmrIssuingCntry, String cmr, EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("QUERY.GET_SEQ_NO_IE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmr);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    return query;
   }
 
   private void addressSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
