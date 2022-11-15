@@ -3143,7 +3143,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(addValidationForParentCompanyNo,
   // GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(disableVatExemptForScenarios, GEOHandler.CN);
-  GEOHandler.addAfterTemplateLoad(setPrivacyIndcReqdForProc, GEOHandler.CN);
+  // GEOHandler.addAfterTemplateLoad(setPrivacyIndcReqdForProc, GEOHandler.CN);
   // GEOHandler.addAfterTemplateLoad(limitClientTierValuesOnCreate,
   // GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(setValuesForScenarios, GEOHandler.CN);
