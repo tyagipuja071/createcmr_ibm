@@ -134,7 +134,7 @@ public class UpdateSwitchElement extends ValidatingElement {
       }
 
       // CREATCMR-7234
-      if (AutomationUtil.isLegalNameChanged(admin) && !payGoAddredited) {
+      if (AutomationUtil.isLegalNameChanged(admin) && !payGoAddredited && StringUtils.isNotEmpty(admin.getOldCustNm1())) {
         validation.setSuccess(false);
         validation.setMessage("Review required");
         String msg = "The request needs further review: Legal name change should be validated.";
