@@ -4228,10 +4228,7 @@ function executeBeforeSubmit() {
     if (reqType == 'U') {
       var errMsg = checkAnyChangesOnCustNameAddrGST();
       if (errMsg != '' && action == 'SFP') {
-        cmr.showConfirm('showVerificationModal()', errMsg, 'Warning', null, {
-          OK : 'Yes',
-          CANCEL : 'No'
-        });
+        cmr.showAlert(errMsg);
       } else {
         showVerificationModal();
       }
@@ -4280,7 +4277,7 @@ function checkAnyChangesOnCustNameAddrGST() {
     }
   }
   if (!isUpdated) {
-    errorMsg = 'You haven\'t updated anything on customer name/address or GST#, please check and take relevant edit operation before submit this Update request. Proceed?';
+    errorMsg = 'You haven\'t updated anything on customer name/address or GST#, please check and take relevant edit operation before submit this Update request.';
   }
   return errorMsg;
 }
