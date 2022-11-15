@@ -57,7 +57,7 @@ public class DPLCheckHandler implements RowHandler {
         try {
           LOG.debug("Performing DPL Check on Mass Create ID " + data.getId().getParReqId() + " Type " + addr.getId().getAddrType() + " Sequence "
               + addr.getId().getSeqNo());
-          response = dplClient.executeAndWrap(DPLCheckClient.EVS_APP_ID, request, DPLCheckResponse.class);
+          response = dplClient.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, DPLCheckResponse.class);
           if (response.isSuccess() && !response.getResult().isPassed()) {
             dplCheckPassed = false;
           } else if (!response.isSuccess()) {
