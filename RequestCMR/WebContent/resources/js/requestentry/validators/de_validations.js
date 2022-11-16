@@ -245,11 +245,12 @@ function autoSetTax() {
   if (reqType != 'C') {
     return;
   }
-  if (dijit.byId('vatExempt').get('checked')) {
-    FormManager.resetValidations('vat');
-  } else {
-    //FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-  }
+//  if (dijit.byId('vatExempt').get('checked')) {
+//    FormManager.resetValidations('vat');
+//  } else {
+//    // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+//    // 'MAIN_CUST_TAB');
+//  }
 }
 
 function setPrivacyIndcReqdForProc() {
@@ -1089,12 +1090,12 @@ function addVatIndValidator(){
     } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
       FormManager.setValue('vatInd', 'T');
       FormManager.readOnly('vatInd');
-    } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+    } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd == '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
     }
   if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
-    FormManager.resetValidations('vat');    
+    FormManager.removeValidator('vat', Validators.REQUIRED); 
   }
 }
 }
