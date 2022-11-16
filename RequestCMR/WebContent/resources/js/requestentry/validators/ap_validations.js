@@ -722,7 +722,7 @@ function addAttachmentValidator() {
         var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         // var docContent = FormManager.getActualValue('docContent');
         if (typeof (_pagemodel) != 'undefined') {
-          if ( reqType == 'C' && (cmrIssuingCntry == '616' && custSubType == 'ESOSW') || (cmrIssuingCntry == '834' && custSubType == 'ASLOM')) {
+          if ( reqType == 'C' && ((cmrIssuingCntry == '616' || cmrIssuingCntry == '796') && custSubType == 'ESOSW') || (cmrIssuingCntry == '834' && custSubType == 'ASLOM')) {
             var id = FormManager.getActualValue('reqId');
             var ret = cmr.query('CHECK_ESA_MATCH_ATTACHMENT', {
             ID : id
