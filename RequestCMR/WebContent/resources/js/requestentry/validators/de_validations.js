@@ -1165,6 +1165,77 @@ function setAbbreviatedNameBasedOnAddressType() {
   }
 }
 
+function similarAddrCheckValidator() {
+  FormManager.addFormValidator(
+      (function() {
+        return {
+          validate : function() {
+            var req_id = FormManager.getActualValue('reqId');
+            var req_type = FormManager.getActualValue('reqType');
+            var _custSubGrp = FormManager.getActualValue('custSubGrp');
+            var scenario3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
+            if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && scenario3PADC.includes(_custSubGrp)) {
+              var record = null;
+              var addrDupExists = [];
+              var custNm1 = '';
+              var custNm2 = '';
+              var addrTxt = '';
+              var city1 = '';
+              var addrTxt2 = '';
+              var stateProv = '';
+              var landCntry = '';
+              var importIndc = '';
+              var dept = '';
+              for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+                record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+                if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+                  record = _allAddressData[i];
+                }
+                custNm1 = record.custNm1[0];
+                custNm2 = record.custNm2[0] != null ? record.custNm2[0] : '';
+                addrTxt = record.addrTxt[0];
+                city1 = record.city1[0] != null ? record.city1[0] : '';
+                stateProv = record.stateProv[0] != null ? record.stateProv[0] : '';
+                addrTxt2 = record.addrTxt2[0] != null ? record.addrTxt2[0] : '';
+                ;
+                landCntry = record.landCntry[0];
+                dept = record.dept[0] != null ? record.dept[0] : '';
+                importIndc = record.importInd[0] != null ? record.importInd[0] : '';
+
+                if (req_type == 'U' && importIndc == 'Y') {
+                  continue; // skip the unique check for addresses in case of
+                  // import for Update requests.
+                }
+                var qParams = {
+                  REQ_ID : req_id,
+                  CUST_NM1 : custNm1,
+                  CUST_NM2 : custNm2,
+                  ADDR_TXT : addrTxt,
+                  ADDR_TXT_2 : addrTxt2,
+                  CITY1 : city1,
+                  STATE_PROV : stateProv,
+                  DEPT : dept,
+                  LAND_CNTRY : landCntry
+                };
+                var results = cmr.query('GET.SME_ADDR_RECORDS_DE', qParams);
+                if (results.ret1 > 1) {
+                  addrDupExists.push(record.addrTypeText);
+                }
+              }
+              if (addrDupExists.length > 0) {
+                return new ValidationResult(null, false, 'Duplicate address details exist for Addresses ' + addrDupExists
+                    + '. Please make sure Sold-To and Install-at address detail should be a unique.');
+              } else {
+                return new ValidationResult(null, true);
+              }
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        };
+      })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -1215,6 +1286,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.GERMANY ]);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.GERMANY ], null, true);
+  GEOHandler.registerValidator(similarAddrCheckValidator, GEOHandler.DE, null, true);
 
   GEOHandler.addAfterConfig(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
