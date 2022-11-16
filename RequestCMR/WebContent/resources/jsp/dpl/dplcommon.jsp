@@ -225,7 +225,9 @@ table.search-results-dpl td, table.search-results-dpl th {
                         <br>
                         ENTITY ID: {{top.entityId}} ({{top.status}})
                         <br>
-                        START DATE: {{top.startDate}} END DATE: ({{top.endDate}})
+                        START DATE: {{top.startDate}} 
+                        <br>
+                        END DATE: {{top.endDate}}
                         <br>
                         ADDRESS: {{top.entityAddress}}, {{top.city}}, {{top.entityCountry}} {{top.entityPostalCode}}
                         <br>
@@ -260,11 +262,11 @@ table.search-results-dpl td, table.search-results-dpl th {
                         <br>
                         ENTITY ID: {{record.entityId}} ({{record.status}})
                         <br>
-                        START DATE: {{record.startDate}} END DATE: ({{record.endDate}})
+                        START DATE: {{record.startDate}} 
+                        <br>
+                        END DATE: {{record.endDate}}
                         <br>
                         ADDRESS: {{record.entityAddress}}, {{record.city}}, {{record.entityCountry}} {{record.entityPostalCode}}
-                        <br>
-                        DENIAL CODE: {{record.denialCodeDescription}} [{{record.denialCode}}]
                         <br>
                         DENIAL CODE: {{record.denialCodeDescription}} [{{record.denialCode}}]
                         <br>
