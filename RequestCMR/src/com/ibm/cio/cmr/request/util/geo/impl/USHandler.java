@@ -1273,6 +1273,10 @@ public class USHandler extends GEOHandler {
     		admin.setMainCustNm2(custNm2);
     	}
     }
+    
+    if("U".equals(admin.getReqType())){
+    	data.setCustSubGrp("");
+    }
 
   }
 
