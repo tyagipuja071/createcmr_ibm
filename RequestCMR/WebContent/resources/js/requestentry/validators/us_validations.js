@@ -419,6 +419,22 @@ function addCtcObsoleteValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addCustName1Validator() {
+	  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {
+	    var custName1 = FormManager.getActualValue('mainCustNm1');	  
+	    var custName2 = FormManager.getActualValue('mainCustNm2');
+	        if (custName2.length > 0 && custName1.length > 25) {
+	          return new ValidationResult(null, false, 'Customer Name has exceeded the maximum characters allowed(the Length is 25). Please check and valid value.');
+	        } else {
+	          return new ValidationResult(null, true);
+	        }
+	      }
+	    }
+	  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 /**
  * After configuration for US
  */
@@ -1363,6 +1379,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
+  GEOHandler.registerValidator(addCustName1Validator, [ SysLoc.USA ], null, true);
   // GEOHandler.registerValidator(clientTierValidator, [ SysLoc.USA ], null,
   // true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);

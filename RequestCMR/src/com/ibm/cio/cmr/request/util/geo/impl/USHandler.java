@@ -1268,8 +1268,8 @@ public class USHandler extends GEOHandler {
     data.setCompanyNm(scc);
     // CREATCMR-6342
     
-    //CREATCMR-7581
-    if(!StringUtils.isEmpty(admin.getMainCustNm2())){
+    //CREATCMR-7581    
+    /*if(!StringUtils.isEmpty(admin.getMainCustNm2())){
     	if(admin.getMainCustNm1().length() > 25){
     		String custNm1 = admin.getMainCustNm1().substring(0, 25);
     		admin.setMainCustNm1(custNm1);
@@ -1279,6 +1279,7 @@ public class USHandler extends GEOHandler {
     		admin.setMainCustNm2(custNm2);
     	}
     }
+    */
 
   }
 
