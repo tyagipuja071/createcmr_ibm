@@ -205,6 +205,8 @@
         (reqentry.getCustSubGrp()!=null&&!reqentry.getCustSubGrp().equals("INTER")&&!reqentry.getCustSubGrp().equals("PRIV")&&!reqentry.getCustSubGrp().equals("BUSPR"))||
         reqentry.getReqType().equalsIgnoreCase("U")&&reqentry.getCmrIssuingCntry().equalsIgnoreCase("641")&&(reqentry.getCapInd()==null||reqentry.getCapInd().equalsIgnoreCase("N"))){%>
     <cmr:info text="${ui.info.cnisicinfo}"></cmr:info><%} %>
+            <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("796")){%>
+    <cmr:info text="${ui.info.nzisicinfo}"></cmr:info><%} %>
         </label>	
         <cmr:field path="isicCd" id="isicCd" fieldId="ISIC" tabId="MAIN_CUST_TAB" size="500" />
       </p>

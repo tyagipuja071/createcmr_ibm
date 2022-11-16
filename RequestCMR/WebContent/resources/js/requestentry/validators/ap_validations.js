@@ -287,6 +287,10 @@ function addAfterConfigAP() {
   }
   // CREATCMR-788
   addressQuotationValidatorAP();
+  
+  if (cntry == '796' && reqType == 'C') {    
+    setLockIsicNZfromDNB()
+  }
 }
 
 function setInacByCluster() {
@@ -4615,6 +4619,16 @@ function addressQuotationValidatorAP() {
   }
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+}
+function setLockIsicNZfromDNB() {
+  
+  var isDnbRecord = FormManager.getActualValue('findDnbResult');
+  if (isDnbRecord =='Accepted') {
+    FormManager.readOnly('isicCd');
+  } else {
+    FormManager.enable('isicCd');
+  }
+  
 }
 function addressQuotationValidatorGCG() {
   
