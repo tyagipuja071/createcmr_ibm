@@ -173,7 +173,10 @@ function doAddAttachment() {
 function addAttachment() {
 
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (cmrIssuingCntry == '616' || cmrIssuingCntry == '796') {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var typeContent = FormManager.getActualValue('docContent');
+
+  if ((cmrIssuingCntry == '616' || cmrIssuingCntry == '796') && custSubGrp == 'ESOSW' && typeContent == 'ESA') {
     ANZshowConfirmEsa()
   } else {
     if (FormManager.validate('frmCMR_addAttachmentModal', true)) {
@@ -291,18 +294,15 @@ function exportToPdf() {
   window.setTimeout('checkToken("' + token + '")', 1000);
 }
 function ANZshowConfirmEsa() {
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var typeContent = FormManager.getActualValue('docContent');
-  if (custSubGrp == 'ESOSW' && typeContent == 'ESA') {
-    var res = cmr
-        .showConfirm(
-            'setAnzConfirmYes()',
-            'By selecting "I confirm" you are certifying that you are aware of the attachment you are going to save is official document of ESA Enrollment Form to support this CMR creation of particular type, and agree to take the responsibility',
-            null, null, {
-              CANCEL : 'No',
-              OK : 'I Confirm'
-            });
-  }
+
+  var res = cmr
+      .showConfirm(
+          'setAnzConfirmYes()',
+          'By selecting "I confirm" you are certifying that you are aware of the attachment you are going to save is official document of ESA Enrollment Form to support this CMR creation of particular type, and agree to take the responsibility',
+          null, null, {
+            CANCEL : 'No',
+            OK : 'I Confirm'
+          });
 
 }
 function setAnzConfirmYes() {
