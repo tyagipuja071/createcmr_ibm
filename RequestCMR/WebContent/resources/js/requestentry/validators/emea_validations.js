@@ -888,7 +888,9 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
     reqType = FormManager.getActualValue('reqType');
     role = _pagemodel.userRole;
   }
-
+  if (reqType != 'C') {
+    return;
+  }
   if (role != 'Requester') {
     return;
   }
@@ -897,7 +899,7 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
   }
   var _custType = FormManager.getActualValue('custSubGrp');
   var addressTyp = FormManager.getActualValue('addrType');
-  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var reqId = FormManager.getActualValue('reqId');
   var copyTypes = document.getElementsByName('copyTypes');
   var copyingToA = false;
   if (copyTypes != null && copyTypes.length > 0) {
@@ -909,9 +911,22 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
   }
 
   if (finalSave || force || copyingToA) {
-
+    var count = null;
     if (addressTyp == 'ZI01' || copyingToA) {
-      autoSetAbbrevLocUKIOnAddrChange();
+      if (cmr.addressMode != 'updateAddress') {
+        qParams = {
+          REQ_ID : reqId,
+        };
+        // check if install-at already present
+        var record = cmr.query('GETZI01VALRECORDS', qParams);
+        count = record.ret1;
+      }
+
+      if (count != null && Number(count) == 0) {
+        autoSetAbbrevLocUKIOnAddrChange();
+      } else if ((cmr.addressMode == 'updateAddress') && (FormManager.getActualValue('addrSeq') == '00001' || copyingToA)) {
+        autoSetAbbrevLocUKIOnAddrChange();
+      }
     }
   }
 }
@@ -1288,26 +1303,14 @@ function validateInternalDeptNumberLength() {
 }
 
 function autoSetAbbrevLocUKIOnAddrChange() {
-
   console.log('Inside autoSetAbbrevLocUKIOnAddrChange');
   var _abbrevLocn = null;
-
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK) {
-
-    if (FormManager.getActualValue('landCntry') == 'GB') {
-      _abbrevLocn = FormManager.getActualValue('postCd')
-    } else {
-      var arr = document.getElementById('landCntry').value.split("-")
-      _abbrevLocn = arr[0];
-    }
-  } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IE) {
-
-    if (FormManager.getActualValue('landCntry') == SysLoc.IE) {
-      _abbrevLocn = FormManager.getActualValue('postCd');
-    } else {
-      var arr = document.getElementById('landCntry').value.split("-")
-      _abbrevLocn = arr[0];
-    }
+  var issuCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if ((FormManager.getActualValue('landCntry') == 'GB' && issuCntry == '866') || (FormManager.getActualValue('landCntry') == 'IE' && issuCntry == '754')) {
+    _abbrevLocn = FormManager.getActualValue('postCd')
+  } else {
+    var arr = document.getElementById('landCntry').value.split("-")
+    _abbrevLocn = arr[0];
   }
 
   if (_abbrevLocn != null && _abbrevLocn.length > 12) {
