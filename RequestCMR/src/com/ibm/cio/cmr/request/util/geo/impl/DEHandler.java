@@ -425,8 +425,8 @@ public class DEHandler extends GEOHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX",
-        "ADDR_TXT", "CUST_PHONE"));
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "POST_CD",
+        "LAND_CNTRY", "PO_BOX", "ADDR_TXT", "CUST_PHONE"));
     return fields;
   }
 
@@ -1106,7 +1106,7 @@ public class DEHandler extends GEOHandler {
     }
     return name4;
   }
-  
+
   private DataRdc getOldData(EntityManager entityManager, String reqId) {
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
     PreparedQuery query = new PreparedQuery(entityManager, sql);

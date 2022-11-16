@@ -1086,10 +1086,10 @@ public class GermanyUtil extends AutomationUtil {
         } else {
           LOG.debug("Address changes don't need review");
           if (changes.hasAddressChanges()) {
-            validation.setMessage("Address changes were found. No further review required.");
+            validation.setMessage("Validated");
             detail.append("Address changes were found. No further review required.");
           } else {
-            validation.setMessage("No Address changes found on the request.");
+            validation.setMessage("Validated");
             detail.append("No Address changes found on the request.");
           }
           if (StringUtils.isBlank(output.getResults())) {
