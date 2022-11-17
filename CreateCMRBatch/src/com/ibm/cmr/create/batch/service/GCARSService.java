@@ -174,17 +174,17 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       GCARSUpdtQueue queue = query.getSingleResult(GCARSUpdtQueue.class);
       String lastSeq = null;
       String lastSourceName = null;
-      Long nextSeq = 0L;
+      int nextSeq = 0;
 
       if (queue != null) {
         lastSourceName = queue.getId().getSourceName();
         lastSeq = lastSourceName.substring((lastSourceName.indexOf("-")) + 1);
       }
       if (!StringUtils.isBlank(lastSeq)) {
-        nextSeq = Long.valueOf(lastSeq) + 1;
+        nextSeq = Integer.valueOf(lastSeq) + 1;
         LOG.debug("GCARS next sequence is " + nextSeq);
       } else {
-        nextSeq = 1L;
+        nextSeq = 1;
       }
       int lineNumber = 1;
 
