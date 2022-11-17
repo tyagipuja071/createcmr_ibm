@@ -17,6 +17,8 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -431,6 +433,15 @@ public class ANZHandler extends APHandler {
           LOG.debug("Creating dummy mailing address..");
           entityManager.persist(mailing);
           entityManager.flush();
+        }
+      }
+
+      AdminPK adminPK = new AdminPK();
+      adminPK.setReqId(addr.getId().getReqId());
+      Admin admin = entityManager.find(Admin.class, adminPK);
+      if (admin.getReqType().equals("C") && !addr.getLandCntry().equalsIgnoreCase("NZ")) {
+        if (addr.getPostCd().length() > 6) {
+          addr.setPostCd("0121");
         }
       }
     }
