@@ -4215,13 +4215,13 @@ public class LAHandler extends GEOHandler {
     String strRequesterId = admin.getRequesterId().toLowerCase();
     String groups = SystemParameters.getString("LA_CME_GSI_LIST");
     LOG.debug("strRequesterId : " + strRequesterId);
-    LOG.debug("groups cmde/gsi : " + groups);
+    LOG.debug("groups cmde/gsi : " + strRequesterId);
 
     requesterFromCmdeGsi = BluePagesHelper.isUserInLaBlueGroup(strRequesterId, groups);
     LOG.debug("requester from cmde/gsi : " + requesterFromCmdeGsi);
 
     groups = SystemParameters.getString("LA_AR_LIST");
-    LOG.debug("groups ar : " + groups);
+    LOG.debug("groups ar : " + strRequesterId);
     requesterFromAcctReciv = BluePagesHelper.isUserInLaBlueGroup(strRequesterId, groups);
     LOG.debug("requester from acct receivable : " + requesterFromAcctReciv);
 
