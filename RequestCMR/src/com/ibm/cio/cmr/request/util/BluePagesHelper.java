@@ -677,8 +677,11 @@ public class BluePagesHelper {
       String[] blueGroups = groups.split(",");
       ReturnCode retCode = null;
       for (String blueGroup : blueGroups) {
+        LOG.debug("blueGroup : " + blueGroup);
         if (bpAPI.groupExist(blueGroup.trim())) {
+          LOG.debug("group existed");
           retCode = bpAPI.inAGroup(intranetId, blueGroup);
+          LOG.debug("retCode : " + retCode);
           if (cwaapi.SUCCESS.equals(retCode)) {
             return true;
           }
