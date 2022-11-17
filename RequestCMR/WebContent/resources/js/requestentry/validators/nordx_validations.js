@@ -146,8 +146,9 @@ function afterConfigForNORDX() {
   setTaxCdValuesByCustSubGrp();
 
   // CREATCMR-1651
+  setKuklaBehaviour();
   setKukalValuesByCustSubGrp();
-
+  
   // CREATCMR-1689
   setAbbreviatedNameValue();
 
@@ -160,8 +161,6 @@ function afterConfigForNORDX() {
 
   // CREATCMR-1656
   setCapRecordActivate();
-
-  kuklaAltShowAndHide();
 
   // CREATCMR-2144
   setCustPrefLangByCountry();
@@ -2881,6 +2880,7 @@ function setKukalValuesByCustSubGrp() {
       FormManager.setValue('custClass', '');
       cmr.hideNode("container-CustClass");
     }
+    
 
   } else if (reqType == 'U') {
     FormManager.limitDropdownValues(field, [ '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45',
@@ -3338,9 +3338,10 @@ function setCapRecordActivate() {
 }
 // CREATCMR-1656
 
-function kuklaAltShowAndHide() {
+function kuklaShowAndHide() {
   var custClassLabel = $("#custClass_label img").attr('title');
   var kukla = FormManager.getActualValue('custClass');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   if (custClassLabel != undefined) {
     if (custClassLabel.match(kukla)) {
@@ -3349,6 +3350,10 @@ function kuklaAltShowAndHide() {
       var altArray = custClassLabel.split('-');
       $("#custClass_label img").attr('title', altArray[0]);
     }
+  }
+  cmr.hideNode("container-CustClass");
+  if (custSubGrp.includes('COM') || custSubGrp.includes('BUS')) {
+    cmr.showNode("container-CustClass");
   }
 }
 
@@ -4928,7 +4933,8 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-1657
   GEOHandler.addAfterConfig(lockDunsNo, GEOHandler.NORDX);
-  GEOHandler.addAfterConfig(kuklaAltShowAndHide, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(kuklaShowAndHide, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(kuklaShowAndHide, GEOHandler.NORDX);
 
   // CREATCMR-2430
   GEOHandler.addAfterConfig(setCustPrefLangByCountry, GEOHandler.NORDX);
