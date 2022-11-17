@@ -289,7 +289,11 @@ function addAfterConfigAP() {
   addressQuotationValidatorAP();
   
   if (cntry == '796' && reqType == 'C') {    
-    setLockIsicNZfromDNB()
+    setLockIsicNZfromDNB();
+    // CREATCMR-7656
+    setDefaultValueforCustomerServiceCode();
+    setDefaultValueforSalesReqNo();
+    removeSalesReqNoValidation();
   }
 }
 
@@ -832,6 +836,67 @@ function defaultCMRNumberPrefix() {
 function defaultCMRNumberPrefixforSingapore() {
   if(custSubGrp == 'INTER' && cmrIssuingCntry == '834') {
     FormManager.show('CmrNoPrefix', 'cmrNoPrefix');
+  }
+}
+
+// CREATCMR-7656
+function defaultCMRNumberPrefixforNewZealand(){
+  console.log(">>>> defaultCMRNumberPrefixforNewZealand >>>>");
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if(reqType == 'C' && cntry == '796' ){
+    if(custSubGrp == 'INTER'){
+      FormManager.enable('cmrNoPrefix');
+      FormManager.setValue('cmrNoPrefix', '990---');
+    }
+    else{
+      FormManager.setValue('cmrNoPrefix', '');
+      FormManager.readOnly('cmrNoPrefix');
+    }
+  }
+}
+
+// CREATCMR-7656
+function setDefaultValueforCustomerServiceCode(){
+  console.log(">>>> setDefaultValueforCustomerServiceCode >>>>");
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if(reqType == 'C' && cntry == '796' && (custSubGrp == 'NRML' || custSubGrp == 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX'
+    || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP'
+      || custSubGrp == 'XESO')){
+    FormManager.setValue('engineeringBo', '9920');
+    FormManager.readOnly('engineeringBo');
+    FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
+  }
+}
+
+// CREATCMR-7656
+function setDefaultValueforSalesReqNo(){
+  console.log(">>>> setDefaultValueforSalesReqNo >>>>");
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if(reqType == 'C' && cntry == '796'&& (custSubGrp == 'NRML' || custSubGrp == 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX'
+    || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP'
+      || custSubGrp == 'XESO')){
+    FormManager.setValue('repTeamMemberName', '000000');
+    FormManager.readOnly('repTeamMemberName');
+  }
+}
+
+// CREATCMR-7656
+function removeSalesReqNoValidation(){
+  console.log(">>>> removeSalesReqNoValidation >>>>");
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if(reqType == 'C' && cntry == '796'&& (custSubGrp == 'NRML' || custSubGrp == 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX'
+    || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP'
+      || custSubGrp == 'XESO')){
+    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED)
   }
 }
 
@@ -4733,6 +4798,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(defaultCMRNumberPrefix, [ SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.INDIA  ]);
   GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefix, [ SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.INDIA  ]);
   GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefixforSingapore, [ SysLoc.SINGAPORE ]);
+  // CREATCMR-7656
+  GEOHandler.addAfterConfig(defaultCMRNumberPrefixforNewZealand, [SysLoc.NEW_ZEALAND]);
+  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefixforNewZealand, [SysLoc.NEW_ZEALAND]);
   // 2333
   GEOHandler.addAfterConfig(setISBUforBPscenario, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setISBUforBPscenario, GEOHandler.ASEAN);
