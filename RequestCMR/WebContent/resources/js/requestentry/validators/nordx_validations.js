@@ -161,8 +161,6 @@ function afterConfigForNORDX() {
   // CREATCMR-1656
   setCapRecordActivate();
 
-  kuklaAltShowAndHide();
-
   // CREATCMR-2144
   setCustPrefLangByCountry();
   setInacCd();
@@ -2837,63 +2835,51 @@ function setKuklaBehaviour(){
     if (reqType == 'C') {
 
       FormManager.setValue('custClass', '');
-      cmr.hideNode("container-CustClass");
 
       if (custSubGrp == 'CBCOM' || custSubGrp == 'DKCOM' || custSubGrp == 'FOCOM' || custSubGrp == 'GLCOM' || custSubGrp == 'ISCOM'
           || custSubGrp == 'FICOM' || custSubGrp == 'EECOM' || custSubGrp == 'LTCOM' || custSubGrp == 'LVCOM' || custSubGrp == 'COMME') {
         var requestingLob = FormManager.getActualValue('requestingLob');
         if (requestingLob == 'IGF' || requestingLob == 'SCT') {
-          cmr.showNode("container-CustClass");
           FormManager.enable('custClass');
 
           // Commercial
           FormManager.limitDropdownValues(field, [ '11', '33', '35' ]);
 
           if (pageModelFlag1 != 'Y') {
-          cmr.showNode("container-CustClass");
           FormManager.readOnly('custClass');
           FormManager.limitDropdownValues(field, [ '11' ]);
           
         }
       } else if (custSubGrp == 'CBBUS' || custSubGrp == 'DKBUS' || custSubGrp == 'FOBUS' || custSubGrp == 'GLBUS' || custSubGrp == 'ISBUS'
           || custSubGrp == 'FIBUS' || custSubGrp == 'EEBUS' || custSubGrp == 'LTBUS' || custSubGrp == 'LVBUS' || custSubGrp == 'BUSPR') {
-        cmr.showNode("container-CustClass");
 
         // Business Partner
         FormManager.limitDropdownValues(field, [ '43', '45', '46' ]);
 
       } else if (custSubGrp == 'DKGOV' || custSubGrp == 'FOGOV' || custSubGrp == 'GLGOV' || custSubGrp == 'ISGOV' || custSubGrp == 'FIGOV'
           || custSubGrp == 'EEGOV' || custSubGrp == 'LTGOV' || custSubGrp == 'LVGOV' || custSubGrp == 'GOVRN') {
-        cmr.hideNode("container-CustClass");
         // Government
         FormManager.limitDropdownValues(field, [ '13' ]);
       } else if (custSubGrp == 'DKINT' || custSubGrp == 'FOINT' || custSubGrp == 'GLINT' || custSubGrp == 'ISINT' || custSubGrp == 'FIINT'
           || custSubGrp == 'EEINT' || custSubGrp == 'LTINT' || custSubGrp == 'LVINT' || custSubGrp == 'INTER' || custSubGrp == 'CBINT') {
-        cmr.hideNode("container-CustClass");
         // Internal
         FormManager.limitDropdownValues(field, [ '81' ]);
       } else if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO'
           || custSubGrp == 'FIISO' || custSubGrp == 'EEISO' || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
-        cmr.hideNode("container-CustClass");
         // Internal SO
         FormManager.limitDropdownValues(field, [ '85' ]);
       } else if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA'
           || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA' || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
-        cmr.hideNode("container-CustClass");
         // Third Party
         FormManager.limitDropdownValues(field, [ '11' ]);
       } else if (custSubGrp == 'DKPRI' || custSubGrp == 'FOPRI' || custSubGrp == 'GLPRI' || custSubGrp == 'ISPRI' || custSubGrp == 'FIPRI'
           || custSubGrp == 'EEPRI' || custSubGrp == 'LTPRI' || custSubGrp == 'LVPRI' || custSubGrp == 'PRIPE') {
-        cmr.hideNode("container-CustClass");
         // Private person
         FormManager.limitDropdownValues(field, [ '60' ]);
       } else if (custSubGrp == 'DKIBM' || custSubGrp == 'FOIBM' || custSubGrp == 'GLIBM' || custSubGrp == 'ISIBM' || custSubGrp == 'FIIBM'
           || custSubGrp == 'EEIBM' || custSubGrp == 'LTIBM' || custSubGrp == 'LVIBM' || custSubGrp == 'IBMEM') {
-        cmr.hideNode("container-CustClass");
         // IBM employee
         FormManager.limitDropdownValues(field, [ '71' ]);
-      } else {
-        cmr.hideNode("container-CustClass");
       }
 
     } else if (reqType == 'U') {
@@ -3492,9 +3478,10 @@ function setCapRecordActivate() {
 }
 // CREATCMR-1656
 
-function kuklaAltShowAndHide() {
+function kuklaShowAndHide() {
   var custClassLabel = $("#custClass_label img").attr('title');
   var kukla = FormManager.getActualValue('custClass');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   if (custClassLabel != undefined) {
     if (custClassLabel.match(kukla)) {
@@ -3503,6 +3490,10 @@ function kuklaAltShowAndHide() {
       var altArray = custClassLabel.split('-');
       $("#custClass_label img").attr('title', altArray[0]);
     }
+  }
+  cmr.hideNode("container-CustClass");
+  if (custSubGrp.includes('COM') || custSubGrp.includes('BUS')) {
+    cmr.showNode("container-CustClass");
   }
 }
 
@@ -5019,7 +5010,8 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-1657
   GEOHandler.addAfterConfig(lockDunsNo, GEOHandler.NORDX);
-  GEOHandler.addAfterConfig(kuklaAltShowAndHide, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(kuklaShowAndHide, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(kuklaShowAndHide, GEOHandler.NORDX);
 
   // CREATCMR-2430
   GEOHandler.addAfterConfig(setCustPrefLangByCountry, GEOHandler.NORDX);
