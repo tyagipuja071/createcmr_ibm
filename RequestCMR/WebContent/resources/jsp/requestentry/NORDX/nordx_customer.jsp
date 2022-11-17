@@ -60,6 +60,16 @@
         <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax_FI" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+  <% } else if ("U".equalsIgnoreCase(reqentry.getCountryUse())) {%>
+  	<cmr:column span="2" containerForField="LocalTax_FI">
+      <p>
+        <cmr:label fieldId="taxCd1">
+          <cmr:fieldLabel fieldId="LocalTax1" />: 
+              <cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}"/>
+        </cmr:label>
+        <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax_FI" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
   <% } %>
  </cmr:view>
 </cmr:row>
