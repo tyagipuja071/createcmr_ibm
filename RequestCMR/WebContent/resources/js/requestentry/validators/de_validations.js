@@ -1165,9 +1165,12 @@ function addVatIndValidator() {
     } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
       FormManager.setValue('vatInd', 'T');
       FormManager.readOnly('vatInd');
-    } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd == '') {
+    } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
+    }
+    if (vatInd == 'N') {
+      FormManager.removeValidator('vat', Validators.REQUIRED); 
     }
   if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
     FormManager.removeValidator('vat', Validators.REQUIRED); 
