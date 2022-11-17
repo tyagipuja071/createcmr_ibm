@@ -1159,7 +1159,7 @@ function setAbbreviatedNameBasedOnAddressType() {
   }
 
   if (custNm1 != undefined && custNm1 != '' && (subCustGrp == '3PA' || subCustGrp == 'X3PA')) {
-    FormManager.setValue('abbrevNm', "C/O " + custNm1.substring(0, 20) + " 3PA");
+    FormManager.setValue('abbrevNm', "C/O " + custNm1.substring(0, 20) + " 3P");
   } else if (custNm2 != undefined && custNm2 != '' && (subCustGrp == 'DC' || subCustGrp == 'XDC')) {
     FormManager.setValue('abbrevNm', custNm2.substring(0, 20) + " DC");
   }
