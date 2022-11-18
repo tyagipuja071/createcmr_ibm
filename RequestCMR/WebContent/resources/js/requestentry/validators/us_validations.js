@@ -423,9 +423,8 @@ function addCustName1Validator() {
 	  FormManager.addFormValidator((function() {
 	    return {
 	      validate : function() {
-	    var custName1 = FormManager.getActualValue('mainCustNm1');	  
-	    var custName2 = FormManager.getActualValue('mainCustNm2');
-	        if (custName2.length > 0 && custName1.length > 25) {
+	    var custName1 = FormManager.getActualValue('mainCustNm1');
+	        if (custName1.length > 25) {
 	          return new ValidationResult(null, false, 'Customer Name has exceeded the maximum characters allowed(the Length is 25). Please check and valid value.');
 	        } else {
 	          return new ValidationResult(null, true);
