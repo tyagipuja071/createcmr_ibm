@@ -146,7 +146,6 @@ function afterConfigForNORDX() {
   setTaxCdValuesByCustSubGrp();
 
   // CREATCMR-1651
-  setKuklaBehaviour();
   setKukalValuesByCustSubGrp();
   
   // CREATCMR-1689
