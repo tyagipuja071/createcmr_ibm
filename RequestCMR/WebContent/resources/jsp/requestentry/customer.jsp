@@ -473,6 +473,17 @@
             </cmr:label>
         </cmr:column>
     </cmr:view>
+    <cmr:view forCountry="796">
+      <cmr:column span="1" containerForField="VATExempt">
+        <p>
+        <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+        <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
+        <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
+            <cmr:fieldLabel fieldId="VATExempt" />
+            <cmr:delta text="${rdcdata.vatExempt}" oldValue="${reqentry.vatExempt == 'Y' ? 'Yes' : 'No'}" />
+        </cmr:label>
+      </cmr:column>
+    </cmr:view>
       <cmr:view forCountry="618,624,678,702,724,754,788,806,846,848,866">
       <cmr:column span="2" containerForField="VATInd" >
        <p>                    
