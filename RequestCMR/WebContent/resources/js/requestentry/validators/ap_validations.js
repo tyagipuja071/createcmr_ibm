@@ -295,8 +295,8 @@ function addAfterConfigAP() {
     setLockIsicNZfromDNB();
     // CREATCMR-7656
     setDefaultValueforCustomerServiceCode();
-    setDefaultValueforSalesReqNo();
-    removeSalesReqNoValidation();
+    // setDefaultValueforSalesReqNo();
+    // removeSalesReqNoValidation();
   }
 }
 
@@ -876,32 +876,40 @@ function setDefaultValueforCustomerServiceCode(){
 }
 
 // CREATCMR-7656
-function setDefaultValueforSalesReqNo(){
-  console.log(">>>> setDefaultValueforSalesReqNo >>>>");
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if(reqType == 'C' && cntry == '796'&& (custSubGrp == 'NRML' || custSubGrp == 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX'
-    || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP'
-      || custSubGrp == 'XESO')){
-    FormManager.setValue('repTeamMemberName', '000000');
-    FormManager.readOnly('repTeamMemberName');
-  }
-}
+// function setDefaultValueforSalesReqNo(){
+// console.log(">>>> setDefaultValueforSalesReqNo >>>>");
+// var reqType = FormManager.getActualValue('reqType');
+// var cntry = FormManager.getActualValue('cmrIssuingCntry');
+// var custSubGrp = FormManager.getActualValue('custSubGrp');
+// if(reqType == 'C' && cntry == '796'&& (custSubGrp == 'NRML' || custSubGrp ==
+// 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp ==
+// 'BLUMX'
+// || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' ||
+// custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' ||
+// custSubGrp == 'XMKTP'
+// || custSubGrp == 'XESO')){
+// FormManager.setValue('repTeamMemberName', '000000');
+// FormManager.readOnly('repTeamMemberName');
+// }
+// }
 
 // CREATCMR-7656
-function removeSalesReqNoValidation(){
-  console.log(">>>> removeSalesReqNoValidation >>>>");
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if(reqType == 'C' && cntry == '796'&& (custSubGrp == 'NRML' || custSubGrp == 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX'
-    || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP'
-      || custSubGrp == 'XESO')){
-    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
-    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED)
-  }
-}
+// function removeSalesReqNoValidation(){
+// console.log(">>>> removeSalesReqNoValidation >>>>");
+// var reqType = FormManager.getActualValue('reqType');
+// var cntry = FormManager.getActualValue('cmrIssuingCntry');
+// var custSubGrp = FormManager.getActualValue('custSubGrp');
+// if(reqType == 'C' && cntry == '796'&& (custSubGrp == 'NRML' || custSubGrp ==
+// 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp ==
+// 'BLUMX'
+// || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' ||
+// custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' ||
+// custSubGrp == 'XMKTP'
+// || custSubGrp == 'XESO')){
+// FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
+// FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED)
+// }
+// }
 
 function setMrc4IntDumForASEAN() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -4817,6 +4825,55 @@ function additionalAddrNmValidatorNZ(){
   })(), 'MAIN_NAME_TAB', 'frmCMR_addressModal');
 }
 
+// CREATCMR-7658
+function addValidatorforInstallingNZ(){
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  
+  if(cntry == '796'){
+    FormManager.addFormValidator((function(){
+      return {
+        validate : function(){
+          var addrType = FormManager.getActualValue('addrType');
+          var name1 = FormManager.getActualValue('custNm1');
+          var name2 = FormManager.getActualValue('custNm2');
+          var attn = FormManager.getActualValue('dept');
+          var street = FormManager.getActualValue('addrTxt');
+          var street2 = FormManager.getActualValue('addrTxt2');
+          var suburb = FormManager.getActualValue('city1');
+          var valueList = new Array();
+          valueList[0]=name1;
+          valueList[1]=name2;
+          valueList[2]=attn;
+          valueList[3]=street;
+          valueList[4]=street2;
+          valueList[5]=suburb;
+          var fieldNameList = new Array('Customer Name','Customer Name cont','Attn','Street','Street Cont','Suburb');
+          var recordCnt = new Array(0,0,0,0,0,0);
+          var strSum="";
+          if(addrType == 'ZS01'){
+            for(var index = 0; index < valueList.length; index++){
+              if(valueList[index].match('PO BOX')){
+                recordCnt[index] = 1;
+              }
+            }
+            for(var index2 = 0; index2 < valueList.length; index2++){
+              if(recordCnt[index2] == 1){
+                strSum += fieldNameList[index2];
+                strSum += "/";
+              }
+            }
+            if(strSum != ""){
+              return new ValidationResult(null, false, strSum + ' can not contain \'PO BOX\' for install address.');
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        }
+      }
+    })(),'MAIN_NAME_TAB', 'frmCMR_addressModal');
+  }
+}
+
 function addressQuotationValidatorGCG() {
   
   var cntry = FormManager.getActualValue('cmrIssuingCntry')
@@ -4856,7 +4913,7 @@ function addCustGrpHandler() {
 }
 
 
-//CREATCMR-7655
+// CREATCMR-7655
 function resetNZNBExempt() {
   if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
     console.log(">>> Process nznbExempt remove * >> ");
@@ -5127,10 +5184,13 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(displayVatRegistrartionStatus,   [ SysLoc.SINGAPORE ] );
 	GEOHandler.addAfterConfig(addCustGrpHandler, GEOHandler.APAC_1);
   
-  //CREATCMR-7655
+  // CREATCMR-7655
   GEOHandler.registerValidator(validatNZBNForNewZeaLand, [ SysLoc.NEW_ZEALAND ], null, true);
   GEOHandler.addAfterConfig(afterConfigForNewZeaLand, [ SysLoc.NEW_ZEALAND]);
   GEOHandler.addAfterTemplateLoad(afterConfigForNewZeaLand, SysLoc.NEW_ZEALAND);
   GEOHandler.addAfterConfig(resetNZNBExempt, [ SysLoc.NEW_ZEALAND ]);
   GEOHandler.addAfterTemplateLoad(resetNZNBExempt, SysLoc.NEW_ZEALAND);
+  
+  // CREATCMR-7658
+  GEOHandler.addAddrFunction(addValidatorforInstallingNZ, [SysLoc.NEW_ZEALAND]);
 });
