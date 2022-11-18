@@ -802,6 +802,29 @@ var cmr = {
     });
     return result;
   },
+  validateNZBNFromAPI: function(businessNumber, custNm) {
+    var result = {};
+    dojo.xhrGet({
+      url : cmr.CONTEXT_ROOT + '/nz/nzbnFromAPI.json',
+      handleAs : 'json',
+      method : 'GET',
+      content : {
+        businessNumber : businessNumber,
+        custNm : custNm
+      },
+      timeout : 50000,
+      sync : true,
+      load : function(data, ioargs) {
+        if (data && data.result) {
+          result = data.result;
+        }
+      },
+      error : function(error, ioargs) {
+        result = {};
+      }
+    });
+    return result;
+  },
   validateCustNmFromAPI: function(reqId, formerCustNm, custNm) {
     var result = {};
     dojo.xhrGet({
