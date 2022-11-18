@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.model.ParamContainer;
@@ -75,21 +74,21 @@ public class DashboardReporting implements Runnable {
           Map<String, Integer> countMap = processResult.getStuckCounts();
           for (String cntry : countMap.keySet()) {
             Integer count = countMap.get(cntry);
-            if (count > 0) {
+            if (count > processResult.getCountsThreshold()) {
               alert.append("\n " + SlackAlertsUtil.bold("- Stuck requests under " + cntry + " = " + count));
             }
           }
           countMap = processResult.getPendingCounts();
           for (String cntry : countMap.keySet()) {
             Integer count = countMap.get(cntry);
-            if (count > 0) {
+            if (count > 5) {
               alert.append("\n " + SlackAlertsUtil.bold("- Pending requests under " + cntry + " = " + count));
             }
           }
           countMap = processResult.getErrorCounts();
           for (String cntry : countMap.keySet()) {
             Integer count = countMap.get(cntry);
-            if (count > 0) {
+            if (count > processResult.getErrorThreshold()) {
               alert.append("\n " + SlackAlertsUtil.bold("- Errors under " + cntry + " = " + count));
             }
           }
@@ -108,14 +107,10 @@ public class DashboardReporting implements Runnable {
           for (String key : stats.keySet()) {
             CountryAutoStats stat = stats.get(key);
             if (stat.getAutomationAverageMin() > autoResult.getProcessTimeThreshold()) {
-              System.out.println("ave: " + stat.getAutomationAverageMin() + " threshold: " + autoResult.getProcessTimeThreshold());
-              alert.append("\n " + SlackAlertsUtil
-                  .bold("- Validation time for " + key + " = " + DurationFormatUtils.formatDuration(stat.getAutomationAverageMin(), "m'm'")));
+              alert.append("\n " + SlackAlertsUtil.bold("- Validation time for " + key + " = " + stat.getAutomationAverageMin() + "m"));
             }
             if (stat.getFullAutoAverageMin() > autoResult.getTatThreshold()) {
-              System.out.println("tat: " + stat.getFullAutoAverageMin() + " threshold: " + autoResult.getTatThreshold());
-              alert.append("\n " + SlackAlertsUtil
-                  .bold("- Touchless processing time for " + key + " = " + DurationFormatUtils.formatDuration(stat.getFullAutoAverageMin(), "m'm'")));
+              alert.append("\n " + SlackAlertsUtil.bold("- Touchless processing time for " + key + " = " + stat.getFullAutoAverageMin() + "m"));
             }
           }
 
