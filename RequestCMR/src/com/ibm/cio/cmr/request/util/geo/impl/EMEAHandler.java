@@ -1805,11 +1805,7 @@ public class EMEAHandler extends BaseSOFHandler {
         query.setForReadOnly(true);
         List<Integer> records = query.getResults(Integer.class);
         if (records != null && records.size() > 0) {
-          if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
-            data.setSpecialTaxCd("20");
-          } else if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
-            data.setSpecialTaxCd("Bl");
-          }
+          data.setSpecialTaxCd("Bl");
         }
       }
       // Changed abbreviated location if cross border to country

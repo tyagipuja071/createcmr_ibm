@@ -724,7 +724,7 @@ function autoSetSpecialTaxCdByScenario() {
       FormManager.setValue('specialTaxCd', '32');
       // FormManager.enable('specialTaxCd');
     } else if (issuingCntry == SysLoc.UK && _custType != 'INTER' && _custType != 'INFSL' && custGrp == 'LOCAL' && !exceptionPostCd.includes(postCd.substr(0, 2))) {
-      FormManager.setValue('specialTaxCd', '20');
+      FormManager.setValue('specialTaxCd', 'Bl');
     } else if (issuingCntry == SysLoc.IRELAND && _custType != 'INTER' && _custType != 'INFSL') {
       FormManager.setValue('specialTaxCd', 'Bl');
     }
