@@ -4,6 +4,7 @@ var _clusterHandlerAP = null;
 var _isicHandlerGCG = null;
 var _clusterHandlerGCG = null;
 var _vatExemptHandler = null;
+var _vatExemptHandlerNZ = null;
 var _bpRelTypeHandlerGCG = null;
 var  _isuHandler = null;
 var _clusterHandlerANZ = null;
@@ -4828,6 +4829,85 @@ function addressQuotationValidatorGCG() {
   }
 
 }
+
+//CREATCMR-7655
+function resetNZNBExempt() {
+  if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
+    console.log(">>> Process nznbExempt remove * >> ");
+    FormManager.setValue("vat", "");
+    FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
+  } else {
+  	console.log(">>> Process nzbnExempt add * >> ");
+  	var custSubGrp = FormManager.getActualValue('custSubGrp');
+    FormManager.enable('vat');
+    if(!(custSubGrp == 'CROSS' || custSubGrp == 'DUMMY' || custSubGrp == 'INTER' || custSubGrp == 'PRIV')){
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'New Zealand Business#' ], 'MAIN_CUST_TAB');
+    }
+  }
+}
+
+function afterConfigForNewZeaLand() { 
+  console.log("----After config. for New Zealand----");
+  if (_vatExemptHandlerNZ == null) {
+    _vatExemptHandlerNZ = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      console.log(">>> RUNNING!!!!");
+      var custSubGrp = FormManager.getActualValue('custSubGrp');
+      FormManager.resetValidations('vat');
+      if (dijit.byId('vatExempt').get('checked')) {
+        console.log(">>> Process nzbnExempt remove * >> ");
+        FormManager.readOnly('vat');
+        FormManager.setValue('vat', '');
+      } else {      
+        console.log(">>> Process nzbnExempt add * >> ");
+        FormManager.enable('vat');
+        if(!(custSubGrp == 'CROSS' || custSubGrp == 'DUMMY' || custSubGrp == 'INTER' || custSubGrp == 'PRIV')){
+          FormManager.addValidator('vat', Validators.REQUIRED, [ 'New Zealand Business#' ], 'MAIN_CUST_TAB');
+        }
+      }
+    });
+  }  
+}
+
+function validatNZBNForNewZeaLand() {
+  console.log('starting validatNZBNForNewZeaLand ...');
+  FormManager.addFormValidator((function() {
+	return {
+	  validate: function() {
+		var vat = FormManager.getActualValue('vat');
+		var reqId = FormManager.getActualValue('reqId');
+		var custNm = '';
+		if (dijit.byId('vatExempt') && dijit.byId('vatExempt').get('checked')) {
+		  return new ValidationResult(null, true);
+		}
+		
+		if (vat == '') {
+		  return new ValidationResult(null, true);
+		} else {
+		  var contractCustNm = cmr.query('GET.CUSTNM_ADDR', {
+		    REQ_ID : reqId,
+		    ADDR_TYPE : 'ZS01'
+		  });
+		  if (contractCustNm != undefined) {
+		    custNm = contractCustNm.ret1.toUpperCase() + " " + contractCustNm.ret2.toUpperCase();
+		  }
+          custNm = custNm.trim();
+		  var nzbnRet = cmr.validateNZBNFromAPI(vat, custNm);
+          if (!nzbnRet.success) {
+          	return new ValidationResult({
+              id : 'vat',
+              type : 'text',
+              name : 'vat'
+          	}, false, nzbnRet.errorMessage);
+	      } else {
+	        return new ValidationResult(null, true);
+	      }
+		}
+	  }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -5018,4 +5098,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(displayVatRegistrartionStatus, [ SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(displayVatRegistrartionStatus,  [ SysLoc.SINGAPORE ] );
   GEOHandler.addAfterTemplateLoad(displayVatRegistrartionStatus,   [ SysLoc.SINGAPORE ] );
+  
+  //CREATCMR-7655
+  GEOHandler.registerValidator(validatNZBNForNewZeaLand, [ SysLoc.NEW_ZEALAND ], null, true);
+  GEOHandler.addAfterConfig(afterConfigForNewZeaLand, [ SysLoc.NEW_ZEALAND]);
+  GEOHandler.addAfterTemplateLoad(afterConfigForNewZeaLand, SysLoc.NEW_ZEALAND);
+  GEOHandler.addAfterConfig(resetNZNBExempt, [ SysLoc.NEW_ZEALAND ]);
+  GEOHandler.addAfterTemplateLoad(resetNZNBExempt, SysLoc.NEW_ZEALAND);
 });
