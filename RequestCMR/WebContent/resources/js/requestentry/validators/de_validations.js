@@ -582,7 +582,8 @@ function validateAddressTypeForScenario() {
           var soldToCnt = recordZs01.ret1;
           var installingCnt = recordZi01.ret1;
           if (installingCnt == 0) {
-            return new ValidationResult(null, false, 'For Third Party sub-scenarios installing address is mandatory. Please add it.');
+            return new ValidationResult(null, false, 'For ' + ((scenarioType == '3PA' || scenarioType == 'X3PA') ? ' Third Party' : ' Data Center')
+                + ' sub-scenarios installing address is mandatory. Please add it.');
           }
           if (soldToCnt == 0) {
             return new ValidationResult(null, false, 'Sold-to address is mandatory.');
