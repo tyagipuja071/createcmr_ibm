@@ -55,6 +55,7 @@ function afterConfigForDE() {
       setISUValues();
       // CREATCMR-7424_7425
       setAbbreviatedNameBasedOnAddressType();
+      setVatIndFields();
 
     });
   }
@@ -1183,6 +1184,10 @@ function setVatIndFields() {
   if (vat != '' && vatInd == '') {
     FormManager.setValue('vatInd', 'T');
     FormManager.readOnly('vatInd');
+  } else if (vatInd == 'E' || vatInd == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+  } else if (vatInd == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
   }
 }
 
