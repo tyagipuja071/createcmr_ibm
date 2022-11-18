@@ -176,7 +176,7 @@ function addAttachment() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var typeContent = FormManager.getActualValue('docContent');
 
-  if (cmrIssuingCntry == '796' && custSubGrp == 'ESOSW' && typeContent == 'ESA') {
+  if (cmrIssuingCntry == '796' && (custSubGrp == 'ESOSW' || custSubGrp == 'XESO') && typeContent == 'ESA') {
     ANZshowConfirmEsa()
   } else {
     if (FormManager.validate('frmCMR_addAttachmentModal', true)) {
