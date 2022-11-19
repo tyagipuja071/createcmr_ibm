@@ -30,6 +30,8 @@ import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.ap.anz.BNValidationRequest;
 import com.ibm.cmr.services.client.automation.ap.anz.BNValidationResponse;
 import com.ibm.cmr.services.client.automation.ap.anz.NMValidationRequest;
+import com.ibm.cmr.services.client.automation.ap.nz.NZBNValidationRequest;
+import com.ibm.cmr.services.client.automation.ap.nz.NZBNValidationResponse;
 import com.ibm.cmr.services.client.automation.cn.CNRequest;
 import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
@@ -549,5 +551,54 @@ public class VatUtilController {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", reqId);
     return query.exists();
+  }
+
+  @RequestMapping(value = "/nz/nzbnFromAPI")
+  public ModelMap validateNZBNFromAPI(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelMap map = new ModelMap();
+    ValidationResult validation = null;
+    
+    String regex = "\\s+$";
+    String businessNumber = request.getParameter("businessNumber").replaceAll(regex, "");
+    String custNm = request.getParameter("custNm").replaceAll(regex, "");
+
+    if (map.isEmpty() && !StringUtils.isBlank(businessNumber) && !StringUtils.isBlank(custNm)) {
+      LOG.debug("Validating Customer Name  " + custNm + " and Business Number " + businessNumber + " for New Zealand");
+
+      String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(baseUrl, AutomationServiceClient.class);
+      autoClient.setReadTimeout(1000 * 60 * 5);
+      autoClient.setRequestMethod(Method.Get);
+
+      NZBNValidationRequest requestToAPI = new NZBNValidationRequest();
+      requestToAPI.setBusinessNumber(businessNumber);
+      System.out.println(requestToAPI + requestToAPI.getBusinessNumber());
+
+      LOG.debug("Connecting to the NZBNValidation service at " + SystemConfiguration.getValue("CMR_SERVICES_URL"));
+      AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.NZ_BN_VALIDATION_SERVICE_ID, requestToAPI,
+          AutomationResponse.class);
+      ObjectMapper mapper = new ObjectMapper();
+      String json = mapper.writeValueAsString(rawResponse);
+
+      TypeReference<AutomationResponse<NZBNValidationResponse>> ref = new TypeReference<AutomationResponse<NZBNValidationResponse>>() {
+      };
+      AutomationResponse<NZBNValidationResponse> nzbnResponse = mapper.readValue(json, ref);
+      if (nzbnResponse != null && nzbnResponse.isSuccess()) {
+        String responseCustNm = StringUtils.isBlank(nzbnResponse.getRecord().getName()) ? ""
+            : nzbnResponse.getRecord().getName().replaceAll(regex, "");
+        if (custNm.equalsIgnoreCase(responseCustNm)) {
+          validation = ValidationResult.success();
+        } else {
+          String message = "New Zealand Business Number is a 13 digits code, can be found via Tab \"Validation links\" - \"NZ Website\", if the code is unavailable for your request, then please tick check box \"NZBN Exempt\" on right side.";
+          validation = ValidationResult.error(message);
+        }
+      } else {
+        validation = ValidationResult
+            .error("NZBN Validation Failed." + (StringUtils.isNotBlank(nzbnResponse.getMessage()) ? nzbnResponse.getMessage() : ""));
+      }
+    }
+    
+    map.addAttribute("result", validation);
+    return map;
   }
 }
