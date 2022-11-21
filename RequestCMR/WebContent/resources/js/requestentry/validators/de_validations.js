@@ -1171,8 +1171,9 @@ function addVatIndValidator() {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
     }
-    if (vatInd == 'N') {
-      FormManager.removeValidator('vat', Validators.REQUIRED); 
+    if (vatInd == 'N' || vatInd == '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
     }
   if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
     FormManager.removeValidator('vat', Validators.REQUIRED); 
