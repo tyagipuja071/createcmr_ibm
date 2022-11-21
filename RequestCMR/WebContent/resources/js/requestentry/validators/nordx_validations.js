@@ -2820,6 +2820,7 @@ function setTaxCdValuesByCustSubGrp() {
         pageModelFlag = 'Y';
       }
     }
+    FormManager.readOnly('taxCd1');
   });
 }
 
