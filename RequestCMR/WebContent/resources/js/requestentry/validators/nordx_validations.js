@@ -2884,7 +2884,6 @@ function setKukalValuesByCustSubGrp() {
 
       if (custSubGrp == 'CBCOM' || custSubGrp == 'DKCOM' || custSubGrp == 'FOCOM' || custSubGrp == 'GLCOM' || custSubGrp == 'ISCOM' || custSubGrp == 'FICOM' || custSubGrp == 'EECOM'
           || custSubGrp == 'LTCOM' || custSubGrp == 'LVCOM' || custSubGrp == 'COMME') {
-        cmr.showNode("container-CustClass");
         FormManager.enable('custClass');
 
         FormManager.limitDropdownValues(FormManager.getField('custClass'), [ '11', '33', '35' ]);
@@ -2893,7 +2892,6 @@ function setKukalValuesByCustSubGrp() {
     } else {
       if (custSubGrp == 'CBCOM' || custSubGrp == 'DKCOM' || custSubGrp == 'FOCOM' || custSubGrp == 'GLCOM' || custSubGrp == 'ISCOM' || custSubGrp == 'FICOM' || custSubGrp == 'EECOM'
           || custSubGrp == 'LTCOM' || custSubGrp == 'LVCOM' || custSubGrp == 'COMME') {
-        cmr.showNode("container-CustClass");
         FormManager.readOnly('custClass');
 
         FormManager.limitDropdownValues(FormManager.getField('custClass'), [ '11' ]);
@@ -2910,6 +2908,7 @@ function setAbbreviatedNameValue() {
 
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
+    kuklaShowAndHide();
 
     if (custSubGrp == 'CBCOM' || custSubGrp == 'CBBUS' || custSubGrp == 'CBINT' || custSubGrp == 'DKCOM' || custSubGrp == 'DKBUS' || custSubGrp == 'DKINT' || custSubGrp == 'DKPRI'
         || custSubGrp == 'DKIBM' || custSubGrp == 'DKGOV' || custSubGrp == 'FOCOM' || custSubGrp == 'FOBUS' || custSubGrp == 'FOINT' || custSubGrp == 'FOPRI' || custSubGrp == 'FOIBM'
@@ -4922,7 +4921,6 @@ dojo.addOnLoad(function() {
   // CREATCMR-1657
   GEOHandler.addAfterConfig(lockDunsNo, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(kuklaShowAndHide, GEOHandler.NORDX);
-  GEOHandler.addAfterTemplateLoad(kuklaShowAndHide, GEOHandler.NORDX);
 
   // CREATCMR-2430
   GEOHandler.addAfterConfig(setCustPrefLangByCountry, GEOHandler.NORDX);
