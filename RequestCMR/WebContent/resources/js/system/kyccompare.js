@@ -28,27 +28,42 @@ app.controller('KYCController', [ '$scope', '$document', '$http', '$timeout', '$
      lines.forEach(function(name,i){
        if (name && name.trim() != ''){
          $scope.names.push({name : name, index : i});
-         
-         dojo.xhrGet({
-           url : cmr.CONTEXT_ROOT + '/kycevs.json?name='+name,
-           handleAs : 'json',
-           timeout : 1000 * 30,
-           sync : false,
-           load : function(data, ioargs) {
-             if (data && data.success){
-               dojo.byId('evs_'+i).innerHTML = data.evs ? '<span style="color:green;font-weight:bold">Passed</span>' : '<span style="color:red;font-weight:bold">Failed</span>';
-               dojo.byId('kyc_'+i).innerHTML = data.kyc ? '<span style="color:green;font-weight:bold">Passed</span>' : '<span style="color:red;font-weight:bold">Failed</span>';
-             } else {
-               dojo.byId('evs_'+i).innerHTML = 'Error';
-               dojo.byId('kyc_'+i).innerHTML = 'Error';
-             }
-           },
-           error : function(error, ioargs) {
-           }
-         });
-         
        }
      });
+     for (var i = 0; i < $scope.names.length; i++){
+       $timeout($scope.dplCheck, 500 * i, false, $scope.names[i]);
+     }
   };
+  $scope.dplCheck = function(item){
+    var name = item.name;
+    var i = item.index;
+    dojo.xhrGet({
+      url : cmr.CONTEXT_ROOT + '/kycevs.json?name='+name,
+      handleAs : 'json',
+      timeout : 1000 * 30,
+      sync : false,
+      load : function(data, ioargs) {
+        if (data && data.success){
+          if (!data.kyc_call){
+            dojo.byId('kyc_'+i).innerHTML = 'Error';
+          } else {
+            dojo.byId('kyc_'+i).innerHTML = data.kyc ? '<span style="color:green;font-weight:bold">Passed</span>' : '<span style="color:red;font-weight:bold">Failed</span>';
+          }
+          if (!data.evs_call){
+            dojo.byId('evs_'+i).innerHTML = 'Error';
+          } else {
+            dojo.byId('evs_'+i).innerHTML = data.evs ? '<span style="color:green;font-weight:bold">Passed</span>' : '<span style="color:red;font-weight:bold">Failed</span>';
+          }
+        } else {
+          dojo.byId('evs_'+i).innerHTML = 'Error';
+          dojo.byId('kyc_'+i).innerHTML = 'Error';
+        }
+      },
+      error : function(error, ioargs) {
+        dojo.byId('evs_'+i).innerHTML = 'Error';
+        dojo.byId('kyc_'+i).innerHTML = 'Error';
+      }
+    });
+  }
 }]);
 

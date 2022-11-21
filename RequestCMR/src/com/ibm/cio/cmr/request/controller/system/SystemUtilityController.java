@@ -435,7 +435,11 @@ public class SystemUtilityController extends BaseController {
 
       map.addAttribute("success", true);
       map.addAttribute("evs", evs.getResult() != null ? evs.getResult().isPassed() : false);
+      map.addAttribute("evs_call", evs.isSuccess());
+      map.addAttribute("evs_raw", evs);
       map.addAttribute("kyc", kyc.getResult() != null ? kyc.getResult().isPassed() : false);
+      map.addAttribute("kyc_raw", kyc);
+      map.addAttribute("kyc_call", kyc.isSuccess());
       map.addAttribute("msg", null);
     } catch (Exception e) {
       e.printStackTrace();
