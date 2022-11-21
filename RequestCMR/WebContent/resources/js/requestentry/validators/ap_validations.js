@@ -4761,7 +4761,7 @@ function additionalAddrNmValidatorOldNZ(){
                   updateInd = updateInd[0];
                 }
                 name = name1 + name2;
-                if(((reqType == 'U' && (updateInd == 'U' || updateInd == 'N')) || reqType == 'C') && type != 'ZS01' && zs01Name != name){
+                if ((reqType == 'U' || reqType == 'C') && type != 'ZS01' && zs01Name != name){
                   count ++;
                 }               
               }         
