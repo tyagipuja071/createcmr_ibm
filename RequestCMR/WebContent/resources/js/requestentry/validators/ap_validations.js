@@ -4897,6 +4897,8 @@ function resetNZNBExempt() {
     FormManager.enable('vat');
     if(!(custSubGrp == 'CROSS' || custSubGrp == 'DUMMY' || custSubGrp == 'INTER' || custSubGrp == 'PRIV')){
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'New Zealand Business#' ], 'MAIN_CUST_TAB');
+    } else {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
     }
   }
 }
@@ -4917,6 +4919,8 @@ function afterConfigForNewZeaLand() {
         FormManager.enable('vat');
         if(!(custSubGrp == 'CROSS' || custSubGrp == 'DUMMY' || custSubGrp == 'INTER' || custSubGrp == 'PRIV')){
           FormManager.addValidator('vat', Validators.REQUIRED, [ 'New Zealand Business#' ], 'MAIN_CUST_TAB');
+        } else {
+          FormManager.removeValidator('vat', Validators.REQUIRED);
         }
       }
     });
