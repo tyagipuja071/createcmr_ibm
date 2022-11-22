@@ -4823,47 +4823,24 @@ function additionalAddrNmValidatorNZ(){
 
 // CREATCMR-7658
 function addValidatorforInstallingNZ(){
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   FormManager.addFormValidator((function(){
     return {
       validate : function(){
         var addrType = FormManager.getActualValue('addrType');
-        var name1 = FormManager.getActualValue('custNm1');
-        var name2 = FormManager.getActualValue('custNm2');
-        var attn = FormManager.getActualValue('dept');
-        var street = FormManager.getActualValue('addrTxt');
-        var street2 = FormManager.getActualValue('addrTxt2');
-        var suburb = FormManager.getActualValue('city1');
-        var valueList = new Array();
-        valueList[0]=name1;
-        valueList[1]=name2;
-        valueList[2]=attn;
-        valueList[3]=street;
-        valueList[4]=street2;
-        valueList[5]=suburb;
-        var fieldNameList = new Array('Customer Name','Customer Name cont','Attn','Street','Street Cont','Suburb');
-        var recordCnt = new Array(0,0,0,0,0,0);
-        var strSum="";
-        if(addrType == 'ZS01'){
-          for(var index = 0; index < valueList.length; index++){
-            if(valueList[index].match('PO BOX')){
-              recordCnt[index] = 1;
-            }
-          }
-          for(var index2 = 0; index2 < valueList.length; index2++){
-            if(recordCnt[index2] == 1){
-              strSum += fieldNameList[index2];
-              strSum += "/";
-            }
-          }
-          if(strSum != ""){
-            return new ValidationResult(null, false, strSum + ' can not contain \'PO BOX\' for install address.');
-          } else {
-            return new ValidationResult(null, true);
-          }
+        var name1 = FormManager.getActualValue('custNm1').toUpperCase();
+        var name2 = FormManager.getActualValue('custNm2').toUpperCase();
+        var attn = FormManager.getActualValue('dept').toUpperCase();
+        var street = FormManager.getActualValue('addrTxt').toUpperCase();
+        var street2 = FormManager.getActualValue('addrTxt2').toUpperCase();
+        var suburb = FormManager.getActualValue('city1').toUpperCase();
+        var address = name1 + name2 + attn + street + street2 + suburb;
+        if((address.includes("PO BOX") || address.includes("POBOX")) && addrType == 'ZS01'){
+          return new ValidationResult(null, false, "NZ Installing address can't contain \'PO BOX\'");
+        } else {
+          return new ValidationResult(null, true);
         }
       }
-    }
+    };
   })(), null, 'frmCMR_addressModal');
 }
 
