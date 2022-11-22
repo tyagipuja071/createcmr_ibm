@@ -103,8 +103,20 @@
   });
   
   function forceAddressValidationFromQS(){
+    var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
     if (FilteringDropdown.pending() || !_allAddressData || _allAddressData.length == 0){
       window.setTimeout('forceAddressValidationFromQS()', 500);
+    }else if (cmrCntry == 755){
+      //CREATCMT-7670 
+      var ctyaSeq = '6';
+      for (var i = 0; i < _allAddressData.length; i++){
+        if (_allAddressData[i].addrType == 'CTYA'){
+          ctyaSeq = _allAddressData[i].addrSeq[0];
+          break;
+        }
+      }
+      cmr.hideProgress();
+      doUpdateAddr(FormManager.getActualValue('reqId'),'CTYA', ctyaSeq, cmr.MANDT, true);
     } else {
       var soldToSeq = '1';
       for (var i = 0; i < _allAddressData.length; i++){
@@ -117,6 +129,7 @@
       doUpdateAddr(FormManager.getActualValue('reqId'),'ZS01', soldToSeq, cmr.MANDT, true);
     }
   }
+  
   function enableSupportal(){
     var error = dojo.byId('cmr-error-box-msg') ? dojo.byId('cmr-error-box-msg').innerHTML : null;
     if (error){
