@@ -1528,4 +1528,13 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     }
   }
 
+  protected String getTrimed(String str) {
+    if (StringUtils.isEmpty(str)) {
+      str = "";
+    } else {
+      str = str.trim();
+    }
+    return str;
+  }
+
 }

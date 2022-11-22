@@ -110,7 +110,6 @@ function disableAddrFieldsMT(cntry, addressMode, saving, finalSave, force) {
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
   var reqType = FormManager.getActualValue('reqType');
-
   if ((custType == 'LOCAL' || reqType == 'U') && addrType == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {

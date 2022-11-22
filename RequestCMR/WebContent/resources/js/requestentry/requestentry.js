@@ -207,13 +207,8 @@ function processRequestAction() {
       } else {
         if (cmrCntry == '821' || cmrCntry == '755') {
           executeBeforeSubmit();
-        } else if (personalInfoPrivacyNoticeCntryList.includes(cmrCntry)) {
-          cmr.showNode('personalInformationDiv');
-          // cmr.showModal('addressVerificationModal');
-          showAddressVerificationModal();
-
         } else {
-          cmr.hideNode('personalInformationDiv');
+          // cmr.hideNode('personalInformationDiv');
           // if there are no errors, show the Address Verification modal window
           // cmr.showModal('addressVerificationModal');
           showAddressVerificationModal();
@@ -1988,7 +1983,7 @@ function matchDnbForAUSG() {
               } else {
                 cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
               }
-            } else if (data.match && !data.isicMatch && !(reqType == 'U' && cntry == SysLoc.AUSTRALIA)) {
+            } else if (data.match && !data.isicMatch) {
               comp_proof_INAUSG = false;
               console.log("ISIC validation failed by Dnb.");
               cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");
