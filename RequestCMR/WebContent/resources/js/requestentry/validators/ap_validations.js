@@ -274,8 +274,26 @@ function addAfterConfigAP() {
   if (cntry != SysLoc.HONG_KONG && cntry !=  SysLoc.MACAO && reqType == 'U') {
     handleObseleteExpiredDataForUpdate();
   }
+  if (cntry == '616' && reqType == 'U' && (role == 'PROCESSOR' || role == 'REQUESTER')) {
+    FormManager.readOnly('isicCd');
+    FormManager.readOnly('subIndustryCd');
+    FormManager.readOnly('apCustClusterId');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('mrcCd');
+    FormManager.readOnly('inacType');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('inacCd');
+  }
   // CREATCMR-788
   addressQuotationValidatorAP();
+  
+  if (cntry == '796' && reqType == 'C') { 
+    setLockIsicNZfromDNB();
+    // CREATCMR-7656
+    setDefaultValueforCustomerServiceCode();
+    // setDefaultValueforSalesReqNo();
+    // removeSalesReqNoValidation();
+  }
 }
 
 function setInacByCluster() {
