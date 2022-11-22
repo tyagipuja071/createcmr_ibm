@@ -101,6 +101,7 @@ public abstract class USBPHandler {
   public static final String SUB_TYPE_STATE_AND_LOCAL_COUNTY = "COUNTY";
   public static final String SUB_TYPE_STATE_AND_LOCAL_CITY = "CITY";
   public static final String SUB_TYPE_FEDERAL_POA = "POA";
+  public static final String SUB_TYPE_FEDERAL_POAN = "POAN";
   public static final String SUB_TYPE_FEDERAL_REGULAR_GOVT = "FEDERAL";
   public static final String SUB_TYPE_COMMERCIAL_REGULAR = "REGULAR";
   public static final String SUB_TYPE_BUSINESS_PARTNER_END_USER = "END USER";

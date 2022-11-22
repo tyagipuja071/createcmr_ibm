@@ -161,7 +161,7 @@ public class USBranchOffcMapping {
       break;
     case LOGIC:
       if (USUtil.SC_BP_END_USER.equals(scenario) || USUtil.SC_BP_POOL.equals(scenario) || USUtil.SC_BP_DEVELOP.equals(scenario)
-          || USUtil.SC_BP_E_HOST.equals(scenario)) {
+          || USUtil.SC_BP_E_HOST.equals(scenario) || USUtil.SC_FSP_END_USER.equals(scenario) || USUtil.SC_FSP_POOL.equals(scenario)) {
         String mktArBo = getMtkgArDept(entityManager, requestData);
         if ("DI3".equals(mktArBo)) {
           calculatedPccArDept = "G8G";
