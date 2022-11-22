@@ -418,6 +418,11 @@
                   <cmr:info text="${ui.info.NordicsForSEVat}" />
                 </span>
               </c:if>
+              <c:if test="${reqentry.cmrIssuingCntry == '796'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NZBNForVat}" />
+                </span>
+              </c:if>
           </label>
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
         </p>
