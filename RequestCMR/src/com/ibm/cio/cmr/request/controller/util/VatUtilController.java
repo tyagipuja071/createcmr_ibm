@@ -589,7 +589,7 @@ public class VatUtilController {
         if (custNm.equalsIgnoreCase(responseCustNm)) {
           validation = ValidationResult.success();
         } else {
-          String message = "New Zealand Business Number is a 13 digits code, can be found via Tab \"Validation links\" - \"NZ Website\", if the code is unavailable for your request, then please tick check box \"NZBN Exempt\" on right side.";
+          String message = "NZBN provided on the request is not valid as per NZBN Validation. Please verify the NZBN provided.";
           validation = ValidationResult.error(message);
         }
       } else {

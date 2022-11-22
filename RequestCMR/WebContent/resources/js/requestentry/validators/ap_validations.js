@@ -4759,7 +4759,7 @@ function additionalAddrNmValidatorOldNZ(){
                   updateInd = updateInd[0];
                 }
                 name = name1 + name2;
-                if(((reqType == 'U' && (updateInd == 'U' || updateInd == 'N')) || reqType == 'C') && type != 'ZS01' && zs01Name != name){
+                if ((reqType == 'U' || reqType == 'C') && type != 'ZS01' && zs01Name != name){
                   count ++;
                 }               
               }         
@@ -4821,51 +4821,25 @@ function additionalAddrNmValidatorNZ(){
 
 // CREATCMR-7658
 function addValidatorforInstallingNZ(){
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  
-  if(cntry == '796'){
-    FormManager.addFormValidator((function(){
-      return {
-        validate : function(){
-          var addrType = FormManager.getActualValue('addrType');
-          var name1 = FormManager.getActualValue('custNm1');
-          var name2 = FormManager.getActualValue('custNm2');
-          var attn = FormManager.getActualValue('dept');
-          var street = FormManager.getActualValue('addrTxt');
-          var street2 = FormManager.getActualValue('addrTxt2');
-          var suburb = FormManager.getActualValue('city1');
-          var valueList = new Array();
-          valueList[0]=name1;
-          valueList[1]=name2;
-          valueList[2]=attn;
-          valueList[3]=street;
-          valueList[4]=street2;
-          valueList[5]=suburb;
-          var fieldNameList = new Array('Customer Name','Customer Name cont','Attn','Street','Street Cont','Suburb');
-          var recordCnt = new Array(0,0,0,0,0,0);
-          var strSum="";
-          if(addrType == 'ZS01'){
-            for(var index = 0; index < valueList.length; index++){
-              if(valueList[index].match('PO BOX')){
-                recordCnt[index] = 1;
-              }
-            }
-            for(var index2 = 0; index2 < valueList.length; index2++){
-              if(recordCnt[index2] == 1){
-                strSum += fieldNameList[index2];
-                strSum += "/";
-              }
-            }
-            if(strSum != ""){
-              return new ValidationResult(null, false, strSum + ' can not contain \'PO BOX\' for install address.');
-            } else {
-              return new ValidationResult(null, true);
-            }
-          }
+  FormManager.addFormValidator((function(){
+    return {
+      validate : function(){
+        var addrType = FormManager.getActualValue('addrType');
+        var name1 = FormManager.getActualValue('custNm1').toUpperCase();
+        var name2 = FormManager.getActualValue('custNm2').toUpperCase();
+        var attn = FormManager.getActualValue('dept').toUpperCase();
+        var street = FormManager.getActualValue('addrTxt').toUpperCase();
+        var street2 = FormManager.getActualValue('addrTxt2').toUpperCase();
+        var suburb = FormManager.getActualValue('city1').toUpperCase();
+        var address = name1 + name2 + attn + street + street2 + suburb;
+        if((address.includes("PO BOX") || address.includes("POBOX")) && addrType == 'ZS01'){
+          return new ValidationResult(null, false, "NZ Installing address can't contain \'PO BOX\'");
+        } else {
+          return new ValidationResult(null, true);
         }
       }
-    })(),'MAIN_NAME_TAB', 'frmCMR_addressModal');
-  }
+    };
+  })(), null, 'frmCMR_addressModal');
 }
 
 function addressQuotationValidatorGCG() {
@@ -4900,6 +4874,8 @@ function resetNZNBExempt() {
     FormManager.enable('vat');
     if(!(custSubGrp == 'CROSS' || custSubGrp == 'DUMMY' || custSubGrp == 'INTER' || custSubGrp == 'PRIV')){
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'New Zealand Business#' ], 'MAIN_CUST_TAB');
+    } else {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
     }
   }
 }
@@ -4920,6 +4896,8 @@ function afterConfigForNewZeaLand() {
         FormManager.enable('vat');
         if(!(custSubGrp == 'CROSS' || custSubGrp == 'DUMMY' || custSubGrp == 'INTER' || custSubGrp == 'PRIV')){
           FormManager.addValidator('vat', Validators.REQUIRED, [ 'New Zealand Business#' ], 'MAIN_CUST_TAB');
+        } else {
+          FormManager.removeValidator('vat', Validators.REQUIRED);
         }
       }
     });
@@ -5097,7 +5075,7 @@ dojo.addOnLoad(function() {
   // Story - 1781935 -> AR Code for Singapore
   GEOHandler.addAddrFunction(setCollCdFrSGOnAddrSave, [ SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(setCollCdFrSingapore, [ SysLoc.SINGAPORE ]);
-  GEOHandler.registerValidator(addAddressLengthValidators, [ SysLoc.AUSTRALIA ], null, true);
+  GEOHandler.registerValidator(addAddressLengthValidators, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ], null, true);
   GEOHandler.registerValidator(addStreetValidationChkReq, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(validateContractAddrAU, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(validateCustNameForNonContractAddrs, [ SysLoc.AUSTRALIA ], null, true);
@@ -5164,5 +5142,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(resetNZNBExempt, SysLoc.NEW_ZEALAND);
   
   // CREATCMR-7658
-  GEOHandler.addAddrFunction(addValidatorforInstallingNZ, [SysLoc.NEW_ZEALAND]);
+  GEOHandler.registerValidator(addValidatorforInstallingNZ, [SysLoc.NEW_ZEALAND], null, true);
 });
