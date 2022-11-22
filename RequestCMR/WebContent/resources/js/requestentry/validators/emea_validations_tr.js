@@ -884,6 +884,8 @@ function autoSetVAT(_custType, custTypeinDB) {
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
 
+    
+
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -9077,20 +9079,6 @@ function vatValidatorTR() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-}
-function addressQuotationValidatorTR() {
-  // CREATCMR-788
-  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
-  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
-  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
-  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Con\'t' ]);
-  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
-  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'District' ]);
-  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
-  FormManager.addValidator('taxOffice', Validators.NO_QUOTATION, [ 'Tax Office' ]);
 }
 function addressQuotationValidatorTR() {
   // CREATCMR-788
