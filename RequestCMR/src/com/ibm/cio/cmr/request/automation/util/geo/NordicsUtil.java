@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -30,6 +31,7 @@ import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
@@ -155,6 +157,17 @@ public class NordicsUtil extends AutomationUtil {
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #");
 
   private static List<NordicsCovMapping> coverageMapping = new ArrayList<NordicsCovMapping>();
+
+  private static Map<String, String> nordxClgxdMapping = new HashMap() {
+    {
+      put("702EE", "104");
+      put("702LT", "106");
+      put("702LV", "105");
+      put("678FO", "102");
+      put("678GL", "103");
+      put("678IS", "742");
+    }
+  };
 
   @SuppressWarnings("unchecked")
   public NordicsUtil() {
@@ -368,13 +381,8 @@ public class NordicsUtil extends AutomationUtil {
     String scenario = requestData.getData().getCustSubGrp();
     String[] kuklaBUSPR = { "43", "44", "45" };
     String[] kuklaISO = { "81", "85" };
-    String NORDX_DENMARK_VKBUR = "0036";
-    String NORDX_ICELAND_VKBUR = "0503";
-    String NORDX_ESTONIA_VKBUR = "0393";
-    String NORDX_LITHUNIA_VKBUR = "0081";
-    String NORDX_FINLAND_VKBUR = "0047";
-    String NORDX_LATVIA_VKBUR = "0081";
     String cntry = requestData.getData().getCmrIssuingCntry();
+    String landCntry = getLandedCntry(requestData.getAddresses());
 
     List<DuplicateCMRCheckResponse> matches = response.getMatches();
     List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
@@ -423,32 +431,26 @@ public class NordicsUtil extends AutomationUtil {
 
     if (response.getMatches() != null) {
       for (DuplicateCMRCheckResponse res : response.getMatches()) {
-        List<Object[]> results = null;
+        List<CmrtCust> results = null;
         if (res.getCmrNo() != null && res.getCmrNo().startsWith("P") && "75".equals(res.getOrderBlk())) {
           subScenarioMatches.add(res);
         }
         try {
-          String sql = ExternalizedQuery.getSql("NORDX.KNVV.GETVKBUR");
+          String sql = ExternalizedQuery.getSql("LEGACYD.GETCUST");
           PreparedQuery query = new PreparedQuery(entityManager, sql);
-          query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-          query.setParameter("CMRNO", res.getCmrNo());
-          query.setParameter("CNTRY", requestData.getData().getCmrIssuingCntry());
-          query.setParameter("ADDR_TYPE", res.getAddrType());
-          results = query.getResults();
+          query.setParameter("COUNTRY", requestData.getData().getCmrIssuingCntry());
+          query.setParameter("CMR_NO", res.getCmrNo());
+          results = query.getResults(CmrtCust.class);
         } catch (Exception e) {
           LOG.debug("An error occurred while retrieving RDc results.");
         }
 
         if (results != null) {
-          String countryUse = requestData.getData().getCountryUse();
-          String cmrIssuingCountry = requestData.getData().getCmrIssuingCntry();
-          for (Object[] result : results) {
-            if (!StringUtils.isBlank(countryUse) && ("702EE".equals(countryUse) && NORDX_ESTONIA_VKBUR.equals(result[0].toString()))
-                || ("702LT".equals(countryUse) && NORDX_LITHUNIA_VKBUR.equals(result[0].toString()))
-                || ("702LV".equals(countryUse) && NORDX_LATVIA_VKBUR.equals(result[0].toString()))
-                || ("702".equals(countryUse) && NORDX_FINLAND_VKBUR.equals(result[0].toString()))
-                || ("678IS".equals(countryUse) && NORDX_ICELAND_VKBUR.equals(result[0].toString()))
-                || (!"678IS".equals(countryUse) && "678".equals(cmrIssuingCountry) && NORDX_DENMARK_VKBUR.equals(result[0].toString()))) {
+          String countryUse = !StringUtils.isBlank(requestData.getData().getCountryUse()) ? requestData.getData().getCountryUse() : "";
+          for (CmrtCust result : results) {
+            String legacyClgxd = result.getOverseasTerritory();
+            if ((!StringUtils.isBlank(nordxClgxdMapping.get(countryUse)) && nordxClgxdMapping.get(countryUse).equals(legacyClgxd))
+                || (StringUtils.isBlank(nordxClgxdMapping.get(countryUse)) && res.getLandedCountry().equals(landCntry))) {
               subScenarioMatches.add(res);
             }
           }
@@ -456,6 +458,15 @@ public class NordicsUtil extends AutomationUtil {
       }
     }
     response.setMatches(subScenarioMatches);
+  }
+
+  private static String getLandedCntry(List<Addr> addrs) {
+    for (Addr addr : addrs) {
+      if ("ZS01".equals(addr.getId().getAddrType())) {
+        return addr.getLandCntry();
+      }
+    }
+    return null;
   }
 
   @Override
