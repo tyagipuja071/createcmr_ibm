@@ -1392,13 +1392,10 @@ public class ItalyTransformer extends EMEATransformer {
           legacyCustExt.setItBillingStreet(18 < addr.getDivn().length() ? addr.getDivn().substring(0, 18) : addr.getDivn());
         }
         legacyCustExt.setItBillingCustomerNo(!StringUtils.isBlank(addr.getParCmrNo()) ? addr.getParCmrNo() : "");
-        
-        crossBorder = isCrossBorder(addr);
         if (crossBorder) {
           landedCountry = addr.getLandCntry();
           legacyCustExt.setiTaxCode((!StringUtils.isBlank(data.getVat()) ? data.getVat() : ""));
-        }
-        if (!crossBorder) {
+        } else {
           legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
         }
       }
