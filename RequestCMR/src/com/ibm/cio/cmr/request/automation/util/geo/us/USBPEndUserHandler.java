@@ -15,11 +15,14 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -36,6 +39,8 @@ import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 public class USBPEndUserHandler extends USBPHandler {
   private static final Logger LOG = Logger.getLogger(USBPEndUserHandler.class);
   public static final List<String> SPECIAL_TAX_STATES = Arrays.asList("AK", "DE", "MT", "NH", "OR");
+  public static final List<String> FEDERAL_CLASSIFIED_ISIC = Arrays.asList("9042", "9043", "9065", "9121", "9185", "9186", "9195", "9199", "9200",
+      "9203", "9204", "9240", "9269");
 
   @Override
   public boolean doInitialValidations(Admin admin, Data data, Addr addr, AutomationResult<OverrideOutput> output, AutomationEngineData engineData) {
@@ -173,8 +178,16 @@ public class USBPEndUserHandler extends USBPHandler {
         affiliate = ibmCmr.getCmrEnterpriseNumber();
       }
       if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
-        details.append(" - Affiliate: " + ibmCmr.getCmrEnterpriseNumber() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), affiliate);
+        LOG.debug(" - copyAndFillIBMData: Affiliate: " + ibmCmr.getCmrAffiliate());
+        details.append(" - Affiliate: " + data.getEnterprise() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
+      } else {
+        updateAffiliate4Child(entityManager, childRequest, ibmCmr);
+        if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
+          LOG.debug(" - copyAndFillIBMData: CmrAffiliate: " + ibmCmr.getCmrAffiliate());
+          details.append(" - Affiliate: " + data.getEnterprise() + (federalPoa ? " (Enterprise from Federal/POA )" : "") + "\n");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
+        }
       }
 
       if (!StringUtils.isBlank(ibmCmr.getCmrIsu())) {
@@ -327,6 +340,25 @@ public class USBPEndUserHandler extends USBPHandler {
 
   }
 
+  private void updateAffiliate4Child(EntityManager entityManager, RequestData childRequest, FindCMRRecordModel ibmCmr) {
+    String konzs = "";
+    String sql = ExternalizedQuery.getSql("US.GET.KNA1.KONZS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("ZZKV_CUSNO", ibmCmr.getCmrNum());
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      konzs = (String) results.get(0)[0];
+    }
+    if (!StringUtils.isBlank(konzs)) {
+      Data data = childRequest.getData();
+      data.setAffiliate(konzs);
+      entityManager.merge(data);
+      ibmCmr.setCmrAffiliate(konzs);
+      LOG.debug(" - updateAffiliate4Child: CmrAffiliate: " + konzs);
+    }
+  }
+
   @Override
   public void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
       FindCMRRecordModel ibmCmr, AutomationResult<OverrideOutput> result) {
@@ -454,9 +486,13 @@ public class USBPEndUserHandler extends USBPHandler {
         subTypeDesc = "Federal Gov't Regular";
         subType = SUB_TYPE_FEDERAL_REGULAR_GOVT;
         custType = USUtil.FEDERAL;
-      } else {
-        subTypeDesc = "Power of Attorney";
+      } else if (FEDERAL_CLASSIFIED_ISIC.contains(data.getIsicCd())) {
+        subTypeDesc = "Power of Attorney (Camouflaged)";
         subType = SUB_TYPE_FEDERAL_POA;
+        custType = USUtil.POWER_OF_ATTORNEY;
+      } else {
+        subTypeDesc = "Power of Attorney (Non-restricted)";
+        subType = SUB_TYPE_FEDERAL_POAN;
         custType = USUtil.POWER_OF_ATTORNEY;
       }
     } else {
