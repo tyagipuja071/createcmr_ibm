@@ -106,7 +106,7 @@
     var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
     if (FilteringDropdown.pending() || !_allAddressData || _allAddressData.length == 0){
       window.setTimeout('forceAddressValidationFromQS()', 500);
-    }else if (cmrCntry == 755){
+    }else if (cmrCntry == '755'){
       //CREATCMT-7670 
       var ctyaSeq = '6';
       for (var i = 0; i < _allAddressData.length; i++){
