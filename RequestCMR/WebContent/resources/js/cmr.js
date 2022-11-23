@@ -306,6 +306,14 @@ var cmr = {
         btn.setAttribute('value', 'OK');
       }
     }
+    var btn = dojo.byId("messagesOverlayButtonOK");
+    if (btn) {
+      if (buttonLabel && buttonLabel.OK) {
+        btn.setAttribute('value', buttonLabel.OK);
+      } else {
+        btn.setAttribute('value', 'OK');
+      }
+    }
     ibmweb.queue.push(function() {
       return dojo.query("div#dialog_messagesOverlay .dijitDialogCloseIcon").length == 1;
     }, function() {

@@ -1104,7 +1104,7 @@ function disableAddrFieldsPTES() {
     FormManager.readOnly('prefSeqNo');
   }
 
-  if ((custType != 'CROSS' || reqType == 'U') && FormManager.getActualValue('addrType') == 'ZS01') {
+  if (FormManager.getActualValue('addrType') == 'ZS01' && (reqType == 'U' || custType != 'CROSS')) {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');

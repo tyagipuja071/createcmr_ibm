@@ -287,7 +287,7 @@ function addAfterConfigAP() {
   // CREATCMR-788
   addressQuotationValidatorAP();
   
-  if (cntry == '796' && reqType == 'C') {    
+  if (cntry == '796' && reqType == 'C') { 
     setLockIsicNZfromDNB();
     // CREATCMR-7656
     setDefaultValueforCustomerServiceCode();
@@ -4708,6 +4708,7 @@ function additionalAddrNmValidator(){
     };
   })(), null, 'frmCMR_addressModal');
 }
+
 // CREATCMR-788
 function addressQuotationValidatorAP() {
   
