@@ -3330,6 +3330,7 @@ function kuklaShowAndHide() {
   var custClassLabel = $("#custClass_label img").attr('title');
   var kukla = FormManager.getActualValue('custClass');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
 
   if (custClassLabel != undefined) {
     if (custClassLabel.match(kukla)) {
@@ -3340,7 +3341,7 @@ function kuklaShowAndHide() {
     }
   }
   cmr.hideNode("container-CustClass");
-  if (custSubGrp.includes('COM') || custSubGrp.includes('BUS')) {
+  if (custSubGrp.includes('COM') || custSubGrp.includes('BUS') || reqType == 'U') {
     cmr.showNode("container-CustClass");
   }
 }
