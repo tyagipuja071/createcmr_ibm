@@ -39,6 +39,8 @@ import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 public class USBPEndUserHandler extends USBPHandler {
   private static final Logger LOG = Logger.getLogger(USBPEndUserHandler.class);
   public static final List<String> SPECIAL_TAX_STATES = Arrays.asList("AK", "DE", "MT", "NH", "OR");
+  public static final List<String> FEDERAL_CLASSIFIED_ISIC = Arrays.asList("9042", "9043", "9065", "9121", "9185", "9186", "9195", "9199", "9200",
+      "9203", "9204", "9240", "9269");
 
   @Override
   public boolean doInitialValidations(Admin admin, Data data, Addr addr, AutomationResult<OverrideOutput> output, AutomationEngineData engineData) {
@@ -484,9 +486,13 @@ public class USBPEndUserHandler extends USBPHandler {
         subTypeDesc = "Federal Gov't Regular";
         subType = SUB_TYPE_FEDERAL_REGULAR_GOVT;
         custType = USUtil.FEDERAL;
-      } else {
-        subTypeDesc = "Power of Attorney";
+      } else if (FEDERAL_CLASSIFIED_ISIC.contains(data.getIsicCd())) {
+        subTypeDesc = "Power of Attorney (Camouflaged)";
         subType = SUB_TYPE_FEDERAL_POA;
+        custType = USUtil.POWER_OF_ATTORNEY;
+      } else {
+        subTypeDesc = "Power of Attorney (Non-restricted)";
+        subType = SUB_TYPE_FEDERAL_POAN;
         custType = USUtil.POWER_OF_ATTORNEY;
       }
     } else {

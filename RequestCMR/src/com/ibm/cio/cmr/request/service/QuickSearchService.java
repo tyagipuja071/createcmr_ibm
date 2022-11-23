@@ -113,9 +113,10 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     ImportCMRModel importModel = new ImportCMRModel();
     importModel.setAddressOnly(false);
     importModel.setCmrIssuingCntry(model.getIssuingCntry());
-    if (SystemLocation.ISRAEL.equals(model.getIssuingCntry())) {
-      importModel.setSearchIssuingCntry(SystemLocation.SAP_ISRAEL_SOF_ONLY);
-    }
+    /*
+     * if (SystemLocation.ISRAEL.equals(model.getIssuingCntry())) {
+     * importModel.setSearchIssuingCntry(SystemLocation.SAP_ISRAEL_SOF_ONLY); }
+     */
     importModel.setCmrNum(model.getCmrNo());
     importModel.setSystem("cmr");
     // check added for external service
