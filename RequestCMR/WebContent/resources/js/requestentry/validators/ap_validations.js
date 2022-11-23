@@ -4523,6 +4523,7 @@ function setRepTeamMemberNo() {
   if (reqType == 'C') {
     FormManager.setValue('repTeamMemberNo', '000000');
     FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('repTeamMemberName');
   }
 }
 
