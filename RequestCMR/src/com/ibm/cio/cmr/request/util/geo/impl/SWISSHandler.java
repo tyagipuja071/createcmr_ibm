@@ -479,21 +479,27 @@ public class SWISSHandler extends GEOHandler {
       query.setParameter("ADDR_TYPE", "ZS01");
       List<Object[]> results = query.getResults();
       if (!results.isEmpty() && results.get(0) != null) {
-        int postCd = Integer.parseInt((String) results.get(0)[0]);
-        String landCntry = (String) results.get(0)[1];
-        if ("CH".equalsIgnoreCase(landCntry) || "LI".equalsIgnoreCase(landCntry)) {
-
-          if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
-            data.setCustPrefLang("D");
-          } else if (postCd >= 6500 && postCd <= 6999) {
-            data.setCustPrefLang("I");
-          } else if (postCd >= 0000 && postCd <= 3000) {
-            data.setCustPrefLang("F");
-          }
-        } else {
-          data.setCustPrefLang("E");
+        int postCd;
+        try {
+          postCd = Integer.parseInt((String) results.get(0)[0]);
+        } catch (NumberFormatException e) {
+          postCd = 0;
+          LOG.debug("Cannot parse postal code since it's alphanumeric.");
         }
-
+        String landCntry = (String) results.get(0)[1];
+        if ("CH".equals(landCntry) || "LI".equals(landCntry)) {
+          if (StringUtils.isBlank(landCntry) && postCd != 0) {
+            if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+              data.setCustPrefLang("D");
+            } else if (postCd >= 6500 && postCd <= 6999) {
+              data.setCustPrefLang("I");
+            } else if (postCd >= 0000 && postCd <= 3000) {
+              data.setCustPrefLang("F");
+            }
+          } else {
+            data.setCustPrefLang("E");
+          }
+        }
       }
     }
 
