@@ -133,6 +133,9 @@ public class RequestMaintService extends BaseBatchService {
       admin.setUseParentManager(true);
       updateEntity(admin, entityManager);
 
+      // CREATCMR-7629 cancel approval before closing if any
+      cancelApprovalsBeforeAutoClose(entityManager, admin.getId().getReqId());
+
       RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment, "Auto-Close", null, null, true, false, null);
       RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), comment);
       keepAlive();
@@ -192,4 +195,10 @@ public class RequestMaintService extends BaseBatchService {
     return true;
   }
 
+  private void cancelApprovalsBeforeAutoClose(EntityManager entityManager, long requestID) {
+    LOG.debug("Processing Cancel Approvals before auto closing request :-" + requestID);
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.AUTOCLOSE.APPROVAL"));
+    query.setParameter("REQ_ID", requestID);
+    query.executeSql();
+  }
 }
