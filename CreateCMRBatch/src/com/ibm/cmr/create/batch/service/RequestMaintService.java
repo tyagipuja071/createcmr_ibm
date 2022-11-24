@@ -122,6 +122,9 @@ public class RequestMaintService extends BaseBatchService {
     for (Admin admin : closeList) {
       Thread.currentThread().setName("REQ-" + admin.getId().getReqId());
 
+      // CREATCMR-7629 cancel approval before closing if any
+      cancelApprovalsBeforeAutoClose(entityManager, admin.getId().getReqId());
+
       admin.setLastUpdtTs(ts);
       admin.setReqStatus("CLO");
       admin.setLockInd("N");
@@ -132,9 +135,6 @@ public class RequestMaintService extends BaseBatchService {
       LOG.debug("Closing Request " + admin.getId().getReqId());
       admin.setUseParentManager(true);
       updateEntity(admin, entityManager);
-
-      // CREATCMR-7629 cancel approval before closing if any
-      cancelApprovalsBeforeAutoClose(entityManager, admin.getId().getReqId());
 
       RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment, "Auto-Close", null, null, true, false, null);
       RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), comment);
