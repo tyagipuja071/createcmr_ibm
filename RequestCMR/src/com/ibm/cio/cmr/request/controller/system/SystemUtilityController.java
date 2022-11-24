@@ -66,6 +66,7 @@ import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.DPLCheckClient;
 import com.ibm.cmr.services.client.dpl.DPLCheckRequest;
 import com.ibm.cmr.services.client.dpl.DPLCheckResponse;
+import com.ibm.cmr.services.client.dpl.KycScreeningResponse;
 
 /**
  * Handles the system administration pages
@@ -415,6 +416,7 @@ public class SystemUtilityController extends BaseController {
   public ModelMap processKYCCompare(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String name = request.getParameter("name");
+    String priv = request.getParameter("priv");
     if (StringUtils.isBlank("name")) {
       map.addAttribute("success", false);
       map.addAttribute("msg", "'name' param is required.");
@@ -430,14 +432,16 @@ public class SystemUtilityController extends BaseController {
       dplRequest.setApplication(appId);
       dplRequest.setCompanyName(name);
       dplRequest.setCountry("US");
+      dplRequest.setPrivate("Y".equals(priv));
+      dplRequest.setIncludeScreening(true);
       DPLCheckResponse evs = dplClient.executeAndWrap(DPLCheckClient.EVS_APP_ID, dplRequest, DPLCheckResponse.class);
-      DPLCheckResponse kyc = dplClient.executeAndWrap(DPLCheckClient.KYC_APP_ID, dplRequest, DPLCheckResponse.class);
+      KycScreeningResponse kyc = dplClient.executeAndWrap(DPLCheckClient.KYC_APP_ID, dplRequest, KycScreeningResponse.class);
 
       map.addAttribute("success", true);
       map.addAttribute("evs", evs.getResult() != null ? evs.getResult().isPassed() : false);
       map.addAttribute("evs_call", evs.isSuccess());
       map.addAttribute("evs_raw", evs);
-      map.addAttribute("kyc", kyc.getResult() != null ? kyc.getResult().isPassed() : false);
+      map.addAttribute("kyc", kyc.getResult() != null ? kyc.getResult().getResult() == null || kyc.getResult().getResult().size() == 0 : false);
       map.addAttribute("kyc_raw", kyc);
       map.addAttribute("kyc_call", kyc.isSuccess());
       map.addAttribute("msg", null);

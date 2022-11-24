@@ -85,7 +85,7 @@ public class DPLSearchElement extends MatchingElement {
 
     DPLSearchProcess dplSearch = new DPLSearchProcess();
     for (String name : names) {
-      dplSearch.performDplSearch(name);
+      dplSearch.performDplSearch(name, isPrivate(requestData));
       searchResult = dplSearch.getResult();
       if (searchResult != null) {
         dplResults.add(searchResult);
@@ -212,6 +212,17 @@ public class DPLSearchElement extends MatchingElement {
       }
     }
     return allNames;
+  }
+
+  private boolean isPrivate(RequestData reqData) {
+    Data data = reqData.getData();
+    String subGrp = data.getCustSubGrp();
+    if (subGrp != null) {
+      if (subGrp.toUpperCase().contains("PRIV") || subGrp.toUpperCase().contains("PRIPE") || subGrp.toUpperCase().contains("PRICU")) {
+        return true;
+      }
+    }
+    return "60".equals(data.getCustClass()) || "9500".equals(data.getIsicCd());
   }
 
   @Override

@@ -104,6 +104,9 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
                   dplName = closestItem.getCustomerFirstName() + " " + closestItem.getCustomerLastName();
                   person = true;
                 }
+                if (!person) {
+                  person = closestItem.getComments() != null && closestItem.getComments().contains("[Individual]");
+                }
                 if (dplName == null) {
                   dplName = "";
                 }
@@ -171,6 +174,9 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
                   }
                   if (dplName == null) {
                     dplName = "";
+                  }
+                  if (!person) {
+                    person = item.getComments() != null && item.getComments().contains("[Individual]");
                   }
                   section.addCell(createValueCell(item.getEntityId()));
                   section.addCell(createValueCell(item.getCountryCode()));
