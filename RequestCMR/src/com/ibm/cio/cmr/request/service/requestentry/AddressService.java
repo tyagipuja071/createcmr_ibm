@@ -218,13 +218,13 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       // }
 
       if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry())) {
-        //if ("C".equals(admin.getReqType())) {
-          if ("ZS01".equals(model.getAddrType())) {
-            newAddrSeq = "001";
-          } else if ("ZI01".equals(model.getAddrType())) {
-            newAddrSeq = "002";
-          }
-        //}        
+        // if ("C".equals(admin.getReqType())) {
+        if ("ZS01".equals(model.getAddrType())) {
+          newAddrSeq = "001";
+        } else if ("ZI01".equals(model.getAddrType())) {
+          newAddrSeq = "002";
+        }
+        // }
       }
       if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry()) || SystemLocation.GREECE.equals(model.getCmrIssuingCntry())) {
         if ("U".equals(admin.getReqType())) {
@@ -235,7 +235,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
           }
         }
       }
-      
+
       model.setAddrSeq(newAddrSeq);
       if (addrExists(entityManager, model.getAddrType(), model.getAddrSeq(), model.getReqId())) {
         throw new CmrException(MessageUtil.ERROR_ALREADY_ADDRESS, uniqAddr.toString());
@@ -1149,10 +1149,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         errorInfo = null;
         if (addr.getDplChkResult() == null) {
           Boolean errorStatus = false;
-          Boolean isPrivate=false;
-          if ("PRIV".equals(data.getCustSubGrp()) || "PRICU".equals(data.getCustSubGrp())) {
-            isPrivate = true;
-          }
+          Boolean isPrivate = isPrivate(data);
           try {
             dplResult = dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
                 geoHandler != null ? !geoHandler.customerNamesOnAddress() : false, isPrivate);
@@ -1311,8 +1308,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
    * @return
    * @throws Exception
    */
-  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, String soldToLandedCountry, String issuingCountry, boolean useNameOnMain,boolean isPrivate)
-      throws Exception {
+  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, String soldToLandedCountry, String issuingCountry, boolean useNameOnMain,
+      boolean isPrivate) throws Exception {
     String servicesUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String appId = SystemConfiguration.getSystemProperty("evs.appID");
     DPLCheckClient dplClient = CmrServicesFactory.getInstance().createClient(servicesUrl, DPLCheckClient.class);
@@ -2459,4 +2456,15 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
     return addrSeq;
   }
+
+  private boolean isPrivate(Data data) {
+    String subGrp = data.getCustSubGrp();
+    if (subGrp != null) {
+      if (subGrp.toUpperCase().contains("PRIV") || subGrp.toUpperCase().contains("PRIPE") || subGrp.toUpperCase().contains("PRICU")) {
+        return true;
+      }
+    }
+    return "60".equals(data.getCustClass()) || "9500".equals(data.getIsicCd());
+  }
+
 }

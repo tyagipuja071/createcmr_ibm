@@ -2,7 +2,8 @@ var app = angular.module('KYCApp', [ 'ngSanitize' ]);
 app.controller('KYCController', [ '$scope', '$document', '$http', '$timeout', '$sanitize', '$filter', function($scope, $document, $http, $timeout, $sanitize, $filter) {
 
   $scope.names = [];
-
+  $scope.priv = 'N';
+  $scope.sample = 'N';
   $scope.test = function(){
      if ($scope.checkType == 'N' && !$scope.inputName){
        alert('Please input the name to screen.');
@@ -38,7 +39,7 @@ app.controller('KYCController', [ '$scope', '$document', '$http', '$timeout', '$
     var name = item.name;
     var i = item.index;
     dojo.xhrGet({
-      url : cmr.CONTEXT_ROOT + '/kycevs.json?name='+name,
+      url : cmr.CONTEXT_ROOT + '/kycevs.json?name='+name+'&priv='+$scope.priv,
       handleAs : 'json',
       timeout : 1000 * 30,
       sync : false,
@@ -48,6 +49,12 @@ app.controller('KYCController', [ '$scope', '$document', '$http', '$timeout', '$
             dojo.byId('kyc_'+i).innerHTML = 'Error';
           } else {
             dojo.byId('kyc_'+i).innerHTML = data.kyc ? '<span style="color:green;font-weight:bold">Passed</span>' : '<span style="color:red;font-weight:bold">Failed</span>';
+            if ($scope.sample == 'Y'){
+              var rec = data.kyc_raw.result.result[0];
+              if (rec){
+                dojo.byId('kyc_'+i).innerHTML = dojo.byId('kyc_'+i).innerHTML +'<br>'+rec.name;
+              }
+            }
           }
           if (!data.evs_call){
             dojo.byId('evs_'+i).innerHTML = 'Error';
