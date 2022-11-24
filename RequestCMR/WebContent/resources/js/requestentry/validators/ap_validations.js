@@ -756,7 +756,7 @@ function addAttachmentValidator() {
               return new ValidationResult(null, true);
             }
            }
-          else if(cmrIssuingCntry != '616' && cmrIssuingCntry != '834') {                         
+          else if(cmrIssuingCntry != '796' && cmrIssuingCntry != '616' && cmrIssuingCntry != '834') {                         
             var id = FormManager.getActualValue('reqId');
             var ret = cmr.query('CHECK_TERRITORY_ATTACHMENT', {
               ID : id

@@ -470,9 +470,10 @@ public class NewZealandUtil extends AutomationUtil {
   private void processSkipCompanyChecks(AutomationEngineData engineData, RequestData requestData, StringBuilder details) {
     Data data = requestData.getData();
 
-    boolean skipCompanyChecks = "9500".equals(data.getIsicCd()) || (data.getCustSubGrp() != null && data.getCustSubGrp().contains("PRIV"));
+    boolean skipCompanyChecks = data.getCustSubGrp() != null && (data.getCustSubGrp().contains(SCENARIO_PRIVATE_CUSTOMER)
+        || data.getCustSubGrp().contains(SCENARIO_DUMMY) || data.getCustSubGrp().contains(SCENARIO_INTERNAL));
     if (skipCompanyChecks) {
-      details.append("Private Person request - company checks will be skipped.\n");
+      details.append("This checks will be skipped.\n");
       ScenarioExceptionsUtil exc = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
       if (exc != null) {
         exc.setSkipCompanyVerification(true);
