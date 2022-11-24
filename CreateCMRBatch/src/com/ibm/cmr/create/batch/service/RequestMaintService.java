@@ -122,6 +122,9 @@ public class RequestMaintService extends BaseBatchService {
     for (Admin admin : closeList) {
       Thread.currentThread().setName("REQ-" + admin.getId().getReqId());
 
+      // CREATCMR-7629 cancel approval before closing if any
+      cancelApprovalsBeforeAutoClose(entityManager, admin.getId().getReqId());
+
       admin.setLastUpdtTs(ts);
       admin.setReqStatus("CLO");
       admin.setLockInd("N");
@@ -192,4 +195,10 @@ public class RequestMaintService extends BaseBatchService {
     return true;
   }
 
+  private void cancelApprovalsBeforeAutoClose(EntityManager entityManager, long requestID) {
+    LOG.debug("Processing Cancel Approvals before auto closing request :-" + requestID);
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.AUTOCLOSE.APPROVAL"));
+    query.setParameter("REQ_ID", requestID);
+    query.executeSql();
+  }
 }
