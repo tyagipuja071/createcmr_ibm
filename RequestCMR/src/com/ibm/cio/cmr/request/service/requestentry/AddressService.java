@@ -1148,11 +1148,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         errorInfo = null;
         if (addr.getDplChkResult() == null) {
           Boolean errorStatus = false;
-          Boolean isPrivate = false;
-          if ("PRIV".equals(data.getCustSubGrp()) || "PRICU".equals(data.getCustSubGrp())) {
-            isPrivate = true;
-
-          }
+          Boolean isPrivate = isPrivate(data);
           try {
             dplResult = dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
                 geoHandler != null ? !geoHandler.customerNamesOnAddress() : false, isPrivate);
@@ -2460,4 +2456,15 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
     return addrSeq;
   }
+
+  private boolean isPrivate(Data data) {
+    String subGrp = data.getCustSubGrp();
+    if (subGrp != null) {
+      if (subGrp.toUpperCase().contains("PRIV") || subGrp.toUpperCase().contains("PRIPE") || subGrp.toUpperCase().contains("PRICU")) {
+        return true;
+      }
+    }
+    return "60".equals(data.getCustClass()) || "9500".equals(data.getIsicCd());
+  }
+
 }

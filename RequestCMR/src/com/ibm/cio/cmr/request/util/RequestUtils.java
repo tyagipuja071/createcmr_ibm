@@ -1732,7 +1732,7 @@ public class RequestUtils {
         result.getResult().stream().forEach((record) -> {
           DPLRecord legacyRecord = new DPLRecord();
           legacyRecord.setAdditionalInfo("Score per relevant term: " + record.getScorePerRelevantTerm());
-          legacyRecord.setComments(record.getNotes());
+          legacyRecord.setComments(("1".equals(record.getPerson()) ? "[Individual] " : "") + record.getNotes());
           legacyRecord.setCompanyName(record.getNameInCorrectOrder());
           legacyRecord.setCountryCode(record.getCountryIso2Code());
           legacyRecord.setDenialCode(record.getCleanCode());

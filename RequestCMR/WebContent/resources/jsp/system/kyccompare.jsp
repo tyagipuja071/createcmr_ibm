@@ -75,6 +75,20 @@ var sessionData = null;
                 </td>
               </tr>
               <tr>
+                <td class="lbl">Private Person:</td>
+                <td>
+                  <input type="radio" name="priv" ng-model="priv" value="Y">Yes
+                  <input type="radio" name="priv" ng-model="priv" value="N">No
+                </td>
+              </tr>
+              <tr>
+                <td class="lbl">Show First Match:</td>
+                <td>
+                  <input type="radio" name="sample" ng-model="sample" value="Y">Yes
+                  <input type="radio" name="sample" ng-model="sample" value="N">No
+                </td>
+              </tr>
+              <tr>
                 <td>
                   &nbsp;
                 </td>

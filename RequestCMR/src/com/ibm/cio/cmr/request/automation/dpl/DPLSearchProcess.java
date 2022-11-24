@@ -36,7 +36,7 @@ public class DPLSearchProcess {
    * @param companyName
    * @throws Exception
    */
-  public void performDplSearch(String companyName) throws Exception {
+  public void performDplSearch(String companyName, boolean privatePerson) throws Exception {
 
     DPLCheckClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"), DPLCheckClient.class);
     DPLCheckRequest request = new DPLCheckRequest();

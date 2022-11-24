@@ -279,13 +279,14 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     List<DPLSearchResults> results = new ArrayList<DPLSearchResults>();
 
     Long reqId = (Long) params.getParam("reqId");
+    RequestData reqData = null;
     if (reqId == null || reqId == 0) {
       String searchString = (String) params.getParam("searchString");
       if (searchString != null) {
         names.add(searchString.toUpperCase().trim());
       }
     } else {
-      RequestData reqData = processRequest(entityManager, params);
+      reqData = processRequest(entityManager, params);
       GEOHandler handler = RequestUtils.getGEOHandler(reqData.getData().getCmrIssuingCntry());
       if (handler != null && !handler.customerNamesOnAddress()) {
         String name = reqData.getAdmin().getMainCustNm1().toUpperCase();
@@ -334,6 +335,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     }
     names.addAll(minimizedList);
 
+    boolean isPrivate = reqData != null ? isPrivate(reqData) : false;
     String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     DPLCheckClient client = CmrServicesFactory.getInstance().createClient(baseUrl, DPLCheckClient.class);
     for (String searchString : names) {
@@ -341,6 +343,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       request.setId(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
       request.setCompanyName(searchString);
       request.setIncludeScreening(true);
+      request.setPrivate(isPrivate);
       try {
         LOG.debug("Performing DPL Search on " + searchString);
         KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
@@ -670,6 +673,17 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       }
     }
     return resultCount;
+  }
+
+  private boolean isPrivate(RequestData reqData) {
+    Data data = reqData.getData();
+    String subGrp = data.getCustSubGrp();
+    if (subGrp != null) {
+      if (subGrp.toUpperCase().contains("PRIV") || subGrp.toUpperCase().contains("PRIPE")) {
+        return true;
+      }
+    }
+    return "60".equals(data.getCustClass()) || "9500".equals(data.getIsicCd());
   }
 
 }
