@@ -1139,7 +1139,6 @@ function checkCmrUpdateBeforeImport() {
 function setAbbreviatedNameBasedOnAddressType() {
   var _reqId = FormManager.getActualValue('reqId');
   var subCustGrp = FormManager.getActualValue('custSubGrp');
-  var addrType = FormManager.getActualValue('addrType');
   var custGrp = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
 
@@ -1163,6 +1162,10 @@ function setAbbreviatedNameBasedOnAddressType() {
     FormManager.setValue('abbrevNm', "C/O " + custNm1.substring(0, 20) + " 3P");
   } else if (custNm2 != undefined && custNm2 != '' && (subCustGrp == 'DC' || subCustGrp == 'XDC')) {
     FormManager.setValue('abbrevNm', custNm2.substring(0, 20) + " DC");
+  } else if (((custNm1 == undefined || custNm1 == '') && (subCustGrp == '3PA' || subCustGrp == 'X3PA')) || ((custNm2 == undefined || custNm2 != '') && (subCustGrp == 'DC' || subCustGrp == 'XDC'))) {
+    FormManager.setValue('abbrevNm', '');
+  } else {
+    autoSetAbbrevNmLogic();
   }
 }
 
