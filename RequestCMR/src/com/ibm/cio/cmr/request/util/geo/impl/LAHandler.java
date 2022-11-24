@@ -3,13 +3,16 @@
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +20,10 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -27,15 +34,17 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
-import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.GeoContactInfo;
 import com.ibm.cio.cmr.request.entity.GeoContactInfoPK;
 import com.ibm.cio.cmr.request.entity.GeoTaxInfo;
 import com.ibm.cio.cmr.request.entity.GeoTaxInfoPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.entity.Stxl;
 import com.ibm.cio.cmr.request.entity.TaxData;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.auto.BaseV2RequestModel;
 import com.ibm.cio.cmr.request.model.auto.BrazilV2ReqModel;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
@@ -57,20 +66,16 @@ import com.ibm.cio.cmr.request.service.requestentry.GeoContactInfoService;
 import com.ibm.cio.cmr.request.service.requestentry.TaxInfoService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.ibm.cmr.services.client.CROSServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
-import com.ibm.cmr.services.client.cros.CROSAddress;
-import com.ibm.cmr.services.client.cros.CROSContact;
-import com.ibm.cmr.services.client.cros.CROSQueryRequest;
-import com.ibm.cmr.services.client.cros.CROSQueryResponse;
-import com.ibm.cmr.services.client.cros.CROSRecord;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
@@ -97,17 +102,30 @@ public class LAHandler extends GEOHandler {
 
   private static final String[] LA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Enterprise", "PPSCEID", "SitePartyID" };
 
+  protected static final String[] LA_MASS_UPDATE_SHEET_NAMES = { "Sold-To", "Bill-To", "Ship-To", "Install-At", "Email", "AccountReceivable",
+      "Data" };
+
+  private static final String DEFAULT_SALES_REP = "111111";
+
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
-    List<FindCMRRecordModel> recordsFromSearch = source.getItems();
-    List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
+    List<FindCMRRecordModel> converted = new ArrayList<>();
+    List<FindCMRRecordModel> records = source.getItems();
 
-    if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0) {
-      doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
-      if (!filteredRecords.isEmpty() && filteredRecords.size() > 0 && filteredRecords != null) {
-        source.setItems(filteredRecords);
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+      for (FindCMRRecordModel record : records) {
+        if ("ZS01".equals(record.getCmrAddrTypeCode())) {
+
+          if (SystemLocation.BRAZIL.equals(record.getCmrIssuedBy())) {
+            record.setCmrAddrSeq(String.valueOf(getFixedStartingSeqNewAddrBR("ZS01")));
+          } else {
+            record.setCmrAddrSeq(String.valueOf(getFixedStartingSeqNewAddr("ZS01")));
+          }
+          converted.add(record);
+        }
       }
+      source.setItems(converted);
     }
   }
 
@@ -116,33 +134,6 @@ public class LAHandler extends GEOHandler {
     // #1308992
     String issuingCntry = reqEntry.getCmrIssuingCntry();
     if (isSSAMXBRIssuingCountry(issuingCntry) && (mainRecords instanceof java.util.List<?> && filteredRecords instanceof java.util.List<?>)) {
-      // during convertFrom
-      if (reqEntry.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_UPDATE)) {
-        List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
-        List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
-        for (Object tempRecObj : recordsToCheck) {
-          if (tempRecObj instanceof FindCMRRecordModel) {
-            FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
-
-            if (isBRIssuingCountry(issuingCntry)) {
-              if (CmrConstants.CUST_CLASS_33.equals(tempRec.getCmrClass()) || CmrConstants.CUST_CLASS_34.equals(tempRec.getCmrClass())) {
-                if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01") || tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZI01")) {
-                  // add current record
-                  recordsToReturn.add(tempRec);
-                }
-              } else {
-                if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")) {
-                  // not LEASI
-                  recordsToReturn.add(tempRec);
-                }
-              }
-            } else {
-              recordsToReturn.add(tempRec);
-            }
-          }
-        }
-      }
-
       if (reqEntry.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_CREATE)) {
         List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
         List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
@@ -152,15 +143,6 @@ public class LAHandler extends GEOHandler {
             if (isBRIssuingCountry(issuingCntry)) {
               if (!StringUtils.isEmpty(reqEntry.getCustType())) {
                 if (reqEntry.getCustType().equalsIgnoreCase(CmrConstants.CUST_TYPE_LEASI)) {
-                  // if
-                  // (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")
-                  // ||
-                  // tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZI01"))
-                  // {
-                  // // add current record
-                  // recordsToReturn.add(tempRec);
-                  // }
-
                   if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01") || tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZI01")) {
                     // add current record
                     recordsToReturn.add(tempRec);
@@ -177,9 +159,6 @@ public class LAHandler extends GEOHandler {
                 }
               }
             } else {
-              // if
-              // (tempRec.getAddrType().equalsIgnoreCase("ZS01"))
-              // {
               if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")) {
                 // FOR SSA MX RETURN ONLY THE LE ADDRESS
                 recordsToReturn.add(tempRec);
@@ -208,9 +187,28 @@ public class LAHandler extends GEOHandler {
 
     if (isBRIssuingCountry(issuingCountry)) {
       data.setProxiLocnNo(mainRecord.getCmrProxiLocn());
+
+      String govType = "";
+      if ("12".equals(mainRecord.getCmrClass())) {
+        govType = "PF";
+      } else if ("13".equals(mainRecord.getCmrClass())) {
+        govType = "PE";
+      } else {
+        govType = "OU";
+      }
+      data.setGovType(govType);
     }
 
-    data.setCollectorNameNo(mainRecord.getCmrCollectorNo());
+    if (SystemLocation.CHILE.equalsIgnoreCase(issuingCountry)) {
+      data.setBusnType(mainRecord.getCmrChileBusnTyp());
+    }
+
+    if (StringUtils.isNotBlank(mainRecord.getCmrCollectorNo()) && mainRecord.getCmrCollectorNo().length() > 6) {
+      data.setCollectorNameNo(mainRecord.getCmrCollectorNo().substring(0, 6));
+    } else {
+      data.setCollectorNameNo(mainRecord.getCmrCollectorNo());
+    }
+
     data.setCollBoId(mainRecord.getCmrCollBo());
 
     // Defect 1267371 :Municipal Fiscal Code/ Tax Code 2 wrongly imported
@@ -324,6 +322,10 @@ public class LAHandler extends GEOHandler {
       if (laReactivateCapable)
         data.setFunc("R");
     }
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      data.setRepTeamMemberNo(DEFAULT_SALES_REP);
+    }
   }
 
   private void importTaxInfo(EntityManager entityManager, Data data, long reqId, String sapNumber, String requesterId) {
@@ -353,6 +355,7 @@ public class LAHandler extends GEOHandler {
           if (isBRIssuingCountry(data.getCmrIssuingCntry())) {
             if ("40".equals(taxData.getId().getTaxCd())) {
               setIcmsData(data, taxData.getTaxSeparationIndc());
+              LOG.debug("BR ICMS ind: " + data.getIcmsInd());
 
               entityManager.merge(data);
               entityManager.flush();
@@ -384,9 +387,9 @@ public class LAHandler extends GEOHandler {
   }
 
   private void setIcmsData(Data data, String taxSepIndc) {
-    if (CmrConstants.YES_NO.N.equals(taxSepIndc)) {
+    if ("N".equals(taxSepIndc)) {
       data.setIcmsInd("1");
-    } else if (CmrConstants.YES_NO.Y.equals(taxSepIndc)) {
+    } else if ("Y".equals(taxSepIndc)) {
       data.setIcmsInd("2");
     }
   }
@@ -412,24 +415,30 @@ public class LAHandler extends GEOHandler {
     String issuingCountry = currentRecord.getCmrIssuedBy();
     String streetAddr1 = address.getAddrTxt();
     address.setPostCd(postalCode);
+
+    // Street
+    address.setAddrTxt(currentRecord.getCmrStreetAddress());
+
+    // Street Cont
+    address.setAddrTxt2(currentRecord.getCmrName4());
+
+    // Street 3 - might be changed to RDC Name3
+    address.setCity2(currentRecord.getCmrCity2());
+
+    // City
+    address.setCity1(currentRecord.getCmrCity());
+
+    // State Prov - computation
+    address.setStateProv(getStateProvCd(issuingCountry, currentRecord.getCmrState(), currentRecord.getCmrCity()));
+
+    if (StringUtils.isNotBlank(address.getCity1())) {
+      address.setLocationCode(getLocationCd(issuingCountry, address.getCity1(), address.getStateProv()));
+    }
+
     // #1180221: Name4 field for LA countries should populate Street Address
     // 2
     String orgName4 = !StringUtils.isEmpty(currentRecord.getCmrName4()) ? currentRecord.getCmrName4() : "";
     LOG.debug(orgName4);
-    // CREATCMR-531
-    String spid = "";
-
-    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
-      address.getId().setAddrSeq(currentRecord.getCmrAddrSeq());
-      spid = getRDcIerpSitePartyId(currentRecord.getCmrSapNumber());
-      address.setIerpSitePrtyId(spid);
-
-    } else {
-      // String addrSeq = address.getId().getAddrSeq();
-      // addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
-      address.getId().setAddrSeq("1");
-      address.setIerpSitePrtyId(spid);
-    }
     if (isMXIssuingCountry(issuingCountry)) {
       /* #1164406 */
       if (!StringUtils.isEmpty(streetAddr1)) {
@@ -633,16 +642,14 @@ public class LAHandler extends GEOHandler {
     String strAdd1 = address.getAddrTxt();
     String strAdd2 = address.getAddrTxt2();
 
-    String[] strAddrs = splitName(strAdd1, strAdd2, 30, 30);
+    if (strAdd1.length() > 30) {
+      String[] strAddrs = splitName(strAdd1, strAdd2, 30, 30);
 
-    if (strAddrs != null && strAddrs.length > 0) {
-      address.setAddrTxt(strAddrs[0]);
-      address.setAddrTxt2(strAddrs[1]);
+      if (strAddrs != null && strAddrs.length > 0) {
+        address.setAddrTxt(strAddrs[0]);
+        address.setAddrTxt2(strAddrs[1]);
+      }
     }
-    /*
-     * End 1665374
-     */
-
   }
 
   @Override
@@ -1746,21 +1753,6 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
-    if (LAHandler.isBRIssuingCountry(cmrIssuingCntry)) {
-      // if
-      // (CmrConstants.CUST_TYPE_PRIPE.equalsIgnoreCase(admin.getCustType())
-      // ||
-      // CmrConstants.CUST_TYPE_IBMEM.equalsIgnoreCase(admin.getCustType()))
-      // {// PRIPE,IBMEM
-      // admin.setDisableAutoProc(CmrConstants.CMT_LOCK_IND_YES);
-      // }
-
-      if ("C".equalsIgnoreCase(admin.getReqType())) {
-        if ("Y".equalsIgnoreCase(admin.getSaveIndAftrTempLoad())) {
-          deleteFilteredAddresses(admin.getId().getReqId(), admin.getCustType(), entityManager);
-        }
-      }
-    }
 
     if (LAHandler.isMXIssuingCountry(cmrIssuingCntry) && "PPN".equalsIgnoreCase(admin.getReqStatus())
         && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
@@ -1875,19 +1867,6 @@ public class LAHandler extends GEOHandler {
         admin.setProcessedFlag(processedFlag);
         throw new CmrException(MessageUtil.ERROR_DPL_NOT_DONE);
       }
-    }
-  }
-
-  private void deleteFilteredAddresses(long reqId, String custType, EntityManager entityManager) {
-    CmrClientService cmrClient = new CmrClientService();
-    boolean isLeasi = "LEASI".equalsIgnoreCase(custType);
-    List<String> addrTypeToDelete = null;
-    if (isLeasi) {
-      addrTypeToDelete = Arrays.asList("ZI01", "ZS01");
-      cmrClient.doActualDeleteOnFirstSaveAfterTempLoad(reqId, addrTypeToDelete, "BR.DELETE.FILTERED.FOR.LEASI", entityManager);
-    } else {
-      addrTypeToDelete = Arrays.asList("ZS01");
-      cmrClient.doActualDeleteOnFirstSaveAfterTempLoad(reqId, addrTypeToDelete, "BR.DELETE.FILTERED.NOT.LEASI", entityManager);
     }
   }
 
@@ -2462,12 +2441,76 @@ public class LAHandler extends GEOHandler {
     }
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+      DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
       if (StringUtils.isEmpty(data.getPpsceid())) {
-        DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
         if (dataRdc != null) {
           data.setPpsceid(dataRdc.getPpsceid());
         }
       }
+      if (data != null && dataRdc != null) {
+        PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CHECK.CONTACT.INFO.RECORD"));
+        query.setParameter("REQ_ID", data.getId().getReqId());
+        List<GeoContactInfo> contacts = query.getResults(GeoContactInfo.class);
+
+        for (GeoContactInfo contact : contacts) {
+          if ("EM".equals(contact.getContactType())) {
+            String email = StringUtils.isNotBlank(contact.getContactEmail()) ? contact.getContactEmail() : "";
+
+            if ("001".equals(contact.getContactSeqNum())) {
+              processContactsUpdate(email, dataRdc.getEmail1(), entityManager, contacts, contact, data);
+            } else if ("002".equals(contact.getContactSeqNum())) {
+              processContactsUpdate(email, dataRdc.getEmail2(), entityManager, contacts, contact, data);
+            } else if ("003".equals(contact.getContactSeqNum())) {
+              processContactsUpdate(email, dataRdc.getEmail3(), entityManager, contacts, contact, data);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private void processContactsUpdate(String currentEmail, String oldEmail, EntityManager entityManager, List<GeoContactInfo> contacts,
+      GeoContactInfo contactEM, Data data) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    if (!currentEmail.equalsIgnoreCase(oldEmail)) {
+      saveOrUpdateAdditionalContactLE(entityManager, contacts, contactEM, data.getId().getReqId());
+    }
+  }
+
+  private void saveOrUpdateAdditionalContactLE(EntityManager entityManager, List<GeoContactInfo> contacts, GeoContactInfo contactEM, long reqId)
+      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    GeoContactInfoPK contactPk = new GeoContactInfoPK();
+
+    String contactSeqEM = contactEM.getContactSeqNum();
+    GeoContactInfo contactLE = contacts.stream().filter(r -> ("LE".equals(r.getContactType()) && contactSeqEM.equals(r.getContactSeqNum()))).findAny()
+        .orElse(null);
+
+    if (contactLE != null) {
+      contactLE.setContactName(contactEM.getContactName());
+      contactLE.setContactPhone(contactEM.getContactPhone());
+      contactLE.setContactEmail(contactEM.getContactEmail());
+      contactLE.setContactTreatment(contactEM.getContactTreatment());
+      contactLE.setContactFunc(contactEM.getContactFunc());
+
+      entityManager.merge(contactLE);
+      entityManager.flush();
+
+    } else {
+      contactLE = new GeoContactInfo();
+      PropertyUtils.copyProperties(contactLE, contactEM);
+      contactLE.setContactType("LE");
+
+      int contactId = 1;
+      try {
+        contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null, String.valueOf(reqId));
+        contactPk.setContactInfoId(contactId);
+      } catch (CmrException ex) {
+        LOG.debug("Exception while getting contactId : " + ex.getMessage(), ex);
+      }
+
+      contactPk.setReqId(reqId);
+      contactLE.setId(contactPk);
+      entityManager.persist(contactLE);
+      entityManager.flush();
     }
   }
 
@@ -2479,16 +2522,8 @@ public class LAHandler extends GEOHandler {
     String streetAddr3 = addr.getCity2();
 
     AdminPK adminPK = new AdminPK();
-    ArrayList<String> addrDetailsList = new ArrayList<String>();
     adminPK.setReqId(addr.getId().getReqId());
     Admin admin = entityManager.find(Admin.class, adminPK);
-    // CREATCMR-531
-    String sapNo = addr.getSapNo();
-    if (!StringUtils.isEmpty(sapNo) && "U".equals(admin.getReqType())) {
-      if (addr.getSapNo().length() > 1) {
-        addr.setIerpSitePrtyId("S".concat(addr.getSapNo().substring(1)));
-      }
-    }
 
     if (isMXIssuingCountry(cmrIssuingCntry) && !(addr.getImportInd() == "Y")) {
       /* #1164406 FOR MANUAL CREATION OF ADDRESS */
@@ -2684,36 +2719,6 @@ public class LAHandler extends GEOHandler {
     return name1Name2Val;
   }
 
-  /*
-   * Author: Dennis N. Defect 1457760: Provide city location code on import for
-   * SSA and MX requests during create and update requests.
-   */
-  private void assignLocationCodeonImportForSSA(Addr address, String issuingCntry) throws Exception {
-    String sql = ExternalizedQuery.getSql("GET_SSA_LOCATION_CD");
-
-    sql = sql.replace(":CITY_DESC", address.getCity1());
-    sql = sql.replace(":ISSUING_CNTRY", issuingCntry);
-    sql = sql.replace(":STATE_CD", address.getStateProv());
-
-    EntityManager em = JpaManager.getEntityManager();
-    PreparedQuery query = new PreparedQuery(em, sql);
-
-    LOG.debug("Getting existing SSA MX Location Code value from CREQCMR DB..");
-    List<Object[]> results = query.getResults();
-
-    if (results != null && results.size() != 0) {
-      Object[] result = results.get(0);
-      String tempLocCode = result[0] != null ? (String) result[0] : "";
-      String suffix = tempLocCode.substring(0, 2);
-      tempLocCode = tempLocCode.replace(suffix, "");
-      LOG.debug("Setting " + (StringUtils.isEmpty(tempLocCode) ? "EMPTY" : tempLocCode) + " as Location Code value");
-      address.setLocationCode(tempLocCode);
-      String tempCityDesc = result[1] != null ? (String) result[1] : "";
-      LOG.debug("Setting " + (StringUtils.isEmpty(tempCityDesc) ? "EMPTY" : tempCityDesc) + " as City desc value");
-      address.setCity1(tempCityDesc);
-    }
-  }
-
   private void assignLocationCodeOnImport(Addr address, String issuingCntry) throws Exception {
     EntityManager em = JpaManager.getEntityManager();
     AddressService addSvc = new AddressService();
@@ -2809,36 +2814,6 @@ public class LAHandler extends GEOHandler {
     return ret;
   }
 
-  // CREATCMR-531
-  private String getRDcIerpSitePartyId(String kunnr) throws Exception {
-    String spid = "";
-
-    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
-    String mandt = SystemConfiguration.getValue("MANDT");
-    String sql = ExternalizedQuery.getSql("GET.IERP.BRAN5");
-    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
-    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
-    String dbId = QueryClient.RDC_APP_ID;
-
-    QueryRequest query = new QueryRequest();
-    query.setSql(sql);
-    query.addField("BRAN5");
-    query.addField("MANDT");
-    query.addField("KUNNR");
-
-    LOG.debug("Getting existing BRAN5 value from RDc DB..");
-    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
-    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
-
-    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
-      List<Map<String, Object>> records = response.getRecords();
-      Map<String, Object> record = records.get(0);
-      spid = record.get("BRAN5") != null ? record.get("BRAN5").toString() : "";
-      LOG.debug("***RETURNING BRAN5 > " + spid + " WHERE KUNNR IS > " + kunnr);
-    }
-    return spid;
-  }
-
   /**
    * Performs validation if the issuing country is SSA, BR, MX
    * 
@@ -2904,208 +2879,97 @@ public class LAHandler extends GEOHandler {
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
     LOG.debug("Inside doAfterImport method");
 
-    AddressService addrSvc = new AddressService();
-
-    if (!isBRIssuingCountry(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
-        && !"Y".equalsIgnoreCase(admin.getProspLegalInd())) {
-
-      CROSQueryRequest request = new CROSQueryRequest();
-      request.setIssuingCntry(data.getCmrIssuingCntry());
-      request.setCmrNo(admin.getModelCmrNo());
-
-      try {
-        CROSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
-            CROSServiceClient.class);
-        CROSQueryResponse response = client.executeAndWrap(CROSServiceClient.QUERY_APP_ID, request, CROSQueryResponse.class);
-
-        if (response.isSuccess()) {
-          CROSRecord record = response.getData();
-          /*
-           * 1471493: As per this defect, ABBREV_NM on a create for SSA should
-           * come from the first 30 chars of the NAME1 field. Thereby, code
-           * below is overriding the previously set value.
-           */
-          // data.setAbbrevNm(record.getAbbrevName());
-          List<CROSAddress> crosAddrList = record.getAddress();
-
-          if (crosAddrList != null && crosAddrList.size() > 0) {
-            for (int i = 0; i < crosAddrList.size(); i++) {
-              CROSAddress cAddr = crosAddrList.get(i);
-              LOG.debug("***BEGIN PRINT CROS ADDR INFO***");
-              LOG.debug("useCode >> " + cAddr.getUseCode());
-              LOG.debug("seqNo >> " + cAddr.getSeqNo());
-              LOG.debug("stateCode >> " + cAddr.getStateCode());
-              LOG.debug("locnCd >> " + cAddr.getLocationCode());
-              String addrType = "";
-
-              if ("LE".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZS01.toString();
-              } else if ("BI".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZP01.toString();
-              } else if ("PP".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZD01.toString();
-              } else if ("US".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZI01.toString();
-              }
-
-              addrSvc.updateSSAStateProvLocnCode(entityManager, cAddr.getStateCode(), cAddr.getLocationCode(), Long.toString(data.getId().getReqId()),
-                  addrType);
-              LOG.debug("***END PRINT CROS ADDR INFO***");
-            }
-          }
-        } else {
-          throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
-        }
-      } catch (Exception e) {
-        LOG.error("An error has occured in setting values for ABBREV_NM coming from the CROS query service on a create request.", e);
-        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
-      }
-    }
-
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      CROSQueryRequest request = new CROSQueryRequest();
-      request.setIssuingCntry(data.getCmrIssuingCntry());
-      request.setCmrNo(data.getCmrNo());
-      try {
-        CROSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
-            CROSServiceClient.class);
-        CROSQueryResponse response = client.executeAndWrap(CROSServiceClient.QUERY_APP_ID, request, CROSQueryResponse.class);
-        if (response.isSuccess()) {
-          CROSRecord record = response.getData();
-          data.setRepTeamMemberNo(record.getSalesRep());
-          data.setAbbrevNm(record.getAbbrevName());
-          data.setInstallTeamCd(record.getInstallTeamCode());
-          data.setSalesTeamCd(record.getSalesTeamCode());
-          data.setGovType(record.getGovernment());
-          data.setMrcCd(record.getMrcCode());
-
-          if (!StringUtils.isEmpty(record.getDplValidCode())) {
-            if ("DENIAL".equalsIgnoreCase(record.getDplValidCode())) {
-              data.setDenialCusInd("Y");
-              data.setEmbargoCd("Y");
-            } else {
-              data.setDenialCusInd("N");
-              data.setEmbargoCd("N");
-            }
-          } else {
-            data.setDenialCusInd("N");
-            data.setEmbargoCd("N");
-          }
-
-          data.setIcmsInd(record.getTaxPayCustCode());
-          String sql = ExternalizedQuery.getSql("UPDATE_DATA_RDC");
-          PreparedQuery qry = new PreparedQuery(entityManager, sql);
-          qry.setParameter("REQ_ID", data.getId().getReqId());
-          qry.setParameter("SALES_REP", record.getSalesRep());
-          qry.setParameter("COLNAMENO", record.getCollectorNo());
-          qry.setParameter("ABBREVNM", record.getAbbrevName());
-          qry.setParameter("COLLBO", record.getCollectorBO());
-          qry.executeSql();
-          List<CROSContact> crossCntlist = record.getContacts();
-          List<CROSAddress> crosAddrList = record.getAddress();
-
-          if (!StringUtils.isEmpty(record.getCollectorNo())) {
-            data.setCollectorNameNo(record.getCollectorNo());
-          }
-
-          DataRdc dataRdc = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
-
-          if (dataRdc != null) {
-            dataRdc.setVatExempt(record.getSalesTeamCode()); // sales
-            // team
-            // code
-            dataRdc.setIdentClient(record.getInstallTeamCode()); // install
-            // team
-            // code
-            dataRdc.setGovType(record.getGovernment());
-            dataRdc.setIsbuCd(record.getProxyLoc());
-            dataRdc.setIcmsInd(record.getTaxPayCustCode());
-            entityManager.merge(dataRdc);
-          }
-
-          int contactId = 1;
-          if (crosAddrList != null && crosAddrList.size() > 0) {
-            for (int i = 0; i < crosAddrList.size(); i++) {
-              CROSAddress cAddr = crosAddrList.get(i);
-              LOG.debug("***BEGIN PRINT CROS ADDR INFO***");
-              LOG.debug("useCode >> " + cAddr.getUseCode());
-              LOG.debug("seqNo >> " + cAddr.getSeqNo());
-              LOG.debug("stateCode >> " + cAddr.getStateCode());
-              LOG.debug("locnCd >> " + cAddr.getLocationCode());
-              String addrType = "";
-
-              if ("LE".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZS01.toString();
-              } else if ("BI".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZP01.toString();
-              } else if ("PP".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZD01.toString();
-              } else if ("US".equalsIgnoreCase(cAddr.getUseCode())) {
-                addrType = CmrConstants.ADDR_TYPE.ZI01.toString();
-              }
-
-              addrSvc.updateSSAStateProvLocnCode(entityManager, cAddr.getStateCode(), cAddr.getLocationCode(), Long.toString(data.getId().getReqId()),
-                  addrType);
-              LOG.debug("***END PRINT CROS ADDR INFO***");
-            }
-          }
-
-          if (crossCntlist != null && crossCntlist.size() > 0) {
-            PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CHECK.CONTACT.INFO.RECORD"));
-            query.setParameter("REQ_ID", data.getId().getReqId());
-            List<GeoContactInfo> results = query.getResults(GeoContactInfo.class);
-            GeoContactInfoService contService = new GeoContactInfoService();
-
-            if (results != null && !results.isEmpty() && results.size() > 0) {
-              contService.deleteAllContactDetails(results, entityManager, data.getId().getReqId());
-            }
-
-            for (CROSContact d : crossCntlist) {
-
-              if (SystemLocation.PERU.equals(data.getCmrIssuingCntry()) && "LE".equalsIgnoreCase(d.getContactCode())) {
-                continue;
-              }
-
-              GeoContactInfo e = new GeoContactInfo();
-              GeoContactInfoPK ePk = new GeoContactInfoPK();
-              e.setContactType(d.getContactCode());
-              e.setContactSeqNum(d.getContactNo());
-              e.setContactName(d.getContactName());
-              e.setContactPhone(d.getContactPhone());
-              e.setContactEmail(d.getContactEmail());
-              e.setContactFunc(".");
-              e.setContactTreatment("Sr.");
-
-              e.setCreateById(admin.getRequesterId());
-              e.setCreateTs(SystemUtil.getCurrentTimestamp());
-              try {
-                contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null, String.valueOf(admin.getId().getReqId()));
-                ePk.setContactInfoId(contactId);
-              } catch (CmrException ex) {
-                LOG.debug("Exception while getting contactId : " + ex.getMessage(), ex);
-              }
-              ePk.setReqId(data.getId().getReqId());
-              e.setId(ePk);
-              entityManager.persist(e);
-              entityManager.flush();
-            }
-          }
-        } else {
-          throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
-        }
-      } catch (Exception e) {
-        LOG.error("An error has occured in setting values coming from the CROS query service.", e);
-        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, e);
-      }
-
       if (data.getId() != null) {
+        if ("88".equalsIgnoreCase(data.getOrdBlk())) {
+          data.setDenialCusInd("Y");
+          data.setEmbargoCd("Y");
+        } else {
+          data.setDenialCusInd("N");
+          data.setEmbargoCd("N");
+        }
+
         String reqId = String.valueOf(data.getId().getReqId());
         // NOTE: As of MVP2 - no stories for secondary sold to
         // we only have one ZS01 (main sold-to)
+        AddressService addrSvc = new AddressService();
         String sapNumber = addrSvc.getAddressSapNo(entityManager, reqId, "ZS01");
         importTaxInfo(entityManager, data, data.getId().getReqId(), sapNumber, admin.getRequesterId());
+        importAddtlContacts(entityManager, data, admin, reqId, sapNumber);
+
+        DataPK dataRdcPk = new DataPK();
+        dataRdcPk.setReqId(data.getId().getReqId());
+        DataRdc dataRdc = entityManager.find(DataRdc.class, dataRdcPk);
+
+        PropertyUtils.copyProperties(dataRdc, data);
+        dataRdc.setId(data.getId());
+        entityManager.merge(dataRdc);
+        entityManager.flush();
       }
     }
+  }
+
+  private void importAddtlContacts(EntityManager entityManager, Data data, Admin admin, String reqId, String sapNumber) {
+    int contactId = 1;
+    List<Stxl> stxlList = getStxlAddlContactsByKunnr(entityManager, sapNumber);
+    if (stxlList != null && stxlList.size() > 0) {
+      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CHECK.CONTACT.INFO.RECORD"));
+      query.setParameter("REQ_ID", data.getId().getReqId());
+      List<GeoContactInfo> results = query.getResults(GeoContactInfo.class);
+      GeoContactInfoService contService = new GeoContactInfoService();
+
+      if (results != null && !results.isEmpty() && results.size() > 0) {
+        contService.deleteAllContactDetails(results, entityManager, data.getId().getReqId());
+      }
+
+      for (Stxl d : stxlList) {
+        GeoContactInfo e = new GeoContactInfo();
+        GeoContactInfoPK ePk = new GeoContactInfoPK();
+        e.setContactType("EM");
+
+        String addlConSeq = "";
+        if ("ZOA1".equals(d.getId().getTdid())) {
+          addlConSeq = "001";
+          data.setEmail1(d.getClustd());
+        } else if ("ZOA2".equals(d.getId().getTdid())) {
+          addlConSeq = "002";
+          data.setEmail2(d.getClustd());
+        } else if ("ZOA3".equals(d.getId().getTdid())) {
+          addlConSeq = "003";
+          data.setEmail3(d.getClustd());
+        }
+
+        e.setContactSeqNum(addlConSeq);
+        e.setContactName("N");
+        e.setContactPhone(".");
+        e.setContactEmail(d.getClustd());
+        e.setContactFunc(".");
+        e.setContactTreatment("Sr.");
+
+        e.setCreateById(admin.getRequesterId());
+        e.setCreateTs(SystemUtil.getCurrentTimestamp());
+        try {
+          contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null, String.valueOf(admin.getId().getReqId()));
+          ePk.setContactInfoId(contactId);
+        } catch (CmrException ex) {
+          LOG.debug("Exception while getting contactId : " + ex.getMessage(), ex);
+        }
+        ePk.setReqId(data.getId().getReqId());
+        e.setId(ePk);
+        entityManager.persist(e);
+        entityManager.flush();
+      }
+    }
+  }
+
+  private List<Stxl> getStxlAddlContactsByKunnr(EntityManager entityManager, String kunnr) {
+    String tdname = kunnr + "%";
+    String sql = ExternalizedQuery.getSql("LA.GET_STXL_ADDL_CONTACTS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("TDNAME", tdname);
+
+    return query.getResults(Stxl.class);
   }
 
   @Override
@@ -3177,32 +3041,81 @@ public class LAHandler extends GEOHandler {
     }
   }
 
-  public static String getStateProvCROSMapping(String issuingCntry, String rdcStateProv) {
-    LOG.info("getting State Prov Mapping for rdcState=" + rdcStateProv);
-    String crosStateProv = "";
-    String sql = ExternalizedQuery.getSql("GETSTATEPROVCROSMAPPING");
-    EntityManager em = JpaManager.getEntityManager();
-    PreparedQuery query = new PreparedQuery(em, sql);
-    query.setParameter("CNTRY", issuingCntry);
-    query.setParameter("RDCSTATEPROV", rdcStateProv);
-    List<String> queryResults = query.getResults(String.class);
-    if (queryResults != null && !queryResults.isEmpty()) {
-      if (queryResults.size() > 1) {
-        // return blank if too many results
-        crosStateProv = queryResults.get(0);
-        LOG.debug("retrieved crosStateProv found on DB and have more than one values.So setting first option as cros value=" + rdcStateProv);
-      } else {
-        // return only one record
-        crosStateProv = queryResults.get(0);
-        LOG.debug("retrieved crosStateProv found on DB. will be set as value=" + crosStateProv);
-      }
+  private String getStateProvCd(String issuingCntry, String state, String city) {
+    LOG.debug("Get StateProv/Regio value...");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String txt = "";
+    String sql = ExternalizedQuery.getSql("GET.LOV.CD_BY_TXT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+    query.setParameter("FIELD_ID", "##StateProv");
+    query.setParameter("TXT", state);
+    List<String> results = query.getResults(String.class);
+
+    if (results != null && results.size() == 1) {
+      txt = results.get(0);
     } else {
-      // return empty if results is null or empty
-      crosStateProv = "";
-      LOG.debug("retrieved crosStateProv is not found on DB. will be set as blank for rdc state value=" + rdcStateProv);
+      txt = getStateProvByCity(entityManager, issuingCntry, results, city);
     }
 
-    return crosStateProv;
+    LOG.debug("Lov txt : " + txt);
+    return txt;
+  }
+
+  private String getStateProvByCity(EntityManager entityManager, String issuingCntry, List<String> stateProvResults, String city) {
+    String txt = "";
+    String sql = ExternalizedQuery.getSql("GET.GEO_CITIES.ID_BY_DESC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CITY_DESC", city);
+    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+    List<String> results = query.getResults(String.class);
+
+    // blank state/prov - determine state/prov value via cityId first 2 char
+    if (stateProvResults.isEmpty() && !results.isEmpty()) {
+      String cityId = results.get(0);
+      if (StringUtils.isNotBlank(cityId) && cityId.length() >= 2) {
+        txt = cityId.substring(0, 2);
+      }
+    } else if (!stateProvResults.isEmpty() && !results.isEmpty()) {
+      // multiple state prov results - determine which state/prov is correct via
+      // cityId
+      for (String res : results) {
+        if (StringUtils.isNotBlank(res) && res.length() >= 2) {
+          String cityId = res.substring(0, 2);
+          if (stateProvResults.contains(cityId)) {
+            txt = cityId;
+            break;
+          }
+        }
+      }
+    }
+    return txt;
+  }
+
+  private String getLocationCd(String issuingCntry, String city, String stateProv) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String txt = "";
+    String sql = ExternalizedQuery.getSql("GET.GEO_CITIES.ID_BY_DESC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CITY_DESC", city);
+    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+    List<String> results = query.getResults(String.class);
+
+    if (results != null && results.size() == 1) {
+      txt = results.get(0);
+    } else if (results != null && results.size() > 1) {
+      for (String res : results) {
+        if (res.startsWith(stateProv)) {
+          txt = res;
+        }
+      }
+    }
+
+    if (txt != null && StringUtils.isNotEmpty(txt) && txt.length() >= 5) {
+      txt = txt.substring(2, 5);
+    }
+
+    return txt;
   }
 
   public static boolean isClearDPL(AddressModel model, Addr addr, EntityManager entityManager) {
@@ -3257,34 +3170,6 @@ public class LAHandler extends GEOHandler {
     }
     return false;
 
-  }
-
-  private CompoundEntity getCurrentRecord(Admin admin, EntityManager entityManager) throws CmrException {
-    if (admin != null && admin.getId().getReqId() > 0) {
-      String sql = ExternalizedQuery.getSql("REQUESTENTRY.MAIN");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("REQ_ID", admin.getId().getReqId());
-      query.setParameter("REQUESTER_ID", admin.getRequesterId());
-      query.setParameter("PROC_CENTER", admin.getLastProcCenterNm());
-      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-      List<CompoundEntity> records = query.getCompundResults(1, Admin.class, Admin.REQUEST_ENTRY_SERVICE_MAPPING);
-      if (records != null && records.size() > 0) {
-        return records.get(0);
-      }
-    }
-    return null;
-  }
-
-  private Addr getCurrentRecordSoldTo(Admin admin, EntityManager entityManager) {
-    Addr addr = new Addr();
-    String qrySoldToAddr = ExternalizedQuery.getSql("RECORD.ADDRESSTGME");
-    PreparedQuery query = new PreparedQuery(entityManager, qrySoldToAddr);
-    query.setParameter("REQ_ID", String.valueOf(admin.getId().getReqId()));
-    query.setParameter("ADDR_TYPE", "ZS01");
-    query.setParameter("ADDR_SEQ", "1");
-    addr = query.getSingleResult(Addr.class);
-
-    return addr;
   }
 
   public void recomputeDPLResult(Admin admin, EntityManager entityManager, long reqId) {
@@ -4134,7 +4019,7 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
   }
 
   private List<TaxData> getTaxDataByKunnr(EntityManager entityManager, String kunnr) {
@@ -4144,6 +4029,347 @@ public class LAHandler extends GEOHandler {
     query.setParameter("KUNNR", kunnr);
 
     return query.getResults(TaxData.class);
+  }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String addrSeqNum = null;
+
+    AdminPK adminPK = new AdminPK();
+    adminPK.setReqId(reqId);
+    Admin admin = entityManager.find(Admin.class, adminPK);
+
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      addrSeqNum = getAddrSeqForCreate(entityManager, reqId, addrType, cmrIssuingCntry);
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      addrSeqNum = getAddrSeqForUpdate(entityManager, reqId, addrType, cmrIssuingCntry);
+    }
+    return addrSeqNum;
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    return generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+  }
+
+  private String getAddrSeqForCreate(EntityManager entityManager, long reqId, String addrType, String cmrIssuingCntry) {
+    int startingSeqNum = 0;
+    String addrSeqNum = null;
+    if (!StringUtils.isEmpty(addrType)) {
+
+      if (SystemLocation.BRAZIL.equals(cmrIssuingCntry)) {
+        startingSeqNum = getFixedStartingSeqNewAddrBR(addrType);
+      } else {
+        startingSeqNum = getFixedStartingSeqNewAddr(addrType);
+      }
+
+      addrSeqNum = getAvailableAddrSeqNum(entityManager, reqId, startingSeqNum);
+    }
+
+    return addrSeqNum;
+  }
+
+  private String getAddrSeqForUpdate(EntityManager entityManager, long reqId, String addrType, String cmrIssuingCntry) {
+    int startingSeqNum = 0;
+    int maxSeqNum = 0;
+    if (SystemLocation.BRAZIL.equals(cmrIssuingCntry)) {
+      startingSeqNum = getFixedStartingSeqNewAddrBR(addrType);
+      maxSeqNum = getMaxSeqBR(addrType);
+    } else {
+      startingSeqNum = getFixedStartingSeqNewAddr(addrType);
+      maxSeqNum = getMaxSeq(addrType);
+    }
+    return getAvailAddrSeqNumInclRdc(entityManager, reqId, startingSeqNum, maxSeqNum);
+  }
+
+  private String getAvailAddrSeqNumInclRdc(EntityManager entityManager, long reqId, int startingSeqNum, int maxSeqNum) {
+    DataPK pk = new DataPK();
+    pk.setReqId(reqId);
+    Data data = entityManager.find(Data.class, pk);
+
+    String cmrNo = data.getCmrNo();
+    Set<Integer> allAddrSeqFromAddr = getAllSavedSeqFromAddr(entityManager, reqId);
+    Set<Integer> allAddrSeqFromRdc = getAllSavedSeqFromRdc(entityManager, cmrNo, data.getCmrIssuingCntry());
+
+    Set<Integer> mergedAddrSet = new HashSet<>();
+    mergedAddrSet.addAll(allAddrSeqFromAddr);
+    mergedAddrSet.addAll(allAddrSeqFromRdc);
+
+    int availSeqNum = startingSeqNum;
+    if (mergedAddrSet.contains(availSeqNum)) {
+      while (mergedAddrSet.contains(availSeqNum)) {
+        availSeqNum++;
+        if (availSeqNum > maxSeqNum) {
+          availSeqNum = startingSeqNum;
+        }
+      }
+    }
+    return String.valueOf(availSeqNum);
+  }
+
+  private int getFixedStartingSeqNewAddrBR(String addrType) {
+    int startSeq = 0;
+    if ("ZS01".equals(addrType)) {
+      startSeq = 100001;
+    } else if ("ZP01".equals(addrType)) {
+      startSeq = 200001;
+    } else if ("ZI01".equals(addrType)) {
+      startSeq = 300001;
+    } else if ("ZD01".equals(addrType)) {
+      startSeq = 400001;
+    }
+    return startSeq;
+  }
+
+  private int getMaxSeqBR(String addrType) {
+    int maxSeq = 0;
+    if ("ZS01".equals(addrType)) {
+      maxSeq = 199999;
+    } else if ("ZP01".equals(addrType)) {
+      maxSeq = 299999;
+    } else if ("ZI01".equals(addrType)) {
+      maxSeq = 399999;
+    } else if ("ZD01".equals(addrType)) {
+      maxSeq = 499999;
+    }
+    return maxSeq;
+  }
+
+  private int getFixedStartingSeqNewAddr(String addrType) {
+    int startSeq = 0;
+    if ("ZS01".equals(addrType)) {
+      startSeq = 10000001;
+    } else if ("ZP01".equals(addrType)) {
+      startSeq = 20000001;
+    } else if ("ZI01".equals(addrType)) {
+      startSeq = 30000001;
+    } else if ("ZD01".equals(addrType)) {
+      startSeq = 40000001;
+    }
+    return startSeq;
+  }
+
+  private int getMaxSeq(String addrType) {
+    int maxSeq = 0;
+    if ("ZS01".equals(addrType)) {
+      maxSeq = 19999999;
+    } else if ("ZP01".equals(addrType)) {
+      maxSeq = 29999999;
+    } else if ("ZI01".equals(addrType)) {
+      maxSeq = 39999999;
+    } else if ("ZD01".equals(addrType)) {
+      maxSeq = 49999999;
+    }
+    return maxSeq;
+  }
+
+  private String getAvailableAddrSeqNum(EntityManager entityManager, long reqId, int startingSeqNum) {
+    int availSeqNum = startingSeqNum;
+    Set<Integer> allAddrSeq = getAllSavedSeqFromAddr(entityManager, reqId);
+    if (allAddrSeq.contains(availSeqNum)) {
+      while (allAddrSeq.contains(availSeqNum)) {
+        availSeqNum++;
+      }
+    }
+    return String.valueOf(availSeqNum);
+  }
+
+  private Set<Integer> getAllSavedSeqFromAddr(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("LA.GET.ADDRSEQ.BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Integer> results = query.getResults(Integer.class);
+
+    Set<Integer> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(results);
+
+    return addrSeqSet;
+  }
+
+  private Set<Integer> getAllSavedSeqFromRdc(EntityManager entityManager, String cmrNo, String cmrIssuingCntry) {
+    String sql = ExternalizedQuery.getSql("GET.KNA1_ZZKV_SEQNO_DISTINCT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", cmrIssuingCntry);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<Integer> resultsRDC = query.getResults(Integer.class);
+    Set<Integer> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(resultsRDC);
+
+    return addrSeqSet;
+  }
+
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country, Admin admin) {
+    LOG.debug("inside LA validateMassUpdateTemplateDupFills handler...");
+
+    XSSFCell currCell = null;
+    boolean isDataFilled = false;
+    boolean isARFilled = false;
+    boolean isEmailFilled = false;
+    boolean requesterFromCmdeGsi = false;
+    boolean requesterFromAcctReciv = false;
+    Map<String, HashSet<String>> mapCmrSeq = new HashMap<String, HashSet<String>>();
+
+    String strRequesterId = admin.getRequesterId().toLowerCase();
+    String groups = SystemParameters.getString("LA_CME_GSI_LIST");
+    LOG.debug("strRequesterId : " + strRequesterId);
+    LOG.debug("groups cmde/gsi : " + strRequesterId);
+
+    requesterFromCmdeGsi = BluePagesHelper.isUserInLaBlueGroup(strRequesterId, groups);
+    LOG.debug("requester from cmde/gsi : " + requesterFromCmdeGsi);
+
+    groups = SystemParameters.getString("LA_AR_LIST");
+    LOG.debug("groups ar : " + strRequesterId);
+    requesterFromAcctReciv = BluePagesHelper.isUserInLaBlueGroup(strRequesterId, groups);
+    LOG.debug("requester from acct receivable : " + requesterFromAcctReciv);
+
+    for (String name : LA_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);
+      LOG.debug("validating for sheet " + name);
+      if (sheet != null) {
+        TemplateValidation error = new TemplateValidation(name);
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            String cmrNo = "";
+            String abbrevname = "";
+            String subindustry = "";
+            String isic = "";
+            String inac = "";
+            String company = "";
+            String isu = "";
+            String clientTier = "";
+            String sbo = "";
+            String kukla = "";
+            String blockCode = "";
+            String vat = "";
+            String creditCode = "";
+            String codCondition = "";
+            String codReason = "";
+            String collection = "";
+            String collector = "";
+            String paymentMode = "";
+            String email1 = "";
+            String email2 = "";
+            String email3 = "";
+
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              abbrevname = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              subindustry = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              isic = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              inac = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              company = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              isu = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              clientTier = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              sbo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              kukla = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              blockCode = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(11);
+              vat = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(abbrevname) || StringUtils.isNotBlank(subindustry) || StringUtils.isNotBlank(isic)
+                  || StringUtils.isNotBlank(inac) || StringUtils.isNotBlank(company) || StringUtils.isNotBlank(isu)
+                  || StringUtils.isNotBlank(clientTier) || StringUtils.isNotBlank(sbo) || StringUtils.isNotBlank(kukla)
+                  || StringUtils.isNotBlank(blockCode) || StringUtils.isNotBlank(vat)) {
+                isDataFilled = true;
+              }
+
+              if (!requesterFromCmdeGsi) {
+                if (isDataFilled) {
+                  LOG.trace("User is not allowed to perform update on this tab.");
+                  error.addError(row.getRowNum() + 1, "", "User is not allowed to perform update on this tab." + "<br>");
+                }
+              }
+
+              if ((isDataFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              } else if (mapCmrSeq.containsKey(cmrNo)) {
+                error.addError(row.getRowNum() + 1, "<br>CMR No.", "Duplicate CMR No. It should be entered only once.");
+              } else {
+                mapCmrSeq.put(cmrNo, new HashSet<String>());
+              }
+            }
+
+            if ("AccountReceivable".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              creditCode = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              codCondition = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              codReason = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              collection = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              collector = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              paymentMode = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(creditCode) || StringUtils.isNotBlank(codCondition) || StringUtils.isNotBlank(codReason)
+                  || StringUtils.isNotBlank(collection) || StringUtils.isNotBlank(collector) || StringUtils.isNotBlank(paymentMode)) {
+                isARFilled = true;
+              }
+
+              if (!requesterFromAcctReciv) {
+                if (isARFilled) {
+                  LOG.trace("User is not allowed to perform update on this tab.");
+                  error.addError(row.getRowNum() + 1, "", "User is not allowed to perform update on this tab." + "<br>");
+                }
+              }
+
+              if ((isARFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+            }
+
+            if ("Email".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              email1 = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              email2 = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              email3 = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(email1) || StringUtils.isNotBlank(email2) || StringUtils.isNotBlank(email3)) {
+                isEmailFilled = true;
+              }
+
+              if ((isEmailFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+            }
+
+          }
+        } // end row loop
+
+        if (error.hasErrors()) {
+          validations.add(error);
+        }
+      }
+    }
   }
 
 }

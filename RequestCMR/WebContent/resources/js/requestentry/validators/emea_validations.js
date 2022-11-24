@@ -494,9 +494,10 @@ function afterConfigForUKI() {
       }
     });
   }
-/*  if (_customerTypeHandler && _customerTypeHandler[0]) {
-    _customerTypeHandler[0].onChange();
-  }*/
+  /*
+   * if (_customerTypeHandler && _customerTypeHandler[0]) {
+   * _customerTypeHandler[0].onChange(); }
+   */
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
 
@@ -570,7 +571,7 @@ function afterConfigForUKI() {
       }
     });
   }
-
+  addressQuotationValidatorUKI();
 }
 
 function addHandlersForUK() {
@@ -4721,8 +4722,8 @@ function afterConfigForIT() {
     });
 
     if (result != null && result.ret1 != '' && result.ret1 != undefined && result.ret1 != 'IT') {
-      FormManager.setValue('vat', '');
-      FormManager.readOnly('vat');
+      FormManager.setValue('taxCd1', '');
+      FormManager.readOnly('taxCd1');
     }
   }
 
@@ -4999,6 +5000,7 @@ function showHideCityStateProvIT() {
   }
   if (landCntryVal == 'IT') {
     FormManager.show('StateProv', 'stateProv');
+    FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
   } else {
     FormManager.hide('StateProv', 'stateProv');
   }
@@ -6729,6 +6731,20 @@ function setVATOnIdentClientChangeIT() {
     } else if ((ident == 'A' || ident == 'D' || ident == 'C') && checkImportIndc == 'Y') {
       FormManager.readOnly('vat');
     }
+    if (ident == 'N') {
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'vat' ], 'MAIN_CUST_TAB');
+      FormManager.enable('vat');
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      FormManager.setValue('taxCd1', '');
+      FormManager.readOnly('taxCd1');
+    } else if (ident == 'Y') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vat', '');
+      FormManager.readOnly('vat');
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      FormManager.setValue('taxCd1', '');
+      FormManager.readOnly('taxCd1');
+    }
 
   }
 
@@ -6852,12 +6868,14 @@ function setStateProvReqdPostalCodeIT() {
     };
     var results = cmr.query('GETSPVALFORPOSTCDIT', qParams);
     if (results != null) {
-      if (role == 'REQUESTER' && results.length > 1 && (addrType != 'ZS01' || !FormManager.getField('addrType_ZS01').checked)) {
+      if (role == 'REQUESTER' && results.length >= 1) {
         FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
       }
-      if (results.length == 1 && role == 'REQUESTER' && (addrType != 'ZS01' || !FormManager.getField('addrType_ZS01').checked)) {
-        FormManager.resetValidations('stateProv');
-      }
+      /*
+       * if (results.length == 1 && role == 'REQUESTER' && (addrType != 'ZS01' ||
+       * !FormManager.getField('addrType_ZS01').checked)) {
+       * FormManager.resetValidations('stateProv'); }
+       */
     }
   }
 }
@@ -8962,10 +8980,16 @@ function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
       var checkImportIndc = getImportedIndcForItaly();
       FormManager.enable('identClient');
       if (ident == 'N') {
-        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Fiscal Code' ], 'MAIN_CUST_TAB');
-        FormManager.enable('taxCd1');
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'vat' ], 'MAIN_CUST_TAB');
+        FormManager.enable('vat');
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+        FormManager.setValue('taxCd1', '');
+        FormManager.readOnly('taxCd1');
       } else if (ident == 'Y') {
-        FormManager.resetValidations('taxCd1');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.setValue('vat', '');
+        FormManager.readOnly('vat');
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
         FormManager.setValue('taxCd1', '');
         FormManager.readOnly('taxCd1');
       }
@@ -9266,6 +9290,8 @@ function addAfterConfigItaly() {
   ibmFieldsBehaviourInCreateByScratchIT();
   disableProcpectCmrIT();
   getOldValuesIT();
+  // CREATCMR-788
+  addressQuotationValidatorIT();
 }
 
 function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
@@ -9592,7 +9618,7 @@ function autoSetUIFieldsOnScnrioUKI() {
     FormManager.readOnly('custClass');
     FormManager.setValue('custClass', '33');
   }
-  
+
   if (issuingCntry == '754') {
     if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
       FormManager.setValue('clientTier', '');
@@ -10456,6 +10482,36 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function addressQuotationValidatorIT() {
+  // CREATCMR-788
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Continuation' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('addrAbbrevName', Validators.NO_QUOTATION, [ 'Abbreviated Name' ]);
+  FormManager.addValidator('streetAbbrev', Validators.NO_QUOTATION, [ 'Street Abbreviation' ]);
+  FormManager.addValidator('addrAbbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ]);
+
+}
+
+function addressQuotationValidatorUKI() {
+  // CREATCMR-788
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Cont' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Attn' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+}
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');

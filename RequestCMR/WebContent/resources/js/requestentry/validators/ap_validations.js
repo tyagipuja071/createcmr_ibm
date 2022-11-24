@@ -9,6 +9,7 @@ var  _isuHandler = null;
 var _clusterHandlerANZ = null;
 var _inacCdHandlerIN = null;
 var _importIndIN = null;
+var _vatRegisterHandlerSG = null;
 
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
@@ -34,8 +35,18 @@ function addHandlersForAP() {
       setIsuOnIsic();
     });
   }
-  handleObseleteExpiredDataForUpdate();
-  }
+  if (_vatRegisterHandlerSG == null) {
+    _vatRegisterHandlerSG = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
+    cmr
+    .showAlert(
+        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of “VAT Registration Status” is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ‘No – VAT unapplicable’, you are confirming that this customer has no VAT# then “VAT Registration Status” is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
+          OK : 'I confirm',
+        });
+        });
+        }
+          handleObseleteExpiredDataForUpdate();
+    }
+
 
 function addHandlersForANZ() {
   if (_clusterHandlerANZ == null && FormManager.getActualValue('reqType') != 'U') {
@@ -223,7 +234,10 @@ function addAfterConfigAP() {
   if ((role == 'PROCESSOR' || role == 'VIEWER') && (custSubGrp.includes('DUM') || custSubGrp.includes('INT')) && aseanCntries.includes(cntry)) {
     FormManager.readOnly('mrcCd');
   }
-
+  // CREATCMR-788
+  if(cntry == '738' || cntry == '736'){
+    addressQuotationValidatorGCG();
+  }
   var streetAddressCont1 = FormManager.getActualValue('addrTxt2');
   if ((cntry == '738' || cntry == '736') && (streetAddressCont1 == '' || streetAddressCont1 == null)) {
     return new ValidationResult({
@@ -262,6 +276,8 @@ function addAfterConfigAP() {
     if (cntry != SysLoc.HONG_KONG && cntry !=  SysLoc.MACAO && reqType == 'U') {
     handleObseleteExpiredDataForUpdate();
   }
+  // CREATCMR-788
+  addressQuotationValidatorAP();
 }
 
 function setInacByCluster() {
@@ -4228,15 +4244,15 @@ function executeBeforeSubmit() {
     if (reqType == 'U') {
       var errMsg = checkAnyChangesOnCustNameAddrGST();
       if (errMsg != '' && action == 'SFP') {
-        cmr.showConfirm('showVerificationModal()', errMsg, 'Warning', null, {
+        cmr.showConfirm('showAddressVerificationModal()', errMsg, 'Warning', null, {
           OK : 'Yes',
           CANCEL : 'No'
         });
       } else {
-        showVerificationModal();
+        showAddressVerificationModal();
       }
     } else {
-      showVerificationModal();
+      showAddressVerificationModal();
     }
   }
 }
@@ -4283,6 +4299,65 @@ function checkAnyChangesOnCustNameAddrGST() {
     errorMsg = 'You haven\'t updated anything on customer name/address or GST#, please check and take relevant edit operation before submit this Update request. Proceed?';
   }
   return errorMsg;
+}
+
+// CREATCMR-6880
+function vatRegistrationForSG() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var reqId = FormManager.getActualValue('reqId');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var addrType = FormManager.getActualValue('addrType');
+  var landCntry ='';
+  if (addrType == 'ZS01') {
+    landCntry = FormManager.getActualValue('landCntry'); 
+  }
+  if (landCntry == '') {
+  var params = {
+      REQ_ID : reqId,
+      ADDR_TYPE : "ZS01"
+    };
+    var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+    landCntry = landCntryResult.ret1;
+  }
+  if (cntry == '834' && landCntry == 'TH') {
+  FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Vat Registration Status' ], 'MAIN_IBM_TAB');
+  var isVatRegistered =  FormManager.getActualValue('taxCd1');
+  if (isVatRegistered == 'NA') {
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_IBM_TAB');
+    FormManager.enable('vat');
+  }
+  }
+}
+
+function displayVatRegistrartionStatus() {
+  console.log(">>> Executing displayVatRegistrationStatus");
+  var reqId = FormManager.getActualValue('reqId');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var addrType = FormManager.getActualValue('addrType');
+  var landCntry ='';
+  if (addrType == 'ZS01') {
+    landCntry = FormManager.getActualValue('landCntry'); 
+  }
+  if (landCntry == '') {
+  var params = {
+      REQ_ID : reqId,
+      ADDR_TYPE : "ZS01"
+    };
+    var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+    landCntry = landCntryResult.ret1;
+  }
+  if (cntry == '834' && landCntry == 'TH') {
+    cmr.showNode('vatRegisterStatus');
+  } else {
+    cmr.hideNode('vatRegisterStatus');
+  }
+  vatRegistrationForSG();
 }
 
 // CREATCMR-6398
@@ -4497,7 +4572,75 @@ function additionalAddrNmValidator(){
     };
   })(), null, 'frmCMR_addressModal');
 }
+var _customerTypeHandler = null;
+function addCustGrpHandler() {
+  if (_customerTypeHandler == null) {
+    var _custType = null;
+    _customerTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      _custType = value;
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
+      var custGrp = FormManager.getActualValue('custGrp');
+      var reqType = FormManager.getActualValue('reqType');
+      var apaCntry = [ '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '858', '766' ];
+      if (reqType == 'C' && custGrp == 'CROSS' && apaCntry.includes(cntry)) {
+        FormManager.setValue('custSubGrp', 'CROSS');
+      }
+    });
+  }
+  if (_customerTypeHandler && _customerTypeHandler[0]) {
+    _customerTypeHandler[0].onChange();
+  }
+}
 
+// CREATCMR-788
+function addressQuotationValidatorAP() {
+  
+  var cntry = FormManager.getActualValue('cmrIssuingCntry')
+  var AP01 = [ SysLoc.BRUNEI ,SysLoc.SRI_LANKA ,SysLoc.INDIA ,SysLoc.INDONESIA,SysLoc.MALASIA,SysLoc.PHILIPPINES,SysLoc.BANGLADESH,SysLoc.SINGAPORE,SysLoc.VIETNAM,SysLoc.THAILAND];
+  if (AP01.indexOf(cntry) > -1) {
+    FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+    FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+    FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Address.(Flr,Bldg,lvl,Unit.)' ]);
+    FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address.Cont1(Street Name, Street No.)' ]);
+    FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Address.Cont2(District,Town,Region)' ]);
+    FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+    if (cntry == SysLoc.INDONESIA || cntry == SysLoc.MALASIA  || cntry == SysLoc.PHILIPPINES) {
+      FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City/State/Province' ]);
+    } else if(cntry == SysLoc.THAILAND) {
+      FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'Street Address Cont\'2' ]);
+    } else {
+      FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+    }
+  } else if (cntry == SysLoc.AUSTRALIA || cntry == SysLoc.NEW_ZEALAND) {
+    FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+    FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+    FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Attn' ]);
+    FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
+    FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Address Con\'t' ]);
+    FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'Suburb' ]);
+    FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  }
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+}
+function addressQuotationValidatorGCG() {
+  
+  var cntry = FormManager.getActualValue('cmrIssuingCntry')
+  
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+  switch (cntry) {
+  case SysLoc.MACAO: case SysLoc.HONG_KONG:
+    FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+    FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+    FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Address.(Flr,Bldg,lvl,Unit.)' ]);
+    FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address. Cont1(Street Name, Street No.)' ]);
+    FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'Address. Cont2(District,Town,Region)' ]);
+    FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+    break;
+  }
+
+}
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4505,6 +4648,7 @@ dojo.addOnLoad(function() {
   GEOHandler.ASEAN = [ SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.LAOS, SysLoc.MALASIA, SysLoc.CAMBODIA ];
   GEOHandler.ANZ = [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ];
   GEOHandler.GCG = [ SysLoc.HONG_KONG, SysLoc.MACAO ];
+  GEOHandler.APAC_1 = [SysLoc.SINGAPORE, SysLoc.PHILIPPINES, SysLoc.THAILAND, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.BRUNEI, SysLoc.VIETNAM, SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA, SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.CHINA, SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.TAIWAN,SysLoc.KOREA ];
   // CREATCMR-6825
   GEOHandler.APAC = [ SysLoc.SINGAPORE, SysLoc.PHILIPPINES, SysLoc.THAILAND, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.BRUNEI, SysLoc.VIETNAM, SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA, 
       SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.HONG_KONG, SysLoc.MACAO  ];
@@ -4676,4 +4820,8 @@ dojo.addOnLoad(function() {
   // CREATCMR-6825
   GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.APAC);
   GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.APAC);
+  GEOHandler.addAfterConfig(addCustGrpHandler, GEOHandler.APAC_1);
+  GEOHandler.addAddrFunction(displayVatRegistrartionStatus, [ SysLoc.SINGAPORE ]);
+  GEOHandler.addAfterConfig(displayVatRegistrartionStatus,  [ SysLoc.SINGAPORE ] );
+  GEOHandler.addAfterTemplateLoad(displayVatRegistrartionStatus,   [ SysLoc.SINGAPORE ] );
 });

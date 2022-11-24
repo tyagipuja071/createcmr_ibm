@@ -194,7 +194,7 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
-          legacyCust.setTelNoOrVat(addr.getCustPhone());
+          legacyCust.setTelNoOrVat(getTrimed(addr.getCustPhone()));
           landedCntry = addr.getLandCntry();
           break;
         }
@@ -213,9 +213,7 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
-          if (!StringUtils.isEmpty(addr.getCustPhone())) {
-            legacyCust.setTelNoOrVat(addr.getCustPhone());
-          }
+          legacyCust.setTelNoOrVat(addr.getCustPhone());
           landedCntry = addr.getLandCntry();
           break;
         }
@@ -358,9 +356,10 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       legacyAddr.getId().setAddrNo(StringUtils.isEmpty(currAddr.getPrefSeqNo()) ? legacyAddr.getId().getAddrNo() : currAddr.getPrefSeqNo());
     }
     formatAddressLinesLD(dummyHandler, legacyAddr);
-    if (("ZD01".equals(currAddr.getId().getAddrType()) || "ZS01".equals(currAddr.getId().getAddrType()))
-        && !StringUtils.isEmpty(currAddr.getCustPhone())) {
+    if ("ZD01".equals(currAddr.getId().getAddrType()) && !StringUtils.isEmpty(currAddr.getCustPhone())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone().trim());
+    } else if ("ZD01".equals(currAddr.getId().getAddrType()) && StringUtils.isEmpty(currAddr.getCustPhone())) {
+      legacyAddr.setAddrPhone("");
     }
     String poBox = currAddr.getPoBox();
     if (!StringUtils.isEmpty(poBox) && ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType()))) {
@@ -417,12 +416,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
           }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
 
         }
         // mailing,installing and EPL(Software Update)-name con't OR Att. Person
@@ -517,12 +518,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
           }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
         }
         // mailing,installing and EPL(Software Update)-name con't OR Att. Person
         if (MQMsgConstants.ADDR_ZP01.equals(addrType) || MQMsgConstants.ADDR_ZI01.equals(addrType) || MQMsgConstants.ADDR_ZS02.equals(addrType)) {
@@ -578,12 +581,15 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
-          } else if (!StringUtils.isEmpty(addrData.getPoBox())) {
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
+          else if (!StringUtils.isEmpty(addrData.getPoBox())) {
             line2 = "PO BOX " + addrData.getPoBox().trim();
           }
         }
@@ -607,12 +613,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
           }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
         }
 
         if (StringUtils.isEmpty(line2)) {
@@ -674,12 +682,15 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
               line3 = "ATT " + line3;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line3 += (line3.length() > 0 ? " " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line3 = addrData.getCustPhone();
-          } else if (!StringUtils.isEmpty(addrData.getPoBox())) {
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line3 += (line3.length() > 0 ? " " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line3 = addrData.getCustPhone();
+          // }
+          else if (!StringUtils.isEmpty(addrData.getPoBox())) {
             line3 = "PO BOX " + addrData.getPoBox().trim();
           }
         }
@@ -703,12 +714,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
               line3 = "ATT " + line3;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line3 += (line3.length() > 0 ? " " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line3 = addrData.getCustPhone();
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line3 += (line3.length() > 0 ? " " : "") +
+            // addrData.getCustPhone();
+            // }
           }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line3 = addrData.getCustPhone();
+          // }
         }
 
         if (StringUtils.isBlank(line3)) {
@@ -767,12 +780,16 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
-          } else if (!StringUtils.isEmpty(addrData.getPoBox())) {
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
+          }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
+
+          else if (!StringUtils.isEmpty(addrData.getPoBox())) {
             line2 = "PO BOX " + addrData.getPoBox().trim();
           }
         }
@@ -792,12 +809,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
             if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
               line2 = "ATT " + line2;
             }
-            if (!StringUtils.isBlank(addrData.getCustPhone())) {
-              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
-            }
-          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
-            line2 = addrData.getCustPhone();
+            // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+            // line2 += (line2.length() > 0 ? ", " : "") +
+            // addrData.getCustPhone();
+            // }
           }
+          // else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+          // line2 = addrData.getCustPhone();
+          // }
         }
         // street
         line3 = addrData.getAddrTxt();
@@ -943,9 +962,22 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
 
     }
 
+    if (!StringUtils.isEmpty(addr.getCustPhone())) {
+      setAddrPhoneForMassUpdate(legacyAddr, addr);
+
+    }
+
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
 
+  }
+
+  private void setAddrPhoneForMassUpdate(CmrtAddr legacyAddr, MassUpdtAddr addr) {
+    if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+      legacyAddr.setAddrPhone("");
+    } else if ("ZD01".equals(addr.getId().getAddrType())) {
+      legacyAddr.setAddrPhone(addr.getCustPhone());
+    }
   }
 
   @Override
@@ -1306,7 +1338,7 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       cust.setIsuCd(muData.getIsuCd() + "7");
     } else {
       String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-        + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
       if (isuClientTier != null && isuClientTier.endsWith("@")) {
         cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
       } else if (isuClientTier != null && isuClientTier.length() == 3) {
@@ -1396,6 +1428,17 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       }
     }
 
+    for (MassUpdtAddr addr : cmrObjects.getMassUpdateAddresses()) {
+      if (!StringUtils.isBlank(addr.getCustPhone()) && "ZS01".equals(addr.getId().getAddrType())) {
+        if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+          cust.setTelNoOrVat("");
+        } else {
+          cust.setTelNoOrVat(getTrimed(addr.getCustPhone()));
+        }
+        break;
+      }
+    }
+
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       String subInd = muData.getSubIndustryCd();
       cust.setImsCd(subInd);
@@ -1445,6 +1488,8 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
   public boolean isPG01Supported() {
     return true;
   }
+
+  @Override
   public void getTargetCountryId(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, String cntry, String cmrNo) {
     LOG.debug("Set LOC1 = 866 in case of IssuingCntry = 754");
     if (cntry.equals("754")) {
@@ -1459,7 +1504,7 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     }
     return false;
   }
-  
+
   private boolean isSharedSequence(CMRRequestContainer cmrObjects, Addr currAddr) {
     Map<String, Integer> sequences = new HashMap<String, Integer>();
     String zs01Seq = "";
@@ -1481,6 +1526,15 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     } else {
       return false;
     }
+  }
+
+  protected String getTrimed(String str) {
+    if (StringUtils.isEmpty(str)) {
+      str = "";
+    } else {
+      str = str.trim();
+    }
+    return str;
   }
 
 }

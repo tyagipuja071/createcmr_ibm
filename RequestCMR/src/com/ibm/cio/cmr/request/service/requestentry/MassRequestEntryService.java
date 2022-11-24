@@ -15,6 +15,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -195,6 +199,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)) {
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else if (FranceUtil.isCountryFREnabled(entityManager, cmrIssuingCntry)) {
+        performLegacyDirectMassUpdate(model, entityManager, request);
+      } else if (LAHandler.isLACountry(cmrIssuingCntry)) {
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else {
         performMassUpdate(model, entityManager, request);
@@ -1831,7 +1837,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
       if (cmrIssuingCntry != null && IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)
           && ((!cmrIssuingCntry.equals(SystemLocation.CANADA) && !CmrConstants.REQ_TYPE_MASS_CREATE.equals(admin.getReqType()))
-              || (cmrIssuingCntry.equals(SystemLocation.CANADA) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType())))) {
+              || (cmrIssuingCntry.equals(SystemLocation.CANADA) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType())))
+          || (LAHandler.isLACountry(cmrIssuingCntry) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType()))) {
         processLegacyDirectMassFile(entityManager, request, reqId, token, items);
         return;
       }
@@ -1885,10 +1892,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
                   log.info("mass update file validated");
-                } else if (LAHandler.isLACountry(cmrIssuingCntry)) {
-                  if (!validateMassUpdateFileLA(item.getInputStream(), data, admin)) {
-                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  }
                 } else if (PageManager.fromGeo("MCO1", cmrIssuingCntry) || PageManager.fromGeo("MCO2", cmrIssuingCntry)) {
                   if (!validateMassUpdateFileMCO(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
@@ -1905,7 +1908,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   if (!validateMassUpdateFileJP(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
-                } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)) {
+                } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry) || LAHandler.isLACountry(cmrIssuingCntry)) {
                   if (!validateDRMassUpdateFile(filePath, data, admin, cmrIssuingCntry)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
@@ -4923,6 +4926,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           model.setTaxCd1(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_CD1") - 1)));
           model.setTaxCd2(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_CD2") - 1)));
           model.setTaxCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_CD") - 1)));
+          model.setTaxNum(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_NUM") - 1)));
           model.setTaxSeparationIndc(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_SEPARATION_INDC") - 1)));
           model.setBillingPrintIndc(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("BILLING_PRINT_INDC") - 1)));
           model.setContractPrintIndc(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CONTRACT_PRINT_INDC") - 1)));
@@ -4943,6 +4947,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           model.setSalesBusOffCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("SALES_BO_CD") - 1)));
           model.setRepTeamMemberNo(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("REP_TEAM_MEMBER_NO") - 1)));
           model.setCollectorNameNo(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COLLECTOR_NO") - 1)));
+          model.setCodCondition(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COD_CONDITION") - 1)));
+          model.setCodCondition(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COD_RSN") - 1)));
+          model.setCreditCode(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CREDIT_CD") - 1)));
+          model.setIbmBankNumber(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("IBM_BANK_NO") - 1)));
 
           // if (!"Y".equals(massUpdtRdcOnly)) {
           List<MassUpdateAddressModel> addrList = new ArrayList<>();
@@ -5323,10 +5331,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
                   log.info("mass update file validated");
-                } else if (LAHandler.isLACountry(cmrIssuingCntry)) {
-                  if (!validateMassUpdateFileLA(item.getInputStream(), data, admin)) {
-                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  }
                 } else if (PageManager.fromGeo("MCO1", cmrIssuingCntry) || PageManager.fromGeo("MCO2", cmrIssuingCntry)) {
                   if (!validateMassUpdateFileMCO(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
@@ -5374,6 +5378,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     if (!validateDRMassUpdateFile(filePath, data, admin, data.getCmrIssuingCntry())) {
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                     }
+                  } else if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
+                    fis = new FileInputStream(filePath);
+                    if (!validateLAMassUpdateFile(filePath, data, admin, data.getCmrIssuingCntry())) { // chie1
+                      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                    }
                   } else if (FranceUtil.isCountryFREnabled(entityManager, data.getCmrIssuingCntry())) {
                     fis = new FileInputStream(filePath);
                     try {
@@ -5417,6 +5426,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListForSWISS(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
                   } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
                     setMassUpdateListForDR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
+                  } else if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
+                    setMassUpdateListForLA(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else {
                     if (!PageManager.fromGeo("JP", cmrIssuingCntry)) {
                       setMassUpdateList(modelList, item.getInputStream(), reqId, newIterId, filePath);
@@ -5558,6 +5569,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(cmrIssuingCntry);
       List<TemplateTab> tabs = template.getTabs();
 
+      Map<String, List<String>> cmrPhoneMap = new ConcurrentHashMap<>();
+
       InputStream mfStream = new FileInputStream(filepath);
 
       // 2. loop through all the tabs returned by the config
@@ -5576,54 +5589,143 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             // Check row for ISU_CD, INAC_CD, and/or CLIENT_TIER only
             if ("Data".equals(tab.getName())) {
               // call method that will set to Data table
-              for (Row cmrRow : dataSheet) {
-                int seqNo = cmrRow.getRowNum() + 1;
-
-                if (seqNo > 1) {
-                  model = new MassUpdateModel();
-                  model.setParReqId(reqId);
-                  model.setSeqNo(seqNo);
-                  model.setIterationId(newIterId);
-                  model.setErrorTxt("");
-                  model.setRowStatusCd("");
-                  // 4. then for every sheet, get the fields
-                  model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
-
-                  if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
-                    models.add(model);
-                  }
-                }
-              }
+              dataSheetIteration(entityManager, reqId, newIterId, cmrIssuingCntry, cmrPhoneMap, models, tab, dataSheet);
             } else {
               // if it is not Data, that means it is an address
-              MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
-
-              for (Row cmrRow : dataSheet) {
-                int seqNo = cmrRow.getRowNum() + 1;
-
-                if (seqNo > 1) {
-                  // 4. then for every sheet, get the fields
-                  addrModel = new MassUpdateAddressModel();
-                  addrModel.setParReqId(reqId);
-                  addrModel.setSeqNo(seqNo);
-                  addrModel.setIterationId(newIterId);
-                  addrModel.setAddrType(tab.getTypeCode());
-                  addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
-
-                  if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
-                    addrModels.add(addrModel);
-                  }
-                }
-              }
+              addressSheetIteration(entityManager, reqId, newIterId, cmrIssuingCntry, cmrPhoneMap, addrModels, tab, dataSheet);
             }
           }
         }
+        // if cmrIssuingCntry UKI then billing phone in data sheet
+        createAddrModelsFromMapForUKI(reqId, newIterId, cmrIssuingCntry, cmrPhoneMap, addrModels);
         massUpdtCol.put("dataModels", models);
         massUpdtCol.put("addrModels", addrModels);
       }
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  private void addressSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
+      Map<String, List<String>> cmrPhoneMap, List<MassUpdateAddressModel> addrModels, TemplateTab tab, Sheet dataSheet) throws Exception {
+    MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+
+    for (Row cmrRow : dataSheet) {
+      int seqNo = cmrRow.getRowNum() + 1;
+
+      if (seqNo > 1) {
+        // 4. then for every sheet, get the fields
+        addrModel = new MassUpdateAddressModel();
+        addrModel.setParReqId(reqId);
+        addrModel.setSeqNo(seqNo);
+        addrModel.setIterationId(newIterId);
+        addrModel.setAddrType(tab.getTypeCode());
+        addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
+        if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+          setAddrModelCustPhoneAndRemoveFromMap(cmrIssuingCntry, cmrPhoneMap, addrModel);
+          addrModels.add(addrModel);
+        }
+      }
+    }
+  }
+
+  private void createAddrModelsFromMapForUKI(long reqId, int newIterId, String cmrIssuingCntry, Map<String, List<String>> cmrPhoneMap,
+      List<MassUpdateAddressModel> addrModels) {
+    if (!cmrPhoneMap.isEmpty() && (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND))) {
+      cmrPhoneMap.forEach((cmr, list) -> {
+        String addSeqNo = getAddSeqNoForMassUpdateUKI(cmrIssuingCntry, cmr);
+        MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+        addrModel.setParReqId(reqId);
+        addrModel.setAddrSeqNo(addSeqNo);
+        addrModel.setCmrNo(cmr);
+        addrModel.setCustPhone(list.get(0));
+        addrModel.setSeqNo(Integer.valueOf(list.get(1)));
+        addrModel.setIterationId(newIterId);
+        addrModel.setAddrType("ZS01");
+        addrModels.add(addrModel);
+      });
+
+    }
+  }
+
+  private String getAddSeqNoForMassUpdateUKI(String cmrIssuingCntry, String cmr) {
+    String addSeqNo = "";
+    EntityManager entityManager = JpaManager.getEntityManager();
+    PreparedQuery query = cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) ? getAddrSeqNosUK(cmrIssuingCntry, cmr, entityManager)
+        : getAddrSeqNosIE(cmrIssuingCntry, cmr, entityManager);
+    List<String> result = query.getResults(String.class);
+    List<String> addSeqNos = Optional.ofNullable(result).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
+        .filter(item -> !item.isEmpty()).collect(Collectors.toList());
+    if (!addSeqNos.isEmpty()) {
+      return addSeqNos.contains("00001") ? "00001" : addSeqNos.get(0);
+    }
+    return addSeqNo;
+  }
+
+  private PreparedQuery getAddrSeqNosUK(String cmrIssuingCntry, String cmr, EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("QUERY.GET_SEQ_NO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmr);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    return query;
+  }
+
+  private PreparedQuery getAddrSeqNosIE(String cmrIssuingCntry, String cmr, EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("QUERY.GET_SEQ_NO_IE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmr);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    return query;
+  }
+
+  private void dataSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
+      Map<String, List<String>> cmrPhoneMap, List<MassUpdateModel> models, TemplateTab tab, Sheet dataSheet) throws Exception {
+    MassUpdateModel model;
+    for (Row cmrRow : dataSheet) {
+      int seqNo = cmrRow.getRowNum() + 1;
+
+      if (seqNo > 1) {
+        model = new MassUpdateModel();
+        model.setParReqId(reqId);
+        model.setSeqNo(seqNo);
+        model.setIterationId(newIterId);
+        model.setErrorTxt("");
+        model.setRowStatusCd("");
+        // 4. then for every sheet, get the fields
+        model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+
+        if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
+          setCMRPhoneInMap(cmrRow, cmrPhoneMap, model, cmrIssuingCntry, seqNo);
+          models.add(model);
+        }
+      }
+    }
+  }
+
+  private void setAddrModelCustPhoneAndRemoveFromMap(String cmrIssuingCntry, Map<String, List<String>> cmrPhoneMap,
+      MassUpdateAddressModel addrModel) {
+    if (!"ZD01".equals(addrModel.getAddrType())
+        && (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND))) {
+      String custPhone = cmrPhoneMap.get(addrModel.getCmrNo()) != null ? cmrPhoneMap.get(addrModel.getCmrNo()).get(0) : "";
+      addrModel.setCustPhone(custPhone);
+      cmrPhoneMap.remove(addrModel.getCmrNo());
+    }
+  }
+
+  private void setCMRPhoneInMap(Row cmrRow, Map<String, List<String>> cmrPhoneMap, MassUpdateModel model, String cmrIssuingCntry, int seqNo) {
+    List<String> list = null;
+    DataFormatter df = new DataFormatter();
+    String phoneNo = df.formatCellValue(cmrRow.getCell(14));
+    if ((cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND)) && !StringUtils.isEmpty(phoneNo)) {
+      list = new ArrayList<>();
+      list.add(phoneNo);
+      list.add(String.valueOf(seqNo));
+      cmrPhoneMap.put(model.getCmrNo(), list);
+
+    }
+
   }
 
   // CMR-800
@@ -5661,6 +5763,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
             // Check row for ISU_CD, INAC_CD, and/or CLIENT_TIER only
             if ("Data".equals(tab.getName())) {
+
               // call method that will set to Data table
               for (Row cmrRow : dataSheet) {
                 int seqNo = cmrRow.getRowNum() + 1;
@@ -5945,6 +6048,196 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             }
           }
         }
+        massUpdtCol.put("dataModels", models);
+        massUpdtCol.put("addrModels", addrModels);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void setMassUpdateListForLA(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
+      String filePath, String cmrIssuingCntry) throws Exception {
+    LOG.debug("setMassUpdateListFor LA....");
+
+    // 1. get the config file and get all the valid tabs
+    try {
+      MassChangeTemplateManager.initTemplatesAndValidators(cmrIssuingCntry);
+      // change to the ID of the config you are generating
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(cmrIssuingCntry);
+      List<TemplateTab> tabs = template.getTabs();
+
+      InputStream mfStream = new FileInputStream(filepath);
+
+      // 2. loop through all the tabs returned by the config
+      if (tabs != null && tabs.size() > 0) {
+        MassUpdateModel model = new MassUpdateModel();
+        List<MassUpdateAddressModel> addrModels = new ArrayList<MassUpdateAddressModel>();
+        List<MassUpdateModel> models = new ArrayList<MassUpdateModel>();
+        List<MassUpdateModel> modelList = new ArrayList<MassUpdateModel>();
+
+        try (Workbook mfWb = new XSSFWorkbook(mfStream)) {
+          for (int i = 0; i < tabs.size(); i++) {
+            // 3. For every sheet, do: Sheet dataSheet =
+            // mfWb.getSheet(CMR_SHEET_NAME);
+            TemplateTab tab = tabs.get(i);
+            Sheet dataSheet = mfWb.getSheet(tab.getName());
+
+            // Check row for ISU_CD, INAC_CD, and/or CLIENT_TIER
+            // only ==========================================
+            if ("Data".equals(tab.getName())) {
+
+              // call method that will set to Data table
+              for (Row cmrRow : dataSheet) {
+                int seqNo = cmrRow.getRowNum() + 1;
+
+                if (seqNo > 1) {
+                  model = new MassUpdateModel();
+                  model.setParReqId(reqId);
+                  model.setSeqNo(seqNo);
+                  model.setIterationId(newIterId);
+                  model.setErrorTxt("");
+                  model.setRowStatusCd("");
+
+                  // 4. then for every sheet, get the fields
+                  model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+
+                  if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
+                    models.add(model);
+                    modelList.add(model);
+                  }
+                }
+              }
+            } else if ("AccountReceivable".equals(tab.getName())) {
+              for (Row cmrRow : dataSheet) {
+                int seqNo = cmrRow.getRowNum() + 1;
+
+                if (seqNo > 1) {
+                  model = new MassUpdateModel();
+                  model.setParReqId(reqId);
+                  model.setSeqNo(seqNo);
+                  model.setIterationId(newIterId);
+                  model.setErrorTxt("");
+                  model.setRowStatusCd("");
+
+                  // 4. then for every sheet, get the fields
+                  model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+
+                  for (MassUpdateModel dataModel : modelList) {
+                    if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0
+                        && dataModel.getSeqNo() >= model.getSeqNo()) {
+                      if (!StringUtils.isEmpty(dataModel.getCmrNo()) && dataModel.getCmrNo().equals(model.getCmrNo())) {
+                        dataModel.setSeqNo(model.getSeqNo());
+                        dataModel.setCollectionCd(model.getCollectionCd());
+                        dataModel.setModeOfPayment(model.getModeOfPayment());
+                        dataModel.setCreditCode(model.getCreditCode());
+                        dataModel.setCodCondition(model.getCodCondition());
+                        dataModel.setCodReason(model.getCodReason());
+                        dataModel.setIbmBankNumber(model.getIbmBankNumber());
+                        dataModel.setCollectorNameNo(model.getCollectorNameNo());
+                        models.set(model.getSeqNo() - 2, dataModel);
+                        modelList.set(model.getSeqNo() - 2, dataModel);
+                        break;
+                      } else {
+                        LOG.debug("skipping since no cmr no that is same in Data tab is found.");
+                      }
+                    }
+                  }
+                }
+              }
+            } else if ("Email".equals(tab.getName())) {
+              for (Row cmrRow : dataSheet) {
+                int seqNo = cmrRow.getRowNum() + 1;
+
+                if (seqNo > 1) {
+                  model = new MassUpdateModel();
+                  model.setParReqId(reqId);
+                  model.setSeqNo(seqNo);
+                  model.setIterationId(newIterId);
+                  model.setErrorTxt("");
+                  model.setRowStatusCd("");
+                  // 4. then for every sheet, get the fields
+                  model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+
+                  for (MassUpdateModel dataModel : modelList) {
+                    if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0
+                        && dataModel.getSeqNo() >= model.getSeqNo()) {
+                      if (!StringUtils.isEmpty(dataModel.getCmrNo()) && dataModel.getCmrNo().equals(model.getCmrNo())) {
+                        dataModel.setSeqNo(model.getSeqNo());
+                        dataModel.setEmail1(model.getEmail1());
+                        dataModel.setEmail2(model.getEmail2());
+                        dataModel.setEmail3(model.getEmail3());
+
+                        models.set(model.getSeqNo() - 2, dataModel);
+                        break;
+                      } else {
+                        LOG.debug("skipping since no cmr no that is same in Data tab is found.");
+                      }
+                    }
+                  }
+                }
+              }
+            } else if ("TaxInfo".equals(tab.getName())) {
+              for (Row cmrRow : dataSheet) {
+                int seqNo = cmrRow.getRowNum() + 1;
+
+                if (seqNo > 1) {
+                  model = new MassUpdateModel();
+                  model.setParReqId(reqId);
+                  model.setSeqNo(seqNo);
+                  model.setIterationId(newIterId);
+                  model.setErrorTxt("");
+                  model.setRowStatusCd("");
+                  // 4. then for every sheet, get the fields
+                  model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+
+                  for (MassUpdateModel dataModel : modelList) {
+                    if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0
+                        && dataModel.getSeqNo() >= model.getSeqNo()) {
+                      if (!StringUtils.isEmpty(dataModel.getCmrNo()) && dataModel.getCmrNo().equals(model.getCmrNo())) {
+                        dataModel.setSeqNo(model.getSeqNo());
+                        dataModel.setTaxCd(model.getTaxCd());
+                        dataModel.setTaxNum(model.getTaxNum());
+                        dataModel.setTaxSeparationIndc(model.getTaxSeparationIndc());
+                        dataModel.setBillingPrintIndc(model.getBillingPrintIndc());
+                        dataModel.setContractPrintIndc(model.getContractPrintIndc());
+                        dataModel.setCountryUse(model.getCountryUse());
+
+                        models.set(model.getSeqNo() - 2, dataModel);
+                        break;
+                      } else {
+                        LOG.debug("skipping since no cmr no that is same in Data tab is found.");
+                      }
+                    }
+                  }
+                }
+              }
+            } else {
+
+              // if it is not Data, that means it is an address
+              MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+
+              for (Row cmrRow : dataSheet) {
+                int seqNo = cmrRow.getRowNum() + 1;
+
+                if (seqNo > 1) {
+                  // 4. then for every sheet, get the fields
+                  addrModel = new MassUpdateAddressModel();
+                  addrModel.setParReqId(reqId);
+                  addrModel.setSeqNo(seqNo);
+                  addrModel.setIterationId(newIterId);
+                  addrModel.setAddrType(tab.getTypeCode());
+                  addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
+
+                  if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+                    addrModels.add(addrModel);
+                  }
+                }
+              }
+            }
+          }
+        }
+
         massUpdtCol.put("dataModels", models);
         massUpdtCol.put("addrModels", addrModels);
       }
@@ -6329,7 +6622,39 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "TAX_CD3":
         muModel.setTaxCd3(tempVal);
-        ;
+        break;
+      case "CREDIT_CD":
+        muModel.setCreditCode(tempVal);
+        break;
+      case "IBM_BANK_NO":
+        muModel.setIbmBankNumber(tempVal);
+        break;
+      case "COLLECTOR_NO":
+        muModel.setCollectorNameNo(tempVal);
+        break;
+      case "COD_CONDITION":
+        muModel.setCodCondition(tempVal);
+        break;
+      case "COD_RSN":
+        muModel.setCodReason(tempVal);
+        break;
+      case "TAX_CD":
+        muModel.setTaxCd(tempVal);
+        break;
+      case "TAX_NUM":
+        muModel.setTaxNum(tempVal);
+        break;
+      case "TAX_SEPARATION_INDC":
+        muModel.setTaxSeparationIndc(tempVal);
+        break;
+      case "BILLING_PRINT_INDC":
+        muModel.setBillingPrintIndc(tempVal);
+        break;
+      case "CONTRACT_PRINT_INDC":
+        muModel.setContractPrintIndc(tempVal);
+        break;
+      case "CNTRY_USE":
+        muModel.setCountryUse(tempVal);
         break;
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
@@ -6624,4 +6949,68 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
     return isSkip;
   }
+
+  public boolean validateLAMassUpdateFile(String path, Data data, Admin admin, String cmrIssuingCntry) throws Exception {
+    List<Boolean> isErr = new ArrayList<Boolean>();
+    try (FileInputStream fis = new FileInputStream(path)) {
+      MassChangeTemplateManager.initTemplatesAndValidators(cmrIssuingCntry);
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(cmrIssuingCntry);
+      EntityManager em = JpaManager.getEntityManager();
+      try {
+        String country = data.getCmrIssuingCntry();
+        LOG.debug("Validating " + path);
+        byte[] bookBytes = template.cloneStream(fis);
+
+        List<TemplateValidation> validations = null;
+        StringBuilder errTxt = new StringBuilder();
+
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+
+          validations = template.validate(em, is, admin, country, 2000);
+          LOG.debug(new ObjectMapper().writeValueAsString(validations));
+
+          for (TemplateValidation validation : validations) {
+            if (validation.hasErrors()) {
+              if (StringUtils.isEmpty(errTxt.toString())) {
+                errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
+              } else {
+                errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
+              }
+            }
+          }
+
+        }
+        if (!StringUtils.isEmpty(errTxt.toString())) {
+          throw new Exception(errTxt.toString());
+        }
+
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+          try (FileOutputStream fos = new FileOutputStream(path)) {
+            LOG.debug("Merging..");
+            template.merge(validations, is, fos, 2000);
+          }
+        }
+        // modify the country for testing
+      } catch (Exception e) {
+
+        LOG.error(e.getMessage());
+        LOG.error("An error occurred in validating DR Mass Update File.");
+        // return false;
+
+        throw new Exception(e.getMessage());
+        // throw new CmrException(MessageUtil.ERROR_GENERAL, e.getMessage());
+        // return false;
+      } finally {
+        em.close();
+      }
+    }
+
+    if (isErr.contains(false)) {
+      return false;
+    } else {
+      return true;
+    }
+
+  }
+
 }

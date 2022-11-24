@@ -110,8 +110,8 @@ function classFieldBehaviour() {
 function disableAddrFieldsMT(cntry, addressMode, saving, finalSave, force) {
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
-
-  if (custType == 'LOCAL' && addrType == 'ZS01') {
+  var reqType = FormManager.getActualValue('reqType');
+  if ((custType == 'LOCAL' || reqType == 'U') && addrType == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     if (!saving && addressMode != 'updateAddress') {
@@ -723,6 +723,8 @@ function addAfterConfigMalta() {
   // disable copy address
   GEOHandler.disableCopyAddress();
   FormManager.removeValidator('vat', Validators.REQUIRED);
+  // CREATCMR-788
+  addressQuotationValidatorMalta();
 }
 
 function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
@@ -821,19 +823,18 @@ function addOrdBlkValidator() {
 }
 
 function setVatValidatorMalta() {
-  var custGrp = FormManager.getActualValue('custGrp');
-  if (custGrp == 'CROSS') {
-    return;
-  }
   console.log("setVatValidatorMalta for Malta..");
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C' && custGrp == 'LOCAL' || custGrp == 'CROSS') {
     FormManager.resetValidations('vat');
-    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    if (custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'PRICU' || custSubGrp == 'IBMEM' || custSubGrp == 'XGOV') {
       FormManager.readOnly('vat');
     }
     if (dijit.byId('vatExempt').get('checked')) {
       FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
     }
     if (!dijit.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
@@ -1193,7 +1194,21 @@ function checkCmrUpdateBeforeImport() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+// CREATCMR-788
+function addressQuotationValidatorMalta() {
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Name 2' ]);
+  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Name 3' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Name 4' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
+}
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '780' ];
   console.log('adding MALTA functions...');

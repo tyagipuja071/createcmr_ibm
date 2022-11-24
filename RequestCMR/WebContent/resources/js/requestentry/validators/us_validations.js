@@ -1295,6 +1295,24 @@ function setMainName1ForKYN() {
   }
 
 }
+function addressQuotationValidator() {
+  // CREATCMR-788
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Address' ]);
+  FormManager.addValidator('divn', Validators.NO_QUOTATION, [ 'Division/Address Con\'t' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Department / Attn' ]);
+  FormManager.addValidator('city2', Validators.NO_QUOTATION, [ 'District' ]);
+  FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Building' ]);
+  FormManager.addValidator('floor', Validators.NO_QUOTATION, [ 'Floor' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Zip Code' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  FormManager.addValidator('custFax', Validators.NO_QUOTATION, [ 'FAX' ]);
+  FormManager.addValidator('transportZone', Validators.NO_QUOTATION, [ 'Transport Zone' ]);
+  FormManager.addValidator('mainCustNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name 2' ]);
+
+}
 
 //CREATCMR-7213
 function federalIsicCheck() {
@@ -1305,7 +1323,7 @@ function federalIsicCheck() {
         var custGrp = FormManager.getActualValue('custGrp');
         var subIndustryCd = FormManager.getActualValue('subIndustryCd');
         var fedIsic = [ '9', '10', '11', '14' ];
-        if (reqType == 'C' && !fedIsic.includes(custGrp) && subIndustryCd.startsWith('Y')) {
+        if (reqType == 'C' && !fedIsic.includes(custGrp) && custGrp != '5' && subIndustryCd.startsWith('Y')) {
           genericMsg = 'Federal ISIC cannot be used with Non-Federal sceanrios.';
           return new ValidationResult(null, false, genericMsg);
         }
@@ -1365,6 +1383,9 @@ dojo.addOnLoad(function() {
   // CREATCMR-6987
   GEOHandler.addAfterTemplateLoad(setMainName1ForKYN, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(setMainName1ForKYN, [ SysLoc.USA ]);
+  // CREATCMR-788
+  GEOHandler.addAddrFunction(addressQuotationValidator, [ SysLoc.USA ]);
+  GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.USA ]);
   //CREATCMR-7213
   GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
 });

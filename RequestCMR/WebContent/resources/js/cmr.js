@@ -219,19 +219,6 @@ var cmr = {
     // Other background function doesn't run properly because of TypeErrors
     // during fresh create for BR(631).
     if (FormManager.getActualValue('reqId') && Number(FormManager.getActualValue('reqId')) > 0) {
-      if (FormManager.getActualValue('cmrIssuingCntry') == '631' && FormManager.getActualValue('reqType') != 'M') {
-        if ((typeof (CmrGrid.GRIDS.ADDRESS_GRID_GRID) != 'undefined' || CmrGrid.GRIDS.ADDRESS_GRID_GRID != null)) {
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-            cmr.showNode('addAddressButton');
-          } else if (FormManager.getActualValue('custType') == '' || (FormManager.getActualValue('custType') != '' && FormManager.getActualValue('custType') != 'LEASI')) {
-            cmr.hideNode('addAddressButton');
-          } else if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount <= 1) {
-            cmr.showNode('addAddressButton');
-          } else {
-            cmr.hideNode('addAddressButton');
-          }
-        }
-      }
       // Story :1202244 by Mukesh Kumar
       if (FormManager.getActualValue('cmrIssuingCntry') == '631' && FormManager.getActualValue('reqType') == 'C' && FormManager.getActualValue('email1') != 'bcibmnfe@br.ibm.com') {
         var _custType = FormManager.getActualValue('custType');
@@ -289,7 +276,7 @@ var cmr = {
       dojo.byId(id).style.display = 'none';
     }
   },
-  showAlert : function(message, title, executeFunc, info) {
+  showAlert : function(message, title, executeFunc, info, buttonLabel) {
     if (!message) {
       return;
     }
@@ -310,6 +297,14 @@ var cmr = {
       cmr.hideNode('alertTitleContainer');
     } else {
       cmr.showNode('alertTitleContainer');
+    }
+    var btn = dojo.byId("messagesOverlayButtonOK");
+    if (btn) {
+      if (buttonLabel && buttonLabel.OK) {
+        btn.setAttribute('value', buttonLabel.OK);
+      } else {
+        btn.setAttribute('value', 'OK');
+      }
     }
     ibmweb.queue.push(function() {
       return dojo.query("div#dialog_messagesOverlay .dijitDialogCloseIcon").length == 1;

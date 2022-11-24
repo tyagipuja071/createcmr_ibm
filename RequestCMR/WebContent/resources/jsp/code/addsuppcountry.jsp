@@ -336,6 +336,22 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
           </div>
         </cmr:column>
       </cmr:row>
+      <cmr:row>
+        <cmr:column span="1" width="180">
+          <p>
+            <cmr:label fieldId="disableCreateByModel">Create by Model: </cmr:label>
+          </p>
+        </cmr:column>
+        <cmr:column span="2">
+          <p>
+          <form:select dojoType="dijit.form.FilteringSelect" id="disableCreateByModel" searchAttr="name" style="display: block; width:550px" maxHeight="200"
+            required="false" path="disableCreateByModel" placeHolder="Create by Model Setting for CMR results">
+            <form:option value="N">Allow Create by Model from CMR results</form:option>
+            <form:option value="Y">DISABLE Create by Model from CMR results</form:option>
+          </form:select>
+          </p>
+        </cmr:column>
+      </cmr:row>
       
       <cmr:row addBackground="true">
         <cmr:column span="1" width="180">
