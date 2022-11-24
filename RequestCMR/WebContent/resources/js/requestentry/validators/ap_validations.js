@@ -953,6 +953,9 @@ function onCustSubGrpChange() {
     if (FormManager.getActualValue('viewOnlyPage') != 'true')
       FormManager.enable('isicCd');
     setISBUScenarioLogic();
+    if (FormManager.getActualValue('cmrIssuingCntry') == '796' && FormManager.getActualValue('reqType') == 'C') {    
+      setLockIsicNZfromDNB()
+    }
 
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custSubGrpInDB = _pagemodel.custSubGrp;
