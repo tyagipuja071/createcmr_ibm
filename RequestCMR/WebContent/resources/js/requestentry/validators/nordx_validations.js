@@ -253,6 +253,7 @@ var _ExpediteHandler = null;
 var _ISICHandler = null; // CMR-1993
 var _sortlHandler = null;
 var sortlFlag = false;
+var _landCntryHandler = null;
 function addHandlersForNORDX() {
 
   if (_ISUHandler == null) {
@@ -361,6 +362,12 @@ function addHandlersForNORDX() {
   if (_ExpediteHandler == null) {
     _ExpediteHandler = dojo.connect(FormManager.getField('expediteInd'), 'onChange', function(value) {
       setExpediteReason();
+    });
+  }
+  
+  if (_landCntryHandler == null) {
+    _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
+      skipStateProvForFO();
     });
   }
 }
@@ -4852,6 +4859,15 @@ function addressQuotationValidatorNORS() {
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
 }
+function skipStateProvForFO() {
+  var landCntry = FormManager.getActualValue('landCntry');
+  if (landCntry == 'FO') {
+    cmr.hideNode('StateProv');
+  } else {
+    cmr.showNode("StateProv");
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 

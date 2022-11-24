@@ -124,6 +124,7 @@
 
 </cmr:row>
 <cmr:row>
+<div id="StateProv">
   <cmr:column span="2" containerForField="StateProv">
     <p>
       <cmr:label fieldId="stateProv">
@@ -134,6 +135,7 @@
       <cmr:field fieldId="StateProv" id="stateProv" path="stateProv" />
     </p>
   </cmr:column>
+  </div>
   <cmr:column span="2">
     <p>
       <cmr:label fieldId="postCd">
