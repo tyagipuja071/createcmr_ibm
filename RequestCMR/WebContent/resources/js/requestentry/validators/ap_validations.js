@@ -296,7 +296,7 @@ function addAfterConfigAP() {
     // setDefaultValueforSalesReqNo();
     // removeSalesReqNoValidation();
     
-    //CREATCMR-7653
+    // CREATCMR-7653
     setDefaultValueForNZCreate();
   }
 }
@@ -849,10 +849,10 @@ function defaultCMRNumberPrefixforNewZealand(){
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if(reqType == 'C' && cntry == '796' ){
+  if(reqType == 'C'){
     if(custSubGrp == 'INTER'){
       FormManager.enable('cmrNoPrefix');
-      FormManager.setValue('cmrNoPrefix', '990---');
+      FormManager.setValue('cmrNoPrefix', _pagemodel.cmrNoPrefix == null ? '990---' : _pagemodel.cmrNoPrefix);
     }
     else{
       FormManager.setValue('cmrNoPrefix', '');
@@ -1753,12 +1753,12 @@ function autoSetAbbrevNmLocnLogic() {
         } else {
           _abbrevNm = "ESA/OEM/SWG_" + custNm1;
         }
-      //CREATCMR-7653 --START--
+      // CREATCMR-7653 --START--
       } else if (reqType == 'C' && custSubGrp == "INTER") {
         _abbrevNm = "Internal use only";
       } else if (reqType == 'C' && custSubGrp == "AQSTN") {
         _abbrevNm = "Acquisition use only";
-      //CREATCMR-7653 --END--
+      // CREATCMR-7653 --END--
       } else {
         _abbrevNm = custNm1;
       }
@@ -2161,7 +2161,7 @@ function updateMRCAseanAnzIsa() {
     return;
   }
   if ((cntry == '856' && ['01251', '08047' , '09053' , '00000'].includes(cluster)) || (cntry == '818' && ['01231', '08044', '00000' , '09054'].includes(cluster)) || (cntry == '778' && ['01222', '00000', '08042' ,'09051'].includes(cluster))  || (cntry == '643' && ['00000'].includes(cluster)) || (cntry == '749' && ['00000' , '09050' , '08040' , '09050'].includes(cluster)) || (cntry == '834' && ['01241' , '09052' , '00000' , '08038'].includes(cluster)) || (cntry == '852' && ['00000' , '01277' , '01273' , '09055' ,'08046'].includes(cluster)) || (cntry == '616' && ['01150' , '71100' , '00001' , '08039' ,'09057'].includes(cluster)) || (cntry == '796' && ['01147' , '71101' , '08037' , '00002' ,'09056'].includes(cluster))) {
-    //CREATCMR-7653 : MRC = 2 - lock field
+    // CREATCMR-7653 : MRC = 2 - lock field
     if(cntry == '796' && custSubGrp == 'DUMMY' && ['00002'].includes(cluster) && _clientTier == 'Z' && _isuCd == '21'){
       FormManager.setValue('mrcCd', '2');
       FormManager.readOnly('mrcCd');
@@ -2423,7 +2423,7 @@ function setCTCIsuByClusterANZ() {
           FormManager.setValue('isuCd', isuCdValue[0]);
         }  else if (apClientTierValue.length > 1) {
           if ((custSubGrp.includes('BLUMX') || custSubGrp.includes('MKTPC') || custSubGrp.includes('DUMMY') || custSubGrp.includes('XDUMM')) && (_cluster == '00001' || _cluster == '00002')) {
-            //CREATCMR-7653 cluster/QTC/ISU: default as 00002/Z/21 - lock field
+            // CREATCMR-7653 cluster/QTC/ISU: default as 00002/Z/21 - lock field
             if(_cmrIssuingCntry='796' && custSubGrp.includes('DUMMY') && _cluster == '00002'){
               FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
               FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
@@ -4989,126 +4989,126 @@ function validatNZBNForNewZeaLand() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-//CREATCMR-7653 : NZ 2.0 - Customer/IBM tab assignments based on Scenario
+// CREATCMR-7653 : NZ 2.0 - Customer/IBM tab assignments based on Scenario
 function setDefaultValueForNZCreate(){
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-//  var action = FormManager.getActualValue('yourAction');
-//  var custNm1 = FormManager.getActualValue('custNm1');
+// var action = FormManager.getActualValue('yourAction');
+// var custNm1 = FormManager.getActualValue('custNm1');
   
-//  var apCustClusterId = FormManager.getActualValue('apCustClusterId');
-//  var clientTier = FormManager.getActualValue('clientTier');
-//  var isuCd = FormManager.getActualValue('isuCd');
+// var apCustClusterId = FormManager.getActualValue('apCustClusterId');
+// var clientTier = FormManager.getActualValue('clientTier');
+// var isuCd = FormManager.getActualValue('isuCd');
   
   if(custGrp == 'LOCAL'){
     switch (custSubGrp) {
     case 'PRIV':
-      //ISIC = 9500, - lock field
+      // ISIC = 9500, - lock field
       FormManager.setValue('isicCd', '9500');
       FormManager.readOnly('isicCd');
-      //cluster/QTC/ISU: default as 00002/Q/34  - lock field
+      // cluster/QTC/ISU: default as 00002/Q/34 - lock field
       FormManager.setValue('apCustClusterId', '00002');
       FormManager.readOnly('apCustClusterId');
       FormManager.setValue('clientTier', 'Q');
       FormManager.readOnly('clientTier');
       FormManager.setValue('isuCd', '34');
       FormManager.readOnly('isuCd');
-      //MRC = 3 - lock field
+      // MRC = 3 - lock field
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
-      //Collection code = 00JC - lock field
+      // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
       break;
     case 'BLUMX':
-      //cluster/QTC/ISU: default as 00002/Q/34  - lock field
+      // cluster/QTC/ISU: default as 00002/Q/34 - lock field
       FormManager.setValue('apCustClusterId', '00002');
       FormManager.readOnly('apCustClusterId');
       FormManager.setValue('clientTier', 'Q');
       FormManager.readOnly('clientTier');
       FormManager.setValue('isuCd', '34');
       FormManager.readOnly('isuCd');
-      //MRC = 3 - lock field
+      // MRC = 3 - lock field
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
-      //Collection code = 00JC - lock field
+      // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
       
       FormManager.readOnly('abbrevNm');
       break;
     case 'MKTPC':
-      //cluster/QTC/ISU: default as 00002/Q/34  - lock field
+      // cluster/QTC/ISU: default as 00002/Q/34 - lock field
       FormManager.setValue('apCustClusterId', '00002');
       FormManager.readOnly('apCustClusterId');
       FormManager.setValue('clientTier', 'Q');
       FormManager.readOnly('clientTier');
       FormManager.setValue('isuCd', '34');
       FormManager.readOnly('isuCd');
-      //MRC = 3 - lock field
+      // MRC = 3 - lock field
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
-      //Collection code = 00JC - lock field
+      // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
       
       FormManager.readOnly('abbrevNm');
       break;
     case 'INTER':
-      //ISIC = 8888, - lock field
+      // ISIC = 8888, - lock field
       FormManager.setValue('isicCd', '8888');
       FormManager.readOnly('isicCd');
-      //cluster/QTC/ISU: default as 00002/Z/21  - lock field
+      // cluster/QTC/ISU: default as 00002/Z/21 - lock field
       FormManager.setValue('apCustClusterId', '00002');
       FormManager.readOnly('apCustClusterId');
       FormManager.setValue('clientTier', 'Z');
       FormManager.readOnly('clientTier');
       FormManager.setValue('isuCd', '21');
       FormManager.readOnly('isuCd');
-      //MRC = 2 - lock field
+      // MRC = 2 - lock field
       FormManager.setValue('mrcCd', '2');
       FormManager.readOnly('mrcCd');
-      //Collection code = 00IL - lock field
+      // Collection code = 00IL - lock field
       FormManager.setValue('collectionCd', '00IL');
       FormManager.readOnly('collectionCd');
       
       FormManager.readOnly('abbrevNm');
       break;
     case 'DUMMY':
-      //ISIC = 8888, - lock field
+      // ISIC = 8888, - lock field
       FormManager.setValue('isicCd', '8888');
       FormManager.readOnly('isicCd');
-      //Collection code = 00IL - lock field
+      // Collection code = 00IL - lock field
       FormManager.setValue('collectionCd', '00IL');
       FormManager.readOnly('collectionCd');
       
       FormManager.readOnly('abbrevNm');
       break;
     case 'AQSTN':
-      //cluster/QTC/ISU: 01147/Q/34, 09056/blank/5K
+      // cluster/QTC/ISU: 01147/Q/34, 09056/blank/5K
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01147', '09056' ]);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ ' ', 'Q' ]);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34', '5K' ]);
       FormManager.setValue('apCustClusterId', '01147');
       FormManager.setValue('clientTier', 'Q');
       FormManager.setValue('isuCd', '34');
-      //MRC = 3 - lock field
+      // MRC = 3 - lock field
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
-      //Collection code = 00JC - lock field
+      // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
       
       FormManager.readOnly('abbrevNm');
       break;
     case 'NRML':
-      //MRC = 3 - lock field
+      // MRC = 3 - lock field
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
-      //Collection code = 00JC - lock field
+      // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
-      //cluster/QTC/ISU: 01147/Q/34, 09056/blank/5K
+      // cluster/QTC/ISU: 01147/Q/34, 09056/blank/5K
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01147', '09056' ]);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ ' ', 'Q' ]);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34', '5K' ]);
@@ -5118,13 +5118,13 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('isuCd', '34');
       break;
     case 'ESOSW':
-      //MRC = 3 - lock field
+      // MRC = 3 - lock field
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
-      //Collection code = 00JC - lock field
+      // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
-      //cluster/QTC/ISU: 01147/Q/34,  09056/blank/5K,  08037/Y/34
+      // cluster/QTC/ISU: 01147/Q/34, 09056/blank/5K, 08037/Y/34
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01147', '09056', '08037' ]);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ ' ', 'Q', 'Y' ]);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34', '5K' ]);
@@ -5134,17 +5134,17 @@ function setDefaultValueForNZCreate(){
       FormManager.readOnly('abbrevNm');
       break;
     case 'ECSYS':
-      //cluster/QTC/ISU:  08037/Y/34  - lock field
+      // cluster/QTC/ISU: 08037/Y/34 - lock field
       FormManager.setValue('apCustClusterId', '08037');
       FormManager.readOnly('apCustClusterId');
       FormManager.setValue('clientTier', 'Y');
       FormManager.readOnly('clientTier');
       FormManager.setValue('isuCd', '34');
       FormManager.readOnly('isuCd');
-      //MRC = 3 - lock field
+      // MRC = 3 - lock field
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
-      //Collection code = 00JC - lock field
+      // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
       break;
@@ -5152,26 +5152,28 @@ function setDefaultValueForNZCreate(){
   }else if(custGrp == 'CROSS'){
     switch (custSubGrp) {
     case 'CROSS':
-      //cluster/QTC/ISU:  01147/Q/34 (setting default and secletable ), 09056/blank/5K
+      // cluster/QTC/ISU: 01147/Q/34 (setting default and secletable ),
+      // 09056/blank/5K
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01147', '09056' ]);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ ' ', 'Q' ]);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34', '5K' ]);
       FormManager.setValue('apCustClusterId', '01147');
       FormManager.setValue('clientTier', 'Q');
       FormManager.setValue('isuCd', '34');
-      //MRC = 3 - lock field
+      // MRC = 3 - lock field
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
-      //Collection code = 00JC - lock field
+      // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
       break;
     }
   }
 }
-//CREATCMR-7653
-//Perform UI validation when'Send for processing': 
-//name can not contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd'  
+// CREATCMR-7653
+// Perform UI validation when'Send for processing':
+// name can not contain 'Private Limited', 'Company', 'Corporation',
+// 'incorporate', 'organization', 'Pvt Ltd'
 function checkNZCustomerNameTextWhenSFP(){
   FormManager.addFormValidator((function() {
     return {
@@ -5212,8 +5214,9 @@ function checkNZCustomerNameTextWhenSFP(){
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
-//CREATCMR-7653
-//Perform UI validation when'Send for processing': Landed country can't be New Zealand
+// CREATCMR-7653
+// Perform UI validation when'Send for processing': Landed country can't be New
+// Zealand
 function checkNZLandedCountryForCrossWhenSFP(){
   FormManager.addFormValidator((function() {
     return {
@@ -5253,7 +5256,7 @@ function checkNZLandedCountryForCrossWhenSFP(){
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
-//CREATCMR-7653
+// CREATCMR-7653
 function checkNZCustomerNameStartsForLocalInterDummy(){
   FormManager.addFormValidator((function() {
     return {
@@ -5487,7 +5490,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-7658
   GEOHandler.registerValidator(addValidatorforInstallingNZ, [SysLoc.NEW_ZEALAND], null, true);
   
-  //CREATCMR-7653
+  // CREATCMR-7653
   GEOHandler.registerValidator(checkNZCustomerNameTextWhenSFP, [ SysLoc.NEW_ZEALAND ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(checkNZLandedCountryForCrossWhenSFP, [ SysLoc.NEW_ZEALAND ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(checkNZCustomerNameStartsForLocalInterDummy, [ SysLoc.NEW_ZEALAND ], GEOHandler.ROLE_REQUESTER, true);
