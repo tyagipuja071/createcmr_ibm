@@ -1280,6 +1280,13 @@ function updateBOForEntp() {
 function setAffiliateNumber() {
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
   var isicCd = FormManager.getActualValue('isicCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var fspEndUser = 'FSP END USER';
+  var fspPool = 'FSP POOL';
+  if (custSubGrp == fspEndUser || custSubGrp == fspPool) {
+    return;
+  }
+  // This will override the affiliate value in UI if calculated via Automation Element
   if (subIndustryCd.startsWith('Y') && (isicCd.startsWith('90') || isicCd.startsWith('91') || isicCd.startsWith('92'))) {
     FormManager.setValue('affiliate', affiliateArray[isicCd]);
   }

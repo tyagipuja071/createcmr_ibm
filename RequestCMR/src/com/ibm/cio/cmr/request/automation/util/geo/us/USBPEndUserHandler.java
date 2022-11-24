@@ -179,14 +179,14 @@ public class USBPEndUserHandler extends USBPHandler {
       }
       if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
         LOG.debug(" - copyAndFillIBMData: Affiliate: " + ibmCmr.getCmrAffiliate());
-        details.append(" - Affiliate: " + ibmCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), affiliate);
+        details.append(" - Affiliate: " + data.getEnterprise() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
       } else {
         updateAffiliate4Child(entityManager, childRequest, ibmCmr);
         if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
           LOG.debug(" - copyAndFillIBMData: CmrAffiliate: " + ibmCmr.getCmrAffiliate());
-          details.append(" - Affiliate: " + ibmCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA )" : "") + "\n");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrAffiliate());
+          details.append(" - Affiliate: " + data.getEnterprise() + (federalPoa ? " (Enterprise from Federal/POA )" : "") + "\n");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
         }
       }
 
