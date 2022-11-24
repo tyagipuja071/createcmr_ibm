@@ -92,6 +92,7 @@ function afterConfigForDE() {
 
   // Disable address copying for GERMANY
   GEOHandler.disableCopyAddress();
+  setVatIndFields();
 }
 
 function vatExemptIBMEmp() {
