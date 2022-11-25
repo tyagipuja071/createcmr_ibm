@@ -26,8 +26,7 @@ function afterConfigForDE() {
         FormManager.resetValidations('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
-        // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
-        // 'MAIN_CUST_TAB');
+       // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       }
     });
   }
@@ -109,8 +108,7 @@ function vatExemptIBMEmp() {
       dijit.byId('vatExempt').set('checked', false);
       FormManager.resetValidations('vat');
       if (!dijit.byId('vatExempt').get('checked')) {
-        // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
-        // 'MAIN_CUST_TAB');
+      //  FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       }
     }
   }
@@ -1141,7 +1139,8 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
-function addVatIndValidator() {
+
+function addVatIndValidator(){
   var _vatHandler = null;
   var _vatIndHandler = null;
   var vat = FormManager.getActualValue('vat');
@@ -1182,18 +1181,14 @@ function addVatIndValidator() {
 }
 }
 
-function setVatIndFields() {
-  var _vatHandler = null;
+function setVatIndFields(){
+  var _vatHandler = null;  
   var vat = FormManager.getActualValue('vat');
   var vatInd = FormManager.getActualValue('vatInd');
-
-  if (vat != '' && vatInd == '') {
+  
+  if (vat != '' && vatInd == ''){
     FormManager.setValue('vatInd', 'T');
     FormManager.readOnly('vatInd');
-  } else if (vatInd == 'E' || vatInd == 'N') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-  } else if (vatInd == 'T') {
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
   }
 }
 

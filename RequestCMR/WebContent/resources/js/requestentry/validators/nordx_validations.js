@@ -16,7 +16,7 @@ function afterConfigForNORDX() {
   reqType = FormManager.getActualValue('reqType');
   var role = null;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var vat = FormManager.getActualValue('vat');
+  var vat = FormManager.getActualValue('vat');  
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -169,8 +169,8 @@ function afterConfigForNORDX() {
   setSortlLength();
   lockSalesRepAndSortl();
   hideACAdminDSC();
-
-  // CREATCMR-788
+  
+  //CREATCMR-788
   addressQuotationValidatorNORS();
 }
 
@@ -429,8 +429,7 @@ function vatAndVatExemptOnScenario(value) {
     var custType = FormManager.getActualValue('custGrp');
     if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 || (custType != '' && custType.includes('LOC'))) {
       FormManager.show('VATExempt', 'vatExempt');
-      // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
-      // 'MAIN_CUST_TAB');
+      //FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       if (_isScenarioChanged) {
         if (isIBPriv) {
           FormManager.getField('vatExempt').set('checked', true);
@@ -4962,9 +4961,10 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.NORDX, null, true);
-
+  
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.NORDX);
+  
   GEOHandler.addAfterConfig(skipStateProvForFO, GEOHandler.NORDX);
 
 });

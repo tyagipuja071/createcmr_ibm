@@ -245,7 +245,6 @@ function processRequestAction() {
         showAddressVerificationModal();
       }
     }
-
     else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
