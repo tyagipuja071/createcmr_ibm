@@ -207,11 +207,11 @@
     <cmr:info text="${ui.info.cnisicinfo}"></cmr:info><%} %>
             <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("796")){%>
     <cmr:info text="${ui.info.nzisicinfo}"></cmr:info><%} %>
-      <cmr:view forCountry="616,744,834">
-           <cmr:info text="${ui.info.isicCdAU}" />
-      </cmr:view>
+      <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("796")){%>
+    <cmr:info text="${ui.info.nzisicinfo}"></cmr:info><%} %>
+     <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("616") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("744") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("834")){%>
+    <cmr:info text="${ui.info.isicCdAU}"></cmr:info><%} %>
         </label>
-        </label>	
         <cmr:field path="isicCd" id="isicCd" fieldId="ISIC" tabId="MAIN_CUST_TAB" size="500" />
       </p>
     </cmr:column>
