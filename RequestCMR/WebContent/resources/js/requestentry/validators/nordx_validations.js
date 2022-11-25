@@ -5037,5 +5037,5 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.NORDX, null, true);
-
+  GEOHandler.addAfterConfig(skipStateProvForFO, GEOHandler.NORDX);
 });
