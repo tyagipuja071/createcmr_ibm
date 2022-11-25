@@ -4585,7 +4585,24 @@ function addCustGrpHandler() {
     _customerTypeHandler[0].onChange();
   }
 }
-
+// CREATCMR-7589
+function setIsicCmrCreation() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var result = FormManager.getActualValue('findDnbResult');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var value = FormManager.getActualValue('isicCd');
+  if (value != "" && value != "9500") {
+    if (reqType == 'C' && result == "Accepted" && cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
+      FormManager.readOnly('isicCd');
+    }
+  }
+  if (result == "Rejected") {
+    if (reqType == 'C' && cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
+      FormManager.enable('isicCd');
+    }
+  }
+}
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4769,4 +4786,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.APAC);
   GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.APAC);
 	GEOHandler.addAfterConfig(addCustGrpHandler, GEOHandler.APAC_1);
+	// CREATCMR-7589
+	GEOHandler.addAfterTemplateLoad(setIsicCmrCreation, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.INDIA ]);
 });
