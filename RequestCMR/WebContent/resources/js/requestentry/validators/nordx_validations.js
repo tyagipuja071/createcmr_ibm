@@ -170,6 +170,8 @@ function afterConfigForNORDX() {
   lockSalesRepAndSortl();
   hideACAdminDSC();
   
+  //CREATCMR-788
+  addressQuotationValidatorNORS();
 }
 
 function disableLandCntry() {

@@ -134,7 +134,7 @@ function afterConfigForBELUX() {
   addAccTemNumValidate();
   disableSBO();
   disableIBMTab();
-  
+  addressQuotationValidatorBELUX();
   
   
   
