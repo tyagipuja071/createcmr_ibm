@@ -4964,5 +4964,6 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(skipStateProvForFO, GEOHandler.NORDX);
 
 });
