@@ -1311,6 +1311,10 @@ function autoSetAbbrevLocUKIOnAddrChange() {
   var issuCntry = FormManager.getActualValue('cmrIssuingCntry');
   if ((FormManager.getActualValue('landCntry') == 'GB' && issuCntry == '866') || (FormManager.getActualValue('landCntry') == 'IE' && issuCntry == '754')) {
     _abbrevLocn = FormManager.getActualValue('postCd')
+    if ((_abbrevLocn == null || _abbrevLocn == '') && issuCntry == '754') {
+      _abbrevLocn = FormManager.getActualValue('city1')
+    }
+
   } else {
     var arr = document.getElementById('landCntry').value.split("-")
     _abbrevLocn = arr[0];
