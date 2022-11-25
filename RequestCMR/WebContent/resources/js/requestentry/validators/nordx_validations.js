@@ -3459,9 +3459,9 @@ function setCustPrefLangByCountry() {
 
 // CREATCMR-1709
 // CREATCMR-5128
-function resetCustPrefLang() {
+/*function resetCustPrefLang() {
   _pagemodel.custPrefLang = null;
-}
+}*/
 // CREATCMR-1709
 
 function setInacCd() {
@@ -4928,8 +4928,9 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-1709
   // CREATCMR-5128
-  GEOHandler.addAfterConfig(resetCustPrefLang, GEOHandler.NORDX);
-  GEOHandler.addAfterTemplateLoad(resetCustPrefLang, GEOHandler.NORDX);
+  // commented for CREATCMR-7669
+  //GEOHandler.addAfterConfig(resetCustPrefLang, GEOHandler.NORDX);
+  //GEOHandler.addAfterTemplateLoad(resetCustPrefLang, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(onSubIndustryChange, GEOHandler.NORDX);//
   // CMR-1709
 
