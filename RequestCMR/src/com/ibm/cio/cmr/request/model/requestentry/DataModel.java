@@ -1249,6 +1249,7 @@ public class DataModel extends BaseModel {
   public void setCustomerIdCd(String customerIdCd) {
     this.customerIdCd = customerIdCd;
   }
+  
 
   public String getVatInd() {
     return vatInd;

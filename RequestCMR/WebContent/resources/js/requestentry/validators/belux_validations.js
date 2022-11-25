@@ -134,10 +134,10 @@ function afterConfigForBELUX() {
   addAccTemNumValidate();
   disableSBO();
   disableIBMTab();
-
-  // CREATCMR-788
-  addressQuotationValidatorBELUX();
-
+  
+  
+  
+  
 }
 
 function checkCmrUpdateBeforeImport() {

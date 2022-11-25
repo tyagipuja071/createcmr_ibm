@@ -7,8 +7,13 @@ function addAfterConfigForSWISS() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var impIndc = getImportedIndcForSwiss();
-
+  var impIndc = getImportedIndcForSwiss();  
+  if (role == 'REQUESTER') {
+    FormManager.removeValidator('custLangCd', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('custLangCd', Validators.REQUIRED, [ 'Prefered Langauge' ], null);
+  }
+ 
   if (role == 'REQUESTER') {
     FormManager.readOnly('subIndustryCd');
   } else {
@@ -438,7 +443,7 @@ function addVatSuffixForCustLangCdScrtch() {
 }
 
 /* Vat Exempt Handler */
-function setVatValidatorSWISS() {
+function setVatValidatorSWISS() {  
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
 
   var _reqId = FormManager.getActualValue('reqId');
@@ -450,16 +455,15 @@ function setVatValidatorSWISS() {
   var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
   landCntry = landCntryResult.ret1;
 
-  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
-
-    FormManager.resetValidations('vat');
-
+  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {    
+    
+    FormManager.resetValidations('vat');   
+    
     if (!dijit.byId('vatExempt').get('checked') && landCntry != 'GB') {
 
-      // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
-      // 'MAIN_CUST_TAB');
+    //  FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
-
+  
   }
 }
 
