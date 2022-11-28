@@ -512,7 +512,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       String sendToId, String sendToNm, boolean complete, boolean transitionToNext) throws Exception {
     AppUser user = AppUser.getUser(request);
     CompoundEntity entity = getCurrentRecord(model, entityManager, request);
-
+    Scorecard scorecard = entity.getEntity(Scorecard.class);
     Admin admin = entity.getEntity(Admin.class);
     String lockedBy = "";
     String lockedByNm = "";
@@ -616,16 +616,13 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     updateEntity(data, entityManager);
 
-    // Scorecard vat acknowledge initialize, if the data.vatInd=N,
-    // then set scorecard.vatAcknowledge=Yes
-    long reqId=model.getReqId();
+    long reqId = model.getReqId();
     RequestData requestData = new RequestData(entityManager, reqId);
     Addr addr = requestData.getAddress("ZS01");
-    boolean iscrossBorder= isCrossBorder(entityManager,model.getCmrIssuingCntry(),addr.getLandCntry());
-    Scorecard scorecard = entity.getEntity(Scorecard.class);
+    // Scorecard vat acknowledge initialize, if the data.vatInd=N,
+    // then set scorecard.vatAcknowledge=Yes
+    boolean iscrossBorder = isCrossBorder(entityManager, model.getCmrIssuingCntry(), addr.getLandCntry());
     if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())) {
-
-      
       if ("N".equals(data.getVatInd()) && (!iscrossBorder)) {
         scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
       } else
@@ -697,7 +694,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       }
     }
   }
-  
+
   public static boolean isCrossBorder(EntityManager entityManager, String issuingCntry, String landCntry) {
     boolean isCrossBorder = false;
     boolean isSubRegion = false;
@@ -710,9 +707,10 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       issuingLandedCntryMap.put((String) result[0], (String) result[1]);
     }
     if ((Arrays.asList("LV", "LT", "EE").contains(landCntry) && "702".equals(issuingCntry))
-        || (Arrays.asList("FO", "GL", "IS").contains(landCntry) && "678".equals(issuingCntry)))
+        || (Arrays.asList("FO", "GL", "IS").contains(landCntry) && "678".equals(issuingCntry))
+        || (Arrays.asList("BE", "LU").contains(landCntry) && "624".equals(issuingCntry))) {
       isSubRegion = true;
-
+    }
     if (StringUtils.isNotBlank(issuingCntry) && issuingCntry.equalsIgnoreCase("624LU")) {
       landedCntry = "LU";
     } else
@@ -725,7 +723,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     return isCrossBorder;
   }
-    
+
   /**
    * Send for processing
    * 
