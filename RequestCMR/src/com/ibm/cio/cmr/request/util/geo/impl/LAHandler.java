@@ -199,6 +199,17 @@ public class LAHandler extends GEOHandler {
       data.setGovType(govType);
     }
 
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && mainRecord != null) {
+      String kukla = mainRecord.getCustClass() != null ? mainRecord.getCustClass() : "";
+      if (StringUtils.isNotEmpty(kukla) && kukla.substring(0, 1).equals("4")) {
+        data.setPartnershipInd("Y");
+        data.setMarketingContCd("1");
+      } else {
+        data.setPartnershipInd("N");
+        data.setMarketingContCd("0");
+      }
+    }
+
     if (SystemLocation.CHILE.equalsIgnoreCase(issuingCountry)) {
       data.setBusnType(mainRecord.getCmrChileBusnTyp());
     }
