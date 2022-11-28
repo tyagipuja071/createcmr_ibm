@@ -3454,6 +3454,14 @@ function setCustPrefLangByCountry() {
   }
 
 }
+
+function lockTaxCode(){
+  var role = FormManager.getActualValue('userRole');
+  if (role == 'Viewer') {
+    FormManager.readOnly('taxCd1');
+  }
+}
+
 // CREATCMR-2144
 
 // CREATCMR-1709
@@ -4966,5 +4974,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.NORDX);
   
   GEOHandler.addAfterConfig(skipStateProvForFO, GEOHandler.NORDX);
-
+  GEOHandler.addAfterConfig(lockTaxCode, GEOHandler.NORDX);
 });
