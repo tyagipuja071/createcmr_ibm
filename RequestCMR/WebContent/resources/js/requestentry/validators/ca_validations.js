@@ -957,7 +957,7 @@ function mappingAddressField(key) {
   } else if (key == 'NB') {
     value = 'E';
   } else if (key == 'QC') {
-    value = [ 'G', 'H', 'J' ];
+    value = [ 'G', 'H', 'J', 'K' ];
   } else if (key == 'ON') {
     value = [ 'K', 'L', 'M', 'N', 'P', 'W' ];
   } else if (key == 'MB') {
