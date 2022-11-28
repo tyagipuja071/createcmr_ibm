@@ -46,7 +46,7 @@ public class NewZealandTransformer extends ANZTransformer {
 
       String line1 = "";
       if (!StringUtils.isBlank(addrData.getDept())) {
-        line1 += "TEST:" + addrData.getDept();
+        line1 += "ATTN:" + addrData.getDept();
       }
 
       String line2 = "";
@@ -162,7 +162,7 @@ public class NewZealandTransformer extends ANZTransformer {
 
     String line3 = "";
     if (!StringUtils.isBlank(addrData.getDept())) {
-      line3 += "TEST:" + addrData.getDept();
+      line3 += "ATTN:" + addrData.getDept();
     }
 
     String line4 = "";
