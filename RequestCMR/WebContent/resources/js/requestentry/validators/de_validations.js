@@ -54,8 +54,6 @@ function afterConfigForDE() {
       setISUValues();
       // CREATCMR-7424_7425
       setAbbreviatedNameBasedOnAddressType();
-      setVatIndFields();
-
     });
   }
 
@@ -91,7 +89,6 @@ function afterConfigForDE() {
 
   // Disable address copying for GERMANY
   GEOHandler.disableCopyAddress();
-  setVatIndFields();
 }
 
 function vatExemptIBMEmp() {
