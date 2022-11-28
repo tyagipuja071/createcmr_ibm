@@ -4109,7 +4109,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
   private void doSkipAndPpn4NoData(AutomationResult<MatchingOutput> result, AutomationEngineData engineData) {
     result.setDetails("Forword request to CMDE, due to CNService API responds error: 无数据 and CN Specific attachment.");
     engineData.addPositiveCheckStatus("Forword request to CMDE, due to CNService API responds error: 无数据 and CN Specific attachment.");
-    engineData.setSkipChecks();
+    // engineData.setSkipChecks();
     result.setResults("Skip");
     result.setOnError(false);
   }
