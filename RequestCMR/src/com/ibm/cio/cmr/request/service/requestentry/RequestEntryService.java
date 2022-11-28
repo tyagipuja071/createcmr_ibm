@@ -622,10 +622,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     // Scorecard vat acknowledge initialize, if the data.vatInd=N,
     // then set scorecard.vatAcknowledge=Yes
     boolean iscrossBorder = isCrossBorder(entityManager, model.getCmrIssuingCntry(), addr.getLandCntry());
-
     if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())) {
-
-      
       if ("N".equals(data.getVatInd()) && (!iscrossBorder)) {
         scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
       } else
@@ -697,7 +694,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       }
     }
   }
-  
+
   public static boolean isCrossBorder(EntityManager entityManager, String issuingCntry, String landCntry) {
     boolean isCrossBorder = false;
     boolean isSubRegion = false;
@@ -726,6 +723,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     return isCrossBorder;
   }
+
   /**
    * Send for processing
    * 
