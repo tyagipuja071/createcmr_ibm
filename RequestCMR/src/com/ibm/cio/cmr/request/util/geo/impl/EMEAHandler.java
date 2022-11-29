@@ -1804,7 +1804,7 @@ public class EMEAHandler extends BaseSOFHandler {
         query.setParameter("CMR_NO", data.getCmrNo());
         query.setForReadOnly(true);
         List<Integer> records = query.getResults(Integer.class);
-        if (records != null && records.size() > 0) {
+        if (records != null && records.size() >= 0) {
           data.setSpecialTaxCd("Bl");
         }
       }
