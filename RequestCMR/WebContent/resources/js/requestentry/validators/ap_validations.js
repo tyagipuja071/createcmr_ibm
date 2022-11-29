@@ -1724,13 +1724,13 @@ function autoSetAbbrevNmLocnLogic() {
     var reqType = FormManager.getActualValue('reqType');
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "BLUMX" || custSubGrp == "XBLUM") {
-        if(reqType == 'C' && custSubGrp == "BLUMX"){
+        if(reqType == 'C'){
           _abbrevNm = "Bluemix use only";
         } else {
           _abbrevNm = "Bluemix_" + custNm1;
         }
       } else if (custSubGrp == "MKTPC" || custSubGrp == "XMKTP") {
-        if(reqType == 'C' && custSubGrp == "MKTPC"){
+        if(reqType == 'C'){
           _abbrevNm = "Market place use only";
         } else {
           _abbrevNm = "Marketplace_" + custNm1;
@@ -1746,7 +1746,7 @@ function autoSetAbbrevNmLocnLogic() {
           _abbrevNm = "Dummy_" + custNm1;
         }
       } else if (custSubGrp == "ESOSW" || custSubGrp == "XESO") {
-        if(reqType == 'C' && custSubGrp == "ESOSW"){
+        if(reqType == 'C'){
           _abbrevNm = "ESA use only";
         } else {
           _abbrevNm = "ESA/OEM/SWG_" + custNm1;
@@ -1754,7 +1754,7 @@ function autoSetAbbrevNmLocnLogic() {
       // CREATCMR-7653 --START--
       } else if (reqType == 'C' && custSubGrp == "INTER") {
         _abbrevNm = "Internal use only";
-      } else if (reqType == 'C' && custSubGrp == "AQSTN") {
+      } else if (reqType == 'C' && (custSubGrp == "AQSTN" || custSubGrp == "XAQST")) {
         _abbrevNm = "Acquisition use only";
       // CREATCMR-7653 --END--
       } else {
@@ -5026,7 +5026,9 @@ function setDefaultValueForNZCreate(){
   var reqId = FormManager.getActualValue('reqId');
   var isicCdInDB = '';
   
-  if(custSubGrp=='BLUMX' || custSubGrp=='MKTPC' || custSubGrp=='AQSTN' || custSubGrp=='NRML' || custSubGrp=='ESOSW' || custSubGrp=='ECSYS' || custSubGrp=='CROSS'){
+  var custSubGroups = ['BLUMX', 'MKTPC', 'AQSTN', 'NRML', 'ESOSW', 'ECSYS', 'CROSS', 'XAQST', 'XBLUM', 'XESO', 'XMKTP'];
+  console.log(">>>>setDefaultValueForNZCreate()>>>> SubGrp="+custSubGrp);
+  if(custSubGroups.includes(custSubGrp)){
     var reqIdParams = {
         REQ_ID : reqId,
       };
@@ -5035,7 +5037,7 @@ function setDefaultValueForNZCreate(){
       if (isicCdResult.ret1 != undefined) {
         isicCdInDB = isicCdResult.ret1;
       }
-      console.log(">>>>NZ(796)>>>SubGrp="+custSubGrp+", ISIC in DB ="+isicCdInDB); 
+      console.log(">>>>setDefaultValueForNZCreate()>>>> ISIC_CD in DB ="+isicCdInDB); 
   }
   
     switch (custSubGrp) {
@@ -5253,6 +5255,105 @@ function setDefaultValueForNZCreate(){
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
+      
+      if(isicCdInDB!=''){
+        FormManager.setValue('isicCd', isicCdInDB);
+        FormManager.readOnly('isicCd');
+      }
+      break;
+    case 'XAQST':
+      // cluster/QTC/ISU: 01147/Q/34, 09056/blank/5K
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01147', '09056' ]);
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q', ' ' ]);
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34', '5K' ]);
+      FormManager.setValue('apCustClusterId', '01147');
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('isuCd', '34');
+      // MRC = 3 - lock field
+      FormManager.setValue('mrcCd', '3');
+      FormManager.readOnly('mrcCd');
+      // Collection code = 00JC - lock field
+      FormManager.setValue('collectionCd', '00JC');
+      FormManager.readOnly('collectionCd');
+      
+      FormManager.setValue('abbrevNm', 'Acquisition use only');
+      FormManager.readOnly('abbrevNm');
+      
+      if(isicCdInDB!=''){
+        FormManager.setValue('isicCd', isicCdInDB);
+        FormManager.readOnly('isicCd');
+      }
+      break;
+    case 'XBLUM':
+      // cluster/QTC/ISU: default as 00002/Q/34 - lock field
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '00002' ]);
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q' ]);
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
+      FormManager.setValue('apCustClusterId', '00002');
+      FormManager.readOnly('apCustClusterId');
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.readOnly('clientTier');
+      FormManager.setValue('isuCd', '34');
+      FormManager.readOnly('isuCd');
+      // MRC = 3 - lock field
+      FormManager.setValue('mrcCd', '3');
+      FormManager.readOnly('mrcCd');
+      // Collection code = 00JC - lock field
+      FormManager.setValue('collectionCd', '00JC');
+      FormManager.readOnly('collectionCd');
+      
+      FormManager.setValue('abbrevNm', 'Bluemix use only');
+      FormManager.readOnly('abbrevNm');
+      
+      if(isicCdInDB!=''){
+        FormManager.setValue('isicCd', isicCdInDB);
+        FormManager.readOnly('isicCd');
+      }
+        
+      break;
+    case 'XESO':
+      // MRC = 3 - lock field
+      FormManager.setValue('mrcCd', '3');
+      FormManager.readOnly('mrcCd');
+      // Collection code = 00JC - lock field
+      FormManager.setValue('collectionCd', '00JC');
+      FormManager.readOnly('collectionCd');
+      // cluster/QTC/ISU: 01147/Q/34, 09056/blank/5K, 08037/Y/34
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01147', '09056', '08037' ]);
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q', ' ', 'Y' ]);
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34', '5K' ]);
+      FormManager.setValue('apCustClusterId', '01147');
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('isuCd', '34');
+      
+      FormManager.setValue('abbrevNm', 'ESA use only');
+      FormManager.readOnly('abbrevNm');
+      
+      if(isicCdInDB!=''){
+        FormManager.setValue('isicCd', isicCdInDB);
+        FormManager.readOnly('isicCd');
+      }
+      break;
+    case 'XMKTP':
+      // cluster/QTC/ISU: default as 00002/Q/34 - lock field
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '00002' ]);
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q' ]);
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
+      FormManager.setValue('apCustClusterId', '00002');
+      FormManager.readOnly('apCustClusterId');
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.readOnly('clientTier');
+      FormManager.setValue('isuCd', '34');
+      FormManager.readOnly('isuCd');
+      // MRC = 3 - lock field
+      FormManager.setValue('mrcCd', '3');
+      FormManager.readOnly('mrcCd');
+      // Collection code = 00JC - lock field
+      FormManager.setValue('collectionCd', '00JC');
+      FormManager.readOnly('collectionCd');
+      
+      FormManager.setValue('abbrevNm', 'Market place use only');
+      FormManager.readOnly('abbrevNm');
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
