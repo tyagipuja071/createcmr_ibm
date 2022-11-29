@@ -100,22 +100,27 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                 Collections.copy(cmrCheckMatches, cmrCheckMatchesDept);
               }
               // cmr - 4512 match dupc prospect cmr
+              int itemNo = 1;
               for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
                 String regex = "\\s+$";
                 String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
                 String cmrRecCustName = StringUtils.isBlank(cmrCheckRecord.getCustomerName()) ? "" : cmrCheckRecord.getCustomerName();
                 custName = custName.replaceAll(regex, "");
                 cmrRecCustName = cmrRecCustName.replaceAll(regex, "");
-                if (!"Y".equals(isProspectCmr) && custName.equalsIgnoreCase(cmrRecCustName) && cmrCheckRecord.getCmrNo() != null
-                    && cmrCheckRecord.getCmrNo().startsWith("P") && "75".equals(cmrCheckRecord.getOrderBlk())) {
-                  // rejection code && "75".equals(cmrCheckRecord.getOrdBlk())
-                  result.setDetails("There is an existing CMR " + cmrCheckRecord.getCmrNo()
-                      + " , please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR.");
-                  engineData.addRejectionComment("OTH", "There is an existing CMR " + cmrCheckRecord.getCmrNo()
+                if (!"Y".equals(isProspectCmr) && cmrCheckRecord.getCmrNo() != null && cmrCheckRecord.getCmrNo().startsWith("P")
+                    && "75".equals(cmrCheckRecord.getOrderBlk())) {
+                  log.debug("Duplicate Prospect CMR Found..");
+                  details.append(cmrCheckMatches.size() + " record(s) found. \n");
+                  output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
+                      itemNo++);
+                  logDuplicateCMR(details, cmrCheckRecord);
+                  engineData.put("cmrCheckMatches", cmrCheckMatches);
+                  engineData.addRejectionComment("DUPC", "There is an existing CMR " + cmrCheckRecord.getCmrNo()
                       + " , please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR", "", "");
                   result.setOnError(true);
-                  result.setResults("There is an existing CMR  " + cmrCheckRecord.getCmrNo()
-                      + " ,  please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR");
+                  result.setResults("Found Duplicate CMRs.");
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
                   return result;
                 }
               }
@@ -128,7 +133,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                   details.append("Showing top 5 matches only.");
                 }
 
-                int itemNo = 1;
+                itemNo = 1;
                 for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
                   details.append("\n");
 
