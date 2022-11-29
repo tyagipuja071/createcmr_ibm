@@ -78,27 +78,24 @@ public class CompanyFinder {
       matches.addAll(findCMRsViaService(searchModel.getIssuingCntry(), searchModel.getCmrNo(), 3, null));
     } else if (isLatin(searchModel.getName())) {
       matches.addAll(findCMRs(searchModel));
-      boolean searchDnb = isLowLevelMatched(matches);
+      // CREATCMR-7388 - always append D&B results
+      boolean searchDnb = true;
+
+      // List<String> lowLevelMatches = Arrays.asList("F3", "F4", "F5", "VAT",
+      // "DUNS");
+      // if (!matches.isEmpty()) {
+      // for (CompanyRecordModel cmrMatch : matches) {
+      // if (lowLevelMatches.contains(cmrMatch.getMatchGrade())) {
+      // searchDnb = true;
+      // break;
+      // }
+      // }
+      // }
       matches.addAll(findRequests(searchModel));
 
-      if (isLatin(searchModel.getName())) {
-        matches.addAll(findCMRs(searchModel));
-        boolean searchDnb = false;
-        // CREATCMR-7388 - always append D&B results
-        searchDnb = true;
-
-        // List<String> lowLevelMatches = Arrays.asList("F3", "F4", "F5", "VAT",
-        // "DUNS");
-        // if (!matches.isEmpty()) {
-        // for (CompanyRecordModel cmrMatch : matches) {
-        // if (lowLevelMatches.contains(cmrMatch.getMatchGrade())) {
-        // searchDnb = true;
-        // break;
-        // }
-        // }
-        // }
-
-        matches.addAll(findRequests(searchModel));
+      if (matches.isEmpty() || searchDnb || "Y".equals(searchModel.getAddDnBMatches())) {
+        matches.addAll(searchDnB(searchModel));
+      }
 
       if (matches.isEmpty() && !StringUtils.isBlank(searchModel.getName()) && LOCAL_LANG_COUNTRIES.contains(searchModel.getIssuingCntry())) {
         // try non latin if country has local lang data
