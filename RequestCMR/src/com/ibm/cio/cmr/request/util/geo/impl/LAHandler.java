@@ -200,7 +200,7 @@ public class LAHandler extends GEOHandler {
     }
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && mainRecord != null) {
-      String kukla = mainRecord.getCustClass() != null ? mainRecord.getCustClass() : "";
+      String kukla = mainRecord.getCmrClass() != null ? mainRecord.getCmrClass() : "";
       if (StringUtils.isNotEmpty(kukla) && kukla.substring(0, 1).equals("4")) {
         data.setPartnershipInd("Y");
         data.setMarketingContCd("1");
