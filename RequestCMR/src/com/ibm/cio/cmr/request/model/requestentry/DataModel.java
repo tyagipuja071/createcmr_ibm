@@ -237,7 +237,12 @@ public class DataModel extends BaseModel {
   private String nationalCusId;
 
   private String rdcComment;
+
   private String abbrevLocn;
+
+  private String collectorNameNo;
+
+  private String mrktChannelInd;
 
   // CH Specific
   private String custLangCd;
@@ -1242,5 +1247,21 @@ public class DataModel extends BaseModel {
 
   public void setCustomerIdCd(String customerIdCd) {
     this.customerIdCd = customerIdCd;
+  }
+
+  public String getCollectorNameNo() {
+    return collectorNameNo;
+  }
+
+  public void setCollectorNameNo(String collectorNameNo) {
+    this.collectorNameNo = collectorNameNo;
+  }
+
+  public String getMrktChannelInd() {
+    return mrktChannelInd;
+  }
+
+  public void setMrktChannelInd(String mrktChannelInd) {
+    this.mrktChannelInd = mrktChannelInd;
   }
 }

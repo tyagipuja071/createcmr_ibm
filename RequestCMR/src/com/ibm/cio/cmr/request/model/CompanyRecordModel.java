@@ -64,12 +64,21 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
       return -1;
     }
 
-    // move CMR types up
-    if ("CMR".equals(this.recType) && !"CMR".equals(o.getRecType())) {
+    // move prospects up
+    if ("CMR".equals(this.recType) && this.cmrNo.startsWith("P")
+        && (!"CMR".equals(o.recType) || ("CMR".equals(o.recType) && !o.cmrNo.startsWith("P")))) {
       return -1;
     }
-    if (!"CMR".equals(this.recType) && "CMR".equals(o.getRecType())) {
+    if ("CMR".equals(o.recType) && o.cmrNo.startsWith("P")
+        && (!"CMR".equals(this.recType) || ("CMR".equals(this.recType) && !this.cmrNo.startsWith("P")))) {
       return 1;
+    }
+    // move CMR types down CREATCMR-7388
+    if ("CMR".equals(this.recType) && !"CMR".equals(o.getRecType())) {
+      return 1;
+    }
+    if (!"CMR".equals(this.recType) && "CMR".equals(o.getRecType())) {
+      return -1;
     }
 
     if ("REQ".equals(this.recType) && !"REQ".equals(o.getRecType())) {

@@ -563,4 +563,10 @@ public class IERPRequestUtils extends RequestUtils {
     return cnEcoNotifyList;
   }
 
+  public static void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country,
+      Admin admin) {
+    GEOHandler handler = getGEOHandler(country);
+    handler.validateMassUpdateTemplateDupFills(validations, book, maxRows, country, admin);
+  }
+
 }

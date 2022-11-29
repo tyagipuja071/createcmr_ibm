@@ -52,13 +52,7 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
-import com.ibm.cmr.services.client.CROSServiceClient;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.cros.CROSContact;
-import com.ibm.cmr.services.client.cros.CROSQueryRequest;
-import com.ibm.cmr.services.client.cros.CROSQueryResponse;
-import com.ibm.cmr.services.client.cros.CROSRecord;
-import com.ibm.cmr.services.client.cros.CROSTax;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 
 /**
  * @author Jeffrey Zamora
@@ -1454,148 +1448,25 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
     return taxInfo;
   }
 
-  public List<GeoTaxInfoModel> getOrigTaxInfoDetails(String cmr, String issuingCntry) {
-    List<GeoTaxInfoModel> taxInfo = new ArrayList<GeoTaxInfoModel>();
-    CROSQueryRequest request = new CROSQueryRequest();
-    request.setIssuingCntry(issuingCntry);
-    request.setCmrNo(cmr);
-    try {
-      CROSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
-          CROSServiceClient.class);
-      CROSQueryResponse response = client.executeAndWrap(CROSServiceClient.QUERY_APP_ID, request, CROSQueryResponse.class);
-
-      if (response.isSuccess()) {
-        CROSRecord record = response.getData();
-        List<CROSTax> crossTaxRecords = record.getTaxCodes();
-
-        if (crossTaxRecords != null && crossTaxRecords.size() > 0) {
-
-          for (CROSTax t : crossTaxRecords) {
-            GeoTaxInfoModel newTaxInfo = new GeoTaxInfoModel();
-            newTaxInfo.setBillingPrintIndc(t.getBillingPrintInd());
-            newTaxInfo.setCntryUse(t.getCountryUse());
-            newTaxInfo.setContractPrintIndc(t.getContractPrintInd());
-            newTaxInfo.setTaxCd(t.getTaxCode());
-            newTaxInfo.setTaxNum(t.getTaxNumber());
-            newTaxInfo.setTaxSeparationIndc(t.getTaxSepInd());
-
-            taxInfo.add(newTaxInfo);
-          }
-
-        }
-
-      }
-    } catch (Exception e) {
-      LOG.error("An error has occured in retrieving contact detail values coming from the CROS query service.");
-      e.printStackTrace();
-    }
-    return taxInfo;
-  }
-
-  // public List<GeoContactInfoModel> getAddlContactDetails(HttpServletRequest
-  // request, long reqId, String issuingCntry) throws CmrException {
-  // EntityManager em = JpaManager.getEntityManager();
-  // List<GeoContactInfoModel> contactLstDto = new
-  // ArrayList<GeoContactInfoModel>();
-  // String sql = ExternalizedQuery.getSql("CONTACTINFO.FINDALL");
-  // GeoContactInfoModel contDto = null;
-  // try {
-  // PreparedQuery query = new PreparedQuery(em, sql);
-  // query.setParameter("REQ_ID", reqId);
-  // query.append("ORDER BY CONTACT_TYPE");
-  // query.setForReadOnly(true);
-  // List<GeoContactInfo> ent = query.getResults(GeoContactInfo.class);
-  // if (ent != null && ent.size() != 0) {
-  // for (GeoContactInfo resultEntity : ent) {
-  // contDto = new GeoContactInfoModel();
-  // copyContactInfoDetails(resultEntity, contDto);
-  // contactLstDto.add(contDto);
-  // }
-  // }
-  // } catch (Exception ex) {
-  // LOG.error(ex.getMessage(), ex);
-  // throw new CmrException(MessageUtil.ERROR_GENERAL);
-  // } finally {
-  // em.clear();
-  // em.close();
-  // }
-  // return contactLstDto;
-  // }
-
   public List<GeoContactInfoModel> getAddlContactDetails(HttpServletRequest request, long reqId, String issuingCntry) throws CmrException {
     EntityManager em = JpaManager.getEntityManager();
     List<GeoContactInfoModel> contactLstDto = new ArrayList<GeoContactInfoModel>();
     String sql = ExternalizedQuery.getSql("CONTACTINFO.FINDALL");
     GeoContactInfoModel contDto = null;
     try {
-      // Start to get the contact info details from the CROS QS
-      CROSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
-          CROSServiceClient.class);
-      CROSQueryResponse response = client.executeAndWrap(CROSServiceClient.QUERY_APP_ID, request, CROSQueryResponse.class);
-
-      HashMap<String, CROSContact> crosContactsMap = new HashMap<String, CROSContact>();
-      HashMap<String, GeoContactInfo> cmrContactsMap = new HashMap<String, GeoContactInfo>();
-      List<CROSContact> crossCntlist = new ArrayList<CROSContact>();
-
-      // if (!response.isSuccess()) {
-      // LOG.error("An error has occured in retrieving contact detail values
-      // coming from the CROS query service.");
-      // Exception e = new
-      // Exception("An error has occured in retrieving contact detail values
-      // coming from the CROS query service.");
-      // throw new CmrException(e);
-      // } else {
-      // // get the contacts and set HM ID as type + name
-      // CROSRecord record = response.getData();
-      // crossCntlist = record.getContacts();
-      //
-      // if (croqqqqqqqqqqqqqqqssCntlist != null && crossCntlist.size() > 0) {
-      // for (CROSContact crosContact : crossCntlist) {
-      // crosContactsMap.put((crosContact.getContactCode() +
-      // (crosContact.getContactName() != null ?
-      // crosContact.getContactName().toLowerCase()
-      // : "")), crosContact);
-      // }
-      // }
-      // }
-      //
-      // PreparedQuery query = new PreparedQuery(em, sql);
-      // query.setParameter("REQ_ID", reqId);
-      // query.append("ORDER BY CONTACT_TYPE");
-      // query.setForReadOnly(true);
-      //
-      // // Start to get contact info details from the DB
-      // List<GeoContactInfo> ent = query.getResults(GeoContactInfo.class);
-      //
-      // if (ent != null && ent.size() != 0) {
-      // for (GeoContactInfo resultEntity : ent) {
-      // cmrContactsMap.put(resultEntity.getContactType()
-      // + (resultEntity.getContactName() != null ?
-      // resultEntity.getContactName().toLowerCase() : ""), resultEntity);
-      // }
-      // }
-      //
-      // if (crossCntlist != null && crossCntlist.size() > 0) {
-      // for (CROSContact d : crossCntlist) {
-      // GeoContactInfoModel newModel = new GeoContactInfoModel();
-      // newModel.setContactEmail(d.getContactEmail());
-      // newModel.setContactName(d.getContactName());
-      // newModel.setContactType(d.getContactCode());
-      // newModel.setContactPhone(d.getContactPhone());
-      // newModel.setContactSeqNum(d.getContactNo());
-      //
-      // if (!cmrContactsMap.containsKey(d.getContactCode() +
-      // (d.getContactName() != null ? d.getContactName().toLowerCase() : "")))
-      // {
-      // newModel.setRemoved("<font color='red'>REMOVED</font>");
-      // }
-      //
-      // contactLstDto.add(newModel);
-      // }
-      // }
-
+      PreparedQuery query = new PreparedQuery(em, sql);
+      query.setParameter("REQ_ID", reqId);
+      query.append("ORDER BY CONTACT_TYPE");
+      query.setForReadOnly(true);
+      List<GeoContactInfo> ent = query.getResults(GeoContactInfo.class);
+      if (ent != null && ent.size() != 0) {
+        for (GeoContactInfo resultEntity : ent) {
+          contDto = new GeoContactInfoModel();
+          copyContactInfoDetails(resultEntity, contDto);
+          contactLstDto.add(contDto);
+        }
+      }
     } catch (Exception ex) {
-      ex.printStackTrace();
       LOG.error(ex.getMessage(), ex);
       throw new CmrException(MessageUtil.ERROR_GENERAL);
     } finally {
@@ -1607,110 +1478,83 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
   public List<GeoContactInfoModel> getCurrentContactInfoDetails(String reqId, String issuingCntry, String cmr) throws CmrException {
     EntityManager em = JpaManager.getEntityManager();
+    DataRdc origContacts = LegacyCommonUtil.getOldData(em, reqId);
     List<GeoContactInfoModel> contactLstDto = new ArrayList<GeoContactInfoModel>();
-    String sql = ExternalizedQuery.getSql("CONTACTINFO.FINDALL");
-    CROSQueryRequest request = new CROSQueryRequest();
-    request.setIssuingCntry(issuingCntry);
-    request.setCmrNo(cmr);
+
+    String email1 = "";
+    String email2 = "";
+    String email3 = "";
 
     try {
-      // Start to get the contact info details from the CROS QS
-      CROSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
-          CROSServiceClient.class);
-      CROSQueryResponse response = client.executeAndWrap(CROSServiceClient.QUERY_APP_ID, request, CROSQueryResponse.class);
-
-      HashMap<String, CROSContact> crosContactsMap = new HashMap<String, CROSContact>();
-      HashMap<String, GeoContactInfo> cmrContactsMap = new HashMap<String, GeoContactInfo>();
-      List<CROSContact> crossCntlist = new ArrayList<CROSContact>();
-
-      if (!response.isSuccess()) {
-        LOG.error("An error has occured in retrieving contact detail values coming from the CROS query service.");
-        Exception e = new Exception("An error has occured in retrieving contact detail values coming from the CROS query service.");
-        throw new CmrException(e);
-      } else {
-        // get the contacts and set HM ID as type + name
-        CROSRecord record = response.getData();
-        crossCntlist = record.getContacts();
-        List<CROSContact> leContacts = new ArrayList<CROSContact>();
-
-        if (crossCntlist != null && crossCntlist.size() > 0) {
-          for (CROSContact crosContact : crossCntlist) {
-
-            if (SystemLocation.PERU.equalsIgnoreCase(issuingCntry) && "LE".equals(crosContact.getContactCode())) {
-              // crossCntlist.remove(crosContact);
-              leContacts.add(crosContact);
-              continue;
-            }
-
-            crosContactsMap.put((crosContact.getContactCode() + crosContact.getContactNo()
-                + (crosContact.getContactEmail() != null ? crosContact.getContactEmail().toLowerCase() : "")), crosContact);
-          }
-
-          if (leContacts.size() > 0) {
-            // DTN: It means there are LE contacts
-            for (CROSContact singleLECont : leContacts) {
-              crossCntlist.remove(singleLECont);
-            }
-          }
-        }
+      if (origContacts != null) {
+        email1 = StringUtils.isNotBlank(origContacts.getEmail1()) ? origContacts.getEmail1() : "";
+        email2 = StringUtils.isNotBlank(origContacts.getEmail2()) ? origContacts.getEmail2() : "";
+        email3 = StringUtils.isNotBlank(origContacts.getEmail3()) ? origContacts.getEmail3() : "";
       }
 
+      String sql = ExternalizedQuery.getSql("CONTACTINFO.FINDALL");
       PreparedQuery query = new PreparedQuery(em, sql);
       query.setParameter("REQ_ID", reqId);
       query.append("ORDER BY CONTACT_TYPE");
       query.setForReadOnly(true);
 
-      // Start to get contact info details from the DB
-      List<GeoContactInfo> ent = query.getResults(GeoContactInfo.class);
+      // Get contact info detail values from the DB
+      List<GeoContactInfo> currentContacts = query.getResults(GeoContactInfo.class);
+      List<String> currentSeqNum = new ArrayList<>();
 
-      if (ent != null && ent.size() != 0) {
-        for (GeoContactInfo resultEntity : ent) {
-          cmrContactsMap.put(resultEntity.getContactType() + resultEntity.getContactSeqNum()
-              + (resultEntity.getContactEmail() != null ? resultEntity.getContactEmail().toLowerCase() : ""), resultEntity);
-        }
-      }
-
-      if (crossCntlist != null && crossCntlist.size() > 0) {
-        for (CROSContact d : crossCntlist) {
+      if (currentContacts != null & currentContacts.size() > 0) {
+        for (GeoContactInfo c : currentContacts) {
           GeoContactInfoModel newModel = new GeoContactInfoModel();
-          newModel.setContactEmail(d.getContactEmail());
-          newModel.setContactName(d.getContactName());
-          newModel.setContactType(d.getContactCode());
-          newModel.setContactPhone(d.getContactPhone());
-          newModel.setContactSeqNum(d.getContactNo());
 
-          if (!cmrContactsMap
-              .containsKey(d.getContactCode() + d.getContactNo() + (d.getContactEmail() != null ? d.getContactEmail().toLowerCase() : ""))) {
-            newModel.setRemoved("REMOVED");
+          newModel.setContactEmail(c.getContactEmail());
+          newModel.setContactName(c.getContactName());
+          newModel.setContactType(c.getContactType());
+          newModel.setContactPhone(c.getContactPhone());
+          newModel.setContactSeqNum(c.getContactSeqNum());
+
+          if ("EM".equals(c.getContactType())) {
+            currentSeqNum.add(c.getContactSeqNum());
+            if ("001".equals(c.getContactSeqNum()) && !email1.equals(c.getContactEmail())) {
+              newModel.setRemoved("ADDED");
+              contactLstDto.add(getRemovedContact(email1, "001"));
+            } else if ("002".equals(c.getContactSeqNum()) && !email2.equals(c.getContactEmail())) {
+              newModel.setRemoved("ADDED");
+              contactLstDto.add(getRemovedContact(email2, "002"));
+            } else if ("003".equals(c.getContactSeqNum()) && !email3.equals(c.getContactEmail())) {
+              newModel.setRemoved("ADDED");
+              contactLstDto.add(getRemovedContact(email3, "003"));
+            }
           }
-
           contactLstDto.add(newModel);
         }
       }
 
-      if (ent != null && ent.size() > 0) {
-        for (GeoContactInfo resultEntity : ent) {
-          GeoContactInfoModel newModel = new GeoContactInfoModel();
-          newModel.setContactEmail(resultEntity.getContactEmail());
-          newModel.setContactName(resultEntity.getContactName());
-          newModel.setContactType(resultEntity.getContactType());
-          newModel.setContactPhone(resultEntity.getContactPhone());
-          newModel.setContactSeqNum(resultEntity.getContactSeqNum());
-
-          if (!crosContactsMap.containsKey(resultEntity.getContactType() + resultEntity.getContactSeqNum()
-              + (resultEntity.getContactEmail() != null ? resultEntity.getContactEmail().toLowerCase() : ""))) {
-            newModel.setRemoved("ADDED");
-            contactLstDto.add(newModel);
-          }
-        }
+      // Get removed contact info detail values only
+      if (StringUtils.isNotBlank(email1) && !currentSeqNum.contains("001")) {
+        contactLstDto.add(getRemovedContact(email1, "001"));
+      } else if (StringUtils.isNotBlank(email2) && !currentSeqNum.contains("002")) {
+        contactLstDto.add(getRemovedContact(email2, "002"));
+      } else if (StringUtils.isNotBlank(email3) && !currentSeqNum.contains("003")) {
+        contactLstDto.add(getRemovedContact(email3, "003"));
       }
 
     } catch (Exception e) {
-      LOG.error("An error has occured in retrieving contact detail values coming from the CROS query service.");
+      LOG.error("An error has occured in retrieving contact info detail values coming from the query service.");
       e.printStackTrace();
     }
 
     return contactLstDto;
+  }
+
+  private GeoContactInfoModel getRemovedContact(String email, String seqNum) {
+    GeoContactInfoModel removed = new GeoContactInfoModel();
+    removed.setContactEmail(email);
+    removed.setContactName("N");
+    removed.setContactType("EM");
+    removed.setContactPhone(".");
+    removed.setRemoved("REMOVED");
+    removed.setContactSeqNum(seqNum);
+    return removed;
   }
 
   private void copyContactInfoDetails(GeoContactInfo from, GeoContactInfoModel to) {

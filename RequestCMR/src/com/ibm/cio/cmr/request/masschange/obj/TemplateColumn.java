@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.DropDownService;
 import com.ibm.cio.cmr.request.util.IERPRequestUtils;
+import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 
 /**
@@ -133,7 +134,7 @@ public class TemplateColumn {
         if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
           lovs = getLovs(entityManager, this.lovId, country, true);
           lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.lovId);
-        } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
+        } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)) {
           lovs = IERPRequestUtils.getLovsDR(entityManager, this.lovId, country, true);
           lovs = IERPRequestUtils.addSpecialCharToLovDR(lovs, country, true, this.lovId);
         } else {
@@ -152,7 +153,7 @@ public class TemplateColumn {
         if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
           lovs = getBDSChoices(entityManager, this.bdsId, country, true);
           lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.bdsId);
-        } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
+        } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)) {
           lovs = IERPRequestUtils.getBDSChoicesDR(entityManager, this.bdsId, country, true);
           lovs = IERPRequestUtils.addSpecialCharToLovDR(lovs, country, true, this.bdsId);
         } else {
@@ -666,7 +667,7 @@ public class TemplateColumn {
    */
   private List<String> getBDSChoices(EntityManager entityManager, String bdsId, String country, boolean codeOnly) {
     ParamContainer params = new ParamContainer();
-    
+
     if (country != null && bdsId != null && ("848".equalsIgnoreCase(country) || "618".equalsIgnoreCase(country)) && ("StateProv").equals(bdsId)) {
       String sql = ExternalizedQuery.getSql("QUERY.QUICK.GET_DEFAULT_COUNTRY");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -677,7 +678,7 @@ public class TemplateColumn {
         params.addParam("landCntry", landedCountry);
       }
     }
-    
+
     List<String> choices = new ArrayList<String>();
     DropDownService service = new DropDownService();
     PreparedQuery query = service.getBDSSql(bdsId, entityManager, params, country);

@@ -176,6 +176,10 @@
     <class>com.ibm.cio.cmr.request.entity.ScAccountCmrStgPK</class>
     <class>com.ibm.cio.cmr.request.entity.USTCRUpdtQueue</class>
     <class>com.ibm.cio.cmr.request.entity.USTCRUpdtQueuePK</class>
+    <class>com.ibm.cio.cmr.request.entity.GCARSUpdtQueue</class>
+    <class>com.ibm.cio.cmr.request.entity.GCARSUpdtQueuePK</class>
+    <class>com.ibm.cio.cmr.request.entity.Kna1AddlBilling</class>
+    <class>com.ibm.cio.cmr.request.entity.Kna1AddlBillingPK</class>
     <class>com.ibm.cio.cmr.request.entity.TaxData</class>
     <class>com.ibm.cio.cmr.request.entity.TaxDataPK</class>
 

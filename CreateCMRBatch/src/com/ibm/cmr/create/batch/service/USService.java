@@ -41,6 +41,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
@@ -227,6 +228,7 @@ public class USService extends TransConnService {
         ProfilerLogger.LOG.trace(
             "After monitorCreqcmr for Request ID: " + id + " " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       } catch (Exception e) {
+        SlackAlertsUtil.recordException("USService", "Request " + admin.getId().getReqId(), e);
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
         processError(entityManager, admin, e.getMessage());
@@ -302,6 +304,7 @@ public class USService extends TransConnService {
         }
         partialCommit(entityManager);
       } catch (Exception e) {
+        SlackAlertsUtil.recordException("USService", "Request " + admin.getId().getReqId(), e);
         LOG.error("Error in processing Aborted Record " + admin.getId().getReqId() + " for Request ID " + admin.getId().getReqId() + " ["
             + e.getMessage() + "]", e);
       }
@@ -597,10 +600,14 @@ public class USService extends TransConnService {
     } else if (CmrConstants.RDC_STATUS_ABORTED.equals(response.getStatus())) {
       overallStatus = CmrConstants.RDC_STATUS_ABORTED;
       statusMessage.append("Record with request ID " + admin.getId().getReqId() + " has FAILED processing. Status: ABORTED");
+      SlackAlertsUtil.recordGenericAlert("USService", "Request " + admin.getId().getReqId(),
+          SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
     } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(response.getStatus())) {
       overallStatus = CmrConstants.RDC_STATUS_NOT_COMPLETED;
       statusMessage.append("Record with request ID " + admin.getId().getReqId() + " has FAILED processing. Status: NOT COMPLETED. Response message: "
           + response.getMessage());
+      SlackAlertsUtil.recordGenericAlert("USService", "Request " + admin.getId().getReqId(),
+          SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
     } else {
       statusMessage.append("Record with request ID " + admin.getId().getReqId() + " has FAILED processing. Status: ABORTED ");
 
@@ -609,6 +616,8 @@ public class USService extends TransConnService {
       } else {
         statusMessage.append("Service Response: " + response.getStatus());
       }
+      SlackAlertsUtil.recordGenericAlert("USService", "Request " + admin.getId().getReqId(),
+          SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
 
     }
 
@@ -940,6 +949,8 @@ public class USService extends TransConnService {
                 comment = comment.append("\nUpdate processing for " + (addr.getId().getAddrType() + "/" + addr.getId().getAddrSeq())
                     + " in RDc skipped: " + response.getMessage());
               }
+              SlackAlertsUtil.recordGenericAlert("USService", "Request " + admin.getId().getReqId(),
+                  SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
             }
 
             usedSequences.add(addr.getId().getAddrSeq());
