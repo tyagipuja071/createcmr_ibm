@@ -60,7 +60,7 @@ public class ConnectService extends BaseSimpleService<String> {
         return nm1.toUpperCase() + (!StringUtils.isEmpty(nm2) ? " " + nm2.toUpperCase() : "") + "|" + formatAddress(addr);
       }
     } catch (Exception e) {
-      LOG.warn("Details cannot be retrieved for Request ID " + reqId, e);
+      LOG.warn("Details cannot be retrieved for Request ID " + reqId);
     }
     return "";
   }

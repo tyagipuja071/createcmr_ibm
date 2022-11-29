@@ -1157,6 +1157,13 @@ public class ItalyTransformer extends EMEATransformer {
         } else {
           custExt.setiTaxCode((!StringUtils.isBlank(fiscalCode) ? fiscalCode : ""));
         }
+        boolean crossBorder = false;
+        for (Addr addr : cmrObjects.getAddresses()) {
+          crossBorder = isCrossBorder(addr);
+          if (crossBorder) {
+            custExt.setiTaxCode((!StringUtils.isBlank(data.getVat()) ? data.getVat() : ""));
+          }
+        }
         if (StringUtils.isNotBlank(identClient)) {
           custExt.setItIdentClient(identClient);
         } else {
@@ -1395,7 +1402,8 @@ public class ItalyTransformer extends EMEATransformer {
         if (crossBorder) {
           landedCountry = addr.getLandCntry();
           legacyCustExt.setiTaxCode((!StringUtils.isBlank(data.getVat()) ? data.getVat() : ""));
-        } else {
+        }
+        if (!crossBorder) {
           legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
         }
       }

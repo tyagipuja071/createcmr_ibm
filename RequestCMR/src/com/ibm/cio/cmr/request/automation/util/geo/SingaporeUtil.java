@@ -687,7 +687,8 @@ public class SingaporeUtil extends AutomationUtil {
       return super.useTaxCd1ForDnbMatch(requestData);
   }
 
-  private void landedCountryRequiresCMDEReview(AutomationEngineData engineData, StringBuilder details, Addr soldTo, Admin admin) {
+  private static void landedCountryRequiresCMDEReview(AutomationEngineData engineData, StringBuilder details, Addr soldTo, Admin admin) {
+    // CREATCMR-6844
     if ("TH".equalsIgnoreCase(soldTo.getLandCntry()) && "C".equalsIgnoreCase(admin.getReqType())) {
       details.append("Processor review is needed as customer is from Thailand" + "\n");
       engineData.addNegativeCheckStatus("ISTHA", "Customer is from Thailand");

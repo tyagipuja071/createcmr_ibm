@@ -3,6 +3,7 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
+<%@ taglib uri="/tags/cmr" prefix="cmr"%>
 <script src="${resourcesPath}/js/system/chart.bundle.js?${cmrv}" type="text/javascript"></script>
 <style>
 div.cmr-alert {
@@ -25,108 +26,9 @@ img.logo {
 <script>
 dojo.addOnLoad(function(){
   dojo.cookie('lastTab', null);
-  if (!BrowserCheck.isFirefox() && !BrowserCheck.isChrome()){
-    var msg = 'You are using an unsupported browser. The functions on the pages may not work properly.<br>';
-    msg += 'Please use either Firefox or Chrome to access the tool to ensure all functions work correctly.';
-    //cmr.showAlert(msg);
-  }
-  if (BrowserCheck.isFirefox() && BrowserCheck.getFirefoxVersion() < 52){
-    var msg = 'You are using an older version of Firefox.  It is recommended to use at least Firefox v52.<br>';
-    msg += 'Some functions of the application may not work correctly until you update to the required version.';
-    //cmr.showAlert(msg);
-  }
-  window.setTimeout('generateCharts()', 150);
 });
 
-function generateCharts(){
-  var creates = cmr.query('VISUAL.DAILY_CREATES', {MANDT : cmr.MANDT, _qall : 'Y'});
-  var ctx = dojo.byId("canvas").getContext("2d");
-  
-  var dataSet = [];
-  var labelSet = [];
-  var colorSet = [];
-  var totals = 0;
-  creates.forEach(function(item, i){
-    dataSet.push(Number(item.ret2));
-    labelSet.push(item.ret1.trim());
-    colorSet.push(getRandomColor());
-    totals += Number(item.ret2);
-  });
-  var ctx = dojo.byId("canvas").getContext("2d");
-  
-  var chart = new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: labelSet,
-      datasets: [{
-        backgroundColor: colorSet,
-        data: dataSet
-      }]
-    },
-    options : {
-      title : {
-        display : true,
-        text : 'Total Requests Created Today (GMT): '+totals
-      },
-      tooltips : {
-        mode : 'index',
-        intersect : false
-      },
-      legend : {
-        display : false
-      },
-      responsive : true
-    }
-  });
 
-  var completes = cmr.query('VISUAL.DAILY_COMPLETES', {MANDT : cmr.MANDT, _qall : 'Y'});
-  var ctx2 = dojo.byId("canvas2").getContext("2d");
-  
-  var dataSet2 = [];
-  var labelSet2 = [];
-  var colorSet2 = [];
-  var totals2 = 0;
-  completes.forEach(function(item, i){
-    dataSet2.push(Number(item.ret2));
-    labelSet2.push(item.ret1.trim());
-    colorSet2.push(getRandomColor());
-    totals2 += Number(item.ret2);
-  });
-  var ctx2 = dojo.byId("canvas2").getContext("2d");
-  
-  var chart2 = new Chart(ctx2, {
-    type: 'pie',
-    data: {
-      labels: labelSet2,
-      datasets: [{
-        backgroundColor: colorSet2,
-        data: dataSet2
-      }]
-    },
-    options : {
-      title : {
-        display : true,
-        text : 'Total Requests Completed Today (GMT): '+totals2
-      },
-      tooltips : {
-        mode : 'index',
-        intersect : false
-      },
-      legend : {
-        display : false
-      },
-      responsive : true
-    }
-  });
-  
-}
-
-function getRandomColor() {
-  var r = Math.floor(Math.random() * 255);
-  var g = Math.floor(Math.random() * 255);
-  var b = Math.floor(Math.random() * 255);
-  return 'rgb(' + r + ',' + g + ',' + b + ')';
-}
 </script>
 <%
   String alert = SystemConfiguration.getValue("ALERT",null); 
@@ -172,6 +74,34 @@ function getRandomColor() {
    padding-bottom: 20px;
   }
   
+  div.quick-start {
+    border: 1px Solid #666;
+    border-radius: 10px;
+    padding: 30px;
+    margin-left: 50px;
+    background: rgb(255,255,255); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(229,229,229,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
+    padding-top: 20px;
+  }
+  div.home-btn {
+    text-align : center;
+    margin-auto;
+    height: 80px;
+    margin-top: 10px;
+    font-size:13px;
+  }
+  div.home-btn input.ibm-btn-small {
+    width: 190px !important;
+    margin-top: 5px;
+    font-size: 13px !important;
+  }
+  div.home-btn span {
+    font-size: 13px;
+    font-weight: bold;
+  }
 </style>
 <div class="ibm-columns">
 
@@ -223,9 +153,12 @@ function getRandomColor() {
                  <div class="logo-text">
                    <ul>
                      <li>
-                     The Client Master Data Execution (CMDE) teams support the processing of requests created 
-                     within CreateCMR.  There are 3 major centers for CMDE: Kuala Lumpur, Bratislava, and Dalian.
-                     Specific teams handle requests from different countries.
+                     The Client  Master Data Execution (CMDE) is in charge of creation, maintenance, and overall management of customer master records (CMR) in 
+                     IBM to support IBM business units and downstream partners with high data quality.
+                     </li>
+                     <li>
+                     The world-wide team is settled in three locations - Bratislava (Slovakia), Dalian (China) and Kuala Lumpur (Malaysia). Centers manage operations 
+                     for different geographical territories and handle data governance of client master records in accordance with IBM data standards.
                      </li>
                      <li>
                      To know more about the CMDE teams and processes, please visit the <a href="https://w3.ibm.com/w3publisher/cmde-cmr" target="_blank">CMDE Site</a>.
@@ -235,9 +168,23 @@ function getRandomColor() {
               </div>
 													
 						</div>
-						<div class="ibm-col-4-2" style="width:400px">
-              <canvas id="canvas" style="height:20px"></canvas>
-              <canvas id="canvas2" style="height:20px"></canvas>
+						<div class="ibm-col-4-2 quick-start" style="width:300px">
+              <div class="home-btn">
+                <span>If you want to start a new request:</span>
+                <cmr:button label="${ui.btn.createNewEntry}" onClick="cmr.chooseNewEntry()" highlight="true" pad="false"/>
+              </div>
+              <div class="home-btn">
+                <span>If you know your request's ID <cmr:info text="You can also press Ctrl-q on any page within the application to open requests by ID"></cmr:info>:</span>
+                <cmr:button label="${ui.btn.openByRequestID}" onClick="openRequestById()" highlight="false" pad="true" />
+              </div>
+              <div class="home-btn">
+                <span>If you want to view your open requests:</span>
+                <cmr:button label="View Pending Requests" onClick="goToUrl('${contextPath}/workflow/open')" highlight="false" pad="true" />
+              </div>
+              <div class="home-btn">
+                You can also check out some <strong><a href="https://w3.ibm.com/w3publisher/cmde-cmr/tutorials/createcmr-tutorials" target="_blank">tutorials</a></strong> from the 
+                CMDE site for more information on how to create/update CMRs or watch a <strong><a href="https://video.ibm.com/embed/recorded/131988262" target="_blank">live demo</a></strong> of the tool.
+              </div>
 						</div>
 					</div>
 					

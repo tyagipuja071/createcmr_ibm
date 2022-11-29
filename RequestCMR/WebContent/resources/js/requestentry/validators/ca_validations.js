@@ -1421,7 +1421,23 @@ function getCsBranchFromPostalCode(postCd) {
   var csBranch = csBranchResult.ret1;
   return csBranch;
 }
+function addressQuotationValidator() {
+  // CREATCMR-788
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Number + Street' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street con\'t' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Department / Attn' ]);
+  FormManager.addValidator('city2', Validators.NO_QUOTATION, [ 'District' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PostBox' ]);
+  FormManager.addValidator('poBoxCity', Validators.NO_QUOTATION, [ 'PostBox City' ]);
+  FormManager.addValidator('mainCustNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
 
+}
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -1467,4 +1483,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addStateProvHandler, [ SysLoc.CANADA ]);
+  // CREATCMR-788
+  GEOHandler.addAddrFunction(addressQuotationValidator, [ SysLoc.CANADA ]);
+  GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.CANADA ]);
+
 });

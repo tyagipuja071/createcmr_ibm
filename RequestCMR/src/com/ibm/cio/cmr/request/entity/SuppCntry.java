@@ -26,14 +26,16 @@ public class SuppCntry extends BaseEntity<SuppCntryPK> implements Serializable {
   @EmbeddedId
   private SuppCntryPK id;
 
+  @Override
   public SuppCntryPK getId() {
     return id;
   }
 
+  @Override
   public void setId(SuppCntryPK id) {
     this.id = id;
   }
-  
+
   private String nm;
 
   @Column(name = "CREATE_DT")
@@ -57,150 +59,149 @@ public class SuppCntry extends BaseEntity<SuppCntryPK> implements Serializable {
   @Column(name = "PROCESSING_TYP")
   private String processingTyp;
 
-  /** 
+  /**
    * Automation Engine Indicator
-   */ 
+   */
   @Column(name = "AUTO_ENGINE_INDC")
   private String autoEngineIndc;
 
-  /** 
+  /**
    * Recovery Direction
-   */ 
+   */
   @Column(name = "RECOVERY_DIRECTION")
   private String recoveryDirection;
 
   @Column(name = "DNB_PRIMARY_INDC")
   private String dnbPrimaryIndc;
 
-  /** 
+  /**
    * Start from Quick Search
-   */ 
+   */
   @Column(name = "START_QUICK_SEARCH")
   private String startQuickSearch;
 
-  /** 
+  /**
    * Tradestyle Name Usage
-   */ 
+   */
   @Column(name = "TRADESTYLE_NM_USAGE")
   private String tradestyleNmUsage;
 
-  public String getNm(){
+  /**
+   * Tradestyle Name Usage
+   */
+  @Column(name = "DISABLE_CREATE_BY_MODEL")
+  private String disableCreateByModel;
+
+  public String getNm() {
     return this.nm;
   }
 
-  public void setNm(String nm){
+  public void setNm(String nm) {
     this.nm = nm;
   }
 
-
-  public Date getCreateDt(){
+  public Date getCreateDt() {
     return this.createDt;
   }
 
-  public void setCreateDt(Date createDt){
+  public void setCreateDt(Date createDt) {
     this.createDt = createDt;
   }
 
-
-  public String getCmt(){
+  public String getCmt() {
     return this.cmt;
   }
 
-  public void setCmt(String cmt){
+  public void setCmt(String cmt) {
     this.cmt = cmt;
   }
 
-
-  public String getAutoProcEnabled(){
+  public String getAutoProcEnabled() {
     return this.autoProcEnabled;
   }
 
-  public void setAutoProcEnabled(String autoProcEnabled){
+  public void setAutoProcEnabled(String autoProcEnabled) {
     this.autoProcEnabled = autoProcEnabled;
   }
 
-
-  public String getHostSysTyp(){
+  public String getHostSysTyp() {
     return this.hostSysTyp;
   }
 
-  public void setHostSysTyp(String hostSysTyp){
+  public void setHostSysTyp(String hostSysTyp) {
     this.hostSysTyp = hostSysTyp;
   }
 
-
-  public String getSuppReqType(){
+  public String getSuppReqType() {
     return this.suppReqType;
   }
 
-  public void setSuppReqType(String suppReqType){
+  public void setSuppReqType(String suppReqType) {
     this.suppReqType = suppReqType;
   }
 
-
-  public String getDefaultLandedCntry(){
+  public String getDefaultLandedCntry() {
     return this.defaultLandedCntry;
   }
 
-  public void setDefaultLandedCntry(String defaultLandedCntry){
+  public void setDefaultLandedCntry(String defaultLandedCntry) {
     this.defaultLandedCntry = defaultLandedCntry;
   }
 
-
-  public String getProcessingTyp(){
+  public String getProcessingTyp() {
     return this.processingTyp;
   }
 
-  public void setProcessingTyp(String processingTyp){
+  public void setProcessingTyp(String processingTyp) {
     this.processingTyp = processingTyp;
   }
 
-
-  public String getAutoEngineIndc(){
+  public String getAutoEngineIndc() {
     return this.autoEngineIndc;
   }
 
-  public void setAutoEngineIndc(String autoEngineIndc){
+  public void setAutoEngineIndc(String autoEngineIndc) {
     this.autoEngineIndc = autoEngineIndc;
   }
 
-
-  public String getRecoveryDirection(){
+  public String getRecoveryDirection() {
     return this.recoveryDirection;
   }
 
-  public void setRecoveryDirection(String recoveryDirection){
+  public void setRecoveryDirection(String recoveryDirection) {
     this.recoveryDirection = recoveryDirection;
   }
 
-
-  public String getDnbPrimaryIndc(){
+  public String getDnbPrimaryIndc() {
     return this.dnbPrimaryIndc;
   }
 
-  public void setDnbPrimaryIndc(String dnbPrimaryIndc){
+  public void setDnbPrimaryIndc(String dnbPrimaryIndc) {
     this.dnbPrimaryIndc = dnbPrimaryIndc;
   }
 
-
-  public String getStartQuickSearch(){
+  public String getStartQuickSearch() {
     return this.startQuickSearch;
   }
 
-  public void setStartQuickSearch(String startQuickSearch){
+  public void setStartQuickSearch(String startQuickSearch) {
     this.startQuickSearch = startQuickSearch;
   }
 
-
-  public String getTradestyleNmUsage(){
+  public String getTradestyleNmUsage() {
     return this.tradestyleNmUsage;
   }
 
-  public void setTradestyleNmUsage(String tradestyleNmUsage){
+  public void setTradestyleNmUsage(String tradestyleNmUsage) {
     this.tradestyleNmUsage = tradestyleNmUsage;
   }
 
+  public String getDisableCreateByModel() {
+    return disableCreateByModel;
+  }
 
-
+  public void setDisableCreateByModel(String disableCreateByModel) {
+    this.disableCreateByModel = disableCreateByModel;
+  }
 
 }

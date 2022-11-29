@@ -250,7 +250,7 @@ function promptUnlockNoValidationError() {
 function doSaveRequest(progressMsg) {
   // enable all checkboxes
   var cb = dojo.query('[type=checkbox]');
-  for ( var i = 0; i < cb.length; i++) {
+  for (var i = 0; i < cb.length; i++) {
     if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
       cb[i].disabled = false;
       cb[i].removeAttribute('disabled');
@@ -321,16 +321,24 @@ function isDPLCheckNeeded() {
 function isNewMassTemplateUsed() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   qParams = {
-      CNTRY : cntry,
-    };
-    var recordLD = cmr.query('CHECK_LD_MASS_NEW_TEMP', qParams);
-    var countrecordLD = recordLD.ret1;
+    CNTRY : cntry,
+  };
+  var recordLD = cmr.query('CHECK_LD_MASS_NEW_TEMP', qParams);
+  var countrecordLD = recordLD.ret1;
 
-    if (Number(countrecordLD) > 0) {
-      return true;
-    } else {
-      return false;
-    }
+  var LA_COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA,
+      SysLoc.HONDURAS, SysLoc.NICARAGUA, SysLoc.PANAMA, SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY, SysLoc.VENEZUELA ];
+
+  if (LA_COUNTRIES.indexOf(cntry) > -1) {
+    return true;
+  }
+
+  if (Number(countrecordLD) > 0) {
+    return true;
+  } else {
+    return false;
+  }
+
 }
 
 function isCompanyProofNeeded() {
@@ -451,7 +459,7 @@ function doSaveChangeComments() {
   // dojo.place(cmtField, document.forms['frmCMR'], 'last');
   try {
     var cb = dojo.query('[type=checkbox]');
-    for ( var i = 0; i < cb.length; i++) {
+    for (var i = 0; i < cb.length; i++) {
       if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
         cb[i].disabled = false;
         cb[i].removeAttribute('disabled');
@@ -512,17 +520,18 @@ function commentFormatter(value, rowIndex) {
 }
 
 function commentImgFormatter(value, rowIndex) {
-  if (!value){
+  if (!value) {
     return '&nbsp';
   }
-  if (value.indexOf('@') > 0){
-    if (value.indexOf('ibm.com') > 0){
-      return '<img title="'+value+'" src="https://unified-profile-api.us-south-k8s.intranet.ibm.com/v3/image/'+value+'" class="cmt-img" onerror="this.onerror=null; this.src=\''+cmr.CONTEXT_ROOT+'/resources/images/person.jpg\'">';
+  if (value.indexOf('@') > 0) {
+    if (value.indexOf('ibm.com') > 0) {
+      return '<img title="' + value + '" src="https://unified-profile-api.us-south-k8s.intranet.ibm.com/v3/image/' + value + '" class="cmt-img" onerror="this.onerror=null; this.src=\''
+          + cmr.CONTEXT_ROOT + '/resources/images/person.jpg\'">';
     } else {
-      return '<img title="'+value+'" src="'+cmr.CONTEXT_ROOT+'/resources/images/person.jpg" class="cmt-img">';
+      return '<img title="' + value + '" src="' + cmr.CONTEXT_ROOT + '/resources/images/person.jpg" class="cmt-img">';
     }
   } else {
-    return '<img title="'+value+'" src="'+cmr.CONTEXT_ROOT+'/resources/images/CreateCMRLogo.png" class="cmt-img">';
+    return '<img title="' + value + '" src="' + cmr.CONTEXT_ROOT + '/resources/images/CreateCMRLogo.png" class="cmt-img">';
   }
 }
 

@@ -132,6 +132,12 @@
           return 'To Requesters'
         }        
         return 'To Processors';
+      },
+      byModelFormatter : function(value, rowIndex) {
+        if (value == 'Y'){
+          return '<span style="font-weight:bold; color:red">Disabled</span>';
+        }        
+        return 'Enabled';
       }
   };
 })();
@@ -168,12 +174,12 @@
             <cmr:gridCol width="10%" field="autoProcEnabled" header="Automatic Processing" >
               <cmr:formatter functionName="SuppCountryService.autoProcFormatter" />
             </cmr:gridCol>
-            <cmr:gridCol width="10%" field="hostSysTyp" header="Host System Type" />
+            <cmr:gridCol width="8%" field="hostSysTyp" header="Host System Type" />
             <cmr:gridCol width="auto" field="suppReqType" header="Supported Request Types" >
               <cmr:formatter functionName="SuppCountryService.reqTypeFormatter" />
             </cmr:gridCol>
             <cmr:gridCol width="5%" field="defaultLandedCntry" header="Default Landed Country" />
-            <cmr:gridCol width="10%" field="autoEngineIndc" header="Automation Engine" >
+            <cmr:gridCol width="9%" field="autoEngineIndc" header="Automation Engine" >
               <cmr:formatter functionName="SuppCountryService.autoEngineFormatter" />
             </cmr:gridCol>
             <cmr:gridCol width="10%" field="recoveryDirection" header="Recovery Direction" >
@@ -184,6 +190,9 @@
             </cmr:gridCol>
             <cmr:gridCol width="8%" field="tradestyleNmUsage" header="TradeStyle Name Usage" >
               <cmr:formatter functionName="SuppCountryService.tradestyleFormatter" />
+            </cmr:gridCol>
+            <cmr:gridCol width="8%" field="disableCreateByModel" header="Create by Model" >
+              <cmr:formatter functionName="SuppCountryService.byModelFormatter" />
             </cmr:gridCol>
           </cmr:grid>
         </cmr:column>

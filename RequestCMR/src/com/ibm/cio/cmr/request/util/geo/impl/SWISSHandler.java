@@ -500,7 +500,6 @@ public class SWISSHandler extends GEOHandler {
         } else {
           data.setCustPrefLang("E");
         }
-
       }
     }
 

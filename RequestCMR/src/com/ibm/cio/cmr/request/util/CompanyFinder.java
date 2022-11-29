@@ -81,9 +81,24 @@ public class CompanyFinder {
       boolean searchDnb = isLowLevelMatched(matches);
       matches.addAll(findRequests(searchModel));
 
-      if (matches.isEmpty() || searchDnb || "Y".equals(searchModel.getAddDnBMatches())) {
-        matches.addAll(searchDnB(searchModel));
-      }
+      if (isLatin(searchModel.getName())) {
+        matches.addAll(findCMRs(searchModel));
+        boolean searchDnb = false;
+        // CREATCMR-7388 - always append D&B results
+        searchDnb = true;
+
+        // List<String> lowLevelMatches = Arrays.asList("F3", "F4", "F5", "VAT",
+        // "DUNS");
+        // if (!matches.isEmpty()) {
+        // for (CompanyRecordModel cmrMatch : matches) {
+        // if (lowLevelMatches.contains(cmrMatch.getMatchGrade())) {
+        // searchDnb = true;
+        // break;
+        // }
+        // }
+        // }
+
+        matches.addAll(findRequests(searchModel));
 
       if (matches.isEmpty() && !StringUtils.isBlank(searchModel.getName()) && LOCAL_LANG_COUNTRIES.contains(searchModel.getIssuingCntry())) {
         // try non latin if country has local lang data
@@ -100,7 +115,18 @@ public class CompanyFinder {
     }
 
     Collections.sort(matches);
-    return matches;
+    List<String> keys = new ArrayList<String>();
+    List<CompanyRecordModel> cleaned = new ArrayList<CompanyRecordModel>();
+    for (CompanyRecordModel rec : matches) {
+      String key = rec.getRecType() + (CompanyRecordModel.REC_TYPE_CMR.equals(rec.getRecType()) ? rec.getCmrNo()
+          : (CompanyRecordModel.REC_TYPE_DNB.equals(rec.getRecType()) ? rec.getDunsNo() : rec.getCmrNo()));
+      if (!keys.contains(key)) {
+        cleaned.add(rec);
+        keys.add(key);
+      }
+    }
+
+    return cleaned;
   }
 
   private static boolean isLowLevelMatched(List<CompanyRecordModel> matches) {

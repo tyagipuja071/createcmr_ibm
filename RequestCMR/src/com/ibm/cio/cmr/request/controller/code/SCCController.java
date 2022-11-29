@@ -209,6 +209,8 @@ public class SCCController extends BaseController {
     try {
 
       String toStr = "";
+      String cSt = StringUtils.leftPad("" + (int) sccModel.getcSt(), 2, "0");
+      cSt = "00".equals(cSt) ? "99" : cSt;
       List<String> taxTeamList = SystemParameters.getList("US.TAX_TEAM_HEAD");
 
       for (String taxTeam : taxTeamList) {
@@ -247,7 +249,7 @@ public class SCCController extends BaseController {
       sb.append("</tr>");
       sb.append("<tr>");
       sb.append("<td>" + sccModel.getnLand() + "</td>");
-      sb.append("<td>" + StringUtils.leftPad("" + (int) sccModel.getcSt(), 2, "0") + "</td>");
+      sb.append("<td>" + cSt + "</td>");
       sb.append("<td>" + StringUtils.leftPad("" + (int) sccModel.getcCnty(), 3, "0") + "</td>");
       sb.append("<td>" + StringUtils.leftPad("" + (int) sccModel.getcCity(), 4, "0") + "</td>");
       sb.append("<td>" + sccModel.getnSt() + "</td>");

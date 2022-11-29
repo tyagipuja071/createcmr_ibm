@@ -37,7 +37,7 @@
                      <%if (!viewOnly){ %>
                      <div class="det-btn">
                        <input type="button" value="Update CMR" title="Request for an Update of this CMR" ng-click="confirmImport(true)">
-                       <input type="button" value="Create CMR by Model" title="Request for a new CMR modeled after this record" ng-click="confirmImport(false)">
+                       <input type="button" ng-show="allowByModel" value="Create CMR by Model" title="Request for a new CMR modeled after this record" ng-click="confirmImport(false)">
                      </div>
                      <%} %>
                    </em>
@@ -284,7 +284,7 @@
                        <%if (!viewOnly){ %>
                        <div class="det-btn">
                          <input type="button" value="Update CMR" title="Request for an Update of this CMR">
-                         <input type="button" value="Create CMR by Model" title="Request for a new CMR modeled after this record">
+                         <input ng-show="allowByModel" type="button" value="Create CMR by Model" title="Request for a new CMR modeled after this record">
                        </div>
                        <%} %>
                      </td>
