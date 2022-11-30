@@ -499,10 +499,13 @@ public class USUtil extends AutomationUtil {
       // }
       // CREATCMR-6342
 
-      if ("X".equals(data.getSpecialTaxCd())) {
-        details.append("Tax Exempt Status cannot be 'X'. Clearing Tax Exempt Status value.").append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
-      }
+      // CREATCMR-7584
+      // if ("X".equals(data.getSpecialTaxCd())) {
+      // details.append("Tax Exempt Status cannot be 'X'. Clearing Tax Exempt
+      // Status value.").append("\n");
+      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+      // "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
+      // }
 
     } else if ("U".equals(admin.getReqType())) {
       eleResults.append("Skipped");
