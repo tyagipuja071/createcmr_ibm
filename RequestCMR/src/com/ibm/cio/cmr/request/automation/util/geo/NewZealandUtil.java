@@ -42,8 +42,6 @@ public class NewZealandUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(NewZealandUtil.class);
 
-  // private static final List<String> ALLOW_DEFAULT_SCENARIOS =
-  // Arrays.asList("PRIV", "XPRIV", "BLUMX", "MKTPC", "XBLUM", "XMKTP");
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, "STAT", "MAIL", "ZF01", "PUBS", "PUBB", "EDUC", "CTYG", "CTYH");
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #", "Customer Name", "Customer Name Con't");
@@ -65,12 +63,6 @@ public class NewZealandUtil extends AutomationUtil {
 
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
-    // String scenarioList[] = { "NRML", "ESOSW" };
-    // Addr soldTo = requestData.getAddress("ZS01");
-    // String custNm1 = soldTo.getCustNm1();
-    // String custNm2 = StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " +
-    // soldTo.getCustNm2() : "";
-    // String customerName = custNm1 + custNm2;
 
     processSkipCompanyChecks(engineData, requestData, details);
     switch (scenario) {
@@ -100,67 +92,7 @@ public class NewZealandUtil extends AutomationUtil {
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     // get request admin and data
-    // long reqId = requestData.getAdmin().getId().getReqId();
-    // Admin admin = requestData.getAdmin();
-    // Data data = requestData.getData();
-    // Addr soldTo = requestData.getAddress("ZS01");
     StringBuilder eleResults = new StringBuilder();
-    // String[] isicScenarioList = { "NRML", "ESOSW", "IGF", "XIGF", "CROSS",
-    // "AQSTN", "XAQST", "SOFT" };
-    // boolean isIsicInvalid = false;
-    // LOG.debug("Australia : Performing field computations for req_id : " +
-    // reqId);
-    // String defaultClusterCd = getDefaultCluster(entityManager, requestData,
-    // engineData);
-    // String validCode = checkIfClusterSalesmanIsValid(entityManager,
-    // requestData);
-    //
-    // // a. check cluster
-    // if (defaultClusterCd.equalsIgnoreCase(data.getApCustClusterId())) {
-    //
-    // if ("9500".equals(data.getIsicCd()) ||
-    // ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
-    // LOG.debug("Default Cluster used but allowed: ISIC=" + data.getIsicCd() +
-    // " Scenario=" + data.getCustSubGrp());
-    // results.setOnError(false);
-    // // eleResults.append("Default Cluster used.\n");
-    // details.append("Default Cluster used but allowed for the request (Private
-    // Person/BlueMix/Marketplace).\n");
-    // } else {
-    // LOG.debug("Default Cluster used.");
-    // engineData.addRejectionComment("OTH", "Cluster should not be the default
-    // cluster for the scenario.", "", "");
-    // results.setOnError(true);
-    // // eleResults.append("Default Cluster used.\n");
-    // details.append("Cluster should not be the default cluster for the
-    // scenario.\n");
-    // }
-    // } else {
-    // LOG.debug("Default Cluster NOT used.");
-    // // eleResults.append("Default Cluster not used.\n");
-    // details.append("Cluster used is not default.\n");
-    // }
-
-    // if ("9500".equals(data.getIsicCd()) ||
-    // ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
-    // LOG.debug("Salesman check skipped for private and allowed scenarios.");
-    // // eleResults.append("\nValid cluster and Salesman No. used.\n");
-    // details.append("\nSalesman check skipped for this scenario
-    // (Private/Marketplace/Bluemix).\n");
-    // } // else {
-    //
-    // isIsicInvalid = isISICValidForScenario(requestData,
-    // Arrays.asList(isicScenarioList));
-    //
-    // if (isIsicInvalid) {
-    // details.append("Invalid ISIC code, please choose another one based on
-    // industry.\n");
-    // engineData.addRejectionComment("OTH", "Invalid ISIC code, please choose
-    // another one based on industry.", "", "");
-    // results.setOnError(true);
-    // } else {
-    // details.append("ISIC is valid" + "\n");
-    // }
 
     if (results != null && !results.isOnError()) {
 
@@ -192,28 +124,6 @@ public class NewZealandUtil extends AutomationUtil {
 
   }
 
-  // private AutomationResponse<BNValidationResponse>
-  // getAuCustNmLayerInfo(String customerName) throws Exception {
-  // AutomationServiceClient client =
-  // CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-  // AutomationServiceClient.class);
-  // client.setReadTimeout(1000 * 60 * 5);
-  // client.setRequestMethod(Method.Get);
-  //
-  // NMValidationRequest request = new NMValidationRequest();
-  // request.setCustNm(customerName);
-  // System.out.println(request + request.getCustNm());
-  // AutomationResponse<?> rawResponse =
-  // client.executeAndWrap(AutomationServiceClient.AU_NM_VALIDATION_SERVICE_ID,
-  // request, AutomationResponse.class);
-  // ObjectMapper mapper = new ObjectMapper();
-  // String json = mapper.writeValueAsString(rawResponse);
-  // TypeReference<AutomationResponse<BNValidationResponse>> ref = new
-  // TypeReference<AutomationResponse<BNValidationResponse>>() {
-  // };
-  // return mapper.readValue(json, ref);
-  // }
-
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
@@ -236,7 +146,7 @@ public class NewZealandUtil extends AutomationUtil {
       try {
 
         if (!(custNmMatch)) {
-          LOG.debug("CustNm match failed with API.Now Checking with DNB to vrify CustNm update");
+          LOG.debug("CustNm match failed with API. Now Checking with DNB to vrify CustNm update");
           MatchingResponse<DnBMatchingResponse> Dnbresponse = DnBUtil.getMatches(requestData, null, "ZS01");
           List<DnBMatchingResponse> matches = Dnbresponse.getMatches();
           if (!matches.isEmpty()) {
@@ -245,16 +155,6 @@ public class NewZealandUtil extends AutomationUtil {
               String dnbCustNm = StringUtils.isBlank(dnbRecord.getDnbName()) ? "" : dnbRecord.getDnbName().replaceAll("\\s+$", "");
               if (customerName.equalsIgnoreCase(dnbCustNm)) {
                 custNmMatch = true;
-                // dnbTradestyleNames = dnbRecord.getTradeStyleNames();
-                // if (dnbTradestyleNames != null) {
-                // for (String tradestyleNm : dnbTradestyleNames) {
-                // tradestyleNm = tradestyleNm.replaceAll("\\s+$", "");
-                // if (tradestyleNm.equalsIgnoreCase(formerCustName)) {
-                // formerCustNmMatch = true;
-                // break;
-                // }
-                // }
-                // }
               }
             }
           }
@@ -275,120 +175,17 @@ public class NewZealandUtil extends AutomationUtil {
               if (StringUtils.isNotEmpty(response.getRecord().getName())) {
                 String responseCustNm = StringUtils.isBlank(response.getRecord().getName()) ? ""
                     : response.getRecord().getName().replaceAll(regex, "");
-                // String responseTradingNm =
-                // StringUtils.isBlank(response.getRecord().getTradingName()) ?
-                // ""
-                // : response.getRecord().getTradingName().replaceAll(regex,
-                // "");
-                // String responseOthTradingNm =
-                // StringUtils.isBlank(response.getRecord().getOtherTradingName())
-                // ? ""
-                // :
-                // response.getRecord().getOtherTradingName().replaceAll(regex,
-                // "");
-                // String responseBusinessNm =
-                // StringUtils.isBlank(response.getRecord().getBusinessName()) ?
-                // ""
-                // : response.getRecord().getBusinessName().replaceAll(regex,
-                // "");
-                // List<String> historicalNameList = new ArrayList<String>();
-                // historicalNameList =
-                // response.getRecord().getHistoricalNameList();
-                // for (String historicalNm : historicalNameList) {
-                // historicalNm = historicalNm.replaceAll(regex, "");
-                // if (response.getRecord().isValid() &&
-                // customerName.equalsIgnoreCase(responseCustNm)
-                // && formerCustName.equalsIgnoreCase(historicalNm)) {
-                // custNmMatch = true;
-                // formerCustNmMatch = true;
-                // }
-                // }
+
                 if (!(custNmMatch)) {
                   if (customerName.equalsIgnoreCase(responseCustNm)) {
                     custNmMatch = true;
-                    // formerCustNmMatch = true;
-                    // }
-                    // else if (response.getRecord().isValid() &&
-                    // (customerName.equalsIgnoreCase(responseCustNm))
-                    // && !((formerCustName.equalsIgnoreCase(responseTradingNm))
-                    // ||
-                    // (formerCustName.equalsIgnoreCase(responseOthTradingNm))
-                    // ||
-                    // (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
-                    // custNmMatch = true;
-                    // formerCustNmMatch = false;
-                    // } else if (response.getRecord().isValid() &&
-                    // !(customerName.equalsIgnoreCase(responseCustNm))
-                    // && ((formerCustName.equalsIgnoreCase(responseTradingNm))
-                    // ||
-                    // (formerCustName.equalsIgnoreCase(responseOthTradingNm))
-                    // ||
-                    // (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
-                    // custNmMatch = false;
-                    // formerCustNmMatch = true;
-                    // } else {
-                    // custNmMatch = false;
-                    // formerCustNmMatch = false;
+
                   }
                 }
               }
             }
           }
-          // if (!(custNmMatch && formerCustNmMatch)) {
-          // try {
-          // response = getAuCustNmLayerInfo(customerName);
-          // } catch (Exception e) {
-          // if (response == null || !response.isSuccess()
-          // && "Parameter 'CustomerName' is required by the service to verify
-          // CustNm change.".equalsIgnoreCase(response.getMessage())) {
-          // LOG.debug("\nFailed to Connect to AU Customer Name Service.Now
-          // Checking with DNB to vrify CustNm update");
-          // }
-          // }
-          //
-          // if (response != null && response.isSuccess()) {
-          // // custNm Validation
-          // if (response.getRecord().isValid()) {
-          // String responseCustNm =
-          // StringUtils.isBlank(response.getRecord().getCompanyName()) ? ""
-          // : response.getRecord().getCompanyName().replaceAll(regex, "");
-          // String responseTradingNm =
-          // StringUtils.isBlank(response.getRecord().getTradingName()) ? ""
-          // : response.getRecord().getTradingName().replaceAll(regex, "");
-          // String responseOthTradingNm =
-          // StringUtils.isBlank(response.getRecord().getOtherTradingName()) ?
-          // ""
-          // : response.getRecord().getOtherTradingName().replaceAll(regex, "");
-          // String responseBusinessNm =
-          // StringUtils.isBlank(response.getRecord().getBusinessName()) ? ""
-          // : response.getRecord().getBusinessName().replaceAll(regex, "");
-          // if (response.getRecord().isValid() &&
-          // (customerName.equalsIgnoreCase(responseCustNm))
-          // && ((formerCustName.equalsIgnoreCase(responseTradingNm)) ||
-          // (formerCustName.equalsIgnoreCase(responseOthTradingNm))
-          // || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
-          // custNmMatch = true;
-          // formerCustNmMatch = true;
-          // } else if (response.getRecord().isValid() &&
-          // (customerName.equalsIgnoreCase(responseCustNm))
-          // && !((formerCustName.equalsIgnoreCase(responseTradingNm)) ||
-          // (formerCustName.equalsIgnoreCase(responseOthTradingNm))
-          // || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
-          // custNmMatch = true;
-          // formerCustNmMatch = false;
-          // } else if (response.getRecord().isValid() &&
-          // !(customerName.equalsIgnoreCase(responseCustNm))
-          // && ((formerCustName.equalsIgnoreCase(responseTradingNm)) ||
-          // (formerCustName.equalsIgnoreCase(responseOthTradingNm))
-          // || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
-          // custNmMatch = false;
-          // formerCustNmMatch = true;
-          // } else {
-          // custNmMatch = false;
-          // formerCustNmMatch = false;
-          // }
-          // }
-          // }
+
         }
         // }
         // customerNm Validation
@@ -398,41 +195,7 @@ public class NewZealandUtil extends AutomationUtil {
           validation.setMessage("Successful");
           output.setProcessOutput(validation);
           output.setDetails("Updates to the CustomerNm field Verified");
-          // }
-          // else if (custNmMatch && !formerCustNmMatch) {
-          // validation.setMessage("Not Validated");
-          // details.append("The Customer Name on the request verified but
-          // former Customer Name does not match from API & DNB service.");
-          // // company proof
-          // if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager,
-          // admin.getId().getReqId())) {
-          // details.append("\nSupporting documentation is provided by the
-          // requester as attachment for " + customerName).append("\n");
-          // } else {
-          // details.append("\nNo supporting documentation is provided by the
-          // requester for customer name update from " + formerCustName + " to "
-          // + customerName + " update.");
-          // }
-          // output.setDetails(details.toString());
-          // engineData.addNegativeCheckStatus("ABNLegalName", "Former Customer
-          // name doesn't matches from API & DNB match");
-          // } else if (!custNmMatch && formerCustNmMatch) {
-          // validation.setMessage("Not Validated");
-          // details.append("The Former Customer Name on the request matches but
-          // Customer Name does not match match from API & DNB.");
-          // // company proof
-          // if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager,
-          // admin.getId().getReqId())) {
-          // details.append("\nSupporting documentation is provided by the
-          // requester as attachment for " + customerName).append("\n");
-          // } else {
-          // details.append("\nNo supporting documentation is provided by the
-          // requester for customer name update from " + formerCustName + " to "
-          // + customerName + " update.");
-          // }
-          // output.setDetails(details.toString());
-          // engineData.addNegativeCheckStatus("ABNLegalName", "Customer name
-          // doesn't matches from API & DNB match");
+
         } else {
           validation.setMessage("Not Validated");
           details.append("The Customer Name doesn't match from API & DNB");
@@ -441,7 +204,7 @@ public class NewZealandUtil extends AutomationUtil {
             details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
           } else {
             details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
-                + customerName + " update.");
+                + customerName + " update. Please provide Supporting documentation(Company Proof) as attachment.");
           }
           output.setDetails(details.toString());
           engineData.addNegativeCheckStatus("ABNLegalName", "The Customer Name doesn't match from API & DNB");
@@ -495,22 +258,6 @@ public class NewZealandUtil extends AutomationUtil {
     return false;
   }
 
-  // public static void addToNotifyListANZ(EntityManager entityManager, long
-  // reqId) {
-  // StringBuilder anzEcoNotifyList = getANZEcoNotifyList();
-  // List<String> users =
-  // Arrays.asList(anzEcoNotifyList.toString().split("\\s*,\\s*"));
-  // for (String user : users) {
-  // NotifList notif = new NotifList();
-  // NotifListPK pk = new NotifListPK();
-  // pk.setReqId(reqId);
-  // pk.setNotifId(user);
-  // notif.setId(pk);
-  // notif.setNotifNm(user);
-  // entityManager.merge(notif);
-  // }
-  // }
-
   @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
@@ -558,7 +305,8 @@ public class NewZealandUtil extends AutomationUtil {
                   if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
                     checkDetails.append("\nSupporting documentation is provided by the requester as attachment for " + addrType).append("\n");
                   } else {
-                    checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
+                    checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType
+                        + " address. Please provide Supporting documentation(Company Proof) as attachment.");
                   }
 
                 } else {
@@ -598,7 +346,8 @@ public class NewZealandUtil extends AutomationUtil {
               if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
                 checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
               } else {
-                checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
+                checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType
+                    + " address. Please provide Supporting documentation(Company Proof) as attachment.");
               }
             } else {
               checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
@@ -635,12 +384,6 @@ public class NewZealandUtil extends AutomationUtil {
     output.setProcessOutput(validation);
     return true;
   }
-
-  // private static StringBuilder getANZEcoNotifyList() {
-  // StringBuilder anzEcoNotifyList = new StringBuilder();
-  // anzEcoNotifyList.append(SystemParameters.getString("ANZ_ECSYS_NOTIFY"));
-  // return anzEcoNotifyList;
-  // }
 
   @Override
   protected List<String> getCountryLegalEndings() {
