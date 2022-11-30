@@ -291,6 +291,7 @@ function addAfterConfigAP() {
     setLockIsicNZfromDNB();
     // CREATCMR-7656
     setDefaultValueforCustomerServiceCode();
+    setLockStatusforSalesReqNo();
     // setDefaultValueforSalesReqNo();
     // removeSalesReqNoValidation();
     
@@ -866,11 +867,24 @@ function setDefaultValueforCustomerServiceCode(){
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if(reqType == 'C' && cntry == '796' && (custSubGrp == 'NRML' || custSubGrp == 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX'
-    || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP'
-      || custSubGrp == 'XESO')){
+    || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' || custSubGrp == 'PRIV' || custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' ||
+    custSubGrp == 'XMKTP' || custSubGrp == 'XESO')){
     FormManager.setValue('engineeringBo', '9920');
     FormManager.readOnly('engineeringBo');
     FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
+  }
+}
+
+// CREATCMR-7656
+function setLockStatusforSalesReqNo(){
+  console.log(">>>> setLockStatusforSalesReqNo >>>>");
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if(custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP' || custSubGrp == 'XESO'){
+    FormManager.readOnly('repTeamMemberName');
+    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
   }
 }
 
