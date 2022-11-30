@@ -123,7 +123,7 @@ function addDnBSearchValidator() {
         }
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var result = FormManager.getActualValue('findDnbResult');
-        if ((result == '' || result.toUpperCase() == 'NOT DONE') && (cntry != SysLoc.CHINA || (cntry == SysLoc.CHINA && ifProspect == 'Y'))) {
+        if ((result == '' || result.toUpperCase() == 'NOT DONE') && cntry != SysLoc.CHINA) {
           return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
         }
         return new ValidationResult(null, true);
