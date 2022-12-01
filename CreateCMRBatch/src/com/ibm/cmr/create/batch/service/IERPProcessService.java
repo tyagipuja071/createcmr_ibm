@@ -46,7 +46,10 @@ import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
 import com.ibm.cmr.create.batch.util.ProfilerLogger;
 import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.GenerateCMRNoClient;
 import com.ibm.cmr.services.client.ProcessClient;
+import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
+import com.ibm.cmr.services.client.cmrno.GenerateCMRNoResponse;
 import com.ibm.cmr.services.client.process.ProcessRequest;
 import com.ibm.cmr.services.client.process.ProcessResponse;
 import com.ibm.cmr.services.client.process.RDcRecord;
@@ -351,6 +354,7 @@ public class IERPProcessService extends BaseBatchService {
       // lockAdminRecordsForProcessing(reqIdList, em);
 
       // start processing
+      ArrayList<String> cmrNoList = new ArrayList<String>();
       for (CompoundEntity entity : reqIdList) {
         long start = new Date().getTime();
         Admin admin = entity.getEntity(Admin.class);
@@ -364,7 +368,8 @@ public class IERPProcessService extends BaseBatchService {
         if (admin != null && !CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
           createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
         }
-        CmrServiceInput cmrServiceInput = getReqParam(em, admin.getId().getReqId(), admin.getReqType(), data);
+        CmrServiceInput cmrServiceInput = getReqParam(em, admin.getId().getReqId(), admin.getReqType(), data, admin, cmrNoList);
+
         GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
         boolean enableTempReact = cntryHandler.enableTempReactivateOnUpdate() && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason());
 
@@ -1267,9 +1272,10 @@ public class IERPProcessService extends BaseBatchService {
     return response;
   }
 
-  public CmrServiceInput getReqParam(EntityManager em, long reqId, String reqType, Data data) {
+  public CmrServiceInput getReqParam(EntityManager em, long reqId, String reqType, Data data, Admin admin, ArrayList<String> cmrNoList) {
     String cmrNo = "";
 
+    String requestType = ((reqType) != null && (reqType).trim().length() > 0) ? (reqType) : "";
     if (!StringUtils.isEmpty(reqType)) {
       // if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
       // cmrNo = "TEMP";
@@ -1277,9 +1283,24 @@ public class IERPProcessService extends BaseBatchService {
       // cmrNo = data.getCmrNo();
       // }
       cmrNo = data.getCmrNo();
+      synchronized (IERPProcessService.class) {
+        if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && "C".equals(requestType)
+            && (StringUtils.isEmpty(cmrNo) || cmrNo.startsWith("P"))) {
+          if (cmrNo != null && cmrNo.startsWith("P"))
+            cmrNo = "";
+          cmrNo = generateCMRNoForIERP(data);
+          // to avoid dup cmr, use this list to check
+          if (!StringUtils.isEmpty(cmrNo) && cmrNoList.contains(cmrNo)) {
+            cmrNo = generateCMRNoForIERP(data);
+            if (!StringUtils.isEmpty(cmrNo))
+              cmrNoList.add(cmrNo);
+          } else if (!StringUtils.isEmpty(cmrNo)) {
+            cmrNoList.add(cmrNo);
+          }
+        }
+      }
     }
 
-    String requestType = ((reqType) != null && (reqType).trim().length() > 0) ? (reqType) : "";
     long requestId = reqId;
     CmrServiceInput cmrServiceInput = new CmrServiceInput();
 
@@ -1290,6 +1311,39 @@ public class IERPProcessService extends BaseBatchService {
     cmrServiceInput.setInputUserId(SystemConfiguration.getValue("BATCH_USERID"));
 
     return cmrServiceInput;
+  }
+
+  /**
+   * Calls the Generate CMR no service to get the next available CMR no
+   * 
+   * @param handler
+   * @param targetSystem
+   * @return
+   */
+  protected String generateCMRNoForIERP(Data data) {
+
+    try {
+      GenerateCMRNoRequest request = new GenerateCMRNoRequest();
+      request.setLoc1(data.getCustClass());
+      request.setLoc2(data.getCmrIssuingCntry());
+      request.setMandt(SystemConfiguration.getValue("MANDT"));
+      request.setSystem("IERP");
+
+      GenerateCMRNoClient client = CmrServicesFactory.getInstance().createClient(BaseBatchService.BATCH_SERVICE_URL, GenerateCMRNoClient.class);
+
+      GenerateCMRNoResponse response = client.executeAndWrap(request, GenerateCMRNoResponse.class);
+
+      if (response.isSuccess()) {
+        return response.getCmrNo();
+      } else {
+        LOG.error("CMR No cannot be generated. Error: " + response.getMsg());
+        return null;
+      }
+    } catch (Exception e) {
+      LOG.error("Error in generating CMR no", e);
+      return null;
+    }
+
   }
 
   private void lockAdminRecordsForProcessing(List<CompoundEntity> forProcessing, EntityManager entityManager) {
