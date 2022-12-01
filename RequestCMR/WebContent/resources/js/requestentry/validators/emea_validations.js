@@ -510,7 +510,8 @@ function afterConfigForUKI() {
       } else {
         console.log(">>> Process vatExempt add * >> ");
         if ("C" == FormManager.getActualValue('reqType') && getZS01LandCntry() != 'GB') {
-         // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+          // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+          // 'MAIN_CUST_TAB');
         }
         FormManager.enable('vat');
       }
@@ -7032,13 +7033,13 @@ function checkIfStateProvBlankForProcIT() {
             REQ_ID : FormManager.getActualValue('reqId'),
           };
           var results = cmr.query('GETZP01STATEPROV', qParams);
-          if (results != null && results.ret1 != undefined) {
+          if ((results != null || results != undefined) && results.ret1 != undefined) {
             if (results.ret1 == '') {
               return new ValidationResult(null, false, 'State Prov cannot be blank for the Billing address');
             }
 
             var results = cmr.query('GETZI01STATEPROV', qParams);
-            if (results != null && results.ret1 != undefined) {
+            if ((results != null || results != undefined) && results.ret1 != undefined) {
               if (results.ret1 == '') {
                 return new ValidationResult(null, false, 'State Prov cannot be blank for the Company address');
               }
@@ -9359,6 +9360,7 @@ function autoSetUIFieldsOnScnrioUKI() {
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (custSubGrp == 'INTER') {
     FormManager.setValue('company', '');
     FormManager.readOnly('company');
@@ -9818,7 +9820,7 @@ function getLandedCntryForItaly() {
   var results = cmr.query('VALIDATOR.LANDED_IT', {
     REQID : FormManager.getActualValue('reqId')
   });
-  if (results != null && results.ret1) {
+  if ((results != null || results != undefined) && results.ret1) {
     _landedIT = results.ret1;
   } else {
     _landedIT = '';
