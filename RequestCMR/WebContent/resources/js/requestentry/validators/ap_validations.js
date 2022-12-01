@@ -293,8 +293,8 @@ function addAfterConfigAP() {
     setLockIsicNZfromDNB();
     // CREATCMR-7656
     setDefaultValueforCustomerServiceCode();
-    setLockStatusforSalesReqNo();
-    removeSalesReqNoValidation();
+    // setLockStatusforSalesReqNo();
+    // removeSalesReqNoValidation();
     
     // CREATCMR-7653
     setDefaultValueForNZCreate();
@@ -869,34 +869,10 @@ function setDefaultValueforCustomerServiceCode(){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if(custSubGrp == 'NRML' || custSubGrp == 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX'
     || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' ||
-    custSubGrp == 'XMKTP' || custSubGrp == 'XESO'){
+    custSubGrp == 'XMKTP' || custSubGrp == 'XESO' || custSubGrp == 'PRIV'){
     FormManager.setValue('engineeringBo', '9920');
     FormManager.readOnly('engineeringBo');
     FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
-  } else if(custSubGrp == 'PRIV'){
-    FormManager.enable('engineeringBo');
-    FormManager.setValue('engineeringBo','');
-  }
-}
-
-// CREATCMR-7656
-function setLockStatusforSalesReqNo(){
-  console.log(">>>> setLockStatusforSalesReqNo >>>>");
-  var custGrp = FormManager.getActualValue('custGrp');
-  if(custGrp == 'CROSS'){
-    FormManager.readOnly('repTeamMemberName');
-  }else{
-    FormManager.enable('repTeamMemberName');
-  }
-}
-
-// CREATCMR-7656
-function removeSalesReqNoValidation(){
-  console.log(">>>> setLockStatusforSalesReqNo >>>>");
-  var custGrp = FormManager.getActualValue('custGrp');
-  if(custGrp == 'CROSS'){
-    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
-    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
   }
 }
 
