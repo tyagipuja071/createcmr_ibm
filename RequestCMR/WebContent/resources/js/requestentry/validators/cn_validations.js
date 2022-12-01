@@ -3114,6 +3114,90 @@ function checkClusterExpired(clusterDataRdc) {
   return true;
 }
 
+// CREATCMR-7567
+function setIsicCdFromDnb() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var action = FormManager.getActualValue('yourAction');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var busnType = FormManager.getActualValue('busnType');
+        var isicCd = FormManager.getActualValue('isicCd');
+        var result = {};
+        if (action == 'SFP' && cmrNo && cmrNo.startsWith('P')) {
+          if (busnType == null || busnType == '') {
+            return;
+          } else {
+            result = findIsicViaDnb();
+            if (!$.isEmptyObject(result)) {
+              var isicCdFromDnb = result.ibmIsic;
+              if (isicCd != isicCdFromDnb) {
+                FormManager.setValue('isicCd', isicCdFromDnb);
+                $("#cnisicinfoSpan").show();
+              }
+            }
+          }
+        }
+      }
+    }
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function findIsicViaDnb() {
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var countryCd = FormManager.getActualValue('landCntry');
+  var busnType = FormManager.getActualValue('busnType');
+  var dnbResult = {};
+  dojo.xhrPost({
+    url : cmr.CONTEXT_ROOT + '/quick_search/find.json',
+    handleAs : 'json',
+    method : 'POST',
+    content : {
+      issuingCntry : issuingCntry,
+      countryCd : 'CN', // countryCd,
+      taxCd1 : busnType,
+    },
+    timeout : 2 * 60000,
+    sync : true,
+    load : function(data, ioargs) {
+      if (data && data.items) {
+        data.items.forEach(function(item, i) {
+          if (item.recType == 'DNB' && (item.matchGrade == '10' || item.matchGrade == '09')) {
+            dnbResult = item;
+            return false;
+          }
+        });
+      }
+    },
+    error : function(error, ioargs) {
+      console.log('error');
+      console.log(error);
+    }
+  });
+  if(!$.isEmptyObject(dnbResult)) {
+    var detailResult = {};
+    dojo.xhrGet({
+      url : cmr.CONTEXT_ROOT + '/quick_search/details.json?dunsNo=' + dnbResult.dunsNo,
+      handleAs : 'json',
+      method : 'GET',
+      content : {},
+      timeout : 60000,
+      sync : true,
+      load : function(data, ioargs) {
+        if (data.success && data.data.results) {
+          detailResult = data.data.results[0];
+        }
+      },
+      error : function(error, ioargs) {
+        console.log('error');
+        console.log(error);
+      }
+    });
+  }
+  return detailResult;
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -3196,6 +3280,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateEnNameInAddrTab, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(validateSearchTermForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateISICForCROSS, GEOHandler.CN, null, false);
-  GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN,　null, false, false);
-  
+  GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN, null, false, false);
+  GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
+
 });
