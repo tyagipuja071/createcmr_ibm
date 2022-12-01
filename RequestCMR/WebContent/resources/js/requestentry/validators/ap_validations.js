@@ -4609,23 +4609,7 @@ function addCustGrpHandler() {
     _customerTypeHandler[0].onChange();
   }
 }
-// CREATCMR-7589
-function setIsicCmrCreation() {
-  var reqType = FormManager.getActualValue('reqType');
-  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var result = FormManager.getActualValue('findDnbResult');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var value = FormManager.getActualValue('isicCd');
-  if (value != "" && value != "9500") {
-    if (reqType == 'C' && result == "Accepted" && cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
-      FormManager.readOnly('isicCd');
-    }
-  }
-  if (result == "Rejected") {
-    if (reqType == 'C' && cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
-      FormManager.enable('isicCd');
-    }
-  }
+
 // CREATCMR-788
 function addressQuotationValidatorAP() {
   
@@ -4657,6 +4641,7 @@ function addressQuotationValidatorAP() {
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
 }
+
 function addressQuotationValidatorGCG() {
   
   var cntry = FormManager.getActualValue('cmrIssuingCntry')
@@ -4673,8 +4658,27 @@ function addressQuotationValidatorGCG() {
     FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
     break;
   }
-
 }
+
+// CREATCMR-7589
+function setIsicCmrCreation() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var result = FormManager.getActualValue('findDnbResult');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var value = FormManager.getActualValue('isicCd');
+  if (value != "" && value != "9500") {
+    if (reqType == 'C' && result == "Accepted" && cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
+      FormManager.readOnly('isicCd');
+    }
+  }
+  if (result == "Rejected") {
+    if (reqType == 'C' && cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
+      FormManager.enable('isicCd');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4848,7 +4852,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateClusterBaseOnScenario, [ SysLoc.SINGAPORE ], null, true);  
   GEOHandler.addAfterConfig(lockInacCodeForIGF, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, SysLoc.INDIA);
-   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate,  GEOHandler.AP );
+  GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate,  GEOHandler.AP );
   GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.AP );
   // India Handler
   GEOHandler.addAddrFunction(displayVatRegistrartionStatus, [ SysLoc.SINGAPORE ]);
