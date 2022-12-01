@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang3.StringUtils;
@@ -705,7 +704,7 @@ public class ItalyTransformer extends EMEATransformer {
         try {
           SAXParserFactory factory = SAXParserFactory.newInstance();
           factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
           factory.newSAXParser().parse(new InputSource(bis), dupHandler);
         } finally {
           bis.close();
@@ -1395,7 +1394,8 @@ public class ItalyTransformer extends EMEATransformer {
         if (crossBorder) {
           landedCountry = addr.getLandCntry();
           legacyCustExt.setiTaxCode((!StringUtils.isBlank(data.getVat()) ? data.getVat() : ""));
-        } else {
+        }
+        if (!crossBorder) {
           legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
         }
       }
