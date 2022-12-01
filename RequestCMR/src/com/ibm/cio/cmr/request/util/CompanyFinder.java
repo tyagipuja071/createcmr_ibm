@@ -282,6 +282,7 @@ public class CompanyFinder {
         cmr.setStreetAddress1(record.getCmrStreetAddress());
         cmr.setStreetAddress2(record.getCmrStreetAddressCont());
         cmr.setVat(record.getCmrVat());
+        cmr.setVatInd(record.getCmrVatInd());
         cmr.setAltName(record.getCmrIntlName1() + (record.getCmrIntlName2() != null ? record.getCmrIntlName2() : ""));
         cmr.setAltStreet(record.getCmrIntlAddress() + (record.getCmrIntlName3() != null ? record.getCmrIntlName3() : ""));
         cmr.setAltCity(record.getCmrIntlCity1());
