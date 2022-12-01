@@ -1394,8 +1394,7 @@ public class ItalyTransformer extends EMEATransformer {
         if (crossBorder) {
           landedCountry = addr.getLandCntry();
           legacyCustExt.setiTaxCode((!StringUtils.isBlank(data.getVat()) ? data.getVat() : ""));
-        }
-        if (!crossBorder) {
+        } else {
           legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
         }
       }

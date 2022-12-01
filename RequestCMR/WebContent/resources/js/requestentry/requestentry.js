@@ -208,7 +208,7 @@ function processRequestAction() {
         if (cmrCntry == '821' || cmrCntry == '755') {
           executeBeforeSubmit();
         } else {
-          cmr.hideNode('personalInformationDiv');
+          //cmr.hideNode('personalInformationDiv');
           // if there are no errors, show the Address Verification modal window
           // cmr.showModal('addressVerificationModal');
           showAddressVerificationModal();
