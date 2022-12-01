@@ -46,6 +46,7 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String cmrShortName;
   private String cmrOrderBlock;
   private String cmrVat;
+  private String cmrVatInd;
   private String cmrBusinessReg;
   private String cmrClientId;
   private String cmrEnterpriseNumber;
@@ -908,6 +909,14 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setCmrVat(String cmrVat) {
     this.cmrVat = cmrVat;
+  }
+
+  public String getCmrVatInd() {
+    return cmrVatInd;
+  }
+
+  public void setCmrVatInd(String cmrVatInd) {
+    this.cmrVatInd = cmrVatInd;
   }
 
   public String getCmrBusinessReg() {
