@@ -711,15 +711,24 @@ function autoSetSpecialTaxCdByScenario() {
   var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var _custType = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
-  var postCd = FormManager.getActualValue('postCd');
   var exceptionPostCd = [ 'GX', 'GY', 'JE' ];
+  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var postCdParams = {
+    REQ_ID : _zs01ReqId,
+    ADDR_TYPE : "ZS01",
+  };
+  var postCdResult = cmr.query('ADDR.GET.POSTCD.BY_REQID_ADDRTYP', postCdParams);
+  postCd = postCdResult.ret1;
+  if (postCd != null && postCd.length > 2) {
+    postCd = postCd.substring(0, 2);
+  }
   if (reqType == 'C' && (issuingCntry == SysLoc.UK || issuingCntry == SysLoc.IRELAND)) {
     if (_custType == '') {
       FormManager.setValue('specialTaxCd', '');
     } else if (_custType == 'INTER' || _custType == 'XINTR' || _custType == 'INFSL') {
       FormManager.setValue('specialTaxCd', 'XX');
       FormManager.readOnly('specialTaxCd');
-    } else if (issuingCntry == SysLoc.UK && exceptionPostCd.includes(postCd.substr(0, 2)) && _custType != 'INTER' && _custType != 'INFSL') {
+    } else if (issuingCntry == SysLoc.UK && exceptionPostCd.includes(postCd) && _custType != 'INTER' && _custType != 'INFSL') {
       FormManager.setValue('specialTaxCd', '32');
       // FormManager.enable('specialTaxCd');
     } else if (issuingCntry == SysLoc.UK && _custType != 'INTER' && _custType != 'INFSL' && custGrp == 'LOCAL' && !exceptionPostCd.includes(postCd.substr(0, 2))) {
@@ -10600,4 +10609,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.addAfterTemplateLoad(setVatIndFields, [ SysLoc.UK, SysLoc.IRELAND ]);
 
+  GEOHandler.addAfterConfig(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
 });

@@ -207,13 +207,8 @@ function processRequestAction() {
       } else {
         if (cmrCntry == '821' || cmrCntry == '755') {
           executeBeforeSubmit();
-        } else if (personalInfoPrivacyNoticeCntryList.includes(cmrCntry)) {
-          cmr.showNode('personalInformationDiv');
-          // cmr.showModal('addressVerificationModal');
-          showAddressVerificationModal();
-
         } else {
-          cmr.hideNode('personalInformationDiv');
+          //cmr.hideNode('personalInformationDiv');
           // if there are no errors, show the Address Verification modal window
           // cmr.showModal('addressVerificationModal');
           showAddressVerificationModal();
