@@ -4719,21 +4719,6 @@ function additionalAddrNmValidator(){
   })(), null, 'frmCMR_addressModal');
 }
 
-var _customerTypeHandler = null;
-function addCustGrpHandler() {
-  if (_customerTypeHandler == null) {
-    _customerTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
-      var cntry = FormManager.getActualValue('cmrIssuingCntry');
-      var custGrp = FormManager.getActualValue('custGrp');
-      var reqType = FormManager.getActualValue('reqType');
-      var apaCntry = [ '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '858', '766' ];
-      if (reqType == 'C' && custGrp == 'CROSS' && apaCntry.includes(cntry)) {
-        FormManager.setValue('custSubGrp', 'CROSS');
-      }
-    });
-  }
-}
-
 // CREATCMR-788
 function addressQuotationValidatorAP() {
   
@@ -4846,6 +4831,7 @@ function additionalAddrNmValidatorOldNZ(){
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
+
 function additionalAddrNmValidatorNZ(){
   FormManager.addFormValidator((function() {
     return {
@@ -4928,6 +4914,21 @@ function addressQuotationValidatorGCG() {
     FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'Address. Cont2(District,Town,Region)' ]);
     FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
     break;
+  }
+}
+
+var _customerTypeHandler = null;
+function addCustGrpHandler() {
+  if (_customerTypeHandler == null) {
+    _customerTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
+      var custGrp = FormManager.getActualValue('custGrp');
+      var reqType = FormManager.getActualValue('reqType');
+      var apaCntry = [ '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '858', '766' ];
+      if (reqType == 'C' && custGrp == 'CROSS' && apaCntry.includes(cntry)) {
+        FormManager.setValue('custSubGrp', 'CROSS');
+      }
+    });
   }
 }
 
