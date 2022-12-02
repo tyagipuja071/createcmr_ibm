@@ -50,6 +50,7 @@ function modeOfPaymentAndOrderBlockCdHandling() {
     // Code' ], 'MAIN_CUST_TAB');
   } else {
     FormManager.resetValidations('modeOfPayment');
+    FormManager.setValue('modeOfPayment', 'A001');
     FormManager.resetValidations('ordBlk');
     FormManager.readOnly('modeOfPayment');
     FormManager.readOnly('ordBlk');
