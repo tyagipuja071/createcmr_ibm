@@ -206,8 +206,6 @@
         reqentry.getReqType().equalsIgnoreCase("U")&&reqentry.getCmrIssuingCntry().equalsIgnoreCase("641")&&(reqentry.getCapInd()==null||reqentry.getCapInd().equalsIgnoreCase("N"))){%>
     <cmr:info text="${ui.info.cnisicinfo}"></cmr:info><%} %>
     <span id="cnisicinfoSpan" style="display:none"><cmr:info text="${ui.info.cnisicinfo}"></cmr:info></span>
-            <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("796")){%>
-    <cmr:info text="${ui.info.nzisicinfo}"></cmr:info><%} %>
       <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("796")){%>
     <cmr:info text="${ui.info.nzisicinfo}"></cmr:info><%} %>
      <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("616") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("744") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("834")){%>
