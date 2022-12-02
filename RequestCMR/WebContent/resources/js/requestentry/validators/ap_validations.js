@@ -4831,6 +4831,7 @@ function additionalAddrNmValidatorOldNZ(){
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
+
 function additionalAddrNmValidatorNZ(){
   FormManager.addFormValidator((function() {
     return {
@@ -4914,14 +4915,12 @@ function addressQuotationValidatorGCG() {
     FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
     break;
   }
-
 }
+
 var _customerTypeHandler = null;
 function addCustGrpHandler() {
   if (_customerTypeHandler == null) {
-    var _custType = null;
     _customerTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
-      _custType = value;
       var cntry = FormManager.getActualValue('cmrIssuingCntry');
       var custGrp = FormManager.getActualValue('custGrp');
       var reqType = FormManager.getActualValue('reqType');
@@ -4931,11 +4930,7 @@ function addCustGrpHandler() {
       }
     });
   }
-  if (_customerTypeHandler && _customerTypeHandler[0]) {
-    _customerTypeHandler[0].onChange();
-  }
 }
-
 
 // CREATCMR-7655
 function resetNZNBExempt() {

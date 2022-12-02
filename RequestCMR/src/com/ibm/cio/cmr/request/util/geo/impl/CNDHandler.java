@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.legacy.CloningRDCDirectUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -135,6 +136,23 @@ public class CNDHandler extends GEOHandler {
   @Override
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
+    UpdatedDataModel update = null;
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "OrderBlock", "-"));
+      update.setNewData(newData.getOrdBlk());
+      update.setOldData(oldData.getOrdBlk());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
+      update.setNewData(newData.getModeOfPayment());
+      update.setOldData(oldData.getModeOfPayment());
+      results.add(update);
+    }
+
   }
 
   @Override
@@ -418,5 +436,18 @@ public class CNDHandler extends GEOHandler {
     LOG.debug("generateCNDCmr :: returnung cndCMR = " + cndCMR);
     LOG.debug("generateCNDCmr :: END");
     return cndCMR;
+  }
+
+  private boolean equals(String val1, String val2) {
+    if (val1 == null && val2 != null) {
+      return StringUtils.isEmpty(val2.trim());
+    }
+    if (val2 == null & val1 != null) {
+      return StringUtils.isEmpty(val1.trim());
+    }
+    if (val1 == null & val2 == null) {
+      return true;
+    }
+    return val1.trim().equals(val2.trim());
   }
 }
