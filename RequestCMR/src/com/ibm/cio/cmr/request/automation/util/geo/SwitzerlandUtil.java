@@ -62,8 +62,8 @@ public class SwitzerlandUtil extends AutomationUtil {
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Department", "PostBox",
       "Attention to/Building/Floor/Office", "Att. Person", "Phone #", "FAX", "Customer Name 4");
 
-  private static final List<String> RELEVANT_ADDRESS_FIELDS_ZS01_ZP01 = Arrays.asList("Street Name And Number", "Customer Legal name");
-  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS_ZS01_ZP01 = Arrays.asList("Attention To/Building/Floor/Office",
+  private static final List<String> RELEVANT_ADDRESS_FIELDS_ZS01_ZP01 = Arrays.asList("Street name and number", "Customer legal name");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS_ZS01_ZP01 = Arrays.asList("Attention to/Building/Floor/Office",
       "Division/Department");
 
   // private static List<ChMubotyMapping> mubotyMappings = new
