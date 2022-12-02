@@ -4569,9 +4569,7 @@ function additionalAddrNmValidator(){
 var _customerTypeHandler = null;
 function addCustGrpHandler() {
   if (_customerTypeHandler == null) {
-    var _custType = null;
     _customerTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
-      _custType = value;
       var cntry = FormManager.getActualValue('cmrIssuingCntry');
       var custGrp = FormManager.getActualValue('custGrp');
       var reqType = FormManager.getActualValue('reqType');
@@ -4580,9 +4578,6 @@ function addCustGrpHandler() {
         FormManager.setValue('custSubGrp', 'CROSS');
       }
     });
-  }
-  if (_customerTypeHandler && _customerTypeHandler[0]) {
-    _customerTypeHandler[0].onChange();
   }
 }
 // CREATCMR-7589
