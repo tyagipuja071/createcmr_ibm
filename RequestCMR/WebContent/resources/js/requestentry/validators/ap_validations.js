@@ -4750,7 +4750,7 @@ function addressQuotationValidatorAP() {
 function setLockIsicNZfromDNB() {
   
   var isDnbRecord = FormManager.getActualValue('findDnbResult');
-  if (isDnbRecord =='Accepted') {
+  if (isDnbRecord =='Accepted' && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
   } else {
     FormManager.enable('isicCd');
