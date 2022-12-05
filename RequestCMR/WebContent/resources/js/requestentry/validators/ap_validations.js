@@ -293,7 +293,7 @@ function addAfterConfigAP() {
     setLockIsicNZfromDNB();
     // CREATCMR-7656
     setDefaultValueforCustomerServiceCode();
-    // setDefaultValueforSalesReqNo();
+    // setLockStatusforSalesReqNo();
     // removeSalesReqNoValidation();
     
     // CREATCMR-7653
@@ -867,9 +867,9 @@ function setDefaultValueforCustomerServiceCode(){
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if(reqType == 'C' && cntry == '796' && (custSubGrp == 'NRML' || custSubGrp == 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX'
-    || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP'
-      || custSubGrp == 'XESO')){
+  if(custSubGrp == 'NRML' || custSubGrp == 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX'
+    || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' ||
+    custSubGrp == 'XMKTP' || custSubGrp == 'XESO' || custSubGrp == 'PRIV'){
     FormManager.setValue('engineeringBo', '9920');
     FormManager.readOnly('engineeringBo');
     FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
@@ -4750,7 +4750,7 @@ function addressQuotationValidatorAP() {
 function setLockIsicNZfromDNB() {
   
   var isDnbRecord = FormManager.getActualValue('findDnbResult');
-  if (isDnbRecord =='Accepted') {
+  if (isDnbRecord =='Accepted' && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
   } else {
     FormManager.enable('isicCd');
