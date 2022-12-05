@@ -1385,7 +1385,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
-  GEOHandler.registerValidator(addCustName1Validator, [ SysLoc.USA ], null, true);
+  //GEOHandler.registerValidator(addCustName1Validator, [ SysLoc.USA ], null, true);
   // GEOHandler.registerValidator(clientTierValidator, [ SysLoc.USA ], null,
   // true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
