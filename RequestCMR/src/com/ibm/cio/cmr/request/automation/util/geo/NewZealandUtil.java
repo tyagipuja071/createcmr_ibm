@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -106,15 +107,21 @@ public class NewZealandUtil extends AutomationUtil {
     return results;
   }
 
-  private AutomationResponse<NZBNValidationResponse> getVatLayerInfo(Admin admin, Data data) throws Exception {
+  private AutomationResponse<NZBNValidationResponse> getNZBNService(Admin admin, Data data, Addr addr) throws Exception {
     AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         AutomationServiceClient.class);
     client.setReadTimeout(1000 * 60 * 5);
     client.setRequestMethod(Method.Get);
 
     NZBNValidationRequest request = new NZBNValidationRequest();
-    request.setBusinessNumber(data.getVat());
-    System.out.println(request + request.getBusinessNumber());
+    String customerName = addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2());
+    if (StringUtils.isNotBlank(data.getVat())) {
+      request.setBusinessNumber(data.getVat());
+      System.out.println("request-businessNumber:" + request.getBusinessNumber());
+    }
+    request.setName(customerName);
+    System.out.println("request-name:" + customerName);
+
     AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.NZ_BN_VALIDATION_SERVICE_ID, request, AutomationResponse.class);
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writeValueAsString(rawResponse);
@@ -140,13 +147,13 @@ public class NewZealandUtil extends AutomationUtil {
       String customerName = zs01.getCustNm1() + (StringUtils.isBlank(zs01.getCustNm2()) ? "" : " " + zs01.getCustNm2());
       String formerCustName = !StringUtils.isBlank(admin.getOldCustNm1()) ? admin.getOldCustNm1().toUpperCase() : "";
       formerCustName += !StringUtils.isBlank(admin.getOldCustNm2()) ? " " + admin.getOldCustNm2().toUpperCase() : "";
-      // List<String> dnbTradestyleNames = new ArrayList<String>();
+      List<String> dnbTradestyleNames = new ArrayList<String>();
       boolean custNmMatch = false;
-      // boolean formerCustNmMatch = false;
+      boolean formerCustNmMatch = false;
       try {
 
-        if (!(custNmMatch)) {
-          LOG.debug("CustNm match failed with API. Now Checking with DNB to vrify CustNm update");
+        if (!(custNmMatch && formerCustNmMatch)) {
+          LOG.debug("Now Checking with DNB to vrify CustNm update");
           MatchingResponse<DnBMatchingResponse> Dnbresponse = DnBUtil.getMatches(requestData, null, "ZS01");
           List<DnBMatchingResponse> matches = Dnbresponse.getMatches();
           if (!matches.isEmpty()) {
@@ -155,42 +162,60 @@ public class NewZealandUtil extends AutomationUtil {
               String dnbCustNm = StringUtils.isBlank(dnbRecord.getDnbName()) ? "" : dnbRecord.getDnbName().replaceAll("\\s+$", "");
               if (customerName.equalsIgnoreCase(dnbCustNm)) {
                 custNmMatch = true;
+                dnbTradestyleNames = dnbRecord.getTradeStyleNames();
+                if (dnbTradestyleNames != null) {
+                  for (String tradestyleNm : dnbTradestyleNames) {
+                    tradestyleNm = tradestyleNm.replaceAll("\\s+$", "");
+                    if (tradestyleNm.equalsIgnoreCase(formerCustName)) {
+                      formerCustNmMatch = true;
+                      break;
+                    }
+                  }
+                }
               }
             }
           }
         }
-        if (!(custNmMatch)) {
+
+        if (!(custNmMatch && formerCustNmMatch)) {
+          LOG.debug("DNB Checking CustNm match failed. Now Checking CustNm with API with  to vrify CustNm update");
           try {
-            response = getVatLayerInfo(admin, data);
+            response = getNZBNService(admin, data, zs01);
           } catch (Exception e) {
             if (response == null || !response.isSuccess()
                 && "Parameter 'businessNumber' is required by the service to verify CustNm change.".equalsIgnoreCase(response.getMessage())) {
               LOG.debug("\nFailed to Connect to ABN Service.Now Checking with DNB to vrify CustNm update");
             }
           }
+          if (response != null && response.isSuccess()) {
+            // custNm Validation
+            if (StringUtils.isNotEmpty(response.getRecord().getName())) {
+              String responseCustNm = StringUtils.isBlank(response.getRecord().getName()) ? "" : response.getRecord().getName().replaceAll(regex, "");
 
-          if (!StringUtils.isBlank(data.getVat())) {
-            if (response != null && response.isSuccess()) {
-              // custNm Validation
-              if (StringUtils.isNotEmpty(response.getRecord().getName())) {
-                String responseCustNm = StringUtils.isBlank(response.getRecord().getName()) ? ""
-                    : response.getRecord().getName().replaceAll(regex, "");
-
-                if (!(custNmMatch)) {
-                  if (customerName.equalsIgnoreCase(responseCustNm)) {
-                    custNmMatch = true;
-
-                  }
+              if (!(custNmMatch)) {
+                if (customerName.equalsIgnoreCase(responseCustNm)) {
+                  custNmMatch = true;
+                }
+              }
+            }
+            if (response.getRecord() != null && response.getRecord().getPreviousEntityNames() != null
+                && response.getRecord().getPreviousEntityNames().length > 0) {
+              String[] historicalNameList = new String[response.getRecord().getPreviousEntityNames().length];
+              historicalNameList = response.getRecord().getPreviousEntityNames();
+              for (String historicalNm : historicalNameList) {
+                historicalNm = historicalNm.replaceAll(regex, "");
+                if (formerCustName.equalsIgnoreCase(historicalNm)) {
+                  formerCustNmMatch = true;
                 }
               }
             }
           }
-
         }
+
         // }
         // customerNm Validation
         details.append("\nUpdates to the non Relevant dataFields fields skipped validation \n\n");
-        if (custNmMatch) {
+        if (custNmMatch && formerCustNmMatch) {
           validation.setSuccess(true);
           validation.setMessage("Successful");
           output.setProcessOutput(validation);
@@ -198,7 +223,7 @@ public class NewZealandUtil extends AutomationUtil {
 
         } else {
           validation.setMessage("Not Validated");
-          details.append("The Customer Name doesn't match from API & DNB");
+          details.append("The Customer Name and Former Customer Name doesn't match from API & DNB");
           // company proof
           if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
             details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
@@ -207,7 +232,7 @@ public class NewZealandUtil extends AutomationUtil {
                 + customerName + " update. Please provide Supporting documentation(Company Proof) as attachment.");
           }
           output.setDetails(details.toString());
-          engineData.addNegativeCheckStatus("ABNLegalName", "The Customer Name doesn't match from API & DNB");
+          engineData.addNegativeCheckStatus("ABNLegalName", "The Customer Name and Former Customer Name doesn't match from API & DNB");
         }
 
       } finally {
