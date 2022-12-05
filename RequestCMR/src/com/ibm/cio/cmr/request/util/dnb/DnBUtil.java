@@ -120,7 +120,7 @@ public class DnBUtil {
     registerDnBVATCode("MU", 9394); // Business Registration Number (Mauritius)
     registerDnBVATCode("NA", 15168); // Tax Registration Number (ZA)
     registerDnBVATCode("NO", 1699); // Register of Business Enterprises Number
-    registerDnBVATCode("NZ", 578); // New Zealand Company Number
+    registerDnBVATCode("NZ", 33961); // Business Registration Number (NZ)
     registerDnBVATCode("PE", 1382); // Peruvian Sole Commercial Registry Number
     // registerDnBVATCode("AU", 17890); // Business Registration Number
     // (Australia)
