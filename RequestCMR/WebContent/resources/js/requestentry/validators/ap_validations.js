@@ -5080,7 +5080,6 @@ function setDefaultValueForNZCreate(){
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
-        FormManager.readOnly('isicCd');
       }
         
       break;
@@ -5107,7 +5106,6 @@ function setDefaultValueForNZCreate(){
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
-        FormManager.readOnly('isicCd');
       }
       break;
     case 'INTER':
@@ -5165,7 +5163,6 @@ function setDefaultValueForNZCreate(){
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
-        FormManager.readOnly('isicCd');
       }
       break;
     case 'NRML':
@@ -5186,7 +5183,6 @@ function setDefaultValueForNZCreate(){
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
-        FormManager.readOnly('isicCd');
       }
       break;
     case 'ESOSW':
@@ -5209,7 +5205,6 @@ function setDefaultValueForNZCreate(){
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
-        FormManager.readOnly('isicCd');
       }
       break;
     case 'ECSYS':
@@ -5232,7 +5227,6 @@ function setDefaultValueForNZCreate(){
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
-        FormManager.readOnly('isicCd');
       }
       break;
     case 'CROSS':
@@ -5253,7 +5247,6 @@ function setDefaultValueForNZCreate(){
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
-        FormManager.readOnly('isicCd');
       }
       break;
     case 'XAQST':
@@ -5276,7 +5269,6 @@ function setDefaultValueForNZCreate(){
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
-        FormManager.readOnly('isicCd');
       }
       break;
     case 'XBLUM':
@@ -5302,7 +5294,6 @@ function setDefaultValueForNZCreate(){
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
-        FormManager.readOnly('isicCd');
       }
         
       break;
@@ -5326,7 +5317,6 @@ function setDefaultValueForNZCreate(){
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
-        FormManager.readOnly('isicCd');
       }
       break;
     case 'XMKTP':
@@ -5352,7 +5342,6 @@ function setDefaultValueForNZCreate(){
       
       if(isicCdInDB!=''){
         FormManager.setValue('isicCd', isicCdInDB);
-        FormManager.readOnly('isicCd');
       }
       break;
     }
