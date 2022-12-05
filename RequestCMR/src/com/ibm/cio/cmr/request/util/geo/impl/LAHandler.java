@@ -3914,6 +3914,10 @@ public class LAHandler extends GEOHandler {
       LOG.error("ZI01 address not found on request.");
     }
 
+    if (brModel.getProxiLocnNo() != null) {
+      requestData.getData().setProxiLocnNo(brModel.getProxiLocnNo());
+    }
+
     LOG.debug("Getting contact info from V2 inputs..");
     String sql = ExternalizedQuery.getSql("BR.GET_DISTINCT_MAILS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
