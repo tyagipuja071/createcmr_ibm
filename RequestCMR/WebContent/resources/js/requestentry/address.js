@@ -1053,7 +1053,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('prefSeqNo', details.ret55);
 
       if (FormManager.getActualValue('cmrIssuingCntry') == '848' || FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager.getActualValue('cmrIssuingCntry') == '754') {
-        if (FormManager.getField('hwInstlMstrFlg') != null) {
+        if (dijit.byId('hwInstlMstrFlg') != undefined && FormManager.getField('hwInstlMstrFlg') != null) {
           FormManager.getField('hwInstlMstrFlg').set('checked', details.ret75 == 'Y' ? true : false);
         }
       }
@@ -1199,6 +1199,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('contact', details.ret71);
       FormManager.setValue('rol', details.ret72);
     }
+
     var cemeaCountries = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
         '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889' ];
 
