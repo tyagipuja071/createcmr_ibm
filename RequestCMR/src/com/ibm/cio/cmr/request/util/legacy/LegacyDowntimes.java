@@ -51,7 +51,7 @@ public class LegacyDowntimes {
    */
   public static boolean isUp(String country, Date currentTime) {
     if (!PROPS.containsKey(country + ".TIMEZONE")) {
-      LOG.trace("No timezone property for " + country);
+      // LOG.trace("No timezone property for " + country);
       return true;
     }
     String tz = PROPS.getProperty(country + ".TIMEZONE");

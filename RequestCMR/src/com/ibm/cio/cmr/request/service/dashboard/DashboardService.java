@@ -75,7 +75,8 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     DashboardResult result = new DashboardResult();
     initFilters(entityManager, result);
 
-    return analyzeResults(result, procs, autos, "Y".equals(params.getParam("LIST_RECORDS")));
+    boolean excludeAutoPercentage = !"Y".equals(params.getParam("INCL_AUTO_PERCENT"));
+    return analyzeResults(result, procs, autos, "Y".equals(params.getParam("LIST_RECORDS")), excludeAutoPercentage);
   }
 
   /**
@@ -122,20 +123,21 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
    * @param addRecords
    * @return
    */
-  private DashboardResult analyzeResults(DashboardResult result, List<ProcessingMonitor> procs, List<AutomationMonitor> autos, boolean addRecords) {
+  private DashboardResult analyzeResults(DashboardResult result, List<ProcessingMonitor> procs, List<AutomationMonitor> autos, boolean addRecords,
+      boolean excludeAutoPct) {
     analyzeProcess(result, procs, addRecords);
-    analyzeAutomation(result, autos, addRecords);
+    analyzeAutomation(result, autos, addRecords, excludeAutoPct);
     checkConnections(result);
 
     List<String> statuses = new ArrayList<>();
     statuses.add(result.getServices().getServicesStatus());
     statuses.add(result.getProcessing().getProcessingStatus());
     statuses.add(result.getAutomation().getAutomationStatus());
-    result.setOverallStatus("GREEN");
-    if (statuses.contains("RED")) {
-      result.setOverallStatus("RED");
-    } else if (statuses.contains("ORANGE")) {
-      result.setOverallStatus("ORANGE");
+    result.setOverallStatus(DashboardResult.STATUS_OK);
+    if (statuses.contains(DashboardResult.STATUS_DOWN)) {
+      result.setOverallStatus(DashboardResult.STATUS_DOWN);
+    } else if (statuses.contains(DashboardResult.STATUS_WARNING)) {
+      result.setOverallStatus(DashboardResult.STATUS_WARNING);
     }
     LOG.debug("Returning monitoring results..");
     return result;
@@ -370,13 +372,13 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     procModel.setMinsThreshold(minsMaxStuck);
     procModel.setErrorCounts(errorCounts);
 
-    procModel.setProcessingStatus("GREEN");
+    procModel.setProcessingStatus(DashboardResult.STATUS_OK);
 
     for (String key : stuckCounts.keySet()) {
       if (stuckCounts.get(key) > procMaxStuck * 2) {
-        procModel.setProcessingStatus("RED");
+        procModel.setProcessingStatus(DashboardResult.STATUS_DOWN);
       } else if (stuckCounts.get(key) > procMaxStuck) {
-        procModel.setProcessingStatus("ORANGE");
+        procModel.setProcessingStatus(DashboardResult.STATUS_WARNING);
       }
     }
 
@@ -394,12 +396,12 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     boolean exceed = false;
     for (String key : errorCounts.keySet()) {
       if (errorCounts.get(key) > errorMax * 2) {
-        procModel.setProcessingStatus("RED");
+        procModel.setProcessingStatus(DashboardResult.STATUS_DOWN);
         exceed = true;
       }
       if (errorCounts.get(key) > errorMax) {
-        if (!"RED".equals(procModel.getProcessingStatus())) {
-          procModel.setProcessingStatus("ORANGE");
+        if (!DashboardResult.STATUS_DOWN.equals(procModel.getProcessingStatus())) {
+          procModel.setProcessingStatus(DashboardResult.STATUS_WARNING);
           exceed = true;
         }
       }
@@ -421,7 +423,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
    * @param autos
    * @param listRecords
    */
-  private void analyzeAutomation(DashboardResult result, List<AutomationMonitor> autos, boolean listRecords) {
+  private void analyzeAutomation(DashboardResult result, List<AutomationMonitor> autos, boolean listRecords, boolean excludeAutoPct) {
     LOG.debug("Analyzing automation status..");
 
     if (listRecords) {
@@ -547,7 +549,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       int index = 0;
       for (int i = 0; i < autoCompletes.size(); i++) {
         if (autoCompletes.get(i) == maxFullAutoDiff) {
-          LOG.trace(key + " Auto complete outlier: " + maxFullAutoDiff);
+          // LOG.trace(key + " Auto complete outlier: " + maxFullAutoDiff);
           found = true;
           index = i;
           break;
@@ -564,7 +566,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       if (ave < 0) {
         ave = 0;
       }
-      LOG.trace(key + " Auto Complete Average: " + ave);
+      // LOG.trace(key + " Auto Complete Average: " + ave);
       String duration = DurationFormatUtils.formatDuration(ave, "HH'h' mm'm'");
       String durMin = DurationFormatUtils.formatDuration(ave, "mm");
       stats.setFullAutoAverageMin(Long.parseLong(durMin));
@@ -578,7 +580,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       index = 0;
       for (int i = 0; i < allCompletes.size(); i++) {
         if (allCompletes.get(i) == maxCompleteDiff) {
-          LOG.trace(key + " All complete outlier: " + maxCompleteDiff);
+          // LOG.trace(key + " All complete outlier: " + maxCompleteDiff);
           found = true;
           index = i;
           break;
@@ -595,7 +597,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       if (ave < 0) {
         ave = 0;
       }
-      LOG.trace(key + " All Completes Average: " + ave);
+      // LOG.trace(key + " All Completes Average: " + ave);
       duration = DurationFormatUtils.formatDuration(ave, "HH'h' mm'm'");
       durMin = DurationFormatUtils.formatDuration(ave, "mm");
       stats.setCompletionAverageMin(Long.parseLong(durMin));
@@ -604,7 +606,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       index = 0;
       for (int i = 0; i < processings.size(); i++) {
         if (processings.get(i) == maxAutoDiff) {
-          LOG.trace(key + " Processing outlier: " + maxAutoDiff);
+          // LOG.trace(key + " Processing outlier: " + maxAutoDiff);
           found = true;
           index = i;
           break;
@@ -621,7 +623,7 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       if (ave < 0) {
         ave = 0;
       }
-      LOG.trace(key + " Processing Average: " + ave);
+      // LOG.trace(key + " Processing Average: " + ave);
       duration = DurationFormatUtils.formatDuration(ave, "mm'm'");
       durMin = DurationFormatUtils.formatDuration(ave, "mm");
       stats.setAutomationAverage(duration);
@@ -658,32 +660,32 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       pendMaxStuck = Integer.parseInt(pendingThreshold);
     }
 
-    model.setAutomationStatus("GREEN");
+    model.setAutomationStatus(DashboardResult.STATUS_OK);
     StringBuilder alert = new StringBuilder();
     if (allPending > pendMaxStuck) {
       if (allPending > pendMaxStuck * 2) {
-        model.setAutomationStatus("RED");
+        model.setAutomationStatus(DashboardResult.STATUS_DOWN);
       }
-      model.setAutomationStatus("ORANGE");
+      model.setAutomationStatus(DashboardResult.STATUS_WARNING);
       alert.append("Total Pending requests for automation is greater than threshold.");
     }
     if (autoProcExceeded) {
-      if (!"RED".equals(model.getAutomationStatus())) {
-        model.setAutomationStatus("ORANGE");
+      if (!DashboardResult.STATUS_DOWN.equals(model.getAutomationStatus())) {
+        model.setAutomationStatus(DashboardResult.STATUS_WARNING);
       }
       alert.append(alert.length() > 0 ? " " : "");
       alert.append("Automation validations for some countries take longer than the threshold.");
     }
     if (compExceeded) {
-      if (!"RED".equals(model.getAutomationStatus())) {
-        model.setAutomationStatus("ORANGE");
+      if (!DashboardResult.STATUS_DOWN.equals(model.getAutomationStatus())) {
+        model.setAutomationStatus(DashboardResult.STATUS_WARNING);
       }
       alert.append(alert.length() > 0 ? " " : "");
       alert.append("Completion turn-around times for some countries take longer than the threshold.");
     }
     if (manualExceeded) {
-      if (!"RED".equals(model.getAutomationStatus())) {
-        model.setAutomationStatus("ORANGE");
+      if (!DashboardResult.STATUS_DOWN.equals(model.getAutomationStatus())) {
+        model.setAutomationStatus(DashboardResult.STATUS_WARNING);
       }
       alert.append(alert.length() > 0 ? " " : "");
       alert.append("Manual review percentage for some countries are greater than the threshold.");
@@ -714,14 +716,15 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
     }
     pingCmrservices(model);
     pingCIservices(model);
-    testCROS(model);
+    model.setCros(true);
+    // testCROS(model);
 
-    model.setServicesStatus("GREEN");
+    model.setServicesStatus(DashboardResult.STATUS_OK);
     if (!model.isFindCmr() || !model.isCmrServices() || !model.isCiServices()) {
-      model.setServicesStatus("RED");
+      model.setServicesStatus(DashboardResult.STATUS_DOWN);
       model.setAlert("One or more connections to main components are down.");
     } else if (!model.isCris() || !model.isCros() || !model.isMq() || !model.isUsCmr()) {
-      model.setServicesStatus("ORANGE");
+      model.setServicesStatus(DashboardResult.STATUS_WARNING);
       model.setAlert("One or more connections to secondary components are down.");
     }
     result.setServices(model);

@@ -51,7 +51,7 @@ public class AustraliaUtil extends AutomationUtil {
   private static final List<String> ALLOW_DEFAULT_SCENARIOS = Arrays.asList("PRIV", "XPRIV", "BLUMX", "MKTPC", "XBLUM", "XMKTP");
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, "STAT", "MAIL", "ZF01", "PUBS", "PUBB", "EDUC", "CTYG", "CTYH");
-  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #", "Customer Name", "Customer Name Con't");
 
   public static final String SCENARIO_BLUEMIX = "BLUMX";
   public static final String SCENARIO_MARKETPLACE = "MKTPC";
@@ -231,24 +231,36 @@ public class AustraliaUtil extends AutomationUtil {
                   : response.getRecord().getOtherTradingName().replaceAll(regex, "");
               String responseBusinessNm = StringUtils.isBlank(response.getRecord().getBusinessName()) ? ""
                   : response.getRecord().getBusinessName().replaceAll(regex, "");
-              if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
-                  && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
-                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
-                custNmMatch = true;
-                formerCustNmMatch = true;
-              } else if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
-                  && !((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
-                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
-                custNmMatch = true;
-                formerCustNmMatch = false;
-              } else if (response.getRecord().isValid() && !(customerName.equalsIgnoreCase(responseCustNm))
-                  && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
-                      || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
-                custNmMatch = false;
-                formerCustNmMatch = true;
-              } else {
-                custNmMatch = false;
-                formerCustNmMatch = false;
+              List<String> historicalNameList = new ArrayList<String>();
+              historicalNameList = response.getRecord().getHistoricalNameList();
+              for (String historicalNm : historicalNameList) {
+                historicalNm = historicalNm.replaceAll(regex, "");
+                if (response.getRecord().isValid() && customerName.equalsIgnoreCase(responseCustNm)
+                    && formerCustName.equalsIgnoreCase(historicalNm)) {
+                  custNmMatch = true;
+                  formerCustNmMatch = true;
+                }
+              }
+              if (!(custNmMatch && formerCustNmMatch)) {
+                if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
+                    && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                        || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
+                  custNmMatch = true;
+                  formerCustNmMatch = true;
+                } else if (response.getRecord().isValid() && (customerName.equalsIgnoreCase(responseCustNm))
+                    && !((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                        || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
+                  custNmMatch = true;
+                  formerCustNmMatch = false;
+                } else if (response.getRecord().isValid() && !(customerName.equalsIgnoreCase(responseCustNm))
+                    && ((formerCustName.equalsIgnoreCase(responseTradingNm)) || (formerCustName.equalsIgnoreCase(responseOthTradingNm))
+                        || (formerCustName.equalsIgnoreCase(responseBusinessNm)))) {
+                  custNmMatch = false;
+                  formerCustNmMatch = true;
+                } else {
+                  custNmMatch = false;
+                  formerCustNmMatch = false;
+                }
               }
             }
           }
