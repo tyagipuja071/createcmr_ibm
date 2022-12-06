@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.DPLCheckClient;
 import com.ibm.cmr.services.client.dpl.DPLCheckRequest;
@@ -44,8 +45,13 @@ public class DPLSearchProcess {
     request.setCompanyName(companyName);
     request.setIncludeScreening(true);
     LOG.debug("Performing DPL Search on " + companyName);
-    KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
-    DPLSearchResponse response = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
+    DPLSearchResponse response = null;
+    if (SystemUtil.useKYCForDPLChecks()) {
+      KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
+      response = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
+    } else {
+      response = client.executeAndWrap(DPLCheckClient.DPL_SEARCH_APP_ID, request, DPLSearchResponse.class);
+    }
 
     if (response == null || !response.isSuccess()) {
       LOG.warn("DPL Search failed with message: " + response.getMsg());

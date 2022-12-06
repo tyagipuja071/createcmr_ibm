@@ -1347,7 +1347,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       request.setCompanyName(name);
     log.debug("Performing DPL Check (service) on Request ID " + admin.getId().getReqId() + " (" + id + ")");
     log.debug(" - Name: " + name);
-    DPLCheckResponse response = dplClient.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, DPLCheckResponse.class);
+    String dplSystemId = SystemUtil.useKYCForDPLChecks() ? DPLCheckClient.KYC_APP_ID : DPLCheckClient.EVS_APP_ID;
+    DPLCheckResponse response = dplClient.executeAndWrap(dplSystemId, request, DPLCheckResponse.class);
     if (!response.isSuccess()) {
       throw new Exception("Failed to connect to DPL check service: " + response.getMsg());
     } else {
