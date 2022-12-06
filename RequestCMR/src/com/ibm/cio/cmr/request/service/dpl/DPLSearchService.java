@@ -347,8 +347,13 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       request.setPrivate(isPrivate);
       try {
         LOG.debug("Performing DPL Search on " + searchString);
-        KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
-        DPLSearchResponse resp = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
+        DPLSearchResponse resp = null;
+        if (SystemUtil.useKYCForDPLChecks()) {
+          KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
+          resp = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
+        } else {
+          resp = client.executeAndWrap(DPLCheckClient.DPL_SEARCH_APP_ID, request, DPLSearchResponse.class);
+        }
         if (resp.isSuccess()) {
           DPLSearchResults result = resp.getResults();
           result.setSearchArgument(searchString);
@@ -627,8 +632,13 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       request.setIncludeScreening(true);
       try {
         LOG.debug("Performing DPL Search on " + searchString);
-        KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
-        DPLSearchResponse resp = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
+        DPLSearchResponse resp = null;
+        if (SystemUtil.useKYCForDPLChecks()) {
+          KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
+          resp = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
+        } else {
+          resp = client.executeAndWrap(DPLCheckClient.DPL_SEARCH_APP_ID, request, DPLSearchResponse.class);
+        }
         if (resp.isSuccess()) {
           DPLSearchResults result = resp.getResults();
           result.setSearchArgument(searchString);
