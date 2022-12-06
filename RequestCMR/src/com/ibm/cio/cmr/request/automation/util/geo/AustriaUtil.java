@@ -60,9 +60,10 @@ public class AustriaUtil extends AutomationUtil {
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO, CmrConstants.RDC_PAYGO_BILLING);
 
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone number", "FAX", "Customer Name 4");
-  private static final List<String> ZS01_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Street Name And Number", "Customer Legal name");
-  private static final List<String> ZS01_NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention To/Building/Floor/Office","Division/Department");
-  
+  private static final List<String> RELEVANT_ADDRESS_FIELDS_ZS01_ZP01 = Arrays.asList("Street Name And Number", "Customer Legal name");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS_ZS01_ZP01 = Arrays.asList("Attention To/Building/Floor/Office",
+      "Division/Department");
+
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
@@ -215,7 +216,6 @@ public class AustriaUtil extends AutomationUtil {
     boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
         && !changes.isAddressChanged("ZI01");
 
-
     StringBuilder duplicateDetails = new StringBuilder();
     StringBuilder checkDetails = new StringBuilder();
 
@@ -272,11 +272,10 @@ public class AustriaUtil extends AutomationUtil {
               } else if (CmrConstants.RDC_PAYGO_BILLING.equals(addrType)) {
                 LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Addition of new PG01 (" + addr.getId().getAddrSeq() + ") address validated in the checks.\n");
-              } 
-              else if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+              } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
                 LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Addition of new ZI01 (" + addr.getId().getAddrSeq() + ") address validated in the checks.\n");
-              }else {
+              } else {
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
                 boolean matchesDnb = false;
                 if (matches != null) {
@@ -309,7 +308,7 @@ public class AustriaUtil extends AutomationUtil {
               checkDetails.append(
                   "Updates to " + addrType + "(" + addr.getId().getAddrSeq() + ") with Aufsd = " + data.getOrdBlk() + " skipped in the checks.\n");
             } else if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
-              if (isRelevantZS01AddressFieldUpdated(changes, addr)) {
+              if (isRelevantAddressFieldUpdatedZS01ZP01(changes, addr)) {
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
                 boolean matchesDnb = false;
                 if (matches != null) {
@@ -329,12 +328,36 @@ public class AustriaUtil extends AutomationUtil {
                         + dnb.getDnbCountry() + "\n\n");
                   }
                 }
-              } else if (isNonRelevantZS01AddressFieldUpdated(changes, addr)) {
+              } else if (isNonRelevantAddressFieldUpdatedForZS01ZP01(changes, addr)) {
                 checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
                     .append("\n");
               }
-            } 
-            else {
+            } else if (CmrConstants.RDC_BILL_TO.equals(addrType)) {
+              if (isRelevantAddressFieldUpdatedZS01ZP01(changes, addr)) {
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
+                boolean matchesDnb = false;
+                if (matches != null) {
+                  // check against D&B
+                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+                }
+                if (!matchesDnb) {
+                  resultCodes.add("R");
+                  checkDetails.append("Updates to Bill To address need verification as it does not matches D&B");
+                  LOG.debug("Updates to Bill To address need verification as it does not matches D&B");
+                } else {
+                  checkDetails.append("Updated address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
+                }
+              } else if (isNonRelevantAddressFieldUpdatedForZS01ZP01(changes, addr)) {
+                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                    .append("\n");
+              }
+            } else {
               // update to other relevant addresses
               if (isRelevantAddressFieldUpdated(changes, addr)) {
                 checkDetails.append("Updates to address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") need to be verified.")
@@ -558,27 +581,27 @@ public class AustriaUtil extends AutomationUtil {
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M", "D", "R");
   }
-  
-  private boolean isRelevantZS01AddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+
+  private boolean isRelevantAddressFieldUpdatedZS01ZP01(RequestChangeContainer changes, Addr addr) {
     List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
     if (addrChanges == null) {
       return false;
     }
     for (UpdatedNameAddrModel change : addrChanges) {
-      if (ZS01_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+      if (RELEVANT_ADDRESS_FIELDS_ZS01_ZP01.contains(change.getDataField())) {
         return true;
       }
     }
     return false;
   }
 
-  private boolean isNonRelevantZS01AddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+  private boolean isNonRelevantAddressFieldUpdatedForZS01ZP01(RequestChangeContainer changes, Addr addr) {
     List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
     if (addrChanges == null) {
       return false;
     }
     for (UpdatedNameAddrModel change : addrChanges) {
-      if (ZS01_NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+      if (NON_RELEVANT_ADDRESS_FIELDS_ZS01_ZP01.contains(change.getDataField())) {
         return true;
       }
     }
