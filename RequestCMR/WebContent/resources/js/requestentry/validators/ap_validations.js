@@ -851,10 +851,12 @@ function defaultCMRNumberPrefixforNewZealand(){
     if(custSubGrp == 'INTER'){
       FormManager.enable('cmrNoPrefix');
       FormManager.setValue('cmrNoPrefix', _pagemodel.cmrNoPrefix == null ? '990---' : _pagemodel.cmrNoPrefix);
+      FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, [ 'CMR Number Prefix' ], 'MAIN_IBM_TAB');
     }
     else{
       FormManager.setValue('cmrNoPrefix', '');
       FormManager.readOnly('cmrNoPrefix');
+      FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
     }
   }
 }
