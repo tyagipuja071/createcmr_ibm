@@ -605,6 +605,7 @@ public class SpainUtil extends AutomationUtil {
     Addr addr = requestData.getAddress("ZS01");
     String bgId = data.getBgId();
     String enterprise = null;
+    String salesRep = null;
 
     if (!isCoverageCalculated) {
       details.setLength(0);
@@ -612,46 +613,45 @@ public class SpainUtil extends AutomationUtil {
     }
 
     if (bgId != null && !"BGNONE".equals(bgId.trim())) {
-      List<SpainFieldsContainer> enterpriseResults = computeEnterpriseES(entityManager, QUERY_BG_ES, bgId, data.getCmrIssuingCntry(), false);
+      List<SpainFieldsContainer> enterpriseResults = computeSREnterpriseES(entityManager, QUERY_BG_ES, bgId, data.getCmrIssuingCntry(), false);
       if (enterpriseResults != null && !enterpriseResults.isEmpty()) {
         for (SpainFieldsContainer field : enterpriseResults) {
           String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
           String calculatedCtc = StringUtils.isBlank(field.getClientTier()) ? "" : field.getClientTier();
           if (field.getIsuCd().equals(container.getIsuCd()) && containerCtc.equals(calculatedCtc) && !StringUtils.isBlank(field.getEnterprise())) {
             enterprise = field.getEnterprise();
+            salesRep = !StringUtils.isBlank(field.getSalesRep()) ? field.getSalesRep().substring(4) : "";
             break;
           }
         }
       }
     }
 
-    HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr, container.getIsuCd(),
-        container.getClientTierCd(), data.getCustSubGrp());
+    // HashMap<String, String> response =
+    // getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr,
+    // container.getIsuCd(),
+    // container.getClientTierCd(), data.getCustSubGrp());
 
-    if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
-      LOG.debug("Calculated Enterprise: " + response.get(ENTP));
-      LOG.debug("Calculated Sales Rep: " + response.get(SALES_REP));
-      details.append("Coverage calculated successfully using 34Q logic mapping.").append("\n");
-      details.append("Sales Rep : " + response.get(SALES_REP)).append("\n");
+    if (!StringUtils.isBlank(enterprise) && !StringUtils.isBlank(salesRep)) {
+      LOG.debug("Calculated Enterprise: " + enterprise);
+      LOG.debug("Calculated Sales Rep: " + salesRep);
+      details.append("Coverage calculated successfully from found CMRs.").append("\n");
+      details.append("Sales Rep : " + salesRep).append("\n");
       details.append("Enterprise : " + (StringUtils.isBlank(enterprise) ? data.getEnterprise() : enterprise)).append("\n");
-      if (StringUtils.isBlank(enterprise)) {
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), response.get(ENTP));
-      } else {
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), enterprise);
-      }
-      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), response.get(SALES_REP));
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), enterprise);
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), salesRep);
       results.setResults("Calculated");
       results.setDetails(details.toString());
     } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
         && StringUtils.isNotBlank(data.getEnterprise())) {
-      details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
+      details.append("Coverage could not be calculated from the found CMRs. Using values from request").append("\n");
       details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
       details.append("Enterprise : " + data.getEnterprise()).append("\n");
       details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
       results.setResults("Calculated");
       results.setDetails(details.toString());
     } else {
-      String msg = "Coverage cannot be calculated. No valid 34Q mapping found from request data.";
+      String msg = "Coverage cannot be calculated. No valid CMRs found from request data.";
       details.append(msg);
       results.setResults("Cannot Calculate");
       results.setDetails(details.toString());
@@ -746,7 +746,7 @@ public class SpainUtil extends AutomationUtil {
     LOG.debug("client tier" + data.getClientTier());
   }
 
-  private List<SpainFieldsContainer> computeEnterpriseES(EntityManager entityManager, String queryBgEs, String bgId, String cmrIssuingCntry,
+  private List<SpainFieldsContainer> computeSREnterpriseES(EntityManager entityManager, String queryBgEs, String bgId, String cmrIssuingCntry,
       boolean b) {
     List<SpainFieldsContainer> calculatedFields = new ArrayList<>();
     String sql = ExternalizedQuery.getSql(queryBgEs);
@@ -768,6 +768,7 @@ public class SpainUtil extends AutomationUtil {
         fieldValues.setIsuCd((String) result[0]);
         fieldValues.setClientTier((String) result[1]);
         fieldValues.setEnterprise((String) result[2]);
+        fieldValues.setSalesRep((String) result[3]);
 
         calculatedFields.add(fieldValues);
       }

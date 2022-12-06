@@ -5,6 +5,7 @@ public class SpainFieldsContainer {
   String enterprise;
   String isuCd;
   String clientTier;
+  String salesRep;
 
   public String getEnterprise() {
     return enterprise;
@@ -28,6 +29,14 @@ public class SpainFieldsContainer {
 
   public void setClientTier(String clientTier) {
     this.clientTier = clientTier;
+  }
+
+  public String getSalesRep() {
+    return salesRep;
+  }
+
+  public void setSalesRep(String salesRep) {
+    this.salesRep = salesRep;
   }
 
 }
