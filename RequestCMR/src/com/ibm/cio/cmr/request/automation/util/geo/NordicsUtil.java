@@ -450,7 +450,8 @@ public class NordicsUtil extends AutomationUtil {
           for (CmrtCust result : results) {
             String legacyClgxd = result.getOverseasTerritory();
             if ((!StringUtils.isBlank(nordxClgxdMapping.get(countryUse)) && nordxClgxdMapping.get(countryUse).equals(legacyClgxd))
-                || (StringUtils.isBlank(nordxClgxdMapping.get(countryUse)) && res.getLandedCountry().equals(landCntry))) {
+                || (StringUtils.isBlank(nordxClgxdMapping.get(countryUse)) && res.getLandedCountry().equals(landCntry)
+                    && StringUtils.isBlank(legacyClgxd))) {
               subScenarioMatches.add(res);
             }
           }
