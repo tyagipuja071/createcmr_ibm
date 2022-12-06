@@ -10611,6 +10611,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.registerValidator(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.addAfterTemplateLoad(setVatIndFields, [ SysLoc.UK, SysLoc.IRELAND ]);
-
-  GEOHandler.addAfterConfig(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
 });
