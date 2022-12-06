@@ -799,7 +799,7 @@ public abstract class APHandler extends GEOHandler {
         } else if ("SOFT".equalsIgnoreCase(data.getCustSubGrp()) || "XSOFT".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "Softlayer Use Only");
         } else {
-          // CREATCMR-7653: for NZ, don't overwrite abbv name
+          setAbbrevNM(data, addr.getCustNm1());
         }
         break;
       }
