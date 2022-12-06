@@ -10615,5 +10615,4 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-1727
   GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
-  GEOHandler.addAfterConfig(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
 });
