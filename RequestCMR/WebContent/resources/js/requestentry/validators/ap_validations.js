@@ -4390,10 +4390,10 @@ function executeBeforeSubmit() {
       if (errMsg != '' && action == 'SFP') {
         cmr.showAlert(errMsg);
       } else {
-        showAddressVerificationModal();
+        showVerificationModal();
       }
     } else {
-      showAddressVerificationModal();
+      showVerificationModal();
     }
   }
 }
