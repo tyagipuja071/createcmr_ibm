@@ -1105,7 +1105,7 @@ var _vatHandler = null;
       var vat = FormManager.getActualValue('vat');
       if (vat == '') {
         FormManager.enable('vatInd');
-        FormManager.setValue('vatInd', 'N'); 
+        FormManager.setValue('vatInd', '');
       }
     }
     }
