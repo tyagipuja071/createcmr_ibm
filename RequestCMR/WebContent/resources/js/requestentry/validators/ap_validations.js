@@ -4242,17 +4242,14 @@ function executeBeforeSubmit() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (cntry == SysLoc.SINGAPORE || cntry == SysLoc.INDIA) {
     if (reqType == 'U') {
-      var errMsg = checkAnyChangesOnCustNameAddrGST();
+      var errMsg = checkAnyChangesOnCustNameAddrGST(cntry);
       if (errMsg != '' && action == 'SFP') {
-        cmr.showConfirm('showAddressVerificationModal()', errMsg, 'Warning', null, {
-          OK : 'Yes',
-          CANCEL : 'No'
-        });
+        cmr.showAlert(errMsg);
       } else {
-        showAddressVerificationModal();
+        showVerificationModal();
       }
     } else {
-      showAddressVerificationModal();
+      showVerificationModal();
     }
   }
 }
@@ -4261,7 +4258,7 @@ function showVerificationModal() {
   cmr.showModal('addressVerificationModal');
 }
 
-function checkAnyChangesOnCustNameAddrGST() {
+function checkAnyChangesOnCustNameAddrGST(cntry) {
   var errorMsg = '';
   var isUpdated = false;
   
@@ -4296,7 +4293,13 @@ function checkAnyChangesOnCustNameAddrGST() {
     }
   }
   if (!isUpdated) {
-    errorMsg = 'You haven\'t updated anything on customer name/address or GST#, please check and take relevant edit operation before submit this Update request. Proceed?';
+    if (cntry != '') {
+      if (cntry == SysLoc.SINGAPORE) {
+        errorMsg = 'You haven\'t updated anything on customer name/address or UEN#, please check and take relevant edit operation before submit this Update request.';
+      } else if (cntry == SysLoc.INDIA) {
+        errorMsg = 'You haven\'t updated anything on customer name/address or GST#, please check and take relevant edit operation before submit this Update request.';
+      }
+    }
   }
   return errorMsg;
 }
