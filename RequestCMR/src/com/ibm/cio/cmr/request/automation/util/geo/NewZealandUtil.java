@@ -44,8 +44,8 @@ public class NewZealandUtil extends AutomationUtil {
   private static final Logger LOG = Logger.getLogger(NewZealandUtil.class);
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, "STAT", "MAIL", "ZF01", "PUBS", "PUBB", "EDUC", "CTYG", "CTYH");
-  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #", "Customer Name", "Customer Name Con't");
+      CmrConstants.RDC_INSTALL_AT, "MAIL");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #", "Customer Name", "Customer Name Con't", "State");
 
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
   private static final String SCENARIO_BLUEMIX = "BLUMX";
@@ -226,6 +226,18 @@ public class NewZealandUtil extends AutomationUtil {
         } else {
           validation.setMessage("Not Validated");
           details.append("The Customer Name and Former Customer Name doesn't match from DNB & NZBN API");
+          if (response != null && response.isSuccess() && response.getRecord() != null) {
+            details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
+            details.append(" - Name.:  " + response.getRecord().getName() + " \n");
+            if (response.getRecord().getPreviousEntityNames() != null) {
+              String[] historicalNameList = new String[response.getRecord().getPreviousEntityNames().length];
+              historicalNameList = response.getRecord().getPreviousEntityNames();
+              for (String historicalNm : historicalNameList) {
+                historicalNm = historicalNm.replaceAll(regex, "");
+                details.append(" - historicalName:  " + historicalNm + " \n");
+              }
+            }
+          }
           // company proof
           if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
             details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
@@ -292,9 +304,7 @@ public class NewZealandUtil extends AutomationUtil {
     Data data = requestData.getData();
     boolean cmdeReview = false;
     boolean poboxReview = false;
-    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
-      return true;
-    }
+
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
@@ -351,10 +361,7 @@ public class NewZealandUtil extends AutomationUtil {
                         && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
                         && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regex, ""))
                         && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
-                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex, ""))
-                        && (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getState())
-                            && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getState().replaceAll(regex, ""))
-                            || StringUtils.isEmpty(nZBNAPIresponse.getRecord().getState()))) {
+                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex, ""))) {
                       matchesAddAPI = true;
                     }
                   }
@@ -371,11 +378,13 @@ public class NewZealandUtil extends AutomationUtil {
                   } else {
                     checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches NZBN API records. Matches:\n");
                     if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() && nZBNAPIresponse.getRecord() != null) {
-                      checkDetails.append(" - NZBN:  " + nZBNAPIresponse.getRecord().getBusinessNumber() + " \n");
+                      checkDetails.append(" Call NZBN API result - NZBN:  " + nZBNAPIresponse.getRecord().getBusinessNumber() + " \n");
                       checkDetails.append(" - Name.:  " + nZBNAPIresponse.getRecord().getName() + " \n");
-                      checkDetails.append(" - Address:  " + nZBNAPIresponse.getRecord().getAddress() + " " + nZBNAPIresponse.getRecord().getState()
-                          + " " + nZBNAPIresponse.getRecord().getCity() + " " + nZBNAPIresponse.getRecord().getPostal() + " "
-                          + nZBNAPIresponse.getRecord().getCountryCode() + "\n\n");
+                      checkDetails.append(
+                          " - Address:  " + nZBNAPIresponse.getRecord().getAddress() + " " + nZBNAPIresponse.getRecord().getState() == null ? ""
+                              : nZBNAPIresponse.getRecord().getState() + " " + nZBNAPIresponse.getRecord().getCity() == null ? ""
+                                  : nZBNAPIresponse.getRecord().getCity() + " " + nZBNAPIresponse.getRecord().getPostal() == null ? ""
+                                      : nZBNAPIresponse.getRecord().getPostal() + " " + nZBNAPIresponse.getRecord().getCountryCode() + "\n\n");
                     }
                   }
                 } else {
@@ -384,6 +393,14 @@ public class NewZealandUtil extends AutomationUtil {
                   cmdeReview = true;
                   checkDetails
                       .append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B  & NZBN API records.\n");
+                  if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() && nZBNAPIresponse.getRecord() != null) {
+                    checkDetails.append(" Call NZBN API result - NZBN:  " + nZBNAPIresponse.getRecord().getBusinessNumber() + " \n");
+                    checkDetails.append(" - Name.:  " + nZBNAPIresponse.getRecord().getName() + " \n");
+                    checkDetails
+                        .append(" - Address:  " + nZBNAPIresponse.getRecord().getAddress() + " " + nZBNAPIresponse.getRecord().getCity() == null ? ""
+                            : nZBNAPIresponse.getRecord().getCity() + " " + nZBNAPIresponse.getRecord().getPostal() == null ? ""
+                                : nZBNAPIresponse.getRecord().getPostal() + " " + nZBNAPIresponse.getRecord().getCountryCode() + "\n\n");
+                  }
                   // company proof
                   if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
                     checkDetails.append("\nSupporting documentation is provided by the requester as attachment for " + addrType).append("\n");
@@ -439,10 +456,7 @@ public class NewZealandUtil extends AutomationUtil {
                     && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
                     && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regex, ""))
                     && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
-                    && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex, ""))
-                    && (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getState())
-                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getState().replaceAll(regex, ""))
-                        || StringUtils.isEmpty(nZBNAPIresponse.getRecord().getState()))) {
+                    && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex, ""))) {
                   matchesAddAPI = true;
                 }
               }
@@ -461,9 +475,8 @@ public class NewZealandUtil extends AutomationUtil {
                 if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() && nZBNAPIresponse.getRecord() != null) {
                   checkDetails.append(" - NZBN:  " + nZBNAPIresponse.getRecord().getBusinessNumber() + " \n");
                   checkDetails.append(" - Name.:  " + nZBNAPIresponse.getRecord().getName() + " \n");
-                  checkDetails.append(" - Address:  " + nZBNAPIresponse.getRecord().getAddress() + " " + nZBNAPIresponse.getRecord().getState() + " "
-                      + nZBNAPIresponse.getRecord().getCity() + " " + nZBNAPIresponse.getRecord().getPostal() + " "
-                      + nZBNAPIresponse.getRecord().getCountryCode() + "\n\n");
+                  checkDetails.append(" - Address:  " + nZBNAPIresponse.getRecord().getAddress() + " " + nZBNAPIresponse.getRecord().getCity() + " "
+                      + nZBNAPIresponse.getRecord().getPostal() + " " + nZBNAPIresponse.getRecord().getCountryCode() + "\n\n");
                 }
               }
             } else {
