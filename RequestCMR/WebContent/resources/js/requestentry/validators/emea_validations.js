@@ -9353,7 +9353,7 @@ function autoSetAbbrNameUKI() {
         ADDR_TYPE : 'ZS01'
       });
     }
-    if ((results != null || results != undefined) && result.ret1 != undefined) {
+    if ((result != null || result != undefined) && result.ret1 != undefined) {
       {
         var _abbrevNmValue = result.ret1 + (result.ret2 != undefined ? result.ret2 : '');
         if (_abbrevNmValue != null && _abbrevNmValue.length > 22) {
