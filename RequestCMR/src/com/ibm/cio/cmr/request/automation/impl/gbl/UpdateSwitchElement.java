@@ -148,12 +148,13 @@ public class UpdateSwitchElement extends ValidatingElement {
 
       }
 
-      if (!output.isOnError() && changes.hasAddressChanges()) {
+      if (!output.isOnError() && changes.hasAddressChanges()) {        
         List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
         String addrTypeCode = null;
         // Start CREATCMR-6229
-        AppUser user = (AppUser) engineData.get("appUser");
+        AppUser user = AutomationEngine.createAutomationAppUser();
         if (!changes.hasDataChanges()) {
+          log.debug("1. Check for SOURCE_SYST_ID: " + admin.getSourceSystId());
           boolean paygoToBill = true;
           boolean isDPLpassed = true;
           for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
@@ -170,6 +171,7 @@ public class UpdateSwitchElement extends ValidatingElement {
           }
           if (paygoToBill && isDPLpassed) {
             if (payGoAddredited) {
+              log.debug("2. Check for SOURCE_SYST_ID: " + admin.getSourceSystId());
               AutomationEngine.createComment(entityManager, "Additional PayGo billing only being added by PayGo accredited partner.", reqId, user);
               admin.setReqStatus("PCP");
               validation.setSuccess(true);
