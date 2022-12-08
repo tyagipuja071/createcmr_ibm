@@ -298,6 +298,8 @@ function addAfterConfigAP() {
     
     // CREATCMR-7653
     setDefaultValueForNZCreate();
+    setLockIsicNZfromDNB();
+    
   }
 }
 
