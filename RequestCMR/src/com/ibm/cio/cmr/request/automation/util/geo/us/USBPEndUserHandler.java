@@ -177,16 +177,16 @@ public class USBPEndUserHandler extends USBPHandler {
       if (federalPoa) {
         affiliate = ibmCmr.getCmrEnterpriseNumber();
       }
-      if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
-        LOG.debug(" - copyAndFillIBMData: Affiliate: " + ibmCmr.getCmrAffiliate());
-        details.append(" - Affiliate: " + data.getEnterprise() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
+      if (!StringUtils.isBlank(ibmCmr.getCmrEnterpriseNumber())) {
+        LOG.debug(" - copyAndFillIBMData: Affiliate: " + ibmCmr.getCmrEnterpriseNumber());
+        details.append(" - Affiliate: " + data.getEnterprise() + (federalPoa ? " (Enterprise of IBM CMR)" : "") + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrEnterpriseNumber());
       } else {
-        updateAffiliate4Child(entityManager, childRequest, ibmCmr);
-        if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
-          LOG.debug(" - copyAndFillIBMData: CmrAffiliate: " + ibmCmr.getCmrAffiliate());
-          details.append(" - Affiliate: " + data.getEnterprise() + (federalPoa ? " (Enterprise from Federal/POA )" : "") + "\n");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
+        updateAffiliateEnterprise4Child(entityManager, childRequest, ibmCmr);
+        if (!StringUtils.isBlank(ibmCmr.getCmrEnterpriseNumber())) {
+          LOG.debug(" - copyAndFillIBMData: CmrAffiliate: " + ibmCmr.getCmrEnterpriseNumber());
+          details.append(" - Affiliate: " + ibmCmr.getCmrEnterpriseNumber() + (federalPoa ? " (Enterprise of IBM CMR)" : "") + "\n");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrEnterpriseNumber());
         }
       }
 
@@ -340,22 +340,30 @@ public class USBPEndUserHandler extends USBPHandler {
 
   }
 
-  private void updateAffiliate4Child(EntityManager entityManager, RequestData childRequest, FindCMRRecordModel ibmCmr) {
+  private void updateAffiliateEnterprise4Child(EntityManager entityManager, RequestData childRequest, FindCMRRecordModel ibmCmr) {
     String konzs = "";
-    String sql = ExternalizedQuery.getSql("US.GET.KNA1.KONZS");
+    String zzkvNode2 = "";
+    String sql = ExternalizedQuery.getSql("US.GET.KNA1.KONZS_ZZKVNODE2");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("ZZKV_CUSNO", ibmCmr.getCmrNum());
     List<Object[]> results = query.getResults();
     if (results != null && results.size() > 0) {
       konzs = (String) results.get(0)[0];
+      zzkvNode2 = (String) results.get(0)[1];
     }
+    Data data = childRequest.getData();
     if (!StringUtils.isBlank(konzs)) {
-      Data data = childRequest.getData();
       data.setAffiliate(konzs);
       entityManager.merge(data);
       ibmCmr.setCmrAffiliate(konzs);
       LOG.debug(" - updateAffiliate4Child: CmrAffiliate: " + konzs);
+    }
+    if (!StringUtils.isBlank(zzkvNode2)) {
+      data.setEnterprise(zzkvNode2);
+      entityManager.merge(data);
+      ibmCmr.setCmrEnterpriseNumber(zzkvNode2);
+      LOG.debug(" - updateEnterprise4Child: CmrEnterprise: " + zzkvNode2);
     }
   }
 
