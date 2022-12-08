@@ -4845,7 +4845,6 @@ function setVatIndFields() {
 
   if (vat != '' && vatInd == '') {
     FormManager.setValue('vatInd', 'T');
-    FormManager.readOnly('vatInd');
   }
 }
 

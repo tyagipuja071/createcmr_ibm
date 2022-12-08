@@ -2146,14 +2146,13 @@ function addVatIndValidator(){
 }
 }
 
-function setVatIndFields(){
-  var _vatHandler = null;  
+function setVatIndFields() {
+  var _vatHandler = null;
   var vat = FormManager.getActualValue('vat');
   var vatInd = FormManager.getActualValue('vatInd');
-  
-  if (vat != '' && vatInd == ''){
+
+  if (vat != '' && vatInd == '') {
     FormManager.setValue('vatInd', 'T');
-    FormManager.readOnly('vatInd');
   }
 }
 // CREATCMR-788
