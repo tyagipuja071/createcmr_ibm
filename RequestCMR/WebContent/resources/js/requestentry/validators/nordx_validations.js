@@ -51,6 +51,7 @@ function afterConfigForNORDX() {
     if (role == 'Requester') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('abbrevLocn');
+      FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     }
     if (role == 'Processor') {
       FormManager.enable('abbrevNm');
@@ -170,6 +171,8 @@ function afterConfigForNORDX() {
   lockSalesRepAndSortl();
   hideACAdminDSC();
 
+  // CREATCMR-788
+  addressQuotationValidatorNORS();
 }
 
 function disableLandCntry() {
@@ -427,9 +430,11 @@ function vatAndVatExemptOnScenario(value) {
         }
       }
     } else {
-      FormManager.getField('vatExempt').set('checked', false);
-      FormManager.hide('VATExempt', 'vatExempt');
-      FormManager.removeValidator('vat', Validators.REQUIRED);
+      if (FormManager.getField('vatExempt') != null) {
+        FormManager.getField('vatExempt').set('checked', false);
+        FormManager.hide('VATExempt', 'vatExempt');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+      }
     }
     resetVatRequired(zs01Cntry, false);
   } else if (FormManager.getActualValue('reqType') == 'U') {
@@ -4774,6 +4779,22 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+// CREATCMR-788
+function addressQuotationValidatorNORS() {
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Additional Info' ]);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Att. Person' ]);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Con\'t' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+
+}
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 

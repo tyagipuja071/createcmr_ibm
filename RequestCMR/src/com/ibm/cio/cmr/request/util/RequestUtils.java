@@ -1673,4 +1673,38 @@ public class RequestUtils {
     return null;
   }
 
+  /**
+   * Tries to extract a request ID value from the given generic model
+   * 
+   * @param model
+   * @return
+   * @throws SecurityException
+   * @throws NoSuchFieldException
+   */
+  public static String extractRequestId(Object model) {
+    if (model == null) {
+      return "-Unknown-";
+    }
+    try {
+      Field reqId = model.getClass().getDeclaredField("reqId");
+      if (reqId == null) {
+        reqId = model.getClass().getDeclaredField("requestId");
+      }
+      if (reqId != null) {
+        reqId.setAccessible(true);
+        Object value = reqId.get(model);
+        if (value != null) {
+          String sValue = value.toString();
+          if ("0".equals(sValue)) {
+            return "-Unknown-";
+          }
+          return sValue;
+        }
+      }
+    } catch (Exception e) {
+      // do nothing
+    }
+    return "-Unknown-";
+  }
+
 }

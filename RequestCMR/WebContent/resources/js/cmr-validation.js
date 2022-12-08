@@ -366,7 +366,16 @@ var Validators = (function() {
       } else {
         return new ValidationResult(fieldOrId, true);
       }
-    }
+    },
+    NO_QUOTATION : function(input) {
+      var str = FormManager.getActualValue(input);
+      var reg = /[\"]/;
+      if (reg.test(str)) {
+        return new ValidationResult(input, false, MessageMgr.MESSAGES.NO_QUOTATION);
+      } else {
+        return new ValidationResult(input, true);
+      }
+    },
   };
 }());
 

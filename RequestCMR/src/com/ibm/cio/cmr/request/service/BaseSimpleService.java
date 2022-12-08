@@ -14,6 +14,7 @@ import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 
 /**
  * Simple Service base class to handle more generic services
@@ -51,6 +52,7 @@ public abstract class BaseSimpleService<R> {
         tx.rollback();
       }
       LOG.error("Error in processing.", e);
+      SlackAlertsUtil.recordException("CreateCMR", getClass().getSimpleName(), e, params);
       // only wrap non CmrException errors
       if (e instanceof CmrException) {
         throw (CmrException) e;

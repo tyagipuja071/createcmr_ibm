@@ -43,6 +43,7 @@ var MessageMgr = (function() {
         clientMessages.TWO_DASHES_FORMAT = data.m5025;
         clientMessages.NO_HALF_ANGLE = data.m5026;
         clientMessages.LATIN1 = data.m5027;
+        clientMessages.NO_QUOTATION = data.m5028;
       },
       error : function(error, ioargs) {
       }

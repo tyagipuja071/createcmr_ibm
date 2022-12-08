@@ -49,9 +49,8 @@ function addrSeqFormatter(value, rowIndex) {
   var paired = rowData.pairedSeq && rowData.pairedSeq[0] ? rowData.pairedSeq[0] : '';
   if (cntry == SysLoc.ISRAEL) {
     return paired == '' ? value : value + '<br>(' + paired + ')';
-  } else if (cntry == SysLoc.GERMANY || cntry == SysLoc.BAHAMAS || cntry == SysLoc.BARBADOS || cntry == SysLoc.BERMUDA
-      || cntry == SysLoc.CAYMAN_ISLANDS || cntry == SysLoc.GUYANA || cntry == SysLoc.JAMAICA || cntry == SysLoc.SAINT_LUCIA
-      || cntry == SysLoc.NETH_ANTILLES || cntry == SysLoc.SURINAME || cntry == SysLoc.TRINIDAD_TOBAGO) {
+  } else if (cntry == SysLoc.GERMANY || cntry == SysLoc.BAHAMAS || cntry == SysLoc.BARBADOS || cntry == SysLoc.BERMUDA || cntry == SysLoc.CAYMAN_ISLANDS || cntry == SysLoc.GUYANA
+      || cntry == SysLoc.JAMAICA || cntry == SysLoc.SAINT_LUCIA || cntry == SysLoc.NETH_ANTILLES || cntry == SysLoc.SURINAME || cntry == SysLoc.TRINIDAD_TOBAGO) {
     if (reqType == 'C' && (status == 'COM' || status == 'PCO')) {
       return paired == '' ? 'N/A' : paired;
     } else if ((reqType == 'U' || reqType == 'X') && importInd == 'Y') {
@@ -109,31 +108,27 @@ function addrFormatter(value, rowIndex) {
     }
 
     if (canCopyAddress(value, rowIndex, this.grid)) {
-      actions += '<input type="button" value="Copy" class="cmr-grid-btn" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq
-          + '\',\'' + mandt + '\',\'' + name + '\')">';
+      actions += '<input type="button" value="Copy" class="cmr-grid-btn" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\',\'' + name + '\')">';
     }
     if (canUpdateAddress(value, rowIndex, this.grid)) {
-      actions += '<input type="button" value="Update" class="cmr-grid-btn" onclick="doUpdateAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq
-          + '\',\'' + mandt + '\')">';
+      actions += '<input type="button" value="Update" class="cmr-grid-btn" onclick="doUpdateAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\')">';
     }
     if (canRemoveAddress(value, rowIndex, this.grid)) {
-      actions += '<input type="button" value="Remove" class="cmr-grid-btn" onclick="doRemoveAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq
-          + '\',\'' + mandt + '\', \'' + name + '\', \'' + addrTypeTxt + '\')">';
+      actions += '<input type="button" value="Remove" class="cmr-grid-btn" onclick="doRemoveAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\', \'' + name + '\', \''
+          + addrTypeTxt + '\')">';
     }
     return actions;
   }
   if (addrType == 'ZS01' || addrType == 'ZI01' || addrType == 'ZP01') {
     if (canCopyAddress(value, rowIndex, this.grid)) {
-      actions += '<input type="button" value="Copy" class="cmr-grid-btn" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq
-          + '\',\'' + mandt + '\',\'' + name + '\')">';
+      actions += '<input type="button" value="Copy" class="cmr-grid-btn" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\',\'' + name + '\')">';
     }
     if (canUpdateAddress(value, rowIndex, this.grid)) {
-      actions += '<input type="button" value="Update" class="cmr-grid-btn" onclick="doUpdateAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq
-          + '\',\'' + mandt + '\')">';
+      actions += '<input type="button" value="Update" class="cmr-grid-btn" onclick="doUpdateAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\')">';
     }
     if (canRemoveAddress(value, rowIndex, this.grid)) {
-      actions += '<input type="button" value="Remove" class="cmr-grid-btn" onclick="doRemoveAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq
-          + '\',\'' + mandt + '\', \'' + name + '\', \'' + addrTypeTxt + '\')">';
+      actions += '<input type="button" value="Remove" class="cmr-grid-btn" onclick="doRemoveAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\', \'' + name + '\', \''
+          + addrTypeTxt + '\')">';
     }
   }
   return actions;
@@ -166,8 +161,7 @@ function dplFormatter(value, rowIndex) {
   } else if ('P' == value) {
     return 'Passed';
   } else if ('F' == value) {
-    return '<a href="javascript: openDplDetails(' + reqId + ', \'' + addrType + '\', \'' + addrSeq
-        + '\')" title="Click to open failure details">Failed</a>';
+    return '<a href="javascript: openDplDetails(' + reqId + ', \'' + addrType + '\', \'' + addrSeq + '\')" title="Click to open failure details">Failed</a>';
   }
   return 'Not Done';
 }
@@ -214,8 +208,8 @@ function openAddressDetails(reqId, addrType, addrSeq, mandt) {
   if (GEOHandler.AP != undefined) {
     setAddressDetailsForViewAP();
   }
-  if (FormManager.getActualValue('cmrIssuingCntry') == '848' || FormManager.getActualValue('cmrIssuingCntry') == '838'
-      || FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager.getActualValue('cmrIssuingCntry') == '754') {
+  if (FormManager.getActualValue('cmrIssuingCntry') == '848' || FormManager.getActualValue('cmrIssuingCntry') == '838' || FormManager.getActualValue('cmrIssuingCntry') == '866'
+      || FormManager.getActualValue('cmrIssuingCntry') == '754') {
     hideHarwareonSummary();
   }
 }
@@ -277,8 +271,7 @@ function AddressDetailsModal_onLoad() {
         cmr.hideNode('updateButtonFromView');
       }
     }
-  } else if ('758' == FormManager.getActualValue('cmrIssuingCntry')
-      && ('U' == FormManager.getActualValue('reqType') || 'X' == FormManager.getActualValue('reqType')) && 'Y' == details.ret31) {
+  } else if ('758' == FormManager.getActualValue('cmrIssuingCntry') && ('U' == FormManager.getActualValue('reqType') || 'X' == FormManager.getActualValue('reqType')) && 'Y' == details.ret31) {
     if (details.ret68 != undefined && details.ret68 != '' && details.ret68 != FormManager.getActualValue('cmrNo')) {
       cmr.hideNode('updateButtonFromView');
     }
@@ -476,8 +469,7 @@ function displayHwMstInstallFlagNew() {
   console.log(">>> Executing displayHwMstInstallFlagNew");
   console.log('>> cmr.addressMode >>' + cmr.addressMode);
   if (cmr.addressMode == 'newAddress'
-      && (FormManager.getActualValue('cmrIssuingCntry') == '838' || FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager
-          .getActualValue('cmrIssuingCntry') == '754')) {
+      && (FormManager.getActualValue('cmrIssuingCntry') == '838' || FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager.getActualValue('cmrIssuingCntry') == '754')) {
     var _addrTypesForEMEA = [ 'ZD01', 'ZP01', 'ZI01', 'ZS01', 'ZS02' ];
     console.log('>> BEGIN displayHwMstInstallFlagNew newAddress or copyAddress function ');
     for (var i = 0; i < _addrTypesForEMEA.length; i++) {
@@ -593,15 +585,15 @@ function doAddToAddressList() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var asean_isa_cntries = [ '643', '744', '736', '738', '796', '778', '749', '834', '818', '852', '856', '616', '652', '615' ];
   // CREATCMR-5741 no TGME Addr Std
-//  if (GEOHandler.isTGMERequired(cntry)) {
-//    var tgmeResult = tgmePreSave();
-//    if (tgmeResult > 0) {
-//      performAddressStandardization(true);
-//      return;
-//    }
-//  } else {
-//    saveNotSupportedTGME();
-//  }
+  // if (GEOHandler.isTGMERequired(cntry)) {
+  // var tgmeResult = tgmePreSave();
+  // if (tgmeResult > 0) {
+  // performAddressStandardization(true);
+  // return;
+  // }
+  // } else {
+  // saveNotSupportedTGME();
+  // }
 
   cmr.currentModalId = 'addEditAddressModal';
   cmr.addressReqId = FormManager.getActualValue('reqId');
@@ -653,13 +645,11 @@ function doAddToAddressList() {
 
     if (FormManager.getActualValue('cmrIssuingCntry') == '838') {
       if (showSoldToError) {
-        cmr
-            .showAlert('This request already has a Billing record. Only one is permitted. The existing record has to be deleted to create a new record.');
+        cmr.showAlert('This request already has a Billing record. Only one is permitted. The existing record has to be deleted to create a new record.');
         return;
       }
       if (showMailingError) {
-        cmr
-            .showAlert('This request already has a Mailing record. Only one is permitted. The existing record has to be deleted to create a new record.');
+        cmr.showAlert('This request already has a Mailing record. Only one is permitted. The existing record has to be deleted to create a new record.');
         return;
       }
       if (showEPLError) {
@@ -668,14 +658,11 @@ function doAddToAddressList() {
       }
     }
     if ((showSoldToError) && (FormManager.getActualValue('cmrIssuingCntry') != '838')) {
-      cmr
-          .showConfirm(
-              'doAddZS01ToAddressList()',
-              'This request already has a Sold To record. Only one is permitted. You will have to remove one before completing the request processing. Do you still want to add this row?',
-              null, null, {
-                OK : 'Add Address Row',
-                CANCEL : 'Cancel'
-              });
+      cmr.showConfirm('doAddZS01ToAddressList()',
+          'This request already has a Sold To record. Only one is permitted. You will have to remove one before completing the request processing. Do you still want to add this row?', null, null, {
+            OK : 'Add Address Row',
+            CANCEL : 'Cancel'
+          });
     } else {
 
       if (FormManager.getActualValue('cmrIssuingCntry') == '641') {
@@ -730,8 +717,7 @@ function doAddToAddressList() {
         } else if (standardCity.suggested != null && standardCity.suggested.length > 0) {
           cmr.showModal('stdcityModal');
         } else {
-          cmr.showAlert('The system cannot find a match for the city name <strong>' + currentCity
-              + '</strong>. Kindly recheck the address and specify a valid city and/or county name.');
+          cmr.showAlert('The system cannot find a match for the city name <strong>' + currentCity + '</strong>. Kindly recheck the address and specify a valid city and/or county name.');
           return;
         }
       }
@@ -752,11 +738,9 @@ function actualAddToAddressList() {
   cmr.currentAddressType = FormManager.getActualValue('addrType');
   cmr.currentAddressSeq = FormManager.getActualValue('addrSeq');
   if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress') {
-    FormManager.doHiddenAction('frmCMR_addressModal', 'ADD_ADDRESS', cmr.CONTEXT_ROOT + '/request/address/process.json?reqId=' + cmr.addrReqId, true,
-        refreshAddressAfterResult, true);
+    FormManager.doHiddenAction('frmCMR_addressModal', 'ADD_ADDRESS', cmr.CONTEXT_ROOT + '/request/address/process.json?reqId=' + cmr.addrReqId, true, refreshAddressAfterResult, true);
   } else if (cmr.addressMode == 'updateAddress') {
-    FormManager.doHiddenAction('frmCMR_addressModal', 'UPDATE_ADDRESS', cmr.CONTEXT_ROOT + '/request/address/process.json?reqId=' + cmr.addrReqId,
-        true, refreshAddressAfterResult, true);
+    FormManager.doHiddenAction('frmCMR_addressModal', 'UPDATE_ADDRESS', cmr.CONTEXT_ROOT + '/request/address/process.json?reqId=' + cmr.addrReqId, true, refreshAddressAfterResult, true);
 
     if (FormManager.getActualValue('cmrIssuingCntry') == '649' && cmr.currentAddressType == 'ZS01' && cmr.currentAddressSeq == '00001') {
       toggleCATaxFieldsByProvCd(FormManager.getActualValue('stateProv'));
@@ -823,10 +807,9 @@ function refreshAddressAfterResult(result, skipCopy, skipHideModal) {
           doBRDPLPageRefresh(result);
         } else {
           // DENNIS: Default DPL refresh validation
-          if (FormManager.getActualValue('custNm1') != cmr.oldname1 || FormManager.getActualValue('custNm2') != cmr.oldname2
-              || FormManager.getActualValue('landCntry') != cmr.oldlandcntry
-              // CMR-1947 refresh page to update abbrv_loc
-              || FormManager.getActualValue('city1') != cmr.oldcity1) {
+          if (FormManager.getActualValue('custNm1') != cmr.oldname1 || FormManager.getActualValue('custNm2') != cmr.oldname2 || FormManager.getActualValue('landCntry') != cmr.oldlandcntry
+          // CMR-1947 refresh page to update abbrv_loc
+          || FormManager.getActualValue('city1') != cmr.oldcity1) {
             FormManager.setValue('dplMessage', result.message);
             FormManager.setValue('showAddress', 'Y');
             if (FormManager.getActualValue('addrType') == 'ZS01') {
@@ -965,7 +948,7 @@ function addEditAddressModal_onLoad() {
     // FormManager.clearValue('billingPstlAddr');
     FormManager.clearValue('custlangCd');
 
-    if (FormManager.getActualValue('cmrIssuingCntry') != '897' && FormManager.getActualValue('cmrIssuingCntry') != '631') {
+    if (FormManager.getActualValue('cmrIssuingCntry') != '897') {
       FormManager.clearValue('addrType');
       FormManager.setValue('addrType', 'ZS01'); // default to ZS01
       cmr.showNode('radiocont_ZS01');
@@ -1024,8 +1007,7 @@ function addEditAddressModal_onLoad() {
     }
 
     if (cmr.addressMode == 'newAddress'
-        && (FormManager.getActualValue('cmrIssuingCntry') == '848' || FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager
-            .getActualValue('cmrIssuingCntry') == '754')) {
+        && (FormManager.getActualValue('cmrIssuingCntry') == '848' || FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager.getActualValue('cmrIssuingCntry') == '754')) {
       FormManager.clearValue('custLangCd');
       FormManager.getField('hwInstlMstrFlg').set('checked', false);
     }
@@ -1070,9 +1052,8 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('taxOffice', details.ret54);
       FormManager.setValue('prefSeqNo', details.ret55);
 
-      if (FormManager.getActualValue('cmrIssuingCntry') == '848' || FormManager.getActualValue('cmrIssuingCntry') == '866'
-          || FormManager.getActualValue('cmrIssuingCntry') == '754') {
-        if (FormManager.getField('hwInstlMstrFlg') != null) {
+      if (FormManager.getActualValue('cmrIssuingCntry') == '848' || FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager.getActualValue('cmrIssuingCntry') == '754') {
+        if (dijit.byId('hwInstlMstrFlg') != undefined && FormManager.getField('hwInstlMstrFlg') != null) {
           FormManager.getField('hwInstlMstrFlg').set('checked', details.ret75 == 'Y' ? true : false);
         }
       }
@@ -1151,7 +1132,7 @@ function addEditAddressModal_onLoad() {
       }
       dojo.query('#addEditAddressModal #addrStdTsString_modal')[0].innerHTML = FormManager.getActualValue('addrStdTsString');
     } else if (cmr.addressMode == 'copyAddress') {
-      if (FormManager.getActualValue('cmrIssuingCntry') != '897' && FormManager.getActualValue('cmrIssuingCntry') != '631') {
+      if (FormManager.getActualValue('cmrIssuingCntry') != '897') {
         FormManager.clearValue('addrType');
       }
       FormManager.clearValue('addrSeq');
@@ -1218,9 +1199,9 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('contact', details.ret71);
       FormManager.setValue('rol', details.ret72);
     }
-    var cemeaCountries = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699',
-        '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849',
-        '850', '865', '889' ];
+
+    var cemeaCountries = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
+        '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889' ];
 
     if (cemeaCountries.indexOf(FormManager.getActualValue('cmrIssuingCntry')) > -1) {
       FormManager.setValue('ierpSitePrtyId', details.ret53);
@@ -1261,8 +1242,7 @@ function addEditAddressModal_onLoad() {
     }
 
     // IERP: China specific address load
-    if (FormManager.getActualValue('cmrIssuingCntry') == '641'
-        && (cmr.addressMode == 'copyAddress' || cmr.addressMode == 'updateAddress' || cmr.addressMode == 'removeAddress')) {
+    if (FormManager.getActualValue('cmrIssuingCntry') == '641' && (cmr.addressMode == 'copyAddress' || cmr.addressMode == 'updateAddress' || cmr.addressMode == 'removeAddress')) {
       FormManager.setValue('cnCustName1', details.ret59);
       cmr.oldcncustname = details.ret59;
       FormManager.setValue('cnCustName2', details.ret60);
@@ -1531,9 +1511,8 @@ function stdcityModal_onLoad() {
   if (cmr.standardCity && cmr.standardCity.suggested && cmr.standardCity.suggested.length > 0) {
     var options = '';
     for (var i = 0; i < cmr.standardCity.suggested.length; i++) {
-      options += '<option value="' + cmr.standardCity.suggested[i].code + ',' + cmr.standardCity.suggested[i].city + ','
-          + cmr.standardCity.suggested[i].name + '">' + cmr.standardCity.suggested[i].city + ', ' + cmr.standardCity.suggested[i].name
-          + ' County</option>';
+      options += '<option value="' + cmr.standardCity.suggested[i].code + ',' + cmr.standardCity.suggested[i].city + ',' + cmr.standardCity.suggested[i].name + '">'
+          + cmr.standardCity.suggested[i].city + ', ' + cmr.standardCity.suggested[i].name + ' County</option>';
     }
     dojo.byId('stdcitynames').innerHTML = options;
   }
@@ -1638,10 +1617,8 @@ function actualRemoveAddr() {
   FormManager.setValue('remAddrType', cmr.removeDetails.remAddrType);
   FormManager.setValue('addrSeq', cmr.removeDetails.remAddrSeq);
   cmr.addrReqId = FormManager.getActualValue('reqId');
-  FormManager.doHiddenAction('frmCMR_addressModal', 'REMOVE_ADDRESS', cmr.CONTEXT_ROOT + '/request/address/process.json?reqId=' + cmr.addrReqId,
-      true, refreshAddressAfterResult, false);
-  if (FormManager.getActualValue('countryUse').substring(0, 3) == '706' && FormManager.getActualValue('custSubGrp') != ''
-      && cmr.removeDetails.remAddrType == 'ZS01') {
+  FormManager.doHiddenAction('frmCMR_addressModal', 'REMOVE_ADDRESS', cmr.CONTEXT_ROOT + '/request/address/process.json?reqId=' + cmr.addrReqId, true, refreshAddressAfterResult, false);
+  if (FormManager.getActualValue('countryUse').substring(0, 3) == '706' && FormManager.getActualValue('custSubGrp') != '' && cmr.removeDetails.remAddrType == 'ZS01') {
     FormManager.setValue('taxCd2', '');
     FormManager.readOnly('taxCd2');
     console.log(">>>> TaX Code Disabled beacuse it's value needs to be based upon installing address");
@@ -1659,8 +1636,8 @@ function actualRemoveAddr() {
     clearCATaxFields();
   }
 
-  if (FormManager.getActualValue('cmrIssuingCntry') == '678' || FormManager.getActualValue('cmrIssuingCntry') == '702'
-      || FormManager.getActualValue('cmrIssuingCntry') == '806' || FormManager.getActualValue('cmrIssuingCntry') == '846') {
+  if (FormManager.getActualValue('cmrIssuingCntry') == '678' || FormManager.getActualValue('cmrIssuingCntry') == '702' || FormManager.getActualValue('cmrIssuingCntry') == '806'
+      || FormManager.getActualValue('cmrIssuingCntry') == '846') {
     if (cmr.removeDetails.remAddrType == 'ZI01') {
       resetAbbNmRemoveAddrNORDX();
     }
@@ -1841,8 +1818,7 @@ function applyAddrChangesModal_onLoad() {
     var choices = '';
     var type = null;
     var useCntry = false;
-    var cEECountries = [ '644', '668', '693', '704', '708', '740', '820', '821', '826', '358', '359', '363', '603', '607', '626', '651', '694',
-        '695', '699', '705', '707', '787', '741', '889' ];
+    var cEECountries = [ '644', '668', '693', '704', '708', '740', '820', '821', '826', '358', '359', '363', '603', '607', '626', '651', '694', '695', '699', '705', '707', '787', '741', '889' ];
     document.getElementById('copy_createOnly').value = '';
     for (var i = 0; i < types.length; i++) {
       type = types[i];
@@ -1903,10 +1879,8 @@ function applyAddrChangesModal_onLoad() {
         }
       }
 
-      if (SysLoc.ISRAEL == cntry
-          && reqType == 'U'
-          && (FormManager.getActualValue('addrType') == 'ZD01' || FormManager.getActualValue('addrType') == 'ZS01' || FormManager
-              .getActualValue('addrType') == 'ZP01') && type.ret1 == 'ZD01') {
+      if (SysLoc.ISRAEL == cntry && reqType == 'U'
+          && (FormManager.getActualValue('addrType') == 'ZD01' || FormManager.getActualValue('addrType') == 'ZS01' || FormManager.getActualValue('addrType') == 'ZP01') && type.ret1 == 'ZD01') {
         if (cmr.addressMode == 'newAddress' && FormManager.getActualValue('addrType') == 'ZD01') {
           continue;
         } else if (cmr.addressMode == 'updateAddress') {
@@ -1951,8 +1925,7 @@ function applyAddrChangesModal_onLoad() {
       }
 
       var cntryRegion = FormManager.getActualValue('countryUse');
-      if ((cntry == '702' || cntry == '846' || cntry == '678' || cntry == '806')
-          && (FormManager.getActualValue('reqType') == 'C' || FormManager.getActualValue('reqType') == 'U')) {
+      if ((cntry == '702' || cntry == '846' || cntry == '678' || cntry == '806') && (FormManager.getActualValue('reqType') == 'C' || FormManager.getActualValue('reqType') == 'U')) {
 
         if (SysLoc.FINLAND == cntry && cntryRegion == '702') {
           // if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType)
@@ -1975,13 +1948,11 @@ function applyAddrChangesModal_onLoad() {
           // }
           if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
             if (type.ret2 != 'Installing (Additional)') {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                  + '</label><br>';
+              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
             }
           } else {
             if (type.ret2 != 'Installing (Additional)') {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                  + ' (copy only if others exist)</label><br>';
+              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
               addressDesc = type.ret2;
             }
           }
@@ -1989,21 +1960,17 @@ function applyAddrChangesModal_onLoad() {
           if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
             if (type.ret2 != 'Installing (Additional)') {
               if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-                choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                    + ' (create additional only)</label><br>';
+                choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
               } else {
-                choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                    + '</label><br>';
+                choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
               }
             }
           } else {
             if (type.ret2 != 'Installing (Additional)') {
               if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-                choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                    + ' (create additional only)</label><br>';
+                choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
               } else {
-                choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                    + ' (copy only if others exist)</label><br>';
+                choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
               }
               addressDesc = type.ret2;
             }
@@ -2043,19 +2010,15 @@ function applyAddrChangesModal_onLoad() {
         // }
         if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
           if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                + ' (create additional only)</label><br>';
+            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
           } else {
-            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                + '</label><br>';
+            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
           }
         } else {
           if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                + ' (create additional only)</label><br>';
+            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
           } else {
-            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                + ' (copy only if others exist)</label><br>';
+            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
           }
           addressDesc = type.ret2;
         }
@@ -2068,19 +2031,15 @@ function applyAddrChangesModal_onLoad() {
           }
           if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
             if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                  + ' (create additional only)</label><br>';
+              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
             } else {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                  + '</label><br>';
+              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
             }
           } else {
             if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                  + ' (create additional only)</label><br>';
+              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
             } else {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                  + ' (copy only if others exist)</label><br>';
+              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
             }
             addressDesc = type.ret2;
           }
@@ -2092,14 +2051,11 @@ function applyAddrChangesModal_onLoad() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         if (!(reqType == 'U' && (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'INTER') && (type.ret1 == 'ZC01' || type.ret1 == 'ZE01'))) {
           if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                + ' (create additional only)</label><br>';
+            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
           } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
-            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                + '</label><br>';
+            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
           } else {
-            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                + ' (copy only if others exist)</label><br>';
+            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
             addressDesc = type.ret2;
           }
         }
@@ -2112,19 +2068,15 @@ function applyAddrChangesModal_onLoad() {
           var reqType = FormManager.getActualValue('reqType');
           if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
             if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                  + ' (create additional only)</label><br>';
+              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
             } else {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                  + '</label><br>';
+              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
             }
           } else {
             if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                  + ' (create additional only)</label><br>';
+              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
             } else {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-                  + ' (copy only if others exist)</label><br>';
+              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
             }
             addressDesc = type.ret2;
           }
@@ -2135,14 +2087,11 @@ function applyAddrChangesModal_onLoad() {
           continue;
         }
         if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + ' (create additional only)</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
         } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + '</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
         } else {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + ' (copy only if others exist)</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
           addressDesc = type.ret2;
         }
       } else if (cntry == '724') {
@@ -2151,14 +2100,11 @@ function applyAddrChangesModal_onLoad() {
           continue;
         }
         if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + ' (create additional only)</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
         } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + '</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
         } else {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + ' (copy only if others exist)</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
           addressDesc = type.ret2;
         }
       } else if (cEECountries.indexOf(cntry) > -1) {
@@ -2167,14 +2113,11 @@ function applyAddrChangesModal_onLoad() {
           continue;
         }
         if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + ' (create additional only)</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
         } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + '</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
         } else {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + ' (copy only if others exist)</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
           addressDesc = type.ret2;
         }
       } else if (cntry == '706') {
@@ -2183,26 +2126,20 @@ function applyAddrChangesModal_onLoad() {
           continue;
         }
         if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + ' (create additional only)</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
         } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + '</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
         } else {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + ' (copy only if others exist)</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
           addressDesc = type.ret2;
         }
       } else {
         if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + ' (create additional only)</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
         } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + '</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
         } else {
-          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
-              + ' (copy only if others exist)</label><br>';
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
           addressDesc = type.ret2;
         }
       }
@@ -2261,8 +2198,7 @@ function copyAddressData() {
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.ISRAEL && targetCopyTypes.includes('ZD01')) {
     showConfirmCopyShippingIL();
   } else {
-    FormManager.doHiddenAction('frmCMRCopyAddrChanges', 'COPY_DATA', cmr.CONTEXT_ROOT + '/request/address/copydata.json', true,
-        refreshAfterAddressCopy, true);
+    FormManager.doHiddenAction('frmCMRCopyAddrChanges', 'COPY_DATA', cmr.CONTEXT_ROOT + '/request/address/copydata.json', true, refreshAfterAddressCopy, true);
   }
 }
 
@@ -2282,8 +2218,7 @@ function showConfirmCopyShippingIL() {
 }
 
 function copyDoHiddenAction() {
-  FormManager.doHiddenAction('frmCMRCopyAddrChanges', 'COPY_DATA', cmr.CONTEXT_ROOT + '/request/address/copydata.json', true,
-      refreshAfterAddressCopy, true);
+  FormManager.doHiddenAction('frmCMRCopyAddrChanges', 'COPY_DATA', cmr.CONTEXT_ROOT + '/request/address/copydata.json', true, refreshAfterAddressCopy, true);
 }
 
 /**
@@ -2341,8 +2276,7 @@ function refreshAfterAddressCopy(result) {
 }
 
 function removeSelectedAddresses() {
-  FormManager.gridHiddenAction('frmCMR', 'REMOVE_ADDRESSES', cmr.CONTEXT_ROOT + '/request/address/process.json', true, refreshAfterAddressRemove,
-      false, 'Remove selected address records?');
+  FormManager.gridHiddenAction('frmCMR', 'REMOVE_ADDRESSES', cmr.CONTEXT_ROOT + '/request/address/process.json', true, refreshAfterAddressRemove, false, 'Remove selected address records?');
 }
 
 function refreshAfterAddressRemove(result) {
@@ -2356,8 +2290,8 @@ function refreshAfterAddressRemove(result) {
   }
 
   // CREATCMR-2262
-  if (FormManager.getActualValue('cmrIssuingCntry') == '678' || FormManager.getActualValue('cmrIssuingCntry') == '702'
-      || FormManager.getActualValue('cmrIssuingCntry') == '806' || FormManager.getActualValue('cmrIssuingCntry') == '846') {
+  if (FormManager.getActualValue('cmrIssuingCntry') == '678' || FormManager.getActualValue('cmrIssuingCntry') == '702' || FormManager.getActualValue('cmrIssuingCntry') == '806'
+      || FormManager.getActualValue('cmrIssuingCntry') == '846') {
     // if (cmr.removeDetails.remAddrType == 'ZI01') {
     // resetAbbNmRemoveAddrNORDX();
     resetAbbNmOnRemoveSelectedAddrNORDX();
@@ -2417,31 +2351,31 @@ function addrFormatterIcons(value, rowIndex) {
     }
 
     if (canCopyAddress(value, rowIndex, this.grid)) {
-      actions += '<img src="' + imgloc + 'addr-copy-icon.png" class="addr-icon" title="Copy Address" onclick="doCopyAddr(\'' + reqId + '\',\''
-          + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\',\'' + name + '\')">';
+      actions += '<img src="' + imgloc + 'addr-copy-icon.png" class="addr-icon" title="Copy Address" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt
+          + '\',\'' + name + '\')">';
     }
     if (canUpdateAddress(value, rowIndex, this.grid)) {
-      actions += '<img src="' + imgloc + 'addr-edit-icon.png" class="addr-icon" title="Update Address" onclick="doUpdateAddr(\'' + reqId + '\',\''
-          + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\')">';
+      actions += '<img src="' + imgloc + 'addr-edit-icon.png" class="addr-icon" title="Update Address" onclick="doUpdateAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt
+          + '\')">';
     }
     if (canRemoveAddress(value, rowIndex, this.grid)) {
-      actions += '<img src="' + imgloc + 'addr-remove-icon.png" class="addr-icon" title="Remove Address" onclick="doRemoveAddr(\'' + reqId + '\',\''
-          + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\', \'' + name + '\', \'' + addrTypeTxt + '\')">';
+      actions += '<img src="' + imgloc + 'addr-remove-icon.png" class="addr-icon" title="Remove Address" onclick="doRemoveAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt
+          + '\', \'' + name + '\', \'' + addrTypeTxt + '\')">';
     }
     return actions;
   }
   if (addrType == 'ZS01' || addrType == 'ZI01' || addrType == 'ZP01') {
     if (canCopyAddress(value, rowIndex, this.grid)) {
-      actions += '<img src="' + imgloc + 'addr-copy-icon.png" class="addr-icon" title="Copy Address" onclick="doCopyAddr(\'' + reqId + '\',\''
-          + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\',\'' + name + '\')">';
+      actions += '<img src="' + imgloc + 'addr-copy-icon.png" class="addr-icon" title="Copy Address" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt
+          + '\',\'' + name + '\')">';
     }
     if (canUpdateAddress(value, rowIndex, this.grid)) {
-      actions += '<img src="' + imgloc + 'addr-edit-icon.png" class="addr-icon" title="Update Address" onclick="doUpdateAddr(\'' + reqId + '\',\''
-          + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\')">';
+      actions += '<img src="' + imgloc + 'addr-edit-icon.png" class="addr-icon" title="Update Address" onclick="doUpdateAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt
+          + '\')">';
     }
     if (canRemoveAddress(value, rowIndex, this.grid)) {
-      actions += '<img src="' + imgloc + 'addr-remove-icon.png" class="addr-icon" title="Remove Address" onclick="doRemoveAddr(\'' + reqId + '\',\''
-          + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\', \'' + name + '\', \'' + addrTypeTxt + '\')">';
+      actions += '<img src="' + imgloc + 'addr-remove-icon.png" class="addr-icon" title="Remove Address" onclick="doRemoveAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt
+          + '\', \'' + name + '\', \'' + addrTypeTxt + '\')">';
     }
   }
   return actions;
@@ -2477,15 +2411,12 @@ function stateProvFormatter(value, rowIndex) {
 
 // dtn: added general method for validations if country is LA
 function isLACountry() {
-  if (FormManager.getActualValue('cmrIssuingCntry') == '631' || FormManager.getActualValue('cmrIssuingCntry') == '781'
-      || FormManager.getActualValue('cmrIssuingCntry') == '613' || FormManager.getActualValue('cmrIssuingCntry') == '629'
-      || FormManager.getActualValue('cmrIssuingCntry') == '655' || FormManager.getActualValue('cmrIssuingCntry') == '661'
-      || FormManager.getActualValue('cmrIssuingCntry') == '663' || FormManager.getActualValue('cmrIssuingCntry') == '681'
-      || FormManager.getActualValue('cmrIssuingCntry') == '683' || FormManager.getActualValue('cmrIssuingCntry') == '731'
-      || FormManager.getActualValue('cmrIssuingCntry') == '735' || FormManager.getActualValue('cmrIssuingCntry') == '799'
-      || FormManager.getActualValue('cmrIssuingCntry') == '811' || FormManager.getActualValue('cmrIssuingCntry') == '813'
-      || FormManager.getActualValue('cmrIssuingCntry') == '815' || FormManager.getActualValue('cmrIssuingCntry') == '829'
-      || FormManager.getActualValue('cmrIssuingCntry') == '869' || FormManager.getActualValue('cmrIssuingCntry') == '871') {
+  if (FormManager.getActualValue('cmrIssuingCntry') == '631' || FormManager.getActualValue('cmrIssuingCntry') == '781' || FormManager.getActualValue('cmrIssuingCntry') == '613'
+      || FormManager.getActualValue('cmrIssuingCntry') == '629' || FormManager.getActualValue('cmrIssuingCntry') == '655' || FormManager.getActualValue('cmrIssuingCntry') == '661'
+      || FormManager.getActualValue('cmrIssuingCntry') == '663' || FormManager.getActualValue('cmrIssuingCntry') == '681' || FormManager.getActualValue('cmrIssuingCntry') == '683'
+      || FormManager.getActualValue('cmrIssuingCntry') == '731' || FormManager.getActualValue('cmrIssuingCntry') == '735' || FormManager.getActualValue('cmrIssuingCntry') == '799'
+      || FormManager.getActualValue('cmrIssuingCntry') == '811' || FormManager.getActualValue('cmrIssuingCntry') == '813' || FormManager.getActualValue('cmrIssuingCntry') == '815'
+      || FormManager.getActualValue('cmrIssuingCntry') == '829' || FormManager.getActualValue('cmrIssuingCntry') == '869' || FormManager.getActualValue('cmrIssuingCntry') == '871') {
     return true;
   } else {
     return false;
@@ -2494,15 +2425,12 @@ function isLACountry() {
 
 // dtn: added general method for validations if country is LA
 function isSSACountry() {
-  if (FormManager.getActualValue('cmrIssuingCntry') == '631' || FormManager.getActualValue('cmrIssuingCntry') == '781'
-      || FormManager.getActualValue('cmrIssuingCntry') == '613' || FormManager.getActualValue('cmrIssuingCntry') == '629'
-      || FormManager.getActualValue('cmrIssuingCntry') == '655' || FormManager.getActualValue('cmrIssuingCntry') == '661'
-      || FormManager.getActualValue('cmrIssuingCntry') == '663' || FormManager.getActualValue('cmrIssuingCntry') == '681'
-      || FormManager.getActualValue('cmrIssuingCntry') == '683' || FormManager.getActualValue('cmrIssuingCntry') == '731'
-      || FormManager.getActualValue('cmrIssuingCntry') == '735' || FormManager.getActualValue('cmrIssuingCntry') == '799'
-      || FormManager.getActualValue('cmrIssuingCntry') == '811' || FormManager.getActualValue('cmrIssuingCntry') == '813'
-      || FormManager.getActualValue('cmrIssuingCntry') == '815' || FormManager.getActualValue('cmrIssuingCntry') == '829'
-      || FormManager.getActualValue('cmrIssuingCntry') == '869' || FormManager.getActualValue('cmrIssuingCntry') == '871') {
+  if (FormManager.getActualValue('cmrIssuingCntry') == '631' || FormManager.getActualValue('cmrIssuingCntry') == '781' || FormManager.getActualValue('cmrIssuingCntry') == '613'
+      || FormManager.getActualValue('cmrIssuingCntry') == '629' || FormManager.getActualValue('cmrIssuingCntry') == '655' || FormManager.getActualValue('cmrIssuingCntry') == '661'
+      || FormManager.getActualValue('cmrIssuingCntry') == '663' || FormManager.getActualValue('cmrIssuingCntry') == '681' || FormManager.getActualValue('cmrIssuingCntry') == '683'
+      || FormManager.getActualValue('cmrIssuingCntry') == '731' || FormManager.getActualValue('cmrIssuingCntry') == '735' || FormManager.getActualValue('cmrIssuingCntry') == '799'
+      || FormManager.getActualValue('cmrIssuingCntry') == '811' || FormManager.getActualValue('cmrIssuingCntry') == '813' || FormManager.getActualValue('cmrIssuingCntry') == '815'
+      || FormManager.getActualValue('cmrIssuingCntry') == '829' || FormManager.getActualValue('cmrIssuingCntry') == '869' || FormManager.getActualValue('cmrIssuingCntry') == '871') {
     return true;
   } else {
     return false;
@@ -2564,8 +2492,7 @@ function resetAbbNmOnActualRemoveAddrFR() {
     singleIndValue = "R5";
   } else if (custSubGrp == "CBTSO" || custSubGrp == "INTSO") {
     singleIndValue = "FM";
-  } else if (custSubGrp == "CBIFF" || custSubGrp == "CBIFL" || custSubGrp == "CBFIN" || custSubGrp == "LCIFF" || custSubGrp == "LCIFL"
-      || custSubGrp == "OTFIN") {
+  } else if (custSubGrp == "CBIFF" || custSubGrp == "CBIFL" || custSubGrp == "CBFIN" || custSubGrp == "LCIFF" || custSubGrp == "LCIFL" || custSubGrp == "OTFIN") {
     singleIndValue = "F3";
   } else if (custSubGrp == "LEASE" || custSubGrp == "CBASE") {
     singleIndValue = "L3";
@@ -2676,8 +2603,7 @@ function resetAbbNmOnRemoveSelectedAddrsFR() {
     singleIndValue = "R5";
   } else if (custSubGrp == "CBTSO" || custSubGrp == "INTSO") {
     singleIndValue = "FM";
-  } else if (custSubGrp == "CBIFF" || custSubGrp == "CBIFL" || custSubGrp == "CBFIN" || custSubGrp == "LCIFF" || custSubGrp == "LCIFL"
-      || custSubGrp == "OTFIN") {
+  } else if (custSubGrp == "CBIFF" || custSubGrp == "CBIFL" || custSubGrp == "CBFIN" || custSubGrp == "LCIFF" || custSubGrp == "LCIFL" || custSubGrp == "OTFIN") {
     singleIndValue = "F3";
   } else if (custSubGrp == "LEASE" || custSubGrp == "CBASE") {
     singleIndValue = "L3";
@@ -2832,13 +2758,11 @@ function doCNDPLPageRefresh(result) {
     cityVal = FormManager.getActualValue('city1');
   }
 
-  if (FormManager.getActualValue('custNm1') != cmr.oldname1 || FormManager.getActualValue('custNm2') != cmr.oldname2
-      || FormManager.getActualValue('landCntry') != cmr.oldlandcntry || FormManager.getActualValue('addrTxt') != cmr.oldaddrtxt
-      || FormManager.getActualValue('addrTxt2') != cmr.oldaddrtxt2 || FormManager.getActualValue('city2') != cmr.oldcity2 || cityVal != cmr.oldcity1
-      || FormManager.getActualValue('postCd') != cmr.oldpostcd || FormManager.getActualValue('bldg') != cmr.oldbldg
-      || FormManager.getActualValue('stateProv') != cmr.oldstateprov || FormManager.getActualValue('cnDistrict') != cmr.oldcndistrict
-      || FormManager.getActualValue('dept') != cmr.olddept || FormManager.getActualValue('office') != cmr.oldoffice
-      || FormManager.getActualValue('poBox') != cmr.oldpobox || FormManager.getActualValue('custPhone') != cmr.oldcustphone
+  if (FormManager.getActualValue('custNm1') != cmr.oldname1 || FormManager.getActualValue('custNm2') != cmr.oldname2 || FormManager.getActualValue('landCntry') != cmr.oldlandcntry
+      || FormManager.getActualValue('addrTxt') != cmr.oldaddrtxt || FormManager.getActualValue('addrTxt2') != cmr.oldaddrtxt2 || FormManager.getActualValue('city2') != cmr.oldcity2
+      || cityVal != cmr.oldcity1 || FormManager.getActualValue('postCd') != cmr.oldpostcd || FormManager.getActualValue('bldg') != cmr.oldbldg
+      || FormManager.getActualValue('stateProv') != cmr.oldstateprov || FormManager.getActualValue('cnDistrict') != cmr.oldcndistrict || FormManager.getActualValue('dept') != cmr.olddept
+      || FormManager.getActualValue('office') != cmr.oldoffice || FormManager.getActualValue('poBox') != cmr.oldpobox || FormManager.getActualValue('custPhone') != cmr.oldcustphone
       || FormManager.getActualValue('transportZone') != cmr.oldtransportzone || FormManager.getActualValue('cnCustName1') != cmr.oldcncustname
       || FormManager.getActualValue('cnCustName2') != cmr.oldcncustname2 || FormManager.getActualValue('cnAddrTxt') != cmr.oldcnaddrtxt
       || FormManager.getActualValue('cnAddrTxt2') != cmr.oldcnaddrtxt2) {
@@ -2862,12 +2786,10 @@ function doCNDPLPageRefresh(result) {
 }
 
 function doSSADPLPageRefresh(result) {
-  if (FormManager.getActualValue('custNm1') != cmr.oldname1 || FormManager.getActualValue('custNm2') != cmr.oldname2
-      || FormManager.getActualValue('landCntry') != cmr.oldlandcntry || FormManager.getActualValue('addrTxt') != cmr.oldaddrtxt
-      || FormManager.getActualValue('addrTxt2') != cmr.oldaddrtxt2 || FormManager.getActualValue('city2') != cmr.oldcity2
-      || FormManager.getActualValue('val_city1') != cmr.oldcity1 || FormManager.getActualValue('postCd') != cmr.oldpostcd
-      || FormManager.getActualValue('divn') != cmr.olddivn || FormManager.getActualValue('stateProv') != cmr.oldstateprov
-      || FormManager.getActualValue('transportZone') != cmr.oldtransportzone) {
+  if (FormManager.getActualValue('custNm1') != cmr.oldname1 || FormManager.getActualValue('custNm2') != cmr.oldname2 || FormManager.getActualValue('landCntry') != cmr.oldlandcntry
+      || FormManager.getActualValue('addrTxt') != cmr.oldaddrtxt || FormManager.getActualValue('addrTxt2') != cmr.oldaddrtxt2 || FormManager.getActualValue('city2') != cmr.oldcity2
+      || FormManager.getActualValue('val_city1') != cmr.oldcity1 || FormManager.getActualValue('postCd') != cmr.oldpostcd || FormManager.getActualValue('divn') != cmr.olddivn
+      || FormManager.getActualValue('stateProv') != cmr.oldstateprov || FormManager.getActualValue('transportZone') != cmr.oldtransportzone) {
 
     FormManager.setValue('dplMessage', result.message);
     FormManager.setValue('showAddress', 'Y');
@@ -2890,11 +2812,10 @@ function doSSADPLPageRefresh(result) {
 function doMXDPLPageRefresh(result) {
 
   // DENNIS: Compared to SSA, MX does not use City2
-  if (FormManager.getActualValue('custNm1') != cmr.oldname1 || FormManager.getActualValue('custNm2') != cmr.oldname2
-      || FormManager.getActualValue('landCntry') != cmr.oldlandcntry || FormManager.getActualValue('addrTxt') != cmr.oldaddrtxt
-      || FormManager.getActualValue('addrTxt2') != cmr.oldaddrtxt2 || FormManager.getActualValue('val_city1') != cmr.oldcity1
-      || FormManager.getActualValue('postCd') != cmr.oldpostcd || FormManager.getActualValue('divn') != cmr.olddivn
-      || FormManager.getActualValue('stateProv') != cmr.oldstateprov || FormManager.getActualValue('transportZone') != cmr.oldtransportzone) {
+  if (FormManager.getActualValue('custNm1') != cmr.oldname1 || FormManager.getActualValue('custNm2') != cmr.oldname2 || FormManager.getActualValue('landCntry') != cmr.oldlandcntry
+      || FormManager.getActualValue('addrTxt') != cmr.oldaddrtxt || FormManager.getActualValue('addrTxt2') != cmr.oldaddrtxt2 || FormManager.getActualValue('val_city1') != cmr.oldcity1
+      || FormManager.getActualValue('postCd') != cmr.oldpostcd || FormManager.getActualValue('divn') != cmr.olddivn || FormManager.getActualValue('stateProv') != cmr.oldstateprov
+      || FormManager.getActualValue('transportZone') != cmr.oldtransportzone) {
 
     FormManager.setValue('dplMessage', result.message);
     FormManager.setValue('showAddress', 'Y');
@@ -2917,12 +2838,10 @@ function doMXDPLPageRefresh(result) {
 function doBRDPLPageRefresh(result) {
 
   // DENNIS: Aside from the MX Address values, BR also evaluates tax information
-  if (FormManager.getActualValue('custNm1') != cmr.oldname1 || FormManager.getActualValue('custNm2') != cmr.oldname2
-      || FormManager.getActualValue('landCntry') != cmr.oldlandcntry || FormManager.getActualValue('addrTxt') != cmr.oldaddrtxt
-      || FormManager.getActualValue('addrTxt2') != cmr.oldaddrtxt2 || FormManager.getActualValue('val_city1') != cmr.oldcity1
-      || FormManager.getActualValue('postCd') != cmr.oldpostcd || FormManager.getActualValue('divn') != cmr.olddivn
-      || FormManager.getActualValue('stateProv') != cmr.oldstateprov || FormManager.getActualValue('transportZone') != cmr.oldtransportzone
-      || FormManager.getActualValue('taxCd1') != cmr.oldtaxcd1 || FormManager.getActualValue('taxCd2') != cmr.oldtaxcd2
+  if (FormManager.getActualValue('custNm1') != cmr.oldname1 || FormManager.getActualValue('custNm2') != cmr.oldname2 || FormManager.getActualValue('landCntry') != cmr.oldlandcntry
+      || FormManager.getActualValue('addrTxt') != cmr.oldaddrtxt || FormManager.getActualValue('addrTxt2') != cmr.oldaddrtxt2 || FormManager.getActualValue('val_city1') != cmr.oldcity1
+      || FormManager.getActualValue('postCd') != cmr.oldpostcd || FormManager.getActualValue('divn') != cmr.olddivn || FormManager.getActualValue('stateProv') != cmr.oldstateprov
+      || FormManager.getActualValue('transportZone') != cmr.oldtransportzone || FormManager.getActualValue('taxCd1') != cmr.oldtaxcd1 || FormManager.getActualValue('taxCd2') != cmr.oldtaxcd2
       || FormManager.getActualValue('vat') != cmr.oldvat) {
 
     FormManager.setValue('dplMessage', result.message);
@@ -3047,12 +2966,9 @@ function doValidateSave() {
         + 'the current value of Street Address Con\'t Chinese is too large in terms of size and will ' + 'be truncated. Would you like to continue?');
     return;
   } else if (bTruncateCnName2 && bTruncateCnStrAddrTxt2) {
-    cmr
-        .showConfirm(
-            'doSaveCnAddressToList()',
-            'After moving excess values from Customer Name Chinese to Customer Name Con\'t Chinese and Street'
-                + ' Address Chinese to Street Address Con\'t Chinese, the current value of Customer Name Con\'t Chinese and Street Address Con\'t Chinese and is too large in terms of size and will '
-                + 'be truncated. Would you like to continue?');
+    cmr.showConfirm('doSaveCnAddressToList()', 'After moving excess values from Customer Name Chinese to Customer Name Con\'t Chinese and Street'
+        + ' Address Chinese to Street Address Con\'t Chinese, the current value of Customer Name Con\'t Chinese and Street Address Con\'t Chinese and is too large in terms of size and will '
+        + 'be truncated. Would you like to continue?');
     return;
   } else {
     doAddToAddressList();
@@ -3072,13 +2988,13 @@ function doDplSearchRequest() {
 
 function resetAbbNmRemoveAddrNORDX() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA'
-      || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA' || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
+  if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA' || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA'
+      || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
     FormManager.setValue('abbrevNm', "");
   }
 
-  if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO'
-      || custSubGrp == 'FIISO' || custSubGrp == 'EEISO' || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
+  if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO' || custSubGrp == 'FIISO' || custSubGrp == 'EEISO'
+      || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
     FormManager.setValue('abbrevNm', "IBM c/o ");
   }
 }
@@ -3109,13 +3025,13 @@ function resetAbbNmOnRemoveSelectedAddrNORDX() {
   if (havingZI01) {
 
     var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA'
-        || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA' || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
+    if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA' || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA'
+        || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
       FormManager.setValue('abbrevNm', "");
     }
 
-    if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO'
-        || custSubGrp == 'FIISO' || custSubGrp == 'EEISO' || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
+    if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO' || custSubGrp == 'FIISO' || custSubGrp == 'EEISO'
+        || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
       FormManager.setValue('abbrevNm', "IBM c/o ");
     }
 

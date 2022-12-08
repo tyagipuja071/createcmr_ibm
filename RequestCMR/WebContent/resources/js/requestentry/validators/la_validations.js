@@ -547,6 +547,7 @@ function afterConfigForLA() {
       setCrosTypSubTypSSAMXOnSecnarios();
       setAbbrevNameRequiredForProcessors();
       setMrcCdToReadOnly();
+      togglePPSCeid();
     });
   }
 
@@ -1604,46 +1605,6 @@ function addStreetAddress2FormValidatorAddrList() {
 } // func end
 
 function toggleAddrTypesForBR(cntry, addressMode, details) {
-  if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-    if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-      var fRecord = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0);
-      var ttype = fRecord.addrType;
-      if (typeof (ttype) == 'object') {
-        ttype = ttype[0];
-      }
-      if (ttype == 'ZS01') {
-        if (FormManager.getActualValue('reqType') == 'C') {
-          if (FormManager.getActualValue('custType') && FormManager.getActualValue('custType') == 'LEASI') {
-            FormManager.setValue('addrType', 'ZI01');
-            cmr.showNode('radiocont_ZI01');
-            cmr.hideNode('radiocont_ZS01');
-          } else {
-            FormManager.setValue('addrType', 'ZS01');
-            cmr.showNode('radiocont_ZS01');
-            cmr.hideNode('radiocont_ZI01');
-          }
-        } else {
-
-        }
-        cmr.hideNode('radiocont_ZD01');
-        cmr.hideNode('radiocont_ZP01');
-      } else if (ttype == 'ZI01') {
-        FormManager.setValue('addrType', 'ZS01');
-        cmr.showNode('radiocont_ZS01');
-        cmr.hideNode('radiocont_ZI01');
-        cmr.hideNode('radiocont_ZD01');
-        cmr.hideNode('radiocont_ZP01');
-      } else {
-
-      }
-    } else {
-      FormManager.setValue('addrType', 'ZS01');
-      cmr.showNode('radiocont_ZS01');
-      cmr.hideNode('radiocont_ZI01');
-      cmr.hideNode('radiocont_ZD01');
-      cmr.hideNode('radiocont_ZP01');
-    }
-  }
   if (addressMode == 'updateAddress' || addressMode == 'copyAddress') {
     // 1164561
     if (details.ret50 != '' && details.ret50 != null) {
@@ -2513,24 +2474,13 @@ function disableFieldsForBrazil() {
 }
 
 function canRemoveAddress(value, rowIndex, grid) {
-  console.log("Remove address button..");
-  var rowData = grid.getItem(0);
-  if (rowData == null) {
-    return '';
-  }
   var rowData = grid.getItem(rowIndex);
-  var importInd = rowData.importInd;
-
+  var importInd = rowData.importInd[0];
   var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'U') {
+  if ('U' == reqType && ('Y' == importInd)) {
     return false;
-  } else {
-    // var addrType = rowData.addrType;
-    // if (addrType == 'ZS01') {
-    // return false;
-    // }
-    return true;
   }
+  return true;
 }
 
 function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
@@ -2790,12 +2740,41 @@ function vatValidatorUY() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function togglePPSCeid() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custType = FormManager.getActualValue('custType');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'C') {
+    
+    if(custSubGrp == '') {
+      custSubGrp = _pagemodel.custSubGrp;
+    }
+    
+    if (custSubGrp == 'CROSS' && custType == 'BUSPR') {
+      FormManager.show('PPSCEID', 'ppsceid');
+      FormManager.enable('ppsceid');
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.setValue('ppsceid', '');
+      FormManager.readOnly('ppsceid');
+      FormManager.hide('PPSCEID', 'ppsceid');
+      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+    }
+  }
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
       SysLoc.MEXICO, SysLoc.NICARAGUA, SysLoc.PANAMA, SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY, SysLoc.VENEZUELA ];
   console.log(GEOHandler.LA);
   console.log('adding LA scripts...');
+  GEOHandler.enableCopyAddress(GEOHandler.LA, null, [ 'ZP01', 'ZD01', 'ZI01' ]);
   // GEOHandler.registerValidator(addTaxInfoValidator, [ SysLoc.ARGENTINA ],
   // null, false, false);
   GEOHandler.registerValidator(addTaxInfoValidator, [ SysLoc.ARGENTINA /* 613 */], GEOHandler.ROLE_PROCESSOR, false, false);
@@ -2876,6 +2855,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
+  GEOHandler.addAfterConfig(togglePPSCeid, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(togglePPSCeid, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
   GEOHandler.registerValidator(vatValidatorUY, [ SysLoc.URUGUAY ], null, true);
 });

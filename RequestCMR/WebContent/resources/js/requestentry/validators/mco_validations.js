@@ -315,7 +315,8 @@ function afterConfigForMCO() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.readOnly('cmrOwner');
-
+  // CREATCMR-788
+  addressQuotationValidatorMCO;
 }
 
 function addAddressTypeValidator() {
@@ -1104,7 +1105,7 @@ function disableAddrFieldsPTES() {
     FormManager.readOnly('prefSeqNo');
   }
 
-  if ((custType != 'CROSS' || reqType == 'U') && FormManager.getActualValue('addrType') == 'ZS01') {
+  if (FormManager.getActualValue('addrType') == 'ZS01' && (reqType == 'U' || custType != 'CROSS')) {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
@@ -1406,6 +1407,8 @@ function abbrvNmProcessorMandatory() {
         if (FormManager.getActualValue('reqType') != 'U') {
           FormManager.readOnly('abbrevNm');
           FormManager.readOnly('abbrevLocn');
+          FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+          FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
         }
       }
     }
@@ -1421,6 +1424,8 @@ function abbrvNmProcessorMandatoryOnChange() {
       if (FormManager.getActualValue('reqType') != 'U') {
         FormManager.readOnly('abbrevNm');
         FormManager.readOnly('abbrevLocn');
+        FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+        FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
       }
       FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
     }
@@ -3220,7 +3225,27 @@ function checkCmrUpdateBeforeImport() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+// CREATCMR-788
+function addressQuotationValidatorMCO() {
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
+    FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Att. Person' ]);
+  } else {
+    FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Attention Person' ]);
+  }
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Department' ]);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address Con\'t' ]);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PostBox' ]);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  FormManager.addValidator('prefSeqNo', Validators.NO_QUOTATION, [ 'Sequence Number' ]);
 
+}
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -3234,6 +3259,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
 
   GEOHandler.addAfterConfig(afterConfigForMCO, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  // CREATCMR-788
+  GEOHandler.addAfterConfig(addressQuotationValidatorMCO, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(addHandlersForPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setClientTierValues, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setSalesRepValues, [ SysLoc.PORTUGAL ]);
