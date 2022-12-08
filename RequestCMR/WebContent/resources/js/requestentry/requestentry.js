@@ -1797,7 +1797,24 @@ function matchDnBForAutomationCountries() {
             } else if (data.confidenceCd) {
               showDnBMatchModal();
             } else {
-              if (cntry != SysLoc.INDIA && cntry != '641' && cntry != SysLoc.CANADA && cntry != '649') {
+              if (cntry == SysLoc.NEW_ZEALAND && reqType == 'C') {
+                console.log('No matches found in dnb : Data Overidden.\n Start to match NZ API...');
+                var dataAPI = matchNZAPICustNmAddrForNZ();
+                console.log(dataAPI);
+                if (dataAPI.success) {
+                	if(!dataAPI.custNmMatch || !dataAPI.addressMatch) {
+                	  console.log('Customer name or address match fail in NZ API');
+                	  cmr.showAlert('No matches found in dnb or NZ API : Data Overidden.\nPlease attach company proof');
+                	  FormManager.setValue('matchOverrideIndc', 'Y');
+                	} else {
+                	  console.log('Customer name and address matched in NZ API');
+                	  cmr.showModal('addressVerificationModal');
+                	}
+                } else {
+                  console.error("An error occurred while matching NZ API: " + dataAPI.message);
+                }
+              }
+              else if (cntry != SysLoc.INDIA && cntry != '641' && cntry != SysLoc.CANADA && cntry != '649') {
                 cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');
                 FormManager.setValue('matchOverrideIndc', 'Y');
               }
@@ -2448,4 +2465,36 @@ function checkIfUpdateChecksRequiredOnUI() {
     }
   }
 
+}
+
+//CREATCMR-7874: NZ 2.0 - API check in Creation
+function matchNZAPICustNmAddrForNZ() {
+  // Get Fields
+  var reqId = FormManager.getActualValue('reqId');
+  var businessNumber = FormManager.getActualValue('vat');
+  var custNm = '';
+  var dataAPIRes = {};
+  var contractCustNm = cmr.query('GET.CUSTNM_ADDR', {
+    REQ_ID : reqId,
+    ADDR_TYPE : 'ZS01'
+  });
+  if (contractCustNm != undefined) {
+    custNm = contractCustNm.ret1.toUpperCase() + " " + contractCustNm.ret2.toUpperCase();
+  }
+  custNm = custNm.trim();
+  console.log("Checking if the request matches D&B...");
+  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
+  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
+  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
+    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
+    return;
+  }
+  
+  // match with NZ API (customer name & address)
+  if (reqId != '' && custNm != '') {
+    dataAPIRes = cmr.validateNZBNFromAPI(businessNumber, reqId, custNm);
+  } else {
+    dataAPIRes.success = false;
+  }
+  return dataAPIRes;
 }

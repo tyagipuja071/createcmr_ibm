@@ -4986,13 +4986,14 @@ function validatNZBNForNewZeaLand() {
 		    custNm = contractCustNm.ret1.toUpperCase() + " " + contractCustNm.ret2.toUpperCase();
 		  }
           custNm = custNm.trim();
-		  var nzbnRet = cmr.validateNZBNFromAPI(vat, custNm);
-          if (!nzbnRet.success) {
+		  var nzbnRet = cmr.validateNZBNFromAPI(vat, reqId, custNm);
+		  console.log(nzbnRet);
+          if (!nzbnRet.success || !nzbnRet.custNmMatch) {
           	return new ValidationResult({
               id : 'vat',
               type : 'text',
               name : 'vat'
-          	}, false, nzbnRet.errorMessage);
+          	}, false, nzbnRet.message);
 	      } else {
 	        return new ValidationResult(null, true);
 	      }
