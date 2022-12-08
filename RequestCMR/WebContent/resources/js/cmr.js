@@ -802,7 +802,7 @@ var cmr = {
     });
     return result;
   },
-  validateNZBNFromAPI: function(businessNumber, custNm) {
+  validateNZBNFromAPI: function(businessNumber, reqId, custNm) {
     var result = {};
     dojo.xhrGet({
       url : cmr.CONTEXT_ROOT + '/nz/nzbnFromAPI.json',
@@ -810,14 +810,13 @@ var cmr = {
       method : 'GET',
       content : {
         businessNumber : businessNumber,
+        reqId : reqId,
         custNm : custNm
       },
       timeout : 50000,
       sync : true,
       load : function(data, ioargs) {
-        if (data && data.result) {
-          result = data.result;
-        }
+        result = data;
       },
       error : function(error, ioargs) {
         result = {};
