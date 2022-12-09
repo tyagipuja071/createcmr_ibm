@@ -409,17 +409,17 @@
 		<scenario>FSP POOL</scenario>
 		<csoSite>logic</csoSite>
 		<mktgDept>EI3</mktgDept>
-		<mtkgArDept>logic</mtkgArDept>
+		<mtkgArDept>28W</mtkgArDept>
 		<svcArOffice>IKE</svcArOffice>
-		<pccArDept>logic</pccArDept>
+		<pccArDept>2CC</pccArDept>
 	</mapping>
 	<mapping>
 		<scenario>FSP END USER</scenario>
 		<csoSite>logic</csoSite>
 		<mktgDept>EI3</mktgDept>
-		<mtkgArDept>logic</mtkgArDept>
+		<mtkgArDept>28W</mtkgArDept>
 		<svcArOffice>IKE</svcArOffice>
-		<pccArDept>logic</pccArDept>
+		<pccArDept>2CC</pccArDept>
 	</mapping>
 	<mapping>
 		<scenario>DEVELOP</scenario>
