@@ -80,7 +80,7 @@ function afterConfigForNL() {
 
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   var vatExempt = dojo.byId('vatExempt');
-  var vatExemptChecked = dojo.byId('vatExempt').checked;
+  var vatExemptChecked = dojo.byId('vatExempt') && dojo.byId('vatExempt').checked;
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -254,7 +254,7 @@ function setVatValidatorNL() {
       return;
     }
     FormManager.resetValidations('vat');
-    if (!dojo.byId('vatExempt').checked) {
+    if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
     
@@ -277,7 +277,7 @@ function setKVKValidatorNL() {
   }
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   var vatExempt = dojo.byId('vatExempt');
-  var vatExemptChecked = dojo.byId('vatExempt').checked;
+  var vatExemptChecked = dojo.byId('vatExempt') && dojo.byId('vatExempt').checked;
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
@@ -1912,14 +1912,13 @@ function addVatIndValidator(){
 }
 }
 
-function setVatIndFields(){
-  var _vatHandler = null;  
+function setVatIndFields() {
+  var _vatHandler = null;
   var vat = FormManager.getActualValue('vat');
   var vatInd = FormManager.getActualValue('vatInd');
-  
-  if (vat != '' && vatInd == ''){
+
+  if (vat != '' && vatInd == '') {
     FormManager.setValue('vatInd', 'T');
-    FormManager.readOnly('vatInd');
   }
 }
 
