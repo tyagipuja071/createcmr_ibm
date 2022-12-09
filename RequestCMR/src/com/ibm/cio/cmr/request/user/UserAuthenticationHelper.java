@@ -54,7 +54,7 @@ public class UserAuthenticationHelper {
     int cwaReturnCode = -1;
     try {
 
-      final String ldapHost = "bluepages.ibm.com:636";
+      final String ldapHost = "bluepages.ibm.com";
 
       cwa2 cwa = new cwa2();
       final ReturnCode cwa2rc = cwa.authenticate(intranetId, password, ldapHost);
