@@ -63,7 +63,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       USUtil.SC_FED_FEDSTATE, USUtil.SC_FED_HEALTHCARE, USUtil.SC_FED_HOSPITAL, USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_NATIVE_CORP,
       USUtil.SC_FED_REGULAR, USUtil.SC_FED_TRIBAL_BUS, USUtil.SC_STATE_CITY, USUtil.SC_STATE_COUNTY, USUtil.SC_STATE_DIST, USUtil.SC_STATE_HOSPITALS,
       USUtil.SC_STATE_STATE);
-  private static final List<String> END_USER_SCENARIOS = Arrays.asList(USUtil.SC_BP_END_USER, USUtil.SC_BP_DEVELOP, USUtil.SC_BP_E_HOST);
+  private static final List<String> END_USER_SCENARIOS = Arrays.asList(USUtil.SC_BP_END_USER, USUtil.SC_BP_DEVELOP, USUtil.SC_BP_E_HOST,
+      USUtil.SC_FSP_END_USER);
 
   public USDuplicateCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);

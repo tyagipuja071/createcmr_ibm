@@ -23,6 +23,7 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -30,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -699,6 +701,30 @@ public class UKIUtil extends AutomationUtil {
   private UkiFieldsContainer getSBOSalesRepForUK(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
       RequestData requestData) {
 
+    // Retrieving SBO Sales Rep from existing CMRs
+    String salesRep = null;
+    String sbo = null;
+    UkiFieldsContainer container = new UkiFieldsContainer();
+    String cmrIssuingCntry = requestData.getData().getCmrIssuingCntry();
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    String covSql = ExternalizedQuery.getSql("AUTO.COV.GET_COV_FROM_BG_ES_UK");
+    PreparedQuery queryCov = new PreparedQuery(entityManager, covSql);
+
+    queryCov.setParameter("KEY", requestData.getData().getBgId());
+    queryCov.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    queryCov.setParameter("COUNTRY", cmrIssuingCntry);
+    queryCov.setParameter("ISO_CNTRY", isoCntry);
+    queryCov.setForReadOnly(true);
+
+    Object[] result = queryCov.getSingleResult();
+    if (result != null) {
+      if (!StringUtils.isBlank((String) result[3])) {
+
+      }
+      container.setSalesRep((String) result[0]);
+      container.setSbo((String) result[1]);
+    }
+
     String scenario = requestData.getData().getCustSubGrp();
     Addr addr;
     if ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario))) {
@@ -715,7 +741,6 @@ public class UKIUtil extends AutomationUtil {
 
     if ("34".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
 
-      UkiFieldsContainer container = new UkiFieldsContainer();
       if ("Q".equals(clientTier) && SCOTLAND_POST_CD.contains(PostCd)) {
         container.setSbo("758");
         container.setSalesRep("SPA758");
@@ -733,15 +758,14 @@ public class UKIUtil extends AutomationUtil {
         query.setForReadOnly(true);
         List<Object[]> results = query.getResults();
         if (results != null && results.size() == 1) {
-          String sbo = (String) results.get(0)[0];
-          String salesRep = (String) results.get(0)[1];
+          sbo = (String) results.get(0)[0];
+          salesRep = (String) results.get(0)[1];
           container.setSbo(sbo);
           container.setSalesRep(salesRep);
           return container;
         }
       }
     } else {
-      UkiFieldsContainer container = new UkiFieldsContainer();
       String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
       String repTeamCd = "";
       String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
@@ -755,8 +779,8 @@ public class UKIUtil extends AutomationUtil {
       query.setForReadOnly(true);
       List<Object[]> results = query.getResults();
       if (results != null && results.size() == 1) {
-        String sbo = (String) results.get(0)[0];
-        String salesRep = (String) results.get(0)[1];
+        sbo = (String) results.get(0)[0];
+        salesRep = (String) results.get(0)[1];
         container.setSbo(sbo);
         container.setSalesRep(salesRep);
         return container;
