@@ -5008,7 +5008,9 @@ function setDefaultValueForNZCreate(){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqId = FormManager.getActualValue('reqId');
   var isicCdInDB = '';
-  
+  if (ormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   var custSubGroups = ['BLUMX', 'MKTPC', 'AQSTN', 'NRML', 'ESOSW', 'ECSYS', 'CROSS', 'XAQST', 'XBLUM', 'XESO', 'XMKTP'];
   console.log(">>>>setDefaultValueForNZCreate()>>>> SubGrp="+custSubGrp);
   if(custSubGroups.includes(custSubGrp)){
