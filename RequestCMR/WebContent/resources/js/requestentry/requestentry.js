@@ -190,7 +190,11 @@ function processRequestAction() {
           }
         }
       } else if (checkIfFinalDnBCheckRequired()) {
-        matchDnBForAutomationCountries();
+      	if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C') {
+      	  matchDnBForNZ();
+      	} else {
+      	  matchDnBForAutomationCountries();
+      	}
       } else if (cmrCntry == '897' || cmrCntry == '649') {
         // CREATCMR-6074
         // addUpdateChecksExecution(frmCMR);
@@ -1828,24 +1832,7 @@ function matchDnBForAutomationCountries() {
             } else if (data.confidenceCd) {
               showDnBMatchModal();
             } else {
-              if (cntry == SysLoc.NEW_ZEALAND && reqType == 'C') {
-                console.log('No matches found in dnb : Data Overidden.\n Start to match NZ API...');
-                var dataAPI = matchNZAPICustNmAddrForNZ();
-                console.log(dataAPI);
-                if (dataAPI.success) {
-                	if(!dataAPI.custNmMatch || !dataAPI.addressMatch) {
-                	  console.log('Customer name or address match fail in NZ API');
-                	  cmr.showAlert('No matches found in dnb or NZ API : Data Overidden.\nPlease attach company proof');
-                	  FormManager.setValue('matchOverrideIndc', 'Y');
-                	} else {
-                	  console.log('Customer name and address matched in NZ API');
-                	  cmr.showModal('addressVerificationModal');
-                	}
-                } else {
-                  console.error("An error occurred while matching NZ API: " + dataAPI.message);
-                }
-              }
-              else if (cntry != SysLoc.INDIA && cntry != '641' && cntry != SysLoc.CANADA && cntry != '649') {
+              if (cntry != SysLoc.INDIA && cntry != '641' && cntry != SysLoc.CANADA && cntry != '649') {
                 cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');
                 FormManager.setValue('matchOverrideIndc', 'Y');
               }
@@ -2502,7 +2489,84 @@ function checkIfUpdateChecksRequiredOnUI() {
 
 }
 
-//CREATCMR-7874: NZ 2.0 - API check in Creation
+//CREATCMR-7874: NZ 2.0 - API check in Creation(D&B match, ISIC match, NZAPI match)
+function matchDnBForNZ() {
+  var reqId = FormManager.getActualValue('reqId');
+  var isicCd = FormManager.getActualValue('isicCd');
+  console.log("Checking if the request matches D&B...");
+  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
+  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
+  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
+    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
+    return;
+  }
+  cmr.showProgress('Checking request data with D&B...');
+  dojo
+      .xhrGet({
+        url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
+        handleAs : 'json',
+        method : 'GET',
+        content : {
+          'reqId' : reqId,
+          'isicCd' : isicCd
+        },
+        timeout : 50000,
+        sync : false,
+        load : function(data, ioargs) {
+          cmr.hideProgress();
+          console.log(data);
+          if (data && data.success) {
+            if (data.match) {
+              if(data.isicMatch) {
+              	cmr.showModal('addressVerificationModal');
+              } else {
+              	cmr.showAlert('DNB match success and ISIC match fail.\nPlease attach company proof');
+            	FormManager.setValue('matchOverrideIndc', 'Y');
+              }
+            } else if (data.tradeStyleMatch) {
+              cmr
+                  .showConfirm(
+                      'autoDnbImportMatch("' + data.dunsNo + '","0")',
+                      'The customer name on the request is a tradestyle name. For CMR creation, legal name should be used. <strong>Tradestyle name can be placed on the address’s division line.</strong> Do you want to override the customer name on the request with <strong><u>'
+                          + data.legalName + '</u></strong>?' + '?', 'Warning', 'doOverrideDnBMatch()', {
+                        OK : 'Yes',
+                        CANCEL : 'No'
+                      });
+            } else if (data.confidenceCd) {
+              showDnBMatchModal();
+            } else {
+              if (data.isicMatch) {
+                console.log('No matches found in dnb : Data Overidden.\n Start to match NZ API...');
+                var dataAPI = matchNZAPICustNmAddrForNZ();
+                console.log(dataAPI);
+            	if(!dataAPI.success || !dataAPI.custNmMatch || !dataAPI.addressMatch) {
+            	  console.log('Customer name or address match fail in NZ API: ' + dataAPI.message);
+            	  cmr.showAlert('No matches found in dnb or NZ API : Data Overidden.\nPlease attach company proof');
+            	  FormManager.setValue('matchOverrideIndc', 'Y');
+            	} else {
+            	  console.log('Customer name and address matched in NZ API');
+            	  cmr.showModal('addressVerificationModal');
+            	}
+              } else {
+            	cmr.showAlert('DNB match fail and ISIC match fail.\nPlease attach company proof');
+            	FormManager.setValue('matchOverrideIndc', 'Y');
+              }
+            }
+          } else {
+            // continue
+            console.log("An error occurred while matching dnb.");
+            cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+              OK : 'Yes',
+              CANCEL : 'No'
+            });
+          }
+        },
+        error : function(error, ioargs) {
+        }
+      });
+
+}
+
 function matchNZAPICustNmAddrForNZ() {
   // Get Fields
   var reqId = FormManager.getActualValue('reqId');
