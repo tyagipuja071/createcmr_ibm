@@ -1,5 +1,5 @@
 /*
- * Licensed Material - Property of IBM * © Copyright IBM Corporation 2010 - All Rights Reserved. 
+ * Licensed Material - Property of IBM * ï¿½ Copyright IBM Corporation 2010 - All Rights Reserved. 
  * US Government Users Restricted Rights - Use, duplication or disclosure 
  * restricted by GSA ADP Schedule Contract with IBM Corp.
  */
@@ -56,7 +56,8 @@ public class UserAuthenticationHelper {
 
       final String ldapHost = "bluepages.ibm.com";
 
-      cwa2 cwa = new cwa2();
+      // cwa2 cwa = new cwa2();
+      cwa2 cwa = new cwa2("ldaps://bluepages.ibm.com:636", "ldaps://bluegroups.ibm.com:636");
       final ReturnCode cwa2rc = cwa.authenticate(intranetId, password, ldapHost);
 
       LOG.info("Blue page authentication return code:" + cwa2rc.getCode() + " message: " + cwa2rc.getMessage());
