@@ -61,7 +61,7 @@ public class NewZealandUtil extends AutomationUtil {
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
-
+    Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
 
@@ -85,6 +85,13 @@ public class NewZealandUtil extends AutomationUtil {
     case SCENARIO_ECOSYS:
     case SCENARIO_CROSS_FOREIGN:
       // addToNotifyListANZ(entityManager, data.getId().getReqId());
+    }
+    boolean companyProofProvided = DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId());
+    if (companyProofProvided) {
+      details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
+      details.append("This Request will be routed to CMDE.\n");
+      engineData.addRejectionComment("OTH", "This Request will be routed to CMDE.", "", "");
+      return false;
     }
     return true;
   }
