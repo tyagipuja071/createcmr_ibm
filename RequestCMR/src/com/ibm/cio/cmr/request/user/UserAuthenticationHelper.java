@@ -56,7 +56,8 @@ public class UserAuthenticationHelper {
 
       final String ldapHost = "bluepages.ibm.com";
 
-      cwa2 cwa = new cwa2();
+      // cwa2 cwa = new cwa2();
+      cwa2 cwa = new cwa2("ldaps://bluepages.ibm.com:636", "ldaps://bluegroups.ibm.com:636");
       final ReturnCode cwa2rc = cwa.authenticate(intranetId, password, ldapHost);
 
       LOG.info("Blue page authentication return code:" + cwa2rc.getCode() + " message: " + cwa2rc.getMessage());
