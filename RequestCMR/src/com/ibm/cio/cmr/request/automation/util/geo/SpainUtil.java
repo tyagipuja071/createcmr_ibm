@@ -785,8 +785,11 @@ public class SpainUtil extends AutomationUtil {
         fieldValues.setIsuCd((String) result[0]);
         fieldValues.setClientTier((String) result[1]);
         fieldValues.setEnterprise((String) result[2]);
-        fieldValues.setSalesRep((String) result[3]);
-
+        fieldValues.setSalesRep("1FICTI"); // Default Sales Rep for Spain
+        if (!StringUtils.isBlank((String) result[3])
+            && AutomationUtil.validateLOVVal(entityManager, cmrIssuingCntry, "##SalRepNameNo", ((String) result[3]).substring(4))) {
+          fieldValues.setSalesRep((String) result[3]);
+        }
         calculatedFields.add(fieldValues);
       }
     }

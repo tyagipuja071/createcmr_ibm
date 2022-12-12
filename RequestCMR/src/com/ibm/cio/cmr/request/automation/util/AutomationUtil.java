@@ -1430,5 +1430,13 @@ public abstract class AutomationUtil {
       }
     }
     return false;
+  public static boolean validateLOVVal(EntityManager em, String issuingCntry, String fieldId, String code) {
+    String sql = ExternalizedQuery.getSql("QUERY.CHECKLOV");
+    PreparedQuery query = new PreparedQuery(em, sql);
+    query.setParameter("FIELD_ID", fieldId);
+    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+    query.setParameter("CD", code);
+
+    return query.exists();
   }
 }
