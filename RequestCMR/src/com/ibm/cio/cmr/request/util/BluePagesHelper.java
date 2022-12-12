@@ -45,6 +45,16 @@ public class BluePagesHelper {
   public static final String BLUEPAGES_KEY_EMP_CNUM = "CNUM";
   public static final String BLUEPAGES_KEY_NOTES_MAIL = "EMAILADDRESS";
 
+  /** Instanciate CWA2 */
+  public static cwa2 cwa2;
+
+  public static cwa2 getCWA2() {
+    if (BluePagesHelper.cwa2 == null) {
+      BluePagesHelper.cwa2 = new cwa2(SystemParameters.getString("BLUEPAGES_SERVER"), SystemParameters.getString("BLUEGROUPS_SERVER"));
+    }
+    return BluePagesHelper.cwa2;
+  }
+
   /**
    * Gets the name by cnum.
    * 
@@ -357,7 +367,7 @@ public class BluePagesHelper {
    * @return
    */
   public static boolean isUserInBlueGroup(String intranetId) {
-    cwa2 bpAPI = new cwa2();
+    cwa2 bpAPI = BluePagesHelper.getCWA2();
     String groups = SystemConfiguration.getValue("BLUEGROUP_ACCESS", null);
     if (StringUtils.isEmpty(groups)) {
       // no bluegroup filter
@@ -380,7 +390,7 @@ public class BluePagesHelper {
   }
 
   public static boolean isUserInBRBPBlueGroup(String intranetId) {
-    cwa2 bpAPI = new cwa2();
+    cwa2 bpAPI = BluePagesHelper.getCWA2();
     String groups = SystemParameters.getString("BR_BP_BLUEGROUPS");
     if (StringUtils.isEmpty(groups)) {
       return true;
@@ -401,7 +411,7 @@ public class BluePagesHelper {
   }
 
   public static boolean isUserInAdminBlueGroup(String intranetId) {
-    cwa2 bpAPI = new cwa2();
+    cwa2 bpAPI = BluePagesHelper.getCWA2();
     String groups = SystemConfiguration.getValue("BLUEGROUP_ADMIN", null);
     if (StringUtils.isEmpty(groups)) {
       // no bluegroup filter
@@ -424,7 +434,7 @@ public class BluePagesHelper {
   }
 
   public static boolean isUserInProcessorBlueGroup(String intranetId) {
-    cwa2 bpAPI = new cwa2();
+    cwa2 bpAPI = BluePagesHelper.getCWA2();
     String groups = SystemConfiguration.getValue("BLUEGROUP_PROCESSOR", null);
     if (StringUtils.isEmpty(groups)) {
       // no bluegroup filter
@@ -606,7 +616,7 @@ public class BluePagesHelper {
 
   // CREATCMR-5447
   public static boolean isUserInUSTAXBlueGroup(String intranetId) {
-    cwa2 bpAPI = new cwa2();
+    cwa2 bpAPI = BluePagesHelper.getCWA2();
     String groups = SystemParameters.getString("US_TAX_BG_LIST");
     if (!StringUtils.isEmpty(groups)) {
       String[] blueGroups = groups.split(",");
@@ -673,7 +683,7 @@ public class BluePagesHelper {
   }
 
   public static boolean isUserInLaBlueGroup(String intranetId, String groups) {
-    cwa2 bpAPI = new cwa2();
+    cwa2 bpAPI = BluePagesHelper.getCWA2();
     if (!StringUtils.isEmpty(groups)) {
       String[] blueGroups = groups.split(",");
       ReturnCode retCode = null;
