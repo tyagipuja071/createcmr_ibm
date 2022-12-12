@@ -860,6 +860,7 @@ function onCustSubGrpChange() {
     FormManager.readOnly('subIndustryCd');
     if (FormManager.getActualValue('viewOnlyPage') != 'true')
       FormManager.enable('isicCd');
+    setIsicCmrCreation();
     setISBUScenarioLogic();
 
     var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -1792,6 +1793,9 @@ function onIsicChange() {
           CANCEL : 'No',
           OK : 'Yes'
         });
+      }
+      if (value != '9500') {
+        setIsicCmrCreation();
       }
     }
   }
@@ -4655,21 +4659,27 @@ function addressQuotationValidatorGCG() {
   }
 }
 
-// CREATCMR-7589
+//CREATCMR-7589
 function setIsicCmrCreation() {
   var reqType = FormManager.getActualValue('reqType');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var result = FormManager.getActualValue('findDnbResult');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var value = FormManager.getActualValue('isicCd');
-  if (value != "" && value != "9500") {
-    if (reqType == 'C' && result == "Accepted" && cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
+  if (result != '' && result == 'Accepted' && reqType == 'C' && (cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834')) {
+    if (custSubGrp == 'NRML' || custSubGrp == 'BLUMX' || custSubGrp == 'AQSTN' || custSubGrp == 'ESOSW' || custSubGrp == 'MKTPC') {
+      FormManager.readOnly('isicCd');
+      var requestId = FormManager.getActualValue('reqId');
+      qParams = {
+        REQ_ID : requestId,
+      };
+      var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+      var oldISIC = result.ret1;
+      FormManager.setValue('isicCd', oldISIC);
       FormManager.readOnly('isicCd');
     }
-  }
-  if (result == "Rejected") {
-    if (reqType == 'C' && cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
-      FormManager.enable('isicCd');
+    if (FormManager.getActualValue('isicCd') != '') {
+      FormManager.readOnly('isicCd');
     }
   }
 }
