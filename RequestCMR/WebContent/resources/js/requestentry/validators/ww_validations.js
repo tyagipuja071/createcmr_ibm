@@ -1102,13 +1102,14 @@ var _vatHandler = null;
   if (_vatHandler == null){   
     
     dojo.byId('vat').onkeyup = function() {
+      var isReadOnly = dojo.byId('vat').readOnly;
       var vat = FormManager.getActualValue('vat');
-      if (vat == '') {
+      if (vat == '' && !isReadOnly) {
         FormManager.enable('vatInd');
         FormManager.setValue('vatInd', '');
       }
     }
-    }
+  }
 }
 /* Register WW Validators */
 dojo.addOnLoad(function() {
