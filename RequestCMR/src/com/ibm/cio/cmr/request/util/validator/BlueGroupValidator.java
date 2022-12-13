@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.util.validator;
 
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.swat.password.cwa2;
 
 /**
@@ -13,7 +14,7 @@ public class BlueGroupValidator implements ParamValidator {
 
   @Override
   public boolean validate(String value) {
-    cwa2 bpAPI = new cwa2();
+    cwa2 bpAPI = BluePagesHelper.getCWA2();
     if (value == null || "".equals(value.trim())) {
       return true;
     }
