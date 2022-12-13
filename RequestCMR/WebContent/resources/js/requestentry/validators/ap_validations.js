@@ -969,7 +969,6 @@ function onCustSubGrpChange() {
       return;
     }
     setIsicCmrCreation();
-    setISBUScenarioLogic();
     autoSetAbbrevNmLocnLogic();
     setCollectionCd();
   });
