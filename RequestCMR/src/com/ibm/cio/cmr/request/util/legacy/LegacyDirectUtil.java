@@ -1209,10 +1209,10 @@ public class LegacyDirectUtil {
     /*
      * fields covered
      */
-    // â€?Fiscal code >> NEW_ENTP_NAME1
-    // â€?Vat# >> VAT
-    // â€?Intent. Cliente >> OUT_CITY_LIMIT
-    // â€?Enterprise number >> ENTERPRISE
+    // ï¿½?Fiscal code >> NEW_ENTP_NAME1
+    // ï¿½?Vat# >> VAT
+    // ï¿½?Intent. Cliente >> OUT_CITY_LIMIT
+    // ï¿½?Enterprise number >> ENTERPRISE
     if (!StringUtils.isBlank(muData.getNewEntpName1()) || !StringUtils.isBlank(muData.getVat()) || !StringUtils.isBlank(muData.getOutCityLimit())
         || !StringUtils.isBlank(muData.getEnterprise())) {
       isITCompanyLevelMassUpdateEnabled = true;
@@ -1525,5 +1525,14 @@ public class LegacyDirectUtil {
     CmrtAddr cmrtAddr = query.getSingleResult(CmrtAddr.class);
 
     return cmrtAddr;
+  }
+
+  public static Addr getSoldToAddress(EntityManager entityManager, Long reqId) {
+    String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    Addr soldToAddr = query.getSingleResult(Addr.class);
+
+    return soldToAddr;
   }
 }
