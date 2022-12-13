@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -173,8 +174,8 @@ public class SlackAlertsUtil {
     headerSection.put("type", "section");
     JSONObject headerText = new JSONObject();
     headerText.put("type", "mrkdwn");
-    headerText.put("text",
-        ":warning: [" + formatter.format(new Date()) + "] (" + Thread.currentThread().getName() + ") " + bold(application + " - " + identifier));
+    headerText.put("text", ":warning: " + SystemConfiguration.getValue("SYSTEM_TYPE", "") + " [" + formatter.format(new Date()) + "] ("
+        + Thread.currentThread().getName() + ") " + bold(application + " - " + identifier));
     headerSection.put("text", headerText);
     blocks.add(headerSection);
 

@@ -2971,6 +2971,52 @@ public class LAHandler extends GEOHandler {
         entityManager.flush();
       }
     }
+
+    // TODO: START - delete code block when we switch to DR
+    if (stxlList != null && stxlList.size() > 0) {
+      // contacts already deleted on EM check
+      addDefaultAddtlContactLE(entityManager, data, admin);
+    } else {
+      // delete all contacts
+      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CHECK.CONTACT.INFO.RECORD"));
+      query.setParameter("REQ_ID", data.getId().getReqId());
+      List<GeoContactInfo> results = query.getResults(GeoContactInfo.class);
+      GeoContactInfoService contService = new GeoContactInfoService();
+
+      if (results != null && !results.isEmpty() && results.size() > 0) {
+        contService.deleteAllContactDetails(results, entityManager, data.getId().getReqId());
+      }
+
+      addDefaultAddtlContactLE(entityManager, data, admin);
+    }
+    // TODO: END - delete code block when we switch to DR
+  }
+
+  private void addDefaultAddtlContactLE(EntityManager entityManager, Data data, Admin admin) {
+
+    GeoContactInfo e = new GeoContactInfo();
+    GeoContactInfoPK ePk = new GeoContactInfoPK();
+    e.setContactType("LE");
+    e.setContactSeqNum("001");
+    e.setContactName("N");
+    e.setContactPhone(".");
+    e.setContactEmail("");
+    e.setContactFunc(".");
+    e.setContactTreatment("Sr.");
+
+    e.setCreateById(admin.getRequesterId());
+    e.setCreateTs(SystemUtil.getCurrentTimestamp());
+
+    try {
+      int contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null, String.valueOf(admin.getId().getReqId()));
+      ePk.setContactInfoId(contactId);
+    } catch (CmrException ex) {
+      LOG.debug("Exception while getting contactId : " + ex.getMessage(), ex);
+    }
+    ePk.setReqId(data.getId().getReqId());
+    e.setId(ePk);
+    entityManager.persist(e);
+    entityManager.flush();
   }
 
   private List<Stxl> getStxlAddlContactsByKunnr(EntityManager entityManager, String kunnr) {
