@@ -968,7 +968,8 @@ function onCustSubGrpChange() {
       FormManager.setValue('isbuCd', _pagemodel.isbuCd);
       return;
     }
-    setIsicCmrCreation();
+    
+    setISBUScenarioLogic();
     autoSetAbbrevNmLocnLogic();
     setCollectionCd();
   });
