@@ -1075,6 +1075,10 @@ function vatIndOnChange() {
     if (_vatIndHandler == null) {
     _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(value) {
       var vatInd = FormManager.getActualValue('vatInd');
+      var userRole = FormManager.getActualValue('userRole');
+      if (userRole == 'Viewer') {
+        return;
+      }
       if (vatInd && dojo.string.trim(vatInd) == 'T') {
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
         FormManager.enable('vat');
