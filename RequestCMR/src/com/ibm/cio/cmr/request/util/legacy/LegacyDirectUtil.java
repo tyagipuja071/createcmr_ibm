@@ -1526,4 +1526,13 @@ public class LegacyDirectUtil {
 
     return cmrtAddr;
   }
+
+  public static Addr getSoldToAddress(EntityManager entityManager, Long reqId) {
+    String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    Addr soldToAddr = query.getSingleResult(Addr.class);
+
+    return soldToAddr;
+  }
 }
