@@ -133,20 +133,6 @@ public class UpdateSwitchElement extends ValidatingElement {
         validation.setSuccess(true);
       }
 
-      // CREATCMR-7234
-      // Remove for now(confirmed with Sudipta) until SAAS squad found solutions
-      // for CREATMCR-7234, as it is blocking NZ2.0 name update testing.
-      if (AutomationUtil.isLegalNameChanged(admin) && !payGoAddredited && StringUtils.isNotEmpty(admin.getOldCustNm1())
-          && !SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry()) && !"796".equals(data.getCmrIssuingCntry())
-          && !"641".equals(data.getCmrIssuingCntry())) {
-        validation.setSuccess(false);
-        validation.setMessage("Review required");
-        String msg = "The request needs further review: Legal name change should be validated.";
-        output.setDetails(msg);
-        engineData.addNegativeCheckStatus(AutomationEngineData.NON_PAYGO_LEGAL_NAME_CHANGE, msg);
-        log.debug(msg);
-      }
-
       log.debug("Validation after data checks: " + validation.isSuccess());
 
       // handling of sbo
@@ -162,7 +148,7 @@ public class UpdateSwitchElement extends ValidatingElement {
 
       }
 
-      if (!output.isOnError() && changes.hasAddressChanges()) {        
+      if (!output.isOnError() && changes.hasAddressChanges()) {
         List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
         String addrTypeCode = null;
         // Start CREATCMR-6229

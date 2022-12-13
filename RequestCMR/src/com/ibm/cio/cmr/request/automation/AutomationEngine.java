@@ -350,9 +350,6 @@ public class AutomationEngine {
       admin.setScenarioVerifiedIndc(scenarioVerifiedIndc);
     }
 
-    // CREATCMR-7234
-    String nonPaygoLegalNameChangeStatus = engineData.get().getNegativeCheckStatus(AutomationEngineData.NON_PAYGO_LEGAL_NAME_CHANGE);
-
     if (processWaiting) {
       if (requestData.getAdmin().getChildReqId() > 0) {
         LOG.debug("Adding process waiting comment log.");
@@ -539,14 +536,6 @@ public class AutomationEngine {
             // CREATCMR-6331
             pendingChecks.put("_usenttocomp", strCmtUsEntCompToPpn);
             // CREATCMR-5447
-          }
-          if (nonPaygoLegalNameChangeStatus != null) { // CREATCMR-7234
-            LOG.debug("Moving Request " + reqId + " to PPN");
-            admin.setReqStatus("PPN");
-            createComment(entityManager, nonPaygoLegalNameChangeStatus, reqId, appUser);
-            createHistory(entityManager, admin, nonPaygoLegalNameChangeStatus, "PPN", "Automated Processing", reqId, appUser, processingCenter, null,
-                false, null);
-
           } else if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {
