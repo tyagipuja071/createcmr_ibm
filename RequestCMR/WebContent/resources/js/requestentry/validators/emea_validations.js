@@ -10544,14 +10544,13 @@ function addVatIndValidator(){
   }
 }
 
-function setVatIndFields(){
-  var _vatHandler = null;  
+function setVatIndFields() {
+  var _vatHandler = null;
   var vat = FormManager.getActualValue('vat');
   var vatInd = FormManager.getActualValue('vatInd');
-  
-  if (vat != '' && vatInd == ''){
+
+  if (vat != '' && vatInd == '') {
     FormManager.setValue('vatInd', 'T');
-    FormManager.readOnly('vatInd');
   }
 }
 
@@ -10839,6 +10838,5 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterConfig(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.registerValidator(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
-  GEOHandler.addAfterTemplateLoad(setVatIndFields, [ SysLoc.UK, SysLoc.IRELAND ]);
-  
+  GEOHandler.addAfterConfig(setVatIndFields, [ SysLoc.UK, SysLoc.IRELAND ]);
 });
