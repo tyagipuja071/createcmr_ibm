@@ -4659,11 +4659,12 @@ function addressQuotationValidatorGCG() {
   }
 }
 
-//CREATCMR-7589
+// CREATCMR-7589
 function setIsicCmrCreation() {
   var reqType = FormManager.getActualValue('reqType');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var result = FormManager.getActualValue('findDnbResult');
+  var cmrResult = FormManager.getActualValue('findCmrResult');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var value = FormManager.getActualValue('isicCd');
   if (result != '' && result == 'Accepted' && reqType == 'C' && (cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834')) {
@@ -4680,6 +4681,21 @@ function setIsicCmrCreation() {
     }
     if (FormManager.getActualValue('isicCd') != '') {
       FormManager.readOnly('isicCd');
+    }
+  }
+  if (cmrResult != '' && cmrResult == 'Accepted' && reqType == 'C' && (cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834')) {
+    var requestId = FormManager.getActualValue('reqId');
+    qParams = {
+      REQ_ID : requestId,
+    };
+    var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+    var oldISIC = result.ret1;
+    if (FormManager.getActualValue('isicCd') == oldISIC) {
+      FormManager.enable('isicCd');
+    }
+    if (custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX' || custSubGrp == 'ASLOM' || custSubGrp == 'MKTPC' || custSubGrp == 'BUSPR' || custSubGrp == 'ECSYS' || custSubGrp == 'NRML') {
+      FormManager.enable('isicCd');
+      FormManager.setValue('isicCd', '');
     }
   }
 }
