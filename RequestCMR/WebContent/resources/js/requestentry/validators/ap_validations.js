@@ -301,6 +301,12 @@ function addAfterConfigAP() {
     setLockIsicNZfromDNB();
     
   }
+  
+  //CREATCMR-7929_NZ_LockISIC4Update
+  if(cntry == '796' && reqType == 'U'){
+    console.log(">>> NZ-796-U >>> Lock ISIC For UPDATE.");
+    FormManager.readOnly('isicCd');
+  }
 }
 
 function setInacByCluster() {
