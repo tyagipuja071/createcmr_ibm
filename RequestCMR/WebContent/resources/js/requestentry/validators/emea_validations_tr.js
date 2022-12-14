@@ -9032,6 +9032,8 @@ function vatValidatorTR() {
         var custGrp = FormManager.getActualValue('custGrp');
         var vat = FormManager.getActualValue('vat');
         var reqId = FormManager.getActualValue('reqId');
+        var cmrResult = FormManager.getActualValue('findCmrResult');
+        var dnbResult = FormManager.getActualValue('findDnbResult');
         var districts = [ 'GAZIMAGUSA', 'GIRNE', 'GUZELYURT', 'YENI ISKELE', 'LEFKE', 'LEFKOSA' ];
         var soldToDistrict = null;
         var vatPattern = null;
@@ -9043,30 +9045,44 @@ function vatValidatorTR() {
             }
           }
         }
-        var qParams = {
-          REQ_ID : reqId
+        var requestId = FormManager.getActualValue('reqId');
+        qParams = {
+          REQ_ID : requestId,
         };
         var result = cmr.query('GET.VAT_OLD_BY_REQID', qParams);
+        var oldVAT = result.ret1;
+        qParams = {
+          REQ_ID : requestId,
+        };
+        var result = cmr.query('GET.OLD_ZS01_DEPT_BY_REQID', qParams);
+        var oldZS01DEPT = result.ret1;
+
         if (result.ret1 == '' && result.ret1 != null) {
           vatDistrictChkUpdate = true;
+        }
+        if ((cmrResult != '' && cmrResult == 'Accepted') || (dnbResult != '' && cmrResult == 'Accepted')) {
+          if (oldVAT == FormManager.getActualValue('vat') && oldZS01DEPT == soldToDistrict) {
+            return new ValidationResult(null, true);
+          }
         }
         if (soldToDistrict != null && districts.includes(soldToDistrict.toUpperCase()) && (reqType == 'C' || (reqType == 'U' && vatDistrictChkUpdate))) {
           vatPattern = /^[0-9]{9}$/;
           if (vat.match(vatPattern) != null && vat.match(vatPattern).length > 0) {
             return new ValidationResult(null, true);
-          }
-          if (vat != '') {
-            return new ValidationResult({
-              id : 'vat',
-              type : 'text',
-              name : 'vat'
-            }, false, 'Format for VAT is incorrect. Correct format is 999999999.');
+          } else {
+            if (vat != '' || oldVAT != '' || (oldVAT != '' && oldZS01DEPT != soldToDistrict)) {
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, 'Format for VAT is incorrect. Correct format is 999999999.');
+            }
           }
         } else {
           if (vat.match(/^[0-9]{10}$/) || vat.match(/^[0-9]{11}$/)) {
             return new ValidationResult(null, true);
           }
-          if (vat != '') {
+          if (vat != '' || oldVAT != '' || (oldVAT != '' && oldZS01DEPT != soldToDistrict)) {
             return new ValidationResult({
               id : 'vat',
               type : 'text',
