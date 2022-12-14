@@ -2516,11 +2516,14 @@ function matchDnBForNZ() {
           cmr.hideProgress();
           console.log(data);
           if (data && data.success) {
-            if (data.match) {
+            if (data.dnbNmMatch && data.dnbAddrMatch) {
+              console.log("DNB name match and DNB address match.");
               if(data.isicMatch) {
+                console.log("ISIC match.");
               	cmr.showModal('addressVerificationModal');
               } else {
-              	cmr.showAlert('DNB match success and ISIC match fail.\nPlease attach company proof');
+                console.log("ISIC mismatch.");
+              	cmr.showAlert('DNB name and address match success. ISIC match fail.\nPlease attach company proof');
             	FormManager.setValue('matchOverrideIndc', 'Y');
               }
             } else if (data.tradeStyleMatch) {
@@ -2535,20 +2538,32 @@ function matchDnBForNZ() {
             } else if (data.confidenceCd) {
               showDnBMatchModal();
             } else {
-              if (data.isicMatch) {
-                console.log('No matches found in dnb : Data Overidden.\n Start to match NZ API...');
-                var dataAPI = matchNZAPICustNmAddrForNZ();
+              if (!data.dnbNmMatch) {
+                console.log("DNB name mismatch and go to NZAPI check...");
+              	var dataAPI = matchNZAPICustNmAddrForNZ();
                 console.log(dataAPI);
             	if(!dataAPI.success || !dataAPI.custNmMatch || !dataAPI.addressMatch) {
             	  console.log('Customer name or address match fail in NZ API: ' + dataAPI.message);
-            	  cmr.showAlert('No matches found in dnb or NZ API : Data Overidden.\nPlease attach company proof');
+            	  cmr.showAlert('DNB name match fail. Name or address match fail in NZAPI.\nPlease attach company proof');
             	  FormManager.setValue('matchOverrideIndc', 'Y');
             	} else {
-            	  console.log('Customer name and address matched in NZ API');
+            	  console.log('Customer name and address matched in NZAPI');
+            	  cmr.showModal('addressVerificationModal');
+            	}
+              } else if (!data.dnbAddrMatch && data.isicMatch) {
+                console.log('DNB name match, DNB address mismatch, ISIC match, go to NZAPI check...');
+                var dataAPI = matchNZAPICustNmAddrForNZ();
+                console.log(dataAPI);
+            	if(!dataAPI.success || !dataAPI.custNmMatch || !dataAPI.addressMatch) {
+            	  console.log('Customer name mismatch or address mismatch in NZAPI: ' + dataAPI.message);
+            	  cmr.showAlert('DNB name match success, DNB address match fail.\nISIC match success.\nName or address match fail in NZAPI.\nPlease attach company proof'); 
+            	  FormManager.setValue('matchOverrideIndc', 'Y');
+            	} else {
+            	  console.log('Customer name and address mismatch in NZAPI');
             	  cmr.showModal('addressVerificationModal');
             	}
               } else {
-            	cmr.showAlert('DNB match fail and ISIC match fail.\nPlease attach company proof');
+            	cmr.showAlert('DNB name and address match fail. ISIC match fail.\nPlease attach company proof');
             	FormManager.setValue('matchOverrideIndc', 'Y');
               }
             }

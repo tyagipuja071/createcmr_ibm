@@ -1537,6 +1537,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
    */
   public ModelMap isDnBMatch(AutoDNBDataModel model, long reqId, String addrType) {
     ModelMap map = new ModelMap();
+    map.put("dnbNmMatch", false);
+    map.put("dnbAddrMatch", false);
     EntityManager entityManager = null;
     try {
       if (reqId > 0) {
@@ -1594,7 +1596,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
                 match = true;
                 break;
               }
-              if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addr, admin, record, null, false, true)) {
+              if (SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())) {
+                ModelMap nzDNBMatchMap = DnBUtil.closelyMatchesDnbNmAndAddr(data.getCmrIssuingCntry(), addr, admin, record, null, false, true);
+                map.putAll(nzDNBMatchMap);
+                break;
+              } else if (record.getConfidenceCode() >= 8
+                  && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addr, admin, record, null, false, true)) {
                 match = true;
                 break;
               } else if (checkTradestyleNames && record.getConfidenceCode() >= 8 && record.getTradeStyleNames() != null && tradeStyleName == null
