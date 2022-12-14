@@ -10336,7 +10336,6 @@ function setVatIndFields() {
 
   if (vat != '' && vatInd == '') {
     FormManager.setValue('vatInd', 'T');
-    FormManager.readOnly('vatInd');
   }
 }
 
@@ -10625,5 +10624,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.registerValidator(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
-  GEOHandler.addAfterTemplateLoad(setVatIndFields, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(setVatIndFields, [ SysLoc.UK, SysLoc.IRELAND ]);
 });
