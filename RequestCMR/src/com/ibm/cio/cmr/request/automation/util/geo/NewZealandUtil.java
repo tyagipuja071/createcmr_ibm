@@ -124,18 +124,18 @@ public class NewZealandUtil extends AutomationUtil {
     String customerName = addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2());
     if (StringUtils.isNotBlank(data.getVat())) {
       request.setBusinessNumber(data.getVat());
-      System.out.println("request-businessNumber:" + request.getBusinessNumber());
+      LOG.debug("request-businessNumber:" + request.getBusinessNumber());
     }
     request.setName(customerName);
-    System.out.println("request-name:" + customerName);
+    LOG.debug("request-name:" + customerName);
 
     AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.NZ_BN_VALIDATION_SERVICE_ID, request, AutomationResponse.class);
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writeValueAsString(rawResponse);
-    TypeReference<AutomationResponse<NZBNValidationRequest>> ref = new TypeReference<AutomationResponse<NZBNValidationRequest>>() {
+    TypeReference<AutomationResponse<NZBNValidationResponse>> ref = new TypeReference<AutomationResponse<NZBNValidationResponse>>() {
     };
-    return mapper.readValue(json, ref);
-
+    AutomationResponse<NZBNValidationResponse> nzbnResponse = mapper.readValue(json, ref);
+    return nzbnResponse;
   }
 
   @Override
@@ -189,13 +189,13 @@ public class NewZealandUtil extends AutomationUtil {
           try {
             response = getNZBNService(admin, data, zs01);
           } catch (Exception e) {
-            if (response == null || !response.isSuccess()
-                && "Parameter 'businessNumber' is required by the NZBN service to verify CustNm change.".equalsIgnoreCase(response.getMessage())) {
+            if (response == null || !response.isSuccess()) {
               LOG.debug("\nFailed to Connect to NZBN Service.");
             }
           }
           if (response != null && response.isSuccess()) {
             // custNm Validation
+            LOG.debug("\nSuccess to Connect to NZBN Service.");
             if (StringUtils.isNotEmpty(response.getRecord().getName())) {
               String responseCustNm = StringUtils.isBlank(response.getRecord().getName()) ? "" : response.getRecord().getName().replaceAll(regex, "");
 
@@ -221,9 +221,6 @@ public class NewZealandUtil extends AutomationUtil {
           }
         }
 
-        // }
-        // customerNm Validation
-        details.append("\nUpdates to the non Relevant dataFields fields skipped validation \n\n");
         if (custNmMatch && formerCustNmMatch) {
           validation.setSuccess(true);
           validation.setMessage("Successful");
@@ -350,14 +347,13 @@ public class NewZealandUtil extends AutomationUtil {
                   try {
                     nZBNAPIresponse = getNZBNService(admin, data, addr);
                   } catch (Exception e) {
-                    if (nZBNAPIresponse == null
-                        || !nZBNAPIresponse.isSuccess() && "Parameter 'businessNumber' is required by the service to verify Addr change."
-                            .equalsIgnoreCase(nZBNAPIresponse.getMessage())) {
+                    if (nZBNAPIresponse == null || !nZBNAPIresponse.isSuccess()) {
                       LOG.debug("\nFailed to Connect to NZBN Service.");
                     }
                   }
                   if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() && nZBNAPIresponse.getRecord() != null) {
                     // addr Validation
+                    LOG.debug("\nSuccess to Connect to NZBN Service.");
                     String addressAll = addressToChk.getCustNm1() + addressToChk.getCustNm2() == null ? ""
                         : addressToChk.getCustNm2() + addressToChk.getAddrTxt() + addressToChk.getAddrTxt2() == null ? ""
                             : addressToChk.getAddrTxt2() + addressToChk.getStateProv() == null ? ""
@@ -370,6 +366,7 @@ public class NewZealandUtil extends AutomationUtil {
                         && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
                         && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex, ""))) {
                       matchesAddAPI = true;
+                      LOG.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
                     }
                   }
                 }
@@ -396,10 +393,11 @@ public class NewZealandUtil extends AutomationUtil {
                   }
                 } else {
 
-                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B & NZBN API");
+                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B"
+                      + (CmrConstants.RDC_SOLD_TO.equals(addrType) ? " & NZBN API" : ""));
                   cmdeReview = true;
-                  checkDetails
-                      .append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B  & NZBN API records.\n");
+                  checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B"
+                      + (CmrConstants.RDC_SOLD_TO.equals(addrType) ? "  & NZBN API records.\n" : " records.\n"));
                   if (CmrConstants.RDC_SOLD_TO.equals(addrType) && nZBNAPIresponse != null && nZBNAPIresponse.isSuccess()
                       && nZBNAPIresponse.getRecord() != null) {
                     checkDetails.append(" Call NZBN API result - NZBN:  " + nZBNAPIresponse.getRecord().getBusinessNumber() + " \n");
@@ -432,62 +430,14 @@ public class NewZealandUtil extends AutomationUtil {
             // new address addition
 
             List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
-            // AutomationResponse<NZBNValidationResponse> nZBNAPIresponse =
-            // null;
+
             boolean matchesDnb = false;
-            // boolean matchesAddAPI = false;
             if (matches != null) {
               // check against D&B
               matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
             }
 
-            // if (!(matchesDnb)) {
-            // LOG.debug("DNB Checking Addr match failed. Now Checking Addr with
-            // NZBN API with to vrify Addr update");
-            // String regex = "\\s+$";
-            // try {
-            // nZBNAPIresponse = getNZBNService(admin, data, addr);
-            // } catch (Exception e) {
-            // if (nZBNAPIresponse == null
-            // || !nZBNAPIresponse.isSuccess() && "Parameter 'businessNumber' is
-            // required by the service to verify Addr change."
-            // .equalsIgnoreCase(nZBNAPIresponse.getMessage())) {
-            // LOG.debug("\nFailed to Connect to NZBN Service.");
-            // }
-            // }
-            // if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() &&
-            // nZBNAPIresponse.getRecord() != null) {
-            // // addr Validation
-            // String addressAll = addressToChk.getCustNm1() +
-            // addressToChk.getCustNm2() == null ? ""
-            // : addressToChk.getCustNm2() + addressToChk.getAddrTxt() +
-            // addressToChk.getAddrTxt2() == null ? ""
-            // : addressToChk.getAddrTxt2() + addressToChk.getStateProv() ==
-            // null ? ""
-            // : addressToChk.getStateProv() + addressToChk.getCity1() == null ?
-            // ""
-            // : addressToChk.getCity1() + addressToChk.getPostCd() == null ? ""
-            // : addressToChk.getPostCd();
-            // if
-            // (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getAddress())
-            // && addressAll.replaceAll(regex,
-            // "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regex,
-            // ""))
-            // && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
-            // && addressAll.replaceAll(regex,
-            // "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regex,
-            // ""))
-            // &&
-            // StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
-            // && addressAll.replaceAll(regex,
-            // "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex,
-            // ""))) {
-            // matchesAddAPI = true;
-            // }
-            // }
-            // }|| matchesAddAPI
             if (matchesDnb) {
-              // if (matchesDnb) {
               checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
               for (DnBMatchingResponse dnb : matches) {
                 checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
@@ -495,23 +445,6 @@ public class NewZealandUtil extends AutomationUtil {
                 checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
                     + dnb.getDnbCountry() + "\n\n");
               }
-              // } else {
-              // checkDetails.append("\nNew address " + addrType + "(" +
-              // addr.getId().getAddrSeq() + ") matches NZBN API records.
-              // Matches:\n");
-              // if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() &&
-              // nZBNAPIresponse.getRecord() != null) {
-              // checkDetails.append(" - NZBN: " +
-              // nZBNAPIresponse.getRecord().getBusinessNumber() + " \n");
-              // checkDetails.append(" - Name.: " +
-              // nZBNAPIresponse.getRecord().getName() + " \n");
-              // checkDetails.append(" - Address: " +
-              // nZBNAPIresponse.getRecord().getAddress() + " " +
-              // nZBNAPIresponse.getRecord().getCity() + " "
-              // + nZBNAPIresponse.getRecord().getPostal() + " " +
-              // nZBNAPIresponse.getRecord().getCountryCode() + "\n\n");
-              // }
-              // } & NZBN API & NZBN API
             } else {
               LOG.debug("New address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
               cmdeReview = true;
