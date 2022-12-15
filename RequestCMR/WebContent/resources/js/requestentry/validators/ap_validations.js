@@ -5098,10 +5098,7 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('abbrevNm', 'Bluemix use only');
       FormManager.readOnly('abbrevNm');
       
-      if(isicCdInDB!=''){
-        FormManager.setValue('isicCd', isicCdInDB);
-      }
-        
+      FormManager.setValue('isicCd', isicCdInDB); 
       break;
     case 'MKTPC':
       // cluster/QTC/ISU: default as 00002/Q/34 - lock field
@@ -5124,9 +5121,7 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('abbrevNm', 'Market place use only');
       FormManager.readOnly('abbrevNm');
       
-      if(isicCdInDB!=''){
-        FormManager.setValue('isicCd', isicCdInDB);
-      }
+      FormManager.setValue('isicCd', isicCdInDB);
       break;
     case 'INTER':
       // ISIC = 8888, - lock field
@@ -5181,9 +5176,7 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('abbrevNm', 'Acquisition use only');
       FormManager.readOnly('abbrevNm');
       
-      if(isicCdInDB!=''){
-        FormManager.setValue('isicCd', isicCdInDB);
-      }
+      FormManager.setValue('isicCd', isicCdInDB);
       break;
     case 'NRML':
       // MRC = 3 - lock field
@@ -5201,9 +5194,7 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('clientTier', 'Q');
       FormManager.setValue('isuCd', '34');
       
-      if(isicCdInDB!=''){
-        FormManager.setValue('isicCd', isicCdInDB);
-      }
+      FormManager.setValue('isicCd', isicCdInDB);
       break;
     case 'ESOSW':
       // MRC = 3 - lock field
@@ -5223,9 +5214,7 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('abbrevNm', 'ESA use only');
       FormManager.readOnly('abbrevNm');
       
-      if(isicCdInDB!=''){
-        FormManager.setValue('isicCd', isicCdInDB);
-      }
+      FormManager.setValue('isicCd', isicCdInDB);
       break;
     case 'ECSYS':
       // cluster/QTC/ISU: 08037/Y/34 - lock field
@@ -5245,9 +5234,7 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
       
-      if(isicCdInDB!=''){
-        FormManager.setValue('isicCd', isicCdInDB);
-      }
+      FormManager.setValue('isicCd', isicCdInDB);
       break;
     case 'CROSS':
       // cluster/QTC/ISU: 01147/Q/34 (setting default and secletable ),
@@ -5265,9 +5252,7 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
       
-      if(isicCdInDB!=''){
-        FormManager.setValue('isicCd', isicCdInDB);
-      }
+      FormManager.setValue('isicCd', isicCdInDB);
       break;
     case 'XAQST':
       // cluster/QTC/ISU: 01147/Q/34, 09056/blank/5K
@@ -5287,9 +5272,7 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('abbrevNm', 'Acquisition use only');
       FormManager.readOnly('abbrevNm');
       
-      if(isicCdInDB!=''){
-        FormManager.setValue('isicCd', isicCdInDB);
-      }
+      FormManager.setValue('isicCd', isicCdInDB);
       break;
     case 'XBLUM':
       // cluster/QTC/ISU: default as 00002/Q/34 - lock field
@@ -5312,10 +5295,7 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('abbrevNm', 'Bluemix use only');
       FormManager.readOnly('abbrevNm');
       
-      if(isicCdInDB!=''){
-        FormManager.setValue('isicCd', isicCdInDB);
-      }
-        
+      FormManager.setValue('isicCd', isicCdInDB);
       break;
     case 'XESO':
       // MRC = 3 - lock field
@@ -5335,9 +5315,7 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('abbrevNm', 'ESA use only');
       FormManager.readOnly('abbrevNm');
       
-      if(isicCdInDB!=''){
-        FormManager.setValue('isicCd', isicCdInDB);
-      }
+      FormManager.setValue('isicCd', isicCdInDB);
       break;
     case 'XMKTP':
       // cluster/QTC/ISU: default as 00002/Q/34 - lock field
@@ -5360,9 +5338,7 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('abbrevNm', 'Market place use only');
       FormManager.readOnly('abbrevNm');
       
-      if(isicCdInDB!=''){
-        FormManager.setValue('isicCd', isicCdInDB);
-      }
+      FormManager.setValue('isicCd', isicCdInDB);
       break;
     }
 }
