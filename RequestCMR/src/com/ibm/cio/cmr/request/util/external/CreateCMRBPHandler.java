@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -24,6 +25,8 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
  * 
  */
 public class CreateCMRBPHandler implements ExternalSystemHandler {
+
+  private static final String US_BP_STATUS_CD = "US_BP_PROCESS";
 
   @Override
   public void addEmailParams(EntityManager entityManager, List<Object> params, Admin admin) {
@@ -151,11 +154,12 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
         Data theData = getChildData(entityManager, admin.getId().getReqId());
         if (theData != null && StringUtils.isNotEmpty(theData.getCmrNo2())) {
           params.add(params.get(3)); // {16}
-          params.add(theData.getCmrNo2()); // {17}
         } else {
           params.add(""); // {16}
-          params.add(""); // {17}
         }
+        String detailedResult = AutomationUtil.extractAutomationDetailedResults(entityManager, data.getId().getReqId(), US_BP_STATUS_CD);
+        String directCmrNo = detailedResult.substring(23, 30);
+        params.add(directCmrNo); // {17}
       }
     } else {
       params.add(""); // {16}
