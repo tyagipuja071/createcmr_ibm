@@ -322,8 +322,8 @@ public class NewZealandUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           Addr addressToChk = requestData.getAddress(addrType);
           if (CmrConstants.RDC_SOLD_TO.equals(addressToChk.getId().getAddrType())) {
-            String addressStr = addressToChk.getCustNm1() + addressToChk.getCustNm2() == null ? ""
-                : addressToChk.getCustNm2() + addressToChk.getAddrTxt() + addressToChk.getAddrTxt2() == null ? "" : addressToChk.getAddrTxt2();
+            String addressStr = addressToChk.getCustNm1() + (addressToChk.getCustNm2() == null ? "" : addressToChk.getCustNm2())
+                + addressToChk.getAddrTxt() + (addressToChk.getAddrTxt2() == null ? "" : addressToChk.getAddrTxt2());
             if (addressStr != null && addressStr.contains("PO BOX")) {
               poboxReview = true;
             }
@@ -351,14 +351,15 @@ public class NewZealandUtil extends AutomationUtil {
                       LOG.debug("\nFailed to Connect to NZBN Service.");
                     }
                   }
+
                   if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() && nZBNAPIresponse.getRecord() != null) {
                     // addr Validation
                     LOG.debug("\nSuccess to Connect to NZBN Service.");
-                    String addressAll = addressToChk.getCustNm1() + addressToChk.getCustNm2() == null ? ""
-                        : addressToChk.getCustNm2() + addressToChk.getAddrTxt() + addressToChk.getAddrTxt2() == null ? ""
-                            : addressToChk.getAddrTxt2() + addressToChk.getStateProv() == null ? ""
-                                : addressToChk.getStateProv() + addressToChk.getCity1() == null ? ""
-                                    : addressToChk.getCity1() + addressToChk.getPostCd() == null ? "" : addressToChk.getPostCd();
+                    String addressAll = addressToChk.getCustNm1() + (addressToChk.getCustNm2() == null ? "" : addressToChk.getCustNm2())
+                        + addressToChk.getAddrTxt() + (addressToChk.getAddrTxt2() == null ? "" : addressToChk.getAddrTxt2())
+                        + (addressToChk.getStateProv() == null ? "" : addressToChk.getStateProv())
+                        + (addressToChk.getCity1() == null ? "" : addressToChk.getCity1())
+                        + (addressToChk.getPostCd() == null ? "" : addressToChk.getPostCd());
                     if (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getAddress())
                         && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regex, ""))
                         && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
@@ -384,11 +385,11 @@ public class NewZealandUtil extends AutomationUtil {
                     if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() && nZBNAPIresponse.getRecord() != null) {
                       checkDetails.append(" Call NZBN API result - NZBN:  " + nZBNAPIresponse.getRecord().getBusinessNumber() + " \n");
                       checkDetails.append(" - Name.:  " + nZBNAPIresponse.getRecord().getName() + " \n");
-                      checkDetails.append(
-                          " - Address:  " + nZBNAPIresponse.getRecord().getAddress() + " " + nZBNAPIresponse.getRecord().getState() == null ? ""
-                              : nZBNAPIresponse.getRecord().getState() + " " + nZBNAPIresponse.getRecord().getCity() == null ? ""
-                                  : nZBNAPIresponse.getRecord().getCity() + " " + nZBNAPIresponse.getRecord().getPostal() == null ? ""
-                                      : nZBNAPIresponse.getRecord().getPostal() + " " + nZBNAPIresponse.getRecord().getCountryCode() + "\n\n");
+                      checkDetails.append(" - Address:  " + nZBNAPIresponse.getRecord().getAddress() + " "
+                          + (nZBNAPIresponse.getRecord().getState() == null ? "" : nZBNAPIresponse.getRecord().getState()) + " "
+                          + (nZBNAPIresponse.getRecord().getCity() == null ? "" : nZBNAPIresponse.getRecord().getCity()) + " "
+                          + (nZBNAPIresponse.getRecord().getPostal() == null ? "" : nZBNAPIresponse.getRecord().getPostal()) + " "
+                          + nZBNAPIresponse.getRecord().getCountryCode() + "\n\n");
                     }
                   }
                 } else {
@@ -402,10 +403,10 @@ public class NewZealandUtil extends AutomationUtil {
                       && nZBNAPIresponse.getRecord() != null) {
                     checkDetails.append(" Call NZBN API result - NZBN:  " + nZBNAPIresponse.getRecord().getBusinessNumber() + " \n");
                     checkDetails.append(" - Name.:  " + nZBNAPIresponse.getRecord().getName() + " \n");
-                    checkDetails
-                        .append(" - Address:  " + nZBNAPIresponse.getRecord().getAddress() + " " + nZBNAPIresponse.getRecord().getCity() == null ? ""
-                            : nZBNAPIresponse.getRecord().getCity() + " " + nZBNAPIresponse.getRecord().getPostal() == null ? ""
-                                : nZBNAPIresponse.getRecord().getPostal() + " " + nZBNAPIresponse.getRecord().getCountryCode() + "\n\n");
+                    checkDetails.append(" - Address:  " + nZBNAPIresponse.getRecord().getAddress() + " "
+                        + (nZBNAPIresponse.getRecord().getCity() == null ? "" : nZBNAPIresponse.getRecord().getCity()) + " "
+                        + (nZBNAPIresponse.getRecord().getPostal() == null ? "" : nZBNAPIresponse.getRecord().getPostal()) + " "
+                        + nZBNAPIresponse.getRecord().getCountryCode() + "\n\n");
                   }
                   // company proof
                   if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
