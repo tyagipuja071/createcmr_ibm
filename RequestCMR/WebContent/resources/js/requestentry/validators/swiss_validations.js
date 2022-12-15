@@ -1840,6 +1840,9 @@ function setVatIndFields() {
 
   if (vat != '' && vatInd == '') {
     FormManager.setValue('vatInd', 'T');
+  } else if (vat == '' && vatInd != '') {
+    FormManager.setValue('vatInd', '');
+    FormManager.enable('vat');
   }
 }
 
