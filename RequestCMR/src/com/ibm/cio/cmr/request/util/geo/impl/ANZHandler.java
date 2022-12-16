@@ -567,7 +567,7 @@ public class ANZHandler extends APHandler {
 
   @Override
   public boolean matchDnbMailingAddr(DnBMatchingResponse dnbRecord, Addr addr, String issuingCountry, Boolean allowLongNameAddress) {
-    if ("616".equals(issuingCountry)) {
+    if ("616".equals(issuingCountry) || "796".equals(issuingCountry)) {
       // match address
       String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
       address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
