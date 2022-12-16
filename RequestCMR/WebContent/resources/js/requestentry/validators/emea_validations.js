@@ -10544,19 +10544,6 @@ function addVatIndValidator(){
   }
 }
 
-function setVatIndFields() {
-  var _vatHandler = null;
-  var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');
-
-  if (vat != '' && vatInd == '') {
-    FormManager.setValue('vatInd', 'T');
-  } else if (vat == '' && vatInd != '') {
-    FormManager.setValue('vatInd', '');
-    FormManager.enable('vat');
-  }
-}
-
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -10841,5 +10828,6 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterConfig(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.registerValidator(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
-  GEOHandler.addAfterConfig(setVatIndFields, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [ SysLoc.UK, SysLoc.IRELAND ]);
 });
