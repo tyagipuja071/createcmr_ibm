@@ -156,7 +156,7 @@ function afterConfigForNORDX() {
 
   // CREATCMR-1690
   settingForProcessor();
-  vatAndVatExemptOnScenario();
+  // vatAndVatExemptOnScenario();
 
   // CREATCMR-1656
   setCapRecordActivate();
@@ -4838,19 +4838,6 @@ function addVatIndValidator() {
   }
 }
 
-function setVatIndFields() {
-  var _vatHandler = null;
-  var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');
-
-  if (vat != '' && vatInd == '') {
-    FormManager.setValue('vatInd', 'T');
-  } else if (vat == '' && vatInd != '') {
-    FormManager.setValue('vatInd', '');
-    FormManager.enable('vat');
-  }
-}
-
 // CREATCMR-788
 function addressQuotationValidatorNORS() {
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
@@ -4972,7 +4959,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.NORDX, null, true);
   
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NORDX);
-  GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NORDX);
   
   GEOHandler.addAfterConfig(skipStateProvForFO, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(lockTaxCode, GEOHandler.NORDX);

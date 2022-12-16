@@ -1913,18 +1913,6 @@ function addVatIndValidator(){
 }
 }
 
-function setVatIndFields() {
-  var _vatHandler = null;
-  var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');
-
-  if (vat != '' && vatInd == '') {
-    FormManager.setValue('vatInd', 'T');
-  } else if (vat == '' && vatInd != '') {
-    FormManager.setValue('vatInd', '');
-    FormManager.enable('vat');
-  }
-}
 // CREATCMR-788
 function addressQuotationValidatorNL() {
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
@@ -1998,5 +1986,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.NL, null, true);
   
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NL, null, true);
-  GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.NL);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
 });

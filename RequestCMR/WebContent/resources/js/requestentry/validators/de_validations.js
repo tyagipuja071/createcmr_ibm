@@ -92,6 +92,9 @@ function afterConfigForDE() {
 }
 
 function vatExemptIBMEmp() {
+  if (!dijit.byId('vatExempt')) {
+    return; 
+  }
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -1178,19 +1181,6 @@ function addVatIndValidator(){
 }
 }
 
-function setVatIndFields() {
-  var _vatHandler = null;
-  var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');
-
-  if (vat != '' && vatInd == '') {
-    FormManager.setValue('vatInd', 'T');
-  } else if (vat == '' && vatInd != '') {
-    FormManager.setValue('vatInd', '');
-    FormManager.enable('vat');
-  }
-}
-
 //CREATCMR-7424_7425
 function setAbbreviatedNameBasedOnAddressType() {
   var _reqId = FormManager.getActualValue('reqId');
@@ -1356,5 +1346,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.DE, null, true);
 
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
-  GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.DE);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
 });
