@@ -1833,19 +1833,6 @@ function addVatIndValidator(){
 }
 }
 
-function setVatIndFields() {
-  var _vatHandler = null;
-  var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');
-
-  if (vat != '' && vatInd == '') {
-    FormManager.setValue('vatInd', 'T');
-  } else if (vat == '' && vatInd != '') {
-    FormManager.setValue('vatInd', '');
-    FormManager.enable('vat');
-  }
-}
-
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
@@ -1911,5 +1898,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.SWISS);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
-  GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
 });
