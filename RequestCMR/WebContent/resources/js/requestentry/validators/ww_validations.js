@@ -1111,6 +1111,34 @@ var _vatHandler = null;
     }
   }
 }
+
+function setVatIndFieldsForGrp1AndNordx() {
+  var _vatHandler = null;
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  // CREATCMR-7944
+  if ("PRICU" == custSubGrp || "PRIPE" == custSubGrp || "FIPRI" == custSubGrp || 
+      "DKPRI" == custSubGrp || "BEPRI" == custSubGrp || "CHPRI" == custSubGrp) {
+    
+    FormManager.setValue('vatInd', 'N');
+    FormManager.enable('vatInd');
+    FormManager.setValue('vat', '');
+    FormManager.readOnly('vat');
+  }
+  // CREATCMR-7165
+  else {
+    var vat = FormManager.getActualValue('vat');
+    var vatInd = FormManager.getActualValue('vatInd');
+
+    if (vat != '' && vatInd == '') {
+      FormManager.setValue('vatInd', 'T');
+    } else if (vat == '' && vatInd != '') {
+      FormManager.setValue('vatInd', '');
+      FormManager.enable('vat');
+    }
+  }
+}
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
