@@ -631,6 +631,12 @@ public class VatUtilController {
             if (!apiCustNmMatch) {
               errorMsg = "NZBN Validation Failed - Customer Name does not match with NZ API.";
             }
+          } else if(nzbnResponse != null && !nzbnResponse.isSuccess()){
+            errorMsg = nzbnResponse.getMessage();
+            LOG.debug("nzbnResponse.isSuccess()=FALSE, nzbnResponse.getMessage()="+errorMsg);
+          } else if(nzbnResponse == null) {
+            errorMsg = "NZBN Response is NULL from NZ API Matches.";
+            LOG.debug("NZBN Response is NULL from NZ API Matches.");
           }
         }
       } else {
