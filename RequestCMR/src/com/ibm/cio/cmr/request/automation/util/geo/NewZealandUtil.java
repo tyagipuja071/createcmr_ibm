@@ -43,8 +43,7 @@ public class NewZealandUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(NewZealandUtil.class);
 
-  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, "MAIL");
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, "MAIL");
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #", "Customer Name", "Customer Name Con't", "State");
 
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
