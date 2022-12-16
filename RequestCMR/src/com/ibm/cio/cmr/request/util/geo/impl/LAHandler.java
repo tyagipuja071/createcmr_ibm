@@ -2931,7 +2931,6 @@ public class LAHandler extends GEOHandler {
         PropertyUtils.copyProperties(dataRdc, data);
         dataRdc.setId(data.getId());
 
-        // CREATCMR-7923
         dataRdc.setCollectorNo(data.getCollectorNameNo());
 
         entityManager.merge(dataRdc);
