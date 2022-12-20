@@ -63,6 +63,16 @@ public class CheckListModel extends BaseModel {
   private String sectionD8;
   private String sectionD9;
   private String sectionD10;
+  private String sectionE1;
+  private String sectionE2;
+  private String sectionE3;
+  private String sectionE4;
+  private String sectionE5;
+  private String sectionE6;
+  private String sectionE7;
+  private String sectionE8;
+  private String sectionE9;
+  private String sectionE10;
 
   private String salesMgrId;
   private String freeTxtField1;
@@ -455,6 +465,86 @@ public class CheckListModel extends BaseModel {
 
   public void setSectionD10(String sectionD10) {
     this.sectionD10 = sectionD10;
+  }
+
+  public String getSectionE1() {
+    return sectionE1;
+  }
+
+  public void setSectionE1(String sectionE1) {
+    this.sectionE1 = sectionE1;
+  }
+
+  public String getSectionE2() {
+    return sectionE2;
+  }
+
+  public void setSectionE2(String sectionE2) {
+    this.sectionE2 = sectionE2;
+  }
+
+  public String getSectionE3() {
+    return sectionE3;
+  }
+
+  public void setSectionE3(String sectionE3) {
+    this.sectionE3 = sectionE3;
+  }
+
+  public String getSectionE4() {
+    return sectionE4;
+  }
+
+  public void setSectionE4(String sectionE4) {
+    this.sectionE4 = sectionE4;
+  }
+
+  public String getSectionE5() {
+    return sectionE5;
+  }
+
+  public void setSectionE5(String sectionE5) {
+    this.sectionE5 = sectionE5;
+  }
+
+  public String getSectionE6() {
+    return sectionE6;
+  }
+
+  public void setSectionE6(String sectionE6) {
+    this.sectionE6 = sectionE6;
+  }
+
+  public String getSectionE7() {
+    return sectionE7;
+  }
+
+  public void setSectionE7(String sectionE7) {
+    this.sectionE7 = sectionE7;
+  }
+
+  public String getSectionE8() {
+    return sectionE8;
+  }
+
+  public void setSectionE8(String sectionE8) {
+    this.sectionE8 = sectionE8;
+  }
+
+  public String getSectionE9() {
+    return sectionE9;
+  }
+
+  public void setSectionE9(String sectionE9) {
+    this.sectionE9 = sectionE9;
+  }
+
+  public String getSectionE10() {
+    return sectionE10;
+  }
+
+  public void setSectionE10(String sectionE10) {
+    this.sectionE10 = sectionE10;
   }
 
   public String getSalesMgrId() {

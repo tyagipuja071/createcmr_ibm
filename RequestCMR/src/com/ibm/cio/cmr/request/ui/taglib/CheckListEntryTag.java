@@ -45,8 +45,8 @@ public class CheckListEntryTag extends TagSupport {
       throw new JspException("section missing while number was specified.");
     }
 
-    if (this.section != null && this.section.compareTo("D") > 0) {
-      throw new JspException("Can only specify up to section D.");
+    if (this.section != null && this.section.compareTo("E") > 0) {
+      throw new JspException("Can only specify up to section E.");
     }
 
     if (this.number > 10) {
