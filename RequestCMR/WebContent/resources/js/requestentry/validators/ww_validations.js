@@ -1118,6 +1118,11 @@ var _vatHandler = null;
 }
 
 function setVatIndFieldsForGrp1AndNordx() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage == 'true') {
+    return;
+  }
+  
   var _vatHandler = null;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
