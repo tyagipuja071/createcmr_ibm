@@ -29,6 +29,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -99,16 +100,69 @@ public class NewZealandUtil extends AutomationUtil {
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     // get request admin and data
-    StringBuilder eleResults = new StringBuilder();
 
-    if (results != null && !results.isOnError()) {
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String custType = data.getCustGrp();
+    boolean isSourceSysIDBlank = StringUtils.isBlank(admin.getSourceSystId()) ? true : false;
+    if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getVat()) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
+        && "LOCAL".equalsIgnoreCase(custType) && !isSourceSysIDBlank) {
+      LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
+      // register vat service of Norway
+      AutomationResponse<NZBNValidationResponse> response = null;
+      String regex = "\\s+$";
+      String customerName = zs01.getCustNm1() + (StringUtils.isBlank(zs01.getCustNm2()) ? "" : " " + zs01.getCustNm2());
+
+      boolean custNmMatch = false;
+
+      LOG.debug("Checking CustNm with NZBN API to vrify CustNm update");
+      try {
+        response = getNZBNService(admin, data, zs01);
+      } catch (Exception e) {
+        if (response == null || !response.isSuccess()) {
+          LOG.debug("\nFailed to Connect to NZBN Service.");
+        }
+      }
+      if (response != null && response.isSuccess() && response.getRecord() != null) {
+        // custNm Validation
+        LOG.debug("\nSuccess to Connect to NZBN Service.");
+        if (StringUtils.isNotEmpty(response.getRecord().getName())) {
+          String responseCustNm = StringUtils.isBlank(response.getRecord().getName()) ? "" : response.getRecord().getName().replaceAll(regex, "");
+
+          if (customerName.equalsIgnoreCase(responseCustNm)) {
+            LOG.debug("\ncustNmMatch  = true to Connect to NZBN Service.");
+            custNmMatch = true;
+          }
+        }
+      }
+      if (custNmMatch) {
+        details.append("The Customer Name and Former Customer matched NZBN API.").append("\n");
+        results.setResults("Calculated.");
+
+      } else {
+        results.setResults("Requester check fail");
+        results.setOnError(true);
+        details.append("The Customer Name doesn't match NZBN API");
+        if (response != null && response.isSuccess() && response.getRecord() != null) {
+          details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
+          details.append(" - Name.:  " + response.getRecord().getName() + " \n");
+        }
+        // company proof
+        if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+          details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+        } else {
+          details.append("\nNo supporting documentation is provided by the requester for customer name " + " :" + customerName
+              + " update. Please provide Supporting documentation(Company Proof) as attachment.");
+        }
+        engineData.addNegativeCheckStatus("NZName", "The Customer Name doesn't match from NZBN API");
+      }
 
     } else {
-      eleResults.append("Error On Field Calculation.");
+      details.append("No specific fields to compute.\n");
+      results.setResults("Skipped");
     }
-    results.setResults(eleResults.toString());
     results.setDetails(details.toString());
-    results.setProcessOutput(overrides);
 
     return results;
   }
