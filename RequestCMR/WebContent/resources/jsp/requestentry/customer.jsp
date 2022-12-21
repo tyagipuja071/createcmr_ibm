@@ -497,8 +497,7 @@
        <p>                    
            <label for="vatInd">
             <cmr:fieldLabel fieldId="VATInd" />:
-             <cmr:delta text="${rdcdata.vatInd}" oldValue="${reqentry.vatInd}"/>
-             </label>
+            </label>
           <cmr:field fieldId="VATInd" id="vatInd" path="vatInd" tabId="MAIN_CUST_TAB" />         
         </p>
       </cmr:column>      
