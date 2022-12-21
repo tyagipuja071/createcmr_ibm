@@ -83,6 +83,9 @@ public class RequestUtils {
   public static final String STATUS_INPUT_REQUIRED = "Input Required";
   public static final String US_CMRISSUINGCOUNTRY = "897";
   private static Map<String, String> rejectionReasons = new HashMap<String, String>();
+  private static final String STATUS_CPR_24 = "CMR is now unblocked for 24 hours, you will receive completion email once it is blocked back.";
+  private static final String STATUS_CPR_48 = "CMR is now unblocked for 48 hours, you will receive completion email once it is blocked back.";
+  public static final List<String> EMEA_CNTRY_DACH = Arrays.asList("724", "618", "848");
 
   public static void refresh() {
     emailTemplate = null;
@@ -336,7 +339,7 @@ public class RequestUtils {
    */
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history, boolean excludeRequester,
       boolean legacyDirect) {
-    List<String> reqStatusFrMailNotif = Arrays.asList("PRJ", "COM");
+    List<String> reqStatusFrMailNotif = Arrays.asList("PRJ", "COM", "CPR");
     if (!reqStatusFrMailNotif.contains(admin.getReqStatus())) {
       return;
     }
@@ -572,7 +575,15 @@ public class RequestUtils {
       params.add(history.getCreateByNm() + " (" + history.getCreateById() + ")"); // {6}
     }
     params.add(CmrConstants.DATE_FORMAT().format(history.getCreateTs())); // {7}
-    params.add(histContent); // {8}
+
+    if ("CPR".equalsIgnoreCase(admin.getReqStatus()) && EMEA_CNTRY_DACH.contains(cmrIssuingCountry)) {
+      params.add(STATUS_CPR_24); // {8}
+    } else if ("CPR".equalsIgnoreCase(admin.getReqStatus())) {
+      params.add(STATUS_CPR_48); // {8}
+    } else {
+      params.add(histContent); // {8}
+    }
+
     params.add(directUrlLink); // {9}
     params.add(rejectReason); // {10}
     params.add(embeddedLink); // {11}
