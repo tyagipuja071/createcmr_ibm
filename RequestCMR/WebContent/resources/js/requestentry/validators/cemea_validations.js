@@ -2636,7 +2636,7 @@ function setAddressDetailsForView() {
 
 function reqReasonOnChangeAT() {
   var reqReason = FormManager.getActualValue('reqReason');
-  if (reqReason == 'IGF' && isZD01OrZP01ExistOnCMR()) {
+  if (reqReason == 'IGF' && isZD01OrZP01ExistOnCMR_AT()) {
     // FormManager.limitDropdownValues(FormManager.getField('custSubGrp'), [
     // 'BUSPR', 'COMME', 'GOVRN', 'IBMEM', 'XBP', 'XCOM', 'XGOV']);
     dojo.byId('radiocont_ZP02').style.display = 'inline-block';
@@ -2646,7 +2646,7 @@ function reqReasonOnChangeAT() {
     dojo.byId('radiocont_ZD02').style.display = 'none';
   }
   dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
-    if (value == 'IGF' && isZD01OrZP01ExistOnCMR()) {
+    if (value == 'IGF' && isZD01OrZP01ExistOnCMR_AT()) {
       // FormManager.limitDropdownValues(FormManager.getField('custSubGrp'), [
       // 'BUSPR', 'COMME', 'GOVRN', 'IBMEM', 'XBP', 'XCOM', 'XGOV']);
       dojo.byId('radiocont_ZP02').style.display = 'inline-block';
@@ -2659,7 +2659,7 @@ function reqReasonOnChangeAT() {
   });
 }
 
-function isZD01OrZP01ExistOnCMR() {
+function isZD01OrZP01ExistOnCMR_AT() {
   for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
     record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
     if (record == null && _allAddressData != null && _allAddressData[i] != null) {
