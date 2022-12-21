@@ -220,11 +220,11 @@
       <br>
     </cmr:chk-entry>
     <cmr:chk-entry number="2" section="E">
-      To the best of your knowledge or belief is your customer involved with the design, development, manufacturing, testing, etc. of any parts, components, or equipment of the tools that are used in the production, manufacturing, testing, etc. of semiconductors. 
+      To the best of your knowledge or belief is your customer involved with the design, development, manufacturing, testing, etc. of any parts, components, or equipment <span style="font-style:italic;text-decoration:underline">of the tools</span> that are used in the production, manufacturing, testing, etc. of semiconductors. 
       <br>
       <br>
       <span style="font-weight:bold">NOTE: </span>
-      This question is asking if the customer builds tools that are used in the semiconductor manufacturing process 
+      This question is asking if the customer builds <span style="text-decoration:underline">tools</span> that are <span style="text-decoration:underline">used in</span> the semiconductor manufacturing process 
       <br>
      </cmr:chk-entry>
   </cmr:chk-section>
