@@ -1112,29 +1112,36 @@ var _vatHandler = null;
   }
 }
 
-function setVatIndFieldsForGrp1AndNordx() {
+function isViewOnly() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnlyPage == 'true') {
+  return viewOnlyPage == 'true';
+}
+
+function isImportingFromQuickSearch() {
+  var quickSearch = new URLSearchParams(location.search).get('qs');
+  return quickSearch == "Y";
+}
+
+function isPrivateScenario() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  return ["PRICU", "PRIPE", "FIPRI", "DKPRI", "BEPRI", "CHPRI"].includes(custSubGrp);
+}
+
+function setVatIndFieldsForGrp1AndNordx() {
+  if (isViewOnly()) {
     return;
   }
-
-  var _vatHandler = null;
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  
   // CREATCMR-7944
-  if ("PRICU" == custSubGrp || "PRIPE" == custSubGrp || "FIPRI" == custSubGrp || 
-      "DKPRI" == custSubGrp || "BEPRI" == custSubGrp || "CHPRI" == custSubGrp) {
-    
+  if (isPrivateScenario()) {
     FormManager.setValue('vatInd', 'N');
     FormManager.enable('vatInd');
     FormManager.setValue('vat', '');
     FormManager.readOnly('vat');
   }
   // CREATCMR-7165
-  else {
+  else if (isImportingFromQuickSearch()) {
     var vat = FormManager.getActualValue('vat');
     var vatInd = FormManager.getActualValue('vatInd');
-
     if (vat != '' && vatInd == '') {
       FormManager.setValue('vatInd', 'T');
     } else if (vat == '' && vatInd != '' && vatInd != 'E') {
