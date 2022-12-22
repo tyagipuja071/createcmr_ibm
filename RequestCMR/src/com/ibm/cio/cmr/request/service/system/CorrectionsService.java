@@ -396,7 +396,7 @@ public class CorrectionsService extends BaseSimpleService<CorrectionsModel> {
       return false;
     }
     for (Field field : object.getClass().getDeclaredFields()) {
-      if (!"id".equals(field.getName()) && !Modifier.isStatic(field.getModifiers())) {
+      if (!Modifier.isStatic(field.getModifiers())) {
         field.setAccessible(true);
         Object value = field.get(object);
         if (value != null) {
