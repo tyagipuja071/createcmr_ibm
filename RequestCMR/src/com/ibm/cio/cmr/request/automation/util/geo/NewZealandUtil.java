@@ -105,9 +105,10 @@ public class NewZealandUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     String custType = data.getCustGrp();
-    boolean isSourceSysIDBlank = StringUtils.isBlank(admin.getSourceSystId()) ? true : false;
+    // boolean isSourceSysIDBlank = StringUtils.isBlank(admin.getSourceSystId())
+    // ? true : false;// && !isSourceSysIDBlank
     if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getVat()) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
-        && "LOCAL".equalsIgnoreCase(custType) && !isSourceSysIDBlank) {
+        && "LOCAL".equalsIgnoreCase(custType)) {
       LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
       // register vat service of Norway
       AutomationResponse<NZBNValidationResponse> response = null;
