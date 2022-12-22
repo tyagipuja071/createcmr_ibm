@@ -2634,7 +2634,7 @@ function changeAbbNmSpainOnScenario() {
       abbName = installingAddrName.ret1 != undefined ? 'IBM/'.concat(installingAddrName.ret1) : abbName;
       if (abbName.length > 22)
         abbName = abbName.substring(0, 22);
-    } else if ([ 'IGSGS', 'GOVIG', 'XIGS', 'THDIG' ].includes(custSubGrp) && installingAddrName.ret1 != undefined && !abbName.includes('IGS')) {
+    } else if ([ 'IGSGS', 'GOVIG', 'XIGS' ].includes(custSubGrp) && installingAddrName.ret1 != undefined && !abbName.includes('IGS')) {
       abbName = installingAddrName.ret1.length >= 18 ? installingAddrName.ret1.substring(0, 18).concat(' IGS') : installingAddrName.ret1.concat(' IGS');
     } else {
       var abbrevOnReq = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', {
@@ -2643,6 +2643,27 @@ function changeAbbNmSpainOnScenario() {
       abbName = abbrevOnReq.ret1;
     }
     FormManager.setValue('abbrevNm', abbName);
+
+    var custGrp = FormManager.getActualValue('custGrp');
+    var abbrevNm = FormManager.getActualValue('abbrevNm');
+    if (custGrp == 'CROSS' || custGrp == 'LOCAL') {
+      var custNm1Params1 = {
+        REQ_ID : reqId,
+        ADDR_TYPE : "ZI01",
+      };
+      var custNm1Result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', custNm1Params1);
+      var custNm1 = custNm1Result.ret1;
+
+      var custNm1Params2 = {
+        REQ_ID : reqId,
+        ADDR_TYPE : "ZS01",
+      };
+      var custNm1Result2 = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', custNm1Params2);
+      var custNm2 = custNm1Result2.ret1;
+      if (custNm1 != '' && custSubGrp == 'THDPT' || custSubGrp == 'THDIG') {
+        FormManager.setValue('abbrevNm', custNm2.substring(0, 9) + "/" + custNm1.substring(0, 10));
+      }
+    }
   }
 }
 function addValidatorForCollectionCdUpdateSpain() {
