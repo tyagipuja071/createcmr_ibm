@@ -96,8 +96,11 @@ public class APPDFConverter extends DefaultPDFConverter {
             if (textLength > 150) {
               padding = textLength / 80;
             }
-            if (items.indexOf(item) == 9) {
-              padding = textLength / 70;
+            if (items.indexOf(item) == 12 || items.indexOf(item) == 13) {
+              padding += 1;
+            }
+            if (items.indexOf(item) == 11) {
+              padding -= 2;
             }
             String text = item.getLabel() != null ? item.getLabel() : "";
             if (text.indexOf("\n") > 0) {
