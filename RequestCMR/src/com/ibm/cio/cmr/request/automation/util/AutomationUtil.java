@@ -653,7 +653,7 @@ public abstract class AutomationUtil {
     if (!dupReqIds.isEmpty()) {
       details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
       details.append(StringUtils.join(dupReqIds, "\n"));
-      engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
+      engineData.addRejectionComment("DUPR", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
       return false;
     } else {
       details.append("No duplicate requests found");
