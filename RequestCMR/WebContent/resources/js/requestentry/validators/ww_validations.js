@@ -1149,6 +1149,9 @@ function setVatIndFieldsForGrp1AndNordx() {
       FormManager.enable('vat');
     }
   }
+  if ('E' == FormManager.getActualValue('vatInd')) {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+  }
 }
 
 /* Register WW Validators */
