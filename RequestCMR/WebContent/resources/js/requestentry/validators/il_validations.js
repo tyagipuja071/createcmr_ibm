@@ -2720,18 +2720,20 @@ function hasDuplicates(array) {
 }
 
 function addressQuotationValidatorIsrael() {
-  // CREATCMR-788
-  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
-  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
-  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
-  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Cont' ]);
-  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
-  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Att. Person' ]);
-  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
-  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  // CREATCMR-788 & CREATCMR-7972
+  if (('ZS01', 'ZP01', 'ZD01').includes(FormManager.getActualValue('addrType'))) {
+    FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+    FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+    FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+    FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Cont' ]);
+    FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+    FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+    FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Att. Person' ]);
+    FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+    FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  }
 }
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
