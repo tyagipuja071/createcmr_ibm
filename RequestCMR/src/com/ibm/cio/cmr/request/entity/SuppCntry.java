@@ -92,6 +92,9 @@ public class SuppCntry extends BaseEntity<SuppCntryPK> implements Serializable {
   @Column(name = "DISABLE_CREATE_BY_MODEL")
   private String disableCreateByModel;
 
+  @Column(name = "HIDE_LOCAL_LANG_DATA")
+  private String hideLocalLangData;
+
   public String getNm() {
     return this.nm;
   }
@@ -202,6 +205,14 @@ public class SuppCntry extends BaseEntity<SuppCntryPK> implements Serializable {
 
   public void setDisableCreateByModel(String disableCreateByModel) {
     this.disableCreateByModel = disableCreateByModel;
+  }
+
+  public String getHideLocalLangData() {
+    return hideLocalLangData;
+  }
+
+  public void setHideLocalLangData(String hideLocalLangData) {
+    this.hideLocalLangData = hideLocalLangData;
   }
 
 }
