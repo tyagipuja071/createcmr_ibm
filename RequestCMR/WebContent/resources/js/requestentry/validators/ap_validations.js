@@ -860,8 +860,9 @@ function onCustSubGrpChange() {
     FormManager.readOnly('subIndustryCd');
     if (FormManager.getActualValue('viewOnlyPage') != 'true')
       FormManager.enable('isicCd');
-    setIsicCmrCreation();
+    
     setISBUScenarioLogic();
+    
 
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custSubGrpInDB = _pagemodel.custSubGrp;
@@ -1772,34 +1773,66 @@ var _isicHandler = null;
 function onIsicChangeHandler() {
   if (_isicHandler == null) {
     _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      onIsicChange();
+
     });
   }
-
 }
 
 function onIsicChange() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (reqType == 'C' && role == 'REQUESTER') {
-    if ((cmrIssuingCntry == '616' && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'AQSTN' || custSubGrp == 'SOFT' || custSubGrp == 'NRML'))
-        || (cmrIssuingCntry == '834' && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'AQSTN' || custSubGrp == 'SOFT' || custSubGrp == 'XAQST' || custSubGrp == 'XMKTP' || custSubGrp == 'XBLUM'))) {
-      var value = FormManager.getActualValue('isicCd');
-      console.log(value);
-      if (value == '9500') {
-        var res = cmr.showConfirm('setPrivate()', 'Does this customer belong to Consumer or Private Person ?', null, 'setIsic()', {
-          CANCEL : 'No',
-          OK : 'Yes'
-        });
+  var value = FormManager.getActualValue('isicCd');
+  var cmrResult = FormManager.getActualValue('findCmrResult');
+  var result = FormManager.getActualValue('findDnbResult')
+
+  if (result != '' && result == 'Accepted') {
+    var value = FormManager.getActualValue('isicCd');
+    if (reqType == 'C' && role == 'REQUESTER' && (custGrp == 'LOCAL' || custGrp == 'CROSS')) {
+      if ((cmrIssuingCntry == '834' && (custSubGrp == 'SPOFF' || custSubGrp == 'CROSS' || custSubGrp == 'XBLUM' || custSubGrp == 'XAQST' || custSubGrp == 'XMKTP' || custSubGrp == 'BLUMX'
+          || custSubGrp == 'MKTPC' || custSubGrp == 'AQSTN' || custSubGrp == 'SOFT' || custSubGrp == 'NRML' || custSubGrp == 'ECSYS' || custSubGrp == 'BUSPR' || custSubGrp == 'ASLOM'))
+          || (cmrIssuingCntry == '616' && (custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX' || custSubGrp == 'ESOSW' || custSubGrp == 'ECSYS' || custSubGrp == 'MKTPC' || custSubGrp == 'NRML'
+              || custSubGrp == 'CROSS' || custSubGrp == 'XAQST'))
+          || (cmrIssuingCntry == '744' && (custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX' || custSubGrp == 'ESOSW' || custSubGrp == 'MKTPC' || custSubGrp == 'NRML' || custSubGrp == 'CROSS'))) {
+        var value = FormManager.getActualValue('isicCd');
+        if (result != '' && result == 'Accepted') {
+          FormManager.readOnly('isicCd', value);
+        }
+        console.log(value);
+
+        if (value == '9500') {
+          var res = cmr.showConfirm('setPrivate()', 'Does this customer belong to Consumer or Private Person ?', null, 'setIsic()', {
+            CANCEL : 'No',
+            OK : 'Yes'
+          });
+        }
+        var requestId = FormManager.getActualValue('reqId');
+        qParams = {
+          REQ_ID : requestId,
+        };
+        var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+        var oldISIC = result.ret1;
+
+        if (value != '9500') {
+          FormManager.setValue('isicCd', oldISIC);
+          FormManager.readOnly('isicCd');
+        }
       }
-      if (value != '9500') {
-        setIsicCmrCreation();
+    }
+  } else {
+    if (cmrResult != '' && cmrResult == 'Accepted') {
+      var value = FormManager.getActualValue('isicCd');
+      if (custSubGrp == 'NRML' || custSubGrp == 'BLUMX' || custSubGrp == 'XBLUM' || custSubGrp == 'XAQST' || custSubGrp == 'XMKTP' || custSubGrp == 'AQSTN' || custSubGrp == 'ESOSW'
+          || custSubGrp == 'MKTPC' || custSubGrp == 'BUSPR' || custSubGrp == 'ECSYS' || custSubGrp == 'SPOFF' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS') {
+        FormManager.setValue('isicCd', '');
+        FormManager.enable('isicCd');
       }
     }
   }
 }
+
 
 function setPrivate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -4659,47 +4692,7 @@ function addressQuotationValidatorGCG() {
   }
 }
 
-// CREATCMR-7589
-function setIsicCmrCreation() {
-  var reqType = FormManager.getActualValue('reqType');
-  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var result = FormManager.getActualValue('findDnbResult');
-  var cmrResult = FormManager.getActualValue('findCmrResult');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var value = FormManager.getActualValue('isicCd');
-  if (result != '' && result == 'Accepted' && reqType == 'C' && (cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834')) {
-    if (custSubGrp == 'NRML' || custSubGrp == 'BLUMX' || custSubGrp == 'AQSTN' || custSubGrp == 'ESOSW' || custSubGrp == 'MKTPC') {
-      FormManager.readOnly('isicCd');
-      var requestId = FormManager.getActualValue('reqId');
-      qParams = {
-        REQ_ID : requestId,
-      };
-      var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
-      var oldISIC = result.ret1;
-      FormManager.setValue('isicCd', oldISIC);
-      FormManager.readOnly('isicCd');
-    }
-    if (FormManager.getActualValue('isicCd') != '') {
-      FormManager.readOnly('isicCd');
-    }
-  }
-  if (cmrResult != '' && cmrResult == 'Accepted' && reqType == 'C' && (cmrIssuingCntry == '616' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834')) {
-    var requestId = FormManager.getActualValue('reqId');
-    qParams = {
-      REQ_ID : requestId,
-    };
-    var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
-    var oldISIC = result.ret1;
-    if (FormManager.getActualValue('isicCd') == oldISIC) {
-      FormManager.enable('isicCd');
-    }
-    if (custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX' || custSubGrp == 'ASLOM' || custSubGrp == 'MKTPC' || custSubGrp == 'BUSPR' || custSubGrp == 'ECSYS' || custSubGrp == 'NRML') {
-      FormManager.enable('isicCd');
-      FormManager.setValue('isicCd', '');
-    }
-  }
-}
-
+  
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4832,9 +4825,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateStreetAddrCont2, [ SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
       SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ], null, true);
   // isic validation for Singapore and Australia
-  GEOHandler.addAfterConfig(onIsicChangeHandler, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO]);
-  GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO ]);
-  GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO ]);
+  GEOHandler.addAfterConfig(onIsicChangeHandler, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO]);
+  GEOHandler.addAfterConfig(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO ]);
+  GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO ]);
 
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForISA, GEOHandler.ISA);
@@ -4882,8 +4875,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-6825
   GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.APAC);
   GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.APAC);
-	// CREATCMR-7589
-	GEOHandler.addAfterTemplateLoad(setIsicCmrCreation, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.INDIA ]);
+	
   GEOHandler.addAfterConfig(addCustGrpHandler, GEOHandler.APAC_1);
   GEOHandler.addAddrFunction(displayVatRegistrartionStatus, [ SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(displayVatRegistrartionStatus,  [ SysLoc.SINGAPORE ] );
