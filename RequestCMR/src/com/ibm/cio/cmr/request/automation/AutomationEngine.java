@@ -331,6 +331,15 @@ public class AutomationEngine {
       if ("N".equals(setPPNFlag)) {
         sccIsValid = true;
       }
+    } else if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
+      if (engineData.get().isNZBNAPICheck() && engineData.get().getPendingChecks().containsKey("DnBMatch")) {
+        stopExecution = false;
+        engineData.get().getPendingChecks().remove("DnBMatch");
+      } else if (!engineData.get().isNZBNAPICheck() && !engineData.get().getPendingChecks().containsKey("DnBMatch")
+          && engineData.get().getPendingChecks().containsKey("NZName")) {
+        stopExecution = false;
+        engineData.get().getPendingChecks().remove("NZName");
+      }
     }
 
     LOG.debug("Automation elements executed for Request " + reqId);
