@@ -19,9 +19,7 @@ import javax.persistence.TemporalType;
  * @author RoopakChugh
  */
 @Entity
-@Table(
-    name = "SUPP_CNTRY",
-    schema = "CREQCMR")
+@Table(name = "SUPP_CNTRY", schema = "CREQCMR")
 public class SuppCntry extends BaseEntity<SuppCntryPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -40,74 +38,61 @@ public class SuppCntry extends BaseEntity<SuppCntryPK> implements Serializable {
 
   private String nm;
 
-  @Column(
-      name = "CREATE_DT")
+  @Column(name = "CREATE_DT")
   @Temporal(TemporalType.DATE)
   private Date createDt;
 
   private String cmt;
 
-  @Column(
-      name = "AUTO_PROC_ENABLED")
+  @Column(name = "AUTO_PROC_ENABLED")
   private String autoProcEnabled;
 
-  @Column(
-      name = "HOST_SYS_TYP")
+  @Column(name = "HOST_SYS_TYP")
   private String hostSysTyp;
 
-  @Column(
-      name = "SUPP_REQ_TYPE")
+  @Column(name = "SUPP_REQ_TYPE")
   private String suppReqType;
 
-  @Column(
-      name = "DEFAULT_LANDED_CNTRY")
+  @Column(name = "DEFAULT_LANDED_CNTRY")
   private String defaultLandedCntry;
 
-  @Column(
-      name = "PROCESSING_TYP")
+  @Column(name = "PROCESSING_TYP")
   private String processingTyp;
 
   /**
    * Automation Engine Indicator
    */
-  @Column(
-      name = "AUTO_ENGINE_INDC")
+  @Column(name = "AUTO_ENGINE_INDC")
   private String autoEngineIndc;
 
   /**
    * Recovery Direction
    */
-  @Column(
-      name = "RECOVERY_DIRECTION")
+  @Column(name = "RECOVERY_DIRECTION")
   private String recoveryDirection;
 
-  @Column(
-      name = "DNB_PRIMARY_INDC")
+  @Column(name = "DNB_PRIMARY_INDC")
   private String dnbPrimaryIndc;
 
   /**
    * Start from Quick Search
    */
-  @Column(
-      name = "START_QUICK_SEARCH")
+  @Column(name = "START_QUICK_SEARCH")
   private String startQuickSearch;
 
   /**
    * Tradestyle Name Usage
    */
-  @Column(
-      name = "TRADESTYLE_NM_USAGE")
+  @Column(name = "TRADESTYLE_NM_USAGE")
   private String tradestyleNmUsage;
 
   /**
    * Tradestyle Name Usage
    */
-  @Column(
-      name = "DISABLE_CREATE_BY_MODEL")
+  @Column(name = "DISABLE_CREATE_BY_MODEL")
   private String disableCreateByModel;
 
-  @Column(
-      name = "HIDE_LOCAL_LANG_DATA")
+  @Column(name = "HIDE_LOCAL_LANG_DATA")
   private String hideLocalLangData;
 
   public String getNm() {
