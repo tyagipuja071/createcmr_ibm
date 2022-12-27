@@ -116,6 +116,7 @@ public class NewZealandUtil extends AutomationUtil {
       String customerName = zs01.getCustNm1() + (StringUtils.isBlank(zs01.getCustNm2()) ? "" : " " + zs01.getCustNm2());
 
       boolean custNmMatch = false;
+      boolean matchesAddAPI = false;
 
       LOG.debug("Checking CustNm with NZBN API to vrify CustNm update");
       try {
@@ -136,10 +137,23 @@ public class NewZealandUtil extends AutomationUtil {
             custNmMatch = true;
           }
         }
+        String addressAll = zs01.getCustNm1() + (zs01.getCustNm2() == null ? "" : zs01.getCustNm2()) + zs01.getAddrTxt()
+            + (zs01.getAddrTxt2() == null ? "" : zs01.getAddrTxt2()) + (zs01.getStateProv() == null ? "" : zs01.getStateProv())
+            + (zs01.getCity1() == null ? "" : zs01.getCity1()) + (zs01.getPostCd() == null ? "" : zs01.getPostCd());
+        if (StringUtils.isNotEmpty(response.getRecord().getAddress())
+            && addressAll.replaceAll(regex, "").contains(response.getRecord().getAddress().replaceAll(regex, ""))
+            && StringUtils.isNotEmpty(response.getRecord().getCity())
+            && addressAll.replaceAll(regex, "").contains(response.getRecord().getCity().replaceAll(regex, ""))
+            && StringUtils.isNotEmpty(response.getRecord().getPostal())
+            && addressAll.replaceAll(regex, "").contains(response.getRecord().getPostal().replaceAll(regex, ""))) {
+          matchesAddAPI = true;
+          LOG.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
+        }
       }
-      if (custNmMatch) {
-        details.append("The Customer Name and Former Customer matched NZBN API.").append("\n");
+      if (custNmMatch && matchesAddAPI) {
+        details.append("The Customer Name and address matched NZBN API.").append("\n");
         results.setResults("Calculated.");
+        engineData.setNZBNAPICheck(true);
 
       } else {
         results.setResults("Requester check fail");

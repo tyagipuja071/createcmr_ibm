@@ -53,6 +53,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
 
   private int trackedNegativeCheckCount;
   private boolean trackNegativeChecks;
+  private boolean flagNZBNAPI;
   /**
    * 
    */
@@ -337,5 +338,13 @@ public class AutomationEngineData extends HashMap<String, Object> {
       }
       addNegativeCheckStatus(VAT_VERIFIED, StringUtils.isNotBlank(message) ? message : "");
     }
+  }
+
+  public boolean isNZBNAPICheck() {
+    return flagNZBNAPI;
+  }
+
+  public void setNZBNAPICheck(boolean flagNZBNAPI) {
+    this.flagNZBNAPI = flagNZBNAPI;
   }
 }
