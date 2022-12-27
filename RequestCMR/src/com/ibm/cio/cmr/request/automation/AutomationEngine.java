@@ -326,6 +326,23 @@ public class AutomationEngine {
       lastElementIndex++;
     }
 
+    boolean sccIsValid = false;
+    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+      String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
+      if ("N".equals(setPPNFlag)) {
+        sccIsValid = true;
+      }
+    } else if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
+      if (engineData.get().isNZBNAPICheck() && engineData.get().getPendingChecks().containsKey("DnBMatch")) {
+        stopExecution = false;
+        engineData.get().getPendingChecks().remove("DnBMatch");
+      } else if (!engineData.get().isNZBNAPICheck() && !engineData.get().getPendingChecks().containsKey("DnBMatch")
+          && engineData.get().getPendingChecks().containsKey("NZName")) {
+        stopExecution = false;
+        engineData.get().getPendingChecks().remove("NZName");
+      }
+    }
+
     LOG.debug("Automation elements executed for Request " + reqId);
 
     Admin admin = requestData.getAdmin();
