@@ -773,11 +773,17 @@ public class GermanyUtil extends AutomationUtil {
                           }
                           String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
                           if (!matches.isEmpty()) {
+                            boolean matchesDnb = false;
                             for (DnBMatchingResponse dnbRecord : matches) {
                               if ("Y".equals(dnbRecord.getOrgIdMatch()) && (StringUtils.isNotEmpty(custName) && StringUtils.isNotEmpty((dnbRecord.getDnbName()))
                                   && StringUtils.getLevenshteinDistance(custName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) <= 5)) {
                                 duns = dnbRecord.getDunsNo();
                                 isNegativeCheckNeedeed = false;
+                                matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+                                if (!matchesDnb) {
+                                  isNegativeCheckNeedeed = true;
+                                  engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
+                                }
                                 break;
                               }
                               isNegativeCheckNeedeed = true;

@@ -260,6 +260,23 @@ public class UKIUtil extends AutomationUtil {
             engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
             details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
           }
+        } else {
+          if (!StringUtils.isBlank(change.getNewData())) {
+            soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+            }
+            if (!matchesDnb) {
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
+              details.append("VAT # on the request did not match D&B\n");
+            } else {
+              details.append("VAT # on the request matches D&B\n");
+            }
+          }
         }
         break;
       case "INAC/NAC Code":

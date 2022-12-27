@@ -144,29 +144,29 @@ public class AustriaUtil extends AutomationUtil {
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
       case "VAT #":
-    	  if(requestData.getAddress("ZS01").getLandCntry().equals("GB")){
-    		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
-                  engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
-                  details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
-                  }
-            }else{
-            	if (!StringUtils.isBlank(change.getNewData())) {
-                    Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-                    List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-                    boolean matchesDnb = false;
-                    if (matches != null) {
-                      // check against D&B
-                      matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-                    }
-                    if (!matchesDnb) {
-                      cmdeReview = true;
-                      engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
-                      details.append("VAT # on the request did not match D&B\n");
-                    } else {
-                      details.append("VAT # on the request matches D&B\n");
-                    }
-                  }
+        if (requestData.getAddress("ZS01").getLandCntry().equals("GB")) {
+          if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)) {
+            engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+            details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+          }
+        } else {
+          if (!StringUtils.isBlank(change.getNewData())) {
+            Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
             }
+            if (!matchesDnb) {
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
+              details.append("VAT # on the request did not match D&B\n");
+            } else {
+              details.append("VAT # on the request matches D&B\n");
+            }
+          }
+        }
         break;
       case "Central order block code":
         if ("94".equals(change.getOldData()) || "94".equals(change.getNewData())) {
