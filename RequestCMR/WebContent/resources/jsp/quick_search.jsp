@@ -547,31 +547,36 @@ form.ibm-column-form .dijitTextBox INPUT {
                          
                        </div>
                      </td>
-                     <td>
-                       {{rec.name}} 
-                       <span ng-if="rec.altName" style="color:rgb(217,108,0)" title="Local Language Data">
-                         <br>
-                         {{rec.altName}}
-                       </span>
-                       <span ng-if="rec.restrictTo" class="restrict" title="Restriction Code">
-                         <br>
-                         {{rec.restrictTo}}
-                       </span>
-                     </td>
-                     <td>
-                       {{rec.streetAddress1}} {{rec.streetAddress2 ? ', '  +rec.streetAddress2: ''}}
-                       
-                       <br> {{rec.city}} {{rec.stateProv ? ', ' + rec.stateProv : ''}}
-                       <br> {{rec.countryCd}} {{rec.postCd}}
-                       <span ng-if="rec.altName" style="color:rgb(217,108,0)" title="Local Language Data">
-                         <br>
-                         {{rec.altStreet}}
-                         <br>
-                         {{rec.altCity}}
-                       </span>
-                         
-                       
-                     </td>
+                    <td>
+					   <div style="color:black">
+					      {{rec.name}} 
+					      <span ng-hide="rec.recType == 'CMR' && rec.cmrNo.indexOf('P') == 0 && hideLocalLangData">
+					      <span ng-if="rec.altName" style="color:rgb(128, 128, 128)" title="Local Language Data">
+					      <br>
+					      {{rec.altName}}
+					      </span>
+					      </span>
+					      <span ng-if="rec.restrictTo" class="restrict" title="Restriction Code">
+					      <br>
+					      {{rec.restrictTo}}
+					      </span>
+					   </div>
+					</td>
+					<td>
+					   <div style="color:black">
+					      {{rec.streetAddress1}} {{rec.streetAddress2 ? ', '  +rec.streetAddress2: ''}}
+					      <br> {{rec.city}} {{rec.stateProv ? ', ' + rec.stateProv : ''}}
+					      <br> {{rec.countryCd}} {{rec.postCd}}
+					      <span ng-hide="rec.recType == 'CMR' && rec.cmrNo.indexOf('P') == 0 && hideLocalLangData">
+					      <span ng-if="rec.altName" style="color:rgb(128, 128, 128)" title="Local Language Data">
+					      <br>
+					      {{rec.altStreet}}
+					      <br>
+					      {{rec.altCity}}
+					      </span>
+					      </span>                        
+					   </div>
+					</td>
                      <td>
                        <span ng-show="rec.recType == 'CMR'">{{rec.vat ?  rec.vat +' (VAT Number)' : ''}}</span> 
                        <span ng-show="rec.recType == 'DNB'">
