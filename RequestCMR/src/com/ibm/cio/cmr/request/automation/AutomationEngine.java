@@ -334,14 +334,7 @@ public class AutomationEngine {
         sccIsValid = true;
       }
     } else if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
-      if (engineData.get().isNZBNAPICheck() && engineData.get().getPendingChecks().containsKey("DnBMatch")) {
-        stopExecution = false;
-        engineData.get().getPendingChecks().remove("DnBMatch");
-      } else if (!engineData.get().isNZBNAPICheck() && !engineData.get().getPendingChecks().containsKey("DnBMatch")
-          && engineData.get().getPendingChecks().containsKey("NZName")) {
-        stopExecution = false;
-        engineData.get().getPendingChecks().remove("NZName");
-      }
+      checkNZBNAPI(stopExecution, actionsOnError);
     }
 
     LOG.debug("Automation elements executed for Request " + reqId);
@@ -622,6 +615,36 @@ public class AutomationEngine {
     entityManager.merge(admin);
     entityManager.flush();
     LOG.debug("Automation engine for Request " + reqId + " finished");
+  }
+
+  /**
+   * Check the NZBN API and DNB result to judge new result
+   * 
+   * @param boolean
+   *          stopExecution
+   * @param List<ActionOnError>
+   *          actionsOnError
+   * @return
+   * @throws @throws
+   */
+  private void checkNZBNAPI(boolean stopExecution, List<ActionOnError> actionsOnError) {
+    if (engineData.get().isNZBNAPICheck()
+        && (engineData.get().getPendingChecks().containsKey("DnBMatch") || engineData.get().getPendingChecks().containsKey("DNBCheck"))) {
+      stopExecution = false;
+      if (engineData.get().getPendingChecks().containsKey("DnBMatch")) {
+        engineData.get().getPendingChecks().remove("DnBMatch");
+        if (actionsOnError != null && actionsOnError.size() > 0)
+          actionsOnError.remove(0);
+      }
+      if (engineData.get().getPendingChecks().containsKey("DNBCheck"))
+        engineData.get().getPendingChecks().remove("DNBCheck");
+    } else if (!engineData.get().isNZBNAPICheck() && !engineData.get().getPendingChecks().containsKey("DnBMatch")
+        && !engineData.get().getPendingChecks().containsKey("DNBCheck") && engineData.get().getPendingChecks().containsKey("NZName")) {
+      stopExecution = false;
+      engineData.get().getPendingChecks().remove("NZName");
+      if (actionsOnError != null && actionsOnError.size() > 0)
+        actionsOnError.remove(0);
+    }
   }
 
   /**
