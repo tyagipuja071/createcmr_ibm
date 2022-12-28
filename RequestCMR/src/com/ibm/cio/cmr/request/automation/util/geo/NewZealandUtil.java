@@ -109,7 +109,10 @@ public class NewZealandUtil extends AutomationUtil {
     String custType = data.getCustGrp();
     // boolean isSourceSysIDBlank = StringUtils.isBlank(admin.getSourceSystId())
     // ? true : false;// && !isSourceSysIDBlank
-    if ("C".equals(admin.getReqType()) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry()) && "LOCAL".equalsIgnoreCase(custType)) {
+
+    if ("C".equals(admin.getReqType()) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry()) && "LOCAL".equalsIgnoreCase(custType)
+        && (engineData.getPendingChecks() == null || engineData.getPendingChecks() != null && !engineData.getPendingChecks().containsKey("DnBMatch")
+            && !engineData.getPendingChecks().containsKey("DNBCheck"))) {
       LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
       // register vat service of Norway
       AutomationResponse<NZBNValidationResponse> response = null;
