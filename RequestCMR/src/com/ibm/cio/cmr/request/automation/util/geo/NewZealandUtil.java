@@ -91,7 +91,9 @@ public class NewZealandUtil extends AutomationUtil {
       details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
       details.append("This Request will be routed to CMDE.\n");
       engineData.addRejectionComment("OTH", "This Request will be routed to CMDE.", "", "");
-      return false;
+      admin.setCompVerifiedIndc("Y");
+      entityManager.merge(admin);
+      entityManager.flush();
     }
     return true;
   }
