@@ -2326,9 +2326,18 @@ function setPPSCEID() {
   var reqType = FormManager.getActualValue('reqType');
   checkAndAddValidator('ppsceid', LATINNORDX, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   checkAndAddValidator('ppsceid', lowercaseLatinValidatorNordx, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  var role = null;
+
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
   if (reqType == 'C' && custSubType != '' && custSubType != undefined && custSubType != null) {
     if (custSubType.includes('BUS')) {
-      FormManager.enable('ppsceid');
+      if (role == 'Viewer') {
+        FormManager.readOnly('ppsceid');
+      } else {
+        FormManager.enable('ppsceid');
+      }
       checkAndAddValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.readOnly('ppsceid');
