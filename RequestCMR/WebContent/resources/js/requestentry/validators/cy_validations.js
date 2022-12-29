@@ -139,6 +139,7 @@ function addVATDisabler() {
     if (req == 'C') {
       return;
     }
+    var vat = FormManager.getActualValue('vat');
 
     FormManager.enable('vat');
 
@@ -151,7 +152,12 @@ function addVATDisabler() {
     }
 
     if (roleCheck && reqCheck) {
-      if (role == 'REQUESTER' && req == 'U') {
+     /* if (role == 'REQUESTER' && req == 'U') {
+        FormManager.readOnly('vat');
+      }
+      clearInterval(interval);
+    }*/
+      if (role == 'REQUESTER' && vat != "") {
         FormManager.readOnly('vat');
       }
       clearInterval(interval);
