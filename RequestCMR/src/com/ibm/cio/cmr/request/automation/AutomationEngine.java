@@ -638,12 +638,6 @@ public class AutomationEngine {
       }
       if (engineData.get().getPendingChecks().containsKey("DNBCheck"))
         engineData.get().getPendingChecks().remove("DNBCheck");
-    } else if (!engineData.get().isNZBNAPICheck() && !engineData.get().getPendingChecks().containsKey("DnBMatch")
-        && !engineData.get().getPendingChecks().containsKey("DNBCheck") && engineData.get().getPendingChecks().containsKey("NZName")) {
-      stopExecution = false;
-      engineData.get().getPendingChecks().remove("NZName");
-      if (actionsOnError != null && actionsOnError.size() > 0)
-        actionsOnError.remove(0);
     }
   }
 
