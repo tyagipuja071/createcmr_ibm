@@ -528,7 +528,7 @@ function addGRAddressTypeValidator() {
             }
           }
 
-          if (zs01Cnt == 0 || zp01Cnt == 0 || zd01Cnt == 0 || zi01Cnt == 0) {
+          if (zp01Cnt == 0) {
             return new ValidationResult(null, false, 'Local Language translation of Sold-to is required');
           } else if (zs01Cnt > 1) {
             return new ValidationResult(null, false, 'Only one Sold To address is allowed.');
