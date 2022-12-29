@@ -1151,8 +1151,11 @@ function setVatIndFieldsForGrp1AndNordx() {
     if (vat != '' && vatInd == '') {
       FormManager.setValue('vatInd', 'T');
     } else if (vat == '' && vatInd != '' && vatInd != 'E') {
-      FormManager.setValue('vatInd', '');
-      FormManager.enable('vat');
+	  // CREATCMR-7980 vatInd not imported for update request.
+	  if( FormManager.getActualValue('reqType')!='U'){
+        FormManager.setValue('vatInd', '');
+        FormManager.enable('vat');
+      }
     }
   }
   if ('E' == FormManager.getActualValue('vatInd')) {
