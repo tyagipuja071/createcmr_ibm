@@ -220,6 +220,9 @@ function addVATDisabler() {
     var role = FormManager.getActualValue('userRole').toUpperCase();
     var req = FormManager.getActualValue('reqType').toUpperCase();
     var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+    
+    var checkFlag = FormManager.getActualValue('cmrNo');
+    var vatCheck = FormManager.getActualValue('vat');
 
     FormManager.enable('vat');
 
@@ -232,17 +235,23 @@ function addVATDisabler() {
     }
 
     if (roleCheck && reqCheck) {
-      if (role == 'REQUESTER' && req == 'U') {
+      /*if (role == 'REQUESTER' && req == 'U') {
+        FormManager.readOnly('vat');
+      }
+      clearInterval(interval);
+    } */
+      if (role == 'REQUESTER' && req == 'U' && vatCheck != "") {
         FormManager.readOnly('vat');
       }
       clearInterval(interval);
     }
-
+      
     if (viewOnlyPage == 'true') {
       FormManager.readOnly('vat');
     }
   }, 1000);
 }
+
 
 /**
  * Add Latin character validation for address fields
