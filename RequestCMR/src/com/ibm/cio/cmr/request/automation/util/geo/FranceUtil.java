@@ -1282,6 +1282,7 @@ public class FranceUtil extends AutomationUtil {
       boolean checkBluepages, RequestData reqData) {
     EntityManager entityManager = JpaManager.getEntityManager();
     boolean legalEndingExists = false;
+    Data data = reqData.getData();
     for (Addr addr : reqData.getAddresses()) {
       String customerName = getCustomerFullName(addr);
       if (hasLegalEndings(customerName)) {
@@ -1318,6 +1319,8 @@ public class FranceUtil extends AutomationUtil {
 
     PrivatePersonCheckResult checkResult = chkPrivatePersonRecordFR(country, landCntry, name, checkBluepages, reqData.getData());
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
+    
+    String scenario = data.getCustSubGrp();
 
     switch (checkStatus) {
     case BluepagesError:
@@ -1333,9 +1336,11 @@ public class FranceUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
       break;
     case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
-      return false;
+      if (SCENARIO_IBM_EMPLOYEE.equalsIgnoreCase(scenario)) {
+        engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+        details.append("Employee details not found in IBM BluePages.").append("\n");
+        return false;
+      }
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
       break;
