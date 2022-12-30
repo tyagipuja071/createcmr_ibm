@@ -57,6 +57,7 @@ public class NewZealandUtil extends AutomationUtil {
   private static final String SCENARIO_ESOSW = "ESOSW";
   private static final String SCENARIO_ECOSYS = "ECSYS";
   private static final String SCENARIO_CROSS_FOREIGN = "CROSS";
+  private static final List<String> RELEVANT_SCENARIO = Arrays.asList(SCENARIO_PRIVATE_CUSTOMER, SCENARIO_DUMMY, SCENARIO_INTERNAL);
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -107,12 +108,13 @@ public class NewZealandUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     String custType = data.getCustGrp();
+    String scenario = data.getCustSubGrp();
     // boolean isSourceSysIDBlank = StringUtils.isBlank(admin.getSourceSystId())
     // ? true : false;// && !isSourceSysIDBlank
 
-    if ("C".equals(admin.getReqType()) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry()) && "LOCAL".equalsIgnoreCase(custType)
-        && (engineData.getPendingChecks() == null || engineData.getPendingChecks() != null && !engineData.getPendingChecks().containsKey("DnBMatch")
-            && !engineData.getPendingChecks().containsKey("DNBCheck"))) {
+    if ("C".equals(admin.getReqType()) && !RELEVANT_SCENARIO.contains(scenario) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
+        && "LOCAL".equalsIgnoreCase(custType) && engineData.getPendingChecks() != null
+        && (engineData.getPendingChecks().containsKey("DnBMatch") || engineData.getPendingChecks().containsKey("DNBCheck"))) {
       LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
       // register vat service of Norway
       AutomationResponse<NZBNValidationResponse> response = null;
@@ -161,7 +163,10 @@ public class NewZealandUtil extends AutomationUtil {
 
       } else {
         results.setResults("Requester check fail");
-        results.setOnError(true);
+        // results.setOnError(true);
+        admin.setCompVerifiedIndc("Y");
+        entityManager.merge(admin);
+        entityManager.flush();
         details.append("The Customer Name doesn't match NZBN API");
         if (response != null && response.isSuccess() && response.getRecord() != null) {
           details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
