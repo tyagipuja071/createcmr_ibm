@@ -883,9 +883,6 @@ function autoSetVAT(_custType, custTypeinDB) {
 
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
-
-    
-
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -2072,18 +2069,17 @@ function addTurkishCharValidator() {
 }
 
 function setEconomicCode() {
-  if (_economicCdHandler == null) {
-    _economicCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      FormManager.setValue('economicCd', '0' + FormManager.getActualValue('subIndustryCd'));
-    });
-  }
-  if (_economicCdHandler && _economicCdHandler[0]) {
-    _economicCdHandler[0].onChange();
-  }
-
-  FormManager.readOnly('economicCd');
-  if (FormManager.getActualValue('subIndustryCd') != '') {
-    FormManager.setValue('economicCd', '0' + FormManager.getActualValue('subIndustryCd'));
+  var requestId = FormManager.getActualValue('reqId');
+  qParams = {
+    REQ_ID : requestId,
+  };
+  var result = cmr.query('GET.ECONOMIC_CD_BY_REQID', qParams);
+  var economicCdResult = result.ret1;
+  var economicCd = FormManager.getActualValue('economicCd');
+  if (economicCdResult == '') {
+    FormManager.setValue('economicCd', '');
+  } else {
+    FormManager.getActualValue('economicCd');
   }
 }
 
@@ -9389,4 +9385,5 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.TURKEY ], null, true);
+  GEOHandler.addAfterConfig(setEconomicCode, [ SysLoc.TURKEY ]);
 });
