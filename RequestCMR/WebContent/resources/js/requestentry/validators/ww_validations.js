@@ -1123,8 +1123,7 @@ function isViewOnly() {
 }
 
 function isImportingFromQuickSearch() {
-  var quickSearch = new URLSearchParams(location.search).get('qs');
-  return quickSearch == "Y";
+  return dojo.cookie('qs') == 'Y' || new URLSearchParams(location.search).get('qs') == 'Y';
 }
 
 function isPrivateScenario() {
@@ -1136,6 +1135,9 @@ function setVatIndFieldsForGrp1AndNordx() {
   if (isViewOnly()) {
     return;
   }
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+
   // CREATCMR-7944
   if (isPrivateScenario()) {
     FormManager.setValue('vatInd', 'N');
@@ -1145,19 +1147,21 @@ function setVatIndFieldsForGrp1AndNordx() {
   }
   // CREATCMR-7165
   else if (isImportingFromQuickSearch()) {
-    var vat = FormManager.getActualValue('vat');
-    var vatInd = FormManager.getActualValue('vatInd');
-
+    dojo.cookie('qs', 'N');
     if (vat != '' && vatInd == '') {
       FormManager.setValue('vatInd', 'T');
-    } else if (vat == '' && vatInd != '' && vatInd != 'E') {
-	  // CREATCMR-7980 vatInd not imported for update request.
-	  if( FormManager.getActualValue('reqType')!='U'){
+    } else if (vat == '') {
+  	  // CREATCMR-7980 vatInd not imported for update request.
+  	  if (FormManager.getActualValue('reqType') != 'U') {
         FormManager.setValue('vatInd', '');
         FormManager.enable('vat');
-      }
+  	  }
     }
+  } else if (vatInd == 'N') {
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
   }
+  
   if ('E' == FormManager.getActualValue('vatInd')) {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
