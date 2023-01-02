@@ -548,9 +548,9 @@ form.ibm-column-form .dijitTextBox INPUT {
                        </div>
                      </td>
                     <td>
-					   <div style="color:black">
+					   <div style="color:black; font-weight: bold">
 					      {{rec.name}} 
-					      <span ng-hide="rec.recType == 'CMR' && rec.cmrNo.indexOf('P') == 0 && hideLocalLangData">
+					      <span style="font-weight: normal" ng-hide="rec.recType == 'CMR' && rec.cmrNo.indexOf('P') == 0 && hideLocalLangData">
 					      <span ng-if="rec.altName" style="color:rgb(128, 128, 128)" title="Local Language Data">
 					      <br>
 					      {{rec.altName}}
@@ -563,11 +563,11 @@ form.ibm-column-form .dijitTextBox INPUT {
 					   </div>
 					</td>
 					<td>
-					   <div style="color:black">
+					   <div style="color:black; font-weight: bold">
 					      {{rec.streetAddress1}} {{rec.streetAddress2 ? ', '  +rec.streetAddress2: ''}}
 					      <br> {{rec.city}} {{rec.stateProv ? ', ' + rec.stateProv : ''}}
 					      <br> {{rec.countryCd}} {{rec.postCd}}
-					      <span ng-hide="rec.recType == 'CMR' && rec.cmrNo.indexOf('P') == 0 && hideLocalLangData">
+					      <span style="font-weight: normal" ng-hide="rec.recType == 'CMR' && rec.cmrNo.indexOf('P') == 0 && hideLocalLangData">
 					      <span ng-if="rec.altName" style="color:rgb(128, 128, 128)" title="Local Language Data">
 					      <br>
 					      {{rec.altStreet}}
@@ -578,8 +578,8 @@ form.ibm-column-form .dijitTextBox INPUT {
 					   </div>
 					</td>
                      <td>
-                       <span ng-show="rec.recType == 'CMR'">{{rec.vat ?  rec.vat +' (VAT Number)' : ''}}</span> 
-                       <span ng-show="rec.recType == 'DNB'">
+                       <span style="color:black; font-weight: bold" ng-show="rec.recType == 'CMR'">{{rec.vat ?  rec.vat +' (VAT Number)' : ''}}</span> 
+                       <span style="color:black; font-weight: bold" ng-show="rec.recType == 'DNB'">
                          <div ng-repeat="orgId in parseVat(rec.vat)">
                            {{orgId}}
                          </div>
