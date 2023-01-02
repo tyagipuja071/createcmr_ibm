@@ -9025,6 +9025,78 @@ function clientTierValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+// creatcmr-6032
+function vatValidatorTR() {
+  console.log('>>Running VAT validation for Turkey.');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custGrp = FormManager.getActualValue('custGrp');
+        var vat = FormManager.getActualValue('vat');
+        var reqId = FormManager.getActualValue('reqId');
+        var cmrResult = FormManager.getActualValue('findCmrResult');
+        var dnbResult = FormManager.getActualValue('findDnbResult');
+        var districts = [ 'GAZIMAGUSA', 'GIRNE', 'GUZELYURT', 'YENI ISKELE', 'LEFKE', 'LEFKOSA' ];
+        var soldToDistrict = null;
+        var vatPattern = null;
+        var vatDistrictChkUpdate = true;
+        if (_allAddressData.length > 0) {
+          for (var i = 0; i < _allAddressData.length; i++) {
+            if (_allAddressData[i].addrType[0] == 'ZS01') {
+              soldToDistrict = _allAddressData[i].dept[0];
+            }
+          }
+        }
+        var requestId = FormManager.getActualValue('reqId');
+        qParams = {
+          REQ_ID : requestId,
+        };
+        var result = cmr.query('GET.VAT_OLD_BY_REQID', qParams);
+        var oldVAT = result.ret1;
+        qParams = {
+          REQ_ID : requestId,
+        };
+        var result = cmr.query('GET.OLD_ZS01_DEPT_BY_REQID', qParams);
+        var oldZS01DEPT = result.ret1;
+
+        if (result.ret1 == '' && result.ret1 != null) {
+          vatDistrictChkUpdate = true;
+        }
+        if ((cmrResult != '' && cmrResult == 'Accepted') || (dnbResult != '' && cmrResult == 'Accepted')) {
+          if (oldVAT == FormManager.getActualValue('vat') && oldZS01DEPT == soldToDistrict) {
+            return new ValidationResult(null, true);
+          }
+        }
+        if (soldToDistrict != null && districts.includes(soldToDistrict.toUpperCase()) && (reqType == 'C' || (reqType == 'U' && vatDistrictChkUpdate))) {
+          vatPattern = /^[0-9]{9}$/;
+          if (vat.match(vatPattern) != null && vat.match(vatPattern).length > 0) {
+            return new ValidationResult(null, true);
+          } else {
+            if (vat != '' || oldVAT != '' || (oldVAT != '' && oldZS01DEPT != soldToDistrict)) {
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, 'Format for VAT is incorrect. Correct format is 999999999.');
+            }
+          }
+        } else {
+          if (vat.match(/^[0-9]{10}$/) || vat.match(/^[0-9]{11}$/)) {
+            return new ValidationResult(null, true);
+          }
+          if (vat != '' || oldVAT != '' || (oldVAT != '' && oldZS01DEPT != soldToDistrict)) {
+            return new ValidationResult({
+              id : 'vat',
+              type : 'text',
+              name : 'vat'
+            }, false, 'Invalid VAT for TR. Length should be 10, or 11 characters long.');
+          }
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
 function addressQuotationValidatorTR() {
   // CREATCMR-788
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
