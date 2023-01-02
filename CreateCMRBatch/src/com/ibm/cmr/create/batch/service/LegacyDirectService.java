@@ -1411,6 +1411,13 @@ public class LegacyDirectService extends TransConnService {
         legacyAddrPk.setCustomerNo(cmrNo);
         legacyAddrPk.setSofCntryCode(cntry);
         String newSeqNo = StringUtils.leftPad(Integer.toString(seqNo), 5, '0');
+        
+        // CREATCMR - 8014 -> for API Requests
+    	String reqAddrSeq = addr.getId().getAddrSeq(); 
+        if(StringUtils.isNotEmpty(reqAddrSeq) && reqAddrSeq.length() < 5) {
+        	String paddedSeq = StringUtils.leftPad(reqAddrSeq, 5, '0');
+        	addr.getId().setAddrSeq(paddedSeq);
+        }
         // Mukesh:Story 1698123
         if ("00001".equals(addr.getId().getAddrSeq()))
           legacyAddrPk.setAddrNo(newSeqNo);
