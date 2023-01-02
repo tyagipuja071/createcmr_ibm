@@ -42,6 +42,21 @@ function afterConfigForCND() {
   addressQuotationValidatorCND();
 }
 
+function modeOfPaymentAndOrderBlockCdHandling() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+    FormManager.addValidator('modeOfPayment', Validators.REQUIRED, [ 'Credit Code' ], 'MAIN_CUST_TAB');
+    // FormManager.addValidator('ordBlk', Validators.REQUIRED, [ 'Order Block
+    // Code' ], 'MAIN_CUST_TAB');
+  } else {
+    FormManager.resetValidations('modeOfPayment');
+    FormManager.setValue('modeOfPayment', 'A001');
+    FormManager.resetValidations('ordBlk');
+    FormManager.readOnly('modeOfPayment');
+    FormManager.readOnly('ordBlk');
+  }
+}
+
 function setClientTierValues() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -240,4 +255,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CND );
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CND );
   GEOHandler.registerValidator(addCtcObsoleteValidator,GEOHandler.CND , null, true);
+  GEOHandler.addAfterConfig(modeOfPaymentAndOrderBlockCdHandling, GEOHandler.CND);
 });
