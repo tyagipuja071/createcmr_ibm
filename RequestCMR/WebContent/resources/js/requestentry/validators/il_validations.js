@@ -74,6 +74,7 @@ function afterConfigForIsrael() {
     if (_addrTypeHandler[i] == null) {
       _addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesIL[i]), 'onClick', function(value) {
         setCustPhone(value);
+        addressQuotationValidatorIsrael();
       });
     }
   }
@@ -126,8 +127,6 @@ function afterConfigForIsrael() {
     }
   }
   limitMODValues();
-  // CREATCMR-788
-  addressQuotationValidatorIsrael();
 }
 
 function setChecklistStatus() {
@@ -2717,18 +2716,32 @@ function hasDuplicates(array) {
 }
 
 function addressQuotationValidatorIsrael() {
-  // CREATCMR-788
-  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
-  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
-  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
-  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Cont' ]);
-  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
-  FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Att. Person' ]);
-  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
-  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  // CREATCMR-788 & CREATCMR-7972
+  if (!['ZS01', 'ZP01', 'ZD01'].includes(FormManager.getActualValue('addrType'))) {
+    FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
+    FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+    FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
+    FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Cont' ]);
+    FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
+    FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+    FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Att. Person' ]);
+    FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
+    FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  } else {
+    FormManager.removeValidator('abbrevNm', Validators.NO_QUOTATION);
+    FormManager.removeValidator('abbrevLocn', Validators.NO_QUOTATION);
+    FormManager.removeValidator('custNm1', Validators.NO_QUOTATION);
+    FormManager.removeValidator('custNm2', Validators.NO_QUOTATION);
+    FormManager.removeValidator('addrTxt', Validators.NO_QUOTATION);
+    FormManager.removeValidator('addrTxt2', Validators.NO_QUOTATION);
+    FormManager.removeValidator('city1', Validators.NO_QUOTATION);
+    FormManager.removeValidator('postCd', Validators.NO_QUOTATION);
+    FormManager.removeValidator('dept', Validators.NO_QUOTATION);
+    FormManager.removeValidator('poBox', Validators.NO_QUOTATION);
+    FormManager.removeValidator('custPhone', Validators.NO_QUOTATION);
+  }
 }
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
@@ -2818,7 +2831,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(inacValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateLandedCountry, [ SysLoc.ISRAEL ], null, true);
-
+  
   GEOHandler.addAfterTemplateLoad(preTickVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setStreetContBehavior, [ SysLoc.ISRAEL ]);
