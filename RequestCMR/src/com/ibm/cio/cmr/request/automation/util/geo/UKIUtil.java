@@ -23,6 +23,7 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -30,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -65,6 +67,7 @@ public class UKIUtil extends AutomationUtil {
   private static final List<String> SCOTLAND_POST_CD = Arrays.asList("AB", "KA", "DD", "KW", "DG", "KY", "EH", "ML", "FK", "PA", "G1", "G2", "G3",
       "G4", "G5", "G6", "G7", "G8", "G9", "PH", "TD", "IV");
   public static final String NORTHERN_IRELAND_POST_CD = "BT";
+  public static boolean covCalculatedFromRdc = false;
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -622,12 +625,25 @@ public class UKIUtil extends AutomationUtil {
       overrides.clearOverrides();
       UkiFieldsContainer fields = null;
       if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
-        fields = calculate32SValuesForUK(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), requestData);
+        if (isCoverageCalculated) {
+          fields = getSBOSalesRepForUK(entityManager, data.getIsuCd(), data.getClientTier(), null, requestData);
+        } else {
+          fields = getSBOSalesRepForUK(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), requestData);
+        }
       } else if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
-        fields = calculate32SValuesForIE(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), data.getCmrIssuingCntry());
+        if (isCoverageCalculated) {
+          fields = getSBOSalesRepForUK(entityManager, data.getIsuCd(), data.getClientTier(), null, requestData);
+        } else {
+          fields = getSBOSalesRepForIE(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), requestData);
+        }
       }
+
       if (fields != null) {
-        details.append("Coverage calculated successfully using 34Q logic.").append("\n");
+        if (covCalculatedFromRdc) {
+          details.append("Coverage calculated successfully from found CMRs.").append("\n");
+        } else {
+          details.append("Coverage calculated successfully using 34Q logic.").append("\n");
+        }
         details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
         details.append("SBO : " + fields.getSbo()).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
@@ -641,7 +657,7 @@ public class UKIUtil extends AutomationUtil {
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else {
-        String msg = "Coverage cannot be calculated. No valid 34Q mapping found from request data.";
+        String msg = "Coverage cannot be calculated. No valid 34Q mapping or existing CMRs found from request data.";
         details.append(msg);
         results.setResults("Cannot Calculate");
         results.setDetails(details.toString());
@@ -652,12 +668,45 @@ public class UKIUtil extends AutomationUtil {
 
   }
 
-  private UkiFieldsContainer calculate32SValuesForUK(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
+  private UkiFieldsContainer getSBOSalesRepForUK(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
       RequestData requestData) {
 
-    Addr zi01 = requestData.getAddress("ZI01");
+    // Retrieving SBO Sales Rep from existing CMRs
+    String salesRep = "";
+    String sbo = "";
+    UkiFieldsContainer container = new UkiFieldsContainer();
+    String cmrIssuingCntry = requestData.getData().getCmrIssuingCntry();
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    String covSql = ExternalizedQuery.getSql("AUTO.COV.GET_COV_FROM_BG_ES_UK");
+    PreparedQuery queryCov = new PreparedQuery(entityManager, covSql);
 
-    String PostCd = zi01.getPostCd();
+    queryCov.setParameter("KEY", requestData.getData().getBgId());
+    queryCov.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    queryCov.setParameter("COUNTRY", cmrIssuingCntry);
+    queryCov.setParameter("ISO_CNTRY", isoCntry);
+    queryCov.setForReadOnly(true);
+
+    Object[] result = queryCov.getSingleResult();
+    if (result != null) {
+      if (!StringUtils.isBlank((String) result[3])) {
+        sbo = ((String) result[3]).substring(0, 3);
+        salesRep = ((String) result[3]).substring(4);
+        container.setSalesRep(salesRep);
+        container.setSbo(sbo);
+        covCalculatedFromRdc = true;
+        return container;
+      }
+    }
+
+    String scenario = requestData.getData().getCustSubGrp();
+    Addr addr;
+    if ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario))) {
+      addr = requestData.getAddress("ZI01");
+    } else {
+      addr = requestData.getAddress("ZS01");
+    }
+
+    String PostCd = addr.getPostCd();
 
     if (PostCd != null && PostCd.length() > 2) {
       PostCd = PostCd.substring(0, 2);
@@ -665,7 +714,6 @@ public class UKIUtil extends AutomationUtil {
 
     if ("34".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
 
-      UkiFieldsContainer container = new UkiFieldsContainer();
       if ("Q".equals(clientTier) && SCOTLAND_POST_CD.contains(PostCd)) {
         container.setSbo("758");
         container.setSalesRep("SPA758");
@@ -683,15 +731,14 @@ public class UKIUtil extends AutomationUtil {
         query.setForReadOnly(true);
         List<Object[]> results = query.getResults();
         if (results != null && results.size() == 1) {
-          String sbo = (String) results.get(0)[0];
-          String salesRep = (String) results.get(0)[1];
+          sbo = (String) results.get(0)[0];
+          salesRep = (String) results.get(0)[1];
           container.setSbo(sbo);
           container.setSalesRep(salesRep);
           return container;
         }
       }
     } else {
-      UkiFieldsContainer container = new UkiFieldsContainer();
       String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
       String repTeamCd = "";
       String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
@@ -705,8 +752,8 @@ public class UKIUtil extends AutomationUtil {
       query.setForReadOnly(true);
       List<Object[]> results = query.getResults();
       if (results != null && results.size() == 1) {
-        String sbo = (String) results.get(0)[0];
-        String salesRep = (String) results.get(0)[1];
+        sbo = (String) results.get(0)[0];
+        salesRep = (String) results.get(0)[1];
         container.setSbo(sbo);
         container.setSalesRep(salesRep);
         return container;
@@ -716,20 +763,46 @@ public class UKIUtil extends AutomationUtil {
 
   }
 
-  private UkiFieldsContainer calculate32SValuesForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
-      String issuingCntry) {
+  private UkiFieldsContainer getSBOSalesRepForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
+      RequestData requestData) {
+
+    // Retrieving SBO Sales Rep from existing CMRs
+    String salesRep = "";
+    String sbo = "";
+    UkiFieldsContainer container = new UkiFieldsContainer();
+    String cmrIssuingCntry = requestData.getData().getCmrIssuingCntry();
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    String covSql = ExternalizedQuery.getSql("AUTO.COV.GET_COV_FROM_BG_ES_UK");
+    PreparedQuery queryCov = new PreparedQuery(entityManager, covSql);
+
+    queryCov.setParameter("KEY", requestData.getData().getBgId());
+    queryCov.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    queryCov.setParameter("COUNTRY", cmrIssuingCntry);
+    queryCov.setParameter("ISO_CNTRY", isoCntry);
+    queryCov.setForReadOnly(true);
+
+    Object[] result = queryCov.getSingleResult();
+    if (result != null) {
+      if (!StringUtils.isBlank((String) result[3])) {
+        sbo = ((String) result[3]).substring(0, 3);
+        salesRep = ((String) result[3]).substring(4);
+        container.setSalesRep(salesRep);
+        container.setSbo(sbo);
+        covCalculatedFromRdc = true;
+        return container;
+      }
+    }
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
     if (isuCtc.equals("34Y") || isuCtc.equals("5K")) {
-      UkiFieldsContainer container = new UkiFieldsContainer();
       String sql = ExternalizedQuery.getSql("QUERY.GET.SALESREP.IRELAND");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISSUING_CNTRY", issuingCntry);
+      query.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
       query.setParameter("ISU_CD", "%" + isuCtc + "%");
       query.setForReadOnly(true);
       List<Object[]> results = query.getResults();
       if (results != null && results.size() == 1) {
-        String sbo = (String) results.get(0)[0];
-        String salesRep = (String) results.get(0)[1];
+        sbo = (String) results.get(0)[0];
+        salesRep = (String) results.get(0)[1];
         container.setSbo(sbo);
         container.setSalesRep(salesRep);
         return container;

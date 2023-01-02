@@ -43,6 +43,7 @@ import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AutomationResults;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
@@ -652,7 +653,7 @@ public abstract class AutomationUtil {
     if (!dupReqIds.isEmpty()) {
       details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
       details.append(StringUtils.join(dupReqIds, "\n"));
-      engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
+      engineData.addRejectionComment("DUPR", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
       return false;
     } else {
       details.append("No duplicate requests found");
@@ -1400,5 +1401,33 @@ public abstract class AutomationUtil {
       query.setParameter("NAME2", addrToCheck.getCustNm2());
     }
     return query.exists();
+  }
+
+  public static boolean validateLOVVal(EntityManager em, String issuingCntry, String fieldId, String code) {
+    String sql = ExternalizedQuery.getSql("QUERY.CHECKLOV");
+    PreparedQuery query = new PreparedQuery(em, sql);
+    query.setParameter("FIELD_ID", fieldId);
+    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+    query.setParameter("CD", code);
+
+    return query.exists();
+  }
+
+  public static String extractAutomationDetailedResults(EntityManager em, long reqId, String processCd) {
+    AutomationResults result = null;
+    String detailedResult = null;
+    String sql = ExternalizedQuery.getSql("AUTOMATION.AUTOMATION_RESULTS");
+    PreparedQuery query = new PreparedQuery(em, sql);
+    try {
+      query.setParameter("REQ_ID", reqId);
+      query.setParameter("PROCESS_CD", processCd);
+      result = query.getResults(AutomationResults.class).get(0);
+      if (result != null) {
+        detailedResult = result.getDetailedResults();
+      }
+    } catch (Exception e) {
+      LOG.debug("An error occured while extracting Automation Results");
+    }
+    return detailedResult;
   }
 }

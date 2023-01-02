@@ -131,7 +131,7 @@
 			34Q
 		</isuCTC>
 		<postalCdStarts>
-			02,05,09,13,16,19,24,28,34,37,40,42,41,38
+			02,05,09,13,16,19,24,28,34,37,40,42,41,38,45,47,49
 		</postalCdStarts>
 		<enterprise>
 			985107
@@ -142,7 +142,6 @@
 		<scenario>
 			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
 		</scenario>
-
 		<isicBelongs>
 			No
 		</isicBelongs>
@@ -153,10 +152,10 @@
 			34Q
 		</isuCTC>
 		<postalCdStarts>
-			08,17,22,25,07,43
+			08,17,22,25,07,43,44,50
 		</postalCdStarts>
 		<enterprise>
-			985404
+			985212
 		</enterprise>
 		<salesRep>
 			1FICTI
@@ -197,7 +196,7 @@
 			34Q
 		</isuCTC>
 		<postalCdStarts>
-			48,15,26,27,31,32,33,36
+			48,15,26,27,31,32,33,36,39,20
 		</postalCdStarts>
 		<enterprise>
 			985504
@@ -300,6 +299,12 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
+		<isicBelongs>
+			None
+		</isicBelongs>
 	</postalMapping>
 	
 	<postalMapping>
@@ -312,6 +317,12 @@
 		<salesRep>
 			012540
 		</salesRep>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
+		<isicBelongs>
+			None
+		</isicBelongs>
 	</postalMapping>
 	
 	<postalMapping>
@@ -324,5 +335,11 @@
 		<salesRep>
 			985129
 		</salesRep>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
+		<isicBelongs>
+			None
+		</isicBelongs>
 	</postalMapping>
 </mappings>  

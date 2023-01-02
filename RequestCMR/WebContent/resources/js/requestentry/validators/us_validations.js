@@ -460,6 +460,11 @@ function afterConfigForUS() {
     FormManager.setValue('clientTier', 'Y');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
+  } else if (reqType == 'C' && role == 'Requester' && custGrp == '15' && custSubGrp == 'FSP POOL') {
+    FormManager.setValue('isuCd', '28');
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
   } else {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
@@ -480,8 +485,7 @@ function afterConfigForUS() {
   var custTypeHandler = null;
   if (custTypeHandler == null) {
     var custTypeHandler = dojo.connect(FormManager.getField('custType'), 'onChange', function(value) {
-      if (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' && FormManager.getActualValue('reqType') == 'C'
-          && FormManager.getActualValue('custType') == '7') {
+      if (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' && FormManager.getActualValue('reqType') == 'C' && FormManager.getActualValue('custType') == '7') {
         FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
       } else {
         FormManager.removeValidator('enterprise', Validators.REQUIRED);
@@ -639,7 +643,7 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'N');
     FormManager.readOnly('isuCd');
-  } else {
+  } else if (scenario != 'FSP POOL') {
     FormManager.enable('isuCd');
   }
 }
@@ -1247,6 +1251,13 @@ function updateBOForEntp() {
 function setAffiliateNumber() {
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
   var isicCd = FormManager.getActualValue('isicCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var fspEndUser = 'FSP END USER';
+  var fspPool = 'FSP POOL';
+  if (custSubGrp == fspEndUser || custSubGrp == fspPool) {
+    return;
+  }
+  // This will override the affiliate value in UI if calculated via Automation Element
   if (subIndustryCd.startsWith('Y') && (isicCd.startsWith('90') || isicCd.startsWith('91') || isicCd.startsWith('92'))) {
     FormManager.setValue('affiliate', affiliateArray[isicCd]);
   }
@@ -1311,7 +1322,6 @@ function addressQuotationValidator() {
   FormManager.addValidator('transportZone', Validators.NO_QUOTATION, [ 'Transport Zone' ]);
   FormManager.addValidator('mainCustNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
   FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name 2' ]);
-
 }
 
 //CREATCMR-7213
@@ -1323,8 +1333,12 @@ function federalIsicCheck() {
         var custGrp = FormManager.getActualValue('custGrp');
         var subIndustryCd = FormManager.getActualValue('subIndustryCd');
         var fedIsic = [ '9', '10', '11', '14' ];
-        if (reqType == 'C' && !fedIsic.includes(custGrp) && custGrp != '5' && subIndustryCd.startsWith('Y')) {
-          genericMsg = 'Federal ISIC cannot be used with Non-Federal sceanrios.';
+        if (reqType == 'C' && !fedIsic.includes(custGrp) && custGrp != '15' && custGrp != '5' && subIndustryCd.startsWith('Y')) {
+          genericMsg = 'Federal ISIC cannot be used with Non-Federal scenarios.';
+          return new ValidationResult(null, false, genericMsg);
+        }
+        if (reqType == 'C' && custGrp == '15' && !subIndustryCd.startsWith('Y')) {
+          genericMsg = 'Only Federal ISIC can be used with Federal Strategic Partner scenarios.';
           return new ValidationResult(null, false, genericMsg);
         }
         return new ValidationResult(null, true);
