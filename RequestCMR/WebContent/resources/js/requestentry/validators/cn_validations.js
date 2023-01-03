@@ -1812,214 +1812,6 @@ function getAddrValue(fieldName, addrType, addrSeq, list) {
   return value;
 }
 
-// no use
-function addAddrUpdateValidator0() {
-  console.log("running addAddrUpdateValidator . . .");
-  FormManager
-      .addFormValidator(
-          (function() {
-            return {
-              validate : function() {
-                
-                if (FormManager.getActualValue('reqType') != 'U') {
-                  return new ValidationResult(null, true);
-                }
-                
-                var failInd = false;
-                var zs01Updated = false;
-                var additionalAddrupdated = false;
-                if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 1) {
-                  var record = null;
-                  var type = null;
-                  var updateIndZS01 = null;
-                  var custNm1ZS01 = null;
-                  var custNm2ZS01 = null;
-                  var addrTxtZS01 = null;
-                  var addrTxt2ZS01 = null;
-                  var cnCustName1ZS01 = null;
-                  var cnCustName2ZS01 = null;
-                  var cnAddrTxtZS01 = null;
-                  var cnAddrTxt2ZS01 = null;
-                  var updateIndOther = null;
-                  var custNm1Other = null;
-                  var custNm2Other = null;
-                  var addrTxtOther = null;
-                  var addrTxt2Other = null;
-                  var cnCustName1Other = null;
-                  var cnCustName2Other = null;
-                  var cnAddrTxtOther = null;
-                  var cnAddrTxt2Other = null;
-
-                  // check ZS01 updated
-                  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-                    record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-                    type = record.addrType;
-                    if (typeof (type) == 'object') {
-                      type = type[0];
-                    }
-                    if (type == 'ZS01') {
-                      updateIndZS01 = record.updateInd;
-                      custNm1ZS01 = record.custNm1;
-                      custNm2ZS01 = record.custNm2;
-                      addrTxtZS01 = record.addrTxt;
-                      addrTxt2ZS01 = record.addrTxt2;
-                      cnCustName1ZS01 = record.cnCustName1;
-                      cnCustName2ZS01 = record.cnCustName2;
-                      cnAddrTxtZS01 = record.cnAddrTxt;
-                      cnAddrTxt2ZS01 = record.cnAddrTxt2;
-                      
-                      if (typeof (updateIndZS01) == 'object') {
-                        updateIndZS01 = updateIndZS01[0];
-                      }
-                      if (typeof (custNm1ZS01) == 'object') {
-                        custNm1ZS01 = custNm1ZS01[0];
-                      }
-                      if (typeof (custNm2ZS01) == 'object') {
-                        custNm2ZS01 = custNm2ZS01[0];
-                      }
-                      if (typeof (addrTxtZS01) == 'object') {
-                        addrTxtZS01 = addrTxtZS01[0];
-                      }
-                      if (typeof (addrTxt2ZS01) == 'object') {
-                        addrTxt2ZS01 = addrTxt2ZS01[0];
-                      }
-                      if (typeof (cnCustName1ZS01) == 'object') {
-                        cnCustName1ZS01 = cnCustName1ZS01[0];
-                      }
-                      if (typeof (cnCustName2ZS01) == 'object') {
-                        cnCustName2ZS01 = cnCustName2ZS01[0];
-                      }
-                      if (typeof (cnAddrTxtZS01) == 'object') {
-                        cnAddrTxtZS01 = cnAddrTxtZS01[0];
-                      }
-                      if (typeof (cnAddrTxt2ZS01) == 'object') {
-                        cnAddrTxt2ZS01 = cnAddrTxt2ZS01[0];
-                      }
-                      
-                      if (updateIndZS01=='U' ) {
-                        zs01Updated = true;
-                      }
-                    }
-                    
-                  }
-                  
-                  // check additional addr updated
-                  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-                    record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-                    type = record.addrType;
-                    if (typeof (type) == 'object') {
-                      type = type[0];
-                    }
-                    if (type != 'ZS01') {
-                      updateIndOther = record.updateInd;
-                      custNm1Other = record.custNm1;
-                      custNm2Other = record.custNm2;
-                      addrTxtOther = record.addrTxt;
-                      addrTxt2Other = record.addrTxt2;
-                      cnCustName1Other = record.cnCustName1;
-                      cnCustName2Other = record.cnCustName2;
-                      cnAddrTxtOther = record.cnAddrTxt;
-                      cnAddrTxt2Other = record.cnAddrTxt2;
-                      
-                      if (typeof (updateIndOther) == 'object') {
-                        updateIndOther = updateIndOther[0];
-                      }
-                      if (typeof (custNm1Other) == 'object') {
-                        custNm1Other = custNm1Other[0];
-                      }
-                      if (typeof (custNm2Other) == 'object') {
-                        custNm2Other = custNm2Other[0];
-                      }
-                      if (typeof (addrTxtOther) == 'object') {
-                        addrTxtOther = addrTxtOther[0];
-                      }
-                      if (typeof (addrTxt2Other) == 'object') {
-                        addrTxt2Other = addrTxt2Other[0];
-                      }
-                      if (typeof (cnCustName1Other) == 'object') {
-                        cnCustName1Other = cnCustName1Other[0];
-                      }
-                      if (typeof (cnCustName2Other) == 'object') {
-                        cnCustName2Other = cnCustName2Other[0];
-                      }
-                      if (typeof (cnAddrTxtOther) == 'object') {
-                        cnAddrTxtOther = cnAddrTxtOther[0];
-                      }
-                      if (typeof (cnAddrTxt2Other) == 'object') {
-                        cnAddrTxt2Other = cnAddrTxt2Other[0];
-                      }
-                      
-                      if (updateIndOther=='U' || updateIndOther=='N') {
-                        additionalAddrupdated = true;
-                      }
-                      
-                      if (zs01Updated) {
-                        if (additionalAddrupdated) {
-                          if ((custNm1ZS01 && custNm1ZS01 != '') || (custNm1Other && custNm1Other != '')) {
-                            if (custNm1ZS01 != custNm1Other) {
-                              failInd = true;
-                            }
-                          } else if ((custNm2ZS01 && custNm2ZS01 != '') || (custNm2Other && custNm2Other != '')) {
-                            if (custNm2ZS01 != custNm2Other) {
-                              failInd = true;
-                            }
-                          } else if ((addrTxtZS01 && addrTxtZS01 != '') || (addrTxtOther && addrTxtOther != '')) {
-                            if (addrTxtZS01 != addrTxtOther) {
-                              failInd = true;
-                            }
-                          } else if ((addrTxt2ZS01 && addrTxt2ZS01 != '') || (addrTxt2Other && addrTxt2Other != '')) {
-                            if (addrTxt2ZS01 != addrTxt2Other) {
-                              failInd = true;
-                            }
-                          } else if ((cnCustName1ZS01 && cnCustName1ZS01 != '') || (cnCustName1Other && cnCustName1Other != '')) {
-                            if (cnCustName1ZS01 != cnCustName1Other) {
-                              failInd = true;
-                            }
-                          } else if ((cnCustName2ZS01 && cnCustName2ZS01 != '') || (cnCustName2Other && cnCustName2Other != '')) {
-                            if (cnCustName2ZS01 != cnCustName2Other) {
-                              failInd = true;
-                            }
-                          } else if ((cnAddrTxtZS01 && cnAddrTxtZS01 != '') || (cnAddrTxtOther && cnAddrTxtOther != '')) {
-                            if (cnAddrTxtZS01 != cnAddrTxtOther) {
-                              failInd = true;
-                            }
-                          } else if ((cnAddrTxt2ZS01 && cnAddrTxt2ZS01 != '') || (cnAddrTxt2Other && cnAddrTxt2Other != '')) {
-                            if (cnAddrTxt2ZS01 != cnAddrTxt2Other) {
-                              failInd = true;
-                            }
-                          }
-                        } else  {
-                          failInd = true;
-                        }
-                      } else {
-                        if (additionalAddrupdated) {
-                          failInd = true;
-                        }
-                      }
-                      
-                    }
-                  }
-                  
-                }
-                
-                if (failInd) {
-                  var id = FormManager.getActualValue('reqId');
-                  var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
-                    ID : id
-                  });
-
-                  if (ret == null || ret.ret1 == null) {
-                    return new ValidationResult(null, false, 'Additional addresses types need to be updated same with Legal Address (Sold To). If you do not agree, please attach supporting document and click Disable automatic processing checkbox.');
-                  } else {
-                    return new ValidationResult(null, true);
-                  }
-                }
-                return new ValidationResult(null, true);
-              }
-            };
-          })(), 'MAIN_NAME_TAB', 'frmCMR');
-}
-
 function setCompanyOnInacCd() {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -2426,10 +2218,10 @@ function convertPoBox(cntry, addressMode, details) {
 }
 
 function validateEnNameForInter() {
-  console.log("running validateCnNameAndAddr . . .");
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        console.log("running validateEnNameForInter . . .");
         var custSubType = FormManager.getActualValue('custSubGrp');
           if (custSubType == 'INTER') {
             var custNm1ZS01 = '';
@@ -2485,8 +2277,7 @@ function validateEnNameInAddrTab() {
   })(), null, 'frmCMR_addressModal');
 }
 
-function validateCnNameAndAddr() {
-  console.log("running validateCnNameAndAddr . . .");
+function validateCnNameAndAddr4Create() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -2494,6 +2285,11 @@ function validateCnNameAndAddr() {
         var action = FormManager.getActualValue('yourAction');
         if(action == 'SFP'){
 
+          if (FormManager.getActualValue('reqType') != 'C') {
+            return new ValidationResult(null, true);
+          }
+          console.log("running validateCnNameAndAddr4Create . . .");
+          
           var cnCustName1ZS01 = '';
           var cnCustName2ZS01 = '';
           var cnAddrTxtZS01 = '';
@@ -2760,6 +2556,345 @@ function validateCnNameAndAddr() {
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
 
+function validateCnNameAndAddr4Update() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var action = FormManager.getActualValue('yourAction');
+        if(action == 'SFP'){
+
+          if (FormManager.getActualValue('reqType') != 'U') {
+            return new ValidationResult(null, true);
+          }
+          console.log("running validateCnNameAndAddr4Update . . .");
+          
+          // 1, no more than 1 ZS01.
+          // 2, if ZS01 only, then check TianYanCha to ask for attached doc if
+          // not 100% match.
+          // 3, if more than 1 addr records, then need Chinese special
+          // attachment if other addr is not same with zs01.
+          // 4, if more than 1 addr records, remove Chinese special attachment
+          // if zs01 CN name and addr 100% match TianYanCha.
+          
+          var addrList = [];
+          var addrRdcList = [];
+          var cnAddrList = [];
+          var cnAddrRdcList = [];
+          
+          // 'failInd = true' means otherAddressUpdated and not sameWithZs01
+          var failInd = false;
+          var zs01AddressUpdated = false;
+          var otherAddressUpdated = false;
+          
+          var zs01Count = 0;
+          
+          var addrTxtZS01 = null;
+          var addrTxt2ZS01 = null;
+          
+          var cnCustName1ZS01 = null;
+          var cnCustName2ZS01 = null;
+          var cnCustName4ZS01 = null;
+          var cnAddrTxtZS01 = null;
+          var cnAddrTxt2ZS01 = null;
+          
+          var addrTypeOther = null;
+          var addrSeqOther = null;
+          
+          var addrTxtOther = null;
+          var addrTxt2Other = null;
+          var cnAddrTxtOther = null;
+          var cnAddrTxt2Other = null;
+          var cnCityZS01 = null;
+          var cnDistrictZS01 = null;
+          
+          addrList = getAddrList();
+          addrRdcList = getAddrRdcList();
+          cnAddrList = getCnAddrList();
+          cnAddrRdcList = getCnAddrRdcList();
+          
+          for (var i=0; i< addrList.length; i++) {
+            if (addrList[i].addrType == 'ZS01') {
+              addrTxtZS01 = addrList[i].addrTxt;
+              addrTxt2ZS01 = addrList[i].addrTxt2;
+            }
+          }
+          
+          for (var i=0; i< cnAddrList.length; i++) {
+            if (cnAddrList[i].addrType == 'ZS01') {
+              cnCustName1ZS01 = cnAddrList[i].cnCustNm1;
+              cnCustName2ZS01 = cnAddrList[i].cnCustNm2;
+              cnCustName4ZS01 = cnAddrList[i].cnAddrTxt2;
+              cnAddrTxtZS01 = cnAddrList[i].cnAddrTxt;
+              cnAddrTxt2ZS01 = cnAddrList[i].cnAddrTxt2;
+              cnCityZS01 = cnAddrList[i].cnCity;
+            }
+          }
+          
+          // get cnDistrictZS01
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            var record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            var type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (type == 'ZS01') {
+              cnDistrictZS01 = record.cnDistrict;
+            }
+            if (typeof (cnDistrictZS01) == 'object') {
+              if (cnDistrictZS01[0] != '' && cnDistrictZS01[0] != null) {
+                cnDistrictZS01 = cnDistrictZS01[0];
+              }
+            }
+          }
+          
+          if (addrList.length > 1) {
+            for (var i=0; i< addrList.length; i++) {
+              if (addrList[i].addrType != 'ZS01') {
+                if (isChangedAddress(addrList[i].addrType, addrList[i].addrSeq, addrList, addrRdcList, cnAddrList, cnAddrRdcList)) {
+                  otherAddressUpdated = true;
+                  addrTxtOther = addrList[i].addrTxt;
+                  addrTxt2Other = addrList[i].addrTxt2;
+                  cnAddrTxtOther = getAddrValue('cnAddrTxt', addrList[i].addrType, addrList[i].addrSeq, cnAddrList);
+                  cnAddrTxt2Other = getAddrValue('cnAddrTxt2', addrList[i].addrType, addrList[i].addrSeq, cnAddrList);
+                }
+                
+                if (otherAddressUpdated) {
+                  if ((addrTxtZS01.toUpperCase() != addrTxtOther.toUpperCase()) 
+                      || (addrTxt2ZS01.toUpperCase() != addrTxt2Other.toUpperCase()) 
+                      || (cnAddrTxtZS01.toUpperCase() != cnAddrTxtOther.toUpperCase()) 
+                      || (cnAddrTxt2ZS01.toUpperCase() != cnAddrTxt2Other.toUpperCase())) {
+                    failInd = true;
+                  }
+                }
+              }
+            }
+          }
+          
+          // var cnNmChanged = getCnNmChangedIndc(cnAddrList, cnAddrRdcList);
+          // var cnAddrChanged = getCnAddrChangedIndc(cnAddrList,
+          // cnAddrRdcList);
+          
+          var tycResult = {};
+          var tycResultByBusnType = {};
+          var tycResultByCnNm = {};
+          
+          if (zs01Count > 1) {
+            return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
+          }
+          
+          var cnAttachFlag = checkCnAttach();
+          
+          // check TianYanCha via Social Credit Code
+          var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
+          tycResultByBusnType = checkTycViaBusnType(cnName);
+          tycResult = tycResultByBusnType;
+          
+          if ($.isEmptyObject(tycResultByBusnType)) {
+            // check TianYanCha via cn name
+            tycResultByCnNm = checkTycViaCnNm(cnName);
+            tycResult = tycResultByCnNm;
+          }
+          
+          // **** handle validation here ****
+          if (addrList != null && addrList.length == 1) {
+            // case 1, single address logic
+            if($.isEmptyObject(tycResultByBusnType) && !$.isEmptyObject(tycResultByCnNm)) {
+              var apiName = '';
+              var apiAddress = '';
+              var apiBusnType = '';
+              apiBusnType = '<br/>Social Credit Code: ' + tycResultByCnNm.creditCode;
+              apiName = '<br/>Company Chinese Name: ' + tycResultByCnNm.name;
+              apiAddress = '<br/>Company Chinese Address: ' + tycResultByCnNm.regLocation;
+              
+              if(!cnAttachFlag){
+                return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the <b>Social credit Code</b> '
+                    + 'doesn\'t match with Tian Yan Cha 100%,or if you insist on using missmatched <b>Social credit Code</b>, you need to attach '
+                    + 'the screenshot of customer business license , government website in attachment, file content must be '
+                    + '"<b>Name and Address Change(China Specific)</b>", the correct information should be:'
+                    + apiBusnType + apiName + apiAddress);
+              }
+            } else {
+              var cnAddress = convert2SBCS(cnAddrTxtZS01 + cnCustName4ZS01);
+              var apiName2SBCS = convert2SBCS(tycResult.name);
+              var apiAddress2SBCS = convert2SBCS(tycResult.regLocation);
+              var apiCity = '';
+              var apiDistrict = '';
+              
+              var nameEqualFlag = true;
+              var addressEqualFlag = true;
+              
+              if(tycResult.city != null){
+                apiCity = tycResult.city;
+              }
+              if(tycResult.district != null){
+                apiDistrict = tycResult.district;
+              }
+
+              var correctName = '';
+              var correctAddress = '';
+              
+              if (apiName2SBCS != cnName) {
+                nameEqualFlag = false;
+                if(!$.isEmptyObject(tycResult)){
+                  correctName = '<br/>Company Name: ' + tycResult.name;
+                } else {
+                  correctName = '<br/>Company Name: No Data';
+                }
+              }
+              if (apiAddress2SBCS != cnAddress) {
+                // address2SBCS = address2SBCS.replace(apiCity,'');
+                // address2SBCS = address2SBCS.replace(apiDistrict,'');
+                if (apiAddress2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+                  addressEqualFlag = true;
+                } else if(apiAddress2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && apiAddress2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+                    addressEqualFlag = true;
+                } else {
+                  addressEqualFlag = false;
+                  if(!$.isEmptyObject(tycResult)){
+                    correctAddress = '<br/>Company Address: ' + tycResult.regLocation;
+                  } else {
+                    correctAddress = '<br/>Company Address: No Data';
+                  }
+                }
+              }
+
+              if(!nameEqualFlag || !addressEqualFlag){
+                if(!cnAttachFlag){
+                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
+                      + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
+                      + 'company name or address, you need attach the screenshot of customer official website, '
+                      + 'business license , government website,contract/purchase order with signature in attachment, '
+                      + 'file content must be "Name and Address Change(China Specific)", the correct company name and address '
+                      + 'should be:'
+                      + correctName + correctAddress);
+                } else {
+                  return new ValidationResult(null, true);
+                }
+              } else if(nameEqualFlag && addressEqualFlag){
+                if(cnAttachFlag){
+                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
+                      + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
+                      );
+                } else {
+                  return new ValidationResult(null, true);
+                }
+              } else {
+                return new ValidationResult(null, true);
+              }
+            }
+            
+          } else if (addrList != null && addrList.length > 1) {
+            // case 2, multiple addresses logic
+            if($.isEmptyObject(tycResultByBusnType) && !$.isEmptyObject(tycResultByCnNm)) {
+              var apiName = '';
+              var apiAddress = '';
+              var apiBusnType = '';
+              apiBusnType = '<br/>Social Credit Code: ' + tycResultByCnNm.creditCode;
+              apiName = '<br/>Company Chinese Name: ' + tycResultByCnNm.name;
+              apiAddress = '<br/>Company Chinese Address: ' + tycResultByCnNm.regLocation;
+              
+              if(!cnAttachFlag){
+                return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the <b>Social credit Code</b> '
+                    + 'doesn\'t match with Tian Yan Cha 100%,or if you insist on using missmatched <b>Social credit Code</b>, you need to attach '
+                    + 'the screenshot of customer business license , government website in attachment, file content must be '
+                    + '"<b>Name and Address Change(China Specific)</b>", the correct information should be:'
+                    + apiBusnType + apiName + apiAddress);
+              }
+            } else {
+              var cnAddress = convert2SBCS(cnAddrTxtZS01 + cnCustName4ZS01);
+              var apiName2SBCS = convert2SBCS(tycResult.name);
+              var apiAddress2SBCS = convert2SBCS(tycResult.regLocation);
+              var apiCity = '';
+              var apiDistrict = '';
+              
+              var nameEqualFlag = true;
+              var addressEqualFlag = true;
+              
+              if(tycResult.city != null){
+                apiCity = tycResult.city;
+              }
+              if(tycResult.district != null){
+                apiDistrict = tycResult.district;
+              }
+
+              var correctName = '';
+              var correctAddress = '';
+              
+              if (apiName2SBCS != cnName) {
+                nameEqualFlag = false;
+                if(!$.isEmptyObject(tycResult)){
+                  correctName = '<br/>Company Name: ' + tycResult.name;
+                } else {
+                  correctName = '<br/>Company Name: No Data';
+                }
+              }
+              if (apiAddress2SBCS != cnAddress) {
+                // address2SBCS = address2SBCS.replace(apiCity,'');
+                // address2SBCS = address2SBCS.replace(apiDistrict,'');
+                if (apiAddress2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+                  addressEqualFlag = true;
+                } else if(apiAddress2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && apiAddress2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+                    addressEqualFlag = true;
+                } else {
+                  addressEqualFlag = false;
+                  if(!$.isEmptyObject(tycResult)){
+                    correctAddress = '<br/>Company Address: ' + tycResult.regLocation;
+                  } else {
+                    correctAddress = '<br/>Company Address: No Data';
+                  }
+                }
+              }
+
+              if(!nameEqualFlag || !addressEqualFlag){
+                if(!cnAttachFlag){
+                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
+                      + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
+                      + 'company name or address, you need attach the screenshot of customer official website, '
+                      + 'business license , government website,contract/purchase order with signature in attachment, '
+                      + 'file content must be "Name and Address Change(China Specific)", the correct company name and address '
+                      + 'should be:'
+                      + correctName + correctAddress);
+                } else {
+                  return new ValidationResult(null, true);
+                }
+              } else if(nameEqualFlag && addressEqualFlag){
+                // 100% match TianYanCha logic
+                // 1, should add CN attachment -
+                // 1.1, when 'failInd' is true, that means other address is not
+                // same with ZS01.
+                // 2, should remove CN attachment -
+                // 2.1, when other address is same with ZS01
+                // 2.2, when English/Chinese address is not changed
+                // and address match TianYanCha
+                if (cnAttachFlag) {
+                  if (!failInd) {
+                    return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
+                        + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
+                        );
+                  }
+                  return new ValidationResult(null, true);
+                } else {
+                  if (failInd) {
+                    return new ValidationResult(null, false, 'The additional address should be same with Sold to address (ZS01).'
+                        + ' If you insist on using different address with Sold to (ZS01),you need to attach the screenshot of customer official website,'
+                        + ' business license,government website,contract/purchase order with signature in attachment, file content must be "Name and Address Change(China Specific)". ');
+                  }
+                  return new ValidationResult(null, true);
+                }
+                return new ValidationResult(null, true);
+              } else {
+                return new ValidationResult(null, true);
+              }
+            }
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    }
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 function checkAddrDiffIndc() {
   var diffIndc = false;
   
@@ -2875,23 +3010,169 @@ function checkAddrDiffIndc() {
 }
 
 function getAddrList() {
+  var addrList = [];
   var reqId = FormManager.getActualValue('reqId');
   var qParams = {
       _qall : 'Y',
       REQ_ID : reqId ,
      };
-  var addrResults = cmr.query('GET.ADDR_BY_REQID', qParams);
-  return addrResults;
+  var results = cmr.query('GET.ADDR_BY_REQID', qParams);
+  if (results != null) {
+    for (var i = 0; i < results.length; i++) {
+      var addr  = {
+          reqId : results[i].ret1,
+          addrType : results[i].ret2,
+          addrSeq : results[i].ret3,
+          custNm1 : results[i].ret4,
+          custNm2 : results[i].ret5,
+          addrTxt : results[i].ret6,
+          addrTxt2 : results[i].ret7,
+          city1 : results[i].ret8,
+      };
+      addrList.push(addr);
+    }
+  }
+  return addrList;
+}
+
+function getAddrRdcList() {
+  var addrRdcList = [];
+  var reqId = FormManager.getActualValue('reqId');
+  var qParams = {
+      _qall : 'Y',
+      REQ_ID : reqId ,
+     };
+  var results = cmr.query('GET.ADDRRDC_BY_REQID', qParams);
+  if (results != null) {
+    for (var i = 0; i < results.length; i++) {
+      var addr  = {
+          reqId : results[i].ret1,
+          addrType : results[i].ret2,
+          addrSeq : results[i].ret3,
+          custNm1 : results[i].ret4,
+          custNm2 : results[i].ret5,
+          addrTxt : results[i].ret6,
+          addrTxt2 : results[i].ret7,
+          city1 : results[i].ret8,
+      };
+      addrRdcList.push(addr);
+    }
+  }
+  return addrRdcList;
 }
 
 function getCnAddrList() {
+  var cnAddrList = [];
   var reqId = FormManager.getActualValue('reqId');
   var qParams = {
       _qall : 'Y',
       REQ_ID : reqId ,
      };
-  var intlAddrResults = cmr.query('GET.INTLADDR_BY_REQID', qParams);
-  return intlAddrResults;
+  var results = cmr.query('GET.INTLADDR_BY_REQID', qParams);
+  if (results != null) {
+    for (var i = 0; i < results.length; i++) {
+      var addr  = {
+          reqId : results[i].ret1,
+          addrType : results[i].ret2,
+          addrSeq : results[i].ret3,
+          cnCustNm1 : results[i].ret4,
+          cnCustNm2 : results[i].ret5,
+          cnAddrTxt : results[i].ret6,
+          cnAddrTxt2 : results[i].ret7, // custNm4
+          cnCity1 : results[i].ret8,
+      };
+      cnAddrList.push(addr);
+    }
+  }
+  return cnAddrList;
+}
+
+function getCnAddrRdcList() {
+  var cnAddrRdcList = [];
+  var reqId = FormManager.getActualValue('reqId');
+  var qParams = {
+      _qall : 'Y',
+      REQ_ID : reqId ,
+     };
+  var results = cmr.query('GET.INTLADDRRDC_BY_REQID', qParams);
+  if (results != null) {
+    for (var i = 0; i < results.length; i++) {
+      var addr  = {
+          reqId : results[i].ret1,
+          addrType : results[i].ret2,
+          addrSeq : results[i].ret3,
+          cnCustNm1 : results[i].ret4,
+          cnCustNm2 : results[i].ret5,
+          cnAddrTxt : results[i].ret6,
+          cnAddrTxt2 : results[i].ret7, // custNm4
+          cnCity1 : results[i].ret8,
+      };
+      cnAddrRdcList.push(addr);
+    }
+  }
+  return cnAddrRdcList;
+}
+
+function checkCnAttach() {
+  var reqId = FormManager.getActualValue('reqId');
+  var qParams = {
+      ID : reqId
+     };
+  var result = cmr.query('CHECK_CN_API_ATTACHMENT', qParams);
+  if (result != null && result.ret1 != null) {
+    return true;
+  }
+  return false;
+}
+
+function checkTycViaBusnType(cnName) {
+  var busnType = FormManager.getActualValue('busnType');
+  var result = {};
+  dojo.xhrGet({
+    url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+    handleAs : 'json',
+    method : 'GET',
+    content : {
+      busnType : busnType,
+      cnName : cnName
+    },
+    timeout : 50000,
+    sync : true,
+    load : function(data, ioargs) {
+      if (data && data.result) {
+        result = data.result;
+      }
+    },
+    error : function(error, ioargs) {
+      result = {};
+    }
+  });
+  return result;
+}
+
+function checkTycViaCnNm(cnName) {
+  var busnType = FormManager.getActualValue('busnType');
+  var result = {};
+  dojo.xhrGet({
+    url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+    handleAs : 'json',
+    method : 'GET',
+    content : {
+      busnType : busnType,
+      cnName : cnName
+    },
+    timeout : 50000,
+    sync : true,
+    load : function(data, ioargs) {
+      if (data && data.result) {
+        result = data.result;
+      }
+    },
+    error : function(error, ioargs) {
+      result = {};
+    }
+  });
+  return result;
 }
 
 function validateSearchTermForCROSS() {
@@ -3269,8 +3550,12 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addCityRequiredOnUpdateValidatorAddrList, GEOHandler.CN, null, true);
   GEOHandler.registerValidator(addSocialCreditCdLengthValidator, GEOHandler.CN, GEOHandler.REQUESTER, true);
-  GEOHandler.registerValidator(addAddrUpdateValidator, GEOHandler.CN, null, true);
-  GEOHandler.registerValidator(validateCnNameAndAddr, GEOHandler.CN, null, false);
+  // GEOHandler.registerValidator(addAddrUpdateValidator, GEOHandler.CN, null,
+  // true);
+  // GEOHandler.registerValidator(validateCnNameAndAddr, GEOHandler.CN, null,
+  // false);
+  GEOHandler.registerValidator(validateCnNameAndAddr4Create, GEOHandler.CN, null, false);
+  GEOHandler.registerValidator(validateCnNameAndAddr4Update, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(addCNDnBMatchingAttachmentValidator, GEOHandler.CN, null, false);
   // GEOHandler.registerValidator(foreignValidator, GEOHandler.CN, null,
   // false,false);
