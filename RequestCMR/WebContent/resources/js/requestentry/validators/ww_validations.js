@@ -1148,6 +1148,8 @@ function setVatIndFieldsForGrp1AndNordx() {
   // CREATCMR-7165
   else if (isImportingFromQuickSearch()) {
     dojo.cookie('qs', 'N');
+    FormManager.enable('vatInd');
+    
     if (vat != '' && vatInd == '') {
       FormManager.setValue('vatInd', 'T');
     } else if (vat == '') {
