@@ -90,7 +90,7 @@
       Libya, Macau, Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, United Arab Emirates, Venezuela & Yemen.
     </cmr:chk-entry>
     <cmr:chk-entry number="2" section="B">
-      <span style="font-weight:bold;text-decoration:underline">Chemical or Biological Weapons</span> ----
+      <span style="font-weight:bold;text-decoration:underline">Chemical or Biological Weapons</span> <br>
       a) To the best of your knowledge or belief is your customer involved in any activity related to or in support of the design, 
       development, production, operation, stockpiling, installation (including on-site installation), maintenance (checking), repair, 
       overhaul, refurbishing, or use of Chemical or Biological Weapons?
@@ -139,34 +139,34 @@
       Venezuela & Vietnam 
 	  <br>
 	  <br>
-	  <span style="font-weight:bold">NOTE:</span> For Myanmar (Burma), Cambodia, Russia, Belarus, China and Venezuela checklist must also provide 
+	  <span style="font-weight:bold">NOTE: </span> For Myanmar (Burma), Cambodia, Russia, Belarus, China and Venezuela checklist must also provide 
 	  Military-Intelligence End Use and End User definitions
       <br>
       <br>
       <span style="font-weight:bold;text-decoration:underline">Definitions </span>
       <br>
       <br>
-      <span style="font-weight:bold;">Military End Users : </span>
+      <span style="font-weight:bold;">Military End Users: </span>
       Include army, navy, air force, marines, coast guard, national guard, security or police, government defense, intelligence and reconnaissance 
       organizations (excludes organizations of the armed forces or national guard, that are covered under the military-intelligence end user 
       definition below), and their contractors or any person or entity whose actions or functions are intended to support military end uses.
       <br>
       <br>
-      <span style="font-weight:bold;">Military End Uses : </span>
+      <span style="font-weight:bold;">Military End Uses: </span>
       incorporation into a military item described on the U.S. Munitions List (USML) (22 CFR part 121, International Traffic in Arms Regulations); 
       incorporation into items classified under ECCNs ending in "A018" or under "600 series" ECCNs; or any item that supports or contributes to 
       the operation, installation, maintenance, repair, overhaul, refurbishing, development, or production, of military items described on the USML, 
       or items classified under ECCNs ending in "A018" or under "600 series" ECCNs.
       <br>
       <br>
-      <span style="font-weight:bold;">Military-Intelligence End User : </span>
+      <span style="font-weight:bold;">Military-Intelligence End User: </span>
       means any intelligence or reconnaissance organization of the armed services (army, navy, marine, air force, or coast guard); or national guard.
       <br>
-      <span style="font-weight:bold;">Military-Intelligence End Uses : </span>
+      <span style="font-weight:bold;">Military-Intelligence End Uses: </span>
       means the design, development, production, use, operation, installation (including on-site installation), maintenance (checking), repair, 
       overhaul, or refurbishing of, or incorporation into, items described on the U.S. Munitions List (USML) (22 CFR part 121, International 
       Traffic in Arms Regulations), or classified under ECCNs ending in "A018" or under "600 series" ECCNs, which are intended to support the 
-      actions or functions of a 'military-intelligence end user' as defined above.
+      actions or functions of a 'military-intelligence end user,' as defined above.
       <br>
     </cmr:chk-entry> 
   </cmr:chk-section>
@@ -174,7 +174,7 @@
   <cmr:chk-section name="Section D" >
     <cmr:chk-entry number="1" section="D">
       <span style="font-weight:bold;text-decoration:underline">Supercomputer</span>
-      ----To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of a "supercomputer"? 
+      ---- To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of a "supercomputer"? 
       <br>
       <br>
       a) Does your customer build supercomputers?
@@ -182,7 +182,7 @@
     </cmr:chk-entry>
     <cmr:chk-entry number="2" section="D">
       <span style="font-weight:bold;text-decoration:underline">Supercomputer</span>
-      ----To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of a "supercomputer"? 
+      ---- To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of a "supercomputer"? 
       <br>
       b) Does your customer own supercomputers?
       <br>
