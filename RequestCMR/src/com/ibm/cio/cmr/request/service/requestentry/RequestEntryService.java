@@ -73,6 +73,7 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.CNDHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
@@ -970,8 +971,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           data.setModeOfPayment(from.getCrosSubTyp());
         }
       }
+      if (CNDHandler.isCNDCountry(data.getCmrIssuingCntry())) {
+        this.log.debug("Setting Mode Of Payment.");
+        data.setModeOfPayment(from.getModeOfPayment());
+      }
       // only copy from UI to data if from IT
-      if (PageManager.fromGeo("EMEA", "758")) {
+      if (PageManager.fromGeo("EMEA", data.getCmrIssuingCntry())) {
         this.log.debug("Setting payment mode");
         data.setModeOfPayment(from.getPaymentMode());
       }
