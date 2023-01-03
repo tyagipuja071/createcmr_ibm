@@ -950,6 +950,9 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     Data data = to.getEntity(Data.class);
     if (data != null) {
       String usemail3 = data.getEmail3() == null ? null : new String(data.getEmail3());
+      String bpGbmSbmAffiliate = data.getAffiliate() == null ? null : new String(data.getAffiliate());
+      String bpGbmSbmEmbargoCd = data.getEmbargoCd() == null ? null : new String(data.getEmbargoCd());
+      String bpGbmSbmOrdBlk = data.getOrdBlk() == null ? null : new String(data.getOrdBlk());
       dataService.copyValuesToEntity(from, data);
       // 1261175 -Dennis - We need to auto assign the cust type if it is an
       // update type and for BR
@@ -1003,11 +1006,17 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         this.log.debug("Setting location no...");
         data.setLocationNumber(from.getLocationNo());
       }
-      // Save email3 value anywhere for us bp source
-      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && !StringUtils.isEmpty(usemail3)
-          && "CreateCMR-BP".equals(admin.getSourceSystId())) {
-        this.log.debug("Setting BP us client model:email3");
-        data.setEmail3(usemail3);
+      if ("CreateCMR-BP".equals(admin.getSourceSystId())) {
+        // Save email3 value anywhere for us bp source
+        if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && !StringUtils.isEmpty(usemail3)) {
+          this.log.debug("Setting BP us client model:email3");
+          data.setEmail3(usemail3);
+        }
+        if (CmrConstants.BP_GBM_SBM_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+          data.setAffiliate(bpGbmSbmAffiliate);
+          data.setEmbargoCd(bpGbmSbmEmbargoCd);
+          data.setOrdBlk(bpGbmSbmOrdBlk);
+        }
       }
     }
     Scorecard score = to.getEntity(Scorecard.class);
