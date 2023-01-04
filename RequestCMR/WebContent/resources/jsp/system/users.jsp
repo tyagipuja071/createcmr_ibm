@@ -102,8 +102,8 @@
   </cmr:boxContent>
 </cmr:form>
 <cmr:section alwaysShown="true">
-  <!--<cmr:buttonsRow>
+  <%-- <cmr:buttonsRow>
     <cmr:button label="Add User" onClick="UserService.addUser()" highlight="true" />
-  </cmr:buttonsRow>-->
+  </cmr:buttonsRow>--%>
 </cmr:section>
 <cmr:model model="users" />

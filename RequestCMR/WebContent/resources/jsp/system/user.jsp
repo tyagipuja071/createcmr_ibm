@@ -193,7 +193,7 @@
     <%} else { %>
       <cmr:button label="Save" onClick="UserService.saveUser(false)" highlight="true" />
     <%} %>
-   <!-- <cmr:button label="Add Another User" onClick="UserService.addUser()" highlight="false" pad="true" />-->
+   <%-- <cmr:button label="Add Another User" onClick="UserService.addUser()" highlight="false" pad="true" />--%>
     <cmr:button label="Back to User List" onClick="window.location = '${contextPath}/users'" pad="true" />
   </cmr:buttonsRow>
   <br>
@@ -241,10 +241,10 @@
         <cmr:row>
         &nbsp;
       </cmr:row>
-        <!--<cmr:buttonsRow>
+        <%--<cmr:buttonsRow>
           <cmr:button label="Add Roles" onClick="UserService.addRoles()" highlight="true" />
-          <cmr:button label="Remove Roles" onClick="UserService.removeRoles()" pad="true" />-->
-        </cmr:buttonsRow>
+          <cmr:button label="Remove Roles" onClick="UserService.removeRoles()" pad="true" />
+        </cmr:buttonsRow>--%>
         <br>
       </cmr:section>
     </cmr:form>
