@@ -31,6 +31,7 @@ public class SuppCountryModel extends BaseModel {
   private String startQuickSearch;
   private String tradestyleNmUsage;
   private String disableCreateByModel;
+  private String hideLocalLangData;
 
   @Override
   public boolean allKeysAssigned() {
@@ -184,6 +185,14 @@ public class SuppCountryModel extends BaseModel {
 
   public void setDisableCreateByModel(String disableCreateByModel) {
     this.disableCreateByModel = disableCreateByModel;
+  }
+
+  public String getHideLocalLangData() {
+    return hideLocalLangData;
+  }
+
+  public void setHideLocalLangData(String hideLocalLangData) {
+    this.hideLocalLangData = hideLocalLangData;
   }
 
 }
