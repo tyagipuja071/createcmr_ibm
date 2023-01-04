@@ -1915,8 +1915,13 @@ function onIsicChange() {
 
   if (reqType == 'C' && role == 'REQUESTER' && (cmrIssuingCntry == '744' || cmrIssuingCntry == '834' || cmrIssuingCntry == '616')) {
     if (cmrResult != '' && cmrResult == 'Accepted') {
-      FormManager.setValue('isicCd', '');
-      FormManager.enable('isicCd');
+      if (custSubGrp == 'INTER' || custSubGrp == 'PRIV' || custSubGrp == 'XPRIV' || custSubGrp == 'DUMMY' || custSubGrp == 'IGF') {
+        FormManager.setValue('isicCd', value);
+        FormManager.readOnly('isicCd');
+      } else {
+        FormManager.setValue('isicCd', '');
+        FormManager.enable('isicCd');
+      }
     } else if (result != '' && result == 'Accepted') {
       console.log(value);
       var requestId = FormManager.getActualValue('reqId');
