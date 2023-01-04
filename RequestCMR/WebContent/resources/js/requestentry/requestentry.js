@@ -631,6 +631,10 @@ function doSaveChangeComments() {
           var rejField = '<input type="hidden" name="rejectReason" value="' + rej + '">';
           rejField += '<input type="hidden" name="rejSupplInfo1" value="' + rejInfo1 + '">';
           rejField += '<input type="hidden" name="rejSupplInfo2" value="' + rejInfo2 + '">';
+
+          if (SysLoc.ISRAEL == FormManager.getActualValue('cmrIssuingCntry')) {
+            rejField += '<input type="hidden" name="statusChgCmt" value="' + cmt + '">';
+          }
           dojo.place(rejField, document.forms['frmCMR'], 'last');
         } else {
           cmr.showAlert('The CMR Number is not correct');
@@ -1568,32 +1572,32 @@ function setRejSupplInfoFields(value) {
     dojo.byId('rejInfo1Label').innerText = "CMR No.";
     dojo.byId('rejInfo2Label').innerText = "Sold-to KUNNR";
     FormManager.readOnly('rejSupplInfo2');
-    break;
+  break;
   case "MDOC":
     cmr.showNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Missing Document";
-    break;
+  break;
   case "MAPP":
     cmr.showNode('rejInfo1Div');
     cmr.showNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Approval Type";
     dojo.byId('rejInfo2Label').innerText = "Approver";
-    break;
+  break;
   case "DUPR":
     cmr.showNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Other Request Id";
-    break;
+  break;
   case "TYPR":
     cmr.showNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Correct Type";
-    break;
+  break;
   default:
     cmr.hideNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
-    break;
+  break;
   }
 }
 
