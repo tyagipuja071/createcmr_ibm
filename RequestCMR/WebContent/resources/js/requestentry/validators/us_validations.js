@@ -739,6 +739,21 @@ function setClientTierValuesUS() {
   }
 }
 
+function setBPNameValuesUS() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  // For Federal Strategic Partners
+  if (FormManager.getActualValue('custGrp')  == '15') {
+    FormManager.setValue('bpName', 'IRMR');
+    if (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER') {
+      FormManager.readOnly('bpName');
+    }
+    return;
+  }
+  FormManager.enable('bpName');
+}
+
 // CREATCMR-3298
 function checkSCCValidate() {
   var landCntry = '';
@@ -1390,6 +1405,7 @@ dojo.addOnLoad(function() {
   // null, true);
 
   GEOHandler.addAfterTemplateLoad(setClientTierValuesUS, [ SysLoc.USA ]);
+  GEOHandler.addAfterTemplateLoad(setBPNameValuesUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(setClientTierValuesUS, [ SysLoc.USA ]);
   // CREATCMR-5447
   GEOHandler.registerValidator(TaxTeamUpdateDataValidation, [ SysLoc.USA ], null, true);
