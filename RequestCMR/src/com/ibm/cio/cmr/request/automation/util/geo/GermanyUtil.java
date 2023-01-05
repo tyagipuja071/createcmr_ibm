@@ -310,26 +310,30 @@ public class GermanyUtil extends AutomationUtil {
       case "DC":
       case "XDC":
         // Duplicate CMR checks Based on Name and Addresses
-        for (Addr addr : requestData.getAddresses()) {
-          String addrTyp = addr.getId().getAddrType();
-          if (StringUtils.isNotBlank(addrTyp) && (addrTyp.equalsIgnoreCase("ZS01") || addrTyp.equalsIgnoreCase("ZI01"))) {
-            String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
-            String duplicateCMRNo = null;
-            // getting fuzzy matches on basis of name
-            try {
+        // Duplicate CMR checks Based on Name and Addresses
+        try {
+          String zs01Kunnr = null;
+          String zi01Kunnr = null;
+          String dupCMRzS01 = null;
+          String dupCMRzI01 = null;
+          for (Addr addr : requestData.getAddresses()) {
+            String addrTyp = addr.getId().getAddrType();
+            if (StringUtils.isNotBlank(addrTyp) && (addrTyp.equalsIgnoreCase("ZS01") || addrTyp.equalsIgnoreCase("ZI01"))) {
+              String custNm = addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
+              String duplicateCMRNo = null;
+              // getting fuzzy matches on basis of name
               MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
                   MatchingServiceClient.class);
               DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
               request.setCustomerName(custNm);
               request.setIssuingCountry(data.getCmrIssuingCntry());
               request.setLandedCountry(addr.getLandCntry());
-              request.setIsicCd(data.getIsuCd());
               request.setPostalCode(addr.getPostCd());
               request.setStateProv(addr.getStateProv());
               request.setStreetLine1(addr.getAddrTxt());
               request.setStreetLine2(addr.getAddrTxt2());
               request.setCity(addr.getCity1());
-              request.setCustClass(data.getCustClass());
+              request.setAddrType(addrTyp);
               client.setReadTimeout(1000 * 60 * 5);
               LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
               MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
@@ -344,24 +348,36 @@ public class GermanyUtil extends AutomationUtil {
               if (resp.getSuccess()) {
                 if (resp.getMatched() && resp.getMatches().size() > 0) {
                   duplicateCMRNo = resp.getMatches().get(0).getCmrNo();
-                  String zs01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.GERMANY);
-                  details.append("The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
-                      + " already has a record with CMR No. " + duplicateCMRNo).append("\n");
-                  engineData.addRejectionComment("DUPC",
-                      "The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
-                          + " already has a record with CMR No. " + duplicateCMRNo,
-                      duplicateCMRNo, zs01Kunnr);
-
-                  valid = false;
-                } else {
-                  details.append("No Duplicate CMRs were found.").append("\n");
+                  if (addrTyp.equalsIgnoreCase("ZS01")) {
+                    dupCMRzS01 = duplicateCMRNo;
+                    zs01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.GERMANY);
+                  } else if (addrTyp.equalsIgnoreCase("ZI01")) {
+                    dupCMRzI01 = duplicateCMRNo;
+                    zi01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.GERMANY);
+                  }
                 }
               }
-            } catch (Exception e) {
-              details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
-              engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
             }
           }
+          if (zs01Kunnr != null && zi01Kunnr != null && StringUtils.isNotBlank(dupCMRzS01) && StringUtils.isNotBlank(dupCMRzI01)
+              && dupCMRzS01.equals(dupCMRzI01)) {
+            details.append("The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
+                + " already has a record with CMR No. for Sold-To " + dupCMRzS01 + " and for Install-At " + dupCMRzI01).append("\n");
+            engineData.addRejectionComment("DUPC",
+                "The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
+                    + " already has a record with CMR No. for Sold-To " + dupCMRzS01,
+                dupCMRzS01, zs01Kunnr);
+            engineData.addRejectionComment("DUPC",
+                "The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
+                    + " already has a record with CMR No. for Install-At " + dupCMRzI01,
+                dupCMRzI01, zi01Kunnr);
+            valid = false;
+          } else {
+            details.append("No Duplicate CMRs were found.").append("\n");
+          }
+        } catch (Exception e) {
+          details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
+          engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
         }
         // Sold-To and Install-At cannot be same for these scenarios
         if (zs01 != null && zi01 != null && addressEquals(zs01, zi01)) {
