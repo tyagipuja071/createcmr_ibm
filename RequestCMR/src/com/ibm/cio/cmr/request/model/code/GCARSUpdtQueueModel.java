@@ -44,6 +44,16 @@ public class GCARSUpdtQueueModel extends BaseModel {
 
   private String updatedTsStr;
 
+  private String searchCriteria;
+
+  public String getSearchCriteria() {
+    return searchCriteria;
+  }
+
+  public void setSearchCriteria(String searchCriteria) {
+    this.searchCriteria = searchCriteria;
+  }
+
   public String getSourceName() {
     return sourceName;
   }
