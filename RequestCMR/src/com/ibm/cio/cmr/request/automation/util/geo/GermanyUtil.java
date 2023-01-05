@@ -927,7 +927,7 @@ public class GermanyUtil extends AutomationUtil {
         }
 
         if (StringUtils.isNotBlank(data.getCustSubGrp()) && "3PA".contains(data.getCustSubGrp())
-            && (changes.isAddressChanged("ZI01") && isOnlyDnBRelevantFieldUpdated(changes, "ZI01")) || isAddressAdded(installAt)) {
+            && ((changes.isAddressChanged("ZI01") && isOnlyDnBRelevantFieldUpdated(changes, "ZI01")) || isAddressAdded(installAt))) {
           // Check if address closely matches DnB
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installAt, false);
           if (matches != null) {
