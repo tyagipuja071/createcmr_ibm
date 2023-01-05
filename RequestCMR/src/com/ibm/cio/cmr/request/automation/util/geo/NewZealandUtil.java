@@ -188,6 +188,12 @@ public class NewZealandUtil extends AutomationUtil {
     }
     results.setDetails(details.toString());
 
+    if (("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))
+        && ("LOCAL".equals(data.getCustGrp()) && "PRIV".equals(data.getCustSubGrp()))) {
+      data.setApCustClusterId("00002");
+      entityManager.merge(data);
+      entityManager.flush();
+    }
     return results;
   }
 
