@@ -193,7 +193,7 @@
     <%} else { %>
       <cmr:button label="Save" onClick="UserService.saveUser(false)" highlight="true" />
     <%} %>
-    <cmr:button label="Add Another User" onClick="UserService.addUser()" highlight="false" pad="true" />
+   <%-- <cmr:button label="Add Another User" onClick="UserService.addUser()" highlight="false" pad="true" />--%>
     <cmr:button label="Back to User List" onClick="window.location = '${contextPath}/users'" pad="true" />
   </cmr:buttonsRow>
   <br>
@@ -214,8 +214,8 @@
         </cmr:row>
         <cmr:row topPad="10" addBackground="false">
           <cmr:column span="6">
-            <cmr:grid usePaging="false" url="/userrolelist.json" id="userRoleListGrid" hasCheckbox="true" checkBoxKeys="userId,roleId,subRoleId"
-              span="6" height="200">
+                    <cmr:grid usePaging="false" url="/userrolelist.json" id="userRoleListGrid" hasCheckbox="false" checkBoxKeys="userId,roleId,subRoleId"
+      span="6" height="200">
               <cmr:gridParam fieldId="userId" value="${user.userId}" />
               <cmr:gridCol width="12%" field="roleDesc" header="Role" />
               <cmr:gridCol width="12%" field="subRoleDesc" header="Sub-role" />
@@ -241,11 +241,11 @@
         <cmr:row>
         &nbsp;
       </cmr:row>
-        <cmr:buttonsRow>
-          <cmr:button label="Add Roles" onClick="UserService.addRoles()" highlight="true" />
+         <%--<cmr:buttonsRow>
+ <cmr:button label="Add Roles" onClick="UserService.addRoles()" highlight="true" />
           <cmr:button label="Remove Roles" onClick="UserService.removeRoles()" pad="true" />
-        </cmr:buttonsRow>
-        <br>
+         </cmr:buttonsRow>--%>
+
       </cmr:section>
     </cmr:form>
   </cmr:boxContent>
