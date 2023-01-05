@@ -207,9 +207,9 @@
 
       <property name="javax.persistence.jdbc.driver" value="com.ibm.db2.jcc.DB2Driver" />
       <property name="javax.persistence.jdbc.url"
-        value="jdbc:db2://warehouse.data.zc2.ibm.com:50001/BLUDB:sslConnection=true;sslTrustStoreLocation=ibm-truststore.jks;sslTrustStorePassword=zaq12wsx" />
-      <property name="javax.persistence.jdbc.user" value="C_MM9J897_nomail_relay_ibm_com" />
-      <property name="javax.persistence.jdbc.password" value="findcmr4us" />
+        value="jdbc:db2://db2w-rnjaxyu.us-south.db2w.cloud.ibm.com:50001/BLUDB:sslConnection=true;enableRowsetSupport=true;fetchSize=1000;" />
+      <property name="javax.persistence.jdbc.user" value="" />
+      <property name="javax.persistence.jdbc.password" value="" />
 
     </properties>
   </persistence-unit>
