@@ -84,13 +84,13 @@ public class BeLuxUtil extends AutomationUtil {
     String landedCountryZP01 = "";
     String custGrp = data.getCustGrp();
     // CREATCMR-6244 LandCntry UK(GB)
-    if(zs01 != null){
-    	String landCntry = zs01.getLandCntry();
-    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
-                && ("CROSS".equals(custGrp))){
-        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
-        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
-        }
+    if (zs01 != null) {
+      String landCntry = zs01.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
     }
     if (zp01 != null) {
       customerNameZP01 = StringUtils.isBlank(zp01.getCustNm1()) ? "" : zp01.getCustNm1();
@@ -414,49 +414,49 @@ public class BeLuxUtil extends AutomationUtil {
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
       case "VAT #":
-    	  if(requestData.getAddress("ZS01").getLandCntry().equals("GB")){
-    		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
-                  engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
-                  details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
-                  }
-            }else{
-            	if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
-                    // ADD
-                    Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-                    List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-                    boolean matchesDnb = false;
-                    if (matches != null) {
-                      // check against D&B
-                      matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-                    }
-                    if (!matchesDnb) {
-                      cmdeReview = true;
-                      engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
-                      details.append("VAT # on the request did not match D&B\n");
-                    } else {
-                      details.append("VAT # on the request matches D&B\n");
-                    }
-                  }
-
-                  if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
-                      && !(change.getOldData().equals(change.getNewData()))) {
-                    // UPDATE
-                    Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-                    List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-                    boolean matchesDnb = false;
-                    if (matches != null) {
-                      // check against D&B
-                      matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-                    }
-                    if (!matchesDnb) {
-                      cmdeReview = true;
-                      engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
-                      details.append("VAT # on the request did not match D&B\n");
-                    } else {
-                      details.append("VAT # on the request matches D&B\n");
-                    }
-                  }
+        if (requestData.getAddress("ZS01").getLandCntry().equals("GB")) {
+          if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)) {
+            engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+            details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+          }
+        } else {
+          if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+            // ADD
+            Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
             }
+            if (!matchesDnb) {
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
+              details.append("VAT # on the request did not match D&B\n");
+            } else {
+              details.append("VAT # on the request matches D&B\n");
+            }
+          }
+
+          if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
+              && !(change.getOldData().equals(change.getNewData()))) {
+            // UPDATE
+            Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+            }
+            if (!matchesDnb) {
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
+              details.append("VAT # on the request did not match D&B\n");
+            } else {
+              details.append("VAT # on the request matches D&B\n");
+            }
+          }
+        }
         break;
       case "ISIC":
       case "INAC/NAC Code":
@@ -775,11 +775,11 @@ public class BeLuxUtil extends AutomationUtil {
     String salesRepTeam = "";
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
     String geoCd = "";
-    if (countryUse.length() > 3) {
+    if (StringUtils.isNotBlank(countryUse) && countryUse.length() > 3) {
       geoCd = countryUse.substring(3, 5);
     }
     String cmrCntry = cmrIssuingctry + geoCd;
-    if (countryUse.length() == 3) {
+    if (StringUtils.isNotBlank(countryUse) && countryUse.length() == 3) {
       salesRepTeam = isuCtc + "BG";
     } else {
       salesRepTeam = isuCtc + "LU";
