@@ -143,7 +143,7 @@
 	  Military-Intelligence End Use and End User definitions
       <br>
       <br>
-      <span style="font-weight:bold;text-decoration:underline">Definitions </span>
+      <span style="font-weight:bold;text-decoration:underline">DEFINITIONS </span>
       <br>
       <br>
       <span style="font-weight:bold;">Military End Users: </span>
