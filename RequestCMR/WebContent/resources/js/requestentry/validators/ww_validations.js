@@ -1254,7 +1254,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addGenericPostalCodeValidator, GEOHandler.GROUP1);
   
   GEOHandler.registerWWValidator(addINACValidator);
-  GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
+
+  // Removing this for coverage-2023 as ISU -32 is no longer absoleted
+  //GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
   
   GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']);  
   GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']); 
