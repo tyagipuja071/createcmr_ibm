@@ -575,6 +575,7 @@ public class IERPProcessService extends BaseBatchService {
                 LOG.debug("no Of Working days before check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
                 noOFWorkingDays = IERPRequestUtils.checkNoOfWorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
                 LOG.debug("no Of Working days after check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
+
               }
               int tempReactThres = SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) ? 2 : 3;
               if (noOFWorkingDays >= tempReactThres) {
@@ -710,8 +711,10 @@ public class IERPProcessService extends BaseBatchService {
                   "COM".equals(admin.getReqStatus()));
             }
 
+            WfHist history = null;
+
             if (!CmrConstants.RDC_STATUS_IGNORED.equals(overallStatus) && firstRun) {
-              IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
+              history = IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
                   "CPR".equals(admin.getReqStatus()));
             }
 
@@ -721,6 +724,9 @@ public class IERPProcessService extends BaseBatchService {
             LOG.debug("*** IERP Site IDs on EMAIL >> " + siteIds.toString());
             try {
               sendEmailNotifications(em, admin, siteIds.toString(), statusMessage.toString());
+              if ("CPR".equals(admin.getReqStatus())) {
+                RequestUtils.sendEmailNotifications(em, admin, history, false, false);
+              }
             } catch (Exception e) {
               LOG.error("ERROR: " + e.getMessage());
             }
