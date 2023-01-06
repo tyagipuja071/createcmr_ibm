@@ -4882,7 +4882,7 @@ function showHideCityStateProvIT() {
     FormManager.hide('StateProv', 'stateProv');
     FormManager.resetValidations('stateProv');
     FormManager.show('StateProvItaly', 'stateProvItaly');
-    FormManager.readOnly('stateProvItaly');
+    // FormManager.readOnly('stateProvItaly');
 
     FormManager.addValidator('city1', Validators.REQUIRED, [ 'City' ], null);
     FormManager.setValue('crossbCntryStateProvMapIT', '');
@@ -6792,6 +6792,31 @@ function setStateProvReqdPostalCodeIT() {
       }
       /*
        * if (results.length == 1 && role == 'REQUESTER' && (addrType != 'ZS01' ||
+       * !FormManager.getField('addrType_ZS01').checked)) {
+       * FormManager.resetValidations('stateProv'); }
+       */
+    }
+  }
+}
+
+function setStateProvEmea() {
+  // var postCode = FormManager.getActualValue('postCd');
+  // var role = FormManager.getActualValue('userRole').toUpperCase();
+  var landCnty = FormManager.getActualValue('landCntry');
+  // var addrType = FormManager.getActualValue('addrType');
+  if (landCnty != '' && landCnty != 'IT') {
+    qParams = {
+      _qall : 'Y',
+      LANDED_CNTRY : landCnty,
+    };
+    var results = cmr.query('GETSPEMEA', qParams);
+    if (results != null) {
+      // if (role == 'REQUESTER' && results.length >= 1) {
+      // FormManager.addValidator('stateProv', Validators.REQUIRED, [
+      // 'State/Province' ], null);
+      // }
+      /*
+       * if (result s.length == 1 && role == 'REQUESTER' && (addrType != 'ZS01' ||
        * !FormManager.getField('addrType_ZS01').checked)) {
        * FormManager.resetValidations('stateProv'); }
        */
@@ -10590,6 +10615,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCMRValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(addBillingValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
+  GEOHandler.addAddrFunction(setStateProvEmea, GEOHandler.EMEA);
   GEOHandler.addAddrFunction(autoSetValuesOnPostalCodeIT, [ SysLoc.ITALY ]);
 
   // CMR-2205
