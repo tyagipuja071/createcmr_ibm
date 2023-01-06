@@ -6799,31 +6799,6 @@ function setStateProvReqdPostalCodeIT() {
   }
 }
 
-function setStateProvEmea() {
-  // var postCode = FormManager.getActualValue('postCd');
-  // var role = FormManager.getActualValue('userRole').toUpperCase();
-  var landCnty = FormManager.getActualValue('landCntry');
-  // var addrType = FormManager.getActualValue('addrType');
-  if (landCnty != '' && landCnty != 'IT') {
-    qParams = {
-      _qall : 'Y',
-      LANDED_CNTRY : landCnty,
-    };
-    var results = cmr.query('GETSPEMEA', qParams);
-    if (results != null) {
-      // if (role == 'REQUESTER' && results.length >= 1) {
-      // FormManager.addValidator('stateProv', Validators.REQUIRED, [
-      // 'State/Province' ], null);
-      // }
-      /*
-       * if (result s.length == 1 && role == 'REQUESTER' && (addrType != 'ZS01' ||
-       * !FormManager.getField('addrType_ZS01').checked)) {
-       * FormManager.resetValidations('stateProv'); }
-       */
-    }
-  }
-}
-
 /*
  * ITALY - sets SBO/IBO based on Sales rep
  */
