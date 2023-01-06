@@ -1159,6 +1159,14 @@ function connectToCmrServices() {
         FormManager.setValue('geoLocationCd', data.glcCode);
         FormManager.setValue('geoLocDesc', data.glcDesc);
         dojo.byId('geoLocDescCont').innerHTML = data.glcDesc != null ? data.glcDesc : '(no description available)';
+        
+        //CREATCMR-7884:reset cluster after retrieve action for NZ
+        var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  		var reqType = FormManager.getActualValue('reqType');
+  		var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST')) {
+          setClusterIDAfterRetrieveAction(data.glcCode);
+        }
       }
       if (data.dunsError) {
         // errorMsg += (showError ? ', ' : '') + 'DUNS No.';
@@ -2456,8 +2464,10 @@ function checkIfUpdateChecksRequiredOnUI() {
 
 //CREATCMR-7874: NZ 2.0 - API check in Creation(D&B match, ISIC match, NZAPI match)
 function matchDnBForNZ() {
+  console.log('>>> matchDnBForNZ >>>');
   var reqId = FormManager.getActualValue('reqId');
   var isicCd = FormManager.getActualValue('isicCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   console.log("Checking if the request matches D&B...");
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
@@ -2485,7 +2495,11 @@ function matchDnBForNZ() {
               console.log("DNB name match and DNB address match.");
               if(data.isicMatch) {
                 console.log("ISIC match.");
-              	cmr.showModal('addressVerificationModal');
+                if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
+                  checkRetrievedForNZ();
+                } else {
+                  cmr.showModal('addressVerificationModal');
+                }
               } else {
                 console.log("ISIC mismatch.");
               	cmr.showAlert('DNB name and address match success. ISIC match fail.\nPlease attach company proof');
@@ -2513,7 +2527,11 @@ function matchDnBForNZ() {
             	  FormManager.setValue('matchOverrideIndc', 'Y');
             	} else {
             	  console.log('Customer name and address matched in NZAPI');
-            	  cmr.showModal('addressVerificationModal');
+            	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
+                    checkRetrievedForNZ();
+                  } else {
+                    cmr.showModal('addressVerificationModal');
+                  }
             	}
               } else if (!data.dnbAddrMatch && data.isicMatch) {
                 console.log('DNB name match, DNB address mismatch, ISIC match, go to NZAPI check...');
@@ -2525,7 +2543,11 @@ function matchDnBForNZ() {
             	  FormManager.setValue('matchOverrideIndc', 'Y');
             	} else {
             	  console.log('Customer name and address mismatch in NZAPI');
-            	  cmr.showModal('addressVerificationModal');
+            	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
+                     checkRetrievedForNZ();
+                  } else {
+                    cmr.showModal('addressVerificationModal');
+                  }
             	}
               } else {
             	cmr.showAlert('DNB name and address match fail. ISIC match fail.\nPlease attach company proof');
@@ -2576,4 +2598,73 @@ function matchNZAPICustNmAddrForNZ() {
     dataAPIRes.success = false;
   }
   return dataAPIRes;
+}
+
+// CREATCMR-7884
+function setClusterIDAfterRetrieveAction(glcCode) {
+  console.log('>>> setClusterIDAfterRetrieveAction >>>');
+  var glcClusterMap = {};
+  glcClusterMap['NZL0005'] = '10662';
+  glcClusterMap['NZL0020'] = '10662';
+  glcClusterMap['NZL0010'] = '10663';
+  glcClusterMap['NZL9999'] = '01147';
+  
+  FormManager.setValue('apCustClusterId', glcClusterMap[glcCode]);
+  FormManager.setValue('clientTier', 'Q');
+  FormManager.setValue('isuCd', '34');
+}
+
+// CREATCMR-7884
+function checkRetrievedForNZ(){
+  console.log('>>> checkRetrievedForNZ >>>');
+  var glcClusterMap = {};
+  glcClusterMap['NZL0005'] = '10662';
+  glcClusterMap['NZL0020'] = '10662';
+  glcClusterMap['NZL0010'] = '10663';
+  glcClusterMap['NZL9999'] = '01147';
+  var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
+  var oldGlcCode = FormManager.getActualValue('geoLocationCd');
+  var oldClusterId = FormManager.getActualValue('apCustClusterId');
+  console.log("hasRetrievedValue is ", hasRetrievedValue, "old GLC code is ", oldGlcCode);
+  
+  if(!hasRetrievedValue) {
+  	cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
+  } else {
+  	console.log("Checking the GLC match... retrieve value again...")
+  	var data = CmrServices.getAll('reqentry');
+  	cmr.hideProgress();
+  	if (data) {
+      console.log(data);
+      if (data.error && data.error == 'Y') {
+        cmr.showAlert('An error was encountered when retrieving the values.\nPlease contact your system administrator.', 'Create CMR');
+      } else {
+        if (data.glcError) {
+          //errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
+        } else {
+          if(glcClusterMap[data.glcCode] != oldClusterId) {
+            console.log("The cluster id are different, then overwrite the GLC code and cluster id.")
+            FormManager.setValue('geoLocationCd', data.glcCode);
+    	    FormManager.setValue('geoLocDesc', data.glcDesc);
+    	    FormManager.setValue('apCustClusterId', glcClusterMap[data.glcCode]);
+  		    FormManager.setValue('clientTier', 'Q');
+  		    FormManager.setValue('isuCd', '34');
+  		    //cmr.showAlert('The GLC and Cluster has been overwritten to ' + data.glcCode + '-' + glcClusterMap[data.glcCode] + ', please continue the process.\nPlease contact your system administrator.', 'Create CMR');
+  		    cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to ' + data.glcCode + '-' + glcClusterMap[data.glcCode] + '. Do you want to proceed with this request?', 'Warning', null, {
+	          OK : 'Yes',
+	          CANCEL : 'No'
+	        });
+		  } else {
+	        if (data.glcCode != oldGlcCode) {
+	          console.log("The GLC code are different, the cluster id are same, then overwrite the GLC code only.")
+	          FormManager.setValue('geoLocationCd', data.glcCode);
+	    	  FormManager.setValue('geoLocDesc', data.glcDesc);
+	    	  cmr.showModal('addressVerificationModal');
+	        }
+          }
+        }
+      }
+  	}
+  }
+  
+
 }
