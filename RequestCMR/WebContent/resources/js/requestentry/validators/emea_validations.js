@@ -10572,7 +10572,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCMRValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(addBillingValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
-  GEOHandler.addAddrFunction(setStateProvEmea, GEOHandler.EMEA);
   GEOHandler.addAddrFunction(autoSetValuesOnPostalCodeIT, [ SysLoc.ITALY ]);
 
   // CMR-2205
