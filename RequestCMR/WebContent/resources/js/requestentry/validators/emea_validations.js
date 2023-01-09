@@ -4878,7 +4878,7 @@ function showHideCityStateProvIT() {
     FormManager.hide('StateProv', 'stateProv');
     FormManager.resetValidations('stateProv');
     FormManager.show('StateProvItaly', 'stateProvItaly');
-    FormManager.readOnly('stateProvItaly');
+    // FormManager.readOnly('stateProvItaly');
 
     FormManager.addValidator('city1', Validators.REQUIRED, [ 'City' ], null);
     FormManager.setValue('crossbCntryStateProvMapIT', '');
@@ -10572,6 +10572,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCMRValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(addBillingValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
+  GEOHandler.addAddrFunction(setStateProvEmea, GEOHandler.EMEA);
   GEOHandler.addAddrFunction(autoSetValuesOnPostalCodeIT, [ SysLoc.ITALY ]);
 
   // CMR-2205
