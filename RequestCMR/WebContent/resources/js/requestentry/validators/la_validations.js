@@ -2920,6 +2920,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(vatValidatorUY, [ SysLoc.URUGUAY ], null, true);
 
   GEOHandler.addAfterTemplateLoad(retainImportValues, SysLoc.ARGENTINA);
-
   GEOHandler.addAfterTemplateLoad(setIBMBankNumberBasedScenarios, [ SysLoc.URUGUAY]);
 });
