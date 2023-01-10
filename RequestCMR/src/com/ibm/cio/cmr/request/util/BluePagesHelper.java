@@ -52,6 +52,8 @@ public class BluePagesHelper {
     if (BluePagesHelper.cwa2 == null) {
       BluePagesHelper.cwa2 = new cwa2(SystemParameters.getString("BLUEPAGES_SERVER"), SystemParameters.getString("BLUEGROUPS_SERVER"));
     }
+    LOG.info("Connecting to BluePage Server: " + SystemParameters.getString("BLUEPAGES_SERVER"));
+    LOG.info("Connecting to BlueGroup Server: " + SystemParameters.getString("BLUEGROUPS_SERVER"));
     return BluePagesHelper.cwa2;
   }
 
