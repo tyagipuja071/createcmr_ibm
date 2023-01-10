@@ -1963,6 +1963,14 @@ function onIsicChange() {
         FormManager.setValue('isicCd', '');
         FormManager.enable('isicCd');
       }
+    } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || result == 'No Results' || result == 'Rejected') {
+      if (custSubGrp == 'INTER' || custSubGrp == 'PRIV' || custSubGrp == 'XPRIV' || custSubGrp == 'DUMMY' || custSubGrp == 'IGF') {
+        FormManager.setValue('isicCd', value);
+        FormManager.readOnly('isicCd');
+      } else {
+        FormManager.setValue('isicCd', '');
+        FormManager.enable('isicCd');
+      }
     }
   }
 }
