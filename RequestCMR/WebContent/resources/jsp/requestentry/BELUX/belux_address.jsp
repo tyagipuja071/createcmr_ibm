@@ -92,8 +92,7 @@
       <cmr:field fieldId="City1" id="city1" path="city1" />
     </p>
   </cmr:column> 
-  </cmr:column>
-</cmr:row>
+ </cmr:row>
 
 <cmr:row>
   <cmr:column span="2">
