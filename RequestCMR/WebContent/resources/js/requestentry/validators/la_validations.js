@@ -2770,6 +2770,41 @@ function togglePPSCeid() {
   }
 }
 
+function retainImportValues(fromAddress, scenario, scenarioChanged) {
+  var isCmrImported = getImportedIndc();
+
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'D' && scenarioChanged && scenario == 'COMME' || scenario == 'BUSPR' || scenario == 'GOVDI' || scenario == 'GOVIN') {
+    var reqId = FormManager.getActualValue('reqId');
+    var result = cmr.query("GET.CMRINFO.IMPORTED_LA", {
+      REQ_ID : reqId
+    });
+
+    if (result != null && result != '') {
+      var origIsic = result.ret1;
+      var origSubInd = result.ret2;
+
+      FormManager.setValue('isicCd', origIsic);
+      FormManager.setValue('subIndustryCd', origSubInd);
+    }
+  }
+}
+
+var _importedIndc = null;
+function getImportedIndc() {
+  if (_importedIndc) {
+    return _importedIndc;
+  }
+  var results = cmr.query('VALIDATOR.IMPORTED_ZS01', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndc = results.ret1;
+  } else {
+    _importedIndc = 'N';
+  }
+  return _importedIndc;
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2860,4 +2895,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(togglePPSCeid, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
   GEOHandler.registerValidator(vatValidatorUY, [ SysLoc.URUGUAY ], null, true);
+
+  GEOHandler.addAfterTemplateLoad(retainImportValues, SysLoc.ARGENTINA);
 });
