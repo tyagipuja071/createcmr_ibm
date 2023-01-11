@@ -2819,6 +2819,7 @@ function setIBMBankNumberBasedScenarios() {
   for (var i = 0; i < ibmBankNumberList.length; i++) {
     valueList[i] = ibmBankNumberList[i].id[0];
     if (custGrp == 'LOCAL') {
+      // remove 04 - Pure Export
       if (ibmBankNumberList[i].id[0] == '04') {
         continue;
       }
