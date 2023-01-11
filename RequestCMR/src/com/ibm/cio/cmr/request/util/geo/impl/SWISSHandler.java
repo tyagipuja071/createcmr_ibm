@@ -488,7 +488,10 @@ public class SWISSHandler extends GEOHandler {
           LOG.debug("Cannot parse postal code since it's alphanumeric.");
         }
         String landCntry = (String) results.get(0)[1];
-        String custSubGrp = StringUtils.isNotBlank(cmrIssuingCntry) ? data.getCustSubGrp().substring(2) : "";
+        String custSubGrp = "";
+        if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(data.getCustSubGrp())) {
+          custSubGrp = data.getCustSubGrp().substring(2);
+        }
         if ("CH".equals(landCntry) || "LI".equals(landCntry)  && custSubGrps.contains(custSubGrp)) {
             if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
               data.setCustPrefLang("D");
