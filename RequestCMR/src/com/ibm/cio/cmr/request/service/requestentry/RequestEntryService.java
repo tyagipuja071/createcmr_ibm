@@ -623,10 +623,23 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     // then set scorecard.vatAcknowledge=Yes
     boolean iscrossBorder = isCrossBorder(entityManager, model.getCmrIssuingCntry(), addr.getLandCntry());
     if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())) {
+      String oldVatValue = getOldVatValue(entityManager, reqId);
+      if (admin.getReqType().equals("C")) {
       if ("N".equals(data.getVatInd()) && (!iscrossBorder)) {
-        // scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+         scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
       } else
         scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
+    }
+      if (admin.getReqType().equals("U")) {
+        if ("N".equals(data.getVatInd()) && (!iscrossBorder)
+            && (oldVatValue == null || oldVatValue.isEmpty())) {
+          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+        } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue != null)) {
+          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
+        } else {
+          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
+        }
+      }
     }
     // CREATCMR-3144 - CN 2.0 special
     if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
@@ -693,6 +706,14 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         updateEntity(admin, entityManager);
       }
     }
+  }
+
+  private String getOldVatValue(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.GET.OLD.VAT.VALUE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    String vatVal = query.getSingleResult(String.class);
+    return vatVal;
   }
 
   public static boolean isCrossBorder(EntityManager entityManager, String issuingCntry, String landCntry) {

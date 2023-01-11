@@ -469,8 +469,8 @@ public class SWISSHandler extends GEOHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
-	  List<String> custSubGrps = Arrays.asList("COM","IBM","PRI");
-	  if ("C".equals(admin.getReqType())) {
+    List<String> custSubGrps = Arrays.asList("COM", "IBM", "PRI");
+    if ("C".equals(admin.getReqType())) {
       data.setCurrencyCd("CHF");
     }
     if (StringUtils.isBlank(data.getCustPrefLang())) {
@@ -487,24 +487,26 @@ public class SWISSHandler extends GEOHandler {
           postCd = 0;
           LOG.debug("Cannot parse postal code since it's alphanumeric.");
         }
-        String landCntry = (String) results.get(0)[1];
-        String custSubGrp = "";
-        if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(data.getCustSubGrp())) {
-          custSubGrp = data.getCustSubGrp().substring(2);
-        }
-        if ("CH".equals(landCntry) || "LI".equals(landCntry)  && custSubGrps.contains(custSubGrp)) {
+        if ("C".equals(admin.getReqType())) {
+          String landCntry = (String) results.get(0)[1];
+          String custSubGrp = "";
+          if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(data.getCustSubGrp())) {
+            custSubGrp = data.getCustSubGrp().substring(2);
+          }
+          if ("CH".equals(landCntry) || "LI".equals(landCntry) && custSubGrps.contains(custSubGrp)) {
             if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
               data.setCustPrefLang("D");
             } else if (postCd >= 6500 && postCd <= 6999) {
               data.setCustPrefLang("I");
             } else if (postCd >= 0000 && postCd <= 3000) {
               data.setCustPrefLang("F");
-            }else {
-                data.setCustPrefLang("E");
+            } else {
+              data.setCustPrefLang("E");
             }
-          
-        }else {
-            data.setCustPrefLang("E");	
+
+          } else {
+            data.setCustPrefLang("E");
+          }
         }
       }
     }
