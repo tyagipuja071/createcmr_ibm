@@ -2805,6 +2805,30 @@ function getImportedIndc() {
   return _importedIndc;
 }
 
+function setIBMBankNumberBasedScenarios() {
+  var custGrp = FormManager.getActualValue('custGrp')
+  var ibmBankNumberList = FormManager.getField('ibmBankNumber').loadedStore._arrayOfAllItems;
+  var valueList = new Array();
+
+  if (custGrp == 'CROSS') {
+    // reset drop down values to default
+    FormManager.resetDropdownValues(FormManager.getField('ibmBankNumber'));
+    return;
+  }
+
+  for (var i = 0; i < ibmBankNumberList.length; i++) {
+    valueList[i] = ibmBankNumberList[i].id[0];
+    if (custGrp == 'LOCAL') {
+      // remove 04 - Pure Export
+      if (ibmBankNumberList[i].id[0] == '04') {
+        continue;
+      }
+    }
+    valueList.push(ibmBankNumberList[i].id[0]);
+    FormManager.limitDropdownValues(FormManager.getField('ibmBankNumber'), valueList);
+  }
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2897,4 +2921,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(vatValidatorUY, [ SysLoc.URUGUAY ], null, true);
 
   GEOHandler.addAfterTemplateLoad(retainImportValues, SysLoc.ARGENTINA);
+  GEOHandler.addAfterTemplateLoad(setIBMBankNumberBasedScenarios, [ SysLoc.URUGUAY]);
 });
