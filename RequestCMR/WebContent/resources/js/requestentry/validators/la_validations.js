@@ -2808,23 +2808,23 @@ function getImportedIndc() {
 function setIBMBankNumberBasedScenarios() {
   var custGrp = FormManager.getActualValue('custGrp')
   var ibmBankNumberList = FormManager.getField('ibmBankNumber').loadedStore._arrayOfAllItems;
-
   var valueList = new Array();
+
+  if (custGrp == 'CROSS') {
+    // reset drop down values to default
+    FormManager.resetDropdownValues(FormManager.getField('ibmBankNumber'));
+    return;
+  }
 
   for (var i = 0; i < ibmBankNumberList.length; i++) {
     valueList[i] = ibmBankNumberList[i].id[0];
-  }
-
-  if (custGrp == 'LOCAL') {
-    // remove 04 - Pure Export
-    for (var i = 0; i < valueList.length; i++) {
-      if ('04' == valueList[i]) {
-        valueList.splice(i, 1);
+    if (custGrp == 'LOCAL') {
+      if (ibmBankNumberList[i].id[0] == '04') {
+        continue;
       }
     }
+    valueList.push(ibmBankNumberList[i].id[0]);
     FormManager.limitDropdownValues(FormManager.getField('ibmBankNumber'), valueList);
-  } else {
-    FormManager.resetDropdownValues(FormManager.getField('ibmBankNumber'));
   }
 }
 
