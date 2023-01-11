@@ -1301,7 +1301,7 @@ function setTaxcd1Status() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if ((reqType == 'C' || reqType == 'U') && (role == 'REQUESTER' || role == 'PROCESSOR')) {
+  if (reqType == 'C' && (role == 'REQUESTER' || role == 'PROCESSOR')) {
     if (taxCd1.indexOf("000") != -1) {
       FormManager.setValue('specialTaxCd', 'X');
     } else if (FormManager.getActualValue('specialTaxCd') != '') {
