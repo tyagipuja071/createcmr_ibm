@@ -9387,6 +9387,5 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.addAfterConfig(setEconomicCode, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(vatValidatorTR, [ SysLoc.TURKEY ], null, true);
 });
