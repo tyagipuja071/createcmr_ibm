@@ -2658,8 +2658,8 @@ function checkRetrievedForNZ(){
 	          console.log("The GLC code are different, the cluster id are same, then overwrite the GLC code only.")
 	          FormManager.setValue('geoLocationCd', data.glcCode);
 	    	  FormManager.setValue('geoLocDesc', data.glcDesc);
-	    	  cmr.showModal('addressVerificationModal');
 	        }
+	        cmr.showModal('addressVerificationModal');
           }
         }
       }
