@@ -968,6 +968,16 @@ function addIsuCdObsoleteValidator(){
         var reqType = FormManager.getActualValue('reqType');
                var isuCd = FormManager.getActualValue('isuCd');
                if (reqType == 'C' && isuCd == '32') {
+                 // CREATCMR-7884
+                 var cntry = FormManager.getActualValue('cmrIssuingCntry');
+                 if(cntry == '796'){
+                   var custSubGrp = FormManager.getActualValue('custSubGrp');
+                   var custSubGrpList = ['NRML','ESOSW','XESO','CROSS'];
+                   if(custSubGrpList.includes(custSubGrp)){
+                     console.log('>>> Skip ISU Obsolete Validator for NRML/ESOSW/XESO/CROSS when isuCd = 32');
+                     return new ValidationResult(null, true);
+                   }
+                 }
                  return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');
                }else  if (reqType == 'U' && isuCd == '32' && oldIsuCd != '32') {
                  return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');

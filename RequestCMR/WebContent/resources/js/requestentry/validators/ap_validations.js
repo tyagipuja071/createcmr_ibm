@@ -400,10 +400,6 @@ function setInacByCluster() {
       updateMRCAseanAnzIsa();
       
       // CREATCMR-7884
-      if(cntry == '796' && _cluster == '08037'){
-        FormManager.setValue('clientTier', 'Y');
-        FormManager.setValue('isuCd', '36');
-      }
       if(cntry == '796' && _clusterNZWithEmptyInac.includes(_cluster)){
         FormManager.setValue('inacCd','');
         FormManager.setValue('inacType', '');
@@ -525,6 +521,17 @@ function setIsuOnIsic(){
     } else if (cmrIssuingCntry == '834' && !(_cluster.includes('04462') || _cluster.includes('05219'))) {
       return;
     }  else if ((cmrIssuingCntry == '738' || cmrIssuingCntry == '736' || cmrIssuingCntry == '616' || cmrIssuingCntry == '796' || aseanCntries.includes(cmrIssuingCntry) ) && (clusterDesc[0] != '' && !clusterDesc[0].ret1.includes('S&S'))) {
+      // CREATCMR-7884
+      var custSubGrp = FormManager.getActualValue('custSubGrp');
+      var reqType = FormManager.getActualValue('reqType');
+      if(reqType == 'C' && cmrIssuingCntry == '796' && custSubGrp=='CROSS' && _cluster=='00002'){
+        console.log('>>> SET ISU = 34 when C/796/CROSS/00002 condition.');
+        FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Z' ]);
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
+        FormManager.setValue('isuCd', '34');
+        FormManager.readOnly('isuCd');
+      }
       return;
     } else if (!(cmrIssuingCntry == '738' || cmrIssuingCntry == '736' || cmrIssuingCntry == '616' || cmrIssuingCntry == '796' || aseanCntries.includes(cmrIssuingCntry) ) && (clusterDesc[0] != '' && !clusterDesc[0].ret1.includes('S&S'))) {
       return;
@@ -901,7 +908,7 @@ function setDefaultValueforCustomerServiceCode(){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if(custSubGrp == 'NRML' || custSubGrp == 'INTER' || custSubGrp == 'DUMMY' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX'
     || custSubGrp == 'MKTPC' || custSubGrp == 'ECSYS' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'XAQST' || custSubGrp == 'XBLUM' ||
-    custSubGrp == 'XMKTP' || custSubGrp == 'XESO' || custSubGrp == 'PRIV'){
+    custSubGrp == 'XMKTP' || custSubGrp == 'XESO' || custSubGrp == 'PRIV' || custSubGrp == 'NRMLC' || custSubGrp == 'KYND'){
     FormManager.setValue('engineeringBo', '9920');
     FormManager.readOnly('engineeringBo');
     FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
@@ -2482,6 +2489,15 @@ function setCTCIsuByClusterANZ() {
             FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
             FormManager.setValue('clientTier', 'Z');
             FormManager.setValue('isuCd','21');
+          } else if(_cmrIssuingCntry='796' && custSubGrp.includes('CROSS') && _cluster == '00002'){
+            // CREATCMR-7884
+            console.log('>>> 796/CROSS/0002/Z/34 >>> lock QTC/ISU');
+            FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+            FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+            FormManager.setValue('clientTier', 'Z');
+            FormManager.setValue('isuCd','34');
+            FormManager.readOnly('clientTier');
+            FormManager.readOnly('isuCd');
           } else {
             FormManager.resetDropdownValues(FormManager.getField('clientTier'));
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
@@ -4205,7 +4221,17 @@ function addCtcObsoleteValidator() {
         }
 
         if (reqType == 'C' && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B"  ||clientTier == "M"|| clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" )) {
-           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
+          // CREATCMR-7884
+          var cntry = FormManager.getActualValue('cmrIssuingCntry');
+          if(clientTier == "T" && cntry == '796'){
+            var custSubGrp = FormManager.getActualValue('custSubGrp');
+            var custSubGrpList = ['NRML','ESOSW','XESO','CROSS'];
+            if(custSubGrpList.includes(custSubGrp)){
+              console.log('>>> Skip CTC Obsolete Validator for NRML/ESOSW/XESO/CROSS when clientTier = T');
+              return new ValidationResult(null, true);
+            }
+          }
+          return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
           } else if (reqType == 'U' && oldCtc != null && oldCtc != clientTier && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B" ||clientTier == "M"|| clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C")) {
            return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
            } else {
@@ -5353,11 +5379,11 @@ function setDefaultValueForNZCreate(){
     case 'XBLUM':
       // cluster/QTC/ISU: default as 00002/Q/34 - lock field
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '00002' ]);
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q' ]);
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Z' ]);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
       FormManager.setValue('apCustClusterId', '00002');
       FormManager.readOnly('apCustClusterId');
-      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('clientTier', 'Z');
       FormManager.readOnly('clientTier');
       FormManager.setValue('isuCd', '34');
       FormManager.readOnly('isuCd');
