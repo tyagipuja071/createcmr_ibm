@@ -70,12 +70,12 @@ dojo.addOnLoad(function(){
 	        <cmr:label fieldId="apCustClusterId"> 
 	         <cmr:fieldLabel fieldId="Cluster" />:
 	         <cmr:delta text="${rdcdata.apCustClusterId}" oldValue="${reqentry.apCustClusterId}"/> 
-	         <c:if test="${reqentry.cmrIssuingCntry == '796'}">
+	         <cmr:view forCountry="796">
 				<cmr:info text="${ui.info.NZForCluster}" />
-	         </c:if>
-	         <c:if test="${reqentry.cmrIssuingCntry == '616'}">
+	         </cmr:view>
+	         <cmr:view forCountry="616">
 				<cmr:info text="${ui.info.AUForCluster}" />
-	         </c:if>
+	         </cmr:view>
 	        </cmr:label>
 	        <cmr:field path="apCustClusterId" id="apCustClusterId" fieldId="Cluster" tabId="MAIN_IBM_TAB" />
 	      	</p>
