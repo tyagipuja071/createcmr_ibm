@@ -2922,6 +2922,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
   GEOHandler.registerValidator(vatValidatorUY, [ SysLoc.URUGUAY ], null, true);
 
-  GEOHandler.addAfterTemplateLoad(retainImportValues, SysLoc.ARGENTINA);
+  GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setIBMBankNumberBasedScenarios, [ SysLoc.URUGUAY]);
 });
