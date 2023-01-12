@@ -55,10 +55,17 @@ public abstract class GCGTransformer extends APTransformer {
 
     String mrcCode = "";
     String isu = handler.cmrData.getIsuCd();
-    if ("32".equalsIgnoreCase(isu) || "34".equalsIgnoreCase(isu))
-      mrcCode = "3";
-    else
-      mrcCode = "2";
+    if (SystemLocation.HONG_KONG.equals(handler.cmrData.getCmrIssuingCntry()) || SystemLocation.MACAO.equals(handler.cmrData.getCmrIssuingCntry())) {
+      if ("32".equalsIgnoreCase(isu) || "34".equalsIgnoreCase(isu) || "36".equalsIgnoreCase(isu) || "5K".equalsIgnoreCase(isu))
+        mrcCode = "3";
+      else
+        mrcCode = "2";
+    } else {
+      if ("32".equalsIgnoreCase(isu) || "34".equalsIgnoreCase(isu))
+        mrcCode = "3";
+      else
+        mrcCode = "2";
+    }
 
     handler.messageHash.put("MrktRespCode", mrcCode);
     String custSubGrp = handler.cmrData.getCustSubGrp();
@@ -91,6 +98,14 @@ public abstract class GCGTransformer extends APTransformer {
       handler.messageHash.put("SellDept", bussinessPartner);
       handler.messageHash.put("InstDept", bussinessPartner);
       handler.messageHash.put("EngrDept", bussinessPartner);
+    } else if ("ESA".equalsIgnoreCase(custSubGrp) || "NRMLC".equalsIgnoreCase(custSubGrp) || "NRMLD".equalsIgnoreCase(custSubGrp)) {
+      if (SystemLocation.HONG_KONG.equals(handler.cmrData.getCmrIssuingCntry())
+          || SystemLocation.MACAO.equals(handler.cmrData.getCmrIssuingCntry())) {
+        String bussinessPartner = subIndCd + mrcCode + "T" + repTeamMemNo;
+        handler.messageHash.put("SellDept", bussinessPartner);
+        handler.messageHash.put("InstDept", bussinessPartner);
+        handler.messageHash.put("EngrDept", bussinessPartner);
+      }
     }
 
     if ("0".equalsIgnoreCase(handler.cmrData.getClientTier())) {

@@ -1691,7 +1691,7 @@ function autoSetAbbrevNmLocnLogic() {
       if (custSubGrp == "AQSTN" || custSubGrp == "XAQST") {
         _abbrevNm = "Acquisition use only";
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
-        _abbrevNm = "ASL use only";
+        _abbrevNm = "ESA use only";
       } else if (custSubGrp == "BLUMX" || custSubGrp == "XBLUM") {
         _abbrevNm = "Bluemix use only";
       } else if (custSubGrp == "MKTPC" || custSubGrp == "XMKTP") {
