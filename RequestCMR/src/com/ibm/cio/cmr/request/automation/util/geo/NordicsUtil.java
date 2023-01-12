@@ -796,8 +796,8 @@ public class NordicsUtil extends AutomationUtil {
   @Override
   public void tweakDnBMatchingRequest(GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
     Data data = requestData.getData();
-    if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.SWEDEN.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-      request.setOrgId(data.getVat().substring(2, 12));
+    if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.SWEDEN.equalsIgnoreCase(data.getCmrIssuingCntry()) && data.getVat().length() > 2) {
+      request.setOrgId(data.getVat().substring(2));
     }
     if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.NORWAY.equalsIgnoreCase(data.getCmrIssuingCntry()) && data.getVat().contains("MVA")) {
       request.setOrgId(data.getVat().replaceAll("MVA", "").trim());
