@@ -3,12 +3,12 @@
  */
 /* Register CND Javascript */
 var _vatExemptHandler = null;
-var _membLvlBPRelTypeHandler=null;
+var _membLvlBPRelTypeHandler = null;
 var _taxExemptHandler = null;
 var _isuHandler = null;
 
 function afterConfigForCND() {
-  
+
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       console.log(">>> RUNNING!!!!");
@@ -23,16 +23,16 @@ function afterConfigForCND() {
       }
     });
   }
-  
+
   window.setTimeout(setDefaultFieldValuesForCND, 6000);
-  
+
   if (_membLvlBPRelTypeHandler == null) {
     window.setTimeout(resetMembLvlBpRelType, 1500);
     _membLvlBPRelTypeHandler = dojo.connect(FormManager.getField('ppsceid'), 'onChange', function(value) {
       resetMembLvlBpRelType();
     });
   }
-  
+
   if (_isuHandler == null && FormManager.getField('isuCd')) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues();
@@ -72,7 +72,7 @@ function setClientTierValues() {
   }
 }
 
-function autoSetTax(){
+function autoSetTax() {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
@@ -87,8 +87,8 @@ function autoSetTax(){
   }
 }
 
-function setDefaultFieldValuesForCND(){
-  if(FormManager.getActualValue('reqType') == 'C'){
+function setDefaultFieldValuesForCND() {
+  if (FormManager.getActualValue('reqType') == 'C') {
     if (!PageManager.isReadOnly()) {
       FormManager.enable('clientTier');
     }
@@ -96,21 +96,21 @@ function setDefaultFieldValuesForCND(){
       setClientTierValues();
       return;
     }
-    if (typeof (_pagemodel) != 'undefined'){
-      if((_pagemodel['custClass'] == null) || (_pagemodel['custClass'] == '')) {
-         FormManager.setValue('custClass', '11');
+    if (typeof (_pagemodel) != 'undefined') {
+      if ((_pagemodel['custClass'] == null) || (_pagemodel['custClass'] == '')) {
+        FormManager.setValue('custClass', '11');
       }
-      if((_pagemodel['isuCd'] == null) || (_pagemodel['isuCd'] == '')) {
+      if ((_pagemodel['isuCd'] == null) || (_pagemodel['isuCd'] == '')) {
         FormManager.setValue('isuCd', '34');
       }
-      if((_pagemodel['clientTier'] == null) || (_pagemodel['clientTier'] == '')) {
+      if ((_pagemodel['clientTier'] == null) || (_pagemodel['clientTier'] == '')) {
         FormManager.setValue('clientTier', 'V');
       }
-      if((_pagemodel['privIndc'] == null) || (_pagemodel['privIndc'] == '')) {
+      if ((_pagemodel['privIndc'] == null) || (_pagemodel['privIndc'] == '')) {
         FormManager.setValue('privIndc', 'W');
       }
-      }
-  }  
+    }
+  }
 }
 
 function addCNDLandedCountryHandler(cntry, addressMode, saving, finalSave) {
@@ -124,70 +124,75 @@ function addCNDLandedCountryHandler(cntry, addressMode, saving, finalSave) {
   }
 }
 
-function setPrivacyIndcReqdForProc(){
-  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR" && FormManager.getActualValue('reqType') == 'C'){
-  FormManager.addValidator('privIndc', Validators.REQUIRED, [ 'PrivacyIndc' ], 'MAIN_CUST_TAB');
+function setPrivacyIndcReqdForProc() {
+  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR" && FormManager.getActualValue('reqType') == 'C') {
+    FormManager.addValidator('privIndc', Validators.REQUIRED, [ 'PrivacyIndc' ], 'MAIN_CUST_TAB');
   }
 }
 
-function resetMembLvlBpRelType(){
-  if(FormManager.getActualValue('reqType') == 'U'){
-    if(FormManager.getActualValue('ppsceid')!=null && FormManager.getActualValue('ppsceid')!=''){
-      FormManager.resetValidations('memLvl');  
-      FormManager.resetValidations('bpRelType'); 
+function resetMembLvlBpRelType() {
+  if (FormManager.getActualValue('reqType') == 'U') {
+    if (FormManager.getActualValue('ppsceid') != null && FormManager.getActualValue('ppsceid') != '') {
+      FormManager.resetValidations('memLvl');
+      FormManager.resetValidations('bpRelType');
     }
   }
 }
 
 function addCtcObsoleteValidator() {
-    FormManager.addFormValidator((function() {
-        return {
-            validate : function() {
-              var reqType = FormManager.getActualValue('reqType');
-              var reqId = FormManager.getActualValue('reqId');
-              var clientTier = FormManager.getActualValue('clientTier');
-              var oldCtc;
-              var qParams = {
-               REQ_ID : reqId
-               };
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var reqId = FormManager.getActualValue('reqId');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var oldCtc;
+        var qParams = {
+          REQ_ID : reqId
+        };
         var result = cmr.query('GET.DATA_RDC.CLIENT_TIER_REQID', qParams);
         if (result != null && result != '') {
-         oldCtc = result.ret1;
-         }
-
-        if (reqType == 'C' && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B" || clientTier == "M"|| clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C"  || clientTier == "0")) {
-           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
-          } else if(reqType == 'U'&& oldCtc != null && oldCtc != clientTier && (clientTier == "4" ||clientTier == "6" || clientTier == "A" || clientTier == "B" ||clientTier == "M"|| clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" || clientTier == "0"))         
-           {
-            return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
-           } else {
-             return new ValidationResult(null, true);
-            }
-          }
+          oldCtc = result.ret1;
         }
-    })(), 'MAIN_IBM_TAB', 'frmCMR');
- }
 
-//  Defect 1370022: By Mukesh
+        if (reqType == 'C'
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "B" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "S"
+                || clientTier == "N" || clientTier == "C" || clientTier == "0")) {
+          return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
+        } else if (reqType == 'U'
+            && oldCtc != null
+            && oldCtc != clientTier
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "B" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "S"
+                || clientTier == "N" || clientTier == "C" || clientTier == "0")) {
+          return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    }
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+// Defect 1370022: By Mukesh
 function canRemoveAddress(value, rowIndex, grid) {
   console.log("Remove address button..");
   var rowData = grid.getItem(0);
   if (rowData == null) {
-    return ''; 
+    return '';
   }
   var rowData = grid.getItem(rowIndex);
   var importInd = rowData.importInd;
-  
+
   var reqType = FormManager.getActualValue('reqType');
-     if(reqType == 'U'){
-        if(importInd == 'Y'){
-         return false;
-        }else{
-         return true;
-        }
-    } else{
+  if (reqType == 'U') {
+    if (importInd == 'Y') {
+      return false;
+    } else {
       return true;
-    }   
+    }
+  } else {
+    return true;
+  }
 }
 function canUpdateAddress(value, rowIndex, grid) {
   return true;
@@ -199,21 +204,21 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
   console.log(value + ' - ' + rowIndex);
   var rowData = grid.getItem(0);
   if (rowData == null) {
-    return ''; 
+    return '';
   }
   rowData = grid.getItem(rowIndex);
   var importInd = rowData.importInd;
   var reqType = FormManager.getActualValue('reqType');
-     if(reqType == 'U'){
-        if(importInd == 'Y'){
-         return false;
-        }else{
-         return true;
-        }
-    } else{
+  if (reqType == 'U') {
+    if (importInd == 'Y') {
+      return false;
+    } else {
       return true;
-    }   
-}   
+    }
+  } else {
+    return true;
+  }
+}
 function addressQuotationValidatorCND() {
   // CREATCMR-788
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
@@ -239,21 +244,24 @@ function addressQuotationValidatorCND() {
 }
 
 dojo.addOnLoad(function() {
-  GEOHandler.CND = [ SysLoc.BAHAMAS, SysLoc.BARBADOS, SysLoc.BERMUDA, SysLoc.CAYMAN_ISLANDS, SysLoc.GUYANA , SysLoc.JAMAICA, SysLoc.SAINT_LUCIA, SysLoc.NETH_ANTILLES, SysLoc.SURINAME, SysLoc.TRINIDAD_TOBAGO ];
+  GEOHandler.CND = [ SysLoc.BAHAMAS, SysLoc.BARBADOS, SysLoc.BERMUDA, SysLoc.CAYMAN_ISLANDS, SysLoc.GUYANA, SysLoc.JAMAICA, SysLoc.SAINT_LUCIA, SysLoc.NETH_ANTILLES, SysLoc.SURINAME,
+      SysLoc.TRINIDAD_TOBAGO ];
   console.log('adding CND validators...');
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.CND);
   GEOHandler.addAfterConfig(afterConfigForCND, GEOHandler.CND);
   GEOHandler.addAfterConfig(autoSetTax, SysLoc.BAHAMAS);
-  //DENNIS: COMMENTED BECAUSE THIS IS IN DUPLICATE OF THE VALIDATOR REGISTERED ON WW
-//  GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.CND, GEOHandler.ROLE_PROCESSOR, false, false);
+  // DENNIS: COMMENTED BECAUSE THIS IS IN DUPLICATE OF THE VALIDATOR REGISTERED
+  // ON WW
+  // GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.CND,
+  // GEOHandler.ROLE_PROCESSOR, false, false);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.CND);
   GEOHandler.addAddrFunction(addCNDLandedCountryHandler, GEOHandler.CND);
-//  GEOHandler.addAfterConfig(setDefaultFieldValuesForCND, GEOHandler.CND);
+  // GEOHandler.addAfterConfig(setDefaultFieldValuesForCND, GEOHandler.CND);
   GEOHandler.addAfterConfig(setPrivacyIndcReqdForProc, GEOHandler.CND);
   GEOHandler.addAfterConfig(resetMembLvlBpRelType, GEOHandler.CND);
   GEOHandler.setRevertIsicBehavior(false);
-  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CND );
-  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CND );
-  GEOHandler.registerValidator(addCtcObsoleteValidator,GEOHandler.CND , null, true);
+  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CND);
+  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CND);
+  GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.CND, null, true);
   GEOHandler.addAfterConfig(modeOfPaymentAndOrderBlockCdHandling, GEOHandler.CND);
 });
