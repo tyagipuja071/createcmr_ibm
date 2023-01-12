@@ -670,7 +670,7 @@ public abstract class APHandler extends GEOHandler {
         if ("AQSTN".equalsIgnoreCase(data.getCustSubGrp()) || "XAQST".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "Acquisition use only");
         } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
-          setAbbrevNM(data, "ASL use only");
+          setAbbrevNM(data, "ESA use only");
         } else if ("BLUMX".equalsIgnoreCase(data.getCustSubGrp()) || "XBLUM".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "Bluemix use only");
         } else if ("MKTPC".equalsIgnoreCase(data.getCustSubGrp()) || "XMKTP".equalsIgnoreCase(data.getCustSubGrp())) {
@@ -690,7 +690,7 @@ public abstract class APHandler extends GEOHandler {
         if ("AQSTN".equalsIgnoreCase(data.getCustSubGrp()) || "XAQST".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "Acquisition use only");
         } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
-          setAbbrevNM(data, "ASL use only");
+          setAbbrevNM(data, "ESA use only");
         } else if ("BLUMX".equalsIgnoreCase(data.getCustSubGrp()) || "XBLUM".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "Bluemix use only");
         } else if ("MKTPC".equalsIgnoreCase(data.getCustSubGrp()) || "XMKTP".equalsIgnoreCase(data.getCustSubGrp())) {
@@ -1276,7 +1276,7 @@ public abstract class APHandler extends GEOHandler {
       if ("AQSTN".equalsIgnoreCase(data.getCustSubGrp()) || "XAQST".equalsIgnoreCase(data.getCustSubGrp())) {
         setAbbrevNM(data, "Acquisition use only");
       } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
-        setAbbrevNM(data, "ASL use only");
+        setAbbrevNM(data, "ESA use only");
       } else if ("BLUMX".equalsIgnoreCase(data.getCustSubGrp()) || "XBLUM".equalsIgnoreCase(data.getCustSubGrp())) {
         setAbbrevNM(data, "Bluemix use only");
       } else if ("MKTPC".equalsIgnoreCase(data.getCustSubGrp()) || "XMKTP".equalsIgnoreCase(data.getCustSubGrp())) {
@@ -1294,7 +1294,7 @@ public abstract class APHandler extends GEOHandler {
       if ("AQSTN".equalsIgnoreCase(data.getCustSubGrp()) || "XAQST".equalsIgnoreCase(data.getCustSubGrp())) {
         setAbbrevNM(data, "Acquisition use only");
       } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
-        setAbbrevNM(data, "ASL use only");
+        setAbbrevNM(data, "ESA use only");
       } else if ("BLUMX".equalsIgnoreCase(data.getCustSubGrp()) || "XBLUM".equalsIgnoreCase(data.getCustSubGrp())) {
         setAbbrevNM(data, "Bluemix use only");
       } else if ("MKTPC".equalsIgnoreCase(data.getCustSubGrp()) || "XMKTP".equalsIgnoreCase(data.getCustSubGrp())) {
