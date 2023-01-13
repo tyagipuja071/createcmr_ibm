@@ -497,7 +497,9 @@ public class RequestEntryController extends BaseController {
       } else if (CmrConstants.Send_for_Processing().equalsIgnoreCase(action)) {
         if ((!StringUtils.isBlank(model.getMessageDefaultApproval()))) {
           mv = new ModelAndView("redirect:/request/" + model.getReqId(), "reqentry", new RequestEntryModel());
-          MessageUtil.setErrorMessage(mv, MessageUtil.ERROR_APPROVAL_DEFAULT_DRA);
+          if (model.getApprovalResult().equalsIgnoreCase("Pending")) {
+            MessageUtil.setErrorMessage(mv, MessageUtil.ERROR_APPROVAL_DEFAULT_DRA);
+          }
         } else {
           mv = new ModelAndView("redirect:/workflow/open", "reqentry", new RequestEntryModel());
           MessageUtil.setInfoMessage(mv, MessageUtil.INFO_REQUEST_PROCESSED, "sent for processing", model.getReqId() + "");
