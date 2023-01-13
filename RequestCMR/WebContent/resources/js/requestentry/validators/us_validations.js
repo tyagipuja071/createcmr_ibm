@@ -402,13 +402,13 @@ function addCtcObsoleteValidator() {
         }
 
         if (reqType == 'C'
-            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S"
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "S"
                 || clientTier == "N" || clientTier == "C" || clientTier == "0")) {
           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
         } else if (reqType == 'U'
             && oldCtc != null
             && oldCtc != clientTier
-            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S"
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "S"
                 || clientTier == "N" || clientTier == "C" || clientTier == "0")) {
           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
         } else {
@@ -757,7 +757,7 @@ function setBPNameValuesUS() {
     return;
   }
   // For Federal Strategic Partners
-  if (FormManager.getActualValue('custGrp')  == '15') {
+  if (FormManager.getActualValue('custGrp') == '15') {
     FormManager.setValue('bpName', 'IRMR');
     if (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER') {
       FormManager.readOnly('bpName');
@@ -1353,7 +1353,7 @@ function addressQuotationValidator() {
   FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name 2' ]);
 }
 
-//CREATCMR-7213
+// CREATCMR-7213
 function federalIsicCheck() {
   FormManager.addFormValidator((function() {
     return {
