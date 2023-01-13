@@ -71,6 +71,8 @@ function approvalStatusFormatter(value, rowIndex) {
     return '<span style="font-weight:bold">Pending Approval</span>';
   case 'APR':
     return '<span style="color:green">Approved</span>';
+  case 'CCAN':
+    return '<em>Cond. Cancelled</em>';
   case 'CAPR':
     return '<span style="color:green;">Cond. Approved</span>';
   case 'REJ':
@@ -87,8 +89,6 @@ function approvalStatusFormatter(value, rowIndex) {
     return 'Override Approved';
   case 'CAN':
     return '<em>Cancelled</em>';
-  case 'CCAN':
-    return '<em>Cond. Cancelled</em>';
   case 'DRA':
     return 'Draft';
   case 'OBSLT':
@@ -285,7 +285,7 @@ function processApprovalModal_onLoad() {
     cmr.hideNode('rejectMainLine');
     cmr.showNode('approveMainLine');
   }
-  
+
   if (reqId != '0') {
     CmrGrid.refresh('ATTACHMENT_GRID', cmr.CONTEXT_ROOT + '/search/attachment.json', 'reqId=' + reqId);
   }

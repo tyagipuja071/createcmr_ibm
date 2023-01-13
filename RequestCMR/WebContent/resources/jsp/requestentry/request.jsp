@@ -366,6 +366,9 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <form:hidden path="dplChkTs" />
     </c:if>
     <form:hidden path="dplChkResult" />
+	<cmr:view forCountry="754,866,624,788,724,618,848">    
+    	<form:hidden path="vatAcknowledge" />
+    </cmr:view>
     <form:hidden path="dplChkUsrId" />
     <form:hidden path="dplChkUsrNm" />
 
@@ -471,6 +474,19 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <cmr:column span="6">
         <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
         <cmr:note text="${ui.info.condApproved}" />
+      </cmr:column>
+    </cmr:row>
+    <br>
+    <%
+      }
+    %>   
+     <%
+      if ("Requester".equals(reqentry.getUserRole()) && CmrConstants.APPROVAL_RESULT_COND_CANCELLED.equals(reqentry.getApprovalResult())) {
+    %>
+    <cmr:row>
+      <cmr:column span="6">
+        <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
+        <cmr:note text="${ui.info.condCancelleds}" />
       </cmr:column>
     </cmr:row>
     <br>
