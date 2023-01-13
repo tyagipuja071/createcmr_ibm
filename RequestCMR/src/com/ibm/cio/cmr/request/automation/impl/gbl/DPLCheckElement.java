@@ -372,6 +372,8 @@ public class DPLCheckElement extends ValidatingElement {
       params.addParam("reqId", reqId);
       params.addParam("user", user);
       params.addParam("filePrefix", "AutoDPLSearch_");
+      params.addParam("mainCustNam1", requestData.getAdmin().getMainCustNm1());
+      params.addParam("mainCustNam2", requestData.getAdmin().getMainCustNm2());
 
       try {
         dplService.process(null, params);
