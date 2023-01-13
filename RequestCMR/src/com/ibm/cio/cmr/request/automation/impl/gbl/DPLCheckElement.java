@@ -180,13 +180,13 @@ public class DPLCheckElement extends ValidatingElement {
           } else {
             Boolean isPrivate = false;
             if (StringUtils.isNotEmpty(data.getIsicCd()) && "9500".equals(data.getIsicCd())) {
-            isPrivate = true;
+              isPrivate = true;
             }
 
             Boolean errorStatus = false;
             try {
               dplResult = addrService.dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
-                  geoHandler != null ? !geoHandler.customerNamesOnAddress() : false,isPrivate);
+                  geoHandler != null ? !geoHandler.customerNamesOnAddress() : false, isPrivate);
             } catch (Exception e) {
               log.error("Error in performing DPL Check when call EVS on Request ID " + reqId + " Addr " + addr.getId().getAddrType() + "/"
                   + addr.getId().getAddrSeq(), e);
@@ -376,6 +376,8 @@ public class DPLCheckElement extends ValidatingElement {
       params.addParam("reqId", reqId);
       params.addParam("user", user);
       params.addParam("filePrefix", "AutoDPLSearch_");
+      params.addParam("mainCustNam1", requestData.getAdmin().getMainCustNm1());
+      params.addParam("mainCustNam2", requestData.getAdmin().getMainCustNm2());
 
       try {
         dplService.process(null, params);
