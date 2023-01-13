@@ -998,14 +998,14 @@ function addCtcObsoleteValidator() {
           oldCtc = result.ret1;
         }
         if (reqType == 'C'
-            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S"
-                || clientTier == "N" || clientTier == "C" || clientTier == "B" || clientTier == "0")) {
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "S" || clientTier == "N"
+                || clientTier == "C" || clientTier == "B" || clientTier == "0")) {
           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
         } else if (reqType == 'U'
             && oldCtc != null
             && oldCtc != clientTier
-            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S"
-                || clientTier == "N" || clientTier == "C" || clientTier == "B" || clientTier == "0")) {
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z" || clientTier == "S" || clientTier == "N"
+                || clientTier == "C" || clientTier == "B" || clientTier == "0")) {
           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
         } else {
           return new ValidationResult(null, true);
