@@ -112,7 +112,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     AppUser user = (AppUser) params.getParam("user");
 
     RequestData reqData = processRequest(entityManager, params);
-    String companyName = extractMainCompanyName(reqData);
+    String companyName = extractMainCompanyName(reqData, params);
     List<DPLSearchResults> results = getPlainDPLSearchResults(entityManager, params);
 
     int resultCount = 0;
@@ -185,7 +185,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
    * @param reqData
    * @return
    */
-  private String extractMainCompanyName(RequestData reqData) {
+  private String extractMainCompanyName(RequestData reqData, ParamContainer params) {
     Data data = reqData.getData();
 
     String companyName = null;
@@ -207,6 +207,15 @@ public class DPLSearchService extends BaseSimpleService<Object> {
 
     }
     if (StringUtils.isBlank(companyName)) {
+      String mainCustNam1 = (String) params.getParam("mainCustNam1") != null ? (String) params.getParam("mainCustNam1") : "";
+      String mainCustNam2 = (String) params.getParam("mainCustNam2") != null ? (String) params.getParam("mainCustNam2") : "";
+      if (StringUtils.isBlank(reqData.getAdmin().getMainCustNm1()) && StringUtils.isNotBlank(mainCustNam1)) {
+        reqData.getAdmin().setMainCustNm1(mainCustNam1);
+      }
+      if (StringUtils.isBlank(reqData.getAdmin().getMainCustNm2()) && StringUtils.isNotBlank(mainCustNam2)) {
+        reqData.getAdmin().setMainCustNm2(mainCustNam2);
+      }
+
       companyName = reqData.getAdmin().getMainCustNm1();
       if (!StringUtils.isBlank(reqData.getAdmin().getMainCustNm2())) {
         companyName += " " + reqData.getAdmin().getMainCustNm2();
@@ -290,6 +299,15 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       reqData = processRequest(entityManager, params);
       GEOHandler handler = RequestUtils.getGEOHandler(reqData.getData().getCmrIssuingCntry());
       if (handler != null && !handler.customerNamesOnAddress()) {
+        String mainCustNam1 = (String) params.getParam("mainCustNam1") != null ? (String) params.getParam("mainCustNam1") : "";
+        String mainCustNam2 = (String) params.getParam("mainCustNam2") != null ? (String) params.getParam("mainCustNam2") : "";
+        if (StringUtils.isBlank(reqData.getAdmin().getMainCustNm1()) && StringUtils.isNotBlank(mainCustNam1)) {
+          reqData.getAdmin().setMainCustNm1(mainCustNam1);
+        }
+        if (StringUtils.isBlank(reqData.getAdmin().getMainCustNm2()) && StringUtils.isNotBlank(mainCustNam2)) {
+          reqData.getAdmin().setMainCustNm2(mainCustNam2);
+        }
+
         String name = reqData.getAdmin().getMainCustNm1().toUpperCase();
         if (!StringUtils.isBlank(reqData.getAdmin().getMainCustNm2())) {
           name += " " + reqData.getAdmin().getMainCustNm2().toUpperCase();
