@@ -874,12 +874,11 @@ public class USUtil extends AutomationUtil {
           }
         }
 
-        // // Admin update checks
-        // if (changes.isLegalNameChanged()) {
-        // failedChecks.put("CUST_NM_UPDATED", "Customer Name on the request is
-        // updated.");
-        // hasNegativeCheck = true;
-        // }
+        boolean isPayGo = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+        if (changes.isLegalNameChanged() && !isPayGo) {
+          hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
+        }
+        
       } finally {
         cedpManager.clear();
         cedpManager.close();
@@ -905,6 +904,16 @@ public class USUtil extends AutomationUtil {
       }
     }
     return true;
+  }
+
+  private boolean validateLegalNameChange(RequestData requestData, Map<String, String> failedChecks) throws Exception {
+    MatchingResponse<DnBMatchingResponse> dnbResponse = DnBUtil.getMatches(requestData, null, "ZS01");
+    if (dnbResponse != null && DnBUtil.hasValidMatches(dnbResponse)) {
+      return false;
+    } else {
+      failedChecks.put("CUST_NM_UPDATED", "The request needs further review: legal name change should be validated");
+      return true;
+    }
   }
 
   /**
