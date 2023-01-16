@@ -29,6 +29,8 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.automation.util.SpainFieldsContainer;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -36,6 +38,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.Person;
@@ -83,6 +86,8 @@ public class SpainUtil extends AutomationUtil {
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #");
   private static final List<String> SCENARIOS_TO_SKIP_COVERAGE = Arrays.asList(SCENARIO_INTERNAL, SCENARIO_INTERNAL_SO, SCENARIO_BUSINESS_PARTNER,
       SCENARIO_CROSSBORDER_BP);
+
+  private static final String QUERY_BG_ES = "AUTO.COV.GET_COV_FROM_BG_ES_UK";
 
   @SuppressWarnings("unchecked")
   public SpainUtil() {
@@ -595,41 +600,61 @@ public class SpainUtil extends AutomationUtil {
 
     Data data = requestData.getData();
     Addr addr = requestData.getAddress("ZS01");
+    String bgId = data.getBgId();
+    String enterprise = null;
+    String salesRep = null;
 
-    if ((!isCoverageCalculated)) {
+    if (!isCoverageCalculated) {
       details.setLength(0);
       overrides.clearOverrides();
+    }
 
-      HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr, data.getIsuCd(), data.getClientTier(),
-          data.getCustSubGrp());
-
-      if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
-        LOG.debug("Calculated Enterprise: " + response.get(ENTP));
-        LOG.debug("Calculated Sales Rep: " + response.get(SALES_REP));
-        details.append("Coverage calculated successfully using 34Q logic mapping.").append("\n");
-        details.append("Sales Rep : " + response.get(SALES_REP)).append("\n");
-        details.append("Enterprise : " + response.get(ENTP)).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), response.get(ENTP));
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(),
-            response.get(SALES_REP));
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
-          && StringUtils.isNotBlank(data.getEnterprise())) {
-        details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
-        details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
-        details.append("Enterprise : " + data.getEnterprise()).append("\n");
-        details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else {
-        String msg = "Coverage cannot be calculated. No valid 34Q mapping found from request data.";
-        details.append(msg);
-        results.setResults("Cannot Calculate");
-        results.setDetails(details.toString());
-        engineData.addNegativeCheckStatus("_esCoverage", msg);
+    if (bgId != null && !"BGNONE".equals(bgId.trim())) {
+      List<SpainFieldsContainer> enterpriseResults = computeSREnterpriseES(entityManager, QUERY_BG_ES, bgId, data.getCmrIssuingCntry(), false);
+      if (enterpriseResults != null && !enterpriseResults.isEmpty()) {
+        for (SpainFieldsContainer field : enterpriseResults) {
+          String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
+          String calculatedCtc = StringUtils.isBlank(field.getClientTier()) ? "" : field.getClientTier();
+          if (field.getIsuCd().equals(container.getIsuCd()) && containerCtc.equals(calculatedCtc) && !StringUtils.isBlank(field.getEnterprise())) {
+            enterprise = field.getEnterprise();
+            salesRep = !StringUtils.isBlank(field.getSalesRep()) ? field.getSalesRep().substring(4) : "";
+            break;
+          }
+        }
       }
     }
+
+    // HashMap<String, String> response =
+    // getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr,
+    // container.getIsuCd(),
+    // container.getClientTierCd(), data.getCustSubGrp());
+
+    if (!StringUtils.isBlank(enterprise) && !StringUtils.isBlank(salesRep)) {
+      LOG.debug("Calculated Enterprise: " + enterprise);
+      LOG.debug("Calculated Sales Rep: " + salesRep);
+      details.append("Coverage calculated successfully from found CMRs.").append("\n");
+      details.append("Sales Rep : " + salesRep).append("\n");
+      details.append("Enterprise : " + (StringUtils.isBlank(enterprise) ? data.getEnterprise() : enterprise)).append("\n");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), enterprise);
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), salesRep);
+      results.setResults("Calculated");
+      results.setDetails(details.toString());
+    } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
+        && StringUtils.isNotBlank(data.getEnterprise())) {
+      details.append("Coverage could not be calculated from the found CMRs. Using values from request").append("\n");
+      details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
+      details.append("Enterprise : " + data.getEnterprise()).append("\n");
+      details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
+      results.setResults("Calculated");
+      results.setDetails(details.toString());
+    } else {
+      String msg = "Coverage cannot be calculated. No valid CMRs found from request data.";
+      details.append(msg);
+      results.setResults("Cannot Calculate");
+      results.setDetails(details.toString());
+      engineData.addNegativeCheckStatus("_esCoverage", msg);
+    }
+
     return true;
   }
 
@@ -673,10 +698,9 @@ public class SpainUtil extends AutomationUtil {
           scenariosList = Arrays.asList(scenarios);
 
           if (isuCd.concat(clientTier).equalsIgnoreCase(postalMapping.getIsuCTC()) && scenariosList.contains(scenario)
-              && "None".equalsIgnoreCase(postalMapping.getIsicBelongs())
-              || (!postalCodes.isEmpty() && postalCodes.contains(postCdtStrt))
+              && ("None".equalsIgnoreCase(postalMapping.getIsicBelongs()) || ((!postalCodes.isEmpty() && postalCodes.contains(postCdtStrt))
                   && (("Yes".equalsIgnoreCase(postalMapping.getIsicBelongs()) && isicCds.contains(subIndCd))
-                      || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(subIndCd)))) {
+                      || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(subIndCd)))))) {
             response.put(ENTP, postalMapping.getEnterprise());
             response.put(SALES_REP, postalMapping.getSaleRep());
             response.put(MATCHING, "Match Found.");
@@ -695,6 +719,7 @@ public class SpainUtil extends AutomationUtil {
     return Arrays.asList("C", "U", "M", "D", "R");
   }
 
+  @Override
   public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
       CoverageContainer container, boolean isCoverageCalculated) throws Exception {
@@ -720,4 +745,79 @@ public class SpainUtil extends AutomationUtil {
     LOG.debug("client tier" + data.getClientTier());
   }
 
+  private List<SpainFieldsContainer> computeSREnterpriseES(EntityManager entityManager, String queryBgEs, String bgId, String cmrIssuingCntry,
+      boolean b) {
+    List<SpainFieldsContainer> calculatedFields = new ArrayList<>();
+    String sql = ExternalizedQuery.getSql(queryBgEs);
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KEY", bgId);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", cmrIssuingCntry);
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    System.err.println("ISO: " + isoCntry);
+    query.setParameter("ISO_CNTRY", isoCntry);
+    query.setForReadOnly(true);
+
+    LOG.debug("Calculating Fields using Spain query " + queryBgEs + " for key: " + bgId);
+    List<Object[]> results = query.getResults(5);
+    if (results != null && !results.isEmpty()) {
+      for (Object[] result : results) {
+        SpainFieldsContainer fieldValues = new SpainFieldsContainer();
+
+        fieldValues.setIsuCd((String) result[0]);
+        fieldValues.setClientTier((String) result[1]);
+        fieldValues.setEnterprise((String) result[2]);
+        fieldValues.setSalesRep("1FICTI"); // Default Sales Rep for Spain
+        if (!StringUtils.isBlank((String) result[3])
+            && AutomationUtil.validateLOVVal(entityManager, cmrIssuingCntry, "##SalRepNameNo", ((String) result[3]).substring(4))) {
+          fieldValues.setSalesRep((String) result[3]);
+        }
+        calculatedFields.add(fieldValues);
+      }
+    }
+
+    return calculatedFields;
+  }
+
+  public int getaddZD01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
+    int zd01count = 0;
+    String count = "";
+    String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR_NO", cmr_no);
+    query.setParameter("ADDR_TYPE", ktokd);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      count = sResult[0].toString();
+      zd01count = Integer.parseInt(count);
+    }
+    System.out.println("zd01count = " + zd01count);
+
+    return zd01count;
+  }
+
+  public int getaddZI01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
+    int zi01count = 0;
+    String count = "";
+    String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR_NO", cmr_no);
+    query.setParameter("ADDR_TYPE", ktokd);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      count = sResult[0].toString();
+      zi01count = Integer.parseInt(count);
+    }
+    System.out.println("zi01count = " + zi01count);
+
+    return zi01count;
+  }
 }

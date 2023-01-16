@@ -60,8 +60,8 @@ public class SWISSHandler extends GEOHandler {
   private static final Logger LOG = Logger.getLogger(DEHandler.class);
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("848");
 
-  private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "Division", "POBoxCity", "Affiliate", "Company",
-      "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode", "BPRelationType", "MembLevel" };
+  private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "POBoxCity", "Affiliate", "Company", "INACType",
+      "POBoxPostalCode", "TransportZone", "CurrencyCode", "BPRelationType", "MembLevel", "CustomerName3" };
 
   public static final String SWISS_MASSCHANGE_TEMPLATE_ID = "SWISS";
 
@@ -801,7 +801,7 @@ public class SWISSHandler extends GEOHandler {
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "CITY2",
-        "POST_CD", "LAND_CNTRY", "PO_BOX", "ADDR_TXT", "CUST_PHONE", "CUST_LANG_CD", "HW_INSTL_MSTR_FLG"));
+        "DIVN", "POST_CD", "LAND_CNTRY", "PO_BOX", "ADDR_TXT", "CUST_PHONE", "CUST_LANG_CD", "HW_INSTL_MSTR_FLG"));
     return fields;
   }
 
@@ -1220,6 +1220,9 @@ public class SWISSHandler extends GEOHandler {
     map.put("##GeoLocationCode", "geoLocationCd");
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
+    map.put("##Division", "divn");
+    map.put("##City2", "city2");
+
     return map;
   }
 

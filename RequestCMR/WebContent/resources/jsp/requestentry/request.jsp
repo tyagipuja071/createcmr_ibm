@@ -103,8 +103,20 @@
   });
   
   function forceAddressValidationFromQS(){
+    var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
     if (FilteringDropdown.pending() || !_allAddressData || _allAddressData.length == 0){
       window.setTimeout('forceAddressValidationFromQS()', 500);
+    }else if (cmrCntry == '755'){
+      //CREATCMT-7670 
+      var ctyaSeq = '6';
+      for (var i = 0; i < _allAddressData.length; i++){
+        if (_allAddressData[i].addrType == 'CTYA'){
+          ctyaSeq = _allAddressData[i].addrSeq[0];
+          break;
+        }
+      }
+      cmr.hideProgress();
+      doUpdateAddr(FormManager.getActualValue('reqId'),'CTYA', ctyaSeq, cmr.MANDT, true);
     } else {
       var soldToSeq = '1';
       for (var i = 0; i < _allAddressData.length; i++){
@@ -117,6 +129,7 @@
       doUpdateAddr(FormManager.getActualValue('reqId'),'ZS01', soldToSeq, cmr.MANDT, true);
     }
   }
+  
   function enableSupportal(){
     var error = dojo.byId('cmr-error-box-msg') ? dojo.byId('cmr-error-box-msg').innerHTML : null;
     if (error){
@@ -317,7 +330,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     </c:if>
     <form:hidden path="covBgRetrievedInd" />
     <form:hidden path="rdcProcessingMsg" />
-    <cmr:view exceptForCountry="848,618,724,706,897">
+    <cmr:view exceptForCountry="848,618,724,706,897,619,621,627,647,640,759,791,839,843,859">
     	<form:hidden path="ordBlk" />
     </cmr:view>
     <cmr:view forGEO="LA">

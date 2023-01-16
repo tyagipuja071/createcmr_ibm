@@ -20,7 +20,7 @@
 
 <cmr:row addBackground="true">
  <cmr:view forCountry="702">
- <% if(reqentry.getCmrIssuingCntry().equalsIgnoreCase("702") && reqentry.getCountryUse().equalsIgnoreCase("702LV")) {%>
+ <% if(reqentry.getCmrIssuingCntry().equalsIgnoreCase("702") && "702LV".equalsIgnoreCase(reqentry.getCountryUse())) {%>
     <cmr:column span="2" containerForField="LocalTax_LV">
       <p>
         <cmr:label fieldId="taxCd1">
@@ -30,7 +30,7 @@
         <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax_LV" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-  	<% } else if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("702") && reqentry.getCountryUse().equalsIgnoreCase("702LT")) {%>
+  	<% } else if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("702") && "702LT".equalsIgnoreCase(reqentry.getCountryUse())) {%>
     <cmr:column span="2" containerForField="LocalTax_LT">
       <p>
         <cmr:label fieldId="taxCd1">
@@ -40,7 +40,7 @@
         <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax_LT" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-  	<% } else if(reqentry.getCmrIssuingCntry().equalsIgnoreCase("702") && reqentry.getCountryUse().equalsIgnoreCase("702EE")) {%>
+  	<% } else if(reqentry.getCmrIssuingCntry().equalsIgnoreCase("702") && "702EE".equalsIgnoreCase(reqentry.getCountryUse())) {%>
     <cmr:column span="2" containerForField="LocalTax_EE">
       <p>
         <cmr:label fieldId="taxCd1">
@@ -50,8 +50,18 @@
         <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax_EE" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-  <% } else if(reqentry.getCountryUse().equalsIgnoreCase("702")) {%>
+  <% } else if("702".equalsIgnoreCase(reqentry.getCountryUse())) {%>
     <cmr:column span="2" containerForField="LocalTax_FI">
+      <p>
+        <cmr:label fieldId="taxCd1">
+          <cmr:fieldLabel fieldId="LocalTax1" />: 
+              <cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}"/>
+        </cmr:label>
+        <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax_FI" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
+  <% } else if ("U".equalsIgnoreCase(reqentry.getCountryUse())) {%>
+  	<cmr:column span="2" containerForField="LocalTax_FI">
       <p>
         <cmr:label fieldId="taxCd1">
           <cmr:fieldLabel fieldId="LocalTax1" />: 

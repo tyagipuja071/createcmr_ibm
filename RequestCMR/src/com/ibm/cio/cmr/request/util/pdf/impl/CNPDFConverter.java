@@ -26,8 +26,8 @@ import com.ibm.cio.cmr.request.util.approval.ChecklistUtil;
 import com.ibm.cio.cmr.request.util.approval.ChecklistUtil.ChecklistResponse;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.pdf.RequestToPDFConverter;
-import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
@@ -111,8 +111,16 @@ public class CNPDFConverter extends DefaultPDFConverter {
           if (textLength > 150) {
             padding = textLength / 80;
           }
-          if (items.indexOf(item) == 9) {
+          if (items.indexOf(item) == 12 || items.indexOf(item) == 13) {
             padding = textLength / 70;
+            padding += 1;
+          }
+          if (items.indexOf(item) == 11) {
+            padding -= 2;
+          }
+          String text = item.getLabel() != null ? item.getLabel() : "";
+          if (text.indexOf("\n") > 0) {
+            padding += 1;
           }
           checklistSection.addCell(createValueCellExtended(item.getLabel(), 1, 1, padding));
           answer = "Y".equals(item.getAnswer()) ? "Yes" : "No";

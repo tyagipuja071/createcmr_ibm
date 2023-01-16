@@ -407,7 +407,7 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
     results = query.getResults();
     if (results != null && !results.isEmpty()) {
       Object[] sResult = results.get(0);
-      output = sResult[0].toString();
+      output = sResult[0] != null ? sResult[0].toString() : "";
     }
     return output;
   }

@@ -9,10 +9,13 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -22,6 +25,8 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
  * 
  */
 public class CreateCMRBPHandler implements ExternalSystemHandler {
+
+  private static final String US_BP_STATUS_CD = "US_BP_PROCESS";
 
   @Override
   public void addEmailParams(EntityManager entityManager, List<Object> params, Admin admin) {
@@ -122,7 +127,14 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
     addressLine1 = addressLine1.trim();
     params.add(addressLine1); // {14}
     params.add(addressLine2); // {15}
-    if ("897".equalsIgnoreCase(cmrIssuingCountry) && "CreateCMR-BP".equals(admin.getSourceSystId())) {
+
+    DataPK dataPk = new DataPK();
+    dataPk.setReqId(admin.getId().getReqId());
+    Data data = entityManager.find(Data.class, dataPk);
+
+    boolean usEndUserScenario = !StringUtils.isBlank(data.getCustSubGrp()) && data.getCustSubGrp().equals(USUtil.SC_FSP_END_USER);
+
+    if (("897".equalsIgnoreCase(cmrIssuingCountry) && "CreateCMR-BP".equals(admin.getSourceSystId())) || usEndUserScenario) {
       if (admin.getChildReqId() > 0) {
         Data theChindData = getChildData(entityManager, admin.getChildReqId());
         if (theChindData != null && StringUtils.isNotEmpty(theChindData.getCmrNo())) {
@@ -142,11 +154,12 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
         Data theData = getChildData(entityManager, admin.getId().getReqId());
         if (theData != null && StringUtils.isNotEmpty(theData.getCmrNo2())) {
           params.add(params.get(3)); // {16}
-          params.add(theData.getCmrNo2()); // {17}
         } else {
           params.add(""); // {16}
-          params.add(""); // {17}
         }
+        String detailedResult = AutomationUtil.extractAutomationDetailedResults(entityManager, data.getId().getReqId(), US_BP_STATUS_CD);
+        String directCmrNo = detailedResult.substring(23, 30);
+        params.add(directCmrNo); // {17}
       }
     } else {
       params.add(""); // {16}

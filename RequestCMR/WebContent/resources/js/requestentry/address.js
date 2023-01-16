@@ -1053,7 +1053,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('prefSeqNo', details.ret55);
 
       if (FormManager.getActualValue('cmrIssuingCntry') == '848' || FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager.getActualValue('cmrIssuingCntry') == '754') {
-        if (FormManager.getField('hwInstlMstrFlg') != null) {
+        if (dijit.byId('hwInstlMstrFlg') != undefined && FormManager.getField('hwInstlMstrFlg') != null) {
           FormManager.getField('hwInstlMstrFlg').set('checked', details.ret75 == 'Y' ? true : false);
         }
       }
