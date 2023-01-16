@@ -1136,7 +1136,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         } else if (containsOnly(statuses, condApprovedStats) && statuses.contains(CmrConstants.APPROVAL_CONDITIONALLY_APPROVED)) {
           model.setApprovalResult(CmrConstants.APPROVAL_RESULT_COND_APPROVED);
         } else if (statuses.contains(CmrConstants.APPROVAL_CONDITIONALLY_CANCELLED)) {
-          model.setApprovalResult(CmrConstants.APPROVAL_RESULT_COND_APPROVED);
+          model.setApprovalResult(CmrConstants.APPROVAL_RESULT_COND_CANCELLED);
         } else if (statuses.contains(CmrConstants.APPROVAL_REJECTED)) {
           model.setApprovalResult(CmrConstants.APPROVAL_RESULT_REJECTED);
           model.setApprovalDateStr(lastUpdtStr);
