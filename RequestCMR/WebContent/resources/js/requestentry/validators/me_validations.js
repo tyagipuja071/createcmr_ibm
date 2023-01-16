@@ -460,10 +460,10 @@ function afterConfigForCEMEA() {
     FormManager.setValue('defaultLandedCountry', landCntry);
   }
 
-  FormManager.readOnly('capInd');
-  if (FormManager.getActualValue('reqType') == 'C') {
-    FormManager.getField('capInd').set('checked', true);
-  }
+//  FormManager.readOnly('capInd');
+//  if (FormManager.getActualValue('reqType') == 'C') {
+//    FormManager.getField('capInd').set('checked', true);
+//  }
 
   FormManager.readOnly('subIndustryCd');
 
@@ -690,7 +690,6 @@ function addHandlersForCEMEA() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setClientTierValues(value);
       if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidME();
       }
@@ -1275,22 +1274,6 @@ function setPreferredLang() {
       FormManager.setValue('custPrefLang', 'E');
     }
     FormManager.enable('custPrefLang');
-  }
-}
-
-function setClientTierValues(isuCd) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  var scenario = FormManager.getActualValue('custSubGrp');
-  var isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  } else {
-    FormManager.enable('clientTier');
-  }
-  if (scenario.includes('IBM')) {
-    FormManager.readOnly('clientTier');
   }
 }
 
@@ -4392,44 +4375,9 @@ function setIsuCtcOnScenarioChange() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (scenario.includes('IN') || scenario.includes('IBM')) {
-    FormManager.setValue('isuCd', '21');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
-  } else if (scenarioChanged) {
+  } else if (scenario.includes('PC') || scenario.includes('PRI')) {
     FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier', 'Q');
-    FormManager.enable('isuCd');
-    FormManager.enable('clientTier');
-  }
-  // CREATCMR-816 No.3 Set company number 985518
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if ((SysLoc.UNITED_ARAB_EMIRATES == cntry || SysLoc.ABU_DHABI == cntry) && scenarioChanged) {
-    if (scenario == 'BUSPR' || scenario.includes('BP') || scenario.includes('IN')) {
-      FormManager.setValue('enterprise', '');
-    } else {
-      // FormManager.setValue('enterprise', '985518');
-    }
-  }
-}
-
-var currentChosenScenarioME = '';
-function setIsuCtcOnScenarioChange() {
-  var reqType = FormManager.getActualValue('reqType');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
-    return;
-  }
-  var scenario = FormManager.getActualValue('custSubGrp');
-  var scenarioChanged = false;
-  if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario) {
-    scenarioChanged = true;
-  }
-  scenarioChanged = scenarioChanged || (currentChosenScenarioME != '' && currentChosenScenarioME != scenario);
-  currentChosenScenarioME = scenario;
-  if (scenario == 'BUSPR' || scenario.includes('BP')) {
-    FormManager.setValue('isuCd', '8B');
-    FormManager.setValue('clientTier', '');
+    FormManager.setValue('clientTier', 'Q'); 
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
   } else if (scenario.includes('IN') || scenario.includes('IBM')) {
@@ -4540,8 +4488,10 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
+  var isuNonBlankCtc = ['32', '34', '36'];
+  var ctcValues = ['Q', 'Y', 'T'];
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
+  if (!isuNonBlankCtc.includes(isuCode)) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -4555,24 +4505,28 @@ function clientTierCodeValidator() {
         name : 'clientTier'
       }, false, 'Client Tier can only accept blank.');
     }
-  } else if (isuCode == '34') {
-    if (clientTierCode == '') { 
+  } else if (isuNonBlankCtc.includes(isuCode)) {
+    if (isuCode == '34' && clientTierCode != 'Q') {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
-      return new ValidationResult(null, true);
-    } else {
+      }, false, 'Client Tier can only accept value \'Q\'.');
+    } else if (isuCode == '32' && clientTierCode != 'T') {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+      }, false, 'Client Tier can only accept value \'T\'.');
+    } else if (isuCode == '36' && clientTierCode != 'Y') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept value \'Y\'.');
     }
   } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+    if (ctcValues.includes(clientTierCode) || clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
@@ -4584,7 +4538,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'T\' or Blank.');
     }
   }
 }
@@ -4721,8 +4675,6 @@ dojo
       GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
       GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
-      GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CEMEA);
-      GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); // CMR-2101
       GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
       GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
