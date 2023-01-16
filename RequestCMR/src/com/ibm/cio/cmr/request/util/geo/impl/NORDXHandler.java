@@ -111,9 +111,9 @@ public class NORDXHandler extends BaseSOFHandler {
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
-	boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
-	if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
-	  // only add zs01 equivalent for create by model
+    boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+      // only add zs01 equivalent for create by model
       FindCMRRecordModel record = mainRecord;
 
       if (!StringUtils.isEmpty(record.getCmrName4())) {
@@ -178,10 +178,6 @@ public class NORDXHandler extends BaseSOFHandler {
             String legacyseqNoformat = StringUtils.leftPad(seqNo, 5, '0');
             String legacyAddressSeq = getLegacyAddressSeq(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), legacyseqNoformat);
 
-            if (StringUtils.isBlank(legacyAddressSeq)) {
-              continue;
-              }
-            
             if (StringUtils.isBlank(legacyAddressSeq)) {
               if ("ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
                 record.setCmrAddrTypeCode("PG01");
@@ -945,10 +941,10 @@ public class NORDXHandler extends BaseSOFHandler {
       data.setBgId("");
       data.setGeoLocationCd("");
       if (prospectCmrChosen) {
-          data.setOrdBlk(mainRecord.getCmrOrderBlock());
-        } else {
-          data.setOrdBlk("");
-        }
+        data.setOrdBlk(mainRecord.getCmrOrderBlock());
+      } else {
+        data.setOrdBlk("");
+      }
       data.setCovDesc("");
       data.setBgDesc("");
       data.setBgRuleId("");
@@ -1202,7 +1198,7 @@ public class NORDXHandler extends BaseSOFHandler {
               ctc = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
               isu = validateColValFromCell(currCell);
-                if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isu))) {
+              if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isu))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
