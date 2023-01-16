@@ -201,18 +201,18 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         }
       }
       break;
-
-    }
-    if (StringUtils.isBlank(companyName)) {
+    case SystemLocation.BRAZIL:
       String mainCustNam1 = (String) params.getParam("mainCustNam1") != null ? (String) params.getParam("mainCustNam1") : "";
       String mainCustNam2 = (String) params.getParam("mainCustNam2") != null ? (String) params.getParam("mainCustNam2") : "";
       if (StringUtils.isBlank(reqData.getAdmin().getMainCustNm1()) && StringUtils.isNotBlank(mainCustNam1)) {
-        reqData.getAdmin().setMainCustNm1(mainCustNam1);
+        companyName = mainCustNam1;
       }
       if (StringUtils.isBlank(reqData.getAdmin().getMainCustNm2()) && StringUtils.isNotBlank(mainCustNam2)) {
-        reqData.getAdmin().setMainCustNm2(mainCustNam2);
+        companyName += " " + mainCustNam2;
       }
-
+      break;
+    }
+    if (StringUtils.isBlank(companyName)) {
       companyName = reqData.getAdmin().getMainCustNm1();
       if (!StringUtils.isBlank(reqData.getAdmin().getMainCustNm2())) {
         companyName += " " + reqData.getAdmin().getMainCustNm2();
@@ -295,20 +295,36 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       RequestData reqData = processRequest(entityManager, params);
       GEOHandler handler = RequestUtils.getGEOHandler(reqData.getData().getCmrIssuingCntry());
       if (handler != null && !handler.customerNamesOnAddress()) {
-        String mainCustNam1 = (String) params.getParam("mainCustNam1") != null ? (String) params.getParam("mainCustNam1") : "";
-        String mainCustNam2 = (String) params.getParam("mainCustNam2") != null ? (String) params.getParam("mainCustNam2") : "";
-        if (StringUtils.isBlank(reqData.getAdmin().getMainCustNm1()) && StringUtils.isNotBlank(mainCustNam1)) {
-          reqData.getAdmin().setMainCustNm1(mainCustNam1);
-        }
-        if (StringUtils.isBlank(reqData.getAdmin().getMainCustNm2()) && StringUtils.isNotBlank(mainCustNam2)) {
-          reqData.getAdmin().setMainCustNm2(mainCustNam2);
-        }
+        String cntry = reqData.getData().getCmrIssuingCntry();
 
-        String name = reqData.getAdmin().getMainCustNm1().toUpperCase();
-        if (!StringUtils.isBlank(reqData.getAdmin().getMainCustNm2())) {
-          name += " " + reqData.getAdmin().getMainCustNm2().toUpperCase();
+        if (SystemLocation.BRAZIL.equals(cntry)) {
+          String cname1 = "";
+          String cname2 = "";
+          String cname = "";
+          String mainCustNam1 = (String) params.getParam("mainCustNam1") != null ? (String) params.getParam("mainCustNam1") : "";
+          String mainCustNam2 = (String) params.getParam("mainCustNam2") != null ? (String) params.getParam("mainCustNam2") : "";
+          if (StringUtils.isBlank(reqData.getAdmin().getMainCustNm1()) && StringUtils.isNotBlank(mainCustNam1)) {
+            cname1 = mainCustNam1;
+          }
+          if (StringUtils.isBlank(reqData.getAdmin().getMainCustNm2()) && StringUtils.isNotBlank(mainCustNam2)) {
+            cname2 = mainCustNam2;
+          }
+          if (StringUtils.isNotBlank(cname1)) {
+            cname = cname1 + (StringUtils.isBlank(cname2) ? " " + cname2 : "");
+          } else {
+            cname = reqData.getAdmin().getMainCustNm1().toUpperCase();
+            if (!StringUtils.isBlank(reqData.getAdmin().getMainCustNm2())) {
+              cname += " " + reqData.getAdmin().getMainCustNm2().toUpperCase();
+            }
+          }
+          names.add(cname.toUpperCase());
+        } else {
+          String name = reqData.getAdmin().getMainCustNm1().toUpperCase();
+          if (!StringUtils.isBlank(reqData.getAdmin().getMainCustNm2())) {
+            name += " " + reqData.getAdmin().getMainCustNm2().toUpperCase();
+          }
+          names.add(name);
         }
-        names.add(name);
       } else {
         String cntry = reqData.getData().getCmrIssuingCntry();
         for (Addr addr : reqData.getAddresses()) {
