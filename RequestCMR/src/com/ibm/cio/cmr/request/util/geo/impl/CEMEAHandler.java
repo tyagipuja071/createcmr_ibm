@@ -2243,13 +2243,27 @@ public class CEMEAHandler extends BaseSOFHandler {
           LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
           error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
         } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
-          if (StringUtils.isBlank(ctc) || !"QY".contains(ctc)) {
-            LOG.trace("The row " + rowIndex
-                + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+          if (StringUtils.isBlank(ctc) || !"Q".contains(ctc)) {
+            LOG.trace(
+                "The row " + rowIndex + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
             error.addError(rowIndex, "Client Tier",
-                ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
           }
-        } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
+        } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
+            LOG.trace(
+                "The row " + rowIndex + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+            error.addError(rowIndex, "Client Tier",
+                ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+          }
+        } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+            LOG.trace(
+                "The row " + rowIndex + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+            error.addError(rowIndex, "Client Tier",
+                ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+          }
+        } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd))) && !"@".equalsIgnoreCase(ctc)) {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
