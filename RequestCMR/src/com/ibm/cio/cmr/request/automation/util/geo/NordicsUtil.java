@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -30,6 +31,7 @@ import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
@@ -47,6 +49,7 @@ import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+import com.ibm.cmr.services.client.matching.request.ReqCheckResponse;
 
 /**
  * 
@@ -154,6 +157,17 @@ public class NordicsUtil extends AutomationUtil {
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #");
 
   private static List<NordicsCovMapping> coverageMapping = new ArrayList<NordicsCovMapping>();
+
+  private static Map<String, String> nordxClgxdMapping = new HashMap() {
+    {
+      put("702EE", "104");
+      put("702LT", "106");
+      put("702LV", "105");
+      put("678FO", "102");
+      put("678GL", "103");
+      put("678IS", "742");
+    }
+  };
 
   @SuppressWarnings("unchecked")
   public NordicsUtil() {
@@ -358,9 +372,11 @@ public class NordicsUtil extends AutomationUtil {
     String[] kuklaBUSPR = { "43", "44", "45" };
     String[] kuklaISO = { "81", "85" };
     String cntry = requestData.getData().getCmrIssuingCntry();
+    String landCntry = getLandedCntry(requestData.getAddresses());
 
     List<DuplicateCMRCheckResponse> matches = response.getMatches();
     List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+    List<DuplicateCMRCheckResponse> subScenarioMatches = new ArrayList<DuplicateCMRCheckResponse>();
 
     if (Arrays.asList(bpScenariosToBeChecked).contains(scenario)) {
       for (DuplicateCMRCheckResponse match : matches) {
@@ -399,6 +415,70 @@ public class NordicsUtil extends AutomationUtil {
       // set filtered matches in response
       response.setMatches(filteredMatches);
     }
+
+    if (response.getMatches() != null) {
+      for (DuplicateCMRCheckResponse res : response.getMatches()) {
+        List<CmrtCust> results = null;
+        try {
+          String sql = ExternalizedQuery.getSql("LEGACYD.GETCUST");
+          PreparedQuery query = new PreparedQuery(entityManager, sql);
+          query.setParameter("COUNTRY", requestData.getData().getCmrIssuingCntry());
+          query.setParameter("CMR_NO", res.getCmrNo());
+          results = query.getResults(CmrtCust.class);
+        } catch (Exception e) {
+          LOG.debug("An error occurred while retrieving RDc results.");
+        }
+
+        if (results != null) {
+          String countryUse = !StringUtils.isBlank(requestData.getData().getCountryUse()) ? requestData.getData().getCountryUse() : "";
+          for (CmrtCust result : results) {
+            String legacyClgxd = result.getOverseasTerritory();
+            if ((!StringUtils.isBlank(nordxClgxdMapping.get(countryUse)) && nordxClgxdMapping.get(countryUse).equals(legacyClgxd))
+                || (StringUtils.isBlank(nordxClgxdMapping.get(countryUse)) && res.getLandedCountry().equals(landCntry)
+                    && StringUtils.isBlank(legacyClgxd))) {
+              subScenarioMatches.add(res);
+            }
+          }
+        }
+      }
+    }
+    response.setMatches(subScenarioMatches);
+  }
+
+  private static String getLandedCntry(List<Addr> addrs) {
+    for (Addr addr : addrs) {
+      if ("ZS01".equals(addr.getId().getAddrType())) {
+        return addr.getLandCntry();
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public void filterDuplicateReqMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<ReqCheckResponse> response) {
+    Data matchedData = new Data();
+    Data data = requestData.getData();
+    List<ReqCheckResponse> filteredMatches = new ArrayList<ReqCheckResponse>();
+    for (ReqCheckResponse res : response.getMatches()) {
+      try {
+        String sql = ExternalizedQuery.getSql("REQUESTENTRY.DATA.SEARCH_BY_REQID");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", res.getReqId());
+        query.setForReadOnly(true);
+        matchedData = query.getSingleResult(Data.class);
+      } catch (Exception e) {
+        LOG.error("An error occurred while trying to retrieve CREQCMR data.");
+      }
+
+      if (matchedData != null) {
+        if (!StringUtils.isEmpty(matchedData.getCountryUse()) && !StringUtils.isEmpty(data.getCountryUse())
+            && matchedData.getCountryUse().equals(data.getCountryUse())) {
+          filteredMatches.add(res);
+        }
+      }
+    }
+    response.setMatches(filteredMatches);
   }
 
   private boolean isuCTCMatch(String cmr, EntityManager entityManager, String cntry) {
@@ -716,8 +796,8 @@ public class NordicsUtil extends AutomationUtil {
   @Override
   public void tweakDnBMatchingRequest(GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
     Data data = requestData.getData();
-    if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.SWEDEN.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-      request.setOrgId(data.getVat().substring(2, 12));
+    if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.SWEDEN.equalsIgnoreCase(data.getCmrIssuingCntry()) && data.getVat().length() > 2) {
+      request.setOrgId(data.getVat().substring(2));
     }
     if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.NORWAY.equalsIgnoreCase(data.getCmrIssuingCntry()) && data.getVat().contains("MVA")) {
       request.setOrgId(data.getVat().replaceAll("MVA", "").trim());

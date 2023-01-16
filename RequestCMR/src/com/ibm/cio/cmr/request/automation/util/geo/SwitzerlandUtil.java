@@ -62,6 +62,10 @@ public class SwitzerlandUtil extends AutomationUtil {
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Department", "PostBox",
       "Attention to/Building/Floor/Office", "Att. Person", "Phone #", "FAX", "Customer Name 4");
 
+  private static final List<String> RELEVANT_ADDRESS_FIELDS_ZS01_ZP01 = Arrays.asList("Street name and number", "Customer legal name");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS_ZS01_ZP01 = Arrays.asList("Attention to/Building/Floor/Office",
+      "Division/Department");
+
   // private static List<ChMubotyMapping> mubotyMappings = new
   // ArrayList<ChMubotyMapping>();
   //
@@ -270,6 +274,31 @@ public class SwitzerlandUtil extends AutomationUtil {
                 }
               } else {
                 checkDetails.append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ")  validated in the checks.\n");
+              }
+            } else if (CmrConstants.RDC_BILL_TO.equals(addrType)) {
+              if (isRelevantAddressFieldUpdatedZS01ZP01(changes, addr)) {
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
+                boolean matchesDnb = false;
+                if (matches != null) {
+                  // check against D&B
+                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+                }
+                if (!matchesDnb) {
+                  resultCodes.add("R");
+                  checkDetails.append("Updates to Bill To address need verification as it does not matches D&B");
+                  LOG.debug("Updates to Bill To address need verification as it does not matches D&B");
+                } else {
+                  checkDetails.append("Updated address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
+                }
+              } else if (isNonRelevantAddressFieldUpdatedForZS01ZP01(changes, addr)) {
+                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                    .append("\n");
               }
             } else {
               // update to other relevant addresses
@@ -629,5 +658,31 @@ public class SwitzerlandUtil extends AutomationUtil {
   @Override
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M", "D", "R");
+  }
+
+  private boolean isRelevantAddressFieldUpdatedZS01ZP01(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (RELEVANT_ADDRESS_FIELDS_ZS01_ZP01.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean isNonRelevantAddressFieldUpdatedForZS01ZP01(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (NON_RELEVANT_ADDRESS_FIELDS_ZS01_ZP01.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
   }
 }

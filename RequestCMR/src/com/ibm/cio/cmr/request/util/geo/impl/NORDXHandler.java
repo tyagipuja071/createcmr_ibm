@@ -111,9 +111,9 @@ public class NORDXHandler extends BaseSOFHandler {
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
-
-    if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
-      // only add zs01 equivalent for create by model
+	boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+	if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+	  // only add zs01 equivalent for create by model
       FindCMRRecordModel record = mainRecord;
 
       if (!StringUtils.isEmpty(record.getCmrName4())) {
@@ -180,16 +180,15 @@ public class NORDXHandler extends BaseSOFHandler {
 
             if (StringUtils.isBlank(legacyAddressSeq)) {
               continue;
+              }
+            
+            if (StringUtils.isBlank(legacyAddressSeq)) {
+              if ("ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
+                record.setCmrAddrTypeCode("PG01");
+              } else if (!"ZP01".equals(record.getCmrAddrTypeCode())) {
+                continue;
+              }
             }
-
-            // if (StringUtils.isBlank(legacyAddressSeq)) {
-            // if ("ZP01".equals(record.getCmrAddrTypeCode()) &&
-            // "PG".equals(record.getCmrOrderBlock())) {
-            // record.setCmrAddrTypeCode("PG01");
-            // } else {
-            // continue;
-            // }
-            // }
 
             // if
             // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
@@ -922,6 +921,7 @@ public class NORDXHandler extends BaseSOFHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
       data.setAbbrevNm("");
       data.setAffiliate("");
       data.setClientTier("");
@@ -944,7 +944,11 @@ public class NORDXHandler extends BaseSOFHandler {
       data.setCovId("");
       data.setBgId("");
       data.setGeoLocationCd("");
-      data.setOrdBlk("");
+      if (prospectCmrChosen) {
+          data.setOrdBlk(mainRecord.getCmrOrderBlock());
+        } else {
+          data.setOrdBlk("");
+        }
       data.setCovDesc("");
       data.setBgDesc("");
       data.setBgRuleId("");

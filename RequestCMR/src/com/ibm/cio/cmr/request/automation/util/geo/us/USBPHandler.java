@@ -101,9 +101,11 @@ public abstract class USBPHandler {
   public static final String SUB_TYPE_STATE_AND_LOCAL_COUNTY = "COUNTY";
   public static final String SUB_TYPE_STATE_AND_LOCAL_CITY = "CITY";
   public static final String SUB_TYPE_FEDERAL_POA = "POA";
+  public static final String SUB_TYPE_FEDERAL_POAN = "POAN";
   public static final String SUB_TYPE_FEDERAL_REGULAR_GOVT = "FEDERAL";
   public static final String SUB_TYPE_COMMERCIAL_REGULAR = "REGULAR";
   public static final String SUB_TYPE_BUSINESS_PARTNER_END_USER = "END USER";
+  public static final String SUB_TYPE_FSP_END_USER = "FSP END USER";
   public static final String AFFILIATE_FEDERAL = "9200000";
   public static final String SUB_TYPE_LEASE_NO_RESTRICT = "NO RESTRICT";
   public static final String SUB_TYPE_LEASE_3CC = "3CC";
@@ -126,10 +128,12 @@ public abstract class USBPHandler {
     String custGrp = data.getCustGrp();
     String custSubGrp = data.getCustSubGrp();
 
-    if (USUtil.CG_THIRD_P_BUSINESS_PARTNER.equals(custGrp)) {
+    if (USUtil.CG_THIRD_P_BUSINESS_PARTNER.equals(custGrp) || USUtil.CG_THIRD_P_FSP.equals(custGrp)) {
       switch (custSubGrp) {
+      case USUtil.SC_FSP_END_USER:
       case USUtil.SC_BP_END_USER:
         return new USBPEndUserHandler();
+      case USUtil.SC_FSP_POOL:
       case USUtil.SC_BP_POOL:
         return new USBPPoolHandler();
       case USUtil.SC_BP_DEVELOP:
