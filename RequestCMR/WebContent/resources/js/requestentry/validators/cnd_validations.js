@@ -209,7 +209,8 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
       return false;
     } else {
       return true;
-    }   
+    }
+  }
 }
 
 function clientTierCodeValidator() {
@@ -241,23 +242,23 @@ function clientTierValidator() {
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
         var valResult = null;
-        
+
         var oldClientTier = null;
         var oldISU = null;
         var requestId = FormManager.getActualValue('reqId');
-        
+
         if (reqType == 'C') {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-              REQ_ID : requestId,
+            REQ_ID : requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-          
+
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU =  result.ret3 != null ? result.ret3 : '';
-            
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
             if (clientTier != oldClientTier || isuCd != oldISU) {
               valResult = clientTierCodeValidator();
             }
@@ -268,6 +269,7 @@ function clientTierValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 function addressQuotationValidatorCND() {
   // CREATCMR-788
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
@@ -309,9 +311,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setPrivacyIndcReqdForProc, GEOHandler.CND);
   GEOHandler.addAfterConfig(resetMembLvlBpRelType, GEOHandler.CND);
   GEOHandler.setRevertIsicBehavior(false);
-  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CND );
-  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CND );
-  GEOHandler.registerValidator(addCtcObsoleteValidator,GEOHandler.CND , null, true);
-  GEOHandler.registerValidator(clientTierValidator,GEOHandler.CND , null, true);
+  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CND);
+  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CND);
+  GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.CND, null, true);
+  GEOHandler.registerValidator(clientTierValidator, GEOHandler.CND, null, true);
   GEOHandler.addAfterConfig(modeOfPaymentAndOrderBlockCdHandling, GEOHandler.CND);
 });
