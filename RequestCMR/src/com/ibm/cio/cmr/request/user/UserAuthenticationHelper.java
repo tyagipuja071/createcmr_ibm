@@ -1,5 +1,5 @@
 /*
- * Licensed Material - Property of IBM * © Copyright IBM Corporation 2010 - All Rights Reserved. 
+ * Licensed Material - Property of IBM * ï¿½ Copyright IBM Corporation 2010 - All Rights Reserved. 
  * US Government Users Restricted Rights - Use, duplication or disclosure 
  * restricted by GSA ADP Schedule Contract with IBM Corp.
  */
@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.swat.password.ReturnCode;
 import com.ibm.swat.password.cwa2;
@@ -54,10 +55,9 @@ public class UserAuthenticationHelper {
     int cwaReturnCode = -1;
     try {
 
-      final String ldapHost = "bluepages.ibm.com";
+      cwa2 cwa = BluePagesHelper.getCWA2();
 
-      cwa2 cwa = new cwa2();
-      final ReturnCode cwa2rc = cwa.authenticate(intranetId, password, ldapHost);
+      final ReturnCode cwa2rc = cwa.authenticate(intranetId, password);
 
       LOG.info("Blue page authentication return code:" + cwa2rc.getCode() + " message: " + cwa2rc.getMessage());
 
