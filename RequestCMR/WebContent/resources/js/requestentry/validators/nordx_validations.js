@@ -4834,6 +4834,43 @@ function skipStateProvForFO() {
   }
 }
 
+function addVatIndValidator(){
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');     
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage'); 
+   
+ if (viewOnlyPage =='true'){
+   FormManager.resetValidations('vat');
+   FormManager.readOnly('vat');
+ } else {
+  var cntry= FormManager.getActualValue('cmrIssuingCntry');
+  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+    ISSUING_CNTRY : cntry
+  });
+  if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.setValue('vatInd', 'N');
+  } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
+    FormManager.setValue('vat', '');
+    FormManager.setValue('vatInd', '');
+  } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.setValue('vatInd', 'N');
+  }
+  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
+    FormManager.resetValidations('vat');
+  }
+}
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 
@@ -4931,4 +4968,8 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterConfig(skipStateProvForFO, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(lockTaxCode, GEOHandler.NORDX);
+  
+  GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NORDX);
 });
