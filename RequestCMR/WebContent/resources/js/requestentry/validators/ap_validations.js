@@ -5256,15 +5256,6 @@ function setDefaultValueForNZCreate(){
       FormManager.readOnly('abbrevNm');
       break;
     case 'AQSTN':
-      // cluster/QTC/ISU:
-      // CREATCMR-7884
-      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '10662', '10663', '01147' ]);
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q']);
-      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34']);
-      
-      FormManager.setValue('apCustClusterId', '10662');
-      FormManager.setValue('clientTier', 'Q');
-      FormManager.setValue('isuCd', '34');
       // MRC = 3 - lock field
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
@@ -5304,14 +5295,6 @@ function setDefaultValueForNZCreate(){
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
       FormManager.readOnly('collectionCd');
-
-      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '10662', '10663', '01147' ]);
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q']);
-      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34']);
-      
-      FormManager.setValue('apCustClusterId', '10662');
-      FormManager.setValue('clientTier', 'Q');
-      FormManager.setValue('isuCd', '34');
       
       FormManager.setValue('isicCd', isicCdInDB);
       break;
@@ -5402,15 +5385,6 @@ function setDefaultValueForNZCreate(){
       FormManager.setValue('isicCd', isicCdInDB);
       break;
     case 'XAQST':
-      // cluster/QTC/ISU:
-      // CREATCMR-7884
-      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '10662', '10663', '01147' ]);
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q']);
-      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34']);
-      
-      FormManager.setValue('apCustClusterId', '10662');
-      FormManager.setValue('clientTier', 'Q');
-      FormManager.setValue('isuCd', '34');
       // MRC = 3 - lock field
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
