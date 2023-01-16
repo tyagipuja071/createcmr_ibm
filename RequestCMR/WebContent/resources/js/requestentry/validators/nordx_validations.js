@@ -4973,5 +4973,4 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterConfig(skipStateProvForFO, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(lockTaxCode, GEOHandler.NORDX);
-  GEOHandler.addAfterConfig(skipStateProvForFO, GEOHandler.NORDX);
 });
