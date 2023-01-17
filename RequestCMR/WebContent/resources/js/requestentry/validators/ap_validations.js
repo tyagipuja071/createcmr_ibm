@@ -5725,6 +5725,10 @@ function setCTCIsuByClusterIndonesia() {
   var scenario = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var _apCustClusterId = FormManager.getActualValue('apCustClusterId');
+  FormManager.setValue('inacCd','');
+  FormManager.setValue('inacType', '');
+  FormManager.enable('inacCd');
+  FormManager.enable('inacType');
 
   if (custSubGrp == 'AQSTN' || custSubGrp == 'XAQST' || custSubGrp == 'NRML' ) {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q']);
@@ -5870,7 +5874,11 @@ function setCTCIsuByClusterMY() {
   var scenario = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var _apCustClusterId = FormManager.getActualValue('apCustClusterId');
-
+  FormManager.setValue('inacCd','');
+  FormManager.setValue('inacType', '');
+  FormManager.enable('inacCd');
+  FormManager.enable('inacType');
+  
   if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN' || custSubGrp == 'XAQST') {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q']);
     FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01222' ]);
