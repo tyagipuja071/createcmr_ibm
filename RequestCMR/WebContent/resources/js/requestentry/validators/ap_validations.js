@@ -1964,7 +1964,7 @@ function onIsicChange() {
       };
       var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
       var oldISIC = result.ret1;
-      if (custSubGrp == '' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX' || custSubGrp == 'ESOSW' || custSubGrp == 'ECSYS' || custSubGrp == 'MKTPC' || custSubGrp == 'NRML'
+      if (custSubGrp == '' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX' || custSubGrp == 'ESOSW' || custSubGrp == 'ECSYS' || custSubGrp == 'MKTPC' || custSubGrp == 'NRML' || custSubGrp == 'NRMLC'
           || custSubGrp == 'CROSS' || custSubGrp == 'SPOFF' || custSubGrp == 'XBLUM' || custSubGrp == 'XAQST' || custSubGrp == 'XMKTP' || custSubGrp == 'BUSPR' || custSubGrp == 'ASLOM') {
         FormManager.setValue('isicCd', oldISIC);
         FormManager.readOnly('isicCd');
@@ -5663,8 +5663,11 @@ function setCTCIsuByClusterIndonesia() {
   var scenario = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var _apCustClusterId = FormManager.getActualValue('apCustClusterId');
-  FormManager.setValue('inacCd','');
-  FormManager.setValue('inacType', '');
+  
+  if( _pagemodel.inacCd == null){
+    FormManager.setValue('inacCd','');
+    FormManager.setValue('inacType', '');
+  }
   FormManager.enable('inacCd');
   FormManager.enable('inacType');
 
@@ -5812,8 +5815,10 @@ function setCTCIsuByClusterMY() {
   var scenario = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var _apCustClusterId = FormManager.getActualValue('apCustClusterId');
-  FormManager.setValue('inacCd','');
-  FormManager.setValue('inacType', '');
+  if( _pagemodel.inacCd == null){
+    FormManager.setValue('inacCd','');
+    FormManager.setValue('inacType', '');
+  }
   FormManager.enable('inacCd');
   FormManager.enable('inacType');
   
