@@ -3757,13 +3757,13 @@ function setVatValidatorGRCYTR() {
     if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
       FormManager.readOnly('vat');
     }
-    if (dijit.byId('vatExempt').get('checked')) {
-      FormManager.clearValue('vat');
-    }
-    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-      FormManager.enable('vat');
-    }
+    // For CREATCMR-7984
+    /*
+     * if (dijit.byId('vatExempt').get('checked')) {
+     * FormManager.clearValue('vat'); } if (undefined != dijit.byId('vatExempt') &&
+     * !dijit.byId('vatExempt').get('checked')) { checkAndAddValidator('vat',
+     * Validators.REQUIRED, [ 'VAT' ]); FormManager.enable('vat'); }
+     */
   }
 }
 
