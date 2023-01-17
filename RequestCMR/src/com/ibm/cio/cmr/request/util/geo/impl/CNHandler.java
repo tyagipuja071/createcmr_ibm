@@ -365,7 +365,7 @@ public class CNHandler extends GEOHandler {
       if ("08036".equals(data.getSearchTerm())) {
         return false;
       }
-      if ("04182".equals(data.getSearchTerm())) {
+      if ("00075".equals(data.getSearchTerm())) {
         return true;
       } else if ((StringUtils.isBlank(data.getSearchTerm()) || "00000".equals(data.getSearchTerm()) || "000000".equals(data.getSearchTerm())
           || data.getSearchTerm().matches("[^0-9]+")) && data.getCmrNo() != null
@@ -379,7 +379,7 @@ public class CNHandler extends GEOHandler {
           || data.getSearchTerm().matches("[^0-9]+")) && data.getCmrNo() != null
           && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
         return true;
-      } else if ("04182".equals(data.getSearchTerm())) {
+      } else if ("00075".equals(data.getSearchTerm())) {
         return true;
       } else {
         return false;
@@ -865,7 +865,7 @@ public class CNHandler extends GEOHandler {
           || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+")))) {
         if (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2")) {
           data.setClientTier("Z");
-          data.setSearchTerm("04182");
+          data.setSearchTerm("00075");
         }
       }
     }
@@ -883,7 +883,7 @@ public class CNHandler extends GEOHandler {
           data.setClientTier("Z");
           data.setSearchTerm("00000");
         } else if (isBPUser(data)) {
-          data.setSearchTerm("04182");
+          data.setSearchTerm("00075");
         } else {
           data.setClientTier("Q");
           data.setSearchTerm("00000");
