@@ -4328,6 +4328,10 @@ function addCtcObsoleteValidator() {
               return new ValidationResult(null, true);
             }
           }
+          if(clientTier == "T" && cntry == '616'){
+          	console.log('>>> Skip CTC Obsolete Validator clientTier = T for AU');
+            return new ValidationResult(null, true);
+          }
           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
           } else if (reqType == 'U' && oldCtc != null && oldCtc != clientTier && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B" ||clientTier == "M"|| clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C")) {
            return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
@@ -5686,7 +5690,7 @@ function addCovBGValidator() {
 }
 
 // CREATCMR-7883
-function checkAUCustomerName() {
+function checkCustomerNameForKYND() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -6324,5 +6328,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCovBGValidator, [SysLoc.NEW_ZEALAND], null, true);
   
   GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
-  
+
+  // CREATCMR-7883
+  GEOHandler.registerValidator(checkCustomerNameForKYND, [SysLoc.AUSTRALIA], null, true);
 });
