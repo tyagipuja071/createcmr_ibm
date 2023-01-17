@@ -2607,11 +2607,11 @@ function setCTCIsuByClusterASEAN() {
      }
       
       // CREATCMR-7887 Indonesia
-      if (FormManager.getActualValue('cmrIssuingCntry') == '749' && (custSubGrp == 'ASLOM' || custSubGrp == 'XASLM' || custSubGrp == 'CROSS')) {
+      if (FormManager.getActualValue('cmrIssuingCntry') == '749' ) {
         setCTCIsuByClusterIndonesia();
       }
       // CREATCMR-7886 Malaysia
-      if (FormManager.getActualValue('cmrIssuingCntry') == '778' && (custSubGrp == 'NRML' || custSubGrp == 'ASLOM' || custSubGrp == 'XASLM' || custSubGrp == 'CROSS')) {
+      if (FormManager.getActualValue('cmrIssuingCntry') == '778' ) {
         setCTCIsuByClusterMY();
       }
       
@@ -5694,7 +5694,7 @@ function setCTCIsuByClusterIndonesia() {
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34','5K','36' ]);
     FormManager.setValue('inacCd','');
     FormManager.setValue('inacType', '');
-    if ( _clusterHandlerINDONESIA == 0 ) {
+    if ( _clusterHandlerINDONESIA == 0 && _pagemodel.apCustClusterId == null ) {
       FormManager.setValue('clientTier', '');
       FormManager.setValue('apCustClusterId','');
       FormManager.setValue('isuCd','');
@@ -5722,7 +5722,7 @@ function setCTCIsuByClusterIndonesia() {
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34','5K','36' ]);
     FormManager.setValue('inacCd','');
     FormManager.setValue('inacType', '');
-    if (_clusterHandlerINDONESIA == 0) {
+    if (_clusterHandlerINDONESIA == 0 && _pagemodel.apCustClusterId == null) {
       FormManager.setValue('clientTier', '');
       FormManager.setValue('apCustClusterId','');
       FormManager.setValue('isuCd','');
@@ -5839,7 +5839,7 @@ function setCTCIsuByClusterMY() {
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '32' ]);
     FormManager.setValue('inacCd','');
     FormManager.setValue('inacType', '');
-    if ( _clusterHandlerINDONESIA == 0 ) {
+    if ( _clusterHandlerINDONESIA == 0 && _pagemodel.apCustClusterId == null ) {
       FormManager.setValue('clientTier', '');
       FormManager.setValue('apCustClusterId','');
       FormManager.setValue('isuCd','');
@@ -5891,7 +5891,7 @@ function setCTCIsuByClusterMY() {
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '32','34','5K','36' ]);
     FormManager.setValue('inacCd','');
     FormManager.setValue('inacType', '');
-    if ( _clusterHandlerINDONESIA == 0 ) {
+    if ( _clusterHandlerINDONESIA == 0 && _pagemodel.apCustClusterId == null ) {
       FormManager.setValue('clientTier', '');
       FormManager.setValue('apCustClusterId','');
       FormManager.setValue('isuCd','');
