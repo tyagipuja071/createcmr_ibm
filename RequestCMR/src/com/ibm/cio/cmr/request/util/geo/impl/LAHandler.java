@@ -214,7 +214,9 @@ public class LAHandler extends GEOHandler {
     }
 
     if (SystemLocation.CHILE.equalsIgnoreCase(issuingCountry)) {
-      data.setBusnType(mainRecord.getCmrChileBusnTyp());
+      data.setBusnType(mainRecord.getCmrStxlTxtVal());
+    } else if (SystemLocation.URUGUAY.equalsIgnoreCase(issuingCountry)) {
+      data.setIbmBankNumber(getLovCdByUpperTxt(SystemLocation.URUGUAY, "##IBMBankNumber", mainRecord.getCmrStxlTxtVal()));
     }
 
     if (StringUtils.isNotBlank(mainRecord.getCmrCollectorNo()) && mainRecord.getCmrCollectorNo().length() > 6) {
@@ -3145,6 +3147,24 @@ public class LAHandler extends GEOHandler {
 
     LOG.debug("Lov txt : " + txt);
     return txt;
+  }
+
+  private String getLovCdByUpperTxt(String issuingCntry, String fieldId, String txt) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+
+    String lovTxt = "";
+    String sql = ExternalizedQuery.getSql("GET.LOV.CD_BY_UPPER_TXT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+    query.setParameter("FIELD_ID", fieldId);
+    query.setParameter("TXT", txt);
+    List<String> results = query.getResults(String.class);
+
+    if (results != null && results.size() > 0) {
+      lovTxt = results.get(0);
+    }
+
+    return lovTxt;
   }
 
   private String getStateProvByCity(EntityManager entityManager, String issuingCntry, List<String> stateProvResults, String city) {
