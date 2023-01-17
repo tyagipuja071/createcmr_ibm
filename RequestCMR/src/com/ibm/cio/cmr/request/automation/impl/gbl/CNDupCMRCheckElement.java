@@ -132,7 +132,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
       if (data.getCustSubGrp() != null) {
         switch (data.getCustSubGrp()) {
-        case "NRML": // SCENARIO_LOCAL_NRML
+        case "NRMLC": // SCENARIO_LOCAL_NRMLC
 
           // logic:
           // a) Duplication means CMRs with same Chinese name or Historical
@@ -245,7 +245,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         nameMatched = true;
 
                         if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
-                          if ("04182".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                          if ("00075".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                               || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                   || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                               && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
@@ -263,7 +263,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             }
                           }
                         } else {
-                          if ("04182".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                          if ("00075".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                               || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                   || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                               && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
@@ -343,7 +343,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           nameMatched = true;
 
                           if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
-                            if ("04182".equals(cmrsMods.getCmrSortl())
+                            if ("00075".equals(cmrsMods.getCmrSortl())
                                 || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                     || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                         || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -363,7 +363,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               }
                             }
                           } else {
-                            if ("04182".equals(cmrsMods.getCmrSortl())
+                            if ("00075".equals(cmrsMods.getCmrSortl())
                                 || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                     || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                         || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -447,7 +447,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             historyNmMatched = true;
 
                             if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
-                              if ("04182".equals(cmrsMods.getCmrSortl())
+                              if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -467,7 +467,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 }
                               }
                             } else {
-                              if ("04182".equals(cmrsMods.getCmrSortl())
+                              if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -557,7 +557,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             historyNmMatched = true;
 
                             if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
-                              if ("04182".equals(cmrsMods.getCmrSortl())
+                              if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -577,7 +577,1087 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 }
                               }
                             } else {
-                              if ("04182".equals(cmrsMods.getCmrSortl())
+                              if ("00075".equals(cmrsMods.getCmrSortl())
+                                  || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                      || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                          || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                      && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                          || cmrsMods.getCmrNum().startsWith("2"))) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                if (!searchTerm08036.equals(cmrsMods.getCmrSortl()) && incloud(kukla, cnSpecialKukla)) {
+                                  // should not be rejected
+                                  log.debug("Not a duplicate CMR.");
+                                } else {
+                                  // should be rejected
+                                  log.debug("Duplicate CMR. Request should be rejected.");
+                                  shouldBeRejected = true;
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                                }
+                              }
+                            }
+
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                  }
+
+                }
+
+                // output
+                if (shouldBeRejected) {
+                  result.setResults("Matches Found");
+                  result.setResults("Found Duplicate CMRs.");
+                  Collections.sort(matchedCMRs);
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+                  // to allow overides later
+                  requestData.getAdmin().setMatchIndc("C");
+                  result.setOnError(true);
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                  sendManagerEmail(entityManager, admin, data, soldTo, details);
+                } else if (prospectCMRFlag && !convertPCMRFlag && !shouldBeRejected) { // CREATCMR-6302
+                  result.setResults("Matches Found");
+                  result.setResults("Found Duplicate Prospect CMRs only.");
+                  pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
+                  Collections.sort(matchedCMRs);
+                  engineData.addRejectionComment("DUPC",
+                      "please import the existing Prospect CMR(" + pcmrs + ") into CreateCMR to convert into Legal CMR.",
+                      StringUtils.join(matchedCMRs, ", "), "");
+                  // to allow overrides later
+                  requestData.getAdmin().setMatchIndc("C");
+                  result.setOnError(true);
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                  // sendManagerEmail(entityManager, admin, data, soldTo,
+                  // details);
+                } else {
+                  result.setDetails("No Duplicate CMRs were found.");
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                }
+              } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
+                result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
+                engineData.addRejectionComment("OTH",
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage(), "", "");
+                result.setOnError(true);
+                result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
+              }
+
+            } catch (Exception e) {
+              e.printStackTrace();
+              result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese.");
+              engineData.addRejectionComment("OTH", "Error on getting China API Data when Duplicate CMR Check of Chinese.", "", "");
+              result.setOnError(true);
+              result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese.");
+            }
+          } else {
+            result.setDetails("Error on getting Chinese name when Duplicate CMR Check.");
+            engineData.addRejectionComment("OTH", "Error on getting Chinese name when Duplicate CMR Check.", "", "");
+            result.setOnError(true);
+            result.setResults("Error on getting Chinese name when Duplicate CMR Check.");
+          }
+
+          break;
+
+        case "NRMLD": // SCENARIO_LOCAL_NRMLD
+
+          // logic:
+          // a) Duplication means CMRs with same Chinese name or Historical
+          // Chinese name.
+          // b) If the existing CMR have CEID,and Search Term not as "08036"
+          // don't define as duplication.
+          // c) If the existing CMR don't have CEID and Search Term is
+          // "08036",then defined as Duplication.
+          // d) If the existing CMR don't have CEID and Search Term not as
+          // "08036",and Kukla not in ('81','85','43','44','45','46') .then
+          // defined as Duplication.
+          // e) If the existing CMR don't have CEID and Search Term not as
+          // "08036",and Kukla in ('81','85','43','44','45','46') .then don't
+          // defined as Duplication.
+          // f) check China API with single byte string value
+          // g) check findcmr twice with single byte and double byte value, if
+          // they are not equals
+
+          // CREATCMR-5461
+          // check if should skip CNDupCMRCheck and set req status PPN
+          skipAndPpn = getSkipAndPpnInd(entityManager, data);
+          if (skipAndPpn) {
+            log.debug("skip CN Dup CMR Check for req " + data.getId().getReqId());
+            doSkipAndPpn(result, engineData);
+            return result;
+          }
+
+          iAddr = handler.getIntlAddrById(soldTo, entityManager);
+          if (iAddr != null) {
+
+            try {
+
+              // 1, Check CN API
+              if (cnCreditCd != null && cnCreditCd.length() > 0) {
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setTaxCd1(cnCreditCd);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+                if (resultCNApi.getMessage() != null && resultCNApi.getMessage().contains("无数据")) {
+                  boolean hasCNSpecialAttach = checkCNSpecialAttach(entityManager, data.getId().getReqId());
+                  if (hasCNSpecialAttach) {
+                    doSkipAndPpn4NoData(result, engineData);
+                    return result;
+                  }
+                }
+              } else {
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
+                cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnNameSingleByte);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+              }
+
+              if (resultCNApi != null && resultCNApi.isSuccess()) {
+                cnNameSingleByte = resultCNApi.getRecord().getName();
+                cnHistoryNameSingleByte = resultCNApi.getRecord().getHistoryNames();
+                cnAddrSingleByte = resultCNApi.getRecord().getRegLocation();
+
+                cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
+                cnHistoryNameDoubleByte = convert2DoubleByte(cnHistoryNameSingleByte);
+                cnAddrDoubleByte = convert2DoubleByte(cnAddrSingleByte);
+
+                try {
+                  // 2, Check FindCMR NON Latin with Chinese name - single byte
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                  searchModelFindCmrCN.setName(cnNameSingleByte);
+                  findCMRResult = searchFindCMR(searchModelFindCmrCN);
+
+                  if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                    List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                    log.debug("There are " + cmrs.size() + " cmrs retrieved from FINDCMR.");
+                    for (FindCMRRecordModel cmrsMods : cmrs) {
+
+                      nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
+                      if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
+                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
+                      }
+
+                      log.debug("CNAPI retrieved name is <" + cnNameSingleByte + "> after trim Chinese Space is <"
+                          + trimChineseSpace(cnNameSingleByte) + ">");
+                      log.debug("FINDCMR retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
+                          + trimChineseSpace(nameFindCmrCnResult) + ">");
+
+                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
+
+                        kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+
+                        log.debug("CNDupCMRCheckElement: request " + data.getId().getReqId() + ", CmrNo " + cmrsMods.getCmrNum() + ", ceid "
+                            + cmrsMods.getCmrPpsceid() + ", search term " + cmrsMods.getCmrSortl() + ", kukla " + kukla);
+
+                        if (cmrsMods.getCmrNum() != null && cmrsMods.getCmrNum().startsWith("P")) {
+                          // CREATCMR-6302
+                          if (StringUtils.isBlank(data.getCmrNo()) || !data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                            log.debug("Found a duplicate prospect CMR.");
+                            pcmrs += cmrsMods.getCmrNum() + ", ";
+                            prospectCMRFlag = true;
+                            handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                          } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                            convertPCMRFlag = true;
+                            log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
+                          } else {
+                            log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
+                          }
+                          continue;
+                        }
+
+                        nameMatched = true;
+
+                        if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
+                          if ("00075".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                              || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                  || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                              && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                            // should not be rejected
+                            log.debug("Not a duplicate CMR.");
+                          } else {
+                            if (searchTerm08036.equals(cmrsMods.getCmrSortl()) || incloud(kukla, cnSpecialKukla)) {
+                              // should not be rejected
+                              log.debug("Not a duplicate CMR.");
+                            } else {
+                              // should be rejected
+                              log.debug("Duplicate CMR. Request should be rejected.");
+                              shouldBeRejected = true;
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                            }
+                          }
+                        } else {
+                          if ("00075".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                              || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                  || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                              && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                  || cmrsMods.getCmrNum().startsWith("2"))) {
+                            // should not be rejected
+                            log.debug("Not a duplicate CMR.");
+                          } else {
+                            if (!searchTerm08036.equals(cmrsMods.getCmrSortl()) && incloud(kukla, cnSpecialKukla)) {
+                              // should not be rejected
+                              log.debug("Not a duplicate CMR.");
+                            } else {
+                              // should be rejected
+                              log.debug("Duplicate CMR. Request should be rejected.");
+                              shouldBeRejected = true;
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                            }
+                          }
+                        }
+
+                      }
+                    }
+                  }
+                } catch (Exception e) {
+                  e.printStackTrace();
+                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte, "",
+                      "");
+                  result.setOnError(true);
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                }
+
+                if (cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
+                  // 3, Check FindCMR NON Latin with Chinese name - double byte
+                  try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                    searchModelFindCmrCN.setName(cnNameDoubleByte);
+                    findCMRResult = searchFindCMR(searchModelFindCmrCN);
+
+                    if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                      List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                      for (FindCMRRecordModel cmrsMods : cmrs) {
+
+                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
+                        if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
+                        }
+
+                        if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
+
+                          kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+
+                          log.debug("CNDupCMRCheckElement: request " + data.getId().getReqId() + ", CmrNo " + cmrsMods.getCmrNum() + ", ceid "
+                              + cmrsMods.getCmrPpsceid() + ", search term " + cmrsMods.getCmrSortl() + ", kukla " + kukla);
+
+                          if (cmrsMods.getCmrNum() != null && cmrsMods.getCmrNum().startsWith("P")) {
+                            // CREATCMR-6302
+                            // log.debug("Skip Duplicate CMR check for prospect
+                            // CmrNo " + cmrsMods.getCmrNum());
+                            // continue;
+                            if (StringUtils.isBlank(data.getCmrNo()) || !data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                              log.debug("Found a duplicate prospect CMR.");
+                              pcmrs += cmrsMods.getCmrNum() + ", ";
+                              prospectCMRFlag = true;
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                            } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                              convertPCMRFlag = true;
+                              log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
+                            } else {
+                              log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
+                            }
+                            continue;
+
+                          }
+
+                          nameMatched = true;
+
+                          if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
+                            if ("00075".equals(cmrsMods.getCmrSortl())
+                                || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                    || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                        || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                    && cmrsMods.getCmrNum() != null
+                                    && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                              // should not be rejected
+                              log.debug("Not a duplicate CMR.");
+                            } else {
+                              if (searchTerm08036.equals(cmrsMods.getCmrSortl()) || incloud(kukla, cnSpecialKukla)) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                // should be rejected
+                                log.debug("Duplicate CMR. Request should be rejected.");
+                                shouldBeRejected = true;
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                              }
+                            }
+                          } else {
+                            if ("00075".equals(cmrsMods.getCmrSortl())
+                                || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                    || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                        || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                    && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                        || cmrsMods.getCmrNum().startsWith("2"))) {
+                              // should not be rejected
+                              log.debug("Not a duplicate CMR.");
+                            } else {
+                              if (!searchTerm08036.equals(cmrsMods.getCmrSortl()) && incloud(kukla, cnSpecialKukla)) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                // should be rejected
+                                log.debug("Duplicate CMR. Request should be rejected.");
+                                shouldBeRejected = true;
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                              }
+                            }
+                          }
+
+                        }
+                      }
+                    }
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte,
+                        "", "");
+                    result.setOnError(true);
+                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                  }
+                }
+
+                // 4, Check FindCMR Non Latin with historical Chinese name -
+                // single byte
+                if (cnHistoryNameSingleByte != null && !"".equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameSingleByte.split(";"));
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  try {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      findCMRResult = searchFindCMR(searchModelFindCmrCN);
+
+                      if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                        List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                        for (FindCMRRecordModel cmrsMods : cmrs) {
+
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
+                          if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
+                          }
+
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
+
+                            kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+
+                            log.debug("CNDupCMRCheckElement: request " + data.getId().getReqId() + ", CmrNo " + cmrsMods.getCmrNum() + ", ceid "
+                                + cmrsMods.getCmrPpsceid() + ", search term " + cmrsMods.getCmrSortl() + ", kukla " + kukla);
+
+                            if (cmrsMods.getCmrNum() != null && cmrsMods.getCmrNum().startsWith("P")) {
+                              // CREATCMR-6302
+                              // log.debug("Skip Duplicate CMR check for
+                              // prospect CmrNo " + cmrsMods.getCmrNum());
+                              // continue;
+                              if (StringUtils.isBlank(data.getCmrNo()) || !data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                log.debug("Found a duplicate prospect CMR.");
+                                pcmrs += cmrsMods.getCmrNum() + ", ";
+                                prospectCMRFlag = true;
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                              } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                convertPCMRFlag = true;
+                                log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
+                              } else {
+                                log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
+                              }
+                              continue;
+
+                            }
+
+                            historyNmMatched = true;
+
+                            if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
+                              if ("00075".equals(cmrsMods.getCmrSortl())
+                                  || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                      || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                          || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                      && cmrsMods.getCmrNum() != null
+                                      && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                if (searchTerm08036.equals(cmrsMods.getCmrSortl()) || incloud(kukla, cnSpecialKukla)) {
+                                  // should not be rejected
+                                  log.debug("Not a duplicate CMR.");
+                                } else {
+                                  // should be rejected
+                                  log.debug("Duplicate CMR. Request should be rejected.");
+                                  shouldBeRejected = true;
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                                }
+                              }
+                            } else {
+                              if ("00075".equals(cmrsMods.getCmrSortl())
+                                  || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                      || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                          || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                      && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                          || cmrsMods.getCmrNum().startsWith("2"))) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                if (!searchTerm08036.equals(cmrsMods.getCmrSortl()) && incloud(kukla, cnSpecialKukla)) {
+                                  // should not be rejected
+                                  log.debug("Not a duplicate CMR.");
+                                } else {
+                                  // should be rejected
+                                  log.debug("Duplicate CMR. Request should be rejected.");
+                                  shouldBeRejected = true;
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                                }
+                              }
+                            }
+
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
+                  }
+
+                }
+
+                // 5, Check FindCMR Non Latin with historical Chinese name -
+                // double byte
+                if (cnHistoryNameDoubleByte != null && !"".equals(cnHistoryNameDoubleByte)
+                    && !cnHistoryNameDoubleByte.equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameDoubleByte.split(";"));
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  try {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      findCMRResult = searchFindCMR(searchModelFindCmrCN);
+
+                      if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                        List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                        for (FindCMRRecordModel cmrsMods : cmrs) {
+
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
+                          if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
+                          }
+
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
+
+                            kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+
+                            log.debug("CNDupCMRCheckElement: request " + data.getId().getReqId() + ", CmrNo " + cmrsMods.getCmrNum() + ", ceid "
+                                + cmrsMods.getCmrPpsceid() + ", search term " + cmrsMods.getCmrSortl() + ", kukla " + kukla);
+
+                            if (cmrsMods.getCmrNum() != null && cmrsMods.getCmrNum().startsWith("P")) {
+                              // CREATCMR-6302
+                              // log.debug("Skip Duplicate CMR check for
+                              // prospect CmrNo " + cmrsMods.getCmrNum());
+                              // continue;
+                              if (StringUtils.isBlank(data.getCmrNo()) || !data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                log.debug("Found a duplicate prospect CMR.");
+                                pcmrs += cmrsMods.getCmrNum() + ", ";
+                                prospectCMRFlag = true;
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                              } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                convertPCMRFlag = true;
+                                log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
+                              } else {
+                                log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
+                              }
+                              continue;
+
+                            }
+
+                            historyNmMatched = true;
+
+                            if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
+                              if ("00075".equals(cmrsMods.getCmrSortl())
+                                  || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                      || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                          || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                      && cmrsMods.getCmrNum() != null
+                                      && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                if (searchTerm08036.equals(cmrsMods.getCmrSortl()) || incloud(kukla, cnSpecialKukla)) {
+                                  // should not be rejected
+                                  log.debug("Not a duplicate CMR.");
+                                } else {
+                                  // should be rejected
+                                  log.debug("Duplicate CMR. Request should be rejected.");
+                                  shouldBeRejected = true;
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                                }
+                              }
+                            } else {
+                              if ("00075".equals(cmrsMods.getCmrSortl())
+                                  || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                      || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                          || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                      && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                          || cmrsMods.getCmrNum().startsWith("2"))) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                if (!searchTerm08036.equals(cmrsMods.getCmrSortl()) && incloud(kukla, cnSpecialKukla)) {
+                                  // should not be rejected
+                                  log.debug("Not a duplicate CMR.");
+                                } else {
+                                  // should be rejected
+                                  log.debug("Duplicate CMR. Request should be rejected.");
+                                  shouldBeRejected = true;
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                                }
+                              }
+                            }
+
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                  }
+
+                }
+
+                // output
+                if (shouldBeRejected) {
+                  result.setResults("Matches Found");
+                  result.setResults("Found Duplicate CMRs.");
+                  Collections.sort(matchedCMRs);
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+                  // to allow overides later
+                  requestData.getAdmin().setMatchIndc("C");
+                  result.setOnError(true);
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                  sendManagerEmail(entityManager, admin, data, soldTo, details);
+                } else if (prospectCMRFlag && !convertPCMRFlag && !shouldBeRejected) { // CREATCMR-6302
+                  result.setResults("Matches Found");
+                  result.setResults("Found Duplicate Prospect CMRs only.");
+                  pcmrs = pcmrs.substring(0, pcmrs.length() - 2);
+                  Collections.sort(matchedCMRs);
+                  engineData.addRejectionComment("DUPC",
+                      "please import the existing Prospect CMR(" + pcmrs + ") into CreateCMR to convert into Legal CMR.",
+                      StringUtils.join(matchedCMRs, ", "), "");
+                  // to allow overrides later
+                  requestData.getAdmin().setMatchIndc("C");
+                  result.setOnError(true);
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                  // sendManagerEmail(entityManager, admin, data, soldTo,
+                  // details);
+                } else {
+                  result.setDetails("No Duplicate CMRs were found.");
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                }
+              } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
+                result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
+                engineData.addRejectionComment("OTH",
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage(), "", "");
+                result.setOnError(true);
+                result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
+              }
+
+            } catch (Exception e) {
+              e.printStackTrace();
+              result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese.");
+              engineData.addRejectionComment("OTH", "Error on getting China API Data when Duplicate CMR Check of Chinese.", "", "");
+              result.setOnError(true);
+              result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese.");
+            }
+          } else {
+            result.setDetails("Error on getting Chinese name when Duplicate CMR Check.");
+            engineData.addRejectionComment("OTH", "Error on getting Chinese name when Duplicate CMR Check.", "", "");
+            result.setOnError(true);
+            result.setResults("Error on getting Chinese name when Duplicate CMR Check.");
+          }
+
+          break;
+
+        case "KYND": // SCENARIO_LOCAL_KYND
+
+          // logic:
+          // a) Duplication means CMRs with same Chinese name or Historical
+          // Chinese name.
+          // b) If the existing CMR have CEID,and Search Term not as "08036"
+          // don't define as duplication.
+          // c) If the existing CMR don't have CEID and Search Term is
+          // "08036",then defined as Duplication.
+          // d) If the existing CMR don't have CEID and Search Term not as
+          // "08036",and Kukla not in ('81','85','43','44','45','46') .then
+          // defined as Duplication.
+          // e) If the existing CMR don't have CEID and Search Term not as
+          // "08036",and Kukla in ('81','85','43','44','45','46') .then don't
+          // defined as Duplication.
+          // f) check China API with single byte string value
+          // g) check findcmr twice with single byte and double byte value, if
+          // they are not equals
+
+          // CREATCMR-5461
+          // check if should skip CNDupCMRCheck and set req status PPN
+          skipAndPpn = getSkipAndPpnInd(entityManager, data);
+          if (skipAndPpn) {
+            log.debug("skip CN Dup CMR Check for req " + data.getId().getReqId());
+            doSkipAndPpn(result, engineData);
+            return result;
+          }
+
+          iAddr = handler.getIntlAddrById(soldTo, entityManager);
+          if (iAddr != null) {
+
+            try {
+
+              // 1, Check CN API
+              if (cnCreditCd != null && cnCreditCd.length() > 0) {
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setTaxCd1(cnCreditCd);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+                if (resultCNApi.getMessage() != null && resultCNApi.getMessage().contains("无数据")) {
+                  boolean hasCNSpecialAttach = checkCNSpecialAttach(entityManager, data.getId().getReqId());
+                  if (hasCNSpecialAttach) {
+                    doSkipAndPpn4NoData(result, engineData);
+                    return result;
+                  }
+                }
+              } else {
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
+                cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnNameSingleByte);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+              }
+
+              if (resultCNApi != null && resultCNApi.isSuccess()) {
+                cnNameSingleByte = resultCNApi.getRecord().getName();
+                cnHistoryNameSingleByte = resultCNApi.getRecord().getHistoryNames();
+                cnAddrSingleByte = resultCNApi.getRecord().getRegLocation();
+
+                cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
+                cnHistoryNameDoubleByte = convert2DoubleByte(cnHistoryNameSingleByte);
+                cnAddrDoubleByte = convert2DoubleByte(cnAddrSingleByte);
+
+                try {
+                  // 2, Check FindCMR NON Latin with Chinese name - single byte
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                  searchModelFindCmrCN.setName(cnNameSingleByte);
+                  findCMRResult = searchFindCMR(searchModelFindCmrCN);
+
+                  if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                    List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                    log.debug("There are " + cmrs.size() + " cmrs retrieved from FINDCMR.");
+                    for (FindCMRRecordModel cmrsMods : cmrs) {
+
+                      nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
+                      if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
+                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
+                      }
+
+                      log.debug("CNAPI retrieved name is <" + cnNameSingleByte + "> after trim Chinese Space is <"
+                          + trimChineseSpace(cnNameSingleByte) + ">");
+                      log.debug("FINDCMR retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
+                          + trimChineseSpace(nameFindCmrCnResult) + ">");
+
+                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
+
+                        kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+
+                        log.debug("CNDupCMRCheckElement: request " + data.getId().getReqId() + ", CmrNo " + cmrsMods.getCmrNum() + ", ceid "
+                            + cmrsMods.getCmrPpsceid() + ", search term " + cmrsMods.getCmrSortl() + ", kukla " + kukla);
+
+                        if (cmrsMods.getCmrNum() != null && cmrsMods.getCmrNum().startsWith("P")) {
+                          // CREATCMR-6302
+                          if (StringUtils.isBlank(data.getCmrNo()) || !data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                            log.debug("Found a duplicate prospect CMR.");
+                            pcmrs += cmrsMods.getCmrNum() + ", ";
+                            prospectCMRFlag = true;
+                            handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                          } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                            convertPCMRFlag = true;
+                            log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
+                          } else {
+                            log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
+                          }
+                          continue;
+                        }
+
+                        nameMatched = true;
+
+                        if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
+                          if ("00075".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                              || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                  || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                              && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                            // should not be rejected
+                            log.debug("Not a duplicate CMR.");
+                          } else {
+                            if (searchTerm08036.equals(cmrsMods.getCmrSortl()) || incloud(kukla, cnSpecialKukla)) {
+                              // should not be rejected
+                              log.debug("Not a duplicate CMR.");
+                            } else {
+                              // should be rejected
+                              log.debug("Duplicate CMR. Request should be rejected.");
+                              shouldBeRejected = true;
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                            }
+                          }
+                        } else {
+                          if ("00075".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                              || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                  || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                              && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                  || cmrsMods.getCmrNum().startsWith("2"))) {
+                            // should not be rejected
+                            log.debug("Not a duplicate CMR.");
+                          } else {
+                            if (!searchTerm08036.equals(cmrsMods.getCmrSortl()) && incloud(kukla, cnSpecialKukla)) {
+                              // should not be rejected
+                              log.debug("Not a duplicate CMR.");
+                            } else {
+                              // should be rejected
+                              log.debug("Duplicate CMR. Request should be rejected.");
+                              shouldBeRejected = true;
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                            }
+                          }
+                        }
+
+                      }
+                    }
+                  }
+                } catch (Exception e) {
+                  e.printStackTrace();
+                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte, "",
+                      "");
+                  result.setOnError(true);
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                }
+
+                if (cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
+                  // 3, Check FindCMR NON Latin with Chinese name - double byte
+                  try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                    searchModelFindCmrCN.setName(cnNameDoubleByte);
+                    findCMRResult = searchFindCMR(searchModelFindCmrCN);
+
+                    if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                      List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                      for (FindCMRRecordModel cmrsMods : cmrs) {
+
+                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
+                        if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
+                        }
+
+                        if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
+
+                          kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+
+                          log.debug("CNDupCMRCheckElement: request " + data.getId().getReqId() + ", CmrNo " + cmrsMods.getCmrNum() + ", ceid "
+                              + cmrsMods.getCmrPpsceid() + ", search term " + cmrsMods.getCmrSortl() + ", kukla " + kukla);
+
+                          if (cmrsMods.getCmrNum() != null && cmrsMods.getCmrNum().startsWith("P")) {
+                            // CREATCMR-6302
+                            // log.debug("Skip Duplicate CMR check for prospect
+                            // CmrNo " + cmrsMods.getCmrNum());
+                            // continue;
+                            if (StringUtils.isBlank(data.getCmrNo()) || !data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                              log.debug("Found a duplicate prospect CMR.");
+                              pcmrs += cmrsMods.getCmrNum() + ", ";
+                              prospectCMRFlag = true;
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                            } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                              convertPCMRFlag = true;
+                              log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
+                            } else {
+                              log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
+                            }
+                            continue;
+
+                          }
+
+                          nameMatched = true;
+
+                          if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
+                            if ("00075".equals(cmrsMods.getCmrSortl())
+                                || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                    || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                        || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                    && cmrsMods.getCmrNum() != null
+                                    && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                              // should not be rejected
+                              log.debug("Not a duplicate CMR.");
+                            } else {
+                              if (searchTerm08036.equals(cmrsMods.getCmrSortl()) || incloud(kukla, cnSpecialKukla)) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                // should be rejected
+                                log.debug("Duplicate CMR. Request should be rejected.");
+                                shouldBeRejected = true;
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                              }
+                            }
+                          } else {
+                            if ("00075".equals(cmrsMods.getCmrSortl())
+                                || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                    || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                        || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                    && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                        || cmrsMods.getCmrNum().startsWith("2"))) {
+                              // should not be rejected
+                              log.debug("Not a duplicate CMR.");
+                            } else {
+                              if (!searchTerm08036.equals(cmrsMods.getCmrSortl()) && incloud(kukla, cnSpecialKukla)) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                // should be rejected
+                                log.debug("Duplicate CMR. Request should be rejected.");
+                                shouldBeRejected = true;
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                              }
+                            }
+                          }
+
+                        }
+                      }
+                    }
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte,
+                        "", "");
+                    result.setOnError(true);
+                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                  }
+                }
+
+                // 4, Check FindCMR Non Latin with historical Chinese name -
+                // single byte
+                if (cnHistoryNameSingleByte != null && !"".equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameSingleByte.split(";"));
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  try {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      findCMRResult = searchFindCMR(searchModelFindCmrCN);
+
+                      if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                        List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                        for (FindCMRRecordModel cmrsMods : cmrs) {
+
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
+                          if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
+                          }
+
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
+
+                            kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+
+                            log.debug("CNDupCMRCheckElement: request " + data.getId().getReqId() + ", CmrNo " + cmrsMods.getCmrNum() + ", ceid "
+                                + cmrsMods.getCmrPpsceid() + ", search term " + cmrsMods.getCmrSortl() + ", kukla " + kukla);
+
+                            if (cmrsMods.getCmrNum() != null && cmrsMods.getCmrNum().startsWith("P")) {
+                              // CREATCMR-6302
+                              // log.debug("Skip Duplicate CMR check for
+                              // prospect CmrNo " + cmrsMods.getCmrNum());
+                              // continue;
+                              if (StringUtils.isBlank(data.getCmrNo()) || !data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                log.debug("Found a duplicate prospect CMR.");
+                                pcmrs += cmrsMods.getCmrNum() + ", ";
+                                prospectCMRFlag = true;
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                              } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                convertPCMRFlag = true;
+                                log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
+                              } else {
+                                log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
+                              }
+                              continue;
+
+                            }
+
+                            historyNmMatched = true;
+
+                            if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
+                              if ("00075".equals(cmrsMods.getCmrSortl())
+                                  || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                      || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                          || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                      && cmrsMods.getCmrNum() != null
+                                      && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                if (searchTerm08036.equals(cmrsMods.getCmrSortl()) || incloud(kukla, cnSpecialKukla)) {
+                                  // should not be rejected
+                                  log.debug("Not a duplicate CMR.");
+                                } else {
+                                  // should be rejected
+                                  log.debug("Duplicate CMR. Request should be rejected.");
+                                  shouldBeRejected = true;
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                                }
+                              }
+                            } else {
+                              if ("00075".equals(cmrsMods.getCmrSortl())
+                                  || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                      || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                          || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                      && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                          || cmrsMods.getCmrNum().startsWith("2"))) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                if (!searchTerm08036.equals(cmrsMods.getCmrSortl()) && incloud(kukla, cnSpecialKukla)) {
+                                  // should not be rejected
+                                  log.debug("Not a duplicate CMR.");
+                                } else {
+                                  // should be rejected
+                                  log.debug("Duplicate CMR. Request should be rejected.");
+                                  shouldBeRejected = true;
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                                }
+                              }
+                            }
+
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
+                  }
+
+                }
+
+                // 5, Check FindCMR Non Latin with historical Chinese name -
+                // double byte
+                if (cnHistoryNameDoubleByte != null && !"".equals(cnHistoryNameDoubleByte)
+                    && !cnHistoryNameDoubleByte.equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameDoubleByte.split(";"));
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  try {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      findCMRResult = searchFindCMR(searchModelFindCmrCN);
+
+                      if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                        List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                        for (FindCMRRecordModel cmrsMods : cmrs) {
+
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
+                          if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
+                            nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
+                          }
+
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
+
+                            kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+
+                            log.debug("CNDupCMRCheckElement: request " + data.getId().getReqId() + ", CmrNo " + cmrsMods.getCmrNum() + ", ceid "
+                                + cmrsMods.getCmrPpsceid() + ", search term " + cmrsMods.getCmrSortl() + ", kukla " + kukla);
+
+                            if (cmrsMods.getCmrNum() != null && cmrsMods.getCmrNum().startsWith("P")) {
+                              // CREATCMR-6302
+                              // log.debug("Skip Duplicate CMR check for
+                              // prospect CmrNo " + cmrsMods.getCmrNum());
+                              // continue;
+                              if (StringUtils.isBlank(data.getCmrNo()) || !data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                log.debug("Found a duplicate prospect CMR.");
+                                pcmrs += cmrsMods.getCmrNum() + ", ";
+                                prospectCMRFlag = true;
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                              } else if (StringUtils.isNotBlank(data.getCmrNo()) && data.getCmrNo().equals(cmrsMods.getCmrNum())) {
+                                convertPCMRFlag = true;
+                                log.debug("Skip Duplicate CMR check for Convert to Legal CMR for prospect CmrNo " + cmrsMods.getCmrNum());
+                              } else {
+                                log.debug("Skip Duplicate CMR check for prospect CmrNo " + cmrsMods.getCmrNum());
+                              }
+                              continue;
+
+                            }
+
+                            historyNmMatched = true;
+
+                            if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
+                              if ("00075".equals(cmrsMods.getCmrSortl())
+                                  || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                                      || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
+                                          || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
+                                      && cmrsMods.getCmrNum() != null
+                                      && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                                // should not be rejected
+                                log.debug("Not a duplicate CMR.");
+                              } else {
+                                if (searchTerm08036.equals(cmrsMods.getCmrSortl()) || incloud(kukla, cnSpecialKukla)) {
+                                  // should not be rejected
+                                  log.debug("Not a duplicate CMR.");
+                                } else {
+                                  // should be rejected
+                                  log.debug("Duplicate CMR. Request should be rejected.");
+                                  shouldBeRejected = true;
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
+                                }
+                              }
+                            } else {
+                              if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -799,7 +1879,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             log.debug("Duplicate CMR. Request should be rejected.");
                             shouldBeRejected = true;
                             handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
-                          } else if ("04182".equals(cmrsMods.getCmrSortl())) {
+                          } else if ("00075".equals(cmrsMods.getCmrSortl())) {
                             // should not be rejected
                             log.debug("Not a duplicate CMR.");
                           } else if (cmrsMods.getCmrSortl() != null
@@ -895,7 +1975,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               log.debug("Duplicate CMR. Request should be rejected.");
                               shouldBeRejected = true;
                               handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
-                            } else if ("04182".equals(cmrsMods.getCmrSortl())) {
+                            } else if ("00075".equals(cmrsMods.getCmrSortl())) {
                               // should not be rejected
                               log.debug("Not a duplicate CMR.");
                             } else if (cmrsMods.getCmrSortl() != null
@@ -992,7 +2072,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
                                 handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
-                              } else if ("04182".equals(cmrsMods.getCmrSortl())) {
+                              } else if ("00075".equals(cmrsMods.getCmrSortl())) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
                               } else if (cmrsMods.getCmrSortl() != null
@@ -1094,7 +2174,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
                                 handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
-                              } else if ("04182".equals(cmrsMods.getCmrSortl())) {
+                              } else if ("00075".equals(cmrsMods.getCmrSortl())) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
                               } else if (cmrsMods.getCmrSortl() != null
@@ -1289,7 +2369,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                             // should not be rejected
                             log.debug("Not a duplicate CMR.");
-                          } else if ("04182".equals(cmrsMods.getCmrSortl())
+                          } else if ("00075".equals(cmrsMods.getCmrSortl())
                               || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                       || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -1304,7 +2384,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             log.debug("Not a duplicate CMR.");
                           }
                         } else {
-                          if ("04182".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                          if ("00075".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                               || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                   || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                               && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
@@ -1364,7 +2444,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                               // should not be rejected
                               log.debug("Not a duplicate CMR.");
-                            } else if ("04182".equals(cmrsMods.getCmrSortl())
+                            } else if ("00075".equals(cmrsMods.getCmrSortl())
                                 || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                     || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                         || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -1379,7 +2459,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               log.debug("Not a duplicate CMR.");
                             }
                           } else {
-                            if ("04182".equals(cmrsMods.getCmrSortl())
+                            if ("00075".equals(cmrsMods.getCmrSortl())
                                 || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                     || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                         || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -1444,7 +2524,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
-                              } else if ("04182".equals(cmrsMods.getCmrSortl())
+                              } else if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -1459,7 +2539,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 log.debug("Not a duplicate CMR.");
                               }
                             } else {
-                              if ("04182".equals(cmrsMods.getCmrSortl())
+                              if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -1530,7 +2610,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
-                              } else if ("04182".equals(cmrsMods.getCmrSortl())
+                              } else if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -1545,7 +2625,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 log.debug("Not a duplicate CMR.");
                               }
                             } else {
-                              if ("04182".equals(cmrsMods.getCmrSortl())
+                              if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -1602,7 +2682,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                           // should not be rejected
                           log.debug("Not a duplicate CMR.");
-                        } else if ("04182".equals(cmrsMods.getCmrSortl())
+                        } else if ("00075".equals(cmrsMods.getCmrSortl())
                             || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                 || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                     || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -1787,7 +2867,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         nameMatched = true;
 
                         if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
-                          if ("04182".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                          if ("00075".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                               || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                   || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                               && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
@@ -1805,7 +2885,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             }
                           }
                         } else {
-                          if ("04182".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
+                          if ("00075".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                               || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                   || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                               && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
@@ -1922,7 +3002,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           nameMatched = true;
 
                           if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
-                            if ("04182".equals(cmrsMods.getCmrSortl())
+                            if ("00075".equals(cmrsMods.getCmrSortl())
                                 || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                     || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                         || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -1942,7 +3022,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               }
                             }
                           } else {
-                            if ("04182".equals(cmrsMods.getCmrSortl())
+                            if ("00075".equals(cmrsMods.getCmrSortl())
                                 || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                     || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                         || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -2064,7 +3144,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             historyNmMatched = true;
 
                             if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
-                              if ("04182".equals(cmrsMods.getCmrSortl())
+                              if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -2084,7 +3164,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 }
                               }
                             } else {
-                              if ("04182".equals(cmrsMods.getCmrSortl())
+                              if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -2214,7 +3294,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             historyNmMatched = true;
 
                             if (cmrsMods.getCmrPpsceid() == null || StringUtils.isBlank(cmrsMods.getCmrPpsceid())) {
-                              if ("04182".equals(cmrsMods.getCmrSortl())
+                              if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
@@ -2234,7 +3314,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 }
                               }
                             } else {
-                              if ("04182".equals(cmrsMods.getCmrSortl())
+                              if ("00075".equals(cmrsMods.getCmrSortl())
                                   || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
