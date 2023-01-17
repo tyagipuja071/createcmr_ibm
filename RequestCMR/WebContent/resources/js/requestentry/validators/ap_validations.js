@@ -395,6 +395,9 @@ function setInacByCluster() {
       	FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
       	FormManager.setValue('inacCd','');
       	FormManager.setValue('inacType', '');
+      }
+      // CREATCMR-7883
+      if(cntry == '616') {
       	updateMRCAseanAnzIsa();
       }
       
