@@ -512,7 +512,10 @@ function setIsuOnIsic(){
   var _cluster = FormManager.getActualValue('apCustClusterId');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var aseanCntries = ['852', '818', '856', '643', '778', '749', '834'];
-  if (_cluster != '') {    
+  if (_cluster != '') {
+    if (_cluster.indexOf(" - ") > 0) {
+      _cluster = _cluster.substring(0, _cluster.indexOf(" - "));
+    }
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cmrIssuingCntry,
@@ -2397,6 +2400,9 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
   var apClientTierValue = [];
   var isuCdValue = [];
   if (_cluster != '' && _cluster != '') {
+    if (_cluster.indexOf(" - ") > 0) {
+      _cluster = _cluster.substring(0, _cluster.indexOf(" - "));
+    }
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : _cmrIssuingCntry,
@@ -3559,6 +3565,9 @@ function setISUDropDownValues() {
   var apClientTierValue = [];
   var isuCdValue = [];
   if (_cluster != '' && ctc != '') {
+    if (_cluster.indexOf(" - ") > 0) {
+      _cluster = _cluster.substring(0, _cluster.indexOf(" - "));
+    }
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : _cmrIssuingCntry,
@@ -6060,6 +6069,41 @@ function setCTCIsuByClusterMY() {
   }
 }
 
+function validateGCGCustomerName(){
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var errorMsg = '';
+        var action = FormManager.getActualValue('yourAction');
+        var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase();
+        
+        var reqType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        var custGrp = FormManager.getActualValue('custGrp');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        
+        if (reqType == 'C') {
+          if (role == 'REQUESTER' && custGrp == 'LOCAL' && custSubGrp == 'KYND') {
+            if(custNm1.indexOf('KYNDRYL') < 0 ){
+              errorMsg = 'Customer name must contain word \'Kyndryl\'';
+            }
+          }
+        }
+        
+        if (errorMsg != '') {
+          return new ValidationResult({
+            id : 'custNm1',
+            type : 'text',
+            name : 'custNm1'
+          }, false, errorMsg);
+        }
+        
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
@@ -6270,4 +6314,7 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-7884
   GEOHandler.registerValidator(addCovBGValidator, [SysLoc.NEW_ZEALAND], null, true);
+  
+  GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
+  
 });
