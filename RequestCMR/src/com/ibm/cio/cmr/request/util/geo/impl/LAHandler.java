@@ -219,7 +219,7 @@ public class LAHandler extends GEOHandler {
       String ibmBankNumberCdTxt = getLovCdByUpperTxt(SystemLocation.URUGUAY, "##IBMBankNumber", mainRecord.getCmrStxlTxtVal());
       data.setIbmBankNumber(ibmBankNumberCdTxt);
 
-      // temporarily duplicates the value here of IBM Bank Number
+      // temporarily duplicates the value of IBM Bank Number after Import
       data.setBusnType(ibmBankNumberCdTxt);
     }
 
@@ -2226,6 +2226,7 @@ public class LAHandler extends GEOHandler {
         data.setEducAllowCd("0");
       }
 
+      // temporarily duplicates the value of IBM Bank Number
       if (issuingCntry.equalsIgnoreCase(SystemLocation.URUGUAY)) {
         data.setBusnType(data.getIbmBankNumber());
       }
