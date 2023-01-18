@@ -8503,7 +8503,7 @@ function setISUCTCBasedScenarios() {
         FormManager.setValue('salesBusOffCd', 'A00');
         FormManager.enable('salesBusOffCd');
       } else {
-        FormManager.setValue('clientTier', '');
+        FormManager.setValue('clientTier', 'Q');
       }
     }
   }
