@@ -2013,6 +2013,52 @@ function updateIndustryClass() {
   if (subIndustryCd != null && subIndustryCd.length > 1) {
     var _industryClass = subIndustryCd.substr(0, 1);
     FormManager.setValue('IndustryClass', _industryClass);
+    updateCluster(_industryClass);
+  }
+}
+
+function updateCluster(value) {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
+  
+  if (viewOnlyPage == 'true' || reqType != 'C') {
+    return;
+  }
+  if (role != 'REQUESTER') {
+    return;
+  }
+  if (cmrIssuCntry != '738' && cmrIssuCntry != '736') {
+    return;
+  }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  switch (custSubGrp) {
+  case 'NRMLC':
+  case 'AQSTN':
+  case 'NRML':
+    handleCluster(value);
+    break;
+  default:
+    // do nothing
+  }
+}
+
+function handleCluster(value) {
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  if (!value) {
+    value = industryClass;
+  }
+  var clusterValues = [];
+  var qParams = {
+      CNTRY : '738',
+      TXT: '%' + value + '%'
+    };
+  var results = cmr.query('GET_CLUSTER_BY_INDUSTRYCLASS', qParams);
+  if (results != null && results != undefined) {
+    FormManager.setValue('apCustClusterId', results.ret1);
+    // FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
+    // clusterValues);
   }
 }
 
