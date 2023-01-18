@@ -216,7 +216,11 @@ public class LAHandler extends GEOHandler {
     if (SystemLocation.CHILE.equalsIgnoreCase(issuingCountry)) {
       data.setBusnType(mainRecord.getCmrStxlTxtVal());
     } else if (SystemLocation.URUGUAY.equalsIgnoreCase(issuingCountry)) {
-      data.setIbmBankNumber(getLovCdByUpperTxt(SystemLocation.URUGUAY, "##IBMBankNumber", mainRecord.getCmrStxlTxtVal()));
+      String ibmBankNumberCdTxt = getLovCdByUpperTxt(SystemLocation.URUGUAY, "##IBMBankNumber", mainRecord.getCmrStxlTxtVal());
+      data.setIbmBankNumber(ibmBankNumberCdTxt);
+
+      // temporarily duplicates the value here of IBM Bank Number
+      data.setBusnType(ibmBankNumberCdTxt);
     }
 
     if (StringUtils.isNotBlank(mainRecord.getCmrCollectorNo()) && mainRecord.getCmrCollectorNo().length() > 6) {
@@ -691,6 +695,8 @@ public class LAHandler extends GEOHandler {
         fields.addAll(Arrays.asList("SECONDARY_LOCN_NO", "LOCN_NO", "ICMS_IND"));
       } else if (SystemLocation.CHILE.equalsIgnoreCase(cmrIssuingCntry)) {
         fields.addAll(Arrays.asList("FOOTNOTE_TXT_LINE_1", "BUSN_TYP"));
+      } else if (SystemLocation.URUGUAY.equalsIgnoreCase(cmrIssuingCntry)) {
+        fields.addAll(Arrays.asList("IBM_BANK_NO", "BUSN_TYP"));
       }
     }
 
@@ -2219,6 +2225,10 @@ public class LAHandler extends GEOHandler {
           || issuingCntry.equalsIgnoreCase(SystemLocation.URUGUAY)) {
         data.setEducAllowCd("0");
       }
+
+      if (issuingCntry.equalsIgnoreCase(SystemLocation.URUGUAY)) {
+        data.setBusnType(data.getIbmBankNumber());
+      }
     }
 
     if (isSSAIssuingCountry(issuingCntry) || isMXIssuingCountry(issuingCntry)) {
@@ -2935,6 +2945,9 @@ public class LAHandler extends GEOHandler {
 
         dataRdc.setCollectorNo(data.getCollectorNameNo());
 
+        // temporarily assign the previous value of IBM Bank Number
+        dataRdc.setBusnType(data.getBusnType());
+
         entityManager.merge(dataRdc);
         entityManager.flush();
       }
@@ -3482,6 +3495,7 @@ public class LAHandler extends GEOHandler {
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##BillingName", "mexicoBillingName");
+    map.put("##IBMBankNumber", "ibmBankNumber");
     return map;
   }
 
