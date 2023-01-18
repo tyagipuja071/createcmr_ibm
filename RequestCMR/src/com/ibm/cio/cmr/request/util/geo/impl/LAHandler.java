@@ -1771,6 +1771,17 @@ public class LAHandler extends GEOHandler {
         results.add(update);
       }
     }
+
+    // Uruguay Customer Invoice
+    if (isUYIssuingCountry(cmrCountry)) {
+      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBusnType(), newData.getIbmBankNumber())) {
+        update = new UpdatedDataModel();
+        update.setDataField(PageManager.getLabel(cmrCountry, "IBMBankNumber", "-"));
+        update.setNewData(service.getCodeAndDescription(newData.getIbmBankNumber(), "IBMBankNumber", cmrCountry));
+        update.setOldData(service.getCodeAndDescription(oldData.getBusnType(), "IBMBankNumber", cmrCountry));
+        results.add(update);
+      }
+    }
   }
 
   @Override
@@ -2881,6 +2892,17 @@ public class LAHandler extends GEOHandler {
 
   }
 
+  public static boolean isUYIssuingCountry(String issuingCntry) {
+    boolean ret = false;
+
+    if (SystemLocation.URUGUAY.equalsIgnoreCase(issuingCntry)) {
+      ret = true;
+    }
+
+    return ret;
+
+  }
+
   /**
    * Performs validation if the issuing country is MX
    * 
@@ -2945,9 +2967,6 @@ public class LAHandler extends GEOHandler {
         dataRdc.setId(data.getId());
 
         dataRdc.setCollectorNo(data.getCollectorNameNo());
-
-        // temporarily assign the previous value of IBM Bank Number
-        dataRdc.setBusnType(data.getBusnType());
 
         entityManager.merge(dataRdc);
         entityManager.flush();
