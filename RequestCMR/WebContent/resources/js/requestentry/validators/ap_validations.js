@@ -5581,9 +5581,9 @@ function checkNZCustomerNameTextWhenSFP(){
         
         if (errorMsg != '') {
           return new ValidationResult({
-            id : 'custNm1',
+            id : 'xxx',
             type : 'text',
-            name : 'custNm1'
+            name : 'xxx'
           }, false, errorMsg);
         }
         
@@ -5711,9 +5711,9 @@ function checkCustomerNameForKYND() {
         
         if (errorMsg != '') {
           return new ValidationResult({
-            id : 'custNm1',
+            id : 'xxx',
             type : 'text',
-            name : 'custNm1'
+            name : 'xxx'
           }, false, errorMsg);
         }
         
@@ -6109,9 +6109,9 @@ function validateGCGCustomerName(){
         
         if (errorMsg != '') {
           return new ValidationResult({
-            id : 'custNm1',
+            id : 'xxx',
             type : 'text',
-            name : 'custNm1'
+            name : 'xxx'
           }, false, errorMsg);
         }
         
@@ -6335,5 +6335,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
 
   // CREATCMR-7883
-  GEOHandler.registerValidator(checkCustomerNameForKYND, [SysLoc.AUSTRALIA], null, true);
+  GEOHandler.registerValidator(checkCustomerNameForKYND, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA], null, true);
 });
