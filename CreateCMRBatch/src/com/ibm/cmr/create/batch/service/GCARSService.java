@@ -34,6 +34,12 @@ import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 
 /**
  * for GCARS process
@@ -42,9 +48,22 @@ import com.ibm.cio.cmr.request.util.mail.MessageType;
 public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
 
   private static final Logger LOG = Logger.getLogger(GCARSService.class);
-  private static final String DEFAULT_DIR = "/ci/shared/data/gcars/";
+  private static final String LOCAL_DIR = "/ci/shared/data/gcars/";
+  // private static final String LOCAL_DIR =
+  // "C:\\Users\\P01788PH1\\Downloads\\gcars\\";
+  private static final String REMOTE_DIR = "/is/isdata/cmr_partners/gcarsBR/IBMgcars/";
   private static final String ARCHIVE_DIR = "/ci/shared/data/gcarsarchive/";
   private static final String ERROR_DIR = "/ci/shared/data/gcarserror/";
+
+  private static final String REMOTE_HOST = System.getProperty("GCARS_FTP_HOST");
+  private static final String USERNAME = System.getProperty("GCARS_FTP_USER");
+  private static final String PASSWORD = System.getProperty("GCARS_FTP_PASS");
+  private static final String KNOWN_HOSTS = System.getProperty("GCARS_FTP_KNOWN_HOSTS");
+  private static final String GCARS_FILE = "bbcro.z010.gcars.inbound.txt";
+  private static final int REMOTE_PORT = 22;
+  private static final int SESSION_TIMEOUT = 10000;
+  private static final int CHANNEL_TIMEOUT = 5000;
+
   private Map<String, Integer> fileSizes = new HashMap<String, Integer>();
   private Map<String, Integer> processedSizes = new HashMap<String, Integer>();
 
@@ -57,7 +76,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   private Mode mode = Mode.Extract;
 
   public static enum Mode {
-    Extract, Update
+    Extract, Update, Download
   };
 
   @Override
@@ -67,6 +86,8 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       return extractFromFiles(entityManager);
     case Update:
       return getPendingRecords(entityManager);
+    case Download:
+      return copyFromRDCServer(entityManager);
     default:
       // nothing here
       return new LinkedList<>();
@@ -82,6 +103,9 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
     case Update:
       updateKna1AddlBillingRecords(entityManager, list);
       break;
+    default:
+      LOG.debug("No mode specified.");
+      break;
     }
     return true;
   }
@@ -96,7 +120,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   protected Queue<GCARSUpdtQueue> extractFromFiles(EntityManager entityManager) {
     String directory = SystemParameters.getString("GCARS.INPUT.DIR");
     if (StringUtils.isBlank(directory)) {
-      directory = DEFAULT_DIR;
+      directory = LOCAL_DIR;
     }
     Queue<GCARSUpdtQueue> queue = new LinkedList<GCARSUpdtQueue>();
     LOG.debug("GCARS Input Directory: " + directory);
@@ -119,6 +143,73 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       LOG.debug("Gathered " + queue.size() + " records from GCARS files.");
     }
     return queue;
+  }
+
+  protected Queue<GCARSUpdtQueue> copyFromRDCServer(EntityManager entityManager) {
+    Queue<GCARSUpdtQueue> queue = new LinkedList<GCARSUpdtQueue>();
+
+    String localDir = SystemParameters.getString("GCARS.INPUT.DIR");
+    if (StringUtils.isBlank(localDir)) {
+      localDir = LOCAL_DIR;
+    }
+
+    String remoteDir = SystemParameters.getString("GCARS.RDC.INPUT.DIR");
+    if (StringUtils.isBlank(remoteDir)) {
+      remoteDir = REMOTE_DIR;
+    }
+
+    // String localFile = SystemConfiguration.getValue("GCARS_LOCAL_DIR") +
+    // GCARS_FILE;
+    String localFile = LOCAL_DIR + GCARS_FILE;
+    String remoteFile = SystemConfiguration.getValue("GCARS_REMOTE_DIR") + GCARS_FILE;
+    Session jschSession = null;
+    // String remoteFile = "";
+    // String localFile = "";
+    try {
+
+      JSch jsch = new JSch();
+      LOG.debug("Known Hosts File: " + KNOWN_HOSTS);
+      LOG.debug("Connecting to FTP Server " + REMOTE_HOST + ":" + REMOTE_PORT + " using " + USERNAME);
+      jsch.setKnownHosts(KNOWN_HOSTS);
+      jschSession = jsch.getSession(USERNAME, REMOTE_HOST, REMOTE_PORT);
+
+      jschSession.setPassword(PASSWORD);
+      jschSession.connect(SESSION_TIMEOUT);
+
+      Channel sftp = jschSession.openChannel("sftp");
+      sftp.connect(CHANNEL_TIMEOUT);
+
+      ChannelSftp channelSftp = (ChannelSftp) sftp;
+
+      channelSftp.get(remoteFile, localFile);
+
+      channelSftp.exit();
+
+    } catch (JSchException | SftpException e) {
+      LOG.warn("An error has occurred when trying to download files from FTP server", e);
+    } finally {
+      if (jschSession != null) {
+        jschSession.disconnect();
+      }
+    }
+    return queue;
+  }
+
+  @SuppressWarnings("unused")
+  private List<String> getRDCFileNames(String path) {
+    LOG.debug("GCARS getFileNames from " + path);
+    List<String> nameList = new ArrayList<String>();
+    File f = new File(path);
+    File fileList[] = f.listFiles();
+    for (File file : fileList) {
+      if (file.isDirectory()) {
+        continue;
+      } else {
+        LOG.info("GCARS File " + file.getName() + " is added for file transfer.");
+        nameList.add(file.getName());
+      }
+    }
+    return nameList;
   }
 
   /**
@@ -157,7 +248,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
 
     String directory = SystemParameters.getString("GCARS.INPUT.DIR");
     if (StringUtils.isBlank(directory)) {
-      directory = DEFAULT_DIR;
+      directory = LOCAL_DIR;
     }
 
     List<GCARSUpdtQueue> gcarsList = new ArrayList<GCARSUpdtQueue>();
@@ -452,7 +543,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
     LOG.debug("Removing processed files from server..");
     String directory = SystemParameters.getString("GCARS.INPUT.DIR");
     if (StringUtils.isBlank(directory)) {
-      directory = DEFAULT_DIR;
+      directory = LOCAL_DIR;
     }
     String archive = SystemParameters.getString("GCARS.ARCHIVE.DIR");
     if (StringUtils.isBlank(archive)) {
@@ -498,8 +589,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
         gcarsCiOps = "barcelj@ph.ibm.com";
       }
     } catch (Exception e) {
-      LOG.debug("Failed in getting emails (CI Ops/GCARS Ops)");
-      e.printStackTrace();
+      LOG.debug("Failed in getting emails (CI Ops/GCARS Ops)", e);
     }
 
     if (!StringUtils.isEmpty(gcarsCiOps) && !StringUtils.isEmpty(email)) {
