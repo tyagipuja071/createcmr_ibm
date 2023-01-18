@@ -1773,7 +1773,7 @@ public class LAHandler extends GEOHandler {
     }
 
     // Uruguay Customer Invoice
-    if (isUYIssuingCountry(cmrCountry)) {
+    if (SystemLocation.URUGUAY.equals(cmrCountry)) {
       if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBusnType(), newData.getIbmBankNumber())) {
         update = new UpdatedDataModel();
         update.setDataField(PageManager.getLabel(cmrCountry, "IBMBankNumber", "-"));
@@ -2885,17 +2885,6 @@ public class LAHandler extends GEOHandler {
     boolean ret = false;
 
     if (SystemLocation.CHILE.equalsIgnoreCase(issuingCntry)) {
-      ret = true;
-    }
-
-    return ret;
-
-  }
-
-  public static boolean isUYIssuingCountry(String issuingCntry) {
-    boolean ret = false;
-
-    if (SystemLocation.URUGUAY.equalsIgnoreCase(issuingCntry)) {
       ret = true;
     }
 
