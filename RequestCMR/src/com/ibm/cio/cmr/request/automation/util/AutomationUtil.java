@@ -1491,5 +1491,4 @@ public abstract class AutomationUtil {
     }
     return detailedResult;
   }
-
 }

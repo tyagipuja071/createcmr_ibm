@@ -1296,6 +1296,7 @@ public class IERPProcessService extends BaseBatchService {
           if (cmrNo != null && cmrNo.startsWith("P"))
             cmrNo = "";
           cmrNo = generateCMRNoForIERP(data);
+          // to avoid dup cmr, use this list to check
           if (!StringUtils.isEmpty(cmrNo) && cmrNoList.contains(cmrNo)) {
             cmrNo = generateCMRNoForIERP(data);
             if (!StringUtils.isEmpty(cmrNo))

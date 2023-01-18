@@ -881,6 +881,7 @@ function autoSetVAT(_custType, custTypeinDB) {
 
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
+
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -9435,4 +9436,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsuChangeHandler, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
+  GEOHandler.registerValidator(vatValidatorTR, [ SysLoc.TURKEY ], null, true);
 });
