@@ -14,11 +14,16 @@ public class GCARSServiceEntryPoint extends BatchEntryPoint {
     String param = args != null && args.length > 0 ? args[0] : "";
     boolean runExtract = "".equals(param) || "EXT".equals(param);
     boolean runUpdate = "".equals(param) || "UPD".equals(param);
+    // boolean runDownload = "".equals(param) || "DOW".equals(param);
+    boolean runDownload = true;
+
     String contextName = "GCARSProcess";
-    if (runExtract && !runUpdate) {
+    if (runExtract) {
       contextName = "GCARSExtract";
-    } else if (!runExtract && runUpdate) {
+    } else if (runUpdate) {
       contextName = "GCARSUpdate";
+    } else if (runDownload) {
+      contextName = "GCARSDownload";
     }
     BatchEntryPoint.initContext(contextName);
 
@@ -33,6 +38,12 @@ public class GCARSServiceEntryPoint extends BatchEntryPoint {
     if (runUpdate) {
       service.setSkipExit(false);
       service.setMode(Mode.Update);
+      service.execute();
+    }
+
+    if (runDownload) {
+      service.setSkipExit(false);
+      service.setMode(Mode.Download);
       service.execute();
     }
   }

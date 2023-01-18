@@ -464,6 +464,28 @@
     <value>US</value>
   </item>
   <item>
+    <id>GCARS_LOCAL_DIR</id>
+    <order>50</order>
+    <name>GCARS Files Local Directory</name>
+    <description>Local directory where copied flat files are placed</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>/ci/shared/data/gcars/</value>
+  </item>
+  <item>
+    <id>GCARS_REMOTE_DIR</id>
+    <order>51</order>
+    <name>GCARS Files Remote Directory</name>
+    <description>Remote directory where flat files will be copied</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>/is/isdata/cmr_partners/gcarsBR/IBMgcars/</value>
+  </item>
+  <item>
     <id>SYSTEM_TYPE</id>
     <order>99</order>
     <name>System Type</name>
