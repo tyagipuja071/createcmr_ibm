@@ -453,6 +453,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <%
       if (!"Viewer".equals(reqentry.getUserRole()) && CmrConstants.APPROVAL_RESULT_PENDING.equals(reqentry.getApprovalResult())) {
     %>
+    <br>
     <cmr:row>
       <cmr:column span="6">
         <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
