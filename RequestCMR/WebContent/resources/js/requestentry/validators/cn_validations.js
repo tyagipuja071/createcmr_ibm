@@ -89,6 +89,7 @@ function setSearchTermList(){
  ]);
   } else if (custSubType == 'KYND') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '09058' ]);
+    FormManager.setValue('searchTerm', '09058');
   } else if (custSubType == 'EMBSA') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '09058','00260','04749','04629','04630','08036','10216','10217',
       '10218','10219','10220','10221','10222','10223','10224','10225','10226','10227','10228','10229','10230','10231','10232','10233',
@@ -120,18 +121,23 @@ function setSearchTermList(){
     FormManager.readOnly('isuCd');
   } else if (custSubType == 'MRKT') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '00000' ]);
+    FormManager.setValue('searchTerm', '00000');
   }
   else if (custSubType == 'BLUMX') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '00000' ]);
+    FormManager.setValue('searchTerm', '00000');
   }
   else if (custSubType == 'BUSPR') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '00075' ]);
+    FormManager.setValue('searchTerm', '00075');
   }
   else if (custSubType == 'INTER') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '00000' ]);
+    FormManager.setValue('searchTerm', '00000');
   }
   else if (custSubType == 'PRIV') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '00000' ]);
+    FormManager.setValue('searchTerm', '00000');
   }
 }
 
