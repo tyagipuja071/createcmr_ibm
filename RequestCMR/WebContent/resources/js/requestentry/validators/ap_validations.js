@@ -6109,9 +6109,9 @@ function validateGCGCustomerName(){
         
         if (errorMsg != '') {
           return new ValidationResult({
-            id : 'xxx',
+            id : 'custNm1',
             type : 'text',
-            name : 'xxx'
+            name : 'custNm1'
           }, false, errorMsg);
         }
         
