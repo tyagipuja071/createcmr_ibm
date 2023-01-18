@@ -34,9 +34,11 @@ import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
+import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
 /**
@@ -53,10 +55,10 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   private static final String ARCHIVE_DIR = "/ci/shared/data/gcarsarchive/";
   private static final String ERROR_DIR = "/ci/shared/data/gcarserror/";
 
-  private static final String REMOTE_HOST = System.getProperty("rdc.server.host");
-  private static final String USERNAME = System.getProperty("rdc.server.user");
-  private static final String PASSWORD = System.getProperty("rdc.server.pass");
-  private static final String KNOWN_HOSTS = System.getProperty("rdc.server.known.hosts");
+  private static final String REMOTE_HOST = System.getProperty("GCARS_FTP_HOST");
+  private static final String USERNAME = System.getProperty("GCARS_FTP_USER");
+  private static final String PASSWORD = System.getProperty("GCARS_FTP_PASS");
+  private static final String KNOWN_HOSTS = System.getProperty("GCARS_FTP_KNOWN_HOSTS");
   private static final String GCARS_FILE = "bbcro.z010.gcars.inbound.txt";
   private static final int REMOTE_PORT = 22;
   private static final int SESSION_TIMEOUT = 10000;
@@ -100,6 +102,9 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       break;
     case Update:
       updateKna1AddlBillingRecords(entityManager, list);
+      break;
+    default:
+      LOG.debug("No mode specified.");
       break;
     }
     return true;
@@ -163,6 +168,8 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
     try {
 
       JSch jsch = new JSch();
+      LOG.debug("Known Hosts File: " + KNOWN_HOSTS);
+      LOG.debug("Connecting to FTP Server " + REMOTE_HOST + ":" + REMOTE_PORT + " using " + USERNAME);
       jsch.setKnownHosts(KNOWN_HOSTS);
       jschSession = jsch.getSession(USERNAME, REMOTE_HOST, REMOTE_PORT);
 
@@ -179,7 +186,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       channelSftp.exit();
 
     } catch (JSchException | SftpException e) {
-      e.printStackTrace();
+      LOG.warn("An error has occurred when trying to download files from FTP server", e);
     } finally {
       if (jschSession != null) {
         jschSession.disconnect();
@@ -188,6 +195,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
     return queue;
   }
 
+  @SuppressWarnings("unused")
   private List<String> getRDCFileNames(String path) {
     LOG.debug("GCARS getFileNames from " + path);
     List<String> nameList = new ArrayList<String>();
@@ -581,8 +589,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
         gcarsCiOps = "barcelj@ph.ibm.com";
       }
     } catch (Exception e) {
-      LOG.debug("Failed in getting emails (CI Ops/GCARS Ops)");
-      e.printStackTrace();
+      LOG.debug("Failed in getting emails (CI Ops/GCARS Ops)", e);
     }
 
     if (!StringUtils.isEmpty(gcarsCiOps) && !StringUtils.isEmpty(email)) {
