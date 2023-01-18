@@ -5580,11 +5580,7 @@ function checkNZCustomerNameTextWhenSFP(){
         }
         
         if (errorMsg != '') {
-          return new ValidationResult({
-            id : 'xxx',
-            type : 'text',
-            name : 'xxx'
-          }, false, errorMsg);
+          return new ValidationResult(null, false, errorMsg);
         }
         
         return new ValidationResult(null, true);
@@ -5710,11 +5706,7 @@ function checkCustomerNameForKYND() {
         }
         
         if (errorMsg != '') {
-          return new ValidationResult({
-            id : 'xxx',
-            type : 'text',
-            name : 'xxx'
-          }, false, errorMsg);
+          return new ValidationResult(null, false, errorMsg);
         }
         
         return new ValidationResult(null, true);
