@@ -469,7 +469,7 @@ public class MassRequestEntryController extends BaseController {
         if ((!StringUtils.isBlank(model.getMessageDefaultApproval()))) {
           mv = new ModelAndView("redirect:/massrequest/" + model.getReqId(), "reqentry", new RequestEntryModel());
           // CREATCMR 537
-          if (model.getApprovalResult().equalsIgnoreCase("Pending")) {
+          if (model.getApprovalResult().equalsIgnoreCase("Pending") || model.getApprovalResult().equalsIgnoreCase("None")) {
             MessageUtil.setErrorMessage(mv, MessageUtil.ERROR_APPROVAL_DEFAULT_DRA);
           }
         } else {
