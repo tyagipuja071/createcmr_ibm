@@ -4652,36 +4652,36 @@ function searchTermCodeValidator() {
           '04' : [ 'A0001243', 'A0004750' ],
           '19' : [ 'A0005230' ]
         };
-        var accSeq702 = {
+        var accSeq_702 = {
           '32T' : [ 'T0010461', 'T0010463' ],
           '34Q' : [ 'T0001379', 'T0006609', 'T0006949', 'T0006974', 'T0007561', 'T0007864' ],
           '36Y' : [ 'T0007974', 'T0010025' ],
           '5K' : [ 'T0009094' ],
           '04' : [ 'A0004751' ]
         };
-        var accSeq702EE = {
+        var accSeq_702EE = {
           '34Q' : [ 'T0004422' ],
           '36Y' : [ 'T0008052' ],
           '5K' : [ 'T0009073' ]
         };
-        var accSeq702LT = {
+        var accSeq_702LT = {
           '34Q' : [ 'T0004394' ],
           '36Y' : [ 'T0008054' ],
           '5K' : [ 'T0009072' ]
         };
-        var accSeq702LV = {
+        var accSeq_702LV = {
           '34Q' : [ 'T0004390' ],
           '36Y' : [ 'T0008053' ],
           '5K' : [ 'T0009071' ]
         };
-        var accSeq806 = {
+        var accSeq_806 = {
           '34Q' : [ 'T0001383', 'T0006611' ],
           '36Y' : [ 'T0007975', 'T0010024' ],
           '32T' : [ 'T0010317', 'T0010316' ],
           '5K' : [ 'T0009095' ],
           '04' : [ 'A0004752' ]
         };
-        var accSeq846 = {
+        var accSeq_846 = {
           '34Q' : [ 'T0001387', 'T0006613', 'T0006888', 'T0006966', 'T0007593' ],
           '36Y' : [ 'T0007976', 'T0010027', 'T0010028' ],
           '32T' : [ 'T0010453', 'T0010444', 'T0010448', 'T0010450', 'T0010445', 'T0010446' ],
@@ -4774,7 +4774,7 @@ function searchTermCodeValidator() {
               }
             }
           } else if (cmrIssuingCntry == '806') {
-            if (accSeq_806.hasOwnProperty(isuCtc) && !accSeq_702LV[isuCtc].includes(searchTerm)) {
+            if (accSeq_806.hasOwnProperty(isuCtc) && !accSeq_806[isuCtc].includes(searchTerm)) {
               return new ValidationResult({
                 id : 'searchTerm',
                 type : 'text',
@@ -4782,7 +4782,7 @@ function searchTermCodeValidator() {
               }, false, 'SearchTerm can only accept ' + accSeq_806[isuCtc]);
             }
           } else if (cmrIssuingCntry == '846') {
-            if (accSeq_846.hasOwnProperty(isuCtc) && !accSeq_702LV[isuCtc].includes(searchTerm)) {
+            if (accSeq_846.hasOwnProperty(isuCtc) && !accSeq_846[isuCtc].includes(searchTerm)) {
               return new ValidationResult({
                 id : 'searchTerm',
                 type : 'text',
