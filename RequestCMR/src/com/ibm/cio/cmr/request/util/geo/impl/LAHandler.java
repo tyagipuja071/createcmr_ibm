@@ -216,7 +216,11 @@ public class LAHandler extends GEOHandler {
     if (SystemLocation.CHILE.equalsIgnoreCase(issuingCountry)) {
       data.setBusnType(mainRecord.getCmrStxlTxtVal());
     } else if (SystemLocation.URUGUAY.equalsIgnoreCase(issuingCountry)) {
-      data.setIbmBankNumber(getLovCdByUpperTxt(SystemLocation.URUGUAY, "##IBMBankNumber", mainRecord.getCmrStxlTxtVal()));
+      String ibmBankNumberCdTxt = getLovCdByUpperTxt(SystemLocation.URUGUAY, "##IBMBankNumber", mainRecord.getCmrStxlTxtVal());
+      data.setIbmBankNumber(ibmBankNumberCdTxt);
+
+      // temporarily duplicates the value of IBM Bank Number after Import
+      data.setBusnType(ibmBankNumberCdTxt);
     }
 
     if (StringUtils.isNotBlank(mainRecord.getCmrCollectorNo()) && mainRecord.getCmrCollectorNo().length() > 6) {
@@ -691,6 +695,8 @@ public class LAHandler extends GEOHandler {
         fields.addAll(Arrays.asList("SECONDARY_LOCN_NO", "LOCN_NO", "ICMS_IND"));
       } else if (SystemLocation.CHILE.equalsIgnoreCase(cmrIssuingCntry)) {
         fields.addAll(Arrays.asList("FOOTNOTE_TXT_LINE_1", "BUSN_TYP"));
+      } else if (SystemLocation.URUGUAY.equalsIgnoreCase(cmrIssuingCntry)) {
+        fields.addAll(Arrays.asList("IBM_BANK_NO", "BUSN_TYP"));
       }
     }
 
@@ -1765,6 +1771,17 @@ public class LAHandler extends GEOHandler {
         results.add(update);
       }
     }
+
+    // Uruguay Customer Invoice
+    if (SystemLocation.URUGUAY.equals(cmrCountry)) {
+      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBusnType(), newData.getIbmBankNumber())) {
+        update = new UpdatedDataModel();
+        update.setDataField(PageManager.getLabel(cmrCountry, "IBMBankNumber", "-"));
+        update.setNewData(service.getCodeAndDescription(newData.getIbmBankNumber(), "IBMBankNumber", cmrCountry));
+        update.setOldData(service.getCodeAndDescription(oldData.getBusnType(), "IBMBankNumber", cmrCountry));
+        results.add(update);
+      }
+    }
   }
 
   @Override
@@ -2218,6 +2235,11 @@ public class LAHandler extends GEOHandler {
       if (issuingCntry.equalsIgnoreCase(SystemLocation.ARGENTINA) || issuingCntry.equalsIgnoreCase(SystemLocation.PARAGUAY)
           || issuingCntry.equalsIgnoreCase(SystemLocation.URUGUAY)) {
         data.setEducAllowCd("0");
+      }
+
+      // temporarily duplicates the value of IBM Bank Number
+      if (issuingCntry.equalsIgnoreCase(SystemLocation.URUGUAY)) {
+        data.setBusnType(data.getIbmBankNumber());
       }
     }
 
@@ -3482,6 +3504,7 @@ public class LAHandler extends GEOHandler {
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##BillingName", "mexicoBillingName");
+    map.put("##IBMBankNumber", "ibmBankNumber");
     return map;
   }
 
