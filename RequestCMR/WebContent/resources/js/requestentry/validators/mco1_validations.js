@@ -156,9 +156,7 @@ function setClientTierValues(isuCd) {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('salesBusOffCd', '0000');
     FormManager.setValue('repTeamMemberNo', 'SALES0');
-  } else {
-    FormManager.enable('clientTier');
-  }
+   }
 }
 
 function setCtcSalesRepSBO(value) {
@@ -1922,37 +1920,26 @@ function vatExemptOnScenario() {
 
 /* End 1430539 */
 
-// CREATCMR-4293
-function setCTCValues() {
-
-  FormManager.removeValidator('clientTier', Validators.REQUIRED);
-
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-
-  // Business Partner
-  var custSubGrpForBusinessPartner = [ 'BUSPR', 'LSBP', 'LSXBP', 'NABP', 'NAXBP', 'SZBP', 'SZXBP', 'XBP', 'ZABP', 'ZAXBP', 'LSLOC', 'NALOC', 'SZLOC', 'LSBLC', 'SZBLC', 'NABLC'  ];
-
-  // Business Partner
-  if (custSubGrpForBusinessPartner.includes(custSubGrp)) {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    var isuCd = FormManager.getActualValue('isuCd');
-    if (isuCd == '8B') {
-      FormManager.setValue('clientTier', '');
-    }
-  }
-
-  // Internal
-  var custSubGrpForInternal = [ 'INTER', 'LSINT', 'LSXIN', 'NAINT', 'NAXIN', 'SZINT', 'SZXIN', 'XINTE', 'ZAINT', 'ZAXIN' ];
-
-  // Internal
-  if (custSubGrpForInternal.includes(custSubGrp)) {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    var isuCd = FormManager.getActualValue('isuCd');
-    if (isuCd == '21') {
-      FormManager.setValue('clientTier', '');
-    }
-  }
-}
+/*
+ * // CREATCMR-4293 function setCTCValues() {
+ * 
+ * FormManager.removeValidator('clientTier', Validators.REQUIRED);
+ * 
+ * var custSubGrp = FormManager.getActualValue('custSubGrp'); // Business
+ * Partner var custSubGrpForBusinessPartner = [ 'BUSPR', 'LSBP', 'LSXBP',
+ * 'NABP', 'NAXBP', 'SZBP', 'SZXBP', 'XBP', 'ZABP', 'ZAXBP', 'LSLOC', 'NALOC',
+ * 'SZLOC', 'LSBLC', 'SZBLC', 'NABLC' ]; // Business Partner if
+ * (custSubGrpForBusinessPartner.includes(custSubGrp)) {
+ * FormManager.removeValidator('clientTier', Validators.REQUIRED); var isuCd =
+ * FormManager.getActualValue('isuCd'); if (isuCd == '8B') {
+ * FormManager.setValue('clientTier', ''); } } // Internal var
+ * custSubGrpForInternal = [ 'INTER', 'LSINT', 'LSXIN', 'NAINT', 'NAXIN',
+ * 'SZINT', 'SZXIN', 'XINTE', 'ZAINT', 'ZAXIN' ]; // Internal if
+ * (custSubGrpForInternal.includes(custSubGrp)) {
+ * FormManager.removeValidator('clientTier', Validators.REQUIRED); var isuCd =
+ * FormManager.getActualValue('isuCd'); if (isuCd == '21') {
+ * FormManager.setValue('clientTier', ''); } } }
+ */
 
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
@@ -1980,17 +1967,51 @@ function clientTierCodeValidator() {
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+    } else if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+      }, false, 'Client Tier can only accept \'Q\'.');
     }
-  } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+  }
+  else if (isuCode == '32') {
+    if (clientTierCode == '') { 
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    } else if (clientTierCode == 'T') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'T\'.');
+    }
+  }
+  else if (isuCode == '36') {
+    if (clientTierCode == '') { 
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    } else if (clientTierCode == 'Y') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Y\'.');
+    }
+  }else {
+    if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
@@ -2002,7 +2023,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+      }, false, 'Client Tier can only accept blank.');
     }
   }
 }
@@ -2108,6 +2129,68 @@ function addressQuotationValidatorZA() {
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
 }
+
+function setEnterpriseBehaviour() {
+  console.log("Inside setEnterpriseBehaviour ");
+  var reqType = FormManager.getActualValue('reqType').toUpperCase();
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custType = FormManager.getActualValue('custSubGrp');
+
+  if (reqType != 'C') {
+    return;
+  }
+  
+  // hide enterprise for BP, IBM employee and Internal
+  var custTypeHideList =['LSBP','LSXBP','NABP','NAXBP','SZBP','SZXBP','ZABP','ZAXBP','LSIBM','LSXIB','LSXIN','LSINT','NAIBM','NAXIB','NAXIN','NAINT','SZIBM','SZXIB','SZXIN','SZINT','ZAIBM','ZAXIB','ZAXIN','ZAINT'];
+  var priveScenatioTypes=['LSXPC','LSPC','NAXPC','NAPC','SZXPC','SZPC','ZAXPC','ZAPC'];
+  
+  if (custTypeHideList.includes(custType)) {
+    FormManager.hide('Enterprise', 'enterprise');
+  } else {
+    FormManager.show('Enterprise', 'enterprise');
+    if (priveScenatioTypes.includes(custType)) {
+      FormManager.readOnly('enterprise');
+    } else {
+      FormManager.enable('enterprise');
+    }
+  }
+ }
+
+function enterpriseValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var numPattern = /^[0-9]+$/;
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var enterprise = FormManager.getActualValue('enterprise');
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+        if (enterprise.length >= 1 && enterprise.length != 6) {
+          return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
+        }
+       var validEnterpriseIds=['008028','010032'];
+        if (isuCode=='36' && clientTierCode=='Y' && !validEnterpriseIds.includes(enterprise)){
+           return new ValidationResult({
+            id : 'enterprise',
+            type : 'text',
+            name : 'enterprise'
+          }, false, 'Enterprise Number is not valid for given ISU, CTC combination');
+        }
+        if (enterprise.length > 1 && !enterprise.match(numPattern) && (reqType != 'C')) {
+          return new ValidationResult({
+            id : 'enterprise',
+            type : 'text',
+            name : 'enterprise'
+          }, false, 'Enterprise Number should be numeric only.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
   console.log('adding MCO1 functions...');
@@ -2186,8 +2269,14 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(vatExemptOnScenario, GEOHandler.MCO1);
   
   // CREATCMR-4293
-  GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO1);
+ // GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO1);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.SOUTH_AFRICA ], null, true);
+  
+  // CREATCMR-7985
+  GEOHandler.addAfterTemplateLoad(setEnterpriseBehaviour, [ SysLoc.SOUTH_AFRICA ]);
+  GEOHandler.registerValidator(enterpriseValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
+  
+  
   
 });
