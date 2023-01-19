@@ -2169,8 +2169,8 @@ function enterpriseValidator() {
         if (enterprise.length >= 1 && enterprise.length != 6) {
           return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
         }
-       var validEnterpriseIds=['008028','010032'];
-        if (isuCode=='36' && clientTierCode=='Y' && !validEnterpriseIds.includes(enterprise)){
+       var validEnterpriseIds = ['008028','010032'];
+        if (isuCode == '36' && clientTierCode == 'Y' && !validEnterpriseIds.includes(enterprise)){
            return new ValidationResult({
             id : 'enterprise',
             type : 'text',

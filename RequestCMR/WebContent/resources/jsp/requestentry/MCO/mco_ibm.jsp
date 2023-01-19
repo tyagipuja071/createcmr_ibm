@@ -31,7 +31,7 @@
 			</p>
 		</cmr:column>
 
-		<cmr:column span="2" containerForField="Enterprise" forCountry="780">
+		<cmr:column span="2" containerForField="Enterprise" forCountry="780,864">
 			<p>
 				<cmr:label fieldId="enterprise">
 					<cmr:fieldLabel fieldId="Enterprise" />:
@@ -42,17 +42,7 @@
 					tabId="MAIN_IBM_TAB" />
 			</p>
 		</cmr:column>
-		<cmr:column span="2" containerForField="Enterprise" forGEO="MCO1,MCO2">
-			<p>
-				<cmr:label fieldId="enterprise">
-					<cmr:fieldLabel fieldId="Enterprise" />:
-              <cmr:delta text="${rdcdata.enterprise}"
-						oldValue="${reqentry.enterprise}" />
-				</cmr:label>
-				<cmr:field id="enterprise" path="enterprise" fieldId="Enterprise"
-					tabId="MAIN_IBM_TAB" />
-			</p>
-		</cmr:column>
+		
 		<%-- <cmr:column span="2" containerForField="EngineeringBo" forCountry="838">
       <p>
         <cmr:label fieldId="engineeringBo">
