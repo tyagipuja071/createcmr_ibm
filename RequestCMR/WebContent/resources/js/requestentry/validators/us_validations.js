@@ -512,7 +512,8 @@ function afterConfigForUS() {
     usCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       if (FormManager.getActualValue('landCntry') != '' && FormManager.getActualValue('landCntry') != 'US') {
         FormManager.setValue('postCd', '00000');
-        FormManager.readOnly('postCd');
+        //CreateCMR-8143
+        //FormManager.readOnly('postCd');
       } else {
         var readOnly = false;
         try {
