@@ -2298,7 +2298,11 @@ function updateMRCAseanAnzIsa() {
     if((custSubGrp == 'INTER' || custSubGrp == 'XINT') && ((['00000'].includes(cluster) && (cntry == '856' || cntry == '818' || cntry == '778' || cntry == '643' || cntry == '749' || cntry == '834' || cntry == '852')) || (['00002'].includes(cluster) && cntry == '796') || (['00001'].includes(cluster) && cntry == '616')) && _isuCd == '21' &&  _clientTier == 'Z') {
       FormManager.setValue('mrcCd', '2');
       return;
-    } 
+    }    
+    if(cntry == '818' && (custSubGrp == 'INTER' || custSubGrp == 'DUMMY')) {
+      FormManager.setValue('mrcCd', '2');
+      return;
+    }   
     // CREATCMR-7883
     if(cntry == '616' && custSubGrp == 'DUMMY' && ['00001'].includes(cluster)) {
       FormManager.setValue('mrcCd', '2');
@@ -2664,6 +2668,7 @@ function setCTCIsuByClusterASEAN() {
     var _cluster = FormManager.getActualValue('apCustClusterId');
     var scenario = FormManager.getActualValue('custGrp');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
+    var issuingCnt3 = ['818', '856'];
 
     var apClientTierValue = [];
     var isuCdValue = [];
@@ -2690,14 +2695,25 @@ function setCTCIsuByClusterASEAN() {
           FormManager.setValue('isuCd', isuCdValue[0]);
         } else if (apClientTierValue.length > 1) {
           if(custSubGrp.includes('BLUM') || custSubGrp.includes('MKTP') || custSubGrp.includes('MKP') || ((custSubGrp.includes('DUMMY') || custSubGrp.includes('XDUMM')) && issuingCntries.includes(_cmrIssuingCntry)) || ((custSubGrp.includes('PRICU') || custSubGrp.includes('BLUMX') || custSubGrp.includes('SPOFF')) && (_cmrIssuingCntry == '749' || _cmrIssuingCntry == '834')) || (_cmrIssuingCntry == '834' && _cluster == '00000' && (custSubGrp == 'MKTPC' || custSubGrp == 'PRIV' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP' || custSubGrp == 'XPRIV'))) {
-            FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q' , 'Y']);
-            FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
-            FormManager.setValue('isuCd','34');
-          } else if(custSubGrp.includes('INTER') || custSubGrp.includes('XINT') ) {
+            if(issuingCnt3.includes(_cmrIssuingCntry) && custSubGrp.includes('DUMMY')) {
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
+              FormManager.setValue('isuCd','21');
+            } else {
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q' , 'Y']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+              FormManager.setValue('isuCd','34');
+            }
+          } else if((custSubGrp.includes('INTER') || custSubGrp.includes('XINT')) && !issuingCnt3.includes(_cmrIssuingCntry)) {
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
             FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
             FormManager.setValue('clientTier', 'Z');
             FormManager.setValue('isuCd','21');
+          } else if(custSubGrp.includes('INTER') && issuingCnt3.includes(_cmrIssuingCntry)) {
+            FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
+            FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
+            FormManager.setValue('clientTier', '0');
+            FormManager.setValue('isuCd','60');
           } else {
             FormManager.resetDropdownValues(FormManager.getField('clientTier'));
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
@@ -6162,6 +6178,29 @@ function validateGCGCustomerName(){
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function validateCustnameForKynd() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var errorMsg = '';
+        var action = FormManager.getActualValue('yourAction');
+        var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase();        
+        var reqType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        var custSubGrp = FormManager.getActualValue('custSubGrp');        
+        if(reqType == 'C' && custSubGrp == 'KYND'){
+          if(custNm1.indexOf('KYNDRYL')==-1){
+            errorMsg = 'Customer name must contain word \'Kyndryl\'';
+          }
+        }        
+        if (errorMsg != '') {
+          return new ValidationResult(null, false, errorMsg);
+        }        
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
@@ -6377,4 +6416,6 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-7883
   GEOHandler.registerValidator(checkCustomerNameForKYND, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA], null, true);
+  
+  GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES], null, true);
 });
