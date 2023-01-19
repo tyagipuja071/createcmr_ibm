@@ -258,7 +258,7 @@ function addHandlersForNORDX() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      //setClientTierValues();
+      // setClientTierValues();
       // CREATCMR-2674
       console.log('_ISUHandler');
       setSalesRepValues();
@@ -477,65 +477,66 @@ function getLandedCountryByAddType(addType) {
 /**
  * Set Client Tier Value
  */
-//function setClientTierValues(isuCd) {
-//  var reqType = FormManager.getActualValue('reqType');
-//  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
-//    return;
-//  }
+// function setClientTierValues(isuCd) {
+// var reqType = FormManager.getActualValue('reqType');
+// if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+// return;
+// }
 //
-//  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-//  var countryUse = FormManager.getActualValue('countryUse');
-//  isuCd = FormManager.getActualValue('isuCd');
-//  var lockClientTier = false;
+// var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+// var countryUse = FormManager.getActualValue('countryUse');
+// isuCd = FormManager.getActualValue('isuCd');
+// var lockClientTier = false;
 //
-//  if (cmrIssuingCntry == '678') {
-//    if ('19' == isuCd) {
-//      lockClientTier = true;
-//    }
-//  } else if (cmrIssuingCntry == '806' || countryUse == '702') {
-//    if ('04' == isuCd) {
-//      lockClientTier = true;
-//    }
-//  } else if (cmrIssuingCntry == '846') {
-//    if ([ '5E', '1R', '04' ].includes(isuCd)) {
-//      lockClientTier = true;
-//    }
-//  } else if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
-//    if ([ '21', '8B' ].includes(isuCd)) {
-//      lockClientTier = true;
-//    }
-//  }
-//  if (lockClientTier) {
-//    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-//    FormManager.setValue('clientTier', '');
-//    FormManager.readOnly('clientTier');
-//    lockClientTier = false;
-//  } else {
-//    FormManager.enable('clientTier');
-//  }
-//  // var cntry = FormManager.getActualValue('cmrIssuingCntry');
-//  // var clientTiers = [];
-//  // if (isuCd != '') {
-//  // var qParams = {
-//  // _qall : 'Y',
-//  // ISSUING_CNTRY : cntry,
-//  // ISU : '%' + isuCd + '%'
-//  // };
-//  // var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-//  // if (results != null) {
-//  // for (var i = 0; i < results.length; i++) {
-//  // clientTiers.push(results[i].ret1);
-//  // }
-//  // if (clientTiers != null) {
-//  // FormManager.limitDropdownValues(FormManager.getField('clientTier'),
-//  // clientTiers);
-//  // if (clientTiers.length == 1) {
-//  // FormManager.setValue('clientTier', clientTiers[0]);
-//  // }
-//  // }
-//  // }
-//  // }
-//}
+// if (cmrIssuingCntry == '678') {
+// if ('19' == isuCd) {
+// lockClientTier = true;
+// }
+// } else if (cmrIssuingCntry == '806' || countryUse == '702') {
+// if ('04' == isuCd) {
+// lockClientTier = true;
+// }
+// } else if (cmrIssuingCntry == '846') {
+// if ([ '5E', '1R', '04' ].includes(isuCd)) {
+// lockClientTier = true;
+// }
+// } else if (countryUse == '702EE' || countryUse == '702LT' || countryUse ==
+// '702LV') {
+// if ([ '21', '8B' ].includes(isuCd)) {
+// lockClientTier = true;
+// }
+// }
+// if (lockClientTier) {
+// FormManager.removeValidator('clientTier', Validators.REQUIRED);
+// FormManager.setValue('clientTier', '');
+// FormManager.readOnly('clientTier');
+// lockClientTier = false;
+// } else {
+// FormManager.enable('clientTier');
+// }
+// // var cntry = FormManager.getActualValue('cmrIssuingCntry');
+// // var clientTiers = [];
+// // if (isuCd != '') {
+// // var qParams = {
+// // _qall : 'Y',
+// // ISSUING_CNTRY : cntry,
+// // ISU : '%' + isuCd + '%'
+// // };
+// // var results = cmr.query('GET.CTCLIST.BYISU', qParams);
+// // if (results != null) {
+// // for (var i = 0; i < results.length; i++) {
+// // clientTiers.push(results[i].ret1);
+// // }
+// // if (clientTiers != null) {
+// // FormManager.limitDropdownValues(FormManager.getField('clientTier'),
+// // clientTiers);
+// // if (clientTiers.length == 1) {
+// // FormManager.setValue('clientTier', clientTiers[0]);
+// // }
+// // }
+// // }
+// // }
+// }
 /**
  * NORDIX - CMR-1709
  */
@@ -4266,7 +4267,7 @@ function setSRValuesBaseOnSubInd() {
             subIndFlag = 'Y';
           }
         }
-      }  else if (isuAndCtc == '04') {
+      } else if (isuAndCtc == '04') {
         if (subIndFlag == 'Y') {
           FormManager.setValue('searchTerm', 'A0004752');
         } else {
@@ -4647,12 +4648,192 @@ function setCTCValues() {
   }
 }
 
+function searchTermCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqTyp = FormManager.getActualValue('reqType');
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var searchTerm = FormManager.getActualValue('searchTerm');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        var countryUse = FormManager.getActualValue('countryUse');
+        var isuCtc = isuCode.concat(clientTierCode);
+        var subIndustry = FormManager.getActualValue('subIndustryCd');
+        var ind = subIndustry.substring(0, 1);
+
+        var scenariosToBlock = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS', 'EEINT',
+            'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT' ];
+
+        var accSeq_678 = {
+          '34Q' : [ 'T0006607', 'T0006644', 'T0006880', 'T0006881', 'T0001375' ],
+          '36Y' : [ 'T0007973', 'T0010026', 'T0007977' ],
+          '32T' : [ 'T0010429', 'T0010431', 'T0010432', 'T0010427', 'T0010419', 'T0010428' ],
+          '5K' : [ 'T0009096' ],
+          '04' : [ 'A0001243', 'A0004750' ],
+          '19' : [ 'A0005230' ]
+        };
+        var accSeq_678IS = {
+          '34Q' : [ 'T0001376', 'T0007879' ],
+          '36Y' : [ 'T0007973', 'T0010026', 'T0007977' ],
+          '32T' : [ 'T0010429', 'T0010431', 'T0010432', 'T0010427', 'T0010419', 'T0010428' ],
+          '5K' : [ 'T0009096' ],
+          '04' : [ 'A0001243', 'A0004750' ],
+          '19' : [ 'A0005230' ]
+        };
+        var accSeq702 = {
+          '32T' : [ 'T0010461', 'T0010463' ],
+          '34Q' : [ 'T0001379', 'T0006609', 'T0006949', 'T0006974', 'T0007561', 'T0007864' ],
+          '36Y' : [ 'T0007974', 'T0010025' ],
+          '5K' : [ 'T0009094' ],
+          '04' : [ 'A0004751' ]
+        };
+        var accSeq702EE = {
+          '34Q' : [ 'T0004422' ],
+          '36Y' : [ 'T0008052' ],
+          '5K' : [ 'T0009073' ]
+        };
+        var accSeq702LT = {
+          '34Q' : [ 'T0004394' ],
+          '36Y' : [ 'T0008054' ],
+          '5K' : [ 'T0009072' ]
+        };
+        var accSeq702LV = {
+          '34Q' : [ 'T0004390' ],
+          '36Y' : [ 'T0008053' ],
+          '5K' : [ 'T0009071' ]
+        };
+        var accSeq806 = {
+          '34Q' : [ 'T0001383', 'T0006611' ],
+          '36Y' : [ 'T0007975', 'T0010024' ],
+          '32T' : [ 'T0010317', 'T0010316' ],
+          '5K' : [ 'T0009095' ],
+          '04' : [ 'A0004752' ]
+        };
+        var accSeq846 = {
+          '34Q' : [ 'T0001387', 'T0006613', 'T0006888', 'T0006966', 'T0007593' ],
+          '36Y' : [ 'T0007976', 'T0010027', 'T0010028' ],
+          '32T' : [ 'T0010453', 'T0010444', 'T0010448', 'T0010450', 'T0010445', 'T0010446' ],
+          '5K' : [ 'T0009097' ],
+          '04' : [ 'I0000272' ],
+          '1R' : [ 'I0000271' ],
+          '3T' : [ 'A0003748' ]
+        };
+        if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
+          if (cmrIssuingCntry == '678') {
+            if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL') {
+              // Denmark, Faroe Islands, Greenland
+              var subIndSearchTerm = {
+                'T0001375' : [ 'K', 'U', 'A', 'F', 'N', 'S' ],
+                'T0006880' : [ 'D', 'W', 'T', 'R' ],
+                'T0006881' : [ 'V', 'J', 'P', 'L', 'M' ],
+                'T0006644' : [ 'G', 'Y', 'E', 'H', 'X' ],
+                'T0006607' : [ 'B', 'C' ]
+              };
+              if (accSeq_678.hasOwnProperty(isuCtc) && !accSeq_678[isuCtc].includes(searchTerm)) {
+                return new ValidationResult({
+                  id : 'searchTerm',
+                  type : 'text',
+                  name : 'searchTerm'
+                }, false, 'SearchTerm can only accept ' + accSeq_678[isuCtc]);
+              }
+              if (accSeq_678.hasOwnProperty(isuCtc) && accSeq_678[isuCtc].includes(searchTerm)) {
+                if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
+                  console.log(subIndSearchTerm[searchTerm]);
+                  return new ValidationResult({
+                    id : 'searchTerm',
+                    type : 'text',
+                    name : 'searchTerm'
+                  }, false, 'SORTL and Subindustry combination mismatch.');
+                }
+              }
+            } else if (countryUse == '678IS') {
+              var subIndSearchTerm = {
+                'T0007879' : [ 'B', 'C' ]
+              };
+              if (accSeq_678IS.hasOwnProperty(isuCtc) && !accSeq_678IS[isuCtc].includes(searchTerm)) {
+                return new ValidationResult({
+                  id : 'searchTerm',
+                  type : 'text',
+                  name : 'searchTerm'
+                }, false, 'SearchTerm can only accept ' + accSeq_678IS[isuCtc]);
+              }
+              if (accSeq_678IS.hasOwnProperty(isuCtc) && accSeq_678IS[isuCtc].includes(searchTerm)) {
+                if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
+                  return new ValidationResult({
+                    id : 'searchTerm',
+                    type : 'text',
+                    name : 'searchTerm'
+                  }, false, 'SearchTerm and SubIndustry combination mismatch.');
+                }
+              }
+            }
+          } else if (cmrIssuingCntry == '702') {
+            if (countryUse == '702') {
+              if (accSeq_702.hasOwnProperty(isuCtc) && !accSeq_702[isuCtc].includes(searchTerm)) {
+                return new ValidationResult({
+                  id : 'searchTerm',
+                  type : 'text',
+                  name : 'searchTerm'
+                }, false, 'SearchTerm can only accept ' + accSeq_702[isuCtc]);
+              }
+            } else if (countryUse == '702EE') {
+              if (accSeq_702EE.hasOwnProperty(isuCtc) && !accSeq_702EE[isuCtc].includes(searchTerm)) {
+                return new ValidationResult({
+                  id : 'searchTerm',
+                  type : 'text',
+                  name : 'searchTerm'
+                }, false, 'SearchTerm can only accept ' + accSeq_702EE[isuCtc]);
+              }
+            } else if (countryUse == '702LT') {
+              if (accSeq_702LT.hasOwnProperty(isuCtc) && !accSeq_702LT[isuCtc].includes(searchTerm)) {
+                return new ValidationResult({
+                  id : 'searchTerm',
+                  type : 'text',
+                  name : 'searchTerm'
+                }, false, 'SearchTerm can only accept ' + accSeq_702LT[isuCtc]);
+              }
+            } else if (countryUse == '702LV') {
+              if (accSeq_702LV.hasOwnProperty(isuCtc) && !accSeq_702LV[isuCtc].includes(searchTerm)) {
+                return new ValidationResult({
+                  id : 'searchTerm',
+                  type : 'text',
+                  name : 'searchTerm'
+                }, false, 'SearchTerm can only accept ' + accSeq_702LV[isuCtc]);
+              }
+            }
+          } else if (cmrIssuingCntry == '806') {
+            if (accSeq_806.hasOwnProperty(isuCtc) && !accSeq_702LV[isuCtc].includes(searchTerm)) {
+              return new ValidationResult({
+                id : 'searchTerm',
+                type : 'text',
+                name : 'searchTerm'
+              }, false, 'SearchTerm can only accept ' + accSeq_806[isuCtc]);
+            }
+          } else if (cmrIssuingCntry == '846') {
+            if (accSeq_846.hasOwnProperty(isuCtc) && !accSeq_702LV[isuCtc].includes(searchTerm)) {
+              return new ValidationResult({
+                id : 'searchTerm',
+                type : 'text',
+                name : 'searchTerm'
+              }, false, 'SearchTerm can only accept ' + accSeq_846[isuCtc]);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-  var activeIsuCd = ['32', '34', '36'];
-  var activeCtc= ['Q', 'Y', 'T'];
+  var activeIsuCd = [ '32', '34', '36' ];
+  var activeCtc = [ 'Q', 'Y', 'T' ];
 
   if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
@@ -4661,6 +4842,11 @@ function clientTierCodeValidator() {
       return new ValidationResult(null, true);
     } else {
       $("#clientTierSpan").html('');
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank.');
 
       return new ValidationResult({
         id : 'clientTier',
@@ -4684,7 +4870,7 @@ function clientTierCodeValidator() {
         name : 'clientTier'
       }, false, 'Client Tier can only accept \'Q\'.');
     }
-  }  else if (isuCode == '36') {
+  } else if (isuCode == '36') {
     if (clientTierCode == '') {
       return new ValidationResult({
         id : 'clientTier',
@@ -4700,7 +4886,7 @@ function clientTierCodeValidator() {
         name : 'clientTier'
       }, false, 'Client Tier can only accept \'Y\'.');
     }
-  }  else if (isuCode == '32') {
+  } else if (isuCode == '32') {
     if (clientTierCode == '') {
       return new ValidationResult({
         id : 'clientTier',
@@ -4834,25 +5020,31 @@ function skipStateProvForFO() {
   }
 }
 
-function isuCtcSortlCovBehaviour(){
+function isuCtcSortlCovBehaviour() {
   var role = null;
+  var reqTyp = FormManager.getActualValue('reqType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  var scenariosToBlock = ['CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 
-    'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS', 'EEINT', 'EEIBM',
-    'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT'];
-  if (role == 'Requester'){
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('searchTerm');
-  } else if (role == 'Processor' && !scenariosToBlock.includes(custSubGrp)){
+  var scenariosToBlock = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS', 'EEINT', 'EEIBM',
+      'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT' ];
+  if (reqTyp == 'C') {
+    if (role == 'Requester') {
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('searchTerm');
+    } else if (role == 'Processor' && !scenariosToBlock.includes(custSubGrp)) {
+      FormManager.enable('clientTier');
+      FormManager.enable('isuCd');
+      FormManager.enable('searchTerm');
+    }
+  } else if (reqTyp == 'U' && !scenariosToBlock.includes(custSubGrp)) {
     FormManager.enable('clientTier');
     FormManager.enable('isuCd');
     FormManager.enable('searchTerm');
   }
-  
+
 }
 
 dojo.addOnLoad(function() {
@@ -4954,6 +5146,8 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterConfig(skipStateProvForFO, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(lockTaxCode, GEOHandler.NORDX);
+  GEOHandler.registerValidator(searchTermCodeValidator, GEOHandler.NORDX, null, true);
+
   // CREATCMR-7925
   GEOHandler.addAfterConfig(isuCtcSortlCovBehaviour, GEOHandler.NORDX);
 });

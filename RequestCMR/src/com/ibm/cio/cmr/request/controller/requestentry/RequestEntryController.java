@@ -497,7 +497,7 @@ public class RequestEntryController extends BaseController {
       } else if (CmrConstants.Send_for_Processing().equalsIgnoreCase(action)) {
         if ((!StringUtils.isBlank(model.getMessageDefaultApproval()))) {
           mv = new ModelAndView("redirect:/request/" + model.getReqId(), "reqentry", new RequestEntryModel());
-          if (model.getApprovalResult().equalsIgnoreCase("Pending")) {
+          if (model.getApprovalResult().equalsIgnoreCase("Pending") || model.getApprovalResult().equalsIgnoreCase("None")) {
             MessageUtil.setErrorMessage(mv, MessageUtil.ERROR_APPROVAL_DEFAULT_DRA);
           }
         } else {
