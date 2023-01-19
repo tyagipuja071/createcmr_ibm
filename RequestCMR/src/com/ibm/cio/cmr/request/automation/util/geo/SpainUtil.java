@@ -463,10 +463,13 @@ public class SpainUtil extends AutomationUtil {
       return true;
     }
     List<Addr> addresses = null;
-    String zdType = "ZD01";
-    String ziType = "ZI01";
-    int zi01count = getaddZI01AddressCount(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), data.getCmrNo(), ziType);
-    int zd01count = getaddZD01AddressCount(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), data.getCmrNo(), zdType);
+    int zi01count = 0;
+    int zp01count = 0;
+    int zd01count = 0;
+    List<Integer> addrCount = getAddressCount(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
+    zi01count = addrCount.get(0);
+    zp01count = addrCount.get(1);
+    zd01count = addrCount.get(2);
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review, D-Reject
     for (String addrType : RELEVANT_ADDRESSES) {
@@ -488,7 +491,8 @@ public class SpainUtil extends AutomationUtil {
                 || (zd01count == 0 && CmrConstants.RDC_SHIP_TO.equals(addrType))) && null == changes.getAddressChange(addrType, "Customer Name")
                 && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Addition of new Installing and Shipping (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              checkDetails.append("Addition of new " + (addrType.equalsIgnoreCase("ZI01") ? "Installing " : "Shipping ") + "("
+                  + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else if (addressExists(entityManager, addr, requestData)) {
               LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
@@ -786,45 +790,23 @@ public class SpainUtil extends AutomationUtil {
     return calculatedFields;
   }
 
-  public int getaddZD01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
-    int zd01count = 0;
-    String count = "";
-    String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("KATR6", katr6);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("CMR_NO", cmr_no);
-    query.setParameter("ADDR_TYPE", ktokd);
-    List<Object[]> results = query.getResults();
-
-    if (results != null && !results.isEmpty()) {
-      Object[] sResult = results.get(0);
-      count = sResult[0].toString();
-      zd01count = Integer.parseInt(count);
-    }
-    System.out.println("zd01count = " + zd01count);
-
-    return zd01count;
-  }
-
-  public int getaddZI01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
+  public List<Integer> getAddressCount(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) {
     int zi01count = 0;
-    String count = "";
-    String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
+    int zp01count = 0;
+    int zd01count = 0;
+    String sql = ExternalizedQuery.getSql("QUERY.GET.COUNT.ADDRTYP");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("KATR6", katr6);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("CMR_NO", cmr_no);
-    query.setParameter("ADDR_TYPE", ktokd);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmrNo);
     List<Object[]> results = query.getResults();
 
     if (results != null && !results.isEmpty()) {
       Object[] sResult = results.get(0);
-      count = sResult[0].toString();
-      zi01count = Integer.parseInt(count);
+      zi01count = Integer.parseInt(sResult[0].toString());
+      zp01count = Integer.parseInt(sResult[1].toString());
+      zd01count = Integer.parseInt(sResult[2].toString());
     }
-    System.out.println("zi01count = " + zi01count);
 
-    return zi01count;
+    return Arrays.asList(zi01count, zp01count, zd01count);
   }
 }
