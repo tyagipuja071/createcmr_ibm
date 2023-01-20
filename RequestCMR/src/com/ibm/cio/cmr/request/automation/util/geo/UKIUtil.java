@@ -352,10 +352,13 @@ public class UKIUtil extends AutomationUtil {
       return true;
     }
     List<Addr> addresses = null;
-    String zdType = "ZD01";
-    String ziType = "ZI01";
-    int zi01count = getaddZI01AddressCount(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), data.getCmrNo(), ziType);
-    int zd01count = getaddZD01AddressCount(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), data.getCmrNo(), zdType);
+    int zi01count = 0;
+    int zp01count = 0;
+    int zd01count = 0;
+    List<Integer> addrCount = getAddressCount(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
+    zi01count = addrCount.get(0);
+    zp01count = addrCount.get(1);
+    zd01count = addrCount.get(2);
     LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
@@ -388,7 +391,8 @@ public class UKIUtil extends AutomationUtil {
                 || (zd01count == 0 && CmrConstants.RDC_SHIP_TO.equals(addrType))) && null == changes.getAddressChange(addrType, "Customer Name")
                 && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Addition of new Installing and Shipping (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              checkDetails.append("Addition of new " + (addrType.equalsIgnoreCase("ZI01") ? "Installing " : "Shipping ") + "("
+                  + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else if (addressExists(entityManager, addr, requestData)) {
               LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
@@ -977,36 +981,15 @@ public class UKIUtil extends AutomationUtil {
     LOG.debug("client tier" + data.getClientTier());
   }
 
-  public int getaddZI01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
+  public List<Integer> getAddressCount(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) {
     int zi01count = 0;
-    String count = "";
-    String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("KATR6", katr6);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("CMR_NO", cmr_no);
-    query.setParameter("ADDR_TYPE", ktokd);
-    List<Object[]> results = query.getResults();
-
-    if (results != null && !results.isEmpty()) {
-      Object[] sResult = results.get(0);
-      count = sResult[0].toString();
-      zi01count = Integer.parseInt(count);
-    }
-    System.out.println("zi01count = " + zi01count);
-
-    return zi01count;
-  }
-
-  public int getaddZD01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
+    int zp01count = 0;
     int zd01count = 0;
     String count = "";
-    String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
+    String sql = ExternalizedQuery.getSql("QUERY.GET.COUNT.ADDRTYP");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("KATR6", katr6);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("CMR_NO", cmr_no);
-    query.setParameter("ADDR_TYPE", ktokd);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmrNo);
     List<Object[]> results = query.getResults();
 
     if (results != null && !results.isEmpty()) {
@@ -1016,7 +999,6 @@ public class UKIUtil extends AutomationUtil {
     }
     System.out.println("zd01count = " + zd01count);
 
-    return zd01count;
+    return Arrays.asList(zi01count, zp01count, zd01count);
   }
-
 }
