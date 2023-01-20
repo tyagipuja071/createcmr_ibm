@@ -912,13 +912,13 @@ public class SWISSService extends BaseBatchService {
           }
 
           updateEntity(admin, entityManager);
-
+          WfHist history = null;
           if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
             RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
                 "Some errors occurred during RDc processing. Please check request's comment log for details.", TransConnService.ACTION_RDC_UPDATE,
                 null, null, "CPR".equals(admin.getReqStatus()));
           } else {
-            RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
+            history = RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
                 "RDc  Processing has been completed(First batch run). Please check request's comment log for details.",
                 TransConnService.ACTION_RDC_UPDATE, null, null, "CPR".equals(admin.getReqStatus()));
           }
@@ -926,7 +926,9 @@ public class SWISSService extends BaseBatchService {
           partialCommit(entityManager);
           LOG.debug(
               "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
-
+          if ("CPR".equals(admin.getReqStatus())) {
+            RequestUtils.sendEmailNotifications(entityManager, admin, history, false, false);
+          }
         } catch (Exception e) {
           LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
           addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
