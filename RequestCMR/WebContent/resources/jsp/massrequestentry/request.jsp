@@ -270,7 +270,7 @@ dojo.addOnLoad(function() {
     <cmr:row>
       <cmr:column span="6">
         <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
-        <cmr:note text="${ui.info.condCancelleds}" />
+        <cmr:note text="${ui.info.condCancelled}" />
       </cmr:column>
     </cmr:row>
     <br>

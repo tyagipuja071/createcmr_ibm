@@ -468,6 +468,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <%
       if ("Requester".equals(reqentry.getUserRole()) && CmrConstants.APPROVAL_RESULT_COND_APPROVED.equals(reqentry.getApprovalResult())) {
     %>
+    <br>
     <cmr:row>
       <cmr:column span="6">
         <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
@@ -481,10 +482,11 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
      <%
       if ("Requester".equals(reqentry.getUserRole()) && CmrConstants.APPROVAL_RESULT_COND_CANCELLED.equals(reqentry.getApprovalResult())) {
     %>
+    <br>
     <cmr:row>
       <cmr:column span="6">
         <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
-        <cmr:note text="${ui.info.condCancelleds}" />
+        <cmr:note text="${ui.info.condCancelled}" />
       </cmr:column>
     </cmr:row>
     <br>
