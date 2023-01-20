@@ -2806,16 +2806,23 @@ function getImportedIndc() {
   return _importedIndc;
 }
 
-function setIBMBankNumberBasedScenarios() {
+function setIBMBankNumberBasedScenarios(fromAddress, scenario, scenarioChanged) {
   var custGrp = FormManager.getActualValue('custGrp')
   var ibmBankNumberList = FormManager.getField('ibmBankNumber').loadedStore._arrayOfAllItems;
   var valueList = new Array();
+
+  if (fromAddress || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
 
   for (var i = 0; i < ibmBankNumberList.length; i++) {
     valueList[i] = ibmBankNumberList[i].id[0];
   }
 
   if (custGrp == 'LOCAL') {
+    if (scenarioChanged) {
+      FormManager.clearValue('ibmBankNumber');
+    }
     // Remove 04 - Pure Export
     for (var i = 0; i < valueList.length; i++) {
       if ('04' == valueList[i]) {
