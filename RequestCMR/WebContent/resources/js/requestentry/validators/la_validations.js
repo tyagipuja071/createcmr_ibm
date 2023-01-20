@@ -2545,6 +2545,11 @@ function setLocNoLockedForRequesterBR() {
 function setSortlForStateProvince() {
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqType = FormManager.getActualValue('reqType');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
   if (cmrIssuingCntry != '631' || reqType != 'C') {
     return;
   }
