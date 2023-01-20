@@ -115,17 +115,12 @@ function afterConfigTW() {
     FormManager.setValue('isuCd', '36');
     FormManager.setValue('mrcCd', '3');
   }
-  if (reqType == 'C' && custSubGrp == 'LOECO') {
-    FormManager.readOnly('searchTerm');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('mrcCd');
-  }
 
   setVatValidator();
   handleObseleteExpiredDataForUpdate();
   // CREATCMR-788
   addressQuotationValidator();
+ addCoverageFieldsValidator();
 }
 
 /**
@@ -154,6 +149,7 @@ function addHandlersForTW() {
   if (_ISUHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValuesTW();
+      addCoverageFieldsValidator();
     });
   }
 
@@ -173,6 +169,7 @@ function addHandlersForTW() {
       setISUCodeValues();
       filterISUOnChange();
       setInacBySearchTerm();
+      addCoverageFieldsValidator();
     });
   }
 }
@@ -279,6 +276,7 @@ function setISUCodeValues() {
   var isicCd = FormManager.getActualValue('isicCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isuCd = FormManager.getActualValue('isuCd');
+  var searchTerm = FormManager.getActualValue('searchTerm');
 
   if (custSubGrp == '') {
     return;
@@ -291,7 +289,7 @@ function setISUCodeValues() {
   var isuCode = [];
 
   if (cntry == '858') {
-    if (isicCd != '') {
+    if (isicCd != '' && (searchTerm == '04476' || searchTerm == '71300')) {
       var qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry,
@@ -496,6 +494,47 @@ function addressQuotationValidator() {
 }
 
 // CREATCMR-7882
+function addCoverageFieldsValidator() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var searchTerm = FormManager.getActualValue('searchTerm');
+  if (reqType == 'C') {
+    if (custSubGrp == 'LOECO' || custSubGrp == 'LOBLU' || custSubGrp == 'LOMAR' || custSubGrp == 'LOOFF' || custSubGrp == 'LOINT') {
+      FormManager.readOnly('searchTerm');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('mrcCd');
+    }
+// if (custSubGrp == 'CBFOR') {
+// FormManager.setValue('searchTerm', '00000');
+// FormManager.setValue('mrcCd', '3');
+// FormManager.setValue('clientTier', 'Z');
+// FormManager.setValue('isuCd', '34');
+// }
+    if (custSubGrp == 'KYND') {
+      FormManager.readOnly('searchTerm');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('mrcCd');
+      FormManager.readOnly('inacType');
+      FormManager.readOnly('inacCd');
+    }
+    if (searchTerm == '00000'){
+      if (custSubGrp == 'LOBLU' || custSubGrp == 'LOMAR' || custSubGrp == 'LOOFF')
+      {
+        FormManager.setValue('mrcCd', '3');
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.setValue('isuCd', '34');
+      }else if (custSubGrp == 'LOINT') {
+        FormManager.setValue('mrcCd', '2');
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.setValue('isuCd', '21');
+      }
+    }
+  }
+}
+
+// CREATCMR-7882
 function filterISUOnChange() {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -530,7 +569,7 @@ function filterISUOnChange() {
 
   if (clientTier != null) {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTier);
-    FormManager.enable('clientTier');
+    // FormManager.enable('clientTier');
     if (clientTier.length == 1) {
       FormManager.setValue('clientTier', clientTier[0]);
       // FormManager.readOnly('clientTier');
@@ -550,6 +589,7 @@ function filterISUOnChange() {
    }
 }
 
+// CREATCMR-7882
 function setInacBySearchTerm() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var _cluster = FormManager.getActualValue('searchTerm');
@@ -627,6 +667,7 @@ function setInacBySearchTerm() {
   }
 }
 
+// CREATCMR-7882
 function onInacTypeChange() {
   var searchTerm = FormManager.getActualValue('searchTerm');
   var reqType = null;
@@ -668,6 +709,33 @@ function onInacTypeChange() {
   }
 }
 
+// CREATCMR-7882
+function checkCustomerNameForKYND() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var errorMsg = '';
+        var action = FormManager.getActualValue('yourAction');
+        var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase();
+        
+        var reqType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if(reqType == 'C' && role == 'REQUESTER' && custSubGrp == 'KYND' && (action=='SFP' || action=='VAL')){
+          if(custNm1.indexOf('KYNDRYL')==-1){
+            errorMsg = 'Customer name must contain word \'Kyndryl\'';
+          }
+        }
+        if (errorMsg != '') {
+          return new ValidationResult(null, false, errorMsg);
+        }
+        
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];
@@ -684,6 +752,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setDupCmrIndcWarning, GEOHandler.TW);
   GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.TW_CHECKLIST);
   GEOHandler.addAfterConfig(onInacTypeChange, GEOHandler.TW);
+ GEOHandler.addAfterConfig(addCoverageFieldsValidator, GEOHandler.TW);
 
   GEOHandler.addAfterTemplateLoad(afterConfigTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(addHandlersForTW, GEOHandler.TW);
@@ -708,6 +777,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
   GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
+ GEOHandler.addAfterTemplateLoad(addCoverageFieldsValidator, GEOHandler.TW);
+ GEOHandler.registerValidator(checkCustomerNameForKYND, GEOHandler.TW, null, true);
   // skip byte checks
   // FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4',
   // 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',
