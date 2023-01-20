@@ -1770,31 +1770,59 @@ function onInacTypeChange() {
 }
 
 var _isicHandler = null;
-
 function onIsicChangeHandler() {
   if (_isicHandler == null) {
-    _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+    _isicHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       onIsicChange();
     });
   }
-
 }
 
 function onIsicChange() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (reqType == 'C' && role == 'REQUESTER') {
-    if ((cmrIssuingCntry == '616' && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'AQSTN' || custSubGrp == 'SOFT' || custSubGrp == 'NRML'))
-        || (cmrIssuingCntry == '834' && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'AQSTN' || custSubGrp == 'SOFT' || custSubGrp == 'XAQST' || custSubGrp == 'XMKTP' || custSubGrp == 'XBLUM'))) {
-      var value = FormManager.getActualValue('isicCd');
+  var value = FormManager.getActualValue('isicCd');
+  var cmrResult = FormManager.getActualValue('findCmrResult');
+  var result = FormManager.getActualValue('findDnbResult');
+
+  if (reqType == 'C' && role == 'REQUESTER' && (cmrIssuingCntry == '744' || cmrIssuingCntry == '834' || cmrIssuingCntry == '616')) {
+    if (cmrResult != '' && cmrResult == 'Accepted') {
+      if (custSubGrp == 'INTER' || custSubGrp == 'PRIV' || custSubGrp == 'XPRIV' || custSubGrp == 'DUMMY' || custSubGrp == 'IGF') {
+        FormManager.setValue('isicCd', value);
+        FormManager.readOnly('isicCd');
+      } else {
+        FormManager.setValue('isicCd', '');
+        FormManager.enable('isicCd');
+      }
+    } else if (result != '' && result == 'Accepted') {
       console.log(value);
-      if (value == '9500') {
-        var res = cmr.showConfirm('setPrivate()', 'Does this customer belong to Consumer or Private Person ?', null, 'setIsic()', {
-          CANCEL : 'No',
-          OK : 'Yes'
-        });
+      var requestId = FormManager.getActualValue('reqId');
+      qParams = {
+        REQ_ID : requestId,
+      };
+      var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+      var oldISIC = result.ret1;
+      if (custSubGrp == '' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX' || custSubGrp == 'ESOSW' || custSubGrp == 'ECSYS' || custSubGrp == 'MKTPC' || custSubGrp == 'NRML' || custSubGrp == 'NRMLC'
+          || custSubGrp == 'CROSS' || custSubGrp == 'SPOFF' || custSubGrp == 'XBLUM' || custSubGrp == 'XAQST' || custSubGrp == 'XMKTP' || custSubGrp == 'BUSPR' || custSubGrp == 'ASLOM' || custSubGrp == 'KYND') {
+        FormManager.setValue('isicCd', oldISIC);
+        FormManager.readOnly('isicCd');
+      } else if (custSubGrp == 'INTER' || custSubGrp == 'PRIV' || custSubGrp == 'XPRIV' || custSubGrp == 'DUMMY' || custSubGrp == 'IGF') {
+        FormManager.setValue('isicCd', value);
+        FormManager.readOnly('isicCd');
+      } else {
+        FormManager.setValue('isicCd', '');
+        FormManager.enable('isicCd');
+      }
+    } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || result == 'No Results' || result == 'Rejected') {
+      if (custSubGrp == 'INTER' || custSubGrp == 'PRIV' || custSubGrp == 'XPRIV' || custSubGrp == 'DUMMY' || custSubGrp == 'IGF') {
+        FormManager.setValue('isicCd', value);
+        FormManager.readOnly('isicCd');
+      } else {
+        FormManager.setValue('isicCd', '');
+        FormManager.enable('isicCd');
       }
     }
   }
@@ -4770,11 +4798,11 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateContractAddrAU, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(validateCustNameForNonContractAddrs, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(validateStreetAddrCont2, [ SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
-      SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ], null, true);
-  // isic validation for Singapore and Australia
-  GEOHandler.addAfterConfig(onIsicChangeHandler, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO]);
-  GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO ]);
-  GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO ]);
+  SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ], null, true);
+  // CREATCMR-7589
+  GEOHandler.addAfterConfig(onIsicChangeHandler, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
+  GEOHandler.addAfterConfig(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
+  GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
 
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForISA, GEOHandler.ISA);
