@@ -2060,7 +2060,7 @@ function updateMRCAseanAnzIsa() {
       FormManager.setValue('mrcCd', '2');
       return;
     }    
-    if(cntry == '818' && (custSubGrp == 'INTER' || custSubGrp == 'DUMMY')) {
+    if(['818', '852'].includes(cntry) && (custSubGrp == 'INTER' || custSubGrp == 'DUMMY')) {
       FormManager.setValue('mrcCd', '2');
       return;
     }   
@@ -2367,7 +2367,7 @@ function setCTCIsuByClusterASEAN() {
     var _cluster = FormManager.getActualValue('apCustClusterId');
     var scenario = FormManager.getActualValue('custGrp');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
-    var issuingCnt3 = ['818', '856'];
+    var issuingCnt3 = ['818', '856', '852'];
 
     var apClientTierValue = [];
     var isuCdValue = [];
@@ -4864,6 +4864,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(displayVatRegistrartionStatus, [ SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(displayVatRegistrartionStatus,  [ SysLoc.SINGAPORE ] );
   GEOHandler.addAfterTemplateLoad(displayVatRegistrartionStatus,   [ SysLoc.SINGAPORE ] );
-  GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES], null, true);
+  GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND], null, true);
   
 });
