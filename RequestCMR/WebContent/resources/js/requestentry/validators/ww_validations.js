@@ -1159,7 +1159,9 @@ function setVatIndFieldsForGrp1AndNordx() {
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');
   }
-  
+  if('T'== FormManager.getActualValue('vatInd') && vat==''){
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');    
+  }
   if ('E' == FormManager.getActualValue('vatInd')) {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
