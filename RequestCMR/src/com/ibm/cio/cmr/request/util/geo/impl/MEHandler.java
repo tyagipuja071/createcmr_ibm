@@ -2204,6 +2204,7 @@ public class MEHandler extends BaseSOFHandler {
 
       TemplateValidation error = new TemplateValidation("Data");
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+        error = new TemplateValidation("Data");
         row = sheet.getRow(rowIndex);
         if (row == null) {
           break; // stop immediately when row is blank
@@ -2249,8 +2250,10 @@ public class MEHandler extends BaseSOFHandler {
             error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
           }
         }
+        if (error.hasErrors()) {
+          validations.add(error);
+        }
       }
-      validations.add(error);
 
       for (String name : countryAddrss) {
         sheet = book.getSheet(name);
