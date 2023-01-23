@@ -985,7 +985,6 @@ public class UKIUtil extends AutomationUtil {
     int zi01count = 0;
     int zp01count = 0;
     int zd01count = 0;
-    String count = "";
     String sql = ExternalizedQuery.getSql("QUERY.GET.COUNT.ADDRTYP");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("RCYAA", cmrIssuingCntry);
@@ -994,10 +993,10 @@ public class UKIUtil extends AutomationUtil {
 
     if (results != null && !results.isEmpty()) {
       Object[] sResult = results.get(0);
-      count = sResult[0].toString();
-      zd01count = Integer.parseInt(count);
+      zi01count = Integer.parseInt(sResult[0].toString());
+      zp01count = Integer.parseInt(sResult[1].toString());
+      zd01count = Integer.parseInt(sResult[2].toString());
     }
-    System.out.println("zd01count = " + zd01count);
 
     return Arrays.asList(zi01count, zp01count, zd01count);
   }
