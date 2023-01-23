@@ -738,7 +738,6 @@ function autoSetFieldsForCustScenariosSSAMX() {
           FormManager.setValue(FormManager.getField('collectorNameNo'), '111111');
         } else if (_cmrCntry == SysLoc.URUGUAY) {
           FormManager.setValue(FormManager.getField('collectorNameNo'), '006800');
-          FormManager.setValue(FormManager.getField('ibmBankNumber'), '04');
         } else if (_cmrCntry == SysLoc.VENEZUELA) {
           FormManager.setValue(FormManager.getField('collectorNameNo'), '000001');
         } else if (_cmrCntry == SysLoc.COSTA_RICA) {
@@ -2837,6 +2836,7 @@ function setIBMBankNumberBasedScenarios(fromAddress, scenario, scenarioChanged) 
     FormManager.limitDropdownValues(FormManager.getField('ibmBankNumber'), valueList);
   } else {
     FormManager.resetDropdownValues(FormManager.getField('ibmBankNumber'));
+    FormManager.removeValidator('ibmBankNumber', Validators.REQUIRED);
   }
 }
 
