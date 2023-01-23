@@ -2408,11 +2408,18 @@ function setCTCIsuByClusterASEAN() {
             FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
             FormManager.setValue('clientTier', 'Z');
             FormManager.setValue('isuCd','21');
-          } else if(custSubGrp.includes('INTER') && issuingCnt3.includes(_cmrIssuingCntry)) {
-            FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
-            FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
-            FormManager.setValue('clientTier', '0');
-            FormManager.setValue('isuCd','60');
+          } else if (issuingCnt3.includes(_cmrIssuingCntry)) {
+            if(custSubGrp.includes('INTER')) {
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
+              FormManager.setValue('clientTier', '0');
+              FormManager.setValue('isuCd','60');
+            } else if(custSubGrp.includes('CROSS')) {
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+              FormManager.setValue('clientTier', 'Z');
+              FormManager.setValue('isuCd','34');
+            }            
           } else {
             FormManager.resetDropdownValues(FormManager.getField('clientTier'));
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
@@ -4681,6 +4688,27 @@ function validateCustnameForKynd() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function restrictClusterData() {
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var restrictedClusters = [];  
+  if (cmrIssuingCntry == '852') {
+    if('ASLOM' == custSubGrp) {
+      restrictedClusters = ['01277','01273','09055'];
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), restrictedClusters);
+    } else if ('NRML' == custSubGrp || 'AQSTN' == custSubGrp) {
+      restrictedClusters = ['01277','01273'];
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), restrictedClusters);
+    }
+  }  
+  if (cmrIssuingCntry == '818') {
+    if('ASLOM' == custSubGrp) {
+      restrictedClusters = ['01231','09054','08044'];
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), restrictedClusters);
+    }     
+  }    
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4865,5 +4893,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(displayVatRegistrartionStatus,  [ SysLoc.SINGAPORE ] );
   GEOHandler.addAfterTemplateLoad(displayVatRegistrartionStatus,   [ SysLoc.SINGAPORE ] );
   GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND], null, true);
-  
+  GEOHandler.addAfterTemplateLoad(restrictClusterData, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND], null, true);  
 });
