@@ -2299,7 +2299,7 @@ function updateMRCAseanAnzIsa() {
       FormManager.setValue('mrcCd', '2');
       return;
     }    
-    if(cntry == '818' && (custSubGrp == 'INTER' || custSubGrp == 'DUMMY')) {
+    if(['818', '852'].includes(cntry) && (custSubGrp == 'INTER' || custSubGrp == 'DUMMY')) {
       FormManager.setValue('mrcCd', '2');
       return;
     }   
@@ -2668,7 +2668,7 @@ function setCTCIsuByClusterASEAN() {
     var _cluster = FormManager.getActualValue('apCustClusterId');
     var scenario = FormManager.getActualValue('custGrp');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
-    var issuingCnt3 = ['818', '856'];
+    var issuingCnt3 = ['818', '856', '852'];
 
     var apClientTierValue = [];
     var isuCdValue = [];
@@ -2709,11 +2709,18 @@ function setCTCIsuByClusterASEAN() {
             FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
             FormManager.setValue('clientTier', 'Z');
             FormManager.setValue('isuCd','21');
-          } else if(custSubGrp.includes('INTER') && issuingCnt3.includes(_cmrIssuingCntry)) {
-            FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
-            FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
-            FormManager.setValue('clientTier', '0');
-            FormManager.setValue('isuCd','60');
+          } else if (issuingCnt3.includes(_cmrIssuingCntry)) {
+            if(custSubGrp.includes('INTER')) {
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
+              FormManager.setValue('clientTier', '0');
+              FormManager.setValue('isuCd','60');
+            } else if(custSubGrp.includes('CROSS')) {
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+              FormManager.setValue('clientTier', 'Z');
+              FormManager.setValue('isuCd','34');
+            }            
           } else {
             FormManager.resetDropdownValues(FormManager.getField('clientTier'));
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
@@ -6417,5 +6424,5 @@ dojo.addOnLoad(function() {
   // CREATCMR-7883
   GEOHandler.registerValidator(checkCustomerNameForKYND, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA], null, true);
   
-  GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES], null, true);
+  GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND], null, true);
 });
