@@ -381,6 +381,7 @@ public class CmrConstants {
   public static final String APPROVAL_PENDING_REMINDER = "PREM";
   public static final String APPROVAL_PENDING_CANCELLATION = "PCAN";
   public static final String APPROVAL_CANCELLED = "CAN";
+  public static final String APPROVAL_CONDITIONALLY_CANCELLED = "CCAN";
   public static final String APPROVAL_APPROVED = "APR";
   public static final String APPROVAL_REJECTED = "REJ";
   public static final String APPROVAL_CONDITIONALLY_APPROVED = "CAPR";
@@ -394,6 +395,7 @@ public class CmrConstants {
   public static final String APPROVAL_RESULT_COND_APPROVED = "Cond. Approved";
   public static final String APPROVAL_RESULT_REJECTED = "Rejected";
   public static final String APPROVAL_RESULT_CANCELLED = "Cancelled";
+  public static final String APPROVAL_RESULT_COND_CANCELLED = "Cond. Cancelled";
 
   // Fixed Approval type for Mass Change requests
   public static final int MASS_REQUEST_APPROVAL_TYPE_ID = 13;
