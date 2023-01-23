@@ -105,6 +105,12 @@
 					<width>25</width>
 					<length>6</length>
 				</column>
+				<column>
+					<label>Enterprise Number</label>
+					<dbColumn>ENTERPRISE</dbColumn>
+					<width>15</width>
+					<length>6</length>
+				</column>
 			</columns>
 		</tab>
 
