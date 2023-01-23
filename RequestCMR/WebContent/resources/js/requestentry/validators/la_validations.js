@@ -2836,6 +2836,7 @@ function setIBMBankNumberBasedScenarios(fromAddress, scenario, scenarioChanged) 
     FormManager.limitDropdownValues(FormManager.getField('ibmBankNumber'), valueList);
   } else {
     FormManager.resetDropdownValues(FormManager.getField('ibmBankNumber'));
+    FormManager.removeValidator('ibmBankNumber', Validators.REQUIRED);
   }
 }
 
