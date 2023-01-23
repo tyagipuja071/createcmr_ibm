@@ -6618,7 +6618,19 @@ function setVATOnIdentClientChangeIT() {
   var landCntry = FormManager.getActualValue('landCntry');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var checkImportIndc = getImportedIndcForItaly();
-
+  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var cntryCdParams = {
+    REQ_ID : _zs01ReqId,
+    ADDR_TYPE : 'ZI01',
+  };
+  var cntryCdResult = cmr.query('ADDR.GET.LANDEDCNTRY.BY_REQID_ADDRTYPE', cntryCdParams);
+  if (cntryCdResult.ret1 != undefined) {
+    countyCd = cntryCdResult.ret1;
+  }
+  var isCrossBorder = false;
+  if (countyCd != 'IT') {
+    isCrossBorder = true;
+  }
   if (ident != '') {
     if (ident == 'B') {
       FormManager.resetValidations('vat');
@@ -6637,12 +6649,15 @@ function setVATOnIdentClientChangeIT() {
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       }
     }
-    if (custGrp == 'CROSS') {
+    if (isCrossBorder) {
       if (ident == 'N') {
-        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      } else {
-        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.resetValidations('taxCd1');
+        FormManager.readOnly('taxCd1');
+        FormManager.enable('vat');
+      } else if (ident == 'Y') {
+        FormManager.resetValidations('taxCd1');
+        FormManager.setValue('taxCd1', '');
+        FormManager.readOnly('taxCd1');
       }
     } else if (ident == 'X' || ident == 'N' || ident == 'Y') {
       FormManager.readOnly('vat');
