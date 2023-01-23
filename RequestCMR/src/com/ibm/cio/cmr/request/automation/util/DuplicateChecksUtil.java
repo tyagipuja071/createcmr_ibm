@@ -150,10 +150,15 @@ public class DuplicateChecksUtil {
       scenariosList.add(UKIUtil.SCENARIO_INTERNAL);
       scenariosList.add(UKIUtil.SCENARIO_INTERNAL_FSL);
       scenariosList.add(UKIUtil.SCENARIO_IGF);
-
+      scenariosList.add(UKIUtil.SCENARIO_PRIVATE_PERSON);
       if (scenariosList.contains(data.getCustSubGrp())) {
         request.setCustClass(data.getCustClass());
       }
+      
+      if(UKIUtil.SCENARIO_PRIVATE_PERSON.equalsIgnoreCase(data.getCustSubGrp())){
+    	 request.setStreetLine1(addr.getAddrTxt()); 
+      }
+      break;
     case SystemLocation.NETHERLANDS:
       if (NetherlandsUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp())) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
