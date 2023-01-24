@@ -483,7 +483,7 @@ public class SpainUtil extends AutomationUtil {
     int zi01count = 0;
     int zp01count = 0;
     int zd01count = 0;
-    List<Integer> addrCount = getAddressCount(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
+    List<Integer> addrCount = getAddressCount(entityManager, SystemLocation.SPAIN, data.getCmrIssuingCntry(), data.getCmrNo());
     zi01count = addrCount.get(0);
     zp01count = addrCount.get(1);
     zd01count = addrCount.get(2);
@@ -807,12 +807,13 @@ public class SpainUtil extends AutomationUtil {
     return calculatedFields;
   }
 
-  public List<Integer> getAddressCount(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) {
+  public List<Integer> getAddressCount(EntityManager entityManager, String cmrIssuingCntry, String realCntry, String cmrNo) {
     int zi01count = 0;
     int zp01count = 0;
     int zd01count = 0;
     String sql = ExternalizedQuery.getSql("QUERY.GET.COUNT.ADDRTYP");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REALCTY", realCntry);
     query.setParameter("RCYAA", cmrIssuingCntry);
     query.setParameter("RCUXA", cmrNo);
     List<Object[]> results = query.getResults();
