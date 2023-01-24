@@ -1826,18 +1826,43 @@ public class ItalyHandler extends BaseSOFHandler {
               "Company [Fiscal code, Vat#, Ident. Cliente, Enterprise number] | Billing [Tax Code/ Code IVA, Collection Code]",
               "Company level fields and Billing level fields can not be filled at the same time");
         }
+        // if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+        // if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(clientTier))
+        // || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isu)))
+        // {
+        // LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU
+        // and CTC value needs to be filled..");
+        // error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both
+        // ISU and CTC value.<br>");
+        // } else if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
+        // if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+        // LOG.trace("The row " + (row.getRowNum() + 1)
+        // + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU
+        // code. Please fix and upload the template again.");
+        // error.addError((row.getRowNum() + 1), "Client Tier",
+        // ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU
+        // code. Please fix and upload the template again.<br>");
+        // }
+        // } else if ((!StringUtils.isBlank(isu) && !"34".equals(isu)) &&
+        // !"@".equalsIgnoreCase(clientTier)) {
+        // LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+        // error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value
+        // should always be @ for IsuCd Value :" + isu + ".<br>");
+        // }
+        // }
+
+        // CREATCMR-7861 Coverage rules
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
           if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(clientTier)) || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isu))) {
             LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
             error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
-          } else if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
-            if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
-              LOG.trace("The row " + (row.getRowNum() + 1)
-                  + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-              error.addError((row.getRowNum() + 1), "Client Tier",
-                  ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
-            }
-          } else if ((!StringUtils.isBlank(isu) && !"34".equals(isu)) && !"@".equalsIgnoreCase(clientTier)) {
+          } else if (!StringUtils.isBlank(isu) && !StringUtils.isBlank(clientTier)
+              && Arrays.asList("34Q", "32T", "34Y").contains(isu.concat(clientTier))) {
+            LOG.trace("The row " + (row.getRowNum() + 1)
+                + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+            error.addError((row.getRowNum() + 1), "Client Tier",
+                ":Note that ISU & Client Tier combination should be '36Y' or '34Q' or '32T'. Please fix and upload the template again.<br>");
+          } else if (!StringUtils.isBlank(isu) && !Arrays.asList("34", "32", "36").contains(isu) && !"@".equalsIgnoreCase(clientTier)) {
             LOG.trace("Client Tier should be '@' for the selected ISU Code.");
             error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu + ".<br>");
           }
