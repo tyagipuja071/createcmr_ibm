@@ -3088,8 +3088,9 @@ function lockIBMTabForFR() {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
   }// CMR-234 -end
+
   var custSubGrpArray = [ 'INTER', 'INTSO', 'IBMEM', 'BUSPR', 'XBUSP' ];
-  if (role == 'PROCESSOR' && ((reqType == 'C' && !custSubGrpArray.includes(custSubGrp)) || reqType == 'U')) {
+  if (role == 'PROCESSOR' && ((reqType == 'C' && !custSubGrpArray.includes(custSubType)) || reqType == 'U')) {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
   }
