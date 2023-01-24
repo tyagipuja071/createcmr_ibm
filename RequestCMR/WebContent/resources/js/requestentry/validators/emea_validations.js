@@ -5030,7 +5030,7 @@ function lockCmrOwner() {
 
 function set34QYZlogicOnISUCtcChange() {
 	var checkImportIndc = getImportedIndcForItaly();
-	var role = FormManager.getActualValue('userRole').uppercase();
+	var role = FormManager.getActualValue('userRole').toUpperCase();
 	var reqType = FormManager.getActualValue('reqType');
 	if (_isScenarioChanged && reqType == 'C') {
 		var custSubType = FormManager.getActualValue('custSubGrp');
@@ -5050,7 +5050,7 @@ function set34QYZlogicOnISUCtcChange() {
 			FormManager.enable('salesBusOffCd');
 			FormManager.setValue('salesBusOffCd', '99');
 			FormManager.clearValue('collectionCd');
-		} else if (commSubTypes.inlcudes(custSubType)) {
+		} else if (commSubTypes.includes(custSubType)) {
 			FormManager.enable('isuCd');
 			FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['32', '34', '36', '04', '19', '28', '14', '4A', '3T', '5K']);
 			FormManager.setValue('isuCd', '34');
@@ -5058,7 +5058,7 @@ function set34QYZlogicOnISUCtcChange() {
 			FormManager.setValue('clientTier', 'Q');
 			FormManager.readOnly('repTeamMemberNo');
 		    FormManager.setValue('repTeamMemberNo', '012345');
-		} else if (ibmEmpCustSubTypes.inlcudes(custSubType)) {
+		} else if (ibmEmpCustSubTypes.includes(custSubType)) {
 			FormManager.readOnly('isuCd');
 			FormManager.setValue('isuCd', '21');
 			FormManager.readOnly('clientTier');
@@ -7877,123 +7877,122 @@ function setPostCdItalyVA(cntry, addressMode, saving, finalSave) {
 }
 
 function validateSBOForIT() {
-  FormManager.addFormValidator(
-      (function() {
-        return {
-          validate : function() {
-            var isu = FormManager.getActualValue('isuCd');
-            var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
-            var lbl1 = FormManager.getLabel('SalesBusOff');
-            var _custType = FormManager.getActualValue('custSubGrp');
-            if (isu != undefined && isu == 21 && _custType != undefined && (_custType == 'INTER' || _custType == 'CROIN' || _custType == 'INTSM' || _custType == 'INTVA') && sbo != undefined
-                && sbo != '') {
-              if (sbo != '1B' && sbo != '1G' && sbo != '1E' && sbo != '11' && sbo != '12' && sbo != '13' && sbo != '14' && sbo != '99') {
-                return new ValidationResult({
-                  id : 'salesBusOffCd',
-                  type : 'text',
-                  name : 'salesBusOffCd'
-                }, false, 'Please enter one of the valid values for ' + lbl1 + ' as listed in the infobubble.');
-              }
-            }
-            return new ValidationResult(null, true);
-          }
-        };
-      })(), 'MAIN_IBM_TAB', 'frmCMR');
+	FormManager.addFormValidator(
+		(function() {
+			return {
+				validate: function() {
+					var isu = FormManager.getActualValue('isuCd');
+					var ctc = FormManager.getActualValue('clienTier');
+					var isuCTC = isu.concat(ctc);
+					var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
+					var salRep = FormManager.getActualValue('repTeamMemberNo');
+					var custSubGrp = FormManager.getActualValue('custSubGrp');
+					var reqType = FormManager.getActualValue('reqType');
+					var cntry = FormManager.getActualValue('cmrIssuingCntry');
+					if (custSubGrp == null || custSubGrp == '' || custSubGrp == undefined || reqType != 'C') {
+						return new ValidationResult(null, true);
 
-  // validate Sbo length for ITALY
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
-        var lbl1 = FormManager.getLabel('SalesBusOff');
-        if (sbo.length != 2 && sbo != undefined && sbo != '') {
-          return new ValidationResult({
-            id : 'salesBusOffCd',
-            type : 'text',
-            name : 'salesBusOffCd'
-          }, false, 'The ' + lbl1 + ' should be two characters long');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+					}
 
-  // validate Sbo Characters and numbers only
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
-        var lbl1 = FormManager.getLabel('SalesBusOff');
-        if (sbo != undefined && sbo != '' && !sbo.match("^[0-9a-zA-Z]*$")) {
-          return new ValidationResult({
-            id : 'salesBusOffCd',
-            type : 'text',
-            name : 'salesBusOffCd'
-          }, false, 'The ' + lbl1 + ' should consist of digits and alphabets only');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+					var qParams = {
+						_qall: 'Y',
+						CNTRY: cntry,
+						SBO: '%' + sbo + '%',
+						SALES_REP: salRep,
+						ISU: '%' + isuCTC + '%'
+					};
+					var results = cmr.query('GET.SR.SBO.BYISUCTC', qParams);
+					var displayInvalidMsg = true;
+
+					if (results != null && results.length > 0) {
+						displayInvalidMsg = false;
+					}
+
+					if (displayInvalidMsg) {
+						return new ValidationResult({
+							id: 'salesBusOffCd',
+							type: 'text',
+							name: 'salesBusOffCd'
+						}, false, 'Please enter the valid combination of ISU , ClientTier ,SBO and Sales Rep.');
+					}
+					return new ValidationResult(null, true);
+				}
+			};
+		})(), 'MAIN_IBM_TAB', 'frmCMR');
+
+	// validate Sbo length for ITALY
+	FormManager.addFormValidator((function() {
+		return {
+			validate: function() {
+				var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
+				var lbl1 = FormManager.getLabel('SalesBusOff');
+				if (sbo.length != 2 && sbo != undefined && sbo != '') {
+					return new ValidationResult({
+						id: 'salesBusOffCd',
+						type: 'text',
+						name: 'salesBusOffCd'
+					}, false, 'The ' + lbl1 + ' should be two characters long');
+				}
+				return new ValidationResult(null, true);
+			}
+		};
+	})(), 'MAIN_IBM_TAB', 'frmCMR');
+
+	// validate Sbo Characters and numbers only
+	FormManager.addFormValidator((function() {
+		return {
+			validate: function() {
+				var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
+				var lbl1 = FormManager.getLabel('SalesBusOff');
+				if (sbo != undefined && sbo != '' && !sbo.match("^[0-9a-zA-Z]*$")) {
+					return new ValidationResult({
+						id: 'salesBusOffCd',
+						type: 'text',
+						name: 'salesBusOffCd'
+					}, false, 'The ' + lbl1 + ' should consist of digits and alphabets only');
+				}
+				return new ValidationResult(null, true);
+			}
+		};
+	})(), 'MAIN_IBM_TAB', 'frmCMR');
 
 }
 
 // CREATCMR - 985 validate Sales Rep
 function validateSalesRepForIT() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
-        var salesRep = FormManager.getActualValue('repTeamMemberNo');
-        var _custType = FormManager.getActualValue('custSubGrp');
-        if (_custType == 'INTER' || _custType == 'CROIN') {
-          if (salesRep != '0B1BA0' && salesRep != '0B1GA0' && salesRep != '0B1EA0' && salesRep != '0B11A0' && salesRep != '0B12A0' && salesRep != '0B13A0' && salesRep != '0B14A0'
-              && salesRep != '012345') {
-            return new ValidationResult({
-              id : 'repTeamMemberNo',
-              type : 'text',
-              name : 'repTeamMemberNo'
-            }, false, 'The Sales Rep value for Internal scenario is invalid.');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+	// validate SalesRep for ITALY
+	FormManager.addFormValidator((function() {
+		return {
+			validate: function() {
+				var salesRep = FormManager.getActualValue('repTeamMemberNo');
+				if (salesRep.length != 6 && salesRep != undefined && salesRep != '') {
+					return new ValidationResult({
+						id: 'repTeamMemberNo',
+						type: 'text',
+						name: 'repTeamMemberNo'
+					}, false, 'The Sales Rep should be six characters long');
+				}
+				return new ValidationResult(null, true);
+			}
+		};
+	})(), 'MAIN_IBM_TAB', 'frmCMR');
 
-  // validate SalesRep for ITALY
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var salesRep = FormManager.getActualValue('repTeamMemberNo');
-        if (salesRep.length != 6 && salesRep != undefined && salesRep != '') {
-          return new ValidationResult({
-            id : 'repTeamMemberNo',
-            type : 'text',
-            name : 'repTeamMemberNo'
-          }, false, 'The Sales Rep should be six characters long');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-
-  // validate SalesRep Characters and numbers only
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var salesRep = FormManager.getActualValue('repTeamMemberNo');
-        if (salesRep != undefined && salesRep != '' && !salesRep.match("^[0-9a-zA-Z]*$")) {
-          return new ValidationResult({
-            id : 'repTeamMemberNo',
-            type : 'text',
-            name : 'repTeamMemberNo'
-          }, false, 'The Sales Rep should consist of digits and alphabets only');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+	// validate SalesRep Characters and numbers only
+	FormManager.addFormValidator((function() {
+		return {
+			validate: function() {
+				var salesRep = FormManager.getActualValue('repTeamMemberNo');
+				if (salesRep != undefined && salesRep != '' && !salesRep.match("^[0-9a-zA-Z]*$")) {
+					return new ValidationResult({
+						id: 'repTeamMemberNo',
+						type: 'text',
+						name: 'repTeamMemberNo'
+					}, false, 'The Sales Rep should consist of digits and alphabets only');
+				}
+				return new ValidationResult(null, true);
+			}
+		};
+	})(), 'MAIN_IBM_TAB', 'frmCMR');
 
 }
 
