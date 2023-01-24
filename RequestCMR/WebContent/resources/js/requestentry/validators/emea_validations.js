@@ -5216,7 +5216,7 @@ function setSBOSalesRepFor34QYZ() {
 	} else {
 		postCodeOrg = '';
 	}
-	var postCode = (postCode.startsWith("200") || postCode.startsWith("201")) ? postCodeOrg.substring(0, 3) : postCodeOrg.substring(0, 2);
+	var postCode = (postCodeOrg.startsWith("200") || postCodeOrg.startsWith("201")) ? postCodeOrg.substring(0, 3) : postCodeOrg.substring(0, 2);
 
 	var commSubTypes = ['COMME', 'COMSM', 'COMVA', 'CROCM', 'GOVST', 'LOCEN', 'GOVSM', 'LOCSM', 'GOVVA', 'LOCVA', 'CROGO', 'NGOIT', 'NGOVA', 'NGOSM', '3PAIT', 'UNIVA',
 		'UNIVE', 'UNISM', '3PASM', '3PAVA', 'CRO3P', 'CROUN', 'CROLC'];
@@ -6449,10 +6449,10 @@ function setVATOnIdentClientChangeIT() {
 	};
 	var cntryCdResult = cmr.query('ADDR.GET.LANDEDCNTRY.BY_REQID_ADDRTYPE', cntryCdParams);
 	if (cntryCdResult.ret1 != undefined) {
-		countyCd = cntryCdResult.ret1;
+		landCntry = cntryCdResult.ret1;
 	}
 	var isCrossBorder = false;
-	if (countyCd != 'IT') {
+	if (landCntry != 'IT') {
 		isCrossBorder = true;
 	}
 	if (ident != '') {
