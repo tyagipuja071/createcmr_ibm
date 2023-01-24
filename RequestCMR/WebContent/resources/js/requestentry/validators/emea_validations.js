@@ -883,6 +883,16 @@ function setUKIAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, 
       });
     }
 
+    if (_cityUKHandler && _cityUKHandler[0]) {
+      _cityUKHandler[0].onChange();
+    }
+
+    if (_postalCdUKHandler == null) {
+      _postalCdUKHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
+        autoSetSpecialTaxCdByScenario();
+      });
+    }
+
     if (_postalCdUKHandler && _postalCdUKHandler[0]) {
       _postalCdUKHandler[0].onChange();
     }
