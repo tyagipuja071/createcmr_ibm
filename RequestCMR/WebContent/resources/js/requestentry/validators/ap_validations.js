@@ -6352,7 +6352,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsicChangeHandler, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
-  
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForISA, GEOHandler.ISA);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
