@@ -268,6 +268,7 @@ var landedCntryMapping = {
 }
 var isuCovHandler = false;
 var ctcCovHandler = false;
+var _custSubTypeHandler = null;
 function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -1672,9 +1673,6 @@ function setClientTierValues(isuCd) {
  * FormManager.setValue('dupClientTierCd', clientTiers[0]); } } } } }
  */
 
-// CreateCMR-811 coverage update for CEE
-var changeFlag = 'N';
-
 function setISUCTCValuesForCEE(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1693,15 +1691,8 @@ function setISUCTCValuesForCEE(isuCd) {
       || FormManager.getActualValue('custSubGrp') == 'METP' || FormManager.getActualValue('custSubGrp') == 'RSXCO' || FormManager.getActualValue('custSubGrp') == 'RSXPC'
       || FormManager.getActualValue('custSubGrp') == 'RSXTP' || FormManager.getActualValue('custSubGrp') == 'RSCOM' || FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager
       .getActualValue('custSubGrp') == 'RSTP')) {
-    // CREATCMR-4293
-    if (changeFlag == 'N') {
-      FormManager.setValue('isuCd', _pagemodel.isuCd == null ? '34' : _pagemodel.isuCd);
-      FormManager.setValue('clientTier', _pagemodel.clientTier == null ? 'Q' : _pagemodel.clientTier);
-      changeFlag = 'Y';
-    } else {
-      FormManager.setValue('isuCd', '34');
-      FormManager.setValue('clientTier', 'Q');
-    }
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
   }
   if (FormManager.getActualValue('custSubGrp') == 'MEINT') {
     FormManager.setValue('isuCd', '21');
@@ -2317,7 +2308,9 @@ function afterConfigForRussia() {
     lockCompanyForCEE();
     setSBOValues();
   });
-
+  dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setSBOValues();
+  });
   dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
     setSBOValues();
   });
@@ -5192,6 +5185,14 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addHandlerForCustSubTypeCEE() {
+  if (_custSubTypeHandler == null) {
+    _custSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      setISUCTCValuesForCEE(value);
+    });
+  }
+}
+
 // CREATCMR-6378
 function retainVatValueAT() {
   var vat = FormManager.getActualValue('vat');
@@ -5416,13 +5417,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
-  // GEOHandler.addAfterConfig(setISUCTCValuesForCEE, GEOHandler.CEE);//
-  GEOHandler.addAfterTemplateLoad(setISUCTCValuesForCEE, GEOHandler.CEE); // CreateCMR-811
-  // GEOHandler.addAfterConfig(setCompanyNoForCEE, GEOHandler.CEE); //
-  // CreateCMR-811
-  // GEOHandler.addAfterTemplateLoad(setCompanyNoForCEE, GEOHandler.CEE); //
-  // CreateCMR-811
-  // CMR-4606 DupCMR exist
   GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, [ SysLoc.RUSSIA ], null, true);
   GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
   GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
@@ -5484,5 +5478,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(togglePPSCeidCEE, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(disableFieldsIBMEm, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setClassificationCodeCEE, GEOHandler.CEMEA);
+  GEOHandler.addAfterConfig(addHandlerForCustSubTypeCEE, GEOHandler.CEE);
 
 });
