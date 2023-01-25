@@ -56,7 +56,7 @@
 							searchAttr="name" style="display: block;" maxHeight="200"
 							required="false" path="searchCriteria" placeHolder="Select Search Type">
 						</form:select>
-          <cmr:label fieldId="sourceName">Source Name: 
+          <cmr:label fieldId="sourceName">Keyword: 
             <cmr:info text="Enter Source Name:"></cmr:info>
           </cmr:label>
           <input id="sourceName" name="sourceName" dojoType="dijit.form.TextBox" />
