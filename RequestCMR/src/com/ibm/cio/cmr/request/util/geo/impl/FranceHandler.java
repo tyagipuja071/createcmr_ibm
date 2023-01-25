@@ -1405,36 +1405,44 @@ public class FranceHandler extends GEOHandler {
               currCell = (XSSFCell) row.getCell(6);
               ctc = validateColValFromCell(currCell);
 
-              if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
+              if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
                 TemplateValidation error = new TemplateValidation(name);
-                LOG.trace("The row " + (row.getRowNum() + 1)
-                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Client Tier",
-                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
                 validations.add(error);
-              } else if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
-                if ((isuCd.startsWith("5K") || isuCd.startsWith("21") || isuCd.startsWith("8B")) && !ctc.equalsIgnoreCase("@")) {
+              } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+                if (StringUtils.isBlank(ctc) || !"Q".contains(ctc)) {
                   TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
-                  validations.add(error);
-                } else if (isuCd.startsWith("34")) {
-                  if (StringUtils.isBlank(ctc) || !"QY".contains(ctc)) {
-                    TemplateValidation error = new TemplateValidation(name);
-                    LOG.trace("The row " + (row.getRowNum() + 1)
-                        + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), "Client Tier",
-                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
-                    validations.add(error);
-                  }
-                } else if (!"@QY".contains(ctc)) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+                  LOG.trace("The row " + rowIndex
+                      + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError(rowIndex, "Client Tier",
+                      ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
+              } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+                if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + rowIndex
+                      + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError(rowIndex, "Client Tier",
+                      ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+                if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + rowIndex
+                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError(rowIndex, "Client Tier",
+                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
+                  && !"@".equalsIgnoreCase(ctc)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
+                validations.add(error);
               }
 
               // String vat = "";// 12
