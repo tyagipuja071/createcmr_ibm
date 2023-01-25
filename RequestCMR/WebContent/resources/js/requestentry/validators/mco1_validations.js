@@ -1994,7 +1994,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\'\'.');
+      }, false, 'Client Tier can only accept \'T\'\'.');
     }
   } else if (isuCode == '36') {
     if (clientTierCode == '') {
