@@ -6345,91 +6345,123 @@ function setExpediteReasonOnChange() {
 	});
 }
 
-function validateVATFiscalLengthOnIdentIT() {
-	FormManager.addFormValidator((function() {
-		return {
-			validate: function() {
-				var requestType = FormManager.getActualValue('reqType');
-				var role = FormManager.getActualValue('userRole').toUpperCase();
-				if (requestType != 'C') {
-					return new ValidationResult(null, true);
-				}
-				var ident = FormManager.getActualValue('identClient');
-				var fiscal = FormManager.getActualValue('taxCd1');
-				var lbl1 = FormManager.getLabel('LocalTax1');
-				var custSubGrp = FormManager.getActualValue('custSubGrp');
+function validateFiscalLengthOnIdentIT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var requestType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        if (requestType != 'C') {
+          return new ValidationResult(null, true);
+        }
+        var ident = FormManager.getActualValue('identClient');
+        var fiscal = FormManager.getActualValue('taxCd1');
+        var lbl1 = FormManager.getLabel('LocalTax1');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-				if (ident == 'A' && fiscal != undefined && fiscal != '' && (fiscal.length != 11 || !fiscal.match("^[0-9]*$")) && (role == 'PROCESSOR' || (role == 'REQUESTER' && custSubGrp == 'BUSPR'))) {
-					return new ValidationResult({
-						id: 'taxCd1',
-						type: 'text',
-						name: 'taxCd1'
-					}, false, 'For Ident Client A ' + lbl1 + ' must be of 11 digits only');
-				}
-				if (ident == 'B' && fiscal != undefined && fiscal != '' && (fiscal.length != 11 || !fiscal.match("^[0-9]*$"))) {
-					return new ValidationResult({
-						id: 'taxCd1',
-						type: 'text',
-						name: 'taxCd1'
-					}, false, 'For Ident Client B ' + lbl1 + ' must be of 11 digits only');
-				}
-				if (ident == 'C' && fiscal != undefined && fiscal != '' && (fiscal.length != 11 || !fiscal.match("^[0-9]*$"))) {
-					return new ValidationResult({
-						id: 'taxCd1',
-						type: 'text',
-						name: 'taxCd1'
-					}, false, 'For Ident Client C ' + lbl1 + ' must be of 11 digits only');
-				}
-				if (ident == 'D' && fiscal != undefined && fiscal != '' && (fiscal.length != 16 || !fiscal.match("^[0-9a-zA-Z]*$")) && role == 'PROCESSOR') {
-					return new ValidationResult({
-						id: 'taxCd1',
-						type: 'text',
-						name: 'taxCd1'
-					}, false, 'For Ident Client D ' + lbl1 + ' must be of 16 alphanumerics only');
-				}
-				if (ident == 'X' && fiscal != undefined && fiscal != '' && fiscal.length != 16) {
-					return new ValidationResult({
-						id: 'taxCd1',
-						type: 'text',
-						name: 'taxCd1'
-					}, false, 'For Ident Client X ' + lbl1 + ' must be of 16 chars');
-				}
-				if (ident == 'X' && fiscal != undefined && fiscal != '' && !fiscal.match("^(?=.*[a-zA-Z])(?=.*[0-9])[0-9a-zA-Z]*$")) {
-					return new ValidationResult({
-						id: 'taxCd1',
-						type: 'text',
-						name: 'taxCd1'
-					}, false, 'For Ident Client X ' + lbl1 + ' must contain alphanumeric characters.');
-				}
-				if (ident == 'N' && fiscal != undefined && fiscal != '' && !fiscal.match("^[0-9a-zA-Z]*$") && role == 'PROCESSOR') {
-					return new ValidationResult({
-						id: 'taxCd1',
-						type: 'text',
-						name: 'taxCd1'
-					}, false, 'For Ident Client N ' + lbl1 + ' must contain digits and alphabets only');
-				}
-				// Defect 1593720
-				var cntryRegion = FormManager.getActualValue('countryUse');
-				var tempCntryRegion = '';
-				if (cntryRegion != '' && cntryRegion.length > 3) {
-					tempCntryRegion = cntryRegion.substring(3, 5);
-				}
-				console.log("cntryRegion is>>" + cntryRegion);
-				// if (tempCntryRegion != 'VA') {
-				// console.log("For Not VA CntryRegion>>" + tempCntryRegion);
-				// if (ident == 'N' && fiscal != undefined && (fiscal == '' ||
-				// fiscal.length > 16) && role == 'PROCESSOR') {
-				// return new ValidationResult({
-				// id : 'taxCd1',
-				// type : 'text',
-				// name : 'taxCd1'
-				// }, false, 'For Ident Client N ' + lbl1 + ' must be of 1-16 chars');
-				// }
-				// }
-				return new ValidationResult(null, true);
-			}
-		};
-	})(), 'MAIN_CUST_TAB', 'frmCMR');
+        if (ident == 'A' && fiscal != undefined && fiscal != '' && (fiscal.length != 11 || !fiscal.match("^[0-9]*$")) && (role == 'PROCESSOR' || (role == 'REQUESTER' && custSubGrp == 'BUSPR'))) {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'For Ident Client A ' + lbl1 + ' must be of 11 digits only');
+        }
+        if (ident == 'B' && fiscal != undefined && fiscal != '' && (fiscal.length != 11 || !fiscal.match("^[0-9]*$"))) {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'For Ident Client B ' + lbl1 + ' must be of 11 digits only');
+        }
+        if (ident == 'C' && fiscal != undefined && fiscal != '' && (fiscal.length != 11 || !fiscal.match("^[0-9]*$"))) {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'For Ident Client C ' + lbl1 + ' must be of 11 digits only');
+        }
+        if (ident == 'D' && fiscal != undefined && fiscal != '' && (fiscal.length != 16 || !fiscal.match("^[0-9a-zA-Z]*$")) && role == 'PROCESSOR') {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'For Ident Client D ' + lbl1 + ' must be of 16 alphanumerics only');
+        }
+        if (ident == 'X' && fiscal != undefined && fiscal != '' && fiscal.length != 16) {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'For Ident Client X ' + lbl1 + ' must be of 16 chars');
+        }
+        if (ident == 'X' && fiscal != undefined && fiscal != '' && !fiscal.match("^(?=.*[a-zA-Z])(?=.*[0-9])[0-9a-zA-Z]*$")) {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'For Ident Client X ' + lbl1 + ' must contain alphanumeric characters.');
+        }
+        if (ident == 'N' && fiscal != undefined && fiscal != '' && !fiscal.match("^[0-9a-zA-Z]*$") && role == 'PROCESSOR') {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'For Ident Client N ' + lbl1 + ' must contain digits and alphabets only');
+        }
+        // Defect 1593720
+        var cntryRegion = FormManager.getActualValue('countryUse');
+        var tempCntryRegion = '';
+        if (cntryRegion != '' && cntryRegion.length > 3) {
+          tempCntryRegion = cntryRegion.substring(3, 5);
+        }
+        console.log("cntryRegion is>>" + cntryRegion);
+        // if (tempCntryRegion != 'VA') {
+        // console.log("For Not VA CntryRegion>>" + tempCntryRegion);
+        // if (ident == 'N' && fiscal != undefined && (fiscal == '' ||
+        // fiscal.length > 16) && role == 'PROCESSOR') {
+        // return new ValidationResult({
+        // id : 'taxCd1',
+        // type : 'text',
+        // name : 'taxCd1'
+        // }, false, 'For Ident Client N ' + lbl1 + ' must be of 1-16 chars');
+        // }
+        // }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function validateVATOnIdentIT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var requestType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        if (requestType != 'C') {
+          return new ValidationResult(null, true);
+        }
+        var ident = FormManager.getActualValue('identClient');
+        var lbl1 = FormManager.getLabel('vat');
+        var vat = FormManager.getActualValue('vat');
+
+        if ((ident == 'A' || ident == 'C' || ident == 'D') && vat != undefined && vat != '' && !vat.match("^IT[0-9]{11}$")) {
+          return new ValidationResult({
+            id : 'vat',
+            type : 'text',
+            name : 'vat'
+          }, false, 'For Ident Client ' + ident + ', ' + lbl1 + ' must be IT99999999999.');
+        } else if ((ident == 'B' || ident == 'X' || ident == 'Y') && vat != '') {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'For Ident Client ' + ident + ', ' + lbl1 + ' must be Blank.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 function setVATOnIdentClientChangeIT() {
@@ -8821,18 +8853,18 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
 }
 
 function addAddrFunctionItaly(cntry, addressMode, saving, finalSave) {
-	addNonLatinCharValidator(cntry, addressMode, saving, finalSave);
-	autoSetSBOSRForCompany(cntry, addressMode, saving, finalSave);
-	autoSetAddrFieldsForIT(cntry, addressMode, saving, finalSave);
-	addressLoadHandlerIT(cntry, addressMode, saving, finalSave);
-	addLatinCharValidatorITALY(cntry, addressMode, saving, finalSave);
-	toggleBPRelMemType(cntry, addressMode, saving, finalSave);
-	setStateProvReqdPostalCodeIT(cntry, addressMode, saving, finalSave);
-	allowCopyOfNonExistingAddressOnly(cntry, addressMode, saving, finalSave);
-	setSpecialTaxCodeOnAddressIT(cntry, addressMode, saving, finalSave);
-	setPostCdItalyVA(cntry, addressMode, saving, finalSave);
-	landedCntryLockedIT(cntry, addressMode, saving, finalSave);
-	autoSetValuesOnPostalCodeIT(addressMode);
+  addNonLatinCharValidator(cntry, addressMode, saving, finalSave);
+  autoSetSBOSRForCompany(cntry, addressMode, saving, finalSave);
+  autoSetAddrFieldsForIT(cntry, addressMode, saving, finalSave);
+  addressLoadHandlerIT(cntry, addressMode, saving, finalSave);
+  addLatinCharValidatorITALY(cntry, addressMode, saving, finalSave);
+  toggleBPRelMemType(cntry, addressMode, saving, finalSave);
+  setStateProvReqdPostalCodeIT(cntry, addressMode, saving, finalSave);
+  allowCopyOfNonExistingAddressOnly(cntry, addressMode, saving, finalSave);
+  setSpecialTaxCodeOnAddressIT(cntry, addressMode, saving, finalSave);
+  setPostCdItalyVA(cntry, addressMode, saving, finalSave);
+  landedCntryLockedIT(cntry, addressMode, saving, finalSave);
+//  autoSetValuesOnPostalCodeIT(addressMode);
 }
 
 function ibmFieldsBehaviourInCreateByScratchIT() {
@@ -10270,7 +10302,8 @@ dojo.addOnLoad(function() {
 	/* 1438717 - add DPL match validation for failed dpl checks */
 	GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
 	GEOHandler.registerValidator(checkIfVATFiscalUpdatedIT, [SysLoc.ITALY]);
-	GEOHandler.registerValidator(validateVATFiscalLengthOnIdentIT, [SysLoc.ITALY]);
+	GEOHandler.registerValidator(validateFiscalLengthOnIdentIT, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(validateVATOnIdentIT, [ SysLoc.ITALY ]);
 	GEOHandler.registerValidator(addInstallingAddrValidator, [SysLoc.ITALY], null, true);
 	GEOHandler.registerValidator(validateEnterpriseNumForIT, [SysLoc.ITALY], null, true);
 	GEOHandler.registerValidator(checkIfStateProvBlankForProcIT, [SysLoc.ITALY], GEOHandler.ROLE_PROCESSOR, true);
@@ -10388,4 +10421,5 @@ dojo.addOnLoad(function() {
 
 	// CREATCMR-1727
 	GEOHandler.registerValidator(addCmrNoValidatorForUKI, [SysLoc.UK, SysLoc.IRELAND], null, true);
+
 });
