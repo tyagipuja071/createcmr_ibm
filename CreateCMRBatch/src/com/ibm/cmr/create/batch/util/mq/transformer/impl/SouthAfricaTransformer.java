@@ -356,6 +356,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
     }
 
+    // CREATCMR-7985
+    legacyCust.setEnterpriseNo(!StringUtils.isEmpty(data.getEnterprise()) ? data.getEnterprise() : "");
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
@@ -509,6 +511,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
 
     }
+
+    legacyCust.setEnterpriseNo(!StringUtils.isEmpty(muData.getEnterprise()) ? muData.getEnterprise() : "");
 
   }
 

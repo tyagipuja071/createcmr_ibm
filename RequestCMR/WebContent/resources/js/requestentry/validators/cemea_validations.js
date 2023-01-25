@@ -7,15 +7,6 @@ var WEST_INCL = new Set([ '101', '102', '103', '104', '105', '106', '107', '108'
     '198', '199', '214', '236', '241', '242', '243', '249', '295', '296', '297', '298', '299', '300', '301', '302', '305', '307', '308', '344', '346', '347', '350', '355', '356', '357', '358', '359',
     '360', '361', '362', '363', '364', '367', '368', '369', '385', '386', '390', '392', '394', '396', '397', '398', '400', '403', '404', '410', '414', '420', '421', '422', '423', '424', '425', '430',
     '431', '440', '442', '443', '445', '446', '454', '455', '456', '457', '600', '601', '602', '603', '606', '607', '610', '612', '613' ]);
-var EAST_INCL = new Set([ '166', '167', '168', '169', '426', '428', '429', '432', '433', '450', '452', '453', '460', '461', '462', '614' ]);
-var CEE_INCL = new Set([ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ]);
-var isicCds = new Set([ '6010', '6411', '6421', '7320', '7511', '7512', '7513', '7514', '7521', '7522', '7523', '7530', '7704', '7706', '7707', '7720', '8010', '8021', '8022', '8030', '8090', '8511',
-    '8512', '8519', '8532', '8809', '8813', '8818', '9900' ]);
-var WEST_INCL = new Set([ '101', '102', '103', '104', '105', '106', '107', '108', '109', '111', '115', '117', '119', '121', '123', '124', '125', '127', '129', '130', '135', '140', '141', '142',
-    '143', '144', '150', '152', '153', '155', '156', '160', '161', '162', '163', '170', '173', '180', '183', '184', '185', '186', '187', '188', '190', '191', '192', '193', '194', '195', '196', '197',
-    '198', '199', '214', '236', '241', '242', '243', '249', '295', '296', '297', '298', '299', '300', '301', '302', '305', '307', '308', '344', '346', '347', '350', '355', '356', '357', '358', '359',
-    '360', '361', '362', '363', '364', '367', '368', '369', '385', '386', '390', '392', '394', '396', '397', '398', '400', '403', '404', '410', '414', '420', '421', '422', '423', '424', '425', '430',
-    '431', '440', '442', '443', '445', '446', '454', '455', '457', '600', '601', '602', '603', '606', '607', '610', '612', '613' ]);
 var EAST_INCL = new Set([ '166', '167', '168', '169', '426', '428', '429', '432', '433', '450', '452', '453', '460', '461', '462', '614', '617', '618', '619', '620', '622', '623', '624', '625',
     '626', '627', '628', '629', '630', '632', '633', '634', '636', '640', '641', '644', '646', '647', '648', '649', '650', '652', '654', '655', '656', '658', '659', '660', '664', '665', '667', '669',
     '670', '671', '672', '675', '677', '678', '679', '680', '683', '685', '687', '688', '689', '690', '693' ]);
@@ -277,6 +268,7 @@ var landedCntryMapping = {
 }
 var isuCovHandler = false;
 var ctcCovHandler = false;
+var _custSubTypeHandler = null;
 function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -1681,9 +1673,6 @@ function setClientTierValues(isuCd) {
  * FormManager.setValue('dupClientTierCd', clientTiers[0]); } } } } }
  */
 
-// CreateCMR-811 coverage update for CEE
-var changeFlag = 'N';
-
 function setISUCTCValuesForCEE(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1702,14 +1691,7 @@ function setISUCTCValuesForCEE(isuCd) {
       || FormManager.getActualValue('custSubGrp') == 'METP' || FormManager.getActualValue('custSubGrp') == 'RSXCO' || FormManager.getActualValue('custSubGrp') == 'RSXPC'
       || FormManager.getActualValue('custSubGrp') == 'RSXTP' || FormManager.getActualValue('custSubGrp') == 'RSCOM' || FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager
       .getActualValue('custSubGrp') == 'RSTP')) {
-    // CREATCMR-4293
-    if (changeFlag == 'N') {
-      FormManager.setValue('isuCd', _pagemodel.isuCd == null ? '34' : _pagemodel.isuCd);
-      changeFlag = 'Y';
-    } else {
-      FormManager.setValue('isuCd', '34');
-    }
-    // CREATCMR-4293
+    FormManager.setValue('isuCd', '34');
     FormManager.setValue('clientTier', 'Q');
   }
   if (FormManager.getActualValue('custSubGrp') == 'MEINT') {
@@ -2326,7 +2308,9 @@ function afterConfigForRussia() {
     lockCompanyForCEE();
     setSBOValues();
   });
-
+  dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setSBOValues();
+  });
   dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
     setSBOValues();
   });
@@ -2370,108 +2354,6 @@ function setSBOafterAddrConfig() {
               sbo = "R02";
             } else if (EAST_INCL.has(head3)) {
               sbo = "R03";
-            } else if ('617' == head3) {
-              sbo = "R04";
-            } else if ('618' == head3) {
-              sbo = "R05";
-            } else if ('619' == head3) {
-              sbo = "R06";
-            } else if ('620' == head3) {
-              sbo = "R07";
-            } else if ('622' == head3) {
-              sbo = "R08";
-            } else if ('623' == head3) {
-              sbo = "R09";
-            } else if ('624' == head3) {
-              sbo = "R10";
-            } else if ('625' == head3) {
-              sbo = "R11";
-            } else if ('626' == head3) {
-              sbo = "R12";
-            } else if ('627' == head3) {
-              sbo = "R13";
-            } else if ('628' == head3) {
-              sbo = "R14";
-            } else if ('629' == head3) {
-              sbo = "R15";
-            } else if ('630' == head3) {
-              sbo = "R16";
-            } else if ('632' == head3) {
-              sbo = "R17";
-            } else if ('633' == head3) {
-              sbo = "R18";
-            } else if ('634' == head3) {
-              sbo = "R19";
-            } else if ('636' == head3) {
-              sbo = "R20";
-            } else if ('640' == head3) {
-              sbo = "R21";
-            } else if ('641' == head3) {
-              sbo = "R22";
-            } else if ('644' == head3) {
-              sbo = "R23";
-            } else if ('646' == head3) {
-              sbo = "R24";
-            } else if ('647' == head3) {
-              sbo = "R25";
-            } else if ('648' == head3) {
-              sbo = "R26";
-            } else if ('649' == head3) {
-              sbo = "R27";
-            } else if ('650' == head3) {
-              sbo = "R28";
-            } else if ('652' == head3) {
-              sbo = "R29";
-            } else if ('654' == head3) {
-              sbo = "R30";
-            } else if ('655' == head3) {
-              sbo = "R31";
-            } else if ('656' == head3) {
-              sbo = "R32";
-            } else if ('658' == head3) {
-              sbo = "R33";
-            } else if ('659' == head3) {
-              sbo = "R34";
-            } else if ('660' == head3) {
-              sbo = "R35";
-            } else if ('664' == head3) {
-              sbo = "R36";
-            } else if ('665' == head3) {
-              sbo = "R37";
-            } else if ('667' == head3) {
-              sbo = "R38";
-            } else if ('669' == head3) {
-              sbo = "R39";
-            } else if ('670' == head3) {
-              sbo = "R40";
-            } else if ('671' == head3) {
-              sbo = "R41";
-            } else if ('672' == head3) {
-              sbo = "R42";
-            } else if ('675' == head3) {
-              sbo = "R43";
-            } else if ('677' == head3) {
-              sbo = "R44";
-            } else if ('678' == head3) {
-              sbo = "R45";
-            } else if ('679' == head3) {
-              sbo = "R46";
-            } else if ('680' == head3) {
-              sbo = "R47";
-            } else if ('683' == head3) {
-              sbo = "R48";
-            } else if ('685' == head3) {
-              sbo = "R49";
-            } else if ('687' == head3) {
-              sbo = "R50";
-            } else if ('688' == head3) {
-              sbo = "R51";
-            } else if ('689' == head3) {
-              sbo = "R52";
-            } else if ('690' == head3) {
-              sbo = "R53";
-            } else if ('693' == head3) {
-              sbo = "R54";
             }
             FormManager.setValue('salesBusOffCd', sbo);
           }
@@ -2540,108 +2422,6 @@ function setSBOValues() {
                     sbo = "R02";
                   } else if (EAST_INCL.has(head3)) {
                     sbo = "R03";
-                  } else if ('617' == head3) {
-                    sbo = "R04";
-                  } else if ('618' == head3) {
-                    sbo = "R05";
-                  } else if ('619' == head3) {
-                    sbo = "R06";
-                  } else if ('620' == head3) {
-                    sbo = "R07";
-                  } else if ('622' == head3) {
-                    sbo = "R08";
-                  } else if ('623' == head3) {
-                    sbo = "R09";
-                  } else if ('624' == head3) {
-                    sbo = "R10";
-                  } else if ('625' == head3) {
-                    sbo = "R11";
-                  } else if ('626' == head3) {
-                    sbo = "R12";
-                  } else if ('627' == head3) {
-                    sbo = "R13";
-                  } else if ('628' == head3) {
-                    sbo = "R14";
-                  } else if ('629' == head3) {
-                    sbo = "R15";
-                  } else if ('630' == head3) {
-                    sbo = "R16";
-                  } else if ('632' == head3) {
-                    sbo = "R17";
-                  } else if ('633' == head3) {
-                    sbo = "R18";
-                  } else if ('634' == head3) {
-                    sbo = "R19";
-                  } else if ('636' == head3) {
-                    sbo = "R20";
-                  } else if ('640' == head3) {
-                    sbo = "R21";
-                  } else if ('641' == head3) {
-                    sbo = "R22";
-                  } else if ('644' == head3) {
-                    sbo = "R23";
-                  } else if ('646' == head3) {
-                    sbo = "R24";
-                  } else if ('647' == head3) {
-                    sbo = "R25";
-                  } else if ('648' == head3) {
-                    sbo = "R26";
-                  } else if ('649' == head3) {
-                    sbo = "R27";
-                  } else if ('650' == head3) {
-                    sbo = "R28";
-                  } else if ('652' == head3) {
-                    sbo = "R29";
-                  } else if ('654' == head3) {
-                    sbo = "R30";
-                  } else if ('655' == head3) {
-                    sbo = "R31";
-                  } else if ('656' == head3) {
-                    sbo = "R32";
-                  } else if ('658' == head3) {
-                    sbo = "R33";
-                  } else if ('659' == head3) {
-                    sbo = "R34";
-                  } else if ('660' == head3) {
-                    sbo = "R35";
-                  } else if ('664' == head3) {
-                    sbo = "R36";
-                  } else if ('665' == head3) {
-                    sbo = "R37";
-                  } else if ('667' == head3) {
-                    sbo = "R38";
-                  } else if ('669' == head3) {
-                    sbo = "R39";
-                  } else if ('670' == head3) {
-                    sbo = "R40";
-                  } else if ('671' == head3) {
-                    sbo = "R41";
-                  } else if ('672' == head3) {
-                    sbo = "R42";
-                  } else if ('675' == head3) {
-                    sbo = "R43";
-                  } else if ('677' == head3) {
-                    sbo = "R44";
-                  } else if ('678' == head3) {
-                    sbo = "R45";
-                  } else if ('679' == head3) {
-                    sbo = "R46";
-                  } else if ('680' == head3) {
-                    sbo = "R47";
-                  } else if ('683' == head3) {
-                    sbo = "R48";
-                  } else if ('685' == head3) {
-                    sbo = "R49";
-                  } else if ('687' == head3) {
-                    sbo = "R50";
-                  } else if ('688' == head3) {
-                    sbo = "R51";
-                  } else if ('689' == head3) {
-                    sbo = "R52";
-                  } else if ('690' == head3) {
-                    sbo = "R53";
-                  } else if ('693' == head3) {
-                    sbo = "R54";
                   }
                   FormManager.setValue('salesBusOffCd', sbo);
                 }
@@ -5279,7 +5059,7 @@ function clientTierCodeValidator() {
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' || isuCode != '32' || isuCode != '36') && reqType == 'U')) {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '32' && isuCode != '36') && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -5323,7 +5103,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\'\'.');
+      }, false, 'Client Tier can only accept \'T\'\'.');
     }
   } else if (isuCode == '36') {
     if (clientTierCode == '') {
@@ -5403,6 +5183,14 @@ function clientTierValidator() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function addHandlerForCustSubTypeCEE() {
+  if (_custSubTypeHandler == null) {
+    _custSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      setISUCTCValuesForCEE(value);
+    });
+  }
 }
 
 // CREATCMR-6378
@@ -5629,13 +5417,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
-  GEOHandler.addAfterConfig(setISUCTCValuesForCEE, GEOHandler.CEE);// CreateCMR-811
-  GEOHandler.addAfterTemplateLoad(setISUCTCValuesForCEE, GEOHandler.CEE); // CreateCMR-811
-  // GEOHandler.addAfterConfig(setCompanyNoForCEE, GEOHandler.CEE); //
-  // CreateCMR-811
-  // GEOHandler.addAfterTemplateLoad(setCompanyNoForCEE, GEOHandler.CEE); //
-  // CreateCMR-811
-  // CMR-4606 DupCMR exist
   GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, [ SysLoc.RUSSIA ], null, true);
   GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
   GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
@@ -5697,5 +5478,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(togglePPSCeidCEE, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(disableFieldsIBMEm, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setClassificationCodeCEE, GEOHandler.CEMEA);
+  GEOHandler.addAfterConfig(addHandlerForCustSubTypeCEE, GEOHandler.CEE);
 
 });

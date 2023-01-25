@@ -881,6 +881,7 @@ function autoSetVAT(_custType, custTypeinDB) {
 
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
+
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -8503,7 +8504,7 @@ function setISUCTCBasedScenarios() {
         FormManager.setValue('salesBusOffCd', 'A00');
         FormManager.enable('salesBusOffCd');
       } else {
-        FormManager.setValue('clientTier', '');
+        FormManager.setValue('clientTier', 'Q');
       }
     }
   }
@@ -8976,7 +8977,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'lient Tier can only accept value Q.');
+      }, false, 'Client Tier can only accept value Q.');
     }
   } else if (isuCode == '32') {
     if (clientTierCode == '') {
@@ -8992,7 +8993,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'lient Tier can only accept value T.');
+      }, false, 'Client Tier can only accept value T.');
     }
   } else if (isuCode == '36') {
     if (clientTierCode == '') {
@@ -9008,7 +9009,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'lient Tier can only accept value Y.');
+      }, false, 'Client Tier can only accept value Y.');
     }
   } else {
     if (clientTierCode == '') {
