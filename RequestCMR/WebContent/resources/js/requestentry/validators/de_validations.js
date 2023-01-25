@@ -41,10 +41,6 @@ function afterConfigForDE() {
         setISUValues();
         setSboOnIMS();
       }
-      setSearchTermDE();
-      // else if (FormManager.getActualValue('reqType') == 'U') {
-      // setISUValuesOnUpdate(value);
-      // }
     });
   }
 
@@ -74,8 +70,7 @@ function afterConfigForDE() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
-      setSearchTermDE();
-      lockCtcFieldOnIsu();
+//      lockCtcFieldOnIsu();
     });
   }
 
@@ -119,60 +114,66 @@ function setSboOnIMS(postCd, subIndustryCd, clientTier) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var ims = FormManager.getActualValue('subIndustryCd').substring(0, 1);
   var clientTier = FormManager.getActualValue('clientTier');
+  var isuCd = FormManager.getActualValue('isuCd');
 
   if (custSubGrp == 'BUSPR') {
     return;
   }
 
-  // CREATCMR-5252
-  var custSubGrpArray = [ 'INTAM', 'INTSO', 'INTIN', 'CROSS', 'IBMEM' ];
-
-  if (custSubGrpArray.includes(custSubGrp)) {
-    ims = 'N/A';
+  if (isuCd + clientTier != '34Q') {
+    ims = '';
   }
-  // CREATCMR-5252
 
   var result = cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', {
-    ISU_CD : '34',
-    CLIENT_TIER : 'Q',
+    ISU_CD : isuCd,
+    CLIENT_TIER : clientTier,
     IMS : '%' + ims + '%'
   });
 
   if (result != null && Object.keys(result).length > 0 && result.ret1) {
     FormManager.setValue('searchTerm', result.ret1);
-    if (role == 'REQUESTER') {
-      FormManager.readOnly('searchTerm');
-    }
   } else {
     FormManager.clearValue('searchTerm');
-    FormManager.enable('searchTerm');
   }
-  setSearchTermDE();
 }
 
-function setSearchTermDE() {
-  var subScenario = FormManager.getActualValue('custSubGrp');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || subScenario == 'BUSPR') {
-    return;
-  }
-  var isuCd = FormManager.getActualValue('isuCd');
-  var clientTier = FormManager.getActualValue('clientTier');
-  if (userRole == 'PROCESSOR') {
-    FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'SORTL' ], 'MAIN_IBM_TAB');
-  }
-
-  if (isuCd == '34' && clientTier == 'Y') {
-    FormManager.setValue('searchTerm', 'T0007970');
-  } else if (isuCd == '5K' && clientTier == '') {
-    FormManager.setValue('searchTerm', 'T0009083');
-  } else if (isuCd == '19' && clientTier == '') {
-    FormManager.setValue('searchTerm', 'A0005226');
-  } else if (isuCd == '3T' && clientTier == '') {
-    FormManager.setValue('searchTerm', 'I0000046');
-  } else if (isuCd == '4F' && clientTier == '') {
-    FormManager.setValue('searchTerm', 'I0000045');
-  }
-
+function validateSBOValuesForIsuCtc() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var isuCd = FormManager.getActualValue('isuCd');
+        var sbo = FormManager.getActualValue('searchTerm');
+        var validSboList = [];
+        var qParams = null;
+        
+        if (isuCd != '') {
+          var results = null;
+          if (isuCd + clientTier != '34Q') {
+            qParams = {
+              _qall : 'Y',
+              ISU_CD : isuCd,
+              CLIENT_TIER : clientTier,
+              IMS : '%'
+            };
+            results = cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', qParams);
+          }
+        }
+        if (results == null || results.length == 0) {
+          return new ValidationResult(null, true);
+        } else {
+          for (let i=0; i<results.length; i++) {
+            validSboList.push(results[i].ret1);
+          }
+          if (!validSboList.includes(sbo)) {
+            return new ValidationResult(null, false, 
+                'The SBO provided is invalid for the ISU-CTC combination.');
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function lockCtcFieldOnIsu() {
@@ -891,6 +892,13 @@ function lockIBMTabForDE() {
     }
     FormManager.readOnly('custClass');
   }
+  if (reqType == 'C' && role == 'PROCESSOR') {
+    if (['INTIN', 'INTSO', 'INTAM', 'IBMEM', 'BUSPR', 'PRIPE'].includes(custSubType)) {
+      FormManager.readOnly('searchTerm');
+    } else {
+      FormManager.enable('searchTerm');
+    }
+  }
 }
 
 function validateDeptAttnBldg() {
@@ -1283,8 +1291,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);
   // GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
-  GEOHandler.addAfterTemplateLoad(lockCtcFieldOnIsu, GEOHandler.DE);
-  GEOHandler.addAfterConfig(lockCtcFieldOnIsu, SysLoc.GERMANY);
+//  GEOHandler.addAfterTemplateLoad(lockCtcFieldOnIsu, GEOHandler.DE);
+//  GEOHandler.addAfterConfig(lockCtcFieldOnIsu, SysLoc.GERMANY);
   GEOHandler.addAfterTemplateLoad(vatExemptIBMEmp, GEOHandler.DE);
 
   // CREATCMR-4293
@@ -1298,5 +1306,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.registerValidator(validateEnterpriseNum, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.DE, null, true);
+  GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.DE, null, true);
 
 });
