@@ -1673,32 +1673,6 @@ function setClientTierValues(isuCd) {
  * FormManager.setValue('dupClientTierCd', clientTiers[0]); } } } } }
  */
 
-function setISUCTCValuesForCEE(isuCd) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
-    FormManager.resetValidations('clientTier');
-    FormManager.setValue('salesBusOffCd', '999');
-    return;
-  }
-
-  if ((FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'XCE' || FormManager.getActualValue('custSubGrp') == 'THDPT'
-      || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU'
-      || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'CSCOM' || FormManager.getActualValue('custSubGrp') == 'CSPC'
-      || FormManager.getActualValue('custSubGrp') == 'CSTP' || FormManager.getActualValue('custSubGrp') == 'MECOM' || FormManager.getActualValue('custSubGrp') == 'MEPC'
-      || FormManager.getActualValue('custSubGrp') == 'METP' || FormManager.getActualValue('custSubGrp') == 'RSXCO' || FormManager.getActualValue('custSubGrp') == 'RSXPC'
-      || FormManager.getActualValue('custSubGrp') == 'RSXTP' || FormManager.getActualValue('custSubGrp') == 'RSCOM' || FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager
-      .getActualValue('custSubGrp') == 'RSTP')) {
-    FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier', 'Q');
-  }
-  if (FormManager.getActualValue('custSubGrp') == 'MEINT') {
-    FormManager.setValue('isuCd', '21');
-  }
-}// End of CreateCMR-811
-
 // CMR-6057 setup ISU value for 821 Dup countries
 function setDupISUCTCValues(custSubGrp) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -5185,14 +5159,6 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function addHandlerForCustSubTypeCEE() {
-  if (_custSubTypeHandler == null) {
-    _custSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-      setISUCTCValuesForCEE(value);
-    });
-  }
-}
-
 // CREATCMR-6378
 function retainVatValueAT() {
   var vat = FormManager.getActualValue('vat');
@@ -5478,6 +5444,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(togglePPSCeidCEE, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(disableFieldsIBMEm, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setClassificationCodeCEE, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(addHandlerForCustSubTypeCEE, GEOHandler.CEE);
 
 });
