@@ -2298,7 +2298,11 @@ function updateMRCAseanAnzIsa() {
     if((custSubGrp == 'INTER' || custSubGrp == 'XINT') && ((['00000'].includes(cluster) && (cntry == '856' || cntry == '818' || cntry == '778' || cntry == '643' || cntry == '749' || cntry == '834' || cntry == '852')) || (['00002'].includes(cluster) && cntry == '796') || (['00001'].includes(cluster) && cntry == '616')) && _isuCd == '21' &&  _clientTier == 'Z') {
       FormManager.setValue('mrcCd', '2');
       return;
-    }    
+    }  
+    if(cntry == '643' && (custSubGrp == 'INTER' || custSubGrp == 'DUMMY') && ['00000'].includes(cluster)) {
+      FormManager.setValue('mrcCd', '2');
+      return;
+    }
     if(['818', '852'].includes(cntry) && (custSubGrp == 'INTER' || custSubGrp == 'DUMMY')) {
       FormManager.setValue('mrcCd', '2');
       return;
@@ -2669,6 +2673,7 @@ function setCTCIsuByClusterASEAN() {
     var scenario = FormManager.getActualValue('custGrp');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var issuingCnt3 = ['818', '856', '852'];
+    var issuingCnt4 = ['643'];
 
     var apClientTierValue = [];
     var isuCdValue = [];
@@ -2694,12 +2699,31 @@ function setCTCIsuByClusterASEAN() {
           FormManager.setValue('clientTier', apClientTierValue[0]);
           FormManager.setValue('isuCd', isuCdValue[0]);
         } else if (apClientTierValue.length > 1) {
-          if(custSubGrp.includes('BLUM') || custSubGrp.includes('MKTP') || custSubGrp.includes('MKP') || ((custSubGrp.includes('DUMMY') || custSubGrp.includes('XDUMM')) && issuingCntries.includes(_cmrIssuingCntry)) || ((custSubGrp.includes('PRICU') || custSubGrp.includes('BLUMX') || custSubGrp.includes('SPOFF')) && (_cmrIssuingCntry == '749' || _cmrIssuingCntry == '834')) || (_cmrIssuingCntry == '834' && _cluster == '00000' && (custSubGrp == 'MKTPC' || custSubGrp == 'PRIV' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP' || custSubGrp == 'XPRIV'))) {
+          if(custSubGrp.includes('BLUM') || custSubGrp.includes('MKTP') || custSubGrp.includes('MKP') || ((custSubGrp.includes('DUMMY') || custSubGrp.includes('XDUMM')||custSubGrp.includes('BUSPR') || custSubGrp.includes('NRML')||custSubGrp.includes('AQSTN')||custSubGrp.includes('ASLOM')||custSubGrp.includes('CROSS')||custSubGrp.includes('INTER')) && issuingCntries.includes(_cmrIssuingCntry)) || ((custSubGrp.includes('PRICU') || custSubGrp.includes('BLUMX') || custSubGrp.includes('SPOFF')) && (_cmrIssuingCntry == '749' || _cmrIssuingCntry == '834')) || (_cmrIssuingCntry == '834' && _cluster == '00000' && (custSubGrp == 'MKTPC' || custSubGrp == 'PRIV' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP' || custSubGrp == 'XPRIV'))) {
             if(issuingCnt3.includes(_cmrIssuingCntry) && custSubGrp.includes('DUMMY')) {
               FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
               FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
               FormManager.setValue('isuCd','21');
-            } else {
+            }
+            else if(issuingCnt4.includes(_cmrIssuingCntry) && custSubGrp.includes('DUMMY')) {
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
+              FormManager.setValue('isuCd','21');
+              FormManager.setValue('clientTier', 'Z');
+            }
+            else if(issuingCnt4.includes(_cmrIssuingCntry) && (custSubGrp.includes('BUSPR') || custSubGrp.includes('NRML')||custSubGrp.includes('AQSTN')||custSubGrp.includes('ASLOM')||custSubGrp.includes('CROSS'))) {
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+              FormManager.setValue('isuCd','34');
+              FormManager.setValue('clientTier', 'Z');
+            }
+            else if(issuingCnt4.includes(_cmrIssuingCntry) && custSubGrp.includes('INTER')) {
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
+              FormManager.setValue('isuCd','60');
+              FormManager.setValue('clientTier', '0');
+            }
+            else {
               FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q' , 'Y']);
               FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
               FormManager.setValue('isuCd','34');
