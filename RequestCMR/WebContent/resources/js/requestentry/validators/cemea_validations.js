@@ -1696,12 +1696,12 @@ function setISUCTCValuesForCEE(isuCd) {
     // CREATCMR-4293
     if (changeFlag == 'N') {
       FormManager.setValue('isuCd', _pagemodel.isuCd == null ? '34' : _pagemodel.isuCd);
+      FormManager.setValue('clientTier', _pagemodel.clientTier == null ? 'Q' : _pagemodel.clientTier);
       changeFlag = 'Y';
     } else {
       FormManager.setValue('isuCd', '34');
+      FormManager.setValue('clientTier', 'Q');
     }
-    // CREATCMR-4293
-    FormManager.setValue('clientTier', 'Q');
   }
   if (FormManager.getActualValue('custSubGrp') == 'MEINT') {
     FormManager.setValue('isuCd', '21');
@@ -5110,7 +5110,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\'\'.');
+      }, false, 'Client Tier can only accept \'T\'\'.');
     }
   } else if (isuCode == '36') {
     if (clientTierCode == '') {
@@ -5416,7 +5416,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
-  GEOHandler.addAfterConfig(setISUCTCValuesForCEE, GEOHandler.CEE);// CreateCMR-811
+  // GEOHandler.addAfterConfig(setISUCTCValuesForCEE, GEOHandler.CEE);//
   GEOHandler.addAfterTemplateLoad(setISUCTCValuesForCEE, GEOHandler.CEE); // CreateCMR-811
   // GEOHandler.addAfterConfig(setCompanyNoForCEE, GEOHandler.CEE); //
   // CreateCMR-811
