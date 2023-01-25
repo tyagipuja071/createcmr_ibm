@@ -651,6 +651,12 @@ function autoSetFieldsForCustScenariosSSAMX() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var internalFlag = false;
   var requesterFlag = false;
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
   if (SSAMX_COUNTRIES.indexOf(_cmrCntry) > -1 && _reqType == 'C') {
     console.log("autoSetFieldsForCrossScenario : current country belongs to SSA_MX. . .");
     console.log("autoSetFieldsForCrossScenario : current customer type : " + _custType);
