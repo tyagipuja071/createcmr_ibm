@@ -256,7 +256,7 @@ function addAfterConfigAP() {
    * 'XMKTP') FormManager.readOnly('clientTier'); else
    * FormManager.enable('clientTier'); }
    */
-    if((cntry == SysLoc.NEW_ZEALAND || cntry == SysLoc.AUSTRALIA ||cntry == SysLoc.INDONESIA || cntry == SysLoc.PHILIPPINES ||cntry == SysLoc.SINGAPORE ||cntry == SysLoc.VIETNAM || cntry == SysLoc.THAILAND || cntry == SysLoc.MALASIA) && (custSubGrp == 'ECSYS' ||custSubGrp == 'XECO' )){
+    if((cntry == SysLoc.NEW_ZEALAND || cntry == SysLoc.AUSTRALIA ||cntry == SysLoc.INDONESIA || cntry == SysLoc.PHILIPPINES ||cntry == SysLoc.SINGAPORE || cntry == SysLoc.THAILAND || cntry == SysLoc.MALASIA) && (custSubGrp == 'ECSYS' ||custSubGrp == 'XECO' )){
         FormManager.setValue('mrcCd', '3');
         FormManager.setValue('clientTier', 'Y');
         FormManager.readOnly('clientTier');
@@ -978,6 +978,9 @@ function setMrc4IntDumForASEAN() {
     return
   }
   if (custSubGrp == 'INTER' || custSubGrp == 'XINT') {
+    if (cntry == '818' || cntry == '852') {
+      return;
+    }
     FormManager.setValue('mrcCd', '2');
     FormManager.enable('isuCd');
   } else if ((custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM') || (['BLUMX', 'PRIV', 'MKTPC'].includes(custSubGrp) && cntry == '749') || (['BLUMX', 'PRIV', 'MKTPC', 'SPOFF'].includes(custSubGrp) && cntry == '834')) {
@@ -2186,6 +2189,9 @@ function setCtcOnIsuCdChangeASEAN() {
     return;
   }
   if (isuCd == '5K') {
+    if (cntry == '818' || cntry == '852') {
+      return;
+    }
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
@@ -2704,6 +2710,7 @@ function setCTCIsuByClusterASEAN() {
               FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
               FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
               FormManager.setValue('isuCd','21');
+              FormManager.readOnly('isuCd');
             }
             else if(issuingCnt4.includes(_cmrIssuingCntry) && custSubGrp.includes('DUMMY')) {
               FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
@@ -4273,10 +4280,11 @@ function addValidatorBasedOnCluster() {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         var cluster = FormManager.getActualValue('apCustClusterId');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
         if(FormManager.getActualValue('reqType') != 'C') {
           return new ValidationResult(null, true);
         }
-        if ((custSubType != 'ECSYS' && custSubType != 'XECO' && custSubType != 'ASLOM' && custSubType != 'ESOSW' ) && (cluster == '08039' || cluster == '08037' || cluster == '08038' || cluster == '08040' || cluster == '08042' ||cluster == '08044' || cluster == '08047'|| cluster == '08046')) {
+        if ((cntry == '852' && custSubType == 'CROSS' && cluster != '08046') || (custSubType != 'ECSYS' && custSubType != 'XECO' && custSubType != 'ASLOM' && custSubType != 'ESOSW' ) && (cluster == '08039' || cluster == '08037' || cluster == '08038' || cluster == '08040' || cluster == '08042' ||cluster == '08044' || cluster == '08047')) {
           return new ValidationResult(null, false, 'Ecosystem Partners Cluster is not allowed for selected scenario.');
         } else {
           return new ValidationResult(null, true);
