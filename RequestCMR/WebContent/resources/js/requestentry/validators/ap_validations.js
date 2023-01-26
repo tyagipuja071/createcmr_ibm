@@ -3923,10 +3923,11 @@ function addValidatorBasedOnCluster() {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         var cluster = FormManager.getActualValue('apCustClusterId');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
         if(FormManager.getActualValue('reqType') != 'C') {
           return new ValidationResult(null, true);
         }
-        if ((custSubType != 'CROSS' && cluster != '08046' ) || (custSubType != 'ECSYS' && custSubType != 'XECO' && custSubType != 'ASLOM' && custSubType != 'ESOSW' ) && (cluster == '08039' || cluster == '08037' || cluster == '08038' || cluster == '08040' || cluster == '08042' ||cluster == '08044' || cluster == '08047')) {
+        if ((cntry == '852' && custSubType != 'CROSS' && cluster != '08046') || (custSubType != 'ECSYS' && custSubType != 'XECO' && custSubType != 'ASLOM' && custSubType != 'ESOSW' ) && (cluster == '08039' || cluster == '08037' || cluster == '08038' || cluster == '08040' || cluster == '08042' ||cluster == '08044' || cluster == '08047')) {
           return new ValidationResult(null, false, 'Ecosystem Partners Cluster is not allowed for selected scenario.');
         } else {
           return new ValidationResult(null, true);
