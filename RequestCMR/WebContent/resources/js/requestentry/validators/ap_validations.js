@@ -827,7 +827,7 @@ function setMrc4IntDumForASEAN() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (custSubGrp == 'INTER' || custSubGrp == 'XINT') {
-    if(cntry == '852', '818') {
+    if (cntry == '818' || cntry == '852') {
       return;
     }
     FormManager.setValue('mrcCd', '2');
@@ -1949,7 +1949,7 @@ function setCtcOnIsuCdChangeASEAN() {
     return;
   }
   if (isuCd == '5K') {
-    if (cntry == '818', '852') {
+    if (cntry == '818' || cntry == '852') {
       return;
     }
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
