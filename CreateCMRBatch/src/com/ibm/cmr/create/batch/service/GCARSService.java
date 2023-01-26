@@ -49,8 +49,6 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
 
   private static final Logger LOG = Logger.getLogger(GCARSService.class);
   private static final String LOCAL_DIR = "/ci/shared/data/gcars/";
-  // private static final String LOCAL_DIR =
-  // "C:\\Users\\P01788PH1\\Downloads\\gcars\\";
   private static final String REMOTE_DIR = "/is/isdata/cmr_partners/gcarsBR/IBMgcars/";
   private static final String ARCHIVE_DIR = "/ci/shared/data/gcarsarchive/";
   private static final String ERROR_DIR = "/ci/shared/data/gcarserror/";
@@ -146,28 +144,29 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   }
 
   protected Queue<GCARSUpdtQueue> copyFromRDCServer(EntityManager entityManager) {
+    LOG.debug("GCARS copyFromRDCServer");
     Queue<GCARSUpdtQueue> queue = new LinkedList<GCARSUpdtQueue>();
 
     String localDir = SystemParameters.getString("GCARS.INPUT.DIR");
     if (StringUtils.isBlank(localDir)) {
       localDir = LOCAL_DIR;
     }
+    LOG.debug("GCARS local directory " + localDir);
 
     String remoteDir = SystemParameters.getString("GCARS.RDC.INPUT.DIR");
     if (StringUtils.isBlank(remoteDir)) {
       remoteDir = REMOTE_DIR;
     }
+    LOG.debug("GCARS remote directory " + remoteDir);
 
-    // String localFile = SystemConfiguration.getValue("GCARS_LOCAL_DIR") +
-    // GCARS_FILE;
-    String localFile = LOCAL_DIR + GCARS_FILE;
+    String localFile = SystemConfiguration.getValue("GCARS_LOCAL_DIR") + GCARS_FILE;
     String remoteFile = SystemConfiguration.getValue("GCARS_REMOTE_DIR") + GCARS_FILE;
     Session jschSession = null;
-    // String remoteFile = "";
-    // String localFile = "";
     try {
 
       JSch jsch = new JSch();
+      LOG.debug("Local file: " + localFile);
+      LOG.debug("Remote file: " + remoteFile);
       LOG.debug("Known Hosts File: " + KNOWN_HOSTS);
       LOG.debug("Connecting to FTP Server " + REMOTE_HOST + ":" + REMOTE_PORT + " using " + USERNAME);
       jsch.setKnownHosts(KNOWN_HOSTS);
