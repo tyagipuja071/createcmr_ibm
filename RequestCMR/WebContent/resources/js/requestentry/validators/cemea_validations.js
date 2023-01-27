@@ -2265,6 +2265,9 @@ function cancelCIS() {
 }
 
 function afterConfigForRussia() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if ("C" == reqType && "REQUESTER" == role) {
