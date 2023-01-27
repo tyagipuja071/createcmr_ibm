@@ -2265,6 +2265,9 @@ function cancelCIS() {
 }
 
 function afterConfigForRussia() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if ("C" == reqType && "REQUESTER" == role) {
@@ -2355,7 +2358,7 @@ function setSBOValues() {
     if (dijit.byId('cisServiceCustIndc').get('checked')) {
       FormManager.setValue('salesBusOffCd', 'R04');
     } else if (custSubType == 'XCOM' || custSubType == 'XTP') {
-      FormManager.setValue('salesBusOffCd', 'R02');
+      FormManager.setValue('salesBusOffCd', 'RO4');
     } else if (custSubType == 'XBP') {
       FormManager.setValue('salesBusOffCd', '000');
     } else if (custSubType == 'XINT') {
