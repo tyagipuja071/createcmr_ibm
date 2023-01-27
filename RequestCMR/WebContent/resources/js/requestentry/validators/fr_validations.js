@@ -1032,10 +1032,12 @@ function setCtcForIsu5K() {
   var ctc = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custSubGrpArray = [ 'INTER', 'INTSO', 'IBMEM', 'BUSPR', 'XBUSP', 'CBTER', 'CBTSO', 'CBIEM' ];
   if (isuCd == '5K' || isuCd == '14' || isuCd == '18' || isuCd == '19' || isuCd == '1R' || isuCd == '31' || isuCd == '3T' || isuCd == '4A') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
-    if (reqType == 'U' || (reqType != 'U' && role == 'PROCESSOR')) {
+    if (reqType == 'U' || (reqType != 'U' && role == 'PROCESSOR' && !custSubGrpArray.includes(custSubGrp))) {
       FormManager.enable('clientTier');
     }
   }
@@ -3087,7 +3089,8 @@ function lockIBMTabForFR() {
     FormManager.readOnly('clientTier');
   }// CMR-234 -end
 
-  if (role == 'PROCESSOR' && (reqType == 'C' || reqType == 'U')) {
+  var custSubGrpArray = [ 'INTER', 'INTSO', 'IBMEM', 'BUSPR', 'XBUSP', 'CBTER', 'CBTSO', 'CBIEM' ];
+  if (role == 'PROCESSOR' && ((reqType == 'C' && !custSubGrpArray.includes(custSubType)) || reqType == 'U')) {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
   }
@@ -4037,7 +4040,7 @@ function clientTierCodeValidator() {
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '32' && isuCode != '36') && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -4058,17 +4061,59 @@ function clientTierCodeValidator() {
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+    } else if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+      }, false, 'Client Tier can only accept \'Q\'\'.');
+    }
+  } else if (isuCode == '32') {
+    if (clientTierCode == '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    } else if (clientTierCode == 'T') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'T\'\'.');
+    }
+  } else if (isuCode == '36') {
+    if (clientTierCode == '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    } else if (clientTierCode == 'Y') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Y\'\'.');
+    }
+  } else if (isuCode != '36' || isuCode != '34' || isuCode != '32') {
+    if (clientTierCode == '') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank.');
     }
   } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == 'Y' || clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
@@ -4080,11 +4125,10 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'T\' or blank.');
     }
   }
 }
-// CREATCMR-4293
 
 function clientTierValidator() {
   FormManager.addFormValidator((function() {
@@ -4141,10 +4185,10 @@ function postBoxValidationBillTo() {
   })(), null, 'frmCMR_addressModal');
 }
 
-// CREATCMR-6000 2H22 coverage changes
+// CREATCMR-8031 2H23 coverage changes
 function isCoverage2H22MEACountry(country) {
-  var emaCountryList = [ 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'ML', 'MR', 'MA', 'NE', 'SN', 'TG', 'AE', 'CI' ];
-  return emaCountryList.includes(country);
+  var meaCountryList = [ 'AE', 'BJ', 'BF', 'CM', 'CF', 'TD', 'GQ', 'GA', 'GM', 'GW', 'ML', 'MR', 'MA', 'NE', 'SN', 'TG', 'TN', 'AE', 'CG', 'CI', 'GN', ];
+  return meaCountryList.includes(country);
 }
 
 function isCoverage2H22Subregion(countryCd) {
@@ -4153,7 +4197,10 @@ function isCoverage2H22Subregion(countryCd) {
 }
 
 function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
-
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
   if (fromAddress && currentLanded != undefined) {
     landedCountry = currentLanded;
   } else {
@@ -4186,6 +4233,23 @@ function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
       FormManager.setValue('isuCd', '21');
       FormManager.setValue('clientTier', '');
       FormManager.setValue('salesBusOffCd', '200200');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('salesBusOffCd');
+    } else if (landedCountry == 'TN') {
+      FormManager.setValue('isuCd', '34');
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('salesBusOffCd', '710710');
+      if (role == 'Requester') {
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('clientTier');
+        FormManager.readOnly('salesBusOffCd');
+      } else if (role == 'Processor') {
+        FormManager.enable('isuCd');
+        FormManager.enable('clientTier');
+        FormManager.enable('salesBusOffCd');
+      }
+
     }
   }
 }

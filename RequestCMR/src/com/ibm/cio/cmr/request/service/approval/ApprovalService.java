@@ -423,6 +423,10 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     query.setParameter("REQ_ID", admin.getId().getReqId());
     boolean conditionallyApproved = query.exists();
     boolean cnConditionallyApproved = false;
+    sql = ExternalizedQuery.getSql("APPROVAL.CHECKIFCONDCANCELLED");
+    query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    boolean conditionallyCancelled = query.exists();
     Data data = null;
     try {
       if (dataService != null) {
@@ -448,7 +452,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       } else {
         if (CmrConstants.REQUEST_STATUS.REP.toString().equals(admin.getReqStatus()) && "N".equalsIgnoreCase(admin.getReviewReqIndc())) {
           boolean processOnCompletion = isProcessOnCompletionChk(entityManager, admin.getId().getReqId(), admin.getReqType())
-              && !conditionallyApproved;
+              && !conditionallyApproved && !conditionallyCancelled;
           if (processOnCompletion) {
             if (data == null || LegacyDowntimes.isUp(data.getCmrIssuingCntry(), SystemUtil.getActualTimestamp())) {
               admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
@@ -1132,7 +1136,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         } else if (containsOnly(statuses, condApprovedStats) && statuses.contains(CmrConstants.APPROVAL_CONDITIONALLY_APPROVED)) {
           model.setApprovalResult(CmrConstants.APPROVAL_RESULT_COND_APPROVED);
         } else if (statuses.contains(CmrConstants.APPROVAL_CONDITIONALLY_CANCELLED)) {
-          model.setApprovalResult(CmrConstants.APPROVAL_RESULT_COND_APPROVED);
+          model.setApprovalResult(CmrConstants.APPROVAL_RESULT_COND_CANCELLED);
         } else if (statuses.contains(CmrConstants.APPROVAL_REJECTED)) {
           model.setApprovalResult(CmrConstants.APPROVAL_RESULT_REJECTED);
           model.setApprovalDateStr(lastUpdtStr);

@@ -21,7 +21,7 @@ if (!"Viewer".equals(reqentry.getUserRole())){
     // remove all actions
     request.setAttribute("yourActionsSqlId", "YOUR_ACTIONS_NONE");
   }
-  if ("Requester".equals(reqentry.getUserRole()) && CmrConstants.APPROVAL_RESULT_COND_APPROVED.equals(approvalStatus)){
+  if ("Requester".equals(reqentry.getUserRole()) && (CmrConstants.APPROVAL_RESULT_COND_APPROVED.equals(approvalStatus)|| CmrConstants.APPROVAL_RESULT_COND_CANCELLED.equals(approvalStatus))){
     // set page to readonly
     request.setAttribute("yourActionsViewOnly", true);
     // remove all actions

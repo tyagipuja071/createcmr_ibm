@@ -107,8 +107,6 @@ function setClientTierValues(isuCd) {
   isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  } else {
-    FormManager.enable('clientTier');
   }
 }
 
@@ -1134,8 +1132,7 @@ function clearPOBoxFromGrid() {
 
 function addAddressGridValidatorStreetPOBox() {
   console.log("addAddressGridValidatorStreetPOBox..............");
-  FormManager.addFormValidator(
-      (function() {
+  FormManager.addFormValidator((function() {
     return {
       validate : function() {
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
@@ -2080,8 +2077,9 @@ function setCTCValues() {
     }
   }
 
-  // Internal
-  var custSubGrpForInternal = [ 'INTER', 'LSINT', 'LSXIN', 'NAINT', 'NAXIN', 'SZINT', 'SZXIN', 'XINTE', 'ZAINT', 'ZAXIN' ];
+  // Internal and IBM Employee
+  var custSubGrpForInternal = [ 'INTER', 'XINTE', 'IBMEM', 'XIBME', 'LSIBM', 'LSXIB', 'LSXIN', 'LSINT', 'NAIBM', 'NAXIB', 'NAXIN', 'NAINT', 'SZIBM', 'SZXIB', 'SZXIN', 'SZINT', 'ZAIBM', 'ZAXIB',
+      'ZAXIN', 'ZAINT' ];
 
   // Internal
   if (custSubGrpForInternal.includes(custSubGrp)) {
@@ -2115,7 +2113,7 @@ function clientTierCodeValidator() {
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '32' && isuCode != '36') && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -2136,14 +2134,56 @@ function clientTierCodeValidator() {
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+    } else if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+      }, false, 'Client Tier can only accept \'Q\'\'.');
+    }
+  } else if (isuCode == '32') {
+    if (clientTierCode == '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    } else if (clientTierCode == 'T') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'T\'\'.');
+    }
+  } else if (isuCode == '36') {
+    if (clientTierCode == '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    } else if (clientTierCode == 'Y') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Y\'\'.');
+    }
+  } else if (isuCode != '36' || isuCode != '34' || isuCode != '32') {
+    if (clientTierCode == '') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank.');
     }
   } else {
     if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
@@ -2158,10 +2198,11 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'T\' or blank.');
     }
   }
 }
+
 // CREATCMR-4293
 
 function clientTierValidator() {
@@ -2307,6 +2348,17 @@ function addressQuotationValidatorMCO2() {
 
 }
 
+function setIsuClientTierBehaviour() {
+  // CREATCMR-7996 COV 1H23
+  console.log("Inside setIsuClientTierBehaviour")
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custSubGrpList = [ 'XBP', 'BUSPR', 'LLCBP', 'IBMEM', 'XIBME', 'INTER', 'XINTE', 'PRICU', 'XPRIC' ];
+
+  if (custSubGrpList.includes(custSubGrp)) {
+    FormManager.readOnly('clientTier');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
       '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
@@ -2411,5 +2463,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(enableTinNumber, SysLoc.KENYA);
   GEOHandler.addAfterTemplateLoad(enableTinNumber, SysLoc.KENYA);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.MCO2, null, true);
+  GEOHandler.addAfterTemplateLoad(setIsuClientTierBehaviour, GEOHandler.MCO2);
 
 });
