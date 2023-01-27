@@ -290,7 +290,7 @@ function afterConfigForZA() {
   }
 
   lobChange();
-  enterpriseValidation();
+  // enterpriseValidation();
   clearPoBoxPhoneAddrGridItems();
   showDeptNoForInternalsOnly();
 // CREATCMR-788
@@ -910,12 +910,12 @@ function onChangeSubCustGroup() {
   });
 }
 
-function enterpriseValidation() {
-  var role = FormManager.getActualValue('userRole');
-  if (role == GEOHandler.ROLE_PROCESSOR) {
-    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
-  }
-}
+/*
+ * function enterpriseValidation() { var role =
+ * FormManager.getActualValue('userRole'); if (role ==
+ * GEOHandler.ROLE_PROCESSOR) { FormManager.addValidator('enterprise',
+ * Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB'); } }
+ */
 
 function showDeptNoForInternalsOnly() {
   var scenario = FormManager.getActualValue('custSubGrp');
@@ -2152,7 +2152,8 @@ function setEnterpriseBehaviour() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
 
-  if (reqType != 'C') {
+  if (reqType == 'U') {
+    FormManager.removeValidator('enterprise', Validators.REQUIRED);
     return;
   }
   
@@ -2161,15 +2162,13 @@ function setEnterpriseBehaviour() {
    
   if (custTypeHideList.includes(custType)) {
     FormManager.hide('Enterprise', 'enterprise');
-    FormManager.removeValidator('enterprise', Validators.REQUIRED);
-    
+       
   } else {
     FormManager.show('Enterprise', 'enterprise');
     if (isuCode == '36' && clientTierCode == 'Y') {
       FormManager.enable('enterprise');
     } else {
-      FormManager.removeValidator('enterprise', Validators.REQUIRED);
-      FormManager.readOnly('enterprise');
+           FormManager.readOnly('enterprise');
     }
   }
  }
@@ -2188,14 +2187,14 @@ function enterpriseValidator() {
           return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
         }
        var validEnterpriseIds = ['008028','010032'];
-        if (isuCode == '36' && clientTierCode == 'Y' && !validEnterpriseIds.includes(enterprise)){
+        if (reqType=='C' && enterprise.length >= 1 && isuCode == '36' && clientTierCode == 'Y' && !validEnterpriseIds.includes(enterprise)){
            return new ValidationResult({
             id : 'enterprise',
             type : 'text',
             name : 'enterprise'
           }, false, 'Enterprise Number is not valid for given ISU, CTC combination');
         }
-        if (enterprise.length > 1 && !enterprise.match(numPattern) && (reqType != 'C')) {
+        if (enterprise.length >=1 && !enterprise.match(numPattern)) {
           return new ValidationResult({
             id : 'enterprise',
             type : 'text',
