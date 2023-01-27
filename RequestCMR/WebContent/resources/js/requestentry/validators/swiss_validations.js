@@ -59,9 +59,6 @@ function addAfterConfigForSWISS() {
           || custSubGrp == 'XCHIB' || custSubGrp == 'LIIBM' || custSubGrp == 'CHBUS' || custSubGrp == 'XCHBP' || custSubGrp == 'LIBUS')) {
     FormManager.readOnly('clientTier');
   }
-  if (reqType == 'C' && (role == 'PROCESSOR')) {
-    FormManager.enable('clientTier');
-  }
 
   if (reqType == 'C') {
     FormManager.readOnly('custNm3');
@@ -140,7 +137,7 @@ function addAfterConfigForSWISS() {
   setVatValidatorSWISS();
   setFieldsMandtStatus();
   // setVatValueOnPrefLang();
-  setMubotyOnPostalCodeIMS();
+//  setMubotyOnPostalCodeIMS();
   showDeptNoForInternalsOnlySWISS();
   if (impIndc != 'N') {
     // setPreferredLangAddr();
@@ -529,8 +526,6 @@ function setSORTLOnIsuCtc() {
   }
   if ([ '18', '28' ].includes(isuCd) && reqType == 'C') {
     FormManager.resetValidations('clientTier');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
   }
 }
 
@@ -551,7 +546,7 @@ function setClientTierValues(isuCd) {
     FormManager.readOnly('clientTier');
   } else {
     var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (reqType == 'U' || (reqType != 'U' && role == 'PROCESSOR')) {
+    if (reqType == 'U') {
       FormManager.enable('clientTier');
     }
   }
@@ -595,7 +590,6 @@ function setClientTierValues(isuCd) {
       FormManager.setValue('clientTier', '');
     }
   }
-
 }
 
 /*
@@ -606,6 +600,9 @@ var postCdOld = '';
 function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
 
   if (FormManager.getActualValue('reqType') != 'C' || (cmr.currentRequestType != undefined && cmr.currentRequestType != 'C') || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (postCd == undefined && subIndustryCd == undefined && clientTier == undefined) {
     return;
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -672,6 +669,46 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
     FormManager.enable('searchTerm');
   }
 }
+
+function validateSBOValuesForIsuCtc() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var isuCd = FormManager.getActualValue('isuCd');
+        var sbo = FormManager.getActualValue('salesBusOffCd');
+        var validSboList = [];
+        var qParams = null;
+        
+        if (isuCd != '') {
+          var results = null;
+          if (isuCd + clientTier != '34Q') {
+            qParams = {
+              _qall : 'Y',
+              ISSUING_CNTRY : cntry,
+              ISU : '%' + isuCd + '%',
+              CTC : '%' + clientTier + '%'
+            };
+            results = cmr.query('GET.SBOLIST.BYISU', qParams);
+          }
+        }
+        if (results == null || results.length == 0) {
+          return new ValidationResult(null, true);
+        } else {
+          for (let i=0; i<results.length; i++) {
+            validSboList.push(results[i].ret1);
+          }
+          if (!validSboList.includes(sbo)) {
+            return new ValidationResult(null, false, 
+                'The SBO provided is invalid. It should be from the list: ' + validSboList);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 
 function onSavingAddress(cntry, addressMode, saving, finalSave, force) {
   console.log(">>>> onSavingAddress ");
@@ -1514,6 +1551,17 @@ function lockIBMTabForSWISS() {
       FormManager.enable('ibmDeptCostCenter');
     }
   }
+  if (reqType == 'C' && role == 'PROCESSOR') {
+    if (custSubType.includes('BUS') || custSubType.includes('INT') || custSubType.includes('PRI')) {
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('searchTerm');
+    } else {
+      FormManager.enable('isuCd');
+      FormManager.enable('clientTier');
+      FormManager.enable('searchTerm');
+    }
+  }
 }
 
 function validateDeptAttnBldg() {
@@ -1565,7 +1613,7 @@ function setCTCValues() {
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '8B') {
       FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
-      if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+      if (reqType == 'U') {
         FormManager.enable('clientTier');
       }
     }
@@ -1580,7 +1628,7 @@ function setCTCValues() {
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '21') {
       FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
-      if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+      if (reqType == 'U') {
         FormManager.enable('clientTier');
       }
     }
@@ -1844,7 +1892,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(displayHwMstrInstallFlag, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(checkHwMstrInstallFlag, GEOHandler.SWISS);
-  GEOHandler.addAddrFunction(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
+//  GEOHandler.addAddrFunction(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
 
   GEOHandler.addAfterConfig(reqReasonOnChange, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(addHandlersForSWISS, GEOHandler.SWISS);
@@ -1854,7 +1902,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCustClassCd, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setVatValidatorSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(addAfterConfigForSWISS, GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
+//  GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(defaultCapIndicator, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setAbbrvNmSwiss, GEOHandler.SWISS);
 
@@ -1900,4 +1948,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
+  GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.SWISS, null, true);
+  
 });
