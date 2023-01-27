@@ -334,6 +334,8 @@ public class RequestEntryModel extends BaseModel {
 
   private String creditCd;
 
+  private String modeOfPayment;
+
   private String identClient;
 
   private String fiscalDataStatus;
@@ -862,6 +864,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setCmrNo(String cmrNo) {
     this.cmrNo = cmrNo;
+  }
+
+  public String getModeOfPayment() {
+    return modeOfPayment;
+  }
+
+  public void setModeOfPayment(String modeOfPayment) {
+    this.modeOfPayment = modeOfPayment;
   }
 
   public String getCmrOwner() {

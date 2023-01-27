@@ -475,15 +475,14 @@ function afterConfigForUKI() {
     var _custType = null;
     _customerTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       _custType = FormManager.getActualValue('custSubGrp');
-      checkScenarioChanged();
-      if (_custType != '' && _isScenarioChanged) {
-
+      // checkScenarioChanged();
+      autoSetSpecialTaxCdByScenario();
+      if (_custType != '') {
         var qParams = {
           REQ_ID : FormManager.getActualValue('reqId'),
         };
         var result = cmr.query('DATA.GET.CUSTSUBGRP.BY_REQID', qParams);
         var custTypeinDB = result.ret1;
-        autoSetSpecialTaxCdByScenario(_custType, custTypeinDB);
         autoSetCollectionCdByScenario(_custType);
         autoSetSBO(_custType, custTypeinDB);
         // autoSetAbbrevLocnOnChangeUKI();
@@ -707,33 +706,36 @@ function setCustClassCd() {
   }
 }
 
-function autoSetSpecialTaxCdByScenario(_custType, custTypeinDB) {
+function autoSetSpecialTaxCdByScenario() {
   var reqType = FormManager.getActualValue('reqType');
   var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-
-  if (custTypeinDB != null && custTypeinDB == _custType) {
-    return;
+  var _custType = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var exceptionPostCd = [ 'GX', 'GY', 'JE' ];
+  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var postCdParams = {
+    REQ_ID : _zs01ReqId,
+    ADDR_TYPE : "ZS01",
+  };
+  var postCdResult = cmr.query('ADDR.GET.POSTCD.BY_REQID_ADDRTYP', postCdParams);
+  postCd = postCdResult.ret1;
+  if (postCd != null && postCd.length > 2) {
+    postCd = postCd.substring(0, 2);
   }
-  if (reqType != 'C') {
-    return;
-  }
-  if (issuingCntry == SysLoc.UK || issuingCntry == SysLoc.IRELAND) {
-    if (_custType == 'INTER' || _custType == 'XINTR') {
+  if (reqType == 'C' && (issuingCntry == SysLoc.UK || issuingCntry == SysLoc.IRELAND)) {
+    if (_custType == '') {
+      FormManager.setValue('specialTaxCd', '');
+    } else if (_custType == 'INTER' || _custType == 'XINTR' || _custType == 'INFSL') {
       FormManager.setValue('specialTaxCd', 'XX');
       FormManager.readOnly('specialTaxCd');
-    } else if (issuingCntry == SysLoc.UK && (_custType == 'CROSS' || _custType == 'XBSPR' || _custType == 'XPRIC' || _custType == 'XGOVR')) {
+    } else if (issuingCntry == SysLoc.UK && ((_custType == 'CROSS' || _custType == 'XBSPR' || _custType == 'XPRIC' || _custType == 'XGOVR') || (exceptionPostCd.includes(postCd) && custGrp == 'LOCAL' && _custType != 'INTER' && _custType != 'INFSL'))) {
       FormManager.setValue('specialTaxCd', '32');
       // FormManager.enable('specialTaxCd');
-    } else {
-      if (_custType == 'INFSL') {
-        FormManager.setValue('specialTaxCd', 'XX');
-        // FormManager.enable('specialTaxCd');
-      } else {
-        FormManager.setValue('specialTaxCd', 'Bl');
-        // FormManager.enable('specialTaxCd');
-      }
+    } else if (issuingCntry == SysLoc.UK && _custType != 'INTER' && _custType != 'INFSL' && custGrp == 'LOCAL' && !exceptionPostCd.includes(postCd.substr(0, 2))) {
+      FormManager.setValue('specialTaxCd', 'Bl');
+    } else if (issuingCntry == SysLoc.IRELAND && _custType != 'INTER' && _custType != 'INFSL') {
+      FormManager.setValue('specialTaxCd', 'Bl');
     }
-    var custGrp = FormManager.getActualValue('custGrp');
     if (issuingCntry == SysLoc.UK && (custGrp != undefined && custGrp != '') && custGrp == 'CROSS') {
       var _reqId = FormManager.getActualValue('reqId');
       var params = {
@@ -748,14 +750,6 @@ function autoSetSpecialTaxCdByScenario(_custType, custTypeinDB) {
       if (landCntry != 'undefined' && landCntry == 'IM') {
         FormManager.setValue('specialTaxCd', 'Bl');
         // FormManager.enable('specialTaxCd');
-      } else {
-        if (custSubGrp != null && custSubGrp == 'XINTR') {
-          FormManager.setValue('specialTaxCd', 'XX');
-          FormManager.readOnly('specialTaxCd');
-        } else {
-          FormManager.setValue('specialTaxCd', '32');
-          // FormManager.enable('specialTaxCd');
-        }
       }
     }
   }
@@ -882,9 +876,9 @@ function setUKIAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, 
       autoSetSboSrOnAddrSaveUK();
     }
 
-    if (_cityUKHandler == null) {
-      _cityUKHandler = dojo.connect(FormManager.getField('city1'), 'onChange', function(value) {
-        //autoSetAbbrevLocUKI();
+    if (_postalCdUKHandler == null) {
+      _postalCdUKHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
+        autoSetSpecialTaxCdByScenario();
       });
     }
 
@@ -6520,7 +6514,7 @@ function setExpediteReasonOnChange() {
   });
 }
 
-function validateVATFiscalLengthOnIdentIT() {
+function validateFiscalLengthOnIdentIT() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -6607,6 +6601,38 @@ function validateVATFiscalLengthOnIdentIT() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function validateVATOnIdentIT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var requestType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        if (requestType != 'C') {
+          return new ValidationResult(null, true);
+        }
+        var ident = FormManager.getActualValue('identClient');
+        var lbl1 = FormManager.getLabel('vat');
+        var vat = FormManager.getActualValue('vat');
+
+        if ((ident == 'A' || ident == 'C' || ident == 'D') && vat != undefined && vat != '' && !vat.match("^IT[0-9]{11}$")) {
+          return new ValidationResult({
+            id : 'vat',
+            type : 'text',
+            name : 'vat'
+          }, false, 'For Ident Client ' + ident + ', ' + lbl1 + ' must be IT99999999999.');
+        } else if ((ident == 'B' || ident == 'X' || ident == 'Y') && vat != '') {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'For Ident Client ' + ident + ', ' + lbl1 + ' must be Blank.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function setVATOnIdentClientChangeIT() {
   var requestType = FormManager.getActualValue('reqType');
   if (requestType != 'C') {
@@ -6618,7 +6644,19 @@ function setVATOnIdentClientChangeIT() {
   var landCntry = FormManager.getActualValue('landCntry');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var checkImportIndc = getImportedIndcForItaly();
-
+  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var cntryCdParams = {
+    REQ_ID : _zs01ReqId,
+    ADDR_TYPE : 'ZI01',
+  };
+  var cntryCdResult = cmr.query('ADDR.GET.LANDEDCNTRY.BY_REQID_ADDRTYPE', cntryCdParams);
+  if (cntryCdResult.ret1 != undefined) {
+    countyCd = cntryCdResult.ret1;
+  }
+  var isCrossBorder = false;
+  if (countyCd != 'IT') {
+    isCrossBorder = true;
+  }
   if (ident != '') {
     if (ident == 'B') {
       FormManager.resetValidations('vat');
@@ -6637,12 +6675,15 @@ function setVATOnIdentClientChangeIT() {
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       }
     }
-    if (custGrp == 'CROSS') {
+    if (isCrossBorder) {
       if (ident == 'N') {
-        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      } else {
-        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.resetValidations('taxCd1');
+        FormManager.readOnly('taxCd1');
+        FormManager.enable('vat');
+      } else if (ident == 'Y') {
+        FormManager.resetValidations('taxCd1');
+        FormManager.setValue('taxCd1', '');
+        FormManager.readOnly('taxCd1');
       }
     } else if (ident == 'X' || ident == 'N' || ident == 'Y') {
       FormManager.readOnly('vat');
@@ -10490,7 +10531,8 @@ dojo.addOnLoad(function() {
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(checkIfVATFiscalUpdatedIT, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(validateVATFiscalLengthOnIdentIT, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(validateFiscalLengthOnIdentIT, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(validateVATOnIdentIT, [ SysLoc.ITALY ]);
   // GEOHandler.registerValidator(validateSRForIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(addInstallingAddrValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateEnterpriseNumForIT, [ SysLoc.ITALY ], null, true);
@@ -10578,6 +10620,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.ITALY, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
 
   // CREATCMR-1727

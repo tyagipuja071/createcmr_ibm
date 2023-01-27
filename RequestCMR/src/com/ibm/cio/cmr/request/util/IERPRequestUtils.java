@@ -23,9 +23,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -33,6 +35,7 @@ import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.DropDownService;
+import com.ibm.cio.cmr.request.util.external.CreateCMRBPHandler;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
@@ -46,6 +49,7 @@ public class IERPRequestUtils extends RequestUtils {
   private static final Logger LOG = Logger.getLogger(RequestUtils.class);
   private static String emailTemplate = null;
   private static String batchemailTemplate = null;
+  private static final String usFspEmailTemplate = "createcmr-bp_end_user";
 
   private static final List<String> FIELDS_CLEAR_LIST = new ArrayList<String>();
 
@@ -163,6 +167,11 @@ public class IERPRequestUtils extends RequestUtils {
       // CREATCMR-2625,6677
       return;
     }
+
+    DataPK dataPk = new DataPK();
+    dataPk.setReqId(admin.getId().getReqId());
+    Data data = entityManager.find(Data.class, dataPk);
+
     String cmrno = "";
     String siteId = siteIds == null ? "" : siteIds;
     String rejectReason = history.getRejReason();
@@ -186,17 +195,9 @@ public class IERPRequestUtils extends RequestUtils {
       return; // no recipients, just return
     }
 
-    // code to retrive the CMR number and Site id for req_ID
-
-    sql = ExternalizedQuery.getSql("REQUESTENTRY.GETCMRANDSITEID");
-    query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", history.getReqId());
-    List<Data> res = query.getResults(Data.class);
-    for (Data result : res) {
-      cmrno = result.getCmrNo();
+    if (data != null) {
+      cmrno = data.getCmrNo();
     }
-
-    Data data = res != null && res.size() > 0 ? res.get(0) : new Data();
 
     if (rejectReason == null) {
       rejectReason = "";
@@ -307,32 +308,37 @@ public class IERPRequestUtils extends RequestUtils {
     }
     String host = SystemConfiguration.getValue("MAIL_HOST");
 
-    if (!StringUtils.isBlank(admin.getSourceSystId()) && "CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
-      String extTemplate = getExternalEmailTemplate(admin.getSourceSystId());
+    boolean usEndUserScenario = !StringUtils.isBlank(data.getCustSubGrp()) && data.getCustSubGrp().equals(USUtil.SC_FSP_END_USER);
+    if ((!StringUtils.isBlank(admin.getSourceSystId()) && "CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) || usEndUserScenario) {
+      String extTemplate = getExternalEmailTemplate(usEndUserScenario ? usFspEmailTemplate : admin.getSourceSystId());
       if (!StringUtils.isBlank(extTemplate)) {
         email = extTemplate;
       }
 
-      List<Object> params = new ArrayList<>();
-      params.add(history.getReqId() + ""); // {0}
-      params.add(customerName); // {1}
-      params.add(siteId); // {2}
-      params.add(cmrno); // {3}
-      params.add(type); // {4}
-      params.add(status); // {5}
-      params.add(history.getCreateByNm() + " (" + history.getCreateById() + ")"); // {6}
-      params.add(CmrConstants.DATE_FORMAT().format(history.getCreateTs())); // {7}
-      params.add(histContent); // {8}
-      params.add(directUrlLink); // {9}
-      params.add(rejectReason); // {10}
-      params.add(feedbackLink); // {11}
-
       String cmrIssuingCountry = data.getCmrIssuingCntry();
       String country = getIssuingCountry(entityManager, cmrIssuingCountry);
       country = cmrIssuingCountry + (StringUtils.isBlank(country) ? "" : " - " + country);
+
+      List<Object> params = new ArrayList<>();
+      params.add(history.getReqId() + ""); // {0}
+      params.add(customerName); // {1}
+      params.add(country); // {2}
+      params.add(cmrno); // {3}
+      params.add(siteId); // {4}
+      params.add(type); // {5}
+      params.add(status); // {6}
+      params.add(history.getCreateByNm() + " (" + history.getCreateById() + ")"); // {7}
+      params.add(CmrConstants.DATE_FORMAT().format(history.getCreateTs())); // {8}
+      params.add(histContent); // {9}
+      params.add(rejectReason); // {10}
+      params.add(feedbackLink); // {11}
       email = StringUtils.replace(email, "$COUNTRY$", country);
 
-      ExternalSystemUtil.addExternalMailParams(entityManager, params, admin); // {12},{13}
+      if (usEndUserScenario) {
+        new CreateCMRBPHandler().addEmailParams(entityManager, params, admin);
+      } else {
+        ExternalSystemUtil.addExternalMailParams(entityManager, params, admin); // {12},{13}
+      }
       email = MessageFormat.format(email, params.toArray(new Object[0]));
     }
 

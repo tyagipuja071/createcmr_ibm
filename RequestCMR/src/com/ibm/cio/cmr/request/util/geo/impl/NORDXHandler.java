@@ -111,7 +111,7 @@ public class NORDXHandler extends BaseSOFHandler {
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
-
+    boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
       // only add zs01 equivalent for create by model
       FindCMRRecordModel record = mainRecord;
@@ -179,17 +179,12 @@ public class NORDXHandler extends BaseSOFHandler {
             String legacyAddressSeq = getLegacyAddressSeq(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), legacyseqNoformat);
 
             if (StringUtils.isBlank(legacyAddressSeq)) {
-              continue;
+              if ("ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
+                record.setCmrAddrTypeCode("PG01");
+              } else if (!"ZP01".equals(record.getCmrAddrTypeCode())) {
+                continue;
+              }
             }
-
-            // if (StringUtils.isBlank(legacyAddressSeq)) {
-            // if ("ZP01".equals(record.getCmrAddrTypeCode()) &&
-            // "PG".equals(record.getCmrOrderBlock())) {
-            // record.setCmrAddrTypeCode("PG01");
-            // } else {
-            // continue;
-            // }
-            // }
 
             // if
             // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
@@ -922,6 +917,7 @@ public class NORDXHandler extends BaseSOFHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
       data.setAbbrevNm("");
       data.setAffiliate("");
       data.setClientTier("");
@@ -944,7 +940,11 @@ public class NORDXHandler extends BaseSOFHandler {
       data.setCovId("");
       data.setBgId("");
       data.setGeoLocationCd("");
-      data.setOrdBlk("");
+      if (prospectCmrChosen) {
+        data.setOrdBlk(mainRecord.getCmrOrderBlock());
+      } else {
+        data.setOrdBlk("");
+      }
       data.setCovDesc("");
       data.setBgDesc("");
       data.setBgRuleId("");
@@ -1198,7 +1198,7 @@ public class NORDXHandler extends BaseSOFHandler {
               ctc = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
               isu = validateColValFromCell(currCell);
-                if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isu))) {
+              if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isu))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(isu) && "34".equals(isu)) {

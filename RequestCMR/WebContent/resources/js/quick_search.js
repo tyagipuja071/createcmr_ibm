@@ -96,6 +96,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     $scope.records = [];
     cmr.showProgress('Searching for records, please wait..');
     $scope.allowByModel = true;
+    $scope.hideLocalLangData = false;
     dojo.xhrPost({
       url : cmr.CONTEXT_ROOT + '/quick_search/find.json',
       handleAs : 'json',
@@ -109,6 +110,11 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
           var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
           if (byModel && byModel.ret1 == 'Y'){
             $scope.allowByModel = false;
+          } 
+          
+          var localLangDataFlg = cmr.query('HIDE_LOCAL_LANG_DATA', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
+          if (localLangDataFlg && localLangDataFlg.ret1 == 'Y'){
+            $scope.hideLocalLangData = true;
           } 
           if (data.items.length > 50) {
             alert('The search resulted to more than 50 matches. Only the top 50 matches will be shown. Please try to change the search parameters to get the other records you need.');
@@ -495,6 +501,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
 
 app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout', '$sanitize', function($scope, $document, $http, $timeout, $sanitize) {
   $scope.allowByModel = true;
+  $scope.hideLocalLangData = false;
   $scope.getParameterByName = function(name, url) {
     if (!url) {
       url = window.location.href;
@@ -545,6 +552,11 @@ app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout'
   if (byModel && byModel.ret1 == 'Y'){
     $scope.allowByModel = false;
   } 
+  
+  var localLangDataFlg = cmr.query('HIDE_LOCAL_LANG_DATA', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
+  if (localLangDataFlg && localLangDataFlg.ret1 == 'Y'){
+    $scope.hideLocalLangData = true;
+   } 
 
   $scope.loadDetails = function() {
     if ($scope.cmrNo) {

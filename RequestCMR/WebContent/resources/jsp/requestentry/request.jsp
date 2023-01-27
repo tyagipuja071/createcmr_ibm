@@ -330,7 +330,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     </c:if>
     <form:hidden path="covBgRetrievedInd" />
     <form:hidden path="rdcProcessingMsg" />
-    <cmr:view exceptForCountry="848,618,724,706,897">
+    <cmr:view exceptForCountry="848,618,724,706,897,619,621,627,647,640,759,791,839,843,859">
     	<form:hidden path="ordBlk" />
     </cmr:view>
     <cmr:view forGEO="LA">
@@ -453,6 +453,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <%
       if (!"Viewer".equals(reqentry.getUserRole()) && CmrConstants.APPROVAL_RESULT_PENDING.equals(reqentry.getApprovalResult())) {
     %>
+    <br>
     <cmr:row>
       <cmr:column span="6">
         <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
@@ -467,10 +468,25 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <%
       if ("Requester".equals(reqentry.getUserRole()) && CmrConstants.APPROVAL_RESULT_COND_APPROVED.equals(reqentry.getApprovalResult())) {
     %>
+    <br>
     <cmr:row>
       <cmr:column span="6">
         <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
         <cmr:note text="${ui.info.condApproved}" />
+      </cmr:column>
+    </cmr:row>
+    <br>
+    <%
+      }
+    %>   
+     <%
+      if ("Requester".equals(reqentry.getUserRole()) && CmrConstants.APPROVAL_RESULT_COND_CANCELLED.equals(reqentry.getApprovalResult())) {
+    %>
+    <br>
+    <cmr:row>
+      <cmr:column span="6">
+        <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
+        <cmr:note text="${ui.info.condCancelled}" />
       </cmr:column>
     </cmr:row>
     <br>

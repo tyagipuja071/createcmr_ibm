@@ -1794,10 +1794,19 @@ public class EMEAHandler extends BaseSOFHandler {
         data.setCollectionCd("TC0");
       }
       // special tax code
-      if ((SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry()))
-          && (StringUtils.isEmpty(data.getSpecialTaxCd()) || data.getSpecialTaxCd() != null || !StringUtils.isNotBlank(data.getSpecialTaxCd()))
-          && ("U".equals(admin.getReqType()))) {
-        data.setSpecialTaxCd("Bl");
+      if (StringUtils.isNotBlank(data.getCmrIssuingCntry()) && StringUtils.isNotBlank(data.getCmrNo())
+          && (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry()))
+          && "U".equals(admin.getReqType())) {
+        EntityManager entityManager = JpaManager.getEntityManager();
+        String sql = ExternalizedQuery.getSql("GET.CMRTCUST.IS_EMPTY_CTXXA");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("CNTRY", data.getCmrIssuingCntry());
+        query.setParameter("CMR_NO", data.getCmrNo());
+        query.setForReadOnly(true);
+        List<Integer> records = query.getResults(Integer.class);
+        if (records != null && records.size() >= 0) {
+          data.setSpecialTaxCd("Bl");
+        }
       }
       // Changed abbreviated location if cross border to country
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {

@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.swat.password.ReturnCode;
 import com.ibm.swat.password.cwa2;
@@ -54,10 +55,9 @@ public class UserAuthenticationHelper {
     int cwaReturnCode = -1;
     try {
 
-      final String ldapHost = "bluepages.ibm.com";
+      cwa2 cwa = BluePagesHelper.getCWA2();
 
       // cwa2 cwa = new cwa2();
-      cwa2 cwa = new cwa2("ldaps://bluepages.ibm.com:636", "ldaps://bluegroups.ibm.com:636");
       final ReturnCode cwa2rc = cwa.authenticate(intranetId, password, ldapHost);
 
       LOG.info("Blue page authentication return code:" + cwa2rc.getCode() + " message: " + cwa2rc.getMessage());

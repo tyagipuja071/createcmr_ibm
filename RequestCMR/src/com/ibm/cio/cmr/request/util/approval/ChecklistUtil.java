@@ -88,9 +88,11 @@ public class ChecklistUtil {
       if (BUNDLE.containsKey("chk." + sysLoc + "." + section)) {
         item.setLabel(BUNDLE.getString("chk." + sysLoc + "." + section));
       } else if (BUNDLE.containsKey("chk.CEMEA." + section)) {
-        LOG.warn("Warning: Element for " + sysLoc + " missing in the " + BUNDLE + ".properties file. Using CEMEA");
-        // TODO fix this later
-        item.setLabel(BUNDLE.getString("chk.CEMEA." + section));
+        if (!"641".equals(sysLoc) && !"736".equals(sysLoc) && !"738".equals(sysLoc)) {
+          LOG.warn("Warning: Element for " + sysLoc + " missing in the " + BUNDLE + ".properties file. Using CEMEA" + section);
+          // TODO fix this later
+          item.setLabel(BUNDLE.getString("chk.CEMEA." + section));
+        }
       }
       return item;
     } catch (MissingResourceException e) {
