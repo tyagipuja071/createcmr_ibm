@@ -846,6 +846,9 @@ function setMrc4IntDumForASEAN() {
     FormManager.enable('isuCd');
   } else if ((custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM') || (['BLUMX', 'PRIV', 'MKTPC'].includes(custSubGrp) && cntry == '749') || (['BLUMX', 'PRIV', 'MKTPC', 'SPOFF'].includes(custSubGrp) && cntry == '834')) {
     FormManager.setValue('mrcCd', '3');
+    if (custSubGrp == 'DUMMY' && (cntry == '818' || cntry == '852')) {
+      return;
+    }
     FormManager.enable('isuCd');
   }
   
@@ -2424,43 +2427,24 @@ function setCTCIsuByClusterASEAN() {
           FormManager.setValue('isuCd', isuCdValue[0]);
         } else if (apClientTierValue.length > 1) {
           if(custSubGrp.includes('BLUM') || custSubGrp.includes('MKTP') || custSubGrp.includes('MKP') || ((custSubGrp.includes('DUMMY') || custSubGrp.includes('XDUMM')) && issuingCntries.includes(_cmrIssuingCntry)) || ((custSubGrp.includes('PRICU') || custSubGrp.includes('BLUMX') || custSubGrp.includes('SPOFF')) && (_cmrIssuingCntry == '749' || _cmrIssuingCntry == '834')) || (_cmrIssuingCntry == '834' && _cluster == '00000' && (custSubGrp == 'MKTPC' || custSubGrp == 'PRIV' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP' || custSubGrp == 'XPRIV'))) {
-            if(issuingCnt3.includes(_cmrIssuingCntry) && custSubGrp.includes('DUMMY')) {
-              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
-              FormManager.setValue('isuCd','21');
-              FormManager.readOnly('isuCd');
-            } else {
               FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q' , 'Y']);
               FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
               FormManager.setValue('isuCd','34');
-              
-              if(_cmrIssuingCntry == '856' && custSubGrp == 'BUSPR') {
-                FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z' ]);
-              }
-            }  
-          } else if((custSubGrp.includes('INTER') || custSubGrp.includes('XINT')) && !issuingCnt3.includes(_cmrIssuingCntry)) {
+          } else if((custSubGrp.includes('INTER') || custSubGrp.includes('XINT'))) {
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
             FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
             FormManager.setValue('clientTier', 'Z');
             FormManager.setValue('isuCd','21');
-          } else if (issuingCnt3.includes(_cmrIssuingCntry)) {
-            if(custSubGrp.includes('INTER')) {
-              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
-              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
-              FormManager.setValue('clientTier', '0');
-              FormManager.setValue('isuCd','60');
-            } else if(custSubGrp.includes('CROSS')) {
-              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
-              FormManager.setValue('clientTier', 'Z');
-              FormManager.setValue('isuCd','34');
-            }            
           } else {
             FormManager.resetDropdownValues(FormManager.getField('clientTier'));
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
             FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
           }
        }
+     }
+     
+     if (issuingCnt3.includes(_cmrIssuingCntry)) {
+       setCTCIsuByClusterPhVnTh();
      }
       
      if (clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || _cluster.includes('BLAN') || clusterDesc[0].ret1.includes('S&S'))) {
@@ -4737,6 +4721,46 @@ function setDefaultOnScenarioChangeTH(fromAddress, scenario, scenarioChanged) {
   
   if(scenarioChanged && scenario == 'CROSS') {
     FormManager.setValue('apCustClusterId','00000');
+  }
+}
+
+function setCTCIsuByClusterPhVnTh() {
+  var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var scenario = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var issuingCnt3 = [ '818', '856', '852' ];
+
+  if (custSubGrp == 'BLUM' || custSubGrp == 'MKTP' || custSubGrp == 'MKP'
+      || ((custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM') && issuingCnt3.includes(_cmrIssuingCntry))) {
+    if (custSubGrp == 'DUMMY') {
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Z' ]);
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '21' ]);
+      FormManager.setValue('isuCd', '21');
+      FormManager.setValue('clientTier', 'Z');
+      FormManager.readOnly('isuCd');
+    } else {
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q', 'Y' ]);
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
+      FormManager.setValue('isuCd', '34');
+      if (_cmrIssuingCntry == '856' && custSubGrp == 'BUSPR') {
+        FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Z' ]);
+      }
+    }
+  } else if (custSubGrp.includes('INTER')) {
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ '0' ]);
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '60' ]);
+    FormManager.setValue('clientTier', '0');
+    FormManager.setValue('isuCd', '60');
+  } else if (custSubGrp.includes('CROSS')) {
+   // FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Z'
+    // ]);
+   // FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
+    // FormManager.setValue('clientTier', 'Z');
+   // FormManager.setValue('isuCd', '34');
+  } else {
+    FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
   }
 }
 
