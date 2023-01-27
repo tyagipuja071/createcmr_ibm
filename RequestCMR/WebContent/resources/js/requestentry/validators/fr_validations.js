@@ -1033,7 +1033,7 @@ function setCtcForIsu5K() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var custSubGrpArray = [ 'INTER', 'INTSO', 'IBMEM', 'BUSPR', 'XBUSP' ];
+  var custSubGrpArray = [ 'INTER', 'INTSO', 'IBMEM', 'BUSPR', 'XBUSP', 'CBTER', 'CBTSO', 'CBIEM' ];
   if (isuCd == '5K' || isuCd == '14' || isuCd == '18' || isuCd == '19' || isuCd == '1R' || isuCd == '31' || isuCd == '3T' || isuCd == '4A') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
@@ -3089,7 +3089,7 @@ function lockIBMTabForFR() {
     FormManager.readOnly('clientTier');
   }// CMR-234 -end
 
-  var custSubGrpArray = [ 'INTER', 'INTSO', 'IBMEM', 'BUSPR', 'XBUSP' ];
+  var custSubGrpArray = [ 'INTER', 'INTSO', 'IBMEM', 'BUSPR', 'XBUSP', 'CBTER', 'CBTSO', 'CBIEM' ];
   if (role == 'PROCESSOR' && ((reqType == 'C' && !custSubGrpArray.includes(custSubType)) || reqType == 'U')) {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
@@ -4185,10 +4185,10 @@ function postBoxValidationBillTo() {
   })(), null, 'frmCMR_addressModal');
 }
 
-// CREATCMR-6000 2H22 coverage changes
+// CREATCMR-8031 2H23 coverage changes
 function isCoverage2H22MEACountry(country) {
-  var emaCountryList = [ 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'ML', 'MR', 'MA', 'NE', 'SN', 'TG', 'AE', 'CI' ];
-  return emaCountryList.includes(country);
+  var meaCountryList = [ 'AE', 'BJ', 'BF', 'CM', 'CF', 'TD', 'GQ', 'GA', 'GM', 'GW', 'ML', 'MR', 'MA', 'NE', 'SN', 'TG', 'TN', 'AE', 'CG', 'CI', 'GN', ];
+  return meaCountryList.includes(country);
 }
 
 function isCoverage2H22Subregion(countryCd) {
@@ -4197,7 +4197,10 @@ function isCoverage2H22Subregion(countryCd) {
 }
 
 function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
-
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
   if (fromAddress && currentLanded != undefined) {
     landedCountry = currentLanded;
   } else {
@@ -4230,6 +4233,23 @@ function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
       FormManager.setValue('isuCd', '21');
       FormManager.setValue('clientTier', '');
       FormManager.setValue('salesBusOffCd', '200200');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('salesBusOffCd');
+    } else if (landedCountry == 'TN') {
+      FormManager.setValue('isuCd', '34');
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('salesBusOffCd', '710710');
+      if (role == 'Requester') {
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('clientTier');
+        FormManager.readOnly('salesBusOffCd');
+      } else if (role == 'Processor') {
+        FormManager.enable('isuCd');
+        FormManager.enable('clientTier');
+        FormManager.enable('salesBusOffCd');
+      }
+
     }
   }
 }
