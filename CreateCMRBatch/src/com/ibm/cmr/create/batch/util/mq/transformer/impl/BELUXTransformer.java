@@ -954,9 +954,9 @@ public class BELUXTransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "28".equals(data.getIsuCd()))) {
+    /*if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "28".equals(data.getIsuCd()))) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
-    }
+    }*/
 
   }
 
