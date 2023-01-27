@@ -2444,7 +2444,7 @@ function setCTCIsuByClusterASEAN() {
      }
      
      if (issuingCnt3.includes(_cmrIssuingCntry)) {
-       setCTCIsuByClusterPhVnTh();
+       setCTCIsuByClusterPhVnTh(apClientTierValue, isuCdValue);
      }
       
      if (clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || _cluster.includes('BLAN') || clusterDesc[0].ret1.includes('S&S'))) {
@@ -4724,11 +4724,13 @@ function setDefaultOnScenarioChangeTH(fromAddress, scenario, scenarioChanged) {
   }
 }
 
-function setCTCIsuByClusterPhVnTh() {
+function setCTCIsuByClusterPhVnTh(apClientTierValue, isuCdValue) {
   var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var scenario = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var cluster = FormManager.getActualValue('apCustClusterId');
   var issuingCnt3 = [ '818', '856', '852' ];
+
 
   if (custSubGrp == 'BLUM' || custSubGrp == 'MKTP' || custSubGrp == 'MKP'
       || ((custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM') && issuingCnt3.includes(_cmrIssuingCntry))) {
@@ -4751,16 +4753,24 @@ function setCTCIsuByClusterPhVnTh() {
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '60' ]);
     FormManager.setValue('clientTier', '0');
     FormManager.setValue('isuCd', '60');
-  } else if (custSubGrp.includes('CROSS')) {
-   // FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Z'
-    // ]);
-   // FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
-    // FormManager.setValue('clientTier', 'Z');
-   // FormManager.setValue('isuCd', '34');
+  } else if (custSubGrp.includes('CROSS') && _cmrIssuingCntry == '856' && cluster == '00000') {
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Z']);
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
+    FormManager.setValue('clientTier', 'Z');
+    FormManager.setValue('isuCd', '34');
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
+  }
+  
+  if(_cmrIssuingCntry == '856') {
+    var isClientTierReadOnlyFromScenarios = TemplateService.isFieldReadOnly('clientTier');
+    if(isClientTierReadOnlyFromScenarios) {
+      FormManager.readOnly('clientTier');
+    } else {
+      FormManager.enable('clientTier'); 
+    }
   }
 }
 
