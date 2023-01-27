@@ -2077,8 +2077,9 @@ function setCTCValues() {
     }
   }
 
-  // Internal
-  var custSubGrpForInternal = [ 'INTER', 'LSINT', 'LSXIN', 'NAINT', 'NAXIN', 'SZINT', 'SZXIN', 'XINTE', 'ZAINT', 'ZAXIN' ];
+  // Internal and IBM Employee
+  var custSubGrpForInternal = [ 'INTER', 'XINTE', 'IBMEM', 'XIBME', 'LSIBM', 'LSXIB', 'LSXIN', 'LSINT', 'NAIBM', 'NAXIB', 'NAXIN', 'NAINT', 'SZIBM', 'SZXIB', 'SZXIN', 'SZINT', 'ZAIBM', 'ZAXIB',
+      'ZAXIN', 'ZAINT' ];
 
   // Internal
   if (custSubGrpForInternal.includes(custSubGrp)) {
