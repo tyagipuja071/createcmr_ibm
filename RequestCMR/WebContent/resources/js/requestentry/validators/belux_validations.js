@@ -70,7 +70,8 @@ function afterConfigForBELUX() {
   // isuCd & clientTier
   if (custSubGrpLst3 == 'BUS' || custSubGrpLst3 == 'PRI' || custSubGrpLst3 == 'INT' || custSubGrpLst3 == 'ISO') {
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
+    // Tier' ], 'MAIN_IBM_TAB');
   }
   // economicCd
   if (custSubGrpLst3 == 'BUS' || custSubGrpLst3 == 'INT' || custSubGrpLst3 == 'ISO') {
@@ -789,7 +790,7 @@ function setVatValidatorBELUX() {
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
     if (custSubGrp == 'BEPRI' || custSubGrp == 'LUPRI') {
-//      FormManager.removeValidator('vat', Validators.REQUIRED);
+      // FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.readOnly('vat');
     } else if (custSubGrp == 'BEPUB' || custSubGrp == 'LUPUB') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
@@ -2018,14 +2019,25 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
+  // if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType ==
+  // 'C') || (isuCode != '34' && reqType == 'U')) {
+  var activeIsuCd = [ '32', '34', '36' ];
+  var activeCtc = [ 'Q', 'Y', 'T' ];
+
+  if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
     } else {
       $("#clientTierSpan").html('');
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank.');
 
       return new ValidationResult({
         id : 'clientTier',
@@ -2034,24 +2046,37 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+    if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+      }, false, 'Client Tier can only accept \'Q\'.');
+    }
+  } else if (isuCode == '36') {
+    if (clientTierCode == 'Y') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Y\'.');
+    }
+  } else if (isuCode == '32') {
+    if (clientTierCode == 'T') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'T\'.');
     }
   } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+    if (activeCtc.includes(clientTierCode) || clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
@@ -2063,11 +2088,75 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\' , \'T\' or blank.');
     }
   }
 }
 // CREATCMR-4293
+
+function beluxSortlValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqTyp = FormManager.getActualValue('reqType');
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var searchTerm = FormManager.getActualValue('searchTerm');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        var countryUse = FormManager.getActualValue('countryUse');
+        var isuCtc = isuCode.concat(clientTierCode);
+        var subIndustry = FormManager.getActualValue('subIndustryCd');
+        var ind = subIndustry.substring(0, 1);
+
+        var scenariosToBlock = [ 'BEBUS', 'BEINT', 'IBMEM', 'BEPRI', 'LUBUS', 'LUINT', 'LUIBM', 'LUPRI', 'LUISO' ];
+
+        var accSeq_624 = {
+          '34Q' : [ 'T0003601' ],
+          '36Y' : [ 'T0007967' ],
+          '32T' : [ 'T0010421', 'T0010425', 'T0010403', 'T0010422', 'T0010426', 'T0010423', 'T0010424' ],
+          '5K' : [ 'T0009066' ],
+          '21' : [ 'BU0000', 'P0000003' ],
+          '28' : [ 'A0004504' ]
+        };
+
+        var accSeq_624LU = {
+          '34Q' : [ 'T0003500' ],
+          '21' : [ 'P0000046', 'LU0000' ],
+          '36Y' : [ 'T0007968' ],
+          '5K' : [ 'T0009902' ]
+        };
+
+        if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
+          if (cmrIssuingCntry == '624') {
+            if (countryUse == '624') {
+              if (accSeq_624.hasOwnProperty(isuCtc) && !accSeq_624[isuCtc].includes(searchTerm)) {
+                return new ValidationResult({
+                  id : 'searchTerm',
+                  type : 'text',
+                  name : 'searchTerm'
+                }, false, 'SearchTerm can only accept ' + accSeq_624[isuCtc]);
+              }
+            }
+            if (cmrIssuingCntry == '624') {
+              if (countryUse == '624LU') {
+                if (accSeq_624LU.hasOwnProperty(isuCtc) && !accSeq_624LU[isuCtc].includes(searchTerm)) {
+                  return new ValidationResult({
+                    id : 'searchTerm',
+                    type : 'text',
+                    name : 'searchTerm'
+                  }, false, 'SearchTerm can only accept ' + accSeq_624LU[isuCtc]);
+                }
+              }
+            }
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
 
 function clientTierValidator() {
   FormManager.addFormValidator((function() {
@@ -2234,4 +2323,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX); 
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX);
 
+  GEOHandler.registerValidator(beluxSortlValidator, GEOHandler.BELUX, null, true);
 });

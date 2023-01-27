@@ -861,6 +861,12 @@ public class NLTransformer extends EMEATransformer {
       } else {
         legacyCust.setEmbargoCd("");
       }
+      
+      if (!StringUtils.isEmpty(data.getIsuCd())) {
+          if (StringUtils.isEmpty(data.getClientTier())) {
+            legacyCust.setIsuCd(data.getIsuCd() + "7");
+          }
+        }
 
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
       // CREATCMR-845
