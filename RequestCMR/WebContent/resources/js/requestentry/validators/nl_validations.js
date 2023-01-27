@@ -45,9 +45,11 @@ function afterConfigForNL() {
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
-    if (FormManager.getActualValue('custSubGrp') != 'IBMEM') {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-    }
+    /*
+     * if (FormManager.getActualValue('custSubGrp') != 'IBMEM') {
+     * FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
+     * Tier' ], 'MAIN_IBM_TAB'); }
+     */
     FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'BO Team' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('isuCd', Validators.REQUIRED);
@@ -114,7 +116,7 @@ function afterConfigForNL() {
   }
   lockDunsNo();
   disableIBMTab();
-  
+
   // CREATCMR-788
   addressQuotationValidatorNL();
 }
@@ -391,7 +393,7 @@ function addHandlersForNL() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
-      setClientTierValuesForUpdate();
+      // setClientTierValuesForUpdate();
       setSORTLBasedOnIsuCtc();
     });
   }
@@ -428,12 +430,12 @@ function addHandlersForNL() {
       setExpediteReason();
     });
   }
-  
+
   if (_SubSceanrioHandler == null) {
-	  _SubSceanrioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-	      setEcoCodeBasedOnSubScenario();
-	    });
-	  }
+    _SubSceanrioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      setEcoCodeBasedOnSubScenario();
+    });
+  }
 }
 
 function setExpediteReason() {
@@ -475,7 +477,7 @@ function setClientTierValues(isuCd) {
         clientTiers.push(results[i].ret1);
       }
       if (clientTiers != null) {
-        if ('7' == clientTierUI && ('5B' == isuCd || '04' == isuCd || '15' == isuCd)) {
+        if ('7' == clientTierUI && ('5K' == isuCd || '21' == isuCd || '28' == isuCd)) {
           FormManager.setValue('clientTier', '');
         }
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
@@ -568,9 +570,7 @@ function setBOTeamValues(clientTier) {
       console.log('custSubGrp==' + FormManager.getActualValue('custSubGrp'));
       console.log('pagemodel custSubGrp==' + _pagemodel.custSubGrp);
 
-      if (FormManager.getActualValue('custSubGrp') != null
-          && FormManager.getActualValue('custSubGrp') != ''
-          && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp
+      if (FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp
           || (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp && FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd)) {
         FormManager.setValue('engineeringBo', selectedBoTeam[0]);
 
@@ -725,10 +725,10 @@ function setSORTL() {
   case 'INTER':
   case 'PRICU':
   case 'BUSPR':
-    if (boTeam != _pagemodel.engineeringBo) {
-      FormManager.setValue('commercialFinanced', boTeam);
-    }
-    break;
+    /*
+     * if (boTeam != _pagemodel.engineeringBo) {
+     * FormManager.setValue('commercialFinanced', boTeam); } break;
+     */
   case 'COMME':
   case 'PUBCU':
   case 'THDPT':
@@ -998,8 +998,7 @@ function addNLAddressTypeValidator() {
     return {
       validate : function() {
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-          return new ValidationResult(null, false,
-              'Sold-to address is mandatory. Only one address for each address type should be defined when sending for processing.');
+          return new ValidationResult(null, false, 'Sold-to address is mandatory. Only one address for each address type should be defined when sending for processing.');
         }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           var reqType = FormManager.getActualValue('reqType');
@@ -1118,29 +1117,26 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
 
 function addAddressFieldValidators() {
   // Street and PO BOX for General Address
-  FormManager
-      .addFormValidator(
-          (function() {
-            return {
-              validate : function() {
-                var addrType = FormManager.getActualValue('addrType');
-                var addrFldCnt = 0;
-                var streetCont = 0;
-                if (FormManager.getActualValue('poBox') != '') {
-                  addrFldCnt++;
-                }
-                if (FormManager.getActualValue('addrTxt') != '') {
-                  addrFldCnt++;
-                  streetCont++;
-                }
-                if (addrFldCnt < 2 && streetCont < 1 && addrType == 'ZS01') {
-                  return new ValidationResult(null, false,
-                      'In General Address, Street is mandatory at all times. It can be filled along with PO BOX but PO BOX cannot be filled without Street.');
-                }
-                return new ValidationResult(null, true);
-              }
-            };
-          })(), null, 'frmCMR_addressModal');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var addrType = FormManager.getActualValue('addrType');
+        var addrFldCnt = 0;
+        var streetCont = 0;
+        if (FormManager.getActualValue('poBox') != '') {
+          addrFldCnt++;
+        }
+        if (FormManager.getActualValue('addrTxt') != '') {
+          addrFldCnt++;
+          streetCont++;
+        }
+        if (addrFldCnt < 2 && streetCont < 1 && addrType == 'ZS01') {
+          return new ValidationResult(null, false, 'In General Address, Street is mandatory at all times. It can be filled along with PO BOX but PO BOX cannot be filled without Street.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
 
   // Street and PO BOX
   FormManager.addFormValidator((function() {
@@ -1287,22 +1283,14 @@ function addCrossBorderValidatorNL() {
           ADDRTYPE : addrType,
           SEQNO : seqNo
         });
-        if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 != defaultLandCntry
-            && scenario != 'CROSS' && billingCnt == 0) {
-          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should be \'' + defaultLandCntry
-              + '\' for Non Cross-Border customers.');
-        } else if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 == defaultLandCntry
-            && scenario == 'CROSS' && billingCnt == 0) {
-          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should not be \'' + defaultLandCntry
-              + '\' for Cross-Border customers.');
-        } else if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 != defaultLandCntry
-            && scenario != 'CROSS' && billingCnt > 0) {
-          return new ValidationResult(null, false, 'Landed Country value of the Billing  Address should be \'' + defaultLandCntry
-              + '\' for Non Cross-Border customers.');
-        } else if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 == defaultLandCntry
-            && scenario == 'CROSS' && billingCnt > 0) {
-          return new ValidationResult(null, false, 'Landed Country value of the Billing  Address should not be \'' + defaultLandCntry
-              + '\' for Cross-Border customers.');
+        if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 != defaultLandCntry && scenario != 'CROSS' && billingCnt == 0) {
+          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should be \'' + defaultLandCntry + '\' for Non Cross-Border customers.');
+        } else if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 == defaultLandCntry && scenario == 'CROSS' && billingCnt == 0) {
+          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should not be \'' + defaultLandCntry + '\' for Cross-Border customers.');
+        } else if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 != defaultLandCntry && scenario != 'CROSS' && billingCnt > 0) {
+          return new ValidationResult(null, false, 'Landed Country value of the Billing  Address should be \'' + defaultLandCntry + '\' for Non Cross-Border customers.');
+        } else if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 == defaultLandCntry && scenario == 'CROSS' && billingCnt > 0) {
+          return new ValidationResult(null, false, 'Landed Country value of the Billing  Address should not be \'' + defaultLandCntry + '\' for Cross-Border customers.');
         }
         return new ValidationResult(null, true);
       }
@@ -1509,50 +1497,49 @@ function addCmrNoValidator() {
 }
 
 function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
-  FormManager
-      .addFormValidator(
-          (function() {
-            return {
-              validate : function() {
-                var reqReason = FormManager.getActualValue('reqReason');
-                var addressType = FormManager.getActualValue('addrType');
-                if (addressType == 'ZP02') {
-                  if (reqReason != 'IGF') {
-                    return new ValidationResult(null, false, 'Request Reason should be IGF.');
-                  }
-                }
-                var requestId = FormManager.getActualValue('reqId');
-                var addressSeq = FormManager.getActualValue('addrSeq');
-                var dummyseq = "xx";
-                var showDuplicateIGFBillToError = false;
-                var qParams;
-                if (cmr.addressMode == 'updateAddress') {
-                  qParams = {
-                    REQ_ID : requestId,
-                    ADDR_SEQ : addressSeq,
-                    ADDR_TYPE : addressType
-                  };
-                } else {
-                  qParams = {
-                    REQ_ID : requestId,
-                    ADDR_SEQ : dummyseq,
-                    ADDR_TYPE : addressType
-                  };
-                }
-                var result = cmr.query('GETADDRECORDSBYTYPE', qParams);
-                var addCount = result.ret1;
-                if (addressType != undefined && addressType != '' && addressType == 'ZP02' && cmr.addressMode != 'updateAddress') {
-                  showDuplicateIGFBillToError = Number(addCount) >= 1 && addressType == 'ZP02';
-                  if (showDuplicateIGFBillToError) {
-                    return new ValidationResult(null, false,
-                        'Only one IGF Bill-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
-                  }
-                }
-
-                return new ValidationResult(null, true);
+  FormManager.addFormValidator(
+      (function() {
+        return {
+          validate : function() {
+            var reqReason = FormManager.getActualValue('reqReason');
+            var addressType = FormManager.getActualValue('addrType');
+            if (addressType == 'ZP02') {
+              if (reqReason != 'IGF') {
+                return new ValidationResult(null, false, 'Request Reason should be IGF.');
               }
-            };
-          })(), null, 'frmCMR_addressModal');
+            }
+            var requestId = FormManager.getActualValue('reqId');
+            var addressSeq = FormManager.getActualValue('addrSeq');
+            var dummyseq = "xx";
+            var showDuplicateIGFBillToError = false;
+            var qParams;
+            if (cmr.addressMode == 'updateAddress') {
+              qParams = {
+                REQ_ID : requestId,
+                ADDR_SEQ : addressSeq,
+                ADDR_TYPE : addressType
+              };
+            } else {
+              qParams = {
+                REQ_ID : requestId,
+                ADDR_SEQ : dummyseq,
+                ADDR_TYPE : addressType
+              };
+            }
+            var result = cmr.query('GETADDRECORDSBYTYPE', qParams);
+            var addCount = result.ret1;
+            if (addressType != undefined && addressType != '' && addressType == 'ZP02' && cmr.addressMode != 'updateAddress') {
+              showDuplicateIGFBillToError = Number(addCount) >= 1 && addressType == 'ZP02';
+              if (showDuplicateIGFBillToError) {
+                return new ValidationResult(null, false,
+                    'Only one IGF Bill-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+              }
+            }
+
+            return new ValidationResult(null, true);
+          }
+        };
+      })(), null, 'frmCMR_addressModal');
 }
 
 function streetValueFormatterBELUX(value, rowIndex) {
@@ -1592,8 +1579,7 @@ function rdcDupZP01Check(cntry, addressMode, saving, finalSave, force) {
           };
           var result = cmr.query('BENELUX.CHECK_RDC_ZP01', qParams);
           if (result != null && result.ret1 != null) {
-            return new ValidationResult(null, false,
-                'Existing Bill-to address was identified in RDc and new one cannot be created, please contact CMR team for further assistence.');
+            return new ValidationResult(null, false, 'Existing Bill-to address was identified in RDc and new one cannot be created, please contact CMR team for further assistence.');
           }
         }
         return new ValidationResult(null, true);
@@ -1642,8 +1628,7 @@ function rdcDupZP01CheckValidator() {
             };
             var result = cmr.query('BENELUX.CHECK_RDC_ZP01', qParams);
             if (result != null && result.ret1 != null) {
-              return new ValidationResult(null, false,
-                  'Existing Bill-to address was identified in RDc and new one cannot be created, please contact CMR team for further assistence.');
+              return new ValidationResult(null, false, 'Existing Bill-to address was identified in RDc and new one cannot be created, please contact CMR team for further assistence.');
             }
           } else {
             return new ValidationResult(null, true);
@@ -1690,67 +1675,83 @@ function addIGFZP02Validator() {
 }
 
 function setSORTLBasedOnIsuCtc() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U'
-    || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-  var isuList = [ '34', '5K', '15', '4A', '04', '28' ];
-  if (isuCd == '34' && clientTier == 'Y') {
-    FormManager.setValue('commercialFinanced', 'T0007969');
-  } else if (isuCd == '34' && clientTier == 'Q') {
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  // before coverage
+  /*
+   * var isuList = [ '34', '5K', '15', '4A', '04', '28' ]; if (isuCd == '34' &&
+   * clientTier == 'Y') { FormManager.setValue('commercialFinanced',
+   * 'T0007969'); } else if (isuCd == '34' && clientTier == 'Q') {
+   * FormManager.setValue('commercialFinanced', 'T0003611'); } else if (isuCd ==
+   * '5K' && clientTier == '') { FormManager.setValue('commercialFinanced',
+   * 'T0009067'); } else if (isuCd == '28' && clientTier == '') {
+   * FormManager.setValue('commercialFinanced', 'I0000270'); } else if (isuCd ==
+   * '15' && clientTier == '') { FormManager.setValue('commercialFinanced',
+   * 'A0005229'); } else if (isuCd == '4A' && clientTier == '') {
+   * FormManager.setValue('commercialFinanced', 'A0005236'); } else if (isuCd ==
+   * '04' && clientTier == '') { FormManager.setValue('commercialFinanced',
+   * 'I0000002'); } else { FormManager.setValue('commercialFinanced', ''); }
+   */
+  //
+  var isuList = [ '21', '34', '36', '5K', '32', '28' ];
+  if (isuCd == '34' && (subGrp == 'COMME' || subGrp == 'THDPT' || subGrp == 'NLDAT' || subGrp == 'PUBCU')) {
     FormManager.setValue('commercialFinanced', 'T0003611');
-  } else if (isuCd == '5K' && clientTier == '') {
-    FormManager.setValue('commercialFinanced', 'T0009067');
-  } else if (isuCd == '28' && clientTier == '') {
-    FormManager.setValue('commercialFinanced', 'I0000270');
-  } else if (isuCd == '15' && clientTier == '') {
-    FormManager.setValue('commercialFinanced', 'A0005229');
-  } else if (isuCd == '4A' && clientTier == '') {
-    FormManager.setValue('commercialFinanced', 'A0005236');
-  } else if (isuCd == '04' && clientTier == '') {
-    FormManager.setValue('commercialFinanced', 'I0000002');
+  } else if (subGrp == 'INTER' || subGrp == 'IBMEM' || subGrp == 'PRICU') {
+    FormManager.setValue('commercialFinanced', '33U00');
+  } else if (subGrp == 'BUSPR') {
+    FormManager.setValue('commercialFinanced', 'P0000004');
   } else {
     FormManager.setValue('commercialFinanced', '');
   }
-  if (isuList.slice(2, 6).includes(isuCd)) {
-    FormManager.resetValidations('clientTier');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    FormManager.enable('clientTier');
-  }
+
+  /*
+   * if (isuList.slice(2, 6).includes(isuCd)) {
+   * FormManager.resetValidations('clientTier');
+   * FormManager.setValue('clientTier', ''); FormManager.readOnly('clientTier'); }
+   * else { FormManager.enable('clientTier'); }
+   */
+
 }
 
-function setClientTierValuesForUpdate() {
-  var reqType = FormManager.getActualValue('reqType');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
-    return;
-  }
-  var isuList = [ '15', '4A', '04', '28' ];
-  var isuCd = FormManager.getActualValue('isuCd');
-  if (isuList.includes(isuCd)) {
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    FormManager.enable('clientTier');
-  }
-}
+/*
+ * function setClientTierValuesForUpdate() { var reqType =
+ * FormManager.getActualValue('reqType'); if
+ * (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C' ||
+ * FormManager.getActualValue('custSubGrp') == 'IBMEM') { return; } var isuList = [
+ * '21', '5K', '28' ]; ; var isuCd = FormManager.getActualValue('isuCd'); if
+ * (isuList.includes(isuCd)) { FormManager.setValue('clientTier', ''); //
+ * FormManager.readOnly('clientTier'); } else {
+ * FormManager.enable('clientTier'); } }
+ */
 
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-	var reqType = FormManager.getActualValue('reqType');
+  var reqType = FormManager.getActualValue('reqType');
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
+  // if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType ==
+  // 'C') || (isuCode != '34' && reqType == 'U')) {
+  var activeIsuCd = [ '32', '34', '36' ];
+  var activeCtc = [ 'Q', 'Y', 'T' ];
+
+  if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
     } else {
       $("#clientTierSpan").html('');
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank.');
 
       return new ValidationResult({
         id : 'clientTier',
@@ -1759,24 +1760,37 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+    if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+      }, false, 'Client Tier can only accept \'Q\'.');
+    }
+  } else if (isuCode == '36') {
+    if (clientTierCode == 'Y') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Y\'.');
+    }
+  } else if (isuCode == '32') {
+    if (clientTierCode == 'T') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'T\'.');
     }
   } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+    if (activeCtc.includes(clientTierCode) || clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
@@ -1788,11 +1802,55 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\' , \'T\' or blank.');
     }
   }
 }
 // CREATCMR-4293
+
+function sortlValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqTyp = FormManager.getActualValue('reqType');
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var searchTerm = FormManager.getActualValue('searchTerm');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        var countryUse = FormManager.getActualValue('countryUse');
+        var isuCtc = isuCode.concat(clientTierCode);
+        var subIndustry = FormManager.getActualValue('subIndustryCd');
+        var ind = subIndustry.substring(0, 1);
+
+        var scenariosToBlock = [ 'BUSPR', 'INTER', 'IBMEM', 'PRICU' ];
+
+        var accSeq_788 = {
+          '34Q' : [ 'T0003611' ],
+          '36Y' : [ 'T0007969', 'T0010029', 'T0010540' ],
+          '32T' : [ 'T0010435', 'T0010402', 'T0010437', 'T0010480', 'T0010401', 'T0010434' ],
+          '5K' : [ 'T0009067' ],
+          '21' : [ '33U00', 'P0000004' ],
+          '28' : [ 'I0000270' ]
+        };
+
+        if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
+          if (cmrIssuingCntry == '788') {
+            if (accSeq_788.hasOwnProperty(isuCtc) && !accSeq_788[isuCtc].includes(searchTerm)) {
+              return new ValidationResult({
+                id : 'searchTerm',
+                type : 'text',
+                name : 'searchTerm'
+              }, false, 'SearchTerm can only accept ' + accSeq_788[isuCtc]);
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
 
 function clientTierValidator() {
   FormManager.addFormValidator((function() {
@@ -1802,23 +1860,23 @@ function clientTierValidator() {
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
         var valResult = null;
-        
+
         var oldClientTier = null;
         var oldISU = null;
         var requestId = FormManager.getActualValue('reqId');
-        
+
         if (reqType == 'C') {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-              REQ_ID : requestId,
+            REQ_ID : requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-          
+
           if (result != null && result != '') {
             oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU =  result.ret3 != null ? result.ret3 : '';
-            
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
             if (clientTier != oldClientTier || isuCd != oldISU) {
               valResult = clientTierCodeValidator();
             }
@@ -1829,7 +1887,6 @@ function clientTierValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
-
 
 function setPPSCEIDRequired() {
   var reqType = FormManager.getActualValue('reqType');
@@ -1901,10 +1958,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.NL);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NL);
   // GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
-  GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.NL);
+  // GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, GEOHandler.NL);
 
-  GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate, GEOHandler.NL);
+  // GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate,
+  // GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLocFrProc, GEOHandler.NL);
 
@@ -1944,4 +2002,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addIGFZP02Validator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(sortlValidator, GEOHandler.NL, null, true);
 });
