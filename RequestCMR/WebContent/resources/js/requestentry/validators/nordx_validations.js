@@ -256,24 +256,26 @@ var _sortlHandler = null;
 var sortlFlag = false;
 function addHandlersForNORDX() {
 
-  if (_ISUHandler == null) {
-    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      // setClientTierValues();
-      // CREATCMR-2674
-      console.log('_ISUHandler');
-      setSalesRepValues();
-      // cleanupACdminDSAndSRValues();// CMR-1746
-    });
-  }
+  // if (_ISUHandler == null) {
+  // _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange',
+  // function(value) {
+  // setClientTierValues();
+  // // CREATCMR-2674
+  // console.log('_ISUHandler');
+  // // setSalesRepValues();
+  // // cleanupACdminDSAndSRValues();// CMR-1746
+  // });
+  // }
 
-  if (_CTCHandler == null) {
-    _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      // CREATCMR-2674
-      console.log('_CTCHandler');
-      setSalesRepValues();
-      // cleanupACdminDSAndSRValues();// CMR-1746
-    });
-  }
+  // if (_CTCHandler == null) {
+  // _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange',
+  // function(value) {
+  // // CREATCMR-2674
+  // console.log('_CTCHandler');
+  // // setSalesRepValues();
+  // // cleanupACdminDSAndSRValues();// CMR-1746
+  // });
+  // }
 
   // if (_SalesRepHandler == null) {
   // _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'),
@@ -469,9 +471,33 @@ function getLandedCountryByAddType(addType) {
 /**
  * Set Client Tier Value
  */
+
+function setClientTierValues() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  isuCd = FormManager.getActualValue('isuCd');
+  isuCtcVals = {
+    '32' : 'T',
+    '34' : 'Q',
+    '36' : 'Y'
+  };
+  if (isuCd != null && isuCd != undefined && isuCd != '') {
+    if (isuCtcVals.hasOwnProperty(isuCd)) {
+      FormManager.setValue('clientTier', isuCtcVals[isuCd]);
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'ClientTier' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.setValue('clientTier', '');
+      FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    }
+  }
+}
+
 // function setClientTierValues(isuCd) {
 // var reqType = FormManager.getActualValue('reqType');
-// if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+// if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C')
+// {
 // return;
 // }
 //
@@ -558,6 +584,17 @@ function onSubIndustryChange() {
   if (_subIndCdHandler && _subIndCdHandler[0]) {
     _subIndCdHandler[0].onChange();
   }
+}
+var _isuHandler = null;
+var _ctcHandler = null;
+function onIsuCtcChange() {
+  _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setSalesRepValues();
+    setClientTierValues();
+  });
+  _ctcHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    setSalesRepValues();
+  });
 }
 
 /*
@@ -2991,7 +3028,6 @@ function setAbbreviatedNameValue() {
       FormManager.setValue('abbrevNm', abbrevNmDBValue);
     }
   }
-  isuCtcSortlCovBehaviour();
 }
 
 function getAbbreviatedNameByAddrType(_reqId, _addrType) {
@@ -3770,6 +3806,8 @@ function setSalesRepValues() {
           FormManager.setValue('searchTerm', 'I0000272');
         } else if (isuAndCtc == '1R') {
           FormManager.setValue('searchTerm', 'I0000271');
+        } else if (isuAndCtc == '3T') {
+          FormManager.setValue('searchTerm', 'A0003748');
         } else if (isuAndCtc == '5E') {
           FormManager.setValue('searchTerm', 'A0003748');
         } else if (isuAndCtc == '5K') {
@@ -4406,8 +4444,9 @@ function lockSalesRepAndSortl() {
     var role = FormManager.getActualValue('userRole').toUpperCase();
     var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-    var lockCustSugGrpForRequester = [ 'DKBUS', 'DKINT', 'FOBUS', 'FOINT', 'GLBUS', 'GLINT', 'ISBUS', 'ISINT', 'FIBUS', 'FIINT', 'EEBUS', 'EEINT', 'LTBUS', 'LTINT', 'LVBUS', 'LVINT', 'BUSPR',
-        'INTER', 'CBBUS', 'CBINT' ];
+    var lockCustSugGrpForRequester = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS',
+        'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT', 'PRIPE', 'DKPRI', 'FOPRI', 'GLPRI', 'ISPRI', 'FIPRI', 'LTPRI', 'LVPRI',
+        'EEPRI' ];
 
     if (role == 'REQUESTER') {
       if (lockCustSugGrpForRequester.includes(custSubGrp)) {
@@ -4417,9 +4456,9 @@ function lockSalesRepAndSortl() {
       }
     }
 
-    var lockCustSugGrpForProcessor = [ 'DKBUS', 'DKINT', 'FOBUS', 'FOINT', 'GLBUS', 'GLINT', 'ISBUS', 'ISINT', 'FIBUS', 'FIINT', 'EEBUS', 'EEINT', 'LTBUS', 'LTINT', 'LVBUS', 'LVINT', 'BUSPR',
-        'INTER', 'CBBUS', 'CBINT' ];
-
+    var lockCustSugGrpForProcessor = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS',
+        'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT', 'PRIPE', 'DKPRI', 'FOPRI', 'GLPRI', 'ISPRI', 'FIPRI', 'LTPRI', 'LVPRI',
+        'EEPRI' ];
     if (role == 'PROCESSOR') {
       if (lockCustSugGrpForProcessor.includes(custSubGrp)) {
         FormManager.readOnly('repTeamMemberNo');
@@ -4606,10 +4645,11 @@ function setCTCValues() {
   }
 
   // Internal
-  var custSubGrpForInternal = [ 'CBINT', 'DKINT', 'EEINT', 'FIINT', 'FOINT', 'GLINT', 'INTER', 'ISINT', 'LTINT', 'LVINT' ];
+  var custSubGrpForInternalIbme = [ 'DKINT', 'DKIBM', 'FOINT', 'FOIBM', 'ISIBM', 'ISINT', 'GLINT', 'GLIBM', 'FIINT', 'FIIBM', 'EEINT', 'EEIBM', 'LTINT', 'LTIBM', 'LVINT', 'LVIBM', 'INTER', 'IBMEM',
+      'CBINT' ];
 
   // Internal
-  if (custSubGrpForInternal.includes(custSubGrp)) {
+  if (custSubGrpForInternalIbme.includes(custSubGrp)) {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '21') {
@@ -4690,107 +4730,109 @@ function searchTermCodeValidator() {
           '1R' : [ 'I0000271' ],
           '3T' : [ 'A0003748' ]
         };
-        if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
-          if (cmrIssuingCntry == '678') {
-            if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL') {
-              // Denmark, Faroe Islands, Greenland
-              var subIndSearchTerm = {
-                'T0001375' : [ 'K', 'U', 'A', 'F', 'N', 'S' ],
-                'T0006880' : [ 'D', 'W', 'T', 'R' ],
-                'T0006881' : [ 'V', 'J', 'P', 'L', 'M' ],
-                'T0006644' : [ 'G', 'Y', 'E', 'H', 'X' ],
-                'T0006607' : [ 'B', 'C' ]
-              };
-              if (accSeq_678.hasOwnProperty(isuCtc) && !accSeq_678[isuCtc].includes(searchTerm)) {
-                return new ValidationResult({
-                  id : 'searchTerm',
-                  type : 'text',
-                  name : 'searchTerm'
-                }, false, 'SearchTerm can only accept ' + accSeq_678[isuCtc]);
-              }
-              if (accSeq_678.hasOwnProperty(isuCtc) && accSeq_678[isuCtc].includes(searchTerm)) {
-                if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
-                  console.log(subIndSearchTerm[searchTerm]);
+        if (reqTyp == 'C') {
+          if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
+            if (cmrIssuingCntry == '678') {
+              if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL') {
+                // Denmark, Faroe Islands, Greenland
+                var subIndSearchTerm = {
+                  'T0001375' : [ 'K', 'U', 'A', 'F', 'N', 'S' ],
+                  'T0006880' : [ 'D', 'W', 'T', 'R' ],
+                  'T0006881' : [ 'V', 'J', 'P', 'L', 'M' ],
+                  'T0006644' : [ 'G', 'Y', 'E', 'H', 'X' ],
+                  'T0006607' : [ 'B', 'C' ]
+                };
+                if (accSeq_678.hasOwnProperty(isuCtc) && !accSeq_678[isuCtc].includes(searchTerm)) {
                   return new ValidationResult({
                     id : 'searchTerm',
                     type : 'text',
                     name : 'searchTerm'
-                  }, false, 'SORTL and Subindustry combination mismatch.');
+                  }, false, 'SearchTerm can only accept ' + accSeq_678[isuCtc]);
                 }
-              }
-            } else if (countryUse == '678IS') {
-              var subIndSearchTerm = {
-                'T0007879' : [ 'B', 'C' ]
-              };
-              if (accSeq_678IS.hasOwnProperty(isuCtc) && !accSeq_678IS[isuCtc].includes(searchTerm)) {
-                return new ValidationResult({
-                  id : 'searchTerm',
-                  type : 'text',
-                  name : 'searchTerm'
-                }, false, 'SearchTerm can only accept ' + accSeq_678IS[isuCtc]);
-              }
-              if (accSeq_678IS.hasOwnProperty(isuCtc) && accSeq_678IS[isuCtc].includes(searchTerm)) {
-                if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
+                if (accSeq_678.hasOwnProperty(isuCtc) && accSeq_678[isuCtc].includes(searchTerm)) {
+                  if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
+                    console.log(subIndSearchTerm[searchTerm]);
+                    return new ValidationResult({
+                      id : 'searchTerm',
+                      type : 'text',
+                      name : 'searchTerm'
+                    }, false, 'SORTL and Subindustry combination mismatch.');
+                  }
+                }
+              } else if (countryUse == '678IS') {
+                var subIndSearchTerm = {
+                  'T0007879' : [ 'B', 'C' ]
+                };
+                if (accSeq_678IS.hasOwnProperty(isuCtc) && !accSeq_678IS[isuCtc].includes(searchTerm)) {
                   return new ValidationResult({
                     id : 'searchTerm',
                     type : 'text',
                     name : 'searchTerm'
-                  }, false, 'SearchTerm and SubIndustry combination mismatch.');
+                  }, false, 'SearchTerm can only accept ' + accSeq_678IS[isuCtc]);
+                }
+                if (accSeq_678IS.hasOwnProperty(isuCtc) && accSeq_678IS[isuCtc].includes(searchTerm)) {
+                  if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
+                    return new ValidationResult({
+                      id : 'searchTerm',
+                      type : 'text',
+                      name : 'searchTerm'
+                    }, false, 'SearchTerm and SubIndustry combination mismatch.');
+                  }
                 }
               }
-            }
-          } else if (cmrIssuingCntry == '702') {
-            if (countryUse == '702') {
-              if (accSeq_702.hasOwnProperty(isuCtc) && !accSeq_702[isuCtc].includes(searchTerm)) {
+            } else if (cmrIssuingCntry == '702') {
+              if (countryUse == '702') {
+                if (accSeq_702.hasOwnProperty(isuCtc) && !accSeq_702[isuCtc].includes(searchTerm)) {
+                  return new ValidationResult({
+                    id : 'searchTerm',
+                    type : 'text',
+                    name : 'searchTerm'
+                  }, false, 'SearchTerm can only accept ' + accSeq_702[isuCtc]);
+                }
+              } else if (countryUse == '702EE') {
+                if (accSeq_702EE.hasOwnProperty(isuCtc) && !accSeq_702EE[isuCtc].includes(searchTerm)) {
+                  return new ValidationResult({
+                    id : 'searchTerm',
+                    type : 'text',
+                    name : 'searchTerm'
+                  }, false, 'SearchTerm can only accept ' + accSeq_702EE[isuCtc]);
+                }
+              } else if (countryUse == '702LT') {
+                if (accSeq_702LT.hasOwnProperty(isuCtc) && !accSeq_702LT[isuCtc].includes(searchTerm)) {
+                  return new ValidationResult({
+                    id : 'searchTerm',
+                    type : 'text',
+                    name : 'searchTerm'
+                  }, false, 'SearchTerm can only accept ' + accSeq_702LT[isuCtc]);
+                }
+              } else if (countryUse == '702LV') {
+                if (accSeq_702LV.hasOwnProperty(isuCtc) && !accSeq_702LV[isuCtc].includes(searchTerm)) {
+                  return new ValidationResult({
+                    id : 'searchTerm',
+                    type : 'text',
+                    name : 'searchTerm'
+                  }, false, 'SearchTerm can only accept ' + accSeq_702LV[isuCtc]);
+                }
+              }
+            } else if (cmrIssuingCntry == '806') {
+              if (accSeq_806.hasOwnProperty(isuCtc) && !accSeq_806[isuCtc].includes(searchTerm)) {
                 return new ValidationResult({
                   id : 'searchTerm',
                   type : 'text',
                   name : 'searchTerm'
-                }, false, 'SearchTerm can only accept ' + accSeq_702[isuCtc]);
+                }, false, 'SearchTerm can only accept ' + accSeq_806[isuCtc]);
               }
-            } else if (countryUse == '702EE') {
-              if (accSeq_702EE.hasOwnProperty(isuCtc) && !accSeq_702EE[isuCtc].includes(searchTerm)) {
+            } else if (cmrIssuingCntry == '846') {
+              if (accSeq_846.hasOwnProperty(isuCtc) && !accSeq_846[isuCtc].includes(searchTerm)) {
                 return new ValidationResult({
                   id : 'searchTerm',
                   type : 'text',
                   name : 'searchTerm'
-                }, false, 'SearchTerm can only accept ' + accSeq_702EE[isuCtc]);
+                }, false, 'SearchTerm can only accept ' + accSeq_846[isuCtc]);
               }
-            } else if (countryUse == '702LT') {
-              if (accSeq_702LT.hasOwnProperty(isuCtc) && !accSeq_702LT[isuCtc].includes(searchTerm)) {
-                return new ValidationResult({
-                  id : 'searchTerm',
-                  type : 'text',
-                  name : 'searchTerm'
-                }, false, 'SearchTerm can only accept ' + accSeq_702LT[isuCtc]);
-              }
-            } else if (countryUse == '702LV') {
-              if (accSeq_702LV.hasOwnProperty(isuCtc) && !accSeq_702LV[isuCtc].includes(searchTerm)) {
-                return new ValidationResult({
-                  id : 'searchTerm',
-                  type : 'text',
-                  name : 'searchTerm'
-                }, false, 'SearchTerm can only accept ' + accSeq_702LV[isuCtc]);
-              }
+            } else {
+              return new ValidationResult(null, true);
             }
-          } else if (cmrIssuingCntry == '806') {
-            if (accSeq_806.hasOwnProperty(isuCtc) && !accSeq_806[isuCtc].includes(searchTerm)) {
-              return new ValidationResult({
-                id : 'searchTerm',
-                type : 'text',
-                name : 'searchTerm'
-              }, false, 'SearchTerm can only accept ' + accSeq_806[isuCtc]);
-            }
-          } else if (cmrIssuingCntry == '846') {
-            if (accSeq_846.hasOwnProperty(isuCtc) && !accSeq_846[isuCtc].includes(searchTerm)) {
-              return new ValidationResult({
-                id : 'searchTerm',
-                type : 'text',
-                name : 'searchTerm'
-              }, false, 'SearchTerm can only accept ' + accSeq_846[isuCtc]);
-            }
-          } else {
-            return new ValidationResult(null, true);
           }
         }
       }
@@ -4943,34 +4985,6 @@ function addressQuotationValidatorNORS() {
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
 }
-
-function isuCtcSortlCovBehaviour() {
-  var role = null;
-  var reqTyp = FormManager.getActualValue('reqType');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (typeof (_pagemodel) != 'undefined') {
-    role = _pagemodel.userRole;
-  }
-  var scenariosToBlock = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS', 'EEINT', 'EEIBM',
-      'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT' ];
-  if (reqTyp == 'C') {
-    if (role == 'Requester') {
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('searchTerm');
-    } else if (role == 'Processor' && !scenariosToBlock.includes(custSubGrp)) {
-      FormManager.enable('clientTier');
-      FormManager.enable('isuCd');
-      FormManager.enable('searchTerm');
-    }
-  } else if (reqTyp == 'U' && !scenariosToBlock.includes(custSubGrp)) {
-    FormManager.enable('clientTier');
-    FormManager.enable('isuCd');
-    FormManager.enable('searchTerm');
-  }
-
-}
-
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 
@@ -5063,6 +5077,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.NORDX, null, true);
   GEOHandler.registerValidator(searchTermCodeValidator, GEOHandler.NORDX, null, true);
 
-  // CREATCMR-7925
-  GEOHandler.addAfterConfig(isuCtcSortlCovBehaviour, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(onIsuCtcChange, GEOHandler.NORDX);
 });
