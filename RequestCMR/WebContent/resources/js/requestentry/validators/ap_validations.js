@@ -353,7 +353,7 @@ function setInacByCluster() {
           FormManager.resetDropdownValues(FormManager.getField('inacType'));
         }
         
-        if(cntry == '856') {
+        if(cntry == '856' || cntry == '852' || cntry == '818') {
           var isInacTypeReadOnlyFromScenarios = TemplateService.isFieldReadOnly('inacType');
           if(isInacTypeReadOnlyFromScenarios) {
             FormManager.readOnly('inacType');
