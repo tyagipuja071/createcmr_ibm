@@ -6,6 +6,7 @@ var _vatExemptHandler = null;
 var _scenarioSubTypeHandler = null;
 var _deClientTierHandler = null;
 var _ISUHandler = null;
+var _ISICHandler = null;
 var _IMSHandler = null;
 var _deIsuCdHandler = null;
 var _subScenarioHandler = null;
@@ -35,42 +36,12 @@ function afterConfigForDE() {
     FormManager.hide('IbmDeptCostCenter', 'ibmDeptCostCenter');
   }
 
-  if (_deClientTierHandler == null) {
-    _deClientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      if (FormManager.getActualValue('reqType') == 'C') {
-        setISUValues();
-        setSboOnIMS();
-      }
-    });
-  }
-
   if (_subScenarioHandler == null) {
     _subScenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       setISUValues();
       // CREATCMR-7424_7425
       setAbbreviatedNameBasedOnAddressType();
 
-    });
-  }
-
-  if (_ISUHandler == null) {
-    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setSboOnIMS(value);
-    });
-  }
-
-  if (_IMSHandler == null) {
-    _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      setSboOnIMS();
-    });
-  }
-
-  if (_deIsuCdHandler == null) {
-    _deIsuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      if (!value) {
-        value = FormManager.getActualValue('isuCd');
-      }
-//      lockCtcFieldOnIsu();
     });
   }
 
@@ -84,6 +55,27 @@ function afterConfigForDE() {
 
   // Disable address copying for GERMANY
   GEOHandler.disableCopyAddress();
+}
+
+function addDECtcHandler() {
+  _deClientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    if (FormManager.getActualValue('reqType') == 'C') {
+      setISUValues();
+      setSboOnIMS(value);
+    }
+  });
+}
+
+function addDEIsuHandler() {
+  _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setSboOnIMS(value);
+  });
+}
+
+function addDESubIndustryHandler() {
+  _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+    setSboOnIMS(value);
+  });
 }
 
 function vatExemptIBMEmp() {
@@ -106,7 +98,8 @@ function vatExemptIBMEmp() {
   }
 }
 
-function setSboOnIMS(postCd, subIndustryCd, clientTier) {
+var oldIsuCtcIms = null;
+function setSboOnIMS(value) {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -115,7 +108,18 @@ function setSboOnIMS(postCd, subIndustryCd, clientTier) {
   var ims = FormManager.getActualValue('subIndustryCd').substring(0, 1);
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
-
+  
+  if ((value != false || value == undefined || value == null) && ims != '' && clientTier != '' && isuCd != '' && oldIsuCtcIms == null) {
+    oldIsuCtcIms = isuCd + clientTier + ims;
+  }
+  
+  if (oldIsuCtcIms == null){
+    return;
+  }
+  if (isuCd + clientTier + ims == oldIsuCtcIms) {
+    return;
+  }
+  
   if (custSubGrp == 'BUSPR') {
     return;
   }
@@ -239,7 +243,7 @@ function disableVatExemptForScenarios() {
       FormManager.disable('vatExempt');
     } else {
       FormManager.enable('vatExempt');
-      autoSetTax();
+//      autoSetTax();
     }
   }
 }
@@ -1252,7 +1256,10 @@ dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
   GEOHandler.addAfterConfig(afterConfigForDE, GEOHandler.DE);
-  GEOHandler.addAfterConfig(autoSetTax, GEOHandler.DE);
+  GEOHandler.addAfterConfig(addDEIsuHandler, GEOHandler.DE);
+  GEOHandler.addAfterConfig(addDECtcHandler, GEOHandler.DE);
+  GEOHandler.addAfterConfig(addDESubIndustryHandler, GEOHandler.DE);
+//  GEOHandler.addAfterConfig(autoSetTax, GEOHandler.DE);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.DE);
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.DE);
   GEOHandler.addAddrFunction(setAbbrevNameDEUpdate, GEOHandler.DE);
@@ -1302,6 +1309,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.registerValidator(validateEnterpriseNum, GEOHandler.DE, null, true);
