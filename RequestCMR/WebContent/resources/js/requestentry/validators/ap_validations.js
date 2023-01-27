@@ -2398,7 +2398,7 @@ function setCTCIsuByClusterASEAN() {
     var issuingCnt4 = ['643'];
     var apClientTierValue = [];
     var isuCdValue = [];
-    var issuingCntries = ['852', '818', '856', '643', '778', '749' , '834'];
+    var issuingCntries = ['852', '818', '856', '778', '749' , '834'];
     if (_cluster != '' && _cluster != '') {
       var qParams = {
         _qall : 'Y',
@@ -2420,30 +2420,11 @@ function setCTCIsuByClusterASEAN() {
           FormManager.setValue('clientTier', apClientTierValue[0]);
           FormManager.setValue('isuCd', isuCdValue[0]);
         } else if (apClientTierValue.length > 1) {
-          if(custSubGrp.includes('BLUM') || custSubGrp.includes('MKTP') || custSubGrp.includes('MKP') || ((custSubGrp.includes('DUMMY') || custSubGrp.includes('XDUMM')||custSubGrp.includes('BUSPR') || custSubGrp.includes('NRML')||custSubGrp.includes('AQSTN')||custSubGrp.includes('ASLOM')||custSubGrp.includes('CROSS')||custSubGrp.includes('INTER')) && issuingCntries.includes(_cmrIssuingCntry)) || ((custSubGrp.includes('PRICU') || custSubGrp.includes('BLUMX') || custSubGrp.includes('SPOFF')) && (_cmrIssuingCntry == '749' || _cmrIssuingCntry == '834')) || (_cmrIssuingCntry == '834' && _cluster == '00000' && (custSubGrp == 'MKTPC' || custSubGrp == 'PRIV' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP' || custSubGrp == 'XPRIV'))) {
-            if(issuingCnt4.includes(_cmrIssuingCntry) && custSubGrp.includes('DUMMY')) {
-              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
-              FormManager.setValue('isuCd','21');
-              FormManager.setValue('clientTier', 'Z');
-            }
-            else if(issuingCnt4.includes(_cmrIssuingCntry) && (custSubGrp.includes('BUSPR') || custSubGrp.includes('NRML')||custSubGrp.includes('AQSTN')||custSubGrp.includes('ASLOM')||custSubGrp.includes('CROSS'))) {
-              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
-              FormManager.setValue('isuCd','34');
-              FormManager.setValue('clientTier', 'Z');
-            }
-            else if(issuingCnt4.includes(_cmrIssuingCntry) && custSubGrp.includes('INTER')) {
-              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
-              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
-              FormManager.setValue('isuCd','60');
-              FormManager.setValue('clientTier', '0');
-            }
-            else {
+          if(custSubGrp.includes('BLUM') || custSubGrp.includes('MKTP') || custSubGrp.includes('MKP') || ((custSubGrp.includes('DUMMY') || custSubGrp.includes('XDUMM')) && issuingCntries.includes(_cmrIssuingCntry))||((custSubGrp.includes('PRICU') || custSubGrp.includes('BLUMX') || custSubGrp.includes('SPOFF')) && (_cmrIssuingCntry == '749' || _cmrIssuingCntry == '834')) || (_cmrIssuingCntry == '834' && _cluster == '00000' && (custSubGrp == 'MKTPC' || custSubGrp == 'PRIV' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP' || custSubGrp == 'XPRIV'))) {
               FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q' , 'Y']);
               FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
               FormManager.setValue('isuCd','34');
-            }
+           
           } else if(custSubGrp.includes('INTER') || custSubGrp.includes('XINT') ) {
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
             FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
@@ -2455,6 +2436,9 @@ function setCTCIsuByClusterASEAN() {
             FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
           }
        }
+        if (issuingCnt4.includes(_cmrIssuingCntry)) {
+          setCTCIsuByClusterBrunei();
+        }
      }
       
      if (clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || _cluster.includes('BLAN') || clusterDesc[0].ret1.includes('S&S'))) {
@@ -2466,6 +2450,34 @@ function setCTCIsuByClusterASEAN() {
   if (_clusterHandler && _clusterHandler[0]) {
     _clusterHandler[0].onChange();
   }
+}
+
+function setCTCIsuByClusterBrunei() {
+  var issuingCnt4 = ['643'];
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if((custSubGrp.includes('DUMMY') || custSubGrp.includes('BUSPR') || custSubGrp.includes('NRML')||custSubGrp.includes('AQSTN')||custSubGrp.includes('ASLOM')||custSubGrp.includes('CROSS')||custSubGrp.includes('INTER')) && issuingCnt4.includes(_cmrIssuingCntry))
+    {
+    if(issuingCnt4.includes(_cmrIssuingCntry) && custSubGrp.includes('DUMMY')) {
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
+      FormManager.setValue('isuCd','21');
+      FormManager.setValue('clientTier', 'Z');
+    }
+    else if(issuingCnt4.includes(_cmrIssuingCntry) && (custSubGrp.includes('BUSPR') || custSubGrp.includes('NRML')||custSubGrp.includes('AQSTN')||custSubGrp.includes('ASLOM')||custSubGrp.includes('CROSS'))) {
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+      FormManager.setValue('isuCd','34');
+      FormManager.setValue('clientTier', 'Z');
+    }
+    else if(issuingCnt4.includes(_cmrIssuingCntry) && custSubGrp.includes('INTER')) {
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
+      FormManager.setValue('isuCd','60');
+      FormManager.setValue('clientTier', '0');
+    }
+    
+    }
 }
 
 function setIsuByClusterCTC() {
