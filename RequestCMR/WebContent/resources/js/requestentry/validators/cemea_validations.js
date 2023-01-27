@@ -2304,7 +2304,7 @@ function setSBOafterAddrConfig() {
       if (dijit.byId('cisServiceCustIndc').get('checked')) {
         FormManager.setValue('salesBusOffCd', 'R04');
       } else if (custSubType == 'XCOM' || custSubType == 'XTP') {
-        FormManager.setValue('salesBusOffCd', 'R02');
+        FormManager.setValue('salesBusOffCd', 'R04');
       } else if (custSubType == 'XBP') {
         FormManager.setValue('salesBusOffCd', '000');
       } else if (custSubType == 'XINT') {
