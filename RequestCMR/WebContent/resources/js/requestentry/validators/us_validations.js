@@ -463,6 +463,11 @@ function afterConfigForUS() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
+  } else if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'IBMEM') {
+    FormManager.setValue('isuCd', '21');
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
   } else {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
@@ -525,6 +530,10 @@ function afterConfigForUS() {
       var _custType = FormManager.getActualValue('custSubGrp');
       if (_custType == 'OEMHW' || _custType == 'OEM-SW' || _custType == 'TPD' || _custType == 'SSD' || _custType == 'DB4') {
         FormManager.setValue('isicCd', '357X');
+      } else if (_custType == 'IBMEM') {
+        FormManager.setValue('isicCd', '9500');
+        FormManager.setValue('subIndustryCd', 'WQ');
+        FormManager.readOnly('subIndustryCd');
       } else {
         var currIsic = FormManager.getActualValue('isicCd');
         if (currIsic != '357X') {
@@ -641,7 +650,7 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'N');
     FormManager.readOnly('isuCd');
-  } else if (scenario != 'FSP POOL') {
+  } else if (scenario != 'FSP POOL' && scenario != 'IBMEM') {
     FormManager.enable('isuCd');
   }
 }
