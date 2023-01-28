@@ -230,7 +230,7 @@ app.controller('CorrectionsController', [ '$scope', '$document', '$http', '$time
   
   $scope.confirmFixPayGoAddresses = function() {
     if (!$scope.model.reqId) {
-      cmr.showAlert('Please input the Request ID.');
+      cmr.showAlert('Please input the Request ID.', 'Error');
       return;
     }
     if (isNaN($scope.model.reqId)) {
@@ -247,19 +247,19 @@ app.controller('CorrectionsController', [ '$scope', '$document', '$http', '$time
     $scope.model.reqId = $scope.model.reqId.trim();
     var input = JSON.parse(JSON.stringify($scope.model));
     console.log(input);
-    cmr.showProgress('Checking & fixing PayGo billing addresses...');
+    cmr.showProgress('Processing PayGo billing addresses...');
 
     $http.post('/CMRServices/cmrs/paygo/corrections/' + $scope.model.reqId, input).then(function(response) {
       console.log(response.data);
       cmr.hideProgress();
-      if (response.data && response.data.success) {
-        cmr.showAlert(response.data.msg, 'Success', null, true);
+      if (response.data && response.data.success && response.data.success == true) {
+        cmr.showAlert(response.data.msg, response.data.title, null, true);
       } else {
-        cmr.showAlert(response.data.msg);
+        cmr.showAlert(response.data.msg, response.data.title);
       }
     }, function(error) {
       cmr.hideProgress();
-      cmr.showAlert(error);
+      cmr.showAlert("An unexpected error occurred", 'Error');
     });
   }
 
