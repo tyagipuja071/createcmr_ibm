@@ -1019,24 +1019,6 @@ function afterConfigForEMEA(){
   }
 }
 
-function findVatInd() {
-	  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-	  var reqId = FormManager.getActualValue('reqId');
-	  var vatInd = FormManager.getActualValue('vatInd');
-	  var custGrp = FormManager.getActualValue('custGrp');
-	    if (vatInd == 'N' && custGrp!='CROSS') {
-	     cmr.showConfirm('markSendForProcessing()',
-	          '<div align="center"><strong><i><u><b><p style="font-size:25px"> Warning Message</p></u><br><br><p style="font-size:15px">Please note, if you choose not to provide the company’s VAT ID, IBM will not be able to include VAT ID in the customer address section. As a consequence the IBM invoice may not be eligible to recover the VAT charged to the client which can cause a delay on payment in countries that is required. However, at any moment business can submit VAT ID update whenever VAT ID is collected/needed.</p><br><br> <p style="font-size:17px">Would you like  to proceed?</p></i></strong></div>', 'Warning', null, {
-	    		OK : 'YES',
-	    CANCEL : 'NO'
-	    	  });
-	    }
-}
-
-function markSendForProcessing() {
-	  var sendForProcess = YourActions.Send_for_Processing;
-	  FormManager.doAction('frmCMR', sendForProcess, true);
-	}
 
 function addVatIndValidator(){
 
@@ -1120,14 +1102,71 @@ var _vatHandler = null;
   if (_vatHandler == null){   
     
     dojo.byId('vat').onkeyup = function() {
+      var isReadOnly = dojo.byId('vat').readOnly;
       var vat = FormManager.getActualValue('vat');
-      if (vat == '') {
+      if (vat == '' && !isReadOnly) {
         FormManager.enable('vatInd');
-        FormManager.setValue('vatInd', 'N'); 
+        FormManager.setValue('vatInd', '');
       }
     }
-    }
+  }
 }
+
+function isViewOnly() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  return viewOnlyPage == 'true';
+}
+
+function isImportingFromQuickSearch() {
+  var quickSearch = new URLSearchParams(location.search).get('qs');
+  return quickSearch == "Y";
+}
+
+function isPrivateScenario() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  return ["PRICU", "PRIPE", "FIPRI", "DKPRI", "BEPRI", "CHPRI"].includes(custSubGrp);
+}
+
+function setVatIndFieldsForGrp1AndNordx() {
+  if (isViewOnly()) {
+    return;
+  }
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+
+  // CREATCMR-7944
+  if (isPrivateScenario()) {
+    FormManager.setValue('vatInd', 'N');
+    FormManager.enable('vatInd');
+    FormManager.setValue('vat', '');
+    FormManager.readOnly('vat');
+  }
+  // CREATCMR-7165
+  else if (isImportingFromQuickSearch()) {
+    dojo.cookie('qs', 'N');
+    FormManager.enable('vatInd');
+    
+    if (vat != '' && vatInd == '') {
+      FormManager.setValue('vatInd', 'T');
+    } else if (vat == '') {
+      // CREATCMR-7980 vatInd not imported for update request.
+      if (FormManager.getActualValue('reqType') != 'U') {
+        FormManager.setValue('vatInd', '');
+        FormManager.enable('vat');
+      }
+    }
+  } else if (vatInd == 'N') {
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
+  }
+  if('T'== FormManager.getActualValue('vatInd') && vat==''){
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');    
+  }
+  if ('E' == FormManager.getActualValue('vatInd')) {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+  }
+}
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
@@ -1212,10 +1251,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerWWValidator(addINACValidator);
   //Removing this for coverage-2023 as ISU -32 is no longer obsoleted
   //GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
+  
   GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']);  
   GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']); 
   GEOHandler.registerWWValidator(addVatIndValidator);
-    
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];
 });

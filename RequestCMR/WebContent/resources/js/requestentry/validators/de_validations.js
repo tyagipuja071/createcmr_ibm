@@ -90,6 +90,9 @@ function afterConfigForDE() {
 }
 
 function vatExemptIBMEmp() {
+  if (!dijit.byId('vatExempt')) {
+    return; 
+  }
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -1104,17 +1107,6 @@ function addVatIndValidator(){
 }
 }
 
-function setVatIndFields(){
-  var _vatHandler = null;  
-  var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');
-  
-  if (vat != '' && vatInd == ''){
-    FormManager.setValue('vatInd', 'T');
-    FormManager.readOnly('vatInd');
-  }
-}
-
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -1172,5 +1164,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateEnterpriseNum, GEOHandler.DE, null, true);  
   
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
-  GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.DE);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
 });

@@ -28,6 +28,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   private String city;
   private String postCd;
   private String vat;
+  private String vatInd;
   private String taxCd1;
   private String matchGrade;
 
@@ -207,6 +208,14 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   public void setVat(String vat) {
     this.vat = vat;
+  }
+
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
   }
 
   public String getMatchGrade() {

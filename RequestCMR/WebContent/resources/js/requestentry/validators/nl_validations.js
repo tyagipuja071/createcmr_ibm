@@ -80,7 +80,7 @@ function afterConfigForNL() {
 
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   var vatExempt = dojo.byId('vatExempt');
-  var vatExemptChecked = dojo.byId('vatExempt').checked;
+  var vatExemptChecked = dojo.byId('vatExempt') && dojo.byId('vatExempt').checked;
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -254,7 +254,7 @@ function setVatValidatorNL() {
       return;
     }
     FormManager.resetValidations('vat');
-    if (!dojo.byId('vatExempt').checked) {
+    if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
     
@@ -277,7 +277,7 @@ function setKVKValidatorNL() {
   }
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   var vatExempt = dojo.byId('vatExempt');
-  var vatExemptChecked = dojo.byId('vatExempt').checked;
+  var vatExemptChecked = dojo.byId('vatExempt') && dojo.byId('vatExempt').checked;
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
@@ -1912,17 +1912,6 @@ function addVatIndValidator(){
 }
 }
 
-function setVatIndFields(){
-  var _vatHandler = null;  
-  var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');
-  
-  if (vat != '' && vatInd == ''){
-    FormManager.setValue('vatInd', 'T');
-    FormManager.readOnly('vatInd');
-  }
-}
-
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -1981,5 +1970,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.NL, null, true);
   
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NL, null, true);
-  GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.NL);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
 });

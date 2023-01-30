@@ -2150,17 +2150,6 @@ function addVatIndValidator(){
 }
 }
 
-function setVatIndFields(){
-  var _vatHandler = null;  
-  var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');
-  
-  if (vat != '' && vatInd == ''){
-    FormManager.setValue('vatInd', 'T');
-    FormManager.readOnly('vatInd');
-  }
-}
-
 dojo.addOnLoad(function() {
   GEOHandler.BELUX = [ '624' ];
 
@@ -2231,6 +2220,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.BELUX, null, true);
   
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.BELUX, null, true);
-  GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.BELUX); 
-
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX); 
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX);
 });

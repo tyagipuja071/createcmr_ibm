@@ -486,6 +486,7 @@ public class SWISSHandler extends GEOHandler {
           postCd = 0;
           LOG.debug("Cannot parse postal code since it's alphanumeric.");
         }
+        if ("C".equals(admin.getReqType())) {
         String landCntry = (String) results.get(0)[1];
         if ("CH".equals(landCntry) || "LI".equals(landCntry)) {
           if (StringUtils.isBlank(landCntry) && postCd != 0) {
@@ -499,6 +500,7 @@ public class SWISSHandler extends GEOHandler {
           } else {
             data.setCustPrefLang("E");
           }
+        }
         }
       }
     }
