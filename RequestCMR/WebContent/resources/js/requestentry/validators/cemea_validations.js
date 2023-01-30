@@ -775,17 +775,14 @@ function addAfterConfigCEE() {
     return;
   }
   dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-    var isuCd ;
-    if(value ='') {
-    isuCd = FormManager.getActualValue('isuCd') ;
- } else {
-   isuCd = value;
- }
-    if (isuCd == '32') {
+    if (!value) {
+      value = FormManager.getActualValue('isuCd');
+    }
+    if (value == '32') {
       FormManager.setValue('clientTier', 'T');
-    } else if (isuCd == '34') {
+    } else if (value == '34') {
       FormManager.setValue('clientTier', 'Q');
-    } else if (isuCd == '36') {
+    } else if (value == '36') {
       FormManager.setValue('clientTier', 'Y');
     } else {
       FormManager.setValue('clientTier', '');
