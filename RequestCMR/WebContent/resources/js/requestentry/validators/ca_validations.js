@@ -760,7 +760,7 @@ function setIsuCtcFor5k() {
   if (custSubGrp == 'ECO') {
     return;
   }
-  if (isuCd == '5K') {
+  if (isuCd == '5K' || (custSubGrp == 'IBME' && isuCd == '21')) {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
@@ -1310,6 +1310,8 @@ function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
       arFaar = '051Z';
     } else if (scenario == 'USA') {
       arFaar = '120V';
+    } else if (scenario == 'IBME') {
+      arFaar = '051Z';
     }
     FormManager.setValue('adminDeptCd', arFaar);
     _scenarioArFaar = arFaar;

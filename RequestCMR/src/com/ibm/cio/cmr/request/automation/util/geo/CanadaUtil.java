@@ -44,7 +44,9 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
@@ -71,6 +73,7 @@ public class CanadaUtil extends AutomationUtil {
   private static final String SCENARIO_BUSINESS_PARTNER = "BUSP";
   private static final String SCENARIO_PRIVATE_HOUSEHOLD = "PRIV";
   private static final String SCENARIO_INTERNAL = "INTER";
+  private static final String SCENARIO_IBM_EMPLOYEE = "IBME";
   private static final String SCENARIO_OEM = "OEM";
   private static final String SCENARIO_STRATEGIC_OUTSOURCING = "SOCUS";
   private static final String SCENARIO_GOVERNMENT = "GOVT";
@@ -90,6 +93,7 @@ public class CanadaUtil extends AutomationUtil {
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> results, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     boolean valid = true;
     String scenario = data.getCustSubGrp();
@@ -119,6 +123,30 @@ public class CanadaUtil extends AutomationUtil {
           valid = false;
           engineData.addRejectionComment("LAND", "Invalid Landed Country.", "Landed country is not Canada", "");
           details.append("Landed Country is not Canada").append("\n");
+        }
+        break;
+      case SCENARIO_IBM_EMPLOYEE:
+        Person person = null;
+        if (StringUtils.isNotBlank(admin.getMainCustNm1())) {
+          try {
+            String mainCustName = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
+            person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
+            if (person == null) {
+              engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+              details.append("Employee details not found in IBM BluePages.").append("\n");
+              return false;
+            } else {
+              details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
+            }
+          } catch (Exception e) {
+            LOG.error("Not able to check name against bluepages", e);
+            engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check name against bluepages for scenario IBM Employee.");
+            return false;
+          }
+        } else {
+          LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
+          engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
+          return false;
         }
         break;
       case SCENARIO_GOVERNMENT:
