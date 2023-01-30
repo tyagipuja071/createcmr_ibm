@@ -108,6 +108,15 @@ function setClientTierValues(isuCd) {
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   }
+  if (isuCd == '32') {
+    FormManager.setValue('clientTier', 'T');
+  } else if (isuCd == '34') {
+    FormManager.setValue('clientTier', 'Q');
+  } else if (isuCd == '36') {
+    FormManager.setValue('clientTier', 'Y');
+  } else {
+    FormManager.setValue('clientTier', '');
+  }
 }
 
 function setStreetContBehavior() {
