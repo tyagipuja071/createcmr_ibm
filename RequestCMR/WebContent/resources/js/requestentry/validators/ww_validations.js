@@ -382,8 +382,8 @@ function addCrossBorderValidator() {
         var scenario = FormManager.getActualValue('custSubGrp');
         var mscenario = FormManager.getActualValue('custGrp');
 
-        if (mscenario == 'CROSS') {
-          scenario = 'CROSS';
+        if (mscenario == 'CROSS') {          
+            scenario = 'CROSS';           
         }
 
         var reqId = FormManager.getActualValue('reqId');
@@ -457,7 +457,7 @@ function addClientTierDefaultLogic() {
 }
 
 function addGenericVATValidator(cntry, tabName, formName, aType) {
-  return function() {
+  return function() {   
     FormManager.addFormValidator((function() {
       var landCntry = cntry;
       var addrType = aType;
@@ -482,8 +482,7 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
           }
-          console.log('ZS01 VAT Country: ' + zs01Cntry);
-
+          console.log('ZS01 VAT Country: ' + zs01Cntry);          
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
             if (result.errorPattern == null) {
@@ -506,18 +505,21 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
         }
       };
     })(), tabName, formName);
-  };
+  }; 
+
 }
 
 // TODO VAT is required for some cross landCntry
-function requireVATForCrossBorder() {
+function requireVATForCrossBorder() {  
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var reqType = FormManager.getActualValue('reqType');
         var scenario = FormManager.getActualValue('custGrp');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-
+        var vat = FormManager.getActualValue('vat');
+        var vatInd = FormManager.getActualValue('vatInd');
+        
         if (reqType != 'C') {
           return new ValidationResult(null, true);
         }
@@ -528,8 +530,11 @@ function requireVATForCrossBorder() {
         if (custSubGrp != null && (custSubGrp.includes('XSOFT') || custSubGrp.includes('XSL') || custSubGrp.includes('XPRIC') || custSubGrp.includes('XPC') || custSubGrp.includes('XGO'))) {
           return new ValidationResult(null, true);
         }
-
-        var vat = FormManager.getActualValue('vat');
+        
+        if (vatInd == 'N' && vat == '') { 
+          FormManager.resetValidations('vat');
+        }
+        
         var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
         var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
           REQID : FormManager.getActualValue('reqId'),
@@ -552,7 +557,8 @@ function requireVATForCrossBorder() {
         return new ValidationResult(null, true);
       }
     };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
+  })(), 'MAIN_CUST_TAB', 'frmCMR'); 
+
 }
 
 /**
@@ -935,15 +941,22 @@ function resetVATValidationsForPayGo(){
   var systemId = FormManager.getActualValue('sourceSystId');
   var cntry= FormManager.getActualValue('cmrIssuingCntry');
   var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
   var results = cmr.query('GET_PARTNER_VAT_EXCEPTIONS', {
     COUNTRY : cntry,
-    SERVICE_ID : systemId
-  });
-  if(results!= null && results!= undefined && results.ret1!='' && results.ret1 == 'Y' && vat == ''){
-    FormManager.resetValidations('vat');
-    // FormManager.getField('vatExempt').checked = true;
+    SERVICE_ID : systemId   
+    
+  }); 
+  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'Y' && vat == ''){    
+   FormManager.resetValidations('vat');
+   //FormManager.getField('vatExempt').checked = true;
     console.log('VAT is non mandatory for PayGO');
+  } 
+  
+  if (vatInd == 'N' && vat == '') { 
+    FormManager.resetValidations('vat');
   }
+  
 }
 
 function addIsuCdObsoleteValidator(){
@@ -966,6 +979,155 @@ function addIsuCdObsoleteValidator(){
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+// CREATCMR-6244
+function vatOptionalForLandedUK() {
+  var _reqId = FormManager.getActualValue('reqId');
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  var params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01"
+  };
+
+  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+  landCntry = landCntryResult.ret1;
+
+  if (reqType == 'C') {
+    if (landCntry == 'GB') {
+      if ((issuingCntry != '866'  && custGrp == 'CROSS') || (issuingCntry == '866' && custGrp == 'LOCAL')) {
+        FormManager.resetValidations('vat');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+      }
+    }
+  } 
+  if (vatInd == 'N' && vat == '') { 
+    FormManager.resetValidations('vat');
+  }
+  
+}
+
+function afterConfigForEMEA(){
+// 6244
+  if (_scenarioTypeHandler == null && FormManager.getField('custGrp')) {
+    _scenarioTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      vatOptionalForLandedUK();
+    });
+  }
+}
+
+function findVatInd() {
+	  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+	  var reqId = FormManager.getActualValue('reqId');
+	  var vatInd = FormManager.getActualValue('vatInd');
+	  var custGrp = FormManager.getActualValue('custGrp');
+	    if (vatInd == 'N' && custGrp!='CROSS') {
+	     cmr.showConfirm('markSendForProcessing()',
+	          '<div align="center"><strong><i><u><b><p style="font-size:25px"> Warning Message</p></u><br><br><p style="font-size:15px">Please note, if you choose not to provide the company’s VAT ID, IBM will not be able to include VAT ID in the customer address section. As a consequence the IBM invoice may not be eligible to recover the VAT charged to the client which can cause a delay on payment in countries that is required. However, at any moment business can submit VAT ID update whenever VAT ID is collected/needed.</p><br><br> <p style="font-size:17px">Would you like  to proceed?</p></i></strong></div>', 'Warning', null, {
+	    		OK : 'YES',
+	    CANCEL : 'NO'
+	    	  });
+	    }
+}
+
+function markSendForProcessing() {
+	  var sendForProcess = YourActions.Send_for_Processing;
+	  FormManager.doAction('frmCMR', sendForProcess, true);
+	}
+
+function addVatIndValidator(){
+
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  var reqStatus = FormManager.getActualValue('reqStatus');     
+  var cntry= FormManager.getActualValue('cmrIssuingCntry');
+  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+    ISSUING_CNTRY : cntry
+  });
+  
+    
+  if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.setValue('vatInd', 'N');
+  } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
+    FormManager.setValue('vat', '');
+    FormManager.setValue('vatInd', '');
+  } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.setValue('vatInd', 'N');
+  }
+  
+  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
+    FormManager.resetValidations('vat');
+  }
+  
+}
+
+function setToReadOnly() {
+ 
+ var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+   
+ if (viewOnlyPage == 'true') {  
+   FormManager.resetValidations('vat');
+   FormManager.resetValidations('vatInd');
+   FormManager.readOnly('vat');
+   FormManager.readOnly('vatInd');
+ } 
+ 
+}
+
+function vatIndOnChange() {
+  
+  var _vatIndHandler = null;
+    
+    if (_vatIndHandler == null) {
+    _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(value) {
+      var vatInd = FormManager.getActualValue('vatInd');
+      if (vatInd && dojo.string.trim(vatInd) == 'T') {
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'N');        
+        FormManager.setValue('vatInd', 'T');
+      } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.readOnly('vat');
+        FormManager.setValue('vat', '');        
+        FormManager.setValue('vatInd', 'N');
+      } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'Y');       
+        FormManager.setValue('vatInd', 'E');
+      }
+    });
+  }
+  
+  if (_vatIndHandler && _vatIndHandler[0]) {
+    _vatIndHandler[0].onChange();
+  }
+  
+var _vatHandler = null;
+  
+  if (_vatHandler == null){   
+    
+    dojo.byId('vat').onkeyup = function() {
+      var vat = FormManager.getActualValue('vat');
+      if (vat == '') {
+        FormManager.enable('vatInd');
+        FormManager.setValue('vatInd', 'N'); 
+      }
+    }
+    }
+}
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
@@ -1035,7 +1197,8 @@ dojo.addOnLoad(function() {
       '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827',
       '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693',
       '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618',
-      '706', '760', '758', '678', '702', '806', '846', '624', '788', '641', '848', '729', '724','858', '649' ], true);
+      '706', '760', '758', '678', '702', '806', '846', '624', '788', '641', '848', '729', '724','858', '649' ], true);  
+  
   GEOHandler.registerValidator(addCrossBorderValidator, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE_CRSSBORDER, null, true);
 
   /* 1427121 BDS Postal COde validation */
@@ -1049,7 +1212,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerWWValidator(addINACValidator);
   //Removing this for coverage-2023 as ISU -32 is no longer obsoleted
   //GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
-
+  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']);  
+  GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']); 
+  GEOHandler.registerWWValidator(addVatIndValidator);
+    
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];
 });

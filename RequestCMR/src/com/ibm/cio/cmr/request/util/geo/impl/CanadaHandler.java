@@ -453,6 +453,7 @@ public class CanadaHandler extends GEOHandler {
     } else {
       data.setSizeCd("");
     }
+    
   }
 
   @Override

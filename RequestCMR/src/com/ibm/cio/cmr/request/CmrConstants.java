@@ -232,7 +232,8 @@ public class CmrConstants {
   public static final String Scorecard_Not_Required = "NR";
   public static final String Scorecard_COMPLETED = "Completed";
   public static final String Scorecard_COMPLETED_WITH_ISSUES = "Completed with Issues";
-
+  public static final String Scorecard_YES = "YES";
+  public static final String Scorecard_NA = "N/A";
   // DPL Address results
   public static final String ADDRESS_Not_Required = "N";
 
@@ -947,4 +948,7 @@ public class CmrConstants {
       "813", "815", "869", "871", "631", "781");
   
   public static final List<String> BP_GBM_SBM_COUNTRIES = Arrays.asList("620", "677", "680", "767", "805", "823", "832");
+  public static final List<String> CROSS_BORDER_COUNTRIES_GROUP1 = Arrays.asList("754", "866", "624", "788", "724", "618", "848");
+  public static final String VAT_ACKNOWLEDGE_YES = "Yes";
+  public static final String VAT_ACKNOWLEDGE_NA = "N/A";
 }

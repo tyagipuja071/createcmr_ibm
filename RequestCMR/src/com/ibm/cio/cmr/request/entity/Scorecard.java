@@ -25,9 +25,13 @@ import com.ibm.cio.cmr.request.entity.listeners.NoLog;
  * @author Rama mohan
  */
 @Entity
-@Table(name = "SCORECARD", schema = "CREQCMR")
+@Table(
+    name = "SCORECARD",
+    schema = "CREQCMR")
 @EntityListeners({ ChangeLogListener.class })
-@ChangeLogDetails(childTable = true, reqId = "id.reqId")
+@ChangeLogDetails(
+    childTable = true,
+    reqId = "id.reqId")
 public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -44,71 +48,91 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
     this.id = id;
   }
 
-  @Column(name = "DPL_CHK_RESULT")
+  @Column(
+      name = "DPL_CHK_RESULT")
   private String dplChkResult;
 
-  @Column(name = "DPL_CHK_USR_ID")
+  @Column(
+      name = "DPL_CHK_USR_ID")
   private String dplChkUsrId;
 
-  @Column(name = "DPL_CHK_USR_NM")
+  @Column(
+      name = "DPL_CHK_USR_NM")
   private String dplChkUsrNm;
 
-  @Column(name = "DPL_CHK_TS")
+  @Column(
+      name = "DPL_CHK_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date dplChkTs;
 
-  @Column(name = "FIND_CMR_RESULT")
+  @Column(
+      name = "FIND_CMR_RESULT")
   private String findCmrResult;
 
-  @Column(name = "FIND_CMR_USR_ID")
+  @Column(
+      name = "FIND_CMR_USR_ID")
   private String findCmrUsrId;
 
-  @Column(name = "FIND_CMR_USR_NM")
+  @Column(
+      name = "FIND_CMR_USR_NM")
   private String findCmrUsrNm;
 
-  @Column(name = "FIND_CMR_REJ_REASON")
+  @Column(
+      name = "FIND_CMR_REJ_REASON")
   private String findCmrRejReason;
 
-  @Column(name = "FIND_CMR_REJ_CMT")
+  @Column(
+      name = "FIND_CMR_REJ_CMT")
   private String findCmrRejCmt;
 
-  @Column(name = "FIND_CMR_TS")
+  @Column(
+      name = "FIND_CMR_TS")
   @Temporal(TemporalType.TIMESTAMP)
   @NoLog
   private Date findCmrTs;
 
-  @Column(name = "FIND_DNB_RESULT")
+  @Column(
+      name = "FIND_DNB_RESULT")
   private String findDnbResult;
 
-  @Column(name = "FIND_DNB_USR_ID")
+  @Column(
+      name = "FIND_DNB_USR_ID")
   private String findDnbUsrId;
 
-  @Column(name = "FIND_DNB_USR_NM")
+  @Column(
+      name = "FIND_DNB_USR_NM")
   private String findDnbUsrNm;
 
-  @Column(name = "FIND_DNB_REJ_REASON")
+  @Column(
+      name = "FIND_DNB_REJ_REASON")
   private String findDnbRejReason;
 
-  @Column(name = "FIND_DNB_REJ_CMT")
+  @Column(
+      name = "FIND_DNB_REJ_CMT")
   private String findDnbRejCmt;
 
-  @Column(name = "FIND_DNB_TS")
+  @Column(
+      name = "FIND_DNB_TS")
   @Temporal(TemporalType.TIMESTAMP)
   @NoLog
   private Date findDnbTs;
 
-  @Column(name = "DPL_ASSESSMENT_RESULT")
+  @Column(
+      name = "DPL_ASSESSMENT_RESULT")
   private String dplAssessmentResult;
 
-  @Column(name = "DPL_ASSESSMENT_DATE")
+  @Column(
+      name = "DPL_ASSESSMENT_DATE")
   @Temporal(TemporalType.TIMESTAMP)
   @NoLog
   private Date dplAssessmentDate;
 
-  @Column(name = "DPL_ASSESSMENT_BY")
+  @Column(
+      name = "DPL_ASSESSMENT_BY")
   private String dplAssessmentBy;
 
-  @Column(name = "DPL_ASSESSMENT_CMT")
+  @Column(
+      name = "DPL_ASSESSMENT_CMT")
   private String dplAssessmentCmt;
   @Column(
       name = "DNB_MATCHING_RESULT")
@@ -116,6 +140,10 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
   @Column(
       name = "RPA_MATCHING_RESULT")
   private String rpaMatchingResult;
+
+  @Column(
+      name = "VAT_ACKNOWLEDGE")
+  private String vatAcknowledge;
 
   public String getDplChkResult() {
     return this.dplChkResult;
@@ -295,5 +323,13 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
 
   public void setRpaMatchingResult(String rpaMatchingResult) {
     this.rpaMatchingResult = rpaMatchingResult;
+  }
+
+  public String getVatAcknowledge() {
+    return vatAcknowledge;
+  }
+
+  public void setVatAcknowledge(String vatAcknowledge) {
+    this.vatAcknowledge = vatAcknowledge;
   }
 }

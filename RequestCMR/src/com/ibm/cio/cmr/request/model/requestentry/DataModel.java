@@ -192,7 +192,9 @@ public class DataModel extends BaseModel {
 
   private String economicCd;
 
-  private String vatExempt;
+  private String vatExempt; 
+  
+  private String vatInd;
 
   private String denialCusInd;
 
@@ -1248,20 +1250,13 @@ public class DataModel extends BaseModel {
   public void setCustomerIdCd(String customerIdCd) {
     this.customerIdCd = customerIdCd;
   }
+  
 
-  public String getCollectorNameNo() {
-    return collectorNameNo;
+  public String getVatInd() {
+    return vatInd;
   }
 
-  public void setCollectorNameNo(String collectorNameNo) {
-    this.collectorNameNo = collectorNameNo;
-  }
-
-  public String getMrktChannelInd() {
-    return mrktChannelInd;
-  }
-
-  public void setMrktChannelInd(String mrktChannelInd) {
-    this.mrktChannelInd = mrktChannelInd;
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
   }
 }

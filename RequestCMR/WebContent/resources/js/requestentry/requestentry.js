@@ -8,8 +8,10 @@
  * 
  */
 var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
+var NORDX = [ '846', '806', '702', '678' ];
 var comp_proof_INAUSG = false;
 var flag = false;
+
 dojo.require("dojo.io.iframe");
 
 /**
@@ -132,6 +134,8 @@ function processRequestAction() {
   } else if (action == YourActions.Send_for_Processing) {
     var findDnbResult = FormManager.getActualValue('findDnbResult');
     var reqType = FormManager.getActualValue('reqType');
+    var vatInd = FormManager.getActualValue('vatInd');
+    var custGrp = FormManager.getActualValue('custGrp');
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
@@ -232,7 +236,8 @@ function processRequestAction() {
         // cmr.showModal('addressVerificationModal');
         showAddressVerificationModal();
       }
-    } else {
+    }
+    else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
 
@@ -813,13 +818,13 @@ var _templateHandler = null;
 var defaultLandCntry = null;
 var _rejSupplInfoHandler = null;
 var _dnbSearchHandler = null;
-
 /**
  * Executed after PageManager loads all the scripts. Place here code that needs
  * to be executed to override the PageManager configurable fields' settings
  */
 function afterConfigChange() {
-  // add special INAC value validator
+  
+      // add special INAC value validator
   // if INAC Type = I, the code should be a number
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (_inacHandler == null) {
@@ -922,7 +927,7 @@ function afterConfigChange() {
       }
       FormManager.disable('func');
       FormManager.readOnly('cmrNo');
-    }
+    } 
   }
 
   // populate the country name field when the county code is chosen
@@ -999,8 +1004,9 @@ function afterConfigChange() {
   }
   // check if dnbManadatory
   handleRequiredDnBSearch();
-
+  
   FormManager.ready();
+  
 }
 
 /**

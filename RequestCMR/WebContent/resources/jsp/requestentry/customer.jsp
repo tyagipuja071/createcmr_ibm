@@ -15,6 +15,7 @@
 <c:set var="resourcesPath" value="${contextPath}/resources" />
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
 
+
 <cmr:section id="CUST_REQ_TAB" hidden="true">
   <jsp:include page="detailstrip.jsp" />
   <cmr:row addBackground="true">
@@ -331,7 +332,8 @@
         </p>
       </cmr:column>
       </cmr:view>
-      <cmr:column span="2" containerForField="VAT" exceptForCountry="897,649">
+      <cmr:view  exceptForCountry="897,649,618,624,678,702,724,754,788,806,846,848,866">
+      <cmr:column span="2" containerForField="VAT">
         <p>
           <label for="vat"> <cmr:fieldLabel fieldId="VAT" />: <cmr:delta text="${rdcdata.vat}" oldValue="${reqentry.vat}" /> <cmr:view
               forCountry="755">
@@ -423,56 +425,56 @@
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,FR" exceptForCountry="755">
-        <cmr:column span="1" containerForField="VATExempt">
+      </cmr:view>       
+      <cmr:view forGEO="MCO,CEMEA,FR" exceptForCountry="755,618">
+        <cmr:column span="1" containerForField="VATExempt" >
           <p>
-            <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+            <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label> 
             <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
-            <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
+           		<cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
               <cmr:fieldLabel fieldId="VATExempt" />
               <cmr:delta text="${rdcdata.vatExempt}" oldValue="${reqentry.vatExempt == 'Y' ? 'Yes' : 'No'}" />
             </cmr:label>
           </p>
         </cmr:column>
-      </cmr:view>
+      </cmr:view> 
     </cmr:view>
-    <cmr:view forGEO="MCO1,MCO2">
+   <cmr:view forGEO="MCO1,MCO2">
       <c:if test="${reqentry.reqType != 'U'}">
-        <cmr:column span="1" containerForField="VATExempt">
+        <cmr:column span="1" containerForField="VATExempt" >
+          <p>
+         <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+            <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB"  />
+             <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
+              <cmr:fieldLabel fieldId="VATExempt" />
+            </cmr:label> 
+          </p>
+        </cmr:column>
+      </c:if>
+    </cmr:view>
+    <cmr:view forCountry="619">
+      <c:if test="${reqentry.reqType != 'U'}">
+        <cmr:column span="1" containerForField="VATExempt" >
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
             <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
-            <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
-              <cmr:fieldLabel fieldId="VATExempt" />
+             <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
+             <cmr:fieldLabel fieldId="VATExempt" />
+              <cmr:delta text="${rdcdata.vatExempt}" oldValue="${reqentry.vatExempt == 'Y' ? 'Yes' : 'No'}" />
             </cmr:label>
           </p>
         </cmr:column>
       </c:if>
     </cmr:view>
-    <cmr:view forCountry="724,619,755">
-      <c:if test="${reqentry.reqType != 'U'}">
+     <cmr:view forCountry="744">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
             <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
-            <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
+          	<cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
               <cmr:fieldLabel fieldId="VATExempt" />
               <cmr:delta text="${rdcdata.vatExempt}" oldValue="${reqentry.vatExempt == 'Y' ? 'Yes' : 'No'}" />
             </cmr:label>
-          </p>
-        </cmr:column>
-      </c:if>
-    </cmr:view>
-        <cmr:view forCountry="744">
-        <cmr:column span="1" containerForField="VATExempt">
-          <p>
-            <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
-            <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
-            <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
-              <cmr:fieldLabel fieldId="VATExempt" />
-              <cmr:delta text="${rdcdata.vatExempt}" oldValue="${reqentry.vatExempt == 'Y' ? 'Yes' : 'No'}" />
-            </cmr:label>
-          </p>
         </cmr:column>
     </cmr:view>
     <div id="vatRegisterStatus"> 

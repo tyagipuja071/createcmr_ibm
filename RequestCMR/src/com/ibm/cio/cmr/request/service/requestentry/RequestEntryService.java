@@ -9,7 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -327,7 +329,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         score.setFindCmrResult(CmrConstants.Scorecard_Not_Done);
         score.setFindDnbResult(CmrConstants.Scorecard_Not_Done);
       }
-
+      // if (StringUtils.isNotEmpty(data.getVatInd()) &&
+      // "N".equals(data.getVatInd()))
+      // score.setVatAcknowledge(CmrConstants.Scorecard_YES);
+      // else
+      // score.setVatAcknowledge(CmrConstants.Scorecard_NA);
       createEntity(score, entityManager);
 
       if (geoHandler != null && geoHandler.hasChecklist(model.getCmrIssuingCntry())) {
@@ -609,7 +615,21 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       }
     }
     updateEntity(data, entityManager);
-
+    
+    
+    long reqId=model.getReqId();
+    RequestData requestData = new RequestData(entityManager, reqId);
+    Addr addr = requestData.getAddress("ZS01");
+    // Scorecard vat acknowledge initialize, if the data.vatInd=N,
+    // then set scorecard.vatAcknowledge=Yes
+    boolean iscrossBorder= isCrossBorder(entityManager,model.getCmrIssuingCntry(),addr.getLandCntry());
+    Scorecard scorecard = entity.getEntity(Scorecard.class);
+    if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())) {
+      if ("N".equals(data.getVatInd()) && (!iscrossBorder)) {
+        scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+      } else
+        scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
+    }
     // CREATCMR-3144 - CN 2.0 special
     if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
       CNHandler.doBeforeSendForProcessing(entityManager, admin, data, model);
@@ -677,6 +697,34 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
   }
 
+  public static boolean isCrossBorder(EntityManager entityManager, String issuingCntry, String landCntry) {
+    boolean isCrossBorder = false;
+    boolean isSubRegion = false;
+    Map<String, String> issuingLandedCntryMap = new HashMap<String, String>();
+    String sql = ExternalizedQuery.getSql("LOAD_LANDCNTRY");
+    String landedCntry;
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    List<Object[]> results = query.getResults();
+    for (Object[] result : results) {
+      issuingLandedCntryMap.put((String) result[0], (String) result[1]);
+    }
+    if ((Arrays.asList("LV", "LT", "EE").contains(landCntry) && "702".equals(issuingCntry))
+        || (Arrays.asList("FO", "GL", "IS").contains(landCntry) && "678".equals(issuingCntry)))
+      isSubRegion = true;
+
+    if (StringUtils.isNotBlank(issuingCntry) && issuingCntry.equalsIgnoreCase("624LU")) {
+      landedCntry = "LU";
+    } else
+      landedCntry = issuingLandedCntryMap.get(issuingCntry);
+    if (landedCntry != null && landCntry != null && StringUtils.isNotBlank(landedCntry) && StringUtils.isNotBlank(landCntry) && !isSubRegion) {
+      if (landedCntry.equalsIgnoreCase(landCntry))
+        isCrossBorder = false;
+      else if (!landedCntry.equalsIgnoreCase(landCntry))
+        isCrossBorder = true;
+    }
+    return isCrossBorder;
+  }
+  
   /**
    * Send for processing
    * 
@@ -1867,7 +1915,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
           cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic())
-              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
+              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim())
+              : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");

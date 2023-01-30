@@ -29,38 +29,48 @@ public class UpdatedAddr implements Serializable {
     this.id = id;
   }
 
-  @Column(name = "CMR_COUNTRY")
+  @Column(
+      name = "CMR_COUNTRY")
   private String cmrCountry;
 
-  @Column(name = "SAP_NO")
+  @Column(
+      name = "SAP_NO")
   private String sapNo;
 
-  @Column(name = "CUST_NM1")
+  @Column(
+      name = "CUST_NM1")
   private String custNm1;
 
-  @Column(name = "CUST_NM2")
+  @Column(
+      name = "CUST_NM2")
   private String custNm2;
 
-  @Column(name = "CUST_NM3")
+  @Column(
+      name = "CUST_NM3")
   private String custNm3;
 
-  @Column(name = "CUST_NM4")
+  @Column(
+      name = "CUST_NM4")
   private String custNm4;
 
-  @Column(name = "ADDR_TXT")
+  @Column(
+      name = "ADDR_TXT")
   private String addrTxt;
 
   private String city1;
 
   private String city2;
 
-  @Column(name = "STATE_PROV")
+  @Column(
+      name = "STATE_PROV")
   private String stateProv;
 
-  @Column(name = "POST_CD")
+  @Column(
+      name = "POST_CD")
   private String postCd;
 
-  @Column(name = "LAND_CNTRY")
+  @Column(
+      name = "LAND_CNTRY")
   private String landCntry;
 
   private String county;
@@ -73,163 +83,221 @@ public class UpdatedAddr implements Serializable {
 
   private String dept;
 
-  @Column(name = "PO_BOX")
+  @Column(
+      name = "PO_BOX")
   private String poBox;
 
-  @Column(name = "PO_BOX_CITY")
+  @Column(
+      name = "PO_BOX_CITY")
   private String poBoxCity;
 
-  @Column(name = "PO_BOX_POST_CD")
+  @Column(
+      name = "PO_BOX_POST_CD")
   private String poBoxPostCd;
 
-  @Column(name = "CUST_FAX")
+  @Column(
+      name = "CUST_FAX")
   private String custFax;
 
-  @Column(name = "CUST_LANG_CD")
+  @Column(
+      name = "CUST_LANG_CD")
   private String custLangCd;
 
-  @Column(name = "HW_INSTL_MSTR_FLG")
+  @Column(
+      name = "HW_INSTL_MSTR_FLG")
   private String hwInstlMstrFlg;
 
-  @Column(name = "CUST_PHONE")
+  @Column(
+      name = "CUST_PHONE")
   private String custPhone;
 
-  @Column(name = "TRANSPORT_ZONE")
+  @Column(
+      name = "TRANSPORT_ZONE")
   private String transportZone;
 
   private String divn;
 
-  @Column(name = "ADDR_TXT_2")
+  @Column(
+      name = "ADDR_TXT_2")
   private String addrTxt2;
 
-  @Column(name = "TAX_CD_1")
+  @Column(
+      name = "TAX_CD_1")
   private String taxCd1;
 
-  @Column(name = "TAX_CD_2")
+  @Column(
+      name = "TAX_CD_2")
   private String taxCd2;
 
-  @Column(name = "VAT")
+  @Column(
+      name = "VAT")
   private String vat;
 
-  @Column(name = "BILLING_PSTL_ADDR")
+  @Column(
+      name = "VAT_IND")
+  private String vatInd;
+
+  @Column(
+      name = "BILLING_PSTL_ADDR")
   private String billingPstlAddr;
 
-  @Column(name = "PAIRED_ADDR_SEQ")
+  @Column(
+      name = "PAIRED_ADDR_SEQ")
   private String pairedAddrSeq;
 
-  @Column(name = "CMR_NUMBER")
+  @Column(
+      name = "CMR_NUMBER")
   private String cmrNumber;
 
-  @Column(name = "CONTACT")
+  @Column(
+      name = "CONTACT")
   private String contact;
 
-  @Column(name = "TAX_OFFICE")
+  @Column(
+      name = "TAX_OFFICE")
   private String taxOffice;
 
-  @Column(name = "EXT_WALLET_ID")
+  @Column(
+      name = "EXT_WALLET_ID")
   private String extWalletId;
 
   /* Old Fields */
-  @Column(name = "SAP_NO_OLD")
+  @Column(
+      name = "SAP_NO_OLD")
   private String sapNoOld;
 
-  @Column(name = "CUST_NM1_OLD")
+  @Column(
+      name = "CUST_NM1_OLD")
   private String custNm1Old;
 
-  @Column(name = "CUST_NM2_OLD")
+  @Column(
+      name = "CUST_NM2_OLD")
   private String custNm2Old;
 
-  @Column(name = "CUST_NM3_OLD")
+  @Column(
+      name = "CUST_NM3_OLD")
   private String custNm3Old;
 
-  @Column(name = "CUST_NM4_OLD")
+  @Column(
+      name = "CUST_NM4_OLD")
   private String custNm4Old;
 
-  @Column(name = "ADDR_TXT_OLD")
+  @Column(
+      name = "ADDR_TXT_OLD")
   private String addrTxtOld;
 
-  @Column(name = "CITY1_OLD")
+  @Column(
+      name = "CITY1_OLD")
   private String city1Old;
 
-  @Column(name = "CITY2_OLD")
+  @Column(
+      name = "CITY2_OLD")
   private String city2Old;
 
-  @Column(name = "STATE_PROV_OLD")
+  @Column(
+      name = "STATE_PROV_OLD")
   private String stateProvOld;
 
-  @Column(name = "POST_CD_OLD")
+  @Column(
+      name = "POST_CD_OLD")
   private String postCdOld;
 
-  @Column(name = "LAND_CNTRY_OLD")
+  @Column(
+      name = "LAND_CNTRY_OLD")
   private String landCntryOld;
 
-  @Column(name = "COUNTY_OLD")
+  @Column(
+      name = "COUNTY_OLD")
   private String countyOld;
 
-  @Column(name = "BLDG_OLD")
+  @Column(
+      name = "BLDG_OLD")
   private String bldgOld;
 
-  @Column(name = "FLOOR_OLD")
+  @Column(
+      name = "FLOOR_OLD")
   private String floorOld;
 
-  @Column(name = "OFFICE_OLD")
+  @Column(
+      name = "OFFICE_OLD")
   private String officeOld;
 
-  @Column(name = "DEPT_OLD")
+  @Column(
+      name = "DEPT_OLD")
   private String deptOld;
 
-  @Column(name = "PO_BOX_OLD")
+  @Column(
+      name = "PO_BOX_OLD")
   private String poBoxOld;
 
-  @Column(name = "PO_BOX_CITY_OLD")
+  @Column(
+      name = "PO_BOX_CITY_OLD")
   private String poBoxCityOld;
 
-  @Column(name = "PO_BOX_POST_CD_OLD")
+  @Column(
+      name = "PO_BOX_POST_CD_OLD")
   private String poBoxPostCdOld;
 
-  @Column(name = "CUST_FAX_OLD")
+  @Column(
+      name = "CUST_FAX_OLD")
   private String custFaxOld;
 
-  @Column(name = "CUST_LANG_CD_OLD")
+  @Column(
+      name = "CUST_LANG_CD_OLD")
   private String custLangCdOld;
 
-  @Column(name = "HW_INSTL_MSTR_FLG_OLD")
+  @Column(
+      name = "HW_INSTL_MSTR_FLG_OLD")
   private String hwInstlMstrFlgOld;
 
-  @Column(name = "CUST_PHONE_OLD")
+  @Column(
+      name = "CUST_PHONE_OLD")
   private String custPhoneOld;
 
-  @Column(name = "TRANSPORT_ZONE_OLD")
+  @Column(
+      name = "TRANSPORT_ZONE_OLD")
   private String transportZoneOld;
 
-  @Column(name = "DIVN_OLD")
+  @Column(
+      name = "DIVN_OLD")
   private String divnOld;
 
-  @Column(name = "ADDR_TXT_2_OLD")
+  @Column(
+      name = "ADDR_TXT_2_OLD")
   private String addrTxt2Old;
 
-  @Column(name = "IMPORT_IND")
+  @Column(
+      name = "IMPORT_IND")
   private String importInd;
 
-  @Column(name = "TAX_CD_1_OLD")
+  @Column(
+      name = "TAX_CD_1_OLD")
   private String taxCd1Old;
 
-  @Column(name = "TAX_CD_2_OLD")
+  @Column(
+      name = "TAX_CD_2_OLD")
   private String taxCd2Old;
 
-  @Column(name = "VAT_OLD")
+  @Column(
+      name = "VAT_OLD")
   private String vatOld;
 
-  @Column(name = "BILLING_PSTL_ADDR_OLD")
+  private String vatIndOld;
+
+  @Column(
+      name = "BILLING_PSTL_ADDR_OLD")
   private String billingPstlAddrOld;
 
-  @Column(name = "CONTACT_OLD")
+  @Column(
+      name = "CONTACT_OLD")
   private String contactOld;
 
-  @Column(name = "TAX_OFFICE_OLD")
+  @Column(
+      name = "TAX_OFFICE_OLD")
   private String taxOfficeOld;
 
-  @Column(name = "EXT_WALLET_ID_OLD")
+  @Column(
+      name = "EXT_WALLET_ID_OLD")
   private String extWalletIdOld;
 
   public String getSapNo() {
@@ -696,6 +764,14 @@ public class UpdatedAddr implements Serializable {
     this.vat = vat;
   }
 
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
+  }
+
   public String getTaxCd1Old() {
     return taxCd1Old;
   }
@@ -718,6 +794,14 @@ public class UpdatedAddr implements Serializable {
 
   public void setVatOld(String vatOld) {
     this.vatOld = vatOld;
+  }
+
+  public String getVatIndOld() {
+    return vatIndOld;
+  }
+
+  public void setVatIndOld(String vatIndOld) {
+    this.vatIndOld = vatIndOld;
   }
 
   public String getBillingPstlAddr() {
