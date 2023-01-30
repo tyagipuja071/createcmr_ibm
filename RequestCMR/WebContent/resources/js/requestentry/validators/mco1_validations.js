@@ -162,7 +162,16 @@ function setClientTierValues(isuCd) {
     FormManager.setValue('salesBusOffCd', '0000');
     FormManager.setValue('repTeamMemberNo', 'SALES0');
    }
-}
+  if (isuCd == '32') {
+     FormManager.setValue('clientTier', 'T');
+   } else if (isuCd == '34') {
+     FormManager.setValue('clientTier', 'Q');
+   } else if (isuCd == '36') {
+     FormManager.setValue('clientTier', 'Y');
+   } else {
+     FormManager.setValue('clientTier', '');
+   }
+  }
 
 function setCtcSalesRepSBO(value) {
   var reqType = FormManager.getActualValue('reqType');
