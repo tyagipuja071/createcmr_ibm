@@ -70,6 +70,9 @@ dojo.addOnLoad(function(){
 	        <cmr:label fieldId="apCustClusterId"> 
 	         <cmr:fieldLabel fieldId="Cluster" />:
 	         <cmr:delta text="${rdcdata.apCustClusterId}" oldValue="${reqentry.apCustClusterId}"/> 
+	         <cmr:view forCountry="852,856,818">
+            	<cmr:info text="${ui.info.clusterReminderMsgTH_VN_PH}"></cmr:info>
+        	</cmr:view> 
 	        </cmr:label>
 	        <cmr:field path="apCustClusterId" id="apCustClusterId" fieldId="Cluster" tabId="MAIN_IBM_TAB" />
 	      	</p>
