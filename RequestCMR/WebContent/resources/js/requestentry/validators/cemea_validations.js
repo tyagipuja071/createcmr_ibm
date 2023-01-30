@@ -1946,6 +1946,7 @@ function setSBOValuesForIsuCtc() {
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
   var ims = FormManager.getActualValue('subIndustryCd');
+  var cusSubGrp = FormManager.getActualValue('custSubGrp');
   var isuCtc = isuCd + clientTier;
   var qParams = null;
   var sbo = [];
@@ -1966,26 +1967,65 @@ function setSBOValuesForIsuCtc() {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry,
-        ISU : '%' + isuCd + clientTier + '%'
+        ISU : '%' + isuCtc + '%'
       };
       results = cmr.query('GET.SBOLIST.BYISU', qParams);
     }
-    console.log("there are " + results.length + " SBO returned.");
+    console.log("There are " + results.length + " SBO returned.");
 
-    var readOnly = false;
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     if (results != null && results.length > 0) {
       for (var i = 0; i < results.length; i++) {
         sbo.push(results[i].ret1);
       }
       FormManager.setValue('salesBusOffCd', sbo[0]);
-      readOnly = true;
     }
-    if (readOnly) {
-      // experimental might need to remove later
+    
+    if (isuCtc == '8B' || isuCtc == '21' || custSubGrp == 'PRICU') {
       FormManager.readOnly('salesBusOffCd');
+    } else if (FormManager.getActualValue('userRole')  == 'Processor'){
+      FormManager.enable('salesBusOffCd');
     }
   }
+}
+
+function validateSBOValuesForIsuCtc() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var isuCd = FormManager.getActualValue('isuCd');
+        var sbo = FormManager.getActualValue('salesBusOffCd');
+        var isuCtc = isuCd + clientTier;
+        var validSboList = [];
+        var qParams = null;
+        
+        if (isuCd != '') {
+          var results = null;
+          if (isuCtc != '34Q') {
+            qParams = {
+              _qall : 'Y',
+              ISSUING_CNTRY : cntry,
+              ISU : '%' + isuCtc + '%'
+            };
+            results = cmr.query('GET.SBOLIST.BYISU', qParams);
+          }
+        }
+        if (results == null) {
+          return new ValidationResult(null, true);
+        } else {
+          for (let i=0; i<results.length; i++) {
+            validSboList.push(results[i].ret1);
+          }
+          if (!validSboList.includes(sbo)) {
+            return new ValidationResult(null, false, 
+                'The SBO provided is invalid. It should be from the list: ' + validSboList);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function setSBOValuesForIsuCtcAT() {
@@ -4459,6 +4499,37 @@ function isicCdOnChangeCEE() {
   });
 }
 
+function validateSortl() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqId = FormManager.getActualValue('reqId');
+        var searchTerm = FormManager.getActualValue('searchTerm');
+        var letterNumber = /^[0-9a-zA-Z]+$/;
+        var qParams = {
+          REQ_ID : reqId,
+        };
+        if (_importedSearchTerm != searchTerm) {
+          console.log("validating Sortl..");
+          if (searchTerm.length != 8) {
+            return new ValidationResult(null, false, 'SBO should be 8 characters long.');
+          }
+
+          if (!searchTerm.match(letterNumber)) {
+            return new ValidationResult({
+              id : 'searchTerm',
+              type : 'text',
+              name : 'searchTerm'
+            }, false, 'SBO should be alpha numeric.');
+          }
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function setCustomerName2LblAndBubble() {
   var custType = FormManager.getActualValue('custGrp');
   var landCntry = FormManager.getActualValue('landCntry');
@@ -5393,8 +5464,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(lockIBMtab, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(lockIBMtab, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(resetVatExemptOnScenario, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(resetVatExemptOnScenario, SysLoc.AUSTRIA);
+//  GEOHandler.addAfterConfig(resetVatExemptOnScenario, [ SysLoc.AUSTRIA ]);
+//  GEOHandler.addAfterTemplateLoad(resetVatExemptOnScenario, SysLoc.AUSTRIA);
   // CEE
   GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
@@ -5458,11 +5529,12 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(setCTCValuesAT, [ SysLoc.AUSTRIA ]);
   GEOHandler.registerValidator(clientTierValidator, SysLoc.AUSTRIA, null, true);
+  GEOHandler.registerValidator(validateSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ], null, true);
 
   GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, SysLoc.AUSTRIA);
   GEOHandler.addAfterTemplateLoad(togglePPSCeidCEE, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(disableFieldsIBMEm, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setClassificationCodeCEE, GEOHandler.CEMEA);
+  GEOHandler.registerValidator(validateSortl, [ SysLoc.AUSTRIA ], null, true);
 
 });

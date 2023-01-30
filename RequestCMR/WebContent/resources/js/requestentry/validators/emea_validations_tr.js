@@ -8504,7 +8504,7 @@ function setISUCTCBasedScenarios() {
         FormManager.setValue('salesBusOffCd', 'A00');
         FormManager.enable('salesBusOffCd');
       } else {
-        FormManager.setValue('clientTier', 'Q');
+        FormManager.setValue('clientTier', '');
       }
     }
   }
@@ -8949,21 +8949,7 @@ function clientTierCodeValidator() {
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
-    if (clientTierCode == '') {
-      $("#clientTierSpan").html('');
-
-      return new ValidationResult(null, true);
-    } else {
-      $("#clientTierSpan").html('');
-
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept blank.');
-    }
-  } else if (isuCode == '34') {
+  if (isuCode == '34') {
     if (clientTierCode == '') {
       return new ValidationResult({
         id : 'clientTier',
@@ -9105,6 +9091,11 @@ function vatValidatorTR() {
         }
         if ((cmrResult != '' && cmrResult == 'Accepted') || (dnbResult != '' && cmrResult == 'Accepted')) {
           if (oldVAT == FormManager.getActualValue('vat') && oldZS01DEPT == soldToDistrict) {
+            return new ValidationResult(null, true);
+          }
+        }
+        if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
+          if (vat == '') {
             return new ValidationResult(null, true);
           }
         }
