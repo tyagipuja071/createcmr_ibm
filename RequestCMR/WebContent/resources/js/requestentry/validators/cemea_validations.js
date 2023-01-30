@@ -775,6 +775,12 @@ function addAfterConfigCEE() {
     return;
   }
   dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    var isuCd ;
+    if(value ='') {
+    isuCd = FormManager.getActualValue('isuCd') ;
+ } else {
+   isuCd = value;
+ }
     if (isuCd == '32') {
       FormManager.setValue('clientTier', 'T');
     } else if (isuCd == '34') {
