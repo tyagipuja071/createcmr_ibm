@@ -369,6 +369,7 @@ function setInacByCluster() {
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       updateMRCAseanAnzIsa();
+      clearInacOnClusterChange(_cluster);
       return;
     }
 }
@@ -4065,6 +4066,11 @@ function addCtcObsoleteValidator() {
         if (result != null && result != '') {
          var oldCtc = result.ret1;
         }
+        
+        if(clientTier == "T" && FormManager.getActualValue('cmrIssuingCntry') == '856'){
+          console.log('>>> Skip CTC Obsolete Validator clientTier = T for TH');
+          return new ValidationResult(null, true);
+        }
 
         if (reqType == 'C' && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B"  ||clientTier == "M"|| clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" )) {
            return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
@@ -4774,6 +4780,40 @@ function setCTCIsuByClusterPhVnTh(apClientTierValue, isuCdValue) {
   }
 }
 
+function clearInacOnScenarioChange(fromAddress, scenario, scenarioChanged) {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  
+  if(scenarioChanged) {
+    var hasDefaultVal = ['KYND'];
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    if(!hasDefaultVal.includes(scenario)) {
+      FormManager.setValue('inacCd','');
+      FormManager.setValue('inacType', '');
+    }  
+  }
+}
+
+function clearInacOnClusterChange(selectedCluster) {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  if(cntry == '856') {
+    var viewOnly = FormManager.getActualValue('viewOnlyPage');
+    if (viewOnly != '' && viewOnly == 'true') {
+      return;
+    }
+    var scenario = FormManager.getActualValue('custSubGrp');
+    var clearInacScenarios = ['XASLM','CROSS', 'ASLOM']; 
+    var noFilterInac = ['01251', '00000', '08047']
+    if (clearInacScenarios.includes(scenario) && noFilterInac.includes(selectedCluster)) {
+      FormManager.setValue('inacCd','');
+      FormManager.setValue('inacType', '');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4959,5 +4999,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(displayVatRegistrartionStatus,   [ SysLoc.SINGAPORE ] );
   GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND], null, true);
   GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [ SysLoc.THAILAND ]);
-
+  GEOHandler.addAfterTemplateLoad(clearInacOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND ]);
 });
