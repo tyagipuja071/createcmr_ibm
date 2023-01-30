@@ -1827,18 +1827,18 @@ public class ItalyHandler extends BaseSOFHandler {
         }
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
           if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(clientTier)) || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isu))) {
-            LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
-            error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+            LOG.trace("The row " + rowIndex + ":Note that both ISU and CTC value needs to be filled..");
+            error.addError(rowIndex, "Data Tab", ":Please fill both ISU and CTC value.<br>");
           } else if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
             if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
-              LOG.trace("The row " + (row.getRowNum() + 1)
+              LOG.trace("The row " + rowIndex
                   + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-              error.addError((row.getRowNum() + 1), "Client Tier",
+              error.addError(rowIndex, "Client Tier",
                   ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
             }
           } else if ((!StringUtils.isBlank(isu) && !"34".equals(isu)) && !"@".equalsIgnoreCase(clientTier)) {
             LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-            error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu + ".<br>");
+            error.addError(rowIndex, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu + ".<br>");
           }
         }
 

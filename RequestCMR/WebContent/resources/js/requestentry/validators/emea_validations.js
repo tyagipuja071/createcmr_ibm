@@ -8014,7 +8014,7 @@ function validateSBOForIT() {
 					var qParams = {
 						_qall: 'Y',
 						CNTRY: cntry,
-						SBO: '%' + sbo + '%',
+						SBO:  sbo,
 						SALES_REP: salRep,
 						ISU: '%' + isuCTC + '%'
 					};
@@ -10386,8 +10386,8 @@ dojo.addOnLoad(function() {
 
 	GEOHandler.addAfterConfig(addVatIndValidator, [SysLoc.UK, SysLoc.IRELAND]);
 	GEOHandler.registerValidator(addVatIndValidator, [SysLoc.UK, SysLoc.IRELAND], null, true);
-	GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK, SysLoc.IRELAND]);
-	GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK, SysLoc.IRELAND]);
+	// GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK, SysLoc.IRELAND]);
+	// GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK, SysLoc.IRELAND]);
 	// CMR-2688
 	GEOHandler.addAfterConfig(setDefaultValueForPreferredLanguage, [SysLoc.TURKEY]);
 	// CMR-1804 Turkey - Fields values validations - ISU Default on UI
