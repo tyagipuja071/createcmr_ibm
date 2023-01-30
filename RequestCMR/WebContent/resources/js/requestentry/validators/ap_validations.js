@@ -4309,8 +4309,8 @@ function addValidatorBasedOnCluster() {
         if(FormManager.getActualValue('reqType') != 'C') {
           return new ValidationResult(null, true);
         }
-        if((cntry == '856' && custSubType == 'CROSS' && cluster == '08047') ||
-           (cntry == '818' && custSubType == 'CROSS' && cluster == '08044') ) {
+        if((cntry == '856' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08047') ||
+           (cntry == '818' && (custSubType == 'CROSS' || custSubType == 'XASLO') && cluster == '08044') ) {
           return new ValidationResult(null, true);
         }
         
