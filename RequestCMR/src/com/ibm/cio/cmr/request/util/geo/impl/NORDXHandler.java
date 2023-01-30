@@ -1083,14 +1083,13 @@ public class NORDXHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet(name);
       LOG.debug("validating for sheet " + name);
       if (sheet != null) {
-        int rowCount = 0;
-        for (Row row : sheet) {
+        for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+          Row row = sheet.getRow(rowIndex);
+          if (row == null) {
+            return;
+          }
           TemplateValidation error = new TemplateValidation(name);
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
-            rowCount++;
-            if (rowCount < 2) {
-              continue;
-            }
             DataFormatter df = new DataFormatter();
             String cmrNo = ""; // 0
             String abbName = ""; // 1
@@ -1229,6 +1228,11 @@ public class NORDXHandler extends BaseSOFHandler {
               } else if ((!StringUtils.isBlank(isu) && !Arrays.asList("32", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(ctc)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu + ".<br>");
+              } else if (!"@QYT".contains(ctc)) {
+                LOG.trace(
+                    "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.<br>");
               }
               currCell = (XSSFCell) row.getCell(12);
               leadingAccount = validateColValFromCell(currCell);

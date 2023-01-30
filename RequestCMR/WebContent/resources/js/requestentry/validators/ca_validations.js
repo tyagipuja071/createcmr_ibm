@@ -749,6 +749,25 @@ function addPSTExemptHandler() {
   }
 }
 
+function setIsuCtcFor5k() {
+  isuCd = FormManager.getActualValue('isuCd');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (viewOnlyPage == 'true') {
+    return;
+  }
+  if (custSubGrp == 'ECO') {
+    return;
+  }
+  if (isuCd == '5K' || (custSubGrp == 'IBME' && isuCd == '21')) {
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    var reqType = FormManager.getActualValue('reqType');
+    FormManager.enable('clientTier');
+  }
+}
+
 function addLocationNoValidator() {
   FormManager.addFormValidator(
       (function() {
@@ -1290,6 +1309,8 @@ function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
       arFaar = '051Z';
     } else if (scenario == 'USA') {
       arFaar = '120V';
+    } else if (scenario == 'IBME') {
+      arFaar = '051Z';
     }
     FormManager.setValue('adminDeptCd', arFaar);
     _scenarioArFaar = arFaar;
