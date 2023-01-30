@@ -8012,7 +8012,7 @@ function validateSBOForIT() {
 					var qParams = {
 						_qall: 'Y',
 						CNTRY: cntry,
-						SBO: '%' + sbo + '%',
+						SBO:  sbo,
 						SALES_REP: salRep,
 						ISU: '%' + isuCTC + '%'
 					};
@@ -10334,6 +10334,40 @@ dojo.addOnLoad(function() {
 
 	GEOHandler.addAfterConfig(addVatIndValidator, [SysLoc.UK, SysLoc.IRELAND]);
 	GEOHandler.registerValidator(addVatIndValidator, [SysLoc.UK, SysLoc.IRELAND], null, true);
-	GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK, SysLoc.IRELAND]);
-	GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK, SysLoc.IRELAND]);
+	// GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK, SysLoc.IRELAND]);
+	// GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK, SysLoc.IRELAND]);
+	// CMR-2688
+	GEOHandler.addAfterConfig(setDefaultValueForPreferredLanguage, [SysLoc.TURKEY]);
+	// CMR-1804 Turkey - Fields values validations - ISU Default on UI
+	GEOHandler.addAfterConfig(setDefaultValueForISU, [SysLoc.TURKEY]);
+	GEOHandler.addAfterConfig(setISUDefaultValueOnSubTypeChange, [SysLoc.TURKEY]);
+	GEOHandler.addAfterTemplateLoad(setISUDefaultValueOnSubTypeChange, [SysLoc.TURKEY]);
+	GEOHandler.addAddrFunction(disableTaxOfficeTR, [SysLoc.TURKEY]);
+
+	// GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.UK ]);
+	// GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.UK ]);
+	GEOHandler.addAfterTemplateLoad(setCustClassCd, [SysLoc.UK, SysLoc.IRELAND]);
+	GEOHandler.addAfterConfig(setCustClassCd, [SysLoc.UK, SysLoc.IRELAND]);
+	GEOHandler.addAfterTemplateLoad(configureCRNForUKI, [SysLoc.UK, SysLoc.IRELAND]);
+	GEOHandler.addAfterConfig(configureCRNForUKI, [SysLoc.UK, SysLoc.IRELAND]);
+	GEOHandler.addAfterTemplateLoad(autoSetVAT, [SysLoc.UK, SysLoc.IRELAND]);
+	GEOHandler.addAfterConfig(autoSetVAT, [SysLoc.UK, SysLoc.IRELAND]);
+
+	GEOHandler.registerValidator(validateVATForINFSLScenarioUKI, [SysLoc.IRELAND], null, true);
+	GEOHandler.registerValidator(sboLengthValidator, [SysLoc.ISRAEL], null, true);
+	GEOHandler.addAfterConfig(addHandlersForIL, [SysLoc.ISRAEL]);
+	GEOHandler.addAddrFunction(countryUseAISRAEL, [SysLoc.ISRAEL]);
+	GEOHandler.addAfterConfig(addHandlersForIE, [SysLoc.IRELAND]);
+
+	// CREATCMR-4293
+	GEOHandler.registerValidator(clientTierValidator, [SysLoc.IRELAND, SysLoc.UK], null, true);
+	GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [SysLoc.UK, SysLoc.IRELAND]);
+	GEOHandler.addAfterConfig(autoSetSpecialTaxCdByScenario, [SysLoc.UK, SysLoc.IRELAND]);
+	GEOHandler.addAfterTemplateLoad(autoSetSpecialTaxCdByScenario, [SysLoc.UK, SysLoc.IRELAND]);
+	GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [SysLoc.UK, SysLoc.IRELAND]);
+	GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [SysLoc.UK, SysLoc.IRELAND], null, true);
+
+	// CREATCMR-1727
+	GEOHandler.registerValidator(addCmrNoValidatorForUKI, [SysLoc.UK, SysLoc.IRELAND], null, true);
+
 });
