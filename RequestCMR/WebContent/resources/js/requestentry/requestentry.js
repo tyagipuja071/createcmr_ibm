@@ -1911,11 +1911,7 @@ function matchDnBForAutomationCountries() {
                 FormManager.setValue('matchOverrideIndc', 'Y');
               } else {
                 // cmr.showModal('addressVerificationModal');
-                if(cmrCntry == SysLoc.CHINA && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='ECOSY')) {
-                  checkRetrievedForCN();
-                } else {
-                  showAddressVerificationModal();
-                }
+                showAddressVerificationModal();
               }
             }
           } else {
@@ -2782,76 +2778,4 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
         FormManager.setValue('isuCd', '34');
       }
      }
-}
-
-//CREATCMR-7879
-function checkRetrievedForCN(){
-  console.log('>>> checkRetrievedForCN >>>');
-  var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
-  var oldGlcCode = FormManager.getActualValue('geoLocationCd');
-  var oldSearchTerm = FormManager.getActualValue('searchTerm');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  console.log("hasRetrievedValue is ", hasRetrievedValue, "old GLC code is ", oldGlcCode);
-  
-  if(!hasRetrievedValue) {
-    cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
-  } else {
-    console.log("Checking the GLC match... retrieve value again...")
-    var data = CmrServices.getAll('reqentry');
-    cmr.hideProgress();
-    if (data) {
-      console.log(data);
-      if (data.error && data.error == 'Y') {
-        cmr.showAlert('An error was encountered when retrieving the values.\nPlease contact your system administrator.', 'Create CMR');
-      } else {
-        if (data.glcError) {
-          cmr.showAlert('The following values cannot be retrieved at the moment.:GEO Location Code\nPlease contact your system administrator.', 'Create CMR');
-        } else {
-          var indc = 'C';
-          if(custSubGrp=='ECOSY'){
-            indc = 'E';
-          }
-          var result = cmr.query('GLC.CN.SEARCHTERM', {          
-            GLC_CD : '%'+data.glcCode+'%',
-            DEFAULT_INDC : indc
-          });
-          if(result != null){
-            var searchTerm = result.ret1;
-            var clientTier = result.ret2;
-            var isuCd = result.ret3;
-            if(searchTerm != oldSearchTerm) {
-              console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
-              FormManager.setValue('geoLocationCd', data.glcCode);
-              FormManager.setValue('geoLocDesc', data.glcDesc);
-              FormManager.setValue('searchTerm', searchTerm);
-              FormManager.readOnly('searchTerm');
-              FormManager.setValue('clientTier', clientTier);
-              FormManager.readOnly('clientTier');
-              FormManager.setValue('isuCd', isuCd);
-              FormManager.readOnly('isuCd');
-              if(clientTier == '00000' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
-                FormManager.setValue('clientTier', 'Q');
-                FormManager.setValue('isuCd', '34');
-              }
-            //cmr.showAlert('The GLC and Cluster has been overwritten to ' + data.glcCode + '-' + glcClusterMap[data.glcCode] + ', please continue the process.\nPlease contact your system administrator.', 'Create CMR');
-            cmr.showConfirm('showAddressVerificationModal()', 'The GLC and searchTerm has been overwritten to ' + data.glcCode + '-' + glcClusterMap[data.glcCode] + '. Do you want to proceed with this request?', 'Warning', null, {
-              OK : 'Yes',
-              CANCEL : 'No'
-            });
-            } else {
-              if (data.glcCode != oldGlcCode) {
-              console.log("The GLC code are different, the searchTerm are same, then overwrite the GLC code only.")
-              FormManager.setValue('geoLocationCd', data.glcCode);
-              FormManager.setValue('geoLocDesc', data.glcDesc);
-              }
-            cmr.showModal('addressVerificationModal');
-            }
-           } else {
-               console.log("The GLC code call the searchTerm fail , please check db.")
-               cmr.showModal('addressVerificationModal');
-           } 
-        }
-      }
-    }
-  }
 }
