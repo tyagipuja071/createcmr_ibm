@@ -489,7 +489,7 @@ function setSBOOnScenario() {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "MC") {
-        FormManager.setValue('salesBusOffCd', '02M02M');
+        FormManager.setValue('salesBusOffCd', '18D18D');
         if (role == 'Requester') {
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
@@ -502,8 +502,8 @@ function setSBOOnScenario() {
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
-      } else if (countyCd == "KM") {
-        FormManager.setValue('salesBusOffCd', '89W89W');// CMR-221
+      } else if (countyCd == "KM" || countyCd == "RE") {
+        FormManager.setValue('salesBusOffCd', '860860');// CMR-221
         if (role == 'Requester') {
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
@@ -660,10 +660,11 @@ function addPostBoxHandler() {
 function addPostCdHandler() {
   var addrType = FormManager.getActualValue('addrType');
   if (addrType != null && addrType == 'ZS01') {
+    var city1 = FormManager.getActualValue('city1');
     var currPostCd = FormManager.getActualValue('postCd');
     currPostCd = currPostCd.substring(0, 2);
     // CREATCMR-4530 For Local scenarios except Internal BP
-    autoSetValuesOnPostalCode(currPostCd);
+    autoSetValuesOnPostalCode(currPostCd, city1);
   }
 }
 
@@ -689,13 +690,15 @@ function add34QPostalCdLogic() {
   if (postCd != null && postCd.length > 2) {
     postCd = postCd.substring(0, 2);
   }
+  var cityResult = cmr.query('ADDR.GET.CITY1.BY_REQID_ADDRTYP', postCdParams);
+  var city1 = cityResult.ret1;
   // autoSetSboOnPostalCode(false, currPostCd);
   // CREATCMR-4530 For Local scenarios except Internal BP
-  autoSetValuesOnPostalCode(postCd);
+  autoSetValuesOnPostalCode(postCd, city1);
   // }
 }
 
-function autoSetValuesOnPostalCode(postCd) {
+function autoSetValuesOnPostalCode(postCd, city1) {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCtc = isuCd + clientTier;
@@ -711,90 +714,94 @@ function autoSetValuesOnPostalCode(postCd) {
   var PostCdList1 = [ '02', '14', '27', '50', '59', '60', '61', '62', '76', '80' ];
   var PostCdList2 = [ '18', '22', '28', '29', '35', '36', '37', '41', '44', '45', '49', '53', '56', '72', '79', '85', '86' ];
   var PostCdList3 = [ '01', '03', '07', '15', '26', '38', '42', '43', '63', '69', '73', '74' ];
-  var PostCdList4 = [ '08', '10', '21', '25', '39', '51', '52', '54', '55', '57', '58', '67', '68', '70', '71', '88', '89', '90' ];
-  var PostCdList5 = [ '82', '87', '81', '65', '64', '47', '46', '40', '33', '32', '31', '24', '23', '19', '17', '16', '12', '09' ];
-  var PostCdList6 = [ '04', '05', '06', '11', '13', '20', '30', '34', '48', '66', '83', '84' ];
+  var PostCdList4 = [ '08', ' 10', ' 21', ' 25', ' 39', ' 51', ' 52', ' 54', ' 55', ' 57', ' 58', ' 67', ' 68', ' 70', ' 71', ' 88', ' 89', ' 90' ];
+  var PostCdList5 = [ '09', ' 12', ' 16', ' 17', ' 19', ' 23', ' 24', ' 31', ' 32', ' 33', ' 40', ' 46', ' 47', ' 64', ' 65', ' 81', ' 82', ' 87' ];
+  var PostCdList6 = [ '04', ' 05', ' 06', ' 11', ' 13', ' 20', ' 30', ' 34', ' 48', ' 66', ' 83', ' 84' ];
+  city1 = city1.toUpperCase();
   var sboSetbyPostalCdLogic = false;
-  if (PostCdList1.includes(postCd)) {
-    FormManager.setValue('salesBusOffCd', "06N06N");
+  if (city1.includes('NIORT')) {
+    FormManager.setValue('salesBusOffCd', "8CB8CB");
     sboSetbyPostalCdLogic = true;
-  } else if (PostCdList2.includes(postCd)) {
-    FormManager.setValue('salesBusOffCd', "03N03N");
+  } else if (PostCdList1.includes(postCd) && city1.includes('LILLE')) {
+    FormManager.setValue('salesBusOffCd', "FLIFLI");
     sboSetbyPostalCdLogic = true;
-  } else if (PostCdList3.includes(postCd)) {
-    FormManager.setValue('salesBusOffCd', "02L02L");
+  } else if (PostCdList2.includes(postCd) && city1.includes('NANTES')) {
+    FormManager.setValue('salesBusOffCd', "INAINA");
     sboSetbyPostalCdLogic = true;
-  } else if (PostCdList4.includes(postCd)) {
-    FormManager.setValue('salesBusOffCd', "06E06E");
+  } else if (PostCdList3.includes(postCd) && city1.includes('LYON')) {
+    FormManager.setValue('salesBusOffCd', "4DD4DD");
     sboSetbyPostalCdLogic = true;
-  } else if (PostCdList5.includes(postCd)) {
-    FormManager.setValue('salesBusOffCd', "03M03M");
+  } else if (PostCdList4.includes(postCd) && city1.includes('STRASBOURG')) {
+    FormManager.setValue('salesBusOffCd', "FSTFST");
     sboSetbyPostalCdLogic = true;
-  } else if (PostCdList6.includes(postCd)) {
-    FormManager.setValue('salesBusOffCd', "5EB5EB");
+  } else if (PostCdList5.includes(postCd) && (city1.includes('BORDEAUX') || city1.includes('TOULOUSE'))) {
+    FormManager.setValue('salesBusOffCd', "IBOIBO");
+    sboSetbyPostalCdLogic = true;
+  } else if (PostCdList6.includes(postCd) && (city1.includes('MARSEILLE') || city1.includes('MONTPELLIER') || city1.includes('NICE'))) {
+    FormManager.setValue('salesBusOffCd', "18D18D");
     sboSetbyPostalCdLogic = true;
   }
   // If Sbo not set by PostalCd logic then ISIC logic
   if (!sboSetbyPostalCdLogic) {
 
     var IsicCdList1 = [ '9806', '6519', '6591', '6592', '7020', '7705', '9819', '6511', '6599', '6711', '6712', '6719', '7715' ];
-    var IsicCdList2 = [ '9811', '4888', '9213', '2230', '9211', '9212', '9214', '9219', '9249', '2211', '2212', '2213', '2219', '2221', '2222', '7413', '9220', '9241', '7430', '7709', '9233', '9801',
-        '6420', '7700', '9111', '9112', '9120', '9191', '9192', '9199', '9232' ];
-    var IsicCdList3 = [ '9808', '8512', '8511', '8519', '7707' ];
-    var IsicCdList4 = [ '9821', '4010', '4020', '4030', '4100', '9000', '7717', '9822', '2330', '2411', '2412', '2413', '2421', '2422', '2429', '2430', '1110', '1120', '2320', '5050', '5141', '6030',
-        '7713' ];
-    var IsicCdList5 = [ '9816', '3530', '2927', '3511', '7718' ];
-    var IsicCdList6 = [ '0140', '0150', '0200', '0501', '0502', '7495', '9812', '1513', '1514', '1520', '1541', '1542', '1543', '1544', '1549', '1551', '1552', '1553', '1554', '1600', '0111', '0112',
-        '0113', '0121', '0122', '0130', '1511', '1512', '1531', '1532', '1533', '8520', '7703', '5121', '5122', '5139', '5142', '5149', '5151', '5152', '5159', '5190', '5020', '5110', '5260', '7112',
-        '7113', '7121', '7129', '7130', '7422', '7491', '7492', '7493', '7494', '7499', '8531', '9301', '9302', '9303', '9309', '9500', '7719', '9804', '5219', '5251', '5030', '5240', '5211', '5220',
-        '5252', '5259', '5520', '5233', '5234', '7714' ];
-    var IsicCdList7 = [ '7511', '7523', '9900', '7706', '9807', '7513', '7514', '7521', '7522', '7720', '9818', '8030', '8090', '8010', '8021', '8022', '7704', '9231', '7512', '7320' ];
-    var IsicCdList8 = [ '8532', '7530' ];
-    var IsicCdList9 = [ '9814', '6601', '6603', '6602', '6720', '7712' ];
-    var IsicCdList10 = [ '9813', '2930', '3410', '3420', '3591', '2511', '3430', '2911', '2921', '3520', '3599', '5010', '5040', '7708', '2811', '2812', '2813', '2892', '2893', '2899', '2912',
-        '2913', '2914', '2915', '2919', '2922', '2923', '2925', '2926', '2929', '3320', '3512', '3592', '3610', '3691', '3692', '3693', '3694', '3699', '4510', '4530', '4540', '7010', '2010', '2021',
-        '2022', '2023', '2029', '2101', '2102', '2109', '1711', '1712', '1722', '1723', '1729', '2310', '2710', '2720', '2731', '2732', '2891', '3710', '1010', '1020', '1030', '1200', '1310', '1320',
-        '1410', '1421', '1422', '1429', '2519', '2520', '2610', '2691', '2692', '2693', '2694', '2695', '2696', '2699', '3720', '7711', '9817', '3110', '3120', '3130', '3140', '3150', '3190', '3210',
-        '3220', '3230', '3311', '3312', '3313', '3330', '3000', '7710' ];
-    var IsicCdList11 = [ '2924', '4520', '7421', '5143', '4550', '7122' ];
-    var IsicCdList12 = [ '2424', '5131', '1721', '1730', '1810', '1820', '1911', '1912', '1920', '5232', '5239', '5231' ];
-    var IsicCdList13 = [ '7310', '2423', '7721' ];
-    var IsicCdList14 = [ '9820', '6210', '6220', '6010', '6021', '6022', '6023', '6110', '6120', '6301', '6302', '6303', '6304', '5510', '7111', '6309', '6411', '6412', '7716' ];
-    var IsicCdList15 = [ '9802', '7230', '7240', '7290', '7210', '7221', '7229', '7250', '7123', '7701', '7702' ];
-    var IsicCdList16 = [ '7414', '7411', '7412' ];
+    var IsicCdList2 = [ '7511', '7523', '9900', '7706', '9807', '7513', '7514', '7521', '7522', '7720', '9818', '8030', '8090', '8010', '8021', '8022', '7704', '9231', '7512', '7320' ];
+    var IsicCdList3 = [ '7310', '2423', '7721' ];
+    var IsicCdList4 = [ '9820', '6210', '6220', '6010', '6021', '6022', '6023', '6110', '6120', '6301', '6302', '6303', '6304', '5510', '7111', '6309', '6411', '6412', '7716' ];
+    var IsicCdList5 = [ '9808', '8512', '8511', '8519', '7707' ];
+    var IsicCdList6 = [ '8532', '7530' ];
+    var IsicCdList7 = [ '7414', '7411', '7412' ];
+    var IsicCdList8 = [ '9813', '2930', '3410', '3420', '3591', '2511', '3430', '2911', '2921', '3520', '3599', '5010', '5040', '7708', '2811', '2812', '2813', '2892', '2893', '2899', '2912', '2913',
+        '2914', '2915', '2919', '2922', '2923', '2925', '2926', '2929', '3320', '3512', '3592', '3610', '3691', '3692', '3693', '3694', '3699', '4510', '4530', '4540', '7010', '2010', '2021', '2022',
+        '2023', '2029', '2101', '2102', '2109', '1711', '1712', '1722', '1723', '1729', '2310', '2710', '2720', '2731', '2732', '2891', '3710', '1010', '1020', '1030', '1200', '1310', '1320', '1410',
+        '1421', '1422', '1429', '2519', '2520', '2610', '2691', '2692', '2693', '2694', '2695', '2696', '2699', '3720', '7711', '9817', '3110', '3120', '3130', '3140', '3150', '3190', '3210', '3220',
+        '3230', '3311', '3312', '3313', '3330', '3000', '7710' ];
+    var IsicCdList9 = [ '9816', '3530', '2927', '3511', '7718' ];
+    var IsicCdList10 = [ '0140', '0150', '0200', '0501', '0502', '7495', '9812', '1513', '1514', '1520', '1541', '1542', '1543', '1544', '1549', '1551', '1552', '1553', '1554', '1600', '0111',
+        '0112', '0113', '0121', '0122', '0130', '1511', '1512', '1531', '1532', '1533', '8520', '7703', '5121', '5122', '5139', '5142', '5149', '5151', '5152', '5159', '5190', '5020', '5110', '5260',
+        '7112', '7113', '7121', '7129', '7130', '7422', '7491', '7492', '7493', '7494', '7499', '8531', '9301', '9302', '9303', '9309', '9500', '7719', '9804', '5219', '5251', '5030', '5240', '5211',
+        '5220', '5252', '5259', '5520', '5233', '5234', '7714' ];
+    var IsicCdList11 = [ '2424', '5131', '1721', '1730', '1810', '1820', '1911', '1912', '1920', '5232', '5239', '5231' ];
+    var IsicCdList12 = [ '9814', '6601', '6603', '6602', '6720', '7712' ];
+    var IsicCdList13 = [ '9811', '4888', '9213', '2230', '9211', '9212', '9214', '9219', '9249', '2211', '2212', '2213', '2219', '2221', '2222', '7413', '9220', '9241', '7430', '7709', '9233',
+        '9801', '6420', '7700', '9111', '9112', '9120', '9191', '9192', '9199', '9232' ];
+    var IsicCdList14 = [ '9802', '7230', '7240', '7290', '7210', '7221', '7229', '7250', '7123', '7701', '7702' ];
+    var IsicCdList15 = [ '2924', '4520', '7421', '5143', '4550', '7122' ];
+    var IsicCdList16 = [ '9821', '4010', '4020', '4030', '4100', '9000', '7717', '9822', '2330', '2411', '2412', '2413', '2421', '2422', '2429', '2430', '1110', '1120', '2320', '5050', '5141',
+        '6030', '7713' ];
 
     if (IsicCdList1.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MC2MC2");
+      FormManager.setValue('salesBusOffCd', "14A14A");
     } else if (IsicCdList2.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MC6MC6");
+      FormManager.setValue('salesBusOffCd', "14B14B");
     } else if (IsicCdList3.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MC3MC3");
+      FormManager.setValue('salesBusOffCd', "14C14C");
     } else if (IsicCdList4.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MN1MN1");
+      FormManager.setValue('salesBusOffCd', "31F31F");
     } else if (IsicCdList5.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MN3MN3");
+      FormManager.setValue('salesBusOffCd', "15C15C");
     } else if (IsicCdList6.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MC9MC9");
+      FormManager.setValue('salesBusOffCd', "3TS3TS");
     } else if (IsicCdList7.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MN5MN5");
+      FormManager.setValue('salesBusOffCd', "8CS8CS");
     } else if (IsicCdList8.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "28S28S");
+      FormManager.setValue('salesBusOffCd', "3TG3TG");
     } else if (IsicCdList9.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MC1MC1");
+      FormManager.setValue('salesBusOffCd', "5BA5BA");
     } else if (IsicCdList10.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MC7MC7");
+      FormManager.setValue('salesBusOffCd', "12W12W");
     } else if (IsicCdList11.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MC8MC8");
+      FormManager.setValue('salesBusOffCd', "11W11W");
     } else if (IsicCdList12.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "4AG4AG");
+      FormManager.setValue('salesBusOffCd', "19W19W");
     } else if (IsicCdList13.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MC0MC0");
+      FormManager.setValue('salesBusOffCd', "4FF4FF");
     } else if (IsicCdList14.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "MN2MN2");
-    } else if (IsicCdList15.includes(isicCd)) {
       FormManager.setValue('salesBusOffCd', "IF1IF1");
+    } else if (IsicCdList15.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "05G05G");
     } else if (IsicCdList16.includes(isicCd)) {
-      FormManager.setValue('salesBusOffCd', "11S11S");
+      FormManager.setValue('salesBusOffCd', "MC5MC5");
     }
   }
 }
@@ -3878,9 +3885,13 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
     FormManager.setValue('salesBusOffCd', '4DF4DF');
   } else if (isuCd == '4A') {
     FormManager.setValue('salesBusOffCd', '5EF5EF');
-  } else if (isuCd == '34' && clientTier == 'Y') {
-    FormManager.setValue('salesBusOffCd', '09A09A');
-  } else if (isuCd == '34' && clientTier == 'Q') {
+  } else if (isuCd == '32' && clientTier == 'T') {
+    FormManager.setValue('salesBusOffCd', 'FSDFSD');
+  }
+  // else if (isuCd == '34' && clientTier == 'Y') {
+  // FormManager.setValue('salesBusOffCd', '09A09A');
+  // }
+  else if (isuCd == '34' && clientTier == 'Q') {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custGrp = FormManager.getActualValue('custGrp');
     if (isExcludedScenario(custSubGrp)) {
@@ -3912,11 +3923,25 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
       FormManager.setValue('salesBusOffCd', 'DD1DD1');
     } else if (custGrp == 'CROSS') {
       if (landedCountry == 'AD') {
-        FormManager.setValue('salesBusOffCd', '03M03M');
+        FormManager.setValue('salesBusOffCd', 'IBOIBO');
       } else if (landedCountry == 'MC') {
-        FormManager.setValue('salesBusOffCd', '5EB5EB');
-      } else if (landedCountry == 'DZ') {
-        FormManager.setValue('salesBusOffCd', '711711');
+        FormManager.setValue('salesBusOffCd', '18D18D');
+      } else if (landedCountry == 'DZ' || landedCountry == 'LY') {
+        FormManager.setValue('salesBusOffCd', '710710');
+      } else if (landedCountry == 'RE' || landedCountry == "KM") {
+        FormManager.setValue('salesBusOffCd', '860860');
+      } else if (landedCountry == 'MQ') {
+        FormManager.setValue('salesBusOffCd', '851851');
+      } else if (landedCountry == 'GP') {
+        FormManager.setValue('salesBusOffCd', '852852');
+      } else if (landedCountry == 'GF' || landedCountry == 'PM') {
+        FormManager.setValue('salesBusOffCd', '853853');
+      } else if (landedCountry == 'YT') {
+        FormManager.setValue('salesBusOffCd', '864864');
+      } else if (landedCountry == 'NC' || landedCountry == 'WF' || landedCountry == 'VU') {
+        FormManager.setValue('salesBusOffCd', '872872');
+      } else if (landedCountry == 'PF') {
+        FormManager.setValue('salesBusOffCd', '873873');
       }
     } else if (custGrp == 'LOCAL') {
       // FormManager.setValue('salesBusOffCd', 'NNNNNN');
