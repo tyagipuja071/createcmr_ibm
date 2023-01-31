@@ -410,6 +410,9 @@ function setInacByCluster() {
       }
       
       if(cntry == '856' || cntry == '852' || cntry == '818') {
+        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+          return;
+        }
         var isInacTypeReadOnlyFromScenarios = TemplateService.isFieldReadOnly('inacType');
         if(isInacTypeReadOnlyFromScenarios) {
           FormManager.readOnly('inacType');
