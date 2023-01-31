@@ -4817,7 +4817,7 @@ function clearInacOnClusterChange(selectedCluster) {
   }
 }
 
-function clearClusterFieldsOnClusterChange(fromAddress, scenario, scenarioChanged) {
+function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var issuingCnt = ['818', '856', '852'];
   if (issuingCnt.includes(cntry)) {
@@ -4826,8 +4826,17 @@ function clearClusterFieldsOnClusterChange(fromAddress, scenario, scenarioChange
       return;
     }
     var scenario = FormManager.getActualValue('custSubGrp');
-    var clearInacScenarios = ['ASLOM', 'XASLO', 'XASLM'];    
-    if(scenarioChanged && clearInacScenarios.includes(scenario)) {
+    var clearClusterFieldsScenarios = ['ASLOM', 'XASLO', 'XASLM'];
+    
+    if(cntry == '856') {
+      clearClusterFieldsScenarios = ['NRMLS', 'XASLM', 'ASLOM'];
+    }
+    
+    if(cntry == '852') {
+      clearClusterFieldsScenarios = ['ASLOM', 'XASLO', 'XASLM', 'NRML', 'AQSTN', 'XAQST' ];
+    }
+    
+    if(scenarioChanged && clearClusterFieldsScenarios.includes(scenario)) {
       FormManager.setValue('apCustClusterId','');
       FormManager.setValue('clientTier', '');
       FormManager.setValue('isuCd', '');
@@ -5022,6 +5031,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND], null, true);
   GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [ SysLoc.THAILAND ]);
   GEOHandler.addAfterTemplateLoad(clearInacOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND ]);
-  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnClusterChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND ]);  
+  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND ]);  
   
 });
