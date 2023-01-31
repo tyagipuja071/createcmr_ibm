@@ -3594,7 +3594,7 @@ function lockDunsNo() {
 // CREATCMR-1657
 
 // CREATCMR-2674
-var oldIsuCtc = null;
+var oldIsuCtcIms = null;
 function setSalesRepValues(value) {
   console.log('setSalesRepValues=====');
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U') {
@@ -3604,18 +3604,20 @@ function setSalesRepValues(value) {
 
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue('countryUse');
-
+  var subIndustry = FormManager.getActualValue('subIndustryCd');
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
-  var isuCtc = isuCd.concat(clientTier);
+  var ims = FormManager.getActualValue('subIndustryCd').substring(0, 1);
 
-  var subIndustry = FormManager.getActualValue('subIndustryCd');
-
-  if ((value != false || value == undefined || value == null) && isuCtc != '' && oldIsuCtc == null) {
-    oldIsuCtc = isuCd + clientTier;
+  if ((value != false || value == undefined || value == null) && ims != '' && clientTier != '' && isuCd != '' && oldIsuCtcIms == null) {
+    oldIsuCtcIms = isuCd + clientTier + ims;
   }
 
-  if (oldIsuCtc == null) {
+  if (oldIsuCtcIms == null) {
+    return;
+  }
+
+  if (isuCd + clientTier + ims == oldIsuCtcIms) {
     return;
   }
 
