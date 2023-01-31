@@ -2550,7 +2550,6 @@ function setSortlForStateProvince() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-  
   if (cmrIssuingCntry != '631' || reqType != 'C') {
     return;
   }
