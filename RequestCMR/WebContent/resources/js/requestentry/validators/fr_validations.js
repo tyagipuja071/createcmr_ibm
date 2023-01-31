@@ -3090,7 +3090,7 @@ function lockIBMTabForFR() {
     FormManager.readOnly('clientTier');
   }// CMR-234 -end
 
-  var custSubGrpArray = [ 'INTER', 'INTSO', 'IBMEM', 'BUSPR', 'XBUSP', 'CBTER', 'CBTSO', 'CBIEM' ];
+  var custSubGrpArray = [ 'INTER', 'INTSO', 'IBMEM', 'BUSPR', 'XBUSP', 'CBTER', 'CBTSO', 'CBIEM', 'PRICU' ];
   if (role == 'PROCESSOR' && ((reqType == 'C' && !custSubGrpArray.includes(custSubType)) || reqType == 'U')) {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
@@ -4260,7 +4260,7 @@ function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
         FormManager.readOnly('isuCd');
         FormManager.readOnly('clientTier');
         FormManager.readOnly('salesBusOffCd');
-      } else if (role == 'Processor') {
+      } else if (role == 'Processor' && custSubGrp != 'PRICU') {
         FormManager.enable('isuCd');
         FormManager.enable('clientTier');
         FormManager.enable('salesBusOffCd');
