@@ -5957,8 +5957,13 @@ function setCTCIsuByClusterMY() {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
   } else if (custSubGrp == 'ASLOM' || custSubGrp == 'XASLM' || custSubGrp == 'CROSS' ) {
-    FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q','0','Y','T','Z']);
-    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01222','09051','08042','10140','10141','10142','10143','10694','10695','10696','00000' ]);
+    if (custSubGrp == 'CROSS') {
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q','0','Y','T','Z']);
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01222','09051','08042','10140','10141','10142','10143','10694','10695','10696','00000' ]);
+    } else {
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q','0','Y','T']);
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01222','09051','08042','10140','10141','10142','10143','10694','10695','10696' ]);
+    }
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '32','34','5K','36' ]);
     FormManager.setValue('inacCd','');
     FormManager.setValue('inacType', '');
