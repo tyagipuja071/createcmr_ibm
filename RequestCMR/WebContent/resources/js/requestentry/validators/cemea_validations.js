@@ -4988,7 +4988,7 @@ function lockCompanyForCEE() {
     }
   }
   if (CEE_INCL.has(cntry) && 'C' == FormManager.getActualValue('reqType')) {
-    var lockSboScenario = [ 'BUSPR', 'INTER', 'XBP', 'XINT', 'IBMEM', 'XINT', 'INTER', 'CSINT', 'RSXIN', 'MEINT', 'RSINT', 'CSBP', 'MEBP', 'RSXBP', 'RSBP' ];
+    var lockSboScenario = [ 'BUSPR', 'INTER', 'XBP', 'XINT', 'IBMEM', 'XINT', 'INTER', 'CSINT', 'RSXIN', 'MEINT', 'RSINT', 'CSBP', 'MEBP', 'RSXBP', 'RSBP', 'PRICU' ];
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     if (lockSboScenario.includes(custSubGrp)) {
       FormManager.readOnly('salesBusOffCd');
