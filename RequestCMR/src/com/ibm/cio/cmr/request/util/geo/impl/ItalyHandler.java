@@ -1826,17 +1826,18 @@ public class ItalyHandler extends BaseSOFHandler {
               "Company level fields and Billing level fields can not be filled at the same time");
         }
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+          List<String> isuCdCtc = Arrays.asList("32T", "34Q", "36Y");
           if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(clientTier)) || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isu))) {
-            LOG.trace("The row " + rowIndex + ":Note that both ISU and CTC value needs to be filled..");
-            error.addError(rowIndex, "Data Tab", ":Please fill both ISU and CTC value.<br>");
-          } else if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
-            if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
-              LOG.trace("The row " + rowIndex
-                  + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+            LOG.trace("The row " + rowIndex + 1 + ":Note that both ISU and CTC value needs to be filled..");
+            error.addError(rowIndex + 1, "Data Tab", ":Please fill both ISU and CTC value.<br>");
+          } else if (!StringUtils.isBlank(isu) && Arrays.asList("32", "34", "36").contains(isu)) {
+            if (StringUtils.isBlank(clientTier) || !isuCdCtc.contains(isu.concat(clientTier))) {
+              LOG.trace("The row " + rowIndex + 1
+                  + ":Note that ISU and Client Tier combination should be '36Y' or '34Q' or '32T'. Please fix and upload the template again.");
               error.addError(rowIndex, "Client Tier",
                   ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
             }
-          } else if ((!StringUtils.isBlank(isu) && !"34".equals(isu)) && !"@".equalsIgnoreCase(clientTier)) {
+          } else if ((!StringUtils.isBlank(isu) && !Arrays.asList("32", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(clientTier)) {
             LOG.trace("Client Tier should be '@' for the selected ISU Code.");
             error.addError(rowIndex, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu + ".<br>");
           }
