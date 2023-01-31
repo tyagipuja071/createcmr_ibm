@@ -418,8 +418,8 @@ function setInacByCluster() {
           FormManager.readOnly('inacType');
         } else {
           FormManager.enable('inacType'); 
-          _oldClusterSelection = _cluster;
         }
+        _oldClusterSelection = _cluster;
       }
     } else {
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
