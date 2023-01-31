@@ -49,9 +49,10 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
 
   private static final Logger LOG = Logger.getLogger(GCARSService.class);
   private static final String LOCAL_DIR = "/ci/shared/data/gcars/";
-  private static final String REMOTE_DIR = "/is/isdata/cmr_partners/gcarsBR/IBMgcars/";
   private static final String ARCHIVE_DIR = "/ci/shared/data/gcarsarchive/";
   private static final String ERROR_DIR = "/ci/shared/data/gcarserror/";
+  private static final String REMOTE_DIR = "/is/isdata/cmr_partners/gcarsBR/IBMgcars/";
+  private static final String REMOTE_ARCHIVE_DIR = "/is/isdata/cmr_partners/gcarsBR/IBMgcarsarchive/";
 
   private static final String REMOTE_HOST = System.getProperty("GCARS_FTP_HOST");
   private static final String USERNAME = System.getProperty("GCARS_FTP_USER");
@@ -116,7 +117,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
    * @return
    */
   protected Queue<GCARSUpdtQueue> extractFromFiles(EntityManager entityManager) {
-    String directory = SystemParameters.getString("GCARS.INPUT.DIR");
+    String directory = SystemConfiguration.getValue("GCARS_LOCAL_DIR");
     if (StringUtils.isBlank(directory)) {
       directory = LOCAL_DIR;
     }
@@ -147,20 +148,20 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
     LOG.debug("GCARS copyFromRDCServer");
     Queue<GCARSUpdtQueue> queue = new LinkedList<GCARSUpdtQueue>();
 
-    String localDir = SystemParameters.getString("GCARS.INPUT.DIR");
+    String localDir = SystemConfiguration.getValue("GCARS_LOCAL_DIR");
     if (StringUtils.isBlank(localDir)) {
       localDir = LOCAL_DIR;
     }
     LOG.debug("GCARS local directory " + localDir);
 
-    String remoteDir = SystemParameters.getString("GCARS.RDC.INPUT.DIR");
+    String remoteDir = SystemConfiguration.getValue("GCARS_REMOTE_DIR");
     if (StringUtils.isBlank(remoteDir)) {
       remoteDir = REMOTE_DIR;
     }
     LOG.debug("GCARS remote directory " + remoteDir);
 
-    String localFile = SystemConfiguration.getValue("GCARS_LOCAL_DIR") + GCARS_FILE;
-    String remoteFile = SystemConfiguration.getValue("GCARS_REMOTE_DIR") + GCARS_FILE;
+    String localFile = localDir + GCARS_FILE;
+    String remoteFile = remoteDir + GCARS_FILE;
     Session jschSession = null;
     try {
 
@@ -178,14 +179,29 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       Channel sftp = jschSession.openChannel("sftp");
       sftp.connect(CHANNEL_TIMEOUT);
 
+      String archiveDir = SystemConfiguration.getValue("GCARS_REMOTE_ARCHIVE_DIR");
+      if (StringUtils.isBlank(archiveDir)) {
+        archiveDir = REMOTE_ARCHIVE_DIR;
+      }
+
       ChannelSftp channelSftp = (ChannelSftp) sftp;
 
       channelSftp.get(remoteFile, localFile);
+
+      SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy-HH-mm");
+      Timestamp ts = SystemUtil.getActualTimestamp();
+      String dateStr = formatter.format(ts);
+      String fileSubstring = GCARS_FILE.replace(".txt", "-" + dateStr + ".txt");
+      LOG.debug(" - Moving file to remote archive dir: " + remoteFile + dateStr);
+
+      channelSftp.rename(remoteFile, archiveDir + fileSubstring);
 
       channelSftp.exit();
 
     } catch (JSchException | SftpException e) {
       LOG.warn("An error has occurred when trying to download files from FTP server", e);
+    } catch (Exception ex) {
+      LOG.debug("Error encountered in GCARS Download" + ex.getMessage());
     } finally {
       if (jschSession != null) {
         jschSession.disconnect();
@@ -245,7 +261,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   private List<GCARSUpdtQueue> parseGCARSFile(String gcarsFile, String fileName, EntityManager entityManager) {
     LOG.debug("Parsing File: " + fileName);
 
-    String directory = SystemParameters.getString("GCARS.INPUT.DIR");
+    String directory = SystemConfiguration.getValue("GCARS_LOCAL_DIR");
     if (StringUtils.isBlank(directory)) {
       directory = LOCAL_DIR;
     }
@@ -332,7 +348,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
         Timestamp ts = SystemUtil.getActualTimestamp();
         String dateStr = formatter.format(ts);
 
-        String error = SystemParameters.getString("GCARS.ERROR.DIR");
+        String error = SystemConfiguration.getValue("GCARS_ERROR_DIR");
         if (StringUtils.isBlank(error)) {
           error = ERROR_DIR;
         }
@@ -540,11 +556,11 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   @Override
   protected void cleanUp(EntityManager entityManager) {
     LOG.debug("Removing processed files from server..");
-    String directory = SystemParameters.getString("GCARS.INPUT.DIR");
+    String directory = SystemConfiguration.getValue("GCARS_LOCAL_DIR");
     if (StringUtils.isBlank(directory)) {
       directory = LOCAL_DIR;
     }
-    String archive = SystemParameters.getString("GCARS.ARCHIVE.DIR");
+    String archive = SystemConfiguration.getValue("GCARS_ARCHIVE_DIR");
     if (StringUtils.isBlank(archive)) {
       archive = ARCHIVE_DIR;
     }
