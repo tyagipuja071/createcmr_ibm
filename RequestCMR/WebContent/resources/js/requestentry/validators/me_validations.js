@@ -687,6 +687,18 @@ function addHandlersForCEMEA() {
       if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidME();
       }
+      if (!value) {
+        value = FormManager.getActualValue('isuCd');
+      }
+      if (value == '32') {
+        FormManager.setValue('clientTier', 'T');
+      } else if (value == '34') {
+        FormManager.setValue('clientTier', 'Q');
+      } else if (value == '36') {
+        FormManager.setValue('clientTier', 'Y');
+      } else {
+        FormManager.setValue('clientTier', '');
+      }
     });
   }
   if (_vatExemptHandler == null) {
