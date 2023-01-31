@@ -475,8 +475,30 @@
     <value>/ci/shared/data/gcars/</value>
   </item>
   <item>
-    <id>GCARS_REMOTE_DIR</id>
+    <id>GCARS_ERROR_DIR</id>
     <order>51</order>
+    <name>GCARS Files Error Directory</name>
+    <description>Error directory where flat files with error are placed</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>/ci/shared/data/gcarserror/</value>
+  </item>
+  <item>
+    <id>GCARS_ARCHIVE_DIR</id>
+    <order>52</order>
+    <name>GCARS Files Archive Directory</name>
+    <description>GCARS Archive directory where flat files will be archived</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>/ci/shared/data/gcarsarchive/</value>
+  </item>
+  <item>
+    <id>GCARS_REMOTE_DIR</id>
+    <order>53</order>
     <name>GCARS Files Remote Directory</name>
     <description>Remote directory where flat files will be copied</description>
     <type>string</type>
@@ -484,6 +506,17 @@
     <required>true</required>
     <editType>text</editType>
     <value>/is/isdata/cmr_partners/gcarsBR/IBMgcars/</value>
+  </item>
+  <item>
+    <id>GCARS_REMOTE_ARCHIVE_DIR</id>
+    <order>54</order>
+    <name>GCARS Files Remote Archive Directory</name>
+    <description>Remote Archive directory where flat files will be archived</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>/is/isdata/cmr_partners/gcarsBR/IBMgcarsarchive/</value>
   </item>
   <item>
     <id>SYSTEM_TYPE</id>
