@@ -3007,6 +3007,12 @@ function setINACCodeMandatory() {
     FormManager.resetValidations('inacCd');
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
   }
+  
+  var setInacRequiredForOfficeCd = "FT,GK, GN,GV, HD,JS,KL, KQ, LC, LG, LJ, PL, PR, QE";
+  var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
+  if(setInacRequiredForOfficeCd.includes(salesBusOffCd)){
+	FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');	
+  }
 }
 function addJSICLogic() {
   var officeCd = FormManager.getActualValue('salesBusOffCd');
