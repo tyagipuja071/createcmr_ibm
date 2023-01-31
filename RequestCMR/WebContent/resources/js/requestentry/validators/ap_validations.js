@@ -363,6 +363,7 @@ function setInacByCluster() {
           } else {
             FormManager.enable('inacType'); 
           }
+          _oldClusterSelection = _cluster;
         }
         
       }
@@ -4799,6 +4800,7 @@ function clearInacOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   }
 }
 
+var _oldClusterSelection = '';
 function clearInacOnClusterChange(selectedCluster) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
@@ -4809,11 +4811,14 @@ function clearInacOnClusterChange(selectedCluster) {
     }
     var scenario = FormManager.getActualValue('custSubGrp');
     var clearInacScenarios = ['XASLM','CROSS', 'ASLOM']; 
-    var noFilterInac = ['01251', '00000', '08047']
-    if (clearInacScenarios.includes(scenario) && noFilterInac.includes(selectedCluster)) {
+    var noFilterInac = ['01251', '00000', '08047'];
+    
+    var clusterValueChanged = _oldClusterSelection != selectedCluster && cmr.currentTab == 'IBM_REQ_TAB';
+    if (clusterValueChanged && clearInacScenarios.includes(scenario) && noFilterInac.includes(selectedCluster)) {
       FormManager.setValue('inacCd','');
       FormManager.setValue('inacType', '');
     }
+    _oldClusterSelection = selectedCluster;
   }
 }
 
