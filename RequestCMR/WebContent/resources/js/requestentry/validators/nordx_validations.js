@@ -598,12 +598,6 @@ function addCtcHandler() {
   });
 }
 
-function addSubIndustryHandler() {
-  _SubIndHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-    setSalesRepValues(value);
-  });
-}
-
 /*
  * NORDX - sets Sales rep based on subIndustry Changed by CMR-1709
  */
@@ -3564,7 +3558,7 @@ function lockDunsNo() {
 // CREATCMR-1657
 
 // CREATCMR-2674
-var oldIsuCtcIms = null;
+var oldIsuCtc = null;
 function setSalesRepValues(value) {
   console.log('setSalesRepValues=====');
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U') {
@@ -3577,17 +3571,12 @@ function setSalesRepValues(value) {
   var subIndustry = FormManager.getActualValue('subIndustryCd');
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
-  var ims = FormManager.getActualValue('subIndustryCd').substring(0, 1);
 
-  if ((value != false || value == undefined || value == null) && ims != '' && clientTier != '' && isuCd != '' && oldIsuCtcIms == null) {
-    oldIsuCtcIms = isuCd + clientTier + ims;
+  if ((value != false || value == undefined || value == null) && isuCd.concat(clientTier) != '' && oldIsuCtc == null) {
+    oldIsuCtc = isuCd + clientTier;
   }
 
-  if (oldIsuCtcIms == null) {
-    return;
-  }
-
-  if (isuCd + clientTier + ims == oldIsuCtcIms) {
+  if (oldIsuCtc == null) {
     return;
   }
 
@@ -5097,5 +5086,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSalesRepValues, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(addCtcHandler, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(addIsuHandler, GEOHandler.NORDX);
-  GEOHandler.addAfterConfig(addSubIndustryHandler, GEOHandler.NORDX);
 });
