@@ -646,6 +646,15 @@ function addHandlersForCEMEA() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
+      if (value == '32') {
+        FormManager.setValue('clientTier', 'T');
+      } else if (value == '34') {
+        FormManager.setValue('clientTier', 'Q');
+      } else if (value == '36') {
+        FormManager.setValue('clientTier', 'Y');
+      } else {
+        FormManager.setValue('clientTier', '');
+      }
       var cntry = FormManager.getActualValue('cmrIssuingCntry');
       // CreateCMR-811
       // if (CEE_INCL.has(cntry)) {
@@ -4511,12 +4520,31 @@ function isicCdOnChangeCEE() {
   });
 }
 
+var _importedSearchTerm = null;
+function resetSortlValidator() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+
+  var qParams = {
+    REQ_ID : reqId,
+  };
+  var result = cmr.query('GET.SEARCH_TERM_DATA_RDC', qParams);
+  if (result != null) {
+    _importedSearchTerm = result.ret1;
+  }
+
+  if (reqType == 'U' && (_importedSearchTerm == '' || _importedSearchTerm == null)) {
+    console.log('Making Sortl optinal as it is empty in RDC');
+    FormManager.resetValidations('salesBusOffCd');
+  }
+}
+
 function validateSortl() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var reqId = FormManager.getActualValue('reqId');
-        var searchTerm = FormManager.getActualValue('searchTerm');
+        var searchTerm = FormManager.getActualValue('salesBusOffCd');
         var letterNumber = /^[0-9a-zA-Z]+$/;
         var qParams = {
           REQ_ID : reqId,
@@ -4529,7 +4557,7 @@ function validateSortl() {
 
           if (!searchTerm.match(letterNumber)) {
             return new ValidationResult({
-              id : 'searchTerm',
+              id : 'salesBusOffCd',
               type : 'text',
               name : 'searchTerm'
             }, false, 'SBO should be alpha numeric.');
@@ -5547,6 +5575,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(togglePPSCeidCEE, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(disableFieldsIBMEm, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setClassificationCodeCEE, GEOHandler.CEMEA);
+  GEOHandler.addAfterConfig(resetSortlValidator, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterTemplateLoad(resetSortlValidator, [ SysLoc.AUSTRIA ]);
   GEOHandler.registerValidator(validateSortl, [ SysLoc.AUSTRIA ], null, true);
 
 });
