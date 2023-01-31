@@ -124,6 +124,7 @@ function afterConfigForFR() {
         if (value == undefined) {
           return;
         }
+        setCtcByIsu(value);
         setCoverageSBOBasedOnIsuCtc();
       });
     }
@@ -4033,6 +4034,21 @@ function setCTCValues() {
     }
   }
 
+}
+
+function setCtcByIsu(value) {
+  if (!value) {
+    value = FormManager.getActualValue('isuCd');
+  }
+  if (value == '32') {
+    FormManager.setValue('clientTier', 'T');
+  } else if (value == '34') {
+    FormManager.setValue('clientTier', 'Q');
+  } else if (value == '36') {
+    FormManager.setValue('clientTier', 'Y');
+  } else {
+    FormManager.setValue('clientTier', '');
+  }
 }
 
 function clientTierCodeValidator() {

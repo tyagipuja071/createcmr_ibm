@@ -243,6 +243,7 @@ function lockEmbargo() {
  */
 var _ISUHandler = null;
 var _CTCHandler = null;
+var _SubIndHandler = null;
 var _subIndCdHandler1 = null;
 // var _SalesRepHandler = null;
 var _AdminDSCHandler = null;
@@ -575,10 +576,6 @@ function onSubIndustryChange() {
     return;
   }
 
-  if (_isScenarioChanged) {
-    setSalesRepValues(value);
-  }
-
   _subIndCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
     if (!value) {
       return;
@@ -606,6 +603,12 @@ function addCtcHandler() {
   _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
     setSalesRepValues(value);
     lockSalesRepAndSortl();
+  });
+}
+
+function addSubIndustryHandler() {
+  _SubIndHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+    setSalesRepValues(value);
   });
 }
 
@@ -4493,18 +4496,6 @@ function lockSalesRepAndSortl() {
     var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
     var isuCtc = isuCode.concat(clientTierCode);
 
-    var lockCustSugGrpForRequester = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS',
-        'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT', 'PRIPE', 'DKPRI', 'FOPRI', 'GLPRI', 'ISPRI', 'FIPRI', 'LTPRI', 'LVPRI',
-        'EEPRI' ];
-
-    if (role == 'REQUESTER') {
-      if (lockCustSugGrpForRequester.includes(custSubGrp)) {
-        FormManager.readOnly('searchTerm');
-      } else {
-        FormManager.enable('searchTerm');
-      }
-    }
-
     var lockCustSugGrpForProcessor = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS',
         'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT', 'PRIPE', 'DKPRI', 'FOPRI', 'GLPRI', 'ISPRI', 'FIPRI', 'LTPRI', 'LVPRI',
         'EEPRI' ];
@@ -4516,7 +4507,7 @@ function lockSalesRepAndSortl() {
       }
     }
 
-    if ((role == 'REQUESTER' || role == 'PROCESSOR') && cmrIssuingCntry == '702' && (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV')) {
+    if (role == 'PROCESSOR' && cmrIssuingCntry == '702' && (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV')) {
       if (isuCtc != null && isuCtc != '' && isuCtc != undefined && isuCtc == '34Q') {
         FormManager.readOnly('repTeamMemberNo');
       } else {
@@ -5217,4 +5208,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSalesRepValues, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(addCtcHandler, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(addIsuHandler, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(addSubIndustryHandler, GEOHandler.NORDX);
 });
