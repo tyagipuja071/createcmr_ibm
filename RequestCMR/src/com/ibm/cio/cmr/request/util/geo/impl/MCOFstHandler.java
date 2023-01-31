@@ -604,11 +604,12 @@ public class MCOFstHandler extends MCOHandler {
     for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
-        TemplateValidation error = new TemplateValidation(name);
+
         boolean isDummyUpdate = false;
         boolean isShippingPhoneUpdate = false;
         boolean islandedFilled = false;
         for (Row row : sheet) {
+          TemplateValidation error = new TemplateValidation(name);
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             String cmrNo = "";
             String seqNo = "";
@@ -908,11 +909,11 @@ public class MCOFstHandler extends MCOHandler {
               }
             }
           }
+          if (error.hasErrors()) {
+            validations.add(error);
+          }
         } // end row loop
 
-        if (error.hasErrors()) {
-          validations.add(error);
-        }
       }
     }
   }

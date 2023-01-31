@@ -1033,12 +1033,12 @@ function setFieldsBehavior(fromAddress, scenario, scenarioChanged) {
       FormManager.removeValidator('clientTier', Validators.REQUIRED);
     }
   }
-  if (role == 'Processor') {
-    FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
-    if (isuCd != '5K') {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-    }
-  }
+  /*
+   * if (role == 'Processor') { FormManager.addValidator('isuCd',
+   * Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB'); if (isuCd != '5K') {
+   * FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ],
+   * 'MAIN_IBM_TAB'); } }
+   */
 }
 
 function addStreetAddressFormValidator() {
