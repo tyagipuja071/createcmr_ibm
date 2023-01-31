@@ -87,6 +87,9 @@ function setSearchTermList(){
       '10249','10250','10251','10252','10253','10254','10255','10256','10257','10258','10259','10260','10158','10159','10160','10161',
       '10162','10163','10164','10165','10166','10167','10168','10169','10170','10171'
  ]);
+    if(FormManager.getActualValue('searchTerm') != 'undefined' && FormManager.getActualValue('searchTerm') == ''){
+      FormManager.setValue('searchTerm', '00000');
+    }
   } else if (custSubType == 'KYND') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '09058' ]);
     FormManager.setValue('searchTerm', '09058');
@@ -991,7 +994,7 @@ function setValuesForScenarios() {
         FormManager.readOnly('searchTerm');
         FormManager.resetValidations('isicCd');
       }
-      if (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || custSubType == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'INTER' || _custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS') {
+      if (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || _custSubGrp == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'INTER' || _custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS') {
         FormManager.hide('PPSCEID', 'ppsceid');
         FormManager.hide('MembLevel', 'memLvl');
         FormManager.hide('BPRelationType', 'bpRelType');
@@ -1020,7 +1023,7 @@ function setValuesForScenarios() {
     }
 
     if (_pagemodel.userRole.toUpperCase() == "PROCESSOR") {
-      if (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || custSubType == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'BUSPR' || _custSubGrp == 'INTER' || _custSubGrp == 'EMBSA' || _custSubGrp == 'BLUMX' || _custSubGrp == 'MRKT') {
+      if (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || _custSubGrp == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'BUSPR' || _custSubGrp == 'INTER' || _custSubGrp == 'EMBSA' || _custSubGrp == 'BLUMX' || _custSubGrp == 'MRKT') {
         FormManager.setValue('cnInterAddrKey', '6');
         FormManager.addValidator('cnInterAddrKey', Validators.REQUIRED, [ 'InterAddrKey' ], '');
         FormManager.readOnly('cnInterAddrKey');
@@ -1035,7 +1038,7 @@ function hideContactInfoFields() {
   
   var addrType = FormManager.getActualValue('addrType');
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || custSubType == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
+  if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || _custSubGrp == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
     // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
     FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
     FormManager.show('ChinaCustomerCntName', 'cnCustContNm');
@@ -1069,7 +1072,7 @@ function autoSetAddrFieldsForCN() {
   if (cmr.addressMode == 'updateAddress') {
       var addrType = FormManager.getActualValue('addrType');
       var _custSubGrp = FormManager.getActualValue('custSubGrp');
-      if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || custSubType == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
+      if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || _custSubGrp == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
       // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
       FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
       FormManager.show('ChinaCustomerCntName', 'cnCustContNm');
@@ -1159,7 +1162,7 @@ function showHideCityCN() {
       //
       var addrType = FormManager.getActualValue('addrType');
       var _custSubGrp = FormManager.getActualValue('custSubGrp');
-      if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || custSubType == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
+      if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || _custSubGrp == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
         FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Phone#" ], null);
         FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
         FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
@@ -1175,7 +1178,7 @@ function showHideCityCN() {
 function addMandatoryOnlyForZS01CN(){
   var addrType = FormManager.getActualValue('addrType');
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || custSubType == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
+  if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRMLC' || _custSubGrp == 'NRMLD'  || _custSubGrp == 'KYND' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
     FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Phone#" ], null);
     FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
     FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
@@ -1554,7 +1557,7 @@ function addValidationForParentCompanyNo() {
   // var parentCompanyNo = FormManager.getActualValue('dealerNo');
   var custSubType = FormManager.getActualValue('custSubGrp');
   var isuCd = FormManager.getActualValue('isuCd');
-  if (custSubType == 'NRMLC' || custSubType == 'NRMLD'  || custSubType == 'KYND' || custSubGrp == 'ECOSY') {
+  if (custSubType == 'NRMLC' || custSubType == 'NRMLD'  || custSubType == 'KYND' || custSubType == 'ECOSY') {
     if (isuCd != "32" && (false == FormManager.getField('govType').checked)) {
       FormManager.addValidator('dealerNo', Validators.REQUIRED, [ 'You can input"000000" when there is not existing one. Parent Company No' ], 'MAIN_IBM_TAB');
     } else {
@@ -3451,7 +3454,7 @@ function validateSearchTermForCROSS() {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         var subType = '';
-        if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRMLC' || custSubType == 'NRMLD'  || custSubType == 'KYND' ||custSubType == 'EMBSA' ||custSubType == 'AQSTN')) {
+        if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRMLD'  || custSubType == 'KYND' ||custSubType == 'EMBSA' ||custSubType == 'AQSTN')) {
           if (custSubType == 'CROSS'){
             subType = 'Foreign';
           } else if(custSubType == 'NRMLC') {
@@ -3510,7 +3513,7 @@ function validateISICForCROSS() {
       validate : function() {
         var subType = '';
         var custSubType = FormManager.getActualValue('custSubGrp');
-        if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRMLC' || custSubType == 'NRMLD' || custSubType == 'KYND' ||custSubType == 'EMBSA' 
+        if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' ||  custSubType == 'NRMLD' || custSubType == 'KYND' ||custSubType == 'EMBSA' 
           || custSubType == 'AQSTN' || custSubType == 'ECOSY' || custSubType == 'MRKT' || custSubType == 'BLUMX')) {
           if (custSubType == 'CROSS'){
             subType = 'Foreign';
@@ -3578,7 +3581,7 @@ function resetISICCode() {
   }
 }
 
-function RetrievedValueValidator() {
+function retrievedValueValidator() {
   console.log("RetrievedValueValidator for REQUESTER...");
   FormManager.addFormValidator((function() {
     return {
@@ -3810,6 +3813,83 @@ function findIsicViaDnb() {
   return detailResult;
 }
 
+//CREATCMR-7879
+
+function retrievedForCNValidator() {
+  console.log("running retrievedForCNValidator...");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var oldGlcCode = FormManager.getActualValue('geoLocationCd');
+        var oldSearchTerm = FormManager.getActualValue('searchTerm');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        console.log( "old GLC code is ", oldGlcCode);
+        if (typeof (_pagemodel) != 'undefined') {
+          if(reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='ECOSY')) {
+
+            console.log("Checking the GLC match... retrieve value again...")
+            var data = CmrServices.getAll('reqentry');
+            cmr.hideProgress();
+            if (data) {
+              console.log(data);
+              if (data.error && data.error == 'Y') {
+                return new ValidationResult(null, false, 'An error was encountered when retrieving the values.\nPlease contact your system administrator. ');
+              } else {
+                if (data.glcError) {
+                  return new ValidationResult(null, false, 'The following values cannot be retrieved at the moment.:GEO Location Code\nPlease contact your system administrator.');
+                } else {
+                  var indc = 'C';
+                  if(custSubGrp=='ECOSY'){
+                    indc = 'E';
+                  }
+                  var result = cmr.query('GLC.CN.SEARCHTERM', {          
+                    GLC_CD : '%'+data.glcCode+'%',
+                    DEFAULT_INDC : indc
+                  });
+                  if(result != null){
+                    var searchTerm = result.ret1;
+                    var clientTier = result.ret2;
+                    var isuCd = result.ret3;
+                    if(searchTerm != oldSearchTerm) {
+                      console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
+                      FormManager.setValue('geoLocationCd', data.glcCode);
+                      FormManager.setValue('geoLocDesc', data.glcDesc);
+                      FormManager.setValue('searchTerm', searchTerm);
+                      FormManager.readOnly('searchTerm');
+                      FormManager.setValue('clientTier', clientTier);
+                      FormManager.readOnly('clientTier');
+                      FormManager.setValue('isuCd', isuCd);
+                      FormManager.readOnly('isuCd');
+                      if(clientTier == '00000' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
+                        FormManager.setValue('clientTier', 'Q');
+                        FormManager.setValue('isuCd', '34');
+                      }
+                      cmr.showAlert('The GEO Location Code has been overwritten to ' + data.glcCode +', \nSearch Term (SORTL) has been overwritten to '+searchTerm +', Client Tier has been overwritten to '+clientTier +', ISU Code has been overwritten to '+isuCd+'.', 'Create CMR');
+                    } else {
+                      if (data.glcCode != oldGlcCode) {
+                      console.log("The GLC code are different, the searchTerm are same, then overwrite the GLC code only.")
+                      FormManager.setValue('geoLocationCd', data.glcCode);
+                      FormManager.setValue('geoLocDesc', data.glcDesc);
+                      }
+                      return new ValidationResult(null, true);
+                    }
+                   } else {
+                       console.log("The GLC code call the searchTerm fail , please check db.")
+                       return new ValidationResult(null, true);
+                   } 
+                }
+              }
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -3897,7 +3977,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateISICForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
-  GEOHandler.registerValidator(RetrievedValueValidator, GEOHandler.CN, null, false, false);
+  GEOHandler.registerValidator(retrievedValueValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
-
+  GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
 });
