@@ -4868,7 +4868,26 @@ function addVatIndValidator(){
   if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
     FormManager.resetValidations('vat');
   }
+ }
 }
+function skipStateProvForFO() {
+  var landCntry = FormManager.getActualValue('landCntry');
+  if (landCntry == 'FO') {
+    cmr.hideNode('StateProv');
+  } else {
+    cmr.showNode("StateProv");
+  }
+}
+
+function setVatIndFields(){
+  var _vatHandler = null;  
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  if (vat != '' && vatInd == ''){
+    FormManager.setValue('vatInd', 'T');
+    FormManager.readOnly('vatInd');
+  }
 }
 
 dojo.addOnLoad(function() {
@@ -4969,7 +4988,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(skipStateProvForFO, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(lockTaxCode, GEOHandler.NORDX);
   
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.NORDX);
+
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NORDX);
 });

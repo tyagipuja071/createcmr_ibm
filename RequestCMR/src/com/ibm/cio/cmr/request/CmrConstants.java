@@ -382,6 +382,7 @@ public class CmrConstants {
   public static final String APPROVAL_PENDING_REMINDER = "PREM";
   public static final String APPROVAL_PENDING_CANCELLATION = "PCAN";
   public static final String APPROVAL_CANCELLED = "CAN";
+  public static final String APPROVAL_CONDITIONALLY_CANCELLED = "CCAN";
   public static final String APPROVAL_APPROVED = "APR";
   public static final String APPROVAL_REJECTED = "REJ";
   public static final String APPROVAL_CONDITIONALLY_APPROVED = "CAPR";
@@ -395,6 +396,7 @@ public class CmrConstants {
   public static final String APPROVAL_RESULT_COND_APPROVED = "Cond. Approved";
   public static final String APPROVAL_RESULT_REJECTED = "Rejected";
   public static final String APPROVAL_RESULT_CANCELLED = "Cancelled";
+  public static final String APPROVAL_RESULT_COND_CANCELLED = "Cond. Cancelled";
 
   // Fixed Approval type for Mass Change requests
   public static final int MASS_REQUEST_APPROVAL_TYPE_ID = 13;
@@ -944,11 +946,9 @@ public class CmrConstants {
 
   public static final List<String> LA_COUNTRIES = Arrays.asList("613", "629", "655", "661", "663", "681", "683", "829", "731", "735", "799", "811",
       "813", "815", "869", "871", "631", "781");
-
-  public static final List<String> CROSS_BORDER_COUNTRIES_GROUP1 = Arrays.asList("866", "754", "724", "848", "618", "788", "624", "678", "702", "806",
-      "846");
-
+  
+  public static final List<String> BP_GBM_SBM_COUNTRIES = Arrays.asList("620", "677", "680", "767", "805", "823", "832");
+  public static final List<String> CROSS_BORDER_COUNTRIES_GROUP1 = Arrays.asList("866", "754", "724", "848", "618", "788", "624", "678", "702", "806","846");
   public static final String VAT_ACKNOWLEDGE_YES = "Yes";
   public static final String VAT_ACKNOWLEDGE_NA = "N/A";
-  public static final List<String> BP_GBM_SBM_COUNTRIES = Arrays.asList("620", "677", "680", "767", "805", "823", "832");
 }

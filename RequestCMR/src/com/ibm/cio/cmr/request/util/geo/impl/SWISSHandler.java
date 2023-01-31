@@ -639,6 +639,11 @@ public class SWISSHandler extends GEOHandler {
       data.setCurrencyCd("CHF");
     }
 
+    if (soldToAddr != null) {
+      admin.setOldCustNm1(soldToAddr.getCustNm1());
+      admin.setOldCustNm2(soldToAddr.getCustNm2());
+    }
+
   }
 
   private String getKunnrSapr3Kna1(String cmrNo, String ordBlk) throws Exception {
