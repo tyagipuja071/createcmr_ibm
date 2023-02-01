@@ -9067,6 +9067,11 @@ function vatValidatorTR() {
             return new ValidationResult(null, true);
           }
         }
+        if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
+          if (vat == '') {
+            return new ValidationResult(null, true);
+          }
+        }
         if (soldToDistrict != null && districts.includes(soldToDistrict.toUpperCase()) && (reqType == 'C' || (reqType == 'U' && vatDistrictChkUpdate))) {
           vatPattern = /^[0-9]{9}$/;
           if (vat.match(vatPattern) != null && vat.match(vatPattern).length > 0) {
