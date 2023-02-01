@@ -667,10 +667,11 @@ function addHandlersForCEMEA() {
       }
 
       var isuCd = FormManager.getActualValue('isuCd');
+      var reqType = FormManager.getActualValue('reqType');
       isuCovHandler = true;
       if (isuCd == '5K') {
         FormManager.resetValidations('clientTier');
-        if (GEOHandler.CEE.includes(cntry)) {
+        if (GEOHandler.CEE.includes(cntry) && reqType == 'C') {
           FormManager.setValue('salesBusOffCd', '999');
         }
       } else {
@@ -2325,9 +2326,9 @@ function afterConfigForRussia() {
 }
 
 function setSBOafterAddrConfig() {
-  // if (FormManager.getActualValue('reqType') != 'C') {
-  // return;
-  // }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   if (FormManager.getActualValue('addrType') == 'ZS01') {
 
     var custType = FormManager.getActualValue('custGrp');
@@ -2382,9 +2383,9 @@ function setSBOafterAddrConfig() {
 }
 
 function setSBOValues() {
-  // if (FormManager.getActualValue('reqType') != 'C') {
-  // return;
-  // }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   var custType = FormManager.getActualValue('custGrp');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
