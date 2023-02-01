@@ -3490,15 +3490,15 @@ function validateSearchTermForCROSS() {
           }
 
 
-          var searchTerm = FormManager.getActualValue('searchTerm');
-          var searchTermTxt = $('#searchTerm').val();
-          if (searchTerm == '00000' || searchTerm == '00075' || searchTerm == '08036' || searchTerm == '71300') {
-            return new ValidationResult(null, false, 'It is not allowed to apply for default search term:' + searchTerm + ' by ' + subType + ' Sub_scenario.');
-          } else if(searchTermTxt.indexOf('Expired') >= 0) { 
-            return new ValidationResult(null, false, 'It is not allowed to apply for default or expired search term for ' + subType + ' Sub_scenario.');
-          }else {
-            return new ValidationResult(null, true);
-          }
+//          var searchTerm = FormManager.getActualValue('searchTerm');
+//          var searchTermTxt = $('#searchTerm').val();
+//          if (searchTerm == '00000' || searchTerm == '00075' || searchTerm == '08036' || searchTerm == '71300') {
+//            return new ValidationResult(null, false, 'It is not allowed to apply for default search term:' + searchTerm + ' by ' + subType + ' Sub_scenario.');
+//          } else if(searchTermTxt.indexOf('Expired') >= 0) { 
+//            return new ValidationResult(null, false, 'It is not allowed to apply for default or expired search term for ' + subType + ' Sub_scenario.');
+//          }else {
+//            return new ValidationResult(null, true);
+//          }
         } else {
           return new ValidationResult(null, true);
         }
@@ -3611,7 +3611,7 @@ function sSDGBGIdValidator() {
             if(custSubType == 'NRMLD'){
               if(!(id == 'GB000YEN' || id == 'GB001A7X' || id == 'GB001CQ3' || id == 'GB300S7F' || id == 'GB001CPY' || id == 'GB001CPW' || id == 'GB001DR4' || id == 'GB001B83'
                 || id == 'GB001CQ2' || id == 'GB001J73' || id == 'GB0018BN' || id == 'GB001A89' || id == 'GB001AUJ' || id == 'GB0018BS' || id == 'GB0018EZ' || id == 'GB227QFM'
-                  || id == 'GB0019BN' || id == 'GB0018X2')){
+                  || id == 'GB0019BN' || id == 'GB0018X2' || id == 'GB001BRC' || id == 'GB000V9W' || id == 'GB000HK1')){
                 return new ValidationResult(null, false, 'Please do not select Scenario Sub Type - "Normal - Signature / Strategic / Dedicated"  as this CMR is not belong to China Signature/Strategic/Dedicate account, please select Scenario Sub Type -"Normal - Select Core".');
               }else {
                 return new ValidationResult(null, true);
@@ -3619,7 +3619,7 @@ function sSDGBGIdValidator() {
             }else{
               if(id == 'GB000YEN' || id == 'GB001A7X' || id == 'GB001CQ3' || id == 'GB300S7F' || id == 'GB001CPY' || id == 'GB001CPW' || id == 'GB001DR4' || id == 'GB001B83'
                 || id == 'GB001CQ2' || id == 'GB001J73' || id == 'GB0018BN' || id == 'GB001A89' || id == 'GB001AUJ' || id == 'GB0018BS' || id == 'GB0018EZ' || id == 'GB227QFM'
-                  || id == 'GB0019BN' || id == 'GB0018X2'){
+                  || id == 'GB0019BN' || id == 'GB0018X2' || id == 'GB001BRC' || id == 'GB000V9W' || id == 'GB000HK1'){
                 return new ValidationResult(null, false, 'Please Select Scenario Sub Type - "Normal - Signature / Strategic / Dedicated".');
               }else {
                 return new ValidationResult(null, true);
@@ -3830,7 +3830,8 @@ function retrievedForCNValidator() {
 
             console.log("Checking the GLC match... retrieve value again...")
             var data = CmrServices.getAll('reqentry');
-            cmr.hideProgress();
+//            var progressShown = true;
+//            cmr.hideProgress();
             if (data) {
               console.log(data);
               if (data.error && data.error == 'Y') {
@@ -3855,14 +3856,19 @@ function retrievedForCNValidator() {
                       console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
                       FormManager.setValue('geoLocationCd', data.glcCode);
                       FormManager.setValue('geoLocDesc', data.glcDesc);
+                      FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm ]);
                       FormManager.setValue('searchTerm', searchTerm);
                       FormManager.readOnly('searchTerm');
+                      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
                       FormManager.setValue('clientTier', clientTier);
                       FormManager.readOnly('clientTier');
+                      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
                       FormManager.setValue('isuCd', isuCd);
                       FormManager.readOnly('isuCd');
                       if(clientTier == '00000' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
+                        FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q' ]);
                         FormManager.setValue('clientTier', 'Q');
+                        FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
                         FormManager.setValue('isuCd', '34');
                       }
                       cmr.showAlert('The GEO Location Code has been overwritten to ' + data.glcCode +', \nSearch Term (SORTL) has been overwritten to '+searchTerm +', Client Tier has been overwritten to '+clientTier +', ISU Code has been overwritten to '+isuCd+'.', 'Create CMR');

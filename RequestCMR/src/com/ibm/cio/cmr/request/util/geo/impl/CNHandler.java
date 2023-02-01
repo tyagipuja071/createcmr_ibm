@@ -532,11 +532,21 @@ public class CNHandler extends GEOHandler {
       List<CompanyRecordModel> resultFindCmrCN = null;
       resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
       if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-        // if (StringUtils.isNotBlank(resultFindCmrCN.get(0).getDunsNo())) {
-        // getGBGIdByGBGservice(entityManager, admin, data, currentAddress,
-        // resultFindCmrCN.get(0).getDunsNo(), false);
-        // } else {
-        getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getCmrNo(), true);
+        ArrayList<String> cmrList = new ArrayList<String>();
+        for (CompanyRecordModel cmr : resultFindCmrCN) {
+          if (cmr.getAltName().endsWith(companyName)) {
+            cmrList.add(cmr.getCmrNo());
+          }
+        }
+        if (cmrList.size() > 0) {
+          for (int i = 0; i < cmrList.size(); i++) {
+            String cmr = cmrList.get(i);
+            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, cmr, true);
+            if (StringUtils.isNotBlank(data.getGbgId()) && StringUtils.isNotBlank(data.getBgId())) {
+              break;
+            }
+          }
+        }
         if (StringUtils.isBlank(data.getGbgId()) && StringUtils.isBlank(data.getBgId())) {
           getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getDunsNo(), false);
         }
