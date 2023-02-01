@@ -4144,6 +4144,88 @@ function clientTierCodeValidator() {
   }
 }
 
+function sboCodeValidator() {
+  var isuCode = FormManager.getActualValue('isuCd');
+  var clientTierCode = FormManager.getActualValue('clientTier');
+  var isuCtc = isuCd + clientTier;
+  var sbo = FormManager.getActualValue('salesBusOffCd');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' || role == 'Requester') {
+    return;
+  }
+  if (isuCtc == '36Y' && !(sbo == '09A09A' || sbo == '10A10A' || sbo == '11A11A')) {
+    return new ValidationResult({
+      id : 'salesBusOffCd',
+      type : 'text',
+      name : 'salesBusOffCd'
+    }, false, 'Sbo can only accept \'09A09A\'\ \'10A10A\'\ \'10A10A\'\' for ISU CTC 36Y.');
+  } else if (isuCtc == '5K' && sbo != '98F98F') {
+    return new ValidationResult({
+      id : 'salesBusOffCd',
+      type : 'text',
+      name : 'salesBusOffCd'
+    }, false, 'Sbo can only accept \'98F98F\'\ for ISU CTC 5K.');
+  } else if (isuCtc == '32T' && sbo != 'FSDFSD') {
+    return new ValidationResult({
+      id : 'salesBusOffCd',
+      type : 'text',
+      name : 'salesBusOffCd'
+    }, false, 'Sbo can only accept \'FSDFSD\'\ for ISU CTC 32T.');
+  } else if (isuCtc == '04' && !(sbo == '05F05F' || sbo == '12F12F' || sbo == '68T68T' || sbo == '035035' || sbo == '031031')) {
+    return new ValidationResult({
+      id : 'salesBusOffCd',
+      type : 'text',
+      name : 'salesBusOffCd'
+    }, false, 'Sbo can only accept \'05F05F\'\ \'12F12F\'\ \'68T68T\'\' \'035035\'\' \'031031\'\' for ISU CTC 04.');
+  } else if (isuCtc == '32T' && sbo != 'FSDFSD') {
+    return new ValidationResult({
+      id : 'salesBusOffCd',
+      type : 'text',
+      name : 'salesBusOffCd'
+    }, false, 'Sbo can only accept \'FSDFSD\'\ for ISU CTC 32T.');
+  } else if (isuCtc == '14' && sbo != '14W14W') {
+    return new ValidationResult({
+      id : 'salesBusOffCd',
+      type : 'text',
+      name : 'salesBusOffCd'
+    }, false, 'Sbo can only accept \'14W14W\'\ for ISU CTC 14.');
+  } else if (isuCtc == '18' && sbo != '05W05W') {
+    return new ValidationResult({
+      id : 'salesBusOffCd',
+      type : 'text',
+      name : 'salesBusOffCd'
+    }, false, 'Sbo can only accept \'05W05W\'\ for ISU CTC 18.');
+  } else if (isuCtc == '19' && sbo != '5ES5ES') {
+    return new ValidationResult({
+      id : 'salesBusOffCd',
+      type : 'text',
+      name : 'salesBusOffCd'
+    }, false, 'Sbo can only accept \'5ES5ES\'\ for ISU CTC 19.');
+  } else if (isuCtc == '3T' && sbo != '4DF4DF') {
+    return new ValidationResult({
+      id : 'salesBusOffCd',
+      type : 'text',
+      name : 'salesBusOffCd'
+    }, false, 'Sbo can only accept \'4DF4DF\'\ for ISU CTC 3T.');
+  } else if (isuCtc == '4A' && sbo != '5EF5EF') {
+    return new ValidationResult({
+      id : 'salesBusOffCd',
+      type : 'text',
+      name : 'salesBusOffCd'
+    }, false, 'Sbo can only accept \'5EF5EF\'\ for ISU CTC 4A.');
+  } else if (isuCtc == '31' && sbo != '040040') {
+    return new ValidationResult({
+      id : 'salesBusOffCd',
+      type : 'text',
+      name : 'salesBusOffCd'
+    }, false, 'Sbo can only accept \'040040\'\ for ISU CTC 31.');
+  }
+}
+
 function clientTierValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -4376,6 +4458,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.FR);
   GEOHandler.registerValidator(clientTierValidator, [ '706' ], null, true);
+  GEOHandler.registerValidator(sboCodeValidator, [ '706' ], null, true);
   GEOHandler.addAddrFunction(set2H22CoverageChangesOnLandedCoutrychange, '706');
   GEOHandler.addAfterTemplateLoad(set2H22CoverageChanges, '706');
 
