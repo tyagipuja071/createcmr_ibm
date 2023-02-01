@@ -1,18 +1,14 @@
 package com.ibm.cmr.create.batch.util;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 
+import com.ibm.ci.search.client.SearchServicesClient;
+import com.ibm.ci.search.client.impl.search.SearchRequest;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
@@ -307,17 +303,17 @@ public class FindCMRUtil {
     // SearchClient.class);
     // JSONArray results = client.execute("findcmr", request, JSONArray.class);
 
-    // SearchRequest request = new SearchRequest();
-    // request.setCmrResultRows(100);
-    // request.setCmrNum(cmrNo);
-    // request.setCmrIssueCategory(cmrIssuingCntry);
-    // request.setAppId("findcmr");
+    SearchRequestSVC request = new SearchRequestSVC();
 
-    // SearchServicesClient client = new
-    // SearchServicesClient(SystemConfiguration.getValue("BATCH_CI_SERVICES_URL"));
-    // JSONArray results = client.sendRequest(request);
+    request.setCmrResultRows(100);
+    request.setCmrNum(cmrNo);
+    request.setCmrIssueCategory(cmrIssuingCntry);
+    request.setAppId("findcmr");
+    request.setSvcId(SystemConfiguration.getSystemProperty("service.id"));
+    request.setSvcPwd(SystemConfiguration.getSystemProperty("service.password"));
 
-    JSONArray results = fetchFromSearchServicesClient();
+    SearchServicesClient client = new SearchServicesClient(SystemConfiguration.getValue("BATCH_CI_SERVICES_URL"));
+    JSONArray results = client.sendRequest(request);
 
     List<SearchResultObject> searchResults = new ArrayList<SearchResultObject>();
     LOG.debug("Parsing JSON results from the service...");
@@ -332,40 +328,6 @@ public class FindCMRUtil {
       }
     }
     return searchResults;
-  }
-
-  private static JSONArray fetchFromSearchServicesClient() {
-    String cmrservices = SystemConfiguration.getValue("BATCH_CI_SERVICES_URL");
-    String serviceId = SystemConfiguration.getSystemProperty("service.id");
-    String servicePwd = SystemConfiguration.getSystemProperty("service.password");
-    cmrservices += "/service/search/findcmr";
-    cmrservices += "?svcId=" + serviceId + "&svcPwd=" + servicePwd;
-    JSONArray result = new JSONArray();
-    try {
-      URL url = new URL(cmrservices);
-      HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-      conn.setDoInput(true);
-      conn.setDoOutput(true);
-      conn.setConnectTimeout(1000 * 30); // 30 seconds
-      InputStream is = conn.getInputStream();
-      StringBuffer sb = new StringBuffer();
-      try {
-        InputStreamReader isr = new InputStreamReader(is, "UTF-8");
-        BufferedReader reader = new BufferedReader(isr);
-        String str;
-        while ((str = reader.readLine()) != null) {
-          sb.append(str);
-        }
-      } finally {
-        is.close();
-        conn.disconnect();
-      }
-      return JSONArray.parse(sb.toString());
-
-    } catch (Exception e) {
-      LOG.error("Error when pinging CI Services", e);
-    }
-    return result;
   }
 
   public static SearchResultObject convertToResultObject(JSONObject main) throws JSONException, IllegalAccessException, InstantiationException {
@@ -575,6 +537,33 @@ public class FindCMRUtil {
       return (val2);
     }
 
+  }
+
+}
+
+class SearchRequestSVC extends SearchRequest {
+  private String svcId;
+  private String svcPwd;
+
+  public SearchRequestSVC() {
+    super();
+    // TODO Auto-generated constructor stub
+  }
+
+  public String getSvcId() {
+    return svcId;
+  }
+
+  public void setSvcId(String svcId) {
+    this.svcId = svcId;
+  }
+
+  public String getSvcPwd() {
+    return svcPwd;
+  }
+
+  public void setSvcPwd(String svcPwd) {
+    this.svcPwd = svcPwd;
   }
 
 }
