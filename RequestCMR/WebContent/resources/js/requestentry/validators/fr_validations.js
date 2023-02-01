@@ -488,36 +488,15 @@ function setSBOOnScenario() {
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
-      } else if (countyCd == "MC") {
-        FormManager.setValue('salesBusOffCd', '18D18D');
+      } else if (countyCd == "LY" || countyCd == "DZ") {
+        FormManager.setValue('salesBusOffCd', '710710');
         if (role == 'Requester') {
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
-      } else if (countyCd == "GP") {
-        FormManager.setValue('salesBusOffCd', '852852');
-        if (role == 'Requester') {
-          FormManager.readOnly('salesBusOffCd');
-        } else if (role == 'Processor') {
-          FormManager.enable('salesBusOffCd');
-        }
-      } else if (countyCd == "KM" || countyCd == "RE") {
-        FormManager.setValue('salesBusOffCd', '860860');// CMR-221
-        if (role == 'Requester') {
-          FormManager.readOnly('salesBusOffCd');
-        } else if (role == 'Processor') {
-          FormManager.enable('salesBusOffCd');
-        }
-      } else if (countyCd == "WF") {
-        FormManager.setValue('salesBusOffCd', '872872');
-        if (role == 'Requester') {
-          FormManager.readOnly('salesBusOffCd');
-        } else if (role == 'Processor') {
-          FormManager.enable('salesBusOffCd');
-        }
-      } else if (countyCd == "GF") {
-        FormManager.setValue('salesBusOffCd', '853853');
+      } else if (countyCd == "RE" || countyCd == "KM") {
+        FormManager.setValue('salesBusOffCd', '860860');
         if (role == 'Requester') {
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
@@ -530,29 +509,15 @@ function setSBOOnScenario() {
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
-      } else if (countyCd == "RE" || countyCd == "TF") {// CMR-221
-        FormManager.setValue('salesBusOffCd', '860860');
+      } else if (countyCd == "GP") {
+        FormManager.setValue('salesBusOffCd', '852852');
         if (role == 'Requester') {
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
-      } else if (countyCd == "PM") {
+      } else if (countyCd == "GF" || countyCd == "PM") {
         FormManager.setValue('salesBusOffCd', '853853');
-        if (role == 'Requester') {
-          FormManager.readOnly('salesBusOffCd');
-        } else if (role == 'Processor') {
-          FormManager.enable('salesBusOffCd');
-        }
-      } else if (countyCd == "VU") {
-        FormManager.setValue('salesBusOffCd', '876876');
-        if (role == 'Requester') {
-          FormManager.readOnly('salesBusOffCd');
-        } else if (role == 'Processor') {
-          FormManager.enable('salesBusOffCd');
-        }
-      } else if (countyCd == "PF") {
-        FormManager.setValue('salesBusOffCd', '873873');
         if (role == 'Requester') {
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
@@ -565,22 +530,29 @@ function setSBOOnScenario() {
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
-      } else if (countyCd == "NC") {
+      } else if (countyCd == "NC" || countyCd == "WF" || countyCd == "VU") {
         FormManager.setValue('salesBusOffCd', '872872');
         if (role == 'Requester') {
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
-      } else if (countyCd == "AD") {
-        FormManager.setValue('salesBusOffCd', '03T03T');
+      } else if (countyCd == "PF") {
+        FormManager.setValue('salesBusOffCd', '873873');
         if (role == 'Requester') {
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
-      } else if (countyCd == "DZ") {
-        FormManager.setValue('salesBusOffCd', '711711');
+      } else if (countyCd == "AD") {
+        FormManager.setValue('salesBusOffCd', 'IBOIBO');
+        if (role == 'Requester') {
+          FormManager.readOnly('salesBusOffCd');
+        } else if (role == 'Processor') {
+          FormManager.enable('salesBusOffCd');
+        }
+      } else if (countyCd == "MC") {
+        FormManager.setValue('salesBusOffCd', '18D18D');
         if (role == 'Requester') {
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
@@ -706,9 +678,10 @@ function autoSetValuesOnPostalCode(postCd, city1) {
   var reqType = FormManager.getActualValue('reqType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isViewPage = FormManager.getActualValue('viewOnlyPage');
+  var custType = FormManager.getActualValue('custGrp');
 
   // add scenario check
-  if (isuCtc != "34Q" || isViewPage == 'true' || reqType == 'U' || custSubGrp == '') {
+  if (isuCtc != "34Q" || isViewPage == 'true' || reqType == 'U' || custSubGrp == '' || custType == 'CROSS') {
     return;
   }
   var PostCdList1 = [ '02', '14', '27', '50', '59', '60', '61', '62', '76', '80' ];
@@ -4228,7 +4201,7 @@ function postBoxValidationBillTo() {
 
 // CREATCMR-8031 2H23 coverage changes
 function isCoverage2H22MEACountry(country) {
-  var meaCountryList = [ 'AE', 'BJ', 'BF', 'CM', 'CF', 'TD', 'GQ', 'GA', 'GM', 'GW', 'ML', 'MR', 'MA', 'NE', 'SN', 'TG', 'TN', 'AE', 'CG', 'CI', 'GN', ];
+  var meaCountryList = [ 'AE', 'BJ', 'BF', 'CM', 'CF', 'TD', 'GQ', 'GA', 'GM', 'GW', 'ML', 'MR', 'MA', 'NE', 'SN', 'TG', 'TN', 'AE', 'CG', 'CI', 'GN', 'LY' ];
   return meaCountryList.includes(country);
 }
 
@@ -4266,18 +4239,7 @@ function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
   }
 
   if (countyCd != '' && landedCountry != '') {
-    if (FormManager.getActualValue('cmrIssuingCntry') == '706' && isCoverage2H22MEACountry(landedCountry)) {
-      FormManager.setValue('isuCd', '34');
-      FormManager.setValue('clientTier', 'Q');
-      FormManager.setValue('salesBusOffCd', '730730')
-    } else if (!isCoverage2H22Subregion(landedCountry) && !isCoverage2H22MEACountry(landedCountry)) {
-      FormManager.setValue('isuCd', '21');
-      FormManager.setValue('clientTier', '');
-      FormManager.setValue('salesBusOffCd', '200200');
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('salesBusOffCd');
-    } else if (landedCountry == 'TN') {
+    if (landedCountry == 'TN') {
       FormManager.setValue('isuCd', '34');
       FormManager.setValue('clientTier', 'Q');
       FormManager.setValue('salesBusOffCd', '710710');
@@ -4290,7 +4252,17 @@ function setCoverage2H22IsuCtcSBOBasedOnLandCntry(fromAddress, currentLanded) {
         FormManager.enable('clientTier');
         FormManager.enable('salesBusOffCd');
       }
-
+    } else if (FormManager.getActualValue('cmrIssuingCntry') == '706' && isCoverage2H22MEACountry(landedCountry)) {
+      FormManager.setValue('isuCd', '34');
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('salesBusOffCd', '730730')
+    } else if (!isCoverage2H22Subregion(landedCountry) && !isCoverage2H22MEACountry(landedCountry)) {
+      FormManager.setValue('isuCd', '21');
+      FormManager.setValue('clientTier', '');
+      FormManager.setValue('salesBusOffCd', '200200');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('salesBusOffCd');
     }
   }
 }
