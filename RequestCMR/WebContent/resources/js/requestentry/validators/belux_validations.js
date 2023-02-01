@@ -130,7 +130,7 @@ function afterConfigForBELUX() {
 
   addHandlerForReqRsn();
   disableModeOfPayment();
-  setAccTemNumValueOnScenarios();
+  // setAccTemNumValueOnScenarios();
   addAccTemNumValidate();
   disableSBO();
   disableIBMTab();
@@ -261,139 +261,63 @@ function setPPSCEIDRequired() {
   }
 }
 
-function setAccTemNumValueOnScenarios() {
-  var cntryUse = FormManager.getActualValue('countryUse');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var reqType = FormManager.getActualValue('reqType');
-  if (typeof (_pagemodel) != 'undefined') {
-    reqType = FormManager.getActualValue('reqType');
-    role = _pagemodel.userRole;
-  }
+/*
+ * function setAccTemNumValueOnScenarios() { var cntryUse =
+ * FormManager.getActualValue('countryUse'); var custSubGrp =
+ * FormManager.getActualValue('custSubGrp'); var reqType =
+ * FormManager.getActualValue('reqType'); if (typeof (_pagemodel) !=
+ * 'undefined') { reqType = FormManager.getActualValue('reqType'); role =
+ * _pagemodel.userRole; }
+ * 
+ * if (FormManager.getActualValue('viewOnlyPage') == 'true') { return; }
+ * 
+ * if (reqType != 'C') { return; }
+ * 
+ * if (custSubGrp == '') { return; }
+ * 
+ * if (custSubGrp == _pagemodel.custSubGrp) { return; }
+ * 
+ * switch (custSubGrp) { case 'BECOM': case 'BEDAT': case 'BE3PA': case 'BEPUB':
+ * case 'CBCOM': break; case 'BEBUS': if (role == 'Requester') {
+ * FormManager.setValue('searchTerm', 'BP0000'); } else if (role == 'processor') { //
+ * do nothing } break; case 'BEINT': FormManager.setValue('searchTerm',
+ * 'BU0000'); break; case 'BEISO': FormManager.setValue('searchTerm', 'BU0000');
+ * break; case 'BEPRI': FormManager.setValue('searchTerm', 'BU0000'); break;
+ * case 'CBBUS': if (cntryUse == '624') { if (role == 'Requester') {
+ * FormManager.setValue('searchTerm', 'BP0000'); } else if (role == 'processor') { //
+ * do nothing } } else if (cntryUse == '624LU') { if (role == 'Requester') {
+ * FormManager.setValue('searchTerm', 'LP0000'); } else if (role == 'processor') { //
+ * do nothing } } break; case 'LU3PA': case 'LUCOM': case 'LUDAT': case 'LUPUB':
+ * break; case 'LUBUS': if (role == 'Requester') {
+ * FormManager.setValue('searchTerm', 'LP0000'); } else if (role == 'processor') { //
+ * do nothing } break; case 'LUINT': FormManager.setValue('searchTerm',
+ * 'LU0000'); break; case 'LUISO': FormManager.setValue('searchTerm', 'LU0000');
+ * break; case 'LUPRI': FormManager.setValue('searchTerm', 'LU0000'); break;
+ * default: break; } }
+ */
 
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  if (reqType != 'C') {
-    return;
-  }
-
-  if (custSubGrp == '') {
-    return;
-  }
-
-  if (custSubGrp == _pagemodel.custSubGrp) {
-    return;
-  }
-
-  switch (custSubGrp) {
-  case 'BECOM':
-  case 'BEDAT':
-  case 'BE3PA':
-  case 'BEPUB':
-  case 'CBCOM':
-    break;
-  case 'BEBUS':
-    if (role == 'Requester') {
-      FormManager.setValue('searchTerm', 'BP0000');
-    } else if (role == 'processor') {
-      // do nothing
-    }
-    break;
-  case 'BEINT':
-    FormManager.setValue('searchTerm', 'BU0000');
-    break;
-  case 'BEISO':
-    FormManager.setValue('searchTerm', 'BU0000');
-    break;
-  case 'BEPRI':
-    FormManager.setValue('searchTerm', 'BU0000');
-    break;
-  case 'CBBUS':
-    if (cntryUse == '624') {
-      if (role == 'Requester') {
-        FormManager.setValue('searchTerm', 'BP0000');
-      } else if (role == 'processor') {
-        // do nothing
-      }
-    } else if (cntryUse == '624LU') {
-      if (role == 'Requester') {
-        FormManager.setValue('searchTerm', 'LP0000');
-      } else if (role == 'processor') {
-        // do nothing
-      }
-    }
-    break;
-  case 'LU3PA':
-  case 'LUCOM':
-  case 'LUDAT':
-  case 'LUPUB':
-    break;
-  case 'LUBUS':
-    if (role == 'Requester') {
-      FormManager.setValue('searchTerm', 'LP0000');
-    } else if (role == 'processor') {
-      // do nothing
-    }
-    break;
-  case 'LUINT':
-    FormManager.setValue('searchTerm', 'LU0000');
-    break;
-  case 'LUISO':
-    FormManager.setValue('searchTerm', 'LU0000');
-    break;
-  case 'LUPRI':
-    FormManager.setValue('searchTerm', 'LU0000');
-    break;
-  default:
-    break;
-  }
-}
-
-function setSortlOnScenarios() {
-  var cntryUse = FormManager.getActualValue('countryUse');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var reqType = FormManager.getActualValue('reqType');
-  if (typeof (_pagemodel) != 'undefined') {
-    reqType = FormManager.getActualValue('reqType');
-    role = _pagemodel.userRole;
-  }
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  if (reqType != 'C') {
-    return;
-  }
-
-  if (custSubGrp == '') {
-    return;
-  }
-
-  switch (custSubGrp) {
-  case 'CBCOM':
-    if (role == 'Requester') {
-      if (cntryUse == '624') {
-        FormManager.setValue('commercialFinanced', 'T0003601');
-      } else if (cntryUse == '624LU') {
-        FormManager.setValue('commercialFinanced', 'T0003500');
-      }
-    }
-    break;
-  case 'CBBUS':
-    if (role == 'Requester') {
-      if (cntryUse == '624') {
-        FormManager.setValue('commercialFinanced', 'BP0000');
-      } else if (cntryUse == '624LU') {
-        FormManager.setValue('commercialFinanced', 'LP0000');
-      }
-    }
-    break;
-  default:
-    break;
-  }
-}
+/*
+ * function setSortlOnScenarios() { var cntryUse =
+ * FormManager.getActualValue('countryUse'); var custSubGrp =
+ * FormManager.getActualValue('custSubGrp'); var reqType =
+ * FormManager.getActualValue('reqType'); if (typeof (_pagemodel) !=
+ * 'undefined') { reqType = FormManager.getActualValue('reqType'); role =
+ * _pagemodel.userRole; }
+ * 
+ * if (FormManager.getActualValue('viewOnlyPage') == 'true') { return; }
+ * 
+ * if (reqType != 'C') { return; }
+ * 
+ * if (custSubGrp == '') { return; }
+ * 
+ * switch (custSubGrp) { case 'CBCOM': if (role == 'Requester') { if (cntryUse ==
+ * '624') { FormManager.setValue('commercialFinanced', 'T0003601'); } else if
+ * (cntryUse == '624LU') { FormManager.setValue('commercialFinanced',
+ * 'T0003500'); } } break; case 'CBBUS': if (role == 'Requester') { if (cntryUse ==
+ * '624') { FormManager.setValue('commercialFinanced', 'BP0000'); } else if
+ * (cntryUse == '624LU') { FormManager.setValue('commercialFinanced', 'LP0000'); } }
+ * break; default: break; } }
+ */
 
 function addAccTemNumValidate() {
   var cntryUse = FormManager.getActualValue('countryUse');
@@ -713,12 +637,34 @@ var _vatExemptHandler = null;
 var _ExpediteHandler = null;
 var _AccountTeamHandler = null;
 
+function addBeIsuHandler() {
+  _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    if (!value) {
+      value = FormManager.getActualValue('isuCd');
+    }
+    reqType = FormManager.getActualValue('reqType');
+    if (value == '32') {
+      FormManager.setValue('clientTier', 'T');
+    } else if (value == '34') {
+      FormManager.setValue('clientTier', 'Q');
+    } else if (value == '36') {
+      FormManager.setValue('clientTier', 'Y');
+    } else {
+      FormManager.setValue('clientTier', '');
+    }
+
+    if (reqType == 'Processor') {
+      FormManager.enable('commercialFinanced');
+    }
+  });
+}
+
 function addHandlersForBELUX() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
-      setClientTierValuesForUpdate();
+      // setClientTierValuesForUpdate();
       setSBOValuesForIsuCtc();
     });
   }
@@ -1716,39 +1662,64 @@ function setSORTL() {
 }
 
 function setSBOValuesForIsuCtc() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('custSubGrp').includes('IBM')) {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType == 'U') {
     return;
   }
+  var role = FormManager.getActualValue('userRole');
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
-  var reqType = FormManager.getActualValue('reqType');
   var countryUse = FormManager.getActualValue('countryUse');
-  var isuList = [ '34', '5K', '28' ];
-  if (isuCd == '34' && clientTier == 'Y') {
-    if (countryUse == '624') {
-      FormManager.setValue('commercialFinanced', 'T0007967');
-    } else {
-      FormManager.setValue('commercialFinanced', 'T0007968');
-    }
-  } else if (isuCd == '34' && clientTier == 'Q') {
-    if (countryUse == '624') {
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  var isuList = [ '34', '36', '28', '32' ];
+  var beSubGrpsList = [ 'BEINT', 'BEISO', 'BEPRI', 'IBMEM' ];
+  var luSubGrpsList = [ 'LUINT', 'LUISO', 'LUPRI', 'LUIBM' ]
+  if (countryUse == '624') {
+    if (isuCd == '34' && clientTier == 'Q') {
       FormManager.setValue('commercialFinanced', 'T0003601');
-    } else {
-      FormManager.setValue('commercialFinanced', 'T0003500');
+      if (role == 'Requester') {
+        FormManager.readOnly('commercialFinanced');
+        FormManager.readOnly('clientTier');
+      }
+      if (role == 'Processor') {
+        FormManager.enable('isuCd');
+        FormManager.enable('commercialFinanced');
+        FormManager.enable('clientTier');
+      }
+    } else if (isuCd == '32' && clientTier == 'T') {
+      FormManager.setValue('commercialFinanced', 'T0010421');
+    } else if (isuCd == '36' && clientTier == 'Y') {
+      FormManager.setValue('commercialFinanced', 'T0007967');
+    } else if (isuCd == '28' && clientTier == '') {
+      FormManager.setValue('commercialFinanced', 'A0004504');
+    } else if (isuCd == '21' && (subGrp == 'BEBUS' || subGrp == 'CBBUS') && clientTier == '') {
+      FormManager.setValue('commercialFinanced', 'P0000003');
+    } else if (isuCd == '21' && (beSubGrpsList.includes(subGrp)) && clientTier == '') {
+      FormManager.setValue('commercialFinanced', 'BU0000');
     }
-  } else if (isuCd == '5K' && clientTier == '') {
-    FormManager.setValue('commercialFinanced', 'T0009066');
-  } else if (isuCd == '28' && clientTier == '') {
-    FormManager.setValue('commercialFinanced', 'A0004504');
-  } else {
-    FormManager.setValue('commercialFinanced', '');
   }
-  if (isuCd == '28' && reqType == 'C') {
-    FormManager.resetValidations('clientTier');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    FormManager.enable('clientTier');
+
+  if (countryUse == '624LU') {
+    if (isuCd == '34' && clientTier == 'Q') {
+      FormManager.setValue('commercialFinanced', 'T0003500');
+      if (role == 'Requester') {
+        FormManager.readOnly('commercialFinanced');
+        FormManager.readOnly('clientTier');
+      }
+      if (role == 'Processor') {
+        FormManager.enable('isuCd');
+        FormManager.enable('commercialFinanced');
+        FormManager.enable('clientTier');
+      }
+    } else if (isuCd == '36' && clientTier == 'Y') {
+      FormManager.setValue('commercialFinanced', 'T0007968');
+    } else if (isuCd == '5K' && clientTier == '') {
+      FormManager.setValue('commercialFinanced', 'T0009902');
+    } else if (isuCd == '21' && subGrp == 'LUBUS' && clientTier == '') {
+      FormManager.setValue('commercialFinanced', 'P0000046');
+    } else if (isuCd == '21' && (luSubGrpsList.includes(subGrp)) && clientTier == '') {
+      FormManager.setValue('commercialFinanced', 'LU0000');
+    }
   }
 }
 
@@ -1967,22 +1938,17 @@ function addREALCTYValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function setClientTierValuesForUpdate() {
-  var reqType = FormManager.getActualValue('reqType');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C' || FormManager.getActualValue('custSubGrp').includes('IBM')) {
-    return;
-  }
-  var isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '28') {
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    FormManager.enable('clientTier');
-  }
-  if (FormManager.getActualValue('custSubGrp').includes('IBM')) {
-    FormManager.readOnly('clientTier');
-  }
-}
+/*
+ * function setClientTierValuesForUpdate() { var reqType =
+ * FormManager.getActualValue('reqType'); if
+ * (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C' ||
+ * FormManager.getActualValue('custSubGrp').includes('IBM')) { return; } var
+ * isuCd = FormManager.getActualValue('isuCd'); if (isuCd == '28') {
+ * FormManager.setValue('clientTier', ''); FormManager.readOnly('clientTier'); }
+ * else { FormManager.enable('clientTier'); } if
+ * (FormManager.getActualValue('custSubGrp').includes('IBM')) {
+ * FormManager.readOnly('clientTier'); } }
+ */
 
 // CREATCMR-4293
 function setCTCValues() {
@@ -2119,21 +2085,21 @@ function beluxSortlValidator() {
         if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
           if (cmrIssuingCntry == '624') {
             if (countryUse == '624') {
-              if (accSeq_624.hasOwnProperty(isuCtc) && !accSeq_624[isuCtc].includes(searchTerm)) {
+              if (accSeq_624.hasOwnProperty(isuCtc) && !accSeq_624[isuCtc].includes(commercialFinanced)) {
                 return new ValidationResult({
-                  id : 'searchTerm',
+                  id : 'commercialFinanced',
                   type : 'text',
-                  name : 'searchTerm'
-                }, false, 'SearchTerm can only accept ' + accSeq_624[isuCtc]);
+                  name : 'commercialFinanced'
+                }, false, 'Sortl can only accept ' + accSeq_624[isuCtc]);
               }
             }
             if (cmrIssuingCntry == '624') {
               if (countryUse == '624LU') {
-                if (accSeq_624LU.hasOwnProperty(isuCtc) && !accSeq_624LU[isuCtc].includes(searchTerm)) {
+                if (accSeq_624LU.hasOwnProperty(isuCtc) && !accSeq_624LU[isuCtc].includes(commercialFinanced)) {
                   return new ValidationResult({
-                    id : 'searchTerm',
+                    id : 'commercialFinanced',
                     type : 'text',
-                    name : 'searchTerm'
+                    name : 'commercialFinanced'
                   }, false, 'SearchTerm can only accept ' + accSeq_624LU[isuCtc]);
                 }
               }
@@ -2234,7 +2200,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setISUDropDown, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setClientTierDropDown, GEOHandler.BELUX);
-  GEOHandler.addAfterTemplateLoad(setSortlOnScenarios, GEOHandler.BELUX);
+  // GEOHandler.addAfterTemplateLoad(setSortlOnScenarios, GEOHandler.BELUX);
 
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.BELUX);
   GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.BELUX);
@@ -2257,13 +2223,15 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDepartmentNumberValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addREALCTYValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.BELUX, null, true);
-  GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.BELUX);
-  GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate, GEOHandler.BELUX);
+  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setVatValidatorBELUX, GEOHandler.BELUX);
+  GEOHandler.addAfterConfig(addBeIsuHandler, GEOHandler.BELUX);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.BELUX);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(beluxSortlValidator, GEOHandler.BELUX, null, true);
+
 });
