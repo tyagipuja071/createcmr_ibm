@@ -2002,8 +2002,8 @@ function setSBOValuesForIsuCtc() {
       }
       FormManager.setValue('salesBusOffCd', sbo[0]);
     }
-
-    if (isuCtc == '8B' || isuCtc == '21' || custSubGrp == 'PRICU') {
+    var lockSboScenario = [ 'PRICU', 'RSXPC', 'CSPC', 'MEPC', 'RSPC' ];
+    if (isuCtc == '8B' || isuCtc == '21' || lockSboScenario.includes(custSubGrp)) {
       FormManager.readOnly('salesBusOffCd');
     } else if (FormManager.getActualValue('userRole') == 'Processor') {
       FormManager.enable('salesBusOffCd');
@@ -4929,7 +4929,7 @@ function lockCompanyForCEE() {
     }
   }
   if (CEE_INCL.has(cntry) && 'C' == FormManager.getActualValue('reqType')) {
-    var lockSboScenario = [ 'BUSPR', 'INTER', 'XBP', 'XINT', 'IBMEM', 'XINT', 'INTER', 'CSINT', 'RSXIN', 'MEINT', 'RSINT', 'CSBP', 'MEBP', 'RSXBP', 'RSBP', 'PRICU' ];
+    var lockSboScenario = [ 'BUSPR', 'INTER', 'XBP', 'XINT', 'IBMEM', 'XINT', 'INTER', 'CSINT', 'RSXIN', 'MEINT', 'RSINT', 'CSBP', 'MEBP', 'RSXBP', 'RSBP', 'PRICU', 'RSXPC', 'CSPC', 'MEPC', 'RSPC' ];
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     if (lockSboScenario.includes(custSubGrp)) {
       FormManager.readOnly('salesBusOffCd');
