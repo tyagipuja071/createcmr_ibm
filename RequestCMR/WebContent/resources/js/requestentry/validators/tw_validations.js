@@ -494,6 +494,14 @@ function addressQuotationValidator() {
 }
 
 // CREATCMR-7882
+function setCluster(){
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'CBFOR') {
+    FormManager.setValue('searchTerm', (_pagemodel.searchTerm == '' || _pagemodel.searchTerm == null) ? '00000' : _pagemodel.searchTerm);
+  }
+}
+
+// CREATCMR-7882
 function addCoverageFieldsValidator() {
   var reqType = FormManager.getActualValue('reqType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -505,12 +513,6 @@ function addCoverageFieldsValidator() {
       FormManager.readOnly('isuCd');
       FormManager.readOnly('mrcCd');
     }
-// if (custSubGrp == 'CBFOR') {
-// FormManager.setValue('searchTerm', '00000');
-// FormManager.setValue('mrcCd', '3');
-// FormManager.setValue('clientTier', 'Z');
-// FormManager.setValue('isuCd', '34');
-// }
     if (custSubGrp == 'KYND') {
       FormManager.readOnly('searchTerm');
       FormManager.readOnly('clientTier');
@@ -520,18 +522,23 @@ function addCoverageFieldsValidator() {
       FormManager.readOnly('inacCd');
     }
     if (searchTerm == '00000'){
-      if (custSubGrp == 'LOBLU' || custSubGrp == 'LOMAR' || custSubGrp == 'LOOFF')
-      {
+      if (custSubGrp == 'LOBLU' || custSubGrp == 'LOMAR' || custSubGrp == 'LOOFF') {
         FormManager.setValue('mrcCd', '3');
         FormManager.setValue('clientTier', 'Z');
         FormManager.setValue('isuCd', '34');
-      }else if (custSubGrp == 'LOINT') {
+      } else if (custSubGrp == 'LOINT') {
         FormManager.setValue('mrcCd', '2');
         FormManager.setValue('clientTier', 'Z');
         FormManager.setValue('isuCd', '21');
+      } else if(custSubGrp == 'CBFOR') {
+        FormManager.setValue('mrcCd', (_pagemodel.mrcCd == '' || _pagemodel.mrcCd == null) ? '3' : _pagemodel.mrcCd);
+        FormManager.setValue('clientTier', (_pagemodel.clientTier == '' || _pagemodel.clientTier == null) ? 'Z' : _pagemodel.clientTier);
+        FormManager.setValue('isuCd', (_pagemodel.isuCd == '' || _pagemodel.isuCd == null) ? '34' : _pagemodel.isuCd);
       }
     }
   }
+  FormManager.addValidator('covId', Validators.REQUIRED, [ 'Coverage Type/ID' ], 'MAIN_IBM_TAB');
+  FormManager.removeValidator('dunsNo', Validators.REQUIRED);
 }
 
 // CREATCMR-7882
@@ -717,12 +724,14 @@ function checkCustomerNameForKYND() {
         var errorMsg = '';
         var action = FormManager.getActualValue('yourAction');
         var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase();
-        
+        var custNm2 = FormManager.getActualValue('mainCustNm2').toUpperCase();
+        var enName = custNm1 + ' ' + custNm2;
+
         var reqType = FormManager.getActualValue('reqType');
         var role = FormManager.getActualValue('userRole').toUpperCase();
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         if(reqType == 'C' && role == 'REQUESTER' && custSubGrp == 'KYND' && (action=='SFP' || action=='VAL')){
-          if(custNm1.indexOf('KYNDRYL')==-1){
+          if(enName.indexOf('KYNDRYL')==-1) {
             errorMsg = 'Customer name must contain word \'Kyndryl\'';
           }
         }
@@ -777,8 +786,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
   GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
- GEOHandler.addAfterTemplateLoad(addCoverageFieldsValidator, GEOHandler.TW);
- GEOHandler.registerValidator(checkCustomerNameForKYND, GEOHandler.TW, null, true);
+  GEOHandler.addAfterTemplateLoad(setCluster, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(addCoverageFieldsValidator, GEOHandler.TW);
+  GEOHandler.registerValidator(checkCustomerNameForKYND, GEOHandler.TW, null, true);
   // skip byte checks
   // FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4',
   // 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',
