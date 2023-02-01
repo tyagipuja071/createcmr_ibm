@@ -2767,10 +2767,13 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
       var searchTerm = result.ret1;
       var clientTier = result.ret2;
       var isuCd = result.ret3;
+      FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm ]);
       FormManager.setValue('searchTerm', searchTerm);
       FormManager.readOnly('searchTerm');
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
       FormManager.setValue('clientTier', clientTier);
       FormManager.readOnly('clientTier');
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
       FormManager.setValue('isuCd', isuCd);
       FormManager.readOnly('isuCd');
       if(clientTier == '00000' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
