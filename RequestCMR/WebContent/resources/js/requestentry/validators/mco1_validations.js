@@ -155,8 +155,9 @@ function setClientTierValues(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  var reqType = FormManager.getActualValue('reqType');
   isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
+  if (isuCd == '5K' && reqType =='C') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('salesBusOffCd', '0000');
     FormManager.setValue('repTeamMemberNo', 'SALES0');
@@ -224,7 +225,8 @@ function setSalesRepSORTL() {
   var reqType = FormManager.getActualValue('reqType');
   var isu = FormManager.getActualValue('isuCd');
   var cntryRegion = FormManager.getActualValue('countryUse');
-  if (isu == '34' && clientTier == 'Y' && reqType == 'C') {
+  var isuCtc=isu.concat(clientTier)
+  if (isuCtc=='34Q' || isuCtc=='36Y'||isuCtc=='32T' && reqType == 'C') {
     if (cntryRegion == '864') {
       FormManager.setValue('repTeamMemberNo', 'SALES9');
       FormManager.setValue('salesBusOffCd', '4961');
@@ -1933,33 +1935,20 @@ function vatExemptOnScenario() {
 
 /* End 1430539 */
 
-/*
- * // CREATCMR-4293 function setCTCValues() {
- * 
- * FormManager.removeValidator('clientTier', Validators.REQUIRED);
- * 
- * var custSubGrp = FormManager.getActualValue('custSubGrp'); // Business
- * Partner var custSubGrpForBusinessPartner = [ 'BUSPR', 'LSBP', 'LSXBP',
- * 'NABP', 'NAXBP', 'SZBP', 'SZXBP', 'XBP', 'ZABP', 'ZAXBP', 'LSLOC', 'NALOC',
- * 'SZLOC', 'LSBLC', 'SZBLC', 'NABLC' ]; // Business Partner if
- * (custSubGrpForBusinessPartner.includes(custSubGrp)) {
- * FormManager.removeValidator('clientTier', Validators.REQUIRED); var isuCd =
- * FormManager.getActualValue('isuCd'); if (isuCd == '8B') {
- * FormManager.setValue('clientTier', ''); } } // Internal var
- * custSubGrpForInternal = [ 'INTER', 'LSINT', 'LSXIN', 'NAINT', 'NAXIN',
- * 'SZINT', 'SZXIN', 'XINTE', 'ZAINT', 'ZAXIN' ]; // Internal if
- * (custSubGrpForInternal.includes(custSubGrp)) {
- * FormManager.removeValidator('clientTier', Validators.REQUIRED); var isuCd =
- * FormManager.getActualValue('isuCd'); if (isuCd == '21') {
- * FormManager.setValue('clientTier', ''); } } }
- */
+
+ // CREATCMR-4293
+function setCTCValues() {
+ 
+ FormManager.removeValidator('clientTier', Validators.REQUIRED);
+ 
+} 
 
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '32' && isuCode != '36') && reqType == 'U')) {
+  
+   if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '32' && isuCode != '36') && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -2023,6 +2012,7 @@ function clientTierCodeValidator() {
     }
   } else if (isuCode != '36' || isuCode != '34' || isuCode != '32') {
     if (clientTierCode == '') {
+      
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
@@ -2032,7 +2022,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+    if (clientTierCode == 'Q' || clientTierCode == 'Y'|| clientTierCode == 'T'  || clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
@@ -2273,10 +2263,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(enableCmrForProcessor, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterConfig(validateTypeOfCustomer, GEOHandler.MCO1);
-  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO1);
-  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.MCO1);
-
-  // GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.SOUTH_AFRICA ],
+   // GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.SOUTH_AFRICA
+    // ],
   // null, true);
   GEOHandler.registerValidator(embargoCdValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.registerValidator(validateCMRNumForProspect, [ SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
@@ -2294,7 +2282,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(vatExemptOnScenario, GEOHandler.MCO1);
   
   // CREATCMR-4293
- // GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO1);
+  GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO1);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.SOUTH_AFRICA ], null, true);
   
