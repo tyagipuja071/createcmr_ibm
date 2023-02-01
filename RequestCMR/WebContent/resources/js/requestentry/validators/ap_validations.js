@@ -2085,12 +2085,13 @@ function updateCluster(value) {
 
 function handleCluster(value) {
   var industryClass = FormManager.getActualValue('IndustryClass');
+  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (!value) {
     value = industryClass;
   }
   var clusterValues = [];
   var qParams = {
-      CNTRY : '738',
+      CNTRY : cmrIssuCntry,
       TXT: '%' + value + '%'
     };
   var results = cmr.query('GET_CLUSTER_BY_INDUSTRYCLASS', qParams);
