@@ -4145,8 +4145,8 @@ function clientTierCodeValidator() {
 }
 
 function sboCodeValidator() {
-  var isuCode = FormManager.getActualValue('isuCd');
-  var clientTierCode = FormManager.getActualValue('clientTier');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
   var isuCtc = isuCd + clientTier;
   var sbo = FormManager.getActualValue('salesBusOffCd');
   var reqType = FormManager.getActualValue('reqType');
