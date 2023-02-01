@@ -294,14 +294,6 @@ public class FindCMRUtil {
   }
 
   private static List<SearchResultObject> findCMRsFromService(String cmrNo, String cmrIssuingCntry) throws Exception {
-    // JSONObject request = new JSONObject();
-    // request.put("cmrResultRows", 100);
-    // request.put("cmrIssueCategory", cmrIssuingCntry);
-    // request.put("cmrNum", cmrNo);
-    // SearchClient client =
-    // CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_CI_SERVICES_URL"),
-    // SearchClient.class);
-    // JSONArray results = client.execute("findcmr", request, JSONArray.class);
 
     SearchRequestSVC request = new SearchRequestSVC();
 
