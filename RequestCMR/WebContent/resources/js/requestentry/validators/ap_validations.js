@@ -263,6 +263,11 @@ function addAfterConfigAP() {
         FormManager.setValue('isuCd', '34');
         FormManager.readOnly('isuCd');
     }
+    
+    // CREATCMR-7883: set Cluster '00001' as default code 
+    if (cntry == SysLoc.AUSTRALIA && custSubGrp == "CROSS") {
+      FormManager.setValue('apCustClusterId', "00001");
+    }
   }
   if (reqType == 'C') {
     setIsuOnIsic();
@@ -315,9 +320,9 @@ function setInacByCluster() {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     // CREATCMR-7884
     var _clusterNZ = ['09056','10114','10115','10116','01147','08037','10662','10663','00002'];
-    var _clusterNZWithEmptyInac = ['01147','08037','10662','10663','00002'];
+    var _clusterNZWithEmptyInac = [];
     // CREATCMR-7883
-    var _clusterAUWithEmptyInac = ['01150','00001','08039'];
+    var _clusterAUWithEmptyInac = [];
     
     if (cntry == '736' || cntry == '738') {
       return;
@@ -4315,7 +4320,12 @@ function addValidatorBasedOnCluster() {
           return new ValidationResult(null, true);
         }
         if((cntry == '856' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08047') ||
-           (cntry == '818' && (custSubType == 'CROSS' || custSubType == 'XASLO') && cluster == '08044') ) {
+           (cntry == '818' && (custSubType == 'CROSS' || custSubType == 'XASLO') && cluster == '08044') ||
+           (cntry == '616' && (custSubType == 'CROSS') && cluster == '08039') ||
+           (cntry == '796' && (custSubType == 'CROSS' || custSubType == 'XESO') && cluster == '08037') ||
+           (cntry == '778' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08042') ||
+           (cntry == '749' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08040')
+            ) {
           return new ValidationResult(null, true);
         }
         
@@ -6677,7 +6687,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCustNameForInternal, [ SysLoc.AUSTRALIA ], null, true);  
   GEOHandler.registerValidator(clusterCdValidatorAU, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.AP, null, true);
-  GEOHandler.registerValidator(validateClusterBaseOnScenario, [ SysLoc.SINGAPORE ], null, true);  
+  // after coverage update, the Cluster code options are restricted on Scenario, so remove this validator
+  //GEOHandler.registerValidator(validateClusterBaseOnScenario, [ SysLoc.SINGAPORE ], null, true);  
   GEOHandler.addAfterConfig(lockInacCodeForIGF, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, SysLoc.INDIA);
   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate,  GEOHandler.AP );
