@@ -512,7 +512,13 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
     }
 
-    legacyCust.setEnterpriseNo(!StringUtils.isEmpty(muData.getEnterprise()) ? muData.getEnterprise() : "");
+    if (!StringUtils.isBlank(muData.getEnterprise())) {
+      if ("@@@@@@".equals(muData.getEnterprise().trim())) {
+        legacyCust.setEnterpriseNo("");
+      } else {
+        legacyCust.setEnterpriseNo(muData.getEnterprise());
+      }
+    }
 
   }
 

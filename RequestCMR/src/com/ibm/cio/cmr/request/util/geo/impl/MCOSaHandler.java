@@ -1057,6 +1057,7 @@ public class MCOSaHandler extends MCOHandler {
             String intDeptNum = ""; // 16
             String isuCd = ""; // 10
             String clientTier = ""; // 11
+            String enterprise = ""; // 17
 
             boolean isDummyUpdate = true;
 
@@ -1125,6 +1126,9 @@ public class MCOSaHandler extends MCOHandler {
 
               currCell = (XSSFCell) row.getCell(10);
               isuCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              enterprise = validateColValFromCell(currCell);
             }
 
             checkListSubRegion = Arrays.asList(nameCont, streetCont);
@@ -1153,6 +1157,16 @@ public class MCOSaHandler extends MCOHandler {
               LOG.trace("Phone Number should contain only digits.");
               error.addError((row.getRowNum() + 1), "Phone #", "Phone Number should contain only digits. <br>");
               // validations.add(error);
+            }
+
+            if (!StringUtils.isBlank(zs01Phone) && !zs01Phone.contains("@") && !zs01Phone.matches("\\d+.\\d*")) {
+              LOG.trace("Phone Number should contain only digits.");
+              error.addError((row.getRowNum() + 1), "Phone #", "Phone Number should contain only digits. <br>");
+            }
+
+            if (!StringUtils.isBlank(enterprise) && !enterprise.contains("@") && !enterprise.matches("\\d+.\\d*")) {
+              LOG.trace("Enterprise Number should contain only digits.");
+              error.addError((row.getRowNum() + 1), "Enterprise #", "Enterprise Number should contain only digits. <br>");
             }
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
