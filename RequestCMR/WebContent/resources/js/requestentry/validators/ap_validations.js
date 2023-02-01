@@ -318,11 +318,14 @@ function setInacByCluster() {
 	console.log(">>>> setInacByCluster >>>>");
     var _cluster = FormManager.getActualValue('apCustClusterId');
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
     // CREATCMR-7884
     var _clusterNZ = ['09056','10114','10115','10116','01147','08037','10662','10663','00002'];
-    var _clusterNZWithEmptyInac = [];
+    //var _clusterNZWithAllInac = ['10662','10663','01147','08037','00002'];
+    var _custSubGrpNZWithEmptyInac = ['INTER', 'XPRIV', 'PRIV', 'DUMMY'];
     // CREATCMR-7883
-    var _clusterAUWithEmptyInac = [];
+    var _clusterAUWithAllInac = ['01150','00001','08039'];
+    var _custSubGrpAUWithEmptyInac = ['INTER', 'XPRIV', 'PRIV', 'DUMMY'];
     
     if (cntry == '736' || cntry == '738') {
       return;
@@ -332,7 +335,7 @@ function setInacByCluster() {
     }
     if (_cluster.includes('BLAN') || _cluster == '05224' || _cluster == '05225' || _cluster == '09062'  || _cluster == '09063'  || _cluster == '09064'  || _cluster == '04477' || _cluster == '04490' || _cluster == '04496' || _cluster == '04467' || _cluster == '04494' || _cluster == '04691' || _cluster == '00035' || _cluster == '00127' || _cluster == '00105' || _cluster == '04470' || _cluster == '04469' || _cluster == '04471' || _cluster == '04485' || _cluster == '04500' || _cluster == '04746' || _cluster == '04744' || _cluster == '04745' || _cluster == '04694'|| 
         ((_cluster.includes('04492') || _cluster.includes('04503') || _cluster.includes('04692') || _cluster.includes('04481') || _cluster.includes('04462') || _cluster.includes('04483') || _cluster.includes('00149') ) && (cntry == '856' || cntry == '834')) || (cntry == '818' && _cluster == '09054') || (cntry == '778' && _cluster == '09051') || (cntry == '856' && (['10690', '09053'].includes(_cluster))) || (cntry == '749' && _cluster == '09050') || (cntry == '834' && (_cluster == '09052' || _cluster == '05219')) || (cntry == '852' && _cluster == '09055') || 
-        (cntry == '616') || 
+        (cntry == '616' && !_clusterAUWithAllInac.includes(_cluster)) || 
         (cntry == '796' && (_cluster == '09056' || _cluster == '10114' || _cluster == '10115' || _cluster == '10116')) ||
         (cntry == '856' && (['04483', '10690', '10686', '10687', '10688', '10689'].includes(_cluster)))) {
     
@@ -394,14 +397,6 @@ function setInacByCluster() {
         } else {
           FormManager.resetDropdownValues(FormManager.getField('inacType'));
         }
-      } else if(cntry == '616' && _clusterAUWithEmptyInac.includes(_cluster)){
-      	// CREATCMR-7883
-      	FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      	FormManager.removeValidator('inacType', Validators.REQUIRED);
-      	FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
-      	FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
-      	FormManager.setValue('inacCd','');
-      	FormManager.setValue('inacType', '');
       }
       // CREATCMR-7883
       if(cntry == '616') {
@@ -409,7 +404,6 @@ function setInacByCluster() {
       }
       
       // CREATCMR-7884
-      var custSubGrp = FormManager.getActualValue('custSubGrp');
       if(cntry == '796' && custSubGrp=='KYND' && _cluster == '09056'){
         FormManager.readOnly('inacType');
       }
@@ -435,9 +429,21 @@ function setInacByCluster() {
       clearInacOnClusterChange(_cluster);
       
       // CREATCMR-7884
-      if(cntry == '796' && _clusterNZWithEmptyInac.includes(_cluster)){
+      if(cntry == '796' && _custSubGrpNZWithEmptyInac.includes(custSubGrp)){
         FormManager.setValue('inacCd','');
         FormManager.setValue('inacType', '');
+        FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
+      	FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
+      }
+      
+      // CREATCMR-7883
+      if(cntry == '616' && _custSubGrpAUWithEmptyInac.includes(custSubGrp)){
+      	FormManager.setValue('inacCd','');
+      	FormManager.setValue('inacType', '');
+      	FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
+      	FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
+      	FormManager.enable('inacType'); 
+      	FormManager.enable('inacCd'); 
       }
       return;
     }
@@ -1926,7 +1932,9 @@ function onSubIndustryChange() {
 // Story -2125 drop down list needed in INAC/NAC FIELD based on INAC Type
 var _inacCdHandler = null;
 function onInacTypeChange() {
-  var cluster = FormManager.getActualValue('apCustClusterId');
+  // CREATCMR-7883
+  var _clusterAUWithAllInac = ['01150','00001','08039'];
+  var _clusterNZWithAllInac = ['10662','10663','01147','08037','00002'];
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
@@ -1937,7 +1945,7 @@ function onInacTypeChange() {
         var cmt = value + ','+ cluster +'%';
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
           console.log(value);
-          if (value != null) {
+          if (value != null && value.length>0) {
             var inacCdValue = [];
             if(cluster.includes('BLAN') || 
                 ((cluster == '04501' || cluster == '04683' || cluster == '04690') && 
@@ -1949,6 +1957,18 @@ function onInacTypeChange() {
                   CMT : cmt ,
                 };
             } else if(cntry == '616') {
+              if (_clusterAUWithAllInac.includes(cluster)) {
+              	cmt = value + '%';
+              }
+              var qParams = {
+                  _qall : 'Y',
+                  ISSUING_CNTRY : cntry ,
+                  CMT : cmt ,
+                  };
+             } else if(cntry == '796') {
+              if (_clusterNZWithAllInac.includes(cluster)) {
+              	cmt = value + '%';
+              }
               var qParams = {
                   _qall : 'Y',
                   ISSUING_CNTRY : cntry ,
