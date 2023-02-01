@@ -876,7 +876,16 @@ function onCustSubGrpChange() {
     setISBUScenarioLogic();
     autoSetAbbrevNmLocnLogic();
     setCollectionCd();
+    filterAvailableClustersByScenarioSubType('744', 'ECOSY', [ '10654', '10655', '10656', '10657' ]);
   });
+}
+
+function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrp, clusters) {
+  var actualCmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var actualCustSubGrp = FormManager.getActualValue('custSubGrp');
+  if (actualCmrIssuCntry == cmrIssuCntry && actualCustSubGrp == custSubGrp) {
+    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), clusters);
+  }
 }
 
 function setCollectionCd() {
@@ -2117,12 +2126,11 @@ function updateMRCAseanAnzIsa() {
       }
     }
     if (_exsitFlag == 0) {
-      if(cntry == '744' && custSubGrp == 'PRIV'){
+      if (cntry == '744' && (custSubGrp == 'PRIV' || custSubGrp == 'ECOSY')) {
         FormManager.setValue('mrcCd', '3');
-      } else{
+      } else {
         FormManager.setValue('mrcCd', '2');
       }
-      FormManager.setValue('mrcCd', '2');
     }
     if(scenario == 'LOCAL' &&(cntry == '744' || cntry == '615' || cntry == '652') && custSubGrp == 'INTER'){
       FormManager.setValue('mrcCd', '3');
