@@ -2776,7 +2776,9 @@ function setCTCIsuByClusterASEAN() {
       if (FormManager.getActualValue('cmrIssuingCntry') == '778' ) {
         setCTCIsuByClusterMY();
       }
-      
+      if (FormManager.getActualValue('cmrIssuingCntry') == '749' || FormManager.getActualValue('cmrIssuingCntry') == '778' || FormManager.getActualValue('cmrIssuingCntry') == '834') {
+        lockInacForIDMYSG();
+      }
       
      if (clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || _cluster.includes('BLAN') || clusterDesc[0].ret1.includes('S&S'))) {
         setIsuOnIsic();
@@ -2797,6 +2799,10 @@ function setCTCIsuByClusterASEAN() {
     setCTCIsuByClusterMY();
     _clusterHandlerINDONESIA = 1;
   }
+  if (FormManager.getActualValue('cmrIssuingCntry') == '749' || FormManager.getActualValue('cmrIssuingCntry') == '778' || FormManager.getActualValue('cmrIssuingCntry') == '834') {
+    lockInacForIDMYSG();
+  }
+  
 }
 
 function setCTCIsuByClusterBrunei() {
@@ -6019,6 +6025,17 @@ function setCTCIsuByClusterIndonesia() {
     FormManager.readOnly('mrcCd');
     FormManager.readOnly('inacCd');
     FormManager.readOnly('inacType');
+  }
+}
+// CREATCMR-7887
+function lockInacForIDMYSG() {
+
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'DUMMY' || custSubGrp == 'PRIV' || custSubGrp == 'PRICU' || custSubGrp == 'INTER' ) {
+    FormManager.setValue('inacCd','');
+    FormManager.setValue('inacType', '');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('inacType');  
   }
 }
 // CREATCMR-7886
