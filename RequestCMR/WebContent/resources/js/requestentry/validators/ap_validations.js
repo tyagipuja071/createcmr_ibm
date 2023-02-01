@@ -4819,7 +4819,7 @@ function clearInacOnClusterChange(selectedCluster) {
     }
 
     if (cntry == '852') {
-      clearInacScenarios = [ 'ASLOM', 'CROSS' ];
+      clearInacScenarios = [ 'ASLOM', 'CROSS', 'XASLM' ];
       noFilterInac = [ '01273', '01277', '08046', '00000' ];
     }
 
