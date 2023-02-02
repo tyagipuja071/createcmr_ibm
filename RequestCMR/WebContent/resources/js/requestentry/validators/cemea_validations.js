@@ -641,6 +641,7 @@ var _ExpediteHandler = null;
 var _IMSHandler = null;
 var _landCntryHandler = null;
 function addHandlersForCEMEA() {
+  var reqType = FormManager.getActualValue('reqType');
   for (var i = 0; i < _addrTypesForCEMEA.length; i++) {
     _addrTypeHandler[i] = null;
     if (_addrTypeHandler[i] == null) {
@@ -679,7 +680,7 @@ function addHandlersForCEMEA() {
       isuCovHandler = true;
       if (isuCd == '5K') {
         FormManager.resetValidations('clientTier');
-        if (GEOHandler.CEE.includes(cntry)) {
+        if (GEOHandler.CEE.includes(cntry) && reqType == 'C') {
           FormManager.setValue('salesBusOffCd', '999');
         }
       } else {
@@ -2010,7 +2011,8 @@ function setSBOValuesForIsuCtc() {
       FormManager.setValue('salesBusOffCd', sbo[0]);
     }
     
-    if (isuCtc == '8B' || isuCtc == '21' || custSubGrp == 'PRICU') {
+    var lockSboScenario = [ 'PRICU', 'RSXPC', 'CSPC', 'MEPC', 'RSPC' ];
+    if (isuCtc == '8B' || isuCtc == '21' || lockSboScenario.includes(custSubGrp)) {
       FormManager.readOnly('salesBusOffCd');
     } else if (FormManager.getActualValue('userRole')  == 'Processor'){
       FormManager.enable('salesBusOffCd');
@@ -2345,9 +2347,9 @@ function afterConfigForRussia() {
 }
 
 function setSBOafterAddrConfig() {
-  // if (FormManager.getActualValue('reqType') != 'C') {
-  // return;
-  // }
+   if (FormManager.getActualValue('reqType') != 'C') {
+   return;
+   }
   if (FormManager.getActualValue('addrType') == 'ZS01') {
 
     var custType = FormManager.getActualValue('custGrp');
@@ -2402,9 +2404,9 @@ function setSBOafterAddrConfig() {
 }
 
 function setSBOValues() {
-  // if (FormManager.getActualValue('reqType') != 'C') {
-  // return;
-  // }
+   if (FormManager.getActualValue('reqType') != 'C') {
+   return;
+   }
   var custType = FormManager.getActualValue('custGrp');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
@@ -4998,8 +5000,7 @@ function lockCompanyForCEE() {
     }
   }
   if (CEE_INCL.has(cntry) && 'C' == FormManager.getActualValue('reqType')) {
-    var lockSboScenario = [ 'BUSPR', 'INTER', 'XBP', 'XINT', 'IBMEM', 'XINT', 'INTER', 'CSINT', 'RSXIN', 'MEINT', 'RSINT', 'CSBP', 'MEBP', 'RSXBP', 'RSBP', 'PRICU' ];
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    var lockSboScenario = [ 'BUSPR', 'INTER', 'XBP', 'XINT', 'IBMEM', 'XINT', 'INTER', 'CSINT', 'RSXIN', 'MEINT', 'RSINT', 'CSBP', 'MEBP', 'RSXBP', 'RSBP', 'PRICU', 'RSXPC', 'CSPC', 'MEPC', 'RSPC' ];    var custSubGrp = FormManager.getActualValue('custSubGrp');
     if (lockSboScenario.includes(custSubGrp)) {
       FormManager.readOnly('salesBusOffCd');
       FormManager.readOnly('isuCd');
@@ -5551,7 +5552,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.CEE);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.CEE, null, true);
   GEOHandler.addAfterConfig(addAfterConfigCEE, GEOHandler.CEE);
-//  GEOHandler.addAfterTemplateLoad(setCTCValuesAT, [ SysLoc.AUSTRIA ]);
+// GEOHandler.addAfterTemplateLoad(setCTCValuesAT, [ SysLoc.AUSTRIA ]);
   GEOHandler.registerValidator(clientTierValidator, SysLoc.AUSTRIA, null, true);
   GEOHandler.registerValidator(validateSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ], null, true);
 

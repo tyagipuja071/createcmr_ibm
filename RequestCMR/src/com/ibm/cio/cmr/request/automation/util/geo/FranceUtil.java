@@ -79,6 +79,7 @@ public class FranceUtil extends AutomationUtil {
   private static final String MATCHING = "matching";
   private static final String ISIC_CD = "IsicCd";
   private static final String POSTAL_CD_STARTS = "postalCdStarts";
+  private static final String CITY = "city";
   private static final String SBO = "sbo";
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #", "Division/Department",
       "Attention to/Building/Floor/Office");
@@ -406,7 +407,8 @@ public class FranceUtil extends AutomationUtil {
 
       if (!isCoverageCalculated) {
         // if not calculated using siren as well
-        if (("34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier())) || ("34".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))
+        if (("34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier())) || ("36".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))
+            || ("32".equals(data.getIsuCd()) && "T".equals(data.getClientTier()))
             || ("5K".equals(data.getIsuCd()) || "14".equals(data.getIsuCd()) || "18".equals(data.getIsuCd()) || "19".equals(data.getIsuCd())
                 || "1R".equals(data.getIsuCd()) || "31".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()) || "4A".equals(data.getIsuCd()))) {
           details.setLength(0);
@@ -418,9 +420,9 @@ public class FranceUtil extends AutomationUtil {
           }
 
           String logicMsg = "";
-          if (("34".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))) {
-            details.append("Calculating coverage using 34Y-new logic.").append("\n");
-            logicMsg = "34Y logic.";
+          if (("36".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))) {
+            details.append("Calculating coverage using 36Y-new logic.").append("\n");
+            logicMsg = "36Y logic.";
           } else if ("5K".equals(data.getIsuCd()) || "14".equals(data.getIsuCd()) || "18".equals(data.getIsuCd()) || "19".equals(data.getIsuCd())
               || "1R".equals(data.getIsuCd()) || "31".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()) || "4A".equals(data.getIsuCd())) {
             details.append("Calculating coverage using 5K,14,18,19,1R,31,3T,4A-new logic.").append("\n");
@@ -431,7 +433,7 @@ public class FranceUtil extends AutomationUtil {
           }
 
           if ((COVERAGE_34Q.contains(addr.getLandCntry()) && custGrp.equals("CROSS") && !SCENARIO_CROSSBORDER_BUSINESS_PARTNER.equals(scenario)
-              && !SCENARIO_CROSSBORDER_INTERNAL.equals(scenario)) || ("34".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))
+              && !SCENARIO_CROSSBORDER_INTERNAL.equals(scenario)) || ("36".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))
               || ("5K".equals(data.getIsuCd()) || "14".equals(data.getIsuCd()) || "18".equals(data.getIsuCd()) || "19".equals(data.getIsuCd())
                   || "1R".equals(data.getIsuCd()) || "31".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()) || "4A".equals(data.getIsuCd()))) {
 
@@ -463,10 +465,11 @@ public class FranceUtil extends AutomationUtil {
               results.setResults("Coverage not calculated.");
             }
           } else if (("FR".equals(addr.getLandCntry()) && custGrp.equals("LOCAL") && !SCENARIO_BUSINESS_PARTNER.equals(scenario)
-              && !SCENARIO_INTERNAL.equals(scenario)) && "34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier())) {
+              && !SCENARIO_IBM_EMPLOYEE.equals(scenario) && !SCENARIO_INTERNAL.equals(scenario)) && "34".equals(data.getIsuCd())
+              && "Q".equals(data.getClientTier())) {
             // POSTAL CODE LOGIC
-            HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), addr.getPostCd(), data.getIsuCd(),
-                data.getClientTier());
+            HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), addr.getPostCd(), addr.getCity1(),
+                data.getIsuCd(), data.getClientTier());
             LOG.debug("Calculated SBO: " + response.get(SBO) + response.get(SBO));
             if (StringUtils.isNotBlank(response.get(MATCHING))) {
               switch (response.get(MATCHING)) {
@@ -480,6 +483,7 @@ public class FranceUtil extends AutomationUtil {
                 details.append("ISU = " + data.getIsuCd()).append("\n");
                 details.append("CTC = " + data.getClientTier()).append("\n");
                 details.append("Postal Code Starts = " + response.get(POSTAL_CD_STARTS)).append("\n\n");
+                details.append("City= " + response.get(CITY)).append("\n\n");
                 details.append("Matching: " + response.get(MATCHING));
                 results.setResults("Coverage Calculated");
                 engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
@@ -587,22 +591,36 @@ public class FranceUtil extends AutomationUtil {
     return true;
   }
 
-  private HashMap<String, String> getSBOFromPostalCodeMapping(String countryUse, String isicCd, String postCd, String isuCd, String clientTier) {
+  private HashMap<String, String> getSBOFromPostalCodeMapping(String countryUse, String isicCd, String postCd, String city, String isuCd,
+      String clientTier) {
     HashMap<String, String> response = new HashMap<String, String>();
+    String regex = "\\s+$";
+    city = (city.toUpperCase()).replaceAll(regex, "");
     response.put(MATCHING, "");
     response.put(POSTAL_CD_STARTS, "");
+    response.put(CITY, "");
     response.put(SBO, "");
     if (!sortlMappings.isEmpty()) {
       for (FrSboMapping mapping : sortlMappings) {
         if (countryUse.equals(mapping.getCountryUse()) && isuCd.equals(mapping.getIsu()) && clientTier.equals(mapping.getCtc())) {
-          if (StringUtils.isNotBlank(mapping.getPostalCdStarts())) {
+          if (StringUtils.isNotBlank(mapping.getPostalCdStarts()) && StringUtils.isNotBlank(mapping.getCity())) {
             String[] postalCodeRanges = mapping.getPostalCdStarts().replaceAll("\n", "").replaceAll(" ", "").split(",");
+            String[] cityRanges = mapping.getCity().replaceAll("\n", "").replaceAll(" ", "").split(",");
             for (String postalCdRange : postalCodeRanges) {
-              if (postCd.startsWith(postalCdRange)) {
-                response.put(MATCHING, "Exact Match");
-                response.put(SBO, mapping.getSbo());
-                response.put(POSTAL_CD_STARTS, postalCdRange);
-                return response;
+              for (String cityRange : cityRanges) {
+                if (postCd.startsWith(postalCdRange) && city.equals(cityRange)) {
+                  response.put(MATCHING, "Exact Match");
+                  response.put(SBO, mapping.getSbo());
+                  response.put(CITY, cityRange);
+                  response.put(POSTAL_CD_STARTS, postalCdRange);
+                  return response;
+                } else if ("NIORT".equals(city)) {
+                  response.put(MATCHING, "Exact Match");
+                  response.put(SBO, "8CB");
+                  response.put(CITY, cityRange);
+                  response.put(POSTAL_CD_STARTS, "any postal code");
+                  return response;
+                }
               }
             }
           }
