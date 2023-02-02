@@ -4353,6 +4353,7 @@ function addValidatorBasedOnCluster() {
         }
         if((cntry == '856' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08047') ||
            (cntry == '818' && (custSubType == 'CROSS' || custSubType == 'XASLO') && cluster == '08044') ||
+           (cntry == '852' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08046') ||
            (cntry == '616' && (custSubType == 'CROSS') && cluster == '08039') ||
            (cntry == '796' && (custSubType == 'CROSS' || custSubType == 'XESO') && cluster == '08037') ||
            (cntry == '778' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08042') ||
@@ -4361,7 +4362,7 @@ function addValidatorBasedOnCluster() {
           return new ValidationResult(null, true);
         }
         
-        if ((cntry == '852' && custSubType == 'CROSS' && cluster != '08046') || (custSubType != 'ECSYS' && custSubType != 'XECO' && custSubType != 'ASLOM' && custSubType != 'ESOSW' ) && (cluster == '08039' || cluster == '08037' || cluster == '08038' || cluster == '08040' || cluster == '08042' ||cluster == '08044' || cluster == '08047')) {
+        if ((custSubType != 'ECSYS' && custSubType != 'XECO' && custSubType != 'ASLOM' && custSubType != 'ESOSW' ) && (cluster == '08039' || cluster == '08037' || cluster == '08038' || cluster == '08040' || cluster == '08042' ||cluster == '08044' || cluster == '08047')) {
           return new ValidationResult(null, false, 'Ecosystem Partners Cluster is not allowed for selected scenario.');
         } else {
           return new ValidationResult(null, true);
@@ -6862,7 +6863,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkCustomerNameForKYND, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA], null, true);
   
   GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND], null, true);
-  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [ SysLoc.THAILAND ]);
+  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [ SysLoc.THAILAND, SysLoc.PHILIPPINES ]);
   GEOHandler.addAfterTemplateLoad(clearInacOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND ]);
   GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.AUSTRALIA]);  
   // CREATCMR-7883
