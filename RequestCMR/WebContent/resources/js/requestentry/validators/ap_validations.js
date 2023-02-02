@@ -6513,6 +6513,10 @@ function clearInacOnClusterChange(selectedCluster) {
     if (clusterValueChanged && clearInacScenarios.includes(scenario) && noFilterInac.includes(selectedCluster)) {
       FormManager.setValue('inacCd', '');
       FormManager.setValue('inacType', '');
+      
+      if(cntry == '856') {
+        FormManager.removeValidator('inacCd', Validators.REQUIRED);
+      }
     }
     _oldClusterSelection = selectedCluster;
   }
