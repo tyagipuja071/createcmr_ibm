@@ -1035,7 +1035,8 @@ dojo.addOnLoad(function() {
       '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827',
       '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693',
       '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618',
-      '706', '760', '758', '678', '702', '806', '846', '624', '788', '641', '848', '729', '724','858', '649' ], true);
+      '706', '760', '758', '678', '702', '806', '846', '624', '788', '641', '848', '729', '724','858', '649', '613', '629', '631', '655', '661', '663', '681', '683', '731', '735', '781', '799', 
+      '811', '813', '815', '829', '869', '871' ], true);
   GEOHandler.registerValidator(addCrossBorderValidator, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE_CRSSBORDER, null, true);
 
   /* 1427121 BDS Postal COde validation */
@@ -1047,8 +1048,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addGenericPostalCodeValidator, GEOHandler.GROUP1);
   
   GEOHandler.registerWWValidator(addINACValidator);
-  //Removing this for coverage-2023 as ISU -32 is no longer obsoleted
-  //GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
+  // Removing this for coverage-2023 as ISU -32 is no longer obsoleted
+  // GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
 
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];
