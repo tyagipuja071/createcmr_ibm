@@ -2058,6 +2058,18 @@ function clientTierCodeValidator() {
 }
 // CREATCMR-4293
 
+function lockFields() {
+  var reqTyp = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var lockSubGrpList = [ 'CBBUS', 'BUSPR', 'INTER', 'IBMEM', 'PRICU' ];
+
+  if (lockSubGrpList.includes(custSubGrp)) {
+    FormManager.readOnly('commercialFinanced');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  }
+}
+
 function beluxSortlValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -2066,14 +2078,14 @@ function beluxSortlValidator() {
         var isuCode = FormManager.getActualValue('isuCd');
         var clientTierCode = FormManager.getActualValue('clientTier');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        var searchTerm = FormManager.getActualValue('searchTerm');
+        var commercialFinanced = FormManager.getActualValue('commercialFinanced');
         var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         var countryUse = FormManager.getActualValue('countryUse');
         var isuCtc = isuCode.concat(clientTierCode);
         var subIndustry = FormManager.getActualValue('subIndustryCd');
         var ind = subIndustry.substring(0, 1);
 
-        var scenariosToBlock = [ 'BEBUS', 'BEINT', 'IBMEM', 'BEPRI', 'LUBUS', 'LUINT', 'LUIBM', 'LUPRI', 'LUISO' ];
+        var scenariosToBlock = [ 'CBBUS', 'BEBUS', 'BEINT', 'IBMEM', 'BEPRI', 'LUBUS', 'LUINT', 'LUIBM', 'LUPRI', 'LUISO' ];
 
         var accSeq_624 = {
           '34Q' : [ 'T0003601' ],
@@ -2287,5 +2299,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX);
 
   GEOHandler.registerValidator(beluxSortlValidator, GEOHandler.BELUX, null, true);
+  GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.BELUX);
+  GEOHandler.addAfterConfig(lockFields, GEOHandler.BELUX);
 
 });
