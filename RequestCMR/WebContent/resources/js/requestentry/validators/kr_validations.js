@@ -17,7 +17,7 @@ function afterConfigKR() {
     FormManager.enable('searchTerm');
     FormManager.enable('clientTier');
     FormManager.enable('isuCd');
-    FormManager.enable('mrcCd')
+    FormManager.enable('mrcCd');
     setSearchTermDropdownValues();
   });
 
