@@ -6052,7 +6052,7 @@ function setCTCIsuByClusterIndonesia() {
 function lockInacForIDMYSG() {
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp == 'DUMMY' || custSubGrp == 'PRIV' || custSubGrp == 'PRICU' || custSubGrp == 'INTER' ) {
+  if (custSubGrp == 'DUMMY' || custSubGrp == 'PRIV' || custSubGrp == 'PRICU' || custSubGrp == 'INTER' || custSubGrp == 'XPRIV' ) {
     FormManager.setValue('inacCd','');
     FormManager.setValue('inacType', '');
     FormManager.readOnly('inacCd');
