@@ -154,12 +154,16 @@ function setSboOnIMS(value) {
   } else {
     FormManager.clearValue('searchTerm');
   }
+  oldIsuCtcIms = isuCd + clientTier + ims;
 }
 
 function validateSBOValuesForIsuCtc() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        if (FormManager.getActualValue('reqType') != 'C') {
+          return;
+        }
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var clientTier = FormManager.getActualValue('clientTier');
         var isuCd = FormManager.getActualValue('isuCd');
@@ -186,8 +190,13 @@ function validateSBOValuesForIsuCtc() {
             validSboList.push(results[i].ret1);
           }
           if (!validSboList.includes(sbo)) {
-            return new ValidationResult(null, false, 
-                'The SBO provided is invalid for the ISU-CTC combination.');
+            if (isuCd + clientTier == '32T') {
+              return new ValidationResult(null, false, 
+                  'The SBO provided is invalid for corresponding ISU+CTC.');
+            } else {
+              return new ValidationResult(null, false, 
+                  'The SBO provided is invalid. It should be from the list: ' + validSboList);
+            }
           }
         }
       }
@@ -207,15 +216,6 @@ function lockCtcFieldOnIsu() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'IBMEM') {
     FormManager.setValue('clientTier', '');
-  }
-  if (isuList.slice(2, 5).includes(isuCd)) {
-    FormManager.resetValidations('clientTier');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
-      FormManager.enable('clientTier');
-    }
   }
 }
 
@@ -298,10 +298,6 @@ function setISUValues(value) {
       value = FormManager.getField('clientTier');
     }
 
-    if (!PageManager.isReadOnly()) {
-      FormManager.enable('isuCd');
-    }
-
     isuValues = null;
 
     if (value == '7') {
@@ -322,31 +318,19 @@ function setISUValues(value) {
       isuValues = [ '34', '60' ];
     } else if (value == 'Q') {
       isuValues = [ '34' ];
-    } else {
-      if (PageManager.isReadOnly()) {
-        FormManager.readOnly('isuCd');
-      } else {
-        FormManager.enable('isuCd');
-      }
     }
 
     if (isuValues != null) {
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuValues);
       if (isuValues.length == 1) {
         FormManager.setValue('isuCd', isuValues[0]);
-        FormManager.readOnly('isuCd');
       }
     } else {
       FormManager.resetDropdownValues(FormManager.getField('isuCd'));
     }
-  } else if (_custSubGrp == 'CROSS' && _pagemodel.userRole.toUpperCase() != "PROCESSOR") {
-    FormManager.readOnly('isuCd');
   }
   // CREATCMR-710 Comments fix
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (reqType == 'C' && role == 'REQUESTER' && (_custSubGrp == 'GOVMT' || _custSubGrp == 'PRIPE')) {
-    FormManager.readOnly('isuCd');
-  }
   lockIBMTabForDE();
 }
 
@@ -915,8 +899,12 @@ function lockIBMTabForDE() {
   if (reqType == 'C' && role == 'PROCESSOR') {
     if (['INTIN', 'INTSO', 'INTAM', 'IBMEM', 'BUSPR', 'PRIPE'].includes(custSubType)) {
       FormManager.readOnly('searchTerm');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
     } else {
       FormManager.enable('searchTerm');
+      FormManager.enable('isuCd');
+      FormManager.enable('clientTier');
     }
   }
 }
