@@ -2176,7 +2176,8 @@ function setEnterpriseBehaviour() {
     if (isuCode == '36' && clientTierCode == 'Y') {
       FormManager.enable('enterprise');
     } else {
-           FormManager.readOnly('enterprise');
+      FormManager.readOnly('enterprise');
+      FormManager.setValue('enterprise', '');
     }
   }
  }
