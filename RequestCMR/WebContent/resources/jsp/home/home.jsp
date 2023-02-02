@@ -12,6 +12,12 @@ div.cmr-alert {
  padding-left: 20px;
  border-radius: 10px;
 }
+div.cmr-notice {
+ border:2px Solid #4169E1; 
+ padding:10px;
+ padding-left: 20px;
+ border-radius: 10px;
+}
 
 img.logo {
   width: 100px;
@@ -190,6 +196,15 @@ dojo.addOnLoad(function(){
 					
 				</div>
 			</div>
+			
+			<div class="ibm-columns">
+				<div class="ibm-col-1-1">
+					<div class="cmr-notice">
+					For the privacy policy, please refer to the following link : <a href="https://w3.ibm.com/w3publisher/w3-privacy-notice" target="_blank">Privacy Notice</a>
+					</div>
+				</div>
+			</div>
+			
 			
 			<!-- stop main content -->
 	</div>
