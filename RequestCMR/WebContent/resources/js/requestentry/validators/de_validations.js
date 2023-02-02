@@ -151,6 +151,7 @@ function setSboOnIMS(value) {
   } else {
     FormManager.clearValue('searchTerm');
   }
+  oldIsuCtcIms = isuCd + clientTier + ims;
 }
 
 function validateSBOValuesForIsuCtc() {
@@ -186,8 +187,13 @@ function validateSBOValuesForIsuCtc() {
             validSboList.push(results[i].ret1);
           }
           if (!validSboList.includes(sbo)) {
-            return new ValidationResult(null, false, 
-                'The SBO provided is invalid. It should be from the list: ' + validSboList);
+            if (isuCd + clientTier == '32T') {
+              return new ValidationResult(null, false, 
+                  'The SBO provided is invalid for corresponding ISU+CTC.');
+            } else {
+              return new ValidationResult(null, false, 
+                  'The SBO provided is invalid. It should be from the list: ' + validSboList);
+            }
           }
         }
       }
