@@ -120,7 +120,7 @@ function afterConfigTW() {
   handleObseleteExpiredDataForUpdate();
   // CREATCMR-788
   addressQuotationValidator();
- addCoverageFieldsValidator();
+  addCoverageFieldsValidator();
 }
 
 /**
@@ -539,6 +539,7 @@ function addCoverageFieldsValidator() {
   }
   FormManager.addValidator('covId', Validators.REQUIRED, [ 'Coverage Type/ID' ], 'MAIN_IBM_TAB');
   FormManager.removeValidator('dunsNo', Validators.REQUIRED);
+  FormManager.removeValidator('isuCd', Validators.REQUIRED);
 }
 
 // CREATCMR-7882
