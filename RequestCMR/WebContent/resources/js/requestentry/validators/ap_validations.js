@@ -445,6 +445,11 @@ function setInacByCluster() {
       	FormManager.enable('inacType'); 
       	FormManager.enable('inacCd'); 
       }
+      //clear INAC after cluster change
+      if(cntry == '616' && _clusterAUWithAllInac.includes(_cluster)){
+      	FormManager.setValue('inacCd','');
+      	FormManager.setValue('inacType', '');
+      }
       return;
     }
 }
