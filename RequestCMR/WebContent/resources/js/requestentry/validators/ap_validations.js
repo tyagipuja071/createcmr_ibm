@@ -928,21 +928,18 @@ function onCustSubGrpChange() {
       FormManager.setValue('abbrevNm', _pagemodel.abbrevNm);
       FormManager.setValue('abbrevLocn', _pagemodel.abbrevLocn);
       FormManager.setValue('isbuCd', _pagemodel.isbuCd);
-      return;
+    } else {
+      setISBUScenarioLogic();
+      autoSetAbbrevNmLocnLogic();
+      setCollectionCd();
     }
-    setISBUScenarioLogic();
-    autoSetAbbrevNmLocnLogic();
-    setCollectionCd();
     
-    if (custSubGrp == 'ECOSY') {
     filterAvailableClustersByScenarioSubType('744', 'ECOSY', [ '10654', '10655', '10656', '10657' ]);
-    } else if (custSubGrp == 'NRML'){
     filterAvailableClustersByScenarioSubType('744', 'NRML', [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215']);
-    } else if (custSubGrp == 'ESOSW'){
     filterAvailableClustersByScenarioSubType('744', 'ESOSW', [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215','10654', '10655', '10656', '10657']);
-    } else if (custSubGrp == 'CROSS'){
     filterAvailableClustersByScenarioSubType('744', 'CROSS', [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215']);
-    }
+    filterAvailableClustersByScenarioSubType('744', 'KYNDR', [ '09062' ]);
+    lockFieldsWithDefaultValuesByScenarioSubType();
   });
 }
 
@@ -951,6 +948,26 @@ function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrp, clus
   var actualCustSubGrp = FormManager.getActualValue('custSubGrp');
   if (actualCmrIssuCntry == cmrIssuCntry && actualCustSubGrp == custSubGrp) {
     FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), clusters);
+    if (clusters.length == 1) {
+      FormManager.setValue('apCustClusterId', clusters[0]);
+    }
+  }
+}
+
+function lockFieldsWithDefaultValuesByScenarioSubType() {
+  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  if (cmrIssuCntry == '744' && custSubGrp == 'KYNDR') {
+    FormManager.readOnly('apCustClusterId');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+    FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
+    FormManager.setValue('inacType', 'I');
+    FormManager.readOnly('inacType');
+    FormManager.setValue('inacCd', '6272');
+    FormManager.readOnly('inacCd');
   }
 }
 
@@ -2095,7 +2112,8 @@ function setCtcOnIsuCdChangeISA() {
     return;
   }
   isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (isuCd == '5K' && custSubGrp != 'KYNDR') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
@@ -2192,7 +2210,7 @@ function updateMRCAseanAnzIsa() {
       }
     }
     if (_exsitFlag == 0) {
-      if (cntry == '744' && (custSubGrp == 'PRIV' || custSubGrp == 'ECOSY')) {
+      if (cntry == '744' && (custSubGrp == 'PRIV' || custSubGrp == 'ECOSY' || custGrp == 'KYNDR')) {
         FormManager.setValue('mrcCd', '3');
       } else {
         FormManager.setValue('mrcCd', '2');
@@ -4778,6 +4796,28 @@ function addressQuotationValidatorGCG() {
   }
 
 }
+function addKyndrylValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (reqType == 'C' && custSubGrp == 'KYNDR') {
+          var custName = FormManager.getActualValue('mainCustNm1');
+          if (!custName.toLowerCase().includes('kyndryl')) {
+            return new ValidationResult({
+              id : 'mainCustNm1',
+              type : 'text',
+              name : 'mainCustNm1'
+            }, false, 'Customer name must contain the word “Kyndryl”.');
+          }
+          
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4961,4 +5001,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(displayVatRegistrartionStatus, [ SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(displayVatRegistrartionStatus,  [ SysLoc.SINGAPORE ] );
   GEOHandler.addAfterTemplateLoad(displayVatRegistrartionStatus,   [ SysLoc.SINGAPORE ] );
+  GEOHandler.registerValidator(addKyndrylValidator, [ SysLoc.INDIA ]);
 });
