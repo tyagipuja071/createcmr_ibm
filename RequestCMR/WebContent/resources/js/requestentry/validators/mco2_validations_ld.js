@@ -1033,12 +1033,12 @@ function setFieldsBehavior(fromAddress, scenario, scenarioChanged) {
       FormManager.removeValidator('clientTier', Validators.REQUIRED);
     }
   }
-  if (role == 'Processor') {
-    FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
-    if (isuCd != '5K') {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-    }
-  }
+  /*
+   * if (role == 'Processor') { FormManager.addValidator('isuCd',
+   * Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB'); if (isuCd != '5K') {
+   * FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ],
+   * 'MAIN_IBM_TAB'); } }
+   */
 }
 
 function addStreetAddressFormValidator() {
@@ -2433,8 +2433,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA ], null, true);
   GEOHandler.registerValidator(addTinNumberValidationKn, [ SysLoc.KENYA ], null, true);
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO2);
+  // GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.MCO2);
+  // GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(addPpsCeidValidator, GEOHandler.MCO2);
 
   GEOHandler.registerValidator(validateCMRForMCO2GMLLCScenario, GEOHandler.MCO2, null, true);
