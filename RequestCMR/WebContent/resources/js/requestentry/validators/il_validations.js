@@ -349,7 +349,7 @@ function requireCtcByISU(value) {
     FormManager.setValue('repTeamMemberNo', '000651');
   } else if (isuCd == '36') {
     FormManager.setValue('clientTier', 'Y');
-    FormManager.setValue('enterprise', '');
+    FormManager.setValue('enterprise', '003290');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
   } else if (isuCd == '5K') {
@@ -362,9 +362,6 @@ function requireCtcByISU(value) {
     FormManager.setValue('enterprise', '985985');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
-  }else{
-    FormManager.setValue('clientTier', '');
-    FormManager.setValue('enterprise', '');
   }
 }
 

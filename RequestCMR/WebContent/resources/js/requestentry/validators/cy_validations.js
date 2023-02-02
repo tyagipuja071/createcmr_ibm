@@ -900,6 +900,8 @@ function setClientTierAndISR(isu) {
     if (isu == '34') {
       FormManager.setValue('clientTier', 'Q');
       FormManager.setValue('enterprise', '822830');
+      FormManager.enable('isuCd');
+      FormManager.enable('clientTier');
       FormManager.enable('enterprise');
       FormManager.readOnly('salesTeamCd')
       FormManager.readOnly('repTeamMemberNo');
@@ -907,6 +909,8 @@ function setClientTierAndISR(isu) {
     } else if (isu == '36') {
       FormManager.setValue('clientTier', 'Y');
       FormManager.setValue('enterprise', '822840');
+      FormManager.enable('isuCd');
+      FormManager.enable('clientTier');
       FormManager.enable('enterprise');
       FormManager.readOnly('salesTeamCd')
       FormManager.readOnly('repTeamMemberNo');
@@ -914,6 +918,8 @@ function setClientTierAndISR(isu) {
     } else if (isu == '32' ) {
       FormManager.setValue('clientTier', 'T');
       FormManager.setValue('enterprise', '985985');
+      FormManager.enable('isuCd');
+      FormManager.enable('clientTier');
       FormManager.enable('enterprise');
       FormManager.readOnly('salesTeamCd')
       FormManager.readOnly('repTeamMemberNo');
@@ -921,20 +927,36 @@ function setClientTierAndISR(isu) {
     } else if (isu == '5K') {
       FormManager.setValue('clientTier', '');
       FormManager.setValue('enterprise', '985999');
+      FormManager.enable('isuCd');
+      FormManager.enable('clientTier');
       FormManager.enable('enterprise');
       FormManager.readOnly('salesTeamCd')
       FormManager.readOnly('repTeamMemberNo');
       FormManager.readOnly('salesBusOffCd');
-    } else {
+    } else if (isu == '21') {
       FormManager.setValue('clientTier', '');
-      FormManager.setValue('enterprise', '');
+      FormManager.setValue('enterprise', '985999');
+      FormManager.readOnly('clientTier');
       FormManager.readOnly('enterprise');
+      FormManager.readOnly('salesTeamCd')
+      FormManager.readOnly('repTeamMemberNo');
+      FormManager.readOnly('salesBusOffCd');
+    }else {
+      FormManager.setValue('clientTier', '');
+      FormManager.enable('clientTier');
+      FormManager.enable('enterprise');
       FormManager.readOnly('salesTeamCd')
       FormManager.readOnly('repTeamMemberNo');
       FormManager.readOnly('salesBusOffCd');
     }
   }
   
+  var custSubGrp = FormManager.getActualValue('custSubGrp')
+  if(custSubGrp != 'COMME' || custSubGrp != 'GOVRN'){
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('isuCd');
+  }
   FormManager.setValue('salesTeamCd', '000000');
   FormManager.setValue('repTeamMemberNo', '000000');
   FormManager.setValue('salesBusOffCd', '000');
@@ -3103,7 +3125,7 @@ function setValuesWRTIsuCtc(ctc){
     FormManager.readOnly('salesTeamCd')
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('salesBusOffCd');
-  } else if ((isu == '5K' || isu == '21') && ctc == '') {
+  } else if (isu == '5K' && ctc == '') {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('salesTeamCd', '000000');
     FormManager.setValue('repTeamMemberNo', '000000');
@@ -3112,10 +3134,30 @@ function setValuesWRTIsuCtc(ctc){
     FormManager.readOnly('salesTeamCd')
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('salesBusOffCd');
+  }else if (isu == '21' && ctc == '') {
+    FormManager.setValue('enterprise', '985999');
+    FormManager.setValue('salesTeamCd', '000000');
+    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.setValue('salesBusOffCd', '000');
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('salesTeamCd')
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('salesBusOffCd');
   }
+  
+  var custSubGrp = FormManager.getActualValue('custSubGrp')
+  if(custSubGrp != 'COMME' || custSubGrp != 'GOVRN' ){
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('isuCd');
+  }
+  
   if(role == 'REQUESTER') {
     FormManager.removeValidator('enterprise', Validators.REQUIRED);
-  } else {
+  } else if (cntry == '666') {
+    FormManager.removeValidator('enterprise', Validators.REQUIRED);
+    FormManager.removeValidator('isuCd', Validators.REQUIRED);
+  }else {
     FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
   }
 }
