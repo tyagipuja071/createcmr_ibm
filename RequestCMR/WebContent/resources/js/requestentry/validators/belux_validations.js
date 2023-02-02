@@ -9,7 +9,7 @@ function afterConfigForBELUX() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
-  var custLang = FormManager.getActualValue('custPrefLang');  
+  var custLang = FormManager.getActualValue('custPrefLang');
   FormManager.readOnly('capInd');
   FormManager.readOnly('sensitiveFlag');
   FormManager.setValue('capInd', true);
@@ -108,7 +108,7 @@ function afterConfigForBELUX() {
     FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
   }
   if (reqType == 'U') {
-    FormManager.resetValidations('taxCd1');    
+    FormManager.resetValidations('taxCd1');
   }
 
   var landCntry = '';
@@ -128,7 +128,7 @@ function afterConfigForBELUX() {
   if ((custSubGrp == 'CBCOM' || custSubGrp == 'CBBUS') && cntryUse == '624LU') {
     FormManager.setValue('taxCd1', '15');
   }
-  
+
   addHandlerForReqRsn();
   disableModeOfPayment();
   // setAccTemNumValueOnScenarios();
@@ -136,9 +136,7 @@ function afterConfigForBELUX() {
   disableSBO();
   disableIBMTab();
   addressQuotationValidatorBELUX();
-  
-  
-  
+
 }
 
 function checkCmrUpdateBeforeImport() {
@@ -750,11 +748,11 @@ function setVatValidatorBELUX() {
     }
     // if (!dijit.byId('vatExempt').get('checked')) {
     if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
-     // checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      // checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
       FormManager.enable('vat');
     }
-  }   
-  
+  }
+
 }
 
 /**
@@ -1587,7 +1585,7 @@ function addBELUXVATValidator(cntry, tabName, formName, aType) {
       };
     })(), tabName, formName);
   };
- }
+}
 function addPhoneValidatorBELUX() {
   FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
 }
@@ -2160,25 +2158,24 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function addVatIndValidator(){
+function addVatIndValidator() {
   var _vatHandler = null;
   var _vatIndHandler = null;
   var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');   
-  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage'); 
-   
- if (viewOnlyPage =='true'){  
-   FormManager.resetValidations('vat');
-   FormManager.readOnly('vat');
- } else {
-   
-  var cntry= FormManager.getActualValue('cmrIssuingCntry');
-  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
-    ISSUING_CNTRY : cntry
-  });
+  var vatInd = FormManager.getActualValue('vatInd');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
 
-      
-  if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+  if (viewOnlyPage == 'true') {
+    FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
+  } else {
+
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+      ISSUING_CNTRY : cntry
+    });
+
+    if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
     } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
@@ -2194,11 +2191,11 @@ function addVatIndValidator(){
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
     }
-    
-  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
-    FormManager.resetValidations('vat');
+
+    if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null) && vatInd == 'N') {
+      FormManager.resetValidations('vat');
+    }
   }
-}
 }
 
 // CREATCMR-788
@@ -2227,7 +2224,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(addHandlersForBELUX, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(setCollectionCodeValues, GEOHandler.BELUX);
-  GEOHandler.addAfterConfig(afterConfigForBELUX, GEOHandler.BELUX);   
+  GEOHandler.addAfterConfig(afterConfigForBELUX, GEOHandler.BELUX);
   // GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.BELUX);
   // GEOHandler.addAfterConfig(addHandlerForReqRsn, GEOHandler.BELUX);
   // GEOHandler.addAfterConfig(setPreferredLanguage, GEOHandler.BELUX);
@@ -2252,9 +2249,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setISUDropDown, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setClientTierDropDown, GEOHandler.BELUX);
-  GEOHandler.addAfterTemplateLoad(setSortlOnScenarios, GEOHandler.BELUX);
-  
-  
   // GEOHandler.addAfterTemplateLoad(setSortlOnScenarios, GEOHandler.BELUX);
 
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.BELUX);
@@ -2287,9 +2281,9 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.BELUX);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.BELUX, null, true);
-  
+
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.BELUX, null, true);
-  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX); 
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX);
 
   GEOHandler.registerValidator(beluxSortlValidator, GEOHandler.BELUX, null, true);
