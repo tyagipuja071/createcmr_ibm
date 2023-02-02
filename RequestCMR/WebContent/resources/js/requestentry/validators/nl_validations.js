@@ -1673,14 +1673,37 @@ function addIGFZP02Validator() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function addNlIsuHandler() {
+  _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    if (!value) {
+      value = FormManager.getActualValue('isuCd');
+    }
+    reqType = FormManager.getActualValue('reqType');
+    if (value == '32') {
+      FormManager.setValue('clientTier', 'T');
+    } else if (value == '34') {
+      FormManager.setValue('clientTier', 'Q');
+    } else if (value == '36') {
+      FormManager.setValue('clientTier', 'Y');
+    } else {
+      FormManager.setValue('clientTier', '');
+    }
+
+    if (reqType == 'Processor') {
+      FormManager.enable('commercialFinanced');
+    }
+  });
+}
+
 function setSORTLBasedOnIsuCtc() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U') {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
   var subGrp = FormManager.getActualValue('custSubGrp');
+  var nlSubList = [ 'INTER', 'IBMEM', 'PRICU' ];
   // before coverage
   /*
    * var isuList = [ '34', '5K', '15', '4A', '04', '28' ]; if (isuCd == '34' &&
@@ -1698,14 +1721,21 @@ function setSORTLBasedOnIsuCtc() {
    */
   //
   var isuList = [ '21', '34', '36', '5K', '32', '28' ];
-  if (isuCd == '34' && (subGrp == 'COMME' || subGrp == 'THDPT' || subGrp == 'NLDAT' || subGrp == 'PUBCU')) {
+  if (isuCd == '34' && clientTier == 'Q') {
     FormManager.setValue('commercialFinanced', 'T0003611');
-  } else if (subGrp == 'INTER' || subGrp == 'IBMEM' || subGrp == 'PRICU') {
+    if (role == 'Requester') {
+      FormManager.readOnly('commercialFinanced');
+      FormManager.readOnly('clientTier');
+    }
+    if (role == 'Processor') {
+      FormManager.enable('isuCd');
+      FormManager.enable('commercialFinanced');
+      FormManager.enable('clientTier');
+    }
+  } else if (nlSubList.includes(subGrp)) {
     FormManager.setValue('commercialFinanced', '33U00');
-  } else if (subGrp == 'BUSPR') {
+  } else if (subGrp == 'BUSPR' || subGrp == 'CBBUS') {
     FormManager.setValue('commercialFinanced', 'P0000004');
-  } else {
-    FormManager.setValue('commercialFinanced', '');
   }
   /*
    * if (isuList.slice(2, 6).includes(isuCd)) {
@@ -1808,6 +1838,18 @@ function clientTierCodeValidator() {
 }
 // CREATCMR-4293
 
+function lockFields() {
+  var reqTyp = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var lockSubGrpList = [ 'CBBUS', 'BUSPR', 'INTER', 'IBMEM', 'PRICU' ];
+
+  if (lockSubGrpList.includes(custSubGrp)) {
+    FormManager.readOnly('commercialFinanced');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  }
+}
+
 function sortlValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -1816,14 +1858,14 @@ function sortlValidator() {
         var isuCode = FormManager.getActualValue('isuCd');
         var clientTierCode = FormManager.getActualValue('clientTier');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        var searchTerm = FormManager.getActualValue('searchTerm');
+        var commercialFinanced = FormManager.getActualValue('commercialFinanced');
         var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         var countryUse = FormManager.getActualValue('countryUse');
         var isuCtc = isuCode.concat(clientTierCode);
         var subIndustry = FormManager.getActualValue('subIndustryCd');
         var ind = subIndustry.substring(0, 1);
 
-        var scenariosToBlock = [ 'BUSPR', 'INTER', 'IBMEM', 'PRICU' ];
+        var scenariosToBlock = [ 'CBBUS', 'BUSPR', 'INTER', 'IBMEM', 'PRICU' ];
 
         var accSeq_788 = {
           '34Q' : [ 'T0003611' ],
@@ -1836,11 +1878,11 @@ function sortlValidator() {
 
         if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
           if (cmrIssuingCntry == '788') {
-            if (accSeq_788.hasOwnProperty(isuCtc) && !accSeq_788[isuCtc].includes(searchTerm)) {
+            if (accSeq_788.hasOwnProperty(isuCtc) && !accSeq_788[isuCtc].includes(commercialFinanced)) {
               return new ValidationResult({
-                id : 'searchTerm',
+                id : 'commercialFinanced',
                 type : 'text',
-                name : 'searchTerm'
+                name : 'commercialFinanced'
               }, false, 'SearchTerm can only accept ' + accSeq_788[isuCtc]);
             } else {
               return new ValidationResult(null, true);
@@ -1850,6 +1892,23 @@ function sortlValidator() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function addAfterConfigNl() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    if (isuCd == '32') {
+      FormManager.setValue('clientTier', 'T');
+    } else if (isuCd == '34') {
+      FormManager.setValue('clientTier', 'Q');
+    } else if (isuCd == '36') {
+      FormManager.setValue('clientTier', 'Y');
+    } else {
+      FormManager.setValue('clientTier', '');
+    }
+  });
 }
 
 function clientTierValidator() {
@@ -2047,4 +2106,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
   GEOHandler.registerValidator(sortlValidator, GEOHandler.NL, null, true);
+  GEOHandler.addAfterConfig(addAfterConfigNl, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(setSORTLBasedOnIsuCtc, GEOHandler.NL);
+  GEOHandler.addAfterConfig(setSORTLBasedOnIsuCtc, GEOHandler.NL);
+  GEOHandler.addAfterConfig(addNlIsuHandler, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.NL);
+  GEOHandler.addAfterConfig(lockFields, GEOHandler.NL);
 });
