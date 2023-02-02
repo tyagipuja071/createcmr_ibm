@@ -5905,6 +5905,22 @@ function checkCustomerNameForKYND() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+// CREATCMR-7883
+function lockCMRNumberPrefixforNoINTER() {
+  var issuingCnt = ['749','778','616', '834'];
+  
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  if (issuingCnt.includes(cntry)) {
+  	if(custSubGrp != 'INTER'){
+      FormManager.readOnly('cmrNoPrefix');
+    } else {
+      FormManager.enable('cmrNoPrefix');
+    }
+  }
+}
+
 // CREATCMR-7887
 function setCTCIsuByClusterIndonesia() {
 
@@ -6593,7 +6609,7 @@ function clearInacOnClusterChange(selectedCluster) {
 
 function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var issuingCnt = ['818', '856', '852'];
+  var issuingCnt = ['818', '856', '852', '616'];
   if (issuingCnt.includes(cntry)) {
     var viewOnly = FormManager.getActualValue('viewOnlyPage');
     if (viewOnly != '' && viewOnly == 'true') {
@@ -6609,12 +6625,21 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     if(cntry == '852') {
       clearClusterFieldsScenarios = ['ASLOM', 'XASLO', 'XASLM', 'NRML', 'AQSTN', 'XAQST' ];
     }
+
+    if(cntry == '616') {
+      clearClusterFieldsScenarios = ['ESOSW', 'NRML' ];
+    }
     
     if(scenarioChanged && clearClusterFieldsScenarios.includes(scenario)) {
       FormManager.setValue('apCustClusterId','');
       FormManager.setValue('clientTier', '');
       FormManager.setValue('isuCd', '');
-      FormManager.setValue('mrcCd', '');     
+      FormManager.setValue('mrcCd', '');    
+      
+      if(cntry == '616') {
+      	FormManager.setValue('inacCd', '');
+        FormManager.setValue('inacType', '');
+      } 
     }
   }
 }
@@ -6839,6 +6864,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND], null, true);
   GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [ SysLoc.THAILAND ]);
   GEOHandler.addAfterTemplateLoad(clearInacOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND ]);
-  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND ]);  
-  
+  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.AUSTRALIA]);  
+  // CREATCMR-7883
+  GEOHandler.addAfterTemplateLoad(lockCMRNumberPrefixforNoINTER, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.SINGAPORE], null, true);
 });
