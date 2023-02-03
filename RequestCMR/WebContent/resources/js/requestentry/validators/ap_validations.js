@@ -324,7 +324,7 @@ function setInacByCluster() {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     // CREATCMR-7884
     var _clusterNZ = ['09056','10114','10115','10116','01147','08037','10662','10663','00002'];
-    //var _clusterNZWithAllInac = ['10662','10663','01147','08037','00002'];
+    var _clusterNZWithAllInac = ['10662','10663','01147','08037','00002'];
     var _custSubGrpNZWithEmptyInac = ['INTER', 'XPRIV', 'PRIV', 'DUMMY'];
     // CREATCMR-7883
     var _clusterAUWithAllInac = ['01150','00001','08039'];
@@ -437,6 +437,12 @@ function setInacByCluster() {
         FormManager.setValue('inacType', '');
         FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
       	FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
+      }
+      
+      // CREATCMR-7884: clear INAC after cluster change
+      if(cntry == '796' && _clusterNZWithAllInac.includes(_cluster)){
+      	FormManager.setValue('inacCd','');
+      	FormManager.setValue('inacType', '');
       }
       
       // CREATCMR-7883
@@ -6708,7 +6714,7 @@ function clearInacOnClusterChange(selectedCluster) {
 
 function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var issuingCnt = ['818', '856', '852', '616'];
+  var issuingCnt = ['818', '856', '852', '616', '796'];
   if (issuingCnt.includes(cntry)) {
     var viewOnly = FormManager.getActualValue('viewOnlyPage');
     if (viewOnly != '' && viewOnly == 'true') {
@@ -6727,6 +6733,11 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
 
     if(cntry == '616') {
       clearClusterFieldsScenarios = ['ESOSW', 'NRML' ];
+    }
+
+	// CREATCMR-7884
+    if(cntry == '796') {
+      clearClusterFieldsScenarios = ['ESOSW', 'NRML', 'NRMLC', 'AQSTN', 'XAQST', 'XESO' ];
     }
     
     if(scenarioChanged && clearClusterFieldsScenarios.includes(scenario)) {
@@ -6964,7 +6975,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND], null, true);
   GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [ SysLoc.THAILAND, SysLoc.PHILIPPINES ]);
   GEOHandler.addAfterTemplateLoad(clearInacOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND ]);
-  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.AUSTRALIA]);  
+  // CREATCMR-7884 -- add NZ to clear cluster
+  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND]);  
   // CREATCMR-7883
   GEOHandler.addAfterTemplateLoad(lockCMRNumberPrefixforNoINTER, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.SINGAPORE], null, true);
 });
