@@ -1538,6 +1538,10 @@ function setCustSubTypeBpGRTRCY(fromAddress, scenario, scenarioChanged) {
   var custType = FormManager.getActualValue('custSubGrp');
   var _reqId = FormManager.getActualValue('reqId');
   var isuCd = FormManager.getActualValue('isuCd')
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
@@ -2911,6 +2915,10 @@ function setCTCValues() {
 }
 
 function iSUCTCEnterpriseCombinedCodeValidatorForCYPRUS() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   console.log(">>>> iSUCTCEnterpriseCombinedCodeValidatorForCYPRUS");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
@@ -2991,6 +2999,10 @@ function iSUCTCEnterpriseCombinedCodeValidatorForCYPRUS() {
 }
 
 function clientTierCodeValidator() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   console.log(">>>> clientTierCodeValidator");
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
@@ -3052,6 +3064,10 @@ function clientTierCodeValidator() {
 // CREATCMR-4293
 
 function clientTierValidator() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   console.log(">>>> clientTierValidator");
   FormManager.addFormValidator((function() {
     return {
@@ -3089,6 +3105,10 @@ function clientTierValidator() {
 }
 
 function setValuesWRTIsuCtc(ctc){
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   console.log(">>>> setValuesWRTIsuCtc");
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var isu = FormManager.getActualValue('isuCd');
