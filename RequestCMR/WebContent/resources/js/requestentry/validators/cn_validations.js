@@ -444,7 +444,7 @@ function setInacBySearchTerm() {
       CMT : '%' + searchTerm + '%'
     };
     var inacList = cmr.query('GET.INAC_BY_CLUSTER', qParams);
-    if (inacList != null) {
+    if (inacList != null && inacList.length >0) {
       var inacTypeSelected ='';
       var arr =  inacList.map(inacList => inacList.ret1);
       inacTypeSelected  =  inacList.map(inacList => inacList.ret2);
@@ -478,7 +478,7 @@ function setInacBySearchTerm() {
                 inacCdValue.push(results[i].ret1);
               }
               FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-              if (inacCdValue.length >= 1) {
+              if (inacCdValue.length == 1) {
                 FormManager.setValue('inacCd', inacCdValue[0]);
               }
             }
@@ -486,6 +486,11 @@ function setInacBySearchTerm() {
       } else {
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
       }
+    }else{
+      FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+      FormManager.resetDropdownValues(FormManager.getField('inacType'));
+      FormManager.removeValidator('inacCd', Validators.REQUIRED);
+      FormManager.removeValidator('inacType', Validators.REQUIRED);
     }
     addSearchTerm04687Logic();
   } 
@@ -3448,64 +3453,64 @@ function checkTycViaCnNm(cnName) {
   return result;
 }
 
-function validateSearchTermForCROSS() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var custSubType = FormManager.getActualValue('custSubGrp');
-        var subType = '';
-        if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRMLD'  || custSubType == 'KYND' ||custSubType == 'EMBSA' ||custSubType == 'AQSTN')) {
-          if (custSubType == 'CROSS'){
-            subType = 'Foreign';
-          } else if(custSubType == 'NRMLC') {
-            subType = 'Normal - Select Core';
-          } else if(custSubType == 'NRMLD') {
-            subType = 'Normal - Signature / Strategic / Dedicated';
-          } else if(custSubType == 'KYND') {
-            subType = 'Kyndryl';
-          } else if(custSubType == 'EMBSA') {
-            subType = 'Embedded Solution Agreement (ESA)';
-          } else if(custSubType == 'AQSTN') {
-            subType = 'Acquisition';
-          }
-          var _GBGId = FormManager.getActualValue('gbgId');
-          var searchTerm = FormManager.getActualValue('searchTerm');
-          if (FormManager.getActualValue('gbgId') != 'undefined' && FormManager.getActualValue('gbgId') != '') {
-          var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
-            ID : _GBGId
-          });
-          if (ret == null || ret.ret1 == null || ret.ret1 == 0) {
-            if(searchTerm == '04472' || searchTerm == '00260' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04687' || searchTerm == '04497'
-              || searchTerm == '04629' || searchTerm == '04495' || searchTerm == '04630' || searchTerm == '04484' || searchTerm == '04480' || searchTerm == '04488'
-                || searchTerm == '04499' || searchTerm == '04486' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749' || searchTerm == '04502'){
-              return new ValidationResult(null, false, 'It is not allowed to apply S1 search term for none S1 GBGId  under ' + subType + ' Sub_scenario.');
-            }
-            }
-          }else{
-            if(searchTerm == '04472' || searchTerm == '00260' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04687' || searchTerm == '04497'
-              || searchTerm == '04629' || searchTerm == '04495' || searchTerm == '04630' || searchTerm == '04484' || searchTerm == '04480' || searchTerm == '04488'
-                || searchTerm == '04499' || searchTerm == '04486' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749' || searchTerm == '04502'){
-              return new ValidationResult(null, false, 'It is not allowed to apply S1 search term for none S1 GBGId  under ' + subType + ' Sub_scenario.');
-            }
-          }
-
-
-//          var searchTerm = FormManager.getActualValue('searchTerm');
-//          var searchTermTxt = $('#searchTerm').val();
-//          if (searchTerm == '00000' || searchTerm == '00075' || searchTerm == '08036' || searchTerm == '71300') {
-//            return new ValidationResult(null, false, 'It is not allowed to apply for default search term:' + searchTerm + ' by ' + subType + ' Sub_scenario.');
-//          } else if(searchTermTxt.indexOf('Expired') >= 0) { 
-//            return new ValidationResult(null, false, 'It is not allowed to apply for default or expired search term for ' + subType + ' Sub_scenario.');
-//          }else {
-//            return new ValidationResult(null, true);
+//function validateSearchTermForCROSS() {
+//  FormManager.addFormValidator((function() {
+//    return {
+//      validate : function() {
+//        var custSubType = FormManager.getActualValue('custSubGrp');
+//        var subType = '';
+//        if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRMLD'  || custSubType == 'KYND' ||custSubType == 'EMBSA' ||custSubType == 'AQSTN')) {
+//          if (custSubType == 'CROSS'){
+//            subType = 'Foreign';
+//          } else if(custSubType == 'NRMLC') {
+//            subType = 'Normal - Select Core';
+//          } else if(custSubType == 'NRMLD') {
+//            subType = 'Normal - Signature / Strategic / Dedicated';
+//          } else if(custSubType == 'KYND') {
+//            subType = 'Kyndryl';
+//          } else if(custSubType == 'EMBSA') {
+//            subType = 'Embedded Solution Agreement (ESA)';
+//          } else if(custSubType == 'AQSTN') {
+//            subType = 'Acquisition';
 //          }
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
+//          var _GBGId = FormManager.getActualValue('gbgId');
+//          var searchTerm = FormManager.getActualValue('searchTerm');
+//          if (FormManager.getActualValue('gbgId') != 'undefined' && FormManager.getActualValue('gbgId') != '') {
+//          var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
+//            ID : _GBGId
+//          });
+//          if (ret == null || ret.ret1 == null || ret.ret1 == 0) {
+//            if(searchTerm == '04472' || searchTerm == '00260' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04687' || searchTerm == '04497'
+//              || searchTerm == '04629' || searchTerm == '04495' || searchTerm == '04630' || searchTerm == '04484' || searchTerm == '04480' || searchTerm == '04488'
+//                || searchTerm == '04499' || searchTerm == '04486' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749' || searchTerm == '04502'){
+//              return new ValidationResult(null, false, 'It is not allowed to apply S1 search term for none S1 GBGId  under ' + subType + ' Sub_scenario.');
+//            }
+//            }
+//          }else{
+//            if(searchTerm == '04472' || searchTerm == '00260' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04687' || searchTerm == '04497'
+//              || searchTerm == '04629' || searchTerm == '04495' || searchTerm == '04630' || searchTerm == '04484' || searchTerm == '04480' || searchTerm == '04488'
+//                || searchTerm == '04499' || searchTerm == '04486' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749' || searchTerm == '04502'){
+//              return new ValidationResult(null, false, 'It is not allowed to apply S1 search term for none S1 GBGId  under ' + subType + ' Sub_scenario.');
+//            }
+//          }
+//
+//
+////          var searchTerm = FormManager.getActualValue('searchTerm');
+////          var searchTermTxt = $('#searchTerm').val();
+////          if (searchTerm == '00000' || searchTerm == '00075' || searchTerm == '08036' || searchTerm == '71300') {
+////            return new ValidationResult(null, false, 'It is not allowed to apply for default search term:' + searchTerm + ' by ' + subType + ' Sub_scenario.');
+////          } else if(searchTermTxt.indexOf('Expired') >= 0) { 
+////            return new ValidationResult(null, false, 'It is not allowed to apply for default or expired search term for ' + subType + ' Sub_scenario.');
+////          }else {
+////            return new ValidationResult(null, true);
+////          }
+//        } else {
+//          return new ValidationResult(null, true);
+//        }
+//      }
+//    };
+//  })(), 'MAIN_IBM_TAB', 'frmCMR');
+//}
 
 function validateISICForCROSS() {
   FormManager.addFormValidator((function() {
@@ -3979,7 +3984,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPRIVCustNameSFPValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(validateEnNameForInter, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateEnNameInAddrTab, GEOHandler.CN, null, false, false);
-  GEOHandler.registerValidator(validateSearchTermForCROSS, GEOHandler.CN, null, false);
+  //GEOHandler.registerValidator(validateSearchTermForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateISICForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
