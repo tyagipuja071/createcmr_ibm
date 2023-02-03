@@ -1407,33 +1407,33 @@ public class FranceHandler extends GEOHandler {
 
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
                 TemplateValidation error = new TemplateValidation(name);
-                LOG.trace("The row " + rowIndex + ":Note that both ISU and CTC value needs to be filled..");
-                error.addError(rowIndex, "Data Tab", ":Please fill both ISU and CTC value.<br>");
+                LOG.trace("The row " + (rowIndex + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                error.addError((rowIndex + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
                 validations.add(error);
               } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("34")) {
                 if (StringUtils.isBlank(ctc) || !"Q".contains(ctc)) {
                   TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + rowIndex
+                  LOG.trace("The row " + (rowIndex + 1)
                       + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
-                  error.addError(rowIndex, "Client Tier",
+                  error.addError((rowIndex + 1), "Client Tier",
                       ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
               } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("36")) {
                 if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
                   TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + rowIndex
+                  LOG.trace("The row " + (rowIndex + 1)
                       + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
-                  error.addError(rowIndex, "Client Tier",
+                  error.addError((rowIndex + 1), "Client Tier",
                       ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
               } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("32")) {
                 if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
                   TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + rowIndex
+                  LOG.trace("The row " + (rowIndex + 1)
                       + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
-                  error.addError(rowIndex, "Client Tier",
+                  error.addError((rowIndex + 1), "Client Tier",
                       ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
@@ -1441,7 +1441,7 @@ public class FranceHandler extends GEOHandler {
                   && !"@".equalsIgnoreCase(ctc)) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                error.addError(rowIndex, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
+                error.addError((rowIndex + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
                 validations.add(error);
               }
 
