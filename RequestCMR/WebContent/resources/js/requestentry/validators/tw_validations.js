@@ -602,6 +602,7 @@ function filterISUOnChange() {
 function setInacBySearchTerm() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var _cluster = FormManager.getActualValue('searchTerm');
+  var _clusterTWWithAllInac = ['09061','04476','10179','10180','10181','10182','10183','10184','10185','10186','10187'];
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -672,6 +673,12 @@ function setInacBySearchTerm() {
     FormManager.removeValidator('inacType', Validators.REQUIRED);
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
+    
+    // clear INAC after cluster change
+    if(cntry == '858' && !_clusterTWWithAllInac.includes(_cluster)){
+      FormManager.setValue('inacCd','');
+      FormManager.setValue('inacType', '');
+    }
     return;
   }
 }
@@ -747,6 +754,25 @@ function checkCustomerNameForKYND() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function clearDescriptionOnScenarioChange() {
+  var bgId = FormManager.getActualValue('bgId');
+  var gbgId = FormManager.getActualValue('gbgId');
+  var covId = FormManager.getActualValue('covId');
+  var geoLocationCd = FormManager.getActualValue('geoLocationCd');
+  if (bgId == null || bgId == '') {
+    $('#bgDescCont').html("(no description available)");
+  }
+  if (gbgId == null || gbgId == '') {
+    $('#gbgDescCont').html("(no description available)");
+  }
+  if (covId == null || covId == '') {
+    $('#covDescCont').html("(no description available)");
+  }
+  if (geoLocationCd == null || geoLocationCd == '') {
+    $('#geoLocDescCont').html("(no description available)");
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];
@@ -790,6 +816,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(setCluster, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(addCoverageFieldsValidator, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(clearDescriptionOnScenarioChange, GEOHandler.TW); 
   GEOHandler.registerValidator(checkCustomerNameForKYND, GEOHandler.TW, null, true);
   // skip byte checks
   // FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4',
