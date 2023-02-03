@@ -2118,7 +2118,10 @@ function setCtcOnIsuCdChangeANZ(isuCd) {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
-    FormManager.enable('clientTier');
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    if (cntry != '736' && cntry != '738') {
+      FormManager.enable('clientTier');
+    }
   }
     handleObseleteExpiredDataForUpdate();  
 }
@@ -5728,8 +5731,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCustNameForInternal, [ SysLoc.AUSTRALIA ], null, true);  
 //  GEOHandler.registerValidator(clusterCdValidatorAU, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.AP, null, true);
-  // after coverage update, the Cluster code options are restricted on Scenario, so remove this validator
-  //GEOHandler.registerValidator(validateClusterBaseOnScenario, [ SysLoc.SINGAPORE ], null, true);  
+  // after coverage update, the Cluster code options are restricted on Scenario,
+  // so remove this validator
+  // GEOHandler.registerValidator(validateClusterBaseOnScenario, [
+  // SysLoc.SINGAPORE ], null, true);
   GEOHandler.addAfterConfig(lockInacCodeForIGF, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, SysLoc.INDIA);
    GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate,  GEOHandler.AP );
