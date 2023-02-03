@@ -4103,7 +4103,7 @@ function sboCodeValidator() {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   } else if (role == 'Requester') {
     return new ValidationResult(null, true);
