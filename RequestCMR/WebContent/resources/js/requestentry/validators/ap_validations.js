@@ -2726,6 +2726,10 @@ function setCTCIsuByClusterANZ() {
   if (_clusterHandler && _clusterHandler[0]) {
     _clusterHandler[0].onChange();
   }
+  // CREATCMR-7884
+  if (FormManager.getActualValue('cmrIssuingCntry') == '796') {
+    lockInacForIDMYSG();
+  }
 }
 
 function setCTCIsuByClusterASEAN() {
