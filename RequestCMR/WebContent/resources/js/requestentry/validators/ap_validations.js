@@ -1851,7 +1851,7 @@ function autoSetAbbrevNmLocnLogic() {
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA use only";
       } else if (custSubGrp == "BLUMX" || custSubGrp == "XBLUM") {
-        _abbrevNm = "Bluemix use only";
+        _abbrevNm = "Consumer only";
       } else if (custSubGrp == "MKTPC" || custSubGrp == "XMKTP") {
         _abbrevNm = "Market Place Order";
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
