@@ -12,11 +12,22 @@ function afterConfigKR() {
   }
   
   var _scenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+    FormManager.resetDropdownValues(FormManager.getField('searchTerm'));
+    FormManager.resetDropdownValues(FormManager.getField('inacType'));
+    FormManager.resetDropdownValues(FormManager.getField('inacCd'));   
+    FormManager.enable('searchTerm');
+    FormManager.enable('clientTier');
+    FormManager.enable('isuCd');
+    FormManager.enable('mrcCd');
     setSearchTermDropdownValues();
   });
 
   var _clusterHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
     LockDefaultISUClientTierMrcValues();
+    setInacNacValues();
+  });
+
+  var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
     setInacNacValues();
   });
   
@@ -458,48 +469,62 @@ function addressQuotationValidator() {
 
 }
 
-function setSearchTermDropdownValues() {
-  var custSubGrp = FormManager.getField('custSubGrp');
+function setSearchTermDropdownValues() { var custSubGrp = FormManager.getActualValue('custSubGrp');
   var searchTerm = FormManager.getField('searchTerm');
   if (searchTerm) {
     switch (custSubGrp) {
-    case "NRST":
-      FormManager.limitDropdownValues(searchTerm, [ '04461', '04466', '05223', '10139' ]);
-    case "BLUMX":
-      FormManager.setValue('searchTerm', '00003');
-      FormManager.readOnly('searchTerm');
-    case "VAPAR":
-      FormManager.limitDropdownValues(searchTerm, [ '00003', '01545' ]);
-    case "CROSS":
-      FormManager.limitDropdownValues(searchTerm, [ '00003', '08016', '09065' ]);
-    case "CBBUS":
-      FormManager.setValue('searchTerm', '71500');
-      FormManager.readOnly('searchTerm');
-    case "ECOSY":
-      FormManager.limitDropdownValues(searchTerm, [ '08016' ]);
-    case "ESA":
-      FormManager.limitDropdownValues(searchTerm, [ '08016', '09065', '01545' ]);
-    case "INTER":
-      FormManager.setValue('searchTerm', '00003');
-      FormManager.readOnly('searchTerm');
-      FormManager.setValue('clientTier', 'Z');
-      FormManager.readOnly('clientTier');
-      FormManager.setValue('mrcCd', '2');
-      FormManager.readOnly('mrcCd');
-      FormManager.setValue('isuCd', '21');
-      FormManager.readOnly('isuCd');
-    case "LKYN":
-      FormManager.limitDropdownValues(searchTerm, [ '09065' ]);
-    case "NRML":
-      FormManager.limitDropdownValues(searchTerm, [ '00003', '01545' ]);
-    case "AQSTN":
-      FormManager.limitDropdownValues(searchTerm, [ '01545' ])
+      case "NRST":
+        FormManager.limitDropdownValues(searchTerm, [ '04461', '04466', '05223', '10139' ]);
+        break;
+      case "BLUMX":
+        FormManager.setValue('searchTerm', '00003');
+        FormManager.readOnly('searchTerm');
+        break;
+      case "VAPAR":
+        FormManager.limitDropdownValues(searchTerm, [ '00003', '01545' ]);
+        break;
+      case "CROSS":
+        FormManager.limitDropdownValues(searchTerm, [ '00003', '08016', '09065' ]);
+        break;
+      case "CBBUS":
+        FormManager.setValue('searchTerm', '71500');
+        FormManager.readOnly('searchTerm');
+        break;
+      case "ECOSY":
+        FormManager.limitDropdownValues(searchTerm, [ '08016' ]);
+        FormManager.setValue('isuCd', '36');
+        FormManager.readOnly('isuCd');
+        FormManager.setValue('clientTier', 'Y');
+        FormManager.readOnly('clientTier');
+        break;
+      case "ESA":
+        FormManager.limitDropdownValues(searchTerm, [ '08016', '09065', '01545' ]);
+        break;
+      case "INTER":
+        FormManager.setValue('searchTerm', '00003');
+        FormManager.readOnly('searchTerm');
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.readOnly('clientTier');
+        FormManager.setValue('mrcCd', '2');
+        FormManager.readOnly('mrcCd');
+        FormManager.setValue('isuCd', '21');
+        FormManager.readOnly('isuCd');
+        break;
+      case "LKYN":
+        FormManager.limitDropdownValues(searchTerm, [ '09065' ]);
+        break;
+      case "NRML":
+        FormManager.limitDropdownValues(searchTerm, [ '00003', '01545' ]);
+        break;
+      case "AQSTN":
+        FormManager.limitDropdownValues(searchTerm, [ '01545' ]);
+        break;
     }
   }
 }
 
 function LockDefaultISUClientTierMrcValues() {
-  var searchTerm = FormManager.getField('searchTerm');
+  var searchTerm = FormManager.getActualValue('searchTerm');
   var clientTier = FormManager.getField('clientTier');
   if (searchTerm == '00003') {
     FormManager.setValue('clientTier', 'Z');
@@ -507,29 +532,30 @@ function LockDefaultISUClientTierMrcValues() {
   } else if (searchTerm == '08016') {
     FormManager.setValue('clientTier', 'Y');
     FormManager.readOnly('clientTier');
+    FormManager.setValue('isuCd', '36');
+    FormManager.readOnly('isuCd');
   } else if (searchTerm == '10139') {
     FormManager.setValue('clientTier', 'T');
     FormManager.readOnly('clientTier');
   } else if (searchTerm == '01545') {
     FormManager.setValue('clientTier', 'Q');
     FormManager.readOnly('clientTier');
-  } else if (searchTerm in [ '71500', '09065', '04461', '04466', '05223' ]) {
+  } else if (searchTerm == '71500' || searchTerm == '09065' || searchTerm =='04461' || searchTerm == '04466' || searchTerm == '05223') {
     FormManager.setValue('clientTier', '0');
     FormManager.readOnly('clientTier');
   }
 
-  if (searchTerm in [ '71500', '04461', '04466', '05223' ]) {
+  if (searchTerm == '71500' || searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223') {
     FormManager.setValue('mrcCd', '2');
     FormManager.readOnly('mrcCd');
-  } else if (searchTerm in [ '01545', '00003', '09065', '08016', '10139' ] && FormManager.getField('custSubGrp') != "INTER") {
-    FormManager.setValue('mrcCd', '3');
+  } else if ((searchTerm == '10139' || searchTerm == '08016' || searchTerm == '09065' || searchTerm == '00003' || searchTerm == '01545') && FormManager.getField('custSubGrp') != "INTER") {   FormManager.setValue('mrcCd', '3');
     FormManager.readOnly('mrcCd');
   }
   if (searchTerm == '00003' && FormManager.getField('custSubGrp') != "INTER") {
     FormManager.setValue('isuCd', '34');
     FormManager.readOnly('isuCd');
   } else if (searchTerm == '08016') {
-    FormManager.setValue('isuCd', 'Y');
+    FormManager.setValue('isuCd', '36');
     FormManager.readOnly('isuCd');
   } else if (searchTerm == '10139') {
     FormManager.setValue('isuCd', '32');
@@ -575,7 +601,7 @@ function setInacNacValues(){
         FormManager.setValue('inacType', 'N');
       } else if(inacType != '' && inacTypeSelected[0].includes(',IN')) {
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
-        var value = FormManager.getField('inacType');
+        var value = FormManager.getActualValue('inacType');
         var cmt = value + ','+ _cluster +'%';
         var value = FormManager.getActualValue('inacType');
         var cntry =  FormManager.getActualValue('cmrIssuingCntry');
@@ -646,7 +672,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.KR, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.KR);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR);
-  GEOHandler.registerValidator(ValidateKyndrlUIControl, GEOHandler.KR);
+  GEOHandler.registerValidator(validateCustnameForKynd, GEOHandler.KR);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.KR);
   // CREATCMR-6825
