@@ -2196,7 +2196,7 @@ function handleCluster(value) {
       TXT: '%' + value + '%'
     };
   var results = cmr.query('GET_CLUSTER_BY_INDUSTRYCLASS', qParams);
-  if (results != null && results != undefined) {
+  if (results != null && results.ret1) {
     FormManager.setValue('apCustClusterId', results.ret1);
     // FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
     // clusterValues);
@@ -6546,6 +6546,30 @@ function setCTCIsuByClusterGCG() {
   }
 }
 
+function setClusterOnScenarioChgGCG (fromAddress, scenario, scenarioChanged) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  
+  if (viewOnly == 'true' || role != 'REQUESTER') {
+    return;
+  }
+  
+  if(reqType == 'C' && scenarioChanged) {
+    switch (custSubGrp) {
+    case 'CROSS':
+      FormManager.setValue('apCustClusterId','00000');
+      break;
+    default:
+      // do nothing
+      break;
+    }
+  }
+}
+
+
 function validateCustnameForKynd() {
   FormManager.addFormValidator((function() {
     return {
@@ -6941,6 +6965,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-7884
   GEOHandler.registerValidator(addCovBGValidator, [SysLoc.NEW_ZEALAND], null, true);
   
+  GEOHandler.addAfterTemplateLoad(setClusterOnScenarioChgGCG, GEOHandler.GCG);
   GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
 
   // CREATCMR-7883
