@@ -3610,9 +3610,10 @@ function sSDGBGIdValidator() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
+        var reqType = FormManager.getActualValue('reqType');
         if (typeof (_pagemodel) != 'undefined') {
           var id = FormManager.getActualValue('gbgId');
-          if (id != 'undefined' && id != ''){
+          if (reqType == 'C' && id != 'undefined' && id != ''){
             if(custSubType == 'NRMLD'){
               if(!(id == 'GB000YEN' || id == 'GB001A7X' || id == 'GB001CQ3' || id == 'GB300S7F' || id == 'GB001CPY' || id == 'GB001CPW' || id == 'GB001DR4' || id == 'GB001B83'
                 || id == 'GB001CQ2' || id == 'GB001J73' || id == 'GB0018BN' || id == 'GB001A89' || id == 'GB001AUJ' || id == 'GB0018BS' || id == 'GB0018EZ' || id == 'GB227QFM'
