@@ -537,7 +537,8 @@ function addCoverageFieldsValidator() {
       }
     }
   }
-  FormManager.addValidator('covId', Validators.REQUIRED, [ 'Coverage Type/ID' ], 'MAIN_IBM_TAB');
+// FormManager.addValidator('covId', Validators.REQUIRED, [ 'Coverage Type/ID'
+// ], 'MAIN_IBM_TAB');
   FormManager.removeValidator('dunsNo', Validators.REQUIRED);
   FormManager.removeValidator('isuCd', Validators.REQUIRED);
 }
