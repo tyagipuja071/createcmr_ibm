@@ -91,6 +91,14 @@ public abstract class GCGTransformer extends APTransformer {
       handler.messageHash.put("SellDept", bussinessPartner);
       handler.messageHash.put("InstDept", bussinessPartner);
       handler.messageHash.put("EngrDept", bussinessPartner);
+    } else if ("ESA".equalsIgnoreCase(custSubGrp)) {
+      if (SystemLocation.HONG_KONG.equals(handler.cmrData.getCmrIssuingCntry())
+          || SystemLocation.MACAO.equals(handler.cmrData.getCmrIssuingCntry())) {
+        String bussinessPartner = subIndCd + mrcCode + "T" + repTeamMemNo;
+        handler.messageHash.put("SellDept", bussinessPartner);
+        handler.messageHash.put("InstDept", bussinessPartner);
+        handler.messageHash.put("EngrDept", bussinessPartner);
+      }
     }
 
     if ("0".equalsIgnoreCase(handler.cmrData.getClientTier())) {
