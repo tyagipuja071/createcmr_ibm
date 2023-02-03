@@ -4079,17 +4079,6 @@ function addValidatorBasedOnCluster() {
         if(FormManager.getActualValue('reqType') != 'C' || cntry =='616' || cntry =='778' || cntry =='749' ) {
           return new ValidationResult(null, true);
         }
-        if((cntry == '856' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08047') ||
-           (cntry == '818' && (custSubType == 'CROSS' || custSubType == 'XASLO') && cluster == '08044') ||
-           (cntry == '852' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08046') ||
-           (cntry == '616' && (custSubType == 'CROSS') && cluster == '08039') ||
-           (cntry == '796' && (custSubType == 'CROSS' || custSubType == 'XESO') && cluster == '08037') ||
-           (cntry == '778' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08042') ||
-           (cntry == '749' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08040')
-            ) {
-          return new ValidationResult(null, true);
-        }
-        
         if ((custSubType != 'ECSYS' && custSubType != 'XECO' && custSubType != 'ASLOM' && custSubType != 'ESOSW' ) && (cluster == '08039' || cluster == '08037' || cluster == '08038' || cluster == '08040' || cluster == '08042' ||cluster == '08044' || cluster == '08047'|| cluster == '08046')) {
           return new ValidationResult(null, false, 'Ecosystem Partners Cluster is not allowed for selected scenario.');
         } else {
@@ -5529,7 +5518,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockFieldsForIndia, SysLoc.INDIA);
   GEOHandler.addAfterConfig(lockFieldsForAU, [ SysLoc.AUSTRALIA ]);
   GEOHandler.addAfterTemplateLoad(lockFieldsForAU, SysLoc.AUSTRALIA);
-  GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ANZ, GEOHandler.ROLE_REQUESTER, true);
+  //GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ANZ, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ASEAN, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.addAfterTemplateLoad(lockAbbvNameOnScenarioChangeGCG, GEOHandler.GCG);
   GEOHandler.addAfterTemplateLoad(setAbbrvNameBPScen, GEOHandler.GCG);
