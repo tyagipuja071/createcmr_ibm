@@ -2588,6 +2588,10 @@ function showVatInfoOnLocal() {
 }
 
 function validateIsuClientTier(isuCd, ctc) {
+ var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   console.log(">>>>  validateIsuClientTier"); 
   var errMsg = '';
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -2629,17 +2633,6 @@ function validateIsuClientTier(isuCd, ctc) {
     return 'Enterprise can only accept \'003290\', \'010023\'.';
   } 
   
-// var validCtcValues = [ 'Q', 'Y' ];
-// var errMsg = '';
-// if (isuCd == '34') {
-// if (!validCtcValues.includes(ctc)) {
-// errMsg = 'Client Tier can only accept Q and Y for ISU 34.';
-// }
-// } else {
-// if (isuCd != '34' && ctc != '') {
-// errMsg = 'Client Tier should be blank only for all other ISU except 34.';
-// }
-// }
  return errMsg;
  
 }
