@@ -2320,12 +2320,11 @@ public class BELUXHandler extends BaseSOFHandler {
       if (is93CMR(cmrNo)) {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.");
         error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.<br>");
-      }
-      if (error.hasErrors()) {
+      }      
+    }
+    if (error.hasErrors()) {
         validations.add(error);
       }
-
-    }
 
     for (String name : countryAddrss) {
       sheet = book.getSheet(name);
