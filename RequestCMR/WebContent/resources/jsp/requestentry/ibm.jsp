@@ -214,6 +214,9 @@ dojo.addOnLoad(function(){
           <cmr:label fieldId="searchTerm">
             <cmr:fieldLabel fieldId="SearchTerm" />: 
             <cmr:delta text="${rdcdata.searchTerm}" oldValue="${reqentry.searchTerm}"/>
+            <cmr:view forCountry="858">
+              <cmr:info text="${ui.info.TWForCluster}" />
+            </cmr:view>
           </cmr:label>
           <cmr:field fieldId="SearchTerm" id="searchTerm" path="searchTerm" tabId="MAIN_IBM_TAB" />
         </p>

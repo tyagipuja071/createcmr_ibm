@@ -320,7 +320,6 @@ function addHandlersForSWISS() {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
       setMubotyOnPostalCodeIMS(value);
-      setSORTLOnIsuCtc();
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
@@ -345,7 +344,6 @@ function addHandlersForSWISS() {
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setMubotyOnPostalCodeIMS(value);
-      setSORTLOnIsuCtc();
     });
   }
 
@@ -359,7 +357,7 @@ function addHandlersForSWISS() {
   if (_IMSHandler == null) {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
       setISUCTCOnIMSChange();
-      setMubotyOnPostalCodeIMS();
+      setMubotyOnPostalCodeIMS(value);
     });
   }
 
@@ -516,31 +514,6 @@ function checkEmbargoCd(value) {
   }
 }
 
-function setSORTLOnIsuCtc() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  var isuCd = FormManager.getActualValue('isuCd');
-  var clientTier = FormManager.getActualValue('clientTier');
-  var reqType = FormManager.getActualValue('reqType');
-  var isuList = [ '34', '5K', '18', '28' ];
-  if (!isuList.includes(isuCd)) {
-    return;
-  }
-  if (isuCd == '34' && clientTier == 'Y') {
-    FormManager.setValue('searchTerm', 'T0007971');
-  } else if (isuCd == '5K' && clientTier == '') {
-    FormManager.setValue('searchTerm', 'T0009084');
-  } else if (isuCd == '18' && clientTier == '') {
-    FormManager.setValue('searchTerm', 'A0004577');
-  } else if (isuCd == '28' && clientTier == '') {
-    FormManager.setValue('searchTerm', 'A0005227');
-  }
-  if ([ '18', '28' ].includes(isuCd) && reqType == 'C') {
-    FormManager.resetValidations('clientTier');
-  }
-}
-
 /*
  * Swiss - sets Client_Tier based on ISU
  */
@@ -549,18 +522,6 @@ function setClientTierValues(isuCd) {
   isuCd = FormManager.getActualValue('isuCd');
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
-  }
-  var isuList = [ '18', '28' ];
-  var reqType = FormManager.getActualValue('reqType');
-  if (isuList.includes(isuCd)) {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (reqType == 'U') {
-      FormManager.enable('clientTier');
-    }
   }
 
   if (FormManager.getActualValue('reqType') != 'C') {
@@ -593,12 +554,10 @@ function setClientTierValues(isuCd) {
     }
 
     if (clientTiers != null && clientTiers.length > 0) {
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
       if (clientTiers.length == 1) {
         FormManager.setValue('clientTier', clientTiers[0]);
       }
     } else {
-      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
       FormManager.setValue('clientTier', '');
     }
   }
@@ -609,12 +568,12 @@ function setClientTierValues(isuCd) {
  */
 var mubotyvalues = [];
 var postCdOld = '';
-function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
+function setMubotyOnPostalCodeIMS(value) {
 
   if (FormManager.getActualValue('reqType') != 'C' || (cmr.currentRequestType != undefined && cmr.currentRequestType != 'C') || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (postCd == undefined && subIndustryCd == undefined && clientTier == undefined) {
+  if (value == undefined) {
     return;
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -665,14 +624,15 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
   }
 
   var result = cmr.query('SWISS.GET.SORTL_BY_ISUCTCIMS', {
+    _qall : 'Y',
     ISU_CD : '%' + isuCd + '%',
     CLIENT_TIER : '%' + clientTier + '%',
     IMS : '%' + ims + '%',
     POST_CD_RANGE : postCd
   });
 
-  if (result != null && Object.keys(result).length > 0 && result.ret1) {
-    FormManager.setValue('searchTerm', result.ret1);
+  if (result != null && Object.keys(result).length > 0 && Object.keys(result).length == 1) {
+    FormManager.setValue('searchTerm', result[0].ret1);
     if (role == 'REQUESTER') {
       FormManager.readOnly('searchTerm');
     }
@@ -686,10 +646,13 @@ function validateSBOValuesForIsuCtc() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        if (FormManager.getActualValue('reqType') != 'C') {
+          return;
+        }
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var clientTier = FormManager.getActualValue('clientTier');
         var isuCd = FormManager.getActualValue('isuCd');
-        var sbo = FormManager.getActualValue('salesBusOffCd');
+        var sbo = FormManager.getActualValue('searchTerm');
         var validSboList = [];
         var qParams = null;
         

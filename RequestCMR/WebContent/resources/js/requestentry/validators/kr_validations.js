@@ -12,10 +12,12 @@ function afterConfigKR() {
   }
   var _scenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     FormManager.resetDropdownValues(FormManager.getField('searchTerm'));
+    FormManager.resetDropdownValues(FormManager.getField('inacType'));
+    FormManager.resetDropdownValues(FormManager.getField('inacCd'));    
     FormManager.enable('searchTerm');
     FormManager.enable('clientTier');
     FormManager.enable('isuCd');
-    FormManager.enable('mrcCd')
+    FormManager.enable('mrcCd');
     setSearchTermDropdownValues();
   });
 
