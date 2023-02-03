@@ -1410,7 +1410,7 @@ public class FranceHandler extends GEOHandler {
                 LOG.trace("The row " + rowIndex + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError(rowIndex, "Data Tab", ":Please fill both ISU and CTC value.<br>");
                 validations.add(error);
-              } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+              } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("34")) {
                 if (StringUtils.isBlank(ctc) || !"Q".contains(ctc)) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + rowIndex
@@ -1419,7 +1419,7 @@ public class FranceHandler extends GEOHandler {
                       ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
-              } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+              } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("36")) {
                 if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + rowIndex
@@ -1428,7 +1428,7 @@ public class FranceHandler extends GEOHandler {
                       ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
-              } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+              } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("32")) {
                 if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + rowIndex
@@ -1437,7 +1437,7 @@ public class FranceHandler extends GEOHandler {
                       ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
-              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
+              } else if ((!StringUtils.isBlank(isuCd) && !(isuCd.startsWith("34") || isuCd.startsWith("32") || isuCd.startsWith("36")))
                   && !"@".equalsIgnoreCase(ctc)) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
