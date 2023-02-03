@@ -3124,7 +3124,8 @@ function addClusterOfcdLogic() {
   var results = cmr.query('GET.INACCD_SECTOR_CLUSTER_BY_OFCD', qParams);
   if (results != null && results.length > 0) {
     for (var i = 0; i < results.length; i++) {
-      if (results[i].ret2 == ' ' && results[i].ret4 != ' ') {
+      //if (results[i].ret2 == ' ' && results[i].ret4 != ' ') {
+	  if ( results[i].ret4 != ' ') {
         cluster = results[i].ret4;
       }
     }
