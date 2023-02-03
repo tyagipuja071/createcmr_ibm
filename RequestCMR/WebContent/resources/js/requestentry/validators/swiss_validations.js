@@ -505,18 +505,6 @@ function setClientTierValues(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
-  var isuList = [ '18', '28' ];
-  var reqType = FormManager.getActualValue('reqType');
-  if (isuList.includes(isuCd)) {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (reqType == 'U') {
-      FormManager.enable('clientTier');
-    }
-  }
 
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
@@ -548,12 +536,10 @@ function setClientTierValues(isuCd) {
     }
 
     if (clientTiers != null && clientTiers.length > 0) {
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
       if (clientTiers.length == 1) {
         FormManager.setValue('clientTier', clientTiers[0]);
       }
     } else {
-      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
       FormManager.setValue('clientTier', '');
     }
   }
@@ -620,14 +606,15 @@ function setMubotyOnPostalCodeIMS(value) {
   }
 
   var result = cmr.query('SWISS.GET.SORTL_BY_ISUCTCIMS', {
+    _qall : 'Y',
     ISU_CD : '%' + isuCd + '%',
     CLIENT_TIER : '%' + clientTier + '%',
     IMS : '%' + ims + '%',
     POST_CD_RANGE : postCd
   });
 
-  if (result != null && Object.keys(result).length > 0 && result.ret1) {
-    FormManager.setValue('searchTerm', result.ret1);
+  if (result != null && Object.keys(result).length > 0 && Object.keys(result).length == 1) {
+    FormManager.setValue('searchTerm', result[0].ret1);
     if (role == 'REQUESTER') {
       FormManager.readOnly('searchTerm');
     }

@@ -141,13 +141,14 @@ function setSboOnIMS(value) {
   }
 
   var result = cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', {
+    _qall : 'Y',
     ISU_CD : isuCd,
     CLIENT_TIER : clientTier,
     IMS : '%' + ims + '%'
   });
 
-  if (result != null && Object.keys(result).length > 0 && result.ret1) {
-    FormManager.setValue('searchTerm', result.ret1);
+  if (result != null && Object.keys(result).length > 0 && Object.keys(result).length == 1) {
+    FormManager.setValue('searchTerm', result[0].ret1);
   } else {
     FormManager.clearValue('searchTerm');
   }
