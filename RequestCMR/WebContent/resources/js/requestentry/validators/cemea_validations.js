@@ -3571,7 +3571,7 @@ function resetVatExempt() {
 
 function resetVatExemptOnchange() {
   dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
-    resetVatExempt();
+//    resetVatExempt();
   });
 }
 
@@ -5403,8 +5403,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); // CMR-2101
   GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
+//  GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
+//  GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(resetVatExemptOnchange, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(lockLocationNo, [ SysLoc.AUSTRIA ]);
 
