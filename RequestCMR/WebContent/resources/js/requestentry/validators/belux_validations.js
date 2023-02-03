@@ -190,7 +190,9 @@ function checkCmrUpdateBeforeImport() {
 }
 
 function disableIBMTab() {
-
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   var reqType = FormManager.getActualValue('reqType');
   var cntryUse = FormManager.getActualValue('countryUse');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -660,6 +662,10 @@ function addBeIsuHandler() {
 
 function addHandlersForBELUX() {
 
+  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+    lockFields();
+  });
+
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
@@ -680,7 +686,7 @@ function addHandlersForBELUX() {
       // setINACValues(value);
       setEconomicCodeValues(value);
       setSBO();
-      setSORTL();
+      // setSORTL();
 
     });
   }
@@ -1619,56 +1625,25 @@ function setSBO(searchTerm) {
   }
 }
 
-function setSORTL() {
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  var acctTeamNum = FormManager.getActualValue('searchTerm');
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  var reqType = FormManager.getActualValue('reqType');
-
-  if (reqType != 'C') {
-    return;
-  }
-  switch (custSubType) {
-  case 'BEINT':
-  case 'BEISO':
-  case 'BEPRI':
-  case 'BEBUS':
-    if (acctTeamNum != _pagemodel.searchTerm) {
-      FormManager.setValue('commercialFinanced', acctTeamNum);
-    }
-    break;
-  case 'BECOM':
-  case 'BEPUB':
-  case 'BE3PA':
-  case 'BEDAT':
-    // do nothing
-    break;
-  case 'LUINT':
-  case 'LUISO':
-  case 'LUPRI':
-  case 'LUBUS':
-    if (acctTeamNum != _pagemodel.searchTerm) {
-      FormManager.setValue('commercialFinanced', acctTeamNum);
-    }
-    break;
-  case 'LUCOM':
-  case 'LUPUB':
-  case 'LU3PA':
-  case 'LUDAT':
-    // do nothing
-    break;
-  case 'CBCOM':
-  case 'CBBUS':
-    // do nothing
-    break;
-  default:
-    break;
-  }
-}
+/*
+ * function setSORTL() {
+ * 
+ * if (FormManager.getActualValue('viewOnlyPage') == 'true') { return; }
+ * 
+ * var acctTeamNum = FormManager.getActualValue('searchTerm'); var custSubType =
+ * FormManager.getActualValue('custSubGrp'); var reqType =
+ * FormManager.getActualValue('reqType');
+ * 
+ * if (reqType != 'C') { return; } switch (custSubType) { case 'BEINT': case
+ * 'BEISO': case 'BEPRI': case 'BEBUS': if (acctTeamNum !=
+ * _pagemodel.searchTerm) { FormManager.setValue('commercialFinanced',
+ * acctTeamNum); } break; case 'BECOM': case 'BEPUB': case 'BE3PA': case
+ * 'BEDAT': // do nothing break; case 'LUINT': case 'LUISO': case 'LUPRI': case
+ * 'LUBUS': if (acctTeamNum != _pagemodel.searchTerm) {
+ * FormManager.setValue('commercialFinanced', acctTeamNum); } break; case
+ * 'LUCOM': case 'LUPUB': case 'LU3PA': case 'LUDAT': // do nothing break; case
+ * 'CBCOM': case 'CBBUS': // do nothing break; default: break; } }
+ */
 
 function setSBOValuesForIsuCtc() {
   var reqType = FormManager.getActualValue('reqType');
@@ -2061,7 +2036,7 @@ function clientTierCodeValidator() {
 function lockFields() {
   var reqTyp = FormManager.getActualValue('reqType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var lockSubGrpList = [ 'CBBUS', 'BUSPR', 'INTER', 'IBMEM', 'PRICU' ];
+  var lockSubGrpList = [ 'CBBUS', 'BUSPR', 'BEINT', 'BEISO', 'IBMEM', 'BEPRI', 'LUBUS', 'LUIBM', 'LUINT', 'LUISO', 'LUPRI' ];
 
   if (lockSubGrpList.includes(custSubGrp)) {
     FormManager.readOnly('commercialFinanced');
