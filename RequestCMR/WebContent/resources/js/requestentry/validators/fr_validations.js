@@ -4055,6 +4055,44 @@ function clientTierCodeValidator() {
   }
 }
 
+function sboValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var sbo = FormManager.getActualValue('salesBusOffCd');
+        var isuCd = FormManager.getActualValue('isuCd');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var reqType = FormManager.getActualValue('reqType');
+        var valResult = null;
+        var oldSbo = null;
+        var oldClientTier = null;
+        var oldISU = null;
+        var requestId = FormManager.getActualValue('reqId');
+
+        if (reqType == 'C') {
+          valResult = sboCodeValidator();
+        } else {
+          qParams = {
+            REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.CLIENT_TIER_ISU_SBO_CD_OLD_BY_REQID', qParams);
+
+          if (result != null && result != '') {
+            oldClientTier = result.ret1 != null ? result.ret1 : '';
+            oldSbo = result.ret3 != null ? result.ret3 : '';
+            oldISU = result.ret2 != null ? result.ret2 : '';
+
+            if (clientTier != oldClientTier || isuCd != oldISU || sbo != oldSbo) {
+              valResult = sboCodeValidator();
+            }
+          }
+        }
+        return valResult;
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function sboCodeValidator() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
@@ -4065,8 +4103,10 @@ function sboCodeValidator() {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' || role == 'Requester') {
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
+  } else if (role == 'Requester') {
+    return new ValidationResult(null, true);
   }
   if (isuCtc == '36Y' && !(sbo == '09A09A' || sbo == '10A10A' || sbo == '11A11A')) {
     return new ValidationResult({
@@ -4404,7 +4444,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.FR);
   GEOHandler.registerValidator(clientTierValidator, [ '706' ], null, true);
-  GEOHandler.registerValidator(sboCodeValidator, [ '706' ], null, true);
+  GEOHandler.registerValidator(sboValidator, [ '706' ], null, true);
   GEOHandler.addAddrFunction(set2H23CoverageChangesOnLandedCoutrychange, '706');
   GEOHandler.addAfterTemplateLoad(set2H23CoverageChanges, '706');
   GEOHandler.addAfterTemplateLoad(setCoverage2H23FieldBehaviour, '706');
