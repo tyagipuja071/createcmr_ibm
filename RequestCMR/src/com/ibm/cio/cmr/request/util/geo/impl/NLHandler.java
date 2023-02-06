@@ -2322,8 +2322,7 @@ public class NLHandler extends BaseSOFHandler {
                   ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
             }
           }
-        else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
-                && !"@".equalsIgnoreCase(ctc)) {
+        else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("32", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
