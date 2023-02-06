@@ -271,6 +271,8 @@ function addAfterConfigAP() {
     setIsuOnIsic();
     onInacTypeChange();
     setInacByCluster();
+    setInacNacValuesIN();
+    filterInacCd('744','10215','NAC','I529');
   }
   // CREATCMR-5258
   if (cntry == '834') {
