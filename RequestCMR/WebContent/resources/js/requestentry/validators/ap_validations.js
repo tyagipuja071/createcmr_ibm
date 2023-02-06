@@ -34,6 +34,9 @@ function addHandlersForAP() {
       setInacByCluster();
       setInacNacValuesIN();
       setIsuOnIsic();
+      
+      filterInacCd('744','10215','NAC','I529');  
+       
     });
   }
   if (_vatRegisterHandlerSG == null) {
@@ -268,8 +271,6 @@ function addAfterConfigAP() {
     setIsuOnIsic();
     onInacTypeChange();
     setInacByCluster();
-    setInacNacValuesIN();
-    
   }
   // CREATCMR-5258
   if (cntry == '834') {
@@ -353,17 +354,18 @@ function setInacByCluster() {
         } else {
           FormManager.resetDropdownValues(FormManager.getField('inacType'));
         }
-      }
-    } else {
+      
+    } else {  
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
       FormManager.removeValidator('inacType', Validators.REQUIRED);
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
-      updateMRCAseanAnzIsa();
+      updateMRCAseanAnzIsa();      
+       
       return;
     }
+}  
 }
-
 function setInacByClusterHKMO() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var _cluster = FormManager.getActualValue('apCustClusterId');
@@ -463,7 +465,7 @@ function setInacNacValuesIN(){
       console.log(arr);
       if (inacList.length == 1) {
         FormManager.setValue('inacCd', arr[0]);
-      }       
+      } 
       if (inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')) {
         FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
         FormManager.setValue('inacType', 'I');
@@ -1842,7 +1844,21 @@ function onInacTypeChange() {
       });
     }
   }
+  
+  
+  
 }
+
+function filterInacCd(cmrIssuCntry, clusters,inacType,inacCd) {
+  var actualCmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var actualCluster = FormManager.getActualValue('apCustClusterId'); 
+  if (actualCmrIssuCntry == cmrIssuCntry && actualCluster == clusters) {
+    FormManager.limitDropdownValues(FormManager.getField('inacType'), inacType);    
+    FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCd);
+    
+  }
+}
+
 
 var _isicHandler = null;
 function onIsicChangeHandler() {
