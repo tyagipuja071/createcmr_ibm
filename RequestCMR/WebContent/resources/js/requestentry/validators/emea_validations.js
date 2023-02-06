@@ -473,6 +473,7 @@ function afterConfigForUKI() {
 
   if (_customerTypeHandler == null) {
     var _custType = null;
+    var issu_cntry = FormManager.getActualValue('cmrIssuingCntry');
     _customerTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       _custType = FormManager.getActualValue('custSubGrp');
       // checkScenarioChanged();
@@ -490,6 +491,9 @@ function afterConfigForUKI() {
         // optionalRuleForVatUK();
         autoSetAbbrNameUKI();
         autoSetUIFieldsOnScnrioUKI();
+        if (issu_cntry == SysLoc.IRELAND){
+          setSboValueBasedOnIsuCtcIE();
+        }
       }
     });
   }
@@ -4758,9 +4762,6 @@ function setSboValueBasedOnIsuCtcIE(value) {
   if (oldIsuCdValueIE == null) {
     return;
   }
-  if (isuCd + clientTier == oldIsuCdValueIE) {
-    return;
-  }
 
   if (isuCd == '5K' && clientTier == '') {
     FormManager.setValue('salesBusOffCd', '000');
@@ -4771,7 +4772,7 @@ function setSboValueBasedOnIsuCtcIE(value) {
   } else if (isuCd == '34' && clientTier == 'Q' && getZS01LandCntry() == 'GB' && scenario == 'CROSS') {
     FormManager.setValue('salesBusOffCd', '057');
     FormManager.setValue('repTeamMemberNo', 'SPA057');
-  } else if (isuCd == '34' && clientTier == 'Q' && getZS01LandCntry() != 'GB') {
+  } else if (isuCd == '34' && clientTier == 'Q') {
     FormManager.setValue('salesBusOffCd', '090');
     FormManager.setValue('repTeamMemberNo', 'MMIR11');
   } else if (isuCd == '21' && clientTier == '') {
@@ -9683,14 +9684,21 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
+  var activeIsuCd = [ '32', '34', '36' ];
+  var activeCtc = [ 'Q', 'Y', 'T' ];
 
-  if (isuCode != '34') {
+  if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
     } else {
       $("#clientTierSpan").html('');
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank.');
 
       return new ValidationResult({
         id : 'clientTier',
@@ -9747,7 +9755,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept \'Y\'.');
     }
   } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == 'T' || clientTierCode == '') {
+    if (activeCtc.includes(clientTierCode) || clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
