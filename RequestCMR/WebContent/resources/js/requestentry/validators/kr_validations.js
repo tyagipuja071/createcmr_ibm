@@ -22,6 +22,8 @@ function afterConfigKR() {
   });
 
   var _clusterHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
+    FormManager.resetDropdownValues(FormManager.getField('inacType'));
+    FormManager.resetDropdownValues(FormManager.getField('inacCd'));  
     LockDefaultISUClientTierMrcValues();
     setInacNacValues();
   });
