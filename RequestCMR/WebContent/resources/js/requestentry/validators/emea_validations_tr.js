@@ -2070,18 +2070,18 @@ function addTurkishCharValidator() {
 }
 
 function setEconomicCode() {
-  if (_economicCdHandler == null) {
-    _economicCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      FormManager.setValue('economicCd', '0' + FormManager.getActualValue('subIndustryCd'));
-    });
-  }
-  if (_economicCdHandler && _economicCdHandler[0]) {
-    _economicCdHandler[0].onChange();
-  }
+  var requestId = FormManager.getActualValue('reqId');
+  qParams = {
+    REQ_ID : requestId,
+  };
+  var result = cmr.query('GET.ECONOMIC_CD_BY_REQID', qParams);
+  var economicCdResult = result.ret1;
+  var economicCd = FormManager.getActualValue('economicCd');
 
-  FormManager.readOnly('economicCd');
-  if (FormManager.getActualValue('subIndustryCd') != '') {
-    FormManager.setValue('economicCd', '0' + FormManager.getActualValue('subIndustryCd'));
+  if (economicCdResult == '') {
+    FormManager.setValue('economicCd', '');
+  } else {
+    FormManager.getActualValue('economicCd');
   }
 }
 
@@ -9067,6 +9067,11 @@ function vatValidatorTR() {
             return new ValidationResult(null, true);
           }
         }
+        if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
+          if (vat == '') {
+            return new ValidationResult(null, true);
+          }
+        }
         if (soldToDistrict != null && districts.includes(soldToDistrict.toUpperCase()) && (reqType == 'C' || (reqType == 'U' && vatDistrictChkUpdate))) {
           vatPattern = /^[0-9]{9}$/;
           if (vat.match(vatPattern) != null && vat.match(vatPattern).length > 0) {
@@ -9387,5 +9392,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.TURKEY ], null, true);
+  GEOHandler.addAfterConfig(setEconomicCode, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(vatValidatorTR, [ SysLoc.TURKEY ], null, true);
+
 });
