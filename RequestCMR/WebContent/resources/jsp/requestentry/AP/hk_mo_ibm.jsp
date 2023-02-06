@@ -423,6 +423,10 @@ dojo.addOnLoad(function(){
       <%} else {%>
       <span class="ibm-required cmr-required-spacer" style="visibility:hidden">*</span>
       <%} %>
+      <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("796") && "Requester".equalsIgnoreCase(reqentry.getUserRole()) && reqentry.getCustSubGrp()!=null
+       && (reqentry.getCustSubGrp().equalsIgnoreCase("NRMLC") || reqentry.getCustSubGrp().equalsIgnoreCase("AQSTN") || reqentry.getCustSubGrp().equalsIgnoreCase("XAQST"))){%>
+      <span class="ibm-required cmr-required-spacer">*</span>
+      <%}%>
         <cmr:info text="${ui.info.coverageBg}"></cmr:info>
       </cmr:column>
       <br>

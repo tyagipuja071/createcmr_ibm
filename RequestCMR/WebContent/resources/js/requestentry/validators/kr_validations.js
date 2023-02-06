@@ -22,7 +22,13 @@ function afterConfigKR() {
   });
 
   var _clusterHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
+    FormManager.resetDropdownValues(FormManager.getField('inacType'));
+    FormManager.resetDropdownValues(FormManager.getField('inacCd'));  
     LockDefaultISUClientTierMrcValues();
+    setInacNacValues();
+  });
+
+  var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
     setInacNacValues();
   });
   
@@ -597,12 +603,14 @@ function LockDefaultISUClientTierMrcValues() {
   if (searchTerm == '71500' || searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223') {
     FormManager.setValue('mrcCd', '2');
     FormManager.readOnly('mrcCd');
-  } else if ((searchTerm == '10139' || searchTerm == '08016' || searchTerm == '09065' || searchTerm == '00003' || searchTerm == '01545') && FormManager.getField('custSubGrp') != "INTER") {
-    FormManager.setValue('mrcCd', '3');
+  } else if ((searchTerm == '10139' || searchTerm == '08016' || searchTerm == '09065' || searchTerm == '00003' || searchTerm == '01545') && FormManager.getField('custSubGrp') != "INTER") {   FormManager.setValue('mrcCd', '3');
     FormManager.readOnly('mrcCd');
   }
   if (searchTerm == '00003' && FormManager.getField('custSubGrp') != "INTER") {
     FormManager.setValue('isuCd', '34');
+    FormManager.readOnly('isuCd');
+  } else if (searchTerm == '08016') {
+    FormManager.setValue('isuCd', '36');
     FormManager.readOnly('isuCd');
   } else if (searchTerm == '10139') {
     FormManager.setValue('isuCd', '32');
@@ -721,6 +729,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.KR, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.KR);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR);
+  GEOHandler.registerValidator(validateCustnameForKynd, GEOHandler.KR);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.KR);
   // CREATCMR-6825
