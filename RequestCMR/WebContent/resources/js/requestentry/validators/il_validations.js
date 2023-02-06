@@ -363,6 +363,7 @@ function requireCtcByISU(value) {
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
   }
+  lockUnlockFieldForISrael();
 }
 
 function addILAddressTypeValidator() {
@@ -1797,6 +1798,7 @@ function resetVatRequired() {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
   }
+  lockUnlockFieldForISrael();
 }
 
 /**
@@ -2213,6 +2215,7 @@ function setEnterpriseSalesRepSBO(isuCd, clientTier) {
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
   }
+  lockUnlockFieldForISrael();
 }
 
 function checkCmrUpdateBeforeImport() {
@@ -2297,33 +2300,16 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
       FormManager.setValue('repTeamMemberNo', '000993');
       FormManager.setValue('enterprise', '985999');
       FormManager.setValue('salesBusOffCd', '009');
-
-      FormManager.readOnly('repTeamMemberNo');
-      FormManager.readOnly('enterprise');
-      FormManager.readOnly('salesBusOffCd');
       requireSalesRepEnterpriseSBOByRole();
     } else {
       FormManager.setValue('repTeamMemberNo', '000651');
       FormManager.setValue('enterprise', '006510');
       FormManager.setValue('salesBusOffCd', '006');
-      if (scenario == 'PRIPE') {
-        FormManager.readOnly('repTeamMemberNo');
-        FormManager.readOnly('enterprise');
-        FormManager.readOnly('salesBusOffCd');
-      } else {
-        FormManager.enable('repTeamMemberNo');
-      }
       requireSalesRepEnterpriseSBOByRole();
     }
-  } else if (reqType == 'C' && !scenarioChanged) {
-      if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE' || scenario == 'IBMEM') {
-        FormManager.readOnly('repTeamMemberNo');
-        FormManager.readOnly('enterprise');
-        FormManager.readOnly('salesBusOffCd');
-      } else {
-        FormManager.enable('repTeamMemberNo');
-      }
-  }
+  } 
+  
+  lockUnlockFieldForISrael();
 }
 
 function lockCMROwner() {
@@ -2567,9 +2553,7 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
       FormManager.setValue('clientTier', 'Q');
     }
   }
-  if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE' || scenario == 'IBMEM') {
-    FormManager.readOnly('clientTier');
-  }
+  lockUnlockFieldForISrael();
 }
 
 function showVatInfoOnLocal() {
@@ -2859,6 +2843,30 @@ function validateAddressShippingPairing() {
 
 function hasDuplicates(array) {
   return (new Set(array)).size !== array.length;
+}
+
+function lockUnlockFieldForISrael() {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var _custGrpSet1 = new Set([ 'COMME','GOVRN','THDPT']);
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || !_custGrpSet1.has(custSubGrp)) {
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('salesTeamCd');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.readOnly('ppsceid');
+
+  } else if (_custGrpSet1.has(custSubGrp)) {
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+    FormManager.enable('enterprise');
+    FormManager.enable('repTeamMemberNo');
+    FormManager.enable('salesTeamCd');
+    FormManager.enable('salesBusOffCd');
+  } 
 }
 
 function addressQuotationValidatorIsrael() {
