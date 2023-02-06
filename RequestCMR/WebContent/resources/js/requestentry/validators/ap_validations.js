@@ -7,7 +7,7 @@ var _vatExemptHandler = null;
 var _vatExemptHandlerNZ = null;
 var _bpRelTypeHandlerGCG = null;
 var  _isuHandler = null;
-var _clusterHandlerANZ = null;
+var _clusterHandlerANZ = null;`
 var _inacCdHandlerIN = null;
 var _importIndIN = null;
 var _vatRegisterHandlerSG = null;
@@ -279,6 +279,8 @@ function addAfterConfigAP() {
     setIsuOnIsic();
     onInacTypeChange();
     setInacByCluster();
+    setInacNacValuesIN();
+    filterInacCd('744','10215','NAC','I529');
   }
   if (cntry == '834') {
     // FormManager.removeValidator('clientTier', Validators.REQUIRED);
