@@ -166,8 +166,8 @@ function addHandlersForTW() {
       if (!value) {
         return;
       }
-      setISUCodeValues();
       filterISUOnChange();
+      setISUCodeValues();
       setInacBySearchTerm();
       addCoverageFieldsValidator();
     });
@@ -561,6 +561,10 @@ function filterISUOnChange() {
     FormManager.setValue('isuCd', isuCdResult.ret2);
   } else {
     FormManager.enable('isuCd');
+  }
+  var searchTerm = FormManager.getActualValue('searchTerm');
+  if (searchTerm == '04476' || searchTerm == '71300') {
+    FormManager.setValue('isuCd', '');
   }
 
   searchTermParams['_qall'] = 'Y';
