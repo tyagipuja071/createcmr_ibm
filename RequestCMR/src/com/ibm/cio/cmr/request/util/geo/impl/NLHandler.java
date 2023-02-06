@@ -2261,9 +2261,8 @@ public class NLHandler extends BaseSOFHandler {
         }
       }
 
-      TemplateValidation error = new TemplateValidation("Data");
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-        error = new TemplateValidation("Data");
+        TemplateValidation error = new TemplateValidation("Data");
         row = sheet.getRow(rowIndex);
         if (row == null) {
           break; // stop immediately when row is blank

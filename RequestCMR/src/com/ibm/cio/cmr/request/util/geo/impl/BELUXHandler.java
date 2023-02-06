@@ -2256,9 +2256,8 @@ public class BELUXHandler extends BaseSOFHandler {
       }
     }
 
-    TemplateValidation error = new TemplateValidation("Data");
     for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-      error = new TemplateValidation("Data");
+      TemplateValidation error = new TemplateValidation("Data");
       row = sheet.getRow(rowIndex);
       if (row == null) {
         break; // stop immediately when row is blank
@@ -2267,14 +2266,14 @@ public class BELUXHandler extends BaseSOFHandler {
       String ordBlk = validateColValFromCell(currCell);
       if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "D".equals(ordBlk) || "P".equals(ordBlk) || "J".equals(ordBlk))) {
         LOG.trace("Order Block Code should only @, D, P, J. >> ");
-        error.addError((rowIndex + 1), "Order Block Code", "Order Block Code should be only @, D, P, J. ");
+        error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should be only @, D, P, J. ");
       }
 
       currCell = row.getCell(cmrNoIndex);
       cmrNo = validateColValFromCell(currCell);
       if (isDivCMR(cmrNo)) {
-        LOG.trace("The row " + (rowIndex + 1) + ":Note the CMR number is a divestiture CMR records.");
-        error.addError((rowIndex + 1), "CMR No.", "The row " + (rowIndex + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
+        LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.");
+        error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
       }
 
       if (is93CMR(cmrNo)) {
