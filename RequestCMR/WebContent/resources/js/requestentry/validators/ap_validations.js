@@ -6986,6 +6986,30 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
   }
 }
 
+// CREATCMR-7884
+function lockClusterFieldsOnScenarioChange(scenario, scenarioChanged) {
+  console.log('>>>> lockClusterFieldsOnScenarioChange >>>>');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  var reqType = FormManager.getActualValue('reqType');
+  var scenario = FormManager.getActualValue('custSubGrp');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  
+  if (viewOnly != '' && viewOnly == 'true') {
+	  return;
+  }
+  
+  var lockClusterScenarios = [];
+  if(cntry == '796') {
+    lockClusterScenarios = ['NRMLC', 'AQSTN', 'XAQST'];
+  }
+  
+  if(scenarioChanged && reqType == 'C' && lockClusterScenarios.includes(scenario)) {
+    FormManager.readOnly('apCustClusterId');
+  } else {
+    FormManager.enable('apCustClusterId'); 
+  }
+}
+
 function addKyndrylValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -7235,4 +7259,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-7883
   GEOHandler.addAfterTemplateLoad(lockCMRNumberPrefixforNoINTER, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.SINGAPORE], null, true);
   GEOHandler.registerValidator(addKyndrylValidator, [ SysLoc.INDIA ]);
+  
+  // CREATCMR-7884 -- lock cluster for NZ
+  GEOHandler.addAfterTemplateLoad(lockClusterFieldsOnScenarioChange, [SysLoc.NEW_ZEALAND]); 
 });
