@@ -525,6 +525,9 @@ function setSBOValuesOnCustType() {
 }
 
 function lockIBMtab() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubType = FormManager.getActualValue('custSubGrp');
   var processorLockScenarios = ['XBP', 'INTER', 'BUSPR', 'INTSO', 'IBMEM'];
@@ -1970,7 +1973,7 @@ function setSBOValuesForIsuCtc() {
   var qParams = null;
   var sbo = [];
   
-  if (ims != '' && clientTier != '' && isuCd != '' && oldIsuCtcIms == null) {
+  if (ims != '' && isuCd != '' && oldIsuCtcIms == null) {
     oldIsuCtcIms = isuCd + clientTier + ims.substring(0,1);
   }
   
@@ -2017,6 +2020,7 @@ function setSBOValuesForIsuCtc() {
     } else if (FormManager.getActualValue('userRole')  == 'Processor'){
       FormManager.enable('salesBusOffCd');
     }
+    oldIsuCtcIms = isuCd + clientTier + ims;
   }
 }
 
