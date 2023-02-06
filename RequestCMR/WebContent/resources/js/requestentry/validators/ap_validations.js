@@ -4273,6 +4273,9 @@ function addCtcObsoleteValidator() {
               return new ValidationResult(null, true);
             }
           }
+          if(clientTier == "T" && (cntry == '736' || cntry == '738')){
+            return new ValidationResult(null, true);
+          }
           if(clientTier == "T" && cntry == '616'){
           	console.log('>>> Skip CTC Obsolete Validator clientTier = T for AU');
             return new ValidationResult(null, true);
@@ -4283,12 +4286,15 @@ function addCtcObsoleteValidator() {
           }
           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
         } else if (reqType == 'U' && oldCtc != null && oldCtc != clientTier && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B" ||clientTier == "M"|| clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C")) {
-           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
+          if(clientTier == "T" && (cntry == '736' || cntry == '738')){
+            return new ValidationResult(null, true);
+          }
+          return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
         } else {
-		      return new ValidationResult(null, true);
-		    }
-	  }
-  };
+          return new ValidationResult(null, true);
+        }
+      }
+     }
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
