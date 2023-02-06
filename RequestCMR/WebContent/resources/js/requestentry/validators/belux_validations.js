@@ -33,7 +33,8 @@ function afterConfigForBELUX() {
 
   if ((custSubGrp.substring(2, 5) == 'INT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO')) {
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
+    // Tier' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'Collection Code' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('economicCd', Validators.REQUIRED, [ 'Economic Code' ], 'MAIN_IBM_TAB');
