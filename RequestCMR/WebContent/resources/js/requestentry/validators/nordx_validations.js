@@ -494,10 +494,8 @@ function setClientTierValues() {
   if (isuCd != null && isuCd != undefined && isuCd != '') {
     if (isuCtcVals.hasOwnProperty(isuCd)) {
       FormManager.setValue('clientTier', isuCtcVals[isuCd]);
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'ClientTier' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.setValue('clientTier', '');
-      FormManager.removeValidator('clientTier', Validators.REQUIRED);
     }
   }
 }
@@ -4837,7 +4835,11 @@ function clientTierCodeValidator() {
     }
   } else if (isuCode == '34') {
     if (clientTierCode == '') {
-      // Do nothing, already handled
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
     } else if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
@@ -4849,7 +4851,11 @@ function clientTierCodeValidator() {
     }
   } else if (isuCode == '36') {
     if (clientTierCode == '') {
-      // Do nothing, already handled
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
     } else if (clientTierCode == 'Y') {
       return new ValidationResult(null, true);
     } else {
@@ -4861,7 +4867,11 @@ function clientTierCodeValidator() {
     }
   } else if (isuCode == '32') {
     if (clientTierCode == '') {
-      // Do nothing, already handled
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
     } else if (clientTierCode == 'T') {
       return new ValidationResult(null, true);
     } else {
