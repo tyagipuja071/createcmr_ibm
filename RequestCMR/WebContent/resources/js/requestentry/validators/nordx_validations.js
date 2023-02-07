@@ -487,10 +487,8 @@ function setClientTierValues() {
   if (isuCd != null && isuCd != undefined && isuCd != '') {
     if (isuCtcVals.hasOwnProperty(isuCd)) {
       FormManager.setValue('clientTier', isuCtcVals[isuCd]);
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'ClientTier' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.setValue('clientTier', '');
-      FormManager.removeValidator('clientTier', Validators.REQUIRED);
     }
   }
 }
@@ -4456,6 +4454,7 @@ function lockSalesRepAndSortl() {
     var clientTierCode = FormManager.getActualValue('clientTier');
     var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
     var isuCtc = isuCode.concat(clientTierCode);
+    var balticsBlockScenarios = [ 'EEBUS', 'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM' ];
 
     var lockCustSugGrpForProcessor = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS',
         'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT', 'PRIPE', 'DKPRI', 'FOPRI', 'GLPRI', 'ISPRI', 'FIPRI', 'LTPRI', 'LVPRI',
@@ -4469,7 +4468,7 @@ function lockSalesRepAndSortl() {
     }
 
     if (role == 'PROCESSOR' && cmrIssuingCntry == '702' && (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV')) {
-      if (isuCtc != null && isuCtc != '' && isuCtc != undefined && isuCtc == '34Q') {
+      if (balticsBlockScenarios.includes(custSubGrp) || (isuCtc != null && isuCtc != '' && isuCtc != undefined && isuCtc == '34Q')) {
         FormManager.readOnly('repTeamMemberNo');
       } else {
         FormManager.enable('repTeamMemberNo');
@@ -4860,12 +4859,6 @@ function clientTierCodeValidator() {
       return new ValidationResult(null, true);
     } else {
       $("#clientTierSpan").html('');
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept blank.');
-
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
