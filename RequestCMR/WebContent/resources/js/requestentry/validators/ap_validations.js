@@ -36,8 +36,8 @@ function addHandlersForAP() {
       setIsuOnIsic();
       
       filterInacCd('744','10215','NAC','I529');  
+      lockInacFieldsByCluster('744', ['10654', '10655', '10656', '10657']);
       lockFieldsWithDefaultValuesByScenarioSubType();
-      
     });
   }
   if (_vatRegisterHandlerSG == null) {
@@ -274,6 +274,7 @@ function addAfterConfigAP() {
     setInacByCluster();
     setInacNacValuesIN();
     filterInacCd('744','10215','NAC','I529');
+    lockInacFieldsByCluster('744', ['10654', '10655', '10656', '10657']);
   }
   // CREATCMR-5258
   if (cntry == '834') {
@@ -939,14 +940,38 @@ function onCustSubGrpChange() {
       setCollectionCd();
     }
     
+    resetFieldsAfterCustSubGrpChange();
+    
     filterAvailableClustersByScenarioSubType('744', ['ECOSY'], [ '10654', '10655', '10656', '10657' ]);
     filterAvailableClustersByScenarioSubType('744', ['NRML' ], [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215']);
     filterAvailableClustersByScenarioSubType('744', ['ESOSW'], [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215','10654', '10655', '10656', '10657']);    
     filterAvailableClustersByScenarioSubType('744', ['KYNDR'], [ '09062' ]);
-    filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV'], [ '2D999' ]);
+    filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV', 'INTER'], [ '2D999' ]);
     
     lockFieldsWithDefaultValuesByScenarioSubType();
   });
+}
+
+function resetFieldsAfterCustSubGrpChange() {
+  console.log(">>>> resetInacNacCdAfterCustSubGrpChange >>>>");
+  
+  FormManager.setValue('isuCd', '');
+  FormManager.setValue('inacType', '');
+  FormManager.setValue('inacCd', '');
+}
+
+function lockInacFieldsByCluster(cmrIssuCntry, clusterArray) {
+  console.log(">>>> lockInacFieldsByCluster >>>>");
+  
+  var actualCmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var actualCluster = FormManager.getActualValue('apCustClusterId');
+
+  if (actualCmrIssuCntry == cmrIssuCntry && clusterArray.includes(actualCluster)) {
+    FormManager.setValue('inacCd', '');
+    FormManager.readOnly('inacCd');
+    FormManager.setValue('inacType', '');
+    FormManager.readOnly('inacType');
+  }
 }
 
 function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrpArray, clusterArray) {
@@ -978,10 +1003,10 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.readOnly('isuCd');
       FormManager.readOnly('mrcCd');
       FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
-      FormManager.setValue('inacType', 'I');
-      FormManager.readOnly('inacType');
       FormManager.setValue('inacCd', '6272');
       FormManager.readOnly('inacCd');
+      FormManager.setValue('inacType', 'I');
+      FormManager.readOnly('inacType');
       
     } else if (['BLUMX', 'MKTPC', 'IGF', 'PRIV'].includes(custSubGrp)) {
       FormManager.readOnly('apCustClusterId');
@@ -997,28 +1022,37 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
       
-      FormManager.setValue('inacType', '');
-      FormManager.readOnly('inacType');
       FormManager.setValue('inacCd', '');
       FormManager.readOnly('inacCd');
+      FormManager.setValue('inacType', '');
+      FormManager.readOnly('inacType');
+      
+    } else if (['ECOSY'].includes(custSubGrp)) {
+      FormManager.setValue('mrcCd', '3');
+      FormManager.readOnly('mrcCd');
+      FormManager.setValue('inacCd', '');
+      FormManager.readOnly('inacCd');
+      FormManager.setValue('inacType', '');
+      FormManager.readOnly('inacType');
+      
     } else if (custSubGrp == 'CROSS'){
-        if (clusterid == '2D999'){
-          FormManager.resetDropdownValues(FormManager.getField('clientTier'))
-          FormManager.setValue('clientTier', 'Z');
-          FormManager.readOnly('clientTier');
-          
-          FormManager.resetDropdownValues(FormManager.getField('isuCd'))
-          FormManager.setValue('isuCd', '34');
-          FormManager.readOnly('isuCd');
-          
-          FormManager.setValue('mrcCd', '3');
-          FormManager.readOnly('mrcCd');
-          
-          FormManager.setValue('inacType', '');
-          FormManager.readOnly('inacType');
-          FormManager.setValue('inacCd', '');
-          FormManager.readOnly('inacCd');
-        }
+      if (clusterid == '2D999'){
+        FormManager.resetDropdownValues(FormManager.getField('clientTier'))
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.readOnly('clientTier');
+        
+        FormManager.resetDropdownValues(FormManager.getField('isuCd'))
+        FormManager.setValue('isuCd', '34');
+        FormManager.readOnly('isuCd');
+        
+        FormManager.setValue('mrcCd', '3');
+        FormManager.readOnly('mrcCd');
+        
+        FormManager.setValue('inacType', '');
+        FormManager.readOnly('inacType');
+        FormManager.setValue('inacCd', '');
+        FormManager.readOnly('inacCd');
+      }  
     }
   }
 }
@@ -2284,6 +2318,9 @@ function updateMRCAseanAnzIsa() {
     }
     if(scenario == 'LOCAL' &&(cntry == '744' || cntry == '615' || cntry == '652') && custSubGrp == 'INTER'){
       FormManager.setValue('mrcCd', '3');
+    }
+    if(scenario == 'LOCAL' && cntry == '744' && custSubGrp == 'INTER' && cluster == '2D999') {
+      FormManager.setValue('mrcCd', '2');
     }
   }
 }
