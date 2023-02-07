@@ -2188,7 +2188,7 @@ function setClientTierValuesIT(isuCd) {
   if (!isuCdList.includes(isuCd)) {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
+  //  FormManager.readOnly('clientTier');
   } else {
     if (isuCdList.includes(isuCd)) {
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
@@ -5944,7 +5944,6 @@ function setAffiliateEnterpriseRequired() {
 function ibmFieldsBehaviourInCreateByModelIT() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubType = FormManager.getActualValue('custSubGrp');
-  var reqId = FormManager.getActualValue('reqId');
   if (FormManager.getActualValue('reqType') == 'C') {
     var checkImportIndc = getImportedIndcForItaly();
     if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -5996,7 +5995,7 @@ function ibmFieldsBehaviourInCreateByModelIT() {
         FormManager.enable('repTeamMemberNo');
         FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
-        FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+       // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
       }
       if (custSubType == 'IBMIT' || custSubType == 'XIBM') {
@@ -9984,6 +9983,46 @@ function addressQuotationValidatorUKI() {
   FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Attn' ]);
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+}
+
+function clientTierValidatorIT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log("Inside clientTierCodeValidator......")
+        var isuCd = FormManager.getActualValue('isuCd');
+        var ctc = FormManager.getActualValue('clientTier');
+        var isuCdList = [ '32', '34', '36' ];
+        var validIsuCTCList = [ '32T', '34Q', '36Y' ];
+        var isuCTC = isuCd.concat(ctc);
+        
+        if (!isuCdList.includes(isuCd)) {
+          if (ctc) {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept blank.');
+          }
+        } else if (isuCdList.includes(isuCd)) {
+          if (ctc == '') {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier code is Mandatory.');
+          } else if (!validIsuCTCList.includes(isuCTC)) {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Valid combinations for ISU & Client Tier can only accept \'34 Q\' or \'36 Y\' or \'32 T\'.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function addVatIndValidator() {
