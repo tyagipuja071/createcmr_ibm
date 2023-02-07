@@ -5593,14 +5593,13 @@ function resetNZNBExempt() {
     FormManager.readOnly('vat');
   } else {
   	console.log(">>> Process nzbnExempt add * >> ");
+  	var custGrp = FormManager.getActualValue('custGrp');
   	var custSubGrp = FormManager.getActualValue('custSubGrp');
     FormManager.enable('vat');
-    if(!(custSubGrp == 'CROSS' || custSubGrp == 'DUMMY' || custSubGrp == 'INTER' || custSubGrp == 'PRIV')){
+    if(!(custGrp == 'CROSS' || custSubGrp == 'DUMMY' || custSubGrp == 'INTER' || custSubGrp == 'PRIV')){
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'New Zealand Business#' ], 'MAIN_CUST_TAB');
-      FormManager.enable('vat');
     } else {
       FormManager.removeValidator('vat', Validators.REQUIRED);
-      FormManager.readOnly('vat');
     }
   }
 }
@@ -5610,6 +5609,7 @@ function afterConfigForNewZeaLand() {
   if (_vatExemptHandlerNZ == null) {
     _vatExemptHandlerNZ = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       console.log(">>> RUNNING!!!!");
+      var custGrp = FormManager.getActualValue('custGrp');
       var custSubGrp = FormManager.getActualValue('custSubGrp');
       FormManager.resetValidations('vat');
       if (dijit.byId('vatExempt').get('checked')) {
@@ -5619,12 +5619,10 @@ function afterConfigForNewZeaLand() {
       } else {      
         console.log(">>> Process nzbnExempt add * >> ");
         FormManager.enable('vat');
-        if(!(custSubGrp == 'CROSS' || custSubGrp == 'DUMMY' || custSubGrp == 'INTER' || custSubGrp == 'PRIV')){
+        if(!(custGrp == 'CROSS' || custSubGrp == 'DUMMY' || custSubGrp == 'INTER' || custSubGrp == 'PRIV')){
           FormManager.addValidator('vat', Validators.REQUIRED, [ 'New Zealand Business#' ], 'MAIN_CUST_TAB');
-          FormManager.enable('vat');
         } else {
           FormManager.removeValidator('vat', Validators.REQUIRED);
-          FormManager.readOnly('vat');
         }
       }
     });
