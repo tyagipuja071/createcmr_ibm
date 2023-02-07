@@ -447,7 +447,11 @@ public class LAHandler extends GEOHandler {
     address.setCity1(currentRecord.getCmrCity());
 
     // State Prov - computation
-    address.setStateProv(getStateProvCd(issuingCountry, currentRecord.getCmrState(), currentRecord.getCmrCity()));
+    if (SystemLocation.BRAZIL.equalsIgnoreCase(issuingCountry)) {
+      address.setStateProv(getStateProvCd(issuingCountry, currentRecord.getCmrState(), currentRecord.getCmrCity()));
+    } else {
+      address.setStateProv(currentRecord.getCmrState());
+    }
 
     if (StringUtils.isNotBlank(address.getCity1())) {
       address.setLocationCode(getLocationCd(issuingCountry, address.getCity1(), address.getStateProv()));
