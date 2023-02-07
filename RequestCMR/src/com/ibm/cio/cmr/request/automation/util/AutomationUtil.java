@@ -591,9 +591,9 @@ public abstract class AutomationUtil {
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
     case DuplicateCMR:
-       if(SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(country)){
-    		return true;
-    	}
+      if (SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(country)) {
+        return true;
+      }
       details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
       engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
           checkResult.getCmrNo(), "");
@@ -1378,7 +1378,7 @@ public abstract class AutomationUtil {
 
   public boolean fillCoverageAttributes(RetrieveIBMValuesElement retrieveElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
-      AutomationEngineData engineData, String covType, String covId, String covDesc) throws Exception {
+      AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
     return false;
   }
 

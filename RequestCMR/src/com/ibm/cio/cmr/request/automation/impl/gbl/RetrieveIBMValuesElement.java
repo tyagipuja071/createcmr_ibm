@@ -144,7 +144,7 @@ public class RetrieveIBMValuesElement extends OverridingElement {
 
     if (countryUtil != null) {
       // hook to perform final calculations
-      countryUtil.fillCoverageAttributes(this, entityManager, results, details, overrides, requestData, engineData, covType, covId, covDesc);
+      countryUtil.fillCoverageAttributes(this, entityManager, results, details, overrides, requestData, engineData, covType, covId, covDesc, gbgId);
     }
 
     results.setResults("Successful Execution");
