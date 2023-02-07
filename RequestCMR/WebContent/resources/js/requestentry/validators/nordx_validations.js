@@ -4424,6 +4424,7 @@ function lockSalesRepAndSortl() {
     var clientTierCode = FormManager.getActualValue('clientTier');
     var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
     var isuCtc = isuCode.concat(clientTierCode);
+    var balticsBlockScenarios = [ 'EEBUS', 'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM' ];
 
     var lockCustSugGrpForProcessor = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS',
         'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT', 'PRIPE', 'DKPRI', 'FOPRI', 'GLPRI', 'ISPRI', 'FIPRI', 'LTPRI', 'LVPRI',
@@ -4437,7 +4438,7 @@ function lockSalesRepAndSortl() {
     }
 
     if (role == 'PROCESSOR' && cmrIssuingCntry == '702' && (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV')) {
-      if (isuCtc != null && isuCtc != '' && isuCtc != undefined && isuCtc == '34Q') {
+      if (balticsBlockScenarios.includes(custSubGrp) || (isuCtc != null && isuCtc != '' && isuCtc != undefined && isuCtc == '34Q')) {
         FormManager.readOnly('repTeamMemberNo');
       } else {
         FormManager.enable('repTeamMemberNo');
@@ -4833,20 +4834,10 @@ function clientTierCodeValidator() {
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier can only accept blank.');
-
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
     if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
+      // Do nothing, already handled
     } else if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
@@ -4858,11 +4849,7 @@ function clientTierCodeValidator() {
     }
   } else if (isuCode == '36') {
     if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
+      // Do nothing, already handled
     } else if (clientTierCode == 'Y') {
       return new ValidationResult(null, true);
     } else {
@@ -4874,11 +4861,7 @@ function clientTierCodeValidator() {
     }
   } else if (isuCode == '32') {
     if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
+      // Do nothing, already handled
     } else if (clientTierCode == 'T') {
       return new ValidationResult(null, true);
     } else {
