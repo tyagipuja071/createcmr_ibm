@@ -473,7 +473,7 @@ function setInacBySearchTerm() {
                 CMT : cmt ,
                };
               var results = cmr.query('GET.INAC_CD', qParams);
-              if (results != null) {
+              if (results != null && results > 0) {
                 for (var i = 0; i < results.length; i++) {
                   inacCdValue.push(results[i].ret1);
                 }
@@ -494,6 +494,8 @@ function setInacBySearchTerm() {
           FormManager.resetDropdownValues(FormManager.getField('inacType'));
         }
     }else{
+      FormManager.readOnly('inacType');
+      FormManager.readOnly('inacCd');
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
