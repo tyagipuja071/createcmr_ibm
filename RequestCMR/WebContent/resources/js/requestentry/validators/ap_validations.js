@@ -946,7 +946,7 @@ function onCustSubGrpChange() {
     filterAvailableClustersByScenarioSubType('744', ['ESOSW'], [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215','10654', '10655', '10656', '10657']);
     filterAvailableClustersByScenarioSubType('744', ['CROSS'], [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215']);
     filterAvailableClustersByScenarioSubType('744', ['KYNDR'], [ '09062' ]);
-    filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV'], [ '2D999' ]);
+    filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV', 'INTER'], [ '2D999' ]);
     
     lockFieldsWithDefaultValuesByScenarioSubType();
   });
@@ -2298,6 +2298,9 @@ function updateMRCAseanAnzIsa() {
     }
     if(scenario == 'LOCAL' &&(cntry == '744' || cntry == '615' || cntry == '652') && custSubGrp == 'INTER'){
       FormManager.setValue('mrcCd', '3');
+    }
+    if(scenario == 'LOCAL' && cntry == '744' && custSubGrp == 'INTER' && cluster == '2D999') {
+      FormManager.setValue('mrcCd', '2');
     }
   }
 }
