@@ -2984,7 +2984,8 @@ function setEntepriseAndSalesRepPT() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet21 = new Set([ 'BUSPR', 'CRINT', 'INTER', 'INTSO', 'XBP' ]);
   var custSubGrpSet34 = new Set([ 'SAAPA', 'CRPRI', 'PRICU', 'THDPT', 'COMME', 'GOVRN', 'CRGOV' ]);
-
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
   var isuCtc = isuCd + clientTier;
 
   if (custSubGrpSet21.has(custSubGrp) && isuCtc == '21') {
@@ -3001,6 +3002,9 @@ function setEntepriseAndSalesRepPT() {
     FormManager.setValue('repTeamMemberNo', '1FICTI');
   } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '5K') {
     FormManager.setValue('enterprise', '985999');
+    FormManager.setValue('repTeamMemberNo', '1FICTI');
+  } else if (custSubGrpSet34.has(custSubGrp)) {
+    FormManager.setValue('enterprise', '');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
   }
 
