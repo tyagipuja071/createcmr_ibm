@@ -323,6 +323,9 @@ function setInacByCluster() {
     if (cntry == '736' || cntry == '738') {
       return;
     }
+    if (cntry == '796' && FormManager.getActualValue('viewOnlyPage') == 'true') {
+      return;
+    }
     if (!_cluster) {
       return;
     }
@@ -5483,8 +5486,7 @@ function checkNZCustomerNameTextWhenSFP(){
       validate : function() {
         var errorMsg = '';
         var action = FormManager.getActualValue('yourAction');
-        var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase();
-        
+        var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase() +' '+ FormManager.getActualValue('mainCustNm2').toUpperCase();
         var reqType = FormManager.getActualValue('reqType');
         var role = FormManager.getActualValue('userRole').toUpperCase();
         var custGrp = FormManager.getActualValue('custGrp');
