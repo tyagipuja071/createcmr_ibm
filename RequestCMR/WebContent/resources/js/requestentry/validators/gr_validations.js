@@ -2597,7 +2597,7 @@ function lockUnlockFieldForGR() {
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('salesBusOffCd');
 
-  } else if (_custGrpSet2PT.has(custSubGrp)) {
+  } else if (_custGrpSet.has(custSubGrp)) {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     FormManager.enable('enterprise');
