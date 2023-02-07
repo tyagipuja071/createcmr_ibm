@@ -38,7 +38,7 @@ public class ForcedStatusChangeService extends BaseService<ForcedStatusChangeMod
 
   private static final String STATUS_CHG_DEFAULT_PREFIX = "***** FORCED STATUS CHANGE ***** ";
   private static final String FORCE_STATUS_CHG_CMT_PRE_PREFIX = "ACTION \"Forced Status Change\" changed the REQUEST STATUS to \"";
-  private static final String FORCE_STATUS_CHG_CMT_POST_PREFIX = "\n";
+  private static final String FORCE_STATUS_CHG_CMT_POST_PREFIX = "\"" + "\n ";
 
   @Override
   protected Logger initLogger() {
