@@ -491,7 +491,7 @@ function afterConfigForUKI() {
         // optionalRuleForVatUK();
         autoSetAbbrNameUKI();
         autoSetUIFieldsOnScnrioUKI();
-        if (issu_cntry == SysLoc.IRELAND){
+        if (issu_cntry == SysLoc.IRELAND) {
           setSboValueBasedOnIsuCtcIE();
         }
       }
@@ -4712,9 +4712,6 @@ function setSboValueBasedOnIsuCtcUK(value) {
   }
 
   if (oldIsuCdValueUK == null) {
-    return;
-  }
-  if (isuCd + clientTier == oldIsuCdValueUK) {
     return;
   }
 
@@ -9699,20 +9696,10 @@ function clientTierCodeValidator() {
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier can only accept blank.');
-
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
     if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
+      // Already handled
     } else if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
@@ -9724,11 +9711,7 @@ function clientTierCodeValidator() {
     }
   } else if (isuCode == '32') {
     if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
+      // Already handled
     } else if (clientTierCode == 'T') {
       return new ValidationResult(null, true);
     } else {
@@ -9740,11 +9723,7 @@ function clientTierCodeValidator() {
     }
   } else if (isuCode == '36') {
     if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
+      // Already handled
     } else if (clientTierCode == 'Y') {
       return new ValidationResult(null, true);
     } else {
