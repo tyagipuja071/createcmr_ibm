@@ -5199,4 +5199,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSalesRepValues, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(addCtcHandler, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(addIsuHandler, GEOHandler.NORDX);
+  
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.NORDX);
 });

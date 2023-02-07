@@ -10256,7 +10256,7 @@ dojo.addOnLoad(function() {
 	
 	GEOHandler.registerValidator(checkIfVATFiscalUpdatedIT, [SysLoc.ITALY]);
 	GEOHandler.registerValidator(validateFiscalLengthOnIdentIT, [ SysLoc.ITALY ]);
-    GEOHandler.registerValidator(validateVATOnIdentIT, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(validateVATOnIdentIT, [ SysLoc.ITALY ]);
 	GEOHandler.registerValidator(addInstallingAddrValidator, [SysLoc.ITALY], null, true);
 	GEOHandler.registerValidator(validateEnterpriseNumForIT, [SysLoc.ITALY], null, true);
 	GEOHandler.registerValidator(checkIfStateProvBlankForProcIT, [SysLoc.ITALY], GEOHandler.ROLE_PROCESSOR, true);
