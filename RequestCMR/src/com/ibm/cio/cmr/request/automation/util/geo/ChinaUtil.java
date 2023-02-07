@@ -130,16 +130,20 @@ public class ChinaUtil extends AutomationUtil {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
     case SCENARIO_ECOSYTEM_PARNER:
-      if ("08036".equals(data.getSearchTerm())) {
-        LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp());
-        result.setOnError(false);
-        details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
-      } else {
-        details
-            .append("Cluster=" + data.getSearchTerm() + " should be default (08036)  for Scenario=" + data.getCustSubGrp() + " for the request.\n");
-        engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() + " should default (08036)  for this scenario", "", "");
-        result.setOnError(true);
-      }
+      // if ("08036".equals(data.getSearchTerm())) {
+      // LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + "
+      // Scenario=" + data.getCustSubGrp());
+      // result.setOnError(false);
+      // details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + "
+      // Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      // } else {
+      // details
+      // .append("Cluster=" + data.getSearchTerm() + " should be default (08036)
+      // for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      // engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm()
+      // + " should default (08036) for this scenario", "", "");
+      // result.setOnError(true);
+      // }
       break;
     case SCENARIO_LOCAL_BUSPR:
       if ("00075".equals(data.getSearchTerm())) {
