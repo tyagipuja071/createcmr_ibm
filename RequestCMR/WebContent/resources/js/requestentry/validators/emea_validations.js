@@ -5179,6 +5179,7 @@ function setSBOSalesRepFor34QYZ() {
   var subRegion = FormManager.getActualValue('countryUse');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
+  var landCntry = '';
   var isuCTC = isu.concat(ctc);
   if (checkImportIndc == 'Y') {
     return;
@@ -5193,8 +5194,22 @@ function setSBOSalesRepFor34QYZ() {
   } else {
     postCodeOrg = '';
   }
-  var postCode = (postCode.startsWith("200") || postCode.startsWith("201")) ? postCodeOrg.substring(0, 3) : postCodeOrg.substring(0, 2);
+  var postCode = (postCodeOrg.startsWith("200") || postCodeOrg.startsWith("201")) ? postCodeOrg.substring(0, 3) : postCodeOrg.substring(0, 2);
 
+  if(postCode == '' || postCode == undefined || postCode == null){
+	return;
+   }
+   
+      // GET LANDCNTRY in case of CB
+     if(custType == 'CROSS'){
+	 var result1 = cmr.query('LANDCNTRY.IT', {
+    REQID : reqId
+     });
+   if (result1 != null && result1.ret1 != undefined) {
+    landCntry = result1.ret1;
+    }
+  }
+      
   var commSubTypes = [ 'COMME', 'COMSM', 'COMVA', 'CROCM', 'GOVST', 'LOCEN', 'GOVSM', 'LOCSM', 'GOVVA', 'LOCVA', 'CROGO', 'NGOIT', 'NGOVA', 'NGOSM', '3PAIT', 'UNIVA', 'UNIVE', 'UNISM', '3PASM',
       '3PAVA', 'CRO3P', 'CROUN', 'CROLC' ];
   var ibmEmpCustSubTypes = [ 'IBMIT', 'XIBM' ];
@@ -5225,14 +5240,23 @@ function setSBOSalesRepFor34QYZ() {
       if ((postCode >= 20 && postCode <= 27) && postCode != 200 && postCode != 201) {
         FormManager.setValue('salesBusOffCd', 'GJ');
       }
-      if ((postCode >= 10 && postCode <= 19) || postCode == 28 && custType == 'CROSS' && subRegion != '758SM' && subRegion != '758VA') {
+      if ((postCode >= 10 && postCode <= 19) || postCode == 28) {
         FormManager.setValue('salesBusOffCd', 'NB');
       }
-      if ((postCode >= 40 && postCode <= 48) || postCode == 29 && (postCode != 45 && postCode != 46) || custType == 'CROSS' || subRegion == '758SM') {
+      if ((postCode >= 40 && postCode <= 48) || postCode == 29 || (postCode != 45 && postCode != 46)) {
         FormManager.setValue('salesBusOffCd', 'DU');
       }
-      if ((postCode >= 00 && postCode <= 04) || custType == 'CROSS' || subRegion == '758VA') {
+      if ((postCode >= 00 && postCode <= 04)) {
         FormManager.setValue('salesBusOffCd', 'NC');
+      }
+      
+     
+      if((custType == 'CROSS' && landCntry == 'SM') || subRegion == '758SM'){
+	        FormManager.setValue('salesBusOffCd', 'DU');
+      }else if((custType == 'CROSS' && landCntry == 'VA') || subRegion == '758VA'){
+	        FormManager.setValue('salesBusOffCd', 'NC');
+      }else if(custType == 'CROSS'){
+	        FormManager.setValue('salesBusOffCd', 'NB');
       }
     } else if (isuCTC == '32T') {
       FormManager.setValue('salesBusOffCd', 'SD');
