@@ -330,6 +330,9 @@ function setInacByCluster() {
     if (cntry == '736' || cntry == '738') {
       return;
     }
+    if (cntry == '796' && FormManager.getActualValue('viewOnlyPage') == 'true') {
+      return;
+    }
     if (!_cluster) {
       return;
     }
