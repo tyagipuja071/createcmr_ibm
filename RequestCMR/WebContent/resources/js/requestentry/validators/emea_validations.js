@@ -9976,10 +9976,7 @@ function clientTierValidatorIT() {
         var isuCdList = [ '32', '34', '36' ];
         var validIsuCTCList = [ '32T', '34Q', '36Y' ];
         var isuCTC = isuCd.concat(ctc);
-        if (FormManager.getActualValue('reqType') == 'U') {
-          return new ValidationResult(null, true);
-        }
-
+        
         if (!isuCdList.includes(isuCd)) {
           if (ctc) {
             return new ValidationResult({
@@ -10000,7 +9997,7 @@ function clientTierValidatorIT() {
               id : 'clientTier',
               type : 'text',
               name : 'clientTier'
-            }, false, 'Valid combinations for ISU & Client Tier can only accept \'34Q\' or \'36Y\' or \'32T\'.');
+            }, false, 'Valid combinations for ISU & Client Tier can only accept \'34 Q\' or \'36 Y\' or \'32 T\'.');
           }
         }
         return new ValidationResult(null, true);
