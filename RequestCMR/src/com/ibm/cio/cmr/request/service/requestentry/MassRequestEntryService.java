@@ -139,7 +139,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   private final ApprovalService approvalService = new ApprovalService();
   private static final String STATUS_CHG_CMT_PRE_PREFIX = "ACTION \"";
   private static final String STATUS_CHG_CMT_MID_PREFIX = "\" changed the REQUEST STATUS to \"";
-  private static final String STATUS_CHG_CMT_POST_PREFIX = "\n";
+  private static final String STATUS_CHG_CMT_POST_PREFIX = "\"" + "\n ";
   private static final String CMR_SHEET_NAME = "Mass Change";
   private static final String MASS_DATA = "Mass Data";
   private static final String CONFIG_SHEET_NAME = "Config";
