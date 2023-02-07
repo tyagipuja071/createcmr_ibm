@@ -655,18 +655,15 @@ function setClientTierValuesMT(isu) {
     if (isu == '34' && custSubGroup == 'PRICU') {
       FormManager.setValue('clientTier', 'Q');
       FormManager.setValue('enterprise', '985204');
-    } else if (isu == '34' && custSubGroup != 'PRICU') {
-      FormManager.setValue('clientTier', 'Q');
-      FormManager.setValue('enterprise', '985204');
     } else if (isu == '36') {
       FormManager.setValue('clientTier', 'Y');
-      FormManager.setValue('enterprise', '822830');
+      FormManager.setValue('enterprise', '985205');
     } else if (isu == '34') {
       FormManager.setValue('clientTier', 'Q');
-      FormManager.setValue('enterprise', '822830');
+      FormManager.setValue('enterprise', '985204');
     } else if (isu == '5K') {
       FormManager.setValue('clientTier', '');
-      FormManager.setValue('enterprise', '822830');
+      FormManager.setValue('enterprise', '985999');
     } else if (isu == '21' && custSubGroup == 'IBMEM') {
       FormManager.setValue('clientTier', '');
       FormManager.setValue('enterprise', '985999');
