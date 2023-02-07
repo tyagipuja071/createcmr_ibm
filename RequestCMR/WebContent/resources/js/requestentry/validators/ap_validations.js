@@ -349,6 +349,9 @@ function setInacByCluster() {
     if (cntry == '736' || cntry == '738') {
       return;
     }
+    if (cntry == '796' && FormManager.getActualValue('viewOnlyPage') == 'true') {
+      return;
+    }
     if (!_cluster) {
       // Empty INAC related when Cluster is not valid >>>> 002005 >>>>
       if(_cluster=='' || _cluster==undefined){
