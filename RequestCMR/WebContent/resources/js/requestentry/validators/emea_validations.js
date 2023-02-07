@@ -10272,6 +10272,7 @@ dojo.addOnLoad(function() {
 	GEOHandler.registerValidator(checkIsicCodeValidationIT, [SysLoc.ITALY]);
 	GEOHandler.registerValidator(addCMRValidator, [SysLoc.ITALY], null, true);
 	GEOHandler.registerValidator(addBillingValidator, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(clientTierValidatorIT, [SysLoc.ITALY], null, true);
 
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
   GEOHandler.checkRoleBeforeAddAddrFunction(addAddrValidationForProcItaly, [ SysLoc.ITALY ], null, GEOHandler.ROLE_PROCESSOR);
