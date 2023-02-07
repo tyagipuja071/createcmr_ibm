@@ -10194,25 +10194,6 @@ dojo.addOnLoad(function() {
 	/* 1438717 - add DPL match validation for failed dpl checks */
 	GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
 	
-	GEOHandler.registerValidator(checkIfVATFiscalUpdatedIT, [SysLoc.ITALY]);
-	GEOHandler.registerValidator(validateFiscalLengthOnIdentIT, [ SysLoc.ITALY ]);
-    GEOHandler.registerValidator(validateVATOnIdentIT, [ SysLoc.ITALY ]);
-	GEOHandler.registerValidator(addInstallingAddrValidator, [SysLoc.ITALY], null, true);
-	GEOHandler.registerValidator(validateEnterpriseNumForIT, [SysLoc.ITALY], null, true);
-	GEOHandler.registerValidator(checkIfStateProvBlankForProcIT, [SysLoc.ITALY], GEOHandler.ROLE_PROCESSOR, true);
-	GEOHandler.registerValidator(stateProvValidatorCBforIT, [SysLoc.ITALY]);
-	GEOHandler.registerValidator(validateSingleReactParentCMR, [SysLoc.ITALY], null, true);
-	GEOHandler.registerValidator(validateSBOForIT, [SysLoc.ITALY]);
-	GEOHandler.registerValidator(validateSalesRepForIT, [SysLoc.ITALY]);
-	GEOHandler.registerValidator(validateCodiceDesIT, [SysLoc.ITALY], null, true);
-	GEOHandler.registerValidator(validateCollectionCdIT, [SysLoc.ITALY], null, true);
-	GEOHandler.registerValidator(validateCMRNumberForIT, [SysLoc.ITALY], null, true);
-	GEOHandler.registerValidator(addEmbargoCodeValidatorIT, [SysLoc.ITALY], null, true);
-	GEOHandler.registerValidator(validateExistingCMRNo, [SysLoc.ITALY], null, true);
-	GEOHandler.registerValidator(checkIsicCodeValidationIT, [SysLoc.ITALY]);
-	GEOHandler.registerValidator(addCMRValidator, [SysLoc.ITALY], null, true);
-	GEOHandler.registerValidator(addBillingValidator, [SysLoc.ITALY], null, true);
-
   GEOHandler.registerValidator(checkIfVATFiscalUpdatedIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(validateFiscalLengthOnIdentIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(validateVATOnIdentIT, [ SysLoc.ITALY ]);
