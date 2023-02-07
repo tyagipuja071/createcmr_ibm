@@ -1298,6 +1298,11 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
         FormManager.readOnly('inacType');
         FormManager.setValue('inacCd', '');
         FormManager.readOnly('inacCd');
+      } else {
+        FormManager.enable('clientTier');
+        FormManager.enable('isuCd');        
+        FormManager.enable('inacType');
+        FormManager.enable('inacCd');
       }  
     }
   }
