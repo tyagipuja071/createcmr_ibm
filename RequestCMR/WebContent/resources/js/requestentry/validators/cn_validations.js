@@ -3855,7 +3855,7 @@ function retrievedForCNValidator() {
                     GLC_CD : '%'+data.glcCode+'%',
                     DEFAULT_INDC : indc
                   });
-                  if(result != null){
+                  if(result != null && result.length > 0){
                     var searchTerm = result.ret1;
                     var clientTier = result.ret2;
                     var isuCd = result.ret3;
