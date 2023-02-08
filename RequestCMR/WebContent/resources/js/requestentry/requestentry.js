@@ -203,6 +203,18 @@ function processRequestAction() {
       	} else {
       	  matchDnBForAutomationCountries();
       	}
+      // CREATCMR-7884: NZ coverage - after company proof provided, also need to retrieve GLC
+      } else if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C') {
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
+      	if(matchOverrideIndc=='Y') {
+      		if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
+            cmr.showProgress('Checking request data..');
+            checkRetrievedForNZ();
+          } else {
+            cmr.showModal('addressVerificationModal');
+          }
+      	}
       } else if (cmrCntry == '897' || cmrCntry == '649') {
         // CREATCMR-6074
         // addUpdateChecksExecution(frmCMR);

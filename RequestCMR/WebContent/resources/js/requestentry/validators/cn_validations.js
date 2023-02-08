@@ -473,7 +473,7 @@ function setInacBySearchTerm() {
                 CMT : cmt ,
                };
               var results = cmr.query('GET.INAC_CD', qParams);
-              if (results != null) {
+              if (results != null && results > 0) {
                 for (var i = 0; i < results.length; i++) {
                   inacCdValue.push(results[i].ret1);
                 }
@@ -494,6 +494,8 @@ function setInacBySearchTerm() {
           FormManager.resetDropdownValues(FormManager.getField('inacType'));
         }
     }else{
+      FormManager.readOnly('inacType');
+      FormManager.readOnly('inacCd');
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
@@ -3964,6 +3966,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHINA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHINA ], null, true);
   GEOHandler.registerValidator(addChecklistValidator, GEOHandler.CN);
+  GEOHandler.registerValidator(retrievedValueValidator, GEOHandler.CN);
 // GEOHandler.registerValidator(isValidDate,GEOHandler.CN);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addFastPassAttachmentValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
@@ -3988,7 +3991,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateISICForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
-  GEOHandler.registerValidator(retrievedValueValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
 });
