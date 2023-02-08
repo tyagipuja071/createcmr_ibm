@@ -291,7 +291,11 @@ function addAfterConfigAP() {
     // CREATCMR-7885
     if(reqType == 'C' && ['ASLOM','NRML','CROSS'].includes(custSubGrp)){
       console.log('addAfterConfigAP >>> 834/ASLOM/NRML/CROSS >>> Set Cluster default as BLANK.');
-      FormManager.setValue('apCustClusterId', '');
+      if(custSubGrp =='CROSS' && _pagemodel.apCustClusterId == null ){
+        FormManager.setValue('apCustClusterId', '00000');
+      }else if(custSubGrp !='CROSS'){
+        FormManager.setValue('apCustClusterId', '');  
+      }
     }
   }
   if (cntry != SysLoc.HONG_KONG && cntry !=  SysLoc.MACAO && reqType == 'U') {
