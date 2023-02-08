@@ -195,10 +195,6 @@ public class NewZealandUtil extends AutomationUtil {
         }
         engineData.addNegativeCheckStatus("NZName", "The Customer Name doesn't match from NZBN API");
       }
-
-    } else {
-      details.append("No specific fields to compute.\n");
-      results.setResults("Skipped");
     }
     results.setDetails(details.toString());
 
