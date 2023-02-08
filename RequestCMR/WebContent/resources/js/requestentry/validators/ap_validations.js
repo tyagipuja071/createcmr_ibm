@@ -2166,15 +2166,18 @@ function setCtcOnIsuCdChangeANZ(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (isuCd == null) {
     isuCd = FormManager.getActualValue('isuCd');
   }
   if (isuCd == '5K') {
+  	if (cntry == '736' || cntry == '738') {
+      return;
+    }
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
-    var cntry = FormManager.getActualValue('cmrIssuingCntry');
     if (cntry != '736' && cntry != '738') {
       FormManager.enable('clientTier');
     }
