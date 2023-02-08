@@ -271,7 +271,7 @@ function addAfterConfigAP() {
         FormManager.readOnly('isuCd');
     }
     
-    // CREATCMR-7883: set Cluster '00001' as default code 
+    // CREATCMR-7883: set Cluster '00001' as default code
     if (cntry == SysLoc.AUSTRALIA && custSubGrp == "CROSS") {
       FormManager.setValue('apCustClusterId', "00001");
     }
@@ -487,7 +487,7 @@ function setInacByCluster() {
         FormManager.enable('inacType'); 
         FormManager.enable('inacCd'); 
       }
-      //clear INAC after cluster change
+      // clear INAC after cluster change
       if(cntry == '616' && _clusterAUWithAllInac.includes(_cluster)){
         FormManager.setValue('inacCd','');
         FormManager.setValue('inacType', '');
@@ -585,6 +585,10 @@ function setInacNacValuesIN(){
   console.log('>>>> setInacNacValuesIN >>>>');
   var _cluster = FormManager.getActualValue('apCustClusterId');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  // CREATCMR-7884
+  if ((cntry == '796' || cntry == '616' || cntry == '834' || cntry == '749' || cntry == '778') && FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
@@ -3031,7 +3035,8 @@ function setCTCIsuByClusterASEAN() {
       var results = cmr.query('GET.CTC_ISU_BY_CLUSTER_CNTRY', qParams);
       if (results != null) {
         for (var i = 0; i < results.length; i++) {
-          // CREATCMR-7885 : Remove duplicate values for Cluster and GB segment to fix bugs.
+          // CREATCMR-7885 : Remove duplicate values for Cluster and GB segment
+          // to fix bugs.
           if(!apClientTierValue.includes(results[i].ret1)){
             apClientTierValue.push(results[i].ret1);
           }
@@ -6114,6 +6119,12 @@ function checkNZCustomerNameTextWhenSFP(){
             errorMsg = 'Customer Name can not contain \'organization\'';
           } else if(custNm1.indexOf('PVT LTD')>-1){
             errorMsg = 'Customer Name can not contain \'Pvt Ltd\'';
+          } else if(custNm1.indexOf('PRIVATE')>-1){
+            errorMsg = 'Customer Name can not contain \'Private\'';
+          } else if(custNm1.indexOf('LIMITED')>-1){
+            errorMsg = 'Customer Name can not contain \'Limited\'';
+          } else if(custNm1.indexOf('LTD')>-1){
+            errorMsg = 'Customer Name can not contain \'Ltd\'';
           }
         } else if(reqType == 'C' && role == 'REQUESTER' && custSubGrp == 'KYND' && (action=='SFP' || action=='VAL')){
           // CREATCMR-7884
@@ -7260,7 +7271,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockFieldsForIndia, SysLoc.INDIA);
   GEOHandler.addAfterConfig(lockFieldsForAU, [ SysLoc.AUSTRALIA ]);
   GEOHandler.addAfterTemplateLoad(lockFieldsForAU, SysLoc.AUSTRALIA);
-  //GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ANZ, GEOHandler.ROLE_REQUESTER, true);
+  // GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ANZ,
+  // GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ASEAN, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.addAfterTemplateLoad(lockAbbvNameOnScenarioChangeGCG, GEOHandler.GCG);
   GEOHandler.addAfterTemplateLoad(setAbbrvNameBPScen, GEOHandler.GCG);
@@ -7275,10 +7287,13 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setCtcOnIsuCdChangeANZ, GEOHandler.ANZ);
   GEOHandler.addAfterConfig(lockFieldsForIndia, [ SysLoc.INDIA ]);
   GEOHandler.registerValidator(validateCustNameForInternal, [ SysLoc.AUSTRALIA ], null, true);  
-//  GEOHandler.registerValidator(clusterCdValidatorAU, [ SysLoc.AUSTRALIA ], null, true);
+// GEOHandler.registerValidator(clusterCdValidatorAU, [ SysLoc.AUSTRALIA ],
+// null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.AP, null, true);
-  // after coverage update, the Cluster code options are restricted on Scenario, so remove this validator
-  //GEOHandler.registerValidator(validateClusterBaseOnScenario, [ SysLoc.SINGAPORE ], null, true);  
+  // after coverage update, the Cluster code options are restricted on Scenario,
+  // so remove this validator
+  // GEOHandler.registerValidator(validateClusterBaseOnScenario, [
+  // SysLoc.SINGAPORE ], null, true);
   GEOHandler.addAfterConfig(lockInacCodeForIGF, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, SysLoc.INDIA);
   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate,  GEOHandler.AP );
@@ -7303,7 +7318,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addValidatorforInstallingNZ, [SysLoc.NEW_ZEALAND], null, true);
   
   // CREATCMR-7653
-  GEOHandler.registerValidator(checkNZCustomerNameTextWhenSFP, [ SysLoc.NEW_ZEALAND ], GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(checkNZCustomerNameTextWhenSFP, [ SysLoc.NEW_ZEALAND,SysLoc.AUSTRALIA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(checkNZLandedCountryForCrossWhenSFP, [ SysLoc.NEW_ZEALAND ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(checkNZCustomerNameStartsForLocalInterDummy, [ SysLoc.NEW_ZEALAND ], GEOHandler.ROLE_REQUESTER, true);
 
