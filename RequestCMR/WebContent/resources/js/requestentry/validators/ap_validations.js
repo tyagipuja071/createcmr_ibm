@@ -1055,6 +1055,11 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
         FormManager.readOnly('inacType');
         FormManager.setValue('inacCd', '');
         FormManager.readOnly('inacCd');
+      } else if (['10654', '10655', '10656', '10657' ].includes(clusterid)) {
+        FormManager.setValue('inacType', '');
+        FormManager.readOnly('inacType');
+        FormManager.setValue('inacCd', '');
+        FormManager.readOnly('inacCd');
       } else {
         FormManager.enable('clientTier');
         FormManager.enable('isuCd');        
@@ -2336,6 +2341,8 @@ function updateMRCAseanAnzIsa() {
     if(scenario == 'LOCAL' && cntry == '744' && custSubGrp == 'INTER' && cluster == '2D999') {
       FormManager.setValue('mrcCd', '2');
     } else if (scenario == 'LOCAL' && cntry == '744' && ['10654', '10655', '10656', '10657'].includes(cluster)) {
+      FormManager.setValue('mrcCd', '3');
+    } else if (scenario == 'CROSS' &&  custSubGrp == 'CROSS' && cntry == '744' && ['10654', '10655', '10656', '10657'].includes(cluster)) {
       FormManager.setValue('mrcCd', '3');
     }
   }
