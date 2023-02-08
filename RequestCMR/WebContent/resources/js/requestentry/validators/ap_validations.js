@@ -1244,6 +1244,9 @@ function lockInacFieldsByCluster(cmrIssuCntry, clusterArray) {
     FormManager.readOnly('inacCd');
     FormManager.setValue('inacType', '');
     FormManager.readOnly('inacType');
+  } else {
+    FormManager.enable('inacCd');
+    FormManager.enable('inacType');
   }
 }
 
@@ -1330,6 +1333,12 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
         FormManager.enable('inacType');
         FormManager.enable('inacCd');
       }  
+    } else {
+      FormManager.enable('apCustClusterId');
+      FormManager.enable('clientTier');
+      FormManager.enable('isuCd');
+      FormManager.enable('inacCd');      
+      FormManager.enable('inacType');
     }
   }
 }
