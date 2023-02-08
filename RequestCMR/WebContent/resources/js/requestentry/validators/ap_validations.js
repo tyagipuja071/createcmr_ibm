@@ -2698,6 +2698,8 @@ function updateMRCAseanAnzIsa() {
     }
     if(scenario == 'LOCAL' && cntry == '744' && custSubGrp == 'INTER' && cluster == '2D999') {
       FormManager.setValue('mrcCd', '2');
+    } else if (scenario == 'LOCAL' && cntry == '744' && ['10654', '10655', '10656', '10657'].includes(cluster)) {
+      FormManager.setValue('mrcCd', '3');
     }
   }
   
