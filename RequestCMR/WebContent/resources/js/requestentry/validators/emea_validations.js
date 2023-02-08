@@ -7221,27 +7221,6 @@ function lockRequireFieldsUKI() {
 			}
 		}
 	}
-
-	if (reqType == 'U' && role == 'REQUESTER') {
-		FormManager.enable('abbrevNm');
-		FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-		FormManager.enable('abbrevLocn');
-		FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
-	} else if (role == 'PROCESSOR') {
-		FormManager.enable('abbrevNm');
-		FormManager.enable('abbrevLocn');
-	}
-	if (reqType == 'C' && role == 'PROCESSOR') {
-		if (custSubGroup == 'IBMEM') {
-			FormManager.readOnly('clientTier');
-			FormManager.readOnly('company');
-			FormManager.readOnly('collectionCd');
-		} else {
-			FormManager.enable('clientTier');
-			FormManager.enable('company');
-			FormManager.enable('collectionCd');
-		}
-	}
 }
 function lockCustClassUKI() {
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -10331,15 +10310,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setIBMFieldsMandtOptional, [ SysLoc.IRELAND, SysLoc.UK ]);
   // GEOHandler.addAfterConfig(setCtcFieldMandtUKI, [ SysLoc.IRELAND, SysLoc.UK
   // ]);
-
-	// GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.UK ]);
-	// GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.UK ]);
-	GEOHandler.addAfterTemplateLoad(setCustClassCd, [SysLoc.UK, SysLoc.IRELAND]);
-	GEOHandler.addAfterConfig(setCustClassCd, [SysLoc.UK, SysLoc.IRELAND]);
-	GEOHandler.addAfterTemplateLoad(configureCRNForUKI, [SysLoc.UK, SysLoc.IRELAND]);
-	GEOHandler.addAfterConfig(configureCRNForUKI, [SysLoc.UK, SysLoc.IRELAND]);
-	// GEOHandler.addAfterTemplateLoad(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
-	// GEOHandler.addAfterConfig(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.registerValidator(requestingLOBCheckFrIFSL, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.registerValidator(addValidatorForCollectionCdUpdateUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(validateCollectionCdValueUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(addValidatorForCompanyRegNum, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(addCustClassValidatorBP, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
 
   // CMR-2205
   GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR, [ SysLoc.TURKEY ]);
@@ -10392,6 +10367,4 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.addAfterConfig(setClientTierBasedOnIsuUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(setClientTierBasedOnIsuUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
-  // CREATCMR-1727
-  GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
 });
