@@ -1185,13 +1185,14 @@ function setVatIndFieldsForGrp1AndNordx() {
 function updateProspectLegalInd() {
   var CMRDataRdc = "";
   var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
   var result = cmr.query("GET.CMR.DATARDC", {
       REQ_ID : reqId
     });
    if (result != null && result.ret1 != '' && result.ret1 != null) {
     CMRDataRdc = result.ret1 ;
   }
-  if (CMRDataRdc != '' && CMRDataRdc.includes("P")) {
+  if (CMRDataRdc != '' && CMRDataRdc.includes("P") && reqType == 'C') {
     FormManager.setValue('prospLegalInd','Y');
   }
 }
