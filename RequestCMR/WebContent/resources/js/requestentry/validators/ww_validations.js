@@ -1182,6 +1182,20 @@ function setVatIndFieldsForGrp1AndNordx() {
   }
 }
 
+function updateProspectLegalInd() {
+  var CMRDataRdc = "";
+  var reqId = FormManager.getActualValue('reqId');
+  var result = cmr.query("GET.CMR.DATARDC", {
+      REQ_ID : reqId
+    });
+   if (result != null && result.ret1 != '' && result.ret1 != null) {
+    CMRDataRdc = result.ret1 ;
+  }
+  if (CMRDataRdc != '' && CMRDataRdc.includes("P")) {
+    FormManager.setValue('prospLegalInd','Y');
+  }
+}
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
@@ -1214,6 +1228,7 @@ dojo.addOnLoad(function() {
        '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
 
   GEOHandler.GROUP1 = [ '724', '848', '618', '624', '788', '624', '649', '866', '754' ];
+  GEOHandler.AllCountries =  ['754'  ,'755'  ,'866'  ,'726'  ,'666'  ,'724'  ,'619'  ,'621'  ,'627'  ,'647'  ,'640'  ,'759'  ,'839'  ,'843'  ,'859'  ,'791'  ,'838'  ,'822'  ,'615'  ,'616'  ,'643'  ,'652'  ,'738'  ,'744'  ,'749'  ,'778'  ,'796'  ,'818'  ,'834'  ,'852'  ,'856'  ,'760'  ,'848'  ,'736'  ,'883'  ,'881'  ,'880'  ,'826'  ,'879'  ,'876'  ,'613'  ,'629'  ,'631'  ,'655'  ,'661'  ,'663'  ,'681'  ,'683'  ,'731'  ,'735'  ,'811'  ,'813'  ,'815'  ,'869'  ,'871'  ,'897'  ,'857'  ,'851'  ,'842'  ,'841'  ,'840'  ,'835'  ,'833'  ,'831'  ,'827'  ,'825'  ,'810'  ,'782'  ,'780'  ,'770'  ,'769'  ,'764'  ,'753'  ,'745'  ,'725'  ,'718'  ,'717'  ,'700'  ,'698'  ,'692'  ,'691'  ,'670'  ,'675'  ,'669'  ,'667'  ,'662'  ,'656'  ,'645'  ,'637'  ,'636'  ,'635'  ,'610'  ,'383'  ,'382'  ,'373'  ,'781'  ,'829'  ,'706'  ,'358'  ,'359'  ,'363'  ,'603'  ,'607'  ,'620'  ,'626'  ,'642'  ,'644'  ,'651'  ,'668'  ,'677'  ,'680'  ,'693'  ,'694'  ,'695'  ,'699'  ,'705'  ,'707'  ,'708'  ,'740'  ,'741'  ,'752'  ,'762'  ,'768'  ,'772'  ,'787'  ,'805'  ,'808'  ,'820'  ,'821'  ,'729'  ,'823'  ,'832'  ,'849'  ,'850'  ,'865'  ,'889'  ,'804'  ,'641'  ,'758'  ,'678'  ,'702'  ,'806'  ,'846'  ,'624'  ,'788'  ,'862'  ,'767'  ,'864'  ,'649'  ,'766'  ,'858'  ,'704'  ,'799'];
   
   GEOHandler.registerWWValidator(addCMRSearchValidator);
   GEOHandler.registerWWValidator(addDnBSearchValidator);
@@ -1270,6 +1285,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerWWValidator(addINACValidator);
   // Removing this for coverage-2023 as ISU -32 is no longer obsoleted
   // GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
+  GEOHandler.addAfterConfig(updateProspectLegalInd,  GEOHandler.AllCountries);
   
   GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']);  
   GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']); 
