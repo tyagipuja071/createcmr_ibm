@@ -293,8 +293,6 @@ function addAfterConfigAP() {
       console.log('addAfterConfigAP >>> 834/ASLOM/NRML/CROSS >>> Set Cluster default as BLANK.');
       if(custSubGrp =='CROSS' && _pagemodel.apCustClusterId == null ){
         FormManager.setValue('apCustClusterId', '00000');
-      }else if(custSubGrp !='CROSS' && _pagemodel.apCustClusterId == null ){
-         FormManager.setValue('apCustClusterId', '');
       }
     }
   }
@@ -7040,7 +7038,7 @@ function clearInacOnClusterChange(selectedCluster) {
 function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   console.log('>>>> clearClusterFieldsOnScenarioChange >>>>');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var issuingCnt = ['818', '856', '852', '616', '796'];
+  var issuingCnt = ['818', '856', '852', '616', '796', '834'];
   if (issuingCnt.includes(cntry)) {
     var viewOnly = FormManager.getActualValue('viewOnlyPage');
     if (viewOnly != '' && viewOnly == 'true') {
@@ -7061,6 +7059,12 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
       clearClusterFieldsScenarios = ['ESOSW', 'NRML' ];
     }
 
+    if(cntry == '834') {
+      clearClusterFieldsScenarios = ['ASLOM', 'NRML' ];
+      if(scenario =='CROSS' && scenarioChanged){
+        FormManager.setValue('apCustClusterId', '00000');
+      }
+    }
 	// CREATCMR-7884
     if(cntry == '796') {
       clearClusterFieldsScenarios = ['ESOSW', 'NRML', 'NRMLC', 'AQSTN', 'XAQST', 'XESO' ];
@@ -7444,7 +7448,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [ SysLoc.THAILAND, SysLoc.PHILIPPINES ]);
   GEOHandler.addAfterTemplateLoad(clearInacOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND ]);
   // CREATCMR-7884 -- add NZ to clear cluster
-  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND]);  
+  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.SINGAPORE]);  
   // CREATCMR-7883
   GEOHandler.addAfterTemplateLoad(lockCMRNumberPrefixforNoINTER, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.SINGAPORE], null, true);
   GEOHandler.registerValidator(addKyndrylValidator, [ SysLoc.INDIA ]);
