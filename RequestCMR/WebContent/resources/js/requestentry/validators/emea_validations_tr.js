@@ -8496,9 +8496,11 @@ function setISUCTCBasedScenarios() {
       } else if (isuCd == '36') {
         FormManager.setValue('clientTier', 'Y');
         FormManager.enable('salesBusOffCd');
+        FormManager.setValue('salesBusOffCd', 'A20');
       } else if (isuCd == '34') {
         FormManager.setValue('clientTier', 'Q');
         FormManager.readOnly('salesBusOffCd');
+        FormManager.setValue('salesBusOffCd', 'A20');
       } else if (isuCd == '32') {
         FormManager.setValue('clientTier', 'T');
         FormManager.setValue('salesBusOffCd', 'A00');
