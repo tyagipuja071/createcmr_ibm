@@ -72,20 +72,20 @@ public class NewZealandUtil extends AutomationUtil {
     case SCENARIO_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       break;
-    case SCENARIO_BLUEMIX:
-    case SCENARIO_MARKETPLACE:
+    // case SCENARIO_BLUEMIX:
+    // case SCENARIO_MARKETPLACE:
     case SCENARIO_INTERNAL:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       break;
     case SCENARIO_DUMMY:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       break;
-    case SCENARIO_ACQUISITION:
-    case SCENARIO_NORMAL:
-    case SCENARIO_ESOSW:
-    case SCENARIO_ECOSYS:
-    case SCENARIO_CROSS_FOREIGN:
-      // addToNotifyListANZ(entityManager, data.getId().getReqId());
+    // case SCENARIO_ACQUISITION:
+    // case SCENARIO_NORMAL:
+    // case SCENARIO_ESOSW:
+    // case SCENARIO_ECOSYS:
+    // case SCENARIO_CROSS_FOREIGN:
+    // addToNotifyListANZ(entityManager, data.getId().getReqId());
     }
     boolean companyProofProvided = DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId());
     if (companyProofProvided) {
