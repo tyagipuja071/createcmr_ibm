@@ -2775,7 +2775,7 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
       GLC_CD : '%'+glcCode+'%',
       DEFAULT_INDC : indc
     });
-    if(result != null && result.length >0){
+    if(result != null && result.ret1 != 'undefined' && result.ret1 != ''){
       var searchTerm = result.ret1;
       var clientTier = result.ret2;
       var isuCd = result.ret3;
