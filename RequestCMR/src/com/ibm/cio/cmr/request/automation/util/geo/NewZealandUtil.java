@@ -163,6 +163,9 @@ public class NewZealandUtil extends AutomationUtil {
 
       } else {
         results.setResults("Requester check fail");
+        if (!"PayGo-Test".equals(admin.getSourceSystId()) || !"BSS".equals(admin.getSourceSystId())) {
+          results.setOnError(true);
+        }
         results.setOnError(true);
         admin.setCompVerifiedIndc("Y");
         entityManager.merge(admin);

@@ -4712,7 +4712,7 @@ function addValidatorBasedOnCluster() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         var cluster = FormManager.getActualValue('apCustClusterId');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        if(FormManager.getActualValue('reqType') != 'C' || cntry =='616' || cntry =='778' || cntry =='749' ) {
+        if(FormManager.getActualValue('reqType') != 'C' || cntry =='616' || cntry =='778' || cntry =='749' || cntry =='834') {
           return new ValidationResult(null, true);
         }
 
