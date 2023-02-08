@@ -3124,13 +3124,12 @@ function addClusterOfcdLogic() {
   var results = cmr.query('GET.INACCD_SECTOR_CLUSTER_BY_OFCD', qParams);
   if (results != null && results.length > 0) {
     for (var i = 0; i < results.length; i++) {
-      //if (results[i].ret2 == ' ' && results[i].ret4 != ' ') {
 	  if ( results[i].ret4 != ' ') {
         cluster = results[i].ret4;
       }
     }
-    FormManager.setValue('searchTerm', cluster);
   }
+  FormManager.setValue('searchTerm', cluster);
 }
 
 function showConfirmForTier2() {
@@ -5425,7 +5424,7 @@ function resetBPWPQValue() {
   if (custSubGrp == 'BPWPQ') {
     if (reqType == 'C' && (_role == 'Requester' || _role == 'Processor')) {
       FormManager.setValue('salesTeamCd', _pagemodel.salesTeamCd == '' ? '' : _pagemodel.salesTeamCd);
-      FormManager.readOnly('salesTeamCd');
+      //FormManager.readOnly('salesTeamCd');
 
       FormManager.setValue('tier2', _pagemodel.clientTier == '' ? '' : _pagemodel.clientTier);
       FormManager.readOnly('tier2');
