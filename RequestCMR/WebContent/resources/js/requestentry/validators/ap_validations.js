@@ -293,8 +293,8 @@ function addAfterConfigAP() {
       console.log('addAfterConfigAP >>> 834/ASLOM/NRML/CROSS >>> Set Cluster default as BLANK.');
       if(custSubGrp =='CROSS' && _pagemodel.apCustClusterId == null ){
         FormManager.setValue('apCustClusterId', '00000');
-      }else if(custSubGrp !='CROSS'){
-        FormManager.setValue('apCustClusterId', '');  
+      }else if(custSubGrp !='CROSS' && _pagemodel.apCustClusterId == null ){
+         FormManager.setValue('apCustClusterId', '');
       }
     }
   }
