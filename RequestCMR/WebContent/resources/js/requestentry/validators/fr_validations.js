@@ -948,7 +948,7 @@ function setCtcForIsu5K() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpArray = [ 'INTER', 'INTSO', 'IBMEM', 'BUSPR', 'XBUSP', 'CBTER', 'CBTSO', 'CBIEM', 'PRICU', 'XBLUM' ];
-  if (isuCd == '5K' || isuCd == '14' || isuCd == '18' || isuCd == '19' || isuCd == '1R' || isuCd == '31' || isuCd == '3T' || isuCd == '4A') {
+  if (isuCd != '34' || isuCd != '32' || isuCd != '36') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
     if (reqType == 'U' || (reqType != 'U' && role == 'PROCESSOR' && !custSubGrpArray.includes(custSubGrp))) {
@@ -4113,7 +4113,7 @@ function sboCodeValidator() {
       id : 'salesBusOffCd',
       type : 'text',
       name : 'salesBusOffCd'
-    }, false, 'Sbo can only accept \'09A09A\'\ \'10A10A\'\ \'10A10A\'\' for ISU CTC 36Y.');
+    }, false, 'Sbo can only accept \'09A09A\'\ \'10A10A\'\ \'11A11A\'\ for ISU CTC 36Y.');
   } else if (isuCtc == '5K' && sbo != '98F98F') {
     return new ValidationResult({
       id : 'salesBusOffCd',
@@ -4131,7 +4131,7 @@ function sboCodeValidator() {
       id : 'salesBusOffCd',
       type : 'text',
       name : 'salesBusOffCd'
-    }, false, 'Sbo can only accept \'05F05F\'\ \'12F12F\'\ \'68T68T\'\' \'035035\'\' \'031031\'\' for ISU CTC 04.');
+    }, false, 'Sbo can only accept \'05F05F\'\ \'12F12F\'\ \'68T68T\'\ \'035035\'\ \'031031\'\ for ISU CTC 04.');
   } else if (isuCtc == '32T' && sbo != 'FSDFSD') {
     return new ValidationResult({
       id : 'salesBusOffCd',
