@@ -163,15 +163,26 @@ public class NewZealandUtil extends AutomationUtil {
 
       } else {
         results.setResults("Requester check fail");
-        // results.setOnError(true);
+        results.setOnError(true);
         admin.setCompVerifiedIndc("Y");
         entityManager.merge(admin);
         entityManager.flush();
-        details.append("The Customer Name doesn't match NZBN API");
-        if (response != null && response.isSuccess() && response.getRecord() != null) {
-          details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
-          details.append(" - Name.:  " + response.getRecord().getName() + " \n");
+        if (!custNmMatch) {
+          details.append("The Customer Name doesn't match NZBN API");
+          if (response != null && response.isSuccess() && response.getRecord() != null) {
+            details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
+            details.append(" - Name.:  " + response.getRecord().getName() + " \n");
+          }
+        } else if (!matchesAddAPI) {
+          details.append("The address doesn't match NZBN API");
+          if (response != null && response.isSuccess() && response.getRecord() != null) {
+            details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
+            details.append(" - Address.:  " + response.getRecord().getAddress() + " \n");
+            details.append(" - City.:  " + response.getRecord().getCity() + " \n");
+            details.append(" - Postal.:  " + response.getRecord().getPostal() + " \n");
+          }
         }
+
         // company proof
         if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
           details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
