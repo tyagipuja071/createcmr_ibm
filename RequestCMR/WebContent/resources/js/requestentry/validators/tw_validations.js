@@ -132,6 +132,7 @@ var _dupCmrIndcHandler = null;
 var _ISUHandler = null;
 var _searchTermHandler = null;
 var _inacCdHandler = null;
+var _subIndCdHandler =null;
 
 function addHandlersForTW() {
   if (_taxTypeHandler == null) {
@@ -170,6 +171,17 @@ function addHandlersForTW() {
       setISUCodeValues();
       setInacBySearchTerm();
       addCoverageFieldsValidator();
+    });
+  }
+  
+  if (_subIndCdHandler == null) {
+    _subIndCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+      if (!value) {
+        return;
+      }
+      if (value != null && value.length > 1) {
+        updateIndustryClass();
+      }
     });
   }
 }
@@ -777,6 +789,16 @@ function clearDescriptionOnScenarioChange() {
   }
 }
 
+// CREATCMR-7882
+function updateIndustryClass() {
+  console.log('>>>> updateIndustryClass >>>>');
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  if (subIndustryCd != null && subIndustryCd.length > 1) {
+    var _industryClass = subIndustryCd.substr(0, 1);
+    FormManager.setValue('IndustryClass', _industryClass);
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];
@@ -794,6 +816,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.TW_CHECKLIST);
   GEOHandler.addAfterConfig(onInacTypeChange, GEOHandler.TW);
  GEOHandler.addAfterConfig(addCoverageFieldsValidator, GEOHandler.TW);
+ GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.TW);
 
   GEOHandler.addAfterTemplateLoad(afterConfigTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(addHandlersForTW, GEOHandler.TW);
