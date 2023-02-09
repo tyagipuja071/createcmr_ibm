@@ -111,11 +111,12 @@ public class IndiaUtil extends AutomationUtil {
         engineData.addNegativeCheckStatus("OTH", "Cmde review required as cluster is set to 08033.");
         return true;
       }
-      if (data.getApCustClusterId().contains("012D999")) {
-        details.append("Cluster cannot be default as 012D999.").append("\n");
-        engineData.addRejectionComment("OTH", "Cluster cannot be default as 012D999.", "", "");
-        return false;
-      }
+      // if (data.getApCustClusterId().contains("012D999")) {
+      // details.append("Cluster cannot be default as 012D999.").append("\n");
+      // engineData.addRejectionComment("OTH", "Cluster cannot be default as
+      // 012D999.", "", "");
+      // return false;
+      // }
       break;
     case SCENARIO_ESOSW:
       engineData.addNegativeCheckStatus("_atESO", "ESOSW request need to be send to CMDE queue for review. ");
