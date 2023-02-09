@@ -40,6 +40,14 @@ function addHandlersForAP() {
       lockFieldsWithDefaultValuesByScenarioSubType();
     });
   }
+
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if(custSubGrp == 'NRMLC') {
+    dojo.connect(FormManager.getField('geoLocationCd'), 'onChange', function(value) {
+      setClusterGlcCovIdMapNrmlc();
+    });
+  }
+  
   if (_vatRegisterHandlerSG == null) {
     _vatRegisterHandlerSG = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
     cmr
@@ -947,7 +955,7 @@ function onCustSubGrpChange() {
     filterAvailableClustersByScenarioSubType('744', ['ESOSW'], [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215','10654', '10655', '10656', '10657']);    
     filterAvailableClustersByScenarioSubType('744', ['KYNDR'], [ '09062' ]);
     filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV', 'INTER'], [ '2D999' ]);
-    
+    filterAvailableClustersByScenarioSubType('744', ['NRMLC'], [ '10590','10591','10592','10593','10594','10595','10596','10597','10598','10599','10600','10601','10602','10603','10604','10605','10606','10607','10608','10609','10610','10611','10612','10613','10614','10615','10616','10617','10618','10619','10620','10621','10622','10623','10624','10625','10626','10627','10628','10629','10630','10631','10632','10633','10634','10635','10636','10637','10638','10639','10640','10641','10642','10643','10644','10645','2D999' ]);
     lockFieldsWithDefaultValuesByScenarioSubType();
   });
 }
@@ -1066,6 +1074,14 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
         FormManager.enable('inacType');
         FormManager.enable('inacCd');
       } 
+    } else if (['NRMLC'].includes(custSubGrp)) {
+      FormManager.setValue('isuCd','34');
+      FormManager.setValue('clientTier','Q');
+      FormManager.setValue('mrcCd','3');
+      FormManager.readOnly('apCustClusterId');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('mrcCd');  
     } else {
       FormManager.enable('apCustClusterId');
       FormManager.enable('clientTier');
@@ -4939,6 +4955,26 @@ function addKyndrylValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
+function setClusterGlcCovIdMapNrmlc() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var glc = FormManager.getActualValue('geoLocationCd');
+  var covId = FormManager.getActualValue('covId');
+  if (custSubGrp == "NRMLC") {
+    var glc = FormManager.getActualValue('geoLocationCd');
+    var covId = FormManager.getActualValue('covId');
+    var qParams = {
+        TXT : glc,
+        CMT : covId
+      };
+    var cluster = cmr.query('GET_CLUSTER_BY_GLC_COVID', qParams);
+    if (cluster != null && cluster.ret1) {
+      FormManager.setValue('apCustClusterId', cluster.ret1);
+      FormManager.readOnly('apCustClusterId');
+    }
+  }
+}
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -5123,4 +5159,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(displayVatRegistrartionStatus,  [ SysLoc.SINGAPORE ] );
   GEOHandler.addAfterTemplateLoad(displayVatRegistrartionStatus,   [ SysLoc.SINGAPORE ] );
   GEOHandler.registerValidator(addKyndrylValidator, [ SysLoc.INDIA ]);
+
+  GEOHandler.addAfterTemplateLoad(onCustSubGrpChange, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(lockFieldsWithDefaultValuesByScenarioSubType, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(lockFieldsWithDefaultValuesByScenarioSubType, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]); 
 });
