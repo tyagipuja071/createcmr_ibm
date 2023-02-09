@@ -199,13 +199,14 @@ window.addEventListener("message", function(e) {
             }
           }
           cmr.currentCmrResult = result;
-          continueUpdateCMR();
+          continueUpdateCMR(result);
 
         } else if (result.data && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GERMANY) {
           var ordBlk = result.data.orderBlock;
           if (ordBlk == '93') {
             cmr.showAlert('Addresses can only be imported from active CMRs. The chosen CMR is an Inactive record.');
           }
+          importCMRConfirm(result);
         } else {
           if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SWITZERLAND) {
             var reqType = FormManager.getActualValue('reqType');
@@ -284,16 +285,16 @@ function importCMRConfirm(result) {
     allowByModel = false;
   } 
   if (!allowByModel){
-    continueUpdateCMR();
+    continueUpdateCMR(result);
   } else {
     var confMsg = 'Do you want to Update the selected CMR or Create a new CMR modeled after this one?';
     cmr.currentCmrResult = result;
-    cmr.showConfirm('continueCreateCMR()', confMsg, null, 'continueUpdateCMR()', {
+    cmr.showConfirm('continueCreateCMR()', confMsg, null, 'continueUpdateCMR(result)', {
       OK : 'Create New CMR',
       CANCEL : 'Update CMR'
     });
   }
-  
+
 }
 /**
  * Continue importing the record with Create type
@@ -333,8 +334,7 @@ function importBillingCompany() {
 /**
  * Continue importing the record with Update type
  */
-function continueUpdateCMR() {
-  var result = cmr.currentCmrResult;
+function continueUpdateCMR(result) {
   FormManager.setValue('reqType', 'U');
   FormManager.setValue('enterCMRNo', result.data.cmrNum);
   importCMRs(result.data.cmrNum, result.data.issuedBy, result.data.issuedByDesc);

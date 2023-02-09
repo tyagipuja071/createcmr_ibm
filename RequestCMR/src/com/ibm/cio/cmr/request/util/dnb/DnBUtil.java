@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+import org.springframework.ui.ModelMap;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
@@ -120,18 +121,19 @@ public class DnBUtil {
     registerDnBVATCode("MU", 9394); // Business Registration Number (Mauritius)
     registerDnBVATCode("NA", 15168); // Tax Registration Number (ZA)
     registerDnBVATCode("NO", 1699); // Register of Business Enterprises Number
-    registerDnBVATCode("NZ", 33961); // Business Registration Number (NZ)
+    registerDnBVATCode("NZ", 33961); // New Zealand Company Number
     registerDnBVATCode("PE", 1382); // Peruvian Sole Commercial Registry Number
     // registerDnBVATCode("AU", 17890); // Business Registration Number
     // (Australia)
-    registerDnBVATCode("PL", 1385); // Polish Tax Identifier
+    // registerDnBVATCode("PL", 1385); // Polish Tax Identifier
+    registerDnBVATCode("PL", 1435); // Polish Tax Identifier
     registerDnBVATCode("PT", 11659); // Chamber Of Commerce Number
     registerDnBVATCode("PY", 1381); // Paraguayan Unique Tax Registration
     registerDnBVATCode("RO", 17278); // Tax Registration Number (Romania)
     registerDnBVATCode("RS", 0); // Unknown
     registerDnBVATCode("RW", 9404); // Business Registration Number (Rwanda)
     registerDnBVATCode("SI", 1439); // Tax Registration Number (Slovenia)
-    registerDnBVATCode("SK", 0); // Unknown
+    registerDnBVATCode("SK", 1438); // Unknown
     registerDnBVATCode("TH", 1391); // Registration Number (Thailand)
     registerDnBVATCode("TJ", 14260); // Tax Registration Number (Tajikistan)
     registerDnBVATCode("TR", 1442); // Tax Registration Number (Turkey)
@@ -285,7 +287,8 @@ public class DnBUtil {
     if (SystemLocation.CHINA.equalsIgnoreCase(issuingCntry)) {
       cmrRecord.setCmrState(StringUtils.isNotBlank(company.getPrimaryStateName()) ? company.getPrimaryStateName() : company.getMailingStateName());
     }
-    if (cmrRecord.getCmrState() == null && (SystemLocation.AUSTRIA.equalsIgnoreCase(issuingCntry) || SystemLocation.SWITZERLAND.equalsIgnoreCase(issuingCntry))) {
+    if (cmrRecord.getCmrState() == null
+        && (SystemLocation.AUSTRIA.equalsIgnoreCase(issuingCntry) || SystemLocation.SWITZERLAND.equalsIgnoreCase(issuingCntry))) {
       cmrRecord.setCmrState(StringUtils.isNotBlank(company.getPrimaryStateName()) ? company.getPrimaryStateName() : company.getMailingStateName());
     }
     cmrRecord.setCmrPostalCode(company.getPrimaryPostalCode() != null ? company.getPrimaryPostalCode() : company.getMailingPostalCode());
@@ -610,6 +613,7 @@ public class DnBUtil {
       boolean useTradestyleName, boolean allowLongNameAddress) {
     GEOHandler handler = RequestUtils.getGEOHandler(country);
     int maxLength = 60;
+    String regex = "\\s+$";
     if (handler != null) {
       maxLength = handler.getName1Length() + handler.getName2Length();
     }
@@ -629,6 +633,8 @@ public class DnBUtil {
       dnbName = dnbName.trim();
       String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
       String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
+      dnbName = dnbName.replaceAll(regex, "");
+      compareName = compareName.replaceAll(regex, "");
       if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbName)) {
         if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbName.toUpperCase()) >= 12
             && (altCompareName == null || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbName.toUpperCase()) >= 12)) {
@@ -745,8 +751,7 @@ public class DnBUtil {
     }
 
     if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
-          && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6
-          && !matchWithDnbMailingAddr) {
+        && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6 && !matchWithDnbMailingAddr) {
       return false;
     }
 
@@ -864,10 +869,13 @@ public class DnBUtil {
     MatchingResponse<DnBMatchingResponse> response = new MatchingResponse<DnBMatchingResponse>();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+
     addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
     Addr addr = requestData.getAddress(addrType);
     boolean isTaxCdMatch = false;
-    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+    // AutomationUtil countryUtil =
+    // AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
     if (countryUtil != null) {
       isTaxCdMatch = countryUtil.useTaxCd1ForDnbMatch(requestData);
     }
@@ -950,5 +958,184 @@ public class DnBUtil {
     query.setParameter("ID", reqId);
 
     return query.exists();
+  }
+
+  /**
+   * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
+   * comparison of the address data against the DnB record and determines if
+   * they match
+   * 
+   * @param country
+   * @param addr
+   * @param admin
+   * @param dnbRecord
+   * @param nameToUse
+   * @param useTradestyleName
+   * @param allowLongNameAddress
+   * @return
+   */
+  public static ModelMap closelyMatchesDnbNmAndAddr(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse,
+      boolean useTradestyleName, boolean allowLongNameAddress) {
+    ModelMap map = new ModelMap();
+    GEOHandler handler = RequestUtils.getGEOHandler(country);
+    int maxLength = 60;
+    String regex = "\\s+$";
+    if (handler != null) {
+      maxLength = handler.getName1Length() + handler.getName2Length();
+    }
+
+    // Name/TradestyleName close matching - BEGIN
+
+    List<String> dnbNames = new ArrayList<String>();
+    boolean nameMatch = false;
+    boolean longNameMatch = false;
+
+    if (useTradestyleName && !dnbRecord.getTradeStyleNames().isEmpty()) {
+      dnbNames.addAll(dnbRecord.getTradeStyleNames());
+    } else {
+      dnbNames.add(dnbRecord.getDnbName());
+    }
+    for (String dnbName : dnbNames) {
+      dnbName = dnbName.trim();
+      String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
+      String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
+      dnbName = dnbName.replaceAll(regex, "");
+      compareName = compareName.replaceAll(regex, "");
+      if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbName)) {
+        if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbName.toUpperCase()) >= 12
+            && (altCompareName == null || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbName.toUpperCase()) >= 12)) {
+          nameMatch = false;
+        }
+        if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbName.toUpperCase()) >= 6
+            && (altCompareName == null || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbName.toUpperCase()) >= 6)) {
+          // do a comparison of common words first
+          List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
+          List<String> commonB = CommonWordsUtil.getVariations(dnbName.toUpperCase());
+          boolean foundMinimal = false;
+          for (String phraseA : commonA) {
+            for (String phraseB : commonB) {
+              if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
+                foundMinimal = true;
+              }
+            }
+          }
+          if (!foundMinimal) {
+            if (altCompareName != null) {
+              List<String> altCommonA = CommonWordsUtil.getVariations(altCompareName.toUpperCase());
+              for (String phraseA : altCommonA) {
+                for (String phraseB : commonB) {
+                  if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
+                    foundMinimal = true;
+                  }
+                }
+              }
+            }
+            if (!foundMinimal) {
+              nameMatch = false;
+            } else {
+              nameMatch = true;
+              break;
+            }
+          }
+        } else {
+          LOG.debug("Name " + compareName + " close to " + dnbName);
+          nameMatch = true;
+          break;
+        }
+
+        try {
+          if (!nameMatch && allowLongNameAddress && !longNameMatch && StringUtils.isNotBlank(compareName)
+              && compareName.getBytes("UTF-8").length >= maxLength
+              && StringUtils.startsWith(dnbName.replaceAll("\\s", ""), compareName.replaceAll("\\s", ""))) {
+            LOG.debug("Name Match failed for - " + compareName + ", but long name match passed.");
+            longNameMatch = true;
+          }
+        } catch (Exception e) {
+          LOG.error("Unable to get bytelength of compareName", e);
+        }
+      }
+    }
+    if (!nameMatch && !longNameMatch) {
+      map.put("dnbNmMatch", false);
+      map.put("dnbAddrMatch", false);
+      return map;
+    }
+    // Name/TradestyleName close matching - END
+
+    // Address close matching - BEGIN
+    String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
+    address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
+    address = address.trim();
+
+    if (handler != null) {
+      String handlerAddress = handler.buildAddressForDnbMatching(country, addr);
+      if (handler != null && !StringUtils.isBlank(handlerAddress)) {
+        address = handlerAddress;
+      }
+    }
+    LOG.debug("Address used for matching: " + address);
+
+    String dnbAddress = dnbRecord.getDnbStreetLine1() != null ? dnbRecord.getDnbStreetLine1() : "";
+    if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
+      dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
+    }
+    dnbAddress = dnbAddress.trim();
+    Boolean matchWithDnbMailingAddr = false;
+    if (handler != null) {
+      matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
+    }
+    LOG.debug("DNB match country =  " + country);
+    Boolean isReshuffledAddr = false;
+    if ("897".equals(country) || "US".equals(country)) {
+      isReshuffledAddr = USHandler.compareUSReshuffledAddress(dnbAddress, address, country);
+      LOG.debug("US isReshuffledAddr =  " + isReshuffledAddr);
+    } else {
+      isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
+      LOG.debug("isReshuffledAddr =  " + isReshuffledAddr);
+    }
+
+    // Boolean isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress,
+    // address, country);
+    if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
+        && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
+        && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr
+        && !matchWithDnbMailingAddr) {
+      map.put("dnbNmMatch", true);
+      map.put("dnbAddrMatch", false);
+      return map;
+    }
+
+    if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())) {
+      String currentPostalCode = addr.getPostCd();
+      String dnbPostalCode = dnbRecord.getDnbPostalCode();
+      if (currentPostalCode.length() != dnbPostalCode.length()) {
+        if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
+          map.put("dnbNmMatch", true);
+          map.put("dnbAddrMatch", false);
+          return map;
+        }
+      }
+      if (currentPostalCode.length() == dnbPostalCode.length()) {
+        if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
+          map.put("dnbNmMatch", true);
+          map.put("dnbAddrMatch", false);
+          return map;
+        }
+      }
+    }
+
+    if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
+        && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6 && !matchWithDnbMailingAddr) {
+      map.put("dnbNmMatch", true);
+      map.put("dnbAddrMatch", false);
+      return map;
+    }
+
+    // Address close matching - END
+
+    map.put("dnbNmMatch", true);
+    map.put("dnbAddrMatch", true);
+    return map;
+
   }
 }

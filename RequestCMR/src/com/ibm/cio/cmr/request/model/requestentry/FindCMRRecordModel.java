@@ -46,6 +46,7 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String cmrShortName;
   private String cmrOrderBlock;
   private String cmrVat;
+  private String cmrVatInd;
   private String cmrBusinessReg;
   private String cmrClientId;
   private String cmrEnterpriseNumber;
@@ -315,14 +316,14 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String cmrCollBo;
   private String cmrCollectorNo;
   private String cmrFiscalCd;
-  private String cmrChileBusnTyp;
+  private String cmrStxlTxtVal;
 
-  public String getCmrChileBusnTyp() {
-    return cmrChileBusnTyp;
+  public String getCmrStxlTxtVal() {
+    return cmrStxlTxtVal;
   }
 
-  public void setCmrChileBusnTyp(String cmrChileBusnTyp) {
-    this.cmrChileBusnTyp = cmrChileBusnTyp;
+  public void setCmrStxlTxtVal(String cmrStxlTxtVal) {
+    this.cmrStxlTxtVal = cmrStxlTxtVal;
   }
 
   public String getCmrMexFiscalRegime() {
@@ -908,6 +909,14 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setCmrVat(String cmrVat) {
     this.cmrVat = cmrVat;
+  }
+
+  public String getCmrVatInd() {
+    return cmrVatInd;
+  }
+
+  public void setCmrVatInd(String cmrVatInd) {
+    this.cmrVatInd = cmrVatInd;
   }
 
   public String getCmrBusinessReg() {

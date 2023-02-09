@@ -12,8 +12,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +66,11 @@ import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileRow;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.StandardCityServiceClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
+import com.ibm.cmr.services.client.dpl.DPLRecord;
+import com.ibm.cmr.services.client.dpl.DPLSearchResponse;
+import com.ibm.cmr.services.client.dpl.DPLSearchResults;
+import com.ibm.cmr.services.client.dpl.KycScreeningResponse;
+import com.ibm.cmr.services.client.dpl.KycScreeningResult;
 import com.ibm.cmr.services.client.stdcity.StandardCityRequest;
 import com.ibm.cmr.services.client.stdcity.StandardCityResponse;
 
@@ -83,6 +90,9 @@ public class RequestUtils {
   public static final String STATUS_INPUT_REQUIRED = "Input Required";
   public static final String US_CMRISSUINGCOUNTRY = "897";
   private static Map<String, String> rejectionReasons = new HashMap<String, String>();
+  private static final String STATUS_CPR_24 = "CMR is now unblocked for 24 hours, you will receive completion email once it is blocked back.";
+  private static final String STATUS_CPR_48 = "CMR is now unblocked for 48 hours, you will receive completion email once it is blocked back.";
+  public static final List<String> EMEA_CNTRY_DACH = Arrays.asList("724", "618", "848");
 
   public static void refresh() {
     emailTemplate = null;
@@ -336,7 +346,7 @@ public class RequestUtils {
    */
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history, boolean excludeRequester,
       boolean legacyDirect) {
-    List<String> reqStatusFrMailNotif = Arrays.asList("PRJ", "COM");
+    List<String> reqStatusFrMailNotif = Arrays.asList("PRJ", "COM", "CPR");
     if (!reqStatusFrMailNotif.contains(admin.getReqStatus())) {
       return;
     }
@@ -572,7 +582,15 @@ public class RequestUtils {
       params.add(history.getCreateByNm() + " (" + history.getCreateById() + ")"); // {6}
     }
     params.add(CmrConstants.DATE_FORMAT().format(history.getCreateTs())); // {7}
-    params.add(histContent); // {8}
+
+    if ("CPR".equalsIgnoreCase(admin.getReqStatus()) && EMEA_CNTRY_DACH.contains(cmrIssuingCountry)) {
+      params.add(STATUS_CPR_24); // {8}
+    } else if ("CPR".equalsIgnoreCase(admin.getReqStatus())) {
+      params.add(STATUS_CPR_48); // {8}
+    } else {
+      params.add(histContent); // {8}
+    }
+
     params.add(directUrlLink); // {9}
     params.add(rejectReason); // {10}
     params.add(embeddedLink); // {11}
@@ -1705,6 +1723,48 @@ public class RequestUtils {
       // do nothing
     }
     return "-Unknown-";
+  }
+
+  public static DPLSearchResponse convertToLegacySearchResults(String userId, KycScreeningResponse response) {
+    DPLSearchResponse legacy = new DPLSearchResponse();
+
+    legacy.setMsg(response.getMsg());
+    legacy.setSuccess(response.isSuccess());
+
+    if (response.getResult() != null) {
+      KycScreeningResult result = response.getResult();
+      DPLSearchResults legacyResult = new DPLSearchResults();
+      legacyResult.setSearchArgument(result.getQuery());
+      legacyResult
+          .setSearchDate(result.getStartTime() != null ? result.getStartTime() : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+      legacyResult.setResults(result.getMessage());
+      if (result.getResult() != null) {
+        List<DPLRecord> legacyRecords = new ArrayList<DPLRecord>();
+        result.getResult().stream().forEach((record) -> {
+          DPLRecord legacyRecord = new DPLRecord();
+          legacyRecord.setAdditionalInfo("Score per relevant term: " + record.getScorePerRelevantTerm());
+          legacyRecord.setComments(("1".equals(record.getPerson()) ? "[Individual] " : "") + record.getNotes());
+          legacyRecord.setCompanyName(record.getNameInCorrectOrder());
+          legacyRecord.setCountryCode(record.getCountryIso2Code());
+          legacyRecord.setDenialCode(record.getCleanCode());
+          legacyRecord.setDenialCodeDescription(record.getCodeDescription());
+          legacyRecord.setEntityAddress(record.getStreet());
+          legacyRecord.setEntityCity(record.getCity());
+          legacyRecord.setEntityCountry(record.getCountryDesc());
+          legacyRecord.setEntityId(record.getCustomerId());
+          legacyRecord.setLastUpdated(record.getLastUpdate());
+          legacyRecord.setStartDate(record.getStartDate());
+          legacyRecord.setStatus("Relevance: " + record.getRelevance());
+          legacyRecords.add(legacyRecord);
+        });
+        LOG.debug("Added " + legacyRecords.size() + " DPL results");
+        legacyResult.setDeniedPartyRecords(legacyRecords);
+
+      }
+      legacy.setResults(legacyResult);
+    }
+
+    return legacy;
   }
 
 }

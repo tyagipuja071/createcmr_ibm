@@ -300,7 +300,7 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
       return false;
     }
     String reqCheckRecordScenario = getScenario(entityManager, reqCheckRecord.getReqId());
-    if ("NRML".equals(scenario)) {
+    if ("NRMLC".equals(scenario)) {
       switch (reqCheckRecordScenario) {
       case "BUSPR":
       case "INTER":
@@ -310,6 +310,25 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
         break;
       case "EMBSA":
       case "AQSTN":
+      case "NRMLD":
+      case "KYND":
+      case "ECOSY":
+      default:
+        output = true;
+        break;
+      }
+    } else if ("NRMLD".equals(scenario)) {
+      switch (reqCheckRecordScenario) {
+      case "BUSPR":
+      case "INTER":
+      case "BLUMX":
+      case "MRKT":
+        output = false;
+        break;
+      case "EMBSA":
+      case "AQSTN":
+      case "NRMLC":
+      case "KYND":
       case "ECOSY":
       default:
         output = true;
@@ -325,7 +344,9 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
         break;
       case "EMBSA":
       case "AQSTN":
-      case "NRML":
+      case "NRMLC":
+      case "NRMLD":
+      case "KYND":
       default:
         output = true;
         break;
@@ -338,9 +359,13 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
       case "MRKT":
       case "EMBSA":
       case "AQSTN":
-      case "NRML":
+      case "NRMLC":
         output = false;
         break;
+      case "NRMLD":
+        output = false;
+        break;
+      case "KYND":
       default:
         output = true;
         break;
@@ -353,9 +378,13 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
       case "MRKT":
       case "EMBSA":
       case "AQSTN":
-      case "NRML":
+      case "NRMLC":
         output = false;
         break;
+      case "NRMLD":
+        output = false;
+        break;
+      case "KYND":
       default:
         output = true;
         break;
@@ -368,9 +397,13 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
       case "MRKT":
       case "EMBSA":
       case "AQSTN":
-      case "NRML":
+      case "NRMLC":
         output = false;
         break;
+      case "NRMLD":
+        output = false;
+        break;
+      case "KYND":
       default:
         output = true;
         break;
@@ -383,9 +416,13 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
       case "BUSPR":
       case "EMBSA":
       case "AQSTN":
-      case "NRML":
+      case "NRMLC":
         output = false;
         break;
+      case "NRMLD":
+        output = false;
+        break;
+      case "KYND":
       default:
         output = true;
         break;

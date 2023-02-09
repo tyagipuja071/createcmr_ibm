@@ -139,7 +139,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   private final ApprovalService approvalService = new ApprovalService();
   private static final String STATUS_CHG_CMT_PRE_PREFIX = "ACTION \"";
   private static final String STATUS_CHG_CMT_MID_PREFIX = "\" changed the REQUEST STATUS to \"";
-  private static final String STATUS_CHG_CMT_POST_PREFIX = "\"<br/>";
+  private static final String STATUS_CHG_CMT_POST_PREFIX = "\"" + "\n ";
   private static final String CMR_SHEET_NAME = "Mass Change";
   private static final String MASS_DATA = "Mass Data";
   private static final String CONFIG_SHEET_NAME = "Config";
@@ -5606,29 +5606,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
   }
 
-  private void addressSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
-      Map<String, List<String>> cmrPhoneMap, List<MassUpdateAddressModel> addrModels, TemplateTab tab, Sheet dataSheet) throws Exception {
-    MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
-
-    for (Row cmrRow : dataSheet) {
-      int seqNo = cmrRow.getRowNum() + 1;
-
-      if (seqNo > 1) {
-        // 4. then for every sheet, get the fields
-        addrModel = new MassUpdateAddressModel();
-        addrModel.setParReqId(reqId);
-        addrModel.setSeqNo(seqNo);
-        addrModel.setIterationId(newIterId);
-        addrModel.setAddrType(tab.getTypeCode());
-        addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
-        if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
-          setAddrModelCustPhoneAndRemoveFromMap(cmrIssuingCntry, cmrPhoneMap, addrModel);
-          addrModels.add(addrModel);
-        }
-      }
-    }
-  }
-
   private void createAddrModelsFromMapForUKI(long reqId, int newIterId, String cmrIssuingCntry, Map<String, List<String>> cmrPhoneMap,
       List<MassUpdateAddressModel> addrModels) {
     if (!cmrPhoneMap.isEmpty() && (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND))) {
@@ -5678,6 +5655,29 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     query.setParameter("RCUXA", cmr);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     return query;
+  }
+
+  private void addressSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
+      Map<String, List<String>> cmrPhoneMap, List<MassUpdateAddressModel> addrModels, TemplateTab tab, Sheet dataSheet) throws Exception {
+    MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+
+    for (Row cmrRow : dataSheet) {
+      int seqNo = cmrRow.getRowNum() + 1;
+
+      if (seqNo > 1) {
+        // 4. then for every sheet, get the fields
+        addrModel = new MassUpdateAddressModel();
+        addrModel.setParReqId(reqId);
+        addrModel.setSeqNo(seqNo);
+        addrModel.setIterationId(newIterId);
+        addrModel.setAddrType(tab.getTypeCode());
+        addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
+        if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+          setAddrModelCustPhoneAndRemoveFromMap(cmrIssuingCntry, cmrPhoneMap, addrModel);
+          addrModels.add(addrModel);
+        }
+      }
+    }
   }
 
   private void dataSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,

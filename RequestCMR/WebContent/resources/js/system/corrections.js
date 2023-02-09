@@ -16,6 +16,10 @@ var globalRetrieve = function(){
 var globalSaveAll = function(){
   
 }
+
+var globalFixPayGoAddresses = function() {
+}
+
 app.controller('CorrectionsController', [ '$scope', '$document', '$http', '$timeout', function($scope, $document, $http, $timeout) {
 
   
@@ -224,7 +228,43 @@ app.controller('CorrectionsController', [ '$scope', '$document', '$http', '$time
     }
   };
   
-  
+  $scope.confirmFixPayGoAddresses = function() {
+    if (!$scope.model.reqId) {
+      cmr.showAlert('Please input the Request ID.', 'Error');
+      return;
+    }
+    if (isNaN($scope.model.reqId)) {
+      cmr.showAlert('Request ID should be numeric.');
+      return;
+    }
+    var msg = 'All PayGo billing addresses in this request will be checked '
+    msg += 'and fixed if inconsistencies are detected.';
+    msg += '<br><br>Proceed?';
+    cmr.showConfirm('globalFixPayGoAddresses()', msg, 'Confirm');
+  }
+
+  $scope.fixPayGoAddresses = function() {
+    $scope.model.reqId = $scope.model.reqId.trim();
+    var input = JSON.parse(JSON.stringify($scope.model));
+    console.log(input);
+    cmr.showProgress('Processing PayGo billing addresses...');
+
+    $http.post('/CMRServices/cmrs/paygo/corrections/' + $scope.model.reqId, input).then(function(response) {
+      console.log(response.data);
+      cmr.hideProgress();
+      if (response.data && response.data.success && response.data.success == true) {
+        cmr.showAlert(response.data.msg, response.data.title, null, true);
+      } else {
+        cmr.showAlert(response.data.msg, response.data.title);
+      }
+    }, function(error) {
+      cmr.hideProgress();
+      cmr.showAlert("An unexpected error occurred", 'Error');
+    });
+  }
+
+  globalFixPayGoAddresses = $scope.fixPayGoAddresses;
+
   $scope.saveAll = function() {
     var input = JSON.parse(JSON.stringify($scope.model));
     input.processType = 'C';

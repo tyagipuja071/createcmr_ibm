@@ -48,8 +48,10 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String REQ_MATCH_SCENARIO = "REQ_MATCH_SCENARIO";
   public static final String SKIP_DNB_ORGID_VAL = "_skipDnBOrgIdVald";
   public static final String SKIP_RETRIEVE_VALUES = "_skipRetrieveValues";
+
   private int trackedNegativeCheckCount;
   private boolean trackNegativeChecks;
+  private boolean flagNZBNAPI;
   /**
    * 
    */
@@ -334,5 +336,13 @@ public class AutomationEngineData extends HashMap<String, Object> {
       }
       addNegativeCheckStatus(VAT_VERIFIED, StringUtils.isNotBlank(message) ? message : "");
     }
+  }
+
+  public boolean isNZBNAPICheck() {
+    return flagNZBNAPI;
+  }
+
+  public void setNZBNAPICheck(boolean flagNZBNAPI) {
+    this.flagNZBNAPI = flagNZBNAPI;
   }
 }

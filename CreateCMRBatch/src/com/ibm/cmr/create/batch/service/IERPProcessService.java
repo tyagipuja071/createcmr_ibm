@@ -40,6 +40,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.util.BatchUtil;
@@ -574,6 +575,7 @@ public class IERPProcessService extends BaseBatchService {
                 LOG.debug("no Of Working days before check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
                 noOFWorkingDays = IERPRequestUtils.checkNoOfWorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
                 LOG.debug("no Of Working days after check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
+
               }
               int tempReactThres = SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) ? 2 : 3;
               if (noOFWorkingDays >= tempReactThres) {
@@ -709,8 +711,10 @@ public class IERPProcessService extends BaseBatchService {
                   "COM".equals(admin.getReqStatus()));
             }
 
+            WfHist history = null;
+
             if (!CmrConstants.RDC_STATUS_IGNORED.equals(overallStatus) && firstRun) {
-              IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
+              history = IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
                   "CPR".equals(admin.getReqStatus()));
             }
 
@@ -720,6 +724,9 @@ public class IERPProcessService extends BaseBatchService {
             LOG.debug("*** IERP Site IDs on EMAIL >> " + siteIds.toString());
             try {
               sendEmailNotifications(em, admin, siteIds.toString(), statusMessage.toString());
+              if ("CPR".equals(admin.getReqStatus())) {
+                RequestUtils.sendEmailNotifications(em, admin, history, false, false);
+              }
             } catch (Exception e) {
               LOG.error("ERROR: " + e.getMessage());
             }
@@ -1281,7 +1288,7 @@ public class IERPProcessService extends BaseBatchService {
       // cmrNo = "TEMP";
       // } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
       // cmrNo = data.getCmrNo();
-      // }
+      // }if (!StringUtils.isBlank(prospectCMR)) {
       cmrNo = data.getCmrNo();
       synchronized (IERPProcessService.class) {
         if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && "C".equals(requestType)
@@ -1498,6 +1505,10 @@ public class IERPProcessService extends BaseBatchService {
       isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
       isAdminUpdated = cntryHandler.isAdminUpdate(admin, data.getCmrIssuingCntry());
       isDataUpdated = isAdminUpdated || isDataUpdated;
+
+      if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry()) && !isDataUpdated) {
+        isDataUpdated = LAHandler.isTaxInfoUpdated(em, admin.getId().getReqId());
+      }
 
       // 3. Check if there are customer and IBM changes, propagate to other
       // addresses

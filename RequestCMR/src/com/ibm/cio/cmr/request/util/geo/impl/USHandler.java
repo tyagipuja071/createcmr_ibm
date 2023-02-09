@@ -844,6 +844,11 @@ public class USHandler extends GEOHandler {
       }
     }
     // CREATCMR-6183
+    // CREATCMR-8142
+    if ("U".equals(admin.getReqType()) && "ICC".equals(cmr.getUsCmrRestrictTo()) && "ZS01".equals(address.getId().getAddrType())) {
+      address.setDivn(cmr.getCmrName());
+    }
+    // CREATCMR-8142
 
   }
 
@@ -876,7 +881,13 @@ public class USHandler extends GEOHandler {
         admin.setOldCustNm2(parts[1]);
       }
     }
-
+    // CREATCMR-8142
+    if ("U".equals(admin.getReqType()) && "ICC".equals(currentRecord.getUsCmrRestrictTo())) {
+      parts = splitName(currentRecord.getUsCmrCompanyNm(), null, 28, 24);
+      admin.setMainCustNm1(parts[0]);
+      admin.setMainCustNm2(parts[1]);
+    }
+    // CREATCMR-8142
   }
 
   public boolean checkIfTerritory(String land1) throws CmrException {
@@ -1211,6 +1222,7 @@ public class USHandler extends GEOHandler {
           || ("BYMODEL".equalsIgnoreCase(data.getCustSubGrp()) && "KYN".equalsIgnoreCase(data.getRestrictTo()))) {
         admin.setMainCustNm1("KYNDRYL INC");
       }
+      data.setVatInd("N");
     }
 
     if (admin != null && "CSP".equals(admin.getReqReason())) {
@@ -1252,6 +1264,11 @@ public class USHandler extends GEOHandler {
         data.setSearchTerm("");
       }
 
+      // CREATCMR-7145
+      if ("KYN".equals(data.getCustSubGrp())) {
+        data.setCustClass("11");
+      }
+
     }
 
     data.setTaxExemptStatus1(data.getSpecialTaxCd());
@@ -1261,8 +1278,6 @@ public class USHandler extends GEOHandler {
     String scc = getSCCByReqId(entityManager, data.getId().getReqId());
     data.setCompanyNm(scc);
     // CREATCMR-6342
-    
-    
     
     if("U".equals(admin.getReqType())){
     	data.setCustSubGrp("");

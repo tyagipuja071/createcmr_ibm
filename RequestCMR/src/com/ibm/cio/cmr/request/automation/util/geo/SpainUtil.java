@@ -136,6 +136,16 @@ public class SpainUtil extends AutomationUtil {
     String customerName = getCustomerFullName(soldTo);
     Addr installAt = requestData.getAddress("ZI01");
     String customerNameZI01 = getCustomerFullName(installAt);
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if(soldTo != null){
+    	String landCntry = soldTo.getLandCntry();
+    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
+                && ("CROSS".equals(custGrp))){
+        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+        }
+    }
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
@@ -297,6 +307,9 @@ public class SpainUtil extends AutomationUtil {
       List<DuplicateCMRCheckResponse> matches = response.getMatches();
       List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
       for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
         if (StringUtils.isNotBlank(match.getSortl())) {
           String sortl = match.getSortl().length() > 3 ? match.getSortl().substring(0, 3) : match.getSortl();
           if (Arrays.asList(sboValuesToCheck).contains(sortl)) {
@@ -328,35 +341,42 @@ public class SpainUtil extends AutomationUtil {
       boolean requesterFromTeam = false;
       switch (change.getDataField()) {
       case "VAT #":
-        if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
-          // ADD
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-          }
-          if (!matchesDnb) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
-            details.append("VAT # on the request did not match D&B\n");
-          } else {
-            details.append("VAT # on the request matches D&B\n");
-          }
-        }
-        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
-            && !(change.getOldData().equals(change.getNewData()))) {
-          // UPDATE
-          String oldData = change.getOldData().substring(3, 11);
-          String newData = change.getNewData().substring(3, 11);
-          if (!(oldData.equals(newData))) {
-            resultCodes.add("D");// Reject
-            details.append("VAT # on the request has characters updated other than the first character. Create New CMR. \n");
-          } else {
-            details.append("VAT # on the request differs only in the first Character\n");
-          }
-        }
+    	  if(requestData.getAddress("ZS01").getLandCntry().equals("GB")){
+    		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
+                  engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+                  details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+                  }
+            }else{
+            	if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+                    // ADD
+                    Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+                    List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+                    boolean matchesDnb = false;
+                    if (matches != null) {
+                      // check against D&B
+                      matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+                    }
+                    if (!matchesDnb) {
+                      cmdeReview = true;
+                      engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
+                      details.append("VAT # on the request did not match D&B\n");
+                    } else {
+                      details.append("VAT # on the request matches D&B\n");
+                    }
+                  }
+                  if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
+                      && !(change.getOldData().equals(change.getNewData()))) {
+                    // UPDATE
+                    String oldData = change.getOldData().substring(3, 11);
+                    String newData = change.getNewData().substring(3, 11);
+                    if (!(oldData.equals(newData))) {
+                      resultCodes.add("D");// Reject
+                      details.append("VAT # on the request has characters updated other than the first character. Create New CMR. \n");
+                    } else {
+                      details.append("VAT # on the request differs only in the first Character\n");
+                    }
+                  }
+            }
         break;
       case "SBO":
         if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
@@ -460,8 +480,15 @@ public class SpainUtil extends AutomationUtil {
       return true;
     }
     List<Addr> addresses = null;
+    int zi01count = 0;
+    int zp01count = 0;
+    int zd01count = 0;
+    List<Integer> addrCount = getAddressCount(entityManager, SystemLocation.SPAIN, data.getCmrIssuingCntry(), data.getCmrNo());
+    zi01count = addrCount.get(0);
+    zp01count = addrCount.get(1);
+    zd01count = addrCount.get(2);
     StringBuilder checkDetails = new StringBuilder();
-    Set<String> resultCodes = new HashSet<String>();// R - review
+    Set<String> resultCodes = new HashSet<String>();// R - review, D-Reject
     for (String addrType : RELEVANT_ADDRESSES) {
       if (changes.isAddressChanged(addrType)) {
         if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
@@ -474,17 +501,19 @@ public class SpainUtil extends AutomationUtil {
             // new address
             // CREATCMR-6586
             LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-            if (addressExists(entityManager, addr, requestData)) {
+            if (CmrConstants.RDC_BILL_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Addition of new Mailing and EPL (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+            } else if (((zi01count == 0 && CmrConstants.RDC_INSTALL_AT.equals(addrType))
+                || (zd01count == 0 && CmrConstants.RDC_SHIP_TO.equals(addrType))) && null == changes.getAddressChange(addrType, "Customer Name")
+                && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Addition of new " + (addrType.equalsIgnoreCase("ZI01") ? "Installing " : "Shipping ") + "("
+                  + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+            } else if (addressExists(entityManager, addr, requestData)) {
               LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
               resultCodes.add("D");
-            } else if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
-              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Addition of new ZD01 and ZS02(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
-            } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getAddressChange(addrType, "Customer Name")
-                && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
-              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Addition of new ZI01 (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else {
               LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
               resultCodes.add("R");
@@ -693,7 +722,6 @@ public class SpainUtil extends AutomationUtil {
             postalCodeRanges = postalMapping.getPostalCdStarts().replaceAll("\n", "").replaceAll(" ", "").split(",");
             postalCodes = Arrays.asList(postalCodeRanges);
           }
-
           String[] scenarios = postalMapping.getScenarios().replaceAll("\n", "").replaceAll(" ", "").split(",");
           scenariosList = Arrays.asList(scenarios);
 
@@ -779,45 +807,24 @@ public class SpainUtil extends AutomationUtil {
     return calculatedFields;
   }
 
-  public int getaddZD01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
-    int zd01count = 0;
-    String count = "";
-    String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("KATR6", katr6);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("CMR_NO", cmr_no);
-    query.setParameter("ADDR_TYPE", ktokd);
-    List<Object[]> results = query.getResults();
-
-    if (results != null && !results.isEmpty()) {
-      Object[] sResult = results.get(0);
-      count = sResult[0].toString();
-      zd01count = Integer.parseInt(count);
-    }
-    System.out.println("zd01count = " + zd01count);
-
-    return zd01count;
-  }
-
-  public int getaddZI01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
+  public List<Integer> getAddressCount(EntityManager entityManager, String cmrIssuingCntry, String realCntry, String cmrNo) {
     int zi01count = 0;
-    String count = "";
-    String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
+    int zp01count = 0;
+    int zd01count = 0;
+    String sql = ExternalizedQuery.getSql("QUERY.GET.COUNT.ADDRTYP");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("KATR6", katr6);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("CMR_NO", cmr_no);
-    query.setParameter("ADDR_TYPE", ktokd);
+    query.setParameter("REALCTY", realCntry);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmrNo);
     List<Object[]> results = query.getResults();
 
     if (results != null && !results.isEmpty()) {
       Object[] sResult = results.get(0);
-      count = sResult[0].toString();
-      zi01count = Integer.parseInt(count);
+      zi01count = Integer.parseInt(sResult[0].toString());
+      zp01count = Integer.parseInt(sResult[1].toString());
+      zd01count = Integer.parseInt(sResult[2].toString());
     }
-    System.out.println("zi01count = " + zi01count);
 
-    return zi01count;
+    return Arrays.asList(zi01count, zp01count, zd01count);
   }
 }

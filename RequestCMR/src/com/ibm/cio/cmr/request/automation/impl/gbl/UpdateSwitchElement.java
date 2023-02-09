@@ -148,7 +148,7 @@ public class UpdateSwitchElement extends ValidatingElement {
 
       }
 
-      if (!output.isOnError() && changes.hasAddressChanges()) {        
+      if (!output.isOnError() && changes.hasAddressChanges()) {
         List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
         String addrTypeCode = null;
         // Start CREATCMR-6229

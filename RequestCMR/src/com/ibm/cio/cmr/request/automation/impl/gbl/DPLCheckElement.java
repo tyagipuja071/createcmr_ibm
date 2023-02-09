@@ -178,15 +178,11 @@ public class DPLCheckElement extends ValidatingElement {
             addr.setDplChkTs(SystemUtil.getCurrentTimestamp());
             entityManager.merge(addr);
           } else {
-            Boolean isPrivate = false;
-            if (StringUtils.isNotEmpty(data.getIsicCd()) && "9500".equals(data.getIsicCd())) {
-            isPrivate = true;
-            }
-
+            Boolean isPrivate = isPrivate(data);
             Boolean errorStatus = false;
             try {
               dplResult = addrService.dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
-                  geoHandler != null ? !geoHandler.customerNamesOnAddress() : false,isPrivate);
+                  geoHandler != null ? !geoHandler.customerNamesOnAddress() : false, isPrivate);
             } catch (Exception e) {
               log.error("Error in performing DPL Check when call EVS on Request ID " + reqId + " Addr " + addr.getId().getAddrType() + "/"
                   + addr.getId().getAddrSeq(), e);
@@ -376,6 +372,8 @@ public class DPLCheckElement extends ValidatingElement {
       params.addParam("reqId", reqId);
       params.addParam("user", user);
       params.addParam("filePrefix", "AutoDPLSearch_");
+      params.addParam("mainCustNam1", requestData.getAdmin().getMainCustNm1());
+      params.addParam("mainCustNam2", requestData.getAdmin().getMainCustNm2());
 
       try {
         dplService.process(null, params);
@@ -409,6 +407,16 @@ public class DPLCheckElement extends ValidatingElement {
   @Override
   public String getProcessDesc() {
     return "DPL Check";
+  }
+
+  private boolean isPrivate(Data data) {
+    String subGrp = data.getCustSubGrp();
+    if (subGrp != null) {
+      if (subGrp.toUpperCase().contains("PRIV") || subGrp.toUpperCase().contains("PRIPE") || subGrp.toUpperCase().contains("PRICU")) {
+        return true;
+      }
+    }
+    return "60".equals(data.getCustClass()) || "9500".equals(data.getIsicCd());
   }
 
 }

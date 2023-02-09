@@ -134,7 +134,7 @@ public class LDMassUpdtRdcMultiWorker extends MassUpdateMultiWorker {
         if (isForErrorTests(entityManager, this.parentAdmin)) {
           response = processMassUpdateError(this.parentAdmin, request.getCmrNo());
         } else {
-          serviceClient.setReadTimeout(60 * 30 * 1000); // 30 mins
+          serviceClient.setReadTimeout(60 * 60 * 1000); // 30 mins
           response = serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
         }
 

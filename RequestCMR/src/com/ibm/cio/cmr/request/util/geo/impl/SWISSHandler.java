@@ -469,6 +469,7 @@ public class SWISSHandler extends GEOHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
+    List<String> custSubGrps = Arrays.asList("COM", "IBM", "PRI");
     if ("C".equals(admin.getReqType())) {
       data.setCurrencyCd("CHF");
     }
@@ -486,16 +487,23 @@ public class SWISSHandler extends GEOHandler {
           postCd = 0;
           LOG.debug("Cannot parse postal code since it's alphanumeric.");
         }
-        String landCntry = (String) results.get(0)[1];
-        if ("CH".equals(landCntry) || "LI".equals(landCntry)) {
-          if (StringUtils.isBlank(landCntry) && postCd != 0) {
+        if ("C".equals(admin.getReqType())) {
+          String landCntry = (String) results.get(0)[1];
+          String custSubGrp = "";
+          if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(data.getCustSubGrp())) {
+            custSubGrp = data.getCustSubGrp().substring(2);
+          }
+          if ("CH".equals(landCntry) || "LI".equals(landCntry) && custSubGrps.contains(custSubGrp)) {
             if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
               data.setCustPrefLang("D");
             } else if (postCd >= 6500 && postCd <= 6999) {
               data.setCustPrefLang("I");
             } else if (postCd >= 0000 && postCd <= 3000) {
               data.setCustPrefLang("F");
+            } else {
+              data.setCustPrefLang("E");
             }
+
           } else {
             data.setCustPrefLang("E");
           }
@@ -508,7 +516,7 @@ public class SWISSHandler extends GEOHandler {
     addrPk.setAddrSeq("00001");
     addrPk.setAddrType("ZS01");
     Addr addr = entityManager.find(Addr.class, addrPk);
-    if (addr != null && !StringUtils.isEmpty(data.getCustPrefLang())) {
+    if (addr != null && StringUtils.isNotEmpty(data.getCustPrefLang())) {
       addr.setCustLangCd(data.getCustPrefLang());
     }
 
@@ -1262,6 +1270,28 @@ public class SWISSHandler extends GEOHandler {
 
   @Override
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
+  }
+
+  @Override
+  public boolean isAddressChanged(EntityManager entityManager, Addr addr, String cmrIssuingCntry, boolean computedChangeInd) {
+    boolean city2Updated = false;
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDRRDC.SEARCH_BY_REQID_TYPE_SEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+    query.setParameter("ADDR_SEQ", addr.getId().getAddrSeq());
+    Addr addrRdc = query.getSingleResult(Addr.class);
+
+    if (addrRdc != null) {
+      String addrRdcCity2 = !StringUtils.isBlank(addrRdc.getCity2()) ? addrRdc.getCity2() : "";
+      String addrCity2 = !StringUtils.isBlank(addr.getCity2()) ? addr.getCity2() : "";
+
+      if (!addrRdcCity2.equals(addrCity2)) {
+        city2Updated = true;
+      }
+      return (city2Updated || computedChangeInd);
+    }
     return true;
   }
 

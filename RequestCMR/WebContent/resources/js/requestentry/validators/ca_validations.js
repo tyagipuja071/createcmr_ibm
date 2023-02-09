@@ -691,7 +691,6 @@ function addFieldHandlers() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
-      setIsuCtcFor5k();
     });
   }
 
@@ -760,7 +759,7 @@ function setIsuCtcFor5k() {
   if (custSubGrp == 'ECO') {
     return;
   }
-  if (isuCd == '5K') {
+  if (isuCd == '5K' || (custSubGrp == 'IBME' && isuCd == '21')) {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
@@ -1310,6 +1309,8 @@ function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
       arFaar = '051Z';
     } else if (scenario == 'USA') {
       arFaar = '120V';
+    } else if (scenario == 'IBME') {
+      arFaar = '051Z';
     }
     FormManager.setValue('adminDeptCd', arFaar);
     _scenarioArFaar = arFaar;
@@ -1339,7 +1340,7 @@ function clientTierCodeValidator() {
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -1464,8 +1465,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
   // ]);
   GEOHandler.addToggleAddrTypeFunction(addPostlCdLogic, [ SysLoc.CANADA ]);
-  GEOHandler.addAfterConfig(setIsuCtcFor5k, [ SysLoc.CANADA ]);
-  GEOHandler.addAfterTemplateLoad(setIsuCtcFor5k, [ SysLoc.CANADA ]);
 
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress([ SysLoc.CANADA ], validateCACopy, [ 'ZP01', 'ZP02' ]);

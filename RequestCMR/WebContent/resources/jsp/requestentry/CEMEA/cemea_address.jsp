@@ -136,7 +136,6 @@
     </p>
   </cmr:column> 
 </cmr:row>
-
 <cmr:row>
 	<cmr:view forCountry="618">
 		<cmr:column span="2" containerForField="Building">

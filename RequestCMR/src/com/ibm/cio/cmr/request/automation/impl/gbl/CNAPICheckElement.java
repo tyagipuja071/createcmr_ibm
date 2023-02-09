@@ -49,7 +49,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
 
-    String SCENARIO_LOCAL_NRML = "NRML";
+    String SCENARIO_LOCAL_NRMLC = "NRMLC";
+    String SCENARIO_LOCAL_NRMLD = "NRMLD";
     String SCENARIO_LOCAL_EMBSA = "EMBSA";
     String SCENARIO_CROSS_CROSS = "CROSS";
     String SCENARIO_LOCAL_AQSTN = "AQSTN";
@@ -105,9 +106,10 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
         // result.setOnError(false);
       } else if (soldTo != null) {
 
-        if (data.getCustSubGrp() != null && (SCENARIO_LOCAL_NRML.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_EMBSA.equals(data.getCustSubGrp())
-            || SCENARIO_LOCAL_BLUMX.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_MRKT.equals(data.getCustSubGrp())
-            || SCENARIO_LOCAL_BUSPR.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_ECOSY.equals(data.getCustSubGrp()))) {
+        if (data.getCustSubGrp() != null && (SCENARIO_LOCAL_NRMLC.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_NRMLD.equals(data.getCustSubGrp())
+            || SCENARIO_LOCAL_EMBSA.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_BLUMX.equals(data.getCustSubGrp())
+            || SCENARIO_LOCAL_MRKT.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_BUSPR.equals(data.getCustSubGrp())
+            || SCENARIO_LOCAL_ECOSY.equals(data.getCustSubGrp()))) {
           CompanyRecordModel searchModel = new CompanyRecordModel();
           searchModel.setIssuingCntry(data.getCmrIssuingCntry());
           searchModel.setCountryCd(soldTo.getLandCntry());
@@ -148,8 +150,9 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
                 details.append("Processor review is required as no high confidence Chinese name and address were found. ").append("\n");
                 details.append("Request name: " + cnName + "\n" + " API name: " + cmrsData.getRecord().getName() + "\n");
                 details.append("Request address: " + cnAddr + "\n" + " API address: " + cmrsData.getRecord().getRegLocation() + "\n");
-                details.append(
-                    "Chinese name and address have been override by trust source. if you agree, please Send for Processing. if you don't agree, please attach supporting document and click Disable automatic processing checkbox.")
+                details
+                    .append(
+                        "Chinese name and address have been override by trust source. if you agree, please Send for Processing. if you don't agree, please attach supporting document and click Disable automatic processing checkbox.")
                     .append("\n");
                 result.setDetails(details.toString().trim());
                 engineData.addNegativeCheckStatus("CNAPICheck", "No high confidence China API matches were found.");
@@ -344,8 +347,9 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
                 // TODO do pop up to let user choose
                 result.setResults("Overridden");
                 result.setOnError(true);
-                details.append(
-                    "Chinese name has been override by trust source. if you agree, please Send for Processing. if you don't agree, please attach supporting document and click Disable automatic processing checkbox.")
+                details
+                    .append(
+                        "Chinese name has been override by trust source. if you agree, please Send for Processing. if you don't agree, please attach supporting document and click Disable automatic processing checkbox.")
                     .append("\n");
               }
             } else {
@@ -408,8 +412,9 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
           overrideNameAndAddress(cmrsData.getRecord().getName(), cmrsData.getRecord().getRegLocation(), soldToIntlAddr, entityManager);
           result.setResults("Overridden");
           result.setOnError(true);
-          details.append(
-              "Chinese address has been override by trust source. if you agree, please Send for Processing. if you don't agree, please attach supporting document and click Disable automatic processing checkbox.")
+          details
+              .append(
+                  "Chinese address has been override by trust source. if you agree, please Send for Processing. if you don't agree, please attach supporting document and click Disable automatic processing checkbox.")
               .append("\n");
         }
 

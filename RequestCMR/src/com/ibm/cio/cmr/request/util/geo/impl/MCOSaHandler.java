@@ -1057,6 +1057,7 @@ public class MCOSaHandler extends MCOHandler {
             String intDeptNum = ""; // 16
             String isuCd = ""; // 10
             String clientTier = ""; // 11
+            String enterprise = ""; // 17
 
             boolean isDummyUpdate = true;
 
@@ -1125,6 +1126,9 @@ public class MCOSaHandler extends MCOHandler {
 
               currCell = (XSSFCell) row.getCell(10);
               isuCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              enterprise = validateColValFromCell(currCell);
             }
 
             checkListSubRegion = Arrays.asList(nameCont, streetCont);
@@ -1135,20 +1139,29 @@ public class MCOSaHandler extends MCOHandler {
             if (StringUtils.isNotBlank(cof) && ("R".equals(cof) || "S".equals(cof) || "T".equals(cof)) && "Y".equals(codFlag)) {
               LOG.trace("if COF is R/S/T, then COD will be N only >> ");
               error.addError((row.getRowNum() + 1), "COD and COF", "if COF is R/S/T, then COD will be N only <br>");
+              // validations.add(error);
             } else if (StringUtils.isBlank(cof) && "N".equals(codFlag)) {
               LOG.trace("If COF is Blank, then COD will be Y only >> ");
               error.addError((row.getRowNum() + 1), "COD and COF", "If COF is Blank, then COD will be Y only. <br>");
+              // validations.add(error);
             }
 
             if (!StringUtils.isBlank(cmrNo) && !cmrNo.startsWith("99") && !StringUtils.isBlank(intDeptNum)) {
               LOG.trace("Internal Department Number can be filled only when cmrNo Start with 99.");
               error.addError((row.getRowNum() + 1), "Internal Dept Number.",
                   "Internal Department Number can be filled only when cmrNo Start with 99.<br>");
+              // validations.add(error);
             }
 
             if (!StringUtils.isBlank(zs01Phone) && !zs01Phone.contains("@") && !zs01Phone.matches("\\d+.\\d*")) {
               LOG.trace("Phone Number should contain only digits.");
               error.addError((row.getRowNum() + 1), "Phone #", "Phone Number should contain only digits. <br>");
+              // validations.add(error);
+            }
+
+            if (!StringUtils.isBlank(enterprise) && !enterprise.contains("@") && !enterprise.matches("\\d+.\\d*")) {
+              LOG.trace("Enterprise Number should contain only digits.");
+              error.addError((row.getRowNum() + 1), "Enterprise #", "Enterprise Number should contain only digits. <br>");
             }
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -1157,18 +1170,32 @@ public class MCOSaHandler extends MCOHandler {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
-                if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+                if (StringUtils.isBlank(clientTier) || !"Q".contains(clientTier)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                      + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError(row.getRowNum() + 1, "Client Tier",
+                      ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
+              } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+                if (StringUtils.isBlank(clientTier) || !"Y".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+                if (StringUtils.isBlank(clientTier) || !"T".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
+                  && !"@".equalsIgnoreCase(clientTier)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
               }
             }
-
 
             /*
              * if (!StringUtils.isBlank(inac) && inac.length() == 4 &&
@@ -1189,11 +1216,13 @@ public class MCOSaHandler extends MCOHandler {
             if (StringUtils.isEmpty(cmrNo)) {
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
+              // validations.add(error);
             }
             if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
               LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "Address Sequence No.",
                   "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again. <br>");
+              // validations.add(error);
             }
 
             if (!isDummyUpdate) {
@@ -1234,6 +1263,7 @@ public class MCOSaHandler extends MCOHandler {
                 LOG.trace("Landed Country is required.");
                 error.addError((row.getRowNum() + 1), "Landed Country", "Landed Country is required.<br>");
               }
+              // validations.add(error);
             }
             if (error.hasErrors()) {
               validations.add(error);

@@ -60,6 +60,8 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       throws Exception {
     Addr soldTo = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String isProspectCmr = admin.getProspLegalInd();
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     boolean matchDepartment = false;
@@ -97,7 +99,32 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                 }
                 Collections.copy(cmrCheckMatches, cmrCheckMatchesDept);
               }
-              if (cmrCheckMatches.size() != 0) {
+              // cmr - 4512 match dupc prospect cmr
+              int itemNo = 1;
+              for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+                String regex = "\\s+$";
+                String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
+                String cmrRecCustName = StringUtils.isBlank(cmrCheckRecord.getCustomerName()) ? "" : cmrCheckRecord.getCustomerName();
+                custName = custName.replaceAll(regex, "");
+                cmrRecCustName = cmrRecCustName.replaceAll(regex, "");
+                if (!"Y".equals(isProspectCmr) && cmrCheckRecord.getCmrNo() != null && cmrCheckRecord.getCmrNo().startsWith("P")
+                    && "75".equals(cmrCheckRecord.getOrderBlk())) {
+                  log.debug("Duplicate Prospect CMR Found..");
+                  details.append(cmrCheckMatches.size() + " record(s) found. \n");
+                  output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
+                      itemNo++);
+                  logDuplicateCMR(details, cmrCheckRecord);
+                  engineData.put("cmrCheckMatches", cmrCheckMatches);
+                  engineData.addRejectionComment("DUPC", "There is an existing CMR " + cmrCheckRecord.getCmrNo()
+                      + " , please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR", "", "");
+                  result.setOnError(true);
+                  result.setResults("Found Duplicate CMRs.");
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                  return result;
+                }
+              }
+              if (cmrCheckMatches.size() != 0 && !"Y".equals(isProspectCmr)) {
                 result.setResults("Matches Found");
                 details.append(cmrCheckMatches.size() + " record(s) found.");
                 List<String> dupCMRNos = new ArrayList<>();
@@ -106,7 +133,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                   details.append("Showing top 5 matches only.");
                 }
 
-                int itemNo = 1;
+                itemNo = 1;
                 for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
                   details.append("\n");
 
@@ -349,6 +376,16 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
 
   private void updateMatches(MatchingResponse<DuplicateCMRCheckResponse> global, MatchingResponse<DuplicateCMRCheckResponse> iteration) {
     List<DuplicateCMRCheckResponse> updated = new ArrayList<DuplicateCMRCheckResponse>();
+    for (DuplicateCMRCheckResponse match : global.getMatches()) {
+      if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+        updated.add(match);
+      }
+    }
+    for (DuplicateCMRCheckResponse match2 : iteration.getMatches()) {
+      if (match2.getCmrNo() != null && match2.getCmrNo().startsWith("P") && "75".equals(match2.getOrderBlk())) {
+        updated.add(match2);
+      }
+    }
     for (DuplicateCMRCheckResponse resp1 : global.getMatches()) {
       for (DuplicateCMRCheckResponse resp2 : iteration.getMatches()) {
         if (resp1.getCmrNo().equals(resp2.getCmrNo())) {

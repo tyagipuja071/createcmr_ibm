@@ -443,7 +443,6 @@ public class AustraliaUtil extends AutomationUtil {
     case SCENARIO_INTERNAL:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
-
     case SCENARIO_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);

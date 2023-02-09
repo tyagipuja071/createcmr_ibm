@@ -84,6 +84,16 @@ public class UKIUtil extends AutomationUtil {
     custNm1 = zi01.getCustNm1();
     custNm2 = !StringUtils.isBlank(zi01.getCustNm2()) ? " " + zi01.getCustNm2() : "";
     String customerNameZI01 = custNm1 + custNm2;
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if (zs01 != null) {
+      String landCntry = zs01.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
+    }
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
@@ -245,7 +255,29 @@ public class UKIUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "VAT #":
-        // noop, for switch handling only
+        if (requestData.getAddress("ZS01").getLandCntry().equals("GB") && !data.getCmrIssuingCntry().equals("866")) {
+          if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)) {
+            engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+            details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+          }
+        } else {
+          if (!StringUtils.isBlank(change.getNewData())) {
+            soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+            }
+            if (!matchesDnb) {
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
+              details.append("VAT # on the request did not match D&B\n");
+            } else {
+              details.append("VAT # on the request matches D&B\n");
+            }
+          }
+        }
         break;
       case "INAC/NAC Code":
       case "ISU Code":
@@ -320,6 +352,13 @@ public class UKIUtil extends AutomationUtil {
       return true;
     }
     List<Addr> addresses = null;
+    int zi01count = 0;
+    int zp01count = 0;
+    int zd01count = 0;
+    List<Integer> addrCount = getAddressCount(entityManager, SystemLocation.UNITED_KINGDOM, data.getCmrIssuingCntry(), data.getCmrNo());
+    zi01count = addrCount.get(0);
+    zp01count = addrCount.get(1);
+    zd01count = addrCount.get(2);
     LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
@@ -345,7 +384,16 @@ public class UKIUtil extends AutomationUtil {
           if ("N".equals(addr.getImportInd())) {
             // new address
             // CREATCMR-6586 checking duplicate for all addresses
-            if (addressExists(entityManager, addr, requestData)) {
+            if (CmrConstants.RDC_BILL_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Addition of new Installing and Shipping(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+            } else if (((zi01count == 0 && CmrConstants.RDC_INSTALL_AT.equals(addrType))
+                || (zd01count == 0 && CmrConstants.RDC_SHIP_TO.equals(addrType))) && null == changes.getAddressChange(addrType, "Customer Name")
+                && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Addition of new " + (addrType.equalsIgnoreCase("ZI01") ? "Installing " : "Shipping ") + "("
+                  + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+            } else if (addressExists(entityManager, addr, requestData)) {
               LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
               resultCodes.add("R");
@@ -588,6 +636,9 @@ public class UKIUtil extends AutomationUtil {
       List<DuplicateCMRCheckResponse> matches = response.getMatches();
       List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
       for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
         if (StringUtils.isNotBlank(match.getCustClass())) {
           String custClass = match.getCustClass();
           if (Arrays.asList(custClassValuesToCheck).contains(custClass)) {
@@ -930,4 +981,24 @@ public class UKIUtil extends AutomationUtil {
     LOG.debug("client tier" + data.getClientTier());
   }
 
+  public List<Integer> getAddressCount(EntityManager entityManager, String cmrIssuingCntry, String realCntry, String cmrNo) {
+    int zi01count = 0;
+    int zp01count = 0;
+    int zd01count = 0;
+    String sql = ExternalizedQuery.getSql("QUERY.GET.COUNT.ADDRTYP");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REALCTY", realCntry);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmrNo);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      zi01count = Integer.parseInt(sResult[0].toString());
+      zp01count = Integer.parseInt(sResult[1].toString());
+      zd01count = Integer.parseInt(sResult[2].toString());
+    }
+
+    return Arrays.asList(zi01count, zp01count, zd01count);
+  }
 }

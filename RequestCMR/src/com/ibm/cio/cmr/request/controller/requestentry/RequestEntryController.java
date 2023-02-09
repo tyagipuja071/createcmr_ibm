@@ -91,7 +91,8 @@ public class RequestEntryController extends BaseController {
    * @return
    * @throws CmrException
    */
-  @RequestMapping(value = "/request/{reqId1}")
+  @RequestMapping(
+      value = "/request/{reqId1}")
   public ModelAndView showRequestDetail(@PathVariable("reqId1") long reqId, HttpServletRequest request, HttpServletResponse response,
       RequestEntryModel model, CheckListModel checklist) throws Exception {
     ModelAndView mv = null;
@@ -231,7 +232,8 @@ public class RequestEntryController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(value = "/request")
+  @RequestMapping(
+      value = "/request")
   public ModelAndView showRequestEntryPage(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model,
       CheckListModel checklist) throws Exception {
 
@@ -544,9 +546,6 @@ public class RequestEntryController extends BaseController {
         MessageUtil.setInfoMessage(mv, MessageUtil.VERIFY_SCENARIO_SUCCESS);
       } else if (CmrConstants.OVERRIDE_DNB.equalsIgnoreCase(action)) {
         MessageUtil.setInfoMessage(mv, MessageUtil.OVERRIDE_DNB_SUCCESS);
-      } else if ("RECREATE".equalsIgnoreCase(action)) {
-        mv = new ModelAndView("redirect:/request/" + model.getReqId(), "reqentry", new RequestEntryModel());
-        MessageUtil.setInfoMessage(mv, MessageUtil.INFO_RECREATE);
       }
 
       if (!StringUtils.isEmpty(model.getDplMessage())) {
@@ -576,7 +575,8 @@ public class RequestEntryController extends BaseController {
    * @return
    * @throws Exception
    */
-  @RequestMapping(value = "/request/import")
+  @RequestMapping(
+      value = "/request/import")
   public ModelAndView importCMRs(HttpServletRequest request, HttpServletResponse response, ImportCMRModel model, RequestEntryModel reqModel)
       throws Exception {
 
@@ -652,7 +652,8 @@ public class RequestEntryController extends BaseController {
    * @return
    * @throws Exception
    */
-  @RequestMapping(value = "/request/dnbimport")
+  @RequestMapping(
+      value = "/request/dnbimport")
   public ModelAndView importDnB(HttpServletRequest request, HttpServletResponse response, ImportCMRModel model, RequestEntryModel reqModel)
       throws Exception {
 
@@ -719,7 +720,8 @@ public class RequestEntryController extends BaseController {
    * @return
    * @throws IOException
    */
-  @RequestMapping(value = "/request/scorecard")
+  @RequestMapping(
+      value = "/request/scorecard")
   public ModelMap getScorecardResult(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
     ModelMap model = new ModelMap();
@@ -737,7 +739,8 @@ public class RequestEntryController extends BaseController {
    * @return
    * @throws IOException
    */
-  @RequestMapping(value = "/request/commentlog/list")
+  @RequestMapping(
+      value = "/request/commentlog/list")
   public ModelMap getCommentLogList(HttpServletRequest request, HttpServletResponse response, CmtModel cmtModel) throws CmrException {
     List<CmtModel> results = cmtservice.search(cmtModel, request);
     ModelMap map = new ModelMap();
@@ -745,7 +748,9 @@ public class RequestEntryController extends BaseController {
     return map;
   }
 
-  @RequestMapping(value = "/request/pdf", method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/request/pdf",
+      method = RequestMethod.POST)
   public void exportToPDF(HttpServletRequest request, HttpServletResponse response, AttachmentModel model) throws Exception {
 
     String token = request.getParameter("tokenId");
@@ -783,7 +788,8 @@ public class RequestEntryController extends BaseController {
    * @return
    * @throws Exception
    */
-  @RequestMapping(value = "/request/crisimport")
+  @RequestMapping(
+      value = "/request/crisimport")
   public ModelAndView importCRISRecords(HttpServletRequest request, HttpServletResponse response, ImportCMRModel model, RequestEntryModel reqModel)
       throws Exception {
 
@@ -842,7 +848,8 @@ public class RequestEntryController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(value = "/request/verify/company")
+  @RequestMapping(
+      value = "/request/verify/company")
   public ModelMap processAddressModal(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model) throws CmrException {
 
     ProcessResultModel result = new ProcessResultModel();
@@ -865,7 +872,8 @@ public class RequestEntryController extends BaseController {
    * @return
    * @throws IOException
    */
-  @RequestMapping(value = "/request/dnb/matchlist")
+  @RequestMapping(
+      value = "/request/dnb/matchlist")
   public ModelMap getDnBMatchList(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
     String reqIdString = request.getParameter("reqId");
     long reqId = reqIdString != null ? Long.parseLong(reqIdString) : 0L;
@@ -873,7 +881,8 @@ public class RequestEntryController extends BaseController {
     return wrapAsSearchResult(results);
   }
 
-  @RequestMapping(value = "/request/dnb/checkMatch")
+  @RequestMapping(
+      value = "/request/dnb/checkMatch")
   public ModelMap checkIfMatchesDnB(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
     ModelMap map = new ModelMap();
     try {
@@ -887,7 +896,8 @@ public class RequestEntryController extends BaseController {
     return map;
   }
 
-  @RequestMapping(value = "/request/dnb/checkMatchUpdate")
+  @RequestMapping(
+      value = "/request/dnb/checkMatchUpdate")
   public ModelMap checkIfMatchesDnBUpdate(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
     ModelMap map = new ModelMap();
     try {
@@ -917,7 +927,8 @@ public class RequestEntryController extends BaseController {
     return map;
   }
 
-  @RequestMapping(value = "/request/dnb/matchlist/importrecord")
+  @RequestMapping(
+      value = "/request/dnb/matchlist/importrecord")
   public ModelMap importMatchIntoRequest(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
     CmrClientService dnbService = new CmrClientService();
     ModelMap map = new ModelMap();
@@ -943,7 +954,8 @@ public class RequestEntryController extends BaseController {
    * @return
    * @throws Exception
    */
-  @RequestMapping(value = "/request/singlereactimport")
+  @RequestMapping(
+      value = "/request/singlereactimport")
   public ModelAndView importSREACTRecords(HttpServletRequest request, HttpServletResponse response, ImportCMRModel model, RequestEntryModel reqModel)
       throws Exception {
 

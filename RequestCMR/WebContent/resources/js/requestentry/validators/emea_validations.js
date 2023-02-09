@@ -78,7 +78,7 @@ function addHandlersForIE() {
   if (_CTCHandlerIE == null) {
     _CTCHandlerIE = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       addSBOSRLogicIE(value);
-      setSboValueBasedOnIsuCtcIE();
+      setSboValueBasedOnIsuCtcIE(value);
     });
   }
 }
@@ -429,26 +429,25 @@ function getZS01LandCntry() {
 }
 
 function afterConfigForUKI() {
-  console.log(" --->>> Process afterConfigForUKI. <<<--- ");
-  var reqType = FormManager.getActualValue('reqType');
-  var role = null;
-  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var companyNum = FormManager.getActualValue('taxCd1');
-  var isicCd = FormManager.getActualValue('isicCd');
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  var zs01LandCntry = getZS01LandCntry();
+	console.log(" --->>> Process afterConfigForUKI. <<<--- ");
+	var reqType = FormManager.getActualValue('reqType');
+	var role = null;
+	var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+	var companyNum = FormManager.getActualValue('taxCd1');
+	var isicCd = FormManager.getActualValue('isicCd');
+	var custSubType = FormManager.getActualValue('custSubGrp');
+	var zs01LandCntry = getZS01LandCntry();
+	if (typeof (_pagemodel) != 'undefined') {
+		reqType = FormManager.getActualValue('reqType');
+		role = _pagemodel.userRole;
+	}
+	cmr.hideNode('deptInfo');
+	// autoSetAbbrevLocnHandler();
+	if (reqType == 'U' || reqType == 'X') {
+		FormManager.resetValidations('collectionCd');
+	}
 
-  if (typeof (_pagemodel) != 'undefined') {
-    reqType = FormManager.getActualValue('reqType');
-    role = _pagemodel.userRole;
-  }
-  cmr.hideNode('deptInfo');
-  // autoSetAbbrevLocnHandler();
-  if (reqType == 'U' || reqType == 'X') {
-    FormManager.resetValidations('collectionCd');
-  }
-
-  optionalRuleForVatUK();
+  // optionalRuleForVatUK();
 
   // CREATCMR-1727
   cmrNoEnableForUKI();
@@ -473,6 +472,7 @@ function afterConfigForUKI() {
 
   if (_customerTypeHandler == null) {
     var _custType = null;
+    var issu_cntry = FormManager.getActualValue('cmrIssuingCntry');
     _customerTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       _custType = FormManager.getActualValue('custSubGrp');
       // checkScenarioChanged();
@@ -486,10 +486,13 @@ function afterConfigForUKI() {
         autoSetCollectionCdByScenario(_custType);
         autoSetSBO(_custType, custTypeinDB);
         // autoSetAbbrevLocnOnChangeUKI();
-        autoSetISUClientTierUK();
-        optionalRuleForVatUK();
+        // autoSetISUClientTierUK();
+        // optionalRuleForVatUK();
         autoSetAbbrNameUKI();
         autoSetUIFieldsOnScnrioUKI();
+        if (issu_cntry == SysLoc.IRELAND) {
+          setSboValueBasedOnIsuCtcIE();
+        }
       }
     });
   }
@@ -510,8 +513,9 @@ function afterConfigForUKI() {
         FormManager.readOnly('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
-        if ("C" == FormManager.getActualValue('reqType')) {
-          FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        if ("C" == FormManager.getActualValue('reqType') && getZS01LandCntry() != 'GB') {
+          // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+          // 'MAIN_CUST_TAB');
         }
         FormManager.enable('vat');
       }
@@ -552,14 +556,13 @@ function afterConfigForUKI() {
 
   if (_isuCdHandlerIE == null && FormManager.getField('isuCd') && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
     _isuCdHandlerIE = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setClientTierValuesUKI();
-      setSboValueBasedOnIsuCtcIE();
+      setClientTierBasedOnIsuUKI();
+      setSboValueBasedOnIsuCtcIE(value);
     });
   }
 
-  /*if (_isuCdHandlerIE && _isuCdHandlerIE[0]) {
-    _isuCdHandlerIE[0].onChange();
-  }
+  /*
+   * if (_isuCdHandlerIE && _isuCdHandlerIE[0]) { _isuCdHandlerIE[0].onChange(); }
    */
   if (_isicHandler == null) {
     _oldIsicCd = FormManager.getActualValue('isicCd');
@@ -573,30 +576,49 @@ function afterConfigForUKI() {
   addressQuotationValidatorUKI();
 }
 
+function setClientTierBasedOnIsuUKI() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  isuCd = FormManager.getActualValue('isuCd');
+  isuCtcVals = {
+    '32' : 'T',
+    '34' : 'Q',
+    '36' : 'Y'
+  };
+  if (isuCd != null && isuCd != undefined && isuCd != '') {
+    if (isuCtcVals.hasOwnProperty(isuCd)) {
+      FormManager.setValue('clientTier', isuCtcVals[isuCd]);
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'ClientTier' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.setValue('clientTier', '');
+      FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    }
+  }
+}
 function addHandlersForUK() {
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      if (_pagemodel.userRole.toUpperCase() == 'PROCESSOR') {
-        setClientTierValuesUKI();
-      }
-      autoSetSBO(value, _pagemodel.isuCd);
-      setSboValueBasedOnIsuCtcUK();
+      setClientTierBasedOnIsuUKI();
+      setSboValueBasedOnIsuCtcUK(value);
     });
   }
-/*  if (_isuCdHandler && _isuCdHandler[0]) {
-    _isuCdHandler[0].onChange();
-  }*/
+  /*
+   * if (_isuCdHandler && _isuCdHandler[0]) { _isuCdHandler[0].onChange(); }
+   */
   if (_clientTierHandler == null && FormManager.getField('clientTier')) {
     _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       autoSetSBO(value, _pagemodel.clientTier);
-      setSrAndSboOnIsicUK(value, _pagemodel.clientTier)
+      setSrAndSboOnIsicUK(value, _pagemodel.clientTier);
       autoSetSboSrOnAddrSaveUK();
-      setSboValueBasedOnIsuCtcUK();
+      setSboValueBasedOnIsuCtcUK(value);
     });
   }
- /* if (_clientTierHandler && _clientTierHandler[0]) {
-    _clientTierHandler[0].onChange();
-  }*/
+  /*
+   * if (_clientTierHandler && _clientTierHandler[0]) {
+   * _clientTierHandler[0].onChange(); }
+   */
   if (_isicCdHandler == null && FormManager.getField('isicCd')) {
     _oldIsicCd = FormManager.getActualValue('isicCd');
     _isicCdHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -606,18 +628,19 @@ function addHandlersForUK() {
       }
     });
   }
-/* if (_isicCdHandler && _isicCdHandler[0]) {
-    _isicCdHandler[0].onChange();
-  }*/
+  /*
+   * if (_isicCdHandler && _isicCdHandler[0]) { _isicCdHandler[0].onChange(); }
+   */
   if (_postCdHandlerUK == null && FormManager.getField('postCd')) {
     _postCdHandlerUK = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
       autoSetSBO(value, _pagemodel.postCd);
       autoSetSboSrOnAddrSaveUK(value, _pagemodel.postCd);
     });
   }
- /* if (_postCdHandlerUK && _postCdHandlerUK[0]) {
-    _postCdHandlerUK[0].onChange();
-  }*/
+  /*
+   * if (_postCdHandlerUK && _postCdHandlerUK[0]) {
+   * _postCdHandlerUK[0].onChange(); }
+   */
 }
 
 function configureCRNForUKI() {
@@ -728,7 +751,8 @@ function autoSetSpecialTaxCdByScenario() {
     } else if (_custType == 'INTER' || _custType == 'XINTR' || _custType == 'INFSL') {
       FormManager.setValue('specialTaxCd', 'XX');
       FormManager.readOnly('specialTaxCd');
-    } else if (issuingCntry == SysLoc.UK && ((_custType == 'CROSS' || _custType == 'XBSPR' || _custType == 'XPRIC' || _custType == 'XGOVR') || (exceptionPostCd.includes(postCd) && custGrp == 'LOCAL' && _custType != 'INTER' && _custType != 'INFSL'))) {
+    } else if (issuingCntry == SysLoc.UK
+        && ((_custType == 'CROSS' || _custType == 'XBSPR' || _custType == 'XPRIC' || _custType == 'XGOVR') || (exceptionPostCd.includes(postCd) && custGrp == 'LOCAL' && _custType != 'INTER' && _custType != 'INFSL'))) {
       FormManager.setValue('specialTaxCd', '32');
       // FormManager.enable('specialTaxCd');
     } else if (issuingCntry == SysLoc.UK && _custType != 'INTER' && _custType != 'INFSL' && custGrp == 'LOCAL' && !exceptionPostCd.includes(postCd.substr(0, 2))) {
@@ -888,7 +912,7 @@ function setUKIAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, 
 
     if (_postalCdUKHandler == null) {
       _postalCdUKHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
-        //autoSetAbbrevLocUKI();
+        autoSetSpecialTaxCdByScenario();
       });
     }
 
@@ -992,6 +1016,9 @@ function autoSetVAT() {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');
+  } else if (getZS01LandCntry() == 'GB') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
   } else {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     FormManager.enable('vat');
@@ -1053,11 +1080,11 @@ function autoSetSBO(value, valueInDB) {
       if (isuCd == '34' && clientTier == 'Q') {
         FormManager.setValue('salesBusOffCd', "057");
         FormManager.setValue('repTeamMemberNo', "SPA057");
-      } else if (isuCd == '34' && clientTier == 'Y') {
-        FormManager.setValue('salesBusOffCd', "017");
-        FormManager.setValue('repTeamMemberNo', "SPAIR7");
       }
     }
+  }
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
+    setSboValueBasedOnIsuCtcIE();
   }
 }
 
@@ -1125,88 +1152,6 @@ function setSrAndSboOnIsicUK() {
       }
     }
   }
-}
-
-function setClientTierValuesUKI() {
-  console.log("setClientTierValuesUKI....")
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
-    return;
-  }
-  var reqType = FormManager.getActualValue('reqType');
-  var isuCd = FormManager.getActualValue('isuCd');
-
-  FormManager.removeValidator('clientTier', Validators.REQUIRED);
-
-  if (isuCd == '5K') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  } else {
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (reqType == 'U' || (reqType != 'U' && role == 'PROCESSOR')) {
-      FormManager.enable('clientTier');
-    }
-  }
-
-  var isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  } else {
-    var reqType = FormManager.getActualValue('reqType');
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (reqType != 'U') {
-      var custSubGrp = FormManager.getActualValue('custSubGrp');
-      if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
-        FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      }
-    }
-    if (reqType == 'U' || (reqType != 'U' && role == 'PROCESSOR')) {
-      FormManager.enable('clientTier');
-    }
-  }
-
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  isuCd = FormManager.getActualValue('isuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var clientTiers = [];
-  if (isuCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + '%'
-    };
-    var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-    if (results != null && results.length > 0) {
-      for (var i = 0; i < results.length; i++) {
-        clientTiers.push(results[i].ret1);
-      }
-    } else {
-      qParams.ISU = '%*%';
-      results = cmr.query('GET.CTCLIST.BYISU', qParams);
-      if (results != null && results.length > 0) {
-        for (var i = 0; i < results.length; i++) {
-          clientTiers.push(results[i].ret1);
-        }
-      }
-    }
-
-    if (clientTiers != null && clientTiers.length > 0) {
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
-      if (clientTiers.length == 1) {
-        // FormManager.setValue('clientTier', clientTiers[0]);
-        FormManager.resetValidations('clientTier');
-        FormManager.readOnly('clientTier');
-      }
-    } else {
-      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-      // FormManager.setValue('clientTier', '');
-    }
-  }
-
-  // CREATCMR-4293
-  setCTCValues();
-
 }
 
 function autoSetSboSrOnAddrSaveUK() {
@@ -1409,7 +1354,6 @@ function autoSetAbbrevNmOnChanageUKI() {
     FormManager.setValue('abbrevNm', _abbrevNmValue);
   }
 }
-
 
 function showDeptNoForInternalsOnlyUKI() {
   console.log(">>BEGIN showDeptNoForInternalsOnlyUKI >>");
@@ -1836,28 +1780,6 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
     return;
   }
   var checkImportIndc = getImportedIndcForItaly();
-  if (reqType == 'C' && checkImportIndc == 'Y' && scenarioChanged) {
-    if (custSubType == 'BUSPR' || custSubType == 'INTER' || custSubType == 'CROBP' || custSubType == 'CROIN' || custSubType == 'BUSSM' || custSubType == 'INTSM' || custSubType == 'BUSVA'
-        || custSubType == 'INTVA') {
-      FormManager.setValue('isuCd', '21');
-      FormManager.readOnly('isuCd');
-      FormManager.setValue('clientTier', '');
-      FormManager.readOnly('clientTier');
-    } else if (custSubType == 'BUSPR' || custSubType == 'CROBP' || custSubType == 'BUSSM' || custSubType == 'BUSVA') {
-      FormManager.readOnly('collectionCd');
-      FormManager.readOnly('repTeamMemberNo');
-      FormManager.setValue('repTeamMemberNo', '09ZPB0');
-      FormManager.readOnly('salesBusOffCd');
-      FormManager.setValue('salesBusOffCd', 'ZP');
-      FormManager.clearValue('collectionCd');
-    } else if (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA' || custSubType == 'INTSM') {
-      FormManager.readOnly('salesBusOffCd');
-      FormManager.readOnly('repTeamMemberNo');
-    } else {
-      FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
-      FormManager.enable('salesBusOffCd');
-    }
-  }
   if (reqType == 'C' && role == 'REQUESTER') {
     console.log("fieldsReadOnlyItaly for REQUESTER..");
     // Defect: 1461349 - For Lock and unlocked
@@ -2250,7 +2172,7 @@ function addEMEAClientTierISULogic() {
 }
 
 function addISUHandlerIT() {
-  var isuHandler = null;
+  var _isuHandler = null;
   _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
     if (!value) {
       value = FormManager.getActualValue('isuCd');
@@ -2260,37 +2182,33 @@ function addISUHandlerIT() {
 }
 
 function setClientTierValuesIT(isuCd) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
-  var reqType = FormManager.getActualValue('reqType');
   isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '28' && reqType == 'C') {
+  isuCdList = [ '36', '34', '32' ];
+  if (!isuCdList.includes(isuCd)) {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
+  //  FormManager.readOnly('clientTier');
   } else {
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (reqType != 'U') {
+    if (isuCdList.includes(isuCd)) {
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-      if (isuCd == '34') {
-        FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-      } else {
-        FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      }
-      // CREATCMR-4293
-      if (custSubGrp == 'CROBP' || custSubGrp == 'CROIN' || custSubGrp == 'INTER' || custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'INTSM' || custSubGrp == 'BUSVA'
-          || custSubGrp == 'INTVA') {
-        FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      }
-    }
-    if ([ 'IBMIT', 'PRICU', 'BUSPR', 'INTER', 'XIBM', 'CROPR', 'CROBP', 'CROIN', 'BUSVA', 'PRIVA', 'INTVA', 'INTSM', 'BUSSM', 'PRISM' ].includes(custSubGrp)) {
-      FormManager.readOnly('clientTier');
     } else {
-      FormManager.enable('clientTier');
+      FormManager.removeValidator('clientTier', Validators.REQUIRED);
     }
   }
-  // setSboValueBasedOnIsuCtcIT();
+  // setting default combos that are allowed for IsuCTC
+  if (isuCd == '32') {
+    FormManager.setValue('clientTier', 'T');
+  } else if (isuCd == '34') {
+    FormManager.setValue('clientTier', 'Q');
+  } else if (isuCd == '36') {
+    FormManager.setValue('clientTier', 'Y');
+  } else {
+    FormManager.setValue('clientTier', '');
+  }
 }
 
 function addSalesRepLogicUK2018() {
@@ -3745,7 +3663,6 @@ function setEnterpriseSalesRepSBO(isuCd) {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
-    FormManager.setValue('clientTier', '')
   }
 }
 
@@ -4532,25 +4449,15 @@ function afterConfigForIT() {
   if (_ISUHandlerIT == null) {
     _ISUHandlerIT = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setAffiliateEnterpriseRequired();
-      autoSetSboOnPostalCode();
       ibmFieldsBehaviourInCreateByScratchIT();
       lockCollectionCode();
-      setSboValueBasedOnIsuCtcIT();
     });
   }
 
   if (_CTCHandlerIT == null) {
     _CTCHandlerIT = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      autoSetSboOnPostalCode();
       ibmFieldsBehaviourInCreateByScratchIT();
       lockCollectionCode();
-      setSboValueBasedOnIsuCtcIT();
-    });
-  }
-
-  if (_salesRepHandlerIT == null) {
-    _salesRepHandlerIT = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-      // autoSetSBOOnSRValueIT();
     });
   }
 
@@ -4580,7 +4487,6 @@ function afterConfigForIT() {
       if (isuCode == '' || ctc == '') {
         setCollCdOnSBOIT(value);
       }
-      autoSetSROnSBOValueIT();
     });
   }
 
@@ -4617,18 +4523,6 @@ function afterConfigForIT() {
   } else if ((reqType == 'U' || reqType == 'X') && role == 'PROCESSOR') {
     FormManager.enable('sensitiveFlag');
   }
-  // if (reqType == 'C' && role == 'REQUESTER' &&
-  // FormManager.getActualValue('isuCd') == '32') {
-  // FormManager.readOnly('collectionCd');
-  // } else if (reqType == 'C' && role == 'PROCESSOR' &&
-  // FormManager.getActualValue('isuCd') == '32') {
-  // FormManager.enable('collectionCd');
-  // }
-  //
-  // if (FormManager.getActualValue('isuCd') != '32') {
-  // FormManager.enable('collectionCd');
-  // }
-
   if (reqType == 'U' || reqType == 'X') {
     var reqId = FormManager.getActualValue('reqId');
     var result = cmr.query('VALIDATOR.BILLING.CROSSBORDERIT', {
@@ -4716,6 +4610,53 @@ function afterConfigForIT() {
     }
   }
 
+  if (_custGrpIT && _custGrpIT[0]) {
+    _custGrpIT[0].onChange();
+  }
+
+  var reqId = FormManager.getActualValue('reqId');
+  if (reqType == 'C' && role == 'REQUESTER') {
+    var checkImportIndc = getImportedIndcForItaly();
+    // Story 1544496: Imported codes should not get overwritten
+    if (checkImportIndc == 'Y') {
+      console.log(">>importIndc is Y -Non editable fields- are ('clientTier', 'isuCd', 'repTeamMemberNo', 'salesBusOffCd','affiliate', 'specialTaxCd' , 'collectionCd','vat', 'taxCd1')");
+      if (custSubType != undefined && custSubType != '' && (custSubType != '3PAIT' && custSubType != '3PASM' && custSubType != '3PAVA')) {
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('clientTier');
+        FormManager.readOnly('repTeamMemberNo');
+        FormManager.readOnly('salesBusOffCd');
+        FormManager.readOnly('affiliate');
+        FormManager.resetValidations('clientTier');
+        // FormManager.readOnly('inacCd');
+      }
+      if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA') {
+        FormManager.enable('inacCd');
+      }
+      FormManager.readOnly('identClient');
+      if (custSubType == 'INTER' || custSubType == 'CROIN' || custSubType == 'INTSM' || custSubType == 'INTVA') {
+        FormManager.readOnly('salesBusOffCd');
+      }
+    }
+  }
+  // CMR-1257
+  if ('C' == FormManager.getActualValue('reqType')) {
+    var _countryUse = '';
+    var cntryRegion = FormManager.getActualValue('countryUse');
+    var _landCntry = FormManager.getActualValue('landCntry');
+    if (cntryRegion != '' && cntryRegion.length > 3) {
+      _countryUse = cntryRegion.substring(3, 5);
+    }
+    if (_countryUse != '' && _landCntry != '' && (_landCntry == 'VA' || _landCntry == 'SM')) {
+      FormManager.readOnly('landCntry');
+    }
+    if (_countryUse != '' && _landCntry != '' && _landCntry == 'VA') {
+      FormManager.setValue('identClient', 'Y');
+    }
+    if (_countryUse != '' && _landCntry != '' && _landCntry == 'IT') {
+      FormManager.setValue('taxCd1', '');
+    }
+  }
+
   if (role.toUpperCase() == 'REQUESTER' && (reqType == 'U' || reqType == 'X')) {
     var _countryUse = '';
     var cntryRegion = FormManager.getActualValue('countryUse');
@@ -4733,52 +4674,52 @@ function afterConfigForIT() {
   }
 }
 
-function setSboValueBasedOnIsuCtcIT() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
+// CREATCMR-5089 ITALY - coverage 2H22 updates sbo should not be set based on
+// isu/ctc
+/**
+ * function setSboValueBasedOnIsuCtcIT() { if
+ * (FormManager.getActualValue('viewOnlyPage') == 'true') { return; } var isuCd =
+ * FormManager.getActualValue('isuCd'); var clientTier =
+ * FormManager.getActualValue('clientTier'); var reqType =
+ * FormManager.getActualValue('reqType'); var isuList = [ '34', '5K', '14',
+ * '19', '3T', '4A' ]; if (!isuList.includes(isuCd)) { //
+ * FormManager.setValue('salesBusOffCd', ''); return; } if (isuCd == '34' &&
+ * clientTier == 'Y') { FormManager.setValue('salesBusOffCd', 'FL'); } else if
+ * (isuCd == '5K' && clientTier == '') { FormManager.setValue('salesBusOffCd',
+ * '99'); } else if (isuCd == '14' && clientTier == '') {
+ * FormManager.setValue('salesBusOffCd', 'TX'); } else if (isuCd == '19' &&
+ * clientTier == '') { FormManager.setValue('salesBusOffCd', 'EB'); } else if
+ * (isuCd == '3T' && clientTier == '') { FormManager.setValue('salesBusOffCd',
+ * 'TF'); } else if (isuCd == '4A' && clientTier == '') {
+ * FormManager.setValue('salesBusOffCd', 'XD'); } if (isuList.slice(2,
+ * 6).includes(isuCd) && reqType == 'C') {
+ * FormManager.resetValidations('clientTier');
+ * FormManager.setValue('clientTier', ''); FormManager.readOnly('clientTier'); } }
+ */
+var oldIsuCdValueUK = null;
+function setSboValueBasedOnIsuCtcUK(value) {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
-  var isuList = [ '34', '5K', '14', '19', '3T', '4A' ];
-  if (!isuList.includes(isuCd)) {
-    // FormManager.setValue('salesBusOffCd', '');
-    return;
-  }
-  if (isuCd == '34' && clientTier == 'Y') {
-    FormManager.setValue('salesBusOffCd', 'FL');
-  } else if (isuCd == '5K' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', '99');
-  } else if (isuCd == '14' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', 'TX');
-  } else if (isuCd == '19' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', 'EB');
-  } else if (isuCd == '3T' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', 'TF');
-  } else if (isuCd == '4A' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', 'XD');
-  }
-  if (isuList.slice(2, 6).includes(isuCd) && reqType == 'C') {
-    FormManager.resetValidations('clientTier');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  }
-}
-
-function setSboValueBasedOnIsuCtcUK() {
-  var isuCd = FormManager.getActualValue('isuCd');
-  var clientTier = FormManager.getActualValue('clientTier');
-  var reqType = FormManager.getActualValue('reqType');
-  var isuList = [ '34', '5K', '05', '11', '4F' ];
+  var isuList = [ '34', '36', '32' ];
   var role = FormManager.getActualValue('userRole').toUpperCase();
 
-  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+  if (reqType == 'U') {
     return;
   }
 
-  if (isuCd == '34' && clientTier == 'Y') {
-    FormManager.setValue('salesBusOffCd', '015');
-    FormManager.setValue('repTeamMemberNo', 'SPA015');
+  if ((value != false || value == undefined || value == null) && isuCd.concat(clientTier) != '' && oldIsuCdValueUK == null) {
+    oldIsuCdValueUK = isuCd + clientTier;
+  }
+
+  if (oldIsuCdValueUK == null) {
+    return;
+  }
+
+  if (isuCd == '32' && clientTier == 'T') {
+    FormManager.setValue('salesBusOffCd', '123');
+    FormManager.setValue('repTeamMemberNo', 'SPA123');
   } else if (isuCd == '5K' && clientTier == '') {
     FormManager.setValue('salesBusOffCd', '000');
     FormManager.setValue('repTeamMemberNo', 'SPA000');
@@ -4788,100 +4729,69 @@ function setSboValueBasedOnIsuCtcUK() {
   } else if (isuCd == '11' && clientTier == '') {
     FormManager.setValue('salesBusOffCd', '111');
     FormManager.setValue('repTeamMemberNo', 'SPA111');
-  } else if (isuCd == '34' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', '104');
-    FormManager.setValue('repTeamMemberNo', 'SPA104');
-  } else if (isuCd == '4F' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', '511');
-    FormManager.setValue('repTeamMemberNo', 'SPA511');
-  }
-  if (isuList.slice(2, 5).includes(isuCd) && reqType == 'C') {
-    FormManager.resetValidations('clientTier');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    if (reqType == 'U' || (reqType != 'U' && role == 'PROCESSOR')) {
-      FormManager.enable('clientTier');
+  } else if (isuCd == '34' && clientTier == 'Q') {
+    setSrAndSboOnIsicUK();
+  } else if (isuCd == '21' && clientTier == '') {
+    if (custSubGrp == 'INTER' || custSubGrp == 'IBMEM') {
+      FormManager.setValue('salesBusOffCd', '000');
+      FormManager.setValue('repTeamMemberNo', 'SPA000');
+    } else if (custSubGrp == 'BUSPR') {
+      FormManager.setValue('salesBusOffCd', '114');
+      FormManager.setValue('repTeamMemberNo', 'SPA114');
     }
+  } else {
+    FormManager.setValue('salesBusOffCd', '');
+    FormManager.setValue('repTeamMemberNo', '');
   }
 }
 
-function setSboValueBasedOnIsuCtcIE() {
+var oldIsuCdValueIE = null;
+function setSboValueBasedOnIsuCtcIE(value) {
+  var reqType = FormManager.getActualValue('reqType');
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
+  var scenario = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isuList = [ '34', '36', '32' ];
+
+  if (reqType == 'U') {
+    return;
+  }
+  if ((value != false || value == undefined || value == null) && clientTier != '' && isuCd != '' && oldIsuCdValueIE == null) {
+    oldIsuCdValueIE = isuCd + clientTier;
+  }
+
+  if (oldIsuCdValueIE == null) {
+    return;
+  }
 
   if (isuCd == '5K' && clientTier == '') {
     FormManager.setValue('salesBusOffCd', '000');
     FormManager.setValue('repTeamMemberNo', 'SPA000');
+  } else if (isuCd == '32' && clientTier == 'T') {
+    FormManager.setValue('salesBusOffCd', '123');
+    FormManager.setValue('repTeamMemberNo', 'SPA123');
+  } else if (isuCd == '34' && clientTier == 'Q' && getZS01LandCntry() == 'GB' && scenario == 'CROSS') {
+    FormManager.setValue('salesBusOffCd', '057');
+    FormManager.setValue('repTeamMemberNo', 'SPA057');
+  } else if (isuCd == '34' && clientTier == 'Q') {
+    FormManager.setValue('salesBusOffCd', '090');
+    FormManager.setValue('repTeamMemberNo', 'MMIR11');
+  } else if (isuCd == '21' && clientTier == '') {
+    if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'IBMEM') {
+      FormManager.setValue('salesBusOffCd', '000');
+      FormManager.setValue('repTeamMemberNo', 'SPA000');
+    } else if (custSubGrp == 'PRICU') {
+      FormManager.setValue('salesBusOffCd', '090');
+      FormManager.setValue('repTeamMemberNo', 'MMIR11');
+    }
+  } else {
+    FormManager.setValue('salesBusOffCd', '');
+    FormManager.setValue('repTeamMemberNo', '');
   }
 }
 
-/*
- * ITALY - sets Sales rep based on isuCTC
- */
-// var _importedSalesRep = '';
-// function setSalesRepValuesIT(isuCd, clientTier) {
-// if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-// return;
-// }
-// if (FormManager.getActualValue('reqType') != 'C') {
-// return;
-// }
-// var checkImportIndc = getImportedIndcForItaly();
-//
-// if (checkImportIndc == 'Y' && _importedSalesRep == '') {
-// _importedSalesRep = _pagemodel.repTeamMemberNo;
-// }
-// var custSubType = FormManager.getActualValue('custSubGrp');
-// var isuCd = FormManager.getActualValue('isuCd');
-// var clientTier = FormManager.getActualValue('clientTier');
-// var cntry = FormManager.getActualValue('cmrIssuingCntry');
-// var salesRep = FormManager.getActualValue('repTeamMemberNo');
-// var role = FormManager.getActualValue('userRole').toUpperCase();
-// var salesReps = [];
-// if (clientTier != '') {
-// qParams = {
-// _qall : 'Y',
-// ISSUING_CNTRY : cntry,
-// ISU : '%' + isuCd + clientTier + '%',
-// };
-// results = cmr.query('GET.SRLIST.BYCTC', qParams);
-// if (results != null && Object.keys(results).length > 0) {
-// for (var i = 0; i < results.length; i++) {
-// salesReps.push(results[i].ret1);
-// }
-// FormManager.enable('repTeamMemberNo');
-// // FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'),
-// // salesReps);
-// if (salesReps.length == 1) {
-// FormManager.setValue('repTeamMemberNo', salesReps[0]);
-// } else if (salesRep != null && salesRep != '') {
-// FormManager.setValue('repTeamMemberNo', salesRep);
-// }
-// }
-// if (custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType ==
-// 'BUSVA' || custSubType == 'CROBP') {
-// FormManager.setValue('isuCd', '21');
-// FormManager.setValue('clientTier', '7');
-// FormManager.setValue('repTeamMemberNo', '09ZPA0');
-// FormManager.readOnly('repTeamMemberNo');
-// } else {
-// FormManager.enable('repTeamMemberNo');
-// }
-// if ((isuCd == '34' && clientTier == 'Q') && (role == "REQUESTER") &&
-// (checkImportIndc == 'N')) {
-// if (checkImportIndc == 'N') {
-// autoSetSBOSROnPostalCode(false, false);
-// } else {
-// FormManager.setValue('repTeamMemberNo', _importedSalesRep);
-// console.log("Kept imported sales rep value >>>" + _importedSalesRep);
-// }
-// FormManager.readOnly('repTeamMemberNo');
-// }
-// }
-// setAffiliateEnterpriseRequired();
-// }
 function showHideCityStateProvIT() {
   console.log("--->>> showHideCityStateProvIT for IT ---<<<");
   var landCntryVal = FormManager.getActualValue('landCntry');
@@ -4892,7 +4802,7 @@ function showHideCityStateProvIT() {
     FormManager.hide('StateProv', 'stateProv');
     FormManager.resetValidations('stateProv');
     FormManager.show('StateProvItaly', 'stateProvItaly');
-    FormManager.readOnly('stateProvItaly');
+    // FormManager.readOnly('stateProvItaly');
 
     FormManager.addValidator('city1', Validators.REQUIRED, [ 'City' ], null);
     FormManager.setValue('crossbCntryStateProvMapIT', '');
@@ -5184,141 +5094,69 @@ function lockCmrOwner() {
   FormManager.readOnly('cmrOwner');
 }
 
-function autoSetSboOnPostalCode(clientTier, currPostCd) {
-  var requestType = FormManager.getActualValue('reqType');
-  var custType = FormManager.getActualValue('custGrp');
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  var isuCode = FormManager.getActualValue('isuCd');
-  var stateProvItaly = FormManager.getActualValue('stateProvItaly');
-  var countryUse = FormManager.getActualValue('countryUse');
-  var ctc = FormManager.getActualValue('clientTier');
-  var landCntryVal = getLandedCntryForItaly();
-  // if (requestType != 'C') {
-  // return;
-  // }
-  var reqId = FormManager.getActualValue('reqId');
-  var result = cmr.query('VALIDATOR.POSTCODEIT', {
-    REQID : reqId
-  });
-
-  var postCodeOrg = '';
-  if (result != null && result.ret1 != undefined) {
-    postCodeOrg = result.ret1;
-  } else {
-    postCodeOrg = '';
-  }
-
-  var stateProvOrg = '';
-  if (result != null && result.ret2 != undefined) {
-    stateProvOrg = result.ret2;
-  } else {
-    stateProvOrg = '';
-  }
-
-  var postCode = parseInt(postCodeOrg.substring(0, 2));
-  if (currPostCd && currPostCd != undefined && currPostCd != '' && currPostCd != postCodeOrg) {
-    postCode = currPostCd.substring(0, 2);
-  }
-
-  // set collection code based on postalcode logic
-  var checkImportIndc = getImportedIndcForItaly();
-  if (custSubType != 'INTER' || custSubType != 'INTSM' || custSubType != 'INTVA' || custSubType != 'CROIN') {
-    if (!(countryUse == '758SM' || countryUse == '758VA')) {
-      if (checkImportIndc != 'Y' && custType != '' && custType != undefined && custType != 'CROSS' && (custSubType == 'BUSVA' || custSubType == 'BUSPR' || custSubType == 'BUSSM')) {
-        if (postCodeOrg != '' && isuCode != '' && isuCode == '34' && ctc == 'Q') {
-          if (postCode >= 00 && postCode <= 04) {
-            FormManager.setValue('salesBusOffCd', 'NC');
-          } else if (postCode == 05 || postCode == 06) {
-            FormManager.setValue('salesBusOffCd', 'NA');
-          } else if (postCode == 10 || postCode == 11 || postCode == 28) {
-            FormManager.setValue('salesBusOffCd', 'NB');
-          } else if (postCode > 11 && postCode <= 19) {
-            FormManager.setValue('salesBusOffCd', 'GE');
-          } else if ((postCode >= 21 && postCode <= 24) || postCode == 27) {
-            FormManager.setValue('salesBusOffCd', 'NL');
-          } else if (postCode == 23 || postCode == 25 || postCode == 26) {
-            FormManager.setValue('salesBusOffCd', 'GJ');
-          } else if (postCode == 20) {
-            FormManager.setValue('salesBusOffCd', 'GH');
-          } else if ((postCode >= 30 && postCode <= 35) || postCode == 45) {
-            FormManager.setValue('salesBusOffCd', 'NF');
-          } else if ((postCode >= 36 && postCode <= 39) || postCode == 46) {
-            FormManager.setValue('salesBusOffCd', 'GK');
-          } else if ((postCode >= 40 && postCode <= 44) || postCode == 29 || postCode == 47 || postCode == 48) {
-            FormManager.setValue('salesBusOffCd', 'NI');
-          } else if (postCode >= 50 && postCode <= 59) {
-            FormManager.setValue('salesBusOffCd', 'RP');
-          } else if (postCode == 60 || postCode == 61) {
-            FormManager.setValue('salesBusOffCd', 'CP');
-          } else if ((postCode >= 62 && postCode <= 67) || (postCode >= 70 && postCode <= 76) || (postCode >= 85 && postCode <= 89) || (postCode >= 7 && postCode <= 9)) {
-            FormManager.setValue('salesBusOffCd', 'CP');
-          } else if (postCode >= 80 && postCode <= 84) {
-            FormManager.setValue('salesBusOffCd', 'NG');
-          } else if (postCode >= 90 && postCode <= 98) {
-            FormManager.setValue('salesBusOffCd', 'NM');
-          }
-          if (stateProvOrg == 'MB' && postCode == 20) {
-            FormManager.setValue('salesBusOffCd', 'NP');
-          }
-        }
-      } else if (custType != '' && custType != undefined && custType == 'CROSS' && landCntryVal != undefined && landCntryVal != '' && landCntryVal == 'SM' && custSubType != undefined
-          && custSubType != '' && custSubType != 'CROBP' && custSubType != 'CROIN') {
-        FormManager.setValue('salesBusOffCd', 'NI');
-        FormManager.setValue('collectionCd', 'CIT03');
-      } else if (custType != '' && custType != undefined && custType == 'CROSS' && landCntryVal != undefined && landCntryVal != '' && landCntryVal == 'VA' && custSubType != undefined
-          && custSubType != '' && custSubType != 'CROBP' && custSubType != 'CROIN') {
-        FormManager.setValue('salesBusOffCd', 'NC');
-        FormManager.setValue('collectionCd', 'CIT14');
-      }
-
-    }
-    if (countryUse && isuCode == '34' && ctc == 'Q') {
-      if (countryUse == '758VA') {
-        FormManager.setValue('repTeamMemberNo', '012345');
-        FormManager.setValue('salesBusOffCd', 'NC');
-        FormManager.setValue('collectionCd', 'CIT14');
-      }
-      if (countryUse == '758SM') {
-        FormManager.setValue('repTeamMemberNo', '012345');
-        FormManager.setValue('salesBusOffCd', 'NI');
-        FormManager.setValue('collectionCd', 'CIT03');
-      }
-
-    }
-    if (custSubType == 'CROBP' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'BUSPR') {
-      FormManager.clearValue('collectionCd');
-    }
-  }
-}
-
 function set34QYZlogicOnISUCtcChange() {
   var checkImportIndc = getImportedIndcForItaly();
-
-  if (_isScenarioChanged) {
-    var addrType = FormManager.getActualValue('addrType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  if (_isScenarioChanged && reqType == 'C') {
     var custSubType = FormManager.getActualValue('custSubGrp');
-    if (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN') {
+    var commSubTypes = [ 'COMME', 'COMSM', 'COMVA', 'CROCM', 'GOVST', 'LOCEN', 'GOVSM', 'LOCSM', 'GOVVA', 'LOCVA', 'CROGO', 'NGOIT', 'NGOVA', 'NGOSM', '3PAIT', 'UNIVA', 'UNIVE', 'UNISM', '3PASM',
+        '3PAVA', 'CRO3P', 'CROUN', 'CROLC' ];
+    var ibmEmpCustSubTypes = [ 'IBMIT', 'XIBM' ];
+    var bpCustTypes = [ 'BUSPR', 'BUSSM', 'BUSVA', 'CROBP' ];
+    var internalCustSubTypes = [ 'INTER', 'INTVA', 'INTSM', 'CROIN' ]
+    var pripeCustSubTypes = [ 'CROPR', 'PRICU', 'PRISM', 'PRIVA' ];
+    if (internalCustSubTypes.includes(custSubType)) {
+      FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
+      FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', '');
+      FormManager.readOnly('repTeamMemberNo');
       FormManager.setValue('repTeamMemberNo', '012345');
+      FormManager.enable('salesBusOffCd');
       FormManager.setValue('salesBusOffCd', '99');
       FormManager.clearValue('collectionCd');
-    }
-    if ((custSubType == 'COMME' || custSubType == 'GOVST' || custSubType == 'LOCEN' || custSubType == 'NGOIT' || custSubType == 'PRICU' || custSubType == '3PAIT' || custSubType == 'UNIVE')
-        && addrType != null && addrType == 'ZS01' && checkImportIndc != 'Y') {
+    } else if (commSubTypes.includes(custSubType)) {
+      FormManager.enable('isuCd');
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '32', '34', '36', '04', '19', '28', '14', '4A', '3T', '5K' ]);
       FormManager.setValue('isuCd', '34');
+      FormManager.enable('clientTier');
       FormManager.setValue('clientTier', 'Q');
-    }
-    if (custSubType == 'IBMIT' || custSubType == 'XIBM') {
+      FormManager.readOnly('repTeamMemberNo');
+      FormManager.setValue('repTeamMemberNo', '012345');
+    } else if (ibmEmpCustSubTypes.includes(custSubType)) {
+      FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
+      FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', '');
+      FormManager.readOnly('repTeamMemberNo');
       FormManager.setValue('repTeamMemberNo', '0B1TA0');
+      FormManager.readOnly('salesBusOffCd');
       FormManager.setValue('salesBusOffCd', '1T');
       FormManager.clearValue('collectionCd');
-    }
-    if (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM') {
+    } else if (bpCustTypes.includes(custSubType)) {
+      FormManager.readOnly('isuCd');
+      FormManager.setValue('isuCd', '21');
+      FormManager.readOnly('clientTier');
+      FormManager.setValue('clientTier', '');
+      if (role == 'REQUESTER') {
+        FormManager.readOnly('repTeamMemberNo');
+        FormManager.readOnly('salesBusOffCd');
+      } else if (role == 'PROCESSOR') {
+        FormManager.enable('repTeamMemberNo');
+        FormManager.readOnly('salesBusOffCd');
+
+      }
+      FormManager.setValue('repTeamMemberNo', '09ZPB0');
+      FormManager.setValue('salesBusOffCd', 'ZP');
+
+    } else if (pripeCustSubTypes.includes(custSubType)) {
+      FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '34');
+      FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', 'Q');
+      FormManager.readOnly('repTeamMemberNo');
+      FormManager.setValue('repTeamMemberNo', '012345');
     }
     setSBOSalesRepFor34QYZ();
   }
@@ -5328,43 +5166,29 @@ function set34QYZlogicOnISUCtcChange() {
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setSBOSalesRepFor34QYZ();
-      // autoSetValuesOnPostalCodeIT();
     });
   }
   if (_clientTierHandler == null && FormManager.getField('clientTier')) {
     _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setSBOSalesRepFor34QYZ();
-      // autoSetValuesOnPostalCodeIT();
     });
-  }
-
-  if (addrType != null && addrType == 'ZS01') {
-    var currPostCd = FormManager.getActualValue('postCd');
-    autoSetSboOnPostalCode(false, currPostCd);
-    // CREATCMR-2658 For Local scenarios except Internal BP
-    if (_postCdHandler == null && FormManager.getField('postCd')) {
-      _postCdHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
-        autoSetValuesOnPostalCodeIT();
-      });
-    }
   }
 }
 
 function setSBOSalesRepFor34QYZ() {
-
   var custType = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
-  var isuCode = FormManager.getActualValue('isuCd');
-  var ctc = FormManager.getActualValue('clientTier');
   var checkImportIndc = getImportedIndcForItaly();
-  var addrType = FormManager.getActualValue('addrType');
+  var reqId = FormManager.getActualValue('reqId')
+  var subRegion = FormManager.getActualValue('countryUse');
+  var isu = FormManager.getActualValue('isuCd');
+  var ctc = FormManager.getActualValue('clientTier');
+  var landCntry = '';
+  var isuCTC = isu.concat(ctc);
   if (checkImportIndc == 'Y') {
     return;
   }
-  if (addrType != null && addrType == 'ZS01') {
-    var currPostCd = FormManager.getActualValue('postCd');
-  }
-  var reqId = FormManager.getActualValue('reqId');
+
   var result = cmr.query('VALIDATOR.POSTCODEIT', {
     REQID : reqId
   });
@@ -5374,77 +5198,87 @@ function setSBOSalesRepFor34QYZ() {
   } else {
     postCodeOrg = '';
   }
-  var postCode = parseInt(postCodeOrg.substring(0, 2));
-  if (currPostCd && currPostCd != undefined && currPostCd != '' && currPostCd != postCodeOrg) {
-    postCode = currPostCd.substring(0, 2);
-  }
+  var postCode = (postCodeOrg.startsWith("200") || postCodeOrg.startsWith("201")) ? postCodeOrg.substring(0, 3) : postCodeOrg.substring(0, 2);
 
-  if (custSubType == 'COMME' || custSubType == 'GOVST' || custSubType == 'LOCEN' || custSubType == 'NGOIT' || custSubType == 'PRICU' || custSubType == '3PAIT' || custSubType == 'UNIVE') {
-    // For 34Q logic
-    if (isuCode != '' && isuCode == '34' && ctc == 'Q') {
-      if ((postCode >= 00 && postCode <= 09) || (postCode >= 62 && postCode <= 67) || (postCode >= 70 && postCode <= 76) || (postCode >= 80 && postCode <= 98)) {
+  if(postCode == '' || postCode == undefined || postCode == null){
+	return;
+   }
+   
+      // GET LANDCNTRY in case of CB
+     if(custType == 'CROSS'){
+	 var result1 = cmr.query('LANDCNTRY.IT', {
+    REQID : reqId
+     });
+   if (result1 != null && result1.ret1 != undefined) {
+    landCntry = result1.ret1;
+    }
+  }
+      
+  var commSubTypes = [ 'COMME', 'COMSM', 'COMVA', 'CROCM', 'GOVST', 'LOCEN', 'GOVSM', 'LOCSM', 'GOVVA', 'LOCVA', 'CROGO', 'NGOIT', 'NGOVA', 'NGOSM', '3PAIT', 'UNIVA', 'UNIVE', 'UNISM', '3PASM',
+      '3PAVA', 'CRO3P', 'CROUN', 'CROLC' ];
+  var ibmEmpCustSubTypes = [ 'IBMIT', 'XIBM' ];
+  var bpCustTypes = [ 'BUSPR', 'BUSSM', 'BUSVA', 'CROBP' ];
+  var internalCustSubTypes = [ 'INTER', 'INTVA', 'INTSM', 'CROIN' ]
+  var pripeCustSubTypes = [ 'CROPR', 'PRICU', 'PRISM', 'PRIVA' ];
+
+  if (commSubTypes.includes(custSubType) || pripeCustSubTypes.includes(custSubType)) {
+    if (isuCTC == '34Q') {
+      if ((postCode >= 05 && postCode <= 06) || (postCode >= 50 && postCode <= 59)) {
         FormManager.setValue('salesBusOffCd', 'RP');
-        FormManager.setValue('repTeamMemberNo', '012345');
-        FormManager.setValue('collectionCd', 'CIT14');
       }
-      if (postCode >= 50 && postCode <= 61) {
-        FormManager.setValue('salesBusOffCd', 'RP');
-        FormManager.setValue('repTeamMemberNo', '012345');
-        FormManager.setValue('collectionCd', 'CIT03');
-      }
-      if (postCode == 20) {
+      if (postCode == 200 || postCode == 201) {
         FormManager.setValue('salesBusOffCd', 'GH');
-        FormManager.setValue('repTeamMemberNo', '012345');
-        FormManager.setValue('collectionCd', 'CIT16');
       }
-      if (postCode >= 21 && postCode <= 27) {
-        FormManager.setValue('salesBusOffCd', 'GH');
-        FormManager.setValue('repTeamMemberNo', '012345');
-        FormManager.setValue('collectionCd', 'CIT02');
+      if (postCode >= 80 && postCode <= 84) {
+        FormManager.setValue('salesBusOffCd', 'NG');
+      }
+      if ((postCode >= 30 && postCode <= 37) || postCode == 45 && (postCode == 33 && postCode == '34')) {
+        FormManager.setValue('salesBusOffCd', 'NI');
+      }
+      if ([ 33, 34, 38, 39, 46 ].includes(postCode)) {
+        FormManager.setValue('salesBusOffCd', 'GK');
+      }
+      if ([ 7, 8, 9 ].includes(postCode) || (postCode >= 60 && postCode <= 67) || (postCode >= 70 && postCode <= 76) || (postCode >= 85 && postCode <= 98)) {
+        FormManager.setValue('salesBusOffCd', 'NM');
+      }
+      if ((postCode >= 20 && postCode <= 27) && postCode != 200 && postCode != 201) {
+        FormManager.setValue('salesBusOffCd', 'GJ');
       }
       if ((postCode >= 10 && postCode <= 19) || postCode == 28) {
-        FormManager.setValue('salesBusOffCd', 'GH');
-        FormManager.setValue('repTeamMemberNo', '012345');
-        FormManager.setValue('collectionCd', 'CIT04');
+        FormManager.setValue('salesBusOffCd', 'NB');
       }
-      if ((postCode >= 30 && postCode <= 39) || postCode == 45 || postCode == 46) {
-        FormManager.setValue('salesBusOffCd', 'NI');
-        FormManager.setValue('repTeamMemberNo', '012345');
-        FormManager.setValue('collectionCd', 'CIT19');
+      if ((postCode >= 40 && postCode <= 48) || postCode == 29 || (postCode != 45 && postCode != 46)) {
+        FormManager.setValue('salesBusOffCd', 'DU');
       }
-      if ((postCode >= 40 && postCode <= 44) || postCode == 29 || postCode == 41 || postCode == 48) {
-        FormManager.setValue('salesBusOffCd', 'NI');
-        FormManager.setValue('repTeamMemberNo', '012345');
-        FormManager.setValue('collectionCd', 'CIT03');
+      if ((postCode >= 00 && postCode <= 04)) {
+        FormManager.setValue('salesBusOffCd', 'NC');
       }
+      
+     
+      if((custType == 'CROSS' && landCntry == 'SM') || subRegion == '758SM'){
+	        FormManager.setValue('salesBusOffCd', 'DU');
+      }else if((custType == 'CROSS' && landCntry == 'VA') || subRegion == '758VA'){
+	        FormManager.setValue('salesBusOffCd', 'NC');
+      }else if(custType == 'CROSS'){
+	        FormManager.setValue('salesBusOffCd', 'NB');
+      }
+    } else if (isuCTC == '32T') {
+      FormManager.setValue('salesBusOffCd', 'SD');
+    } else if (isuCTC == '14') {
+      FormManager.setValue('salesBusOffCd', 'TX');
+    } else if (isuCTC == '4A') {
+      FormManager.setValue('salesBusOffCd', 'XD');
+    } else if (isuCTC == '3T') {
+      FormManager.setValue('salesBusOffCd', 'TF');
+    } else if (isuCTC == '5K') {
+      FormManager.setValue('salesBusOffCd', '99');
     }
-    // CREATCMR 2658 34Y and 34Z logic
-    if (isuCode != '' && isuCode == '34' && ctc == 'Y') {
-      FormManager.setValue('salesBusOffCd', 'FL');
-      FormManager.setValue('repTeamMemberNo', '012345');
-      FormManager.clearValue('collectionCd');
-    }
-    if (isuCode != '' && isuCode == '34' && ctc == 'Z') {
-      FormManager.setValue('salesBusOffCd', 'ZZ');
-      FormManager.setValue('repTeamMemberNo', '012345');
-      FormManager.clearValue('collectionCd');
-    }
-  }
-  if (isuCode != '' && isuCode == '21' && ctc == '7') {
-    if (custSubType == 'BUSPR') {
-      // FormManager.setValue('isuCd', '21');
-      // FormManager.setValue('clientTier', '7');
-      FormManager.setValue('repTeamMemberNo', '09ZPB0');
-      FormManager.setValue('salesBusOffCd', 'ZP');
-      FormManager.clearValue('collectionCd');
-    }
-    if (custSubType == 'IBMIT' || custSubType == 'XIBM') {
-      // FormManager.setValue('isuCd', '21');
-      // FormManager.setValue('clientTier', '7');
-      FormManager.setValue('repTeamMemberNo', '0B1TA0');
-      FormManager.setValue('salesBusOffCd', '1T');
-      FormManager.clearValue('collectionCd');
-    }
+  } else if (bpCustTypes.includes(custSubType)) {
+    FormManager.setValue('salesBusOffCd', 'ZP');
+  } else if (internalCustSubTypes.includes(custSubType)) {
+    FormManager.setValue('salesBusOffCd', '99');
+  } else if (ibmEmpCustSubTypes.includes(custSubType)) {
+    FormManager.setValue('salesBusOffCd', '1T');
   }
 }
 
@@ -6139,7 +5973,6 @@ function setAffiliateEnterpriseRequired() {
 function ibmFieldsBehaviourInCreateByModelIT() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubType = FormManager.getActualValue('custSubGrp');
-  var reqId = FormManager.getActualValue('reqId');
   if (FormManager.getActualValue('reqType') == 'C') {
     var checkImportIndc = getImportedIndcForItaly();
     if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -6191,7 +6024,7 @@ function ibmFieldsBehaviourInCreateByModelIT() {
         FormManager.enable('repTeamMemberNo');
         FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
-        FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+       // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
       }
       if (custSubType == 'IBMIT' || custSubType == 'XIBM') {
@@ -6514,7 +6347,7 @@ function setExpediteReasonOnChange() {
   });
 }
 
-function validateVATFiscalLengthOnIdentIT() {
+function validateFiscalLengthOnIdentIT() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -6601,79 +6434,111 @@ function validateVATFiscalLengthOnIdentIT() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function validateVATOnIdentIT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var requestType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        if (requestType != 'C') {
+          return new ValidationResult(null, true);
+        }
+        var ident = FormManager.getActualValue('identClient');
+        var lbl1 = FormManager.getLabel('vat');
+        var vat = FormManager.getActualValue('vat');
+
+        if ((ident == 'A' || ident == 'C' || ident == 'D') && vat != undefined && vat != '' && !vat.match("^IT[0-9]{11}$")) {
+          return new ValidationResult({
+            id : 'vat',
+            type : 'text',
+            name : 'vat'
+          }, false, 'For Ident Client ' + ident + ', ' + lbl1 + ' must be IT99999999999.');
+        } else if ((ident == 'B' || ident == 'X' || ident == 'Y') && vat != '') {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'For Ident Client ' + ident + ', ' + lbl1 + ' must be Blank.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function setVATOnIdentClientChangeIT() {
   var requestType = FormManager.getActualValue('reqType');
   if (requestType != 'C') {
     return new ValidationResult(null, true);
   }
 
-  var custGrp = FormManager.getActualValue('custGrp');
-  var ident = FormManager.getActualValue('identClient');
-  var landCntry = FormManager.getActualValue('landCntry');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var checkImportIndc = getImportedIndcForItaly();
-  var _zs01ReqId = FormManager.getActualValue('reqId');
-  var cntryCdParams = {
-    REQ_ID : _zs01ReqId,
-    ADDR_TYPE : 'ZI01',
-  };
-  var cntryCdResult = cmr.query('ADDR.GET.LANDEDCNTRY.BY_REQID_ADDRTYPE', cntryCdParams);
-  if (cntryCdResult.ret1 != undefined) {
-    countyCd = cntryCdResult.ret1;
-  }
-  var isCrossBorder = false;
-  if (countyCd != 'IT') {
-    isCrossBorder = true;
-  }
-  if (ident != '') {
-    if (ident == 'B') {
-      FormManager.resetValidations('vat');
-    }
-    if (role == 'REQUESTER') {
-      if (ident == 'A' || ident == 'D') {
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      } else if (ident == 'C') {
-        FormManager.resetValidations('vat');
-      }
-    }
-    if (role == 'PROCESSOR') {
-      if (ident == 'A' || ident == 'D') {
-        FormManager.resetValidations('vat');
-      } else if (ident == 'C') {
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      }
-    }
-    if (isCrossBorder) {
-      if (ident == 'N') {
-        FormManager.resetValidations('taxCd1');
-        FormManager.readOnly('taxCd1');
-        FormManager.enable('vat');
-      } else if (ident == 'Y') {
-        FormManager.resetValidations('taxCd1');
-        FormManager.setValue('taxCd1', '');
-        FormManager.readOnly('taxCd1');
-      }
-    } else if (ident == 'X' || ident == 'N' || ident == 'Y') {
-      FormManager.readOnly('vat');
-      FormManager.setValue('vat', '');
-      FormManager.resetValidations('vat');
-    } else if ((ident == 'A' || ident == 'D' || ident == 'C') && checkImportIndc == 'Y') {
-      FormManager.readOnly('vat');
-    }
-    if (ident == 'N') {
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'vat' ], 'MAIN_CUST_TAB');
-      FormManager.enable('vat');
-      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-      FormManager.setValue('taxCd1', '');
-      FormManager.readOnly('taxCd1');
-    } else if (ident == 'Y') {
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-      FormManager.setValue('vat', '');
-      FormManager.readOnly('vat');
-      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-      FormManager.setValue('taxCd1', '');
-      FormManager.readOnly('taxCd1');
-    }
+	var custGrp = FormManager.getActualValue('custGrp');
+	var ident = FormManager.getActualValue('identClient');
+	var landCntry = FormManager.getActualValue('landCntry');
+	var role = FormManager.getActualValue('userRole').toUpperCase();
+	var checkImportIndc = getImportedIndcForItaly();
+	var _zs01ReqId = FormManager.getActualValue('reqId');
+	var cntryCdParams = {
+		REQ_ID: _zs01ReqId,
+		ADDR_TYPE: 'ZI01',
+	};
+	var cntryCdResult = cmr.query('ADDR.GET.LANDEDCNTRY.BY_REQID_ADDRTYPE', cntryCdParams);
+	if (cntryCdResult.ret1 != undefined) {
+		landCntry = cntryCdResult.ret1;
+	}
+	var isCrossBorder = false;
+	if (landCntry != 'IT') {
+		isCrossBorder = true;
+	}
+	if (ident != '') {
+		if (ident == 'B') {
+			FormManager.resetValidations('vat');
+		}
+		if (role == 'REQUESTER') {
+			if (ident == 'A' || ident == 'D') {
+				FormManager.addValidator('vat', Validators.REQUIRED, ['VAT'], 'MAIN_CUST_TAB');
+			} else if (ident == 'C') {
+				FormManager.resetValidations('vat');
+			}
+		}
+		if (role == 'PROCESSOR') {
+			if (ident == 'A' || ident == 'D') {
+				FormManager.resetValidations('vat');
+			} else if (ident == 'C') {
+				FormManager.addValidator('vat', Validators.REQUIRED, ['VAT'], 'MAIN_CUST_TAB');
+			}
+		}
+		if (isCrossBorder) {
+			if (ident == 'N') {
+				FormManager.resetValidations('taxCd1');
+				FormManager.readOnly('taxCd1');
+				FormManager.enable('vat');
+			} else if (ident == 'Y') {
+				FormManager.resetValidations('taxCd1');
+				FormManager.setValue('taxCd1', '');
+				FormManager.readOnly('taxCd1');
+			}
+		} else if (ident == 'X' || ident == 'N' || ident == 'Y') {
+			FormManager.readOnly('vat');
+			FormManager.setValue('vat', '');
+			FormManager.resetValidations('vat');
+		} else if ((ident == 'A' || ident == 'D' || ident == 'C') && checkImportIndc == 'Y') {
+			FormManager.readOnly('vat');
+		}
+		if (ident == 'N') {
+			FormManager.addValidator('vat', Validators.REQUIRED, ['vat'], 'MAIN_CUST_TAB');
+			FormManager.enable('vat');
+			FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+			FormManager.setValue('taxCd1', '');
+			FormManager.readOnly('taxCd1');
+		} else if (ident == 'Y') {
+			FormManager.removeValidator('vat', Validators.REQUIRED);
+			FormManager.setValue('vat', '');
+			FormManager.readOnly('vat');
+			FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+			FormManager.setValue('taxCd1', '');
+			FormManager.readOnly('taxCd1');
+		}
 
   }
 
@@ -6809,32 +6674,6 @@ function setStateProvReqdPostalCodeIT() {
   }
 }
 
-/*
- * ITALY - sets SBO/IBO based on Sales rep
- */
-// function autoSetSBOOnSRValueIT() {
-// var reqType = FormManager.getActualValue('reqType');
-// var custSubGrp = FormManager.getActualValue('custSubGrp');
-// if (reqType != 'C') {
-// return;
-// }
-// var sbo = FormManager.getActualValue('salesBusOffCd');
-// var salesRep = FormManager.getActualValue('repTeamMemberNo');
-// if (salesRep != undefined && salesRep != '' && salesRep.length >= 4) {
-// sbo = salesRep.substring(2, 4);
-// }
-// if (sbo != '' && sbo.length == 2 && (custSubGrp == 'INTER' || custSubGrp ==
-// 'CROIN' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA')
-// && !(FormManager.getActualValue('salesBusOffCd') == sbo ||
-// FormManager.getActualValue('salesBusOffCd') == '0' + sbo + 'B000')) {
-// FormManager.setValue('salesBusOffCd', sbo);
-// FormManager.readOnly('salesBusOffCd');
-// console.log('setting SBO=' + sbo);
-// }
-// if (salesRep == '') {
-// FormManager.clearValue('salesBusOffCd');
-// }
-// }
 // CREATCMR-2658 ITALY
 function autoSetSROnSBOValueIT() {
   var reqType = FormManager.getActualValue('reqType');
@@ -6894,95 +6733,6 @@ function autoSetSROnSBOValueIT() {
   // if (salesRep == '') {
   // FormManager.clearValue('salesBusOffCd');
   // }
-}
-
-// CREATCMR-2658 auto set 34Q logic on Local scenarios for ITALY
-function autoSetValuesOnPostalCodeIT(addressMode) {
-  var addrType = FormManager.getActualValue('addrType');
-  var checkImportIndc = getImportedIndcForItaly();
-  if (checkImportIndc == 'Y') {
-    return;
-  }
-  var currPostCd = '';
-  if (addrType != null && addrType == 'ZS01') {
-    currPostCd = FormManager.getActualValue('postCd');
-  } else if (addressMode == 'COPY') {
-    // if (addrType != null && addrType == 'ZI01') {
-    currPostCd = FormManager.getActualValue('postCd');
-    // } else if (addrType != null && addrType == 'ZP01') {
-    // currPostCd = FormManager.getActualValue('postCd');
-    // }
-  }
-
-  var reqId = FormManager.getActualValue('reqId');
-  var result = cmr.query('VALIDATOR.POSTCODEIT', {
-    REQID : reqId
-  });
-  var postCodeOrg = '';
-  if (result != null && result.ret1 != undefined) {
-    postCodeOrg = result.ret1;
-  } else {
-    postCodeOrg = '';
-  }
-  var postCode = parseInt(postCodeOrg.substring(0, 2));
-  if (currPostCd && currPostCd != undefined && currPostCd != '' && currPostCd != postCodeOrg) {
-    postCode = currPostCd.substring(0, 2);
-  }
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  var isuCode = FormManager.getActualValue('isuCd');
-  var ctc = FormManager.getActualValue('clientTier');
-  if (custSubType == 'COMME' || custSubType == 'GOVST' || custSubType == 'LOCEN' || custSubType == 'NGOIT' || custSubType == 'PRICU' || custSubType == '3PAIT' || custSubType == 'UNIVE') {
-
-    if ((postCode >= 00 && postCode <= 09) || (postCode >= 62 && postCode <= 67) || (postCode >= 70 && postCode <= 76) || (postCode >= 80 && postCode <= 98)) {
-      FormManager.setValue('salesBusOffCd', 'RP');
-      FormManager.setValue('repTeamMemberNo', '012345');
-      FormManager.setValue('collectionCd', 'CIT14');
-      FormManager.setValue('isuCd', '34');
-      FormManager.setValue('clientTier', 'Q');
-    }
-    if (postCode >= 50 && postCode <= 61) {
-      FormManager.setValue('salesBusOffCd', 'RP');
-      FormManager.setValue('repTeamMemberNo', '012345');
-      FormManager.setValue('collectionCd', 'CIT03');
-      FormManager.setValue('isuCd', '34');
-      FormManager.setValue('clientTier', 'Q');
-    }
-    if (postCode == 20) {
-      FormManager.setValue('salesBusOffCd', 'GH');
-      FormManager.setValue('repTeamMemberNo', '012345');
-      FormManager.setValue('collectionCd', 'CIT16');
-      FormManager.setValue('isuCd', '34');
-      FormManager.setValue('clientTier', 'Q');
-    }
-    if (postCode >= 21 && postCode <= 27) {
-      FormManager.setValue('salesBusOffCd', 'GH');
-      FormManager.setValue('repTeamMemberNo', '012345');
-      FormManager.setValue('collectionCd', 'CIT02');
-      FormManager.setValue('isuCd', '34');
-      FormManager.setValue('clientTier', 'Q');
-    }
-    if ((postCode >= 10 && postCode <= 19) || postCode == 28) {
-      FormManager.setValue('salesBusOffCd', 'GH');
-      FormManager.setValue('repTeamMemberNo', '012345');
-      FormManager.setValue('collectionCd', 'CIT04');
-      FormManager.setValue('isuCd', '34');
-      FormManager.setValue('clientTier', 'Q');
-    }
-    if ((postCode >= 30 && postCode <= 39) || postCode == 45 || postCode == 46) {
-      FormManager.setValue('salesBusOffCd', 'NI');
-      FormManager.setValue('repTeamMemberNo', '012345');
-      FormManager.setValue('collectionCd', 'CIT19');
-      FormManager.setValue('isuCd', '34');
-      FormManager.setValue('clientTier', 'Q');
-    }
-    if ((postCode >= 40 && postCode <= 44) || postCode == 29 || postCode == 41 || postCode == 48) {
-      FormManager.setValue('salesBusOffCd', 'NI');
-      FormManager.setValue('repTeamMemberNo', '012345');
-      FormManager.setValue('collectionCd', 'CIT03');
-      FormManager.setValue('isuCd', '34');
-      FormManager.setValue('clientTier', 'Q');
-    }
-  }
 }
 
 function addInstallingAddrValidator() {
@@ -7071,13 +6821,13 @@ function checkIfStateProvBlankForProcIT() {
             REQ_ID : FormManager.getActualValue('reqId'),
           };
           var results = cmr.query('GETZP01STATEPROV', qParams);
-          if (results != null && results.ret1 != undefined) {
+          if ((results != null || results != undefined) && results.ret1 != undefined) {
             if (results.ret1 == '') {
               return new ValidationResult(null, false, 'State Prov cannot be blank for the Billing address');
             }
 
             var results = cmr.query('GETZI01STATEPROV', qParams);
-            if (results != null && results.ret1 != undefined) {
+            if ((results != null || results != undefined) && results.ret1 != undefined) {
               if (results.ret1 == '') {
                 return new ValidationResult(null, false, 'State Prov cannot be blank for the Company address');
               }
@@ -7409,14 +7159,18 @@ function lockRequireFieldsUKI() {
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var vat = FormManager.getActualValue('vat');
   var fieldsToDisable = new Array();
+  var lokedFieldsForAllRoles = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM' ]
 
   if (reqType == 'C') {
     if (custSubGroup == 'PRICU' || custSubGroup == 'BUSPR' || custSubGroup == 'INTER') {
       FormManager.readOnly('inacCd');
     }
-    if (custSubGroup == 'IBMEM') {
-      FormManager.setValue('clientTier', '');
-    }
+  }
+  if (lokedFieldsForAllRoles.includes(custSubGroup)) {
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
   }
 
   if (reqType == 'C' && role == 'REQUESTER') {
@@ -7461,39 +7215,17 @@ function lockRequireFieldsUKI() {
     FormManager.enable('abbrevLocn');
   }
 
-  if ((reqType == 'U' || reqType == 'X') && FormManager.getActualValue('ordBlk') == '93') {
-    FormManager.readOnly('reqReason');
-    if (role == 'REQUESTER') {
-      if (vat == '' || vat == 'undefined') {
-        FormManager.enable('vat');
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      } else {
-        FormManager.readOnly('vat');
-      }
-    }
-  }
-
-  if (reqType == 'U' && role == 'REQUESTER') {
-    FormManager.enable('abbrevNm');
-    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-    FormManager.enable('abbrevLocn');
-    FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
-  } else if (role == 'PROCESSOR') {
-    FormManager.enable('abbrevNm');
-    FormManager.enable('abbrevLocn');
-  }
-
-  if (reqType == 'C' && role == 'PROCESSOR') {
-    if (custSubGroup == 'IBMEM') {
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('company');
-      FormManager.readOnly('collectionCd');
-    } else {
-      FormManager.enable('clientTier');
-      FormManager.enable('company');
-      FormManager.enable('collectionCd');
-    }
-  }
+	if ((reqType == 'U' || reqType == 'X') && FormManager.getActualValue('ordBlk') == '93') {
+		FormManager.readOnly('reqReason');
+		if (role == 'REQUESTER') {
+			if (vat == '' || vat == 'undefined') {
+				FormManager.enable('vat');
+				FormManager.addValidator('vat', Validators.REQUIRED, ['VAT'], 'MAIN_CUST_TAB');
+			} else {
+				FormManager.readOnly('vat');
+			}
+		}
+	}
 }
 function lockCustClassUKI() {
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -7716,8 +7448,6 @@ function autoPopulateISUClientTierUK() {
       if (postCd != '' && (isNorthernIrelandPostCd(postCd))) {
         FormManager.setValue('isuCd', "34");
         FormManager.setValue('clientTier', "Q");
-      } else {
-        FormManager.setValue('clientTier', "Q");
       }
     }
   } else {
@@ -7726,60 +7456,62 @@ function autoPopulateISUClientTierUK() {
   }
 }
 
-function autoSetISUClientTierUK() {
-  console.log("autoSetISUClientTierUK........")
-  var custSubGroup = FormManager.getActualValue('custSubGrp');
-  var reqType = FormManager.getActualValue('reqType');
-  var noScenario = new Set([ 'INTER', 'XINTR', 'BUSPR', 'XBSPR' ]);
-  var isuCd = FormManager.getActualValue('isuCd');
-  var clientTier = FormManager.getActualValue('clientTier');
-  var isuCdList = [ '34', '5K', '4F', '11', '05' ];
-
-  if (reqType != 'C') {
-    return;
-  }
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  if ('866' == FormManager.getActualValue('cmrIssuingCntry') && isuCdList.includes(isuCd) && clientTier == '') {
-    return;
-  }
-
-  if ('866' == FormManager.getActualValue('cmrIssuingCntry')) {
-    if (custSubGroup != undefined && custSubGroup != '' && !noScenario.has(custSubGroup)) {
-
-      var _reqId = FormManager.getActualValue('reqId');
-      var postCdParams = {
-        REQ_ID : _reqId,
-        ADDR_TYPE : "ZS01",
-      };
-
-      var postCdResult = cmr.query('ADDR.GET.POSTCD.BY_REQID_ADDRTYP', postCdParams);
-      var postCd = postCdResult.ret1;
-      if (postCd != null && postCd.length > 2) {
-        postCd = postCd.substring(0, 2);
-      }
-
-      if (postCd != '' && (isNorthernIrelandPostCd(postCd))) {
-        FormManager.setValue('isuCd', "34");
-        FormManager.setValue('clientTier', "Q");
-      } else {
-        FormManager.setValue('clientTier', "Q");
-      }
-    } else {
-      FormManager.setValue('isuCd', '21');
-      FormManager.setValue('clientTier', '');
-
-      // CREATCMR-4293
-      var custSubGrp = FormManager.getActualValue('custSubGrp');
-      // Business Partner OR Internal
-      if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
-        FormManager.setValue('clientTier', '');
-      }
-    }
-  }
-}
+// function autoSetISUClientTierUK() {
+// console.log("autoSetISUClientTierUK........")
+// var custSubGroup = FormManager.getActualValue('custSubGrp');
+// var reqType = FormManager.getActualValue('reqType');
+// var noScenario = new Set([ 'INTER', 'XINTR', 'BUSPR', 'XBSPR' ]);
+// var isuCd = FormManager.getActualValue('isuCd');
+// var clientTier = FormManager.getActualValue('clientTier');
+// var isuCdList = [ '34', '36', '32' ];
+//
+// if (reqType != 'C') {
+// return;
+// }
+// if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+// return;
+// }
+//
+// if ('866' == FormManager.getActualValue('cmrIssuingCntry') &&
+// isuCdList.includes(isuCd) && clientTier == '') {
+// return;
+// }
+//
+// if ('866' == FormManager.getActualValue('cmrIssuingCntry')) {
+// if (custSubGroup != undefined && custSubGroup != '' &&
+// !noScenario.has(custSubGroup)) {
+//
+// var _reqId = FormManager.getActualValue('reqId');
+// var postCdParams = {
+// REQ_ID : _reqId,
+// ADDR_TYPE : "ZS01",
+// };
+//
+// var postCdResult = cmr.query('ADDR.GET.POSTCD.BY_REQID_ADDRTYP',
+// postCdParams);
+// var postCd = postCdResult.ret1;
+// if (postCd != null && postCd.length > 2) {
+// postCd = postCd.substring(0, 2);
+// }
+//
+// if (postCd != '' && (isNorthernIrelandPostCd(postCd))) {
+// FormManager.setValue('isuCd', "34");
+// FormManager.setValue('clientTier', "Q");
+// } else {
+// FormManager.setValue('clientTier', "Q");
+// }
+// } else {
+// FormManager.setValue('isuCd', '21');
+//
+// // CREATCMR-4293
+// var custSubGrp = FormManager.getActualValue('custSubGrp');
+// // Business Partner OR Internal
+// if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
+// FormManager.setValue('clientTier', '');
+// }
+// }
+// }
+// }
 function disableAddrFieldsUKI() {
   var addrType = FormManager.getActualValue('addrType');
   var custGrp = FormManager.getActualValue('custGrp');
@@ -8246,28 +7978,47 @@ function setPostCdItalyVA(cntry, addressMode, saving, finalSave) {
 }
 
 function validateSBOForIT() {
-  FormManager.addFormValidator(
-      (function() {
-        return {
-          validate : function() {
-            var isu = FormManager.getActualValue('isuCd');
-            var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
-            var lbl1 = FormManager.getLabel('SalesBusOff');
-            var _custType = FormManager.getActualValue('custSubGrp');
-            if (isu != undefined && isu == 21 && _custType != undefined && (_custType == 'INTER' || _custType == 'CROIN' || _custType == 'INTSM' || _custType == 'INTVA') && sbo != undefined
-                && sbo != '') {
-              if (sbo != '1B' && sbo != '1G' && sbo != '1E' && sbo != '11' && sbo != '12' && sbo != '13' && sbo != '14' && sbo != '99') {
-                return new ValidationResult({
-                  id : 'salesBusOffCd',
-                  type : 'text',
-                  name : 'salesBusOffCd'
-                }, false, 'Please enter one of the valid values for ' + lbl1 + ' as listed in the infobubble.');
-              }
-            }
-            return new ValidationResult(null, true);
-          }
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isu = FormManager.getActualValue('isuCd');
+        var ctc = FormManager.getActualValue('clienTier');
+        var isuCTC = isu.concat(ctc);
+        var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
+        var salRep = FormManager.getActualValue('repTeamMemberNo');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var reqType = FormManager.getActualValue('reqType');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (custSubGrp == null || custSubGrp == '' || custSubGrp == undefined || reqType != 'C') {
+          return new ValidationResult(null, true);
+
+        }
+
+        var qParams = {
+          _qall : 'Y',
+          CNTRY : cntry,
+          SBO : sbo,
+          SALES_REP : salRep,
+          ISU : '%' + isuCTC + '%'
         };
-      })(), 'MAIN_IBM_TAB', 'frmCMR');
+        var results = cmr.query('GET.SR.SBO.BYISUCTC', qParams);
+        var displayInvalidMsg = true;
+
+        if (results != null && results.length > 0) {
+          displayInvalidMsg = false;
+        }
+
+        if (displayInvalidMsg) {
+          return new ValidationResult({
+            id : 'salesBusOffCd',
+            type : 'text',
+            name : 'salesBusOffCd'
+          }, false, 'Please enter the valid combination of ISU , ClientTier ,SBO and Sales Rep.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 
   // validate Sbo length for ITALY
   FormManager.addFormValidator((function() {
@@ -8309,27 +8060,25 @@ function validateSBOForIT() {
 
 // CREATCMR - 985 validate Sales Rep
 function validateSalesRepForIT() {
+  // validate SalesRep for ITALY
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
         var salesRep = FormManager.getActualValue('repTeamMemberNo');
-        var _custType = FormManager.getActualValue('custSubGrp');
-        if (_custType == 'INTER' || _custType == 'CROIN') {
-          if (salesRep != '0B1BA0' && salesRep != '0B1GA0' && salesRep != '0B1EA0' && salesRep != '0B11A0' && salesRep != '0B12A0' && salesRep != '0B13A0' && salesRep != '0B14A0'
-              && salesRep != '012345') {
-            return new ValidationResult({
-              id : 'repTeamMemberNo',
-              type : 'text',
-              name : 'repTeamMemberNo'
-            }, false, 'The Sales Rep value for Internal scenario is invalid.');
-          }
+        if (salesRep.length != 6 && salesRep != undefined && salesRep != '') {
+          return new ValidationResult({
+            id : 'repTeamMemberNo',
+            type : 'text',
+            name : 'repTeamMemberNo'
+          }, false, 'The Sales Rep should be six characters long');
         }
         return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
 
+function validateSalesRepForUKI() {
   // validate SalesRep for ITALY
   FormManager.addFormValidator((function() {
     return {
@@ -8363,7 +8112,6 @@ function validateSalesRepForIT() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
-
 }
 
 function validateCollectionCdIT() {
@@ -8432,10 +8180,6 @@ function setIBMFieldsMandtOptional() {
 
     } else {
       FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], null);
-      if (!('5K' == FormManager.getActualValue('isuCd'))) {
-        FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], null);
-      }
-
       FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep No' ], null);
       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], null);
       // setClientTierValuesUKI();
@@ -8451,19 +8195,11 @@ function setCtcFieldMandtUKI() {
   if (role != 'PROCESSOR' || reqType != 'C' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     return;
   }
-  if (cntry == '866') {
-    var isuList = [ '34', '5K', '05', '11', '4F' ];
-    if (isuList.includes(isuCd)) {
-      FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      return;
-    }
-  } else {
-    if ('5K' == isuCd || '28' == isuCd) {
-      FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      return;
-    }
+  var isuList = [ '34', '36', '32' ];
+  if (!isuList.includes(isuCd)) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    return;
   }
-  FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], null);
 }
 
 function validateCMRNumberForIT() {
@@ -8763,8 +8499,6 @@ function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
       FormManager.enable('cmrNo');
     }
     if ((_custSubGrp == 'INTER' || _custSubGrp == 'CROIN' || _custSubGrp == 'INTSM' || _custSubGrp == 'INTVA') && scenarioChanged) {
-      // FormManager.setValue('repTeamMemberNo', '');
-      // FormManager.setValue('salesBusOffCd', '');
       FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
@@ -8774,7 +8508,6 @@ function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
   if (checkImportIndc != 'Y') {
     var ident = FormManager.getActualValue('identClient');
     if (FormManager.getActualValue('reqType') == 'C' && 'CROSS' == FormManager.getActualValue('custGrp')) {
-      var reqId = FormManager.getActualValue('reqId');
       var checkImportIndc = getImportedIndcForItaly();
       FormManager.enable('identClient');
       if (ident == 'N') {
@@ -8793,9 +8526,6 @@ function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
       }
     }
   }
-  autoSetSboOnPostalCode(false, false);
-  // CREATCMR-2658 For Local scenarios except Internal BP
-  // autoSetValuesOnPostalCodeIT();
   autoSetSROnSBOValueIT();
 
 }
@@ -9110,7 +8840,6 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   ibmFieldsBehaviourInCreateByModelIT();
   ibmFieldsBehaviourInCreateByScratchIT();
   disableProcpectCmrIT();
-  // autoSetSBOOnSRValueIT();
   autoSetSROnSBOValueIT();
   set34QYZlogicOnISUCtcChange();
   setVATOnIdentClientChangeIT();
@@ -9128,7 +8857,7 @@ function addAddrFunctionItaly(cntry, addressMode, saving, finalSave) {
   setSpecialTaxCodeOnAddressIT(cntry, addressMode, saving, finalSave);
   setPostCdItalyVA(cntry, addressMode, saving, finalSave);
   landedCntryLockedIT(cntry, addressMode, saving, finalSave);
-  autoSetValuesOnPostalCodeIT(addressMode);
+  // autoSetValuesOnPostalCodeIT(addressMode);
 }
 
 function ibmFieldsBehaviourInCreateByScratchIT() {
@@ -9388,7 +9117,7 @@ function autoSetAbbrNameUKI() {
         ADDR_TYPE : 'ZS01'
       });
     }
-    if (result.ret1 != undefined) {
+    if ((result != null || result != undefined) && result.ret1 != undefined) {
       {
         var _abbrevNmValue = result.ret1 + (result.ret2 != undefined ? result.ret2 : '');
         if (_abbrevNmValue != null && _abbrevNmValue.length > 22) {
@@ -9864,7 +9593,7 @@ function getLandedCntryForItaly() {
   var results = cmr.query('VALIDATOR.LANDED_IT', {
     REQID : FormManager.getActualValue('reqId')
   });
-  if (results != null && results.ret1) {
+  if ((results != null || results != undefined) && results.ret1) {
     _landedIT = results.ret1;
   } else {
     _landedIT = '';
@@ -9999,15 +9728,16 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
+  var activeIsuCd = [ '32', '34', '36' ];
+  var activeCtc = [ 'Q', 'Y', 'T' ];
 
-  if (isuCode != '34') {
+  if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
     } else {
       $("#clientTierSpan").html('');
-
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
@@ -10016,22 +9746,42 @@ function clientTierCodeValidator() {
     }
   } else if (isuCode == '34') {
     if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+      // 
+    } else if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+      }, false, 'Client Tier can only accept \'Q\'.');
+    }
+  } else if (isuCode == '32') {
+    if (clientTierCode == '') {
+      //
+    } else if (clientTierCode == 'T') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'T\'.');
+    }
+  } else if (isuCode == '36') {
+    if (clientTierCode == '') {
+      //
+    } else if (clientTierCode == 'Y') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Y\'.');
     }
   } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+    if (activeCtc.includes(clientTierCode) || clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
@@ -10043,10 +9793,11 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'T\' or blank.');
     }
   }
 }
+
 // CREATCMR-4293
 
 function clientTierValidator() {
@@ -10086,67 +9837,56 @@ function clientTierValidator() {
 }
 
 // CREATCMR-4293
-function setCTCValues() {
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
 
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    var reqType = FormManager.getActualValue('reqType');
-    // Business Partner OR Internal
-    if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
-      FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      var isuCd = FormManager.getActualValue('isuCd');
-      if (isuCd == '21') {
-        FormManager.setValue('clientTier', '');
-        if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
-          FormManager.enable('clientTier');
+function checkCmrUpdateBeforeImport() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var uptsrdc = '';
+        var lastupts = '';
+
+        if (reqType == 'C') {
+          // console.log('reqType = ' + reqType);
+          return new ValidationResult(null, true);
+        }
+
+        var resultsCC = cmr.query('GETUPTSRDC', {
+          COUNTRY : cntry,
+          CMRNO : cmrNo,
+          MANDT : cmr.MANDT
+        });
+
+        if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
+          uptsrdc = resultsCC.ret1;
+          // console.log('lastupdatets in RDC = ' + uptsrdc);
+        }
+
+        var results11 = cmr.query('GETUPTSADDR', {
+          REQ_ID : reqId
+        });
+        if (results11 != null && results11 != undefined && results11.ret1 != '') {
+          lastupts = results11.ret1;
+          // console.log('lastupdatets in CreateCMR = ' + lastupts);
+        }
+
+        if (lastupts != '' && uptsrdc != '') {
+          if (uptsrdc > lastupts) {
+            return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
         }
       }
-    }
-  }
-
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.ITALY) {
-
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    // Business Partner OR Internal
-    if (custSubGrp == 'CROBP' || custSubGrp == 'CROIN' || custSubGrp == 'INTER' || custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'INTSM' || custSubGrp == 'BUSVA'
-        || custSubGrp == 'INTVA') {
-      FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      var isuCd = FormManager.getActualValue('isuCd');
-      if (isuCd == '21') {
-        FormManager.setValue('clientTier', '');
-        if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
-          FormManager.enable('clientTier');
-        }
-      }
-    }
-  }
-
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK) {
-
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    var reqType = FormManager.getActualValue('reqType');
-    // Business Partner OR Internal
-    if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
-      FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      var isuCd = FormManager.getActualValue('isuCd');
-      if (isuCd == '21') {
-        FormManager.setValue('clientTier', '');
-        if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
-          FormManager.enable('clientTier');
-        }
-      }
-    }
-  }
-
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
-
 // CREATCMR-1727
 function cmrNoEnableForUKI() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -10174,7 +9914,7 @@ function addCmrNoValidatorForUKI() {
           return new ValidationResult(null, true);
         }
 
-        if (cmrNo != '' && cmrNo != null  && !cmrNo.startsWith('P')) {
+        if (cmrNo != '' && cmrNo != null && !cmrNo.startsWith('P')) {
           if (cmrNo.length != 6) {
             return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
           } else if (isNaN(cmrNo)) {
@@ -10229,57 +9969,6 @@ function addCmrNoValidatorForUKI() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 // CREATCMR-1727
-
-function checkCmrUpdateBeforeImport() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var cmrNo = FormManager.getActualValue('cmrNo');
-        var reqId = FormManager.getActualValue('reqId');
-        var reqType = FormManager.getActualValue('reqType');
-        var uptsrdc = '';
-        var lastupts = '';
-
-        if (reqType == 'C') {
-          // console.log('reqType = ' + reqType);
-          return new ValidationResult(null, true);
-        }
-
-        var resultsCC = cmr.query('GETUPTSRDC', {
-          COUNTRY : cntry,
-          CMRNO : cmrNo,
-          MANDT : cmr.MANDT
-        });
-
-        if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
-          uptsrdc = resultsCC.ret1;
-          // console.log('lastupdatets in RDC = ' + uptsrdc);
-        }
-
-        var results11 = cmr.query('GETUPTSADDR', {
-          REQ_ID : reqId
-        });
-        if (results11 != null && results11 != undefined && results11.ret1 != '') {
-          lastupts = results11.ret1;
-          // console.log('lastupdatets in CreateCMR = ' + lastupts);
-        }
-
-        if (lastupts != '' && uptsrdc != '') {
-          if (uptsrdc > lastupts) {
-            return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
-          } else {
-            return new ValidationResult(null, true);
-          }
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-    };
-  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
-}
-
 function addressQuotationValidatorIT() {
   // CREATCMR-788
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
@@ -10310,36 +9999,116 @@ function addressQuotationValidatorUKI() {
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 }
-dojo.addOnLoad(function() {
-  GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
-  console.log('adding EMEA functions...');
-  GEOHandler.addAddrFunction(addEMEALandedCountryHandler, GEOHandler.EMEA);
-  GEOHandler.enableCopyAddress(GEOHandler.EMEA, validateEMEACopy, [ 'ZD01', 'CTYC' ]);
-  GEOHandler.enableCustomerNamesOnAddress(GEOHandler.EMEA);
-  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.EMEA);
-  GEOHandler.setRevertIsicBehavior(false);
-  GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [ SysLoc.ISRAEL, SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(emeaPpsCeidValidator, GEOHandler.EMEA);
 
-  // UKI Specific
-  GEOHandler.addAfterConfig(afterConfigForUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.addAfterConfig(defaultCapIndicatorUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.addAfterTemplateLoad(setClientTierValuesUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
-  GEOHandler.addAfterConfig(setAbbrevNmLocationLockAndMandatoryUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(lockCmrOwner, [ SysLoc.TURKEY ]);
-  // GEOHandler.addAfterConfig(addSBOSRLogicIE, [ SysLoc.IRELAND ]);
-  GEOHandler.addAfterConfig(addSalesRepLogicUK2018, [ SysLoc.UK ]);
-  GEOHandler.addAfterConfig(addHandlersForUK, [ SysLoc.UK ]);
-  GEOHandler.registerValidator(addUKAddressTypeValidator, [ SysLoc.UK ], null, true);
-  GEOHandler.registerValidator(addIRAddressTypeValidator, [ SysLoc.IRELAND ], null, true);
-  GEOHandler.registerValidator(addPostCdCityValidator, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
-  GEOHandler.addAddrFunction(addLatinCharValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  // GEOHandler.registerValidator(addNameContAttnDeptValidatorUKI, [
-  // SysLoc.IRELAND, SysLoc.UK ], null, true);
-  GEOHandler.registerValidator(validateCompanyNoForUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
-  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.UK, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.UK ], null, true);
-  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.IRELAND, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.IRELAND ], null, true);
+function clientTierValidatorIT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log("Inside clientTierCodeValidator......")
+        var isuCd = FormManager.getActualValue('isuCd');
+        var ctc = FormManager.getActualValue('clientTier');
+        var isuCdList = [ '32', '34', '36' ];
+        var validIsuCTCList = [ '32T', '34Q', '36Y' ];
+        var isuCTC = isuCd.concat(ctc);
+        
+        if (!isuCdList.includes(isuCd)) {
+          if (ctc) {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept blank.');
+          }
+        } else if (isuCdList.includes(isuCd)) {
+          if (ctc == '') {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier code is Mandatory.');
+          } else if (!validIsuCTCList.includes(isuCTC)) {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Valid combinations for ISU & Client Tier can only accept \'34 Q\' or \'36 Y\' or \'32 T\'.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function addVatIndValidator() {
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnlyPage == 'true') {
+    FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
+  } else {
+
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+      ISSUING_CNTRY : cntry
+    });
+
+    if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.readOnly('vatInd');
+    } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
+      FormManager.setValue('vat', '');
+      FormManager.setValue('vatInd', '');
+    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.readOnly('vatInd');
+    } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    }
+    if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null) && vatInd == 'N') {
+      FormManager.resetValidations('vat');
+    }
+  }
+}
+
+dojo.addOnLoad(function() {
+	GEOHandler.EMEA = [SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY];
+	console.log('adding EMEA functions...');
+	GEOHandler.addAddrFunction(addEMEALandedCountryHandler, GEOHandler.EMEA);
+	GEOHandler.enableCopyAddress(GEOHandler.EMEA, validateEMEACopy, ['ZD01', 'CTYC']);
+	GEOHandler.enableCustomerNamesOnAddress(GEOHandler.EMEA);
+	GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.EMEA);
+	GEOHandler.setRevertIsicBehavior(false);
+	GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [SysLoc.ISRAEL, SysLoc.TURKEY]);
+	GEOHandler.addAfterTemplateLoad(emeaPpsCeidValidator, GEOHandler.EMEA);
+	// UKI Specific
+	GEOHandler.addAfterConfig(afterConfigForUKI, [SysLoc.IRELAND, SysLoc.UK]);
+	GEOHandler.addAfterConfig(defaultCapIndicatorUKI, [SysLoc.IRELAND, SysLoc.UK]);
+	// GEOHandler.addAfterConfig(setClientTierValuesUKI, [ SysLoc.UK,
+	// SysLoc.IRELAND ]);
+	GEOHandler.addAfterConfig(setAbbrevNmLocationLockAndMandatoryUKI, [SysLoc.IRELAND, SysLoc.UK]);
+	GEOHandler.addAfterConfig(lockCmrOwner, [SysLoc.TURKEY]);
+	GEOHandler.addAfterTemplateLoad(lockCmrOwner, [SysLoc.TURKEY]);
+	// GEOHandler.addAfterConfig(addSBOSRLogicIE, [ SysLoc.IRELAND ]);
+	GEOHandler.addAfterConfig(addSalesRepLogicUK2018, [SysLoc.UK]);
+	GEOHandler.addAfterConfig(addHandlersForUK, [SysLoc.UK]);
+	GEOHandler.registerValidator(addUKAddressTypeValidator, [SysLoc.UK], null, true);
+	GEOHandler.registerValidator(addIRAddressTypeValidator, [SysLoc.IRELAND], null, true);
+	GEOHandler.registerValidator(addPostCdCityValidator, [SysLoc.IRELAND, SysLoc.UK], null, true);
+	GEOHandler.addAddrFunction(addLatinCharValidatorUKI, [SysLoc.IRELAND, SysLoc.UK]);
+	// GEOHandler.registerValidator(addNameContAttnDeptValidatorUKI, [
+	// SysLoc.IRELAND, SysLoc.UK ], null, true);
+	GEOHandler.registerValidator(validateCompanyNoForUKI, [SysLoc.IRELAND, SysLoc.UK], null, true);
+	GEOHandler.registerValidator(addGenericVATValidator(SysLoc.UK, 'MAIN_CUST_TAB', 'frmCMR'), [SysLoc.UK], null, true);
+	GEOHandler.registerValidator(addGenericVATValidator(SysLoc.IRELAND, 'MAIN_CUST_TAB', 'frmCMR'), [SysLoc.IRELAND], null, true);
 
   GEOHandler.registerValidator(addHwMstrInstFlgValidator, [ SysLoc.IRELAND, SysLoc.UK, SysLoc.SPAIN ], null, true);
   GEOHandler.addAddrFunction(checkHwMstrInstallFlag, [ SysLoc.IRELAND, SysLoc.UK, SysLoc.SPAIN ], null, true);
@@ -10352,6 +10121,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnlyUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.registerValidator(validateInternalDeptNumberLength, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.addAddrFunction(autoSetAbbrevLocnOnAddSaveUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
+  GEOHandler.addAddrFunction(addPOBOXValidatorEMEA, [ SysLoc.IRELAND, SysLoc.UK ]);
 
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.UK ]);
@@ -10412,7 +10182,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateAbbrLocWithZS01TR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(set34QYZlogicOnISUCtcChange, [ SysLoc.ITALY ]);
   GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
@@ -10481,38 +10250,55 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(viewOnlyAddressDetails, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setVatValidatorTR, [ SysLoc.TURKEY, ]);
 
-  // common israel/greece/cyprus/turkey
-  GEOHandler.addAfterConfig(defaultCapIndicator, [ SysLoc.ISRAEL, SysLoc.TURKEY ]);
-
-  // Italy
-  GEOHandler.checkRoleBeforeAddAddrFunction(addAddrValidationForProcItaly, [ SysLoc.ITALY ], null, GEOHandler.ROLE_PROCESSOR);
-  GEOHandler.registerValidator(addCrossBorderValidatorForIT, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(addCompanyAddrValidator, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(addBillingAddrValidator, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.ITALY, 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), [ SysLoc.ITALY ], null, true);
-  GEOHandler.addAddrFunction(addPOBOXValidatorEMEA, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.registerValidator(validateFiscalCodeForCreatesIT, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(validateLandCntryForCBCreatesIT, [ SysLoc.ITALY ], null, true);
-  GEOHandler.addAfterConfig(setClientTierValuesIT, [ SysLoc.ITALY ]);
-  GEOHandler.addAfterTemplateLoad(setClientTierValuesIT, [ SysLoc.ITALY ]);
-
-  /* 1438717 - add DPL match validation for failed dpl checks */
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(checkIfVATFiscalUpdatedIT, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(validateVATFiscalLengthOnIdentIT, [ SysLoc.ITALY ]);
-  // GEOHandler.registerValidator(validateSRForIT, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(addInstallingAddrValidator, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(validateEnterpriseNumForIT, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(checkIfStateProvBlankForProcIT, [ SysLoc.ITALY ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(stateProvValidatorCBforIT, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(validateSingleReactParentCMR, [ SysLoc.ITALY ], null, true);
   // CMR-2085 Turkey:CMR number: manual insertion for processor,
   // validation
   // numeric, existing
   GEOHandler.registerValidator(validateCMRNumExistForTR, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(validateCMRNumberForTR, [ SysLoc.TURKEY ], null, true);
   GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.TURKEY ]);
+  // common israel/greece/cyprus/turkey
+  GEOHandler.addAfterConfig(defaultCapIndicator, [ SysLoc.ISRAEL, SysLoc.TURKEY ]);
 
+	// Italy
+	GEOHandler.registerValidator(addCrossBorderValidatorForIT, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(addCompanyAddrValidator, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(addBillingAddrValidator, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(addGenericVATValidator(SysLoc.ITALY, 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(validateFiscalCodeForCreatesIT, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(validateLandCntryForCBCreatesIT, [SysLoc.ITALY], null, true);
+	/* 1438717 - add DPL match validation for failed dpl checks */
+	GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
+	
+	GEOHandler.registerValidator(checkIfVATFiscalUpdatedIT, [SysLoc.ITALY]);
+	GEOHandler.registerValidator(validateFiscalLengthOnIdentIT, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(validateVATOnIdentIT, [ SysLoc.ITALY ]);
+	GEOHandler.registerValidator(addInstallingAddrValidator, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(validateEnterpriseNumForIT, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(checkIfStateProvBlankForProcIT, [SysLoc.ITALY], GEOHandler.ROLE_PROCESSOR, true);
+	GEOHandler.registerValidator(stateProvValidatorCBforIT, [SysLoc.ITALY]);
+	GEOHandler.registerValidator(validateSingleReactParentCMR, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(validateSBOForIT, [SysLoc.ITALY]);
+	GEOHandler.registerValidator(validateSalesRepForIT, [SysLoc.ITALY]);
+	GEOHandler.registerValidator(validateCodiceDesIT, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(validateCollectionCdIT, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(validateCMRNumberForIT, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(addEmbargoCodeValidatorIT, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(validateExistingCMRNo, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(checkIsicCodeValidationIT, [SysLoc.ITALY]);
+	GEOHandler.registerValidator(addCMRValidator, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(addBillingValidator, [SysLoc.ITALY], null, true);
+	GEOHandler.registerValidator(clientTierValidatorIT, [SysLoc.ITALY], null, true);
+
+  GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
+  GEOHandler.checkRoleBeforeAddAddrFunction(addAddrValidationForProcItaly, [ SysLoc.ITALY ], null, GEOHandler.ROLE_PROCESSOR);
+
+  GEOHandler.addAfterTemplateLoad(setClientTierValuesIT, [ SysLoc.ITALY ]);
+  GEOHandler.addAfterTemplateLoad(set34QYZlogicOnISUCtcChange, [ SysLoc.ITALY ]);
+  GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
+
+  GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
+  GEOHandler.addAfterConfig(addISUHandlerIT, [ SysLoc.ITALY ]);
+  GEOHandler.addAfterConfig(setClientTierValuesIT, [ SysLoc.ITALY ]);
   // For EmbargoCode
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.EMEA);
 
@@ -10531,34 +10317,36 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(disableAddrFieldsUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAddrFunction(optionalRulePostalCodeUK, [ SysLoc.UK ]);
   GEOHandler.addAddrFunction(setTaxCdBasedOnlandCntryUK, [ SysLoc.UK ]);
-  GEOHandler.registerValidator(validateSBOForIT, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(validateSalesRepForIT, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(validateCodiceDesIT, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(validateCollectionCdIT, [ SysLoc.ITALY ], null, true);
+
   GEOHandler.addAfterConfig(setIBMFieldsMandtOptional, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterTemplateLoad(setIBMFieldsMandtOptional, [ SysLoc.IRELAND, SysLoc.UK ]);
   // GEOHandler.addAfterConfig(setCtcFieldMandtUKI, [ SysLoc.IRELAND, SysLoc.UK
   // ]);
-  GEOHandler.registerValidator(validateCMRNumberForIT, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(addEmbargoCodeValidatorIT, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(requestingLOBCheckFrIFSL, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.registerValidator(addValidatorForCollectionCdUpdateUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(validateCollectionCdValueUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addValidatorForCompanyRegNum, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addCustClassValidatorBP, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
-  GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
-  GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(addCMRValidator, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(addBillingValidator, [ SysLoc.ITALY ], null, true);
-  GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
-  GEOHandler.addAddrFunction(autoSetValuesOnPostalCodeIT, [ SysLoc.ITALY ]);
 
   // CMR-2205
   GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(autoSetAbbrevLocnOnChangeTR, [ SysLoc.TURKEY ]);
 
+  // CREATCMR-4293
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
+  // CREATCMR-1727
+  GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+
+  GEOHandler.addAfterConfig(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.registerValidator(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  // GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK,
+  // SysLoc.IRELAND]);
+  // GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK,
+  // SysLoc.IRELAND]);
   // CMR-2688
   GEOHandler.addAfterConfig(setDefaultValueForPreferredLanguage, [ SysLoc.TURKEY ]);
   // CMR-1804 Turkey - Fields values validations - ISU Default on UI
@@ -10571,27 +10359,24 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.UK ]);
   GEOHandler.addAfterTemplateLoad(setCustClassCd, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(setCustClassCd, [ SysLoc.UK, SysLoc.IRELAND ]);
-  GEOHandler.addAfterTemplateLoad(configureCRNForUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
-  GEOHandler.addAfterConfig(configureCRNForUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
 
   GEOHandler.registerValidator(validateVATForINFSLScenarioUKI, [ SysLoc.IRELAND ], null, true);
-  GEOHandler.registerValidator(sboLengthValidator, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(sboLengthValidator, [ SysLoc.ISRAEL, SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(addHandlersForIE, [ SysLoc.IRELAND ]);
-  GEOHandler.addAfterConfig(addISUHandlerIT, [ SysLoc.ITALY ]);
 
   // CREATCMR-4293
-  GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.ITALY, SysLoc.UK ], null, true);
+  GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
-
-  // CREATCMR-1727
-  GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.addAfterConfig(setClientTierBasedOnIsuUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(setClientTierBasedOnIsuUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
+  // CREATCMR-1727
+  GEOHandler.registerValidator(validateSalesRepForUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
 });

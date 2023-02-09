@@ -1744,21 +1744,33 @@ public class IsraelHandler extends EMEAHandler {
 
         // validate ISU and CTC combination
         String isuCd = validateColValFromCell(row.getCell(10));
-        if (StringUtils.isNotBlank(isuCd) || StringUtils.isNotBlank(ctc)) {
-          if (StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) {
-            error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier should be filled when updating ISU.");
-          } else if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
-            error.addError(rowIndex + 1, "<br>ISU Code", "ISU Code should be filled when updating Client Tier.");
-          } else if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
-            List<String> validCtcList = Arrays.asList("Q", "Y");
-            if (isuCd.equals("34")) {
-              if (!validCtcList.contains(ctc)) {
-                error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier value should be either Q or Y for ISU Code 34.");
-              }
-            } else if (!isuCd.equals("34") && !ctc.equals("@")) {
-              error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier value should always be @ for all other ISU except 34.");
-            }
+        if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+          LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+          error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+        } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"Q".equals(ctc)) {
+            LOG.trace("The row " + (row.getRowNum() + 1)
+                + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
+            error.addError((row.getRowNum() + 1), "Client Tier",
+                ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
           }
+        } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"Y".equals(ctc)) {
+            LOG.trace("The row " + (row.getRowNum() + 1)
+                + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+            error.addError((row.getRowNum() + 1), "Client Tier",
+                ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+          }
+        } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"T".equals(ctc)) {
+            LOG.trace("The row " + (row.getRowNum() + 1)
+                + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+            error.addError((row.getRowNum() + 1), "Client Tier",
+                ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+          }
+        } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("32", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
+          LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+          error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
       }
     }
@@ -1987,56 +1999,6 @@ public class IsraelHandler extends EMEAHandler {
     }
   }
 
-  private static String validateMassKna1AddrSeqExist(String cmrNo, String seqNo, String addrType) {
-    LOG.info("Israel MU validate rdc address sequence " + seqNo + " for CMR No. " + cmrNo);
-    String errMessage = "";
-
-    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
-      EntityManager entityManager = JpaManager.getEntityManager();
-      if (entityManager != null) {
-        String sql = ExternalizedQuery.getSql("IL.MASS.GET.KNA1.ADDR.SEQ");
-        PreparedQuery query = new PreparedQuery(entityManager, sql);
-        query.setParameter("KATR6", SystemLocation.ISRAEL);
-        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-        query.setParameter("ZZKV_CUSNO", cmrNo);
-        query.setParameter("ZZKV_SEQNO", Integer.valueOf(seqNo));
-        query.setParameter("ZZKV_SEQNO_PAD", seqNo);
-        query.setForReadOnly(true);
-        String result = query.getSingleResult(String.class);
-
-        if (StringUtils.isBlank(result)) {
-          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
-              + " does not exist in RDC. Please raise single update for CMR " + cmrNo + " so the address can be inserted to RDC.";
-        }
-      }
-    }
-    return errMessage;
-  }
-
-  private static String validateMassLegacyAddrSeqExist(String cmrNo, String seqNo, String addrType) {
-    LOG.info("Israel MU validate legacy address sequence " + seqNo + " for CMR No. " + cmrNo);
-    String errMessage = "";
-
-    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
-      EntityManager entityManager = JpaManager.getEntityManager();
-      if (entityManager != null) {
-        String sql = ExternalizedQuery.getSql("IL.MASS.GET.LEGACY.ADDR.SEQ");
-        PreparedQuery query = new PreparedQuery(entityManager, sql);
-        query.setParameter("RCYAA", SystemLocation.ISRAEL);
-        query.setParameter("RCUXA", cmrNo);
-        query.setParameter("SEQ", seqNo);
-        query.setForReadOnly(true);
-        String result = query.getSingleResult(String.class);
-
-        if (StringUtils.isBlank(result)) {
-          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
-              + " does not exist in DB2. Please contact CMDE team to review the CMR.";
-        }
-      }
-    }
-    return errMessage;
-  }
-
   private void validateAddrRequiredFields(XSSFRow row, TemplateValidation error, String sheetName) {
     // Check required fields
     boolean checkRequiredFields = false;
@@ -2175,6 +2137,56 @@ public class IsraelHandler extends EMEAHandler {
       }
     }
     return isDivestiture;
+  }
+
+  private static String validateMassKna1AddrSeqExist(String cmrNo, String seqNo, String addrType) {
+    LOG.info("Israel MU validate rdc address sequence " + seqNo + " for CMR No. " + cmrNo);
+    String errMessage = "";
+
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("IL.MASS.GET.KNA1.ADDR.SEQ");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("KATR6", SystemLocation.ISRAEL);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("ZZKV_CUSNO", cmrNo);
+        query.setParameter("ZZKV_SEQNO", Integer.valueOf(seqNo));
+        query.setParameter("ZZKV_SEQNO_PAD", seqNo);
+        query.setForReadOnly(true);
+        String result = query.getSingleResult(String.class);
+
+        if (StringUtils.isBlank(result)) {
+          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
+              + " does not exist in RDC. Please raise single update for CMR " + cmrNo + " so the address can be inserted to RDC.";
+        }
+      }
+    }
+    return errMessage;
+  }
+
+  private static String validateMassLegacyAddrSeqExist(String cmrNo, String seqNo, String addrType) {
+    LOG.info("Israel MU validate legacy address sequence " + seqNo + " for CMR No. " + cmrNo);
+    String errMessage = "";
+
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("IL.MASS.GET.LEGACY.ADDR.SEQ");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("RCYAA", SystemLocation.ISRAEL);
+        query.setParameter("RCUXA", cmrNo);
+        query.setParameter("SEQ", seqNo);
+        query.setForReadOnly(true);
+        String result = query.getSingleResult(String.class);
+
+        if (StringUtils.isBlank(result)) {
+          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
+              + " does not exist in DB2. Please contact CMDE team to review the CMR.";
+        }
+      }
+    }
+    return errMessage;
   }
 
   private static String validateISICKukla(String cmrNo, String cntry, String usrIsic, String usrKukla) {

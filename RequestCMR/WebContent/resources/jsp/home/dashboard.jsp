@@ -240,6 +240,16 @@
             <a href="<%=SystemConfiguration.getValue("BATCH_CI_SERVICES_URL")+"/service/ping"%>" target="_blank">Ping URL</a>
           </td>
         </tr>
+          <tr>
+          <td>US CMR (US Legacy)</td>
+          <td>Secondary</td>
+          <td>Retrieves US CMR values and primary point of creation and updates</td>
+          <td style="text-align:center">
+            <img src="${resourcesPath}/images/approve.png" class="proc-img-m" ng-show="services.usCmr" title="Connection is successful">
+            <img src="${resourcesPath}/images/reject.png" class="proc-img-m" ng-show="!services.usCmr" title="Connection is DOWN">
+          </td>
+          <td>&nbsp;</td>
+        </tr>
         <tr>
           <td>CRIS (Japan Legacy)</td>
           <td>Secondary</td>

@@ -782,7 +782,11 @@
     <put-attribute name="title" value="CreateCMR | Update Request" />
     <put-attribute name="body" value="/resources/jsp/findcmr.jsp" />
   </definition>
-
  
+  <definition name="kyccompare" extends="base">
+    <put-attribute name="title" value="CreateCMR | KYC vs EVS" />
+    <put-attribute name="body" value="/resources/jsp/system/kyccompare.jsp" />
+  </definition>
+
    <!-- Single Reactivation End -->
 </tiles-definitions>

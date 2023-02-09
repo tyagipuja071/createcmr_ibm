@@ -153,9 +153,6 @@ public class CNHandler extends GEOHandler {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
-    }
   }
 
   @Override
@@ -368,7 +365,7 @@ public class CNHandler extends GEOHandler {
       if ("08036".equals(data.getSearchTerm())) {
         return false;
       }
-      if ("04182".equals(data.getSearchTerm())) {
+      if ("00075".equals(data.getSearchTerm())) {
         return true;
       } else if ((StringUtils.isBlank(data.getSearchTerm()) || "00000".equals(data.getSearchTerm()) || "000000".equals(data.getSearchTerm())
           || data.getSearchTerm().matches("[^0-9]+")) && data.getCmrNo() != null
@@ -382,7 +379,7 @@ public class CNHandler extends GEOHandler {
           || data.getSearchTerm().matches("[^0-9]+")) && data.getCmrNo() != null
           && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
         return true;
-      } else if ("04182".equals(data.getSearchTerm())) {
+      } else if ("00075".equals(data.getSearchTerm())) {
         return true;
       } else {
         return false;
@@ -535,11 +532,21 @@ public class CNHandler extends GEOHandler {
       List<CompanyRecordModel> resultFindCmrCN = null;
       resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
       if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-        // if (StringUtils.isNotBlank(resultFindCmrCN.get(0).getDunsNo())) {
-        // getGBGIdByGBGservice(entityManager, admin, data, currentAddress,
-        // resultFindCmrCN.get(0).getDunsNo(), false);
-        // } else {
-        getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getCmrNo(), true);
+        ArrayList<String> cmrList = new ArrayList<String>();
+        for (CompanyRecordModel cmr : resultFindCmrCN) {
+          if (cmr.getAltName().endsWith(companyName)) {
+            cmrList.add(cmr.getCmrNo());
+          }
+        }
+        if (cmrList.size() > 0) {
+          for (int i = 0; i < cmrList.size(); i++) {
+            String cmr = cmrList.get(i);
+            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, cmr, true);
+            if (StringUtils.isNotBlank(data.getGbgId()) && StringUtils.isNotBlank(data.getBgId())) {
+              break;
+            }
+          }
+        }
         if (StringUtils.isBlank(data.getGbgId()) && StringUtils.isBlank(data.getBgId())) {
           getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getDunsNo(), false);
         }
@@ -868,7 +875,7 @@ public class CNHandler extends GEOHandler {
           || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+")))) {
         if (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2")) {
           data.setClientTier("Z");
-          data.setSearchTerm("04182");
+          data.setSearchTerm("00075");
         }
       }
     }
@@ -885,8 +892,8 @@ public class CNHandler extends GEOHandler {
         } else if ("21".equals(data.getIsuCd()) || "60".equals(data.getIsuCd())) {
           data.setClientTier("Z");
           data.setSearchTerm("00000");
-        } else if (isBPUser(data)) { // CREATCMR-6084
-          data.setSearchTerm("04182");
+        } else if (isBPUser(data)) {
+          data.setSearchTerm("00075");
         } else {
           data.setClientTier("Q");
           data.setSearchTerm("00000");

@@ -245,6 +245,13 @@ if (readOnly){
                 <td>${reqentry.approvalResult}</td>
                 <td>${reqentry.approvalDateStr}</td>
               </tr>
+              <cmr:view forCountry="866,754,724,848,618,788,624,678,702,806,846">
+	              <tr>
+	                <td>VAT Acknowledge</td>
+	                <td id='vatAckknowledge'>${reqentry.vatAcknowledge}</td>
+	                <td>${reqentry.findCmrDate}</td>
+	              </tr>
+              </cmr:view>
               <%if (null != reqentry.getCmrIssuingCntry() && ("852".equals(reqentry.getCmrIssuingCntry()) || "720".equals(reqentry.getCmrIssuingCntry()) || "738".equals(reqentry.getCmrIssuingCntry()) || "736".equals(reqentry.getCmrIssuingCntry()) || "646".equals(reqentry.getCmrIssuingCntry()) || "714".equals(reqentry.getCmrIssuingCntry()))) {%>
               <tr>
                 <td>Proliferation Checklist
@@ -476,7 +483,7 @@ if (readOnly){
       %>
       </cmr:row>
     </cmr:view>
-    <cmr:view forGEO="EMEA,IERP,CND,AP,MCO,FR,MCO1,MCO2,CEMEA,JP,CN,NORDX,BELUX,NL,SWISS">
+    <cmr:view forGEO="EMEA,IERP,CND,AP,MCO,FR,MCO1,MCO2,CEMEA,JP,CN,NORDX,BELUX,NL,SWISS,TW">
       <form:hidden path="mainCustNm1" id="mainCustNm1"/>
       <form:hidden path="mainCustNm2" id="mainCustNm2"/>
     </cmr:view>

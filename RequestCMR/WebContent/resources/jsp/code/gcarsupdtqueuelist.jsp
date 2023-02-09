@@ -11,6 +11,8 @@
 <script src="${resourcesPath}/js/system/system.js?${cmrv}" type="text/javascript"></script>
 <script>
   dojo.addOnLoad(function() {
+    FilteringDropdown.loadItems('searchCriteria', 'searchCriteria_spinner', 'lov', 'fieldId=SearchCriteria&cmrIssuingCntry=*');
+    FormManager.addValidator('searchCriteria', Validators.REQUIRED, [ 'Search Criteria' ]);
     FormManager.ready();
   });
   
@@ -34,7 +36,7 @@
       },
       refresh : function(){
         var url = cmr.CONTEXT_ROOT + '/code/gcars_updt_queue_list.json';
-        CmrGrid.refresh('gcarsUpdtQueueGrid', url, 'sourceName=:sourceName');
+        CmrGrid.refresh('gcarsUpdtQueueGrid', url, 'sourceName=:sourceName&searchCriteria=:searchCriteria');
       }
     };
   })();
@@ -49,7 +51,12 @@
       
       <cmr:row topPad="8">
         <cmr:column span="2">
-          <cmr:label fieldId="sourceName">Source Name: 
+          <cmr:label fieldId="searchCriteria">Please select search criteria:</cmr:label>
+						<form:select dojoType="dijit.form.FilteringSelect" id="searchCriteria"
+							searchAttr="name" style="display: block;" maxHeight="200"
+							required="false" path="searchCriteria" placeHolder="Select Search Type">
+						</form:select>
+          <cmr:label fieldId="sourceName">Keyword: 
             <cmr:info text="Enter Source Name:"></cmr:info>
           </cmr:label>
           <input id="sourceName" name="sourceName" dojoType="dijit.form.TextBox" />

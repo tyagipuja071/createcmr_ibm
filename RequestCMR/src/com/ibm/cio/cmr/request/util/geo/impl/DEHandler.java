@@ -91,7 +91,6 @@ public class DEHandler extends GEOHandler {
         }
       }
     }
-
   }
 
   @SuppressWarnings("unchecked")
@@ -203,6 +202,7 @@ public class DEHandler extends GEOHandler {
 
   @Override
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = null;
     if (!StringUtils.isEmpty(addrType)) {
       if ("ZD02".equals(addrType)) {
         return "598";
@@ -210,11 +210,8 @@ public class DEHandler extends GEOHandler {
         return "599";
       }
     }
-
-    // CREATCMR-6139
     // return super.generateAddrSeq(entityManager, addrType, reqId,
     // cmrIssuingCntry);
-    String newAddrSeq = null;
     int addrSeq = 0;
     String maxAddrSeq = null;
     String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_CEE");
@@ -242,8 +239,6 @@ public class DEHandler extends GEOHandler {
 
     newAddrSeq = Integer.toString(addrSeq);
     return newAddrSeq;
-    // CREATCMR-6139
-
   }
 
   @Override
@@ -430,8 +425,8 @@ public class DEHandler extends GEOHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX",
-        "ADDR_TXT", "CUST_PHONE"));
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "POST_CD",
+        "LAND_CNTRY", "PO_BOX", "ADDR_TXT", "CUST_PHONE"));
     return fields;
   }
 
@@ -814,7 +809,7 @@ public class DEHandler extends GEOHandler {
             String inac = ""; // 8
             String ordBlk = ""; // 11
             String isuCd = ""; // 6
-            String clientTier = ""; // 8
+            String ctc = ""; // 8
 
             if (row.getRowNum() == 2001) {
               continue;
@@ -927,7 +922,7 @@ public class DEHandler extends GEOHandler {
               isuCd = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              clientTier = validateColValFromCell(currCell);
+              ctc = validateColValFromCell(currCell);
 
               if (!StringUtils.isBlank(isic) && !StringUtils.isBlank(classificationCd)
                   && ((!"9500".equals(isic) && "60".equals(classificationCd)) || ("9500".equals(isic) && !"60".equals(classificationCd)))) {
@@ -957,36 +952,41 @@ public class DEHandler extends GEOHandler {
                 // validations.add(error);
               }
 
-              List<String> isuBlankCtc = Arrays.asList("5K", "19", "3T", "4F", "21", "8B");
-              if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
-                LOG.trace("The row " + (row.getRowNum() + 1)
-                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Client Tier",
-                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
-              } else if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-                if (isuBlankCtc.contains(isuCd) && !clientTier.equalsIgnoreCase("@")) {
-                  LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + "\n");
-                } else if (isuCd.startsWith("34")) {
-                  if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
-                    LOG.trace("The row " + (row.getRowNum() + 1)
-                        + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), "Client Tier",
-                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
-                  }
-                } else if (!"@QY".contains(clientTier)) {
+              if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+              } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+                if (StringUtils.isBlank(ctc) || !"Q".contains(ctc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                      + ":Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+                      ":Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
+              } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+                if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + "Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+                if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
+                  && !"@".equalsIgnoreCase(ctc)) {
+                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
               }
             }
-          }
-          if (error.hasErrors()) {
-            validations.add(error);
-          }
-        } // end row loop
+            if (error.hasErrors()) {
+              validations.add(error);
+            }
+          } // end row loop
+        }
       }
     }
   }
@@ -1111,7 +1111,7 @@ public class DEHandler extends GEOHandler {
     }
     return name4;
   }
-  
+
   private DataRdc getOldData(EntityManager entityManager, String reqId) {
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
     PreparedQuery query = new PreparedQuery(entityManager, sql);

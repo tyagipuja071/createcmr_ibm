@@ -65,6 +65,16 @@ public class NetherlandsUtil extends AutomationUtil {
     String customerName = zs01.getCustNm1();
     String customerNameZP01 = "";
     String landedCountryZP01 = "";
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if (zs01 != null) {
+      String landCntry = zs01.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
+    }
     if (zp01 != null) {
       customerNameZP01 = StringUtils.isBlank(zp01.getCustNm1()) ? "" : zp01.getCustNm1();
       landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
@@ -164,10 +174,10 @@ public class NetherlandsUtil extends AutomationUtil {
       overrides.clearOverrides(); // clear existing overrides
 
       NLFieldsContainer fields = calculate32SValuesFromIMSNL(entityManager, requestData.getData());
-  
-        String commercialFinanced = calculateSortlByRepTeamCd(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(), data.getIsuCd(),
-            data.getClientTier());
-        if (StringUtils.isNotBlank(commercialFinanced)) {
+
+      String commercialFinanced = calculateSortlByRepTeamCd(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(), data.getIsuCd(),
+          data.getClientTier());
+      if (StringUtils.isNotBlank(commercialFinanced)) {
         details.append("Coverage calculated successfully using Sortl logic.").append("\n");
         details.append("SORTL : " + data.getCommercialFinanced()).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SORTL", data.getCommercialFinanced(), commercialFinanced);
@@ -184,7 +194,7 @@ public class NetherlandsUtil extends AutomationUtil {
         results.setResults("Cannot Calculate");
         results.setDetails(details.toString());
       }
-        
+
       if (fields != null) {
         details.append("Coverage calculated successfully using 32S logic.").append("\n");
         if (StringUtils.isNotBlank(fields.getEngineeringBO())) {
@@ -333,40 +343,46 @@ public class NetherlandsUtil extends AutomationUtil {
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
       case "VAT #":
-        if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
-          // ADD
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          String billToCntry = getBillToLandCntry(entityManager, requestData);
-          if (soldTo.getLandCntry().equals(billToCntry)) {
-            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-            boolean matchesDnb = false;
-            if (matches != null) {
-              // check against D&B
-              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-            }
-            if (!matchesDnb) {
-              cmdeReview = true;
-              engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
-              details.append("VAT # on the request did not match D&B\n");
+        if (requestData.getAddress("ZS01").getLandCntry().equals("GB")) {
+          if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)) {
+            engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+            details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+          }
+        } else {
+          if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+            // ADD
+            Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+            String billToCntry = getBillToLandCntry(entityManager, requestData);
+            if (soldTo.getLandCntry().equals(billToCntry)) {
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+              boolean matchesDnb = false;
+              if (matches != null) {
+                // check against D&B
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+              }
+              if (!matchesDnb) {
+                cmdeReview = true;
+                engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
+                details.append("VAT # on the request did not match D&B\n");
+              } else {
+                details.append("VAT # on the request matches D&B\n");
+              }
             } else {
-              details.append("VAT # on the request matches D&B\n");
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "Sold to and Bill to have different landed country.");
             }
-          } else {
+          }
+
+          if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
+              && !(change.getOldData().equals(change.getNewData()))) {
+            // UPDATE
             cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "Sold to and Bill to have different landed country.");
+            engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT updation requires cmde review.");
+          }
+          if (StringUtils.isBlank(change.getNewData()) && !StringUtils.isBlank(change.getOldData())) {
+            // noop
           }
         }
-
-        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
-            && !(change.getOldData().equals(change.getNewData()))) {
-          // UPDATE
-          cmdeReview = true;
-          engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT updation requires cmde review.");
-        }
-        if (StringUtils.isBlank(change.getNewData()) && !StringUtils.isBlank(change.getOldData())) {
-          // noop
-        }
-
         break;
       case "ISIC":
       case "INAC/NAC Code":
@@ -479,7 +495,8 @@ public class NetherlandsUtil extends AutomationUtil {
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
     Addr zs01 = requestData.getAddress("ZS01");
-//    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
+    // boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager,
+    // requestData.getAdmin().getSourceSystId());
     LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
@@ -511,7 +528,7 @@ public class NetherlandsUtil extends AutomationUtil {
                 // check against D&B
                 matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
               }
-             
+
               if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                 resultCodes.add("D");
@@ -574,14 +591,13 @@ public class NetherlandsUtil extends AutomationUtil {
                       checkDetails
                           .append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing Bill-To address.\n");
                       resultCodes.add("D");
-                    } 
-                    else {
+                    } else {
                       LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                       checkDetails.append(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")" + "with same attentionTo");
                       checkDetails
                           .append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ") validated in the checks.\n");
 
-                   }
+                    }
                   } else {
                     checkDetails
                         .append("Updates to address fields for" + addrType + "(" + addr.getId().getAddrSeq() + ") validated in the checks.\n");
@@ -732,7 +748,7 @@ public class NetherlandsUtil extends AutomationUtil {
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M", "D", "R");
   }
-  
+
   public String calculateSortlByRepTeamCd(EntityManager entityManager, String cmrIssuingctry, String countryUse, String isuCd, String clientTier) {
     List<Object[]> commercialFinancedResults = new ArrayList<>();
     String commercialFinanced = "";

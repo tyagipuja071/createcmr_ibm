@@ -971,12 +971,13 @@ public class ATService extends TransConnService {
 
           updateEntity(admin, entityManager);
 
+          WfHist history = null;
           if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
             RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
                 "Some errors occurred during RDc processing. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
                 "CPR".equals(admin.getReqStatus()));
           } else {
-            RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
+            history = RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
                 "RDc  Processing has been completed(First batch run). Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
                 "CPR".equals(admin.getReqStatus()));
           }
@@ -984,6 +985,10 @@ public class ATService extends TransConnService {
           partialCommit(entityManager);
           LOG.debug(
               "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
+
+          if ("CPR".equals(admin.getReqStatus())) {
+            RequestUtils.sendEmailNotifications(entityManager, admin, history, false, false);
+          }
 
         } catch (Exception e) {
           LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
@@ -996,7 +1001,7 @@ public class ATService extends TransConnService {
         if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
           noOFWorkingHours = checked2WorkingDays(admin.getRdcProcessingTs(), SystemUtil.getCurrentTimestamp());
         }
-        if (noOFWorkingHours >= 48) {
+        if (noOFWorkingHours >= 24) {
           lockRecordUpdt(entityManager, admin);
           LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
           try {
@@ -1903,10 +1908,19 @@ public class ATService extends TransConnService {
               if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
                 comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
                     + " was SUCCESSFULLY processed:\n");
+                LOG.info("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
+                    + " was SUCCESSFULLY processed:\n");
                 for (RDcRecord pRecord : response.getRecords()) {
-                  comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
-                  comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  if (comment.length() > 9900) {
+                    LOG.info("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    LOG.info(" address type: " + pRecord.getAddressType() + "\n");
+                  } else {
+                    comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  }
+
                 }
+
               }
             } else {
               comment.append("RDc records were not processed.");
