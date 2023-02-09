@@ -208,7 +208,7 @@ function processRequestAction() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
       	if(matchOverrideIndc=='Y') {
-      	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
+      	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN') {
             cmr.showProgress('Checking request data..');
             checkRetrievedForNZ();
           } else {
@@ -1255,7 +1255,7 @@ function connectToCmrServices() {
         var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   		var reqType = FormManager.getActualValue('reqType');
   		var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST')) {
+        if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
           setClusterIDAfterRetrieveAction(data.glcCode);
         }
         if(cmrCntry == SysLoc.CHINA && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='ECOSY')) {
@@ -2594,7 +2594,7 @@ function matchDnBForNZ() {
               console.log("DNB name match and DNB address match.");
               if(data.isicMatch) {
                 console.log("ISIC match.");
-                if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
+                if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN') {
                   checkRetrievedForNZ();
                 } else {
                   showAddressVerificationModal();
@@ -2626,7 +2626,7 @@ function matchDnBForNZ() {
             	  FormManager.setValue('matchOverrideIndc', 'Y');
             	} else {
             	  console.log('Customer name and address matched in NZAPI');
-            	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
+            	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN') {
                     checkRetrievedForNZ();
                   } else {
                     showAddressVerificationModal();
@@ -2642,7 +2642,7 @@ function matchDnBForNZ() {
             	  FormManager.setValue('matchOverrideIndc', 'Y');
             	} else {
             	  console.log('Customer name and address mismatch in NZAPI');
-            	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
+            	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN') {
                      checkRetrievedForNZ();
                   } else {
                     showAddressVerificationModal();
