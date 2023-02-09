@@ -5689,7 +5689,7 @@ function addCovBGValidator() {
       validate : function() {
         var reqType = FormManager.getActualValue('reqType');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST')) {
+        if (reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
           var result = FormManager.getActualValue('covBgRetrievedInd');
           if (result == '' || result.toUpperCase() != 'Y') {
             return new ValidationResult(null, false, 'Coverage/Buying Group/GLC/DUNS values have not been retrieved yet.');
@@ -6248,7 +6248,7 @@ function lockClusterFieldsOnScenarioChange(scenario, scenarioChanged) {
   
   var lockClusterScenarios = [];
   if(cntry == '796') {
-    lockClusterScenarios = ['NRMLC', 'AQSTN', 'XAQST'];
+    lockClusterScenarios = ['NRMLC', 'AQSTN'];
   }
   
   if(scenarioChanged && reqType == 'C' && lockClusterScenarios.includes(scenario)) {
