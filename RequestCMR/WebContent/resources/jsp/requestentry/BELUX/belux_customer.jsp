@@ -86,7 +86,7 @@
 			<cmr:label fieldId="modeOfPayment">
 				<cmr:fieldLabel fieldId="ModeOfPayment" />: 
 			</cmr:label>
-			<cmr:field path="paymentMode" id="modeOfPayment" fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />		 
+			<cmr:field path="modeOfPayment" id="modeOfPayment" fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />		 
 		 </p>
 		</cmr:column>
 	  </c:if>
