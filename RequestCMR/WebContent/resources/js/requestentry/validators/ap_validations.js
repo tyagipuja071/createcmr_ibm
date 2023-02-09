@@ -7263,16 +7263,14 @@ function setInacCdTypeStatus(){
 function setClusterGlcCovIdMapNrmlc() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var glc = FormManager.getActualValue('geoLocationCd');
   var covId = FormManager.getActualValue('covId');
   if (custSubGrp == "NRMLC") {
     var glc = FormManager.getActualValue('geoLocationCd');
     var covId = FormManager.getActualValue('covId');
     var qParams = {
         TXT : glc,
-        CMT : covId
       };
-    var cluster = cmr.query('GET_CLUSTER_BY_GLC_COVID', qParams);
+    var cluster = cmr.query('GET_CLUSTER_BY_GLC', qParams);
     if (cluster != null && cluster.ret1) {
       FormManager.setValue('apCustClusterId', cluster.ret1);
       FormManager.readOnly('apCustClusterId');
