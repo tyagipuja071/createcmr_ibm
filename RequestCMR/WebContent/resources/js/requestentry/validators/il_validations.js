@@ -2591,14 +2591,10 @@ function validateIsuClientTier(isuCd, ctc) {
   var isuCtc = isuCd + clientTier;
   var isuCtcEnterprise = isuCtc + enterprise;
 
-  FormManager.removeValidator('isuCd', Validators.REQUIRED);
   FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  FormManager.removeValidator('enterprise', Validators.REQUIRED);
   
-  if (custSubGroup == '') {
+  if (custSubGroup == '' || isuCd == '') {
     return new ValidationResult(null, true);
-  } else if (!isuCdSet.has(isuCd) && !custSubGroupSet.has(custSubGroup)) {
-    return 'ISU can only accept \'34\', \'36\', \'5K\', \'32\'.';
   } else if (isuCdSet1.has(isuCd) && clientTier != '') {
     return 'Client Tier can only accept blank.';
   } else if (isuCd == '34' && clientTier != 'Q') {
@@ -2613,7 +2609,7 @@ function validateIsuClientTier(isuCd, ctc) {
     return 'Enterprise can only accept \'006510\'.';
   } else if (isuCd == '32' && enterprise != '985985') {
     return 'Enterprise can only accept \'985985\'.';
-  } else if (isuCd == '36' && (enterprise != '003290' || enterprise != '010023')) {
+  } else if (isuCd == '36' && enterprise != '003290' && enterprise != '010023') {
     return 'Enterprise can only accept \'003290\', \'010023\'.';
   } 
   
