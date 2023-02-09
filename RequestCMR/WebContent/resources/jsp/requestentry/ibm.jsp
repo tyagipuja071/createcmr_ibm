@@ -225,7 +225,7 @@ dojo.addOnLoad(function(){
       
       <cmr:column span="2" containerForField="IndustryClass" forCountry="858" >
         <p>
-          <label style="">IndustryClass:${reqentry.subIndustryCd}</label>
+          <label style="">IndustryClass:</label>
           <input type="text" id="IndustryClass" name ="IndustryClass" value="${fn:substring(reqentry.subIndustryCd, 0, 1)}" readonly="readonly" style="width:15px;BACKGROUND: #FFFFEE;border: 1px Solid #DDDDDD"/>
         </p>
       </cmr:column>
