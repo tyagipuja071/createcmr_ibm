@@ -777,8 +777,8 @@ function commentImgFormatter(value, rowIndex) {
   }
   if (value.indexOf('@') > 0) {
     if (value.indexOf('ibm.com') > 0) {
-      return '<img title="' + value + '" src="https://w3-unifiedprofile-api.dal1a.cirrus.ibm.com/v3/image/' + value + '" class="cmt-img" onerror="this.onerror=null; this.src=\''
-          + cmr.CONTEXT_ROOT + '/resources/images/person.jpg\'">';
+      return '<img title="' + value + '" src="https://w3-unifiedprofile-api.dal1a.cirrus.ibm.com/v3/image/' + value + '" class="cmt-img" onerror="this.onerror=null; this.src=\'' + cmr.CONTEXT_ROOT
+          + '/resources/images/person.jpg\'">';
     } else {
       return '<img title="' + value + '" src="' + cmr.CONTEXT_ROOT + '/resources/images/person.jpg" class="cmt-img">';
     }
@@ -1207,6 +1207,11 @@ function connectToCmrServices() {
     // FormManager.setValue('dunsNo', '');
   }
   FormManager.setValue('covBgRetrievedInd', 'Y');
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cmrCntry == '744') {
+    setClusterGlcCovIdMapNrmlc();
+    lockFieldsWithDefaultValuesByScenarioSubType();
+  }
 }
 
 /**
@@ -1572,32 +1577,32 @@ function setRejSupplInfoFields(value) {
     dojo.byId('rejInfo1Label').innerText = "CMR No.";
     dojo.byId('rejInfo2Label').innerText = "Sold-to KUNNR";
     FormManager.readOnly('rejSupplInfo2');
-  break;
+    break;
   case "MDOC":
     cmr.showNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Missing Document";
-  break;
+    break;
   case "MAPP":
     cmr.showNode('rejInfo1Div');
     cmr.showNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Approval Type";
     dojo.byId('rejInfo2Label').innerText = "Approver";
-  break;
+    break;
   case "DUPR":
     cmr.showNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Other Request Id";
-  break;
+    break;
   case "TYPR":
     cmr.showNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Correct Type";
-  break;
+    break;
   default:
     cmr.hideNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
-  break;
+    break;
   }
 }
 
