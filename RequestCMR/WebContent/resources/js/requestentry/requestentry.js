@@ -189,7 +189,7 @@ function processRequestAction() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
       	if(matchOverrideIndc=='Y') {
-      	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
+      	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN') {
             cmr.showProgress('Checking request data..');
             checkRetrievedForNZ();
           } else {
@@ -1184,7 +1184,7 @@ function connectToCmrServices() {
         var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   		  var reqType = FormManager.getActualValue('reqType');
   		  var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST')) {
+        if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
           setClusterIDAfterRetrieveAction(data.glcCode);
         }
         if(cmrCntry == SysLoc.CHINA && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='ECOSY')) {
