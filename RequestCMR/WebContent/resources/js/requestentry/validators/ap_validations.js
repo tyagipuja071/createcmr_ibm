@@ -5271,7 +5271,7 @@ function setDefaultValueForNZCreate(){
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'T']);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '32']);
       
-      FormManager.setValue('apCustClusterId', '10114');
+      // FormManager.setValue('apCustClusterId', '10114');
       FormManager.setValue('clientTier', 'T');
       FormManager.setValue('isuCd', '32');
       
@@ -5326,7 +5326,7 @@ function setDefaultValueForNZCreate(){
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01147','09056','08037','10114','10115','10116','10662','10663' ]);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q','0','Y','T' ]);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34','5K','36','32' ]);
-      FormManager.setValue('apCustClusterId', '01147');
+      // FormManager.setValue('apCustClusterId', '01147');
       FormManager.setValue('clientTier', 'Q');
       FormManager.setValue('isuCd', '34');
       
@@ -5362,7 +5362,9 @@ function setDefaultValueForNZCreate(){
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '00002','01147','09056','08037','10114','10115','10116','10662','10663' ]);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Z','Q','0','Y','T' ]);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34','5K','36','32' ]);
-      FormManager.setValue('apCustClusterId', '00002');
+      if(_pagemodel.apCustClusterId == null){        
+        FormManager.setValue('apCustClusterId', '00002');
+      }
       FormManager.setValue('clientTier', 'Z');
       FormManager.setValue('isuCd', '34');
       // MRC = 3 - lock field
@@ -5422,7 +5424,7 @@ function setDefaultValueForNZCreate(){
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '01147','09056','08037','10114','10115','10116','10662','10663' ]);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q','0','Y','T' ]);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34','5K','36','32' ]);
-      FormManager.setValue('apCustClusterId', '01147');
+      // FormManager.setValue('apCustClusterId', '01147');
       FormManager.setValue('clientTier', 'Q');
       FormManager.setValue('isuCd', '34');
       
@@ -6218,6 +6220,9 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
 	  // CREATCMR-7884
     if(cntry == '796') {
       clearClusterFieldsScenarios = ['ESOSW', 'NRML', 'NRMLC', 'AQSTN', 'XAQST', 'XESO' ];
+      if(scenario =='CROSS' && scenarioChanged){        
+        FormManager.setValue('apCustClusterId', '00002');
+      }
     }
     
     if(scenarioChanged && clearClusterFieldsScenarios.includes(scenario)) {
