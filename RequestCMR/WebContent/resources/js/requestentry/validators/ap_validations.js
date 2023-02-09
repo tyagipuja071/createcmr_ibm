@@ -7265,7 +7265,7 @@ function setClusterGlcCovIdMapNrmlc() {
     var qParams = {
         TXT : glc,
       };
-    var cluster = cmr.query('GET_CLUSTER_BY_GLC_COVID', qParams);
+    var cluster = cmr.query('GET_CLUSTER_BY_GLC', qParams);
     if (cluster != null && cluster.ret1) {
       FormManager.setValue('apCustClusterId', cluster.ret1);
       FormManager.readOnly('apCustClusterId');
