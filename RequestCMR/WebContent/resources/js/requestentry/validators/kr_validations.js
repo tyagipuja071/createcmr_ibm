@@ -14,7 +14,6 @@ function afterConfigKR() {
     FormManager.resetDropdownValues(FormManager.getField('searchTerm'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-    FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.setValue('inacType','');
     FormManager.setValue('inacCd','');
     FormManager.enable('searchTerm');
