@@ -194,17 +194,31 @@ function setSearchTermByGBGId() {
           var record = cmr.query('GETZS01STATEBYREQID', qParams);
           var zs01State = record.ret1;
           if (zs01State != '') {
-            if(zs01State == '52'||zs01State == '53'||zs01State == '44'||zs01State == '51'||zs01State == '50'||zs01State == '45'||zs01State == '46'){
+//            if(zs01State == '52'||zs01State == '53'||zs01State == '44'||zs01State == '51'||zs01State == '50'||zs01State == '45'||zs01State == '46'){
+//              FormManager.setValue('searchTerm', '04749');
+//              FormManager.setValue('bgId', 'DB002KDH');
+//            }else if(zs01State == '15'||zs01State == '61'||zs01State == '13'||zs01State == '21'||zs01State == '64'||zs01State == '11'||zs01State == '62'||
+//                zs01State == '63'||zs01State == '41'||zs01State == '12'||zs01State == '23'||zs01State == '65'||zs01State == '22'||zs01State == '54'||zs01State == '14'){
+//              FormManager.setValue('searchTerm', '04749');
+//              FormManager.setValue('bgId', 'DB002CBD');
+//            }else if(zs01State == '32'||zs01State == '36'||zs01State == '34'){
+//              FormManager.setValue('searchTerm', '04749');
+//              FormManager.setValue('bgId', 'DB002C9T');
+//            }else if(zs01State == '33'||zs01State == '42'||zs01State == '43'||zs01State == '31'||zs01State == '35'||zs01State == '37'){
+//              FormManager.setValue('searchTerm', '04749');
+//              FormManager.setValue('bgId', 'DB002CF1');
+//            }
+            if(zs01State == 'GZ'||zs01State == 'YN'||zs01State == 'GD'||zs01State == 'SC'||zs01State == 'CQ'||zs01State == 'GX'||zs01State == 'HI'){
               FormManager.setValue('searchTerm', '04749');
               FormManager.setValue('bgId', 'DB002KDH');
-            }else if(zs01State == '15'||zs01State == '61'||zs01State == '13'||zs01State == '21'||zs01State == '64'||zs01State == '11'||zs01State == '62'||
-                zs01State == '63'||zs01State == '41'||zs01State == '12'||zs01State == '23'||zs01State == '65'||zs01State == '22'||zs01State == '54'||zs01State == '14'){
+            }else if(zs01State == 'NM'||zs01State == 'SN'||zs01State == 'HE'||zs01State == 'LN'||zs01State == 'NX'||zs01State == 'BJ'||zs01State == 'GS'||
+                zs01State == 'QH'||zs01State == 'HA'||zs01State == 'TJ'||zs01State == 'HL'||zs01State == 'XJ'||zs01State == 'JL'||zs01State == 'XZ'||zs01State == 'SX'){
               FormManager.setValue('searchTerm', '04749');
               FormManager.setValue('bgId', 'DB002CBD');
-            }else if(zs01State == '32'||zs01State == '36'||zs01State == '34'){
+            }else if(zs01State == 'JS'||zs01State == 'JX'||zs01State == 'AH'){
               FormManager.setValue('searchTerm', '04749');
               FormManager.setValue('bgId', 'DB002C9T');
-            }else if(zs01State == '33'||zs01State == '42'||zs01State == '43'||zs01State == '31'||zs01State == '35'||zs01State == '37'){
+            }else if(zs01State == 'ZJ'||zs01State == 'HB'||zs01State == 'HN'||zs01State == 'SH'||zs01State == 'FJ'||zs01State == 'SD'){
               FormManager.setValue('searchTerm', '04749');
               FormManager.setValue('bgId', 'DB002CF1');
             }
@@ -3893,6 +3907,16 @@ function retrievedForCNValidator() {
                       }
                       return new ValidationResult(null, true);
                     }
+                   } else if(custSubGrp=='ECOSY'){
+                     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
+                     FormManager.setValue('searchTerm', '08036');
+                     FormManager.readOnly('searchTerm');
+                     FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
+                     FormManager.setValue('clientTier', 'Y');
+                     FormManager.readOnly('clientTier');
+                     FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
+                     FormManager.setValue('isuCd', '36');
+                     FormManager.readOnly('isuCd');
                    } else {
                        console.log("The GLC code call the searchTerm fail , please check db.")
                        return new ValidationResult(null, true);
