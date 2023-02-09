@@ -212,10 +212,10 @@ function processRequestAction() {
             cmr.showProgress('Checking request data..');
             checkRetrievedForNZ();
           } else {
-            cmr.showModal('addressVerificationModal');
+            showAddressVerificationModal();
           }
       	} else {
-      	  cmr.showModal('addressVerificationModal');
+      	  showAddressVerificationModal();
       	}
       } else if (cmrCntry == '897' || cmrCntry == '649') {
         // CREATCMR-6074
@@ -2597,7 +2597,7 @@ function matchDnBForNZ() {
                 if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
                   checkRetrievedForNZ();
                 } else {
-                  cmr.showModal('addressVerificationModal');
+                  showAddressVerificationModal();
                 }
               } else {
                 console.log("ISIC mismatch.");
@@ -2629,7 +2629,7 @@ function matchDnBForNZ() {
             	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
                     checkRetrievedForNZ();
                   } else {
-                    cmr.showModal('addressVerificationModal');
+                    showAddressVerificationModal();
                   }
             	}
               } else if (!data.dnbAddrMatch && data.isicMatch) {
@@ -2645,7 +2645,7 @@ function matchDnBForNZ() {
             	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='XAQST') {
                      checkRetrievedForNZ();
                   } else {
-                    cmr.showModal('addressVerificationModal');
+                    showAddressVerificationModal();
                   }
             	}
               } else {
@@ -2758,7 +2758,7 @@ function checkRetrievedForNZ(){
 	          FormManager.setValue('geoLocationCd', data.glcCode);
 	    	  FormManager.setValue('geoLocDesc', data.glcDesc);
 	        }
-	        cmr.showModal('addressVerificationModal');
+	        showAddressVerificationModal();
           }
         }
       }
