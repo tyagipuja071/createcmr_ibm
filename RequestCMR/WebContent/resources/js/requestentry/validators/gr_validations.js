@@ -2676,5 +2676,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.GREECE ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.GREECE ], null, true);
-
+  GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE ]);
 });
