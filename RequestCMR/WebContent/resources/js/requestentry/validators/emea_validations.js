@@ -8092,22 +8092,126 @@ function validateSalesRepForUKI() {
             name : 'repTeamMemberNo'
           }, false, 'The Sales Rep should be six characters long');
         }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-
-  // validate SalesRep Characters and numbers only
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var salesRep = FormManager.getActualValue('repTeamMemberNo');
         if (salesRep != undefined && salesRep != '' && !salesRep.match("^[0-9a-zA-Z]*$")) {
           return new ValidationResult({
             id : 'repTeamMemberNo',
             type : 'text',
             name : 'repTeamMemberNo'
           }, false, 'The Sales Rep should consist of digits and alphabets only');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function validateSboSrForIsuCtcUK() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isu = FormManager.getActualValue('isuCd');
+        var ctc = FormManager.getActualValue('clientTier');
+        var isuCTC = isu.concat(ctc);
+        var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
+        var salRep = FormManager.getActualValue('repTeamMemberNo');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var reqType = FormManager.getActualValue('reqType');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (custSubGrp == null || custSubGrp == '' || custSubGrp == undefined || reqType != 'C') {
+          return new ValidationResult(null, true);
+        }
+
+        var isuCtcList = [ '3T', '04', '05', '5K', '11', '12', '15', '18', '21', '28', '32T', '34Q', '36Y' ];
+
+        if (!isuCtcList.includes(isuCTC) || sbo == null || sbo == '' || sbo == undefined || salRep == null || salRep == '' || salRep == undefined) {
+          return new ValidationResult(null, true);
+        }
+
+        var qParams = {
+          _qall : 'Y',
+          CNTRY : cntry,
+          SBO : sbo,
+          SALES_REP : salRep,
+          ISU : isu,
+          CTC : ctc
+        };
+        var results = cmr.query('UK.GET.SBOSR_FOR_ISU_CTC', qParams);
+        var displayInvalidMsg = true;
+
+        if (results != null && results.length > 0) {
+          displayInvalidMsg = false;
+        }
+
+        if (displayInvalidMsg) {
+          return new ValidationResult({
+            id : 'salesBusOffCd',
+            type : 'text',
+            name : 'salesBusOffCd'
+          }, false, 'Please enter the valid combination of ISU, ClientTier, SBO and Sales Rep.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function validateSboSrForIsuCtcIE() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isu = FormManager.getActualValue('isuCd');
+        var ctc = FormManager.getActualValue('clientTier');
+        var isuCTC = isu.concat(ctc);
+        var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
+        var salRep = FormManager.getActualValue('repTeamMemberNo');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var scenario = FormManager.getActualValue('custGrp');
+        var reqType = FormManager.getActualValue('reqType');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (custSubGrp == null || custSubGrp == '' || custSubGrp == undefined || reqType != 'C') {
+          return new ValidationResult(null, true);
+        }
+        var isuCtcList = [ '5K', '21', '32T', '34Q', '36Y' ];
+        if (!isuCtcList.includes(isuCTC) || sbo == null || sbo == '' || sbo == undefined || salRep == null || salRep == '' || salRep == undefined) {
+          return new ValidationResult(null, true);
+        }
+
+        if (isuCTC == '34Q') {
+          if (getZS01LandCntry() == 'GB' && scenario == 'CROSS' && (sbo != '057' || salRep != 'SPA057')) {
+            return new ValidationResult({
+              id : 'salesBusOffCd',
+              type : 'text',
+              name : 'salesBusOffCd'
+            }, false, 'Please enter the valid combination of ISU, ClientTier, SBO and Sales Rep.');
+          } else if (getZS01LandCntry() != 'GB' && (sbo != '090' || salRep != 'MMIR11')) {
+            return new ValidationResult({
+              id : 'salesBusOffCd',
+              type : 'text',
+              name : 'salesBusOffCd'
+            }, false, 'Please enter the valid combination of ISU, ClientTier, SBO and Sales Rep.');
+          }
+        } else {
+          var qParams = {
+            _qall : 'Y',
+            CNTRY : cntry,
+            SBO : sbo,
+            SALES_REP : salRep,
+            ISU : '%' + isuCTC + '%'
+          };
+          var results = cmr.query('IE.GET.SBOSR_FOR_ISU_CTC', qParams);
+          var displayInvalidMsg = true;
+
+          if (results != null && results.length > 0) {
+            displayInvalidMsg = false;
+          }
+
+          if (displayInvalidMsg) {
+            return new ValidationResult({
+              id : 'salesBusOffCd',
+              type : 'text',
+              name : 'salesBusOffCd'
+            }, false, 'Please enter the valid combination of ISU, ClientTier, SBO and Sales Rep.');
+          }
         }
         return new ValidationResult(null, true);
       }
@@ -10389,6 +10493,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierBasedOnIsuUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(setClientTierBasedOnIsuUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   // CREATCMR-1727
-  GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
-  GEOHandler.registerValidator(validateSalesRepForUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.registerValidator(validateSalesRepForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(validateSboSrForIsuCtcUK, [ SysLoc.UK ], null, true);
+  GEOHandler.registerValidator(validateSboSrForIsuCtcIE, [ SysLoc.IRELAND ], null, true);
 });
