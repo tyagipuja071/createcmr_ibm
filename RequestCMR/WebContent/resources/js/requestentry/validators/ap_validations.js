@@ -36,6 +36,7 @@ function addHandlersForAP() {
       setIsuOnIsic();
       
       filterInacCd('744','10215','NAC','I529');  
+      applyClusterFilters();
       lockInacFieldsByCluster('744', ['10654', '10655', '10656', '10657']);
       lockFieldsWithDefaultValuesByScenarioSubType();
     });
@@ -274,6 +275,7 @@ function addAfterConfigAP() {
     setInacByCluster();
     setInacNacValuesIN();
     filterInacCd('744','10215','NAC','I529');
+    applyClusterFilters();
     lockInacFieldsByCluster('744', ['10654', '10655', '10656', '10657']);
   }
   // CREATCMR-5258
@@ -941,15 +943,17 @@ function onCustSubGrpChange() {
     }
     
     resetFieldsAfterCustSubGrpChange();
-    
-    filterAvailableClustersByScenarioSubType('744', ['ECOSY'], [ '10654', '10655', '10656', '10657' ]);
-    filterAvailableClustersByScenarioSubType('744', ['NRML' ], [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215']);
-    filterAvailableClustersByScenarioSubType('744', ['ESOSW'], [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215','10654', '10655', '10656', '10657']);    
-    filterAvailableClustersByScenarioSubType('744', ['KYNDR'], [ '09062' ]);
-    filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV', 'INTER'], [ '2D999' ]);
-    
+    applyClusterFilters();    
     lockFieldsWithDefaultValuesByScenarioSubType();
   });
+}
+
+function applyClusterFilters() {
+  filterAvailableClustersByScenarioSubType('744', ['ECOSY'], [ '10654', '10655', '10656', '10657' ]);
+  filterAvailableClustersByScenarioSubType('744', ['NRML' ], [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215']);
+  filterAvailableClustersByScenarioSubType('744', ['ESOSW'], [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215','10654', '10655', '10656', '10657']);    
+  filterAvailableClustersByScenarioSubType('744', ['KYNDR'], [ '09062' ]);
+  filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV', 'INTER'], [ '2D999' ]);
 }
 
 function resetFieldsAfterCustSubGrpChange() {
@@ -984,6 +988,7 @@ function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrpArray,
   var actualCustSubGrp = FormManager.getActualValue('custSubGrp');
   
   if (actualCmrIssuCntry == cmrIssuCntry && custSubGrpArray.includes(actualCustSubGrp)) {
+    FormManager.resetDropdownValues(FormManager.getField('apCustClusterId'));
     FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), clusterArray);
     if (clusterArray.length == 1) {
       FormManager.setValue('apCustClusterId', clusterArray[0]);
@@ -2012,7 +2017,8 @@ function onIsicChange() {
       var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
       var oldISIC = result.ret1;
       if (custSubGrp == '' || custSubGrp == 'AQSTN' || custSubGrp == 'BLUMX' || custSubGrp == 'ESOSW' || custSubGrp == 'ECSYS' || custSubGrp == 'MKTPC' || custSubGrp == 'NRML' || custSubGrp == 'NRMLC'
-          || custSubGrp == 'CROSS' || custSubGrp == 'SPOFF' || custSubGrp == 'XBLUM' || custSubGrp == 'XAQST' || custSubGrp == 'XMKTP' || custSubGrp == 'BUSPR' || custSubGrp == 'ASLOM' || custSubGrp == 'KYND') {
+          || custSubGrp == 'CROSS' || custSubGrp == 'SPOFF' || custSubGrp == 'XBLUM' || custSubGrp == 'XAQST' || custSubGrp == 'XMKTP' || custSubGrp == 'BUSPR' || custSubGrp == 'ASLOM' || custSubGrp == 'KYND'
+          || custSubGrp == 'ECOSY' || custSubGrp == 'KYNDR') {
         FormManager.setValue('isicCd', oldISIC);
         FormManager.readOnly('isicCd');
       } else if (custSubGrp == 'INTER' || custSubGrp == 'PRIV' || custSubGrp == 'XPRIV' || custSubGrp == 'DUMMY' || custSubGrp == 'IGF') {
@@ -2466,7 +2472,14 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
         apClientTierValue.push(results[i].ret1);
         isuCdValue.push(results[i].ret2);
       }  
-      if (apClientTierValue.length == 1) {
+      if (scenario == 'LOCAL' && custSubGrp == 'INTER'){
+        FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+        FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
+        FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
+        FormManager.setValue('clientTier','0');
+        FormManager.setValue('isuCd','60');
+      }
+      else if (apClientTierValue.length == 1) {
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
         FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
         FormManager.setValue('clientTier', apClientTierValue[0]);
