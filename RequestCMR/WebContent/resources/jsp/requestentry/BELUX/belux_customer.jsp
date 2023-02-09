@@ -79,7 +79,6 @@
           <cmr:field path="ibmDeptCostCenter" id="ibmDeptCostCenter" fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
-      
       <c:if test="${reqentry.reqType == 'U'}">
 		<cmr:column span="2" containerForField="ModeOfPayment">
 		 <p>
