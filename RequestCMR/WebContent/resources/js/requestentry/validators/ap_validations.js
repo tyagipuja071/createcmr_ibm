@@ -2355,7 +2355,7 @@ function updateMRCAseanAnzIsa() {
   var scenario = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var aseanCntries = ['852', '818', '856', '643', '778', '749', '834'];
+  var aseanCntries = ['852', '818', '856', '643', '778', '749'];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var _isuCd = FormManager.getActualValue('isuCd');
   var _clientTier = FormManager.getActualValue('clientTier');
