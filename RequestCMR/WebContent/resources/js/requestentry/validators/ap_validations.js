@@ -280,7 +280,7 @@ function addAfterConfigAP() {
     }
     
     // CREATCMR-7883: set Cluster '00001' as default code
-    if (cntry == SysLoc.AUSTRALIA && custSubGrp == "CROSS") {
+    if (cntry == SysLoc.AUSTRALIA && custSubGrp == "CROSS" && _pagemodel.apCustClusterId == null) {
       FormManager.setValue('apCustClusterId', "00001");
     }
   }
@@ -7093,6 +7093,9 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
 
     if(cntry == '616') {
       clearClusterFieldsScenarios = ['ESOSW', 'NRML' ];
+      if(scenario =='CROSS' && scenarioChanged){        
+        FormManager.setValue('apCustClusterId', '00001');
+      }
     }
 
     if(cntry == '834') {
