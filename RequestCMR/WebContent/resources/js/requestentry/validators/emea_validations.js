@@ -8224,6 +8224,7 @@ function validateSboSrForIsuCtcIE() {
 }
 
 function fetchSboSrForIsuCtcIE(cntry, sbo, salRep, isuCTC) {
+  console.log(">>>> fetchSboSrForIsuCtcIE");
   var results = null;
   var qParams = {
     _qall : 'Y',
@@ -8237,6 +8238,7 @@ function fetchSboSrForIsuCtcIE(cntry, sbo, salRep, isuCTC) {
 }
 
 function fetchSboSrForIsuCtcUK(cntry, sbo, salRep, isu, ctc) {
+  console.log(">>>> fetchSboSrForIsuCtcUK");
   var results = null;
   var qParams = {
     _qall : 'Y',
