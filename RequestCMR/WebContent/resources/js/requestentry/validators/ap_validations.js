@@ -1324,10 +1324,12 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
       
-      FormManager.setValue('inacCd', '');
-      FormManager.readOnly('inacCd');
-      FormManager.setValue('inacType', '');
-      FormManager.readOnly('inacType');
+      if(['IGF', 'PRIV'].includes(custSubGrp)) {
+        FormManager.setValue('inacCd', '');
+        FormManager.readOnly('inacCd');
+        FormManager.setValue('inacType', '');
+        FormManager.readOnly('inacType');
+      }      
       
     } else if (['ECOSY'].includes(custSubGrp)) {
       FormManager.setValue('mrcCd', '3');
@@ -7572,4 +7574,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
   GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
   GEOHandler.registerValidator(validateRetrieveValues, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(applyClusterFilters, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterConfig(applyClusterFilters, [ SysLoc.INDIA ]);
 });
