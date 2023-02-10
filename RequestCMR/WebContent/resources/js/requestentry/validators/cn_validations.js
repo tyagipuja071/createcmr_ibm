@@ -87,7 +87,7 @@ function setSearchTermList(){
       '10249','10250','10251','10252','10253','10254','10255','10256','10257','10258','10259','10260','10158','10159','10160','10161',
       '10162','10163','10164','10165','10166','10167','10168','10169','10170','10171'
  ]);
-    if(FormManager.getActualValue('searchTerm') != 'undefined' && FormManager.getActualValue('searchTerm') == ''){
+    if(FormManager.getActualValue('searchTerm') != undefined && FormManager.getActualValue('searchTerm') == ''){
       FormManager.setValue('searchTerm', '00000');
     }
   } else if (custSubType == 'KYND') {
@@ -146,7 +146,7 @@ function setSearchTermList(){
 
 function setSearchTermByGBGId() {
   var _GBGId = FormManager.getActualValue('gbgId');
-  if (FormManager.getActualValue('gbgId') != 'undefined' && FormManager.getActualValue('gbgId') != '') {
+  if (FormManager.getActualValue('gbgId') != undefined && FormManager.getActualValue('gbgId') != '') {
   var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
     ID : _GBGId
   });
@@ -187,7 +187,7 @@ function setSearchTermByGBGId() {
       FormManager.setValue('searchTerm', '10171');
     }else if(_GBGId == 'GB300S7F'){
       var zs01ReqId = FormManager.getActualValue('reqId');
-      if (zs01ReqId != 'undefined' && zs01ReqId != '') {
+      if (zs01ReqId != undefined && zs01ReqId != '') {
         qParams = {
             REQ_ID : zs01ReqId,
           };
@@ -226,7 +226,7 @@ function setSearchTermByGBGId() {
           //FormManager.readOnly('searchTerm');
       }
     }
-    if(FormManager.getActualValue('searchTerm') != 'undefined' && FormManager.getActualValue('searchTerm') != ''){
+    if(FormManager.getActualValue('searchTerm') != undefined && FormManager.getActualValue('searchTerm') != ''){
       FormManager.readOnly('searchTerm');
     }    
   }
@@ -261,7 +261,7 @@ function setSearchTermByGBGId() {
 }
 
 function afterConfigForCN() {
-  if (FormManager.getActualValue('isicCd') != 'undefined' && FormManager.getActualValue('isicCd') != '') {
+  if (FormManager.getActualValue('isicCd') != undefined && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
     var custSubType = FormManager.getActualValue('custSubGrp');
     var isicCd = FormManager.getField('isicCd');
@@ -455,7 +455,7 @@ function setInacBySearchTerm() {
 //    FormManager.readOnly('inacType');
 //    return;
 //  }
-  if (FormManager.getActualValue('reqType') == 'C' && searchTerm != 'undefined' && searchTerm != '') {
+  if (FormManager.getActualValue('reqType') == 'C' && searchTerm != undefined && searchTerm != '') {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
     var qParams = {
@@ -614,7 +614,7 @@ function onInacTypeChange() {
   reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     var custSubT = FormManager.getActualValue('custSubGrp');
-    if (_inacCdHandler == null && searchTerm != 'undefined' && searchTerm != '') {
+    if (_inacCdHandler == null && searchTerm != undefined && searchTerm != '') {
       _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
         var cmt = value + ','+ searchTerm +'%';
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -658,7 +658,7 @@ function autoSetIBMDeptCostCenter() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var _custClass = FormManager.getActualValue('custClass');
   if (FormManager.getActualValue('cmrIssuingCntry') == '641' && FormManager.getActualValue('reqType') == 'C') {
-    if (_custSubGrp != 'undefined' && _custClass != 'undefined' && _custClass != '') {
+    if (_custSubGrp != undefined && _custClass != undefined && _custClass != '') {
       if (_custSubGrp == 'INTAM' || _custSubGrp == 'INTSO' || _custSubGrp == 'INTIN') {
         FormManager.show('IbmDeptCostCenter', 'ibmDeptCostCenter');
         if (_custClass == '81') {
@@ -693,7 +693,7 @@ function defaultGovernmentIndicator(){
 function disableVatExemptForScenarios() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   // setValuesForScenarios();
-  if (_custSubGrp != 'undefined' && _custSubGrp != '') {
+  if (_custSubGrp != undefined && _custSubGrp != '') {
     if (_custSubGrp == 'INTER'  ||  _custSubGrp == 'PRIV' || _custSubGrp == 'CROSS') {
       FormManager.disable('vatExempt');
       FormManager.removeValidator('busnType', Validators.REQUIRED);
@@ -867,7 +867,7 @@ function filterClientTierOnChange() {
     FormManager.resetDropdownValues(FormManager.getField('isuCd'));
   }
 
-  if (FormManager.getField('searchTerm') != 'undefined' && FormManager.getField('searchTerm') != '') {
+  if (FormManager.getField('searchTerm') != undefined && FormManager.getField('searchTerm') != '') {
     FormManager.readOnly('isuCd');
   } else {
     if (_pagemodel.userRole.toUpperCase() == "PROCESSOR") {
@@ -889,7 +889,7 @@ function limitClientTierValuesOnCreate() {
     return;
   }
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (_custSubGrp != 'undefined' && _custSubGrp != '') {
+  if (_custSubGrp != undefined && _custSubGrp != '') {
     if (_custSubGrp == 'COMME' || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
       var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', 'T', 'S', 'C', 'N' ];
       if (clientTierValues != null) {
@@ -978,8 +978,8 @@ function setValuesForScenarios() {
     FormManager.resetValidations('cnInterAddrKey');
   }
 
-  if (FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '') {
-    if (FormManager.getActualValue('isicCd') != 'undefined' && FormManager.getActualValue('isicCd') != '') {
+  if (FormManager.getActualValue('reqType') == 'C' && _custSubGrp != undefined && _custSubGrp != '') {
+    if (FormManager.getActualValue('isicCd') != undefined && FormManager.getActualValue('isicCd') != '') {
       FormManager.readOnly('isicCd');
       var custSubType = FormManager.getActualValue('custSubGrp');
       var isicCd = FormManager.getField('isicCd');
@@ -1031,7 +1031,7 @@ function setValuesForScenarios() {
       }
       if (_custSubGrp == 'ECOSY'){
         var _GBGId = FormManager.getActualValue('gbgId');
-        if(_GBGId != 'undefined' && _GBGId != ''){
+        if(_GBGId != undefined && _GBGId != ''){
           var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
             ID : _GBGId
           });
@@ -1167,13 +1167,13 @@ function showHideCityCN() {
     // if (_custSubGrp != 'undefined' && _custSubGrp != '' && (_custSubGrp ==
     // 'AQSTN' || _custSubGrp == 'CROSS') &&
     // FormManager.getActualValue('reqType') == 'C') {
-    if (_custSubGrp != 'undefined' && _custSubGrp != '' && _custSubGrp == 'CROSS' && FormManager.getActualValue('reqType') == 'C') {
+    if (_custSubGrp != undefined && _custSubGrp != '' && _custSubGrp == 'CROSS' && FormManager.getActualValue('reqType') == 'C') {
       FormManager.resetValidations('cnCustName1');
       FormManager.resetValidations('cnAddrTxt');
       FormManager.resetValidations('cnCity');
       FormManager.resetValidations('stateProv');
     } else {
-      if (_custSubGrp != 'undefined' && _custSubGrp != '' && (_custSubGrp != 'PRIV' && _custSubGrp != 'INTER' && _custSubGrp != 'AQSTN')) {
+      if (_custSubGrp != undefined && _custSubGrp != '' && (_custSubGrp != 'PRIV' && _custSubGrp != 'INTER' && _custSubGrp != 'AQSTN')) {
         FormManager.addValidator('cnCity', Validators.REQUIRED, [ 'City Chinese' ], null);
         FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ 'Street Address Chinese' ], null);
         FormManager.addValidator('cnCustName1', Validators.REQUIRED, [ 'Customer Name Chinese' ], null);
@@ -1321,7 +1321,7 @@ function addFastPassAttachmentValidator() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
-        if (typeof (_pagemodel) != 'undefined') {
+        if (typeof (_pagemodel) != undefined) {
           if (custSubType == 'EMBSA') {
             var id = FormManager.getActualValue('reqId');
             var ret = cmr.query('CHECK_FASTPASS_ATTACHMENT', {
@@ -1348,7 +1348,7 @@ function setTDOFlagToYesValidator() {
       validate : function() {
         var tdoFlag = FormManager.getActualValue('icmsInd');
         var overallStatus = FormManager.getActualValue('overallStatus');
-        if (typeof (_pagemodel) != 'undefined') {
+        if (typeof (_pagemodel) != undefined) {
           var id = FormManager.getActualValue('reqId');
           var ret = cmr.query('GET_REQUEST_APPROVAL', {
             REQ_ID : id
@@ -1417,8 +1417,8 @@ function addPRIVCustNameValidator() {
          var _custSubGrp = FormManager.getActualValue('custSubGrp');
          var englishName1 = FormManager.getActualValue('custNm1');
          var englishName2 = FormManager.getActualValue('custNm2');
-         if (_custSubGrp != 'undefined' && _custSubGrp != '' && _custSubGrp == 'PRIV') {
-           if (englishName1 != 'undefined' && englishName1 != ''){
+         if (_custSubGrp != undefined && _custSubGrp != '' && _custSubGrp == 'PRIV') {
+           if (englishName1 != undefined && englishName1 != ''){
              englishName1 = englishName1.toUpperCase();
              if (englishName1.indexOf("PRIVATE LIMITED") < 0 && englishName1.indexOf("COMPANY") < 0 && englishName1.indexOf("CORPORATION") < 0  && englishName1.indexOf("INCORPORATE") < 0 && englishName1.indexOf("ORGANIZATION") < 0 && englishName1.indexOf("LIMITED") < 0 && englishName1.indexOf("PVT LTD") < 0 && englishName1.indexOf("CO., LTD.") < 0 && englishName1.indexOf("LTD") < 0 && englishName1.indexOf("LTD.") < 0 && englishName1.indexOf("COM LTD") < 0){
                console.log("Customer Name English for Private Person validate is successful...");
@@ -1426,7 +1426,7 @@ function addPRIVCustNameValidator() {
                return new ValidationResult(null, false, "Customer Name English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','Limited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
              }
            }
-           if (englishName2 != 'undefined' && englishName2 != ''){
+           if (englishName2 != undefined && englishName2 != ''){
              englishName2 = englishName2.toUpperCase();
              if (englishName2.indexOf("PRIVATE LIMITED") < 0 && englishName2.indexOf("COMPANY") < 0 && englishName2.indexOf("CORPORATION") < 0  && englishName2.indexOf("INCORPORATE") < 0 && englishName2.indexOf("ORGANIZATION") < 0 && englishName2.indexOf("LIMITED") < 0 && englishName2.indexOf("PVT LTD") < 0 && englishName2.indexOf("CO.,LTD.") < 0 && englishName2.indexOf("LTD") < 0 && englishName2.indexOf("LTD.") < 0 && englishName2.indexOf("COM LTD") < 0 ){
                console.log("Customer Name Con't English for Private Person validate is successful...");
@@ -1453,8 +1453,8 @@ function addPRIVCustNameSFPValidator(){
              var _custSubGrp = FormManager.getActualValue('custSubGrp');
              var englishName1 = record.custNm1[0];
              var englishName2 = record.custNm2[0];
-             if (_custSubGrp != 'undefined' && _custSubGrp != '' && _custSubGrp == 'PRIV') {
-               if (englishName1 != 'undefined' && englishName1 != null && englishName1 != ''){
+             if (_custSubGrp != undefined && _custSubGrp != '' && _custSubGrp == 'PRIV') {
+               if (englishName1 != undefined && englishName1 != null && englishName1 != ''){
                  englishName1 = englishName1.toUpperCase();
                  if (englishName1.indexOf("PRIVATE LIMITED") < 0 && englishName1.indexOf("COMPANY") < 0 && englishName1.indexOf("CORPORATION") < 0  && englishName1.indexOf("INCORPORATE") < 0 && englishName1.indexOf("ORGANIZATION") < 0 && englishName1.indexOf("LIMITED") < 0 && englishName1.indexOf("PVT LTD") < 0 && englishName1.indexOf("CO., LTD.") < 0 && englishName1.indexOf("LTD") < 0 && englishName1.indexOf("LTD.") < 0 && englishName1.indexOf("COM LTD") < 0){
                    console.log("Customer Name English for Private Person validate is successful...");
@@ -1462,7 +1462,7 @@ function addPRIVCustNameSFPValidator(){
                    return new ValidationResult(null, false, "Customer Name English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','Limited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
                  }
                }
-               if (englishName2 != 'undefined' && englishName2 != null && englishName2 != ''){
+               if (englishName2 != undefined && englishName2 != null && englishName2 != ''){
                  englishName2 = englishName2.toUpperCase();
                  if (englishName2.indexOf("PRIVATE LIMITED") < 0 && englishName2.indexOf("COMPANY") < 0 && englishName2.indexOf("CORPORATION") < 0  && englishName2.indexOf("INCORPORATE") < 0 && englishName2.indexOf("ORGANIZATION") < 0 && englishName2.indexOf("LIMITED") < 0 && englishName2.indexOf("PVT LTD") < 0 && englishName2.indexOf("CO.,LTD.") < 0 && englishName2.indexOf("LTD") < 0 && englishName2.indexOf("LTD.") < 0 && englishName2.indexOf("COM LTD") < 0 ){
                    console.log("Customer Name Con't English for Private Person validate is successful...");
@@ -1534,7 +1534,7 @@ function addCityRequiredOnUpdateValidatorAddrList() {
             return {
               validate : function() {
                 var reqType = FormManager.getActualValue('reqType');
-                if (typeof (CmrGrid.GRIDS.ADDRESS_GRID_GRID) != 'undefined' && CmrGrid.GRIDS.ADDRESS_GRID_GRID != null) {
+                if (typeof (CmrGrid.GRIDS.ADDRESS_GRID_GRID) != undefined && CmrGrid.GRIDS.ADDRESS_GRID_GRID != null) {
                   var addressStore = CmrGrid.GRIDS.ADDRESS_GRID_GRID.store, addressItems = addressStore._arrayOfAllItems, addrGridRow = 0, rowString = '', errorCount = 0, genericMsg = 'City was changed to empty (see comments) and is required to be supplied a new value.';
                   if (addressItems != null && addressItems.length != 0) {
                     for ( var key in addressItems) {
@@ -3626,10 +3626,10 @@ function sSDGBGIdValidator() {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         var reqType = FormManager.getActualValue('reqType');
-        if (typeof (_pagemodel) != 'undefined') {
+        if (typeof (_pagemodel) != undefined) {
           var id = FormManager.getActualValue('gbgId');
           if (reqType == 'C'){
-            if(id != 'undefined' && id != ''){
+            if(id != undefined && id != ''){
               if(custSubType == 'NRMLD'){
                 if(!(id == 'GB000YEN' || id == 'GB001A7X' || id == 'GB001CQ3' || id == 'GB300S7F' || id == 'GB001CPY' || id == 'GB001CPW' || id == 'GB001DR4' || id == 'GB001B83'
                   || id == 'GB001CQ2' || id == 'GB001J73' || id == 'GB0018BN' || id == 'GB001A89' || id == 'GB001AUJ' || id == 'GB0018BS' || id == 'GB0018EZ' || id == 'GB227QFM'
@@ -3667,9 +3667,9 @@ function s1GBGIdValidator() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
-        if (typeof (_pagemodel) != 'undefined') {
+        if (typeof (_pagemodel) != undefined) {
           var id = FormManager.getActualValue('gbgId');
-          if (custSubType == 'ECOSY' && id != 'undefined' && id != '') {
+          if (custSubType == 'ECOSY' && id != undefined && id != '') {
             var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
               ID : id
             });
@@ -3694,7 +3694,7 @@ function foreignValidator() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
-        if (typeof (_pagemodel) != 'undefined') {
+        if (typeof (_pagemodel) != undefined) {
           if (custSubType == 'CROSS') {
             var id = FormManager.getActualValue('reqId');
             var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
@@ -3852,7 +3852,7 @@ function retrievedForCNValidator() {
         var oldSearchTerm = FormManager.getActualValue('searchTerm');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         console.log( "old GLC code is ", oldGlcCode);
-        if (typeof (_pagemodel) != 'undefined') {
+        if (typeof (_pagemodel) != undefined) {
           if(reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='ECOSY')) {
 
             console.log("Checking the GLC match... retrieve value again...")
@@ -3875,7 +3875,7 @@ function retrievedForCNValidator() {
                     GLC_CD : '%'+data.glcCode+'%',
                     DEFAULT_INDC : indc
                   });
-                  if(result != null && result.ret1 != 'undefined' && result.ret1 != ''){
+                  if(result != null && result.ret1 != undefined && result.ret1 != ''){
                     var searchTerm = result.ret1;
                     var clientTier = result.ret2;
                     var isuCd = result.ret3;
@@ -3907,17 +3907,18 @@ function retrievedForCNValidator() {
                       }
                       return new ValidationResult(null, true);
                     }
-                   } else if(custSubGrp=='ECOSY'){
-                     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
-                     FormManager.setValue('searchTerm', '08036');
-                     FormManager.readOnly('searchTerm');
-                     FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
-                     FormManager.setValue('clientTier', 'Y');
-                     FormManager.readOnly('clientTier');
-                     FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
-                     FormManager.setValue('isuCd', '36');
-                     FormManager.readOnly('isuCd');
                    } else {
+                     if(custSubGrp=='ECOSY' && data.glcCode != undefined && data.glcCode != ''){
+                       FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
+                       FormManager.setValue('searchTerm', '08036');
+                       FormManager.readOnly('searchTerm');
+                       FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
+                       FormManager.setValue('clientTier', 'Y');
+                       FormManager.readOnly('clientTier');
+                       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
+                       FormManager.setValue('isuCd', '36');
+                       FormManager.readOnly('isuCd');
+                     }
                        console.log("The GLC code call the searchTerm fail , please check db.")
                        return new ValidationResult(null, true);
                    } 
