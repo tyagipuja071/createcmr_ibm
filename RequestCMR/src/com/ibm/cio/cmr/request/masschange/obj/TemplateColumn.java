@@ -131,12 +131,12 @@ public class TemplateColumn {
         // retrieved from LOV
         List<String> lovs = null;
 
-        if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
-          lovs = getLovs(entityManager, this.lovId, country, true);
-          lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.lovId);
-        } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)) {
+        if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)) {
           lovs = IERPRequestUtils.getLovsDR(entityManager, this.lovId, country, true);
           lovs = IERPRequestUtils.addSpecialCharToLovDR(lovs, country, true, this.lovId);
+        } else if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
+          lovs = getLovs(entityManager, this.lovId, country, true);
+          lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.lovId);
         } else {
           lovs = getLovs(entityManager, this.lovId, country, false);
         }
@@ -150,12 +150,12 @@ public class TemplateColumn {
         // retrieved from BDS
         List<String> lovs = null;
 
-        if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
-          lovs = getBDSChoices(entityManager, this.bdsId, country, true);
-          lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.bdsId);
-        } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)) {
+        if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)) {
           lovs = IERPRequestUtils.getBDSChoicesDR(entityManager, this.bdsId, country, true);
           lovs = IERPRequestUtils.addSpecialCharToLovDR(lovs, country, true, this.bdsId);
+        } else if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
+          lovs = getBDSChoices(entityManager, this.bdsId, country, true);
+          lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.bdsId);
         } else {
           lovs = getBDSChoices(entityManager, this.bdsId, country, false);
         }
