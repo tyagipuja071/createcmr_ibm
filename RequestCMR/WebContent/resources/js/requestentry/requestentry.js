@@ -235,7 +235,27 @@ function processRequestAction() {
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    if (cmrCntry == SysLoc.INDIA && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
+      var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
+      if (hasRetrievedValue) {
+        var oldGlc = FormManager.getActualValue('geoLocationCd');
+        var oldCluster = FormManager.getActualValue('apCustClusterId');
+        retrieveInterfaceValues();
 
+        setClusterGlcCovIdMapNrmlc();
+        var newGlc = FormManager.getActualValue('geoLocationCd');
+        var newCluster = FormManager.getActualValue('apCustClusterId');
+        if (oldGlc != newGlc || oldCluster != newCluster) {
+          cmr.showAlert('GLC and Cluster has been overwritten to' + newGlc + 'and' + newCluster + 'respectively');
+          cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to ' + newGlc + 'and' + newCluster + 'respectively'
+              + '. Do you want to proceed with this request?', 'Warning', null, {
+            OK : 'Yes',
+            CANCEL : 'No'
+          });
+        }
+      }
+    }
   } else if (action == YourActions.Processing_Create_Up_Complete) {
     var cmrNo = FormManager.getActualValue('cmrNo');
     var disAutoProc = FormManager.getActualValue('disableAutoProc');
