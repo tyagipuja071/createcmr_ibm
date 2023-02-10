@@ -211,16 +211,20 @@ function setSearchTermByGBGId() {
             if(zs01State == 'GZ'||zs01State == 'YN'||zs01State == 'GD'||zs01State == 'SC'||zs01State == 'CQ'||zs01State == 'GX'||zs01State == 'HI'){
               FormManager.setValue('searchTerm', '04749');
               FormManager.setValue('bgId', 'DB002KDH');
+              FormManager.setValue('bgDesc', 'RCCB SOUTH');
             }else if(zs01State == 'NM'||zs01State == 'SN'||zs01State == 'HE'||zs01State == 'LN'||zs01State == 'NX'||zs01State == 'BJ'||zs01State == 'GS'||
                 zs01State == 'QH'||zs01State == 'HA'||zs01State == 'TJ'||zs01State == 'HL'||zs01State == 'XJ'||zs01State == 'JL'||zs01State == 'XZ'||zs01State == 'SX'){
               FormManager.setValue('searchTerm', '04749');
               FormManager.setValue('bgId', 'DB002CBD');
+              FormManager.setValue('bgDesc', 'RCCB NORTH');
             }else if(zs01State == 'JS'||zs01State == 'JX'||zs01State == 'AH'){
               FormManager.setValue('searchTerm', '04749');
               FormManager.setValue('bgId', 'DB002C9T');
+              FormManager.setValue('bgDesc', 'RCCB EAST1');
             }else if(zs01State == 'ZJ'||zs01State == 'HB'||zs01State == 'HN'||zs01State == 'SH'||zs01State == 'FJ'||zs01State == 'SD'){
               FormManager.setValue('searchTerm', '04749');
               FormManager.setValue('bgId', 'DB002CF1');
+              FormManager.setValue('bgDesc', 'RCCB EAST2');
             }
           }
           //FormManager.readOnly('searchTerm');
@@ -278,7 +282,7 @@ function afterConfigForCN() {
   if (FormManager.getActualValue('reqType') == 'C') {
     setSearchTermList();
   }
-  if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C' && (custSubT == 'CROSS' || custSubT == 'NRMLC' || custSubT == 'NRMLD' || custSubT == 'KYND' ||custSubT == 'EMBSA' ||custSubT == 'AQSTN')) {
+  if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C' && (custSubT == 'CROSS' || custSubT == 'NRMLD' || custSubT == 'EMBSA')) {
     setSearchTermByGBGId();
   }
   
@@ -1036,7 +1040,7 @@ function setValuesForScenarios() {
             ID : _GBGId
           });
           if (ret && ret.ret1 && ret.ret1 != 0) {
-            cmr.showAlert("S&S Account client and subsidiary is not allowed to apply for ecosystem CMR type, pls change other 'Scenario Sub-type' in General Tab.", "Warning");
+            cmr.showAlert("Please select Scenario Sub Type -'Normal - Signature / Strategic / Dedicated', as this CMR belongs to China Signature/Strategic/Dedicate account.", "Warning");
           }
         }
       }
