@@ -80,6 +80,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     String matchType = "NA";
     Admin admin = requestData.getAdmin();
+    String isProspectCmr = admin.getProspLegalInd();
     Data data = requestData.getData();
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
@@ -164,13 +165,35 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           if (responseCMR != null && responseCMR.getSuccess()) {
             if (responseCMR.getMatched() && !responseCMR.getMatches().isEmpty()) {
               cmrCheckMatches = responseCMR.getMatches();
+              // cmr - 4512 match dupc prospect cmr
+              itemNo = 1;
+              for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+                if (!"Y".equals(isProspectCmr) && cmrCheckRecord.getCmrNo() != null && cmrCheckRecord.getCmrNo().startsWith("P")
+                    && "75".equals(cmrCheckRecord.getOrderBlk())) {
+                  LOG.debug("Duplicate Prospect CMR Found..");
+                  details.append(cmrCheckMatches.size() + " record(s) found. \n");
+                  output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
+                      itemNo++);
+                  DupCMRCheckElement.logDuplicateCMR(details, cmrCheckRecord);
+                  engineData.put("cmrCheckMatches", cmrCheckMatches);
+                  engineData.addRejectionComment("DUPC", "There is an existing CMR " + cmrCheckRecord.getCmrNo()
+                      + " , please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR", "", "");
+                  result.setOnError(true);
+                  result.setResults("Found Duplicate CMRs.");
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                  return result;
+                }
+              }
+            }
+            if (responseCMR.getMatched() && !responseCMR.getMatches().isEmpty() && cmrCheckMatches.size() != 0 && !"Y".equals(isProspectCmr)) {
               details.append(cmrCheckMatches.size() + " record(s) found.");
               if (cmrCheckMatches.size() > 5) {
                 cmrCheckMatches = cmrCheckMatches.subList(0, 5);
                 details.append("Showing top 5 matches only.");
               }
 
-              // int itemNo = 1;
+              itemNo = 1;
               for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
                 details.append("\n");
                 LOG.debug("Duplicate CMRs Found..");
