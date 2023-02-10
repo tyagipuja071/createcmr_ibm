@@ -1043,13 +1043,6 @@ function onCustSubGrpChange() {
     setISBUScenarioLogic();
     autoSetAbbrevNmLocnLogic();
     setCollectionCd();
-    
-    // CREATCMR-7885
-    if(FormManager.getActualValue('cmrIssuingCntry') == '834'){
-      console.log('No need to reset isuCd for 834/SG >>>>');
-    } else {
-      resetFieldsAfterCustSubGrpChange();
-    }
   });
 }
 
