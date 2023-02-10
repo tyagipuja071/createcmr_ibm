@@ -1012,7 +1012,7 @@ function autoSetVAT() {
     FormManager.enable('vatExempt')
   }
 
-  if (dijit.byId('vatExempt').get('checked')) {
+  if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');
