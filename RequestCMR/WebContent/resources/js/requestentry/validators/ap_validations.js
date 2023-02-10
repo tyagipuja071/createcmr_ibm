@@ -443,7 +443,9 @@ function setInacByCluster() {
         FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
       	FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
       }
-      
+      if(cntry == '834'){        
+        FormManager.removeValidator('inacCd', Validators.NUMBER);
+      }
       // CREATCMR-7885
       setInacCdTypeStatus();
       
@@ -4415,7 +4417,7 @@ function addValidatorBasedOnCluster() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         var cluster = FormManager.getActualValue('apCustClusterId');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        if(FormManager.getActualValue('reqType') != 'C' || cntry =='616' || cntry =='778' || cntry =='749' ) {
+        if(FormManager.getActualValue('reqType') != 'C' || cntry =='616' || cntry =='778' || cntry =='749' || cntry =='834') {
           return new ValidationResult(null, true);
         }
         if((cntry == '856' && (custSubType == 'CROSS' || custSubType == 'XASLM') && cluster == '08047') ||
@@ -4574,7 +4576,7 @@ function addCtcObsoleteValidator() {
             return new ValidationResult(null, true);
           }
           // CREATCMR-7887
-          if(cntry == '778' || cntry == '749'){
+          if(cntry == '778' || cntry == '749' || cntry == '834'){
             return new ValidationResult(null, true);
           }
           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
@@ -6353,7 +6355,7 @@ function setCTCIsuByClusterMY() {
 function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   console.log('>>>> clearClusterFieldsOnScenarioChange >>>>');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var issuingCnt = ['818', '856', '852', '616', '796'];
+  var issuingCnt = ['818', '856', '852', '616', '796', '834'];
   if (issuingCnt.includes(cntry)) {
     var viewOnly = FormManager.getActualValue('viewOnlyPage');
     if (viewOnly != '' && viewOnly == 'true') {
@@ -6377,6 +6379,12 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
       }
     }
 
+    if(cntry == '834') {
+      clearClusterFieldsScenarios = ['ASLOM', 'NRML' ];
+      if(scenario =='CROSS' && scenarioChanged){
+        FormManager.setValue('apCustClusterId', '00000');
+      }
+    }
 	  // CREATCMR-7884
     if(cntry == '796') {
       clearClusterFieldsScenarios = ['ESOSW', 'NRML', 'NRMLC', 'AQSTN', 'XAQST', 'XESO' ];
@@ -6860,7 +6868,7 @@ dojo.addOnLoad(function() {
   
   // CREATCMR-7883
   GEOHandler.registerValidator(checkCustomerNameForKYND, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA], null, true);
-  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND]);  
+  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND,SysLoc.SINGAPORE] );  
   // CREATCMR-7883
   GEOHandler.addAfterTemplateLoad(lockCMRNumberPrefixforNoINTER, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.SINGAPORE], null, true);
   
