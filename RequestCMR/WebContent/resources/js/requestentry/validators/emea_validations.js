@@ -623,7 +623,12 @@ function addHandlersForUK() {
   if (_isicCdHandler == null && FormManager.getField('isicCd')) {
     _oldIsicCd = FormManager.getActualValue('isicCd');
     _isicCdHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      if (_oldIsicCd != FormManager.getActualValue('isicCd')) {
+      var currentIsicCd = FormManager.getActualValue('isicCd');
+      var isIsicNull = currentIsicCd == '' || currentIsicCd == null || currentIsicCd == undefined;
+      if (_oldIsicCd != currentIsicCd) {
+        if (isIsicNull) {
+          FormManager.setValue('isicCd', _oldIsicCd);
+        }
         autoSetSBO(value, _pagemodel.isicCd);
         setSrAndSboOnIsicUK(value, _pagemodel.isicCd);
       }
@@ -1164,11 +1169,17 @@ function autoSetSboSrOnAddrSaveUK() {
     }
     var isuCd = FormManager.getActualValue('isuCd');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
+    var role = null;
+    if (typeof (_pagemodel) != 'undefined') {
+      role = _pagemodel.userRole;
+    }
 
     if (custSubGrp == 'COMME' || custSubGrp == 'IGF' || custSubGrp == 'XIGF' || custSubGrp == 'COMLC' || custSubGrp == 'COOEM' || custSubGrp == 'SOFTL' || custSubGrp == 'THDPT'
         || custSubGrp == 'CROSS' || custSubGrp == 'XGOVR' || custSubGrp == 'INFSL' || custSubGrp == 'DC') {
-      FormManager.enable('salesBusOffCd');
-      FormManager.enable('repTeamMemberNo');
+      if (role == 'Processor') {
+        FormManager.enable('salesBusOffCd');
+        FormManager.enable('repTeamMemberNo');
+      }
       FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
       FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
       setSrAndSboOnIsicUK();
@@ -8106,6 +8117,7 @@ function validateSalesRepForUKI() {
 }
 
 function validateSboSrForIsuCtcUK() {
+  console.log(">>>> validateSboSrForIsuCtcUK");
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -8131,7 +8143,6 @@ function validateSboSrForIsuCtcUK() {
         }
 
         var qParams = {
-          _qall : 'Y',
           CNTRY : cntry,
           SBO : sbo,
           SALES_REP : salRep,
@@ -8159,6 +8170,7 @@ function validateSboSrForIsuCtcUK() {
 }
 
 function validateSboSrForIsuCtcIE() {
+  console.log(">>>> validateSboSrForIsuCtcIE");
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -8199,7 +8211,6 @@ function validateSboSrForIsuCtcIE() {
           }
         } else {
           var qParams = {
-            _qall : 'Y',
             CNTRY : cntry,
             SBO : sbo,
             SALES_REP : salRep,
