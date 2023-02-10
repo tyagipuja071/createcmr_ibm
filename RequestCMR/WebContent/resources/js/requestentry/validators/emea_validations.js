@@ -8117,7 +8117,7 @@ function validateSalesRepForUKI() {
 }
 
 function validateSboSrForIsuCtcUK() {
-  console.log(">>>> validateSboSrForIsuCtcUK");
+  console.log(">>>> validateSboSrForIsuCtc");
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -8141,15 +8141,7 @@ function validateSboSrForIsuCtcUK() {
         if (!isuCtcList.includes(isuCTC) || isSboNull || isSrNull) {
           return new ValidationResult(null, true);
         }
-
-        var qParams = {
-          CNTRY : cntry,
-          SBO : sbo,
-          SALES_REP : salRep,
-          ISU : isu,
-          CTC : ctc
-        };
-        var results = cmr.query('UK.GET.SBOSR_FOR_ISU_CTC', qParams);
+        var results = fetchSboSrForIsuCtcUK(cntry, sbo, salRep, isu, ctc);
         var displayInvalidMsg = true;
 
         if (results != null && results.length > 0) {
@@ -8210,13 +8202,7 @@ function validateSboSrForIsuCtcIE() {
             }, false, 'Please enter the valid combination of ISU, ClientTier, SBO and Sales Rep.');
           }
         } else {
-          var qParams = {
-            CNTRY : cntry,
-            SBO : sbo,
-            SALES_REP : salRep,
-            ISU : '%' + isuCTC + '%'
-          };
-          var results = cmr.query('IE.GET.SBOSR_FOR_ISU_CTC', qParams);
+          var results = fetchSboSrForIsuCtcIE(cntry, sbo, salRep, isuCTC);
           var displayInvalidMsg = true;
 
           if (results != null && results.length > 0) {
@@ -8235,6 +8221,33 @@ function validateSboSrForIsuCtcIE() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function fetchSboSrForIsuCtcIE(cntry, sbo, salRep, isuCTC) {
+  var results = null;
+  var qParams = {
+    _qall : 'Y',
+    CNTRY : cntry,
+    SBO : sbo,
+    SALES_REP : salRep,
+    ISU : '%' + isuCTC + '%'
+  };
+  results = cmr.query('IE.GET.SBOSR_FOR_ISU_CTC', qParams);
+  return results;
+}
+
+function fetchSboSrForIsuCtcUK(cntry, sbo, salRep, isu, ctc) {
+  var results = null;
+  var qParams = {
+    _qall : 'Y',
+    CNTRY : cntry,
+    SBO : sbo,
+    SALES_REP : salRep,
+    ISU : isu,
+    CTC : ctc
+  };
+  results = cmr.query('UK.GET.SBOSR_FOR_ISU_CTC', qParams);
+  return results;
 }
 
 function validateCollectionCdIT() {
