@@ -1038,7 +1038,7 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.setValue('inacType', 'I');
       FormManager.readOnly('inacType');
       
-    } else if (['BLUMX', 'MKTPC', 'IGF', 'PRIV'].includes(custSubGrp)) {
+    } else if (['IGF', 'PRIV'].includes(custSubGrp)) {
       FormManager.readOnly('apCustClusterId');
       
       FormManager.resetDropdownValues(FormManager.getField('clientTier'))
