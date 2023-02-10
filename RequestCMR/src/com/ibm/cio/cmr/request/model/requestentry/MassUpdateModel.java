@@ -193,6 +193,16 @@ public class MassUpdateModel extends BaseModel {
 
   private String taxNum;
 
+  private String mexicoBillingName;
+
+  public String getMexicoBillingName() {
+    return mexicoBillingName;
+  }
+
+  public void setMexicoBillingName(String mexicoBillingName) {
+    this.mexicoBillingName = mexicoBillingName;
+  }
+
   public String getBpAcctTyp() {
     return bpAcctTyp;
   }
