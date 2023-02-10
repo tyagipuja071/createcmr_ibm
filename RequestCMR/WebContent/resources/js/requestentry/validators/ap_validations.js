@@ -487,6 +487,10 @@ function setInacByCluster() {
         FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
       }
       
+      if(cntry == '834'){        
+        FormManager.removeValidator('inacCd', Validators.NUMBER);
+      }
+      
       // CREATCMR-7885
       setInacCdTypeStatus();
       
@@ -4933,7 +4937,7 @@ function addCtcObsoleteValidator() {
             return new ValidationResult(null, true);
           }
           // CREATCMR-7887
-          if(cntry == '778' || cntry == '749'){
+          if(cntry == '778' || cntry == '749' || cntry == '834'){
             return new ValidationResult(null, true);
           }
           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
