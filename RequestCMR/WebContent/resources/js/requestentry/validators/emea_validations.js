@@ -8117,13 +8117,16 @@ function validateSboSrForIsuCtcUK() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var reqType = FormManager.getActualValue('reqType');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        if (custSubGrp == null || custSubGrp == '' || custSubGrp == undefined || reqType != 'C') {
+        var isSboNull = sbo == null || sbo == '' || sbo == undefined;
+        var isSrNull = salRep == null || salRep == '' || salRep == undefined;
+        var isSubGrpNull = custSubGrp == null || custSubGrp == '' || custSubGrp == undefined;
+        if (isSubGrpNull || reqType != 'C') {
           return new ValidationResult(null, true);
         }
 
         var isuCtcList = [ '3T', '04', '05', '5K', '11', '12', '15', '18', '21', '28', '32T', '34Q', '36Y' ];
 
-        if (!isuCtcList.includes(isuCTC) || sbo == null || sbo == '' || sbo == undefined || salRep == null || salRep == '' || salRep == undefined) {
+        if (!isuCtcList.includes(isuCTC) || isSboNull || isSrNull) {
           return new ValidationResult(null, true);
         }
 
@@ -8168,22 +8171,26 @@ function validateSboSrForIsuCtcIE() {
         var scenario = FormManager.getActualValue('custGrp');
         var reqType = FormManager.getActualValue('reqType');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        if (custSubGrp == null || custSubGrp == '' || custSubGrp == undefined || reqType != 'C') {
+        var zs01LandCntry = getZS01LandCntry();
+        var isSboNull = sbo == null || sbo == '' || sbo == undefined;
+        var isSrNull = salRep == null || salRep == '' || salRep == undefined;
+        var isSubGrpNull = custSubGrp == null || custSubGrp == '' || custSubGrp == undefined;
+        if (isSubGrpNull || reqType != 'C') {
           return new ValidationResult(null, true);
         }
         var isuCtcList = [ '5K', '21', '32T', '34Q', '36Y' ];
-        if (!isuCtcList.includes(isuCTC) || sbo == null || sbo == '' || sbo == undefined || salRep == null || salRep == '' || salRep == undefined) {
+        if (!isuCtcList.includes(isuCTC) || isSboNull || isSrNull) {
           return new ValidationResult(null, true);
         }
 
         if (isuCTC == '34Q') {
-          if (getZS01LandCntry() == 'GB' && scenario == 'CROSS' && (sbo != '057' || salRep != 'SPA057')) {
+          if (zs01LandCntry == 'GB' && scenario == 'CROSS' && (sbo != '057' || salRep != 'SPA057')) {
             return new ValidationResult({
               id : 'salesBusOffCd',
               type : 'text',
               name : 'salesBusOffCd'
             }, false, 'Please enter the valid combination of ISU, ClientTier, SBO and Sales Rep.');
-          } else if (getZS01LandCntry() != 'GB' && (sbo != '090' || salRep != 'MMIR11')) {
+          } else if (zs01LandCntry != 'GB' && (sbo != '090' || salRep != 'MMIR11')) {
             return new ValidationResult({
               id : 'salesBusOffCd',
               type : 'text',
