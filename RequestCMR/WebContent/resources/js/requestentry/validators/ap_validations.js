@@ -3212,7 +3212,7 @@ function setCTCIsuByClusterISA() {
         setCTCIsuByClusterBDLK();
       }
       if ( FormManager.getActualValue('cmrIssuingCntry') == '615' || FormManager.getActualValue('cmrIssuingCntry') == '652') {
-        // lockInacForIDMYSG();
+        lockInacForIDMYSG();
       }
 
    
@@ -3227,7 +3227,7 @@ function setCTCIsuByClusterISA() {
   }
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '615' || FormManager.getActualValue('cmrIssuingCntry') == '652' ) {
-    // lockInacForIDMYSG();
+    lockInacForIDMYSG();
   }
   
 }
@@ -6575,7 +6575,7 @@ function setCTCIsuByClusterBDLK() {
     FormManager.setValue('inacType', '');
     if (_clusterHandlerINDONESIA == 0 && _pagemodel.apCustClusterId == null) {
       FormManager.setValue('clientTier', '');
-      FormManager.setValue('apCustClusterId','');
+      FormManager.setValue('apCustClusterId','2D999');
       FormManager.setValue('isuCd','');
       _apCustClusterId = '';
     }
