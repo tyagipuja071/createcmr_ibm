@@ -171,6 +171,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+                if (resultCNApi.getMessage() != null && resultCNApi.getMessage().contains("无数据")) {
+                  boolean hasCNSpecialAttach = checkCNSpecialAttach(entityManager, data.getId().getReqId());
+                  if (hasCNSpecialAttach) {
+                    doSkipAndPpn4NoData(result, engineData);
+                    return result;
+                  }
+                }
               } else {
                 cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
@@ -702,6 +709,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+                if (resultCNApi.getMessage() != null && resultCNApi.getMessage().contains("无数据")) {
+                  boolean hasCNSpecialAttach = checkCNSpecialAttach(entityManager, data.getId().getReqId());
+                  if (hasCNSpecialAttach) {
+                    doSkipAndPpn4NoData(result, engineData);
+                    return result;
+                  }
+                }
               } else {
                 cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
@@ -1211,6 +1225,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+                if (resultCNApi.getMessage() != null && resultCNApi.getMessage().contains("无数据")) {
+                  boolean hasCNSpecialAttach = checkCNSpecialAttach(entityManager, data.getId().getReqId());
+                  if (hasCNSpecialAttach) {
+                    doSkipAndPpn4NoData(result, engineData);
+                    return result;
+                  }
+                }
               } else {
                 cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
@@ -1688,6 +1709,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+                if (resultCNApi.getMessage() != null && resultCNApi.getMessage().contains("无数据")) {
+                  boolean hasCNSpecialAttach = checkCNSpecialAttach(entityManager, data.getId().getReqId());
+                  if (hasCNSpecialAttach) {
+                    doSkipAndPpn4NoData(result, engineData);
+                    return result;
+                  }
+                }
               } else {
                 cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
@@ -2384,6 +2412,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+                if (resultCNApi.getMessage() != null && resultCNApi.getMessage().contains("无数据")) {
+                  boolean hasCNSpecialAttach = checkCNSpecialAttach(entityManager, data.getId().getReqId());
+                  if (hasCNSpecialAttach) {
+                    doSkipAndPpn4NoData(result, engineData);
+                    return result;
+                  }
+                }
               } else {
 
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
@@ -2786,6 +2821,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+                if (resultCNApi.getMessage() != null && resultCNApi.getMessage().contains("无数据")) {
+                  boolean hasCNSpecialAttach = checkCNSpecialAttach(entityManager, data.getId().getReqId());
+                  if (hasCNSpecialAttach) {
+                    doSkipAndPpn4NoData(result, engineData);
+                    return result;
+                  }
+                }
               } else {
                 cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
@@ -4060,6 +4102,14 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     result.setDetails("Skip CN Duplicate CMR Check and forword request to CMDE, due to VAT Exempt and CN Specific attachment.");
     engineData.addPositiveCheckStatus("Skip CN Duplicate CMR Check and forword request to CMDE, due to VAT Exempt and CN Specific attachment.");
     engineData.setSkipChecks();
+    result.setResults("Skip");
+    result.setOnError(false);
+  }
+
+  private void doSkipAndPpn4NoData(AutomationResult<MatchingOutput> result, AutomationEngineData engineData) {
+    result.setDetails("Forword request to CMDE, due to CNService API responds error: 无数据 and CN Specific attachment.");
+    engineData.addPositiveCheckStatus("Forword request to CMDE, due to CNService API responds error: 无数据 and CN Specific attachment.");
+    // engineData.setSkipChecks();
     result.setResults("Skip");
     result.setOnError(false);
   }

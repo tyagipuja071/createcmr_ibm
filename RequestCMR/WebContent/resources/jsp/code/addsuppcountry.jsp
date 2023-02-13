@@ -353,6 +353,23 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
         </cmr:column>
       </cmr:row>
       
+       <cmr:row>
+        <cmr:column span="1" width="180">
+          <p>
+            <cmr:label fieldId="hideLocalLangData">Local Language Data: </cmr:label>
+          </p>
+        </cmr:column>
+        <cmr:column span="2">
+          <p>
+          <form:select dojoType="dijit.form.FilteringSelect" id="hideLocalLangData" searchAttr="name" style="display: block; width:550px" maxHeight="200"
+            required="false" path="hideLocalLangData" placeHolder="Local Language Setting for Prospect CMR results">
+            <form:option value="N">Show  Local Language Data for Prospect CMR</form:option>
+            <form:option value="Y">Hide Local Language Data for Prospect CMR</form:option>
+          </form:select>
+          </p>
+        </cmr:column>
+      </cmr:row>
+      
       <cmr:row addBackground="true">
         <cmr:column span="1" width="180">
           <h3>Automation Engine</h3>

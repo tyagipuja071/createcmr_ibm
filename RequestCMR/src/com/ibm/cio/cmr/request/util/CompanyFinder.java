@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -75,49 +76,41 @@ public class CompanyFinder {
     List<CompanyRecordModel> matches = new ArrayList<CompanyRecordModel>();
     if (!StringUtils.isBlank(searchModel.getCmrNo())) {
       matches.addAll(findCMRsViaService(searchModel.getIssuingCntry(), searchModel.getCmrNo(), 3, null));
-    } else {
+    } else if (isLatin(searchModel.getName())) {
+      matches.addAll(findCMRs(searchModel));
+      // CREATCMR-7388 - always append D&B results
+      boolean searchDnb = true;
 
-      if (isLatin(searchModel.getName())) {
-        matches.addAll(findCMRs(searchModel));
-        boolean searchDnb = false;
-        // CREATCMR-7388 - always append D&B results
-        searchDnb = true;
+      // List<String> lowLevelMatches = Arrays.asList("F3", "F4", "F5", "VAT",
+      // "DUNS");
+      // if (!matches.isEmpty()) {
+      // for (CompanyRecordModel cmrMatch : matches) {
+      // if (lowLevelMatches.contains(cmrMatch.getMatchGrade())) {
+      // searchDnb = true;
+      // break;
+      // }
+      // }
+      // }
+      matches.addAll(findRequests(searchModel));
 
-        // List<String> lowLevelMatches = Arrays.asList("F3", "F4", "F5", "VAT",
-        // "DUNS");
-        // if (!matches.isEmpty()) {
-        // for (CompanyRecordModel cmrMatch : matches) {
-        // if (lowLevelMatches.contains(cmrMatch.getMatchGrade())) {
-        // searchDnb = true;
-        // break;
-        // }
-        // }
-        // }
+      if (matches.isEmpty() || searchDnb || "Y".equals(searchModel.getAddDnBMatches())) {
+        matches.addAll(searchDnB(searchModel));
+      }
 
-        matches.addAll(findRequests(searchModel));
-
-        if ("Y".equals(searchModel.getAddDnBMatches())) {
-          // make the dnb append available for processors
-          searchDnb = true;
-        }
-        if (matches.isEmpty() || searchDnb) {
-          matches.addAll(searchDnB(searchModel));
-        }
-
-        if (matches.isEmpty() && !StringUtils.isBlank(searchModel.getName())) {
-          // try non latin if country has local lang data
-          if (LOCAL_LANG_COUNTRIES.contains(searchModel.getIssuingCntry())) {
-            LOG.debug("Trying non-latin search on inputs..");
-            matches.addAll(findCMRsNonLatin(searchModel));
-          }
-        }
-
-      } else {
-        LOG.debug("Finding CMRs using local language..");
+      if (matches.isEmpty() && !StringUtils.isBlank(searchModel.getName()) && LOCAL_LANG_COUNTRIES.contains(searchModel.getIssuingCntry())) {
+        // try non latin if country has local lang data
+        LOG.debug("Trying non-latin search on inputs..");
         matches.addAll(findCMRsNonLatin(searchModel));
       }
 
+    } else {
+      LOG.debug("Finding CMRs using local language..");
+      matches.addAll(findCMRsNonLatin(searchModel));
+      if ("Y".equals(searchModel.getAddDnBMatches())) {
+        matches.addAll(searchDnB(searchModel));
+      }
     }
+
     Collections.sort(matches);
     List<String> keys = new ArrayList<String>();
     List<CompanyRecordModel> cleaned = new ArrayList<CompanyRecordModel>();
@@ -131,6 +124,13 @@ public class CompanyFinder {
     }
 
     return cleaned;
+  }
+
+  private static boolean isLowLevelMatched(List<CompanyRecordModel> matches) {
+    List<String> lowLevelMatches = Arrays.asList("F3", "F4", "F5", "VAT", "DUNS");
+
+    return Optional.ofNullable(matches).orElseGet(Collections::emptyList).parallelStream()
+        .anyMatch(cmrMatch -> lowLevelMatches.contains(cmrMatch.getMatchGrade()));
   }
 
   /**

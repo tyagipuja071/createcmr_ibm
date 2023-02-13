@@ -468,7 +468,10 @@ public class MassRequestEntryController extends BaseController {
 
         if ((!StringUtils.isBlank(model.getMessageDefaultApproval()))) {
           mv = new ModelAndView("redirect:/massrequest/" + model.getReqId(), "reqentry", new RequestEntryModel());
-          MessageUtil.setErrorMessage(mv, MessageUtil.ERROR_APPROVAL_DEFAULT_DRA);
+          // CREATCMR 537
+          if (model.getApprovalResult().equalsIgnoreCase("Pending") || model.getApprovalResult().equalsIgnoreCase("None")) {
+            MessageUtil.setErrorMessage(mv, MessageUtil.ERROR_APPROVAL_DEFAULT_DRA);
+          }
         } else {
           mv = new ModelAndView("redirect:/workflow/open", "reqentry", new RequestEntryModel());
           MessageUtil.setInfoMessage(mv, MessageUtil.INFO_REQUEST_PROCESSED, "sent for processing", model.getReqId() + "");

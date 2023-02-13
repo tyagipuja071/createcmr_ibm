@@ -138,6 +138,12 @@
           return '<span style="font-weight:bold; color:red">Disabled</span>';
         }        
         return 'Enabled';
+      },
+      hideLocalLangDataFormatter : function(value, rowIndex) {
+        if (value == 'Y'){
+          return '<span style="font-weight:bold; color:red">Hidden</span>';
+        }        
+        return 'Enabled';
       }
   };
 })();
@@ -193,6 +199,9 @@
             </cmr:gridCol>
             <cmr:gridCol width="8%" field="disableCreateByModel" header="Create by Model" >
               <cmr:formatter functionName="SuppCountryService.byModelFormatter" />
+            </cmr:gridCol>
+            <cmr:gridCol width="8%" field="hideLocalLangData" header="Local Language Data" >
+              <cmr:formatter functionName="SuppCountryService.hideLocalLangDataFormatter" />
             </cmr:gridCol>
           </cmr:grid>
         </cmr:column>
