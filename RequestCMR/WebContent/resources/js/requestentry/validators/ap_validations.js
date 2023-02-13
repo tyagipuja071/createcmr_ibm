@@ -127,6 +127,8 @@ function afterConfigForIndia() {
   if(custSubGrp == 'CROSS'){
     FormManager.readOnly('vat');
   }
+  // CREATCMR-7005
+  
 
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     FormManager.setValue('covId','');
@@ -144,6 +146,7 @@ function afterConfigForIndia() {
       setClusterGlcCovIdMapNrmlc();
     });
   }
+  
 }
 
 function resetGstExempt() {
@@ -612,9 +615,23 @@ function setInacByClusterHKMO() {
   }
 }
 
+var previousCluster = null;
+function saveClusterAfterSave() {
+  if (previousCluster == null) {
+    previousCluster = FormManager.getActualValue('apCustClusterId');
+  }
+}
+
 function setInacNacValuesIN(){
   console.log('>>>> setInacNacValuesIN >>>>');
   var _cluster = FormManager.getActualValue('apCustClusterId');
+  /* Avoid INAC type/code override in page reload */
+  if (previousCluster == null) {
+    previousCluster = FormManager.getActualValue('apCustClusterId');
+  }
+  if (previousCluster == _cluster) {
+    return;
+  }
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   // CREATCMR-7884
   if ((cntry == '796' || cntry == '616' || cntry == '834' || cntry == '749' || cntry == '778') && FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -669,6 +686,15 @@ function setInacNacValuesIN(){
       } else {
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
       }
+      FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.resetDropdownValues(FormManager.getField('inacType'));
+      FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+      FormManager.clearValue('inacType');
+      FormManager.clearValue('inacCd');
+      FormManager.removeValidator('inacType', Validators.REQUIRED);
+      FormManager.removeValidator('inacCd', Validators.REQUIRED);  
     }
 }
 
@@ -1244,18 +1270,23 @@ function onCustSubGrpChange() {
 function applyClusterFilters() {
   filterAvailableClustersByScenarioSubType('744', ['ECOSY'], [ '10654', '10655', '10656', '10657' ]);
   filterAvailableClustersByScenarioSubType('744', ['NRML' ], [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215']);
-  filterAvailableClustersByScenarioSubType('744', ['ESOSW'], [ '05224', '04477', '04490', '04467','05225','10193','10194','10195','10196','10197','10198','10199','10200','10201','10202','10203','10204','10205','10206','10207','10208','10209','10210','10211','10212','10213','10214','10215','10654', '10655', '10656', '10657']);    
+  filterAvailableClustersByScenarioSubType('744', ['ESOSW'], [ '05224', '04477', '04490', '04467', '05225', '09062', '10193', '10194', '10195', '10196', '10197', '10198', '10199', '10200', '10201', '10202', '10203', '10204', '10205', '10206', '10207', '10208', '10209', '10210', '10211', '10212',
+                                                               '10213', '10214', '10215', '10590', '10591', '10592', '10593', '10594', '10595', '10596', '10597', '10598', '10599', '10600', '10601', '10602', '10603', '10604', '10605', '10606', '10607', '10608', '10609', '10610', '10611', '10612',
+                                                               '10613', '10614', '10615', '10616', '10617', '10618', '10619', '10620', '10621', '10622', '10623', '10624', '10625', '10626', '10627', '10628', '10629', '10630', '10631', '10632', '10633', '10634', '10635', '10636', '10637', '10638',
+                                                               '10639', '10640', '10641', '10642', '10643', '10644', '10645', '10654', '10655', '10656']);    
   filterAvailableClustersByScenarioSubType('744', ['KYNDR'], [ '09062' ]);
   filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV', 'INTER'], [ '2D999' ]);
   filterAvailableClustersByScenarioSubType('744', ['NRMLC'], [ '10590','10591','10592','10593','10594','10595','10596','10597','10598','10599','10600','10601','10602','10603','10604','10605','10606','10607','10608','10609','10610','10611','10612','10613','10614','10615','10616','10617','10618','10619','10620','10621','10622','10623','10624','10625','10626','10627','10628','10629','10630','10631','10632','10633','10634','10635','10636','10637','10638','10639','10640','10641','10642','10643','10644','10645','2D999' ]);
   filterAvailableClustersByScenarioSubType('744', ['AQSTN'], [ '10590','10591','10592','10593','10594','10595','10596','10597','10598','10599','10600','10601','10602','10603','10604','10605','10606','10607','10608','10609','10610','10611','10612','10613','10614','10615','10616','10617','10618','10619','10620','10621','10622','10623','10624','10625','10626','10627','10628','10629','10630','10631','10632','10633','10634','10635','10636','10637','10638','10639','10640','10641','10642','10643','10644','10645','2D999' ]);
+  lockFieldsWithDefaultValuesByScenarioSubType();
 }
 
 function resetFieldsAfterCustSubGrpChange() {
   console.log(">>>> resetInacNacCdAfterCustSubGrpChange >>>>");
   
-  FormManager.setValue('inacType', '');
-  FormManager.setValue('inacCd', '');
+  FormManager.setValue('isuCd', '');
+//  FormManager.setValue('inacType', '');
+//  FormManager.setValue('inacCd', '');
 }
 
 function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrpArray, clusterArray) {
@@ -7379,7 +7410,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addAfterConfigAP, GEOHandler.AP);
   GEOHandler.addAfterTemplateLoad(addAfterConfigAP, GEOHandler.AP);
-  
+  GEOHandler.addAfterConfig(saveClusterAfterSave, [ SysLoc.INDIA ]);
   GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateProvCd, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateRegionCd, GEOHandler.AP);
