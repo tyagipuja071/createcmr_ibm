@@ -59,7 +59,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
   @Override
   public AutomationResult<MatchingOutput> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
-    log.debug(">>>> DupcCmrCheckElement");
+    log.debug("DupcCmrCheckElement");
     Addr soldTo = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
@@ -249,7 +249,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
   public static AutomationResult<MatchingOutput> checkDupcProspectCmr(List<DuplicateCMRCheckResponse> cmrCheckMatches, Addr soldTo,
       String isProspectCmr, AutomationEngineData engineData, AutomationResult<MatchingOutput> result, String issuingCntry) {
     // cmr - 4512 match dupc prospect cmr
-    log.debug(">>>> checkDupcProspectCmr");
+    log.debug("checkDupcProspectCmr");
     StringBuilder details = new StringBuilder();
     MatchingOutput output = new MatchingOutput();
     int itemNo = 1;

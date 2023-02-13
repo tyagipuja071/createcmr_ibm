@@ -73,7 +73,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
   @Override
   public AutomationResult<MatchingOutput> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
-    LOG.debug(">>>> USDupcCheckElement");
+    LOG.debug("USDupcCheckElement");
     boolean dupReqFound = false;
     boolean reqChkSrvError = false;
     boolean dupCMRFound = false;
