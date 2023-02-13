@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
@@ -78,6 +80,12 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNDHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
+import com.ibm.cmr.services.client.AutomationServiceClient;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.ServiceClient.Method;
+import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.ap.nz.NZBNValidationRequest;
+import com.ibm.cmr.services.client.automation.ap.nz.NZBNValidationResponse;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
@@ -2072,5 +2080,292 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
 
   }
+
+  //CREATCMR-8430: do DNB check for NZ update -- Begin
+  public ModelMap isDnBAPIMatchAddrsUpdateNZ(AutoDNBDataModel model, long reqId) {
+    ModelMap map = new ModelMap();
+    EntityManager entityManager = null;
+    try {
+      if (reqId > 0) {
+        entityManager = JpaManager.getEntityManager();
+        RequestData requestData = new RequestData(entityManager, reqId);
+        Data data = requestData.getData();
+        Admin admin = requestData.getAdmin();
+        RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, requestData);
+
+        ModelMap custNmMap = isCustNmMatchForNZ(requestData, changes);
+        if ((boolean) custNmMap.get("success") && (boolean) custNmMap.get("custNmMatch") && (boolean) custNmMap.get("formerCustNmMatch")) {
+          ModelMap addrMap = isAddressUpdateMatchForNZ(model, reqId, requestData, changes);
+          map.putAll(custNmMap);
+          map.put("matchesAddrDnb", (boolean) addrMap.get("matchesAddrDnb"));
+          map.put("matchesAddrAPI", (boolean) addrMap.get("matchesAddrAPI"));
+          map.put("message", addrMap.get("message"));
+        } else {
+          return custNmMap;
+        }
+      } else {
+        map.put("success", false);
+        map.put("custNmMatch", false);
+        map.put("formerCustNmMatch", false);
+        map.put("matchesAddrDnb", false);
+        map.put("matchesAddrAPI", false);
+        String message = "Invalid request Id";
+        map.put("message", message);
+      }
+    } catch (Exception e) {
+      log.debug("Error occurred while checking DnB Matches." + e);
+      map.put("success", false);
+      map.put("custNmMatch", false);
+      map.put("formerCustNmMatch", false);
+      map.put("matchesAddrDnb", false);
+      map.put("matchesAddrAPI", false);
+      String message = "An error occurred while matching with DnB.";
+      map.put("message", message);
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+    return map;
+
+  }
+
+  private AutomationResponse<NZBNValidationResponse> getNZBNService(Admin admin, Data data, Addr addr) throws Exception {
+    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        AutomationServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    client.setRequestMethod(Method.Get);
+
+    NZBNValidationRequest request = new NZBNValidationRequest();
+    String customerName = addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2());
+    if (StringUtils.isNotBlank(data.getVat())) {
+      request.setBusinessNumber(data.getVat());
+      log.debug("request-businessNumber:" + request.getBusinessNumber());
+    }
+    request.setName(customerName);
+    log.debug("request-name:" + customerName);
+
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.NZ_BN_VALIDATION_SERVICE_ID, request, AutomationResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<AutomationResponse<NZBNValidationResponse>> ref = new TypeReference<AutomationResponse<NZBNValidationResponse>>() {
+    };
+    AutomationResponse<NZBNValidationResponse> nzbnResponse = mapper.readValue(json, ref);
+    return nzbnResponse;
+  }
+
+  private ModelMap isCustNmMatchForNZ(RequestData requestData, RequestChangeContainer changes) throws Exception {
+    ModelMap map = new ModelMap();
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    StringBuilder details = new StringBuilder();
+
+    boolean CustNmChanged = changes.isLegalNameChanged();
+    // CustNmChanged = false;
+    if (CustNmChanged) {
+      AutomationResponse<NZBNValidationResponse> response = null;
+      Addr zs01 = requestData.getAddress("ZS01");
+      String regex = "\\s+$";
+      String customerName = zs01.getCustNm1() + (StringUtils.isBlank(zs01.getCustNm2()) ? "" : " " + zs01.getCustNm2());
+      String formerCustName = !StringUtils.isBlank(admin.getOldCustNm1()) ? admin.getOldCustNm1().toUpperCase() : "";
+      formerCustName += !StringUtils.isBlank(admin.getOldCustNm2()) ? " " + admin.getOldCustNm2().toUpperCase() : "";
+      List<String> dnbTradestyleNames = new ArrayList<String>();
+      boolean custNmMatch = false;
+      boolean formerCustNmMatch = false;
+      String errMessage = "";
+      if (!(custNmMatch && formerCustNmMatch)) {
+        log.debug("Now Checking with DNB to vrify CustNm update. customerName=" + customerName + ", formerCustName=" + formerCustName);
+        MatchingResponse<DnBMatchingResponse> Dnbresponse = DnBUtil.getMatches(requestData, null, "ZS01");
+        List<DnBMatchingResponse> matches = Dnbresponse.getMatches();
+        if (!matches.isEmpty()) {
+          for (DnBMatchingResponse dnbRecord : matches) {
+            // checks for CustNm match
+            String dnbCustNm = StringUtils.isBlank(dnbRecord.getDnbName()) ? "" : dnbRecord.getDnbName().replaceAll("\\s+$", "");
+            if (customerName.equalsIgnoreCase(dnbCustNm)) {
+              custNmMatch = true;
+              dnbTradestyleNames = dnbRecord.getTradeStyleNames();
+              if (dnbTradestyleNames != null) {
+                for (String tradestyleNm : dnbTradestyleNames) {
+                  tradestyleNm = tradestyleNm.replaceAll("\\s+$", "");
+                  if (tradestyleNm.equalsIgnoreCase(formerCustName)) {
+                    formerCustNmMatch = true;
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (!(custNmMatch && formerCustNmMatch)) {
+        log.debug("DNB Checking CustNm match failed. Now Checking CustNm with NZBN API with  to vrify CustNm update");
+        try {
+          response = getNZBNService(admin, data, zs01);
+        } catch (Exception e) {
+          if (response == null || !response.isSuccess()) {
+            errMessage = "Failed to Connect to NZBN Service.";
+            log.debug("\nFailed to Connect to NZBN Service.");
+          }
+        }
+        if (response != null && response.isSuccess()) {
+          // custNm Validation
+          log.debug("\nSuccess to Connect to NZBN Service.");
+          if (StringUtils.isNotEmpty(response.getRecord().getName())) {
+            String responseCustNm = StringUtils.isBlank(response.getRecord().getName()) ? "" : response.getRecord().getName().replaceAll(regex, "");
+
+            if (!(custNmMatch)) {
+              if (customerName.equalsIgnoreCase(responseCustNm)) {
+                custNmMatch = true;
+                log.debug("\ncustNmMatch  = true to Connect to NZBN Service.");
+              }
+            }
+          }
+          if (response.getRecord() != null && response.getRecord().getPreviousEntityNames() != null
+              && response.getRecord().getPreviousEntityNames().length > 0) {
+            String[] historicalNameList = new String[response.getRecord().getPreviousEntityNames().length];
+            historicalNameList = response.getRecord().getPreviousEntityNames();
+            for (String historicalNm : historicalNameList) {
+              historicalNm = historicalNm.replaceAll(regex, "");
+              if (formerCustName.equalsIgnoreCase(historicalNm)) {
+                formerCustNmMatch = true;
+                log.debug("\nformerCustNmMatch = true to Connect to NZBN Service.");
+              }
+            }
+          }
+        }
+      }
+
+      map.put("success", true);
+      map.put("custNmMatch", custNmMatch);
+      map.put("formerCustNmMatch", formerCustNmMatch);
+      map.put("message", errMessage);
+      if (!custNmMatch || !formerCustNmMatch) {
+        map.put("message", "The Customer Name and Former Customer Name doesn't match from DNB & NZBN API.");
+        if (response != null && response.isSuccess() && response.getRecord() != null) {
+          details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
+          details.append(" - Name.:  " + response.getRecord().getName() + " \n");
+          if (response.getRecord().getPreviousEntityNames() != null) {
+            String[] historicalNameList = new String[response.getRecord().getPreviousEntityNames().length];
+            historicalNameList = response.getRecord().getPreviousEntityNames();
+            for (String historicalNm : historicalNameList) {
+              historicalNm = historicalNm.replaceAll(regex, "");
+              details.append(" - historicalName:  " + historicalNm + " \n");
+            }
+          }
+        }
+        log.info(details.toString());
+      }
+    } else {
+      map.put("success", true);
+      map.put("custNmMatch", true);
+      map.put("formerCustNmMatch", true);
+      map.put("message", "");
+      log.info("Updates to the dataFields fields skipped validation");
+    }
+    return map;
+  }
+
+  private ModelMap isAddressUpdateMatchForNZ(AutoDNBDataModel model, long reqId, RequestData requestData, RequestChangeContainer changes) {
+    ModelMap map = new ModelMap();
+    map.put("matchesAddrSuccess", true);
+    map.put("matchesAddrDnb", true);
+    map.put("matchesAddrAPI", true);
+    map.put("message", "");
+
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, "MAIL", "ZP01", "ZI01", "ZF01", "CTYG", "CTYH");
+    
+    List<Addr> addresses = null;
+    for (String addrType : RELEVANT_ADDRESSES) {
+      if (changes.isAddressChanged(addrType)) {
+        if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+        } else {
+          addresses = requestData.getAddresses(addrType);
+        }
+        for (Addr addr : addresses) {
+          Addr addressToChk = requestData.getAddress(addrType);
+          String errMessage = "";
+          if ("Y".equals(addr.getChangedIndc())) {
+            // update address
+            if (RELEVANT_ADDRESSES.contains(addrType)) {
+              if (isRelevantAddressFieldUpdated(changes, addr)) {
+
+                Map dnbmatchmap = isDnBMatch(model, reqId, addr.getId().getAddrType());
+                boolean matchesAddrDnb = (boolean) dnbmatchmap.get("dnbAddrMatch");
+                AutomationResponse<NZBNValidationResponse> nZBNAPIresponse = null;
+                boolean matchesAddrAPI = false;
+
+                if (!(matchesAddrDnb) && CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+                  log.debug("DNB Checking Addr match failed. Now Checking Addr with NZBN API with  to vrify Addr update");
+                  String regex = "\\s+$";
+                  try {
+                    nZBNAPIresponse = getNZBNService(admin, data, addr);
+                  } catch (Exception e) {
+                    if (nZBNAPIresponse == null || !nZBNAPIresponse.isSuccess()) {
+                      log.debug("\nFailed to Connect to NZBN Service.");
+                    }
+                  }
+
+                  if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() && nZBNAPIresponse.getRecord() != null) {
+                    // addr Validation
+                    log.debug("\nSuccess to Connect to NZBN Service.");
+                    String addressAll = addressToChk.getCustNm1() + (addressToChk.getCustNm2() == null ? "" : addressToChk.getCustNm2())
+                        + addressToChk.getAddrTxt() + (addressToChk.getAddrTxt2() == null ? "" : addressToChk.getAddrTxt2())
+                        + (addressToChk.getStateProv() == null ? "" : addressToChk.getStateProv())
+                        + (addressToChk.getCity1() == null ? "" : addressToChk.getCity1())
+                        + (addressToChk.getPostCd() == null ? "" : addressToChk.getPostCd());
+                    if (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getAddress())
+                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regex, ""))
+                        && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
+                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regex, ""))
+                        && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
+                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex, ""))) {
+                      matchesAddrAPI = true;
+                      log.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
+                    }
+                  }
+                }
+                if (!matchesAddrDnb && !matchesAddrAPI) {
+                  map.put("addressType", addrType);
+                  map.put("matchesAddrDnb", matchesAddrDnb);
+                  map.put("matchesAddrAPI", matchesAddrAPI);
+                  errMessage = "DNB Address and NZAPI Address match failed.";
+                  map.put("message", errMessage);
+                  return map;
+                }
+
+              } else {
+                log.debug("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.");
+              }
+            } else {
+              // proceed
+              log.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
+            }
+          } else if ("N".equals(addr.getImportInd())) {
+            // new address addition
+            Map dnbmatchmap = isDnBMatch(model, reqId, addr.getId().getAddrType());
+            boolean matchesDnb = (boolean) dnbmatchmap.get("dnbAddrMatch");
+            if (!matchesDnb) {
+              errMessage = "New address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B.";
+              map.put("matchesAddrSuccess", true);
+              map.put("addressType", addrType);
+              map.put("matchesAddrDnb", false);
+              map.put("matchesAddrAPI", true);
+              map.put("message", errMessage);
+              return map;
+            }
+          }
+        }
+        // End of addresses loop
+      }
+      // End of changed address type check
+    }
+    // End of address type loop
+    return map;
+  }
+  //CREATCMR-8430: do DNB check for NZ update -- End
 
 }
