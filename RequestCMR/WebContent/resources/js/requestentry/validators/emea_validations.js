@@ -6514,7 +6514,7 @@ function setExpediteReasonOnChange() {
   });
 }
 
-function validateVATFiscalLengthOnIdentIT() {
+function validateFiscalLengthOnIdentIT() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -6595,6 +6595,38 @@ function validateVATFiscalLengthOnIdentIT() {
         // }, false, 'For Ident Client N ' + lbl1 + ' must be of 1-16 chars');
         // }
         // }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function validateVATOnIdentIT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var requestType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        if (requestType != 'C') {
+          return new ValidationResult(null, true);
+        }
+        var ident = FormManager.getActualValue('identClient');
+        var lbl1 = FormManager.getLabel('vat');
+        var vat = FormManager.getActualValue('vat');
+
+        if ((ident == 'A' || ident == 'C' || ident == 'D') && vat != undefined && vat != '' && !vat.match("^IT[0-9]{11}$")) {
+          return new ValidationResult({
+            id : 'vat',
+            type : 'text',
+            name : 'vat'
+          }, false, 'For Ident Client ' + ident + ', ' + lbl1 + ' must be IT99999999999.');
+        } else if ((ident == 'B' || ident == 'X' || ident == 'Y') && vat != '') {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'For Ident Client ' + ident + ', ' + lbl1 + ' must be Blank.');
+        }
         return new ValidationResult(null, true);
       }
     };
@@ -10499,7 +10531,8 @@ dojo.addOnLoad(function() {
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(checkIfVATFiscalUpdatedIT, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(validateVATFiscalLengthOnIdentIT, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(validateFiscalLengthOnIdentIT, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(validateVATOnIdentIT, [ SysLoc.ITALY ]);
   // GEOHandler.registerValidator(validateSRForIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(addInstallingAddrValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateEnterpriseNumForIT, [ SysLoc.ITALY ], null, true);
