@@ -1164,6 +1164,11 @@ public class MCOSaHandler extends MCOHandler {
               error.addError((row.getRowNum() + 1), "Enterprise #", "Enterprise Number should contain only digits. <br>");
             }
 
+            if (!StringUtils.isBlank(enterprise) && !enterprise.contains("@") && !enterprise.matches("\\d+.\\d*")) {
+              LOG.trace("Enterprise Number should contain only digits.");
+              error.addError((row.getRowNum() + 1), "Enterprise #", "Enterprise Number should contain only digits. <br>");
+            }
+
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {

@@ -882,6 +882,8 @@ function autoSetVAT(_custType, custTypeinDB) {
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
 
+    
+
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {

@@ -666,6 +666,7 @@ function addHandlersForCEMEA() {
       }
 
       var isuCd = FormManager.getActualValue('isuCd');
+      var reqType = FormManager.getActualValue('reqType');
       isuCovHandler = true;
       if (isuCd == '5K') {
         FormManager.resetValidations('clientTier');
