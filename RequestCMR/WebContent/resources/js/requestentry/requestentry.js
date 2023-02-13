@@ -1846,7 +1846,8 @@ function checkIfDnBCheckReqForIndia() {
   var result = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
     ID : reqId
   });
-  if (reqType == 'C' && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS')) {
+  if (reqType == 'C'
+      && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'NRMLC')) {
     if (result && result.ret1) {
       return false;
     } else {
@@ -2823,7 +2824,7 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
       FormManager.setValue('clientTier', 'Q');
       FormManager.setValue('isuCd', '34');
     }
-  }else if(custSubGrp=='ECOSY' && glcCode != undefined && glcCode != ''){
+  } else if (custSubGrp == 'ECOSY' && glcCode != undefined && glcCode != '') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
     FormManager.setValue('searchTerm', '08036');
     FormManager.readOnly('searchTerm');
