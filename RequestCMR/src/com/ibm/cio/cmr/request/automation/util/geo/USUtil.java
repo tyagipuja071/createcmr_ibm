@@ -98,6 +98,7 @@ public class USUtil extends AutomationUtil {
   public static final String CG_IGS = "12";
   public static final String CG_INTERNAL = "13";
   public static final String CG_BY_MODEL = "14";
+  public static final String CG_THIRD_P_FSP = "15";
 
   // Cust Types for determination
   public static final String COMMERCIAL = "1";
@@ -170,6 +171,8 @@ public class USUtil extends AutomationUtil {
   // Business Partner
   public static final String SC_BP_END_USER = "END USER";
   public static final String SC_BP_POOL = "POOL";
+  public static final String SC_FSP_END_USER = "FSP END USER";
+  public static final String SC_FSP_POOL = "FSP POOL";
   public static final String SC_BP_DEVELOP = "DEVELOP";
   public static final String SC_BP_E_HOST = "E-HOST";
   // BYMODEL
@@ -499,10 +502,13 @@ public class USUtil extends AutomationUtil {
       // }
       // CREATCMR-6342
 
-      if ("X".equals(data.getSpecialTaxCd())) {
-        details.append("Tax Exempt Status cannot be 'X'. Clearing Tax Exempt Status value.").append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
-      }
+      // CREATCMR-7584
+      // if ("X".equals(data.getSpecialTaxCd())) {
+      // details.append("Tax Exempt Status cannot be 'X'. Clearing Tax Exempt
+      // Status value.").append("\n");
+      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+      // "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
+      // }
 
     } else if ("U".equals(admin.getReqType())) {
       eleResults.append("Skipped");

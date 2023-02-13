@@ -759,11 +759,11 @@ public class BeLuxUtil extends AutomationUtil {
     String salesRepTeam = "";
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
     String geoCd = "";
-    if (countryUse.length() > 3) {
+    if (StringUtils.isNotBlank(countryUse) && countryUse.length() > 3) {
       geoCd = countryUse.substring(3, 5);
     }
     String cmrCntry = cmrIssuingctry + geoCd;
-    if (countryUse.length() == 3) {
+    if (StringUtils.isNotBlank(countryUse) && countryUse.length() == 3) {
       salesRepTeam = isuCtc + "BG";
     } else {
       salesRepTeam = isuCtc + "LU";

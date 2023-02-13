@@ -9,6 +9,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -19,9 +20,14 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.approval.ChecklistItem;
 import com.ibm.cio.cmr.request.util.approval.ChecklistUtil;
 import com.ibm.cio.cmr.request.util.approval.ChecklistUtil.ChecklistResponse;
+import com.ibm.cio.cmr.request.util.pdf.RequestToPDFConverter;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 
 /**
@@ -29,9 +35,13 @@ import com.itextpdf.layout.element.Table;
  * 
  */
 public class APPDFConverter extends DefaultPDFConverter {
+  private PdfFont regularFont;
+  private Logger LOG = Logger.getLogger(RequestToPDFConverter.class);
+  private PdfFont chineseFont;
 
   public APPDFConverter(String cmrIssuingCntry) throws IOException {
     super(cmrIssuingCntry);
+    this.regularFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
 
   }
 
@@ -80,7 +90,27 @@ public class APPDFConverter extends DefaultPDFConverter {
         checklistSection.addCell(createLabelCell("Item"));
         checklistSection.addCell(createLabelCell("Response"));
         for (ChecklistItem item : items) {
-          checklistSection.addCell(createValueCell(item.getLabel()));
+          if ("736".equals(sysLoc) || "738".equals(sysLoc)) {
+            int padding = 1;
+            int textLength = item.getLabel().length();
+            if (textLength > 150) {
+              padding = textLength / 80;
+            }
+            if (items.indexOf(item) == 12 || items.indexOf(item) == 13) {
+              padding = textLength / 70;
+              padding += 1;
+            }
+            if (items.indexOf(item) == 11) {
+              padding -= 2;
+            }
+            String text = item.getLabel() != null ? item.getLabel() : "";
+            if (text.indexOf("\n") > 0) {
+              padding += 1;
+            }
+            checklistSection.addCell(createValueCellExtended(item.getLabel(), 1, 1, padding));
+          } else {
+            checklistSection.addCell(createValueCell(item.getLabel()));
+          }
           answer = "Y".equals(item.getAnswer()) ? "Yes" : "No";
           answerCell = createValueCell(answer);
           if ("Y".equals(item.getAnswer())) {
@@ -138,4 +168,23 @@ public class APPDFConverter extends DefaultPDFConverter {
     ibm.addCell(createValueCell(null));
 
   }
+
+  private Cell createValueCellExtended(String text, int rowSpan, int colSpan, int padding) {
+    Cell cell = new Cell(rowSpan, colSpan);
+    if (text != null && (!text.isEmpty())) {
+      cell.setHeight(10 * padding);
+      Paragraph label = null;
+      LOG.warn("text === " + text);
+      if (!StringUtils.isBlank(text)) {
+        label = new Paragraph(text);
+      } else {
+        label = new Paragraph();
+      }
+      label.setFont(this.regularFont);
+      label.setFontSize(7);
+      cell.add(label);
+    }
+    return cell;
+  }
+
 }

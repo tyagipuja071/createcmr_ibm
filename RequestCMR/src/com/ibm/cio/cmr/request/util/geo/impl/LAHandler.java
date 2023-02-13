@@ -1793,7 +1793,7 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public boolean retrieveInvalidCustomersForCMRSearch(String cmrIssuingCntry) {
-    return true;
+    return false;
   }
 
   @Override

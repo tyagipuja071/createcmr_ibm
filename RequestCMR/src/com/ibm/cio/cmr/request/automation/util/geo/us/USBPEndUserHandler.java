@@ -39,6 +39,8 @@ import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 public class USBPEndUserHandler extends USBPHandler {
   private static final Logger LOG = Logger.getLogger(USBPEndUserHandler.class);
   public static final List<String> SPECIAL_TAX_STATES = Arrays.asList("AK", "DE", "MT", "NH", "OR");
+  public static final List<String> FEDERAL_CLASSIFIED_ISIC = Arrays.asList("9042", "9043", "9065", "9121", "9185", "9186", "9195", "9199", "9200",
+      "9203", "9204", "9240", "9269");
 
   @Override
   public boolean doInitialValidations(Admin admin, Data data, Addr addr, AutomationResult<OverrideOutput> output, AutomationEngineData engineData) {
@@ -60,9 +62,10 @@ public class USBPEndUserHandler extends USBPHandler {
         output.setDetails("Non BP End User create by model scenario not supported.");
         return true;
       }
-    } else if (!TYPE_BUSINESS_PARTNER.equals(custGrp) || !SUB_TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp)) {
+    } else if ((!TYPE_BUSINESS_PARTNER.equals(custGrp) || !SUB_TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp))
+        && !SUB_TYPE_FSP_END_USER.equals(custSubGrp)) {
       output.setResults("Skipped");
-      output.setDetails("Non BP End User scenario not supported.");
+      output.setDetails("Non BP End User or Non FSP End User scenario not supported.");
       return true;
     }
 
@@ -168,22 +171,22 @@ public class USBPEndUserHandler extends USBPHandler {
         details.append("\nCopying IBM Codes from IBM CMR " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName() + ": \n");
       }
 
-      String affiliate = ibmCmr.getCmrAffiliate();
+      String affiliate = ibmCmr.getCmrEnterpriseNumber();
       String isic = ibmCmr.getCmrIsic();
       boolean federalPoa = isic != null && (isic.startsWith("90") || isic.startsWith("91") || isic.startsWith("92"));
       if (federalPoa) {
         affiliate = ibmCmr.getCmrEnterpriseNumber();
       }
-      if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
-        LOG.debug(" - copyAndFillIBMData: Affiliate: " + ibmCmr.getCmrAffiliate());
-        details.append(" - Affiliate: " + ibmCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), affiliate);
+      if (!StringUtils.isBlank(ibmCmr.getCmrEnterpriseNumber())) {
+        LOG.debug(" - copyAndFillIBMData: Affiliate: " + ibmCmr.getCmrEnterpriseNumber());
+        details.append(" - Affiliate: " + data.getEnterprise() + (federalPoa ? " (Enterprise of IBM CMR)" : "") + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrEnterpriseNumber());
       } else {
-        updateAffiliate4Child(entityManager, childRequest, ibmCmr);
-        if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
-          LOG.debug(" - copyAndFillIBMData: CmrAffiliate: " + ibmCmr.getCmrAffiliate());
-          details.append(" - Affiliate: " + ibmCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA )" : "") + "\n");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrAffiliate());
+        updateAffiliateEnterprise4Child(entityManager, childRequest, ibmCmr);
+        if (!StringUtils.isBlank(ibmCmr.getCmrEnterpriseNumber())) {
+          LOG.debug(" - copyAndFillIBMData: CmrAffiliate: " + ibmCmr.getCmrEnterpriseNumber());
+          details.append(" - Affiliate: " + ibmCmr.getCmrEnterpriseNumber() + (federalPoa ? " (Enterprise of IBM CMR)" : "") + "\n");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrEnterpriseNumber());
         }
       }
 
@@ -337,22 +340,30 @@ public class USBPEndUserHandler extends USBPHandler {
 
   }
 
-  private void updateAffiliate4Child(EntityManager entityManager, RequestData childRequest, FindCMRRecordModel ibmCmr) {
+  private void updateAffiliateEnterprise4Child(EntityManager entityManager, RequestData childRequest, FindCMRRecordModel ibmCmr) {
     String konzs = "";
-    String sql = ExternalizedQuery.getSql("US.GET.KNA1.KONZS");
+    String zzkvNode2 = "";
+    String sql = ExternalizedQuery.getSql("US.GET.KNA1.KONZS_ZZKVNODE2");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("ZZKV_CUSNO", ibmCmr.getCmrNum());
     List<Object[]> results = query.getResults();
     if (results != null && results.size() > 0) {
       konzs = (String) results.get(0)[0];
+      zzkvNode2 = (String) results.get(0)[1];
     }
+    Data data = childRequest.getData();
     if (!StringUtils.isBlank(konzs)) {
-      Data data = childRequest.getData();
       data.setAffiliate(konzs);
       entityManager.merge(data);
       ibmCmr.setCmrAffiliate(konzs);
       LOG.debug(" - updateAffiliate4Child: CmrAffiliate: " + konzs);
+    }
+    if (!StringUtils.isBlank(zzkvNode2)) {
+      data.setEnterprise(zzkvNode2);
+      entityManager.merge(data);
+      ibmCmr.setCmrEnterpriseNumber(zzkvNode2);
+      LOG.debug(" - updateEnterprise4Child: CmrEnterprise: " + zzkvNode2);
     }
   }
 
@@ -483,9 +494,13 @@ public class USBPEndUserHandler extends USBPHandler {
         subTypeDesc = "Federal Gov't Regular";
         subType = SUB_TYPE_FEDERAL_REGULAR_GOVT;
         custType = USUtil.FEDERAL;
-      } else {
-        subTypeDesc = "Power of Attorney";
+      } else if (FEDERAL_CLASSIFIED_ISIC.contains(data.getIsicCd())) {
+        subTypeDesc = "Power of Attorney (Camouflaged)";
         subType = SUB_TYPE_FEDERAL_POA;
+        custType = USUtil.POWER_OF_ATTORNEY;
+      } else {
+        subTypeDesc = "Power of Attorney (Non-restricted)";
+        subType = SUB_TYPE_FEDERAL_POAN;
         custType = USUtil.POWER_OF_ATTORNEY;
       }
     } else {

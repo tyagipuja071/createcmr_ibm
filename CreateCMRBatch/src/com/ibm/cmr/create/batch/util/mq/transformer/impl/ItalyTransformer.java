@@ -61,6 +61,7 @@ public class ItalyTransformer extends EMEATransformer {
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode", "ARemark", "IsBusinessPartner" };
   // jz: installing, billing, company, postal
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZS02" };
+  public static final String DEFAULT_LANDED_COUNTRY = "IT";
   protected String dummyFiscalCode = "";
   protected Map<String, String> dupCMRValues = new HashMap<String, String>();
 
@@ -575,6 +576,10 @@ public class ItalyTransformer extends EMEATransformer {
     return !"IT".equals(addr.getLandCntry());
   }
 
+  protected boolean isCrossBorderIT(String billLandCntry) {
+    return !"IT".equals(billLandCntry);
+  }
+
   protected String setAsteriskIfEmpty(String value) {
     if (StringUtils.isEmpty(value)) {
       return "*";
@@ -939,8 +944,14 @@ public class ItalyTransformer extends EMEATransformer {
     Admin admin = cmrObjects.getAdmin();
     Data data = cmrObjects.getData();
     formatDataLines(dummyHandler);
-    Addr addrData = dummyHandler.addrData;
-    boolean crossBorder = isCrossBorder(addrData);
+    List<Addr> addresses = cmrObjects.getAddresses();
+    String landedCountry = "";
+    for (Addr addrVal : addresses) {
+      if ("ZP01".equals(addrVal.getId().getAddrType())) {
+        landedCountry = addrVal.getLandCntry();
+      }
+    }
+    boolean crossBorder = isCrossBorderIT(landedCountry);
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
@@ -1023,13 +1034,9 @@ public class ItalyTransformer extends EMEATransformer {
 
     legacyCust.setCollectionCd("");
     legacyCust.setTaxCd("");
-
-    if (crossBorder) {
-      // default 9001
-      legacyCust.setCeBo(StringUtils.isEmpty(data.getEngineeringBo()) ? "9001" : data.getEngineeringBo() + "000");
-      legacyCust.setVat("");
-    } else {
-      // default 8412
+    // CREATCMR 3271
+    if (!crossBorder) {
+      // local
       legacyCust.setCeBo(StringUtils.isEmpty(data.getEngineeringBo()) ? "8412" : data.getEngineeringBo() + "000");
 
       // CMR-589-Removing prefix IT for local
@@ -1039,9 +1046,11 @@ public class ItalyTransformer extends EMEATransformer {
         } else {
           legacyCust.setVat(dummyHandler.cmrData.getVat());
         }
-      } else {
-        legacyCust.setVat("");
       }
+    } else {
+      // CROSS
+      legacyCust.setVat("");
+      legacyCust.setCeBo(StringUtils.isEmpty(data.getEngineeringBo()) ? "9001" : data.getEngineeringBo() + "000");
     }
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && StringUtils.isNotBlank(data.getFiscalDataStatus())
@@ -1052,7 +1061,7 @@ public class ItalyTransformer extends EMEATransformer {
       } catch (Exception e) {
         LOG.error("unable to fill nulls for legacy cust before double updates", e);
       }
-      updateFiscalDataForDoubleUpdates(entityManager, data, cmrObjects);
+      updateFiscalDataForDoubleUpdates(entityManager, data, cmrObjects, crossBorder);
     }
 
     List<String> isuCdList = Arrays.asList("5K", "14", "19", "3T", "4A");
@@ -1075,7 +1084,7 @@ public class ItalyTransformer extends EMEATransformer {
     }
   }
 
-  private void updateFiscalDataForDoubleUpdates(EntityManager entityManager, Data data, CMRRequestContainer cmrObjects) {
+  private void updateFiscalDataForDoubleUpdates(EntityManager entityManager, Data data, CMRRequestContainer cmrObjects, Boolean crossBorder) {
 
     LOG.debug(">>> Into updateFiscalDataForDoubleUpdates method <<<");
 
@@ -1126,12 +1135,6 @@ public class ItalyTransformer extends EMEATransformer {
     }
     if (custRecords.size() > 0) {
       for (CmrtCust cust : custRecords) {
-        if (StringUtils.isNotBlank(vat)) {
-          cust.setVat(vat);
-        } else {
-          cust.setVat("");
-        }
-
         if (StringUtils.isNotBlank(enterprise)) {
           cust.setEnterpriseNo(enterprise);
         } else {
@@ -1149,17 +1152,10 @@ public class ItalyTransformer extends EMEATransformer {
         } else {
           custExt.setItCompanyCustomerNo("");
         }
-        if (StringUtils.isNotBlank(fiscalCode)) {
-          custExt.setiTaxCode(fiscalCode);
+        if (crossBorder) {
+          custExt.setiTaxCode((!StringUtils.isBlank(data.getVat()) ? data.getVat() : ""));
         } else {
-          custExt.setiTaxCode("");
-        }
-        boolean crossBorder = false;
-        for (Addr addr : cmrObjects.getAddresses()) {
-          crossBorder = isCrossBorder(addr);
-          if (crossBorder) {
-            custExt.setiTaxCode((!StringUtils.isBlank(data.getVat()) ? data.getVat() : ""));
-          }
+          custExt.setiTaxCode((!StringUtils.isBlank(fiscalCode) ? fiscalCode : ""));
         }
         if (StringUtils.isNotBlank(identClient)) {
           custExt.setItIdentClient(identClient);
@@ -1202,9 +1198,14 @@ public class ItalyTransformer extends EMEATransformer {
   @Override
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
-    String addrType = currAddr.getId().getAddrType();
-    boolean crossBorder = isCrossBorder(currAddr);
-
+    List<Addr> addresses = cmrObjects.getAddresses();
+    String landedCountry = "";
+    for (Addr addrVal : addresses) {
+      if ("ZP01".equals(addrVal.getId().getAddrType())) {
+        landedCountry = addrVal.getLandCntry();
+      }
+    }
+    boolean crossBorder = isCrossBorderIT(landedCountry);
     // CREATCMR-7470 All Address Types
     if (crossBorder) {
       legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : "");
@@ -1225,7 +1226,6 @@ public class ItalyTransformer extends EMEATransformer {
     Addr addrData = handler.addrData;
     Data cmrData = handler.cmrData;
     boolean update = "U".equals(handler.adminData.getReqType());
-    boolean crossBorder = isCrossBorder(addrData);
 
     LOG.debug("Legacy Direct -Handling Address for " + (update ? "update" : "create") + " request.");
 
@@ -1367,8 +1367,14 @@ public class ItalyTransformer extends EMEATransformer {
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
       CMRRequestContainer cmrObjects) {
     Data data = cmrObjects.getData();
-    boolean crossBorder = false;
+    List<Addr> addresses = cmrObjects.getAddresses();
     String landedCountry = "";
+    for (Addr addrVal : addresses) {
+      if ("ZP01".equals(addrVal.getId().getAddrType())) {
+        landedCountry = addrVal.getLandCntry();
+      }
+    }
+    boolean crossBorder = isCrossBorderIT(landedCountry);
     for (Addr addr : cmrObjects.getAddresses()) {
       // Billing Address
       if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
@@ -1384,15 +1390,11 @@ public class ItalyTransformer extends EMEATransformer {
           // INDABB - Street Abbrev
           legacyCustExt.setItBillingStreet(18 < addr.getDivn().length() ? addr.getDivn().substring(0, 18) : addr.getDivn());
         }
-
         legacyCustExt.setItBillingCustomerNo(!StringUtils.isBlank(addr.getParCmrNo()) ? addr.getParCmrNo() : "");
-
-        crossBorder = isCrossBorder(addr);
         if (crossBorder) {
           landedCountry = addr.getLandCntry();
           legacyCustExt.setiTaxCode((!StringUtils.isBlank(data.getVat()) ? data.getVat() : ""));
-        }
-        if (!crossBorder) {
+        } else {
           legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
         }
       }

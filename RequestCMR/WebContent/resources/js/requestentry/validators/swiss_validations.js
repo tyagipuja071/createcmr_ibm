@@ -8,11 +8,6 @@ function addAfterConfigForSWISS() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var impIndc = getImportedIndcForSwiss();
-  if (role == 'REQUESTER') {
-    FormManager.removeValidator('custLangCd', Validators.REQUIRED);
-  } else {
-    FormManager.addValidator('custLangCd', Validators.REQUIRED, [ 'Prefered Langauge' ], null);
-  }
 
   if (role == 'REQUESTER') {
     FormManager.readOnly('subIndustryCd');
@@ -1238,42 +1233,6 @@ function addCmrNoLengthValidator() {
 
 /* defect : 1853292 */
 var _addrTypesForSwiss = [ 'ZD01', 'ZI01', 'ZP01', 'ZS01' ];
-function addPreferedLangValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-          var recordList = null;
-          var reqType = FormManager.getActualValue('reqType')
-          var role = FormManager.getActualValue('userRole').toUpperCase();
-          var islangCdEmpty = false;
-
-          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-            recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-            if (recordList == null && _allAddressData != null && _allAddressData[i] != null) {
-              recordList = _allAddressData[i];
-            }
-            addrCustLangCd = recordList.custLangCd;
-
-            if (typeof (addrCustLangCd) == 'object') {
-              addrCustLangCd = addrCustLangCd[0];
-            }
-            if (role == 'PROCESSOR' && (addrCustLangCd == null || addrCustLangCd == '')) {
-
-              islangCdEmpty = true;
-            }
-          }
-
-          if (islangCdEmpty == true) {
-            return new ValidationResult(null, false, 'Prefered Langauge should not be empty.');
-          }
-          return new ValidationResult(null, true);
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
-}
 
 /* defect : 1837046 */
 function defaultCapIndicator() {
@@ -1841,7 +1800,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAbbrvNmSwiss, GEOHandler.SWISS);
 
   GEOHandler.registerValidator(addHwMstrInstFlgValidator, GEOHandler.SWISS, null, true);
-  GEOHandler.registerValidator(addPreferedLangValidator, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addCMRNumberValidation, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addFormatForCMRNumValidator, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addCmrNoLengthValidator, GEOHandler.SWISS, null, true);

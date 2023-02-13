@@ -25,6 +25,24 @@
         <cmr:field fieldId="PrivacyIndc" id="privIndc" path="privIndc" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    <cmr:column span="2" containerForField="OrderBlock">
+      <p>
+        <label for="ordBlk"> 
+          <cmr:fieldLabel fieldId="OrderBlock" />: 
+          <cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}" />
+        </label>
+        <cmr:field path="ordBlk" id="ordBlk" fieldId="OrderBlock" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
+    <cmr:column span="2" containerForField="ModeOfPayment">
+      <p>
+        <label for="modeOfPayment"> 
+          <cmr:fieldLabel fieldId="ModeOfPayment" />: 
+          <cmr:delta text="${rdcdata.modeOfPayment}" oldValue="${reqentry.modeOfPayment}" />
+        </label>
+        <cmr:field path="modeOfPayment" id="modeOfPayment" fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
   </cmr:row>
  
 </cmr:view>

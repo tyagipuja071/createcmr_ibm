@@ -2460,7 +2460,7 @@ public class CNHandler extends GEOHandler {
     results = query.getResults();
     if (results != null && !results.isEmpty()) {
       Object[] sResult = results.get(0);
-      subScenario = sResult[0].toString();
+      subScenario = sResult[0] != null ? sResult[0].toString() : "";
     }
     return subScenario;
   }
