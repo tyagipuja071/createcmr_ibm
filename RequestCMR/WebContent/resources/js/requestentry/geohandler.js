@@ -141,10 +141,12 @@ var GEOHandler = (function() {
   var nameAddressType = 'ZS01';
 
   var forceLockUnlock = function() {
+  	console.log(">>>> forceLockUnlock");
     FormManager.readOnly('cmrIssuingCntry');
   }
 
   var getCMRIssuingCountry = function() {
+   	console.log(">>>> getCMRIssuingCountry");
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     if (cntry == '' && typeof (_pagemodel) != 'undefined') {
       cntry = _pagemodel.cmrIssuingCntry;
