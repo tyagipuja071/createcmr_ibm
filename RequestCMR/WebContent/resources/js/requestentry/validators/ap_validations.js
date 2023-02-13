@@ -4986,7 +4986,7 @@ function addCtcObsoleteValidator() {
         return new ValidationResult(null, true);
       }
       
-      if(clientTier == "T" && FormManager.getActualValue('cmrIssuingCntry') == '774'){
+      if(clientTier == "T" && FormManager.getActualValue('cmrIssuingCntry') == '744'){
         console.log('>>> Skip CTC Obsolete Validator clientTier = T for IN');
         return new ValidationResult(null, true);
       }
