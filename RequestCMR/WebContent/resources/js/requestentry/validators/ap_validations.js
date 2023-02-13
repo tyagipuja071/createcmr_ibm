@@ -39,7 +39,7 @@ function addHandlersForAP() {
       setInacNacValuesIN();
       setIsuOnIsic();
       
-      filterInacCd('744','10215','NAC','I529');  
+      filterInacCd('744','10215','N','I529');  
       applyClusterFilters();
     });
   }
@@ -303,7 +303,7 @@ function addAfterConfigAP() {
     onInacTypeChange();
     setInacByCluster();
     setInacNacValuesIN();
-    filterInacCd('744','10215','NAC','I529');
+    filterInacCd('744','10215','N','I529');
     applyClusterFilters();
   }
   if (cntry == '834') {
@@ -446,6 +446,7 @@ function setInacByCluster() {
                   inacCdValue.push(results[i].ret1);
                 }
                 FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+                FormManager.setValue('inacCd', inacCdValue[0]);
                 if (inacCdValue.length == 1) {
                   FormManager.setValue('inacCd', inacCdValue[0]);
                 }
@@ -678,11 +679,13 @@ function setInacNacValuesIN(){
                 inacCdValue.push(results[i].ret1);
               }
               FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+              FormManager.setValue('inacCd', inacCdValue[0]);
               if (inacCdValue.length == 1) {
                 FormManager.setValue('inacCd', inacCdValue[0]);
               }
             }
           }
+          FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
       } else {
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
       }
@@ -1278,6 +1281,8 @@ function applyClusterFilters() {
   filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV', 'INTER'], [ '2D999' ]);
   filterAvailableClustersByScenarioSubType('744', ['NRMLC'], [ '10590','10591','10592','10593','10594','10595','10596','10597','10598','10599','10600','10601','10602','10603','10604','10605','10606','10607','10608','10609','10610','10611','10612','10613','10614','10615','10616','10617','10618','10619','10620','10621','10622','10623','10624','10625','10626','10627','10628','10629','10630','10631','10632','10633','10634','10635','10636','10637','10638','10639','10640','10641','10642','10643','10644','10645','2D999' ]);
   filterAvailableClustersByScenarioSubType('744', ['AQSTN'], [ '10590','10591','10592','10593','10594','10595','10596','10597','10598','10599','10600','10601','10602','10603','10604','10605','10606','10607','10608','10609','10610','10611','10612','10613','10614','10615','10616','10617','10618','10619','10620','10621','10622','10623','10624','10625','10626','10627','10628','10629','10630','10631','10632','10633','10634','10635','10636','10637','10638','10639','10640','10641','10642','10643','10644','10645','2D999' ]);
+  
+  
   lockFieldsWithDefaultValuesByScenarioSubType();
 }
 
@@ -1300,6 +1305,8 @@ function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrpArray,
     FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), clusterArray);
     if (clusterArray.length == 1) {
       FormManager.setValue('apCustClusterId', clusterArray[0]);
+      FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
     }
   }
 }
@@ -1403,15 +1410,6 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
         FormManager.setValue('mrcCd', '3');
         FormManager.readOnly('mrcCd');
         
-        FormManager.setValue('inacType', '');
-        FormManager.readOnly('inacType');
-        FormManager.setValue('inacCd', '');
-        FormManager.readOnly('inacCd');
-      } else if (['10654', '10655', '10656', '10657' ].includes(clusterid)) {
-        FormManager.setValue('inacType', '');
-        FormManager.readOnly('inacType');
-        FormManager.setValue('inacCd', '');
-        FormManager.readOnly('inacCd');
       } else {
         FormManager.enable('clientTier');
         FormManager.enable('isuCd');        
@@ -2364,6 +2362,7 @@ function onInacTypeChange() {
                 }
                 FormManager.resetDropdownValues(FormManager.getField('inacCd'));
                 FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+                FormManager.setValue('inacCd', inacCdValue[0]);
                 if (inacCdValue.length == 1) {
                   FormManager.setValue('inacCd', inacCdValue[0]);
                 }
@@ -2375,7 +2374,7 @@ function onInacTypeChange() {
     }
   }
   
-  
+  FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
   
 }
 
@@ -2385,7 +2384,9 @@ function filterInacCd(cmrIssuCntry, clusters,inacType,inacCd) {
   if (actualCmrIssuCntry == cmrIssuCntry && actualCluster == clusters) {
     FormManager.limitDropdownValues(FormManager.getField('inacType'), inacType);    
     FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCd);
-    
+    FormManager.setValue('inacCd',inacCd);
+    FormManager.setValue('inacType', inacType);    
+    FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
   }
 }
 
@@ -4964,62 +4965,68 @@ function checkExpiredData() {
 }
 
 function addCtcObsoleteValidator() {
-    FormManager.addFormValidator((function() {
-        return {
-            validate : function() {
-              var reqType = FormManager.getActualValue('reqType');
-              var reqId = FormManager.getActualValue('reqId');
-              var clientTier = FormManager.getActualValue('clientTier');
-              var oldCtc;
-              var qParams = {
-               REQ_ID : reqId
-               };
+  FormManager.addFormValidator((function() {
+      return {
+          validate : function() {
+            var reqType = FormManager.getActualValue('reqType');
+            var reqId = FormManager.getActualValue('reqId');
+            var clientTier = FormManager.getActualValue('clientTier');
+            var oldCtc;
+            var qParams = {
+             REQ_ID : reqId
+             };
 
-        var result = cmr.query('GET.DATA_RDC.CLIENT_TIER_REQID', qParams);
-        if (result != null && result != '') {
-         var oldCtc = result.ret1;
-        }
-        
-        if(clientTier == "T" && FormManager.getActualValue('cmrIssuingCntry') == '856'){
-          console.log('>>> Skip CTC Obsolete Validator clientTier = T for TH');
-          return new ValidationResult(null, true);
-        }
-
-        if (reqType == 'C' && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B"  ||clientTier == "M"|| clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" )) {
-          // CREATCMR-7884
-          var cntry = FormManager.getActualValue('cmrIssuingCntry');
-          if(clientTier == "T" && cntry == '796'){
-            var custSubGrp = FormManager.getActualValue('custSubGrp');
-            var custSubGrpList = ['NRML','ESOSW','XESO','CROSS'];
-            if(custSubGrpList.includes(custSubGrp)){
-              console.log('>>> Skip CTC Obsolete Validator for NRML/ESOSW/XESO/CROSS when clientTier = T');
-              return new ValidationResult(null, true);
-            }
-          }
-          if(clientTier == "T" && (cntry == '736' || cntry == '738')){
-            return new ValidationResult(null, true);
-          }
-          if(clientTier == "T" && cntry == '616'){
-          	console.log('>>> Skip CTC Obsolete Validator clientTier = T for AU');
-            return new ValidationResult(null, true);
-          }
-          // CREATCMR-7887
-          if(cntry == '778' || cntry == '749' || cntry == '834'){
-            return new ValidationResult(null, true);
-          }
-          return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
-        } else if (reqType == 'U' && oldCtc != null && oldCtc != clientTier && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B" ||clientTier == "M"|| clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C")) {
-          if(clientTier == "T" && (cntry == '736' || cntry == '738')){
-            return new ValidationResult(null, true);
-          }
-          return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
-        } else {
-          return new ValidationResult(null, true);
-        }
+      var result = cmr.query('GET.DATA_RDC.CLIENT_TIER_REQID', qParams);
+      if (result != null && result != '') {
+       var oldCtc = result.ret1;
       }
-     }
-    })(), 'MAIN_IBM_TAB', 'frmCMR');
- }
+      
+      if(clientTier == "T" && FormManager.getActualValue('cmrIssuingCntry') == '856'){
+        console.log('>>> Skip CTC Obsolete Validator clientTier = T for TH');
+        return new ValidationResult(null, true);
+      }
+      
+      if(clientTier == "T" && FormManager.getActualValue('cmrIssuingCntry') == '774'){
+        console.log('>>> Skip CTC Obsolete Validator clientTier = T for IN');
+        return new ValidationResult(null, true);
+      }
+      
+      if (reqType == 'C' && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B"  ||clientTier == "M"|| clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" )) {
+        // CREATCMR-7884
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if(clientTier == "T" && cntry == '796'){
+          var custSubGrp = FormManager.getActualValue('custSubGrp');
+          var custSubGrpList = ['NRML','ESOSW','XESO','CROSS'];
+          if(custSubGrpList.includes(custSubGrp)){
+            console.log('>>> Skip CTC Obsolete Validator for NRML/ESOSW/XESO/CROSS when clientTier = T');
+            return new ValidationResult(null, true);
+          }
+        }
+        if(clientTier == "T" && (cntry == '736' || cntry == '738')){
+          return new ValidationResult(null, true);
+        }
+        if(clientTier == "T" && cntry == '616'){
+          console.log('>>> Skip CTC Obsolete Validator clientTier = T for AU');
+          return new ValidationResult(null, true);
+        }
+        // CREATCMR-7887
+        if(cntry == '778' || cntry == '749' || cntry == '834'){
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
+      } else if (reqType == 'U' && oldCtc != null && oldCtc != clientTier && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B" ||clientTier == "M"|| clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C")) {
+        if(clientTier == "T" && (cntry == '736' || cntry == '738')){
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
+      } else {
+        return new ValidationResult(null, true);
+      }
+    }
+   }
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 
 function clusterCdValidatorAU() {
   FormManager.addFormValidator((function() {
