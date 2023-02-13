@@ -532,11 +532,11 @@ public class MCOCewaHandler extends MCOHandler {
     for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
-        TemplateValidation error = new TemplateValidation(name);
         boolean isDummyUpdate = false;
         boolean isShippingPhoneUpdate = false;
         boolean islandedFilled = false;
         for (Row row : sheet) {
+          TemplateValidation error = new TemplateValidation(name);
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             String cmrNo = "";
             String seqNo = ""; // 1
@@ -778,7 +778,11 @@ public class MCOCewaHandler extends MCOHandler {
               boolean isMatch = Pattern.matches("^[A-Z0-9]+$", tin);
               if (!isMatch) {
                 LOG.trace("Invalid format for TIN Number.");
-                error.addError((row.getRowNum() + 1), "TIN Number", "Invalid format for TIN Number. It should contain only upper-case latin and numeric characters. ");
+                error.addError((row.getRowNum() + 1), "TIN Number",
+                    "Invalid format for TIN Number. It should contain only upper-case latin and numeric characters. ");
+              } else if (tin.length() != 11) {
+                LOG.trace("Invalid length for TIN Number.");
+                error.addError((row.getRowNum() + 1), "TIN Number", "Invalid length for TIN Number. It should contain exactly 11 characters. ");
               }
             }
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -815,24 +819,42 @@ public class MCOCewaHandler extends MCOHandler {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
-                if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+                if (StringUtils.isBlank(clientTier) || !"Q".contains(clientTier)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                      + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                      ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
+              } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+                if (StringUtils.isBlank(clientTier) || !"Y".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+                if (StringUtils.isBlank(clientTier) || !"T".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
+                  && !"@".equalsIgnoreCase(clientTier)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
               }
             }
-        } // end row loop
-      }
-        if (error.hasErrors()) {
-          validations.add(error);
+            if (error.hasErrors()) {
+              validations.add(error);
+            }
+          }
+
+          // end row loop
         }
+
+      }
     }
-  }
   }
 
   private String getShippingPhoneFromLegacy(FindCMRRecordModel address) {
