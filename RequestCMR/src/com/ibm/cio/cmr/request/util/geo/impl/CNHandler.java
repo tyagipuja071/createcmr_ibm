@@ -536,6 +536,7 @@ public class CNHandler extends GEOHandler {
         for (CompanyRecordModel cmr : resultFindCmrCN) {
           if (cmr.getAltName().endsWith(companyName)) {
             cmrList.add(cmr.getCmrNo());
+            break;
           }
         }
         if (cmrList.size() > 0) {
@@ -552,11 +553,9 @@ public class CNHandler extends GEOHandler {
         }
         // }
       }
+    } else {
+      getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null, false);
     }
-    // else {
-    // getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null,
-    // false);
-    // }
 
   }
 
