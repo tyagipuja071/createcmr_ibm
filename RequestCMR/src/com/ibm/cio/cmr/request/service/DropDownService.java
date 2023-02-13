@@ -284,41 +284,6 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         query.append("  and ((REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W where COUNTRY_CD = :LAND1) and 'US' = :LAND1)");
         query.append("  or (REFT_COUNTRY_KEY = 0 and 'US' <> :LAND1))");
         query.setParameter("LAND1", params.getParam("landCntry"));
-      } else if (LAHandler.isLACountry(cntry)) {
-        String LALanded = PageManager.getDefaultLandedCountry(cntry);
-        // try {
-        // LALanded = SystemUtil.getISOCountryCode(cntry);
-        // } catch (Exception e) {
-        //
-        // }
-
-        if (!LAHandler.isBRIssuingCountry(cntry)) {
-          query.append("  and ((REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W where COUNTRY_CD = :LAND1) and '" + LALanded
-              + "' = :LAND1)");
-          query.append("  or (REFT_COUNTRY_KEY = 0 and '" + LALanded + "' <> :LAND1))");
-          query.setParameter("LAND1", LALanded);
-
-        } else {
-          if (!"BR".equals(params.getParam("landCntry"))) {
-            // query.append(" and ((REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY
-            // from CMMA.REFT_COUNTRY_W where COUNTRY_CD = :LAND1) and '"
-            // + LALanded
-            // + "' = :LAND1)");
-            // query
-            // .append(" or ((REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from
-            // CMMA.REFT_COUNTRY_W where COUNTRY_CD = :LAND1) and 'EX' =
-            // STATE_PROV_CD)");
-            // query.setParameter("LAND1", params.getParam("landCntry"));
-            query.append(
-                " and STATE_PROV_CD = 'EX' and REFT_COUNTRY_KEY  = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W where COUNTRY_CD = 'BR')");
-          } else {
-            query.append("  and ((REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W where COUNTRY_CD = :LAND1) and '" + LALanded
-                + "' = :LAND1)");
-            query.append("  or (REFT_COUNTRY_KEY = 0 and '" + LALanded + "' <> :LAND1))");
-            query.setParameter("LAND1", params.getParam("landCntry"));
-          }
-        }
-
       } else if ("758".equalsIgnoreCase(cntry)) {
         // String dropDownCity = params.getParam("dropDownCity") != null ?
         // params.getParam("dropDownCity").toString() : "";
@@ -592,7 +557,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
     }
 
     if ("DropDownCity".equalsIgnoreCase(fieldId)) {
-      if (LAHandler.isLACountry(cntry) || CNHandler.isCNIssuingCountry(cntry)) {
+      if (CNHandler.isCNIssuingCountry(cntry)) {
         String param = params.getParam("stateProv") != null ? params.getParam("stateProv").toString() : "";
         query.append(" and CITY_ID like('" + param + "%')");
         query.append(" and (ISSUING_CNTRY = '" + cntry + "')");

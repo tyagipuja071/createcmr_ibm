@@ -35,17 +35,50 @@ public class GCARSUpdtQueueService extends BaseService<GCARSUpdtQueueModel, GCAR
   protected List<GCARSUpdtQueueModel> doSearch(GCARSUpdtQueueModel model, EntityManager entityManager, HttpServletRequest request) throws Exception {
 
     SimpleDateFormat formatter = new SimpleDateFormat(SystemConfiguration.getValue("DATE_TIME_FORMAT"));
-    String sql = ExternalizedQuery.getSql("BR.GET.GCARS_UPDT_QUEUE");
 
     String sourceName = request.getParameter("sourceName");
+    String searchCriteria = request.getParameter("searchCriteria");
 
-    if (StringUtils.isBlank(sourceName)) {
-      sourceName = "";
+    PreparedQuery q = null;
+
+    String sqlQuery = "";
+    String paramKey = "";
+    String paramValue = "";
+
+    if (StringUtils.isNotBlank(sourceName) && StringUtils.isNotEmpty(searchCriteria)) {
+      if (searchCriteria.equals("CRTD")) {
+        sqlQuery = "BR.GET.GCARS_UPDT_QUEUE_BY_CREATE_DT";
+        paramKey = "CREATE_DT";
+        paramValue = "%" + sourceName + "%";
+      } else if (searchCriteria.equals("CMRN")) {
+        sqlQuery = "BR.GET.GCARS_UPDT_QUEUE_BY_CMR_NO";
+        paramKey = "CMR_NO";
+        paramValue = sourceName;
+      } else if (searchCriteria.equals("SRCN")) {
+        sqlQuery = "BR.GET.GCARS_UPDT_QUEUE";
+        paramKey = "SOURCE_NAME";
+        paramValue = "%" + sourceName + "%";
+      } else if (searchCriteria.equals("PROCS")) {
+        sqlQuery = "BR.GET.GCARS_UPDT_QUEUE_BY_PROC_STATUS";
+        paramKey = "PROC_STATUS";
+        paramValue = sourceName;
+      } else {
+        sqlQuery = "BR.GET.GCARS_UPDT_QUEUE";
+        paramKey = "SOURCE_NAME";
+        paramValue = "%" + sourceName + "%";
+      }
+    } else {
+      if (StringUtils.isBlank(sourceName)) {
+        sourceName = "";
+      }
+      sqlQuery = "BR.GET.GCARS_UPDT_QUEUE";
+      paramKey = "SOURCE_NAME";
+      paramValue = "%" + sourceName + "%";
     }
 
-    PreparedQuery q = new PreparedQuery(entityManager, sql);
-    q.setParameter("SOURCE_NAME", "%" + sourceName + "%");
-
+    String sql = ExternalizedQuery.getSql(sqlQuery);
+    q = new PreparedQuery(entityManager, sql);
+    q.setParameter(paramKey, paramValue);
     q.setForReadOnly(true);
 
     List<GCARSUpdtQueue> gcarsUpdtQueueList = q.getResults(GCARSUpdtQueue.class);

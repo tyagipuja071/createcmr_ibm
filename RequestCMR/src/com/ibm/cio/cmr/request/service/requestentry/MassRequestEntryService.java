@@ -4948,7 +4948,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           model.setRepTeamMemberNo(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("REP_TEAM_MEMBER_NO") - 1)));
           model.setCollectorNameNo(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COLLECTOR_NO") - 1)));
           model.setCodCondition(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COD_CONDITION") - 1)));
-          model.setCodCondition(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COD_RSN") - 1)));
+          model.setCodReason(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COD_RSN") - 1)));
           model.setCreditCode(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CREDIT_CD") - 1)));
           model.setIbmBankNumber(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("IBM_BANK_NO") - 1)));
 
@@ -5373,14 +5373,14 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry()) && !validateATMassUpdateFile(filePath, data, admin)) {
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                     }
-                  } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
-                    fis = new FileInputStream(filePath);
-                    if (!validateDRMassUpdateFile(filePath, data, admin, data.getCmrIssuingCntry())) {
-                      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                    }
                   } else if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
                     fis = new FileInputStream(filePath);
                     if (!validateLAMassUpdateFile(filePath, data, admin, data.getCmrIssuingCntry())) { // chie1
+                      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                    }
+                  } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
+                    fis = new FileInputStream(filePath);
+                    if (!validateDRMassUpdateFile(filePath, data, admin, data.getCmrIssuingCntry())) {
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                     }
                   } else if (FranceUtil.isCountryFREnabled(entityManager, data.getCmrIssuingCntry())) {
@@ -5424,10 +5424,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListForFR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
                   } else if (SwissUtil.isCountrySwissEnabled(entityManager, data.getCmrIssuingCntry())) {
                     setMassUpdateListForSWISS(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
-                  } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
-                    setMassUpdateListForDR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
                     setMassUpdateListForLA(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
+                  } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
+                    setMassUpdateListForDR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else {
                     if (!PageManager.fromGeo("JP", cmrIssuingCntry)) {
                       setMassUpdateList(modelList, item.getInputStream(), reqId, newIterId, filePath);
@@ -6655,6 +6655,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CNTRY_USE":
         muModel.setCountryUse(tempVal);
+        break;
+      case "MEXICO_BILLING_NAME":
+        muModel.setMexicoBillingName(tempVal);
         break;
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
