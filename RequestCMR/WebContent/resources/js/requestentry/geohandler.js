@@ -140,11 +140,16 @@ var GEOHandler = (function() {
 
   var nameAddressType = 'ZS01';
 
+  var forceLockUnlock = function() {
+    FormManager.readOnly('cmrIssuingCntry');
+  }
+
   var getCMRIssuingCountry = function() {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     if (cntry == '' && typeof (_pagemodel) != 'undefined') {
       cntry = _pagemodel.cmrIssuingCntry;
     }
+    forceLockUnlock();
     return cntry;
   };
 
@@ -386,12 +391,12 @@ var GEOHandler = (function() {
     isTGMERequired : function(cntry) {
       // CREATCMR-5741 no TGME Addr Std
       return false;
-//      for (var i = 0; i < noTGME.length; i++) {
-//        if (noTGME[i] == cntry) {
-//          return false;
-//        }
-//      }
-//      return true;
+      // for (var i = 0; i < noTGME.length; i++) {
+      // if (noTGME[i] == cntry) {
+      // return false;
+      // }
+      // }
+      // return true;
     },
     enableCopyAddress : function(arrayOfCountries, validator, arrayOfTypesWithoutCopy) {
       var cntry = getCMRIssuingCountry();
