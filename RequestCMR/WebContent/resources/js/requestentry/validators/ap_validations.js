@@ -131,9 +131,6 @@ function afterConfigForIndia() {
   
 
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-    FormManager.setValue('covId','');
-    FormManager.setValue('geoLocationCd','');
-    FormManager.setValue('covBgRetrievedInd','N');
     lockFieldsWithDefaultValuesByScenarioSubType();
   });
 
@@ -1292,8 +1289,8 @@ function resetFieldsAfterCustSubGrpChange() {
   console.log(">>>> resetInacNacCdAfterCustSubGrpChange >>>>");
   
   FormManager.setValue('isuCd', '');
-//  FormManager.setValue('inacType', '');
-//  FormManager.setValue('inacCd', '');
+// FormManager.setValue('inacType', '');
+// FormManager.setValue('inacCd', '');
 }
 
 function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrpArray, clusterArray) {
