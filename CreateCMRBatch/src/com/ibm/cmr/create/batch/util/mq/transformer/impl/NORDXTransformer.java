@@ -1474,15 +1474,18 @@ public class NORDXTransformer extends EMEATransformer {
       cust.setIsuCd(isuClientTier);
     }
 
-    if (data.getCmrIssuingCntry().equals("702")) {
-      if (data.getCountryUse().equals("702")) {
-        if (isuClientTier != null && ("5K".equals(muData.getIsuCd()) || "04".equals(muData.getIsuCd()))) {
-          cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
-        }
-      } else if (Arrays.asList("5K", "21", "8B").contains(muData.getIsuCd())) {
-        cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
-      }
-    }
+    // if (data.getCmrIssuingCntry().equals("702")) {
+    // if (data.getCountryUse().equals("702")) {
+    // if (isuClientTier != null && ("5K".equals(muData.getIsuCd()) ||
+    // "04".equals(muData.getIsuCd()))) {
+    // cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ?
+    // muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
+    // }
+    // } else if (Arrays.asList("5K", "21", "8B").contains(muData.getIsuCd())) {
+    // cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ?
+    // muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
+    // }
+    // }
 
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
       if ("@".equals(muData.getRepTeamMemberNo())) {
