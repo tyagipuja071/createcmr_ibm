@@ -537,6 +537,7 @@ function setInacNacValuesIN(){
               }
             }
           }
+	  FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');    
           FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
       } else {
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
@@ -2060,6 +2061,7 @@ function filterInacCd(cmrIssuCntry, clusters,inacType,inacCd) {
     FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCd);
     FormManager.setValue('inacCd',inacCd);
     FormManager.setValue('inacType', inacType);    
+    FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
   }
 }
