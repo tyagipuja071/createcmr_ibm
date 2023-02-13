@@ -198,22 +198,28 @@ function processRequestAction() {
             showAddressVerificationModal();
           }
         }
+      } else if (cmrCntry == SysLoc.NEW_ZEALAND) {
+        // CREATCMR-8430: do DNB check for NZ update
+        var checkCompProof = checkForCompanyProofAttachment();
+        if (checkIfFinalDnBCheckRequired() && checkCompProof) {
+          if(reqType == 'C') {
+            matchDnBForNZ();
+          } else {
+            matchDnBForNZUpdate();
+          }
+        } else {
+          if(reqType == 'C') {
+            var custSubGrp = FormManager.getActualValue('custSubGrp');
+            if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN') {
+              cmr.showProgress('Checking request data..');
+              checkRetrievedForNZ();
+            } else {
+              showAddressVerificationModal();
+            }
+          }
+        }
       } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
-       // CREATCMR-7884: NZ coverage - after company proof provided, also need to retrieve GLC
-      } else if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C') {
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
-      	if(matchOverrideIndc=='Y') {
-      	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN') {
-            cmr.showProgress('Checking request data..');
-            checkRetrievedForNZ();
-          } else {
-            showAddressVerificationModal();
-          }
-      	} else {
-      	  showAddressVerificationModal();
-      	}
       } else if (cmrCntry == '897' || cmrCntry == '649') {
         // CREATCMR-6074
         // addUpdateChecksExecution(frmCMR);
@@ -1837,6 +1843,14 @@ function checkIfFinalDnBCheckRequired() {
       return true;
     }
   }
+  // CREATCMR-8430: do DNB check for NZ update
+  if (cmrCntry == '796') {
+    if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+      && !isSkipDnbMatching()) {
+    // currently Enabled Only For US
+      return true;
+    }
+  }
   return false;
 }
 function checkIfDnBCheckReqForIndia() {
@@ -2836,69 +2850,66 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
     FormManager.readOnly('isuCd');
   }
 }
-// CREATCMR-7884
-function setClusterIDAfterRetrieveAction(glcCode) {
-  console.log('>>> setClusterIDAfterRetrieveAction >>>');
-  var glcClusterMap = {};
-  glcClusterMap['NZL0005'] = '10662';
-  glcClusterMap['NZL0020'] = '10662';
-  glcClusterMap['NZL0010'] = '10663';
-  glcClusterMap['NZL9999'] = '01147';
-  
-  FormManager.setValue('apCustClusterId', glcClusterMap[glcCode]);
-  FormManager.setValue('clientTier', 'Q');
-  FormManager.setValue('isuCd', '34');
-}
 
-// CREATCMR-7884
-function checkRetrievedForNZ(){
-  console.log('>>> checkRetrievedForNZ >>>');
-  var glcClusterMap = {};
-  glcClusterMap['NZL0005'] = '10662';
-  glcClusterMap['NZL0020'] = '10662';
-  glcClusterMap['NZL0010'] = '10663';
-  glcClusterMap['NZL9999'] = '01147';
-  var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
-  var oldGlcCode = FormManager.getActualValue('geoLocationCd');
-  var oldClusterId = FormManager.getActualValue('apCustClusterId');
-  console.log("hasRetrievedValue is ", hasRetrievedValue, "old GLC code is ", oldGlcCode);
-  
-  if(!hasRetrievedValue) {
-  	cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
-  } else {
-  	console.log("Checking the GLC match... retrieve value again...")
-  	var data = CmrServices.getAll('reqentry');
-  	cmr.hideProgress();
-  	if (data) {
-      console.log(data);
-      if (data.error && data.error == 'Y') {
-        cmr.showAlert('An error was encountered when retrieving the values.\nPlease contact your system administrator.', 'Create CMR');
-      } else {
-        if (data.glcError) {
-          //errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
-        } else {
-          if(glcClusterMap[data.glcCode] != oldClusterId) {
-            console.log("The cluster id are different, then overwrite the GLC code and cluster id.")
-            FormManager.setValue('geoLocationCd', data.glcCode);
-    	    FormManager.setValue('geoLocDesc', data.glcDesc);
-    	    FormManager.setValue('apCustClusterId', glcClusterMap[data.glcCode]);
-  		    FormManager.setValue('clientTier', 'Q');
-  		    FormManager.setValue('isuCd', '34');
-  		    //cmr.showAlert('The GLC and Cluster has been overwritten to ' + data.glcCode + '-' + glcClusterMap[data.glcCode] + ', please continue the process.\nPlease contact your system administrator.', 'Create CMR');
-  		    cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to ' + data.glcCode + '-' + glcClusterMap[data.glcCode] + '. Do you want to proceed with this request?', 'Warning', null, {
-	          OK : 'Yes',
-	          CANCEL : 'No'
-	        });
-		  } else {
-	        if (data.glcCode != oldGlcCode) {
-	          console.log("The GLC code are different, the cluster id are same, then overwrite the GLC code only.")
-	          FormManager.setValue('geoLocationCd', data.glcCode);
-	    	  FormManager.setValue('geoLocDesc', data.glcDesc);
-	        }
-	        showAddressVerificationModal();
-          }
-        }
-      }
-  	}
+// CREATCMR-8430: do DNB check for NZ update
+function matchDnBForNZUpdate() {
+  console.log('>>> matchDnBForNZUpdate >>>');
+  var reqId = FormManager.getActualValue('reqId');
+  console.log("Checking if the request matches D&B...");
+  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
+  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
+  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
+    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
+    return;
   }
+  cmr.showProgress('Checking request data with D&B...');
+  dojo
+      .xhrGet({
+        url : cmr.CONTEXT_ROOT + '/request/dnb/checkDNBAPIMatchUpdateForNZ.json',
+        handleAs : 'json',
+        method : 'GET',
+        content : {
+          'reqId' : reqId
+        },
+        timeout : 50000,
+        sync : false,
+        load : function(data, ioargs) {
+          cmr.hideProgress();
+          console.log(data);
+          if (data && data.success) {
+            if (!data.custNmMatch){
+            	cmr.showAlert('Customer name match fail.\nPlease attach company proof');
+            	FormManager.setValue('matchOverrideIndc', 'Y');
+            } else if(!data.formerCustNmMatch) {
+              cmr.showAlert('Customer former name match fail.\nPlease attach company proof');
+            	FormManager.setValue('matchOverrideIndc', 'Y');
+            } else if(!data.matchesAddrDnb) {
+              if(data.addressType == "ZS01") {
+                if (!data.matchesAddrAPI) {
+                  cmr.showAlert('DNB address match fail. NZAPI address match fail.\nPlease attach company proof');
+                  FormManager.setValue('matchOverrideIndc', 'Y');
+                } else {
+                  console.log("DNB address match fail. NZAPI address match success.")
+                  showAddressVerificationModal();
+                }
+              } else {
+                cmr.showAlert(data.message + '\nPlease attach company proof');
+                FormManager.setValue('matchOverrideIndc', 'Y');
+              }
+            } else {
+              showAddressVerificationModal();
+            }
+          } else {
+            // continue
+            console.log("An error occurred while matching dnb.");
+            cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+              OK : 'Yes',
+              CANCEL : 'No'
+            });
+          }
+        },
+        error : function(error, ioargs) {
+        }
+      });
+
 }

@@ -1080,26 +1080,18 @@ public class DnBUtil {
       dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
     }
     dnbAddress = dnbAddress.trim();
-    Boolean matchWithDnbMailingAddr = false;
-    if (handler != null) {
-      matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
-    }
+    // CREATCMR-8430: removed mailing address check
     LOG.debug("DNB match country =  " + country);
     Boolean isReshuffledAddr = false;
-    if ("897".equals(country) || "US".equals(country)) {
-      isReshuffledAddr = USHandler.compareUSReshuffledAddress(dnbAddress, address, country);
-      LOG.debug("US isReshuffledAddr =  " + isReshuffledAddr);
-    } else {
-      isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
-      LOG.debug("isReshuffledAddr =  " + isReshuffledAddr);
-    }
+    isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
+    LOG.debug("isReshuffledAddr =  " + isReshuffledAddr);
 
     // Boolean isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress,
     // address, country);
     if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
         && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
         && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr
-        && !matchWithDnbMailingAddr) {
+    ) {
       map.put("dnbNmMatch", true);
       map.put("dnbAddrMatch", false);
       return map;
@@ -1109,14 +1101,14 @@ public class DnBUtil {
       String currentPostalCode = addr.getPostCd();
       String dnbPostalCode = dnbRecord.getDnbPostalCode();
       if (currentPostalCode.length() != dnbPostalCode.length()) {
-        if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
+        if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode)) {
           map.put("dnbNmMatch", true);
           map.put("dnbAddrMatch", false);
           return map;
         }
       }
       if (currentPostalCode.length() == dnbPostalCode.length()) {
-        if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode) && !matchWithDnbMailingAddr) {
+        if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode)) {
           map.put("dnbNmMatch", true);
           map.put("dnbAddrMatch", false);
           return map;
@@ -1125,7 +1117,7 @@ public class DnBUtil {
     }
 
     if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
-        && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6 && !matchWithDnbMailingAddr) {
+        && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6) {
       map.put("dnbNmMatch", true);
       map.put("dnbAddrMatch", false);
       return map;
