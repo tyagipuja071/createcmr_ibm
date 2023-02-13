@@ -4387,6 +4387,11 @@ function addCtcObsoleteValidator() {
         if (result != null && result != '') {
          var oldCtc = result.ret1;
         }
+		    
+	if(clientTier == "T" && FormManager.getActualValue('cmrIssuingCntry') == '744'){
+        console.log('>>> Skip CTC Obsolete Validator clientTier = T for IN');
+        return new ValidationResult(null, true);
+      }	    
 
         if (reqType == 'C' && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B"  ||clientTier == "M"|| clientTier == "V" || clientTier == "S" || clientTier == "N" || clientTier == "C" )) {
            return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
