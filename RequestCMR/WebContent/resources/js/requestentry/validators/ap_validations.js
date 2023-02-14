@@ -362,6 +362,7 @@ function addAfterConfigAP() {
   if(cntry == '796' && reqType == 'U'){
     console.log(">>> NZ-796-U >>> Lock ISIC For UPDATE.");
     FormManager.readOnly('isicCd');
+  }  
   // CREATCMR-7653
   if (cntry == '796' && reqType == 'C') {
     setDefaultValueForNZCreate();
@@ -7995,4 +7996,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
   GEOHandler.registerValidator(validateRetrieveValues, [ SysLoc.INDIA ]);
  
-})}
+});
