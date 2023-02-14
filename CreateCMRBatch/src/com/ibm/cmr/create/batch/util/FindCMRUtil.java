@@ -294,21 +294,16 @@ public class FindCMRUtil {
   }
 
   private static List<SearchResultObject> findCMRsFromService(String cmrNo, String cmrIssuingCntry) throws Exception {
-    // JSONObject request = new JSONObject();
-    // request.put("cmrResultRows", 100);
-    // request.put("cmrIssueCategory", cmrIssuingCntry);
-    // request.put("cmrNum", cmrNo);
-    // SearchClient client =
-    // CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_CI_SERVICES_URL"),
-    // SearchClient.class);
-    // JSONArray results = client.execute("findcmr", request, JSONArray.class);
 
-    SearchRequest request = new SearchRequest();
+    SearchRequestSVC request = new SearchRequestSVC();
+
     request.setCmrResultRows(100);
     request.setCmrNum(cmrNo);
     request.setCmrIssueCategory(cmrIssuingCntry);
     request.setAppId("findcmr");
-
+    request.setSvcId(SystemConfiguration.getSystemProperty("service.id"));
+    request.setSvcPwd(SystemConfiguration.getSystemProperty("service.password"));
+		LOG.debug("Calling CI SERVICES");
     SearchServicesClient client = new SearchServicesClient(SystemConfiguration.getValue("BATCH_CI_SERVICES_URL"));
     JSONArray results = client.sendRequest(request);
 
@@ -534,6 +529,33 @@ public class FindCMRUtil {
       return (val2);
     }
 
+  }
+
+}
+
+class SearchRequestSVC extends SearchRequest {
+  private String svcId;
+  private String svcPwd;
+
+  public SearchRequestSVC() {
+    super();
+    // TODO Auto-generated constructor stub
+  }
+
+  public String getSvcId() {
+    return svcId;
+  }
+
+  public void setSvcId(String svcId) {
+    this.svcId = svcId;
+  }
+
+  public String getSvcPwd() {
+    return svcPwd;
+  }
+
+  public void setSvcPwd(String svcPwd) {
+    this.svcPwd = svcPwd;
   }
 
 }

@@ -158,7 +158,10 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
           params.add(""); // {16}
         }
         String detailedResult = AutomationUtil.extractAutomationDetailedResults(entityManager, data.getId().getReqId(), US_BP_STATUS_CD);
-        String directCmrNo = detailedResult.substring(23, 30);
+        String directCmrNo = "";
+        if (StringUtils.isNotBlank(detailedResult) && detailedResult.length() > 30) {
+          directCmrNo = detailedResult.substring(23, 30);
+        }
         params.add(directCmrNo); // {17}
       }
     } else {

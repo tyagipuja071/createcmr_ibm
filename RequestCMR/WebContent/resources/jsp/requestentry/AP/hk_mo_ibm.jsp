@@ -70,6 +70,15 @@ dojo.addOnLoad(function(){
 	        <cmr:label fieldId="apCustClusterId"> 
 	         <cmr:fieldLabel fieldId="Cluster" />:
 	         <cmr:delta text="${rdcdata.apCustClusterId}" oldValue="${reqentry.apCustClusterId}"/> 
+	         <cmr:view forCountry="796">
+				<cmr:info text="${ui.info.NZForCluster}" />
+	         </cmr:view>
+	         <cmr:view forCountry="616,749,778,834">
+				<cmr:info text="${ui.info.AUForCluster}" />
+	         </cmr:view>
+	         <cmr:view forCountry="852,856,818">
+            	<cmr:info text="${ui.info.clusterReminderMsgTH_VN_PH}"></cmr:info>
+        	 </cmr:view>
 	        </cmr:label>
 	        <cmr:field path="apCustClusterId" id="apCustClusterId" fieldId="Cluster" tabId="MAIN_IBM_TAB" />
 	      	</p>
@@ -411,6 +420,10 @@ dojo.addOnLoad(function(){
       <%} else {%>
       <span class="ibm-required cmr-required-spacer" style="visibility:hidden">*</span>
       <%} %>
+      <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("796") && "Requester".equalsIgnoreCase(reqentry.getUserRole()) && reqentry.getCustSubGrp()!=null
+       && (reqentry.getCustSubGrp().equalsIgnoreCase("NRMLC") || reqentry.getCustSubGrp().equalsIgnoreCase("AQSTN"))){%>
+      <span class="ibm-required cmr-required-spacer">*</span>
+      <%}%>
         <cmr:info text="${ui.info.coverageBg}"></cmr:info>
       </cmr:column>
       <br>

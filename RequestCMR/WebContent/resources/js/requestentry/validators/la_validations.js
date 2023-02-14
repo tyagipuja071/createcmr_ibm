@@ -651,6 +651,12 @@ function autoSetFieldsForCustScenariosSSAMX() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var internalFlag = false;
   var requesterFlag = false;
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
   if (SSAMX_COUNTRIES.indexOf(_cmrCntry) > -1 && _reqType == 'C') {
     console.log("autoSetFieldsForCrossScenario : current country belongs to SSA_MX. . .");
     console.log("autoSetFieldsForCrossScenario : current customer type : " + _custType);
@@ -2545,6 +2551,11 @@ function setLocNoLockedForRequesterBR() {
 function setSortlForStateProvince() {
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqType = FormManager.getActualValue('reqType');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
   if (cmrIssuingCntry != '631' || reqType != 'C') {
     return;
   }
@@ -2770,6 +2781,71 @@ function togglePPSCeid() {
   }
 }
 
+function retainImportValues(fromAddress, scenario, scenarioChanged) {
+  var isCmrImported = getImportedIndc();
+
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'D' && scenarioChanged && scenario == 'COMME' || scenario == 'BUSPR' || scenario == 'GOVDI' || scenario == 'GOVIN') {
+    var reqId = FormManager.getActualValue('reqId');
+    var result = cmr.query("GET.CMRINFO.IMPORTED_LA", {
+      REQ_ID : reqId
+    });
+
+    if (result != null && result != '') {
+      var origIsic = result.ret1;
+      var origSubInd = result.ret2;
+
+      FormManager.setValue('isicCd', origIsic);
+      FormManager.setValue('subIndustryCd', origSubInd);
+    }
+  }
+}
+
+var _importedIndc = null;
+function getImportedIndc() {
+  if (_importedIndc) {
+    return _importedIndc;
+  }
+  var results = cmr.query('VALIDATOR.IMPORTED_ZS01', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndc = results.ret1;
+  } else {
+    _importedIndc = 'N';
+  }
+  return _importedIndc;
+}
+
+function setIBMBankNumberBasedScenarios(fromAddress, scenario, scenarioChanged) {
+  var custGrp = FormManager.getActualValue('custGrp')
+  var ibmBankNumberList = FormManager.getField('ibmBankNumber').loadedStore._arrayOfAllItems;
+  var valueList = new Array();
+
+  if (fromAddress || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  for (var i = 0; i < ibmBankNumberList.length; i++) {
+    valueList[i] = ibmBankNumberList[i].id[0];
+  }
+
+  if (custGrp == 'LOCAL') {
+    if (scenarioChanged) {
+      FormManager.clearValue('ibmBankNumber');
+    }
+    // Remove 04 - Pure Export
+    for (var i = 0; i < valueList.length; i++) {
+      if ('04' == valueList[i]) {
+        valueList.splice(i, 1);
+      }
+    }
+    FormManager.limitDropdownValues(FormManager.getField('ibmBankNumber'), valueList);
+  } else {
+    FormManager.resetDropdownValues(FormManager.getField('ibmBankNumber'));
+    FormManager.removeValidator('ibmBankNumber', Validators.REQUIRED);
+  }
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2860,4 +2936,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(togglePPSCeid, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
   GEOHandler.registerValidator(vatValidatorUY, [ SysLoc.URUGUAY ], null, true);
+
+  GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(setIBMBankNumberBasedScenarios, [ SysLoc.URUGUAY]);
 });

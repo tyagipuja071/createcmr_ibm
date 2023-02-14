@@ -97,7 +97,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
   private final ApprovalService approvalService = new ApprovalService();
   private static final String STATUS_CHG_CMT_PRE_PREFIX = "ACTION \"";
   private static final String STATUS_CHG_CMT_MID_PREFIX = "\" changed the REQUEST STATUS to \"";
-  private static final String STATUS_CHG_CMT_POST_PREFIX = "\"<br/>";
+  private static final String STATUS_CHG_CMT_POST_PREFIX = "\"" + "\n ";
   private CheckListModel checklist;
 
   @Override

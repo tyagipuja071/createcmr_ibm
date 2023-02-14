@@ -1057,6 +1057,7 @@ public class MCOSaHandler extends MCOHandler {
             String intDeptNum = ""; // 16
             String isuCd = ""; // 10
             String clientTier = ""; // 11
+            String enterprise = ""; // 17
 
             boolean isDummyUpdate = true;
 
@@ -1125,6 +1126,9 @@ public class MCOSaHandler extends MCOHandler {
 
               currCell = (XSSFCell) row.getCell(10);
               isuCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              enterprise = validateColValFromCell(currCell);
             }
 
             checkListSubRegion = Arrays.asList(nameCont, streetCont);
@@ -1151,24 +1155,43 @@ public class MCOSaHandler extends MCOHandler {
               error.addError((row.getRowNum() + 1), "Phone #", "Phone Number should contain only digits. <br>");
             }
 
+            if (!StringUtils.isBlank(enterprise) && !enterprise.contains("@") && !enterprise.matches("\\d+.\\d*")) {
+              LOG.trace("Enterprise Number should contain only digits.");
+              error.addError((row.getRowNum() + 1), "Enterprise #", "Enterprise Number should contain only digits. <br>");
+            }
+
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
-                if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+                if (StringUtils.isBlank(clientTier) || !"Q".contains(clientTier)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                      + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError(row.getRowNum() + 1, "Client Tier",
+                      ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
+              } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+                if (StringUtils.isBlank(clientTier) || !"Y".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+                if (StringUtils.isBlank(clientTier) || !"T".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
+                  && !"@".equalsIgnoreCase(clientTier)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
               }
             }
-
 
             /*
              * if (!StringUtils.isBlank(inac) && inac.length() == 4 &&

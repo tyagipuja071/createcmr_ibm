@@ -868,7 +868,8 @@ public class FranceUtil extends AutomationUtil {
             filteredMatches.add(match);
           } else if (Arrays.asList(kuklaGovrn).contains(kukla) && ("GOVRN".equals(scenario) || "CBVRN".equals(scenario))) {
             filteredMatches.add(match);
-          } else if (Arrays.asList(kuklaBuspr).contains(kukla) && ("BPIEU".equals(scenario) || "CBIEU".equals(scenario))) {
+          } else if (Arrays.asList(kuklaBuspr).contains(kukla)
+              && ("BPIEU".equals(scenario) || "CBIEU".equals(scenario) || "BUSPR".equals(scenario) || "XBUSP".equals(scenario))) {
             filteredMatches.add(match);
           } else if (Arrays.asList(kuklaCBIEM).contains(kukla) && ("CBIEM".equals(scenario))) {
             filteredMatches.add(match);

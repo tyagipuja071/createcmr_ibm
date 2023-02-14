@@ -476,7 +476,7 @@ if (readOnly){
       %>
       </cmr:row>
     </cmr:view>
-    <cmr:view forGEO="EMEA,IERP,CND,AP,MCO,FR,MCO1,MCO2,CEMEA,JP,CN,NORDX,BELUX,NL,SWISS">
+    <cmr:view forGEO="EMEA,IERP,CND,AP,MCO,FR,MCO1,MCO2,CEMEA,JP,CN,NORDX,BELUX,NL,SWISS,TW">
       <form:hidden path="mainCustNm1" id="mainCustNm1"/>
       <form:hidden path="mainCustNm2" id="mainCustNm2"/>
     </cmr:view>
