@@ -76,7 +76,7 @@ dojo.addOnLoad(function(){
 	         <cmr:view forCountry="796">
 				<cmr:info text="${ui.info.NZForCluster}" />
 	         </cmr:view>
-	         <cmr:view forCountry="616,749,778">
+	         <cmr:view forCountry="616,749,778,834,615,652">
 				<cmr:info text="${ui.info.AUForCluster}" />
 	         </cmr:view>
 	         <cmr:view forCountry="852,856,818">
@@ -424,7 +424,7 @@ dojo.addOnLoad(function(){
       <span class="ibm-required cmr-required-spacer" style="visibility:hidden">*</span>
       <%} %>
       <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("796") && "Requester".equalsIgnoreCase(reqentry.getUserRole()) && reqentry.getCustSubGrp()!=null
-       && (reqentry.getCustSubGrp().equalsIgnoreCase("NRMLC") || reqentry.getCustSubGrp().equalsIgnoreCase("AQSTN") || reqentry.getCustSubGrp().equalsIgnoreCase("XAQST"))){%>
+       && (reqentry.getCustSubGrp().equalsIgnoreCase("NRMLC") || reqentry.getCustSubGrp().equalsIgnoreCase("AQSTN"))){%>
       <span class="ibm-required cmr-required-spacer">*</span>
       <%}%>
         <cmr:info text="${ui.info.coverageBg}"></cmr:info>

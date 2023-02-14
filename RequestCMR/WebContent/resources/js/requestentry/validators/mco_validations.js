@@ -2905,6 +2905,7 @@ function setClientTierValues() {
   } else {
     FormManager.setValue('clientTier', '');
   }
+  removeClientTireValidation();
   setEnterpriseValues();
 }
 
@@ -2917,7 +2918,9 @@ function setEnterpriseValues() {
     setEntepriseAndSalesRepES();
   } else if (SysLoc.PORTUGAL) {
     setEntepriseAndSalesRepPT();
+    setSBOAndEBO();
   }
+
   forceLockUnlock();
 }
 
@@ -2933,11 +2936,11 @@ function setEntepriseAndSalesRepES() {
   var clientTier = FormManager.getActualValue('clientTier');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet21 = new Set([ 'INTER', 'INTSO', 'IBMEM' ]);
-  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'THDPT', 'IGSGS', 'GOVIG', 'THDIG', 'PRICU' ]);
+  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'THDPT', 'IGSGS', 'GOVIG', 'THDIG', 'PRICU', 'XIGS' ]);
 
   var isuCtc = isuCd + clientTier;
 
-  if (custSubGrp == 'BUSPR' && isuCtc == '21') {
+  if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && isuCtc == '21') {
     FormManager.setValue('enterprise', '985107');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
   } else if (custSubGrpSet21.has(custSubGrp) && isuCtc == '21') {
@@ -3007,7 +3010,6 @@ function setEntepriseAndSalesRepPT() {
     FormManager.setValue('enterprise', '');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
   }
-
 }
 
 function setEnterpriseValues34Q() {
@@ -3354,7 +3356,6 @@ function validatorISUCTCEntPT() {
         if (!custSubGrpSet.has(custSubGroup)) {
           return;
         }
-
         if ((isuCd != '34' && isuCd != '36') && clientTier != '') {
           return new ValidationResult({
             id : 'clientTier',
@@ -3396,6 +3397,21 @@ function validatorISUCTCEntPT() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function removeClientTireValidation() {
+  var isuCd = FormManager.getActualValue('isuCd');
+
+  // Only for Request type create
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+  }
 }
 // CREATCMR-788
 function addressQuotationValidatorMCO() {

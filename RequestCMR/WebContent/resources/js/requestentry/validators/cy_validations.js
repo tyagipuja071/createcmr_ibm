@@ -3148,7 +3148,7 @@ function lockUnlockFieldForCY() {
     FormManager.readOnly('salesTeamCd');
     FormManager.readOnly('salesBusOffCd');
 
-  } else if (_custGrpSet2PT.has(custSubGrp)) {
+  } else if (_custGrpSet.has(custSubGrp)) {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     FormManager.enable('enterprise');
@@ -3324,5 +3324,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.CYPRUS ], null, true);
-
+  GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.CYPRUS ]);
 });

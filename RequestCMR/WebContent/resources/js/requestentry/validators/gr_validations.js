@@ -2291,18 +2291,11 @@ function iSUCTCEnterpriseCombinedCodeValidatorForGREECE() {
   var isuCtc = isuCd + clientTier;
   var isuCtcEnterprise = isuCtc + enterprise;
 
-  FormManager.removeValidator('isuCd', Validators.REQUIRED);
   FormManager.removeValidator('clientTier', Validators.REQUIRED);
   FormManager.removeValidator('enterprise', Validators.REQUIRED);
 
-  if (custSubGroup == '') {
+  if (custSubGroup == '' || isuCd == '') {
     return new ValidationResult(null, true);
-  } else if (!isuCdSet.has(isuCd) && !custSubGroupSet.has(custSubGroup)) {
-    return new ValidationResult({
-      id : 'isuCd',
-      type : 'text',
-      name : 'isuCd'
-    }, false, 'ISU can only accept \'34\', \'36\', \'5K\', \'32\'.');
   } else if (isuCdSet1.has(isuCd) && clientTier != '') {
     return new ValidationResult({
       id : 'clientTier',
@@ -2683,5 +2676,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.GREECE ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.GREECE ], null, true);
-
+  GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE ]);
 });

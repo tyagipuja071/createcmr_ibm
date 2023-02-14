@@ -447,11 +447,7 @@ public class LAHandler extends GEOHandler {
     address.setCity1(currentRecord.getCmrCity());
 
     // State Prov - computation
-    if (SystemLocation.BRAZIL.equalsIgnoreCase(issuingCountry)) {
-      address.setStateProv(getStateProvCd(issuingCountry, currentRecord.getCmrState(), currentRecord.getCmrCity()));
-    } else {
-      address.setStateProv(currentRecord.getCmrState());
-    }
+    address.setStateProv(currentRecord.getCmrState());
 
     if (StringUtils.isNotBlank(address.getCity1())) {
       address.setLocationCode(getLocationCd(issuingCountry, address.getCity1(), address.getStateProv()));
@@ -718,6 +714,8 @@ public class LAHandler extends GEOHandler {
     String issuingCntry = data.getCmrIssuingCntry();
     String sORTL = data.getSalesBusOffCd();
     String subindustry = data.getSubIndustryCd();
+    String fiscalRegime = data.getTaxCd3();
+    String mexBillingName = data.getMexicoBillingName();
 
     if ((!StringUtils.isEmpty(issuingCntry) && !StringUtils.isEmpty(sORTL) && null != data)) {
       // doSolveMrcIsuClientTierLogic(data, issuingCntry, sORTL);
@@ -4389,6 +4387,8 @@ public class LAHandler extends GEOHandler {
             String email1 = "";
             String email2 = "";
             String email3 = "";
+            String fiscalRegime = "";
+            String mexBillingName = "";
 
             if (row.getRowNum() == 2001) {
               continue;
@@ -4419,11 +4419,16 @@ public class LAHandler extends GEOHandler {
               blockCode = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(11);
               vat = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(12);
+              fiscalRegime = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(13);
+              mexBillingName = validateColValFromCell(currCell);
 
               if (StringUtils.isNotBlank(abbrevname) || StringUtils.isNotBlank(subindustry) || StringUtils.isNotBlank(isic)
                   || StringUtils.isNotBlank(inac) || StringUtils.isNotBlank(company) || StringUtils.isNotBlank(isu)
                   || StringUtils.isNotBlank(clientTier) || StringUtils.isNotBlank(sbo) || StringUtils.isNotBlank(kukla)
-                  || StringUtils.isNotBlank(blockCode) || StringUtils.isNotBlank(vat)) {
+                  || StringUtils.isNotBlank(blockCode) || StringUtils.isNotBlank(vat) || StringUtils.isNotBlank(fiscalRegime)
+                  || StringUtils.isNotBlank(mexBillingName)) {
                 isDataFilled = true;
               }
 

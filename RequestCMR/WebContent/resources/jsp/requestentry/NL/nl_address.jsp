@@ -83,6 +83,17 @@
       <cmr:field fieldId="LandedCountry" id="landCntry" path="landCntry" />
     </p>
   </cmr:column>
+  
+   <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="stateProv">
+        <cmr:fieldLabel fieldId="StateProv" />:
+             <cmr:delta text="-" id="delta-stateProv" code="L" />
+        <cmr:info text="${ui.info.addrStateProv}" />
+      </cmr:label>
+      <cmr:field fieldId="StateProv" id="stateProv" path="stateProv" />
+    </p>
+  </cmr:column>
 </cmr:row>
 
 <cmr:row>

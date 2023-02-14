@@ -201,7 +201,7 @@ public class SingaporeUtil extends AutomationUtil {
      */
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    String scenario = data.getCustSubGrp();    
+    String scenario = data.getCustSubGrp();
     String[] scnarioList = { "ASLOM", "NRML" };
     Addr soldTo = requestData.getAddress("ZS01");
     String custNm1 = soldTo.getCustNm1();
@@ -819,4 +819,14 @@ public class SingaporeUtil extends AutomationUtil {
       return result;
     }
   }
+
+  @Override
+  public void emptyINAC(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    Data data = requestData.getData();
+    LOG.debug("INAC code value " + data.getInacCd());
+    data.setInacCd("");
+    LOG.debug("INAC type value " + data.getInacType());
+    data.setInacType("");
+  }
+
 }
