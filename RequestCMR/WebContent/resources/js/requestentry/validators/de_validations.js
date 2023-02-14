@@ -51,6 +51,8 @@ function afterConfigForDE() {
   if (_subScenarioHandler == null) {
     _subScenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       setISUValues();
+      // CREATCMR-7424_7425
+      setAbbreviatedNameBasedOnAddressType();
     });
   }
 
@@ -229,8 +231,9 @@ function defaultCapIndicator() {
 
 function disableVatExemptForScenarios() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
+  var scenario3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
   if (FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '') {
-    if (_custSubGrp != 'COMME' && _custSubGrp != '3PADC' && _custSubGrp != 'GOVMT' && _custSubGrp != 'BROKR' && _custSubGrp != 'CROSS') {
+    if (_custSubGrp != 'COMME' && !scenario3PADC.includes(_custSubGrp) && _custSubGrp != 'GOVMT' && _custSubGrp != 'BROKR' && _custSubGrp != 'CROSS') {
       FormManager.disable('vatExempt');
     } else {
       FormManager.enable('vatExempt');
@@ -262,12 +265,12 @@ function setISUValues(value) {
   reqType = FormManager.getActualValue('reqType');
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var value = FormManager.getActualValue('clientTier');
-
+  var scenario3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
   if (reqType != 'C') {
     return;
   }
 
-  if (_custSubGrp != 'PRIPE' && _custSubGrp != 'COMME' && _custSubGrp != '3PADC' && _custSubGrp != 'IBMEM' && _custSubGrp != 'CROSS') {
+  if (_custSubGrp != 'PRIPE' && _custSubGrp != 'COMME' && !scenario3PADC.includes(_custSubGrp) && _custSubGrp != 'IBMEM' && _custSubGrp != 'CROSS') {
 
     if (!value) {
       value = FormManager.getField('clientTier');
@@ -327,13 +330,14 @@ function setISUValues(value) {
 
 function limitClientTierValuesOnCreate() {
   var reqType = null;
+  var scenario3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
   reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
     return;
   }
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   if (_custSubGrp != 'undefined' && _custSubGrp != '') {
-    if (_custSubGrp == 'COMME' || _custSubGrp == '3PADC' || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
+    if (_custSubGrp == 'COMME' || scenario3PADC.includes(_custSubGrp) || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
       var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', '7', 'T', 'S', 'C', 'N' ];
       if (clientTierValues != null) {
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTierValues);
@@ -537,6 +541,7 @@ function validateAddressTypeForScenario() {
         var reqType = FormManager.getActualValue('reqType');
         var scenarioType = FormManager.getActualValue('custSubGrp');
         var systemId = FormManager.getActualValue('sourceSystId');
+        var scenarioType3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
         if (reqType == 'C' && scenarioType != undefined && scenarioType != '' && (scenarioType == 'PRIPE' || scenarioType == 'IBMEM')) {
           var qParams = {
             REQ_ID : requestId,
@@ -563,6 +568,20 @@ function validateAddressTypeForScenario() {
             return new ValidationResult(null, false, 'Only Sold To Address is allowed for ' + scenarioDesc + ' scenario. Please remove other addresses.');
           } else {
             return new ValidationResult(null, true);
+          }
+        } else if (reqType == 'C' && scenarioType != undefined && scenarioType != '' && scenarioType3PADC.includes(scenarioType)) {
+          /*
+           * Mandatory addresses ZS01/ZI01 *Sold-to *Installing (Install at)
+           */
+          var soldToCnt = getCountOfAddressByReqId(requestId, 'ZS01')
+          var installingCnt = getCountOfAddressByReqId(requestId, 'ZI01');
+
+          if (installingCnt == 0) {
+            return new ValidationResult(null, false, 'For ' + ((scenarioType == '3PA' || scenarioType == 'X3PA') ? ' Third Party' : ' Data Center')
+                + ' sub-scenarios installing address is mandatory. Please add it.');
+          }
+          if (soldToCnt == 0) {
+            return new ValidationResult(null, false, 'Sold-to address is mandatory.');
           }
         }
         return new ValidationResult(null, true);
@@ -1109,6 +1128,70 @@ function checkCmrUpdateBeforeImport() {
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+// CREATCMR-7424_7425
+function setAbbreviatedNameBasedOnAddressType() {
+  console.log(">>>> setAbbreviatedNameBasedOnAddressType");
+  var _reqId = FormManager.getActualValue('reqId');
+  var subCustGrp = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var custNm1 = getCustNmByReqIdAndAddrTyp(_reqId, "ZI01");
+  var custNm2 = getCustNmByReqIdAndAddrTyp(_reqId, "ZS01");
+
+  if (reqType == 'U') {
+    return;
+  }
+
+  if (custNm1 != undefined && custNm1 != '' && (subCustGrp == '3PA' || subCustGrp == 'X3PA')) {
+    FormManager.setValue('abbrevNm', "C/O " + custNm1.substring(0, 20) + " 3P");
+  } else if (custNm2 != undefined && custNm2 != '' && (subCustGrp == 'DC' || subCustGrp == 'XDC')) {
+    FormManager.setValue('abbrevNm', custNm2.substring(0, 20) + " DC");
+  } else if (((custNm1 == undefined || custNm1 == '') && (subCustGrp == '3PA' || subCustGrp == 'X3PA')) || ((custNm2 == undefined || custNm2 != '') && (subCustGrp == 'DC' || subCustGrp == 'XDC'))) {
+    FormManager.setValue('abbrevNm', '');
+  } else {
+    autoSetAbbrevNmLogic();
+  }
+}
+
+function getCountOfAddressByReqId(reqId, addrTyp) {
+  console.log(">>>> getCountOfAddressByReqId");
+  var count = 0;
+  var countRecord = null;
+  var qParams = {
+    REQ_ID : reqId,
+    ADDR_TYP : addrTyp
+  };
+  countRecord = cmr.query('GET_COUNT_OF_RECORDS_BY_ADDRTYP', qParams);
+  if (!isParamtNull(countRecord)) {
+    count = countRecord.ret1;
+  }
+  return count;
+}
+
+function getCustNmByReqIdAndAddrTyp(reqId, addrTyp) {
+  console.log(">>>> getCustNmByReqIdAndAddrTyp");
+  var results = null;
+  var custNmResult = null;
+  var custNmParams = {
+    REQ_ID : reqId,
+    ADDR_TYPE : addrTyp
+  };
+  results = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', custNmParams);
+  if (!isParamtNull(results)) {
+    custNmResult = results.ret1;
+  }
+  return custNmResult;
+}
+
+function isParamtNull(param) {
+  console.log(">>>> isParamtNull");
+  var isNull = false;
+  if (param == null || param == undefined || param == '') {
+    isNull = true;
+  }
+  return isNull;
 }
 
 dojo.addOnLoad(function() {

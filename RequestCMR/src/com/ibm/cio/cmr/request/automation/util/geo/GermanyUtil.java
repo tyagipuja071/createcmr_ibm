@@ -40,8 +40,10 @@ import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
@@ -98,6 +100,7 @@ public class GermanyUtil extends AutomationUtil {
       AutomationResult<ValidationOutput> results, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
+    Addr zi01 = requestData.getAddress("ZI01");
     Admin admin = requestData.getAdmin();
     boolean valid = true;
     String scenario = data.getCustSubGrp();
@@ -292,14 +295,96 @@ public class GermanyUtil extends AutomationUtil {
           data.setIbmDeptCostCenter("00X306");
         }
         break;
+      case "3PA":
+      case "X3PA":
+      case "DC":
+      case "XDC":
+        // Duplicate CMR checks Based on Name and Addresses
+        try {
+          String zs01Kunnr = null;
+          String zi01Kunnr = null;
+          String dupCMRzS01 = null;
+          String dupCMRzI01 = null;
+          for (Addr addr : requestData.getAddresses()) {
+            String addrTyp = addr.getId().getAddrType();
+            if (StringUtils.isNotBlank(addrTyp) && (addrTyp.equalsIgnoreCase("ZS01") || addrTyp.equalsIgnoreCase("ZI01"))) {
+              String custNm = addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
+              String duplicateCMRNo = null;
+              // getting fuzzy matches on basis of name
+              MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+                  MatchingServiceClient.class);
+              DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
+              request.setCustomerName(custNm);
+              request.setIssuingCountry(data.getCmrIssuingCntry());
+              request.setLandedCountry(addr.getLandCntry());
+              request.setPostalCode(addr.getPostCd());
+              request.setStateProv(addr.getStateProv());
+              request.setStreetLine1(addr.getAddrTxt());
+              request.setStreetLine2(addr.getAddrTxt2());
+              request.setCity(addr.getCity1());
+              request.setAddrType(addrTyp);
+              client.setReadTimeout(1000 * 60 * 5);
+              LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+              MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
+              ObjectMapper mapper = new ObjectMapper();
+              String json = mapper.writeValueAsString(rawResponse);
+
+              TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> ref = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
+              };
+
+              MatchingResponse<DuplicateCMRCheckResponse> resp = mapper.readValue(json, ref);
+
+              if (resp.getSuccess()) {
+                if (resp.getMatched() && resp.getMatches().size() > 0) {
+                  duplicateCMRNo = resp.getMatches().get(0).getCmrNo();
+                  if (addrTyp.equalsIgnoreCase("ZS01")) {
+                    dupCMRzS01 = duplicateCMRNo;
+                    zs01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.GERMANY);
+                  } else if (addrTyp.equalsIgnoreCase("ZI01")) {
+                    dupCMRzI01 = duplicateCMRNo;
+                    zi01Kunnr = getZI01Kunnr(duplicateCMRNo, SystemLocation.GERMANY);
+                  }
+                }
+              }
+            }
+          }
+          if (zs01Kunnr != null && zi01Kunnr != null && StringUtils.isNotBlank(dupCMRzS01) && StringUtils.isNotBlank(dupCMRzI01)
+              && dupCMRzS01.equals(dupCMRzI01)) {
+            details.append("The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
+                + " already has a record with CMR No. for Sold-To " + dupCMRzS01 + " and for Install-At " + dupCMRzI01).append("\n");
+            engineData.addRejectionComment("DUPC",
+                "The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
+                    + " already has a record with CMR No. for Sold-To " + dupCMRzS01,
+                dupCMRzS01, zs01Kunnr);
+            engineData.addRejectionComment("DUPC",
+                "The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
+                    + " already has a record with CMR No. for Install-At " + dupCMRzI01,
+                dupCMRzI01, zi01Kunnr);
+            valid = false;
+          } else {
+            details.append("No Duplicate CMRs were found.").append("\n");
+          }
+        } catch (Exception e) {
+          details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
+          engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+        }
+        // Sold-To and Install-At cannot be same for these scenarios
+        if (zs01 != null && zi01 != null && addressEquals(zs01, zi01)) {
+          engineData.addRejectionComment("OTH", "For this scenario, Sold-to and Install-at need to be different", "", "");
+          details.append("For 3rd Party and Data Center Sold-To and Install-At address should be different");
+          return false;
+        }
+        break;
       }
 
-      if (!scenario.equals("3PADC")) {
+      List<String> scenario3PA = Arrays.asList("3PA", "X3PA");
+      List<String> scenarioDC = Arrays.asList("DC", "XDC");
+      if (!scenario3PA.contains(scenario)) {
         for (Addr addr : requestData.getAddresses()) {
           String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
           if (StringUtils.isNotBlank(custNm)
               && (custNm.toUpperCase().contains("C/O") || custNm.toUpperCase().contains("C / O") || custNm.toUpperCase().contains("CARE OF"))) {
-            engineData.addNegativeCheckStatus("SCENARIO_CHECK", "The scenario should be for 3rd Party / Data Center.");
+            engineData.addNegativeCheckStatus("SCENARIO_CHECK", "The scenario should be for 3rd Party");
             break;
           }
         }
@@ -317,9 +402,66 @@ public class GermanyUtil extends AutomationUtil {
   }
 
   @Override
+  public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    String address = "ZS01";
+
+    LOG.debug("Address for the scenario to check: " + scenario);
+    if ("3PA".equals(scenario) || "X3PA".equals(scenario)) {
+      address = "ZI01";
+    }
+    return address;
+  }
+
+  @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+
+    if ("3PA".contains(data.getCustSubGrp()) || "X3PA".contains(data.getCustSubGrp())) {
+      Addr zi01 = requestData.getAddress("ZI01");
+      boolean highQualityMatchExists = false;
+      List<DnBMatchingResponse> response = getMatches(requestData, engineData, zi01, false);
+      if (response != null && response.size() > 0) {
+        for (DnBMatchingResponse dnbRecord : response) {
+          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
+          if (closelyMatches) {
+            engineData.put("ZI01_DNB_MATCH", dnbRecord);
+            highQualityMatchExists = true;
+            details.append("High Quality DnB Match found for Installing address.\n");
+            details.append(" - Confidence Code:  " + dnbRecord.getConfidenceCode() + " \n");
+            details.append(" - DUNS No.:  " + dnbRecord.getDunsNo() + " \n");
+            details.append(" - Name:  " + dnbRecord.getDnbName() + " \n");
+            details.append(" - Address:  " + dnbRecord.getDnbStreetLine1() + " " + dnbRecord.getDnbCity() + " " + dnbRecord.getDnbPostalCode() + " "
+                + dnbRecord.getDnbCountry() + "\n\n");
+            details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
+            LOG.debug("Connecting to D&B details service..");
+            DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
+            if (dnbData != null) {
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
+              details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
+              String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
+              if (subInd != null) {
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+                details.append("Subindustry Code  =  " + subInd).append("\n");
+              }
+            }
+            results.setResults("Calculated.");
+            results.setProcessOutput(overrides);
+            break;
+          }
+        }
+      }
+      if (!highQualityMatchExists && "C".equals(admin.getReqType())) {
+        LOG.debug("No High Quality DnB Match found for Installing address.");
+        details.append("No High Quality DnB Match found for Installing address. Request will require CMDE review before proceeding.").append("\n");
+        engineData.addNegativeCheckStatus("NOMATCHFOUND",
+            "No High Quality DnB Match found for Installing address. Request cannot be processed automatically.");
+      }
+    }
+
     /*
      * Addr zs01 = requestData.getAddress("ZS01"); Admin admin =
      * requestData.getAdmin(); boolean payGoAddredited =
@@ -388,7 +530,6 @@ public class GermanyUtil extends AutomationUtil {
         data.setAbbrevNm(replaceGermanCharacters(data.getAbbrevNm()));
       }
     }
-
     return results;
   }
 
