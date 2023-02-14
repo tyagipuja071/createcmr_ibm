@@ -2130,14 +2130,13 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
   }
 
-  private AutomationResponse<NZBNValidationResponse> getNZBNService(Admin admin, Data data, Addr addr) throws Exception {
+  private AutomationResponse<NZBNValidationResponse> getNZBNService(Admin admin, Data data, String customerName) throws Exception {
     AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         AutomationServiceClient.class);
     client.setReadTimeout(1000 * 60 * 5);
     client.setRequestMethod(Method.Get);
 
     NZBNValidationRequest request = new NZBNValidationRequest();
-    String customerName = addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2());
     if (StringUtils.isNotBlank(data.getVat())) {
       request.setBusinessNumber(data.getVat());
       log.debug("request-businessNumber:" + request.getBusinessNumber());
@@ -2201,7 +2200,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       if (!(custNmMatch && formerCustNmMatch)) {
         log.debug("DNB Checking CustNm match failed. Now Checking CustNm with NZBN API with  to vrify CustNm update");
         try {
-          response = getNZBNService(admin, data, zs01);
+          response = getNZBNService(admin, data, customerName);
         } catch (Exception e) {
           if (response == null || !response.isSuccess()) {
             errMessage = "Failed to Connect to NZBN Service.";
@@ -2277,6 +2276,17 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     Data data = requestData.getData();
     List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, "MAIL", "ZP01", "ZI01", "ZF01", "CTYG", "CTYH");
     
+    Addr zs01 = requestData.getAddress("ZS01");
+    String customerName = zs01.getCustNm1() + (StringUtils.isBlank(zs01.getCustNm2()) ? "" : " " + zs01.getCustNm2());
+    AutomationResponse<NZBNValidationResponse> nZBNAPIresponse = null;
+    try {
+      nZBNAPIresponse = getNZBNService(admin, data, customerName);
+    } catch (Exception e) {
+      if (nZBNAPIresponse == null || !nZBNAPIresponse.isSuccess()) {
+        log.debug("\nFailed to Connect to NZBN Service.");
+      }
+    }
+
     List<Addr> addresses = null;
     for (String addrType : RELEVANT_ADDRESSES) {
       if (changes.isAddressChanged(addrType)) {
@@ -2295,19 +2305,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
                 Map dnbmatchmap = isDnBMatch(model, reqId, addr.getId().getAddrType());
                 boolean matchesAddrDnb = (boolean) dnbmatchmap.get("dnbAddrMatch");
-                AutomationResponse<NZBNValidationResponse> nZBNAPIresponse = null;
                 boolean matchesAddrAPI = false;
 
-                if (!(matchesAddrDnb) && CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+                if (!matchesAddrDnb) {
                   log.debug("DNB Checking Addr match failed. Now Checking Addr with NZBN API with  to vrify Addr update");
                   String regex = "\\s+$";
-                  try {
-                    nZBNAPIresponse = getNZBNService(admin, data, addr);
-                  } catch (Exception e) {
-                    if (nZBNAPIresponse == null || !nZBNAPIresponse.isSuccess()) {
-                      log.debug("\nFailed to Connect to NZBN Service.");
-                    }
-                  }
 
                   if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() && nZBNAPIresponse.getRecord() != null) {
                     // addr Validation
@@ -2347,13 +2349,37 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           } else if ("N".equals(addr.getImportInd())) {
             // new address addition
             Map dnbmatchmap = isDnBMatch(model, reqId, addr.getId().getAddrType());
-            boolean matchesDnb = (boolean) dnbmatchmap.get("dnbAddrMatch");
-            if (!matchesDnb) {
-              errMessage = "New address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B.";
-              map.put("matchesAddrSuccess", true);
+            boolean matchesAddrDnb = (boolean) dnbmatchmap.get("dnbAddrMatch");
+            boolean matchesAddrAPI = false;
+            if (!matchesAddrDnb) {
+              log.debug("DNB Checking Addr match failed. Now Checking Addr with NZBN API with to vrify Addr add");
+              String regex = "\\s+$";
+
+              if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() && nZBNAPIresponse.getRecord() != null) {
+                // addr Validation
+                log.debug("\nSuccess to Connect to NZBN Service.");
+                String addressAll = addressToChk.getCustNm1() + (addressToChk.getCustNm2() == null ? "" : addressToChk.getCustNm2())
+                    + addressToChk.getAddrTxt() + (addressToChk.getAddrTxt2() == null ? "" : addressToChk.getAddrTxt2())
+                    + (addressToChk.getStateProv() == null ? "" : addressToChk.getStateProv())
+                    + (addressToChk.getCity1() == null ? "" : addressToChk.getCity1())
+                    + (addressToChk.getPostCd() == null ? "" : addressToChk.getPostCd());
+                if (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getAddress())
+                    && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regex, ""))
+                    && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
+                    && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regex, ""))
+                    && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
+                    && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex, ""))) {
+                  matchesAddrAPI = true;
+                  log.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
+                }
+              }
+            }
+
+            if (!matchesAddrDnb && !matchesAddrAPI) {
               map.put("addressType", addrType);
-              map.put("matchesAddrDnb", false);
-              map.put("matchesAddrAPI", true);
+              map.put("matchesAddrDnb", matchesAddrDnb);
+              map.put("matchesAddrAPI", matchesAddrAPI);
+              errMessage = "New address for " + addrType + " (" + addr.getId().getAddrSeq() + ") does not match with DNB and NZAPI.";
               map.put("message", errMessage);
               return map;
             }
