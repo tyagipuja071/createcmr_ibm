@@ -195,6 +195,16 @@ public class MassUpdateModel extends BaseModel {
 
   private String mexicoBillingName;
 
+  private String mexicoFiscalRegime;
+
+  public String getMexicoFiscalRegime() {
+    return mexicoFiscalRegime;
+  }
+
+  public void setMexicoFiscalRegime(String mexicoFiscalRegime) {
+    this.mexicoFiscalRegime = mexicoFiscalRegime;
+  }
+
   public String getMexicoBillingName() {
     return mexicoBillingName;
   }
