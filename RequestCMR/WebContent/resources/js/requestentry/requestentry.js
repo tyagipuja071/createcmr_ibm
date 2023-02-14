@@ -1879,8 +1879,7 @@ function checkIfDnBCheckReqForIndia() {
   var result = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
     ID : reqId
   });
-  if (reqType == 'C'
-      && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'NRMLC')) {
+  if (reqType == 'C' && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'NRMLC')) {
     if (result && result.ret1) {
       return false;
     } else {
