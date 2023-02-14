@@ -6659,6 +6659,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "MEXICO_BILLING_NAME":
         muModel.setMexicoBillingName(tempVal);
         break;
+      case "MEXICO_FISCAL_REGIME":
+        muModel.setMexicoFiscalRegime(tempVal);
+        break;
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
         break;
