@@ -346,7 +346,7 @@ function addAfterConfigAP() {
   // CREATCMR-7929_NZ_LockISIC4Update
   if(cntry == '796' && reqType == 'U'){
     console.log(">>> NZ-796-U >>> Lock ISIC For UPDATE.");
-    FormManager.readOnly('isicCd');
+    FormManager.readOnly('isicCd');}
   // CREATCMR-7653
   if (cntry == '796' && reqType == 'C') {
     setDefaultValueForNZCreate();
@@ -370,6 +370,11 @@ function setInacByCluster() {
     // CREATCMR-7885
     var _clusterSG = ['09052','10144','10145','10146','10147','10148','10149','10150','10151','10152','10153','10154','10155','10156','10157'];
     var _clusterSGEmptyInac = (_cluster=='00000' && ['PRIV','XPRIV','BUSPR','DUMMY','INTER'].includes(custSubGrp));
+    
+    // CREATCMR-8504
+    var _clusterIndiaMrc3 = ['05224', '04477', '04490', '04467', '05225', '09062', '10193', '10194', '10195', '10196', '10197', '10198', '10199', 
+      '10200', '10201', '10202', '10203', '10204', '10205', '10206', '10207', '10208', '10209', '10210', '10211', '10212', '10213', '10214',
+      '10215']
     
     if (cntry == '736' || cntry == '738') {
       return;
@@ -395,7 +400,8 @@ function setInacByCluster() {
         (cntry == '834' && _clusterSG.includes(_cluster)) || 
         (cntry == '616' && !_clusterAUWithAllInac.includes(_cluster)) || 
         (cntry == '796' && (_cluster == '09056' || _cluster == '10114' || _cluster == '10115' || _cluster == '10116')) ||
-        (cntry == '856' && (['04483', '10690', '10686', '10687', '10688', '10689'].includes(_cluster)))) {
+        (cntry == '856' && (['04483', '10690', '10686', '10687', '10688', '10689'].includes(_cluster))) ||
+        (cntry == '744' && _clusterIndiaMrc3.includes(_cluster))) {
     
       FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
@@ -404,7 +410,8 @@ function setInacByCluster() {
         (cntry == '818' && _cluster == '09054') || (cntry == '778' && _cluster == '09051') || (cntry == '856' && _cluster == '09053') || (cntry == '749' && _cluster == '09050') || (cntry == '852' && _cluster == '09055') || (cntry == '616' && _cluster == '09057') || 
         (cntry == '834' && _clusterSG.includes(_cluster)) ||
         (cntry == '796' && _clusterNZ.includes(_cluster)) ||
-        (cntry == '856' && (['10690', '10686', '10687', '10688', '10689'].includes(_cluster)))){
+        (cntry == '856' && (['10690', '10686', '10687', '10688', '10689'].includes(_cluster))) ||
+        (cntry == '744' && _clusterIndiaMrc3.includes(_cluster))){
         FormManager.setValue('mrcCd', '3');
       }
       var qParams = {
@@ -7951,4 +7958,4 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateRetrieveValues, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(applyClusterFilters, [ SysLoc.INDIA ]);
   GEOHandler.addAfterConfig(applyClusterFilters, [ SysLoc.INDIA ]);
-})}
+});
