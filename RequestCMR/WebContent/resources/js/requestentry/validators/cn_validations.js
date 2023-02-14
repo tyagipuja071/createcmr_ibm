@@ -3875,6 +3875,55 @@ function retrievedForCNValidator() {
                   if(custSubGrp=='ECOSY'){
                     indc = 'E';
                   }
+                  if(custSubGrp=='NRMLC' || custSubGrp == 'AQSTN' && glcCode == 'CNL9999'){
+                    var zs01ReqId = FormManager.getActualValue('reqId');
+                    if (zs01ReqId != undefined && zs01ReqId != '') {
+                      qParams = {
+                          REQ_ID : zs01ReqId,
+                        };
+                        var record = cmr.query('GETZS01STATECITYBYREQID', qParams);
+                        if(record && record.ret1 != undefined && record.ret1 != ''){
+                          var zs01State = record.ret1;
+                          var zs01City = record.ret2;
+                          if (zs01State == 'JS' && zs01City == 'Su Zhou') {
+                              FormManager.setValue('covId', 'T0010223');
+                              FormManager.setValue('covDesc', 'CN - ST-EC/Su Zhou Branch');
+                              dojo.byId('covDescCont').innerHTML = 'CN - ST-EC/Su Zhou Branch' != null ? 'CN - ST-EC/Su Zhou Branch' : '(no description available)';
+                              FormManager.setValue('geoLocationCd', 'CNL1325');
+                              FormManager.setValue('geoLocDesc', 'Su Zhou Jiangsu GLC');
+                              dojo.byId('geoLocDescCont').innerHTML = 'Su Zhou Jiangsu GLC' != null ? 'Su Zhou Jiangsu GLC' : '(no description available)';
+                              glcCode = 'CNL1325';
+                          }
+                          if (zs01State == 'AH' && zs01City == 'Su Zhou') {
+                            FormManager.setValue('covId', 'T0010218');
+                            FormManager.setValue('covDesc', 'CN - ST-EC/He Fei Branch');
+                            dojo.byId('covDescCont').innerHTML = 'CN - ST-EC/He Fei Branch' != null ? 'CN - ST-EC/He Fei Branch' : '(no description available)';
+                            FormManager.setValue('geoLocationCd', 'CNL0625');
+                            FormManager.setValue('geoLocDesc', 'Su Zhou Anhui GLC');
+                            dojo.byId('geoLocDescCont').innerHTML = 'Su Zhou Anhui GLC' != null ? 'Su Zhou Anhui GLC' : '(no description available)';
+                            glcCode = 'CNL0625';
+                         }
+                         if (zs01State == 'FJ' && zs01City == 'Fu Zhou') {
+                            FormManager.setValue('covId', 'T0010248');
+                            FormManager.setValue('covDesc', 'CN - ST-SC/Fu Zhou Branch');
+                            dojo.byId('covDescCont').innerHTML = 'CN - ST-SC/Fu Zhou Branch' != null ? 'CN - ST-SC/Fu Zhou Branch' : '(no description available)';
+                            FormManager.setValue('geoLocationCd', 'CNL0365');
+                            FormManager.setValue('geoLocDesc', 'Fu Zhou Fujian (Location) GLC');
+                            dojo.byId('geoLocDescCont').innerHTML = 'Fu Zhou Fujian (Location) GLC' != null ? 'Fu Zhou Fujian (Location) GLC' : '(no description available)';
+                            glcCode = 'CNL0365';
+                         }
+                         if (zs01State == 'JX' && zs01City == 'Fu Zhou') {
+                            FormManager.setValue('covId', 'T0010219');
+                            FormManager.setValue('covDesc', 'CN - ST-EC/Nan Chang Branch');
+                            dojo.byId('covDescCont').innerHTML = 'CN - ST-EC/Nan Chang Branch' != null ? 'CN - ST-EC/Nan Chang Branch' : '(no description available)';
+                            FormManager.setValue('geoLocationCd', 'CNL0945');
+                            FormManager.setValue('geoLocDesc', 'Fu Zhou Jiangxi GLC');
+                            dojo.byId('geoLocDescCont').innerHTML = 'Fu Zhou Jiangxi GLC' != null ? 'Fu Zhou Jiangxi GLC' : '(no description available)';
+                            glcCode = 'CNL0945';
+                         }
+                       }
+                     }
+                  }
                   var result = cmr.query('GLC.CN.SEARCHTERM', {          
                     GLC_CD : '%'+data.glcCode+'%',
                     DEFAULT_INDC : indc
