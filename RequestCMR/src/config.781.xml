@@ -76,7 +76,7 @@
 				</column>
 				<column>
 					<label>Tax Regime</label>
-					<dbColumn>TAX_CD3</dbColumn>
+					<dbColumn>MEXICO_FISCAL_REGIME</dbColumn>
 					<width>20</width>
 					<length>30</length>
 					<lovId>LocalTax3</lovId>
@@ -85,7 +85,7 @@
 					<label>Mexico Billing Name</label>
 					<dbColumn>MEXICO_BILLING_NAME</dbColumn>
 					<width>20</width>
-					<length>250</length>
+					<length>254</length>
 				</column>
 			</columns>
 		</tab>
