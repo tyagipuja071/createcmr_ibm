@@ -661,6 +661,12 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       if (cmr.getCmrAddrTypeCode().equals("ZLST") && cmr.getCmrIssuedBy().equals("897")) {
         continue;
       }
+      // CREATCMR-7152
+      if (cmr.getCmrIssuedBy().equals("897")) {
+        if (!"ZS01".equals(cmr.getCmrAddrTypeCode()) && !"ZI01".equals(cmr.getCmrAddrTypeCode()) && !"PG01".equals(cmr.getCmrAddrTypeCode())) {
+          continue;
+        }
+      }
       addr = new Addr();
       addrPk = new AddrPK();
       addrPk.setReqId(reqId);
