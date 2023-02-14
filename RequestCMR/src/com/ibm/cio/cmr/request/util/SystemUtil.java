@@ -31,8 +31,6 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.RequestChangeLog;
 import com.ibm.cio.cmr.request.entity.RequestChangeLogPK;
-import com.ibm.cio.cmr.request.entity.SystParameters;
-import com.ibm.cio.cmr.request.entity.SystParametersPK;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -314,6 +312,50 @@ public class SystemUtil {
     return executeFindCMR(findCMRUrl, cmrIssuingCntry, null);
   }
 
+  public static void main(String[] args) throws NoSuchFieldException, SecurityException {
+    // SystParameters t = new SystParameters();
+    // SystParametersPK pk = new SystParametersPK();
+    // pk.setParameterCd("XXX");
+    // t.setId(pk);
+    // System.out.println(getRelevantKey(t));
+    String findCMRUrl = "https://localhost:9444/FindCMR/getCMRData.json?customerNumber=P19060&issuingCountryCode=706&resultRows=2000&svcId=CreateCMR&svcPwd=k03wQ@lX&showProspectCMRS=Y";
+    String cmrIss = "706";
+    String searchCntr = "706";
+    StringBuilder error = new StringBuilder();
+
+    try {
+      InputStream is = SystemUtil.class.getResourceAsStream("C:/Users/LVW0R2631/Downloads/findcmrresp.json");
+      try {
+        InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+        try {
+          BufferedReader br = new BufferedReader(isr);
+          try {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+              error.append(line);
+            }
+          } finally {
+            br.close();
+          }
+        } finally {
+          isr.close();
+        }
+      } finally {
+        is.close();
+      }
+    } catch (Exception e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+
+    try {
+      executeFindCMR(findCMRUrl, cmrIss, searchCntr);
+    } catch (CmrException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
   private static FindCMRResultModel executeFindCMR(String findCMRUrl, String cmrIssuingCntry, String searchCountry) throws CmrException {
     try {
       URL findCMR = new URL(findCMRUrl);
@@ -498,14 +540,6 @@ public class SystemUtil {
     } catch (Exception e) {
       return "?";
     }
-  }
-
-  public static void main(String[] args) throws NoSuchFieldException, SecurityException {
-    SystParameters t = new SystParameters();
-    SystParametersPK pk = new SystParametersPK();
-    pk.setParameterCd("XXX");
-    t.setId(pk);
-    System.out.println(getRelevantKey(t));
   }
 
   public static String getFieldId(Object entity) {
