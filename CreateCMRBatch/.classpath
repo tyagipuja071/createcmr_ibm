@@ -3,7 +3,7 @@
 	<classpathentry kind="lib" path="application"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container/CreateCMR"/>
-	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.ibm.ws.st.core.runtimeClasspathProvider/Liberty Runtime"/>
+    <classpathentry exported="true" kind="con" path="org.eclipse.jst.server.core.container/com.ibm.ws.st.core.runtimeClasspathProvider/DefaultServer"/>
 	<classpathentry kind="lib" path="/CreateCMR/config"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CreateCMR"/>
