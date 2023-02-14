@@ -202,15 +202,15 @@ function processRequestAction() {
         // CREATCMR-8430: do DNB check for NZ update
         var checkCompProof = checkForCompanyProofAttachment();
         if (checkIfFinalDnBCheckRequired() && checkCompProof) {
-          if(reqType == 'C') {
+          if (reqType == 'C') {
             matchDnBForNZ();
           } else {
             matchDnBForNZUpdate();
           }
         } else {
-          if(reqType == 'C') {
+          if (reqType == 'C') {
             var custSubGrp = FormManager.getActualValue('custSubGrp');
-            if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN') {
+            if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
               cmr.showProgress('Checking request data..');
               checkRetrievedForNZ();
             } else {
@@ -274,21 +274,40 @@ function processRequestAction() {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     if (cmrCntry == SysLoc.INDIA && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
       var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
-      if (hasRetrievedValue) {
+      if (!hasRetrievedValue) {
+        cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
+      } else {
         var oldGlc = FormManager.getActualValue('geoLocationCd');
         var oldCluster = FormManager.getActualValue('apCustClusterId');
-        retrieveInterfaceValues();
+        console.log("Checking the GLC match... retrieve value again...")
+        var data = CmrServices.getAll('reqentry');
 
-        setClusterGlcCovIdMapNrmlc();
-        var newGlc = FormManager.getActualValue('geoLocationCd');
-        var newCluster = FormManager.getActualValue('apCustClusterId');
-        if (oldGlc != newGlc || oldCluster != newCluster) {
-          cmr.showAlert('GLC and Cluster has been overwritten to' + newGlc + 'and' + newCluster + 'respectively');
-          cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to ' + newGlc + 'and' + newCluster + 'respectively'
-              + '. Do you want to proceed with this request?', 'Warning', null, {
-            OK : 'Yes',
-            CANCEL : 'No'
-          });
+        // cmr.hideProgress();
+        if (data) {
+          console.log(data);
+          if (data.error && data.error == 'Y') {
+            cmr.showAlert('An error was encountered when retrieving the values.\nPlease contact your system administrator.', 'Create CMR');
+          } else {
+            if (data.glcError) {
+              // errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
+            } else {
+              var newGlc = data.glcCode
+              var qParams = {
+                TXT : newGlc,
+              };
+              var newCluster = cmr.query('GET_CLUSTER_BY_GLC', qParams);
+              if (newCluster != null && (oldGlc != newGlc || oldCluster != newCluster.ret1)) {
+                retrieveInterfaceValues();
+                FormManager.setValue('apCustClusterId', newCluster.ret1);
+                FormManager.readOnly('apCustClusterId');
+                cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to ' + newGlc + 'and' + newCluster.ret1 + 'respectively'
+                    + '. Do you want to proceed with this request?', 'Warning', null, {
+                  OK : 'Yes',
+                  CANCEL : 'No'
+                });
+              }
+            }
+          }
         }
       }
     }
@@ -1275,15 +1294,15 @@ function connectToCmrServices() {
         FormManager.setValue('geoLocationCd', data.glcCode);
         FormManager.setValue('geoLocDesc', data.glcDesc);
         dojo.byId('geoLocDescCont').innerHTML = data.glcDesc != null ? data.glcDesc : '(no description available)';
-        
-        //CREATCMR-7884:reset cluster after retrieve action for NZ
+
+        // CREATCMR-7884:reset cluster after retrieve action for NZ
         var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
-  		  var reqType = FormManager.getActualValue('reqType');
-  		  var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
           setClusterIDAfterRetrieveAction(data.glcCode);
         }
-        if(cmrCntry == SysLoc.CHINA && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='ECOSY')) {
+        if (cmrCntry == SysLoc.CHINA && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN' || custSubGrp == 'ECOSY')) {
           setClusterIDAfterRetrieveAction4CN(custSubGrp, data.glcCode);
         }
       }
@@ -1846,8 +1865,8 @@ function checkIfFinalDnBCheckRequired() {
   // CREATCMR-8430: do DNB check for NZ update
   if (cmrCntry == '796') {
     if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
-      && !isSkipDnbMatching()) {
-    // currently Enabled Only For US
+        && !isSkipDnbMatching()) {
+      // currently Enabled Only For US
       return true;
     }
   }
@@ -1861,7 +1880,8 @@ function checkIfDnBCheckReqForIndia() {
     ID : reqId
   });
   if (reqType == 'C'
-      && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS' || custSubGrp == 'NRMLC')) {
+      && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS'
+          || custSubGrp == 'NRMLC' || custSubGrp == 'KYNDR' || custSubGrp == 'ECOSY')) {
     if (result && result.ret1) {
       return false;
     } else {
@@ -2602,7 +2622,7 @@ function checkIfUpdateChecksRequiredOnUI() {
 
 // CREATCMR-7874: NZ 2.0 - API check in Creation(D&B match, ISIC match, NZAPI
 // match)
-function matchDnBForNZ() {  
+function matchDnBForNZ() {
   console.log('>>> matchDnBForNZ >>>');
   var reqId = FormManager.getActualValue('reqId');
   var isicCd = FormManager.getActualValue('isicCd');
@@ -2817,24 +2837,24 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
   if (custSubGrp == 'ECOSY') {
     indc = 'E';
   }
-  if(custSubGrp=='NRMLC' && glcCode == 'CNL9999'){
+  if (custSubGrp == 'NRMLC' && glcCode == 'CNL9999') {
     var zs01ReqId = FormManager.getActualValue('reqId');
     if (zs01ReqId != undefined && zs01ReqId != '') {
       qParams = {
-          REQ_ID : zs01ReqId,
-        };
-        var record = cmr.query('GETZS01STATECITYBYREQID', qParams);
-        if(record && record.ret1 != undefined && record.ret1 != ''){
-          var zs01State = record.ret1;
-          var zs01City = record.ret2;
-          if (zs01State == 'JS' && zs01City == 'Su Zhou') {
-            FormManager.setValue('covId', 'T0010223');
-            FormManager.setValue('covDesc', 'CN - ST-EC/Su Zhou Branch');
-            dojo.byId('covDescCont').innerHTML = 'CN - ST-EC/Su Zhou Branch' != null ? 'CN - ST-EC/Su Zhou Branch' : '(no description available)';
-            FormManager.setValue('geoLocationCd', 'CNL1325');
-            FormManager.setValue('geoLocDesc', 'Su Zhou Jiangsu GLC');
-            dojo.byId('geoLocDescCont').innerHTML = 'Su Zhou Jiangsu GLC' != null ? 'Su Zhou Jiangsu GLC' : '(no description available)';
-            glcCode = 'CNL1325';
+        REQ_ID : zs01ReqId,
+      };
+      var record = cmr.query('GETZS01STATECITYBYREQID', qParams);
+      if (record && record.ret1 != undefined && record.ret1 != '') {
+        var zs01State = record.ret1;
+        var zs01City = record.ret2;
+        if (zs01State == 'JS' && zs01City == 'Su Zhou') {
+          FormManager.setValue('covId', 'T0010223');
+          FormManager.setValue('covDesc', 'CN - ST-EC/Su Zhou Branch');
+          dojo.byId('covDescCont').innerHTML = 'CN - ST-EC/Su Zhou Branch' != null ? 'CN - ST-EC/Su Zhou Branch' : '(no description available)';
+          FormManager.setValue('geoLocationCd', 'CNL1325');
+          FormManager.setValue('geoLocDesc', 'Su Zhou Jiangsu GLC');
+          dojo.byId('geoLocDescCont').innerHTML = 'Su Zhou Jiangsu GLC' != null ? 'Su Zhou Jiangsu GLC' : '(no description available)';
+          glcCode = 'CNL1325';
         }
         if (zs01State == 'AH' && zs01City == 'Su Zhou') {
           FormManager.setValue('covId', 'T0010218');
@@ -2844,8 +2864,8 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
           FormManager.setValue('geoLocDesc', 'Su Zhou Anhui GLC');
           dojo.byId('geoLocDescCont').innerHTML = 'Su Zhou Anhui GLC' != null ? 'Su Zhou Anhui GLC' : '(no description available)';
           glcCode = 'CNL0625';
-       }
-       if (zs01State == 'FJ' && zs01City == 'Fu Zhou') {
+        }
+        if (zs01State == 'FJ' && zs01City == 'Fu Zhou') {
           FormManager.setValue('covId', 'T0010248');
           FormManager.setValue('covDesc', 'CN - ST-SC/Fu Zhou Branch');
           dojo.byId('covDescCont').innerHTML = 'CN - ST-SC/Fu Zhou Branch' != null ? 'CN - ST-SC/Fu Zhou Branch' : '(no description available)';
@@ -2853,8 +2873,8 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
           FormManager.setValue('geoLocDesc', 'Fu Zhou Fujian (Location) GLC');
           dojo.byId('geoLocDescCont').innerHTML = 'Fu Zhou Fujian (Location) GLC' != null ? 'Fu Zhou Fujian (Location) GLC' : '(no description available)';
           glcCode = 'CNL0365';
-       }
-       if (zs01State == 'JX' && zs01City == 'Fu Zhou') {
+        }
+        if (zs01State == 'JX' && zs01City == 'Fu Zhou') {
           FormManager.setValue('covId', 'T0010219');
           FormManager.setValue('covDesc', 'CN - ST-EC/Nan Chang Branch');
           dojo.byId('covDescCont').innerHTML = 'CN - ST-EC/Nan Chang Branch' != null ? 'CN - ST-EC/Nan Chang Branch' : '(no description available)';
@@ -2862,9 +2882,9 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
           FormManager.setValue('geoLocDesc', 'Fu Zhou Jiangxi GLC');
           dojo.byId('geoLocDescCont').innerHTML = 'Fu Zhou Jiangxi GLC' != null ? 'Fu Zhou Jiangxi GLC' : '(no description available)';
           glcCode = 'CNL0945';
-       }
-       }
-     }
+        }
+      }
+    }
   }
   var result = cmr.query('GLC.CN.SEARCHTERM', {
     GLC_CD : '%' + glcCode + '%',
@@ -2912,53 +2932,52 @@ function matchDnBForNZUpdate() {
     return;
   }
   cmr.showProgress('Checking request data with D&B...');
-  dojo
-      .xhrGet({
-        url : cmr.CONTEXT_ROOT + '/request/dnb/checkDNBAPIMatchUpdateForNZ.json',
-        handleAs : 'json',
-        method : 'GET',
-        content : {
-          'reqId' : reqId
-        },
-        timeout : 50000,
-        sync : false,
-        load : function(data, ioargs) {
-          cmr.hideProgress();
-          console.log(data);
-          if (data && data.success) {
-            if (!data.custNmMatch){
-            	cmr.showAlert('Customer name match fail.\nPlease attach company proof');
-            	FormManager.setValue('matchOverrideIndc', 'Y');
-            } else if(!data.formerCustNmMatch) {
-              cmr.showAlert('Customer former name match fail.\nPlease attach company proof');
-            	FormManager.setValue('matchOverrideIndc', 'Y');
-            } else if(!data.matchesAddrDnb) {
-              if(data.addressType == "ZS01") {
-                if (!data.matchesAddrAPI) {
-                  cmr.showAlert('DNB address match fail. NZAPI address match fail.\nPlease attach company proof');
-                  FormManager.setValue('matchOverrideIndc', 'Y');
-                } else {
-                  console.log("DNB address match fail. NZAPI address match success.")
-                  showAddressVerificationModal();
-                }
-              } else {
-                cmr.showAlert(data.message + '\nPlease attach company proof');
-                FormManager.setValue('matchOverrideIndc', 'Y');
-              }
+  dojo.xhrGet({
+    url : cmr.CONTEXT_ROOT + '/request/dnb/checkDNBAPIMatchUpdateForNZ.json',
+    handleAs : 'json',
+    method : 'GET',
+    content : {
+      'reqId' : reqId
+    },
+    timeout : 50000,
+    sync : false,
+    load : function(data, ioargs) {
+      cmr.hideProgress();
+      console.log(data);
+      if (data && data.success) {
+        if (!data.custNmMatch) {
+          cmr.showAlert('Customer name match fail.\nPlease attach company proof');
+          FormManager.setValue('matchOverrideIndc', 'Y');
+        } else if (!data.formerCustNmMatch) {
+          cmr.showAlert('Customer former name match fail.\nPlease attach company proof');
+          FormManager.setValue('matchOverrideIndc', 'Y');
+        } else if (!data.matchesAddrDnb) {
+          if (data.addressType == "ZS01") {
+            if (!data.matchesAddrAPI) {
+              cmr.showAlert('DNB address match fail. NZAPI address match fail.\nPlease attach company proof');
+              FormManager.setValue('matchOverrideIndc', 'Y');
             } else {
+              console.log("DNB address match fail. NZAPI address match success.")
               showAddressVerificationModal();
             }
           } else {
-            // continue
-            console.log("An error occurred while matching dnb.");
-            cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
-              OK : 'Yes',
-              CANCEL : 'No'
-            });
+            cmr.showAlert(data.message + '\nPlease attach company proof');
+            FormManager.setValue('matchOverrideIndc', 'Y');
           }
-        },
-        error : function(error, ioargs) {
+        } else {
+          showAddressVerificationModal();
         }
-      });
+      } else {
+        // continue
+        console.log("An error occurred while matching dnb.");
+        cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+          OK : 'Yes',
+          CANCEL : 'No'
+        });
+      }
+    },
+    error : function(error, ioargs) {
+    }
+  });
 
 }
