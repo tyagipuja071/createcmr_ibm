@@ -57,8 +57,7 @@ public class UserAuthenticationHelper {
 
       cwa2 cwa = BluePagesHelper.getCWA2();
 
-      // cwa2 cwa = new cwa2();
-      final ReturnCode cwa2rc = cwa.authenticate(intranetId, password, ldapHost);
+      final ReturnCode cwa2rc = cwa.authenticate(intranetId, password);
 
       LOG.info("Blue page authentication return code:" + cwa2rc.getCode() + " message: " + cwa2rc.getMessage());
 
