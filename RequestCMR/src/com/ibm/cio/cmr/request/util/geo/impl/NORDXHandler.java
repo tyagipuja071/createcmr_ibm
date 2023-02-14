@@ -996,6 +996,7 @@ public class NORDXHandler extends BaseSOFHandler {
     // String engineeringBo = getACAdminFromLegacy(cntry, cmrNo);
     // data.setEngineeringBo(engineeringBo);
     // LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
+
     // CREATCMR - 8359
     // String salesRep = getSRFromLegacy(cntry, cmrNo);
     data.setRepTeamMemberNo("NOREP0");
