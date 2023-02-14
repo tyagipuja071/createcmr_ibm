@@ -371,7 +371,8 @@ function setInacByCluster() {
     if (cntry == '736' || cntry == '738') {
       return;
     }
-    if (cntry == '796' && FormManager.getActualValue('viewOnlyPage') == 'true') {
+    // CREATCMR-8458
+    if ((cntry == '796' || cntry == '834' || cntry == '616') && FormManager.getActualValue('viewOnlyPage') == 'true') {
       return;
     }
     if (!_cluster) {
