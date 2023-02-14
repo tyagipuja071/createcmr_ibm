@@ -95,10 +95,13 @@ public class UpdateSwitchElement extends ValidatingElement {
 
       GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
       
+      if("897".equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())){
+    	  requestData.getData().setRestrictInd(usRestricted);
+      }
+      
       boolean isLegalNameUpdtd = handler != null && !handler.customerNamesOnAddress() && AutomationUtil.isLegalNameChanged(admin);
       RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, requestData);
 
-      log.debug(" ====== RestrictInd" + data.getRestrictInd());
       if("897".equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())){
     	  data.setRestrictInd(usRestricted);
       }
