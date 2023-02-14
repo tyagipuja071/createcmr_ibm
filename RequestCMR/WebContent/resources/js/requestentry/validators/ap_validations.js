@@ -243,6 +243,17 @@ function addAfterConfigAP() {
   if (reqType == 'U' && (cntry == '738' || cntry == '736')) {
     FormManager.readOnly('postCd');
   }
+  
+  var clusterId = FormManager.getActualValue('apCustClusterId');
+  if (reqType == 'C' && cntry == '643' && clusterId=='00000') {
+	    FormManager.readOnly('apCustClusterId');
+	  }
+  
+  if (reqType == 'C' && cntry == '643' && clusterId=='00000' && (custSubGrp=='DUMMY' || custSubGrp=='INTER' || custSubGrp=='BUSPR' )) {
+	    FormManager.readOnly('inacType');
+	    FormManager.readOnly('inacCd');
+	  
+	  }
 
   if (reqType == 'U' && cntry == '834') {
     FormManager.readOnly('isicCd');
