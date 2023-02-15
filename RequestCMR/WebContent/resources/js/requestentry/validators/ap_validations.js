@@ -2473,7 +2473,7 @@ function onInacTypeChange() {
       });
     }
   }
-  var custSubGrpList =['AQSTN', 'BLUMX', 'MKTPC', 'IGF', 'PRIV', 'NRMLC']
+  var custSubGrpList =['AQSTN', 'BLUMX', 'MKTPC', 'IGF', 'PRIV', 'NRMLC', 'MKTPC', 'ECOSY', 'ECOSW', 'ESOSY', 'INTER', 'KYNDR', 'CROSS']
   if(!custSubGrpList.includes(custSubGrp) && cntry == SysLoc.INDIA) {
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
   }
