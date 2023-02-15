@@ -163,11 +163,10 @@ public class NewZealandUtil extends AutomationUtil {
         engineData.setNZBNAPICheck(true);
 
       } else {
-        results.setResults("Requester check fail");
+        results.setResults("Request check failed");
         if (!"PayGo-Test".equals(admin.getSourceSystId()) && !"BSS".equals(admin.getSourceSystId())) {
           results.setOnError(true);
         }
-        results.setOnError(true);
         admin.setCompVerifiedIndc("Y");
         entityManager.merge(admin);
         entityManager.flush();

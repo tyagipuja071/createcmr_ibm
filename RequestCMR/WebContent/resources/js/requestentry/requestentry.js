@@ -216,6 +216,8 @@ function processRequestAction() {
             } else {
               showAddressVerificationModal();
             }
+          } else {
+          	showAddressVerificationModal();
           }
         }
       } else if (checkIfFinalDnBCheckRequired()) {
