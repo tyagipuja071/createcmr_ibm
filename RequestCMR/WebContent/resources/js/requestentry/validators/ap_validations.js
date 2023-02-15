@@ -2388,7 +2388,9 @@ function onInacTypeChange() {
   // CREATCMR-7883
   var _clusterAUWithAllInac = ['01150','00001','08039'];
   var _clusterNZWithAllInac = ['10662','10663','01147','08037','00002'];
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = null;
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     if (_inacCdHandler == null) {
@@ -2399,7 +2401,6 @@ function onInacTypeChange() {
         console.log('onInacTypeChange cluster='+cluster);
         console.log('onInacTypeChange value='+value);
         console.log('onInacTypeChange cmt='+cmt);
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
           if (value != null && value.length>0) {
             var inacCdValue = [];
             if(cluster.includes('BLAN') || 
@@ -2467,8 +2468,10 @@ function onInacTypeChange() {
       });
     }
   }
-  
-  FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+  var custSubGrpList =['AQSTN', 'BLUMX', 'MKTPC', 'IGF', 'PRIV', 'NRMLC']
+  if(!custSubGrpList.includes(custSubGrp) && cntry == SysLoc.INDIA) {
+    FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+  }
   
 }
 
@@ -4694,11 +4697,12 @@ function validateGSTForIndia() {
               }
             var gstRet = cmr.validateGST(country, vat, name, address, postal, city);
             if (!gstRet.success) {
-              return new ValidationResult({
-                id : 'vat',
-                type : 'text',
-                name : 'vat'
-              }, false, gstRet.errorMessage);
+// return new ValidationResult({
+// id : 'vat',
+// type : 'text',
+// name : 'vat'
+// }, false, gstRet.errorMessage);
+              return new ValidationResult(null, true);
             } else {
               return new ValidationResult(null, true);
             }
