@@ -2309,7 +2309,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
                 if (!matchesAddrDnb) {
                   log.debug("DNB Checking Addr match failed. Now Checking Addr with NZBN API with  to vrify Addr update");
-                  String regex = "\\s+$";
+                  String regexForAddr = "\\s+|$";
 
                   if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() && nZBNAPIresponse.getRecord() != null) {
                     // addr Validation
@@ -2320,11 +2320,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
                         + (addressToChk.getCity1() == null ? "" : addressToChk.getCity1())
                         + (addressToChk.getPostCd() == null ? "" : addressToChk.getPostCd());
                     if (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getAddress())
-                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regex, ""))
+                        && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regexForAddr, ""))
                         && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
-                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regex, ""))
+                        && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regexForAddr, ""))
                         && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
-                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex, ""))) {
+                        && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regexForAddr, ""))) {
                       matchesAddrAPI = true;
                       log.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
                     }
@@ -2353,7 +2353,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
             boolean matchesAddrAPI = false;
             if (!matchesAddrDnb) {
               log.debug("DNB Checking Addr match failed. Now Checking Addr with NZBN API with to vrify Addr add");
-              String regex = "\\s+$";
+              String regexForAddr = "\\s+|$";
 
               if (nZBNAPIresponse != null && nZBNAPIresponse.isSuccess() && nZBNAPIresponse.getRecord() != null) {
                 // addr Validation
@@ -2364,11 +2364,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
                     + (addressToChk.getCity1() == null ? "" : addressToChk.getCity1())
                     + (addressToChk.getPostCd() == null ? "" : addressToChk.getPostCd());
                 if (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getAddress())
-                    && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regex, ""))
+                    && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regexForAddr, ""))
                     && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
-                    && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regex, ""))
+                    && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regexForAddr, ""))
                     && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
-                    && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex, ""))) {
+                    && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regexForAddr, ""))) {
                   matchesAddrAPI = true;
                   log.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
                 }

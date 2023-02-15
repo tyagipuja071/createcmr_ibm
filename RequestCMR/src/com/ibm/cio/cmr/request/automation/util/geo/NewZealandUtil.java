@@ -144,15 +144,16 @@ public class NewZealandUtil extends AutomationUtil {
             custNmMatch = true;
           }
         }
+        String regexForAddr = "\\s+|$";
         String addressAll = zs01.getCustNm1() + (zs01.getCustNm2() == null ? "" : zs01.getCustNm2()) + zs01.getAddrTxt()
             + (zs01.getAddrTxt2() == null ? "" : zs01.getAddrTxt2()) + (zs01.getStateProv() == null ? "" : zs01.getStateProv())
             + (zs01.getCity1() == null ? "" : zs01.getCity1()) + (zs01.getPostCd() == null ? "" : zs01.getPostCd());
         if (StringUtils.isNotEmpty(response.getRecord().getAddress())
-            && addressAll.replaceAll(regex, "").contains(response.getRecord().getAddress().replaceAll(regex, ""))
+            && addressAll.replaceAll(regexForAddr, "").contains(response.getRecord().getAddress().replaceAll(regexForAddr, ""))
             && StringUtils.isNotEmpty(response.getRecord().getCity())
-            && addressAll.replaceAll(regex, "").contains(response.getRecord().getCity().replaceAll(regex, ""))
+            && addressAll.replaceAll(regexForAddr, "").contains(response.getRecord().getCity().replaceAll(regexForAddr, ""))
             && StringUtils.isNotEmpty(response.getRecord().getPostal())
-            && addressAll.replaceAll(regex, "").contains(response.getRecord().getPostal().replaceAll(regex, ""))) {
+            && addressAll.replaceAll(regexForAddr, "").contains(response.getRecord().getPostal().replaceAll(regexForAddr, ""))) {
           matchesAddAPI = true;
           LOG.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
         }
@@ -436,7 +437,7 @@ public class NewZealandUtil extends AutomationUtil {
 
                 if (!(matchesDnb) && CmrConstants.RDC_SOLD_TO.equals(addrType)) {
                   LOG.debug("DNB Checking Addr match failed. Now Checking Addr with NZBN API with  to vrify Addr update");
-                  String regex = "\\s+$";
+                  String regexForAddr = "\\s+|$";
                   try {
                     nZBNAPIresponse = getNZBNService(admin, data, addr);
                   } catch (Exception e) {
@@ -454,11 +455,11 @@ public class NewZealandUtil extends AutomationUtil {
                         + (addressToChk.getCity1() == null ? "" : addressToChk.getCity1())
                         + (addressToChk.getPostCd() == null ? "" : addressToChk.getPostCd());
                     if (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getAddress())
-                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regex, ""))
+                        && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regexForAddr, ""))
                         && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
-                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regex, ""))
+                        && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regexForAddr, ""))
                         && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
-                        && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex, ""))) {
+                        && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regexForAddr, ""))) {
                       matchesAddAPI = true;
                       LOG.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
                     }
@@ -547,7 +548,7 @@ public class NewZealandUtil extends AutomationUtil {
               LOG.debug(
                   "New address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B. Now Checking Addr with NZBN API... ");
 
-              String regex = "\\s+$";
+              String regexForAddr = "\\s+|$";
               try {
                 nZBNAPIresponse = getNZBNService(admin, data, addr);
               } catch (Exception e) {
@@ -565,11 +566,11 @@ public class NewZealandUtil extends AutomationUtil {
                     + (addressToChk.getCity1() == null ? "" : addressToChk.getCity1())
                     + (addressToChk.getPostCd() == null ? "" : addressToChk.getPostCd());
                 if (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getAddress())
-                    && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regex, ""))
+                    && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regexForAddr, ""))
                     && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
-                    && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regex, ""))
+                    && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regexForAddr, ""))
                     && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
-                    && addressAll.replaceAll(regex, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regex, ""))) {
+                    && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regexForAddr, ""))) {
                   matchesAddAPI = true;
                   LOG.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
                 }
