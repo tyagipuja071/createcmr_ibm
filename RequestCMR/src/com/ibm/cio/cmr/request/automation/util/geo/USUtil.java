@@ -868,6 +868,7 @@ public class USUtil extends AutomationUtil {
             case "Size Code":
             case "CAP Record":
             case "iERP Site Party ID":
+            case "Restricted":
               // SKIP THESE FIELDS
               break;
             default:
