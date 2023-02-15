@@ -3459,6 +3459,9 @@ function setClassificationCode() {
 }
 
 function setTaxCd() {
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
   FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
   FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
 

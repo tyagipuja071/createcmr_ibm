@@ -196,12 +196,10 @@ public class FranceHandler extends GEOHandler {
     }
     // changes made as part of defect CMR - 3242
     try {
-      if ("88".equals(mainRecord.getCmrOrderBlock()) || "".equals(mainRecord.getCmrOrderBlock())) {
-        data.setCurrencyCd(geCurrencyCode(zs01sapNo));
-        data.setTaxCd2(getTaxCodeForFR(zs01sapNo));
-        data.setAdminDeptLine(getDepartment(zs01sapNo));
-        data.setIbmDeptCostCenter(getInternalDepartment((data.getCmrNo())));
-      }
+      data.setCurrencyCd(geCurrencyCode(zs01sapNo));
+      data.setTaxCd2(getTaxCodeForFR(zs01sapNo));
+      data.setAdminDeptLine(getDepartment(zs01sapNo));
+      data.setIbmDeptCostCenter(getInternalDepartment((data.getCmrNo())));
     } catch (Exception e) {
       LOG.error("Error occured on setting Currency Code/ tax code value during import.");
       e.printStackTrace();
