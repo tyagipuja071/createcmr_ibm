@@ -4697,11 +4697,11 @@ function validateGSTForIndia() {
               }
             var gstRet = cmr.validateGST(country, vat, name, address, postal, city);
             if (!gstRet.success) {
-// return new ValidationResult({
-// id : 'vat',
-// type : 'text',
-// name : 'vat'
-// }, false, gstRet.errorMessage);
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, gstRet.errorMessage);
               return new ValidationResult(null, true);
             } else {
               return new ValidationResult(null, true);
