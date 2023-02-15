@@ -466,6 +466,7 @@ public class CNHandler extends GEOHandler {
             data.setBgId(gbg.getBgId());
             data.setBgDesc(gbg.getBgName());
             data.setBgRuleId(gbg.getLdeRule());
+            setBGValues(data, currentAddress);
             entityManager.merge(data);
             entityManager.flush();
             break;
@@ -506,6 +507,7 @@ public class CNHandler extends GEOHandler {
             data.setBgId(gbg.getBgId());
             data.setBgDesc(gbg.getBgName());
             data.setBgRuleId(gbg.getLdeRule());
+            setBGValues(data, currentAddress);
             entityManager.merge(data);
             entityManager.flush();
             break;
@@ -516,6 +518,34 @@ public class CNHandler extends GEOHandler {
       }
     }
 
+  }
+
+  private void setBGValues(Data data, Addr currentAddress) throws Exception {
+    if ("GB300S7F".equals(data.getGbgId())) {
+      if ("GZ".equals(currentAddress.getStateProv()) || "YN".equals(currentAddress.getStateProv()) || "GD".equals(currentAddress.getStateProv())
+          || "SC".equals(currentAddress.getStateProv()) || "CQ".equals(currentAddress.getStateProv()) || "GX".equals(currentAddress.getStateProv())
+          || "HI".equals(currentAddress.getStateProv())) {
+        data.setBgId("DB002KDH");
+        data.setBgDesc("RCCB SOUTH");
+      } else if ("NM".equals(currentAddress.getStateProv()) || "SN".equals(currentAddress.getStateProv())
+          || "HE".equals(currentAddress.getStateProv()) || "LN".equals(currentAddress.getStateProv()) || "NX".equals(currentAddress.getStateProv())
+          || "BJ".equals(currentAddress.getStateProv()) || "GS".equals(currentAddress.getStateProv()) || "QH".equals(currentAddress.getStateProv())
+          || "HA".equals(currentAddress.getStateProv()) || "TJ".equals(currentAddress.getStateProv()) || "HL".equals(currentAddress.getStateProv())
+          || "XJ".equals(currentAddress.getStateProv()) || "JL".equals(currentAddress.getStateProv()) || "XZ".equals(currentAddress.getStateProv())
+          || "SX".equals(currentAddress.getStateProv())) {
+        data.setBgId("DB002CBD");
+        data.setBgDesc("RCCB NORTH");
+      } else if ("JS".equals(currentAddress.getStateProv()) || "JX".equals(currentAddress.getStateProv())
+          || "AH".equals(currentAddress.getStateProv())) {
+        data.setBgId("DB002C9T");
+        data.setBgDesc("RCCB EAST1");
+      } else if ("ZJ".equals(currentAddress.getStateProv()) || "HB".equals(currentAddress.getStateProv())
+          || "HN".equals(currentAddress.getStateProv()) || "SH".equals(currentAddress.getStateProv()) || "FJ".equals(currentAddress.getStateProv())
+          || "SD".equals(currentAddress.getStateProv())) {
+        data.setBgId("DB002CF1");
+        data.setBgDesc("RCCB EAST2");
+      }
+    }
   }
 
   private void getGBGId(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
@@ -554,11 +584,11 @@ public class CNHandler extends GEOHandler {
         // }
       }
     }
+
     // else {
     // getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null,
     // false);
     // }
-
   }
 
   /**
