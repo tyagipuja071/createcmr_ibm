@@ -2801,11 +2801,14 @@ function setCtcOnIsuCdChangeISA() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+ FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier'], 'MAIN_IBM_TAB');
     // CREATCMR-7878
     var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
     if(_cmrIssuingCntry != '615' && _cmrIssuingCntry !='652'){
       FormManager.enable('clientTier');
+    }
+    if (FormManager.getActualValue('reqType') == 'C') {
+      FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
     }
   }
   handleObseleteExpiredDataForUpdate();
