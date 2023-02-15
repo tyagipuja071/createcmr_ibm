@@ -4707,7 +4707,6 @@ function validateGSTForIndia() {
                 type : 'text',
                 name : 'vat'
               }, false, gstRet.errorMessage);
-              return new ValidationResult(null, true);
             } else {
               return new ValidationResult(null, true);
             }
