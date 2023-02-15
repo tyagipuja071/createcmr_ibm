@@ -250,23 +250,41 @@ function processRequestAction() {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
     var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (cmrCntry == SysLoc.INDIA && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
-      var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
-      if (hasRetrievedValue) {
+    if (cmrCntry == SysLoc.INDIA && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {   var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
+    if (!hasRetrievedValue) {
+        cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
+      } else {
         var oldGlc = FormManager.getActualValue('geoLocationCd');
         var oldCluster = FormManager.getActualValue('apCustClusterId');
-        retrieveInterfaceValues();
+        console.log("Checking the GLC match... retrieve value again...")
+        var data = CmrServices.getAll('reqentry');
 
-        setClusterGlcCovIdMapNrmlc();
-        var newGlc = FormManager.getActualValue('geoLocationCd');
-        var newCluster = FormManager.getActualValue('apCustClusterId');
-        if (oldGlc != newGlc || oldCluster != newCluster) {
-          cmr.showAlert('GLC and Cluster has been overwritten to' + newGlc + 'and' + newCluster + 'respectively');
-          cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to ' + newGlc + 'and' + newCluster + 'respectively'
-              + '. Do you want to proceed with this request?', 'Warning', null, {
-            OK : 'Yes',
-            CANCEL : 'No'
-          });
+        // cmr.hideProgress();
+        if (data) {
+          console.log(data);
+          if (data.error && data.error == 'Y') {
+            cmr.showAlert('An error was encountered when retrieving the values.\nPlease contact your system administrator.', 'Create CMR');
+          } else {
+            if (data.glcError) {
+              // errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
+            } else {
+              var newGlc = data.glcCode
+              var qParams = {
+                TXT : newGlc,
+              };
+              var newCluster = cmr.query('GET_CLUSTER_BY_GLC', qParams);
+              if (newCluster != null && (oldGlc != newGlc || oldCluster != newCluster.ret1)) {
+                retrieveInterfaceValues();
+                FormManager.setValue('apCustClusterId', newCluster.ret1);
+                FormManager.readOnly('apCustClusterId');
+                cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to "' + newGlc + '" and "' + newCluster.ret1 + '" respectively'
+                    + '. Do you want to proceed with this request?', 'Warning', null, {
+                  OK : 'Yes',
+                  CANCEL : 'No'
+                });
+              }
+            }
+          }
         }
       }
     }
