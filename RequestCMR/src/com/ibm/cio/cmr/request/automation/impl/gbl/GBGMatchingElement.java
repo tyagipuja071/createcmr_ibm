@@ -127,14 +127,16 @@ public class GBGMatchingElement extends MatchingElement {
       }
       request.setMinConfidence("6");
 
-      if (StringUtils.isBlank(data.getDunsNo())) {
-        // duns has not been computed yet, check if any matching has been
-        // performed
-        if (dnbMatching != null && dnbMatching.getConfidenceCode() > 7) {
-          request.setDunsNo(dnbMatching.getDunsNo());
+      if ("ZS01".equals(address)) {
+        if (StringUtils.isBlank(data.getDunsNo())) {
+          // duns has not been computed yet, check if any matching has been
+          // performed
+          if (dnbMatching != null && dnbMatching.getConfidenceCode() > 7) {
+            request.setDunsNo(dnbMatching.getDunsNo());
+          }
+        } else {
+          request.setDunsNo(data.getDunsNo());
         }
-      } else {
-        request.setDunsNo(data.getDunsNo());
       }
 
       if (automationUtil != null) {

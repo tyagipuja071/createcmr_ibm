@@ -1165,6 +1165,36 @@ public abstract class AutomationUtil {
     return kunnr;
   }
 
+  protected String getZI01Kunnr(String cmrNo, String cntry) throws Exception {
+    LOG.debug("getZI01Kunnr");
+    LOG.debug("Fetching ZI01 Kunnrs for cmrNo if present");
+    String kunnr = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.ZS01.KUNNR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + cntry + "'");
+
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUNNR");
+    query.addField("ZZKV_CUSNO");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      kunnr = record.get("KUNNR") != null ? record.get("KUNNR").toString() : "";
+    }
+    return kunnr;
+  }
+
   /**
    * Skips execution for all elements
    * 
