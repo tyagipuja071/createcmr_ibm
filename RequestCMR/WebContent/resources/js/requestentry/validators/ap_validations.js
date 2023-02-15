@@ -2807,6 +2807,9 @@ function setCtcOnIsuCdChangeISA() {
     if(_cmrIssuingCntry != '615' && _cmrIssuingCntry !='652'){
       FormManager.enable('clientTier');
     }
+    if (FormManager.getActualValue('reqType') == 'C') {
+      FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
+    }
   }
   handleObseleteExpiredDataForUpdate();
 }
