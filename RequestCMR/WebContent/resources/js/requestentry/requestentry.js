@@ -302,7 +302,7 @@ function processRequestAction() {
                 retrieveInterfaceValues();
                 FormManager.setValue('apCustClusterId', newCluster.ret1);
                 FormManager.readOnly('apCustClusterId');
-                cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to ' + newGlc + 'and' + newCluster.ret1 + 'respectively'
+                cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to "' + newGlc + '" and "' + newCluster.ret1 + '" respectively'
                     + '. Do you want to proceed with this request?', 'Warning', null, {
                   OK : 'Yes',
                   CANCEL : 'No'

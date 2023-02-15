@@ -140,6 +140,11 @@ function afterConfigForIndia() {
   dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
     lockFieldsWithDefaultValuesByScenarioSubType();
   });
+  
+  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+    lockFieldsWithDefaultValuesByScenarioSubType();
+  });
+  
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if(custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
     dojo.connect(FormManager.getField('geoLocationCd'), 'onChange', function(value) {
