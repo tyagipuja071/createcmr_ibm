@@ -433,8 +433,10 @@ public class AutomationEngine {
           // data.setUsSicmen("8888");
           // data.setSubIndustryCd("ZZ");
         } else {
-
+          LOG.debug("actionsOnError is emtpy ? " + actionsOnError.isEmpty());
           if (!actionsOnError.isEmpty()) {
+            LOG.debug("actionsOnError is actionsOnError.contains(ActionOnError.Reject) ? " + actionsOnError.contains(ActionOnError.Reject));
+            LOG.debug("actionsOnError is actionsOnError.contains(ActionOnError.Wait) ? " + actionsOnError.contains(ActionOnError.Wait));
             // an error has occurred
             if (actionsOnError.contains(ActionOnError.Reject)) {
               moveToNextStep = false;
@@ -506,7 +508,7 @@ public class AutomationEngine {
           }
         }
         if (moveToNextStep) {
-
+          LOG.debug("Moving to next step for " + reqId + ", Cntry is " + data.getCmrIssuingCntry());
           // if there is anything that changed on the request via automated
           // import of overrides /match /standard output, do a save
           if (hasOverrideOrMatchingApplied) {
@@ -548,6 +550,7 @@ public class AutomationEngine {
             pendingChecks.put("_usenttocomp", strCmtUsEntCompToPpn);
             // CREATCMR-5447
           } else if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
+            LOG.debug("Moving Request " + reqId + " to PCP or LEG");
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {
               // move to PCP
