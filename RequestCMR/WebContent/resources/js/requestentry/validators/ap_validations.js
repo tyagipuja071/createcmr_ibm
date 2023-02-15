@@ -139,6 +139,11 @@ function afterConfigForIndia() {
     lockFieldsWithDefaultValuesByScenarioSubType();
   });
   
+
+  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+    lockFieldsWithDefaultValuesByScenarioSubType();
+  });
+  
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if(custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
     dojo.connect(FormManager.getField('geoLocationCd'), 'onChange', function(value) {
@@ -7386,6 +7391,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
   GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
   GEOHandler.registerValidator(validateRetrieveValues, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(applyClusterFilters, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterConfig(applyClusterFilters, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterConfig(lockFieldsWithDefaultValuesByScenarioSubType, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(lockFieldsWithDefaultValuesByScenarioSubType, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(applyClusterFilters, [ SysLoc.INDIA ]);
   GEOHandler.addAfterConfig(applyClusterFilters, [ SysLoc.INDIA ]);
 });
