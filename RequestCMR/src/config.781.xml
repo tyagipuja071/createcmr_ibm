@@ -123,12 +123,11 @@
 					<width>16</width>
 					<lovId>ColBoId</lovId>
 				</column>
-				<column exactLength="true">
+				<column>
 					<label>Collector</label>
 					<dbColumn>COLLECTOR_NO</dbColumn>
 					<length>6</length>
 					<width>16</width>
-					<lovId>CollectorNo</lovId>
 				</column>
 				<column>
 					<label>Payment Method</label>
