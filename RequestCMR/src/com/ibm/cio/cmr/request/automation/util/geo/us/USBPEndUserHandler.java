@@ -267,7 +267,7 @@ public class USBPEndUserHandler extends USBPHandler {
     }
 
     // do final checks on request data
-    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
+    //overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     // CREATCMR-6342
     if (!USUtil.CG_BY_MODEL.equals(data.getCustGrp())) {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
