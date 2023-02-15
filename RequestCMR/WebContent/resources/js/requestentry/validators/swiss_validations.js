@@ -1887,7 +1887,14 @@ function checkCmrUpdateBeforeImport() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
-
+var _isuHandler = null;
+function onScenarioChangeHandler() {
+  if (_isuHandler == null) {
+    _isuHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      setPreferredLangSwiss();
+    });
+  }
+}
 function getPostalCodeForSwiss() {
   console.log(">>>> getPostalCodeForSwiss");
   var zs01ReqId = FormManager.getActualValue('reqId');
