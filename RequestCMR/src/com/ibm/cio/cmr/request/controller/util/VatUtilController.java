@@ -607,6 +607,7 @@ public class VatUtilController {
                 apiCustNmMatch = true;
 
                 // Address matching - BEGIN
+                String regexForAddr = "\\s+|$";
                 String addressAll = addr.getCustNm1() + (addr.getCustNm2() == null ? "" : addr.getCustNm2())
                     + (addr.getAddrTxt() != null ? addr.getAddrTxt() : "") + (addr.getAddrTxt2() == null ? "" : addr.getAddrTxt2())
                     + (addr.getStateProv() == null ? "" : addr.getStateProv()) + (addr.getCity1() == null ? "" : addr.getCity1())
@@ -614,11 +615,11 @@ public class VatUtilController {
                 LOG.debug("****** addressAll: " + addressAll);
                 LOG.debug("Address used for NZ API matching: " + addressAll + " VS " + nzbnResRec.getAddress());
                 if (StringUtils.isNotEmpty(nzbnResRec.getAddress())
-                    && addressAll.replaceAll(regex, "").contains(nzbnResRec.getAddress().replaceAll(regex, ""))
+                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getAddress().replaceAll(regexForAddr, ""))
                     && StringUtils.isNotEmpty(nzbnResRec.getCity())
-                    && addressAll.replaceAll(regex, "").contains(nzbnResRec.getCity().replaceAll(regex, ""))
+                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getCity().replaceAll(regexForAddr, ""))
                     && StringUtils.isNotEmpty(nzbnResRec.getPostal())
-                    && addressAll.replaceAll(regex, "").contains(nzbnResRec.getPostal().replaceAll(regex, ""))) {
+                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getPostal().replaceAll(regexForAddr, ""))) {
                   apiAddressMatch = true;
                 }
                 // Address matching - END
