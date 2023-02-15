@@ -2203,13 +2203,6 @@ function setClientTierValuesIT(isuCd) {
   if (!isuCdList.includes(isuCd)) {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
-  //  FormManager.readOnly('clientTier');
-  } else {
-    if (isuCdList.includes(isuCd)) {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-    } else {
-      FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    }
   }
   // setting default combos that are allowed for IsuCTC
   if (isuCd == '32') {
@@ -5191,13 +5184,14 @@ function setSBOSalesRepFor34QYZ() {
   var custType = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
   var checkImportIndc = getImportedIndcForItaly();
-  var reqId = FormManager.getActualValue('reqId')
+  var reqId = FormManager.getActualValue('reqId');
   var subRegion = FormManager.getActualValue('countryUse');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
   var landCntry = '';
   var isuCTC = isu.concat(ctc);
-  if (checkImportIndc == 'Y') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
     return;
   }
 
@@ -5250,7 +5244,7 @@ function setSBOSalesRepFor34QYZ() {
       if ([ 33, 34, 38, 39, 46 ].includes(postCode)) {
         FormManager.setValue('salesBusOffCd', 'GK');
       }
-      if ([ 7, 8, 9 ].includes(postCode) || (postCode >= 60 && postCode <= 67) || (postCode >= 70 && postCode <= 76) || (postCode >= 85 && postCode <= 98)) {
+      if ([ 07, 08, 09 ].includes(postCode) || (postCode >= 60 && postCode <= 67) || (postCode >= 70 && postCode <= 76) || (postCode >= 85 && postCode <= 98)) {
         FormManager.setValue('salesBusOffCd', 'NM');
       }
       if ((postCode >= 20 && postCode <= 27) && postCode != 200 && postCode != 201) {
@@ -5259,7 +5253,7 @@ function setSBOSalesRepFor34QYZ() {
       if ((postCode >= 10 && postCode <= 19) || postCode == 28) {
         FormManager.setValue('salesBusOffCd', 'NB');
       }
-      if ((postCode >= 40 && postCode <= 48) || postCode == 29 || (postCode != 45 && postCode != 46)) {
+      if ((postCode >= 40 && postCode <= 48) || postCode == 29 && (postCode != 45 && postCode != 46)) {
         FormManager.setValue('salesBusOffCd', 'DU');
       }
       if ((postCode >= 00 && postCode <= 04)) {
@@ -9883,9 +9877,13 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') {
-      // 
-    } else if (clientTierCode == 'Q') {
+   if (clientTierCode == '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    }  else if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
@@ -9895,9 +9893,13 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept \'Q\'.');
     }
   } else if (isuCode == '32') {
-    if (clientTierCode == '') {
-      //
-    } else if (clientTierCode == 'T') {
+   if (clientTierCode == '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    }  else if (clientTierCode == 'T') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
@@ -9907,8 +9909,12 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept \'T\'.');
     }
   } else if (isuCode == '36') {
-    if (clientTierCode == '') {
-      //
+   if (clientTierCode == '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
     } else if (clientTierCode == 'Y') {
       return new ValidationResult(null, true);
     } else {
@@ -10143,40 +10149,103 @@ function clientTierValidatorIT() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        console.log("Inside clientTierCodeValidator......")
+        var clientTier = FormManager.getActualValue('clientTier');
         var isuCd = FormManager.getActualValue('isuCd');
-        var ctc = FormManager.getActualValue('clientTier');
-        var isuCdList = [ '32', '34', '36' ];
-        var validIsuCTCList = [ '32T', '34Q', '36Y' ];
-        var isuCTC = isuCd.concat(ctc);
-        
-        if (!isuCdList.includes(isuCd)) {
-          if (ctc) {
-            return new ValidationResult({
-              id : 'clientTier',
-              type : 'text',
-              name : 'clientTier'
-            }, false, 'Client Tier can only accept blank.');
-          }
-        } else if (isuCdList.includes(isuCd)) {
-          if (ctc == '') {
-            return new ValidationResult({
-              id : 'clientTier',
-              type : 'text',
-              name : 'clientTier'
-            }, false, 'Client Tier code is Mandatory.');
-          } else if (!validIsuCTCList.includes(isuCTC)) {
-            return new ValidationResult({
-              id : 'clientTier',
-              type : 'text',
-              name : 'clientTier'
-            }, false, 'Valid combinations for ISU & Client Tier can only accept \'34 Q\' or \'36 Y\' or \'32 T\'.');
+        var reqType = FormManager.getActualValue('reqType');
+        var valResult = null;
+
+        var oldClientTier = null;
+        var oldISU = null;
+        var requestId = FormManager.getActualValue('reqId');
+
+        if (reqType == 'C') {
+          valResult = clientTierCodeValidator();
+        } else {
+          qParams = {
+            REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
+
+          if (result != null && result != '') {
+            oldClientTier = result.ret1 != null ? result.ret1 : '';
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
+            if (clientTier != oldClientTier || isuCd != oldISU) {
+              valResult = clientTierCodeValidator();
+            }
           }
         }
-        return new ValidationResult(null, true);
+        return valResult;
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function clientTierCodeValidator() {
+	var isuCode = FormManager.getActualValue('isuCd');
+  var clientTierCode = FormManager.getActualValue('clientTier');
+  var activeIsuCd = [ '32', '34', '36' ];
+  var activeCtc = [ 'Q', 'Y', 'T' ];
+
+  if (!activeIsuCd.includes(isuCode)) {
+    if (clientTierCode == '') {
+      $("#clientTierSpan").html('');
+
+      return new ValidationResult(null, true);
+    } else {
+      $("#clientTierSpan").html('');
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank.');
+    }
+  } else if (isuCode == '34') {
+   if (clientTierCode == 'Q') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Q\'.');
+    }
+  } else if (isuCode == '36') {
+     if (clientTierCode == 'Y') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Y\'.');
+    }
+  } else if (isuCode == '32') {
+    if (clientTierCode == 'T') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'T\'.');
+    }
+  } else {
+    if (activeCtc.includes(clientTierCode) || clientTierCode == '') {
+      $("#clientTierSpan").html('');
+
+      return new ValidationResult(null, true);
+    } else {
+      $("#clientTierSpan").html('');
+      $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Q\', \'Y\' , \'T\' or blank.');
+    }
+  }
 }
 
 function addVatIndValidator() {
