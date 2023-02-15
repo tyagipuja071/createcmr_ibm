@@ -129,15 +129,16 @@ function afterConfigForIndia() {
   
 
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) { 
-        setInacNacValuesIN();
-        filterInacCd('744','10215','N','I529');
-        applyClusterFilters();
-        lockFieldsWithDefaultValuesByScenarioSubType();
+    setInacNacValuesIN();
+    filterInacCd('744','10215','N','I529');
+    applyClusterFilters();
+    lockFieldsWithDefaultValuesByScenarioSubType();
   });
 
   dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
     lockFieldsWithDefaultValuesByScenarioSubType();
   });
+  
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if(custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
     dojo.connect(FormManager.getField('geoLocationCd'), 'onChange', function(value) {
@@ -600,10 +601,35 @@ function setInacByClusterHKMO() {
 }
 
 var previousCluster = null;
+var previousSubScenario = null;
 function saveClusterAfterSave() {
   if (previousCluster == null) {
     previousCluster = FormManager.getActualValue('apCustClusterId');
   }
+}
+function savePreviousSubScenario() {
+  if (previousSubScenario == null) {
+    previousSubScenario = FormManager.getActualValue('custSubGrp');
+  }
+}
+
+function checkClusterSubScenarioChanged() {
+  if (previousCluster == null) {
+    previousCluster = FormManager.getActualValue('apCustClusterId');
+  }
+  if (previousSubScenario == null) {
+    previousSubScenario = FormManager.getActualValue('custSubGrp');
+  }
+  
+  var currentCluster = FormManager.getActualValue('apCustClusterId');
+  var currentSubScenario = FormManager.getActualValue('custSubGrp');
+  
+  if (previousCluster + previousSubScenario == currentCluster + currentSubScenario) {
+    return false;
+  }
+  previousCluster = currentCluster;
+  previousSubScenario = currentSubScenario;
+  return true;
 }
 
 function setInacNacValuesIN(){
@@ -1182,14 +1208,12 @@ function applyClusterFilters() {
   filterAvailableClustersByScenarioSubType('744', ['ESOSW'], [ '05224', '04477', '04490', '04467', '05225', '09062', '10193', '10194', '10195', '10196', '10197', '10198', '10199', '10200', '10201', '10202', '10203', '10204', '10205', '10206', '10207', '10208', '10209', '10210', '10211', '10212',
                                                                '10213', '10214', '10215', '10590', '10591', '10592', '10593', '10594', '10595', '10596', '10597', '10598', '10599', '10600', '10601', '10602', '10603', '10604', '10605', '10606', '10607', '10608', '10609', '10610', '10611', '10612',
                                                                '10613', '10614', '10615', '10616', '10617', '10618', '10619', '10620', '10621', '10622', '10623', '10624', '10625', '10626', '10627', '10628', '10629', '10630', '10631', '10632', '10633', '10634', '10635', '10636', '10637', '10638',
-                                                               '10639', '10640', '10641', '10642', '10643', '10644', '10645', '10654', '10655', '10656']);    
+                                                               '10639', '10640', '10641', '10642', '10643', '10644', '10645', '10654', '10655', '10656', '10657']);    
   filterAvailableClustersByScenarioSubType('744', ['KYNDR'], [ '09062' ]);
   filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV', 'INTER'], [ '2D999' ]);
   filterAvailableClustersByScenarioSubType('744', ['NRMLC'], [ '10590','10591','10592','10593','10594','10595','10596','10597','10598','10599','10600','10601','10602','10603','10604','10605','10606','10607','10608','10609','10610','10611','10612','10613','10614','10615','10616','10617','10618','10619','10620','10621','10622','10623','10624','10625','10626','10627','10628','10629','10630','10631','10632','10633','10634','10635','10636','10637','10638','10639','10640','10641','10642','10643','10644','10645','2D999' ]);
   filterAvailableClustersByScenarioSubType('744', ['AQSTN'], [ '10590','10591','10592','10593','10594','10595','10596','10597','10598','10599','10600','10601','10602','10603','10604','10605','10606','10607','10608','10609','10610','10611','10612','10613','10614','10615','10616','10617','10618','10619','10620','10621','10622','10623','10624','10625','10626','10627','10628','10629','10630','10631','10632','10633','10634','10635','10636','10637','10638','10639','10640','10641','10642','10643','10644','10645','2D999' ]);
-  
-  
-  lockFieldsWithDefaultValuesByScenarioSubType();
+    
 }
 
 function resetFieldsAfterCustSubGrpChange() {
@@ -1270,6 +1294,11 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  
+  if (!checkClusterSubScenarioChanged()) {
+    return;
+  }
+  
   var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var clusterid = FormManager.getActualValue('apCustClusterId');
@@ -1315,7 +1344,13 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.setValue('inacType', '');
       FormManager.enable('inacType');
       
-    } else if (custSubGrp == 'CROSS'){
+    } else if (custSubGrp == 'INTER') {
+      FormManager.setValue('inacCd', '');
+      FormManager.setValue('inacType', '');
+      FormManager.readOnly('inacCd');
+      FormManager.readOnly('inacType');
+      
+    } else if (custSubGrp == 'CROSS') {
       FormManager.setValue('apCustClusterId','2D999');  
       if (clusterid == '2D999'){
         FormManager.resetDropdownValues(FormManager.getField('clientTier'));
@@ -7135,6 +7170,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addAfterConfigAP, GEOHandler.AP);
   GEOHandler.addAfterTemplateLoad(addAfterConfigAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(saveClusterAfterSave, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterConfig(savePreviousSubScenario, [ SysLoc.INDIA ]);
   GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateProvCd, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateRegionCd, GEOHandler.AP);
@@ -7327,8 +7363,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(clearInacOnScenarioChange, [ SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND ]);
 
   GEOHandler.registerValidator(addKyndrylValidator, [ SysLoc.INDIA ]);
-  GEOHandler.addAfterConfig(lockFieldsWithDefaultValuesByScenarioSubType, [ SysLoc.INDIA ]);
-  GEOHandler.addAfterTemplateLoad(lockFieldsWithDefaultValuesByScenarioSubType, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
   GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
   GEOHandler.registerValidator(validateRetrieveValues, [ SysLoc.INDIA ]);
