@@ -2837,7 +2837,7 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
   if (custSubGrp == 'ECOSY') {
     indc = 'E';
   }
-  if (custSubGrp == 'NRMLC' && glcCode == 'CNL9999') {
+  if ((custSubGrp=='NRMLC' || custSubGrp == 'AQSTN') && glcCode == 'CNL9999') {
     var zs01ReqId = FormManager.getActualValue('reqId');
     if (zs01ReqId != undefined && zs01ReqId != '') {
       qParams = {
