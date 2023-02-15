@@ -732,8 +732,6 @@ function setInacNacValuesIN(){
     return;
   }
   
-  FormManager.setValue('apCustClusterId',clusterid);
-  
   var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
@@ -1522,8 +1520,7 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.readOnly('inacCd');
       FormManager.readOnly('inacType');
       
-    } else if (custSubGrp == 'CROSS'){
-      FormManager.setValue('apCustClusterId','2D999');  
+    } else if (custSubGrp == 'CROSS'){      
       if (clusterid == '2D999'){
         FormManager.resetDropdownValues(FormManager.getField('clientTier'))
         FormManager.setValue('clientTier', 'Z');
