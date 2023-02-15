@@ -553,9 +553,11 @@ public class CNHandler extends GEOHandler {
         }
         // }
       }
-    } else {
-      getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null, false);
     }
+    // else {
+    // getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null,
+    // false);
+    // }
 
   }
 
