@@ -395,7 +395,6 @@ function addHandlersForNL() {
       setClientTierValues(value);
       // setClientTierValuesForUpdate();
       setBOTeamValues();
-      setBOTeamValues();
       setSORTLBasedOnIsuCtc();
     });
   }
