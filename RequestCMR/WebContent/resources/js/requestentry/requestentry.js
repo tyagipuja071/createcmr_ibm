@@ -162,6 +162,7 @@ function processRequestAction() {
             matchDnBForIndia();
           } else {
             // cmr.showModal('addressVerificationModal');
+            verifyGlcChangeIN();
             showAddressVerificationModal();
           }
         } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
@@ -251,6 +252,7 @@ function processRequestAction() {
       } else {
         // if there are no errors, show the Address Verification modal window
         // cmr.showModal('addressVerificationModal');
+        verifyGlcChangeIN();
         showAddressVerificationModal();
       }
     } else if (comp_proof_INAUSG && cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
@@ -272,46 +274,6 @@ function processRequestAction() {
       }
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
-    }
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (cmrCntry == SysLoc.INDIA && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
-      var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
-      if (!hasRetrievedValue) {
-        cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
-      } else {
-        var oldGlc = FormManager.getActualValue('geoLocationCd');
-        var oldCluster = FormManager.getActualValue('apCustClusterId');
-        console.log("Checking the GLC match... retrieve value again...")
-        var data = CmrServices.getAll('reqentry');
-
-        // cmr.hideProgress();
-        if (data) {
-          console.log(data);
-          if (data.error && data.error == 'Y') {
-            cmr.showAlert('An error was encountered when retrieving the values.\nPlease contact your system administrator.', 'Create CMR');
-          } else {
-            if (data.glcError) {
-              // errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
-            } else {
-              var newGlc = data.glcCode
-              var qParams = {
-                TXT : newGlc,
-              };
-              var newCluster = cmr.query('GET_CLUSTER_BY_GLC', qParams);
-              if (newCluster != null && (oldGlc != newGlc || oldCluster != newCluster.ret1)) {
-                retrieveInterfaceValues();
-                FormManager.setValue('apCustClusterId', newCluster.ret1);
-                FormManager.readOnly('apCustClusterId');
-                cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to "' + newGlc + '" and "' + newCluster.ret1 + '" respectively'
-                    + '. Do you want to proceed with this request?', 'Warning', null, {
-                  OK : 'Yes',
-                  CANCEL : 'No'
-                });
-              }
-            }
-          }
-        }
-      }
     }
   } else if (action == YourActions.Processing_Create_Up_Complete) {
     var cmrNo = FormManager.getActualValue('cmrNo');
@@ -387,6 +349,46 @@ function processRequestAction() {
     }
   } else {
     cmr.showAlert('Invalid action.');
+  }
+}
+
+function verifyGlcChangeIN() {
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (cmrCntry == SysLoc.INDIA && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
+    var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
+    if (!hasRetrievedValue) {
+      cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
+    } else {
+      var oldGlc = FormManager.getActualValue('geoLocationCd');
+      var oldCluster = FormManager.getActualValue('apCustClusterId');
+      console.log("Checking the GLC match... retrieve value again...")
+      var data = CmrServices.getAll('reqentry');
+
+      // cmr.hideProgress();
+      if (data) {
+        console.log(data);
+        if (data.error && data.error == 'Y') {
+          cmr.showAlert('An error was encountered when retrieving the values.\nPlease contact your system administrator.', 'Create CMR');
+        } else {
+          if (data.glcError) {
+            // errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
+          } else {
+            var newGlc = data.glcCode
+            var qParams = {
+              TXT : newGlc,
+            };
+            var newCluster = cmr.query('GET_CLUSTER_BY_GLC', qParams);
+            if (newCluster != null && (oldGlc != newGlc || oldCluster != newCluster.ret1)) {
+              retrieveInterfaceValues();
+              FormManager.setValue('apCustClusterId', newCluster.ret1);
+              FormManager.readOnly('apCustClusterId');
+              cmr.showAlert('The GLC and Cluster has been overwritten to ' + newGlc + 'and' + newCluster.ret1 + 'respectively' + '. Do you want to proceed with this request?');
+            }
+          }
+        }
+      }
+    }
   }
 }
 
@@ -2031,7 +2033,7 @@ function matchDnBForIndia() {
       'isicCd' : isicCd
     },
     timeout : 50000,
-    sync : false,
+    sync : true,
     load : function(data, ioargs) {
       cmr.hideProgress();
       console.log(data);
@@ -2049,6 +2051,7 @@ function matchDnBForIndia() {
             MessageMgr.clearMessages();
             doValidateRequest();
             // cmr.showModal('addressVerificationModal');
+            verifyGlcChangeIN();
             showAddressVerificationModal();
           } else {
             cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
@@ -2062,6 +2065,7 @@ function matchDnBForIndia() {
           } else if (data.match && !data.isicMatch && custSubGrp == 'IGF') {
             comp_proof_INAUSG = true;
             // cmr.showModal('addressVerificationModal');
+            verifyGlcChangeIN();
             showAddressVerificationModal();
           } else {
             comp_proof_INAUSG = false;
@@ -2074,6 +2078,7 @@ function matchDnBForIndia() {
         }
       } else {
         // continue
+        verifyGlcChangeIN();
         console.log("An error occurred while matching dnb.");
         cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
           OK : 'Yes',
@@ -2839,7 +2844,7 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
   if (custSubGrp == 'ECOSY') {
     indc = 'E';
   }
-  if ((custSubGrp=='NRMLC' || custSubGrp == 'AQSTN') && glcCode == 'CNL9999') {
+  if ((custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') && glcCode == 'CNL9999') {
     var zs01ReqId = FormManager.getActualValue('reqId');
     if (zs01ReqId != undefined && zs01ReqId != '') {
       qParams = {
