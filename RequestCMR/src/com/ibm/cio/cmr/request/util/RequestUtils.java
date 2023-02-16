@@ -1707,4 +1707,34 @@ public class RequestUtils {
     return "-Unknown-";
   }
 
+  /**
+   * Ensures the prospect to legal flag is set properly
+   * 
+   * @param admin
+   * @param data
+   */
+  public static void setProspLegalConversionFlag(Admin admin, Data data) {
+    if (!"C".equals(admin.getReqType())) {
+      admin.setProspLegalInd(null);
+      // no flag for non creates
+      return;
+    }
+    if ("COM".equals(admin.getReqType())) {
+      // ignore completed records
+      return;
+    }
+    if (StringUtils.isBlank(data.getCmrNo())) {
+      // blank out, no prospect imported
+      admin.setProspLegalInd(null);
+    } else {
+      if (data.getCmrNo().startsWith("P")) {
+        // prospect imported
+        admin.setProspLegalInd("Y");
+      } else {
+        admin.setProspLegalInd(null);
+      }
+    }
+
+  }
+
 }
