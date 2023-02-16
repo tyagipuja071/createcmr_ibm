@@ -382,7 +382,7 @@ function verifyGlcChangeIN() {
               retrieveInterfaceValues();
               FormManager.setValue('apCustClusterId', newCluster.ret1);
               FormManager.readOnly('apCustClusterId');
-              cmr.showAlert('The GLC and Cluster has been overwritten to ' + newGlc + 'and' + newCluster.ret1 + 'respectively' + '. Do you want to proceed with this request?',
+              cmr.showAlert('The GLC and Cluster has been overwritten to ' + newGlc + ' and ' + newCluster.ret1 + ' respectively' + '. Do you want to proceed with this request?',
                   ' GLC and Cluster value overwritten', 'showAddressVerificationModal()');
             } else {
               showAddressVerificationModal();
