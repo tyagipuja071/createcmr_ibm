@@ -365,6 +365,7 @@ public class GBGMatchingElement extends MatchingElement {
         }
         handler.setGBGValues(entityManager, requestData, "INAC", value);
       }
+      updateEntity(data, entityManager);
       return true;
     } else {
       LOG.warn("LDE rule for import is missing.");
