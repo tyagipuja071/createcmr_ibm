@@ -21,8 +21,7 @@ function addHandlersForAP() {
   if (_inacCdHandlerIN == null) {
     _inacCdHandlerIN = dojo.connect(FormManager.getField('inacCd'), 'onChange', function(value) {
       lockInacTypeForIGF();
-      lockInacNacFieldsByScenarioSubType();
-      setInacNacFieldsAsOptionalByScenarioSubType();
+      setInacNacFieldsRequiredIN();
     });
   }
   if (_isuHandler == null) {
@@ -49,10 +48,10 @@ function addHandlersForAP() {
         '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of “VAT Registration Status” is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ‘No – VAT unapplicable’, you are confirming that this customer has no VAT# then “VAT Registration Status” is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
           OK : 'I confirm',
         });
-        });
-        }
-          handleObseleteExpiredDataForUpdate();
-    }
+    });
+  }
+  handleObseleteExpiredDataForUpdate();
+}
 
 
 function addHandlersForANZ() {
@@ -132,6 +131,7 @@ function afterConfigForIndia() {
     setInacNacValuesIN();
     filterInacCd('744','10215','N','I529');
     applyClusterFilters();
+    lockInacNacFieldsByScenarioSubType();
     lockFieldsWithDefaultValuesByScenarioSubType();
   });
 
@@ -669,7 +669,7 @@ function setInacNacValuesIN(){
         CMT : '%' + _cluster + '%'
       };
       var inacList = cmr.query('GET.INAC_BY_CLUSTER', qParams);
-      if (inacList != null && inacList.length>0) {
+      if (inacList != null && inacList.length > 0) {
         var inacTypeSelected ='';
         var arr =  inacList.map(inacList => inacList.ret1);
         inacTypeSelected  =  inacList.map(inacList => inacList.ret2);
@@ -684,7 +684,7 @@ function setInacNacValuesIN(){
         } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
           FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
           FormManager.setValue('inacType', 'N');
-        } else if(inacType != '' && inacTypeSelected[0].includes(',IN')) {
+        } else if (inacType != '' && inacTypeSelected[0].includes(',IN')) {
           FormManager.resetDropdownValues(FormManager.getField('inacType'));
           var value = FormManager.getField('inacType');
           var cmt = value + ','+ _cluster +'%';
@@ -723,9 +723,8 @@ function setInacNacValuesIN(){
         FormManager.clearValue('inacType');
         FormManager.clearValue('inacCd');
         FormManager.removeValidator('inacType', Validators.REQUIRED);
-        FormManager.removeValidator('inacCd', Validators.REQUIRED);  
+        FormManager.removeValidator('inacCd', Validators.REQUIRED);
       }
-      setInacNacFieldsAsOptionalByScenarioSubType();
   }    
 }
 /* ASEAN ANZ GCG ISIC MAPPING */
@@ -1267,25 +1266,36 @@ function lockInacNacFieldsByScenarioSubType() {
     return;
   }
   
-  var shouldLock = false;  
+  var shouldLock = false; 
+  var shouldClear = false;
   var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var clusterid = FormManager.getActualValue('apCustClusterId');
 
   if (cmrIssuCntry == '744') {
-    if (['KYNDR', 'INTER'].includes(custSubGrp)) {
+    if (['KYNDR'].includes(custSubGrp)) {
       shouldLock = true;
+    } else if (['INTER', 'IGF', 'PRIV'].includes(custSubGrp)) {
+      shouldLock = true;
+      shouldClear = true;
     }
   }
 
   if (shouldLock) {
     FormManager.readOnly('inacCd');
     FormManager.readOnly('inacType');
+  } else {
+    FormManager.enable('inacCd');
+    FormManager.enable('inacType');
+  }
+  if (shouldClear) {
+    FormManager.setValue('inacCd', '');
+    FormManager.setValue('inacType', '');
   }
 }
 
-function setInacNacFieldsAsOptionalByScenarioSubType() {
-  console.log(">>>> setInacNacFieldsAsOptionalByScenarioSubType >>>>");
+function setInacNacFieldsRequiredIN() {
+  console.log(">>>> setInacNacFieldsRequiredIN >>>>");
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -1293,6 +1303,8 @@ function setInacNacFieldsAsOptionalByScenarioSubType() {
   var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var clusterid = FormManager.getActualValue('apCustClusterId');
+  var inacCd = FormManager.getActualValue('inacCd');
+  var inacType = FormManager.getActualValue('inacType');
 
   if (cmrIssuCntry == '744') {
     if (['ECOSY', 'BLUMX', 'MKTPC', 'IGF', 'PRIV', 'INTER'].includes(custSubGrp)) {
@@ -1304,6 +1316,13 @@ function setInacNacFieldsAsOptionalByScenarioSubType() {
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
     FormManager.removeValidator('inacType', Validators.REQUIRED);
   }
+  
+  if (inacCd != '' && inacCd != undefined) {
+    FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.removeValidator('inacType', Validators.REQUIRED);
+  }
+  
 }
 
 function lockFieldsWithDefaultValuesByScenarioSubType() {
@@ -1312,13 +1331,23 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
     return;
   }
   
-  if (!checkClusterSubScenarioChanged()) {
-    return;
-  }
-  
   var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var clusterid = FormManager.getActualValue('apCustClusterId');
+  
+  /* For these two scenrios, the below mentioned fields will always be locked regardless of any other condition */
+  if (['NRMLC','AQSTN'].includes(custSubGrp)) {
+    FormManager.setValue('isuCd','34');
+    FormManager.setValue('clientTier','Q');
+    FormManager.readOnly('apCustClusterId');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');  
+  }
+  
+  if (!checkClusterSubScenarioChanged()) {
+    return;
+  }
   
   if (cmrIssuCntry == '744') {
     
@@ -7443,4 +7472,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(applyClusterFilters, [ SysLoc.INDIA ]);
   GEOHandler.addAfterConfig(lockFieldsWithDefaultValuesByScenarioSubType, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockFieldsWithDefaultValuesByScenarioSubType, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, [ SysLoc.INDIA ]);
 });
