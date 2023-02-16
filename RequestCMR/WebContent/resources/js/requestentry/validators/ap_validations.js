@@ -515,8 +515,10 @@ function setInacByCluster() {
       setInacCdTypeStatus();    
     } else {
       console.log('>>>> setInacByCluster ELSE scenario >>>>');
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
+      if (cntry != '744') {
+        FormManager.removeValidator('inacCd', Validators.REQUIRED);
+        FormManager.removeValidator('inacType', Validators.REQUIRED);
+      }
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       updateMRCAseanAnzIsa();
@@ -1507,11 +1509,7 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  
-  if (!checkClusterSubScenarioChanged()) {
-    return;
-  }
-  
+
   var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var clusterid = FormManager.getActualValue('apCustClusterId');
@@ -1520,7 +1518,7 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
     if (custSubGrp == 'CROSS'){ 
       FormManager.setValue('apCustClusterId', '2D999');
     }
-    });
+  });
   
   /*
    * For these two scenrios, the below mentioned fields will always be locked
