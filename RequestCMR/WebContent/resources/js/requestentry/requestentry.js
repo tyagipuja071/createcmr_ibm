@@ -137,7 +137,7 @@ function processRequestAction() {
     var vatInd = FormManager.getActualValue('vatInd');
     var custGrp = FormManager.getActualValue('custGrp');
     var reqId = FormManager.getActualValue('reqId');
-    var crossScenTyp = ['CROSS','LUCRO','EECRO','LTCRO','LVCRO','FOCRO','GLCRO','ISCRO'];
+    var crossScenTyp = [ 'CROSS', 'LUCRO', 'EECRO', 'LTCRO', 'LVCRO', 'FOCRO', 'GLCRO', 'ISCRO' ];
     if (custGrp == null || custGrp == '') {
       custGrp = getCustGrp();
     }
@@ -151,8 +151,8 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
       cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
-      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry'))) && (vatInd == 'N') && (!crossScenTyp.includes(custGrp))
-          && ((oldVatValue == '' && reqType == 'U') || (reqType == 'C'))) {
+      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry'))) && (vatInd == 'N')
+          && (!crossScenTyp.includes(custGrp)) && ((oldVatValue == '' && reqType == 'U') || (reqType == 'C'))) {
         findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
@@ -164,7 +164,6 @@ function processRequestAction() {
           } else {
             // cmr.showModal('addressVerificationModal');
             verifyGlcChangeIN();
-            showAddressVerificationModal();
           }
         } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
           matchDnBForAutomationCountries();
@@ -219,7 +218,7 @@ function processRequestAction() {
               showAddressVerificationModal();
             }
           } else {
-          	showAddressVerificationModal();
+            showAddressVerificationModal();
           }
         }
       } else if (checkIfFinalDnBCheckRequired()) {
@@ -254,7 +253,6 @@ function processRequestAction() {
         // if there are no errors, show the Address Verification modal window
         // cmr.showModal('addressVerificationModal');
         verifyGlcChangeIN();
-        showAddressVerificationModal();
       }
     } else if (comp_proof_INAUSG && cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
       // Cmr-3176- Dnb match
@@ -384,12 +382,19 @@ function verifyGlcChangeIN() {
               retrieveInterfaceValues();
               FormManager.setValue('apCustClusterId', newCluster.ret1);
               FormManager.readOnly('apCustClusterId');
-              cmr.showAlert('The GLC and Cluster has been overwritten to ' + newGlc + 'and' + newCluster.ret1 + 'respectively' + '. Do you want to proceed with this request?');
+              cmr.showAlert('The GLC and Cluster has been overwritten to ' + newGlc + 'and' + newCluster.ret1 + 'respectively' + '. Do you want to proceed with this request?',
+                  ' GLC and Cluster value overwritten', 'showAddressVerificationModal()');
+            } else {
+              showAddressVerificationModal();
             }
           }
         }
+      } else {
+        showAddressVerificationModal();
       }
     }
+  } else {
+    showAddressVerificationModal();
   }
 }
 
@@ -2053,7 +2058,6 @@ function matchDnBForIndia() {
             doValidateRequest();
             // cmr.showModal('addressVerificationModal');
             verifyGlcChangeIN();
-            showAddressVerificationModal();
           } else {
             cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
           }
@@ -2067,7 +2071,6 @@ function matchDnBForIndia() {
             comp_proof_INAUSG = true;
             // cmr.showModal('addressVerificationModal');
             verifyGlcChangeIN();
-            showAddressVerificationModal();
           } else {
             comp_proof_INAUSG = false;
             console.log("Name/Address validation failed by dnb");
@@ -2079,9 +2082,8 @@ function matchDnBForIndia() {
         }
       } else {
         // continue
-        verifyGlcChangeIN();
         console.log("An error occurred while matching dnb.");
-        cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+        cmr.showConfirm('verifyGlcChangeIN()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
           OK : 'Yes',
           CANCEL : 'No'
         });
