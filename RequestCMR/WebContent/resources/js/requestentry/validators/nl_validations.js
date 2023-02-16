@@ -1859,21 +1859,6 @@ function sortlValidator() {
 
         if (reqType == 'C') {
           valResult = sortlCheckValidator();
-        } else {
-          qParams = {
-            REQ_ID : requestId,
-          };
-          var result = cmr.query('GET.BENELUX.CLIENT_TIER_ISU_SBO_CD_OLD_BY_REQID', qParams);
-
-          if (result != null && result != '') {
-            oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldSearchTerm = result.ret3 != null ? result.ret3 : '';
-            oldISU = result.ret2 != null ? result.ret2 : '';
-
-            if (clientTier != oldClientTier || isuCd != oldISU || commercialFinanced != oldSearchTerm) {
-              valResult = sortlCheckValidator();
-            }
-          }
         }
         return valResult;
       }
