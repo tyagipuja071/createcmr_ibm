@@ -1895,7 +1895,7 @@ function onScenarioChangeHandler() {
     });
   }
 }
-function changePL() {
+function onPostalCodeChangeHandler() {
   console.log(">>>> Preferred Language on Postal Coade change");
   dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
     setPreferredLangSwiss();
@@ -2000,6 +2000,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setPreferredLangSwiss, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setPreferredLangSwiss, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onScenarioChangeHandler, GEOHandler.SWISS);
-  GEOHandler.addAfterConfig(changePL, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(onPostalCodeChangeHandler, GEOHandler.SWISS);
   
 });
