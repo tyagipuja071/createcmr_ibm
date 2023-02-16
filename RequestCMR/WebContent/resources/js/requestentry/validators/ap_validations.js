@@ -45,7 +45,7 @@ function addHandlersForAP() {
     _vatRegisterHandlerSG = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
     cmr
     .showAlert(
-        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of ‚ÄúVAT Registration Status‚Äù is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ‚ÄòNo ‚Äì VAT unapplicable‚Äô, you are confirming that this customer has no VAT# then ‚ÄúVAT Registration Status‚Äù is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
+        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of ìVAT Registration Statusî is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ëNo ñ VAT unapplicableí, you are confirming that this customer has no VAT# then ìVAT Registration Statusî is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
           OK : 'I confirm',
         });
     });
@@ -1335,6 +1335,14 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var clusterid = FormManager.getActualValue('apCustClusterId');
   
+
+  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+	if (custSubGrp == 'CROSS'){ 
+	  FormManager.setValue('apCustClusterId', '2D999');
+	}
+  });
+
+  
   /* For these two scenrios, the below mentioned fields will always be locked regardless of any other condition */
   if (['NRMLC','AQSTN'].includes(custSubGrp)) {
     FormManager.setValue('isuCd','34');
@@ -1410,17 +1418,12 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
     } else if (custSubGrp == 'CROSS') {
       FormManager.setValue('apCustClusterId','2D999');  
       if (clusterid == '2D999'){
-        FormManager.resetDropdownValues(FormManager.getField('clientTier'));
         FormManager.setValue('clientTier', 'Z');
-        FormManager.readOnly('clientTier');
-        
-        FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+        FormManager.readOnly('clientTier');       
         FormManager.setValue('isuCd', '34');
-        FormManager.readOnly('isuCd');
-        
+        FormManager.readOnly('isuCd');        
         FormManager.setValue('mrcCd', '3');
-        FormManager.readOnly('mrcCd');
-        
+        FormManager.readOnly('mrcCd');        
       } else {
         FormManager.enable('clientTier');
         FormManager.enable('isuCd');        
@@ -7196,7 +7199,7 @@ function addKyndrylValidator() {
               id : 'mainCustNm1',
               type : 'text',
               name : 'mainCustNm1'
-            }, false, 'Customer name must contain the word ‚ÄúKyndryl‚Äù.');
+            }, false, 'Customer name must contain the word ìKyndrylî.');
           }
           
         }
