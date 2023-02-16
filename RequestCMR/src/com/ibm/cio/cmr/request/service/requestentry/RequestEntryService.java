@@ -2319,12 +2319,16 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
                         + (addressToChk.getStateProv() == null ? "" : addressToChk.getStateProv())
                         + (addressToChk.getCity1() == null ? "" : addressToChk.getCity1())
                         + (addressToChk.getPostCd() == null ? "" : addressToChk.getPostCd());
+                    addressAll = addressAll.toUpperCase();
                     if (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getAddress())
-                        && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regexForAddr, ""))
+                        && addressAll.replaceAll(regexForAddr, "")
+                            .contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regexForAddr, "").toUpperCase())
                         && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
-                        && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regexForAddr, ""))
+                        && addressAll.replaceAll(regexForAddr, "")
+                            .contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regexForAddr, "").toUpperCase())
                         && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
-                        && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regexForAddr, ""))) {
+                        && addressAll.replaceAll(regexForAddr, "")
+                            .contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regexForAddr, "").toUpperCase())) {
                       matchesAddrAPI = true;
                       log.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
                     }
@@ -2363,12 +2367,16 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
                     + (addressToChk.getStateProv() == null ? "" : addressToChk.getStateProv())
                     + (addressToChk.getCity1() == null ? "" : addressToChk.getCity1())
                     + (addressToChk.getPostCd() == null ? "" : addressToChk.getPostCd());
+                addressAll = addressAll.toUpperCase();
                 if (StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getAddress())
-                    && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regexForAddr, ""))
+                    && addressAll.replaceAll(regexForAddr, "")
+                        .contains(nZBNAPIresponse.getRecord().getAddress().replaceAll(regexForAddr, "").toUpperCase())
                     && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getCity())
-                    && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regexForAddr, ""))
+                    && addressAll.replaceAll(regexForAddr, "")
+                        .contains(nZBNAPIresponse.getRecord().getCity().replaceAll(regexForAddr, "").toUpperCase())
                     && StringUtils.isNotEmpty(nZBNAPIresponse.getRecord().getPostal())
-                    && addressAll.replaceAll(regexForAddr, "").contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regexForAddr, ""))) {
+                    && addressAll.replaceAll(regexForAddr, "")
+                        .contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regexForAddr, "").toUpperCase())) {
                   matchesAddrAPI = true;
                   log.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
                 }
