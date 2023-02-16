@@ -1516,6 +1516,12 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var clusterid = FormManager.getActualValue('apCustClusterId');
   
+  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+    if (custSubGrp == 'CROSS'){ 
+      FormManager.setValue('apCustClusterId', '2D999');
+    }
+    });
+  
   /*
    * For these two scenrios, the below mentioned fields will always be locked
    * regardless of any other condition
@@ -1595,11 +1601,10 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
     } else if (custSubGrp == 'CROSS') {
       FormManager.setValue('apCustClusterId','2D999');
       if (clusterid == '2D999'){
-        FormManager.resetDropdownValues(FormManager.getField('clientTier'))
+        
         FormManager.setValue('clientTier', 'Z');
         FormManager.readOnly('clientTier');
         
-        FormManager.resetDropdownValues(FormManager.getField('isuCd'))
         FormManager.setValue('isuCd', '34');
         FormManager.readOnly('isuCd');
         
