@@ -1187,7 +1187,7 @@ function connectToCmrServices() {
         if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
           setClusterIDAfterRetrieveAction(data.glcCode);
         }
-        if(cmrCntry == SysLoc.CHINA && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='ECOSY')) {
+        if (cmrCntry == SysLoc.CHINA && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN' || custSubGrp == 'ECOSY')) {
           setClusterIDAfterRetrieveAction4CN(custSubGrp, data.glcCode);
         }
       }
@@ -2501,6 +2501,47 @@ function setClusterIDAfterRetrieveAction(glcCode) {
   FormManager.setValue('apCustClusterId', glcClusterMap[glcCode]);
   FormManager.setValue('clientTier', 'Q');
   FormManager.setValue('isuCd', '34');
+}
+
+//CREATCMR-7879
+function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
+  console.log('>>> setClusterIDAfterRetrieveAction4CN >>>');
+  var indc = 'C';
+  if (custSubGrp == 'ECOSY') {
+    indc = 'E';
+  }
+  var result = cmr.query('GLC.CN.SEARCHTERM', {
+    GLC_CD : '%' + glcCode + '%',
+    DEFAULT_INDC : indc
+  });
+  if (result != null && result.ret1 != undefined && result.ret1 != '') {
+    var searchTerm = result.ret1;
+    var clientTier = result.ret2;
+    var isuCd = result.ret3;
+    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm ]);
+    FormManager.setValue('searchTerm', searchTerm);
+    FormManager.readOnly('searchTerm');
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
+    FormManager.setValue('clientTier', clientTier);
+    FormManager.readOnly('clientTier');
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
+    FormManager.setValue('isuCd', isuCd);
+    FormManager.readOnly('isuCd');
+    if (clientTier == '00000' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('isuCd', '34');
+    }
+  } else if (custSubGrp == 'ECOSY' && glcCode != undefined && glcCode != '') {
+    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
+    FormManager.setValue('searchTerm', '08036');
+    FormManager.readOnly('searchTerm');
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
+    FormManager.setValue('clientTier', 'Y');
+    FormManager.readOnly('clientTier');
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
+    FormManager.setValue('isuCd', '36');
+    FormManager.readOnly('isuCd');
+  }
 }
 
 // CREATCMR-7884
