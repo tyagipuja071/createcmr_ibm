@@ -732,6 +732,8 @@ function setInacNacValuesIN(){
     return;
   }
   
+  FormManager.setValue('apCustClusterId',_cluster);
+  
   var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
@@ -1519,6 +1521,15 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.setValue('inacType', '');
       FormManager.readOnly('inacCd');
       FormManager.readOnly('inacType');
+      FormManager.setValue('apCustClusterId', '2D999');
+      FormManager.setValue('clientTier', '0');
+      FormManager.setValue('isuCd', '60');
+      FormManager.setValue('mrcCd', '2');
+      
+      FormManager.readOnly('apCustClusterId');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('mrcCd');
       
     } else if (custSubGrp == 'CROSS'){      
       if (clusterid == '2D999'){
@@ -2815,10 +2826,13 @@ function setCtcOnIsuCdChangeANZ(isuCd) {
       return;
     }
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  }
+  }else {
+    if (cntry != '736' && cntry != '738' && cntry != '744') {
+      FormManager.enable('clientTier');
+    }
     handleObseleteExpiredDataForUpdate();  
 }
-
+}
 function setCtcOnIsuCdChangeGCG() {
   console.log('>>>> setCtcOnIsuCdChangeGCG >>>>');
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -2845,7 +2859,7 @@ function setCtcOnIsuCdChangeISA() {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     // CREATCMR-7878
     var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-    if(_cmrIssuingCntry != '615' && _cmrIssuingCntry !='652'){
+    if(_cmrIssuingCntry != '615' && _cmrIssuingCntry !='652' && _cmrIssuingCntry !='744'){
       FormManager.enable('clientTier');
     }
     if (FormManager.getActualValue('reqType') == 'C') {
@@ -4454,6 +4468,16 @@ function setISUDropDownValues() {
              FormManager.setValue('clientTier', 'Q');
              FormManager.setValue('isuCd','34');
              FormManager.enable('clientTier');
+             
+             // fixing issue 8513 for india
+             // GB Segment values are not correct and it is not locked
+             if (_cmrIssuingCntry == '744' && (custSubGrp == 'BLUMX' || custSubGrp ==
+               'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'PRIV')) {
+
+               FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+               FormManager.setValue('clientTier', 'Z');
+               FormManager.readOnly('clientTier');
+             }
           }
         else if (scenario == 'LOCAL' && custSubGrp == 'INTER'){
              FormManager.resetDropdownValues(FormManager.getField('clientTier'));
@@ -4461,6 +4485,15 @@ function setISUDropDownValues() {
              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
              FormManager.setValue('clientTier','0');
              FormManager.setValue('isuCd','60');
+             
+             // fixing issue 8513 for india
+             // GB Segment values are not correct and it is not locked
+             // inaccd and inacType should be read only for internal
+             if (_cmrIssuingCntry == '744' && (custSubGrp == 'INTER')) {
+               FormManager.readOnly('clientTier');
+               FormManager.readOnly('inacCd');
+               FormManager.readOnly('inacType');
+             }
           }
         else {
              FormManager.resetDropdownValues(FormManager.getField('clientTier'));
