@@ -613,13 +613,14 @@ public class VatUtilController {
                     + (addr.getStateProv() == null ? "" : addr.getStateProv()) + (addr.getCity1() == null ? "" : addr.getCity1())
                     + (addr.getPostCd() == null ? "" : addr.getPostCd());
                 LOG.debug("****** addressAll: " + addressAll);
+                addressAll = addressAll.toUpperCase();
                 LOG.debug("Address used for NZ API matching: " + addressAll + " VS " + nzbnResRec.getAddress());
                 if (StringUtils.isNotEmpty(nzbnResRec.getAddress())
-                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getAddress().replaceAll(regexForAddr, ""))
+                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getAddress().replaceAll(regexForAddr, "").toUpperCase())
                     && StringUtils.isNotEmpty(nzbnResRec.getCity())
-                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getCity().replaceAll(regexForAddr, ""))
+                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getCity().replaceAll(regexForAddr, "").toUpperCase())
                     && StringUtils.isNotEmpty(nzbnResRec.getPostal())
-                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getPostal().replaceAll(regexForAddr, ""))) {
+                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getPostal().replaceAll(regexForAddr, "").toUpperCase())) {
                   apiAddressMatch = true;
                 }
                 // Address matching - END
