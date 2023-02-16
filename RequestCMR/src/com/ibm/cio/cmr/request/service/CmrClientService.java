@@ -391,7 +391,7 @@ public class CmrClientService extends BaseSimpleService<Object> {
       input.setCountryCode(addr.getLandCntry());
       input.setPostalCode(addr.getPostCd());
       input.setCity(addr.getCity1());
-      input.setStateProvinceCode(addr.getStateProv());
+      input.setStateProvinceCode("641".equals(data.getCmrIssuingCntry()) ? switchCNState(addr.getStateProv()) : addr.getStateProv());
       input.setSitePartyID(data.getSitePartyId());
       list.getCoverageInput().add(input);
       request.setCoverageInputList(list);
@@ -419,6 +419,79 @@ public class CmrClientService extends BaseSimpleService<Object> {
       return false;
     }
 
+  }
+
+  private String switchCNState(String stateProv) {
+    if ("BJ".equals(stateProv)) {
+      return "11";
+    } else if ("TJ".equals(stateProv)) {
+      return "12";
+    } else if ("HE".equals(stateProv)) {
+      return "13";
+    } else if ("SX".equals(stateProv)) {
+      return "14";
+    } else if ("NM".equals(stateProv)) {
+      return "15";
+    } else if ("LN".equals(stateProv)) {
+      return "21";
+    } else if ("JL".equals(stateProv)) {
+      return "22";
+    } else if ("HL".equals(stateProv)) {
+      return "23";
+    } else if ("SH".equals(stateProv)) {
+      return "31";
+    } else if ("JS".equals(stateProv)) {
+      return "32";
+    } else if ("ZJ".equals(stateProv)) {
+      return "33";
+    } else if ("AH".equals(stateProv)) {
+      return "34";
+    } else if ("FJ".equals(stateProv)) {
+      return "35";
+    } else if ("JX".equals(stateProv)) {
+      return "36";
+    } else if ("SD".equals(stateProv)) {
+      return "37";
+    } else if ("HA".equals(stateProv)) {
+      return "41";
+    } else if ("HB".equals(stateProv)) {
+      return "42";
+    } else if ("HN".equals(stateProv)) {
+      return "43";
+    } else if ("GD".equals(stateProv)) {
+      return "44";
+    } else if ("GX".equals(stateProv)) {
+      return "45";
+    } else if ("HI".equals(stateProv)) {
+      return "46";
+    } else if ("CQ".equals(stateProv)) {
+      return "50";
+    } else if ("SC".equals(stateProv)) {
+      return "51";
+    } else if ("GZ".equals(stateProv)) {
+      return "52";
+    } else if ("YN".equals(stateProv)) {
+      return "53";
+    } else if ("XZ".equals(stateProv)) {
+      return "54";
+    } else if ("SN".equals(stateProv)) {
+      return "61";
+    } else if ("GS".equals(stateProv)) {
+      return "62";
+    } else if ("QH".equals(stateProv)) {
+      return "63";
+    } else if ("NX".equals(stateProv)) {
+      return "64";
+    } else if ("XJ".equals(stateProv)) {
+      return "65";
+    } else if ("TW".equals(stateProv)) {
+      return "71";
+    } else if ("HK".equals(stateProv)) {
+      return "91";
+    } else if ("MO".equals(stateProv)) {
+      return "92";
+    }
+    return stateProv;
   }
 
   public boolean getLHDuns(EntityManager entityManager, Addr addr, RequestEntryModel data, ModelMap response) throws Exception {
