@@ -1700,7 +1700,7 @@ function setSBOValuesForIsuCtc() {
       FormManager.setValue('commercialFinanced', 'T0007968');
     } else if (isuCd == '5K' && clientTier == '') {
       FormManager.setValue('commercialFinanced', 'T0009902');
-    } else if (isuCd == '21' && subGrp == 'LUBUS' && clientTier == '') {
+    } else if (isuCd == '21' && (subGrp == 'LUBUS' || subGrp == 'CBBUS') && clientTier == '') {
       FormManager.setValue('commercialFinanced', 'P0000046');
     } else if (isuCd == '21' && (luSubGrpsList.includes(subGrp)) && clientTier == '') {
       FormManager.setValue('commercialFinanced', 'LU0000');
@@ -2062,21 +2062,6 @@ function beluxSortlValidator() {
 
         if (reqType == 'C') {
           valResult = sortlCheckValidator();
-        } else {
-          qParams = {
-            REQ_ID : requestId,
-          };
-          var result = cmr.query('GET.BENELUX.CLIENT_TIER_ISU_SBO_CD_OLD_BY_REQID', qParams);
-
-          if (result != null && result != '') {
-            oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldSearchTerm = result.ret3 != null ? result.ret3 : '';
-            oldISU = result.ret2 != null ? result.ret2 : '';
-
-            if (clientTier != oldClientTier || isuCd != oldISU || commercialFinanced != oldSearchTerm) {
-              valResult = sortlCheckValidator();
-            }
-          }
         }
         return valResult;
       }
