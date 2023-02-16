@@ -799,13 +799,10 @@ function setInacNacValuesIN(){
                 for (var i = 0; i < results.length; i++) {
                   inacCdValue.push(results[i].ret1);
                 }
-                FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
               FormManager.setValue('inacCd', inacCdValue[0]);
               if (inacCdValue.length == 1) {
                 FormManager.setValue('inacCd', inacCdValue[0]);
-                if (inacCdValue.length == 1) {
-                  FormManager.setValue('inacCd', inacCdValue[0]);
-                }
               }
             }
       FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');    
@@ -1519,7 +1516,10 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var clusterid = FormManager.getActualValue('apCustClusterId');
   
-  /* For these two scenrios, the below mentioned fields will always be locked regardless of any other condition */
+  /*
+   * For these two scenrios, the below mentioned fields will always be locked
+   * regardless of any other condition
+   */
   if (['NRMLC','AQSTN'].includes(custSubGrp)) {
     FormManager.setValue('isuCd','34');
     FormManager.setValue('clientTier','Q');
@@ -3778,7 +3778,8 @@ function removeStateValidatorForHkMoNZ() {
         FormManager.resetValidations('postCd');
 
       } else {
-        //FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State' ], null);
+        // FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State'
+        // ], null);
         FormManager.removeValidator('stateProv', Validators.REQUIRED);
         if (landCntry == '' || FormManager.GETFIELD_VALIDATIONS['landCntry'].indexOf(Validators.REQUIRED) < 0)
           FormManager.addValidator('postCd', Validators.REQUIRED, [ 'Postal Code' ], null);
