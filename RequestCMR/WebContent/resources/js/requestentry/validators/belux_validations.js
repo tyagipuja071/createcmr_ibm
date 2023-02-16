@@ -2050,64 +2050,96 @@ function beluxSortlValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var reqTyp = FormManager.getActualValue('reqType');
-        var isuCode = FormManager.getActualValue('isuCd');
-        var clientTierCode = FormManager.getActualValue('clientTier');
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
         var commercialFinanced = FormManager.getActualValue('commercialFinanced');
-        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-        var countryUse = FormManager.getActualValue('countryUse');
-        var isuCtc = isuCode.concat(clientTierCode);
-        var subIndustry = FormManager.getActualValue('subIndustryCd');
-        var ind = subIndustry.substring(0, 1);
+        var isuCd = FormManager.getActualValue('isuCd');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var reqType = FormManager.getActualValue('reqType');
+        var valResult = null;
+        var oldSearchTerm = null;
+        var oldClientTier = null;
+        var oldISU = null;
+        var requestId = FormManager.getActualValue('reqId');
 
-        var scenariosToBlock = [ 'CBBUS', 'BEBUS', 'BEINT', 'IBMEM', 'BEPRI', 'LUBUS', 'LUINT', 'LUIBM', 'LUPRI', 'LUISO' ];
+        if (reqType == 'C') {
+          valResult = sortlCheckValidator();
+        } else {
+          qParams = {
+            REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.BENELUX.CLIENT_TIER_ISU_SBO_CD_OLD_BY_REQID', qParams);
 
-        var accSeq_624 = {
-          '34Q' : [ 'T0003601' ],
-          '36Y' : [ 'T0007967' ],
-          '32T' : [ 'T0010421', 'T0010425', 'T0010403', 'T0010422', 'T0010426', 'T0010423', 'T0010424' ],
-          '5K' : [ 'T0009066' ],
-          '21' : [ 'BU0000', 'P0000003' ],
-          '28' : [ 'A0004504' ]
-        };
+          if (result != null && result != '') {
+            oldClientTier = result.ret1 != null ? result.ret1 : '';
+            oldSearchTerm = result.ret3 != null ? result.ret3 : '';
+            oldISU = result.ret2 != null ? result.ret2 : '';
 
-        var accSeq_624LU = {
-          '34Q' : [ 'T0003500' ],
-          '21' : [ 'P0000046', 'LU0000' ],
-          '36Y' : [ 'T0007968' ],
-          '5K' : [ 'T0009902' ]
-        };
-
-        if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
-          if (cmrIssuingCntry == '624') {
-            if (countryUse == '624') {
-              if (accSeq_624.hasOwnProperty(isuCtc) && !accSeq_624[isuCtc].includes(commercialFinanced)) {
-                return new ValidationResult({
-                  id : 'commercialFinanced',
-                  type : 'text',
-                  name : 'commercialFinanced'
-                }, false, 'Sortl can only accept ' + accSeq_624[isuCtc]);
-              }
-            }
-            if (cmrIssuingCntry == '624') {
-              if (countryUse == '624LU') {
-                if (accSeq_624LU.hasOwnProperty(isuCtc) && !accSeq_624LU[isuCtc].includes(commercialFinanced)) {
-                  return new ValidationResult({
-                    id : 'commercialFinanced',
-                    type : 'text',
-                    name : 'commercialFinanced'
-                  }, false, 'SearchTerm can only accept ' + accSeq_624LU[isuCtc]);
-                }
-              }
+            if (clientTier != oldClientTier || isuCd != oldISU || commercialFinanced != oldSearchTerm) {
+              valResult = sortlCheckValidator();
             }
           }
-        } else {
-          return new ValidationResult(null, true);
         }
+        return valResult;
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function sortlCheckValidator() {
+  var reqTyp = FormManager.getActualValue('reqType');
+  var isuCode = FormManager.getActualValue('isuCd');
+  var clientTierCode = FormManager.getActualValue('clientTier');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var commercialFinanced = FormManager.getActualValue('commercialFinanced');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var countryUse = FormManager.getActualValue('countryUse');
+  var isuCtc = isuCode.concat(clientTierCode);
+  var subIndustry = FormManager.getActualValue('subIndustryCd');
+  var ind = subIndustry.substring(0, 1);
+
+  var scenariosToBlock = [ 'CBBUS', 'BEBUS', 'BEINT', 'IBMEM', 'BEPRI', 'LUBUS', 'LUINT', 'LUIBM', 'LUPRI', 'LUISO' ];
+
+  var accSeq_624 = {
+    '34Q' : [ 'T0003601' ],
+    '36Y' : [ 'T0007967' ],
+    '32T' : [ 'T0010421', 'T0010425', 'T0010403', 'T0010422', 'T0010426', 'T0010423', 'T0010424' ],
+    '5K' : [ 'T0009066' ],
+    '21' : [ 'BU0000', 'P0000003' ],
+    '28' : [ 'A0004504' ]
+  };
+
+  var accSeq_624LU = {
+    '34Q' : [ 'T0003500' ],
+    '21' : [ 'P0000046', 'LU0000' ],
+    '36Y' : [ 'T0007968' ],
+    '5K' : [ 'T0009902' ]
+  };
+
+  if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
+    if (cmrIssuingCntry == '624') {
+      if (countryUse == '624') {
+        if (accSeq_624.hasOwnProperty(isuCtc) && !accSeq_624[isuCtc].includes(commercialFinanced)) {
+          return new ValidationResult({
+            id : 'commercialFinanced',
+            type : 'text',
+            name : 'commercialFinanced'
+          }, false, 'SORTL can only accept ' + accSeq_624[isuCtc]);
+        }
+      }
+      if (cmrIssuingCntry == '624') {
+        if (countryUse == '624LU') {
+          if (accSeq_624LU.hasOwnProperty(isuCtc) && !accSeq_624LU[isuCtc].includes(commercialFinanced)) {
+            return new ValidationResult({
+              id : 'commercialFinanced',
+              type : 'text',
+              name : 'commercialFinanced'
+            }, false, 'SORTL can only accept ' + accSeq_624LU[isuCtc]);
+          }
+        }
+      }
+    }
+  } else {
+    return new ValidationResult(null, true);
+  }
 }
 
 function clientTierValidator() {
