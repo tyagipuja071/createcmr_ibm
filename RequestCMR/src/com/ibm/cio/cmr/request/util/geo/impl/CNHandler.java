@@ -566,7 +566,7 @@ public class CNHandler extends GEOHandler {
         for (CompanyRecordModel cmr : resultFindCmrCN) {
           if (cmr.getAltName().endsWith(companyName)) {
             cmrList.add(cmr.getCmrNo());
-            break;
+            // break;
           }
         }
         if (cmrList.size() > 0) {
