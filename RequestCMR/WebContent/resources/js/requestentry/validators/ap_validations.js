@@ -1347,6 +1347,10 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');  
   }
+  
+  if (!checkClusterSubScenarioChanged()) {
+    return;
+  }
 
   if (cmrIssuCntry == '744') {
     
