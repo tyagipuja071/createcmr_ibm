@@ -10271,13 +10271,15 @@ function addVatIndValidator() {
       FormManager.setValue('vatInd', 'N');
     } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
       FormManager.setValue('vatInd', 'T');
-      FormManager.readOnly('vatInd');
+      FormManager.enable('vatInd');
+   //   FormManager.readOnly('vatInd');
     } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
       FormManager.setValue('vat', '');
       FormManager.setValue('vatInd', '');
-    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd == '') {
       FormManager.setValue('vatInd', 'T');
-      FormManager.readOnly('vatInd');
+      FormManager.enable('vatInd');
+      // FormManager.readOnly('vatInd');
     } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
@@ -10552,10 +10554,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.registerValidator(addVatIndValidator, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
-  // GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK,
-  // SysLoc.IRELAND]);
-  // GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [SysLoc.UK,
-  // SysLoc.IRELAND]);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [ SysLoc.UK, SysLoc.IRELAND ]);
   // CMR-2688
   GEOHandler.addAfterConfig(setDefaultValueForPreferredLanguage, [ SysLoc.TURKEY ]);
   // CMR-1804 Turkey - Fields values validations - ISU Default on UI
