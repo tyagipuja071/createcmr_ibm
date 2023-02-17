@@ -121,18 +121,21 @@ function afterConfigForIndia() {
   
   // CREATCMR-7005
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if(custSubGrp == 'CROSS'){
-    FormManager.readOnly('vat');
-  }
+   if(custSubGrp == 'CROSS'){
+     FormManager.readOnly('vat');
+   } 
   // CREATCMR-7005
   
-
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) { 
     setInacNacValuesIN();
     filterInacCd('744','10215','N','I529');
     applyClusterFilters();
     lockInacNacFieldsByScenarioSubType();
-    lockFieldsWithDefaultValuesByScenarioSubType();
+    lockFieldsWithDefaultValuesByScenarioSubType();   
+    
+      if (custSubGrp == 'CROSS'){ 
+      FormManager.setValue('apCustClusterId', '2D999');
+      }       
   });
 
   dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
@@ -1277,7 +1280,8 @@ function lockInacNacFieldsByScenarioSubType() {
 
   if (cmrIssuCntry == '744') {
     if (['KYNDR'].includes(custSubGrp)) {
-      shouldLock = true;
+   // only inacType should be locked for Kyndryl India
+      FormManager.readOnly('inacType');
     } else if (['INTER', 'IGF', 'PRIV'].includes(custSubGrp)) {
       shouldLock = true;
       shouldClear = true;
@@ -2614,6 +2618,10 @@ function setISBUScenarioLogic() {
   var isbuList = null;
   if (cmrIssuingCntry == '744' && custSubGrp == 'PRIV') {
     FormManager.readOnly('apCustClusterId');
+  }
+  //india coverage kyndryl
+  if (cmrIssuingCntry == '744' && custSubGrp == 'KYNDR') {
+    FormManager.readOnly('inacType');
   }
   if (custSubGrp == 'BLUMX' || custSubGrp == 'XBLUM') {
     if (cmrIssuingCntry == '615' || cmrIssuingCntry == '652' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
