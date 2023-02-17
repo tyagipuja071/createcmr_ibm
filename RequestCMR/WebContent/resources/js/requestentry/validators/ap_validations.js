@@ -45,7 +45,7 @@ function addHandlersForAP() {
     _vatRegisterHandlerSG = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
     cmr
     .showAlert(
-        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of “VAT Registration Status” is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ‘No – VAT unapplicable’, you are confirming that this customer has no VAT# then “VAT Registration Status” is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
+        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of ï¿½VAT Registration Statusï¿½ is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ï¿½No ï¿½ VAT unapplicableï¿½, you are confirming that this customer has no VAT# then ï¿½VAT Registration Statusï¿½ is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
           OK : 'I confirm',
         });
     });
@@ -1335,14 +1335,6 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var clusterid = FormManager.getActualValue('apCustClusterId');
   
-
-  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-	if (custSubGrp == 'CROSS'){ 
-	  FormManager.setValue('apCustClusterId', '2D999');
-	}
-  });
-
-  
   /* For these two scenrios, the below mentioned fields will always be locked regardless of any other condition */
   if (['NRMLC','AQSTN'].includes(custSubGrp)) {
     FormManager.setValue('isuCd','34');
@@ -1416,7 +1408,10 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.readOnly('mrcCd');
       
     } else if (custSubGrp == 'CROSS') {
-      FormManager.setValue('apCustClusterId','2D999');  
+      if (FormManager.getField('apCustClusterId') == '') {
+        FormManager.setValue('apCustClusterId','2D999');
+      }
+      clusterid = FormManager.getActualValue('apCustClusterId');
       if (clusterid == '2D999'){
         FormManager.setValue('clientTier', 'Z');
         FormManager.readOnly('clientTier');       
@@ -3060,6 +3055,30 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
                FormManager.resetDropdownValues(FormManager.getField('clientTier'));
                FormManager.setValue('clientTier','');
                FormManager.setValue('isuCd','');
+               
+                  // fixing issue 8340 for india
+                 // GB Segment values are not correct and it is not locked by
+                  // default for CROSS scenario
+                   if (_cmrIssuingCntry == '744' && (custSubGrp == 'CROSS')) {
+                   if (FormManager.getField('apCustClusterId') == '' || FormManager.getField('apCustClusterId') == '2D999') {
+                     FormManager.setValue('apCustClusterId', '2D999');
+                     FormManager.resetDropdownValues(FormManager.getField('clientTier'))
+                     FormManager.setValue('clientTier', 'Z');
+                     FormManager.readOnly('clientTier');
+                     FormManager.resetDropdownValues(FormManager.getField('isuCd'))
+                     FormManager.setValue('isuCd', '34');
+                     FormManager.readOnly('isuCd');
+                     FormManager.setValue('mrcCd', '3');
+                     FormManager.readOnly('mrcCd');
+                   } else {
+                     FormManager.enable('clientTier');
+                     FormManager.enable('isuCd');
+                     FormManager.enable('inacType');
+                     FormManager.enable('inacCd');
+                   }
+                 }
+               
+               
                }
         }
     }
@@ -4343,11 +4362,34 @@ function setISUDropDownValues() {
                FormManager.readOnly('inacCd');
                FormManager.readOnly('inacType');
              }
-          }
+          } 
         else {
              FormManager.resetDropdownValues(FormManager.getField('clientTier'));
              FormManager.setValue('clientTier','');
              FormManager.setValue('isuCd','');
+             
+                 // fixing issue 8340 for india
+                 // GB Segment values are not correct and it is not locked by
+                  // default for CROSS scenario
+                 if (_cmrIssuingCntry == '744' && (custSubGrp == 'CROSS')) {
+                   if (FormManager.getField('apCustClusterId') == '' || FormManager.getField('apCustClusterId') == '2D999') {
+                     FormManager.setValue('apCustClusterId', '2D999');
+                     FormManager.resetDropdownValues(FormManager.getField('clientTier'))
+                     FormManager.setValue('clientTier', 'Z');
+                     FormManager.readOnly('clientTier');
+                     FormManager.resetDropdownValues(FormManager.getField('isuCd'))
+                     FormManager.setValue('isuCd', '34');
+                     FormManager.readOnly('isuCd');
+                     FormManager.setValue('mrcCd', '3');
+                     FormManager.readOnly('mrcCd');
+                   } else {
+                     FormManager.enable('clientTier');
+                     FormManager.enable('isuCd');
+                     FormManager.enable('inacType');
+                     FormManager.enable('inacCd');
+                   }
+                 }
+             
              }
 
       } else if (apClientTierValue.length > 1) {
@@ -7199,7 +7241,7 @@ function addKyndrylValidator() {
               id : 'mainCustNm1',
               type : 'text',
               name : 'mainCustNm1'
-            }, false, 'Customer name must contain the word “Kyndryl”.');
+            }, false, 'Customer name must contain the word ï¿½Kyndrylï¿½.');
           }
           
         }
