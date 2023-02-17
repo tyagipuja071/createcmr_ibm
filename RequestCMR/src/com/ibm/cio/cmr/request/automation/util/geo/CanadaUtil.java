@@ -1008,7 +1008,7 @@ public class CanadaUtil extends AutomationUtil {
 
   @Override
   public List<String> getSkipChecksRequestTypesforCMDE() {
-    return Arrays.asList("C", "U", "M");
+    return Arrays.asList("C", "U", "M", "R", "D");
   }
 
   /**
