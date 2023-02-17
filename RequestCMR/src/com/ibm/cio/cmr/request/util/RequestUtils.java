@@ -38,6 +38,8 @@ import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Lov;
 import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
@@ -1713,7 +1715,7 @@ public class RequestUtils {
    * @param admin
    * @param data
    */
-  public static void setProspLegalConversionFlag(Admin admin, Data data) {
+  public static void setProspLegalConversionFlag(EntityManager entityManager, Admin admin, Data data) {
     if (!"C".equals(admin.getReqType())) {
       admin.setProspLegalInd(null);
       // no flag for non creates
@@ -1723,11 +1725,19 @@ public class RequestUtils {
       // ignore completed records
       return;
     }
-    if (StringUtils.isBlank(data.getCmrNo())) {
+    String cmrNo = data.getCmrNo();
+    DataPK pk = new DataPK();
+    pk.setReqId(data.getId().getReqId());
+    DataRdc rdc = entityManager.find(DataRdc.class, pk);
+    if (rdc != null && StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(rdc.getCmrNo()) && rdc.getCmrNo().startsWith("P")) {
+      // for other implementations, get prospect cmr no from data_rdc
+      cmrNo = rdc.getCmrNo();
+    }
+    if (StringUtils.isBlank(cmrNo)) {
       // blank out, no prospect imported
       admin.setProspLegalInd(null);
     } else {
-      if (data.getCmrNo().startsWith("P")) {
+      if (cmrNo.startsWith("P")) {
         // prospect imported
         admin.setProspLegalInd("Y");
       } else {
