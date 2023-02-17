@@ -289,10 +289,17 @@ function importCMRConfirm(result) {
   } else {
     var confMsg = 'Do you want to Update the selected CMR or Create a new CMR modeled after this one?';
     cmr.currentCmrResult = result;
+    if(reqCmrIssuingCntry == '758'){
+	 cmr.showConfirm('continueCreateCMR()', confMsg, null, 'continueUpdateCMR(cmr.currentCmrResult)', {
+      OK : 'Create New CMR',
+      CANCEL : 'Update CMR'
+    });
+    }else {
     cmr.showConfirm('continueCreateCMR()', confMsg, null, 'continueUpdateCMR(result)', {
       OK : 'Create New CMR',
       CANCEL : 'Update CMR'
     });
+    }
   }
 
 }
