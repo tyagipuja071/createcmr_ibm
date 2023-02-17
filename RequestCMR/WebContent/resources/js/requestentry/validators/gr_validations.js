@@ -237,7 +237,7 @@ function addVATDisabler() {
     }
 
     if (roleCheck && reqCheck) {
-      if (role == 'REQUESTER' && vat != 'U') {
+      if (role == 'REQUESTER' && vat != "") {
         FormManager.readOnly('vat');
       }
       clearInterval(interval);
