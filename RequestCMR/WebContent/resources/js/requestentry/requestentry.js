@@ -1614,6 +1614,7 @@ function overrideDnBMatch() {
   // FOR CN
   var cntry = FormManager.getActualValue('landCntry');
   var loc = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
   if (cntry == 'CN' || loc == '641') {
     var reqType = FormManager.getActualValue('reqType');
     var custSubGroup = FormManager.getActualValue('custSubGrp');
@@ -1631,6 +1632,14 @@ function overrideDnBMatch() {
               'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
               'Warning', null, null);
     }
+  // CREATCMR-8430: do NZBN API check after override dnb
+  } else if (loc == SysLoc.NEW_ZEALAND && reqType == 'C') {
+    console.log(">>> for NZ, do NZBN API check after doOverrideDnBMatch >>>")
+    cmr
+        .showConfirm(
+            'doNZBNAPIMatch()',
+            'This action will override the D&B Matching Process.<br>Proceed?',
+            'Warning', null, null);
   } else {
     cmr
         .showConfirm(
@@ -2941,4 +2950,48 @@ function matchDnBForNZUpdate() {
     }
   });
 
+}
+
+// CREATCMR-8430: do NZBN API check,
+function doNZBNAPIMatch() {
+  console.log('>>> doNZBNAPIMacht >>>');
+  FormManager.setValue('matchOverrideIndc', 'Y');
+  FormManager.setValue('findDnbResult', 'Rejected');
+  
+  hideModaldnb_Window();
+  
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  console.log("Checking if the request matches NZBN API...");
+  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
+  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
+  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
+    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
+    return;
+  }
+  cmr.showProgress('Checking request data with NZBN API...');
+
+  var dataAPI = matchNZAPICustNmAddrForNZ();
+  console.log(dataAPI);
+  if (dataAPI && dataAPI.success) {
+    if (!dataAPI.custNmMatch || !dataAPI.addressMatch) {
+      console.log('Customer name or address match fail in NZ API: ' + dataAPI.message);
+      cmr.showAlert('Name or address match fail in NZBN API.\nPlease attach company proof');
+      FormManager.setValue('matchOverrideIndc', 'Y');
+    } else {
+      console.log('Customer name and address matched in NZBN API');
+      if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
+        checkRetrievedForNZ();
+      } else {
+        cmr.hideProgress();
+        showAddressVerificationModal();
+      }
+    }
+  } else {
+    // continue
+    console.log("An error occurred while matching dnb.");
+    cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+      OK : 'Yes',
+      CANCEL : 'No'
+    });
+  }
 }
