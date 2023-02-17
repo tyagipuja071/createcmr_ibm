@@ -108,13 +108,13 @@ public class SwitzerlandUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     String custGrp = data.getCustGrp();
     // CREATCMR-6244 LandCntry UK(GB)
-    if(soldTo != null){
-    	String landCntry = soldTo.getLandCntry();
-    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
-                && ("CROSS".equals(custGrp))){
-        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
-        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
-        }
+    if (soldTo != null) {
+      String landCntry = soldTo.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
     }
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
 
@@ -496,9 +496,7 @@ public class SwitzerlandUtil extends AutomationUtil {
     String sortl = null;
     switch (actualScenario) {
     case SCENARIO_COMMERCIAL:
-      if (!isCoverageCalculated) {
-        sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
-      }
+      sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
@@ -517,7 +515,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       }
     }
 
-    LOG.debug("----CovId()+Coverage--" + data.getCovId());
+    LOG.debug("----CovId() + Coverage--" + data.getCovId());
     if (sortl != null) {
       details.append("Setting SORTL to " + sortl + " based on Postal Code rules.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
@@ -598,7 +596,7 @@ public class SwitzerlandUtil extends AutomationUtil {
   // }
 
   public String getSortlForISUCTC(EntityManager entityManager, String subIndustryCd, String postCd, String isuCd, String clientTier) {
-    if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+    if (StringUtils.isNotBlank(isuCd)) {
 
       if (StringUtils.isNotBlank(subIndustryCd) && subIndustryCd.length() > 1) {
         subIndustryCd = subIndustryCd.substring(0, 1);
@@ -619,6 +617,12 @@ public class SwitzerlandUtil extends AutomationUtil {
       } else {
         postCd = "";
       }
+
+      if (!"34".equals("isuCd") && !"Q".equals(clientTier)) {
+        subIndustryCd = "";
+        postCd = "";
+      }
+      clientTier = StringUtils.isNotBlank(clientTier) ? clientTier : "";
 
       String sql = ExternalizedQuery.getSql("QUERY.SWISS.GET.SORTL_BY_ISUCTCIMS");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
