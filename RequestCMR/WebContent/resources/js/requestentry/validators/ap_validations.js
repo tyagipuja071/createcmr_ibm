@@ -4161,8 +4161,8 @@ function addContactInfoValidator() {
               }
               break;
             case '796':
-              if ((custName == null || streetAddr == null || postCd == null || city == null || state == null)) {
-                mandtDetails_2++;
+              if ((custName == null || streetAddr == null || postCd == null || city == null)) {
+                mandtDetails_1++;
               }
               break;
             case '616':
