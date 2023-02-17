@@ -1411,9 +1411,6 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.readOnly('mrcCd');
       
     } else if (custSubGrp == 'CROSS') {
-      if (FormManager.getField('apCustClusterId') == '') {
-        FormManager.setValue('apCustClusterId','2D999');
-      }
       clusterid = FormManager.getActualValue('apCustClusterId');
       if (clusterid == '2D999'){
         FormManager.setValue('clientTier', 'Z');
