@@ -1280,7 +1280,8 @@ public class USHandler extends GEOHandler {
     // CREATCMR-6342
     
     if("U".equals(admin.getReqType())){
-    	data.setCustSubGrp("");
+      data.setCustSubGrp("");
+      data.setVatInd("N");
     }
 
   }
