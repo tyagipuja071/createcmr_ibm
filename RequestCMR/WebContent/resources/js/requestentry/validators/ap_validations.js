@@ -482,8 +482,11 @@ function setInacByCluster() {
       // CREATCMR-7885
       setInacCdTypeStatus();
     } else {
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
+      console.log('>>>> setInacByCluster ELSE scenario >>>>');
+      if (cntry != '744') {
+        FormManager.removeValidator('inacCd', Validators.REQUIRED);
+        FormManager.removeValidator('inacType', Validators.REQUIRED);
+      }
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       updateMRCAseanAnzIsa();
@@ -1344,11 +1347,7 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');  
   }
-  
-  if (!checkClusterSubScenarioChanged()) {
-    return;
-  }
-  
+
   if (cmrIssuCntry == '744') {
     
     if (['KYNDR'].includes(custSubGrp)) {
@@ -3036,6 +3035,17 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
                  FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
                  FormManager.setValue('clientTier', 'Z');
                  FormManager.readOnly('clientTier');
+                 
+                 // CREATCMR-7877
+                 // lock inacCd and inacType
+                 if(custSubGrp == 'IGF' || custSubGrp == 'PRIV') {
+                   FormManager.setValue('inacCd','');
+                   FormManager.readOnly('inacCd');
+                   
+                   FormManager.setValue('inacType','');
+                   FormManager.readOnly('inacType');
+                 }
+                 
                }
                
             } else if (scenario == 'LOCAL' && custSubGrp == 'INTER'){
@@ -4347,6 +4357,17 @@ function setISUDropDownValues() {
                FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
                FormManager.setValue('clientTier', 'Z');
                FormManager.readOnly('clientTier');
+               
+               // CREATCMR-7877
+               // lock inacCd and inacType
+               if(custSubGrp == 'IGF' || custSubGrp == 'PRIV') {
+                 FormManager.setValue('inacCd','');
+                 FormManager.readOnly('inacCd');
+                 
+                 FormManager.setValue('inacType','');
+                 FormManager.readOnly('inacType');
+               }
+               
              }
                           
           }
