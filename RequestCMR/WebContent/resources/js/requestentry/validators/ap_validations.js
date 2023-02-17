@@ -7833,7 +7833,7 @@ function addKyndrylValidator() {
               id : 'mainCustNm1',
               type : 'text',
               name : 'mainCustNm1'
-            }, false, 'Customer name must contain the word “Kyndryl”.');
+            }, false, 'Customer name must contain the word "Kyndryl".');
           }
           
         }
@@ -7932,29 +7932,6 @@ function setInacCdTypeStatus(){
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
   }
-}
-
-function addKyndrylValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var reqType = FormManager.getActualValue('reqType');
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (reqType == 'C' && custSubGrp == 'KYNDR') {
-          var custName = FormManager.getActualValue('mainCustNm1');
-          if (!custName.toLowerCase().includes('kyndryl')) {
-            return new ValidationResult({
-              id : 'mainCustNm1',
-              type : 'text',
-              name : 'mainCustNm1'
-            }, false, 'Customer name must contain the word "Kyndryl".');
-          }
-          
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function setInacCdTypeStatus(){
