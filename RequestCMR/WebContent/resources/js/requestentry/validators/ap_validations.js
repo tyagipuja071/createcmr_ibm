@@ -7243,7 +7243,7 @@ function addKyndrylValidator() {
               id : 'mainCustNm1',
               type : 'text',
               name : 'mainCustNm1'
-            }, false, 'Customer name must contain the word �Kyndryl�.');
+            }, false, 'Customer name must contain the word "Kyndryl".');
           }
           
         }
