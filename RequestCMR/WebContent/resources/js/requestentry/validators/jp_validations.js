@@ -2997,7 +2997,7 @@ function setINACCodeMandatory() {
       }
     }
     if (isRequired) {
-      FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+      //FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
       FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCd);
     } else {
       FormManager.resetValidations('inacCd');
