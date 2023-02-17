@@ -348,7 +348,7 @@ public class FranceUtil extends AutomationUtil {
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
       if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
         sbo = computeSBOForCovFR(entityManager, QUERY_BG_SBO_FR, bgId, data.getCmrIssuingCntry(), false);
-        sbo.substring(0, 3);
+        sbo = sbo.substring(0, 3);
       }
 
       FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
@@ -607,7 +607,7 @@ public class FranceUtil extends AutomationUtil {
     query.setParameter("ISO_CNTRY", isoCntry);
     query.setForReadOnly(true);
 
-    LOG.debug("Calculating SORTL using Spain query " + queryBgFR + " for key: " + bgId);
+    LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
     List<Object[]> results = query.getResults(5);
     if (results != null && !results.isEmpty()) {
       for (Object[] result : results) {
