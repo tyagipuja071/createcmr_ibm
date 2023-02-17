@@ -390,7 +390,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
       setLockByName(admin);
       saveAccessToken(admin, request);
-      RequestUtils.setProspLegalConversionFlag(admin, data);
+      RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
       updateEntity(admin, entityManager);
 
       adminToUse = admin;
@@ -592,7 +592,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
     saveAccessToken(admin, request);
     setLockByName(admin);
-    RequestUtils.setProspLegalConversionFlag(admin, data);
+    RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
     updateEntity(admin, entityManager);
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(model.getReqType()) && LAHandler.isLACountry(model.getCmrIssuingCntry())
