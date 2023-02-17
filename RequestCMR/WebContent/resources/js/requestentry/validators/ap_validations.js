@@ -1538,11 +1538,14 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
     if (['KYNDR'].includes(custSubGrp)) {
       FormManager.readOnly('apCustClusterId');
       FormManager.readOnly('clientTier');
+      
       FormManager.setValue('isuCd', '5K');
       FormManager.readOnly('isuCd');
+      
       FormManager.readOnly('mrcCd');
+      
       FormManager.setValue('inacCd', '6272');
-      FormManager.readOnly('inacCd');
+      FormManager.enable('inacCd');
       FormManager.setValue('inacType', 'I');
       FormManager.readOnly('inacType');
       
