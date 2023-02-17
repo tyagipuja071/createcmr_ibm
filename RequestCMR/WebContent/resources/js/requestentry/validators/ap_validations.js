@@ -1597,18 +1597,17 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.readOnly('mrcCd');
       
     } else if (custSubGrp == 'CROSS') {
-      FormManager.setValue('apCustClusterId','2D999');
+      if (FormManager.getField('apCustClusterId') == '') {
+        FormManager.setValue('apCustClusterId','2D999');
+      }
+      clusterid = FormManager.getActualValue('apCustClusterId');
       if (clusterid == '2D999'){
-        
         FormManager.setValue('clientTier', 'Z');
-        FormManager.readOnly('clientTier');
-        
+        FormManager.readOnly('clientTier');       
         FormManager.setValue('isuCd', '34');
-        FormManager.readOnly('isuCd');
-        
+        FormManager.readOnly('isuCd');        
         FormManager.setValue('mrcCd', '3');
-        FormManager.readOnly('mrcCd');
-        
+        FormManager.readOnly('mrcCd');        
       } else {
         FormManager.enable('clientTier');
         FormManager.enable('isuCd');        
@@ -3258,6 +3257,30 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
                FormManager.resetDropdownValues(FormManager.getField('clientTier'));
                FormManager.setValue('clientTier','');
                FormManager.setValue('isuCd','');
+               
+                  // fixing issue 8340 for india
+                 // GB Segment values are not correct and it is not locked by
+                  // default for CROSS scenario
+                   if (_cmrIssuingCntry == '744' && (custSubGrp == 'CROSS')) {
+                   if (FormManager.getField('apCustClusterId') == '' || FormManager.getField('apCustClusterId') == '2D999') {
+                     FormManager.setValue('apCustClusterId', '2D999');
+                     FormManager.resetDropdownValues(FormManager.getField('clientTier'))
+                     FormManager.setValue('clientTier', 'Z');
+                     FormManager.readOnly('clientTier');
+                     FormManager.resetDropdownValues(FormManager.getField('isuCd'))
+                     FormManager.setValue('isuCd', '34');
+                     FormManager.readOnly('isuCd');
+                     FormManager.setValue('mrcCd', '3');
+                     FormManager.readOnly('mrcCd');
+                   } else {
+                     FormManager.enable('clientTier');
+                     FormManager.enable('isuCd');
+                     FormManager.enable('inacType');
+                     FormManager.enable('inacCd');
+                   }
+                 }
+               
+               
                }
         }
     }
@@ -4582,11 +4605,34 @@ function setISUDropDownValues() {
                FormManager.readOnly('inacCd');
                FormManager.readOnly('inacType');
              }
-          }
+          } 
         else {
              FormManager.resetDropdownValues(FormManager.getField('clientTier'));
              FormManager.setValue('clientTier','');
              FormManager.setValue('isuCd','');
+             
+                 // fixing issue 8340 for india
+                 // GB Segment values are not correct and it is not locked by
+                  // default for CROSS scenario
+                 if (_cmrIssuingCntry == '744' && (custSubGrp == 'CROSS')) {
+                   if (FormManager.getField('apCustClusterId') == '' || FormManager.getField('apCustClusterId') == '2D999') {
+                     FormManager.setValue('apCustClusterId', '2D999');
+                     FormManager.resetDropdownValues(FormManager.getField('clientTier'))
+                     FormManager.setValue('clientTier', 'Z');
+                     FormManager.readOnly('clientTier');
+                     FormManager.resetDropdownValues(FormManager.getField('isuCd'))
+                     FormManager.setValue('isuCd', '34');
+                     FormManager.readOnly('isuCd');
+                     FormManager.setValue('mrcCd', '3');
+                     FormManager.readOnly('mrcCd');
+                   } else {
+                     FormManager.enable('clientTier');
+                     FormManager.enable('isuCd');
+                     FormManager.enable('inacType');
+                     FormManager.enable('inacCd');
+                   }
+                 }
+             
              }
 
       } else if (apClientTierValue.length > 1) {
@@ -7886,6 +7932,29 @@ function setInacCdTypeStatus(){
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
   }
+}
+
+function addKyndrylValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (reqType == 'C' && custSubGrp == 'KYNDR') {
+          var custName = FormManager.getActualValue('mainCustNm1');
+          if (!custName.toLowerCase().includes('kyndryl')) {
+            return new ValidationResult({
+              id : 'mainCustNm1',
+              type : 'text',
+              name : 'mainCustNm1'
+            }, false, 'Customer name must contain the word "Kyndryl".');
+          }
+          
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function setInacCdTypeStatus(){
