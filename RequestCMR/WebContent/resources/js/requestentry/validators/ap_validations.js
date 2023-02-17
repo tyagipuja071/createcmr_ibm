@@ -11,7 +11,7 @@ var _inacCdHandlerIN = null;
 var _importIndIN = null;
 var _vatRegisterHandlerSG = null;
 var _clusterHandlerINDONESIA = 0;
-
+var custSubGrpHandler = null;
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
     _isicHandlerAP = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -1349,7 +1349,11 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   }
 
   if (cmrIssuCntry == '744') {
-    
+	 custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+	   if (custSubGrp == 'CROSS'){ 
+		 FormManager.setValue('apCustClusterId', '2D999');
+	   }
+	 });   
     if (['KYNDR'].includes(custSubGrp)) {
       FormManager.readOnly('apCustClusterId');
       FormManager.readOnly('clientTier');
@@ -1407,9 +1411,6 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.readOnly('mrcCd');
       
     } else if (custSubGrp == 'CROSS') {
-      if (FormManager.getField('apCustClusterId') == '') {
-        FormManager.setValue('apCustClusterId','2D999');
-      }
       clusterid = FormManager.getActualValue('apCustClusterId');
       if (clusterid == '2D999'){
         FormManager.setValue('clientTier', 'Z');
