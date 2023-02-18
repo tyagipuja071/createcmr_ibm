@@ -479,7 +479,7 @@ function setInacByCluster() {
           FormManager.resetDropdownValues(FormManager.getField('inacType'));
         }
         
-        if(cntry == '856' || cntry == '852' || cntry == '818' || '744') {
+        if(cntry == '856' || cntry == '852' || cntry == '818') {
           if (FormManager.getActualValue('viewOnlyPage') == 'true') {
             return;
           }
@@ -500,10 +500,6 @@ function setInacByCluster() {
       
       // CREATCMR-7884
       if(cntry == '796' && custSubGrp=='KYND' && _cluster == '09056'){
-        FormManager.readOnly('inacType');
-      }
-      
-      if(cntry == '744' && custSubGrp=='KYND' && _cluster == '09062'){
         FormManager.readOnly('inacType');
       }
       
