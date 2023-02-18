@@ -47,7 +47,7 @@ function addHandlersForAP() {
     _vatRegisterHandlerSG = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
     cmr
     .showAlert(
-        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of “VAT Registration Status” is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ‘No – VAT unapplicable’, you are confirming that this customer has no VAT# then “VAT Registration Status” is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
+        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of "VAT Registration Status" is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting \'No – VAT unapplicable\', you are confirming that this customer has no VAT# then "VAT Registration Status" is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
           OK : 'I confirm',
         });
     });
@@ -119,6 +119,8 @@ function afterConfigForIndia() {
         }
         }
     });
+    
+    
   }
   
   // CREATCMR-7005
@@ -135,9 +137,10 @@ function afterConfigForIndia() {
     lockInacNacFieldsByScenarioSubType();
     lockFieldsWithDefaultValuesByScenarioSubType();   
     
-      if (custSubGrp == 'CROSS'){ 
-      FormManager.setValue('apCustClusterId', '2D999');
-      }       
+    if (cntry == SysLoc.INDIA && custSubGrp == "CROSS" && _pagemodel.apCustClusterId == null) {
+      FormManager.setValue('apCustClusterId', "2D999");
+    }
+             
   });
 
   dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
@@ -154,6 +157,8 @@ function afterConfigForIndia() {
       setClusterGlcCovIdMapNrmlc();
     });
   }
+  
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   
 }
 
@@ -316,6 +321,22 @@ function addAfterConfigAP() {
     if (cntry == SysLoc.AUSTRALIA && custSubGrp == "CROSS" && _pagemodel.apCustClusterId == null) {
       FormManager.setValue('apCustClusterId', "00001");
     }
+    
+    if (cntry == SysLoc.INDIA && custSubGrp == "CROSS" && _pagemodel.apCustClusterId == null) {
+      FormManager.setValue('apCustClusterId', "2D999");
+    } else if (cntry == SysLoc.INDIA && custSubGrp == "KYNDR") {
+        FormManager.readOnly('apCustClusterId');
+      FormManager.readOnly('clientTier');
+      FormManager.setValue('isuCd', '5K');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('mrcCd');
+      FormManager.setValue('inacCd', '6272');
+      FormManager.enable('inacCd');
+      FormManager.setValue('inacType', 'I');
+      FormManager.readOnly('inacType');
+    }
+    
+    
   }
   if (reqType == 'C') {
     setIsuOnIsic();
@@ -1518,12 +1539,6 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var clusterid = FormManager.getActualValue('apCustClusterId');
   
-  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-    if (custSubGrp == 'CROSS'){ 
-      FormManager.setValue('apCustClusterId', '2D999');
-    }
-  });
-  
   /*
    * For these two scenrios, the below mentioned fields will always be locked
    * regardless of any other condition
@@ -1537,16 +1552,24 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
     FormManager.readOnly('mrcCd');  
   }
   
+  
+  
   if (!checkClusterSubScenarioChanged()) {
     return;
   }
 
   if (cmrIssuCntry == '744') {
-	 custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-	   if (custSubGrp == 'CROSS'){ 
-		 FormManager.setValue('apCustClusterId', '2D999');
-	   }
-	 });   
+    
+    dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
+      if (FormManager.getActualValue('custSubGrp') == 'CROSS' && window.loadDefaultCrossSettings == true){ 
+        FormManager.setValue('apCustClusterId', '2D999');
+        FormManager.setValue('inacCd', '');
+        FormManager.setValue('inacType', '');
+        
+        window.loadDefaultCrossSettings = false;
+      }
+    });
+    
     if (['KYNDR'].includes(custSubGrp)) {
       FormManager.readOnly('apCustClusterId');
       FormManager.readOnly('clientTier');
@@ -1607,9 +1630,11 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.readOnly('isuCd');
       FormManager.readOnly('mrcCd');
       
-    } else if (custSubGrp == 'CROSS') {
+    } else if (custSubGrp == 'CROSS') { 
+      
       clusterid = FormManager.getActualValue('apCustClusterId');
-      if (clusterid == '2D999'){
+      
+      if (_pagemodel.apCustClusterId == '2D999' || clusterid == '2D999'){
         FormManager.setValue('clientTier', 'Z');
         FormManager.readOnly('clientTier');       
         FormManager.setValue('isuCd', '34');
@@ -2812,10 +2837,7 @@ function setISBUScenarioLogic() {
   if (cmrIssuingCntry == '744' && custSubGrp == 'PRIV') {
     FormManager.readOnly('apCustClusterId');
   }
-  //india coverage kyndryl
-  if (cmrIssuingCntry == '744' && custSubGrp == 'KYNDR') {
-    FormManager.readOnly('inacType');
-  }
+
   if (custSubGrp == 'BLUMX' || custSubGrp == 'XBLUM') {
     if (cmrIssuingCntry == '615' || cmrIssuingCntry == '652' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
       FormManager.setValue('isbuCd', 'GMBW');
@@ -3219,7 +3241,20 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
       for (var i = 0; i < results.length; i++) {
         apClientTierValue.push(results[i].ret1);
         isuCdValue.push(results[i].ret2);
-      }  
+      } 
+      
+      if (_cmrIssuingCntry == '744' && (custSubGrp == 'KYNDR')){
+        FormManager.readOnly('apCustClusterId');
+        FormManager.readOnly('clientTier');
+        FormManager.setValue('isuCd', '5K');
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('mrcCd');
+        FormManager.setValue('inacCd', '6272');
+        FormManager.enable('inacCd');
+        FormManager.setValue('inacType', 'I');
+        FormManager.readOnly('inacType');     
+      }
+      
       if (scenario == 'LOCAL' && custSubGrp == 'INTER'){
         FormManager.resetDropdownValues(FormManager.getField('clientTier'));
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
@@ -3301,7 +3336,19 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
                      FormManager.enable('inacType');
                      FormManager.enable('inacCd');
                    }
+                 } else if (_cmrIssuingCntry == '744' && (custSubGrp == 'KYNDR')){
+                   FormManager.readOnly('apCustClusterId');
+                   FormManager.readOnly('clientTier');
+                   FormManager.setValue('isuCd', '5K');
+                   FormManager.readOnly('isuCd');
+                   FormManager.readOnly('mrcCd');
+                   FormManager.setValue('inacCd', '6272');
+                   FormManager.enable('inacCd');
+                   FormManager.setValue('inacType', 'I');
+                   FormManager.readOnly('inacType');                   
                  }
+                   
+                   
                
                
                }
@@ -4589,6 +4636,19 @@ function setISUDropDownValues() {
         isuCdValue.push(results[i].ret2);
       }
       
+      if (_cmrIssuingCntry == '744' && (custSubGrp == 'KYNDR')){
+        FormManager.readOnly('apCustClusterId');
+        FormManager.readOnly('clientTier');
+        FormManager.setValue('isuCd', '5K');
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('mrcCd');
+        FormManager.setValue('inacCd', '6272');
+        FormManager.enable('inacCd');
+        FormManager.setValue('inacType', 'I');
+        FormManager.readOnly('inacType');                   
+      }
+      
+      
       if (apClientTierValue.length == 1) {
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
         FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
@@ -4665,6 +4725,16 @@ function setISUDropDownValues() {
                      FormManager.enable('inacType');
                      FormManager.enable('inacCd');
                    }
+                 } else if (_cmrIssuingCntry == '744' && (custSubGrp == 'KYNDR')){
+                   FormManager.readOnly('apCustClusterId');
+                   FormManager.readOnly('clientTier');
+                   FormManager.setValue('isuCd', '5K');
+                   FormManager.readOnly('isuCd');
+                   FormManager.readOnly('mrcCd');
+                   FormManager.setValue('inacCd', '6272');
+                   FormManager.enable('inacCd');
+                   FormManager.setValue('inacType', 'I');
+                   FormManager.readOnly('inacType');                   
                  }
              
              }
@@ -6002,6 +6072,21 @@ function additionalAddrNmValidator(){
       }
     };
   })(), null, 'frmCMR_addressModal');
+}
+var _customerTypeHandler = null;
+function addCustGrpHandler() {
+  if (_customerTypeHandler == null) {
+    _customerTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
+      var custGrp = FormManager.getActualValue('custGrp');
+      var reqType = FormManager.getActualValue('reqType');
+      var apaCntry = [ '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '858', '766' ];
+      if (reqType == 'C' && custGrp == 'CROSS' && apaCntry.includes(cntry)) {
+        FormManager.setValue('custSubGrp', 'CROSS');
+        window.loadDefaultCrossSettings = true;
+      }
+    });
+  }
 }
 
 // CREATCMR-788
