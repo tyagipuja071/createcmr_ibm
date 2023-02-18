@@ -135,10 +135,10 @@ function afterConfigForIndia() {
     lockInacNacFieldsByScenarioSubType();
     lockFieldsWithDefaultValuesByScenarioSubType();   
     
-      /*
-       * if (custSubGrp == 'CROSS'){ FormManager.setValue('apCustClusterId',
-       * '2D999'); }
-       */      
+    if (cntry == SysLoc.INDIA && custSubGrp == "CROSS" && _pagemodel.apCustClusterId == null) {
+      FormManager.setValue('apCustClusterId', "2D999");
+    }
+             
   });
 
   dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
@@ -158,10 +158,7 @@ function afterConfigForIndia() {
   }
   
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-
-  if (cntry == SysLoc.INDIA && custSubGrp == "CROSS" && _pagemodel.apCustClusterId == null) {
-    FormManager.setValue('apCustClusterId', "2D999");
-  }
+  
 }
 
 function resetGstExempt() {
@@ -323,6 +320,22 @@ function addAfterConfigAP() {
     if (cntry == SysLoc.AUSTRALIA && custSubGrp == "CROSS" && _pagemodel.apCustClusterId == null) {
       FormManager.setValue('apCustClusterId', "00001");
     }
+    
+    if (cntry == SysLoc.INDIA && custSubGrp == "CROSS" && _pagemodel.apCustClusterId == null) {
+      FormManager.setValue('apCustClusterId', "2D999");
+    } else if (cntry == SysLoc.INDIA && custSubGrp == "KYNDR") {
+        FormManager.readOnly('apCustClusterId');
+      FormManager.readOnly('clientTier');
+      FormManager.setValue('isuCd', '5K');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('mrcCd');
+      FormManager.setValue('inacCd', '6272');
+      FormManager.enable('inacCd');
+      FormManager.setValue('inacType', 'I');
+      FormManager.readOnly('inacType');
+    }
+    
+    
   }
   if (reqType == 'C') {
     setIsuOnIsic();
@@ -466,7 +479,7 @@ function setInacByCluster() {
           FormManager.resetDropdownValues(FormManager.getField('inacType'));
         }
         
-        if(cntry == '856' || cntry == '852' || cntry == '818') {
+        if(cntry == '856' || cntry == '852' || cntry == '818' || '744') {
           if (FormManager.getActualValue('viewOnlyPage') == 'true') {
             return;
           }
@@ -487,6 +500,10 @@ function setInacByCluster() {
       
       // CREATCMR-7884
       if(cntry == '796' && custSubGrp=='KYND' && _cluster == '09056'){
+        FormManager.readOnly('inacType');
+      }
+      
+      if(cntry == '744' && custSubGrp=='KYND' && _cluster == '09062'){
         FormManager.readOnly('inacType');
       }
       
