@@ -199,7 +199,7 @@ window.addEventListener("message", function(e) {
             }
           }
           cmr.currentCmrResult = result;
-          continueUpdateCMR(result);
+          continueUpdateCMR();
 
         } else if (result.data && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GERMANY) {
           var ordBlk = result.data.orderBlock;
@@ -281,15 +281,16 @@ function importCMRConfirm(result) {
   
   var allowByModel = true;
   var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : reqCmrIssuingCntry});
-  if (byModel && byModel.ret1 == 'Y'){
+  if (byModel && byModel.ret1 == 'Y') {
     allowByModel = false;
   } 
   if (!allowByModel){
-    continueUpdateCMR(result);
+    cmr.currentCmrResult = result;
+    continueUpdateCMR();
   } else {
     var confMsg = 'Do you want to Update the selected CMR or Create a new CMR modeled after this one?';
     cmr.currentCmrResult = result;
-    cmr.showConfirm('continueCreateCMR()', confMsg, null, 'continueUpdateCMR(result)', {
+    cmr.showConfirm('continueCreateCMR()', confMsg, null, 'continueUpdateCMR()', {
       OK : 'Create New CMR',
       CANCEL : 'Update CMR'
     });
@@ -334,7 +335,8 @@ function importBillingCompany() {
 /**
  * Continue importing the record with Update type
  */
-function continueUpdateCMR(result) {
+function continueUpdateCMR() {
+  var result = cmr.currentCmrResult;
   FormManager.setValue('reqType', 'U');
   FormManager.setValue('enterCMRNo', result.data.cmrNum);
   importCMRs(result.data.cmrNum, result.data.issuedBy, result.data.issuedByDesc);
