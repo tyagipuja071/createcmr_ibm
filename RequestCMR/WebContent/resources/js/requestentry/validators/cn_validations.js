@@ -3620,7 +3620,7 @@ function retrievedValueValidator() {
           }
         }
     };
-  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function sSDGBGIdValidator() {
@@ -3662,7 +3662,7 @@ function sSDGBGIdValidator() {
         }
       }
     };
-  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function s1GBGIdValidator() {
@@ -3689,7 +3689,7 @@ function s1GBGIdValidator() {
         }
       }
     };
-  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function foreignValidator() {
@@ -3935,7 +3935,7 @@ function retrievedForCNValidator() {
         }
       }
     };
-  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 dojo.addOnLoad(function() {
