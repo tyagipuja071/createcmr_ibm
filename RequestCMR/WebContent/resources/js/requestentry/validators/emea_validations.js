@@ -118,6 +118,7 @@ var _oldIdentClientIT = "";
 var _oldVatIT = "";
 var _lobHandler = null;
 var _landCntryHandlerUK = null;
+var _landCntryHandlerIE = null;
 var _postalCdUKHandler = null;
 var _cityUKHandler = null;
 var _custGrpIT = null;
@@ -535,7 +536,6 @@ function afterConfigForUKI() {
   }
   if (_lobHandler == null) {
     var _custType = FormManager.getActualValue('custSubGrp');
-    ;
     _lobHandler = dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
       var lob = FormManager.getActualValue('requestingLob');
       if (lob != '') {
@@ -546,12 +546,22 @@ function afterConfigForUKI() {
   }
 
   if (_landCntryHandlerUK == null && issuingCntry == SysLoc.UK) {
-    _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
+    _landCntryHandlerUK = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       optionalRulePostalCodeUK();
     });
   }
   if (_landCntryHandlerUK && _landCntryHandlerUK[0]) {
     _landCntryHandlerUK[0].onChange();
+  }
+
+  if (_landCntryHandlerIE == null && issuingCntry == SysLoc.IE) {
+    _landCntryHandlerIE = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
+      setClientTierBasedOnIsuUKI();
+      setSboValueBasedOnIsuCtcIE();
+    });
+  }
+  if (_landCntryHandlerIE && _landCntryHandlerIE[0]) {
+    _landCntryHandlerIE[0].onChange();
   }
 
   if (_isuCdHandlerIE == null && FormManager.getField('isuCd') && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
@@ -593,7 +603,7 @@ function setClientTierBasedOnIsuUKI() {
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'ClientTier' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.setValue('clientTier', '');
-      FormManager.removeValidator('clientTier', Validators.REQUIRED);
+      FormManager.resetValidations('clientTier');
     }
   }
 }
