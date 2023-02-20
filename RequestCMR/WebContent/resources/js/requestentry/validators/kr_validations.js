@@ -31,6 +31,9 @@ function afterConfigKR() {
     FormManager.setValue('inacCd','');
     LockDefaultISUClientTierMrcValues();
     setInacNacValues();
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
   });
 
   var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
