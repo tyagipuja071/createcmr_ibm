@@ -348,10 +348,16 @@ function addCovBGValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+var forceLockUnlock = function() {
+  console.log(">>>> forceLockUnlock");
+  FormManager.readOnly('cmrIssuingCntry');
+}
+
 function initGenericTemplateHandler() {
   // templates/scenarios initialization. connect onchange of the customer type
   // to load the template
   console.log('init init');
+  forceLockUnlock();
   if (_templateHandler == null && FormManager.getField('custSubGrp')) {
     _templateHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       if (_delayedLoadComplete) {
