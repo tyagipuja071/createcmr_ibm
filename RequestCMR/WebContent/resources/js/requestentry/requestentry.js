@@ -146,7 +146,7 @@ function processRequestAction() {
             matchDnBForIndia();
           } else {
             // cmr.showModal('addressVerificationModal');
-            showAddressVerificationModal();
+            verifyGlcChangeIN();
           }
         } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
           matchDnBForAutomationCountries();
@@ -227,7 +227,7 @@ function processRequestAction() {
       } else {
         // if there are no errors, show the Address Verification modal window
         // cmr.showModal('addressVerificationModal');
-        showAddressVerificationModal();
+        verifyGlcChangeIN();
       }
     } else if (comp_proof_INAUSG && cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
       // Cmr-3176- Dnb match
@@ -249,7 +249,6 @@ function processRequestAction() {
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
-
   } else if (action == YourActions.Processing_Create_Up_Complete) {
     var cmrNo = FormManager.getActualValue('cmrNo');
     var disAutoProc = FormManager.getActualValue('disableAutoProc');
@@ -324,6 +323,53 @@ function processRequestAction() {
     }
   } else {
     cmr.showAlert('Invalid action.');
+  }
+}
+
+function verifyGlcChangeIN() {
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (cmrCntry == SysLoc.INDIA && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
+    var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
+    if (!hasRetrievedValue) {
+      cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
+    } else {
+      var oldGlc = FormManager.getActualValue('geoLocationCd');
+      var oldCluster = FormManager.getActualValue('apCustClusterId');
+      console.log("Checking the GLC match... retrieve value again...")
+      var data = CmrServices.getAll('reqentry');
+
+      // cmr.hideProgress();
+      if (data) {
+        console.log(data);
+        if (data.error && data.error == 'Y') {
+          cmr.showAlert('An error was encountered when retrieving the values.\nPlease contact your system administrator.', 'Create CMR');
+        } else {
+          if (data.glcError) {
+            // errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
+          } else {
+            var newGlc = data.glcCode
+            var qParams = {
+              TXT : newGlc,
+            };
+            var newCluster = cmr.query('GET_CLUSTER_BY_GLC', qParams);
+            if (newCluster != null && (oldGlc != newGlc || oldCluster != newCluster.ret1)) {
+              retrieveInterfaceValues();
+              FormManager.setValue('apCustClusterId', newCluster.ret1);
+              FormManager.readOnly('apCustClusterId');
+              cmr.showAlert('The GLC and Cluster has been overwritten to ' + newGlc + ' and ' + newCluster.ret1 + ' respectively' + '. Do you want to proceed with this request?',
+                  ' GLC and Cluster value overwritten', 'showAddressVerificationModal()');
+            } else {
+              showAddressVerificationModal();
+            }
+          }
+        }
+      } else {
+        showAddressVerificationModal();
+      }
+    }
+  } else {
+    showAddressVerificationModal();
   }
 }
 
@@ -791,8 +837,8 @@ function commentImgFormatter(value, rowIndex) {
   }
   if (value.indexOf('@') > 0) {
     if (value.indexOf('ibm.com') > 0) {
-      return '<img title="' + value + '" src="https://w3-unifiedprofile-api.dal1a.cirrus.ibm.com/v3/image/' + value + '" class="cmt-img" onerror="this.onerror=null; this.src=\''
-          + cmr.CONTEXT_ROOT + '/resources/images/person.jpg\'">';
+      return '<img title="' + value + '" src="https://w3-unifiedprofile-api.dal1a.cirrus.ibm.com/v3/image/' + value + '" class="cmt-img" onerror="this.onerror=null; this.src=\'' + cmr.CONTEXT_ROOT
+          + '/resources/images/person.jpg\'">';
     } else {
       return '<img title="' + value + '" src="' + cmr.CONTEXT_ROOT + '/resources/images/person.jpg" class="cmt-img">';
     }
@@ -1232,6 +1278,11 @@ function connectToCmrServices() {
     // FormManager.setValue('dunsNo', '');
   }
   FormManager.setValue('covBgRetrievedInd', 'Y');
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cmrCntry == '744') {
+    setClusterGlcCovIdMapNrmlc();
+    lockFieldsWithDefaultValuesByScenarioSubType();
+  }
 }
 
 /**
@@ -1597,32 +1648,32 @@ function setRejSupplInfoFields(value) {
     dojo.byId('rejInfo1Label').innerText = "CMR No.";
     dojo.byId('rejInfo2Label').innerText = "Sold-to KUNNR";
     FormManager.readOnly('rejSupplInfo2');
-  break;
+    break;
   case "MDOC":
     cmr.showNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Missing Document";
-  break;
+    break;
   case "MAPP":
     cmr.showNode('rejInfo1Div');
     cmr.showNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Approval Type";
     dojo.byId('rejInfo2Label').innerText = "Approver";
-  break;
+    break;
   case "DUPR":
     cmr.showNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Other Request Id";
-  break;
+    break;
   case "TYPR":
     cmr.showNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "Correct Type";
-  break;
+    break;
   default:
     cmr.hideNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
-  break;
+    break;
   }
 }
 
@@ -1751,7 +1802,9 @@ function checkIfDnBCheckReqForIndia() {
   var result = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
     ID : reqId
   });
-  if (reqType == 'C' && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS')) {
+  if (reqType == 'C'
+      && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp == 'CROSS'
+          || custSubGrp == 'NRMLC' || custSubGrp == 'KYNDR' || custSubGrp == 'ECOSY')) {
     if (result && result.ret1) {
       return false;
     } else {
@@ -1899,7 +1952,7 @@ function matchDnBForIndia() {
       'isicCd' : isicCd
     },
     timeout : 50000,
-    sync : false,
+    sync : true,
     load : function(data, ioargs) {
       cmr.hideProgress();
       console.log(data);
@@ -1917,7 +1970,7 @@ function matchDnBForIndia() {
             MessageMgr.clearMessages();
             doValidateRequest();
             // cmr.showModal('addressVerificationModal');
-            showAddressVerificationModal();
+            verifyGlcChangeIN();
           } else {
             cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
           }
@@ -1930,7 +1983,7 @@ function matchDnBForIndia() {
           } else if (data.match && !data.isicMatch && custSubGrp == 'IGF') {
             comp_proof_INAUSG = true;
             // cmr.showModal('addressVerificationModal');
-            showAddressVerificationModal();
+            verifyGlcChangeIN();
           } else {
             comp_proof_INAUSG = false;
             console.log("Name/Address validation failed by dnb");
@@ -1943,7 +1996,7 @@ function matchDnBForIndia() {
       } else {
         // continue
         console.log("An error occurred while matching dnb.");
-        cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+        cmr.showConfirm('verifyGlcChangeIN()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
           OK : 'Yes',
           CANCEL : 'No'
         });
