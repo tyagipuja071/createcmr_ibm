@@ -253,6 +253,7 @@ var GEOHandler = (function() {
     },
 
     executeAfterConfigs : function() {
+      forceLockUnlock();
       if (dojo.byId("reqId").value == '0' && !_forceExecuteAfterConfigs) {
         console.log('skipping after configurations for new request..');
         return;
