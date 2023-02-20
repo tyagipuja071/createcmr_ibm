@@ -74,6 +74,7 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
+import com.itextpdf.styledxmlparser.jsoup.internal.StringUtil;
 
 /**
  * 
@@ -194,6 +195,7 @@ public class USUtil extends AutomationUtil {
   public static List<USBranchOffcMapping> svcARBOMappings = new ArrayList<USBranchOffcMapping>();
   public static List<USBranchOffcMapping> boMappings = new ArrayList<USBranchOffcMapping>();
   private static Map<String, USDetailsContainer> usDetailsMap = new HashMap<String, USDetailsContainer>();
+  private static List<USFedIsicMapping> usFedIsicMap = new ArrayList<USFedIsicMapping>();
 
   @SuppressWarnings("unchecked")
   public USUtil() {
@@ -237,6 +239,25 @@ public class USUtil extends AutomationUtil {
       try {
         InputStream is = ConfigUtil.getResourceStream("us-mktgsvc-mapping.xml");
         USUtil.svcARBOMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
+      } catch (Exception e) {
+        LOG.error("Error occured while digesting xml.", e);
+      }
+    }
+
+    LOG.debug("US - initializing mapping for Fed Isic for DnB matches");
+    if (USUtil.usFedIsicMap.isEmpty()) {
+      Digester digester = new Digester();
+      digester.setValidating(false);
+      digester.addObjectCreate("mappings", ArrayList.class);
+
+      digester.addObjectCreate("mappings/mapping", USFedIsicMapping.class);
+
+      digester.addBeanPropertySetter("mappings/mapping/dnb-isic", "dnbIsic");
+      digester.addBeanPropertySetter("mappings/mapping/cmr-isic", "cmrIsic");
+      digester.addSetNext("mappings/mapping", "add");
+      try {
+        InputStream is = ConfigUtil.getResourceStream("us-fed-isic-mapping.xml");
+        USUtil.usFedIsicMap = (ArrayList<USFedIsicMapping>) digester.parse(is);
       } catch (Exception e) {
         LOG.error("Error occured while digesting xml.", e);
       }
@@ -2429,6 +2450,25 @@ public class USUtil extends AutomationUtil {
     usDetails.setPccArDept(pccArDept);
     usDetailsMap.put(cmrNo, usDetails);
     return usDetails;
+  }
+
+  @Override
+  public String tweakDnBMatchingResponse(EntityManager entityManager, RequestData requestData) {
+    LOG.debug("tweakDnBMatchingResponse USUtil");
+    Data data = requestData.getData();
+    String subScenario = data.getCustGrp();
+    String isicOverridedValue = data.getIsicCd();
+    List<String> dnbIsicOverrideScenarios = Arrays.asList(CG_COMMERCIAL, CG_COMMERCIAL_FRANCHISE, CG_COMMERCIAL_RESTRICTED);
+    if (!StringUtil.isBlank(subScenario) && dnbIsicOverrideScenarios.contains(subScenario)) {
+      if (!usFedIsicMap.isEmpty()) {
+        for (USFedIsicMapping mapping : usFedIsicMap) {
+          if (data.getIsicCd().equals(mapping.getDnbIsic()) && !mapping.getCmrIsic().isEmpty()) {
+            isicOverridedValue = mapping.getCmrIsic();
+          }
+        }
+      }
+    }
+    return isicOverridedValue;
   }
 
 }
