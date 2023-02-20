@@ -2955,10 +2955,10 @@ function matchDnBForNZUpdate() {
 // CREATCMR-8430: do NZBN API check,
 function doNZBNAPIMatch() {
   console.log('>>> doNZBNAPIMacht >>>');
-  FormManager.setValue('matchOverrideIndc', 'Y');
   FormManager.setValue('findDnbResult', 'Rejected');
   
   hideModaldnb_Window();
+  cmr.showProgress('Checking request data with NZBN API...');
   
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   console.log("Checking if the request matches NZBN API...");
@@ -2968,21 +2968,20 @@ function doNZBNAPIMatch() {
     cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
     return;
   }
-  cmr.showProgress('Checking request data with NZBN API...');
+  
 
   var dataAPI = matchNZAPICustNmAddrForNZ();
   console.log(dataAPI);
+  cmr.hideProgress();
   if (dataAPI && dataAPI.success) {
     if (!dataAPI.custNmMatch || !dataAPI.addressMatch) {
       console.log('Customer name or address match fail in NZ API: ' + dataAPI.message);
-      cmr.showAlert('Name or address match fail in NZBN API.\nPlease attach company proof');
-      FormManager.setValue('matchOverrideIndc', 'Y');
+      cmr.showAlert('Name or address match fail in NZBN API.\nPlease attach company proof', 'Warning', 'doOverrideDnBMatch()');
     } else {
       console.log('Customer name and address matched in NZBN API');
       if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
         checkRetrievedForNZ();
       } else {
-        cmr.hideProgress();
         showAddressVerificationModal();
       }
     }
