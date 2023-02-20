@@ -3529,7 +3529,7 @@ function setCTCIsuByClusterASEAN() {
 
     var apClientTierValue = [];
     var isuCdValue = [];
-    var issuingCntries = ['852', '818', '856','778', '749' , '834'];
+    var issuingCntries = ['852', '818', '856', '778', '749' , '834'];
     if (_cluster != '' && _cluster != '') {
       var qParams = {
         _qall : 'Y',
