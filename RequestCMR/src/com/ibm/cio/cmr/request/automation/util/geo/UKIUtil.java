@@ -354,7 +354,7 @@ public class UKIUtil extends AutomationUtil {
             // CREATCMR-6586 checking duplicate for all addresses
             if (CmrConstants.RDC_BILL_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Addition of new Installing and Shipping(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              checkDetails.append("Addition of new Mailing and EPL (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else if (((zi01count == 0 && CmrConstants.RDC_INSTALL_AT.equals(addrType))
                 || (zd01count == 0 && CmrConstants.RDC_SHIP_TO.equals(addrType))) && null == changes.getAddressChange(addrType, "Customer Name")
                 && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
