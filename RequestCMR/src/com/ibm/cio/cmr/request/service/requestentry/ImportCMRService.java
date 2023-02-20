@@ -658,11 +658,11 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     Map<String, Integer> seqMap = new HashMap<String, Integer>();
     Integer seq = null;
     for (FindCMRRecordModel cmr : cmrs) {
-      if (cmr.getCmrAddrTypeCode().equals("ZLST") && cmr.getCmrIssuedBy().equals("897")) {
+      if (cmr.getCmrAddrTypeCode().equals("ZLST") && "897".equals(cmr.getCmrIssuedBy())) {
         continue;
       }
       // CREATCMR-7152
-      if (cmr.getCmrIssuedBy().equals("897")) {
+      if ("897".equals(cmr.getCmrIssuedBy())) {
         if (!"ZS01".equals(cmr.getCmrAddrTypeCode()) && !"ZI01".equals(cmr.getCmrAddrTypeCode()) && !"PG01".equals(cmr.getCmrAddrTypeCode())) {
           continue;
         }
