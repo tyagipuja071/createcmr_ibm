@@ -3332,10 +3332,11 @@ function setCTCIsuByClusterASEAN() {
     var scenario = FormManager.getActualValue('custGrp');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var issuingCnt3 = ['818', '856', '852'];
+    var issuingCnt4 = ['643'];
 
     var apClientTierValue = [];
     var isuCdValue = [];
-    var issuingCntries = ['852', '818', '856', '643', '778', '749' , '834'];
+    var issuingCntries = ['852', '818', '856', '778', '749' , '834'];
     if (_cluster != '' && _cluster != '') {
       var qParams = {
         _qall : 'Y',
