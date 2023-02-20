@@ -26,7 +26,7 @@ function afterConfigKR() {
 
   var _clusterHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
-    FormManager.resetDropdownValues(FormManager.getField('inacCd'));  
+    FormManager.resetDropdownValues(FormManager.getField('inacCd')); 
     FormManager.setValue('inacType','');
     FormManager.setValue('inacCd','');
     LockDefaultISUClientTierMrcValues();
@@ -553,17 +553,17 @@ function setSearchTermDropdownValues() {
         FormManager.limitDropdownValues(searchTerm, [ '00003' ]);
         FormManager.setValue('searchTerm', '00003');
         FormManager.readOnly('searchTerm');
-        break;  
+        break;    
       case "VAPAR":
         FormManager.limitDropdownValues(searchTerm, [ '00003' ]);
         FormManager.setValue('searchTerm', '00003');
         FormManager.readOnly('searchTerm');
-        break; 
+        break;  
       case "CROSS":
         FormManager.limitDropdownValues(searchTerm, [ '00003', '08016', '09065' ]);
         break;
       case "CBBUS":
-        FormManager.limitDropdownValues(searchTerm, [ '71500' ]);
+        FormManager.limitDropdownValues(searchTerm, [ '71500' ]); 
         FormManager.setValue('searchTerm', '71500');
         FormManager.readOnly('searchTerm');
         break;
@@ -590,7 +590,7 @@ function setSearchTermDropdownValues() {
         FormManager.setValue('isuCd', '21');
         FormManager.readOnly('isuCd');
         break;
-      case "LKYN":
+      case "LKYN":  
         FormManager.limitDropdownValues(searchTerm, [ '09065' ]);
         FormManager.setValue('searchTerm', '09065');
         FormManager.readOnly('searchTerm');
@@ -721,7 +721,7 @@ function setInacNacValues(){
       FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);     
+      FormManager.removeValidator('inacCd', Validators.REQUIRED);      
     }
 }
 
