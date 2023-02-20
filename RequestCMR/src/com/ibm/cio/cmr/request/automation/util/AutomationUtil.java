@@ -1491,4 +1491,11 @@ public abstract class AutomationUtil {
     }
     return detailedResult;
   }
+
+  public String tweakDnBMatchingResponse(EntityManager entityManager, RequestData requestData) {
+    LOG.debug("tweakDnBMatchingResponse");
+    Data data = requestData.getData();
+    return data.getIsicCd();
+  }
+
 }
