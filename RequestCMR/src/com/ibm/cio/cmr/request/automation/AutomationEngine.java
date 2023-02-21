@@ -433,10 +433,7 @@ public class AutomationEngine {
           // data.setUsSicmen("8888");
           // data.setSubIndustryCd("ZZ");
         } else {
-          LOG.debug("actionsOnError is emtpy ? " + actionsOnError.isEmpty());
           if (!actionsOnError.isEmpty()) {
-            LOG.debug("actionsOnError is actionsOnError.contains(ActionOnError.Reject) ? " + actionsOnError.contains(ActionOnError.Reject));
-            LOG.debug("actionsOnError is actionsOnError.contains(ActionOnError.Wait) ? " + actionsOnError.contains(ActionOnError.Wait));
             // an error has occurred
             if (actionsOnError.contains(ActionOnError.Reject)) {
               moveToNextStep = false;
