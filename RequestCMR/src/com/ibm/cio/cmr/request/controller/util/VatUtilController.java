@@ -623,7 +623,26 @@ public class VatUtilController {
                     && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getPostal().replaceAll(regexForAddr, "").toUpperCase())) {
                   apiAddressMatch = true;
                 }
-                // Address matching - END
+
+                // CREATCMR-8430: checking if the address matches with service
+                // type address from API
+                LOG.debug("REGISTERED Address matched ?  " + apiAddressMatch);
+
+                String serviceAddr = nzbnResRec.getServiceAddressDetail();
+                if (!apiAddressMatch && StringUtils.isNotEmpty(serviceAddr)) {
+                  LOG.debug("****** addressOfRequest: " + addressAll);
+                  LOG.debug("****** serviceAddr: " + serviceAddr);
+                  String[] serviceAddrArr = serviceAddr.split("\\^");
+                  boolean serviceFlag = false;
+                  for (String partAddr : serviceAddrArr) {
+                    serviceFlag = (addressAll.replaceAll(regexForAddr, "").contains(partAddr.replaceAll(regexForAddr, "").toUpperCase()));
+                    if (!serviceFlag) {
+                      break;
+                    }
+                  }
+                  apiAddressMatch = serviceFlag;
+                  LOG.debug("SERVICE Address matched ?  " + apiAddressMatch);
+                }
               }
             }
 

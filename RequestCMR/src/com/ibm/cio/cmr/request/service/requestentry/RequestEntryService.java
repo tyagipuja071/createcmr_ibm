@@ -2332,6 +2332,26 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
                       matchesAddrAPI = true;
                       log.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
                     }
+
+                    // CREATCMR-8430: checking if the address matches with
+                    // service type address from API
+                    log.debug("REGISTERED Address matched ?  " + matchesAddrAPI);
+
+                    String serviceAddr = nZBNAPIresponse.getRecord().getServiceAddressDetail();
+                    if (!matchesAddrAPI && StringUtils.isNotEmpty(serviceAddr)) {
+                      log.debug("****** addressOfRequest: " + addressAll);
+                      log.debug("****** serviceAddr: " + serviceAddr);
+                      String[] serviceAddrArr = serviceAddr.split("\\^");
+                      boolean serviceFlag = false;
+                      for (String partAddr : serviceAddrArr) {
+                        serviceFlag = (addressAll.replaceAll(regexForAddr, "").contains(partAddr.replaceAll(regexForAddr, "").toUpperCase()));
+                        if (!serviceFlag) {
+                          break;
+                        }
+                      }
+                      matchesAddrAPI = serviceFlag;
+                      log.debug("SERVICE Address matched ?  " + matchesAddrAPI);
+                    }
                   }
                 }
                 if (!matchesAddrDnb && !matchesAddrAPI) {
@@ -2379,6 +2399,26 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
                         .contains(nZBNAPIresponse.getRecord().getPostal().replaceAll(regexForAddr, "").toUpperCase())) {
                   matchesAddrAPI = true;
                   log.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
+                }
+
+                // CREATCMR-8430: checking if the address matches with service
+                // type address from API
+                log.debug("REGISTERED Address matched ?  " + matchesAddrAPI);
+
+                String serviceAddr = nZBNAPIresponse.getRecord().getServiceAddressDetail();
+                if (!matchesAddrAPI && StringUtils.isNotEmpty(serviceAddr)) {
+                  log.debug("****** addressOfRequest: " + addressAll);
+                  log.debug("****** serviceAddr: " + serviceAddr);
+                  String[] serviceAddrArr = serviceAddr.split("\\^");
+                  boolean serviceFlag = false;
+                  for (String partAddr : serviceAddrArr) {
+                    serviceFlag = (addressAll.replaceAll(regexForAddr, "").contains(partAddr.replaceAll(regexForAddr, "").toUpperCase()));
+                    if (!serviceFlag) {
+                      break;
+                    }
+                  }
+                  matchesAddrAPI = serviceFlag;
+                  log.debug("SERVICE Address matched ?  " + matchesAddrAPI);
                 }
               }
             }
