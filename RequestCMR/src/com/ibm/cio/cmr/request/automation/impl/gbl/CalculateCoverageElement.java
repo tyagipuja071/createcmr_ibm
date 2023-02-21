@@ -299,8 +299,10 @@ public class CalculateCoverageElement extends OverridingElement {
                 details.append("\nCalculated Coverage is same as the Default Coverage.").append("\n");
               }
             }
+            calculatedCoverageContainer = container;
+          }
+          if (RequestUtils.EMEA_CNTRY_DACH.equals(data.getCmrIssuingCntry())) {
             calculatedCoverageContainer = coverages.get(0);
-
           }
         }
       } else if (BG_NONE.equals(covFrom)) {
