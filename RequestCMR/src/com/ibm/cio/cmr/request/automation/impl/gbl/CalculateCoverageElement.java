@@ -299,7 +299,7 @@ public class CalculateCoverageElement extends OverridingElement {
                 details.append("\nCalculated Coverage is same as the Default Coverage.").append("\n");
               }
             }
-            calculatedCoverageContainer = container;
+            calculatedCoverageContainer = coverages.get(0);
 
           }
         }
