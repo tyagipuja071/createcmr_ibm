@@ -5193,7 +5193,6 @@ function set34QYZlogicOnISUCtcChange() {
 function setSBOSalesRepFor34QYZ() {
   var custType = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
-  var checkImportIndc = getImportedIndcForItaly();
   var reqId = FormManager.getActualValue('reqId');
   var subRegion = FormManager.getActualValue('countryUse');
   var isu = FormManager.getActualValue('isuCd');
@@ -6498,6 +6497,7 @@ function setVATOnIdentClientChangeIT() {
     REQ_ID : _zs01ReqId,
     ADDR_TYPE : 'ZI01',
   };
+  var countyCd = '';
   var cntryCdResult = cmr.query('ADDR.GET.LANDEDCNTRY.BY_REQID_ADDRTYPE', cntryCdParams);
   if (cntryCdResult.ret1 != undefined) {
     countyCd = cntryCdResult.ret1;
@@ -10517,6 +10517,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterConfig(addISUHandlerIT, [ SysLoc.ITALY ]);
   GEOHandler.addAfterConfig(setClientTierValuesIT, [ SysLoc.ITALY ]);
+  GEOHandler.addAfterConfig(setSBOSalesRepFor34QYZ, [ SysLoc.ITALY ]);
   // For EmbargoCode
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.EMEA);
 
