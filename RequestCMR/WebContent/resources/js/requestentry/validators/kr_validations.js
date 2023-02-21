@@ -676,6 +676,9 @@ function LockDefaultISUClientTierMrcValues() {
   } else if (searchTerm == '09065') {
     FormManager.setValue('isuCd', '5K');
     FormManager.readOnly('isuCd');
+  } else if (searchTerm == '00003' && FormManager.getField('custSubGrp') == "INTER") {
+    FormManager.setValue('isuCd', '21');
+    FormManager.readOnly('isuCd');
   }
   
   if (searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223' ) {
