@@ -3533,29 +3533,7 @@ public class GreeceHandler extends BaseSOFHandler {
   @Override
   public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
-    if (SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.CYPRUS.equals(cmrCountry)) {
-      if (!equals(addr.getTaxOffice(), addr.getTaxOfficeOld())) {
-        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
-        update.setAddrType(addrTypeDesc);
-        update.setSapNumber(sapNumber);
-        update.setDataField(PageManager.getLabel(cmrCountry, "", "TaxOffice"));
-        update.setNewData(addr.getTaxOffice());
-        update.setOldData(addr.getTaxOfficeOld());
-        results.add(update);
-      }
-    }
-
-    if (SystemLocation.UNITED_KINGDOM.equals(cmrCountry) || SystemLocation.IRELAND.equals(cmrCountry)) {
-      if (!equals(addr.getHwInstlMstrFlg(), addr.getHwInstlMstrFlgOld())) {
-        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
-        update.setAddrType(addrTypeDesc);
-        update.setSapNumber(sapNumber);
-        update.setDataField(PageManager.getLabel(cmrCountry, "", "HW Master Install Flag"));
-        update.setNewData(addr.getHwInstlMstrFlg());
-        update.setOldData(addr.getHwInstlMstrFlgOld());
-        results.add(update);
-      }
-    }
+    // noop
   }
 
   public String getaddAddressAdrnr(EntityManager entityManager, String mandt, String kunnr, String ktokd, String seq) {
