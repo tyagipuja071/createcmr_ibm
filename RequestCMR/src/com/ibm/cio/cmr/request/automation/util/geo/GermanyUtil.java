@@ -738,7 +738,10 @@ public class GermanyUtil extends AutomationUtil {
     List<String> sboValues = new ArrayList<>();
     String isu = StringUtils.isNotBlank(isuCd) ? isuCd : "";
     String ctc = StringUtils.isNotBlank(clientTier) ? clientTier : "";
-    String ims = subIndustryCd.substring(0, 1);
+    String ims = "";
+    if (StringUtils.isNotBlank(subIndustryCd)) {
+      ims = subIndustryCd.substring(0, 1);
+    }
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
     if (!"34Q".equals(isuCtc)) {
       ims = "";
