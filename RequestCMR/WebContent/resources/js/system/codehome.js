@@ -357,6 +357,13 @@ var _allGroups = [ {
     "subType" : false,
     "parent" : "United States"
   }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/us_company',
+    "name" : "US COMPANY",
+    "description" : "Maintains US COMPANY (US Only)",
+    "table" : "SAPR3.US_COMPANY",
+    "subType" : false,
+    "parent" : "United States"
+  }, {
     "href" : cmr.CONTEXT_ROOT + '/code/us_tcr_updt_queue',
     "name" : "US TCR UPDT QUEUE",
     "description" : "Maintains US TCR UPDT QUEUE Service (US Only)",

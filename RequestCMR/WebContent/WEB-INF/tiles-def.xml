@@ -782,6 +782,17 @@
     <put-attribute name="title" value="CreateCMR | Update Request" />
     <put-attribute name="body" value="/resources/jsp/findcmr.jsp" />
   </definition>
+  
+  <definition name="uscompany" extends="base">
+    <put-attribute name="title" value="CreateCMR | List of US Company Data" />
+    <put-attribute name="body" value="/resources/jsp/code/uscompanylist.jsp" />
+  </definition>
+  
+  <definition name="uscompanyform" extends="base">
+    <put-attribute name="title" value="CreateCMR | US Company Maintenance" />
+    <put-attribute name="body" value="/resources/jsp/code/uscompany.jsp" />
+  </definition>
+
  
   <definition name="kyccompare" extends="base">
     <put-attribute name="title" value="CreateCMR | KYC vs EVS" />
