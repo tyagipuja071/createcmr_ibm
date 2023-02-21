@@ -66,7 +66,7 @@ public class NPSService extends BaseBatchService {
           data = entityManager.find(Data.class, dataPK);
           if (data != null) {
 
-            feedbackUrl = Feedback.getNPSUrl(entityManager, admin, data.getCmrIssuingCntry());
+            feedbackUrl = Feedback.getLink(data);
             processor = Feedback.getProcessor(entityManager, admin.getId().getReqId());
 
             LOG.debug(" - Feedback URL: " + feedbackUrl);
