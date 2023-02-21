@@ -637,36 +637,47 @@ public class GermanyUtil extends AutomationUtil {
     LOG.debug("sortl-------------" + coverage);
 
     details.append("\n");
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null && CalculateCoverageElement.COV_BG.equals(covFrom)) {
-      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
-      details.append("Computed SORTL = " + coverageId).append("\n");
-      results.setResults("Coverage Calculated");
+    // if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom
+    // != null && CalculateCoverageElement.COV_BG.equals(covFrom)) {
+    // overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+    // "SEARCH_TERM", data.getSearchTerm(), coverageId);
+    // details.append("Computed SORTL = " + coverageId).append("\n");
+    // results.setResults("Coverage Calculated");
+    // engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+    // } else if ("34".equals(data.getIsuCd()) &&
+    // "Q".equals(data.getClientTier())) {
+    // details.setLength(0); // clearing details
+    // overrides.clearOverrides();
+    details.append("Calculating coverage based on IMS Mapping rule.").append("\n");
+    String sbo = "";
+    String isuCd = null;
+    String clientTier = null;
+    if (StringUtils.isNotBlank(container.getIsuCd())) {
+      isuCd = container.getIsuCd();
+      clientTier = container.getClientTierCd();
+    } else {
+      isuCd = data.getIsuCd();
+      clientTier = data.getClientTier();
+    }
+    sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), isuCd, clientTier);
+    if (StringUtils.isNotBlank(sbo)) {
+      details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sbo);
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-    } else if ("34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier())) {
-      details.setLength(0); // clearing details
-      overrides.clearOverrides();
-      details.append("Calculating coverage using 34Q logic.").append("\n");
-      String sbo = "";
-      sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), data.getIsuCd(), data.getClientTier());
-      if (StringUtils.isNotBlank(sbo)) {
-        details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sbo);
-        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+      results.setResults("Calculated");
+    } else if (!isCoverageCalculated) {
+      String sboReq = data.getSalesBusOffCd();
+      if (!StringUtils.isBlank(sboReq)) {
+        String msg = "No valid SBO mapping from request data. Using SBO " + sboReq + " from request.";
+        details.append(msg);
         results.setResults("Calculated");
-      } else if (!isCoverageCalculated) {
-        String sboReq = data.getSalesBusOffCd();
-        if (!StringUtils.isBlank(sboReq)) {
-          String msg = "No valid SBO mapping from request data. Using SBO " + sboReq + " from request.";
-          details.append(msg);
-          results.setResults("Calculated");
-          results.setDetails(details.toString());
-        } else {
-          String msg = "Coverage cannot be calculated. No valid SBO mapping from request data.";
-          details.append(msg);
-          results.setResults("Cannot Calculate");
-          results.setDetails(details.toString());
-          engineData.addNegativeCheckStatus("_atSbo", msg);
-        }
+        results.setDetails(details.toString());
+      } else {
+        String msg = "Coverage cannot be calculated. No valid SBO mapping from request data.";
+        details.append(msg);
+        results.setResults("Cannot Calculate");
+        results.setDetails(details.toString());
+        engineData.addNegativeCheckStatus("_atSbo", msg);
       }
       /*
        * HashMap<String, String> response =
@@ -707,7 +718,7 @@ public class GermanyUtil extends AutomationUtil {
     } else {
       details.setLength(0);
       overrides.clearOverrides();
-      details.append("Coverage could not be calculated through Buying group or 34Q logic.\n Skipping coverage calculation.").append("\n");
+      details.append("Coverage could not be calculated IMS Mapping rule.\n Skipping coverage calculation.").append("\n");
       results.setResults("Skipped");
     }
     LOG.debug("---data.getSearchTerm---" + data.getSearchTerm());
@@ -727,9 +738,16 @@ public class GermanyUtil extends AutomationUtil {
     List<String> sboValues = new ArrayList<>();
     String isu = StringUtils.isNotBlank(isuCd) ? isuCd : "";
     String ctc = StringUtils.isNotBlank(clientTier) ? clientTier : "";
+    String ims = "";
+    if (StringUtils.isNotBlank(subIndustryCd)) {
+      ims = subIndustryCd.substring(0, 1);
+    }
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
-    if (StringUtils.isNotBlank(subIndustryCd) && ("34Q".equals(isuCtc))) {
-      String ims = subIndustryCd.substring(0, 1);
+    if (!"34Q".equals(isuCtc)) {
+      ims = "";
+    }
+
+    if (StringUtils.isNotBlank(subIndustryCd)) {
       String sql = ExternalizedQuery.getSql("AUTO.DE.GET_SBOLIST_FROM_ISUCTC");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("ISU", isu);
@@ -739,7 +757,7 @@ public class GermanyUtil extends AutomationUtil {
       query.setForReadOnly(true);
       sboValues = query.getResults(String.class);
     }
-    if (sboValues != null && sboValues.size() == 1) {
+    if (sboValues != null) {
       return sboValues.get(0);
     } else {
       return "";

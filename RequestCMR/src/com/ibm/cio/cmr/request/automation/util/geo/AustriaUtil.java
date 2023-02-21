@@ -467,6 +467,15 @@ public class AustriaUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
     String sbo = "";
+    String isuCd = null;
+    String clientTier = null;
+    if (StringUtils.isNotBlank(container.getIsuCd())) {
+      isuCd = container.getIsuCd();
+      clientTier = container.getClientTierCd();
+    } else {
+      isuCd = data.getIsuCd();
+      clientTier = data.getClientTier();
+    }
     String coverageId = container.getFinalCoverage();
     String coverage = data.getSearchTerm();
     System.out.println("sortl----------" + coverage);
@@ -477,12 +486,8 @@ public class AustriaUtil extends AutomationUtil {
     case SCENARIO_COMMERCIAL:
     case SCENARIO_CROSS_COMMERICAL:
     case SCENARIO_THIRD_PARTY_DC:
-      if (!isCoverageCalculated) {
-        sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), data.getIsuCd(), data.getClientTier());
-      }
-      break;
     case SCENARIO_PRIVATE_CUSTOMER:
-      sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), data.getIsuCd(), data.getClientTier());
+      sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), isuCd, clientTier);
       break;
     }
 
@@ -536,7 +541,7 @@ public class AustriaUtil extends AutomationUtil {
       query.setParameter("ISSUING_CNTRY", SystemLocation.AUSTRIA);
       sboValues = query.getResults(String.class);
     }
-    if (sboValues != null && sboValues.size() == 1) {
+    if (sboValues != null) {
       return sboValues.get(0);
     } else {
       return "";
