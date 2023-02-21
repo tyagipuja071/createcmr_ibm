@@ -773,6 +773,7 @@ function validateCustnameForKynd() {
 }
 
 function getIsuFromIsic(){
+  var searchTerm = FormManager.getActualValue('searchTerm');
   var isicCd = FormManager.getActualValue('isicCd');
   if (!(searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223')) {
     return;
