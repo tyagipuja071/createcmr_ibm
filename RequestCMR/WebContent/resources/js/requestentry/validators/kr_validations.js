@@ -75,7 +75,9 @@ function afterConfigKR() {
   // Non editable for requester role
   if (reqType == 'C' && role == 'Requester') {
     FormManager.readOnly('isuCd');
-    FormManager.readOnly('cmrNoPrefix');
+    if (custSubGrp != 'INTER') {
+      FormManager.readOnly('cmrNoPrefix');
+    }
   }
 
   if (reqType == 'C') {
@@ -419,8 +421,10 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('covId');
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('contactName2');
-    FormManager.readOnly('contactName3');
-    FormManager.readOnly('cmrNoPrefix');
+    FormManager.readOnly('contactName3'); 
+    if (custSubGrp != 'INTER') {
+      FormManager.readOnly('cmrNoPrefix');
+    }
     FormManager.readOnly('bgId');
     FormManager.readOnly('gbgId');
     FormManager.readOnly('bgRuleId');
@@ -474,7 +478,9 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('contactName2');
     FormManager.readOnly('contactName3');
-    FormManager.readOnly('cmrNoPrefix');
+    if (custSubGrp != 'INTER') {
+      FormManager.readOnly('cmrNoPrefix');
+    }
     FormManager.readOnly('bgId');
     FormManager.readOnly('gbgId');
     FormManager.readOnly('bgRuleId');
@@ -596,6 +602,9 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('mrcCd');
         FormManager.setValue('isuCd', '21');
         FormManager.readOnly('isuCd');
+        FormManager.setValue('isicCd', '8888');
+        FormManager.readOnly('isicCd');
+        FormManager.enable('cmrNoPrefix');
         break;
       case "LKYN":
         FormManager.limitDropdownValues(searchTerm, [ '09065' ]);
