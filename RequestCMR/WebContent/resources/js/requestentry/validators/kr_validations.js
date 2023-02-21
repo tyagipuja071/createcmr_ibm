@@ -24,6 +24,7 @@ function afterConfigKR() {
     FormManager.setValue('inacCd','');
     FormManager.enable('searchTerm');
     setSearchTermDropdownValues();
+    LockDefaultISUClientTierMrcValues();
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
@@ -620,6 +621,10 @@ function LockDefaultISUClientTierMrcValues() {
     FormManager.setValue('isuCd', '5K');
     FormManager.readOnly('isuCd');
   }
+  
+  if (searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223' ) {
+    getIsuFromIsic();
+  }
   FormManager.readOnly('clientTier');
   FormManager.readOnly('isuCd');
   FormManager.readOnly('mrcCd');
@@ -710,12 +715,14 @@ function validateCustnameForKynd() {
 
 function getIsuFromIsic(){
 	  var isicCd = FormManager.getActualValue('isicCd');
-	  
+	  if (!(searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223')) {
+		    return;
+      }
 	  var ISU = [];
 	  if (isicCd != '') {
 	    var qParams = {
 	      _qall : 'Y',
-	      ISSUING_CNTRY : cmrIssuingCntry,
+	      ISSUING_CNTRY : '856',
 	      REP_TEAM_CD : '%' + isicCd + '%'
 	    };
 	    var results = cmr.query('GET.ISULIST.BYISIC', qParams);
