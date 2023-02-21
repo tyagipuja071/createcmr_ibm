@@ -1,9 +1,14 @@
 /* Register KR Javascripts */
+var _isicHandler = null;
 
 function afterConfigKR() {
   var role = null;
   var reqType = null;
   var _isuHandler = null;
+  
+  _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+    getIsuFromIsic();
+  });
 
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
@@ -23,7 +28,6 @@ function afterConfigKR() {
     FormManager.readOnly('mrcCd');
   });
   
-
   var _clusterHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     FormManager.resetDropdownValues(FormManager.getField('inacCd')); 
@@ -560,12 +564,15 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('searchTerm');
         break;  
       case "CROSS":
-        FormManager.limitDropdownValues(searchTerm, [ '00003', '08016', '09065' ]);
+        FormManager.limitDropdownValues(searchTerm, [ '01545' , '00003' , '09065' , '08016' , '04461' , '04466' , '05223' , '10139' ]);
+        FormManager.setValue('searchTerm', '00003');
         break;
       case "CBBUS":
         FormManager.limitDropdownValues(searchTerm, [ '71500' ]); 
         FormManager.setValue('searchTerm', '71500');
         FormManager.readOnly('searchTerm');
+        FormManager.readOnly('inacCd');
+        FormManager.readOnly('inacType');
         break;
       case "ECOSY":
         FormManager.limitDropdownValues(searchTerm, [ '08016' ]);
@@ -748,6 +755,30 @@ function validateCustnameForKynd() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function getIsuFromIsic(){
+  var isicCd = FormManager.getActualValue('isicCd');
+  
+  var ISU = [];
+  if (isicCd != '') {
+    var qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cmrIssuingCntry,
+      REP_TEAM_CD : '%' + isicCd + '%'
+    };
+    var results = cmr.query('GET.ISULIST.BYISIC', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        ISU.push(results[i].ret1);
+      }
+      if (ISU != null) {
+        FormManager.limitDropdownValues(FormManager.getField('isuCd'), ISU);
+        if (ISU.length >= 1) {
+          FormManager.setValue('isuCd', ISU[0]);
+        }
+      }
+    }
+  }
+}
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
   console.log('adding KOREA functions...');
@@ -785,5 +816,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(LockDefaultISUClientTierMrcValues, GEOHandler.KR);
   GEOHandler.addAfterConfig(setInacNacValues, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(setInacNacValues, GEOHandler.KR);
+  GEOHandler.addAfterConfig(getIsuFromIsic, GEOHandler.KR);
+  GEOHandler.addAfterTemplateLoad(getIsuFromIsic, GEOHandler.KR);
 
 });
