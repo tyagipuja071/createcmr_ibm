@@ -8017,6 +8017,13 @@ function addHandlersForUKI() {
       });
     }
   }
+}
+
+function toggleTypeOfCustomerForTR() {
+  var reqType = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+  }
   if (reqType == 'U') {
     FormManager.show('TypeOfCustomer', 'crosSubTyp');
   } else {
