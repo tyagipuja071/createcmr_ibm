@@ -7,8 +7,8 @@ function afterConfigKR() {
   var _isuHandler = null;
   
   _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-	    getIsuFromIsic();
-	  });
+    getIsuFromIsic();
+  });
 
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
@@ -74,8 +74,8 @@ function afterConfigKR() {
   if (reqType == 'C' && role == 'Requester') {
     FormManager.readOnly('isuCd');
     if (custSubGrp != 'INTER') {
-        FormManager.readOnly('cmrNoPrefix');
-      }
+      FormManager.readOnly('cmrNoPrefix');
+    }
   }
   
   if (reqType == 'C') {
@@ -425,8 +425,8 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('contactName2');
     FormManager.readOnly('contactName3');
     if (custSubGrp != 'INTER') {
-        FormManager.readOnly('cmrNoPrefix');
-      }
+      FormManager.readOnly('cmrNoPrefix');
+    }
     FormManager.readOnly('bgId');
     FormManager.readOnly('gbgId');
     FormManager.readOnly('bgRuleId');
