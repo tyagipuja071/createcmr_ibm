@@ -269,18 +269,19 @@ function addAfterConfigAP() {
       FormManager.readOnly('apCustClusterId');
     }
   
-  if (reqType == 'C' && cntry == '643' && clusterId=='00000') 
-	 {
-	   if(custSubGrp=='DUMMY' || custSubGrp=='INTER' || custSubGrp=='BUSPR' )
-		  {
-         FormManager.readOnly('inacType');
-         FormManager.readOnly('inacCd'); 
-		  }
-	   if(custSubGrp=='AQSTN' || custSubGrp=='NRML' || custSubGrp=='ASLOM')
-		  {
-		  FormManager.enable('inacType');
-		  FormManager.enable('inacCd');
-	      }
+  if (reqType == 'C' && cntry == '643' && clusterId=='00000')
+	  {
+	  if(custSubGrp=='DUMMY' || custSubGrp=='INTER' || custSubGrp=='BUSPR' )
+	  {
+      FormManager.readOnly('inacType');
+      FormManager.readOnly('inacCd');
+	  }
+	  if(custSubGrp=='AQSTN' || custSubGrp=='NRML' || custSubGrp=='ASLOM')
+	  {
+	  FormManager.enable('inacType');
+	  FormManager.enable('inacCd');
+		  
+      }
     }
 
   if (reqType == 'U' && cntry == '834') {
