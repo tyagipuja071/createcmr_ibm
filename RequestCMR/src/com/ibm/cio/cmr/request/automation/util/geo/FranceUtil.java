@@ -348,7 +348,6 @@ public class FranceUtil extends AutomationUtil {
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
       if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
         sbo = computeSBOForCovFR(entityManager, QUERY_BG_SBO_FR, bgId, data.getCmrIssuingCntry(), false);
-        sbo = sbo.substring(0, 3);
       }
 
       FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
@@ -359,6 +358,7 @@ public class FranceUtil extends AutomationUtil {
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
         details.append("SORTL: " + sboVal + sboVal);
       } else if (sbo != null && !sbo.isEmpty()) {
+        sbo = sbo.substring(0, 3);
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo + sbo);
         details.append("SORTL: " + sbo + sbo);
       }
