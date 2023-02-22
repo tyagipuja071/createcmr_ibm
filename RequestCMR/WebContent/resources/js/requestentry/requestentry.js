@@ -1312,7 +1312,7 @@ function connectToCmrServices() {
         if (cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
           setClusterIDAfterRetrieveAction(data.glcCode);
         }
-        if (cmrCntry == SysLoc.CHINA && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN' || custSubGrp == 'ECOSY')) {
+        if (cmrCntry == SysLoc.CHINA && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN' || custSubGrp == 'ECOSY' || custSubGrp == 'EMBSA')) {
           setClusterIDAfterRetrieveAction4CN(custSubGrp, data.glcCode);
         }
       }
@@ -2853,6 +2853,21 @@ function checkRetrievedForNZ() {
 function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
   console.log('>>> setClusterIDAfterRetrieveAction4CN >>>');
   var indc = 'C';
+  if(custSubGrp == 'EMBSA'){
+    var _GBGId = FormManager.getActualValue('gbgId');
+    if (FormManager.getActualValue('gbgId') != undefined && FormManager.getActualValue('gbgId') != '') {
+    var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
+      ID : _GBGId
+    });
+    if (ret && ret.ret1 && ret.ret1 != 0) {
+      indc = '';
+    }else{
+      indc = 'C';
+    }
+    }else{
+      indc = 'C';
+    }
+  }
   if (custSubGrp == 'ECOSY') {
     indc = 'E';
   }
