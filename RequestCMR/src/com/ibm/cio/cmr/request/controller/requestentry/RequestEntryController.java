@@ -1026,7 +1026,9 @@ public class RequestEntryController extends BaseController {
     try {
       String reqIdString = request.getParameter("reqId");
       long reqId = reqIdString != null ? Long.parseLong(reqIdString) : 0L;
-      map = service.isDnBAPIMatchAddrsUpdateNZ(model, reqId);
+      String regex = "\\s+$";
+      String businessNumber = request.getParameter("businessNumber").replaceAll(regex, "");
+      map = service.isDnBAPIMatchAddrsUpdateNZ(model, reqId, businessNumber);
     } catch (Exception e) {
       LOG.error("Error occured in D&B matching", e);
       map.put("success", false);

@@ -2909,6 +2909,7 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
 function matchDnBForNZUpdate() {
   console.log('>>> matchDnBForNZUpdate >>>');
   var reqId = FormManager.getActualValue('reqId');
+  var businessNumber = FormManager.getActualValue('vat');
   console.log("Checking if the request matches D&B...");
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
@@ -2922,7 +2923,8 @@ function matchDnBForNZUpdate() {
     handleAs : 'json',
     method : 'GET',
     content : {
-      'reqId' : reqId
+      'reqId' : reqId,
+      'businessNumber' : businessNumber
     },
     timeout : 50000,
     sync : false,

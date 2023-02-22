@@ -2082,7 +2082,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
   }
 
   //CREATCMR-8430: do DNB check for NZ update -- Begin
-  public ModelMap isDnBAPIMatchAddrsUpdateNZ(AutoDNBDataModel model, long reqId) {
+  public ModelMap isDnBAPIMatchAddrsUpdateNZ(AutoDNBDataModel model, long reqId, String businessNumber) {
     ModelMap map = new ModelMap();
     EntityManager entityManager = null;
     try {
@@ -2093,9 +2093,9 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         Admin admin = requestData.getAdmin();
         RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, requestData);
 
-        ModelMap custNmMap = isCustNmMatchForNZ(requestData, changes);
+        ModelMap custNmMap = isCustNmMatchForNZ(requestData, changes, businessNumber);
         if ((boolean) custNmMap.get("success") && (boolean) custNmMap.get("custNmMatch") && (boolean) custNmMap.get("formerCustNmMatch")) {
-          ModelMap addrMap = isAddressUpdateMatchForNZ(model, reqId, requestData, changes);
+          ModelMap addrMap = isAddressUpdateMatchForNZ(model, reqId, businessNumber, requestData, changes);
           map.putAll(custNmMap);
           map.put("matchesAddrDnb", (boolean) addrMap.get("matchesAddrDnb"));
           map.put("matchesAddrAPI", (boolean) addrMap.get("matchesAddrAPI"));
@@ -2130,15 +2130,16 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
   }
 
-  private AutomationResponse<NZBNValidationResponse> getNZBNService(Admin admin, Data data, String customerName) throws Exception {
+  private AutomationResponse<NZBNValidationResponse> getNZBNService(String customerName, String businessNumber)
+      throws Exception {
     AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         AutomationServiceClient.class);
     client.setReadTimeout(1000 * 60 * 5);
     client.setRequestMethod(Method.Get);
 
     NZBNValidationRequest request = new NZBNValidationRequest();
-    if (StringUtils.isNotBlank(data.getVat())) {
-      request.setBusinessNumber(data.getVat());
+    if (StringUtils.isNotBlank(businessNumber)) {
+      request.setBusinessNumber(businessNumber);
       log.debug("request-businessNumber:" + request.getBusinessNumber());
     }
     request.setName(customerName);
@@ -2153,10 +2154,9 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     return nzbnResponse;
   }
 
-  private ModelMap isCustNmMatchForNZ(RequestData requestData, RequestChangeContainer changes) throws Exception {
+  private ModelMap isCustNmMatchForNZ(RequestData requestData, RequestChangeContainer changes, String businessNumber) throws Exception {
     ModelMap map = new ModelMap();
     Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
     StringBuilder details = new StringBuilder();
 
     boolean CustNmChanged = changes.isLegalNameChanged();
@@ -2179,13 +2179,13 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         if (!matches.isEmpty()) {
           for (DnBMatchingResponse dnbRecord : matches) {
             // checks for CustNm match
-            String dnbCustNm = StringUtils.isBlank(dnbRecord.getDnbName()) ? "" : dnbRecord.getDnbName().replaceAll("\\s+$", "");
+            String dnbCustNm = StringUtils.isBlank(dnbRecord.getDnbName()) ? "" : dnbRecord.getDnbName().replaceAll(regex, "");
             if (customerName.equalsIgnoreCase(dnbCustNm)) {
               custNmMatch = true;
               dnbTradestyleNames = dnbRecord.getTradeStyleNames();
               if (dnbTradestyleNames != null) {
                 for (String tradestyleNm : dnbTradestyleNames) {
-                  tradestyleNm = tradestyleNm.replaceAll("\\s+$", "");
+                  tradestyleNm = tradestyleNm.replaceAll(regex, "");
                   if (tradestyleNm.equalsIgnoreCase(formerCustName)) {
                     formerCustNmMatch = true;
                     break;
@@ -2200,7 +2200,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       if (!(custNmMatch && formerCustNmMatch)) {
         log.debug("DNB Checking CustNm match failed. Now Checking CustNm with NZBN API with  to vrify CustNm update");
         try {
-          response = getNZBNService(admin, data, customerName);
+          response = getNZBNService(customerName, businessNumber);
         } catch (Exception e) {
           if (response == null || !response.isSuccess()) {
             errMessage = "Failed to Connect to NZBN Service.";
@@ -2265,22 +2265,21 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     return map;
   }
 
-  private ModelMap isAddressUpdateMatchForNZ(AutoDNBDataModel model, long reqId, RequestData requestData, RequestChangeContainer changes) {
+  private ModelMap isAddressUpdateMatchForNZ(AutoDNBDataModel model, long reqId, String businessNumber, RequestData requestData,
+      RequestChangeContainer changes) {
     ModelMap map = new ModelMap();
     map.put("matchesAddrSuccess", true);
     map.put("matchesAddrDnb", true);
     map.put("matchesAddrAPI", true);
     map.put("message", "");
 
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
     List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, "MAIL", "ZP01", "ZI01", "ZF01", "CTYG", "CTYH");
     
     Addr zs01 = requestData.getAddress("ZS01");
     String customerName = zs01.getCustNm1() + (StringUtils.isBlank(zs01.getCustNm2()) ? "" : " " + zs01.getCustNm2());
     AutomationResponse<NZBNValidationResponse> nZBNAPIresponse = null;
     try {
-      nZBNAPIresponse = getNZBNService(admin, data, customerName);
+      nZBNAPIresponse = getNZBNService(customerName, businessNumber);
     } catch (Exception e) {
       if (nZBNAPIresponse == null || !nZBNAPIresponse.isSuccess()) {
         log.debug("\nFailed to Connect to NZBN Service.");
