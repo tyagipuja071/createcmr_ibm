@@ -1773,7 +1773,48 @@ function checkCmrUpdateBeforeImport() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
-
+var _custGrpHandler = null;
+function onScenarioChangeHandler() {
+  if (_custGrpHandler == null) {
+    _custGrpHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      setPreferredLangSwiss();
+    });
+  }
+}
+function onPostalCodeChangeHandler() {
+  console.log(">>>> Preferred Language on Postal Coade change");
+  dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
+    setPreferredLangSwiss();
+  });
+}
+function setPreferredLangSwiss() {
+  console.log(">>>> setPreferredLangSwiss");
+  var postCd = FormManager.getActualValue('postCd');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp').toUpperCase();
+  var flag = custGrp == 'CHLOC' || custGrp == '' || (custGrp == '' && reqType == 'U');
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
+  var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
+  var postCd = FormManager.getActualValue('postCd');
+  postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
+  if (custGrp == 'CROSS') {
+    FormManager.setValue('custPrefLang', 'E');
+    role == 'PROCESSOR' ? FormManager.enable('custPrefLang') : FormManager.readOnly('custPrefLang');
+  } else if ((postCd >= 3000 && postCd <= 6499) || postCd > 6999) {
+    FormManager.setValue('custPrefLang', 'D');
+    role == 'PROCESSOR' && flag ? FormManager.enable('custPrefLang') : FormManager.readOnly('custPrefLang');
+  } else if (postCd >= 6500 && postCd <= 6999) {
+    FormManager.setValue('custPrefLang', 'I');
+    role == 'PROCESSOR' && flag ? FormManager.enable('custPrefLang') : FormManager.readOnly('custPrefLang');
+  } else if (postCd < 3000) {
+    FormManager.setValue('custPrefLang', 'F');
+    role == 'PROCESSOR' && flag ? FormManager.enable('custPrefLang') : FormManager.readOnly('custPrefLang');
+  }
+}
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
@@ -1838,4 +1879,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.SWISS);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.SWISS, null, true);
+
+  GEOHandler.addAfterConfig(setPreferredLangSwiss, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(setPreferredLangSwiss, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(onScenarioChangeHandler, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(onPostalCodeChangeHandler, GEOHandler.SWISS);
 });
