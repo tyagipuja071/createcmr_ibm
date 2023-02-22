@@ -473,6 +473,15 @@ public class SwitzerlandUtil extends AutomationUtil {
     String coverage = data.getSearchTerm();
     LOG.debug("coverageId--------------------" + container.getFinalCoverage());
     LOG.debug("sortl--------------------" + coverage);
+    String isuCd = null;
+    String clientTier = null;
+    if (StringUtils.isNotBlank(container.getIsuCd())) {
+      isuCd = container.getIsuCd();
+      clientTier = container.getClientTierCd();
+    } else {
+      isuCd = data.getIsuCd();
+      clientTier = data.getClientTier();
+    }
 
     List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
 
@@ -480,13 +489,11 @@ public class SwitzerlandUtil extends AutomationUtil {
     String sortl = null;
     switch (actualScenario) {
     case SCENARIO_COMMERCIAL:
-      if (!isCoverageCalculated) {
-        sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
-      }
+      sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), isuCd, clientTier);
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
-      sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
+      sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), isuCd, clientTier);
       break;
     default:
       if ("34".equals(data.getIsuCd()) && ("Q".equals(data.getClientTier())) && !isCoverageCalculated) {
@@ -501,7 +508,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       }
     }
 
-    LOG.debug("----CovId()+Coverage--" + data.getCovId());
+    LOG.debug("----CovId() + Coverage--" + data.getCovId());
     if (sortl != null) {
       details.append("Setting SORTL to " + sortl + " based on Postal Code rules.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
@@ -582,7 +589,7 @@ public class SwitzerlandUtil extends AutomationUtil {
   // }
 
   public String getSortlForISUCTC(EntityManager entityManager, String subIndustryCd, String postCd, String isuCd, String clientTier) {
-    if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+    if (StringUtils.isNotBlank(isuCd)) {
 
       if (StringUtils.isNotBlank(subIndustryCd) && subIndustryCd.length() > 1) {
         subIndustryCd = subIndustryCd.substring(0, 1);
@@ -603,6 +610,12 @@ public class SwitzerlandUtil extends AutomationUtil {
       } else {
         postCd = "";
       }
+
+      if (!"34".equals("isuCd") && !"Q".equals(clientTier)) {
+        subIndustryCd = "";
+        postCd = "";
+      }
+      clientTier = StringUtils.isNotBlank(clientTier) ? clientTier : "";
 
       String sql = ExternalizedQuery.getSql("QUERY.SWISS.GET.SORTL_BY_ISUCTCIMS");
       PreparedQuery query = new PreparedQuery(entityManager, sql);

@@ -8496,9 +8496,11 @@ function setISUCTCBasedScenarios() {
       } else if (isuCd == '36') {
         FormManager.setValue('clientTier', 'Y');
         FormManager.enable('salesBusOffCd');
+        FormManager.setValue('salesBusOffCd', 'A20');
       } else if (isuCd == '34') {
         FormManager.setValue('clientTier', 'Q');
         FormManager.readOnly('salesBusOffCd');
+        FormManager.setValue('salesBusOffCd', 'A20');
       } else if (isuCd == '32') {
         FormManager.setValue('clientTier', 'T');
         FormManager.setValue('salesBusOffCd', 'A00');
@@ -8600,7 +8602,7 @@ function setClassificationCodeTR() {
   if (FormManager.getActualValue('reqType') == 'C') {
     FormManager.limitDropdownValues(field, [ '45', '46', '71' ]);
   } else if (FormManager.getActualValue('reqType') == 'U') {
-    FormManager.limitDropdownValues(field, [ '11', '13', '33', '35', '45', '46', '60', '71' ]);
+    FormManager.limitDropdownValues(field, [ '11', '13', '33', '35', '45', '46', '60', '71', '81' ]);
   }
 }
 

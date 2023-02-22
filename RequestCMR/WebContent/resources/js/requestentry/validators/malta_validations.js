@@ -1105,33 +1105,33 @@ function setCTCValues() {
     if (isuCd == '21') {
       FormManager.setValue('clientTier', '');
     }
-    lockUnlockFieldForMALTA();
   }
+  lockUnlockFieldForMALTA();
+}
 
-  function lockFieldsIBMEM() {
-    console.log(">>>> lockFieldsIBMEM");
-    if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-      FormManager.readOnly('inacCd');
-      FormManager.readOnly('dunsNo');
-      return;
-    }
-    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
-      FormManager.readOnly('inacCd');
-      FormManager.readOnly('dunsNo');
-    } else {
-      FormManager.enable('inacCd');
-      FormManager.enable('dunsNo');
-    }
-    lockUnlockFieldForMALTA();
+function lockFieldsIBMEM() {
+  console.log(">>>> lockFieldsIBMEM");
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('dunsNo');
+    return;
   }
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('dunsNo');
+  } else {
+    FormManager.enable('inacCd');
+    FormManager.enable('dunsNo');
+  }
+  lockUnlockFieldForMALTA();
+}
 
-  function iSUCTCEnterpriseCombinedCodeValidator() {
-    var reqType = FormManager.getActualValue('reqType');
-    if (reqType != 'C') {
-      return;
-    }
+function iSUCTCEnterpriseCombinedCodeValidator() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
   }
-  console.log(">>>> iSUCTCEnterpriseCombinedCodeValidatorForCYPRUS");
+  console.log(">>>> iSUCTCEnterpriseCombinedCodeValidator");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var isuCd = FormManager.getActualValue('isuCd');
@@ -1145,18 +1145,11 @@ function setCTCValues() {
   var isuCtc = isuCd + clientTier;
   var isuCtcEnterprise = isuCtc + enterprise;
 
-  FormManager.removeValidator('isuCd', Validators.REQUIRED);
   FormManager.removeValidator('clientTier', Validators.REQUIRED);
   FormManager.removeValidator('enterprise', Validators.REQUIRED);
 
-  if (custSubGroup == '') {
+  if (custSubGroup == '' || isuCd == '') {
     return new ValidationResult(null, true);
-  } else if (!isuCdSet.has(isuCd) && !custSubGroupSet.has(custSubGroup)) {
-    return new ValidationResult({
-      id : 'isuCd',
-      type : 'text',
-      name : 'isuCd'
-    }, false, 'ISU can only accept \'34\', \'36\', \'5K\'.');
   } else if (isuCdSet1.has(isuCd) && clientTier != '') {
     return new ValidationResult({
       id : 'clientTier',
@@ -1210,7 +1203,7 @@ function clientTierCodeValidator() {
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
-  if (cntry == SysLoc.CYPRUS && reqType == 'C') {
+  if (cntry == SysLoc.MALTA && reqType == 'C') {
     return iSUCTCEnterpriseCombinedCodeValidator();
   }
 
@@ -1376,7 +1369,7 @@ function lockUnlockFieldForMALTA() {
     FormManager.readOnly('ppsceid');
 
   } else if (custSubGrp == 'PRICU') {
-    FormManager.enable('isuCd');
+    FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('enterprise');
     FormManager.readOnly('repTeamMemberNo');
