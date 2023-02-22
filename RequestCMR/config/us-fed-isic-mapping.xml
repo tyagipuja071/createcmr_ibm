@@ -1,75 +1,111 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <mappings>
 	<mapping>
 		<dnb-isic>9000</dnb-isic>
 		<cmr-isic>8800</cmr-isic>
+		<dnb-subInd>YD</dnb-subInd>
+		<cmr-subInd>UE</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9111</dnb-isic>
 		<cmr-isic>8801</cmr-isic>
+		<dnb-subInd>YE</dnb-subInd>
+		<cmr-subInd>KZ</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9112</dnb-isic>
 		<cmr-isic>8802</cmr-isic>
+		<dnb-subInd>YE</dnb-subInd>
+		<cmr-subInd>KZ</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9120</dnb-isic>
 		<cmr-isic>8803</cmr-isic>
+		<dnb-subInd>YE</dnb-subInd>
+		<cmr-subInd>KZ</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9191</dnb-isic>
 		<cmr-isic>8804</cmr-isic>
+		<dnb-subInd>YC</dnb-subInd>
+		<cmr-subInd>KZ</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9192</dnb-isic>
 		<cmr-isic>8805</cmr-isic>
+		<dnb-subInd>YD</dnb-subInd>
+		<cmr-subInd>KZ</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9199</dnb-isic>
 		<cmr-isic>8806</cmr-isic>
+		<dnb-subInd>YC</dnb-subInd>
+		<cmr-subInd>KZ</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9211</dnb-isic>
 		<cmr-isic>8807</cmr-isic>
+		<dnb-subInd>YA</dnb-subInd>
+		<cmr-subInd>KC</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9212</dnb-isic>
 		<cmr-isic>8808</cmr-isic>
+		<dnb-subInd></dnb-subInd>
+		<cmr-subInd>KC</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9213</dnb-isic>
 		<cmr-isic>8809</cmr-isic>
+		<dnb-subInd>YA</dnb-subInd>
+		<cmr-subInd>KB</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9214</dnb-isic>
 		<cmr-isic>8810</cmr-isic>
+		<dnb-subInd>YA</dnb-subInd>
+		<cmr-subInd>KC</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9219</dnb-isic>
 		<cmr-isic>8811</cmr-isic>
+		<dnb-subInd>YA</dnb-subInd>
+		<cmr-subInd>KC</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9220</dnb-isic>
 		<cmr-isic>8812</cmr-isic>
+		<dnb-subInd>KD</dnb-subInd>
+		<cmr-subInd>KD</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9231</dnb-isic>
 		<cmr-isic>8813</cmr-isic>
+		<dnb-subInd>YA</dnb-subInd>
+		<cmr-subInd>EA</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9232</dnb-isic>
 		<cmr-isic>8814</cmr-isic>
+		<dnb-subInd>YC</dnb-subInd>
+		<cmr-subInd>KZ</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9233</dnb-isic>
 		<cmr-isic>8815</cmr-isic>
+		<dnb-subInd>YE</dnb-subInd>
+		<cmr-subInd>KZ</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9241</dnb-isic>
 		<cmr-isic>8816</cmr-isic>
+		<dnb-subInd>YE</dnb-subInd>
+		<cmr-subInd>KE</cmr-subInd>
 	</mapping>
 	<mapping>
 		<dnb-isic>9249</dnb-isic>
 		<cmr-isic>8817</cmr-isic>
+		<dnb-subInd>YA</dnb-subInd>
+		<cmr-subInd>KC</cmr-subInd>
 	</mapping>
 </mappings>
