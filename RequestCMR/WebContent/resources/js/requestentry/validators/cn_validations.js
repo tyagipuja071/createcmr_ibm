@@ -93,15 +93,14 @@ function setSearchTermList(){
   } else if (custSubType == 'KYND') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '09058' ]);
     FormManager.setValue('searchTerm', '09058');
-  } else if (custSubType == 'EMBSA') {
-    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '09058','00260','04749','04629','04630','08036','10216','10217',
+  } else   if (custSubType == 'EMBSA') {
+    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '09058','08036','10216','10217',
       '10218','10219','10220','10221','10222','10223','10224','10225','10226','10227','10228','10229','10230','10231','10232','10233',
       '10234','10235','10236','10237','10238','10239','10240','10241','10242','10243','10244','10245','10246','10247','10248','10249',
       '10250','10251','10252','10253','10254','10255','10256','10257','10258','10259','10260','10545','10546','10547','10548','10549',
       '10550','10551','10552','10553','10554','10555','10556','10557','10558','10559','10560','10561','10562','10563','10564','10565',
       '10566','10567','10568','10569','10570','10571','10572','10573','10574','10575','10576','10577','10578','10579','10580','10581',
-      '10582','10583','10584','10585','10586','10587','10588','10589','10158','10159','10160','10161','10162','10163','10164','10165',
-      '10166','10167','10168','10169','10170','10171'
+      '10582','10583','10584','10585','10586','10587','10588','10589'
  ]);
   } else if (custSubType == 'AQSTN') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '00000','10216','10217','10218','10219','10220','10221','10222',
@@ -151,6 +150,15 @@ function setSearchTermByGBGId() {
     ID : _GBGId
   });
   if (ret && ret.ret1 && ret.ret1 != 0) {
+    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '09058','00260','04749','04629','04630','08036','10216','10217',
+      '10218','10219','10220','10221','10222','10223','10224','10225','10226','10227','10228','10229','10230','10231','10232','10233',
+      '10234','10235','10236','10237','10238','10239','10240','10241','10242','10243','10244','10245','10246','10247','10248','10249',
+      '10250','10251','10252','10253','10254','10255','10256','10257','10258','10259','10260','10545','10546','10547','10548','10549',
+      '10550','10551','10552','10553','10554','10555','10556','10557','10558','10559','10560','10561','10562','10563','10564','10565',
+      '10566','10567','10568','10569','10570','10571','10572','10573','10574','10575','10576','10577','10578','10579','10580','10581',
+      '10582','10583','10584','10585','10586','10587','10588','10589','10158','10159','10160','10161','10162','10163','10164','10165',
+      '10166','10167','10168','10169','10170','10171'
+    ]);
     if(_GBGId == 'GB000YEN'){
       FormManager.setValue('searchTerm', '00260');
     }else if(_GBGId == 'GB001A7X'){
@@ -3857,7 +3865,7 @@ function retrievedForCNValidator() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         console.log( "old GLC code is ", oldGlcCode);
         if (typeof (_pagemodel) != undefined) {
-          if(reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='ECOSY')) {
+          if(reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='ECOSY' || custSubGrp == 'EMBSA')) {
 
             console.log("Checking the GLC match... retrieve value again...")
             var data = CmrServices.getAll('reqentry');
@@ -3872,6 +3880,21 @@ function retrievedForCNValidator() {
                   return new ValidationResult(null, false, 'The following values cannot be retrieved at the moment.:GEO Location Code\nPlease contact your system administrator.');
                 } else {
                   var indc = 'C';
+                  if(custSubGrp == 'EMBSA'){
+                    var _GBGId = FormManager.getActualValue('gbgId');
+                    if (FormManager.getActualValue('gbgId') != undefined && FormManager.getActualValue('gbgId') != '') {
+                    var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
+                      ID : _GBGId
+                    });
+                    if (ret && ret.ret1 && ret.ret1 != 0) {
+                      indc = '';
+                    }else{
+                      indc = 'C';
+                    }
+                    }else{
+                      indc = 'C';
+                    }
+                  }
                   if(custSubGrp=='ECOSY'){
                     indc = 'E';
                   }
