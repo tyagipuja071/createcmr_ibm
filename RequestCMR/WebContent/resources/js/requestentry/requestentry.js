@@ -2859,49 +2859,72 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
     var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
       ID : _GBGId
     });
-    if (ret && ret.ret1 && ret.ret1 != 0) {
-      indc = '';
-    }else{
-      indc = 'C';
+      if (ret && ret.ret1 && ret.ret1 != 0) {
+        indc = '';
+      }
     }
-    }else{
-      indc = 'C';
+    if(indc == 'C'){
+      var result1 = cmr.query('GLC.CN.SEARCHTERM', {
+        GLC_CD : '%' + glcCode + '%',
+        DEFAULT_INDC : indc
+      });
+      indc = 'E';
+      var result2 = cmr.query('GLC.CN.SEARCHTERM', {
+        GLC_CD : '%' + glcCode + '%',
+        DEFAULT_INDC : indc
+      });
+      if (result1 != null && result1.ret1 != undefined && result1.ret1 != '' || result2 != null && result2.ret1 != undefined && result2.ret1 != '') {
+        var searchTerm1 = result1 != null ? result1.ret1 : '';
+        var searchTerm2 = result2 != null ? result2.ret1 : '';
+        var clientTier = result1.ret2;
+        var isuCd = result1.ret3;
+        FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm1,searchTerm2 ]);
+        FormManager.setValue('searchTerm', searchTerm1);
+        //FormManager.readOnly('searchTerm');
+        FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
+        FormManager.setValue('clientTier', clientTier);
+        FormManager.readOnly('clientTier');
+        FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
+        FormManager.setValue('isuCd', isuCd);
+        FormManager.readOnly('isuCd');
+      }
     }
-  }
-  if (custSubGrp == 'ECOSY') {
-    indc = 'E';
-  }
-  var result = cmr.query('GLC.CN.SEARCHTERM', {
-    GLC_CD : '%' + glcCode + '%',
-    DEFAULT_INDC : indc
-  });
-  if (result != null && result.ret1 != undefined && result.ret1 != '') {
-    var searchTerm = result.ret1;
-    var clientTier = result.ret2;
-    var isuCd = result.ret3;
-    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm ]);
-    FormManager.setValue('searchTerm', searchTerm);
-    FormManager.readOnly('searchTerm');
-    FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
-    FormManager.setValue('clientTier', clientTier);
-    FormManager.readOnly('clientTier');
-    FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
-    FormManager.setValue('isuCd', isuCd);
-    FormManager.readOnly('isuCd');
-    if (clientTier == '00000' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
-      FormManager.setValue('clientTier', 'Q');
-      FormManager.setValue('isuCd', '34');
+  }else{
+    if (custSubGrp == 'ECOSY') {
+      indc = 'E';
     }
-  } else if (custSubGrp == 'ECOSY' && glcCode != undefined && glcCode != '') {
-    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
-    FormManager.setValue('searchTerm', '08036');
-    FormManager.readOnly('searchTerm');
-    FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
-    FormManager.setValue('clientTier', 'Y');
-    FormManager.readOnly('clientTier');
-    FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
-    FormManager.setValue('isuCd', '36');
-    FormManager.readOnly('isuCd');
+    var result = cmr.query('GLC.CN.SEARCHTERM', {
+      GLC_CD : '%' + glcCode + '%',
+      DEFAULT_INDC : indc
+    });
+    if (result != null && result.ret1 != undefined && result.ret1 != '') {
+      var searchTerm = result.ret1;
+      var clientTier = result.ret2;
+      var isuCd = result.ret3;
+      FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm ]);
+      FormManager.setValue('searchTerm', searchTerm);
+      FormManager.readOnly('searchTerm');
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
+      FormManager.setValue('clientTier', clientTier);
+      FormManager.readOnly('clientTier');
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
+      FormManager.setValue('isuCd', isuCd);
+      FormManager.readOnly('isuCd');
+      if (clientTier == '00000' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
+        FormManager.setValue('clientTier', 'Q');
+        FormManager.setValue('isuCd', '34');
+      }
+    } else if (custSubGrp == 'ECOSY' && glcCode != undefined && glcCode != '') {
+      FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
+      FormManager.setValue('searchTerm', '08036');
+      FormManager.readOnly('searchTerm');
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
+      FormManager.setValue('clientTier', 'Y');
+      FormManager.readOnly('clientTier');
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
+      FormManager.setValue('isuCd', '36');
+      FormManager.readOnly('isuCd');
+    }
   }
 }
 
