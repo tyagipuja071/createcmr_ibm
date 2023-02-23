@@ -64,6 +64,8 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_BP_LOCAL_LU = "LUBUS";
   public static final String SCENARIO_DATA_CENTER_LU = "LUDAT";
   public static final String SCENARIO_IBMEM_LU = "LUIBM";
+  private static final String QUERY_BG_SBO_BENELUX = "AUTO.COV.GET_SBO_FROM_BG_FR";
+
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO, CmrConstants.RDC_PAYGO_BILLING);
@@ -192,6 +194,9 @@ public class BeLuxUtil extends AutomationUtil {
     Data data = requestData.getData();
     String gbgCntry = chkFrAffiliateCntry(engineData, requestData, entityManager);
     String cmrCntry = data.getCountryUse().length() == 3 ? "Belgium" : "Luxembourg";
+    String bgId = data.getBgId();
+    String commercialFin = "";
+    String coverageId = container.getFinalCoverage();
 
     if (StringUtils.isNotBlank(gbgCntry) && cmrCntry.equalsIgnoreCase(gbgCntry)) {
       details.append("Coverage calculated for: " + gbgCntry).append("\n");
@@ -215,7 +220,17 @@ public class BeLuxUtil extends AutomationUtil {
         }
         details.append("SBO calculated from Account Team: " + sbo);
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
-
+      }
+      details.append("\n");
+      if (isCoverageCalculated && StringUtils.isNotBlank(coverageId)) {
+        if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
+          commercialFin = computeSBOForCovBelux(entityManager, QUERY_BG_SBO_BENELUX, bgId, data.getCmrIssuingCntry(), false);
+        }
+        if (commercialFin != null && !commercialFin.isEmpty()) {
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "COMMERCIAL_FINANCED", data.getSalesBusOffCd(), commercialFin);
+          details.append("SORTL: " + commercialFin + commercialFin);
+        }
+        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
       }
     }
 
@@ -282,6 +297,29 @@ public class BeLuxUtil extends AutomationUtil {
     }
     return true;
   }
+    
+    private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
+      String sortl = "";
+      String sql = ExternalizedQuery.getSql(queryBgFR);
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("KEY", bgId);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("COUNTRY", cmrIssuingCntry);
+      String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+      System.err.println("ISO: " + isoCntry);
+      query.setParameter("ISO_CNTRY", isoCntry);
+      query.setForReadOnly(true);
+
+      LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
+      List<Object[]> results = query.getResults(5);
+      if (results != null && !results.isEmpty()) {
+        for (Object[] result : results) {
+          // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
+          sortl = (String) result[0];
+        }
+      }
+      return sortl;
+    }
 
   private String chkFrAffiliateCntry(AutomationEngineData engineData, RequestData reqData, EntityManager entityManager) {
     GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
