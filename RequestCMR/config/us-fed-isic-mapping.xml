@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <mappings>
 	<mapping>
 		<dnb-isic>9000</dnb-isic>
@@ -51,7 +51,7 @@
 	<mapping>
 		<dnb-isic>9212</dnb-isic>
 		<cmr-isic>8808</cmr-isic>
-		<dnb-subInd></dnb-subInd>
+		<dnb-subInd>KC</dnb-subInd>
 		<cmr-subInd>KC</cmr-subInd>
 	</mapping>
 	<mapping>
