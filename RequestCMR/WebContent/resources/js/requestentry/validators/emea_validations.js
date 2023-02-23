@@ -10209,7 +10209,6 @@ function clientTierCodeValidator() {
   if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
-
       return new ValidationResult(null, true);
     } else {
       $("#clientTierSpan").html('');
@@ -10220,15 +10219,9 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-   if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    }  else if (clientTierCode == 'Q') {
+    if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
-    } else {
+    } else if (clientTierCode != 'Q' && clientTierCode != '') {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
@@ -10236,31 +10229,19 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept \'Q\'.');
     }
   } else if (isuCode == '32') {
-   if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    }  else if (clientTierCode == 'T') {
+    if (clientTierCode == 'T') {
       return new ValidationResult(null, true);
-    } else {
+    } else if (clientTierCode != 'T' && clientTierCode != '') {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept blank.');
+      }, false, 'Client Tier can only accept \'T\'.');
     }
   } else if (isuCode == '36') {
-   if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Y') {
+    if (clientTierCode == 'Y') {
       return new ValidationResult(null, true);
-    } else {
+    } else if (clientTierCode != 'Y' && clientTierCode != '') {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',

@@ -646,12 +646,14 @@ public class UKIUtil extends AutomationUtil {
         }
         details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
         details.append("SBO : " + fields.getSbo()).append("\n");
-        details.append("ISU : " + fields.getIsu()).append("\n");
-        details.append("Client Tier : " + fields.getCtc()).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), fields.getSalesRep());
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), fields.getIsu());
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), fields.getCtc());
+        details.append("ISU : " + fields.getIsu()).append("\n");
+        details.append("Client Tier : " + fields.getCtc()).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(),
+            !StringUtils.isBlank(fields.getIsu()) ? fields.getIsu() : data.getIsuCd());
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(),
+            !StringUtils.isBlank(fields.getCtc()) ? fields.getCtc() : data.getClientTier());
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())) {
