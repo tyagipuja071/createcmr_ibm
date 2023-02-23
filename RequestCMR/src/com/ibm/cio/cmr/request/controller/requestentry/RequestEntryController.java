@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -314,7 +315,10 @@ public class RequestEntryController extends BaseController {
     } else if (StringUtils.isEmpty(model.getNewReqCntry())) {
       model.setCountryUse(model.getCmrIssuingCntry());
     }
-    model.setCustPrefLang(CmrConstants.LANGUAGE_ENGLISH);
+    // avoid setting default pref lang as E for NORDX -> CREATCMR - 8388
+    if (StringUtils.isNotEmpty(model.getCmrIssuingCntry()) && !Arrays.asList("678", "702", "846", "806").contains(model.getCmrIssuingCntry())) {
+      model.setCustPrefLang(CmrConstants.LANGUAGE_ENGLISH);
+    }
 
     if (!StringUtils.isEmpty(model.getNewReqType())) {
       model.setReqType(model.getNewReqType());
