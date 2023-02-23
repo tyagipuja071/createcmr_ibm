@@ -1228,7 +1228,7 @@ function onCustSubGrpChange() {
     FormManager.readOnly('subIndustryCd');
     if (FormManager.getActualValue('viewOnlyPage') != 'true')
       FormManager.enable('isicCd');
-    setISBUScenarioLogic();
+//    setISBUScenarioLogic();
     
     // CREATCMR-7653
     if (FormManager.getActualValue('cmrIssuingCntry') == '796' && FormManager.getActualValue('reqType') == 'C') {    
@@ -3440,6 +3440,7 @@ function setCTCIsuByClusterASEAN() {
        }
         if (issuingCnt4.includes(_cmrIssuingCntry)) {
           setCTCIsuByClusterBrunei();
+          setISBUandMRCScenarioLogic();
         }
      }
      
@@ -3512,6 +3513,30 @@ function setCTCIsuByClusterBrunei() {
     }
 }
 
+function setISBUandMRCScenarioLogic() {
+	  console.log(">>>> setISBUScenarioLogic");
+	  var custSubGrp = FormManager.getActualValue('custSubGrp');
+	  var isbuList = null;
+	 if (custSubGrp == 'BUSPR') {
+	   
+	      isbuList = [ 'BPN1', 'BPN2' ];
+	      console.log("isbuList = " + isbuList);
+	      FormManager.enable('isbuCd');
+	      FormManager.setValue('isbuCd', '');
+	      FormManager.limitDropdownValues(FormManager.getField('isbuCd'), isbuList);
+	    
+	  }
+	  if  (['00000'].includes(cluster)) {
+	   
+	    if(custSubGrp == 'INTER' || custSubGrp == 'DUMMY') {
+	        FormManager.setValue('mrcCd', '2');
+	        return;
+	    } 
+	    FormManager.setValue('mrcCd', '3');
+	    return;
+	  }  
+	  
+	}
 function setIsuByClusterCTC() {
   console.log('>>>> setIsuByClusterCTC >>>>');
   var reqType = FormManager.getActualValue('reqType');
