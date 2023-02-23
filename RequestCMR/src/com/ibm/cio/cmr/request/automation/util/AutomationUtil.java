@@ -50,6 +50,7 @@ import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.Person;
@@ -1429,6 +1430,33 @@ public abstract class AutomationUtil {
       query.setParameter("NAME2", addrToCheck.getCustNm2());
     }
     return query.exists();
+  }
+
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong> return true if there are country specific logic
+   * 
+   * @param entityManager
+   * @param engineData
+   * @param requestData
+   * @param return
+   * @throws Exception
+   */
+  public static boolean isTaxManagerEmeaUpdateCheck(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData)
+      throws Exception {
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    String cmrIssuingCntry = data.getCmrIssuingCntry();
+    if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(admin.getReqType())) {
+      String sql = ExternalizedQuery.getSql("QUERY.GET.TAX_MANAGER.BY_ISSUING_CNTRY");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
+      List<String> taxManagers = query.getResults(String.class);
+      if (taxManagers != null) {
+        return taxManagers.stream().anyMatch(res -> res.equalsIgnoreCase(admin.getRequesterId()));
+      }
+    }
+    return false;
   }
 
   public static boolean validateLOVVal(EntityManager em, String issuingCntry, String fieldId, String code) {
