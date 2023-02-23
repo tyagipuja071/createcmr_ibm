@@ -22,6 +22,8 @@ function afterConfigKR() {
     FormManager.setValue('inacType','');
     FormManager.setValue('inacCd','');
     FormManager.enable('searchTerm');
+    FormManager.enable('isicCd');
+    FormManager.setValue('isicCd','');
     setSearchTermDropdownValues();
     LockDefaultISUClientTierMrcValues();
     FormManager.readOnly('clientTier');
@@ -594,6 +596,8 @@ function setSearchTermDropdownValues() {
         FormManager.limitDropdownValues(searchTerm, [ '08016', '09065', '01545' ]);
         break;
       case "INTER":
+        FormManager.setValue('isuCd', '21');
+        FormManager.readOnly('isuCd');
         FormManager.limitDropdownValues(searchTerm, [ '00003' ]);
         FormManager.setValue('searchTerm', '00003');
         FormManager.readOnly('searchTerm');
@@ -601,10 +605,10 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('clientTier');
         FormManager.setValue('mrcCd', '2');
         FormManager.readOnly('mrcCd');
-        FormManager.setValue('isuCd', '21');
-        FormManager.readOnly('isuCd');
         FormManager.setValue('isicCd', '8888');
         FormManager.readOnly('isicCd');
+        FormManager.readOnly('inacCd');
+        FormManager.readOnly('inacType');
         FormManager.enable('cmrNoPrefix');
         break;
       case "LKYN":  
@@ -627,6 +631,9 @@ function setSearchTermDropdownValues() {
 }
 
 function LockDefaultISUClientTierMrcValues() {
+  FormManager.setValue('clientTier','');
+  FormManager.setValue('isuCd','');
+  FormManager.setValue('mrcCd','');
   var searchTerm = FormManager.getActualValue('searchTerm');
   var clientTier = FormManager.getField('clientTier');
   if (searchTerm == "00003") {
@@ -666,9 +673,6 @@ function LockDefaultISUClientTierMrcValues() {
     FormManager.readOnly('isuCd');
   } else if (searchTerm == '01545') {
     FormManager.setValue('isuCd', '34');
-    FormManager.readOnly('isuCd');
-  } else if (searchTerm == '08016') {
-    FormManager.setValue('isuCd', '36');
     FormManager.readOnly('isuCd');
   } else if (searchTerm == '71500') {
     FormManager.setValue('isuCd', '5B');
@@ -778,6 +782,7 @@ function getIsuFromIsic(){
   if (!(searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223')) {
     return;
   }
+  FormManager.setValue('isuCd','');
   var ISU = [];
   if (isicCd != '') {
     var qParams = {
