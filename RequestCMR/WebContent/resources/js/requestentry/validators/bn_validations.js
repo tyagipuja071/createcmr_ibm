@@ -3515,7 +3515,6 @@ function setCTCIsuByClusterBrunei() {
 
 function setISBUandMRCScenarioLogic() {
 	  console.log(">>>> setISBUScenarioLogic");
-	  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 	  var custSubGrp = FormManager.getActualValue('custSubGrp');
 	  var isbuList = null;
 	 if (custSubGrp == 'BUSPR') {
