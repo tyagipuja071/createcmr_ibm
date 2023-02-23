@@ -1464,5 +1464,35 @@ public abstract class AutomationUtil {
     Data data = requestData.getData();
     return data.getIsicCd();
   }
+  
+  public static List<DACHFieldContainer> computeDACHCoverageElements(EntityManager entityManager, String queryBgDACH, String bgId,
+      String cmrIssuingCntry) {
+    List<DACHFieldContainer> calculatedFields = new ArrayList<>();
+    String sql = ExternalizedQuery.getSql(queryBgDACH);
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KEY", bgId);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", cmrIssuingCntry);
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    System.err.println("ISO: " + isoCntry);
+    query.setParameter("ISO_CNTRY", isoCntry);
+    query.setForReadOnly(true);
+
+    LOG.debug("Calculating Fields using DACH query " + queryBgDACH + " for key: " + bgId);
+    List<Object[]> results = query.getResults(5);
+    if (results != null && !results.isEmpty()) {
+      for (Object[] result : results) {
+        DACHFieldContainer fieldValues = new DACHFieldContainer();
+        fieldValues.setIsuCd((String) result[0]);
+        fieldValues.setClientTier((String) result[1]);
+        fieldValues.setEnterprise((String) result[2]);
+        fieldValues.setSearchTerm((String) result[3]);
+        fieldValues.setInac((String) result[4]);
+        calculatedFields.add(fieldValues);
+      }
+    }
+    return calculatedFields;
+  }
+  
 
 }
