@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
+import com.ibm.cio.cmr.request.automation.util.DACHFieldContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -469,6 +470,7 @@ public class AustriaUtil extends AutomationUtil {
     String sbo = "";
     String isuCd = null;
     String clientTier = null;
+    String bgId = data.getBgId();
     if (StringUtils.isNotBlank(container.getIsuCd())) {
       isuCd = container.getIsuCd();
       clientTier = container.getClientTierCd();
@@ -482,46 +484,72 @@ public class AustriaUtil extends AutomationUtil {
     System.out.println("coverageId----------" + coverageId);
     List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
     LOG.info("Starting coverage calculations for Request ID " + requestData.getData().getId().getReqId());
-    switch (scenario) {
-    case SCENARIO_COMMERCIAL:
-    case SCENARIO_CROSS_COMMERICAL:
-    case SCENARIO_THIRD_PARTY_DC:
-    case SCENARIO_PRIVATE_CUSTOMER:
-      sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), isuCd, clientTier);
-      break;
-    }
-
-    if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario)) && StringUtils.isNotBlank(coverage)
-        && covList.contains(coverage)) {
-      details.append("Setting Isu ctc to 28-7 based on coverage.");
-      overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
-      overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "7");
-    }
-    if (StringUtils.isNotBlank(sbo)) {
-      details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
-      overrides.addOverride(covElement.getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
-      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-      results.setResults("Calculated");
-    } else if (!isCoverageCalculated) {
-      String sboReq = data.getSalesBusOffCd();
-      if (!StringUtils.isBlank(sboReq)) {
-        String msg = "No valid SBO mapping from request data. Using SBO " + sboReq + " from request.";
-        details.append(msg);
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else {
-        String msg = "Coverage cannot be calculated. No valid SBO mapping from request data.";
-        details.append(msg);
-        results.setResults("Cannot Calculate");
-        results.setDetails(details.toString());
-        engineData.addNegativeCheckStatus("_atSbo", msg);
+        if (bgId != null && !"BGNONE".equals(bgId.trim())) {
+      List<DACHFieldContainer> queryResults = AutomationUtil.computeDACHCoverageElements(entityManager, "AUTO.COV.CALCULATE_COV_ELEMENTS_DACH", bgId,
+          data.getCmrIssuingCntry());
+      if (queryResults != null && !queryResults.isEmpty()) {
+        for (DACHFieldContainer result : queryResults) {
+          DACHFieldContainer queryResult = (DACHFieldContainer) result;
+          String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
+          String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
+          String queryIsu = queryResult.getIsuCd();
+          String queryCtc = queryResult.getClientTier();
+          if (containerIsu.equals(queryIsu) && containerCtc.equals(queryCtc)) {
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), queryResult.getSearchTerm());
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), queryResult.getInac());
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), queryResult.getEnterprise());
+            details.append("Data calculated based on CMR Data:").append("\n");
+            details.append(" - SORTL = " + queryResult.getSearchTerm()).append("\n");
+            details.append(" - INAC Code = " + queryResult.getInac()).append("\n");
+            details.append(" - Enterprise = " + queryResult.getEnterprise()).append("\n");
+            engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+            results.setResults("Calculated");
+            break;
+          }
+        }
       }
+    } else {
+      switch (scenario) {
+      case SCENARIO_COMMERCIAL:
+      case SCENARIO_CROSS_COMMERICAL:
+      case SCENARIO_THIRD_PARTY_DC:
+      case SCENARIO_PRIVATE_CUSTOMER:
+        sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), isuCd, clientTier);
+        break;
+      }
+
+      if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario)) && StringUtils.isNotBlank(coverage)
+          && covList.contains(coverage)) {
+        details.append("Setting Isu ctc to 28-7 based on coverage.");
+        overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
+        overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "7");
+      }
+      if (StringUtils.isNotBlank(sbo)) {
+        details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
+        overrides.addOverride(covElement.getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+        results.setResults("Calculated");
+      } else if (!isCoverageCalculated) {
+        String sboReq = data.getSalesBusOffCd();
+        if (!StringUtils.isBlank(sboReq)) {
+          String msg = "No valid SBO mapping from request data. Using SBO " + sboReq + " from request.";
+          details.append(msg);
+          results.setResults("Calculated");
+          results.setDetails(details.toString());
+        } else {
+          String msg = "Coverage cannot be calculated. No valid SBO mapping from request data.";
+          details.append(msg);
+          results.setResults("Cannot Calculate");
+          results.setDetails(details.toString());
+          engineData.addNegativeCheckStatus("_atSbo", msg);
+        }
+      }
+
     }
 
     return true;
 
   }
-
   private String getSBOFromIMS(EntityManager entityManager, String subIndustryCd, String isuCd, String clientTier) {
     List<String> sboValues = new ArrayList<>();
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
