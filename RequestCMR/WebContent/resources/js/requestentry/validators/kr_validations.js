@@ -29,6 +29,10 @@ function afterConfigKR() {
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
+    if (custSubGrp == 'INTER') {
+      FormManager.setValue('isuCd', '21');
+      FormManager.readOnly('isuCd');
+    }
   });
   
   var _clusterHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
