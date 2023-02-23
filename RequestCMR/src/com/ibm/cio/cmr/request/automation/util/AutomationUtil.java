@@ -51,6 +51,7 @@ import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.Person;
@@ -1496,7 +1497,7 @@ public abstract class AutomationUtil {
     LOG.debug("tweakDnBMatchingResponse");
     // NOOP
   }
-  
+
   public static List<DACHFieldContainer> computeDACHCoverageElements(EntityManager entityManager, String queryBgDACH, String bgId,
       String cmrIssuingCntry) {
     List<DACHFieldContainer> calculatedFields = new ArrayList<>();
@@ -1525,6 +1526,5 @@ public abstract class AutomationUtil {
     }
     return calculatedFields;
   }
-  
 
 }
