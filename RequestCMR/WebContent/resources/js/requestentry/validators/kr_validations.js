@@ -23,7 +23,8 @@ function afterConfigKR() {
     FormManager.setValue('inacCd','');
     FormManager.enable('searchTerm');
     FormManager.enable('isicCd');
-    FormManager.setValue('isicCd','');
+    FormManager.enable('inacType');
+    FormManager.enable('inacCd');
     setSearchTermDropdownValues();
     LockDefaultISUClientTierMrcValues();
     FormManager.readOnly('clientTier');
