@@ -573,6 +573,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       postalCode = postalCode != null ? postalCode.replace("-", "") : "";
       addr.setPostCd(postalCode);
 
+      addr.setTransportZone(StringUtils.isNotBlank(cmr.getCmrTransportZone()) ? cmr.getCmrTransportZone() : "Z000000001");
+
       int addrLength = 35;
       if (street != null && street.length() > addrLength) {
         if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
