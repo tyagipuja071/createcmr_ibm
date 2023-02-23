@@ -3516,6 +3516,7 @@ function setCTCIsuByClusterBrunei() {
 function setISBUandMRCScenarioLogic() {
 	  console.log(">>>> setISBUScenarioLogic");
 	  var custSubGrp = FormManager.getActualValue('custSubGrp');
+	  var cluster = FormManager.getActualValue('apCustClusterId');
 	  var isbuList = null;
 	 if (custSubGrp == 'BUSPR') {
 	   
@@ -3526,7 +3527,7 @@ function setISBUandMRCScenarioLogic() {
 	      FormManager.limitDropdownValues(FormManager.getField('isbuCd'), isbuList);
 	    
 	  }
-	  if  (['00000'].includes(cluster)) {
+	  if  (cluster=='00000') {
 	   
 	    if(custSubGrp == 'INTER' || custSubGrp == 'DUMMY') {
 	        FormManager.setValue('mrcCd', '2');
