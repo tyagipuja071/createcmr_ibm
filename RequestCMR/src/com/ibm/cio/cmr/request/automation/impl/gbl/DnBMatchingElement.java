@@ -581,12 +581,11 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     Admin admin = requestData.getAdmin();
     if (Arrays.asList("DUNS_NO", "ISIC_CD", "SUB_INDUSTRY_CD").contains(field)) {
       setEntityValue(data, field, match.getId().getMatchKeyValue());
-      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && "ISIC_CD".equals(field)) {
+      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
         try {
           AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
           if (countryUtil != null) {
-            String isicOverride = countryUtil.tweakDnBMatchingResponse(entityManager, requestData);
-            data.setIsicCd(isicOverride);
+            countryUtil.tweakDnBMatchingResponse(entityManager, data, field);
           }
         } catch (Exception e) {
           LOG.debug("An error occured while extracting Automation Results");
