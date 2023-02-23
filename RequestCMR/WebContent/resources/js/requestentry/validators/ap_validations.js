@@ -11,6 +11,7 @@ var _inacCdHandlerIN = null;
 var _importIndIN = null;
 var _vatRegisterHandlerSG = null;
 var _clusterHandlerINDONESIA = 0;
+var _inacHandlerANZSG = 0;
 
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
@@ -32,6 +33,8 @@ function addHandlersForAP() {
   
   if (_clusterHandlerAP == null && FormManager.getActualValue('reqType') != 'U') {
     _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
+      // CREATCMR-7883-7884
+      _inacHandlerANZSG = _inacHandlerANZSG +1;
       setInacByCluster();
       setIsuOnIsic();
     });
@@ -141,6 +144,8 @@ function addAfterConfigAP() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
   _clusterHandlerINDONESIA = 0;
+  // CREATCMR-7883-7884
+  _inacHandlerANZSG = 0;
   if (reqType == 'U') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
@@ -275,6 +280,8 @@ function addAfterConfigAP() {
   if (reqType == 'C') {
     setIsuOnIsic();
     onInacTypeChange();
+    // CREATCMR-7883-7884
+    _inacHandlerANZSG = 0;
     setInacByCluster();
   }
   // CREATCMR-5258
@@ -450,25 +457,35 @@ function setInacByCluster() {
       setInacCdTypeStatus();
       
       // CREATCMR-7884: clear INAC after cluster change
-      if(cntry == '796' && _clusterNZWithAllInac.includes(_cluster)){
-        FormManager.setValue('inacCd','');
-        FormManager.setValue('inacType', '');
-      }
+// if(cntry == '796' && _clusterNZWithAllInac.includes(_cluster)){
+// FormManager.setValue('inacCd','');
+// FormManager.setValue('inacType', '');
+// }
       
       // CREATCMR-7883
-      if(cntry == '616' && _custSubGrpAUWithEmptyInac.includes(custSubGrp)){
-      	FormManager.setValue('inacCd','');
-      	FormManager.setValue('inacType', '');
-      	FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
-      	FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
-      	FormManager.enable('inacType'); 
-      	FormManager.enable('inacCd'); 
-      }
+// if(cntry == '616' && _custSubGrpAUWithEmptyInac.includes(custSubGrp)){
+// FormManager.setValue('inacCd','');
+// FormManager.setValue('inacType', '');
+// FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
+// FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
+// FormManager.enable('inacType');
+// FormManager.enable('inacCd');
+// }
       // clear INAC after cluster change
-      if(cntry == '616' && _clusterAUWithAllInac.includes(_cluster)){
+     // CREATCMR-7883-7884
+     if((cntry == '616' && _custSubGrpAUWithEmptyInac.includes(custSubGrp)) || (cntry == '796' && _custSubGrpNZWithEmptyInac.includes(custSubGrp))){
+       FormManager.setValue('inacCd','');
+       FormManager.setValue('inacType', '');
+       FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
+       FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
+       FormManager.enable('inacType');
+       FormManager.enable('inacCd');
+     }
+      if((cntry == '616' || cntry == '796') && _inacHandlerANZSG >2 ){
       	FormManager.setValue('inacCd','');
       	FormManager.setValue('inacType', '');
       }
+      // CREATCMR-7883-7884
       clearInacOnClusterChange(_cluster);
       return;
     }
@@ -6596,6 +6613,20 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
       }
     }
     
+    // CREATCMR-7883-7884
+    var _custSubGrpAUWithEmptyInac = ['INTER', 'XPRIV', 'PRIV', 'DUMMY'];
+    var _custSubGrpNZWithEmptyInac = ['INTER', 'XPRIV', 'PRIV', 'DUMMY'];
+    var _custSubGrpSGWithEmptyInac = ['INTER', 'XPRIV', 'PRIV', 'DUMMY', 'BUSPR'];
+    if(scenarioChanged && ((cntry == '834' && _custSubGrpSGWithEmptyInac.includes(scenario)) || (cntry == '616' && _custSubGrpAUWithEmptyInac.includes(scenario)) || (cntry == '796' && _custSubGrpNZWithEmptyInac.includes(scenario)))) {
+      FormManager.setValue('inacCd','');
+      FormManager.setValue('inacType', '');
+      FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
+      FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
+      FormManager.readOnly('inacType');
+      FormManager.readOnly('inacCd');
+    }
+    // CREATCMR-7883-7884
+    
     if(scenarioChanged && clearClusterFieldsScenarios.includes(scenario)) {
       FormManager.setValue('apCustClusterId','');
       FormManager.setValue('clientTier', '');
@@ -6808,8 +6839,10 @@ function setInacCdTypeStatus(){
     if(clusterSGEmptyInac){
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
       FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.setValue('inacCd','');
-      FormManager.setValue('inacType', '');
+      if(_inacHandlerANZSG >2){
+        FormManager.setValue('inacCd','');
+        FormManager.setValue('inacType', '');
+      }
       // LOCK GB Seg(QTC)/ISU
       FormManager.readOnly('clientTier');
       FormManager.readOnly('isuCd');
@@ -6855,8 +6888,10 @@ function setInacCdTypeStatus(){
       console.log('remove REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
       FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.setValue('inacCd','');
-      FormManager.setValue('inacType', '');
+      if(_inacHandlerANZSG >2){
+        FormManager.setValue('inacCd','');
+        FormManager.setValue('inacType', '');
+      }
     }
     
     if(isInacRequired){
