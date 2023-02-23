@@ -66,7 +66,6 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_IBMEM_LU = "LUIBM";
   private static final String QUERY_BG_SBO_BENELUX = "AUTO.COV.GET_SBO_FROM_BG_FR";
 
-
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO, CmrConstants.RDC_PAYGO_BILLING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone #");
