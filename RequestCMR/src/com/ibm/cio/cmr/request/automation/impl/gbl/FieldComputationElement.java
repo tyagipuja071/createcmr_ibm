@@ -44,9 +44,7 @@ public class FieldComputationElement extends OverridingElement {
       return results;
     }
     if (countryUtil != null) {
-      log.debug("actionsOnError is emtpy ? -- before " + super.getActionOnError());
       result = countryUtil.doCountryFieldComputations(entityManager, results, details, overrides, requestData, engineData);
-      log.debug("actionsOnError is emtpy ? -- after " + super.getActionOnError());
     }
     if (result == null) {
       details
@@ -71,8 +69,6 @@ public class FieldComputationElement extends OverridingElement {
       log.debug("Error On Field Calculation");
       // engineData.addRejectionComment(result.getResults());
       results = result;
-      log.debug("actionsOnError is emtpy ? -- result.getResults() " + result.getResults());
-      log.debug("actionsOnError is emtpy ? -- result.getResults() " + super.getActionOnError());
 
       // CREATCMR-8430: don't set PRJ status for NZBN Check.
       Data data = requestData.getData();
@@ -81,7 +77,6 @@ public class FieldComputationElement extends OverridingElement {
         super.setStopOnError(false);
         super.setActionOnError(ActionOnError.fromCode(""));
       } else if (result.getResults() != null && "Requester check fail".equals(result.getResults())) {
-        log.debug("actionsOnError is emtpy ? -- setting to PRJ ? yes!");
         super.setStopOnError(true);
         super.setActionOnError(ActionOnError.fromCode("R"));
       }
