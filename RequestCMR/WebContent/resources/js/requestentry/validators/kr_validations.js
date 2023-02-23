@@ -23,11 +23,17 @@ function afterConfigKR() {
     FormManager.setValue('inacType','');
     FormManager.setValue('inacCd','');
     FormManager.enable('searchTerm');
+    FormManager.enable('isicCd');
+    FormManager.setValue('isicCd','');
     setSearchTermDropdownValues();
     LockDefaultISUClientTierMrcValues();
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
+    if (custSubGrp == 'INTER') {
+        FormManager.setValue('isuCd', '21');
+        FormManager.readOnly('isuCd');
+      }
   });
 
   var _clusterHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
@@ -539,6 +545,8 @@ function setSearchTermDropdownValues() { var custSubGrp = FormManager.getActualV
         FormManager.limitDropdownValues(searchTerm, [ '08016', '09065', '01545' ]);
         break;
       case "INTER":
+        FormManager.setValue('isuCd', '21');
+        FormManager.readOnly('isuCd');  
         FormManager.limitDropdownValues(searchTerm, [ '00003' ]);  
         FormManager.setValue('searchTerm', '00003');
         FormManager.readOnly('searchTerm');
@@ -546,11 +554,11 @@ function setSearchTermDropdownValues() { var custSubGrp = FormManager.getActualV
         FormManager.readOnly('clientTier');
         FormManager.setValue('mrcCd', '2');
         FormManager.readOnly('mrcCd');
-        FormManager.setValue('isuCd', '21');
-        FormManager.readOnly('isuCd');
         FormManager.setValue('isicCd', '8888');
         FormManager.readOnly('isicCd');
         FormManager.readOnly('cmrNoPrefix');
+        FormManager.readOnly('inacCd');
+        FormManager.readOnly('inacType');
         break;
       case "LKYN":  
         FormManager.limitDropdownValues(searchTerm, [ '09065' ]);
@@ -572,6 +580,9 @@ function setSearchTermDropdownValues() { var custSubGrp = FormManager.getActualV
 }
 
 function LockDefaultISUClientTierMrcValues() {
+  FormManager.setValue('clientTier','');
+  FormManager.setValue('isuCd','');
+  FormManager.setValue('mrcCd','');	
   var searchTerm = FormManager.getActualValue('searchTerm');
   var clientTier = FormManager.getField('clientTier');
   if (searchTerm == '00003') {
@@ -721,6 +732,7 @@ function getIsuFromIsic(){
 	  if (!(searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223')) {
 		    return;
       }
+	  FormManager.setValue('isuCd','');
 	  var ISU = [];
 	  if (isicCd != '') {
 	    var qParams = {
