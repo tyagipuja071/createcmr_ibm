@@ -93,15 +93,14 @@ function setSearchTermList(){
   } else if (custSubType == 'KYND') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '09058' ]);
     FormManager.setValue('searchTerm', '09058');
-  } else if (custSubType == 'EMBSA') {
-    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '09058','00260','04749','04629','04630','08036','10216','10217',
+  } else   if (custSubType == 'EMBSA') {
+    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '09058','08036','10216','10217',
       '10218','10219','10220','10221','10222','10223','10224','10225','10226','10227','10228','10229','10230','10231','10232','10233',
       '10234','10235','10236','10237','10238','10239','10240','10241','10242','10243','10244','10245','10246','10247','10248','10249',
       '10250','10251','10252','10253','10254','10255','10256','10257','10258','10259','10260','10545','10546','10547','10548','10549',
       '10550','10551','10552','10553','10554','10555','10556','10557','10558','10559','10560','10561','10562','10563','10564','10565',
       '10566','10567','10568','10569','10570','10571','10572','10573','10574','10575','10576','10577','10578','10579','10580','10581',
-      '10582','10583','10584','10585','10586','10587','10588','10589','10158','10159','10160','10161','10162','10163','10164','10165',
-      '10166','10167','10168','10169','10170','10171'
+      '10582','10583','10584','10585','10586','10587','10588','10589'
  ]);
   } else if (custSubType == 'AQSTN') {
     FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '00000','10216','10217','10218','10219','10220','10221','10222',
@@ -146,11 +145,21 @@ function setSearchTermList(){
 
 function setSearchTermByGBGId() {
   var _GBGId = FormManager.getActualValue('gbgId');
+  var gbgFlag = false;
   if (FormManager.getActualValue('gbgId') != undefined && FormManager.getActualValue('gbgId') != '') {
   var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
     ID : _GBGId
   });
   if (ret && ret.ret1 && ret.ret1 != 0) {
+    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '09058','00260','04749','04629','04630','08036','10216','10217',
+      '10218','10219','10220','10221','10222','10223','10224','10225','10226','10227','10228','10229','10230','10231','10232','10233',
+      '10234','10235','10236','10237','10238','10239','10240','10241','10242','10243','10244','10245','10246','10247','10248','10249',
+      '10250','10251','10252','10253','10254','10255','10256','10257','10258','10259','10260','10545','10546','10547','10548','10549',
+      '10550','10551','10552','10553','10554','10555','10556','10557','10558','10559','10560','10561','10562','10563','10564','10565',
+      '10566','10567','10568','10569','10570','10571','10572','10573','10574','10575','10576','10577','10578','10579','10580','10581',
+      '10582','10583','10584','10585','10586','10587','10588','10589','10158','10159','10160','10161','10162','10163','10164','10165',
+      '10166','10167','10168','10169','10170','10171'
+    ]);
     if(_GBGId == 'GB000YEN'){
       FormManager.setValue('searchTerm', '00260');
     }else if(_GBGId == 'GB001A7X'){
@@ -194,20 +203,6 @@ function setSearchTermByGBGId() {
           var record = cmr.query('GETZS01STATEBYREQID', qParams);
           var zs01State = record.ret1;
           if (zs01State != '') {
-//            if(zs01State == '52'||zs01State == '53'||zs01State == '44'||zs01State == '51'||zs01State == '50'||zs01State == '45'||zs01State == '46'){
-//              FormManager.setValue('searchTerm', '04749');
-//              FormManager.setValue('bgId', 'DB002KDH');
-//            }else if(zs01State == '15'||zs01State == '61'||zs01State == '13'||zs01State == '21'||zs01State == '64'||zs01State == '11'||zs01State == '62'||
-//                zs01State == '63'||zs01State == '41'||zs01State == '12'||zs01State == '23'||zs01State == '65'||zs01State == '22'||zs01State == '54'||zs01State == '14'){
-//              FormManager.setValue('searchTerm', '04749');
-//              FormManager.setValue('bgId', 'DB002CBD');
-//            }else if(zs01State == '32'||zs01State == '36'||zs01State == '34'){
-//              FormManager.setValue('searchTerm', '04749');
-//              FormManager.setValue('bgId', 'DB002C9T');
-//            }else if(zs01State == '33'||zs01State == '42'||zs01State == '43'||zs01State == '31'||zs01State == '35'||zs01State == '37'){
-//              FormManager.setValue('searchTerm', '04749');
-//              FormManager.setValue('bgId', 'DB002CF1');
-//            }
             if(zs01State == 'GZ'||zs01State == 'YN'||zs01State == 'GD'||zs01State == 'SC'||zs01State == 'CQ'||zs01State == 'GX'||zs01State == 'HI'){
               FormManager.setValue('searchTerm', '04749');
               FormManager.setValue('bgId', 'DB002KDH');
@@ -233,6 +228,8 @@ function setSearchTermByGBGId() {
     if(FormManager.getActualValue('searchTerm') != undefined && FormManager.getActualValue('searchTerm') != ''){
       FormManager.readOnly('searchTerm');
     }    
+  }else{
+    gbgFlag = true;
   }
   var mandt = FormManager.getActualValue('mandt');
   var ret = cmr.query('CHECK_CN_INAC_BY_GBG_ID', {
@@ -256,6 +253,49 @@ function setSearchTermByGBGId() {
   }
 
   }
+  
+  var glcCode = FormManager.getActualValue('geoLocationCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if(custSubGrp=='EMBSA' && glcCode != undefined && glcCode != '' && (gbgFlag || FormManager.getActualValue('gbgId') == undefined || FormManager.getActualValue('gbgId') == '')){
+    var oldSearchTerm = FormManager.getActualValue('searchTerm');
+    var indc = 'C';
+    var result1 = cmr.query('GLC.CN.SEARCHTERM', {
+      GLC_CD : '%' + glcCode + '%',
+      DEFAULT_INDC : indc
+    });
+    indc = 'E';
+    var result2 = cmr.query('GLC.CN.SEARCHTERM', {
+      GLC_CD : '%' + glcCode + '%',
+      DEFAULT_INDC : indc
+    });
+    if (result1 != null && result1.ret1 != undefined && result1.ret1 != '' || result2 != null && result2.ret1 != undefined && result2.ret1 != '') {
+      var searchTerm1 = result1 != null ? result1.ret1 : '';
+      var searchTerm2 = result2 != null ? result2.ret1 : '';
+      var clientTier1 = result1.ret2;
+      var clientTier2 = result2.ret2;
+      var isuCd1 = result1.ret3;
+      var isuCd2 = result2.ret3;
+      FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm1, searchTerm2 ]);
+      if(oldSearchTerm == searchTerm2){
+        FormManager.setValue('searchTerm', searchTerm2);
+        FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier2 ]);
+        FormManager.setValue('clientTier', clientTier2);
+        FormManager.readOnly('clientTier');
+        FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd2 ]);
+        FormManager.setValue('isuCd', isuCd2);
+        FormManager.readOnly('isuCd');
+      }else{
+        FormManager.setValue('searchTerm', searchTerm1);
+        FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier1 ]);
+        FormManager.setValue('clientTier', clientTier1);
+        FormManager.readOnly('clientTier');
+        FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd1 ]);
+        FormManager.setValue('isuCd', isuCd1);
+        FormManager.readOnly('isuCd');
+      }
+    }
+  }
+
 //  else{
 //    FormManager.setValue('inacCd', '');
 //    FormManager.readOnly('inacCd');
@@ -3646,7 +3686,11 @@ function sSDGBGIdValidator() {
                 if(id == 'GB000YEN' || id == 'GB001A7X' || id == 'GB001CQ3' || id == 'GB300S7F' || id == 'GB001CPY' || id == 'GB001CPW' || id == 'GB001DR4' || id == 'GB001B83'
                   || id == 'GB001CQ2' || id == 'GB001J73' || id == 'GB0018BN' || id == 'GB001A89' || id == 'GB001AUJ' || id == 'GB0018BS' || id == 'GB0018EZ' || id == 'GB227QFM'
                     || id == 'GB0019BN' || id == 'GB0018X2' ){
-                  return new ValidationResult(null, false, 'Please select Scenario Sub Type -"Normal - Signature / Strategic / Dedicated", as this CMR belongs to China Signature/Strategic/Dedicate account.');
+                  if(custSubType != 'EMBSA'){
+                    return new ValidationResult(null, false, 'Please select Scenario Sub Type -"Normal - Signature / Strategic / Dedicated", as this CMR belongs to China Signature/Strategic/Dedicate account.');
+                  }else{
+                    return new ValidationResult(null, true);
+                  }
                 }else {
                   return new ValidationResult(null, true);
                 }
@@ -3857,7 +3901,7 @@ function retrievedForCNValidator() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         console.log( "old GLC code is ", oldGlcCode);
         if (typeof (_pagemodel) != undefined) {
-          if(reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='ECOSY')) {
+          if(reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN' || custSubGrp=='ECOSY' || custSubGrp == 'EMBSA')) {
 
             console.log("Checking the GLC match... retrieve value again...")
             var data = CmrServices.getAll('reqentry');
@@ -3872,60 +3916,141 @@ function retrievedForCNValidator() {
                   return new ValidationResult(null, false, 'The following values cannot be retrieved at the moment.:GEO Location Code\nPlease contact your system administrator.');
                 } else {
                   var indc = 'C';
-                  if(custSubGrp=='ECOSY'){
-                    indc = 'E';
-                  }
-                  var result = cmr.query('GLC.CN.SEARCHTERM', {          
-                    GLC_CD : '%'+data.glcCode+'%',
-                    DEFAULT_INDC : indc
-                  });
-                  if(result != null && result.ret1 != undefined && result.ret1 != ''){
-                    var searchTerm = result.ret1;
-                    var clientTier = result.ret2;
-                    var isuCd = result.ret3;
-                    if(searchTerm != oldSearchTerm) {
-                      console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
-                      FormManager.setValue('geoLocationCd', data.glcCode);
-                      FormManager.setValue('geoLocDesc', data.glcDesc);
-                      FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm ]);
-                      FormManager.setValue('searchTerm', searchTerm);
-                      FormManager.readOnly('searchTerm');
-                      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
-                      FormManager.setValue('clientTier', clientTier);
-                      FormManager.readOnly('clientTier');
-                      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
-                      FormManager.setValue('isuCd', isuCd);
-                      FormManager.readOnly('isuCd');
-                      if(clientTier == '00000' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
-                        FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q' ]);
-                        FormManager.setValue('clientTier', 'Q');
-                        FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
-                        FormManager.setValue('isuCd', '34');
+                  if(custSubGrp == 'EMBSA'){
+                    var _GBGId = FormManager.getActualValue('gbgId');
+                    if (FormManager.getActualValue('gbgId') != undefined && FormManager.getActualValue('gbgId') != '') {
+                      var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
+                        ID : _GBGId
+                      });
+                      if (ret && ret.ret1 && ret.ret1 != 0) {
+                        indc = '';
                       }
-                      cmr.showAlert('The GEO Location Code has been overwritten to ' + data.glcCode +', \nSearch Term (SORTL) has been overwritten to '+searchTerm +', Client Tier has been overwritten to '+clientTier +', ISU Code has been overwritten to '+isuCd+'.', 'Create CMR');
-                    } else {
-                      if (data.glcCode != oldGlcCode) {
-                      console.log("The GLC code are different, the searchTerm are same, then overwrite the GLC code only.")
-                      FormManager.setValue('geoLocationCd', data.glcCode);
-                      FormManager.setValue('geoLocDesc', data.glcDesc);
-                      }
-                      return new ValidationResult(null, true);
                     }
-                   } else {
-                     if(custSubGrp=='ECOSY' && data.glcCode != undefined && data.glcCode != ''){
-                       FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
-                       FormManager.setValue('searchTerm', '08036');
-                       FormManager.readOnly('searchTerm');
-                       FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
-                       FormManager.setValue('clientTier', 'Y');
-                       FormManager.readOnly('clientTier');
-                       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
-                       FormManager.setValue('isuCd', '36');
-                       FormManager.readOnly('isuCd');
-                     }
-                       console.log("The GLC code call the searchTerm fail , please check db.")
-                       return new ValidationResult(null, true);
-                   } 
+                    if(indc == 'C'){
+                      var result1 = cmr.query('GLC.CN.SEARCHTERM', {          
+                        GLC_CD : '%'+data.glcCode+'%',
+                        DEFAULT_INDC : indc
+                      });
+                      indc = 'E';
+                      var result2 = cmr.query('GLC.CN.SEARCHTERM', {          
+                        GLC_CD : '%'+data.glcCode+'%',
+                        DEFAULT_INDC : indc
+                      });
+                      if (result1 != null && result1.ret1 != undefined && result1.ret1 != '' || result2 != null && result2.ret1 != undefined && result2.ret1 != '') {
+                        var searchTerm1 = result1 != null ? result1.ret1 : '';
+                        var searchTerm2 = result2 != null ? result2.ret1 : '';
+                        var clientTier1 = result1.ret2;
+                        var clientTier2 = result2.ret2;
+                        var isuCd1 = result1.ret3;
+                        var isuCd2 = result2.ret3;
+                        if(searchTerm1 != oldSearchTerm&&searchTerm2 != oldSearchTerm) {
+                          console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
+                          FormManager.setValue('geoLocationCd', data.glcCode);
+                          FormManager.setValue('geoLocDesc', data.glcDesc);
+                          FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm1 ,searchTerm2]);
+                          FormManager.setValue('searchTerm', searchTerm1);
+                          FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier1 ]);
+                          FormManager.setValue('clientTier', clientTier1);
+                          FormManager.readOnly('clientTier');
+                          FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd1 ]);
+                          FormManager.setValue('isuCd', isuCd1);
+                          FormManager.readOnly('isuCd');
+                          cmr.showAlert('The GEO Location Code has been overwritten to ' + data.glcCode +', \nSearch Term (SORTL) has been overwritten to '+searchTerm1 +', Client Tier has been overwritten to '+clientTier +', ISU Code has been overwritten to '+isuCd+'.', 'Create CMR');
+                        } else if(searchTerm1 == oldSearchTerm){
+                          console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
+                          FormManager.setValue('geoLocationCd', data.glcCode);
+                          FormManager.setValue('geoLocDesc', data.glcDesc);
+                          FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm1 ,searchTerm2]);
+                          FormManager.setValue('searchTerm', searchTerm1);
+                          FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier1 ]);
+                          FormManager.setValue('clientTier', clientTier1);
+                          FormManager.readOnly('clientTier');
+                          FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd1 ]);
+                          FormManager.setValue('isuCd', isuCd1);
+                          FormManager.readOnly('isuCd');
+                          return new ValidationResult(null, true);
+                        }else if(searchTerm2 == oldSearchTerm){
+                          console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
+                          FormManager.setValue('geoLocationCd', data.glcCode);
+                          FormManager.setValue('geoLocDesc', data.glcDesc);
+                          FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm1 ,searchTerm2]);
+                          FormManager.setValue('searchTerm', searchTerm1);
+                          FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier2 ]);
+                          FormManager.setValue('clientTier', clientTier2);
+                          FormManager.readOnly('clientTier');
+                          FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd2 ]);
+                          FormManager.setValue('isuCd', isuCd2);
+                          FormManager.readOnly('isuCd');
+                          return new ValidationResult(null, true);
+                        }else {
+                          if (data.glcCode != oldGlcCode) {
+                          console.log("The GLC code are different, the searchTerm are same, then overwrite the GLC code only.")
+                          FormManager.setValue('geoLocationCd', data.glcCode);
+                          FormManager.setValue('geoLocDesc', data.glcDesc);
+                          }
+                          return new ValidationResult(null, true);
+                        }
+                       } else {
+                           console.log("The GLC code call the searchTerm fail , please check db.")
+                           return new ValidationResult(null, true);
+                       } 
+                    }
+                  }else{
+                    if(custSubGrp=='ECOSY'){
+                      indc = 'E';
+                    }
+                    var result = cmr.query('GLC.CN.SEARCHTERM', {          
+                      GLC_CD : '%'+data.glcCode+'%',
+                      DEFAULT_INDC : indc
+                    });
+                    if(result != null && result.ret1 != undefined && result.ret1 != ''){
+                      var searchTerm = result.ret1;
+                      var clientTier = result.ret2;
+                      var isuCd = result.ret3;
+                      if(searchTerm != oldSearchTerm) {
+                        console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
+                        FormManager.setValue('geoLocationCd', data.glcCode);
+                        FormManager.setValue('geoLocDesc', data.glcDesc);
+                        FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm ]);
+                        FormManager.setValue('searchTerm', searchTerm);
+                        FormManager.readOnly('searchTerm');
+                        FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
+                        FormManager.setValue('clientTier', clientTier);
+                        FormManager.readOnly('clientTier');
+                        FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
+                        FormManager.setValue('isuCd', isuCd);
+                        FormManager.readOnly('isuCd');
+                        if(clientTier == '00000' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
+                          FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q' ]);
+                          FormManager.setValue('clientTier', 'Q');
+                          FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
+                          FormManager.setValue('isuCd', '34');
+                        }
+                        cmr.showAlert('The GEO Location Code has been overwritten to ' + data.glcCode +', \nSearch Term (SORTL) has been overwritten to '+searchTerm +', Client Tier has been overwritten to '+clientTier +', ISU Code has been overwritten to '+isuCd+'.', 'Create CMR');
+                      } else {
+                        if (data.glcCode != oldGlcCode) {
+                        console.log("The GLC code are different, the searchTerm are same, then overwrite the GLC code only.")
+                        FormManager.setValue('geoLocationCd', data.glcCode);
+                        FormManager.setValue('geoLocDesc', data.glcDesc);
+                        }
+                        return new ValidationResult(null, true);
+                      }
+                     } else {
+                       if(custSubGrp=='ECOSY' && data.glcCode != undefined && data.glcCode != ''){
+                         FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
+                         FormManager.setValue('searchTerm', '08036');
+                         FormManager.readOnly('searchTerm');
+                         FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
+                         FormManager.setValue('clientTier', 'Y');
+                         FormManager.readOnly('clientTier');
+                         FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
+                         FormManager.setValue('isuCd', '36');
+                         FormManager.readOnly('isuCd');
+                       }
+                         console.log("The GLC code call the searchTerm fail , please check db.")
+                         return new ValidationResult(null, true);
+                     } 
+                  }
                 }
               }
             }
@@ -4027,5 +4152,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
-  GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
+ // GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
 });
