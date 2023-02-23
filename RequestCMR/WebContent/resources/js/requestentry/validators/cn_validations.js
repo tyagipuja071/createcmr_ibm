@@ -3915,142 +3915,23 @@ function retrievedForCNValidator() {
                 if (data.glcError) {
                   return new ValidationResult(null, false, 'The following values cannot be retrieved at the moment.:GEO Location Code\nPlease contact your system administrator.');
                 } else {
-                  var indc = 'C';
+                  var indc = false;
                   if(custSubGrp == 'EMBSA'){
-                    var _GBGId = FormManager.getActualValue('gbgId');
-                    if (FormManager.getActualValue('gbgId') != undefined && FormManager.getActualValue('gbgId') != '') {
-                      var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
-                        ID : _GBGId
-                      });
-                      if (ret && ret.ret1 && ret.ret1 != 0) {
-                        indc = '';
-                      }
-                    }
-                    if(indc == 'C'){
-                      var result1 = cmr.query('GLC.CN.SEARCHTERM', {          
-                        GLC_CD : '%'+data.glcCode+'%',
-                        DEFAULT_INDC : indc
-                      });
-                      indc = 'E';
-                      var result2 = cmr.query('GLC.CN.SEARCHTERM', {          
-                        GLC_CD : '%'+data.glcCode+'%',
-                        DEFAULT_INDC : indc
-                      });
-                      if (result1 != null && result1.ret1 != undefined && result1.ret1 != '' || result2 != null && result2.ret1 != undefined && result2.ret1 != '') {
-                        var searchTerm1 = result1 != null ? result1.ret1 : '';
-                        var searchTerm2 = result2 != null ? result2.ret1 : '';
-                        var clientTier1 = result1.ret2;
-                        var clientTier2 = result2.ret2;
-                        var isuCd1 = result1.ret3;
-                        var isuCd2 = result2.ret3;
-                        if(searchTerm1 != oldSearchTerm&&searchTerm2 != oldSearchTerm) {
-                          console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
-                          FormManager.setValue('geoLocationCd', data.glcCode);
-                          FormManager.setValue('geoLocDesc', data.glcDesc);
-                          FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm1 ,searchTerm2]);
-                          FormManager.setValue('searchTerm', searchTerm1);
-                          FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier1 ]);
-                          FormManager.setValue('clientTier', clientTier1);
-                          FormManager.readOnly('clientTier');
-                          FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd1 ]);
-                          FormManager.setValue('isuCd', isuCd1);
-                          FormManager.readOnly('isuCd');
-                          cmr.showAlert('The GEO Location Code has been overwritten to ' + data.glcCode +', \nSearch Term (SORTL) has been overwritten to '+searchTerm1 +', Client Tier has been overwritten to '+clientTier +', ISU Code has been overwritten to '+isuCd+'.', 'Create CMR');
-                        } else if(searchTerm1 == oldSearchTerm){
-                          console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
-                          FormManager.setValue('geoLocationCd', data.glcCode);
-                          FormManager.setValue('geoLocDesc', data.glcDesc);
-                          FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm1 ,searchTerm2]);
-                          FormManager.setValue('searchTerm', searchTerm1);
-                          FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier1 ]);
-                          FormManager.setValue('clientTier', clientTier1);
-                          FormManager.readOnly('clientTier');
-                          FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd1 ]);
-                          FormManager.setValue('isuCd', isuCd1);
-                          FormManager.readOnly('isuCd');
-                          return new ValidationResult(null, true);
-                        }else if(searchTerm2 == oldSearchTerm){
-                          console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
-                          FormManager.setValue('geoLocationCd', data.glcCode);
-                          FormManager.setValue('geoLocDesc', data.glcDesc);
-                          FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm1 ,searchTerm2]);
-                          FormManager.setValue('searchTerm', searchTerm1);
-                          FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier2 ]);
-                          FormManager.setValue('clientTier', clientTier2);
-                          FormManager.readOnly('clientTier');
-                          FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd2 ]);
-                          FormManager.setValue('isuCd', isuCd2);
-                          FormManager.readOnly('isuCd');
-                          return new ValidationResult(null, true);
-                        }else {
-                          if (data.glcCode != oldGlcCode) {
-                          console.log("The GLC code are different, the searchTerm are same, then overwrite the GLC code only.")
-                          FormManager.setValue('geoLocationCd', data.glcCode);
-                          FormManager.setValue('geoLocDesc', data.glcDesc);
-                          }
-                          return new ValidationResult(null, true);
-                        }
-                       } else {
-                           console.log("The GLC code call the searchTerm fail , please check db.")
-                           return new ValidationResult(null, true);
-                       } 
-                    }
-                  }else{
-                    if(custSubGrp=='ECOSY'){
-                      indc = 'E';
-                    }
-                    var result = cmr.query('GLC.CN.SEARCHTERM', {          
-                      GLC_CD : '%'+data.glcCode+'%',
-                      DEFAULT_INDC : indc
-                    });
-                    if(result != null && result.ret1 != undefined && result.ret1 != ''){
-                      var searchTerm = result.ret1;
-                      var clientTier = result.ret2;
-                      var isuCd = result.ret3;
-                      if(searchTerm != oldSearchTerm) {
-                        console.log("The searchTerm are different, then overwrite the GLC code and searchTerm.")
-                        FormManager.setValue('geoLocationCd', data.glcCode);
-                        FormManager.setValue('geoLocDesc', data.glcDesc);
-                        FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm ]);
-                        FormManager.setValue('searchTerm', searchTerm);
-                        FormManager.readOnly('searchTerm');
-                        FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
-                        FormManager.setValue('clientTier', clientTier);
-                        FormManager.readOnly('clientTier');
-                        FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
-                        FormManager.setValue('isuCd', isuCd);
-                        FormManager.readOnly('isuCd');
-                        if(clientTier == '00000' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
-                          FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Q' ]);
-                          FormManager.setValue('clientTier', 'Q');
-                          FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '34' ]);
-                          FormManager.setValue('isuCd', '34');
-                        }
-                        cmr.showAlert('The GEO Location Code has been overwritten to ' + data.glcCode +', \nSearch Term (SORTL) has been overwritten to '+searchTerm +', Client Tier has been overwritten to '+clientTier +', ISU Code has been overwritten to '+isuCd+'.', 'Create CMR');
-                      } else {
-                        if (data.glcCode != oldGlcCode) {
-                        console.log("The GLC code are different, the searchTerm are same, then overwrite the GLC code only.")
-                        FormManager.setValue('geoLocationCd', data.glcCode);
-                        FormManager.setValue('geoLocDesc', data.glcDesc);
-                        }
-                        return new ValidationResult(null, true);
-                      }
-                     } else {
-                       if(custSubGrp=='ECOSY' && data.glcCode != undefined && data.glcCode != ''){
-                         FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
-                         FormManager.setValue('searchTerm', '08036');
-                         FormManager.readOnly('searchTerm');
-                         FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
-                         FormManager.setValue('clientTier', 'Y');
-                         FormManager.readOnly('clientTier');
-                         FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
-                         FormManager.setValue('isuCd', '36');
-                         FormManager.readOnly('isuCd');
+                     var _GBGId = FormManager.getActualValue('gbgId');
+                     if (FormManager.getActualValue('gbgId') != undefined && FormManager.getActualValue('gbgId') != '') {
+                       var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
+                         ID : _GBGId
+                       });
+                       if (ret && ret.ret1 && ret.ret1 != 0) {
+                         indc = true;
                        }
-                         console.log("The GLC code call the searchTerm fail , please check db.")
-                         return new ValidationResult(null, true);
-                     } 
+                     }
                   }
+                  if(oldGlcCode != undefined && oldGlcCode != '' && data.glcCode != undefined && data.glcCode != '' && data.glcCode != oldGlcCode && (custSubGrp != 'EMBSA' || !indc)){
+                    return new ValidationResult(null, false, 'The GEO Location Code has been changed to ' + data.glcCode +', \nPlease click Retrieve Values button.');
+                  }else{
+                    return new ValidationResult(null, true);
+                  }              
                 }
               }
             }
@@ -4152,5 +4033,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
- // GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
+  GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
 });
