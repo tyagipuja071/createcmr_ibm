@@ -824,6 +824,9 @@ public class ItalyHandler extends BaseSOFHandler {
     CmrtCust cust = null;
     String processingType = PageManager.getProcessingType(SystemLocation.ITALY, "U");
     boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+    String landedCountry = mainRecord.getCmrCountryLanded();
+    boolean crossBorder = isCrossBorderIT(landedCountry);
+
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       isLD = true;
       if (!prospectCmrChosen) {
@@ -831,19 +834,9 @@ public class ItalyHandler extends BaseSOFHandler {
         cust = this.legacyObjects.getCustomer();
       }
 
-      if (cExt != null) {
-        identClient = cExt.getItIdentClient();
-        fiscalCode = cExt.getiTaxCode();
-        vat = cExt.getiTaxCode();
-        taxCode = cExt.getItIVA();
-        tipoClinte = cExt.getTipoCliente();
-        coddes = cExt.getCoddes();
-        pec = cExt.getPec();
-        indiemail = cExt.getIndEmail();
-        collectionCd = cExt.getItCodeSSV();
-      }
       if (cust != null) {
-        // vat = cust.getVat();
+        // uncommented assignment of vat as of CREATCMR - 8185
+        vat = cust.getVat();
         abbrevNm = cust.getAbbrevNm();
         abbrevLoc = cust.getAbbrevLocn();
         sbo = cust.getSbo();
@@ -853,6 +846,21 @@ public class ItalyHandler extends BaseSOFHandler {
         inac = cust.getInacCd();
         salesRep = cust.getSalesRepNo();
         customerType = cust.getCustType();
+      }
+
+      if (cExt != null) {
+        identClient = cExt.getItIdentClient();
+        fiscalCode = cExt.getiTaxCode();
+        // CREATCMR-8185
+        if (crossBorder) {
+          vat = cExt.getiTaxCode();
+        }
+        taxCode = cExt.getItIVA();
+        tipoClinte = cExt.getTipoCliente();
+        coddes = cExt.getCoddes();
+        pec = cExt.getPec();
+        indiemail = cExt.getIndEmail();
+        collectionCd = cExt.getItCodeSSV();
       }
     }
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
@@ -1006,6 +1014,10 @@ public class ItalyHandler extends BaseSOFHandler {
     } else {
       data.setMrcCd("2");
     }
+  }
+
+  private boolean isCrossBorderIT(String billLandCntry) {
+    return !"IT".equals(billLandCntry);
   }
 
   @Override
