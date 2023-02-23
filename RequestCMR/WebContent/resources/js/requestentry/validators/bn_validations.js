@@ -3538,7 +3538,6 @@ function setISBUandMRCScenarioLogic() {
 	  }  
 	  
 	}
-
 function setIsuByClusterCTC() {
   console.log('>>>> setIsuByClusterCTC >>>>');
   var reqType = FormManager.getActualValue('reqType');
