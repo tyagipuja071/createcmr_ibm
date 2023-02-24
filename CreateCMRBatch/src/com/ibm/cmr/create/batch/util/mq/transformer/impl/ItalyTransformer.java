@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang3.StringUtils;
@@ -705,7 +704,7 @@ public class ItalyTransformer extends EMEATransformer {
         try {
           SAXParserFactory factory = SAXParserFactory.newInstance();
           factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
           factory.newSAXParser().parse(new InputSource(bis), dupHandler);
         } finally {
           bis.close();
@@ -1064,8 +1063,8 @@ public class ItalyTransformer extends EMEATransformer {
       updateFiscalDataForDoubleUpdates(entityManager, data, cmrObjects, crossBorder);
     }
 
-    List<String> isuCdList = Arrays.asList("5K", "14", "19", "3T", "4A");
-    if (!StringUtils.isEmpty(data.getIsuCd()) && isuCdList.contains(data.getIsuCd())) {
+    List<String> isuCdList = Arrays.asList("34", "36", "32");
+    if (!StringUtils.isEmpty(data.getIsuCd()) && !isuCdList.contains(data.getIsuCd())) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
     } else {
       String isuCtc;
@@ -1585,7 +1584,7 @@ public class ItalyTransformer extends EMEATransformer {
         cust.setIsuCd(muData.getIsuCd() + "7");
       } else {
         String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+            + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
         if (isuClientTier != null && isuClientTier.endsWith("@")) {
           cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
         } else if (isuClientTier != null && isuClientTier.length() == 3) {
