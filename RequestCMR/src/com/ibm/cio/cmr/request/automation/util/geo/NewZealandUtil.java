@@ -199,16 +199,15 @@ public class NewZealandUtil extends AutomationUtil {
           }
         } else if (!matchesAddAPI) {
           details.append("The address doesn't match NZBN API");
+          // company proof
+          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+            details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+          } else {
+            details.append("\nNo supporting documentation is provided by the requester for customer name " + " :" + customerName
+                + " update. Please provide Supporting documentation(Company Proof) as attachment.");
+          }
+          engineData.addNegativeCheckStatus("NZName", "The Customer Name doesn't match from NZBN API");
         }
-
-        // company proof
-        if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-          details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
-        } else {
-          details.append("\nNo supporting documentation is provided by the requester for customer name " + " :" + customerName
-              + " update. Please provide Supporting documentation(Company Proof) as attachment.");
-        }
-        engineData.addNegativeCheckStatus("NZName", "The Customer Name doesn't match from NZBN API");
       }
     }
     results.setDetails(details.toString());
@@ -624,14 +623,13 @@ public class NewZealandUtil extends AutomationUtil {
               } else {
                 checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B"
                     + (CmrConstants.RDC_SOLD_TO.equals(addrType) ? "  & NZBN API records.\n" : " records.\n"));
-              }
-
-              // company proof
-              if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-                checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
-              } else {
-                checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType
-                    + " address. Please provide Supporting documentation(Company Proof) as attachment.");
+                 // company proof
+                if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                  checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
+                } else {
+                  checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType
+                      + " address. Please provide Supporting documentation(Company Proof) as attachment.");
+                }
               }
             }
           }
