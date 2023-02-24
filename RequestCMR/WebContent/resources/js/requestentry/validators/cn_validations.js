@@ -319,7 +319,7 @@ function afterConfigForCN() {
     }
   }
   var custSubT = FormManager.getActualValue('custSubGrp');
-  if (FormManager.getActualValue('reqType') == 'C') {
+  if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C') {
     setSearchTermList();
   }
   if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C' && (custSubT == 'CROSS' || custSubT == 'NRMLD' || custSubT == 'EMBSA')) {
