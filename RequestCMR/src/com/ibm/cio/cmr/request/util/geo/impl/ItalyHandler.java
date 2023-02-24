@@ -824,6 +824,15 @@ public class ItalyHandler extends BaseSOFHandler {
     CmrtCust cust = null;
     String processingType = PageManager.getProcessingType(SystemLocation.ITALY, "U");
     boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+    String billinglandCntry = "";
+    if (results != null && !results.getItems().isEmpty()) {
+      FindCMRRecordModel billingRecord = results.getItems().stream().filter(item -> "ZP01".equalsIgnoreCase(item.getCmrAddrTypeCode())).findAny()
+          .orElse(null);
+      billinglandCntry = billingRecord != null ? billingRecord.getCmrCountryLanded() : "";
+    }
+
+    boolean crossBorder = isCrossBorderIT(billinglandCntry);
+
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       isLD = true;
       if (!prospectCmrChosen) {
@@ -831,19 +840,9 @@ public class ItalyHandler extends BaseSOFHandler {
         cust = this.legacyObjects.getCustomer();
       }
 
-      if (cExt != null) {
-        identClient = cExt.getItIdentClient();
-        fiscalCode = cExt.getiTaxCode();
-        vat = cExt.getiTaxCode();
-        taxCode = cExt.getItIVA();
-        tipoClinte = cExt.getTipoCliente();
-        coddes = cExt.getCoddes();
-        pec = cExt.getPec();
-        indiemail = cExt.getIndEmail();
-        collectionCd = cExt.getItCodeSSV();
-      }
       if (cust != null) {
-        // vat = cust.getVat();
+        // uncommented assignment of vat as of CREATCMR - 8185
+        vat = cust.getVat();
         abbrevNm = cust.getAbbrevNm();
         abbrevLoc = cust.getAbbrevLocn();
         sbo = cust.getSbo();
@@ -853,6 +852,21 @@ public class ItalyHandler extends BaseSOFHandler {
         inac = cust.getInacCd();
         salesRep = cust.getSalesRepNo();
         customerType = cust.getCustType();
+      }
+
+      if (cExt != null) {
+        identClient = cExt.getItIdentClient();
+        fiscalCode = cExt.getiTaxCode();
+        // CREATCMR-8185
+        if (crossBorder) {
+          vat = cExt.getiTaxCode();
+        }
+        taxCode = cExt.getItIVA();
+        tipoClinte = cExt.getTipoCliente();
+        coddes = cExt.getCoddes();
+        pec = cExt.getPec();
+        indiemail = cExt.getIndEmail();
+        collectionCd = cExt.getItCodeSSV();
       }
     }
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
@@ -1006,6 +1020,10 @@ public class ItalyHandler extends BaseSOFHandler {
     } else {
       data.setMrcCd("2");
     }
+  }
+
+  private boolean isCrossBorderIT(String billLandCntry) {
+    return !"IT".equals(billLandCntry);
   }
 
   @Override
@@ -1826,20 +1844,38 @@ public class ItalyHandler extends BaseSOFHandler {
               "Company level fields and Billing level fields can not be filled at the same time");
         }
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
-          List<String> isuCdCtc = Arrays.asList("32T", "34Q", "36Y");
-          if (StringUtils.isBlank(isu)) {
-            LOG.trace("The row " + rowIndex + 1 + ":Note that ISU value needs to be filled..");
-            error.addError(rowIndex + 1, "Data Tab", ":Please fill both ISU and CTC value.<br>");
-          } else if (StringUtils.isNotBlank(isu) && Arrays.asList("32", "34", "36").contains(isu)) {
-            if (StringUtils.isBlank(clientTier) || !isuCdCtc.contains(isu.concat(clientTier))) {
-              LOG.trace("The row " + rowIndex + 1
-                  + ":Note that ISU and Client Tier combination should be '36Y' or '34Q' or '32T'. Please fix and upload the template again.");
-              error.addError(rowIndex, "Client Tier",
-                  ":Note that ISU and Client Tier combination should be '36Y' or '34Q' or '32T'. Please fix and upload the template again.<br>");
+          if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(clientTier)) || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isu))) {
+            LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+            error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+          } else if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
+            if (!"Q".contains(clientTier) || StringUtils.isBlank(clientTier)) {
+              LOG.trace("The row " + (row.getRowNum() + 1)
+                  + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "Client Tier",
+                  ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
             }
-          } else if ((StringUtils.isNotBlank(isu) && !Arrays.asList("32", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(clientTier)) {
+          } else if (!StringUtils.isBlank(isu) && "32".equals(isu)) {
+            if (!"T".contains(clientTier) || StringUtils.isBlank(clientTier)) {
+              LOG.trace("The row " + (row.getRowNum() + 1)
+                  + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "Client Tier",
+                  ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+            }
+          } else if (!StringUtils.isBlank(isu) && "36".equals(isu)) {
+            if (!"Y".contains(clientTier) || StringUtils.isBlank(clientTier)) {
+              LOG.trace("The row " + (row.getRowNum() + 1)
+                  + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "Client Tier",
+                  ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+            }
+          } else if ((!StringUtils.isBlank(isu) && !Arrays.asList("32", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(clientTier)) {
             LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-            error.addError(rowIndex, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu + ".<br>");
+            error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu + ".<br>");
+          } else if (!"@QYT".contains(clientTier)) {
+            LOG.trace(
+                "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.");
+            error.addError((row.getRowNum() + 1), "Client Tier",
+                ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.<br>");
           }
         }
 

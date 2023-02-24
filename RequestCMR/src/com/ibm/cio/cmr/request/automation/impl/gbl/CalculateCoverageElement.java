@@ -300,7 +300,9 @@ public class CalculateCoverageElement extends OverridingElement {
               }
             }
             calculatedCoverageContainer = container;
-
+          }
+          if (RequestUtils.EMEA_CNTRY_DACH.equals(data.getCmrIssuingCntry())) {
+            calculatedCoverageContainer = coverages.get(0);
           }
         }
       } else if (BG_NONE.equals(covFrom)) {

@@ -354,7 +354,7 @@ public class UKIUtil extends AutomationUtil {
             // CREATCMR-6586 checking duplicate for all addresses
             if (CmrConstants.RDC_BILL_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Addition of new Installing and Shipping(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              checkDetails.append("Addition of new Mailing and EPL (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else if (((zi01count == 0 && CmrConstants.RDC_INSTALL_AT.equals(addrType))
                 || (zd01count == 0 && CmrConstants.RDC_SHIP_TO.equals(addrType))) && null == changes.getAddressChange(addrType, "Customer Name")
                 && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
@@ -684,7 +684,7 @@ public class UKIUtil extends AutomationUtil {
         }
       } else if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
         if (isCoverageCalculated) {
-          fields = getSBOSalesRepForUK(entityManager, data.getIsuCd(), data.getClientTier(), null, requestData);
+          fields = getSBOSalesRepForIE(entityManager, data.getIsuCd(), data.getClientTier(), null, requestData);
         } else {
           fields = getSBOSalesRepForIE(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), requestData);
         }
@@ -698,8 +698,12 @@ public class UKIUtil extends AutomationUtil {
         }
         details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
         details.append("SBO : " + fields.getSbo()).append("\n");
+        details.append("ISU : " + fields.getIsu()).append("\n");
+        details.append("Client Tier : " + fields.getCtc()).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), fields.getSalesRep());
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), fields.getIsu());
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), fields.getCtc());
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())) {
@@ -726,6 +730,8 @@ public class UKIUtil extends AutomationUtil {
     // Retrieving SBO Sales Rep from existing CMRs
     String salesRep = "";
     String sbo = "";
+    String isu = "";
+    String ctc = "";
     UkiFieldsContainer container = new UkiFieldsContainer();
     String cmrIssuingCntry = requestData.getData().getCmrIssuingCntry();
     String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
@@ -746,6 +752,18 @@ public class UKIUtil extends AutomationUtil {
         container.setSalesRep(salesRep);
         container.setSbo(sbo);
         covCalculatedFromRdc = true;
+      }
+      if (!StringUtils.isBlank((String) result[0])) {
+        isu = (String) result[0];
+        container.setIsu(isu);
+        covCalculatedFromRdc = true;
+      }
+      if (!StringUtils.isBlank((String) result[1])) {
+        ctc = (String) result[1];
+        container.setCtc(ctc);
+        covCalculatedFromRdc = true;
+      }
+      if (covCalculatedFromRdc) {
         return container;
       }
     }
@@ -821,6 +839,8 @@ public class UKIUtil extends AutomationUtil {
     // Retrieving SBO Sales Rep from existing CMRs
     String salesRep = "";
     String sbo = "";
+    String isu = "";
+    String ctc = "";
     UkiFieldsContainer container = new UkiFieldsContainer();
     String cmrIssuingCntry = requestData.getData().getCmrIssuingCntry();
     String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
@@ -841,6 +861,18 @@ public class UKIUtil extends AutomationUtil {
         container.setSalesRep(salesRep);
         container.setSbo(sbo);
         covCalculatedFromRdc = true;
+      }
+      if (!StringUtils.isBlank((String) result[0])) {
+        isu = (String) result[0];
+        container.setIsu(isu);
+        covCalculatedFromRdc = true;
+      }
+      if (!StringUtils.isBlank((String) result[1])) {
+        ctc = (String) result[1];
+        container.setCtc(ctc);
+        covCalculatedFromRdc = true;
+      }
+      if (covCalculatedFromRdc) {
         return container;
       }
     }
@@ -898,6 +930,24 @@ public class UKIUtil extends AutomationUtil {
   private class UkiFieldsContainer {
     private String sbo;
     private String salesRep;
+    private String isu;
+    private String ctc;
+
+    public String getIsu() {
+      return isu;
+    }
+
+    public void setIsu(String isu) {
+      this.isu = isu;
+    }
+
+    public String getCtc() {
+      return ctc;
+    }
+
+    public void setCtc(String ctc) {
+      this.ctc = ctc;
+    }
 
     public String getSbo() {
       return sbo;

@@ -38,6 +38,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -77,6 +78,7 @@ public class FranceUtil extends AutomationUtil {
   private static final Logger LOG = Logger.getLogger(FranceUtil.class);
   private static List<FrSboMapping> sortlMappings = new ArrayList<FrSboMapping>();
   private static final String MATCHING = "matching";
+  private static final String QUERY_BG_SBO_FR = "AUTO.COV.GET_SBO_FROM_BG_FR";
   private static final String ISIC_CD = "IsicCd";
   private static final String POSTAL_CD_STARTS = "postalCdStarts";
   private static final String CITY = "city";
@@ -340,8 +342,14 @@ public class FranceUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     String coverageId = container.getFinalCoverage();
     Addr addr = requestData.getAddress("ZS01");
+    String bgId = data.getBgId();
+    String sbo = "";
     details.append("\n");
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
+      if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
+        sbo = computeSBOForCovFR(entityManager, QUERY_BG_SBO_FR, bgId, data.getCmrIssuingCntry(), false);
+      }
+
       FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
       String sboVal = "";
       if (overrides.getData().containsKey(sboKeyVal)) {
@@ -349,6 +357,10 @@ public class FranceUtil extends AutomationUtil {
         sboVal = sboVal.substring(0, 3);
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
         details.append("SORTL: " + sboVal + sboVal);
+      } else if (sbo != null && !sbo.isEmpty()) {
+        sbo = sbo.substring(0, 3);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo + sbo);
+        details.append("SORTL: " + sbo + sbo);
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else {
@@ -581,6 +593,29 @@ public class FranceUtil extends AutomationUtil {
       }
     }
     return true;
+  }
+
+  private String computeSBOForCovFR(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
+    String sortl = "";
+    String sql = ExternalizedQuery.getSql(queryBgFR);
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KEY", bgId);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", cmrIssuingCntry);
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    System.err.println("ISO: " + isoCntry);
+    query.setParameter("ISO_CNTRY", isoCntry);
+    query.setForReadOnly(true);
+
+    LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
+    List<Object[]> results = query.getResults(5);
+    if (results != null && !results.isEmpty()) {
+      for (Object[] result : results) {
+        // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
+        sortl = (String) result[0];
+      }
+    }
+    return sortl;
   }
 
   private HashMap<String, String> getSBOFromPostalCodeMapping(String countryUse, String isicCd, String postCd, String city, String isuCd,
