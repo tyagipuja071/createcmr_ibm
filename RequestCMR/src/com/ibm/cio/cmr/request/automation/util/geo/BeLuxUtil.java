@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -306,29 +307,29 @@ public class BeLuxUtil extends AutomationUtil {
     }
     return true;
   }
-    
-    private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
-      String sortl = "";
-      String sql = ExternalizedQuery.getSql(queryBgFR);
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("KEY", bgId);
-      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-      query.setParameter("COUNTRY", cmrIssuingCntry);
-      String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
-      System.err.println("ISO: " + isoCntry);
-      query.setParameter("ISO_CNTRY", isoCntry);
-      query.setForReadOnly(true);
 
-      LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
-      List<Object[]> results = query.getResults(5);
-      if (results != null && !results.isEmpty()) {
-        for (Object[] result : results) {
-          // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
-          sortl = (String) result[0];
-        }
+  private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
+    String sortl = "";
+    String sql = ExternalizedQuery.getSql(queryBgFR);
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KEY", bgId);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", cmrIssuingCntry);
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    System.err.println("ISO: " + isoCntry);
+    query.setParameter("ISO_CNTRY", isoCntry);
+    query.setForReadOnly(true);
+
+    LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
+    List<Object[]> results = query.getResults(5);
+    if (results != null && !results.isEmpty()) {
+      for (Object[] result : results) {
+        // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
+        sortl = (String) result[0];
       }
-      return sortl;
     }
+    return sortl;
+  }
 
   private String chkFrAffiliateCntry(AutomationEngineData engineData, RequestData reqData, EntityManager entityManager) {
     GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
