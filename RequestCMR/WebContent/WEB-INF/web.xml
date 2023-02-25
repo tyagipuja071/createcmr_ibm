@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app id="CREATE_CMR" version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+<web-app id="CREATE_CMR" version="3.0"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 	<display-name>Create CMR</display-name>
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
@@ -7,73 +9,82 @@
 
 	<!-- Spring MVC Configuration -->
 	<servlet>
-	    <servlet-name>Spring MVC Dispatcher Servlet</servlet-name>
-	    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-	    	<init-param>
-	        	<param-name>contextConfigLocation</param-name>
-	        	<param-value>/WEB-INF/applicationContext.xml</param-value>
-    		</init-param>
-    	<load-on-startup>1</load-on-startup> 
+		<servlet-name>Spring MVC Dispatcher Servlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/applicationContext.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
 	</servlet>
-	
+
 	<servlet-mapping>
-	    <servlet-name>Spring MVC Dispatcher Servlet</servlet-name>
-	    <url-pattern>/</url-pattern> 
+		<servlet-name>Spring MVC Dispatcher Servlet</servlet-name>
+		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
-  <filter>
-    <filter-name>SecurityFilter</filter-name>
-      <filter-class>com.ibm.cio.cmr.request.filter.SecurityFilter</filter-class>
-  </filter>
-  <filter-mapping>
-      <filter-name>SecurityFilter</filter-name>
-      <url-pattern>/*</url-pattern>
-  </filter-mapping> 
-	
+	<filter>
+		<filter-name>SecurityFilter</filter-name>
+		<filter-class>com.ibm.cio.cmr.request.filter.SecurityFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>SecurityFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>AppUserInjectFilter</filter-name>
+		<filter-class>com.ibm.cio.cmr.request.filter.AppUserInjectFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>AppUserInjectFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
 	<filter>
 		<filter-name>SessionInactivityFilter</filter-name>
-	  	<filter-class>com.ibm.cio.cmr.request.filter.SessionInactivityFilter</filter-class>
-	  	<init-param>
-	    	<param-name>pathSpec</param-name>
-	    	<param-value>exclude</param-value>
-	  	</init-param>
-	  	<init-param>
-	    	<param-name>pathList</param-name>
-	    	<param-value>tgme,login,nps,timeout,performLogin,logout,messages,error,dropdown,systemRefresh,TouchRequestCMR.process,getTestSearchResult.process,config,approval,external,update,monitor</param-value>
-	  	</init-param>
-	  	<init-param>
-	    	<param-name>sessionTimeoutPath</param-name>
-	    	<param-value>/timeout</param-value>
-	  	</init-param>
-	  	<init-param>
-	    	<param-name>timeoutLengthMinutes</param-name>
-	    	<param-value>30</param-value>
-	  	</init-param>
+		<filter-class>com.ibm.cio.cmr.request.filter.SessionInactivityFilter</filter-class>
+		<init-param>
+			<param-name>pathSpec</param-name>
+			<param-value>exclude</param-value>
+		</init-param>
+		<init-param>
+			<param-name>pathList</param-name>
+			<param-value>tgme,login,nps,timeout,performLogin,logout,messages,error,dropdown,systemRefresh,TouchRequestCMR.process,getTestSearchResult.process,config,approval,external,update,monitor</param-value>
+		</init-param>
+		<init-param>
+			<param-name>sessionTimeoutPath</param-name>
+			<param-value>/timeout</param-value>
+		</init-param>
+		<init-param>
+			<param-name>timeoutLengthMinutes</param-name>
+			<param-value>30</param-value>
+		</init-param>
 	</filter>
-	
+
 	<filter-mapping>
-	  	<filter-name>SessionInactivityFilter</filter-name>
-	  	<url-pattern>/*</url-pattern>
-        
-	</filter-mapping>	
-	
+		<filter-name>SessionInactivityFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+
+	</filter-mapping>
+
 	<!-- The character encoding type for the request can be set using the CharacterEncodingFilter. 
 		By setting this, when a form values are retrieved from the request the encoding 
 		type will be UTF-8. -->
 	<filter>
-	<filter-name>encoding-filter</filter-name>
-	<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
-	<init-param>
-		<param-name>encoding</param-name>
-		<param-value>UTF-8</param-value>
-	</init-param>
+		<filter-name>encoding-filter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
 	</filter>
-	
+
 	<filter-mapping>
 		<filter-name>encoding-filter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-	
+
 
 	<!-- Error Page Configurations -->
 	<error-page>
@@ -82,7 +93,7 @@
 	</error-page>
 	<error-page>
 		<error-code>404</error-code>
-    <location>/resources/jsp/templates/errorPage.jsp</location>
+		<location>/resources/jsp/templates/errorPage.jsp</location>
 	</error-page>
 	<error-page>
 		<error-code>400</error-code>
@@ -92,15 +103,15 @@
 		<error-code>500</error-code>
 		<location>/resources/jsp/templates/errorPage.jsp</location>
 	</error-page>
-	
+
 	<!-- Global timeout of session for App -->
 	<session-config>
 		<session-timeout>120</session-timeout>
-	</session-config>		
+	</session-config>
 	<jsp-config>
-      <taglib>
-        <taglib-uri>/tags/cmr</taglib-uri>
-        <taglib-location>/WEB-INF/tld/cmr-taglib.tld</taglib-location>
-      </taglib>
-    </jsp-config>
+		<taglib>
+			<taglib-uri>/tags/cmr</taglib-uri>
+			<taglib-location>/WEB-INF/tld/cmr-taglib.tld</taglib-location>
+		</taglib>
+	</jsp-config>
 </web-app>
