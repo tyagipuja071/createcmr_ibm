@@ -158,9 +158,6 @@ public class OAuthUtils {
     // verify signature
     boolean isValid = verifySignatureFor(ALGORITHM, publicKey, header.getBytes(), payload.getBytes(), tokenSignatureDecoded);
 
-    boolean isValid2 = verifySignatureFor(ALGORITHM, publicKey, java.util.Base64.getUrlDecoder().decode(header),
-        java.util.Base64.getUrlDecoder().decode(payload), tokenSignatureDecoded);
-
     if (!isValid) {
       throw new SignatureException("Invalid Signature!");
     }
