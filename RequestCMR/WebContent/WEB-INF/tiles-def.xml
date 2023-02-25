@@ -14,6 +14,11 @@
     <put-attribute name="breadcrumbs" value="/resources/jsp/templates/breadcrumbs.jsp" />
   </definition>
 
+  <definition name="loggedOut" extends="base">
+    <put-attribute name="title" value="CreateCMR | Logged out" />
+    <put-attribute name="body" value="/resources/jsp/logout/logout.jsp" />
+  </definition>
+  
   <definition name="login" extends="base">
     <put-attribute name="title" value="CreateCMR | Please Log in" />
     <put-attribute name="body" value="/resources/jsp/login/login.jsp" />

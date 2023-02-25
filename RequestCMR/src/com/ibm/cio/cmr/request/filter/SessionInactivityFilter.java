@@ -15,6 +15,7 @@
 package com.ibm.cio.cmr.request.filter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -37,6 +38,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
 
 /**
  * This filter can test to see if a session has expired, and if it has can
@@ -196,6 +198,10 @@ public class SessionInactivityFilter implements Filter {
 
         if (session.getAttribute(CmrConstants.SESSION_APPUSER_KEY) == null) {
           LOG.debug("No user session found");
+
+          // revoke token
+          OAuthUtils.revokeToken((String) session.getAttribute("accessToken"));
+
           session.invalidate();
           long reqId = extractRequestId((HttpServletRequest) request);
           if (reqId > 0) {
@@ -211,6 +217,10 @@ public class SessionInactivityFilter implements Filter {
 
         if (tooLongSinceLastUserTriggeredRequest(req)) {
           LOG.debug("User session has expired");
+
+          // revoke token
+          OAuthUtils.revokeToken((String) session.getAttribute("accessToken"));
+
           AppUser.remove(req);
           session.invalidate();
           long reqId = extractRequestId((HttpServletRequest) request);
@@ -227,6 +237,26 @@ public class SessionInactivityFilter implements Filter {
 
         if (!req.getRequestURI().contains("/sessioncheck")) {
           updateLastUserTriggeredRequestDate(req);
+        }
+
+        LocalDateTime tokenExpiringTime = (LocalDateTime) session.getAttribute("tokenExpiringTime");
+        if (tokenExpiringTime != null && LocalDateTime.now().isAfter(tokenExpiringTime)) {
+          LOG.debug("Access token expired!");
+          // revoke token
+          OAuthUtils.revokeToken((String) session.getAttribute("accessToken"));
+
+          AppUser.remove(req);
+          session.invalidate();
+          long reqId = extractRequestId((HttpServletRequest) request);
+          if (reqId > 0) {
+            req.setAttribute("r", reqId);
+          }
+          String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
+          if (!StringUtils.isBlank(findCmrParams)) {
+            req.setAttribute("c", findCmrParams);
+          }
+          req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
+          return;
         }
       } else {
         // LOG.debug("User has no session");

@@ -142,7 +142,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://localhost:9444/FindCMR</value>
+    <value>https://findcmr.c360-dev-cluster.us-south.containers.appdomain.cloud/FindCMR</value>
   </item>
   <item>
     <id>MAIL_SUBJECT</id>
@@ -473,5 +473,60 @@
     <required>true</required>
     <editType>text</editType>
     <value>TEST</value>
+  </item>
+  <item>
+    <id>ACTIVATE_SSO</id>
+    <order>99</order>
+    <name>SSO ISSUER URL</name>
+    <description>Issuer URL provided by SSO Self-Service Provisioner</description>
+    <type>boolean</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>true</value>
+  </item>
+  <item>
+    <id>SSO_ISSUER_URL</id>
+    <order>99</order>
+    <name>SSO ISSUER URL</name>
+    <description>Issuer URL provided by SSO Self-Service Provisioner</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>https://preprod.login.w3.ibm.com/oidc/endpoint/default</value>
+  </item>
+  <item>
+    <id>SSO_REDIRECT_URL</id>
+    <order>99</order>
+    <name>SSO Redirect URL</name>
+    <description>Redirect URL set up at SSO Self-Service Provisioner</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>https://localhost:9444/CreateCMR/oidcclient/redirect/createcmr</value>
+  </item>
+  <item>
+    <id>W3_CLIENT_ID</id>
+    <order>99</order>
+    <name>W3 CLIENT ID</name>
+    <description>Client ID provided by Authorization Server</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>ZjVjZDBiZDAtYzcyMS00</value>
+  </item>
+  <item>
+    <id>W3_CLIENT_SECRET</id>
+    <order>99</order>
+    <name>W3 SECRET ID</name>
+    <description>Client SECRET provided by Authorization Server</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>ZTI0ZmE4MDYtMzE2NC00</value>
   </item>
 </config>

@@ -50,6 +50,7 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
 import com.ibm.cmr.services.client.AuthorizationClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.auth.Authorization;
@@ -81,7 +82,8 @@ public class LoginController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(value = "/login")
+  @RequestMapping(
+      value = "/login")
   public ModelAndView showLoginPage(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
     long reqId = 0;
     try {
@@ -117,7 +119,9 @@ public class LoginController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(value = "/home", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/home",
+      method = RequestMethod.GET)
   public ModelAndView showHomePage(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
     ModelAndView mv = new ModelAndView("landingPage", "loginUser", new LogInUserModel());
     setPageKeys("HOME", "OVERVIEW", mv);
@@ -131,7 +135,8 @@ public class LoginController extends BaseController {
    *          model map object
    * @return {@link ModelAndView} "login"
    */
-  @RequestMapping(value = "/timeout")
+  @RequestMapping(
+      value = "/timeout")
   public ModelAndView showTimeoutPage(HttpServletRequest request, ModelMap model) {
     LogInUserModel newModel = new LogInUserModel();
     MessageUtil.setErrorMessage(model, MessageUtil.ERROR_TIMEOUT);
@@ -155,12 +160,25 @@ public class LoginController extends BaseController {
    * @param request
    * @return
    */
-  @RequestMapping(value = "/logout", method = RequestMethod.GET)
-  public ModelAndView performLogout(ModelMap model, HttpServletRequest request) {
+  @RequestMapping(
+      value = "/logout",
+      method = RequestMethod.GET)
+  public ModelAndView performLogout(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+
+    String activateFilter = SystemConfiguration.getValue("ACTIVATE_SSO");
+    if (activateFilter.equalsIgnoreCase("true")) {
+      // revoke token
+      String access_token = (String) request.getSession().getAttribute("accessToken");
+      OAuthUtils.revokeToken(access_token);
+      AppUser.remove(request);
+      request.getSession().invalidate();
+
+      ModelAndView mv = new ModelAndView("loggedOut", "loginUser", new LogInUserModel());
+      return mv;
+    }
 
     AppUser.remove(request);
     request.getSession().invalidate();
-
     ModelAndView mv = new ModelAndView("redirect:/login", "loginUser", new LogInUserModel());
     MessageUtil.setInfoMessage(mv, MessageUtil.INFO_LOGOUT);
     return mv;
@@ -175,7 +193,9 @@ public class LoginController extends BaseController {
    * @param response
    * @return
    */
-  @RequestMapping(value = "/performLogin", method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/performLogin",
+      method = RequestMethod.POST)
   public ModelAndView performLogin(@ModelAttribute("loginUser") LogInUserModel loginUser, HttpServletRequest request, HttpServletResponse response) {
 
     LOG.info("Logon Attempt (" + CmrConstants.DATE_TIME_FORMAT().format(SystemUtil.getCurrentTimestamp()) + ") by " + loginUser.getUsername());
@@ -490,12 +510,16 @@ public class LoginController extends BaseController {
 
   }
 
-  @RequestMapping(value = "/log", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/log",
+      method = RequestMethod.GET)
   public ModelAndView showLog(HttpServletRequest request) {
     return new ModelAndView("log", "login", new LogInUserModel());
   }
 
-  @RequestMapping(value = "/checkLoginStatus", method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/checkLoginStatus",
+      method = RequestMethod.POST)
   public ModelMap checkLoginStatus(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
     AppUser user = AppUser.getUser(request);
     ModelMap map = new ModelMap();
@@ -540,6 +564,45 @@ public class LoginController extends BaseController {
     query.setParameter("ID", intranetId.toLowerCase());
     query.setForReadOnly(true);
     return query.exists();
+  }
+
+  @RequestMapping(
+      method = RequestMethod.GET,
+      value = "/oidcclient/redirect/createcmr")
+  public ModelAndView handleOIDCRedirect(HttpServletRequest request, HttpServletResponse response) {
+
+    ModelAndView mv = null;
+    AppUser appUser = AppUser.getUser(request);
+    LogInUserModel loginUser = (LogInUserModel) request.getSession().getAttribute("loggedInUserModel");
+
+    if (appUser.isPreferencesSet()) {
+      if (loginUser.getR() > 0) {
+        mv = new ModelAndView("redirect:/request/" + loginUser.getR(), "appUser", appUser);
+      } else if (!StringUtils.isBlank(loginUser.getC())) {
+        String c = loginUser.getC();
+        String decoded = new String(Base64.getDecoder().decode(c));
+        String params = decoded.substring(2);
+        if (decoded.startsWith("f")) {
+          mv = new ModelAndView("redirect:/findcmr?" + params, "appUser", appUser);
+        } else if (decoded.startsWith("r")) {
+          mv = new ModelAndView("redirect:/request?" + params, "appUser", appUser);
+        } else {
+          mv = new ModelAndView("redirect:/home", "appUser", appUser);
+        }
+      } else if (appUser.isApprover()) {
+        mv = new ModelAndView("redirect:/myappr", "approval", new MyApprovalsModel());
+      } else {
+        mv = new ModelAndView("redirect:/home", "appUser", appUser);
+      }
+      // setPageKeys("HOME", "OVERVIEW", mv);
+    } else {
+      UserPrefModel pref = new UserPrefModel();
+      pref.setRequesterId(appUser.getIntranetId());
+      mv = new ModelAndView("redirect:/preferences", "pref", pref);
+      // setPageKeys("PREFERENCE", "PREF_SUB", mv);
+    }
+
+    return mv;
   }
 
 }
