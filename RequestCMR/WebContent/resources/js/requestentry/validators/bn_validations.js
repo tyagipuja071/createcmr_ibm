@@ -502,7 +502,11 @@ function setInacByCluster() {
         }
         
       }
+<<<<<<< HEAD
             
+=======
+           
+>>>>>>> refs/remotes/origin/saas_creatcmr-8111_ap_coverage
       // CREATCMR-7884
       if(cntry == '796' && custSubGrp=='KYND' && _cluster == '09056'){
         FormManager.readOnly('inacType');
