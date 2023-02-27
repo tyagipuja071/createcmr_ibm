@@ -9122,7 +9122,7 @@ function addAddrFunctionItaly(cntry, addressMode, saving, finalSave) {
   setSpecialTaxCodeOnAddressIT(cntry, addressMode, saving, finalSave);
   setPostCdItalyVA(cntry, addressMode, saving, finalSave);
   landedCntryLockedIT(cntry, addressMode, saving, finalSave);
-  autoSetValuesOnPostalCodeIT(addressMode);
+ // autoSetValuesOnPostalCodeIT(addressMode);
 }
 
 function ibmFieldsBehaviourInCreateByScratchIT() {
