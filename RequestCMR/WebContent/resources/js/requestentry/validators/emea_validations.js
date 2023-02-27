@@ -9269,7 +9269,7 @@ function autoSetAbbrNameUKI() {
         FormManager.readOnly('abbrevNm');
       }
       // CREATCMR-8135
-      if ((cmrCntry == '866' || cmrCntry == '754') && (custSubGrp == 'DC' && _abbrevNmValue != null && _abbrevNmValue.length > 17)) {
+      if ((cmrCntry == '866' || cmrCntry == '754') && (custSubGrp == 'DC' && _abbrevNmValue != null && _abbrevNmValue.length > 0)) {
         _abbrevNmValue = _abbrevNmValue.substr(0, 17) + " DC";
         FormManager.setValue('abbrevNm', _abbrevNmValue);
         FormManager.readOnly('abbrevNm');
