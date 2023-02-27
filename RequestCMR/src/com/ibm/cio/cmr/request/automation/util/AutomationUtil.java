@@ -1170,6 +1170,8 @@ public abstract class AutomationUtil {
   }
 
   protected String getZI01Kunnr(String cmrNo, String cntry) throws Exception {
+    LOG.debug("getZI01Kunnr");
+    LOG.debug("Fetching ZI01 Kunnrs for cmrNo if present");
     String kunnr = "";
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");

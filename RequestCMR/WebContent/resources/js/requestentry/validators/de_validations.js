@@ -10,6 +10,8 @@ var _ISICHandler = null;
 var _IMSHandler = null;
 var _deIsuCdHandler = null;
 var _subScenarioHandler = null;
+var oldVatExempt = null;
+var oldCustSubGrp = null;
 
 function afterConfigForDE() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -29,6 +31,7 @@ function afterConfigForDE() {
         console.log(">>> Process vatExempt add * >> ");
        // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       }
+      vatExemptIBMEmp();
     });
   }
 
@@ -42,6 +45,28 @@ function afterConfigForDE() {
       setISUValues();
       // CREATCMR-7424_7425
       setAbbreviatedNameBasedOnAddressType();
+    });
+  }
+
+  if (_ISUHandler == null) {
+    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setSboOnIMS(value);
+    });
+  }
+
+  if (_IMSHandler == null) {
+    _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+      setSboOnIMS();
+    });
+  }
+
+  if (_deIsuCdHandler == null) {
+    _deIsuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      if (!value) {
+        value = FormManager.getActualValue('isuCd');
+      }
+      setSearchTermDE();
+      lockCtcFieldOnIsu();
     });
   }
 
@@ -90,6 +115,20 @@ function afterConfigForDE() {
   GEOHandler.disableCopyAddress();
 }
 
+function saveVatExemptStat() {
+  console.log(">>>> saveVatExemptStat");
+  if (isParamtNull(oldVatExempt)) {
+    oldVatExempt = dijit.byId('vatExempt').get('checked');
+  }
+}
+
+function saveCustSubStat() {
+  console.log(">>>> saveCustSubStat");
+  if (isParamtNull(oldCustSubGrp)) {
+    oldCustSubGrp = FormManager.getActualValue('custSubGrp');
+  }
+}
+
 function vatExemptIBMEmp() {
   if (!dijit.byId('vatExempt')) {
     return; 
@@ -97,6 +136,14 @@ function vatExemptIBMEmp() {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var vatExempt = dijit.byId('vatExempt').get('checked');
+  saveCustSubStat();
+  saveVatExemptStat();
+  if (oldCustSubGrp == custSubGrp && oldVatExempt == vatExempt) {
+    return;
+  }
+
   if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');

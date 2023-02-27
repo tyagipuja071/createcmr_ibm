@@ -289,7 +289,6 @@ public class USBPEhostHandler extends USBPHandler {
 
     details.append(" - Dept/Attn: -------E-HOSTING-------\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "-------E-HOSTING-------");
-    //CREATCMR-8186
     //details.append(" - Restricted Ind: Y\n");
     //overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     details.append(" - Restricted to: BPQS\n");

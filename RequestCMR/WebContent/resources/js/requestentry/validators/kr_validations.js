@@ -1,14 +1,9 @@
 /* Register KR Javascripts */
-var _isicHandler = null;
 
 function afterConfigKR() {
   var role = null;
   var reqType = null;
   var _isuHandler = null;
-  
-  _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-    getIsuFromIsic();
-  });
 
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
@@ -72,8 +67,7 @@ function afterConfigKR() {
   FormManager.addValidator('installRep', Validators.REQUIRED, [ 'Tax Invoice Type' ], 'MAIN_CUST_TAB');
 
   FormManager.addValidator('contactName3', Validators.REQUIRED, [ 'Product Type' ], 'MAIN_IBM_TAB');
-  // FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market
-  // Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
+  //FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('commercialFinanced', Validators.REQUIRED, [ 'ROL Code' ], 'MAIN_IBM_TAB');
 
   FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
@@ -83,9 +77,7 @@ function afterConfigKR() {
   // Non editable for requester role
   if (reqType == 'C' && role == 'Requester') {
     FormManager.readOnly('isuCd');
-    if (custSubGrp != 'INTER') {
-      FormManager.readOnly('cmrNoPrefix');
-    }
+    FormManager.readOnly('cmrNoPrefix');
   }
 
   if (reqType == 'C') {
@@ -124,9 +116,6 @@ function afterConfigKR() {
   handleObseleteExpiredDataForUpdate();
   // CREATCMR-788
   addressQuotationValidator();
-  FormManager.readOnly('clientTier');
-  FormManager.readOnly('isuCd');
-  FormManager.readOnly('mrcCd');
 }
 
 function setClientTierValues() {
@@ -141,11 +130,9 @@ function setClientTierValues() {
     if (reqType != 'U') {
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     }
+    FormManager.enable('clientTier');
   }
   handleObseleteExpiredDataForUpdate();
-  FormManager.readOnly('clientTier');
-  FormManager.readOnly('isuCd');
-  FormManager.readOnly('mrcCd');
 }
 
 function setChecklistStatus() {
@@ -830,7 +817,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.KR, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.KR);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR);
-  GEOHandler.registerValidator(validateCustnameForKynd, GEOHandler.KR);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.KR);
   // CREATCMR-6825

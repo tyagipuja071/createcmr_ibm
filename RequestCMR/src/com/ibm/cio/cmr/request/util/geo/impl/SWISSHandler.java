@@ -436,7 +436,6 @@ public class SWISSHandler extends GEOHandler {
     // update.setOldData(oldData.getCurrencyCd());
     // results.add(update);
     // }
-
     // CREATCMR-8304
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustPrefLang(), newData.getCustPrefLang())) {
       update = new UpdatedDataModel();
@@ -445,7 +444,6 @@ public class SWISSHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getCustPrefLang(), "CustLangCd", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
