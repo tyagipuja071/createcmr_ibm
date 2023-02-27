@@ -5265,6 +5265,7 @@ function setSBOSalesRepFor34QYZ() {
 	var landCntry = '';
 	var isuCTC = isu.concat(ctc);
 	var reqType = FormManager.getActualValue('reqType');
+	var reqId = FormManager.getActualValue('reqId');
   if (reqType == 'U') {
     return;
   }
@@ -8109,7 +8110,7 @@ function validateSBOForIT() {
 					var qParams = {
 						_qall: 'Y',
 						CNTRY: cntry,
-						SBO:  sbo,
+						SBO:  '%' + sbo + '%',
 						SALES_REP: salRep,
 						ISU: '%' + isuCTC + '%'
 					};
@@ -9122,6 +9123,7 @@ function addAddrFunctionItaly(cntry, addressMode, saving, finalSave) {
   setSpecialTaxCodeOnAddressIT(cntry, addressMode, saving, finalSave);
   setPostCdItalyVA(cntry, addressMode, saving, finalSave);
   landedCntryLockedIT(cntry, addressMode, saving, finalSave);
+  setSBOSalesRepFor34QYZ(cntry, addressMode, saving, finalSave);
  // autoSetValuesOnPostalCodeIT(addressMode);
 }
 
