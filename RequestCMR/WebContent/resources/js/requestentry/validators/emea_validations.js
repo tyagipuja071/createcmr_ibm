@@ -6084,9 +6084,9 @@ function ibmFieldsBehaviourInCreateByModelIT() {
       }
 
       if (role == "REQUESTER" && !(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
-        FormManager.enable('isuCd');
+     //   FormManager.enable('isuCd');
         // FormManager.readOnly('inacCd');
-        FormManager.enable('clientTier');
+     //   FormManager.enable('clientTier');
         FormManager.enable('collectionCd');
         FormManager.enable('repTeamMemberNo');
         FormManager.enable('salesBusOffCd');
@@ -6095,10 +6095,10 @@ function ibmFieldsBehaviourInCreateByModelIT() {
         FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
         FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
       } else {
-        FormManager.enable('isuCd');
+      //  FormManager.enable('isuCd');
         FormManager.enable('inacCd');
         FormManager.enable('affiliate');
-        FormManager.enable('clientTier');
+     //   FormManager.enable('clientTier');
         FormManager.enable('salesBusOffCd');
         FormManager.enable('repTeamMemberNo');
         FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU' ], 'MAIN_IBM_TAB');
