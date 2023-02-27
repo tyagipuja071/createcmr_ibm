@@ -6085,11 +6085,11 @@ function ibmFieldsBehaviourInCreateByModelIT() {
 
       if (role == "REQUESTER" && !(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
      //   FormManager.enable('isuCd');
-        // FormManager.readOnly('inacCd');
+     //   FormManager.readOnly('inacCd');
      //   FormManager.enable('clientTier');
-        FormManager.enable('collectionCd');
-        FormManager.enable('repTeamMemberNo');
-        FormManager.enable('salesBusOffCd');
+          FormManager.enable('collectionCd');
+    //    FormManager.enable('repTeamMemberNo');
+    //    FormManager.enable('salesBusOffCd');
         FormManager.removeValidator('isuCd', Validators.REQUIRED);
         FormManager.removeValidator('clientTier', Validators.REQUIRED);
         FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
@@ -6099,8 +6099,8 @@ function ibmFieldsBehaviourInCreateByModelIT() {
         FormManager.enable('inacCd');
         FormManager.enable('affiliate');
      //   FormManager.enable('clientTier');
-        FormManager.enable('salesBusOffCd');
-        FormManager.enable('repTeamMemberNo');
+    //    FormManager.enable('salesBusOffCd');
+    //    FormManager.enable('repTeamMemberNo');
         FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
     //    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
