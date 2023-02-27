@@ -502,11 +502,7 @@ function setInacByCluster() {
         }
         
       }
-<<<<<<< HEAD
-            
-=======
-           
->>>>>>> refs/remotes/origin/saas_creatcmr-8111_ap_coverage
+
       // CREATCMR-7884
       if(cntry == '796' && custSubGrp=='KYND' && _cluster == '09056'){
         FormManager.readOnly('inacType');
@@ -1190,7 +1186,7 @@ function onCustSubGrpChange() {
     FormManager.readOnly('subIndustryCd');
     if (FormManager.getActualValue('viewOnlyPage') != 'true')
       FormManager.enable('isicCd');
-    //setISBUScenarioLogic();
+    // setISBUScenarioLogic();
     
     // CREATCMR-7653
     if (FormManager.getActualValue('cmrIssuingCntry') == '796' && FormManager.getActualValue('reqType') == 'C') {    
