@@ -20,10 +20,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
+import com.ibm.cio.cmr.request.model.login.LogInUserModel;
+import com.ibm.cio.cmr.request.service.user.UserService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
-import com.ibm.cio.cmr.request.util.oauth.UserHelper;
+import com.ibm.cio.cmr.request.util.oauth.Tokens;
 
 /**
  * This filter ensures valid user is present at the request. If not, the request
@@ -33,86 +38,117 @@ import com.ibm.cio.cmr.request.util.oauth.UserHelper;
  * @author Hesller Huller
  *
  */
+@Component
 @WebFilter(
     filterName = "AppUserInjectFilter",
     urlPatterns = "/*")
 public class AppUserInjectFilter implements Filter {
 
+  @Autowired
+  private UserService userService;
+
   protected static final Logger LOG = Logger.getLogger(AppUserInjectFilter.class);
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+
+    // only using during development and testing
+    boolean skipTest = false;
+    if (skipTest) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse resp = (HttpServletResponse) response;
     String url = req.getRequestURI();
+    String userIntranetEmail = null;
+    try {
+      if (shouldFilter(req)) {
 
-    if (shouldFilter(req)) {
+        AppUser user = AppUser.getUser(req);
+        if (user == null) {
+          LOG.trace("Single Sign On injecting for this url: " + url);
 
-      LOG.trace("Single Sign On injecting for this url: " + url);
-      AppUser user = AppUser.getUser(req);
-      if (user == null) {
-        LOG.warn("No user on the session yet. Checking IBM ID...");
+          LOG.warn("No user on the session yet. Checking IBM ID...");
 
-        // get all request params
-        Set<String> paramNames = request.getParameterMap().keySet();
+          // try to get user Intranet
+          userIntranetEmail = (String) req.getSession().getAttribute("userIntranetEmail");
 
-        // when request contains code and grant_id, means we are at second step
-        // of
-        // SSO and need to get access token
-        if (paramNames.contains("code") && paramNames.contains("grant_id")) {
-          LOG.trace("Obtaining access token for grant_id: " + request.getParameter("grant_id"));
+          // get all request params
+          Set<String> paramNames = request.getParameterMap().keySet();
 
-          // get access_token and id_token
-          String code = request.getParameter("code");
-          String rawToken = OAuthUtils.getAccessToken(code);
+          // when request contains code and grant_id, means we are at second
+          // step
+          // of
+          // SSO and need to get access token
+          if (paramNames.contains("code") && paramNames.contains("grant_id")) {
+            LOG.trace("Requesting access token for grant_id: " + request.getParameter("grant_id"));
 
-          // parse raw token
-          OAuthUtils.parseToken(rawToken);
+            // get access_token and id_token
+            String code = request.getParameter("code");
+            String rawToken = OAuthUtils.getAccessToken(code);
 
-          // validate JWT signature
-          try {
-            OAuthUtils.validateSignature();
-          } catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException e) {
-            // TODO interrupt the thread here
-            LOG.error(e.getMessage());
+            // parse raw token
+            Tokens tokens = OAuthUtils.parseToken(rawToken);
 
-            // close the thread as signature validation was invalid.
-            Thread.currentThread().interrupt();
+            // validate JWT signature
+            boolean isJWTValid = false;
+            try {
+              LOG.trace("Validating signature for grant_id: " + request.getParameter("grant_id"));
+              isJWTValid = OAuthUtils.validateSignature();
+              LOG.trace("JWT Signature validated successfully for grant_id: " + request.getParameter("grant_id"));
+            } catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException e) {
+              // TODO interrupt the thread here
+              LOG.error("An error occured when validating the signature: ", e);
+            }
+
+            // check token expiring datetime
+
+            boolean isTokenExpired = false;
+            // TODO IMPLEMENT HERE
+
+            // assign AppUser
+            if (isJWTValid && !isTokenExpired) {
+              userIntranetEmail = (String) tokens.getId_token().getClaims().get("emailAddress");
+              req.getSession().setAttribute("userIntranetEmail", userIntranetEmail);
+
+              LogInUserModel loginUser = new LogInUserModel();
+              loginUser.setUsername(userIntranetEmail);
+
+              new OAuthUtils().authorizeAndSetRoles(loginUser, userService, req, resp);
+              // ===============================
+              // TODO how to proceed from here?
+              filterChain.doFilter(req, resp);
+              return;
+            } else {
+              LOG.trace("Invalid Token! Unable to proceed with the request.");
+              // TODO what to do if token is invalid or expired?
+              return;
+            }
           }
 
-          // ============= work done till here =================
-        }
-
-        // iterating over parameter names and get its value
-        for (String name : paramNames) {
-          String value = request.getParameter(name);
-          System.out.println(name + ": " + value);
-          System.out.println("<br>");
-        }
-
-        String body = getBody((HttpServletRequest) request);
-
-        UserHelper userHelper = new UserHelper();
-
-        String ibmUniqueId = userHelper.getUNID();
-
-        if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
-          // redirect to /ibmid
           LOG.debug("No IBM ID detected. Redirecting to IBM ID intercept..");
           HttpServletResponse httpResp = (HttpServletResponse) response;
           req.getSession().invalidate();
           httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
-          return;
-        } else {
-          LOG.debug("IBM ID found. Injecting App User");
-          LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmUniqueId is " + userHelper.getUNID());
-          LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmFullName is " + userHelper.getPrincipalName());
-          LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmId is " + userHelper.getEmailAddress());
+
+          // LOG.debug("IBM ID found. Injecting App User");
+          // LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmUniqueId
+          // is " + userHelper.getUNID());
+          // LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmFullName
+          // is " + userHelper.getPrincipalName());
+          // LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmId is " +
+          // userHelper.getEmailAddress());
+          //
         }
       }
+
+    } catch (Exception e) {
+      LOG.error("Error processing AppUserInjectFilter", e);
     }
 
-    filterChain.doFilter(request, response);
+    filterChain.doFilter(req, resp);
 
   }
 
@@ -137,7 +173,8 @@ public class AppUserInjectFilter implements Filter {
 
   @Override
   public void init(FilterConfig config) throws ServletException {
-    LOG.info("CreateCMR AppUser inject Filter initialized.");
+    SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
+    LOG.info("CreateCMR " + config.getFilterName() + " initialized.");
   }
 
   public String getBody(HttpServletRequest request) throws IOException {

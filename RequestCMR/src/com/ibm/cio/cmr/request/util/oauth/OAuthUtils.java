@@ -1,35 +1,60 @@
 package com.ibm.cio.cmr.request.util.oauth;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.UserPref;
+import com.ibm.cio.cmr.request.entity.UserPrefPK;
+import com.ibm.cio.cmr.request.model.login.LogInUserModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.user.UserService;
+import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.Person;
+import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cmr.services.client.AuthorizationClient;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.auth.Authorization;
+import com.ibm.cmr.services.client.auth.AuthorizationRequest;
+import com.ibm.cmr.services.client.auth.AuthorizationRequest.ApplicationCode;
+import com.ibm.cmr.services.client.auth.AuthorizationResponse;
+import com.ibm.cmr.services.client.auth.Role;
 
 /*
  * Utility class to interact with Authorization Server.
@@ -148,21 +173,27 @@ public class OAuthUtils {
       }
     }
 
-    // validate the signature using the public key
-    String jwtToken = tokens.getEncodedJwtToken();
-    String header = jwtToken.substring(0, jwtToken.indexOf("."));
-    String payload = jwtToken.substring(jwt.indexOf(".") + 1, jwt.lastIndexOf("."));
-    String tokenSignature = jwtToken.substring(jwtToken.lastIndexOf(".") + 1);
-    byte[] tokenSignatureDecoded = java.util.Base64.getUrlDecoder().decode(tokenSignature);
+    boolean isValid = false;
 
-    // verify signature
-    boolean isValid = verifySignatureFor(ALGORITHM, publicKey, header.getBytes(), payload.getBytes(), tokenSignatureDecoded);
+    try {
 
-    if (!isValid) {
-      throw new SignatureException("Invalid Signature!");
+      String jwtToken = tokens.getEncodedJwtToken();
+
+      String header = jwtToken.substring(0, jwtToken.indexOf("."));
+      String payload = jwtToken.substring(jwtToken.indexOf(".") + 1, jwtToken.lastIndexOf("."));
+      String tokenSignature = jwtToken.substring(jwtToken.lastIndexOf(".") + 1);
+      byte[] tokenSignatureDecoded = java.util.Base64.getUrlDecoder().decode(tokenSignature);
+
+      isValid = verifySignatureFor(ALGORITHM, publicKey, header.getBytes(), payload.getBytes(), tokenSignatureDecoded);
+
+      return isValid;
+
+    } catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      LOG.error(e.getMessage());
+      return false;
     }
-
-    return isValid;
   }
 
   /**
@@ -196,7 +227,7 @@ public class OAuthUtils {
   }
 
   /**
-   * This method gets the keys from Authorization Server JWKS endpoint
+   * Get the keys from Authorization Server JWKS endpoint
    * 
    * @throws IOException
    */
@@ -207,7 +238,9 @@ public class OAuthUtils {
 
     try {
       // prepare the request
-      String endPoint = SystemConfiguration.getValue("SSO_ISSUER_URL") + JWKS_ENDPOINT;
+      String endPoint = "https://preprod.login.w3.ibm.com/v1.0/endpoint/default/jwks";// SystemConfiguration.getValue("SSO_ISSUER_URL")
+                                                                                      // +
+                                                                                      // JWKS_ENDPOINT;
       URL url = new URL(endPoint);
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("GET");
@@ -255,10 +288,17 @@ public class OAuthUtils {
     return keys;
   }
 
+  /**
+   * Construct the Public Key using the modulus and exponent
+   * 
+   * @param modulus
+   * @param exponent
+   * @return
+   */
   private static PublicKey getPublicKey(String modulus, String exponent) {
     try {
-      byte exponentB[] = Base64.decodeBase64(exponent);
-      byte modulusB[] = Base64.decodeBase64(modulus);
+      byte exponentB[] = org.apache.commons.codec.binary.Base64.decodeBase64(exponent);
+      byte modulusB[] = org.apache.commons.codec.binary.Base64.decodeBase64(modulus);
       BigInteger bigExponent = new BigInteger(1, exponentB);
       BigInteger bigModulus = new BigInteger(1, modulusB);
 
@@ -275,17 +315,356 @@ public class OAuthUtils {
 
   }
 
-  public static RSAPrivateKey readPrivateKey(File file) throws Exception {
-    String key = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
+  /**
+   * After JWT Signature be validated, this method is called to authenticate
+   * user via service and set its role.
+   * 
+   * @param loginUser
+   * @param request
+   * @param response
+   * @throws CmrException,
+   *           Exception
+   */
+  public void authorizeAndSetRoles(LogInUserModel loginUser, UserService userService, HttpServletRequest request, HttpServletResponse response)
+      throws CmrException, Exception {
+    boolean isApprover = false;
+    System.out.println("asdf");
+    // implement the new Role mapping
+    AuthorizationResponse authResp = authenticateViaService(loginUser.getUsername());
 
-    String privateKeyPEM = key.replace("-----BEGIN PRIVATE KEY-----", "").replaceAll(System.lineSeparator(), "").replace("-----END PRIVATE KEY-----",
-        "");
+    // authResp.setAuthorized(false);
 
-    byte[] encoded = Base64.decodeBase64(privateKeyPEM);
+    if (authResp.isError()) {
+      // error in service layer
+      throw new CmrException(MessageUtil.ERROR_CANNOT_AUTHENTICATE);
+    }
 
-    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-    PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-    return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+
+      if (!authResp.isAuthorized()) {
+        // user has no roles, check if approver first
+        LOG.debug("User has no CreateCMR roles. Checking if approver..");
+        isApprover = isApprover(entityManager, loginUser.getUsername());
+
+        if (!isApprover) {
+          throw new CmrException(MessageUtil.ERROR_BLUEGROUPS_AUTH);
+        } else {
+          Authorization auth = new Authorization();
+          auth.setRoles(new ArrayList<Role>());
+          authResp.setAuthorization(auth);
+        }
+      }
+
+      LOG.debug("User " + loginUser.getUsername() + " authenticated and authorised successfully");
+
+      String userCnum = userService.getUserCnum(loginUser.getUsername());
+
+      Map<String, String> bpPersonDetails = BluePagesHelper.getBluePagesDetailsByIntranetAddr(loginUser.getUsername());
+
+      boolean inAdminGroup = false;
+      boolean inProcessorGroup = false;
+      boolean inRequestorGroup = false;
+      boolean inCMDEGroup = false;
+
+      AppUser appUser = new AppUser();
+      appUser.setUserCnum(userCnum);
+      appUser.setIntranetId(loginUser.getUsername().toLowerCase());
+      appUser.setEmpName(bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_NAME));
+      appUser.setCountryCode(bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_COUNTRY_CODE));
+      String notesEmail = bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_NOTES_MAIL);
+
+      // set the user roles
+      String roleKey = null;
+      Authorization auth = authResp.getAuthorization();
+      for (Role role : auth.getRoles()) {
+        roleKey = role.getRoleId();
+        if (roleKey.equals(CmrConstants.ROLES.ADMIN.toString())) {
+          inAdminGroup = true;
+        }
+        if (roleKey.equals(CmrConstants.ROLES.PROCESSOR.toString())) {
+          inProcessorGroup = true;
+        }
+        if (roleKey.equals(CmrConstants.ROLES.REQUESTER.toString())) {
+          inRequestorGroup = true;
+        }
+        if (roleKey.equals(CmrConstants.ROLES.CMDE.toString())) {
+          inCMDEGroup = true;
+        }
+        appUser.addRole(roleKey, role.getSubRoleId());
+      }
+
+      if (isApprover) {
+        appUser.setApprover(true);
+      } else if (isApprover(entityManager, loginUser.getUsername())) {
+        appUser.setHasApprovals(true);
+      }
+      appUser.setAuth(auth);
+      LOG.debug("User " + loginUser.getUsername() + ": Roles = " + auth.getRdcRoles().size() + " Auth Groups: " + auth.getAuthGroups().size());
+
+      // set CMR Owner via blue pages' notes email
+      appUser.setNotesEmailId(notesEmail);
+      if (notesEmail.toUpperCase().contains("LENOVO")) {
+        appUser.setCompanyCode("KAU");
+      } else if (notesEmail.toUpperCase().contains("TRURO")) {
+        appUser.setCompanyCode("TRU");
+      } else if (notesEmail.toUpperCase().contains("FONSECA")) {
+        appUser.setCompanyCode("FON");
+      } else if (notesEmail.toUpperCase().contains("IBM")) {
+        appUser.setCompanyCode("IBM");
+      }
+
+      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("LOGIN.HAS_PREF"));
+      query.setParameter("USER_ID", appUser.getIntranetId().toLowerCase());
+      List<Object[]> results = query.getResults(2);
+      boolean hasDelegate = false;
+      boolean hasRecord = false;
+      for (Object[] result : results) {
+        hasRecord = true;
+        if (!StringUtils.isEmpty((String) result[2])) {
+          hasDelegate = true;
+        }
+        if (!StringUtils.isEmpty((String) result[3]) && appUser.getProcessingCenter() == null) {
+          appUser.setProcessingCenter((String) result[3]);
+        }
+        if (!StringUtils.isEmpty((String) result[1]) && appUser.getCmrIssuingCntry() == null) {
+          appUser.setCmrIssuingCntry((String) result[1]);
+        }
+        if (!StringUtils.isEmpty((String) result[4]) && appUser.getBluePagesName() == null) {
+          appUser.setBluePagesName((String) result[4]);
+        }
+        if (!StringUtils.isEmpty((String) result[5])) {
+          appUser.setDefaultLineOfBusn((String) result[5]);
+        }
+        if (!StringUtils.isEmpty((String) result[6])) {
+          appUser.setDefaultRequestRsn((String) result[6]);
+        }
+        if (!StringUtils.isEmpty((String) result[7])) {
+          appUser.setDefaultReqType((String) result[7]);
+        }
+        if (!StringUtils.isEmpty((String) result[8])) {
+          appUser.setDefaultNoOfRecords(Integer.parseInt((String) result[8]));
+        }
+        if (!StringUtils.isEmpty((String) result[9])) {
+          appUser.setHasCountries(true);
+        }
+        appUser.setShowPendingOnly("Y".equals(result[10]));
+        appUser.setShowLatestFirst("Y".equals(result[11]));
+      }
+      if (hasDelegate) {
+        appUser.setPreferencesSet(true);
+        if (appUser.getBluePagesName() == null) {
+          Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
+          if (p != null) {
+            appUser.setBluePagesName(p.getName());
+          }
+        }
+
+      } else if (!hasRecord) {
+        // create the default record
+        String name = createUserPrefRecord(entityManager, appUser.getIntranetId(), appUser.getEmpName(), appUser.getCountryCode(), notesEmail);
+        appUser.setBluePagesName(name);
+      }
+
+      appUser.setAdmin(inAdminGroup);
+      appUser.setProcessor(inProcessorGroup);
+      appUser.setRequestor(inRequestorGroup);
+      appUser.setCmde(inCMDEGroup);
+
+      // Set it in the session so that it can be later accessed in UI
+      // for display
+      request.getSession().setAttribute("displayName", bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_NAME));
+
+      // assign appuser
+      request.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, appUser);
+
+      request.getSession().setAttribute("cmr.last.request.date", new Date());
+
+      request.getSession().setAttribute("logged-in", "true");
+
+      request.getSession().setAttribute("WTMStatus", "P");
+
+      request.getSession().setMaxInactiveInterval(60 * 60 * 3);
+
+      response.addHeader("Set-Cookie", "countryCode=" + appUser.getCountryCode() + "; HttpOnly; Secure; SameSite=Strict");
+
+      // if (appUser.isPreferencesSet()) {
+      // if (loginUser.getR() > 0) {
+      // mv = new ModelAndView("redirect:/request/" + loginUser.getR(),
+      // "appUser", appUser);
+      // } else if (!StringUtils.isBlank(loginUser.getC())) {
+      // String c = loginUser.getC();
+      // String decoded = new String(Base64.getDecoder().decode(c));
+      // String params = decoded.substring(2);
+      // if (decoded.startsWith("f")) {
+      // mv = new ModelAndView("redirect:/findcmr?" + params, "appUser",
+      // appUser);
+      // } else if (decoded.startsWith("r")) {
+      // mv = new ModelAndView("redirect:/request?" + params, "appUser",
+      // appUser);
+      // } else {
+      // mv = new ModelAndView("redirect:/home", "appUser", appUser);
+      // }
+      // } else if (appUser.isApprover()) {
+      // mv = new ModelAndView("redirect:/myappr", "approval", new
+      // MyApprovalsModel());
+      // } else {
+      // mv = new ModelAndView("redirect:/home", "appUser", appUser);
+      // }
+      // // setPageKeys("HOME", "OVERVIEW", mv);
+      // } else {
+      // UserPrefModel pref = new UserPrefModel();
+      // pref.setRequesterId(appUser.getIntranetId());
+      // mv = new ModelAndView("redirect:/preferences", "pref", pref);
+      // // setPageKeys("PREFERENCE", "PREF_SUB", mv);
+      // }
+
+      SystemParameters.logUserAccess("CreateCMR", appUser.getIntranetId());
+      AuthCodeRetriever authCode = new AuthCodeRetriever(loginUser.getUsername(), request.getSession());
+      Thread authThread = new Thread(authCode);
+      authThread.start();
+
+    } catch (Exception e) {
+      LOG.error("Error in retrieving Preference settings.", e);
+      if (e instanceof CmrException) {
+        throw e;
+      }
+      throw new CmrException(MessageUtil.ERROR_GENERAL);
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+
+  }
+
+  private AuthorizationResponse authenticateViaService(String user) throws Exception {
+    try {
+      String url = SystemConfiguration.getValue("CMR_SERVICES_URL", "");
+      if ("".equals(url)) {
+        AuthorizationResponse resp = new AuthorizationResponse();
+        Authorization det = new Authorization();
+        resp.setAuthorized(false);
+        resp.setAuthorization(det);
+        return resp;
+      }
+
+      AuthorizationClient auth = CmrServicesFactory.getInstance().createClient(url, AuthorizationClient.class);
+      AuthorizationRequest request = new AuthorizationRequest();
+      request.setApplicationCode(ApplicationCode.CreateCMR);
+      request.setUserId(user.toLowerCase());
+
+      AuthorizationResponse response = auth.executeAndWrap(request, AuthorizationResponse.class);
+      return response;
+    } catch (Exception e) {
+      LOG.error("Error in connecting to the Authorization Service: " + e.getMessage());
+      throw new CmrException(MessageUtil.ERROR_CANNOT_AUTHENTICATE);
+    }
+  }
+
+  /**
+   * Checks if the user is currently an approver
+   * 
+   * @param entityManager
+   * @param intranetId
+   * @return
+   */
+  private boolean isApprover(EntityManager entityManager, String intranetId) {
+    String sql = ExternalizedQuery.getSql("APPROVAL.CHECK_APPROVER");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", intranetId.toLowerCase());
+    query.setForReadOnly(true);
+    return query.exists();
+  }
+
+  private String createUserPrefRecord(EntityManager entityManager, String intranetId, String name, String cntryCode, String notesId)
+      throws Exception {
+    EntityTransaction tx = entityManager.getTransaction();
+    tx.begin();
+    try {
+      LOG.debug("Creating user preferences for " + name + " (" + intranetId + ")");
+      UserPref pref = new UserPref();
+      UserPrefPK pk = new UserPrefPK();
+      pk.setRequesterId(intranetId);
+      pref.setId(pk);
+
+      pref.setReceiveMailInd(CmrConstants.YES_NO.Y.toString());
+      Person p = BluePagesHelper.getPerson(intranetId, notesId);
+      if (p == null || StringUtils.isEmpty(p.getName())) {
+        pref.setRequesterNm(name);
+      } else {
+        pref.setRequesterNm(p.getName());
+      }
+      LOG.debug("Pref being added: " + pref.getId().getRequesterId() + " (" + pref.getRequesterNm() + ")");
+      pref.setDftIssuingCntry(getMappedCountryCode(cntryCode));
+
+      entityManager.persist(pref);
+      entityManager.flush();
+      tx.commit();
+
+      return pref.getRequesterNm();
+    } catch (Exception e) {
+      LOG.error("Error in creating User Preference record", e);
+      tx.rollback();
+      throw e;
+    }
+  }
+
+  // for exceptions on the country code
+  private String getMappedCountryCode(String countryCode) {
+    if ("PH1".equals(countryCode)) {
+      return "818";
+    }
+    return countryCode;
+  }
+
+  class AuthCodeRetriever implements Runnable {
+
+    private String username;
+    private HttpSession session;
+
+    public AuthCodeRetriever(String username, HttpSession session) {
+      this.username = username;
+      this.session = session;
+    }
+
+    @Override
+    public void run() {
+      try {
+        LOG.debug("Starting Authorization Code retrieval from Find CMR [" + SystemConfiguration.getValue("FIND_CMR_URL") + "]");
+        StringBuilder sb = new StringBuilder();
+        URL url = new URL(SystemConfiguration.getValue("FIND_CMR_URL") + "/authorize?username=" + this.username + "&appName=RequestCMR");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setDoInput(true);
+        InputStream is = conn.getInputStream();
+        try {
+          InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+          try {
+            BufferedReader br = new BufferedReader(isr);
+            try {
+              String line = null;
+              while ((line = br.readLine()) != null) {
+                sb.append(line);
+              }
+            } finally {
+              br.close();
+            }
+          } finally {
+            isr.close();
+          }
+        } finally {
+          is.close();
+        }
+        LOG.debug("Returned " + sb.toString());
+        AppUser user = (AppUser) this.session.getAttribute(CmrConstants.SESSION_APPUSER_KEY);
+        if (user != null) {
+          user.setAuthCode(sb.toString());
+        }
+        conn.disconnect();
+      } catch (Exception e) {
+        LOG.error("Error in retrieving authorization code " + e.getMessage());
+      }
+    }
+
   }
 
 }
