@@ -20,9 +20,9 @@ function afterConfigForBELUX() {
     role = _pagemodel.userRole;
   }
 
-  if (custGrp != null && custGrp != '') {
-    FormManager.clearValue('inacCd');
-  }
+  /*
+   * if (custGrp != null && custGrp != '') { FormManager.clearValue('inacCd'); }
+   */
 
   if ((custSubGrp.substring(2, 5) == 'INT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO' || custSubGrp == 'BECOM' || custSubGrp == 'BEDAT'
       || custSubGrp == 'LUCOM' || custSubGrp == 'LUDAT')) {

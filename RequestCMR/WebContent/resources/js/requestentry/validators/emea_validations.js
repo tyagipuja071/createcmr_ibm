@@ -9250,14 +9250,14 @@ function autoSetAbbrNameUKI() {
     // Defect-6793
     autoSetAbbrevNmFrmDept();
   } else {
-    if (role == "PROCESSOR") {
-      var result = cmr.query('UKI.GET_ABBNAME_DATA', {
-        REQ_ID : reqId
-      });
-    } else if (role == "REQUESTER") {
+    if (role == "REQUESTER" || ((SysLoc.IRELAND == cmrCntry || SysLoc.UK == cmrCntry) && custSubGrp == 'DC')) {
       var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
         REQ_ID : reqId,
         ADDR_TYPE : 'ZS01'
+      });
+    } else if (role == "PROCESSOR") {
+      var result = cmr.query('UKI.GET_ABBNAME_DATA', {
+        REQ_ID : reqId
       });
     }
     if ((result != null || result != undefined) && result.ret1 != undefined) {
