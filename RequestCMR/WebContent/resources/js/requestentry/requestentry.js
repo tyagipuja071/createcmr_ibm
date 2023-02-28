@@ -2996,6 +2996,8 @@ function matchDnBForNZUpdate() {
 function doNZBNAPIMatch() {
   console.log('>>> doNZBNAPIMacht >>>');
   FormManager.setValue('findDnbResult', 'Rejected');
+  // CREATCMR-8430: use usSicmen to save the dnboverride flag for NZ, automation will use this flag to skip DNB matching
+  FormManager.setValue('usSicmen', 'DNBO');
   
   hideModaldnb_Window();
   cmr.showProgress('Checking request data with NZBN API...');
