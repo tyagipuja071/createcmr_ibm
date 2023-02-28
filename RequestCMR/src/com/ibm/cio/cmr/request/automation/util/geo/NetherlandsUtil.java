@@ -168,7 +168,6 @@ public class NetherlandsUtil extends AutomationUtil {
         details.append("SORTL: " + commercialFin + commercialFin);
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-   
     
     if(!isCoverageCalculated) {
       // if not calculated using bg/gbg try calculation using 32/S logic
