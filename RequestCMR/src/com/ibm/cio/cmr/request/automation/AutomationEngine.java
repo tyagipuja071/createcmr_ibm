@@ -191,6 +191,7 @@ public class AutomationEngine {
     boolean isUsTaxSkipToPcp = false;
     // CREATCMR-5447
     boolean isUsTaxSkipToPpn = false;
+    boolean usProliferationCntrySkip = false;
     boolean requesterFromTaxTeam = false;
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
     requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
@@ -212,6 +213,10 @@ public class AutomationEngine {
         strCmtUsEntCompToPpn = USHandler.getUSEntCompToPPN(entityManager, requestData.getAdmin());
         if (StringUtils.isNotBlank(strCmtUsEntCompToPpn)) {
           isUsEntCompToPpn = true;
+        }
+      } else if ("C".equals(requestData.getAdmin().getReqType())) {
+        if (requestData.getAddress("ZS01") != null) {
+          usProliferationCntrySkip = USHandler.isProliferationLandedCntry(requestData.getAddress("ZS01"));
         }
       }
     }
@@ -546,8 +551,12 @@ public class AutomationEngine {
             // CREATCMR-6331
             pendingChecks.put("_usenttocomp", strCmtUsEntCompToPpn);
             // CREATCMR-5447
-          } else if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
-            LOG.debug("Moving Request " + reqId + " to PCP or LEG");
+          }
+          if (usProliferationCntrySkip) {
+            pendingChecks.put("_usproliferr", "Proliferation country location is requested, CMDE review required.");
+            // CREATCMR-8124
+          }
+          if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {
               // move to PCP
