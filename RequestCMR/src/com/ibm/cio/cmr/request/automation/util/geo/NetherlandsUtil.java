@@ -160,7 +160,6 @@ public class NetherlandsUtil extends AutomationUtil {
       details.append("-BO Team: " + sortl);
     }
 
-   
       if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
         commercialFin = computeSBOForCovBelux(entityManager, QUERY_BG_SBO_BENELUX, bgId, data.getCmrIssuingCntry(), false);
       }
