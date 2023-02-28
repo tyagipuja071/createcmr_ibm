@@ -82,6 +82,18 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     scorecard.setDnbMatchingResult("");
     Boolean override = false;
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+
+    // CREATCMR-8430: use usSicmen to save the dnboverride flag for NZ
+    // the requester choose override dnb and did NZBN API in UI, automation will use this flag to skip DNB matching for this case
+    if (SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry()) && data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase("DNBO")) {
+      LOG.debug("DNB Overriden from UI - NZ");
+      result.setResults("Overriden");
+      result.setDetails(
+          "D&B matches were chosen to be overridden by the requester.");
+      engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+      return result;
+    }
+
     // skip dnb matching if dnb matches on UI are overriden and attachment is
     // provided
     if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
