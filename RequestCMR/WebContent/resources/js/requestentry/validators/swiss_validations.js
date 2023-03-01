@@ -658,7 +658,7 @@ function validateSBOValuesForIsuCtc() {
           }
           if (!validSboList.includes(sbo)) {
             return new ValidationResult(null, false, 
-                'The SBO provided is invalid. It should be from the list: ' + validSboList);
+                'The SORTL provided is invalid. It should be from the list: ' + validSboList);
           }
         }
       }
