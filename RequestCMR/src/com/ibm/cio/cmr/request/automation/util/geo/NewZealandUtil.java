@@ -227,6 +227,8 @@ public class NewZealandUtil extends AutomationUtil {
     client.setReadTimeout(1000 * 60 * 5);
     client.setRequestMethod(Method.Get);
 
+    LOG.debug("Connecting to the NZBNValidation service at CMR_SERVICES_URL = " + SystemConfiguration.getValue("CMR_SERVICES_URL"));
+    LOG.debug("Connecting to the NZBNValidation service at BATCH_SERVICES_URL = " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
     NZBNValidationRequest request = new NZBNValidationRequest();
     String customerName = addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2());
     if (StringUtils.isNotBlank(data.getVat())) {
