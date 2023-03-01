@@ -8091,6 +8091,24 @@ function addEmbargoCodeValidatorIT() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addEmbargoCdValidatorForTR() {
+  var role = FormManager.getActualValue('userRole');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (role == GEOHandler.ROLE_PROCESSOR) {
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          var embargoCd = FormManager.getActualValue('embargoCd');
+          if (embargoCd && !(embargoCd == 'Y' || embargoCd == 'C' || embargoCd == 'J' || embargoCd == '')) {
+            return new ValidationResult(null, false, 'Order Block Code should be only Y, C, J, Blank allowed');
+          }
+          return new ValidationResult(null, true);
+        }
+      };
+    })(), 'MAIN_CUST_TAB', 'frmCMR');
+  }
+}
+
 /**
  * Set Client Tier Value
  */
@@ -9266,6 +9284,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
+  GEOHandler.registerValidator(addEmbargoCdValidatorForTR, [ SysLoc.TURKEY ], null, true);
 
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
