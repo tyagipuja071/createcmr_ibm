@@ -5538,7 +5538,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, [ SysLoc.AUSTRIA ]);
   GEOHandler.registerValidator(validateSortl, [ SysLoc.AUSTRIA ], null, true);
 
-  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
-  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
-
 });
