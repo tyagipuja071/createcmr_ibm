@@ -5179,7 +5179,7 @@ function set34QYZlogicOnISUCtcChange() {
 	var checkImportIndc = getImportedIndcForItaly();
 	var role = FormManager.getActualValue('userRole').toUpperCase();
 	var reqType = FormManager.getActualValue('reqType');
-	if (_isScenarioChanged && reqType == 'C') {
+	if (reqType == 'C') {
 		var custSubType = FormManager.getActualValue('custSubGrp');
 		var commSubTypes = ['COMME', 'COMSM', 'COMVA', 'CROCM', 'GOVST', 'LOCEN', 'GOVSM', 'LOCSM', 'GOVVA', 'LOCVA', 'CROGO', 'NGOIT', 'NGOVA', 'NGOSM', '3PAIT', 'UNIVA',
 			'UNIVE', 'UNISM', '3PASM', '3PAVA', 'CRO3P', 'CROUN', 'CROLC'];
@@ -5225,7 +5225,7 @@ function set34QYZlogicOnISUCtcChange() {
 				FormManager.readOnly('salesBusOffCd');
 			} else if (role == 'PROCESSOR') {
 				FormManager.enable('repTeamMemberNo');
-				FormManager.readOnly('salesBusOffCd');
+				FormManager.enable('salesBusOffCd');
 
 			}
 			FormManager.setValue('repTeamMemberNo', '09ZPB0');
@@ -8110,8 +8110,8 @@ function validateSBOForIT() {
 					var qParams = {
 						_qall: 'Y',
 						CNTRY: cntry,
-						SBO:  '%' + sbo + '%',
-						SALES_REP: salRep,
+						SBO:   sbo,
+						SALES_REP:  '%' + salRep + '%',
 						ISU: '%' + isuCTC + '%'
 					};
 					var results = cmr.query('GET.SR.SBO.BYISUCTC', qParams);
@@ -9150,24 +9150,25 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
   }
   var checkImportIndc = getImportedIndcForItaly();
   if (checkImportIndc != 'Y') {
-    if (role == 'REQUESTER') {
-      FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
-      if (countryUse == '758SM' || countryUse == '758VA') {
-        if ((isuCd == '34' && clientTier == 'Q') || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA') {
-          FormManager.readOnly('salesBusOffCd');
-          FormManager.readOnly('repTeamMemberNo');
-        } else {
-          FormManager.enable('salesBusOffCd');
-          FormManager.enable('repTeamMemberNo');
-        }
-      }
-    }
-    if (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'PRICU' || custSubGrp == 'CROPR' || custSubGrp == 'PRISM'
-        || custSubGrp == 'PRIVA') {
-      FormManager.readOnly('salesBusOffCd');
-      FormManager.readOnly('repTeamMemberNo');
-      FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
-    }
+  // commented as implemented for CREATCMR-7861
+   //  if (role == 'REQUESTER') {
+//       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+//       if (countryUse == '758SM' || countryUse == '758VA') {
+//         if ((isuCd == '34' && clientTier == 'Q') || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA') {
+//           FormManager.readOnly('salesBusOffCd');
+//           FormManager.readOnly('repTeamMemberNo');
+//         } else {
+//           FormManager.enable('salesBusOffCd');
+//           FormManager.enable('repTeamMemberNo');
+//         }
+//       }
+//     }
+   //  if (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'PRICU' || custSubGrp == 'CROPR' || custSubGrp == 'PRISM'
+//         || custSubGrp == 'PRIVA') {
+//       FormManager.readOnly('salesBusOffCd');
+//       FormManager.readOnly('repTeamMemberNo');
+//       FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+//     }
 
     if ((isuCd == '34' && clientTier == 'Q')
         || (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA'
