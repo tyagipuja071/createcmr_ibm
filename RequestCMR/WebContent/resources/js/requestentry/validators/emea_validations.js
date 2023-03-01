@@ -5205,6 +5205,7 @@ function set34QYZlogicOnISUCtcChange() {
 			FormManager.setValue('clientTier', 'Q');
 			FormManager.readOnly('repTeamMemberNo');
 			FormManager.setValue('repTeamMemberNo', '012345');
+			FormManager.enable('salesBusOffCd');
 		} else if (ibmEmpCustSubTypes.includes(custSubType)) {
 			FormManager.readOnly('isuCd');
 			FormManager.setValue('isuCd', '21');
@@ -5226,7 +5227,6 @@ function set34QYZlogicOnISUCtcChange() {
 			} else if (role == 'PROCESSOR') {
 				FormManager.enable('repTeamMemberNo');
 				FormManager.enable('salesBusOffCd');
-
 			}
 			FormManager.setValue('repTeamMemberNo', '09ZPB0');
 			FormManager.setValue('salesBusOffCd', 'ZP');
@@ -5286,14 +5286,13 @@ function setSBOSalesRepFor34QYZ() {
    }
 
       // GET LANDCNTRY in case of CB
-     if(custType == 'CROSS'){
 	 var result1 = cmr.query('LANDCNTRY.IT', {
     REQID : reqId
      });
    if (result1 != null && result1.ret1 != undefined) {
     landCntry = result1.ret1;
     }
-  }
+  
 	var commSubTypes = ['COMME', 'COMSM', 'COMVA', 'CROCM', 'GOVST', 'LOCEN', 'GOVSM', 'LOCSM', 'GOVVA', 'LOCVA', 'CROGO', 'NGOIT', 'NGOVA', 'NGOSM', '3PAIT', 'UNIVA',
 		'UNIVE', 'UNISM', '3PASM', '3PAVA', 'CRO3P', 'CROUN', 'CROLC'];
 	var ibmEmpCustSubTypes = ['IBMIT', 'XIBM'];
@@ -5335,9 +5334,9 @@ function setSBOSalesRepFor34QYZ() {
       }
 
 
-      if((custType == 'CROSS' && landCntry == 'SM') || subRegion == '758SM'){
+      if((custType == 'CROSS') || subRegion == '758SM'){
 	        FormManager.setValue('salesBusOffCd', 'DU');
-      }else if((custType == 'CROSS' && landCntry == 'VA') || subRegion == '758VA'){
+      }else if((custType == 'CROSS') || subRegion == '758VA'){
 	        FormManager.setValue('salesBusOffCd', 'NC');
       }else if(custType == 'CROSS'){
 	        FormManager.setValue('salesBusOffCd', 'NB');
@@ -10725,7 +10724,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(addHandlersForIE, [ SysLoc.IRELAND ]);
  
-  GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.ITALY, SysLoc.UK ], null, true);
+  GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
