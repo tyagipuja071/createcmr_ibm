@@ -163,6 +163,15 @@ function processRequestAction() {
           // cmr.showModal('addressVerificationModal');
           showAddressVerificationModal();
         }
+      } else if (cmrCntry == SysLoc.GERMANY && reqType == 'U') {
+        // Cmr- Dnb match Germany update
+        var checkCompProof = checkForCompanyProofAttachment();
+        if (checkIfFinalDnBCheckRequired() && reqType == 'U' && checkCompProof) {
+          // CustNm check and Addresses Dnb Check
+          matchDnBForAutomationCountries();
+        } else {
+          showAddressVerificationModal();
+        }
       } else if (cmrCntry == SysLoc.SINGAPORE || cmrCntry == SysLoc.AUSTRALIA) {
         // Cmr-1701 for isic Dnb match acc to scenario
         if (findDnbResult == 'Accepted') {
@@ -1707,9 +1716,9 @@ function checkIfFinalDnBCheckRequired() {
       return true;
     }
   }
-  if (cmrCntry == '616') {
+  if (cmrCntry == '616' || cmrCntry == '724') {
     if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')) {
-      // currently Enabled Only For AU
+      // currently Enabled Only For AU & Germany
       return true;
     }
   }
@@ -1789,7 +1798,15 @@ function matchDnBForAutomationCountries() {
           cmr.hideProgress();
           console.log(data);
           if (data && data.success) {
-            if (data.match) {
+            if (cmrCntry == SysLoc.GERMANY && reqType == 'U') {
+              if (data.dnbNmMatch && data.orgIdMatch) {
+                // cmr.showModal('addressVerificationModal');
+                showAddressVerificationModal();
+              } else {
+                cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');
+                FormManager.setValue('matchOverrideIndc', 'Y');
+              }
+            } else if (data.match) {
               // cmr.showModal('addressVerificationModal');
               showAddressVerificationModal();
             } else if (data.tradeStyleMatch) {

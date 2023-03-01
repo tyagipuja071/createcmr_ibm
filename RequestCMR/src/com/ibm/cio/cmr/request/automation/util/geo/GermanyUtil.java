@@ -654,7 +654,7 @@ public class GermanyUtil extends AutomationUtil {
           data.getCmrIssuingCntry());
       if (queryResults != null && !queryResults.isEmpty()) {
         for (DACHFieldContainer result : queryResults) {
-          DACHFieldContainer queryResult = (DACHFieldContainer) result;
+          DACHFieldContainer queryResult = result;
           String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
           String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
           String queryIsu = queryResult.getIsuCd();
@@ -794,11 +794,13 @@ public class GermanyUtil extends AutomationUtil {
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     boolean isNegativeCheckNeedeed = false;
     if (changes != null && changes.hasDataChanges()) {
-      if (changes.isDataChanged("VAT #")) {
+      if (changes.isDataChanged("VAT #")
+          || CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo)) {
         UpdatedDataModel vatChange = changes.getDataChange("VAT #");
         if (vatChange != null) {
           if ((StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
-              || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))) {
+              || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
+              || isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo)) {
             // check if the name + VAT exists in D&B
             List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
             if (matches.isEmpty()) {
