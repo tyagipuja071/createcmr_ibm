@@ -73,7 +73,7 @@ public class AppUserInjectFilter implements Filter {
       if (shouldFilter(req)) {
 
         AppUser user = AppUser.getUser(req);
-        if (user == null && session != null) {
+        if (user == null) {
           LOG.trace("Single Sign On injecting for this url: " + url);
 
           LOG.warn("No user on the session yet. Checking IBM ID...");
@@ -140,11 +140,7 @@ public class AppUserInjectFilter implements Filter {
           HttpServletResponse httpResp = (HttpServletResponse) response;
           session.invalidate();
           httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
-        } else {
-          LOG.trace("User session found for " + user.getEmpName() + " (" + user.getIntranetId() + ")");
-
         }
-
       }
 
     } catch (Exception e) {
