@@ -443,7 +443,10 @@ function addClientTierDefaultLogic() {
   if (_clientTierHandler == null) {
     _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       value = FormManager.getActualValue('clientTier');
-      FormManager.enable('isuCd');
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
+      if (cntry != '766') {
+        FormManager.enable('isuCd');
+      }
       if (value == 'B' || value == 'M' || value == 'W' || value == 'T' || value == 'S' || value == 'C' || value == 'N') {
         FormManager.setValue('isuCd', '32');
         FormManager.readOnly('isuCd');
@@ -457,7 +460,9 @@ function addClientTierDefaultLogic() {
         if (PageManager.isReadOnly()) {
           FormManager.readOnly('isuCd');
         } else {
-          FormManager.enable('isuCd');
+          if (cntry != '766') {
+            FormManager.enable('isuCd');
+          }
         }
       }
     });
@@ -960,7 +965,7 @@ function resetVATValidationsForPayGo(){
   }); 
   if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'Y' && vat == ''){    
    FormManager.resetValidations('vat');
-   //FormManager.getField('vatExempt').checked = true;
+   // FormManager.getField('vatExempt').checked = true;
     console.log('VAT is non mandatory for PayGO');
   } 
   
@@ -1058,14 +1063,14 @@ function addVatIndValidator(){
   } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
     FormManager.setValue('vatInd', 'T');
     FormManager.enable('vatInd');
-  //  FormManager.readOnly('vatInd');
+  // FormManager.readOnly('vatInd');
   } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
     FormManager.setValue('vat', '');
     FormManager.setValue('vatInd', '');
   } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd == '') {
     FormManager.setValue('vatInd', 'T');
     FormManager.enable('vatInd');
-    //  FormManager.readOnly('vatInd');
+    // FormManager.readOnly('vatInd');
   } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.setValue('vatInd', 'N');
