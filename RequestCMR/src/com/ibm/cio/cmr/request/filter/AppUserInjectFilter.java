@@ -18,12 +18,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.model.login.LogInUserModel;
 import com.ibm.cio.cmr.request.service.user.UserService;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -53,27 +56,30 @@ public class AppUserInjectFilter implements Filter {
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
     // only using during development and testing
-    boolean skipTest = false;
-    if (skipTest) {
+    String activateFilter = SystemConfiguration.getValue("ACTIVATE_SSO_FILTER");
+    if (StringUtils.isNotBlank(activateFilter) && activateFilter.equals("false")) {
       filterChain.doFilter(request, response);
       return;
     }
 
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse resp = (HttpServletResponse) response;
+    HttpSession session = req.getSession(false);
+
     String url = req.getRequestURI();
     String userIntranetEmail = null;
+
     try {
       if (shouldFilter(req)) {
 
         AppUser user = AppUser.getUser(req);
-        if (user == null) {
+        if (user == null && session != null) {
           LOG.trace("Single Sign On injecting for this url: " + url);
 
           LOG.warn("No user on the session yet. Checking IBM ID...");
 
           // try to get user Intranet
-          userIntranetEmail = (String) req.getSession().getAttribute("userIntranetEmail");
+          userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
 
           // get all request params
           Set<String> paramNames = request.getParameterMap().keySet();
@@ -103,20 +109,20 @@ public class AppUserInjectFilter implements Filter {
               LOG.error("An error occured when validating the signature: ", e);
             }
 
-            // check token expiring datetime
-
-            boolean isTokenExpired = false;
-            // TODO IMPLEMENT HERE
-
             // assign AppUser
-            if (isJWTValid && !isTokenExpired) {
+            if (isJWTValid) {
               userIntranetEmail = (String) tokens.getId_token().getClaims().get("emailAddress");
-              req.getSession().setAttribute("userIntranetEmail", userIntranetEmail);
+              session.setAttribute("userIntranetEmail", userIntranetEmail);
 
               LogInUserModel loginUser = new LogInUserModel();
               loginUser.setUsername(userIntranetEmail);
 
               new OAuthUtils().authorizeAndSetRoles(loginUser, userService, req, resp);
+
+              session.setAttribute("loggedInUserModel", loginUser);
+              session.setAttribute("accessToken", tokens.getAccess_token());
+              session.setAttribute("tokenExpiringTime", tokens.getExpires_in());
+
               // ===============================
               // TODO how to proceed from here?
               filterChain.doFilter(req, resp);
@@ -128,20 +134,17 @@ public class AppUserInjectFilter implements Filter {
             }
           }
 
-          LOG.debug("No IBM ID detected. Redirecting to IBM ID intercept..");
+          // this code should run only if no AppUser is present or user has
+          // invalid token
+          LOG.debug("No IBM ID detected. Redirecting to W3 ID Provisioner...");
           HttpServletResponse httpResp = (HttpServletResponse) response;
-          req.getSession().invalidate();
+          session.invalidate();
           httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
+        } else {
+          LOG.trace("User session found for " + user.getEmpName() + " (" + user.getIntranetId() + ")");
 
-          // LOG.debug("IBM ID found. Injecting App User");
-          // LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmUniqueId
-          // is " + userHelper.getUNID());
-          // LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmFullName
-          // is " + userHelper.getPrincipalName());
-          // LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmId is " +
-          // userHelper.getEmailAddress());
-          //
         }
+
       }
 
     } catch (Exception e) {
@@ -150,6 +153,32 @@ public class AppUserInjectFilter implements Filter {
 
     filterChain.doFilter(req, resp);
 
+  }
+
+  private long extractRequestId(HttpServletRequest request) {
+    String reqIdParam = request.getParameter("reqId");
+    if (reqIdParam != null && StringUtils.isNumeric(reqIdParam) && !"0".equals(reqIdParam)) {
+      return Long.parseLong(reqIdParam);
+    }
+    Object reqIdAtt = request.getAttribute("reqId");
+    if (reqIdAtt != null && StringUtils.isNumeric(reqIdAtt.toString()) && !"0".equals(reqIdAtt.toString())) {
+      return Long.parseLong(reqIdAtt.toString());
+    }
+
+    String url = request.getRequestURI();
+    if (url != null) {
+      if (url.contains("?")) {
+        url = url.substring(0, url.indexOf("?"));
+      }
+      if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
+        String reqId = url.substring(url.lastIndexOf("/") + 1);
+        if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
+          return Long.parseLong(reqId);
+        }
+      }
+    }
+
+    return 0;
   }
 
   private boolean shouldFilter(HttpServletRequest request) {

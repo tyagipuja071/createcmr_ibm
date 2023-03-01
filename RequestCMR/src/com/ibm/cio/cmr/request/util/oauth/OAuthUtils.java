@@ -32,6 +32,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONObject;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
@@ -67,6 +68,8 @@ public class OAuthUtils {
   public static final String TOKEN_ENDPOINT = "/token";
   public static final String USERINFO_ENDPOINT = "/userinfo";
   public static final String JWKS_ENDPOINT = "/jwks";
+  public static final String REVOKE_ENDPOINT = "/revoke";
+  public static final String INTROSPECT_ENDPOINT = "/introspect";
   public static final String ISSUER_URL = SystemConfiguration.getValue("SSO_ISSUER_URL");
 
   private static final byte JWT_PART_SEPARATOR = (byte) 46;
@@ -227,7 +230,7 @@ public class OAuthUtils {
   }
 
   /**
-   * Get the keys from Authorization Server JWKS endpoint
+   * Get the keys from Authorization Server's JWKS endpoint
    * 
    * @throws IOException
    */
@@ -238,9 +241,7 @@ public class OAuthUtils {
 
     try {
       // prepare the request
-      String endPoint = "https://preprod.login.w3.ibm.com/v1.0/endpoint/default/jwks";// SystemConfiguration.getValue("SSO_ISSUER_URL")
-                                                                                      // +
-                                                                                      // JWKS_ENDPOINT;
+      String endPoint = SystemConfiguration.getValue("SSO_ISSUER_URL") + JWKS_ENDPOINT;
       URL url = new URL(endPoint);
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("GET");
@@ -253,7 +254,6 @@ public class OAuthUtils {
 
       if (statusCode == 200) {
         // request executed successfully
-
         // reading request response
         BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         String inputLine;
@@ -311,8 +311,80 @@ public class OAuthUtils {
     } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
       e.printStackTrace();
     }
-    return null;
 
+    return null;
+  }
+
+  /**
+   * Revoke the access token make it inactive
+   * 
+   * @param access_token
+   * @return
+   */
+  public static boolean revokeToken(String access_token) {
+    if (StringUtils.isNotBlank(access_token)) {
+      try {
+
+        Map<String, String> headers = new HashMap<String, String>();
+
+        HttpPostForm httpPostForm = new HttpPostForm(SystemConfiguration.getValue("SSO_ISSUER_URL") + REVOKE_ENDPOINT, "utf-8", headers);
+
+        // httpPostForm.addFormField("grant_type", "authorization_code");
+        httpPostForm.addFormField("token", access_token);
+        httpPostForm.addFormField("client_id", SystemConfiguration.getValue("W3_CLIENT_ID"));
+        httpPostForm.addFormField("client_secret", SystemConfiguration.getValue("W3_CLIENT_SECRET"));
+
+        String response = httpPostForm.finish();
+
+        System.out.println(response);
+        LOG.debug("Access Token revoked!");
+        return true;
+      } catch (Exception e) {
+        e.printStackTrace();
+        LOG.debug(e);
+        return false;
+      }
+    }
+    LOG.debug("No access token to be revoked!");
+    return false;
+  }
+
+  /**
+   * Verify if the toke is still active
+   * 
+   * @param access_token
+   * @return
+   */
+  public static boolean introspectToken(String access_token) {
+    if (StringUtils.isNotBlank(access_token)) {
+      try {
+
+        Map<String, String> headers = new HashMap<String, String>();
+
+        HttpPostForm httpPostForm = new HttpPostForm(SystemConfiguration.getValue("SSO_ISSUER_URL") + INTROSPECT_ENDPOINT, "utf-8", headers);
+
+        // httpPostForm.addFormField("grant_type", "authorization_code");
+        httpPostForm.addFormField("token", access_token);
+        httpPostForm.addFormField("client_id", SystemConfiguration.getValue("W3_CLIENT_ID"));
+        httpPostForm.addFormField("client_secret", SystemConfiguration.getValue("W3_CLIENT_SECRET"));
+
+        String response = httpPostForm.finish();
+
+        JSONObject jsonResp = new JSONObject(response);
+        if (jsonResp.getBoolean("active")) {
+          LOG.debug("Access Token revoked: " + access_token);
+          return true;
+        }
+        return false;
+      } catch (Exception e) {
+        e.printStackTrace();
+        LOG.error("Unable to verify the token: " + access_token);
+        LOG.debug(e);
+        return false;
+      }
+    }
+    LOG.debug("No access token to be revoked!");
+    return false;
   }
 
   /**
@@ -328,7 +400,6 @@ public class OAuthUtils {
   public void authorizeAndSetRoles(LogInUserModel loginUser, UserService userService, HttpServletRequest request, HttpServletResponse response)
       throws CmrException, Exception {
     boolean isApprover = false;
-    System.out.println("asdf");
     // implement the new Role mapping
     AuthorizationResponse authResp = authenticateViaService(loginUser.getUsername());
 

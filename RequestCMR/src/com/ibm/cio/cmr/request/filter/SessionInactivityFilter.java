@@ -37,6 +37,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
 
 /**
  * This filter can test to see if a session has expired, and if it has can
@@ -196,6 +197,10 @@ public class SessionInactivityFilter implements Filter {
 
         if (session.getAttribute(CmrConstants.SESSION_APPUSER_KEY) == null) {
           LOG.debug("No user session found");
+
+          // revoke token
+          OAuthUtils.revokeToken((String) session.getAttribute("accessToken"));
+
           session.invalidate();
           long reqId = extractRequestId((HttpServletRequest) request);
           if (reqId > 0) {
@@ -211,6 +216,10 @@ public class SessionInactivityFilter implements Filter {
 
         if (tooLongSinceLastUserTriggeredRequest(req)) {
           LOG.debug("User session has expired");
+
+          // revoke token
+          OAuthUtils.revokeToken((String) session.getAttribute("accessToken"));
+
           AppUser.remove(req);
           session.invalidate();
           long reqId = extractRequestId((HttpServletRequest) request);
