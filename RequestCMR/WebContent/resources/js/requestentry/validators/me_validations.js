@@ -4295,13 +4295,20 @@ function validatorsDIGITForDupField() {
 
 function addEmbargoCdValidatorForME() {
   var role = FormManager.getActualValue('userRole');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (role == GEOHandler.ROLE_PROCESSOR) {
     FormManager.addFormValidator((function() {
       return {
         validate : function() {
           var embargoCd = FormManager.getActualValue('embargoCd');
-          if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == 'J' || embargoCd == '')) {
-            return new ValidationResult(null, false, 'Order Block Code should be only E, S, J, Blank allowed');
+          if (cntry == '808' || cntry == '865') {
+            if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == 'J' || embargoCd == 'C' || embargoCd == '')) {
+              return new ValidationResult(null, false, 'Order Block Code should be only E, S, J, C, Blank allowed');
+            }
+          } else {
+            if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == 'J' || embargoCd == '')) {
+              return new ValidationResult(null, false, 'Order Block Code should be only E, S, J, Blank allowed');
+            }
           }
           return new ValidationResult(null, true);
         }

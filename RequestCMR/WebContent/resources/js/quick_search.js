@@ -204,6 +204,21 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
   $scope.importRecord = function(rec, update) {
     var temp = JSON.stringify($scope.frozen);
     var model = JSON.parse(temp);
+    model.subRegion = $scope.getSubRegion(model.issuingCntry, model.countryCd && model.countryCd.length == 2 ? model.countryCd : $scope.frozen.countryCd);
+    model.reqType = update ? 'U' : 'C';
+    model.hasCmr = false;
+    model.hasDnb = false;
+    model.cmrNo = rec.cmrNo;
+    model.dunsNo = rec.dunsNo;
+    model.recType = rec.recType;
+    $scope.records.forEach(function(curr, i) {
+      if (curr.recType == 'CMR') {
+        model.hasCmr = true;
+      }
+      if (curr.recType == 'DNB') {
+        model.hasDnb = true;
+      }
+    });
 
     if (update) {
       var cmrNo = model.cmrNo;
@@ -243,22 +258,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
         }
       }
     }
-    model.subRegion = $scope.getSubRegion(model.issuingCntry, model.countryCd && model.countryCd.length == 2 ? model.countryCd : $scope.frozen.countryCd);
-    model.reqType = update ? 'U' : 'C';
-    model.hasCmr = false;
-    model.hasDnb = false;
-    model.cmrNo = rec.cmrNo;
-    model.dunsNo = rec.dunsNo;
-    model.recType = rec.recType;
-    $scope.records.forEach(function(curr, i) {
-      if (curr.recType == 'CMR') {
-        model.hasCmr = true;
-      }
-      if (curr.recType == 'DNB') {
-        model.hasDnb = true;
-      }
-    });
-
     cmr.showProgress('Creating new request from the record, please wait..');
     dojo.xhrPost({
       url : cmr.CONTEXT_ROOT + '/quick_search/process.json',

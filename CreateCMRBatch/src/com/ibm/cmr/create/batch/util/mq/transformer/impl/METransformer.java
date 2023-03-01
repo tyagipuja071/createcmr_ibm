@@ -1251,7 +1251,7 @@ public class METransformer extends EMEATransformer {
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
       String cof = data.getCommercialFinanced();
       if (!StringUtils.isBlank(cof)) {
-        if ("R".equals(cof) || "S".equals(cof) || "T".equals(cof)) {
+        if ("R".equals(cof) || "S".equals(cof) || "T".equals(cof) || "C".equals(cof)) {
           legacyCust.setModeOfPayment(cof);
         }
       } else {

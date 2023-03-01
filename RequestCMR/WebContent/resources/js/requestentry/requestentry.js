@@ -2654,6 +2654,9 @@ function matchDnBForNZ() {
     return;
   }
   cmr.showProgress('Checking request data with D&B...');
+  // CREATCMR-8430: reset usSicmen when start DNB matching
+  FormManager.setValue('usSicmen', '');  
+
   dojo
       .xhrGet({
         url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
@@ -3037,6 +3040,8 @@ function matchDnBForNZUpdate() {
 function doNZBNAPIMatch() {
   console.log('>>> doNZBNAPIMacht >>>');
   FormManager.setValue('findDnbResult', 'Rejected');
+  // CREATCMR-8430: use usSicmen to save the dnboverride flag for NZ, automation will use this flag to skip DNB matching
+  FormManager.setValue('usSicmen', 'DNBO');
   
   hideModaldnb_Window();
   cmr.showProgress('Checking request data with NZBN API...');

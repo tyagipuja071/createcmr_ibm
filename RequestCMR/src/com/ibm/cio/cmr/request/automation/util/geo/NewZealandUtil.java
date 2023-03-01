@@ -227,6 +227,8 @@ public class NewZealandUtil extends AutomationUtil {
     client.setReadTimeout(1000 * 60 * 5);
     client.setRequestMethod(Method.Get);
 
+    LOG.debug("Connecting to the NZBNValidation service at CMR_SERVICES_URL = " + SystemConfiguration.getValue("CMR_SERVICES_URL"));
+    LOG.debug("Connecting to the NZBNValidation service at BATCH_SERVICES_URL = " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
     NZBNValidationRequest request = new NZBNValidationRequest();
     String customerName = addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2());
     if (StringUtils.isNotBlank(data.getVat())) {
@@ -448,7 +450,7 @@ public class NewZealandUtil extends AutomationUtil {
                   matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
                 }
 
-                if (!(matchesDnb) && CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+                if (!matchesDnb) {
                   LOG.debug("DNB Checking Addr match failed. Now Checking Addr with NZBN API with  to vrify Addr update");
                   String regexForAddr = "\\s+|$";
                   try {
@@ -501,25 +503,18 @@ public class NewZealandUtil extends AutomationUtil {
                     }
                   }
                 }
-                if (matchesDnb || CmrConstants.RDC_SOLD_TO.equals(addrType) && matchesAddAPI) {
+                if (matchesDnb || matchesAddAPI) {
                   if (matchesDnb) {
-                    checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-                    for (DnBMatchingResponse dnb : matches) {
-                      checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                      checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                      checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                          + dnb.getDnbCountry() + "\n\n");
-                    }
+                    checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.");
                   } else {
-                    checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches NZBN API records. Matches:\n");
+                    checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches NZBN API records.\n");
                   }
                 } else {
 
-                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B"
-                      + (CmrConstants.RDC_SOLD_TO.equals(addrType) ? " & NZBN API" : ""));
+                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B & NZBN API.");
                   cmdeReview = true;
                   checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B"
-                      + (CmrConstants.RDC_SOLD_TO.equals(addrType) ? "  & NZBN API records.\n" : " records.\n"));
+                      + "  & NZBN API records.\n");
                   // company proof
                   if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
                     checkDetails.append("\nSupporting documentation is provided by the requester as attachment for " + addrType).append("\n");
@@ -554,13 +549,7 @@ public class NewZealandUtil extends AutomationUtil {
             }
 
             if (matchesDnb) {
-              checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-              for (DnBMatchingResponse dnb : matches) {
-                checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                    + dnb.getDnbCountry() + "\n\n");
-              }
+              checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.");
             } else {
               // CREATCMR-8430: add NZBN API check for new addresses
               LOG.debug(
@@ -617,12 +606,13 @@ public class NewZealandUtil extends AutomationUtil {
                 }
               }
 
-              cmdeReview = true;
               if (matchesAddAPI) {
-                checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches NZBN API records. Matches:\n");
+                checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches NZBN API records.\n");
               } else {
-                checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B"
-                    + (CmrConstants.RDC_SOLD_TO.equals(addrType) ? "  & NZBN API records.\n" : " records.\n"));
+                cmdeReview = true;
+                LOG.debug("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches NZBN API records.\n");
+
+                checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match NZBN API records.\n");
                  // company proof
                 if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
                   checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");

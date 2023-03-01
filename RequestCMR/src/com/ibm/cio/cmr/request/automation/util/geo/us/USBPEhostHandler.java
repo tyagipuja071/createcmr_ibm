@@ -54,7 +54,7 @@ public class USBPEhostHandler extends USBPHandler {
 
     if (StringUtils.isNotBlank(data.getEnterprise())) {
       USCeIdMapping mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
-      if (mapping == null || !mapping.isDistributor()) {
+      if ((mapping == null || !mapping.isDistributor()) && (!EXCLUDE_2_ENTERPRISES.contains(data.getEnterprise()))) {
         output.setResults("Non-Distributor BP");
         output.setDetails(
             "BP E-Hosting records are only allowed to be created under Distributors, please check and confirm with the Distributor for this transaction.");
