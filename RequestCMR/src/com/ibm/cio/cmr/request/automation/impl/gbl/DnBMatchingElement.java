@@ -90,7 +90,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       result.setResults("Overriden");
       result.setDetails(
           "D&B matches were chosen to be overridden by the requester.");
-      engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+      // engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were
+      // chosen to be overridden by the requester.");
       return result;
     }
 
