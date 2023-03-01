@@ -6021,23 +6021,23 @@ function ibmFieldsBehaviourInCreateByModelIT() {
       }
 
       if (role == "REQUESTER" && !(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
-     //   FormManager.enable('isuCd');
-     //   FormManager.readOnly('inacCd');
-     //   FormManager.enable('clientTier');
-          FormManager.enable('collectionCd');
-      //  FormManager.enable('repTeamMemberNo');
-      //  FormManager.enable('salesBusOffCd');
+        // FormManager.enable('isuCd');
+        // FormManager.readOnly('inacCd');
+        // FormManager.enable('clientTier');
+        FormManager.enable('collectionCd');
+        // FormManager.enable('repTeamMemberNo');
+        // FormManager.enable('salesBusOffCd');
         FormManager.removeValidator('isuCd', Validators.REQUIRED);
         FormManager.removeValidator('clientTier', Validators.REQUIRED);
         FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
         FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
       } else {
-      //  FormManager.enable('isuCd');
-          FormManager.enable('inacCd');
-          FormManager.enable('affiliate');
-     //   FormManager.enable('clientTier');
-     //   FormManager.enable('salesBusOffCd');
-     //   FormManager.enable('repTeamMemberNo');
+        // FormManager.enable('isuCd');
+        FormManager.enable('inacCd');
+        FormManager.enable('affiliate');
+        // FormManager.enable('clientTier');
+        // FormManager.enable('salesBusOffCd');
+        // FormManager.enable('repTeamMemberNo');
         FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
         // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
@@ -8012,12 +8012,12 @@ function validateSBOForIT() {
         }
 
         var qParams = {
-						_qall: 'Y',
-						CNTRY: cntry,
-						SBO:  '%' + sbo + '%',
-						SALES_REP: salRep,
-						ISU: '%' + isuCTC + '%'
-					};
+          _qall : 'Y',
+          CNTRY : cntry,
+          SBO : '%' + sbo + '%',
+          SALES_REP : salRep,
+          ISU : '%' + isuCTC + '%'
+        };
         var results = cmr.query('GET.SR.SBO.BYISUCTC', qParams);
         var displayInvalidMsg = true;
 
@@ -9027,25 +9027,29 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
   }
   var checkImportIndc = getImportedIndcForItaly();
   if (checkImportIndc != 'Y') {
-	// commented as implemented for CREATCMR-7861
-   //  if (role == 'REQUESTER') {
-//       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
-//       if (countryUse == '758SM' || countryUse == '758VA') {
-//         if ((isuCd == '34' && clientTier == 'Q') || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA') {
-//           FormManager.readOnly('salesBusOffCd');
-//           FormManager.readOnly('repTeamMemberNo');
-//         } else {
-//           FormManager.enable('salesBusOffCd');
-//           FormManager.enable('repTeamMemberNo');
-//         }
-//       }
-//     }
-   //  if (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'PRICU' || custSubGrp == 'CROPR' || custSubGrp == 'PRISM'
-//         || custSubGrp == 'PRIVA') {
-//       FormManager.readOnly('salesBusOffCd');
-//       FormManager.readOnly('repTeamMemberNo');
-//       FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
-//     }
+    // commented as implemented for CREATCMR-7861
+    // if (role == 'REQUESTER') {
+    // FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ],
+    // 'MAIN_IBM_TAB');
+    // if (countryUse == '758SM' || countryUse == '758VA') {
+    // if ((isuCd == '34' && clientTier == 'Q') || custSubGrp == 'BUSSM' ||
+    // custSubGrp == 'BUSVA') {
+    // FormManager.readOnly('salesBusOffCd');
+    // FormManager.readOnly('repTeamMemberNo');
+    // } else {
+    // FormManager.enable('salesBusOffCd');
+    // FormManager.enable('repTeamMemberNo');
+    // }
+    // }
+    // }
+    // if (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp ==
+    // 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'PRICU' || custSubGrp
+    // == 'CROPR' || custSubGrp == 'PRISM'
+    // || custSubGrp == 'PRIVA') {
+    // FormManager.readOnly('salesBusOffCd');
+    // FormManager.readOnly('repTeamMemberNo');
+    // FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+    // }
 
     if ((isuCd == '34' && clientTier == 'Q')
         || (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA'
@@ -9243,7 +9247,6 @@ function autoSetAbbrNameUKI() {
     var qParams = {
       REQ_ID : FormManager.getActualValue('reqId'),
     };
-
     var result = cmr.query('UKI.GET_ABBNAME_DATA', qParams);
     if (result.ret1 != undefined && result.ret1 != '') {
       FormManager.setValue('abbrevNm', result.ret1);
@@ -9252,16 +9255,11 @@ function autoSetAbbrNameUKI() {
     // Defect-6793
     autoSetAbbrevNmFrmDept();
   } else {
-    if (role == "REQUESTER" || ((SysLoc.IRELAND == cmrCntry || SysLoc.UK == cmrCntry) && custSubGrp == 'DC')) {
-      var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
-        REQ_ID : reqId,
-        ADDR_TYPE : 'ZS01'
-      });
-    } else if (role == "PROCESSOR") {
-      var result = cmr.query('UKI.GET_ABBNAME_DATA', {
-        REQ_ID : reqId
-      });
-    }
+    var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
+      REQ_ID : reqId,
+      ADDR_TYPE : 'ZS01'
+    });
+
     if ((result != null || result != undefined) && result.ret1 != undefined) {
       {
         var _abbrevNmValue = result.ret1 + (result.ret2 != undefined ? result.ret2 : '');
@@ -9272,7 +9270,7 @@ function autoSetAbbrNameUKI() {
         FormManager.readOnly('abbrevNm');
       }
       // CREATCMR-8135
-      if ((cmrCntry == '866' || cmrCntry == '754') && (custSubGrp == 'DC' && _abbrevNmValue != null && _abbrevNmValue.length > 0)) {
+      if (custSubGrp == 'DC' && _abbrevNmValue != null && _abbrevNmValue.length > 0) {
         _abbrevNmValue = _abbrevNmValue.substr(0, 17) + " DC";
         FormManager.setValue('abbrevNm', _abbrevNmValue);
         FormManager.readOnly('abbrevNm');
