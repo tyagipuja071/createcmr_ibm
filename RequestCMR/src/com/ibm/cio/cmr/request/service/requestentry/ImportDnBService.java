@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -559,7 +560,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       cnHandler.convertChinaStateNameToStateCode(addr, cmr, entityManager);
     }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3
-        && (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()))) {
+        && (Arrays.asList(SystemLocation.AUSTRIA, SystemLocation.SWITZERLAND, SystemLocation.NORWAY, SystemLocation.FINLAND, SystemLocation.DENMARK,
+            SystemLocation.SWEDEN).contains(reqModel.getCmrIssuingCntry()))) {
       convertStateNameToStateCode(addr, cmr, entityManager);
     }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {
