@@ -502,7 +502,6 @@ function setInacByCluster() {
         }
         
       }
-
       // CREATCMR-7884
       if(cntry == '796' && custSubGrp=='KYND' && _cluster == '09056'){
         FormManager.readOnly('inacType');

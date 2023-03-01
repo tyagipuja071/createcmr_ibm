@@ -206,7 +206,6 @@ function addVATDisabler() {
       FormManager.readOnly('vat');
     }
   }, 1000);
-
 }
 
 /**

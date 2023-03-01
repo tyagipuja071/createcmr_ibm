@@ -134,7 +134,6 @@ public class USBPPoolHandler extends USBPHandler {
 
     details.append(" - Dept/Attn: --------POOL--------\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "--------POOL--------");
-    //CREATCMR-8186
     //details.append(" - Restricted Ind: Y\n");
     //overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     details.append(" - Restricted to: BPQS\n");
