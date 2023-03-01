@@ -448,7 +448,7 @@ public class NewZealandUtil extends AutomationUtil {
                   matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
                 }
 
-                if (!(matchesDnb) && CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+                if (!matchesDnb) {
                   LOG.debug("DNB Checking Addr match failed. Now Checking Addr with NZBN API with  to vrify Addr update");
                   String regexForAddr = "\\s+|$";
                   try {
@@ -501,7 +501,7 @@ public class NewZealandUtil extends AutomationUtil {
                     }
                   }
                 }
-                if (matchesDnb || CmrConstants.RDC_SOLD_TO.equals(addrType) && matchesAddAPI) {
+                if (matchesDnb || matchesAddAPI) {
                   if (matchesDnb) {
                     checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.");
                   } else {
@@ -509,11 +509,10 @@ public class NewZealandUtil extends AutomationUtil {
                   }
                 } else {
 
-                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B"
-                      + (CmrConstants.RDC_SOLD_TO.equals(addrType) ? " & NZBN API" : ""));
+                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B & NZBN API.");
                   cmdeReview = true;
                   checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B"
-                      + (CmrConstants.RDC_SOLD_TO.equals(addrType) ? "  & NZBN API records.\n" : " records.\n"));
+                      + "  & NZBN API records.\n");
                   // company proof
                   if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
                     checkDetails.append("\nSupporting documentation is provided by the requester as attachment for " + addrType).append("\n");

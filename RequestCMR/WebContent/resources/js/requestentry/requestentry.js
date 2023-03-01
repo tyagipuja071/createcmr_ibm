@@ -2654,6 +2654,9 @@ function matchDnBForNZ() {
     return;
   }
   cmr.showProgress('Checking request data with D&B...');
+  // CREATCMR-8430: reset usSicmen when start DNB matching
+  FormManager.setValue('usSicmen', '');  
+
   dojo
       .xhrGet({
         url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
