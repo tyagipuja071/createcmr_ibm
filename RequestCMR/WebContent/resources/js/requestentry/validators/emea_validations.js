@@ -5115,7 +5115,7 @@ function set34QYZlogicOnISUCtcChange() {
   var checkImportIndc = getImportedIndcForItaly();
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqType = FormManager.getActualValue('reqType');
-  if (_isScenarioChanged && reqType == 'C') {
+  if (reqType == 'C') {
     var custSubType = FormManager.getActualValue('custSubGrp');
     var commSubTypes = [ 'COMME', 'COMSM', 'COMVA', 'CROCM', 'GOVST', 'LOCEN', 'GOVSM', 'LOCSM', 'GOVVA', 'LOCVA', 'CROGO', 'NGOIT', 'NGOVA', 'NGOSM', '3PAIT', 'UNIVA', 'UNIVE', 'UNISM', '3PASM',
         '3PAVA', 'CRO3P', 'CROUN', 'CROLC' ];
@@ -5161,7 +5161,7 @@ function set34QYZlogicOnISUCtcChange() {
         FormManager.readOnly('salesBusOffCd');
       } else if (role == 'PROCESSOR') {
         FormManager.enable('repTeamMemberNo');
-        FormManager.readOnly('salesBusOffCd');
+        FormManager.enable('salesBusOffCd');
 
       }
       FormManager.setValue('repTeamMemberNo', '09ZPB0');
@@ -6021,23 +6021,23 @@ function ibmFieldsBehaviourInCreateByModelIT() {
       }
 
       if (role == "REQUESTER" && !(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
-        FormManager.enable('isuCd');
-        // FormManager.readOnly('inacCd');
-        FormManager.enable('clientTier');
-        FormManager.enable('collectionCd');
-        FormManager.enable('repTeamMemberNo');
-        FormManager.enable('salesBusOffCd');
+     //   FormManager.enable('isuCd');
+     //   FormManager.readOnly('inacCd');
+     //   FormManager.enable('clientTier');
+          FormManager.enable('collectionCd');
+      //  FormManager.enable('repTeamMemberNo');
+      //  FormManager.enable('salesBusOffCd');
         FormManager.removeValidator('isuCd', Validators.REQUIRED);
         FormManager.removeValidator('clientTier', Validators.REQUIRED);
         FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
         FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
       } else {
-        FormManager.enable('isuCd');
-        FormManager.enable('inacCd');
-        FormManager.enable('affiliate');
-        FormManager.enable('clientTier');
-        FormManager.enable('salesBusOffCd');
-        FormManager.enable('repTeamMemberNo');
+      //  FormManager.enable('isuCd');
+          FormManager.enable('inacCd');
+          FormManager.enable('affiliate');
+     //   FormManager.enable('clientTier');
+     //   FormManager.enable('salesBusOffCd');
+     //   FormManager.enable('repTeamMemberNo');
         FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
         // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
@@ -8012,12 +8012,12 @@ function validateSBOForIT() {
         }
 
         var qParams = {
-          _qall : 'Y',
-          CNTRY : cntry,
-          SBO : sbo,
-          SALES_REP : salRep,
-          ISU : '%' + isuCTC + '%'
-        };
+						_qall: 'Y',
+						CNTRY: cntry,
+						SBO:  '%' + sbo + '%',
+						SALES_REP: salRep,
+						ISU: '%' + isuCTC + '%'
+					};
         var results = cmr.query('GET.SR.SBO.BYISUCTC', qParams);
         var displayInvalidMsg = true;
 
@@ -9000,6 +9000,7 @@ function addAddrFunctionItaly(cntry, addressMode, saving, finalSave) {
   setSpecialTaxCodeOnAddressIT(cntry, addressMode, saving, finalSave);
   setPostCdItalyVA(cntry, addressMode, saving, finalSave);
   landedCntryLockedIT(cntry, addressMode, saving, finalSave);
+  setSBOSalesRepFor34QYZ(cntry, addressMode, saving, finalSave);
   // autoSetValuesOnPostalCodeIT(addressMode);
 }
 
@@ -9026,24 +9027,25 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
   }
   var checkImportIndc = getImportedIndcForItaly();
   if (checkImportIndc != 'Y') {
-    if (role == 'REQUESTER') {
-      FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
-      if (countryUse == '758SM' || countryUse == '758VA') {
-        if ((isuCd == '34' && clientTier == 'Q') || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA') {
-          FormManager.readOnly('salesBusOffCd');
-          FormManager.readOnly('repTeamMemberNo');
-        } else {
-          FormManager.enable('salesBusOffCd');
-          FormManager.enable('repTeamMemberNo');
-        }
-      }
-    }
-    if (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'PRICU' || custSubGrp == 'CROPR' || custSubGrp == 'PRISM'
-        || custSubGrp == 'PRIVA') {
-      FormManager.readOnly('salesBusOffCd');
-      FormManager.readOnly('repTeamMemberNo');
-      FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
-    }
+	// commented as implemented for CREATCMR-7861
+   //  if (role == 'REQUESTER') {
+//       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+//       if (countryUse == '758SM' || countryUse == '758VA') {
+//         if ((isuCd == '34' && clientTier == 'Q') || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA') {
+//           FormManager.readOnly('salesBusOffCd');
+//           FormManager.readOnly('repTeamMemberNo');
+//         } else {
+//           FormManager.enable('salesBusOffCd');
+//           FormManager.enable('repTeamMemberNo');
+//         }
+//       }
+//     }
+   //  if (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'PRICU' || custSubGrp == 'CROPR' || custSubGrp == 'PRISM'
+//         || custSubGrp == 'PRIVA') {
+//       FormManager.readOnly('salesBusOffCd');
+//       FormManager.readOnly('repTeamMemberNo');
+//       FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+//     }
 
     if ((isuCd == '34' && clientTier == 'Q')
         || (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA'
