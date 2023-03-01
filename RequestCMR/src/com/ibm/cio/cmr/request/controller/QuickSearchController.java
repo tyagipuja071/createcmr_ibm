@@ -129,7 +129,7 @@ public class QuickSearchController extends BaseController {
 
     try {
       AppUser user = AppUser.getUser(request);
-      AsyncRequestCreator async = new AsyncRequestCreator(user, company.getIssuingCntry(), company.getCmrNo());
+      AsyncRequestCreator async = new AsyncRequestCreator(user, company.getIssuingCntry(), company.getSubRegion(), company.getCmrNo());
       Thread t = new Thread(async);
       t.start();
       map.addAttribute("success", true);
