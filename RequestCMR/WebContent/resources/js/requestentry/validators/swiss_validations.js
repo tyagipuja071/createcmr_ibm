@@ -1510,7 +1510,7 @@ function lockIBMTabForSWISS() {
     }
   }
   if (reqType == 'C' && role == 'PROCESSOR') {
-    if (custSubType.includes('BUS') || custSubType.includes('INT') || custSubType.includes('PRI')) {
+    if (custSubType.includes('BUS') || custSubType.includes('INT') || custSubType.includes('PRI') || custSubType.includes('IBM')) {
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
       FormManager.readOnly('searchTerm');
