@@ -165,13 +165,22 @@ public class LoginController extends BaseController {
       method = RequestMethod.GET)
   public ModelAndView performLogout(ModelMap model, HttpServletRequest request) {
 
-    // revoke token
-    String access_token = (String) request.getSession().getAttribute("accessToken");
-    OAuthUtils.revokeToken(access_token);
+    String activateFilter = SystemConfiguration.getValue("ACTIVATE_SSO");
+    if (activateFilter.equalsIgnoreCase("true")) {
+      // revoke token
+      String access_token = (String) request.getSession().getAttribute("accessToken");
+      OAuthUtils.revokeToken(access_token);
+      AppUser.remove(request);
+      request.getSession().invalidate();
+
+      // TODO: which ModelAndView return from here
+      ModelAndView mv = new ModelAndView();
+      MessageUtil.setInfoMessage(mv, MessageUtil.INFO_LOGOUT);
+      return mv;
+    }
 
     AppUser.remove(request);
     request.getSession().invalidate();
-
     ModelAndView mv = new ModelAndView("redirect:/login", "loginUser", new LogInUserModel());
     MessageUtil.setInfoMessage(mv, MessageUtil.INFO_LOGOUT);
     return mv;

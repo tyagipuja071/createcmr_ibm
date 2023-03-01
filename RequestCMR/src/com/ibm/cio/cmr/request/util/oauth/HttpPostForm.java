@@ -10,10 +10,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 public class HttpPostForm {
   private HttpURLConnection httpConn;
   private Map<String, Object> queryParams;
   private String charset;
+
+  protected static final Logger LOG = Logger.getLogger(HttpPostForm.class);
 
   /**
    * This constructor initializes a new HTTP POST request with content type is
@@ -142,6 +146,8 @@ public class HttpPostForm {
       }
       response = result.toString(this.charset);
       httpConn.disconnect();
+    } else if (status == HttpURLConnection.HTTP_BAD_REQUEST) {
+      LOG.debug("Bad request! It is likely the authorization code has expired.");
     } else {
       throw new IOException("Server returned non-OK status: " + status);
     }

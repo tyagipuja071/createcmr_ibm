@@ -355,7 +355,7 @@ public class OAuthUtils {
    * @param access_token
    * @return
    */
-  public static boolean introspectToken(String access_token) {
+  public static boolean isTokenActive(String access_token) {
     if (StringUtils.isNotBlank(access_token)) {
       try {
 
@@ -369,13 +369,9 @@ public class OAuthUtils {
         httpPostForm.addFormField("client_secret", SystemConfiguration.getValue("W3_CLIENT_SECRET"));
 
         String response = httpPostForm.finish();
-
+        LOG.debug("verifying if token is valid: " + access_token);
         JSONObject jsonResp = new JSONObject(response);
-        if (jsonResp.getBoolean("active")) {
-          LOG.debug("Access Token revoked: " + access_token);
-          return true;
-        }
-        return false;
+        return jsonResp.getBoolean("active");
       } catch (Exception e) {
         e.printStackTrace();
         LOG.error("Unable to verify the token: " + access_token);

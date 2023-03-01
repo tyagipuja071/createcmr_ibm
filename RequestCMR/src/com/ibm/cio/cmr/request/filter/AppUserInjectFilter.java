@@ -55,16 +55,16 @@ public class AppUserInjectFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-    // only using during development and testing
-    String activateFilter = SystemConfiguration.getValue("ACTIVATE_SSO_FILTER");
-    if (StringUtils.isNotBlank(activateFilter) && activateFilter.equals("false")) {
+    // can be used to deactivate this filter completely
+    String activateFilter = SystemConfiguration.getValue("ACTIVATE_SSO");
+    if (activateFilter.equalsIgnoreCase("false")) {
       filterChain.doFilter(request, response);
       return;
     }
 
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse resp = (HttpServletResponse) response;
-    HttpSession session = req.getSession(false);
+    HttpSession session = req.getSession();
 
     String url = req.getRequestURI();
     String userIntranetEmail = null;
@@ -140,6 +140,13 @@ public class AppUserInjectFilter implements Filter {
           HttpServletResponse httpResp = (HttpServletResponse) response;
           session.invalidate();
           httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
+          return;
+        } else {
+          if (!OAuthUtils.isTokenActive((String) session.getAttribute("accessToken"))) {
+            // invalidate session and remove the user
+            AppUser.remove(req);
+            session.invalidate();
+          }
         }
       }
 
@@ -181,6 +188,18 @@ public class AppUserInjectFilter implements Filter {
     String url = request.getRequestURI();
 
     if (url.endsWith("/api")) {
+      return false;
+    }
+    if (url.contains("/CreateCMR/query")) {
+      return false;
+    }
+    if (url.contains("/CreateCMR/dropdown/")) {
+      return false;
+    }
+    if (url.contains("/CreateCMR/resources")) {
+      return false;
+    }
+    if (url.endsWith("/logout")) {
       return false;
     }
     // if (url.contains("/") &&
