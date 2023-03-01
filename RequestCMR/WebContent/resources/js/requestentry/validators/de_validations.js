@@ -1403,4 +1403,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.registerValidator(validateEnterpriseNum, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.DE, null, true);
+  GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.DE, null, true);
 });
