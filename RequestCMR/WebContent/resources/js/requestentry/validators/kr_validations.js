@@ -30,7 +30,7 @@ function afterConfigKR() {
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
-    if (custSubGrp == 'INTER') {
+    if (custSubGrp.value == 'Internal') {
         FormManager.setValue('isuCd', '21');
         FormManager.readOnly('isuCd');
       }
@@ -39,6 +39,7 @@ function afterConfigKR() {
   var _clusterHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     FormManager.resetDropdownValues(FormManager.getField('inacCd')); 
+    FormManager.resetDropdownValues(FormManager.getField('isuCd'));
     FormManager.setValue('inacType','');
     FormManager.setValue('inacCd','');
     LockDefaultISUClientTierMrcValues();
@@ -637,6 +638,7 @@ function LockDefaultISUClientTierMrcValues() {
   }
   
   if (searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223' ) {
+	FormManager.readOnly('isuCd');
     getIsuFromIsic();
   }
   FormManager.readOnly('clientTier');
@@ -732,7 +734,6 @@ function getIsuFromIsic(){
 	  if (!(searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223')) {
 		    return;
       }
-	  FormManager.setValue('isuCd','');
 	  var ISU = [];
 	  if (isicCd != '') {
 	    var qParams = {
@@ -746,13 +747,16 @@ function getIsuFromIsic(){
 	        ISU.push(results[i].ret1);
 	      }
 	      if (ISU != null) {
+	    	FormManager.setValue('isuCd','');
 	        FormManager.limitDropdownValues(FormManager.getField('isuCd'), ISU);
 	        if (ISU.length >= 1) {
 	          FormManager.setValue('isuCd', ISU[0]);
 	        }
 	      }
 	    }
-	  }
+	  } else {
+		    FormManager.readOnly('isuCd');
+      }
 	}
 
 dojo.addOnLoad(function() {
