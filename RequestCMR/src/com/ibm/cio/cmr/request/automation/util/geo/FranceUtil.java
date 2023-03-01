@@ -377,11 +377,14 @@ public class FranceUtil extends AutomationUtil {
           List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren + "%",
               data.getCmrIssuingCntry());
           if (coverages != null && !coverages.isEmpty()) {
+
             CoverageContainer coverage = coverages.get(0);
             LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
                 + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
-            covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, null, coverage, CalculateCoverageElement.FINAL,
-                CalculateCoverageElement.COV_REQ, true);
+            // covElement.logCoverage(entityManager, engineData, requestData,
+            // null, details, overrides, null, coverage,
+            // CalculateCoverageElement.FINAL,
+            // CalculateCoverageElement.COV_REQ, true);
             FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
             String sboValue = "";
             if (overrides.getData().containsKey(sboKey)) {
