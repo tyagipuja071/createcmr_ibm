@@ -432,7 +432,10 @@ function addClientTierDefaultLogic() {
   if (_clientTierHandler == null) {
     _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       value = FormManager.getActualValue('clientTier');
-      FormManager.enable('isuCd');
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
+      if (cntry != '766') {
+        FormManager.enable('isuCd');
+      }
       if (value == 'B' || value == 'M' || value == 'W' || value == 'T' || value == 'S' || value == 'C' || value == 'N') {
         FormManager.setValue('isuCd', '32');
         FormManager.readOnly('isuCd');
@@ -446,7 +449,9 @@ function addClientTierDefaultLogic() {
         if (PageManager.isReadOnly()) {
           FormManager.readOnly('isuCd');
         } else {
-          FormManager.enable('isuCd');
+          if (cntry != '766') {
+            FormManager.enable('isuCd');
+          }
         }
       }
     });
