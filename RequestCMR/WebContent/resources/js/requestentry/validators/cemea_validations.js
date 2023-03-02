@@ -690,11 +690,6 @@ function addHandlersForCEMEA() {
             FormManager.removeValidator('clientTier', Validators.REQUIRED);
           }
         }
-
-        if (cntry == '618') {
-          FormManager.removeValidator('clientTier', Validators.REQUIRED);
-        }
-        // CREATCMR-4293
       }
       if (cntry == '618') {
         setClientTierValuesAT(value);
@@ -760,10 +755,7 @@ function setClientTierValuesAT(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  }
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
 }
 
 function addAfterConfigCEE() {
