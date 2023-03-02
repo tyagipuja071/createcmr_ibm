@@ -880,18 +880,18 @@ public class GermanyUtil extends AutomationUtil {
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     boolean isNegativeCheckNeedeed = false;
     if (changes != null && changes.hasDataChanges()) {
-      if (changes.isDataChanged("VAT #")) {
+      if (changes.isDataChanged("VAT #")
+          || (CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo))) {
         UpdatedDataModel vatChange = changes.getDataChange("VAT #");
-        if (vatChange != null) {
-        	if(requestData.getAddress("ZS01").getLandCntry().equals("GB")){
+        	if(vatChange != null && requestData.getAddress("ZS01").getLandCntry().equals("GB")){
         		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
                       engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
                       detail.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
                       isNegativeCheckNeedeed = true;
                       }
-                }else{
-                	if ((StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
-                            || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))) {
+                }
+          if (isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo) || (vatChange != null && (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
+                            || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())))) {
                           // check if the name + VAT exists in D&B
                           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
                           if (matches.isEmpty()) {
@@ -934,9 +934,6 @@ public class GermanyUtil extends AutomationUtil {
                           detail.append("Updates to VAT need verification.\n");
                           LOG.debug("Updates to VAT need verification.");
                         }
-
-                      }
-                }
       } else if (changes.isDataChanged("Order Block")) {
         UpdatedDataModel OBChange = changes.getDataChange("Order Block");
         if (OBChange != null) {
