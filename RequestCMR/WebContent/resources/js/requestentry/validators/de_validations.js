@@ -200,10 +200,10 @@ function validateSBOValuesForIsuCtc() {
           if (!validSboList.includes(sbo)) {
             if (isuCd + clientTier == '32T') {
               return new ValidationResult(null, false, 
-                  'The SBO provided is invalid for corresponding ISU+CTC.');
+                  'The SORTL provided is invalid for corresponding ISU+CTC.');
             } else {
               return new ValidationResult(null, false, 
-                  'The SBO provided is invalid. It should be from the list: ' + validSboList);
+                  'The SORTL provided is invalid. It should be from the list: ' + validSboList);
             }
           }
         }
