@@ -58,6 +58,7 @@ function addISUHandler() {
   console.log(">>>> addISUHandler");
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldClientTier = FormManager.getActualValue('clientTier');
+  removeClientTireValidation();
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       if (_oldIsu != FormManager.getActualValue('isuCd') || (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp'))) {
@@ -2436,7 +2437,7 @@ function lockUnlockFieldForGR() {
     FormManager.readOnly('salesBusOffCd');
     FormManager.readOnly('ppsceid');
 
-  } else if (!_custGrpSet.has(custSubGrp)) {
+  } else if (!_custGrpSet.has(custSubGrp) && custSubGrp != '') {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('enterprise');
