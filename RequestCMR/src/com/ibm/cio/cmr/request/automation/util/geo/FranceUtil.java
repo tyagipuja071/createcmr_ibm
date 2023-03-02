@@ -620,12 +620,14 @@ public class FranceUtil extends AutomationUtil {
 
     LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
     List<Object[]> results = query.getResults(5);
+    List<String> sortlList = new ArrayList<String>();
     if (results != null && !results.isEmpty()) {
       for (Object[] result : results) {
-        // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
         sortl = (String) result[0];
+        sortlList.add(sortl);
       }
     }
+    sortl = sortlList.get(0);
     return sortl;
   }
 
