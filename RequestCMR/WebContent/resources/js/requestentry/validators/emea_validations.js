@@ -8154,6 +8154,34 @@ function validateSalesRepForIT() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+
+function validateCollectionCdIT() {
+	FormManager.addFormValidator((function() {
+		return {
+			validate: function() {
+				var collCd = FormManager.getActualValue('collectionCd');
+				var alphanumeric = /^[0-9A-Z]*$/;
+
+				if (collCd == '') {
+					return new ValidationResult(null, true);
+				} else {
+					if (collCd.length < 5) {
+						return new ValidationResult(null, false, 'Collection Code should be exactly 5 characters.');
+					}
+					if (!collCd.match(alphanumeric)) {
+						return new ValidationResult({
+							id: 'collectionCd',
+							type: 'text',
+							name: 'collectionCd'
+						}, false, 'Collection Code should contain only upper-case latin and numeric characters.');
+					}
+					return new ValidationResult(null, true);
+				}
+			}
+		};
+	})(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function validateSalesRepForUKI() {
   // validate SalesRep for ITALY
   FormManager.addFormValidator((function() {
