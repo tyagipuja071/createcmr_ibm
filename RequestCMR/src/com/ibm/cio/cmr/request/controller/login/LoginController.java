@@ -163,7 +163,7 @@ public class LoginController extends BaseController {
   @RequestMapping(
       value = "/logout",
       method = RequestMethod.GET)
-  public ModelAndView performLogout(ModelMap model, HttpServletRequest request) {
+  public ModelAndView performLogout(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
 
     String activateFilter = SystemConfiguration.getValue("ACTIVATE_SSO");
     if (activateFilter.equalsIgnoreCase("true")) {
@@ -173,9 +173,7 @@ public class LoginController extends BaseController {
       AppUser.remove(request);
       request.getSession().invalidate();
 
-      // TODO: which ModelAndView return from here
-      ModelAndView mv = new ModelAndView();
-      MessageUtil.setInfoMessage(mv, MessageUtil.INFO_LOGOUT);
+      ModelAndView mv = new ModelAndView("loggedOut", "loginUser", new LogInUserModel());
       return mv;
     }
 

@@ -123,8 +123,6 @@ public class AppUserInjectFilter implements Filter {
               session.setAttribute("accessToken", tokens.getAccess_token());
               session.setAttribute("tokenExpiringTime", tokens.getExpires_in());
 
-              // ===============================
-              // TODO how to proceed from here?
               filterChain.doFilter(req, resp);
               return;
             } else {
@@ -134,14 +132,13 @@ public class AppUserInjectFilter implements Filter {
             }
           }
 
-          // this code should run only if no AppUser is present or user has
-          // invalid token
           LOG.debug("No IBM ID detected. Redirecting to W3 ID Provisioner...");
           HttpServletResponse httpResp = (HttpServletResponse) response;
           session.invalidate();
           httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
           return;
         } else {
+          LOG.debug(url);
           if (!OAuthUtils.isTokenActive((String) session.getAttribute("accessToken"))) {
             // invalidate session and remove the user
             AppUser.remove(req);
@@ -200,6 +197,9 @@ public class AppUserInjectFilter implements Filter {
       return false;
     }
     if (url.endsWith("/logout")) {
+      return false;
+    }
+    if (url.endsWith("/CreateCMR/messages/client.json")) {
       return false;
     }
     // if (url.contains("/") &&
