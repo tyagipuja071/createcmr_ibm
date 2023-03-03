@@ -4258,27 +4258,25 @@ function validatorsDIGITForDupField() {
 }
 
 function addEmbargoCdValidatorForME() {
-  var role = FormManager.getActualValue('userRole');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (role == GEOHandler.ROLE_PROCESSOR) {
-    FormManager.addFormValidator((function() {
-      return {
-        validate : function() {
-          var embargoCd = FormManager.getActualValue('embargoCd');
-          if (cntry == '808' || cntry == '865') {
-            if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == 'J' || embargoCd == 'C' || embargoCd == '')) {
-              return new ValidationResult(null, false, 'Order Block Code should be only E, S, J, C, Blank allowed');
-            }
-          } else {
-            if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == 'J' || embargoCd == '')) {
-              return new ValidationResult(null, false, 'Order Block Code should be only E, S, J, Blank allowed');
-            }
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var role = FormManager.getActualValue('userRole');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var embargoCd = FormManager.getActualValue('embargoCd');
+        if (cntry == '808' || cntry == '865') {
+          if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == 'J' || embargoCd == 'C' || embargoCd == '')) {
+            return new ValidationResult(null, false, 'Order Block Code should be only E, S, J, C, Blank allowed');
           }
-          return new ValidationResult(null, true);
+        } else {
+          if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == 'J' || embargoCd == '')) {
+            return new ValidationResult(null, false, 'Order Block Code should be only E, S, J, Blank allowed');
+          }
         }
-      };
-    })(), 'MAIN_CUST_TAB', 'frmCMR');
-  }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 // CMR-4606
 function checkGAddressExist() {
