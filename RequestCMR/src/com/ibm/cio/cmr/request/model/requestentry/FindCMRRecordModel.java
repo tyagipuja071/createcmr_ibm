@@ -316,14 +316,14 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String cmrCollBo;
   private String cmrCollectorNo;
   private String cmrFiscalCd;
-  private String cmrChileBusnTyp;
+  private String cmrStxlTxtVal;
 
-  public String getCmrChileBusnTyp() {
-    return cmrChileBusnTyp;
+  public String getCmrStxlTxtVal() {
+    return cmrStxlTxtVal;
   }
 
-  public void setCmrChileBusnTyp(String cmrChileBusnTyp) {
-    this.cmrChileBusnTyp = cmrChileBusnTyp;
+  public void setCmrStxlTxtVal(String cmrStxlTxtVal) {
+    this.cmrStxlTxtVal = cmrStxlTxtVal;
   }
 
   public String getCmrMexFiscalRegime() {

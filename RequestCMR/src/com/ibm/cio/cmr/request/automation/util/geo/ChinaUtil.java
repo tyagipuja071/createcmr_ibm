@@ -31,7 +31,7 @@ import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 public class ChinaUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(ChinaUtil.class);
-  public static final String SCENARIO_LOCAL_NRML = "NRML";
+  public static final String SCENARIO_LOCAL_NRMLC = "NRMLC";
   public static final String SCENARIO_LOCAL_EMBSA = "EMBSA";
   public static final String SCENARIO_CROSS_CROSS = "CROSS";
   public static final String SCENARIO_LOCAL_AQSTN = "AQSTN";
@@ -130,26 +130,30 @@ public class ChinaUtil extends AutomationUtil {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
     case SCENARIO_ECOSYTEM_PARNER:
-      if ("08036".equals(data.getSearchTerm())) {
-        LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp());
-        result.setOnError(false);
-        details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
-      } else {
-        details
-            .append("Cluster=" + data.getSearchTerm() + " should be default (08036)  for Scenario=" + data.getCustSubGrp() + " for the request.\n");
-        engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() + " should default (08036)  for this scenario", "", "");
-        result.setOnError(true);
-      }
+      // if ("08036".equals(data.getSearchTerm())) {
+      // LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + "
+      // Scenario=" + data.getCustSubGrp());
+      // result.setOnError(false);
+      // details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + "
+      // Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      // } else {
+      // details
+      // .append("Cluster=" + data.getSearchTerm() + " should be default (08036)
+      // for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      // engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm()
+      // + " should default (08036) for this scenario", "", "");
+      // result.setOnError(true);
+      // }
       break;
     case SCENARIO_LOCAL_BUSPR:
-      if ("04182".equals(data.getSearchTerm())) {
+      if ("00075".equals(data.getSearchTerm())) {
         LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp());
         result.setOnError(false);
         details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
       } else {
         details
-            .append("Cluster=" + data.getSearchTerm() + " should be default (04182)  for Scenario=" + data.getCustSubGrp() + " for the request.\n");
-        engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() + " should default (04182)  for this scenario", "", "");
+            .append("Cluster=" + data.getSearchTerm() + " should be default (00075)  for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() + " should default (00075)  for this scenario", "", "");
         result.setOnError(true);
       }
 
@@ -373,7 +377,7 @@ public class ChinaUtil extends AutomationUtil {
     List<String> managerID = SystemParameters.getList("AUTO_CN_MGR_BP_LIST");
     boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
 
-    if (StringUtils.isNotBlank(scenario) && SCENARIO_LOCAL_BUSPR.equals(scenario) || "04182".equals(data.getSearchTerm())
+    if (StringUtils.isNotBlank(scenario) && SCENARIO_LOCAL_BUSPR.equals(scenario) || "00075".equals(data.getSearchTerm())
         || (StringUtils.isBlank(data.getSearchTerm()) || data.getSearchTerm().equals("00000") || !StringUtils.isNumeric(data.getSearchTerm()))
             && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
       if (!managerCheck) {

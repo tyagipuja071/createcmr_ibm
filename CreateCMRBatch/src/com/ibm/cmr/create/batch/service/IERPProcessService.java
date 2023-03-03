@@ -40,6 +40,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.util.BatchUtil;
@@ -1498,6 +1499,10 @@ public class IERPProcessService extends BaseBatchService {
       isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
       isAdminUpdated = cntryHandler.isAdminUpdate(admin, data.getCmrIssuingCntry());
       isDataUpdated = isAdminUpdated || isDataUpdated;
+
+      if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry()) && !isDataUpdated) {
+        isDataUpdated = LAHandler.isTaxInfoUpdated(em, admin.getId().getReqId());
+      }
 
       // 3. Check if there are customer and IBM changes, propagate to other
       // addresses

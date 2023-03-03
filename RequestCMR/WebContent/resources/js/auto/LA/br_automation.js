@@ -40,6 +40,7 @@ function afterConfigForBRV2() {
     prompt += '<br>Private Person';
     prompt += '<br>IBM Employee';
     prompt += '<br>Cross-Border';
+    prompt += '<br>Convert Prospect CMR to Legal';
     // prompt += '<br>(placeholder for new scenario)';
     cmr.showConfirm(null, prompt, 'Client Type', 'Automation.goToOldRequestPage()', {
       OK : 'No',

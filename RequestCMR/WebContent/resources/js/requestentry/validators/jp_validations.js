@@ -2991,13 +2991,15 @@ function setINACCodeMandatory() {
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
   } else if (results != null && results.length > 0) {
     for (var i = 0; i < results.length; i++) {
-      if (results[i].ret2 != ' ' && results[i].ret3 == ' ') {
+      if (results[i].ret2 != ' ') {
         isRequired = true;
         inacCd.push(results[i].ret2);
       }
     }
     if (isRequired) {
-      FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+	  if(!( FormManager.getActualValue('custGrp')=='SUBSI' && FormManager.getActualValue('custSubGrp')=='BQICL') ){
+        FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+      }
       FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCd);
     } else {
       FormManager.resetValidations('inacCd');
@@ -3006,6 +3008,12 @@ function setINACCodeMandatory() {
   } else {
     FormManager.resetValidations('inacCd');
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+  }
+  
+  var setInacRequiredForOfficeCd = "FT,GK, GN,GV, HD,JS,KL, KQ, LC, LG, LJ, PL, PR, QE";
+  var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
+  if(setInacRequiredForOfficeCd.includes(salesBusOffCd)){
+	FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');	
   }
 }
 function addJSICLogic() {
@@ -3118,12 +3126,12 @@ function addClusterOfcdLogic() {
   var results = cmr.query('GET.INACCD_SECTOR_CLUSTER_BY_OFCD', qParams);
   if (results != null && results.length > 0) {
     for (var i = 0; i < results.length; i++) {
-      if (results[i].ret2 == ' ' && results[i].ret4 != ' ') {
+	  if ( results[i].ret4 != ' ') {
         cluster = results[i].ret4;
       }
     }
-    FormManager.setValue('searchTerm', cluster);
   }
+  FormManager.setValue('searchTerm', cluster);
 }
 
 function showConfirmForTier2() {
@@ -5418,7 +5426,7 @@ function resetBPWPQValue() {
   if (custSubGrp == 'BPWPQ') {
     if (reqType == 'C' && (_role == 'Requester' || _role == 'Processor')) {
       FormManager.setValue('salesTeamCd', _pagemodel.salesTeamCd == '' ? '' : _pagemodel.salesTeamCd);
-      FormManager.readOnly('salesTeamCd');
+      //FormManager.readOnly('salesTeamCd');
 
       FormManager.setValue('tier2', _pagemodel.clientTier == '' ? '' : _pagemodel.clientTier);
       FormManager.readOnly('tier2');

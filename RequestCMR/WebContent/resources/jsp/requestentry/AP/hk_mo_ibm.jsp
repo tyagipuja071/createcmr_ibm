@@ -69,11 +69,14 @@ dojo.addOnLoad(function(){
 	      	<p>
 	        <cmr:label fieldId="apCustClusterId"> 
 	         <cmr:fieldLabel fieldId="Cluster" />:
+             <cmr:view forCountry="744">
+                <cmr:info text="${ui.info.ClusterIndia}" />
+             </cmr:view> 
 	         <cmr:delta text="${rdcdata.apCustClusterId}" oldValue="${reqentry.apCustClusterId}"/> 
 	         <cmr:view forCountry="796">
 				<cmr:info text="${ui.info.NZForCluster}" />
 	         </cmr:view>
-	         <cmr:view forCountry="616,749,778,834">
+	         <cmr:view forCountry="616,749,778,834,615,652">
 				<cmr:info text="${ui.info.AUForCluster}" />
 	         </cmr:view>
 	         <cmr:view forCountry="852,856,818">

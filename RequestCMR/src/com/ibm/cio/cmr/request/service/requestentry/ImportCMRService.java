@@ -115,10 +115,13 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     FindCMRRecordModel mainRecord = result.getItems().size() > 0 ? result.getItems().get(0) : null;
     String mainCustNm1 = "";
     String mainCustNm2 = "";
-
+    String prospectSeqNum = "";
     if (mainRecord != null) {
       mainCustNm1 = mainRecord.getCmrName1Plain();
       mainCustNm2 = mainRecord.getCmrName2Plain();
+      if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
+        prospectSeqNum = mainRecord.getCmrAddrSeq();
+      }
     }
 
     geoHandler = convertResults(entityManager, reqModel, result, searchModel);
@@ -215,6 +218,10 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           admin.setProspLegalInd(CmrConstants.YES_NO.Y.toString());
           admin.setDelInd(null);
           admin.setModelCmrNo(null);
+
+          if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+            data.setProspectSeqNo(prospectSeqNum);
+          }
           String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry()
               : searchModel.getSearchIssuingCntry();
           String desc = DropdownListController.getDescription("CMRIssuingCntry", sysLoc, sysLoc, false);
@@ -652,8 +659,14 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     Map<String, Integer> seqMap = new HashMap<String, Integer>();
     Integer seq = null;
     for (FindCMRRecordModel cmr : cmrs) {
-      if (cmr.getCmrAddrTypeCode().equals("ZLST") && cmr.getCmrIssuedBy().equals("897")) {
+      if (cmr.getCmrAddrTypeCode().equals("ZLST") && "897".equals(cmr.getCmrIssuedBy())) {
         continue;
+      }
+      // CREATCMR-7152
+      if ("897".equals(cmr.getCmrIssuedBy())) {
+        if (!"ZS01".equals(cmr.getCmrAddrTypeCode()) && !"ZI01".equals(cmr.getCmrAddrTypeCode()) && !"PG01".equals(cmr.getCmrAddrTypeCode())) {
+          continue;
+        }
       }
       addr = new Addr();
       addrPk = new AddrPK();

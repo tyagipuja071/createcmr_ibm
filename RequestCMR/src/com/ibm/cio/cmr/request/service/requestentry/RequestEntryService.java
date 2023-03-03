@@ -99,7 +99,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
   private final ApprovalService approvalService = new ApprovalService();
   private static final String STATUS_CHG_CMT_PRE_PREFIX = "ACTION \"";
   private static final String STATUS_CHG_CMT_MID_PREFIX = "\" changed the REQUEST STATUS to \"";
-  private static final String STATUS_CHG_CMT_POST_PREFIX = "\"<br/>";
+  private static final String STATUS_CHG_CMT_POST_PREFIX = "\"" + "\n ";
   private CheckListModel checklist;
 
   @Override
@@ -392,13 +392,15 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         geoHandler.doBeforeAdminSave(entityManager, admin, model.getCmrIssuingCntry());
       }
 
+      Data data = entity.getEntity(Data.class);
+
       setLockByName(admin);
       saveAccessToken(admin, request);
+      RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
       updateEntity(admin, entityManager);
 
       adminToUse = admin;
       // create the Data record
-      Data data = entity.getEntity(Data.class);
       if (clearCmrNoAndSap) {
         data.setCmrNo(null);
       }
@@ -591,8 +593,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       geoHandler.doBeforeAdminSave(entityManager, admin, model.getCmrIssuingCntry());
     }
 
+    // update the Data record
+    Data data = entity.getEntity(Data.class);
+
     saveAccessToken(admin, request);
     setLockByName(admin);
+    RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
     updateEntity(admin, entityManager);
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(model.getReqType()) && LAHandler.isLACountry(model.getCmrIssuingCntry())
@@ -600,8 +606,6 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       LAHandler.doDPLNotDone(String.valueOf(model.getReqId()), entityManager, model.getAction(), admin, lockedBy, lockedByNm, processingStatus);
     }
 
-    // update the Data record
-    Data data = entity.getEntity(Data.class);
     if (geoHandler != null && LAHandler.isLACountry(model.getCmrIssuingCntry())) {
       geoHandler.setDataDefaultsOnCreate(data, entityManager);
       geoHandler.doBeforeDataSave(entityManager, admin, data, model.getCmrIssuingCntry());
@@ -699,14 +703,6 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       saveChecklist(entityManager, model.getReqId(), user);
     }
 
-    if (data != null && admin != null && CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())
-        && StringUtils.isNotBlank(data.getCmrIssuingCntry()) && PageManager.fromGeo("EMEA", data.getCmrIssuingCntry())
-        && "Y".equals(admin.getProspLegalInd())) {
-      if (StringUtils.isBlank(data.getCmrNo()) || (StringUtils.isNotBlank(data.getCmrNo()) && !data.getCmrNo().startsWith("P"))) {
-        admin.setProspLegalInd("");
-        updateEntity(admin, entityManager);
-      }
-    }
   }
 
   private String getOldVatValue(EntityManager entityManager, long reqId) {

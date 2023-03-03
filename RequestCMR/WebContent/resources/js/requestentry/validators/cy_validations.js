@@ -136,6 +136,8 @@ function addVATDisabler() {
     var req = FormManager.getActualValue('reqType').toUpperCase();
     var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
     
+    var vat = FormManager.getActualValue('vat');
+    
     if (req == 'C') {
       return;
     }
@@ -151,7 +153,7 @@ function addVATDisabler() {
     }
 
     if (roleCheck && reqCheck) {
-      if (role == 'REQUESTER' && req == 'U') {
+      if (role == 'REQUESTER' && vat != "") {
         FormManager.readOnly('vat');
       }
       clearInterval(interval);
@@ -161,7 +163,6 @@ function addVATDisabler() {
       FormManager.readOnly('vat');
     }
   }, 1000);
-
 }
 
 /**
@@ -3053,5 +3054,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.CYPRUS ], null, true);
+  GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.CYPRUS ]);
 
 });

@@ -1,4 +1,4 @@
-<template id="LA" for="UPDATE">
+<template id="781" for="UPDATE">
 	<tabs>
 		<tab name="Data" type="Data">
 			<columns>
@@ -73,6 +73,19 @@
 					<dbColumn>VAT</dbColumn>
 					<width>20</width>
 					<length>16</length>
+				</column>
+				<column>
+					<label>Tax Regime</label>
+					<dbColumn>MEXICO_FISCAL_REGIME</dbColumn>
+					<width>20</width>
+					<length>30</length>
+					<lovId>LocalTax3</lovId>
+				</column>
+				<column>
+					<label>Mexico Billing Name</label>
+					<dbColumn>MEXICO_BILLING_NAME</dbColumn>
+					<width>20</width>
+					<length>254</length>
 				</column>
 			</columns>
 		</tab>

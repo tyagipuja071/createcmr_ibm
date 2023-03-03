@@ -38,6 +38,8 @@ import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Lov;
 import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
@@ -498,7 +500,7 @@ public class RequestUtils {
     boolean includeUser = false;
     String embeddedLink = "";
     if ("COM".equals(history.getReqStatus()) || "COM".equals(admin.getReqStatus())) {
-      embeddedLink = Feedback.genEmbeddedNPSLink(entityManager, admin, data.getCmrIssuingCntry());
+      embeddedLink = Feedback.generateEmeddedFeedbackLink(data);
     } else if ("PPN".equals(history.getReqStatus())) {
       embeddedLink = Feedback.generateEmeddedContactLink(data);
       includeUser = !StringUtils.isEmpty(embeddedLink);
@@ -1705,6 +1707,44 @@ public class RequestUtils {
       // do nothing
     }
     return "-Unknown-";
+  }
+
+  /**
+   * Ensures the prospect to legal flag is set properly
+   * 
+   * @param admin
+   * @param data
+   */
+  public static void setProspLegalConversionFlag(EntityManager entityManager, Admin admin, Data data) {
+    if (!"C".equals(admin.getReqType())) {
+      admin.setProspLegalInd(null);
+      // no flag for non creates
+      return;
+    }
+    if ("COM".equals(admin.getReqType())) {
+      // ignore completed records
+      return;
+    }
+    String cmrNo = data.getCmrNo();
+    DataPK pk = new DataPK();
+    pk.setReqId(data.getId().getReqId());
+    DataRdc rdc = entityManager.find(DataRdc.class, pk);
+    if (rdc != null && StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(rdc.getCmrNo()) && rdc.getCmrNo().startsWith("P")) {
+      // for other implementations, get prospect cmr no from data_rdc
+      cmrNo = rdc.getCmrNo();
+    }
+    if (StringUtils.isBlank(cmrNo)) {
+      // blank out, no prospect imported
+      admin.setProspLegalInd(null);
+    } else {
+      if (cmrNo.startsWith("P")) {
+        // prospect imported
+        admin.setProspLegalInd("Y");
+      } else {
+        admin.setProspLegalInd(null);
+      }
+    }
+
   }
 
 }
