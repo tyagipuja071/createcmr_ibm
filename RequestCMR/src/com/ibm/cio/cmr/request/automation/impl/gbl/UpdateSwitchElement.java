@@ -59,6 +59,7 @@ public class UpdateSwitchElement extends ValidatingElement {
     Data data = requestData.getData();
     Addr addr = requestData.getAddress("PG01");
     long reqId = requestData.getAdmin().getId().getReqId();
+    String usRestricted = data.getRestrictInd();
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     // CREATCMR-6074
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
@@ -96,6 +97,10 @@ public class UpdateSwitchElement extends ValidatingElement {
 
       boolean isLegalNameUpdtd = handler != null && !handler.customerNamesOnAddress() && AutomationUtil.isLegalNameChanged(admin);
       RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, requestData);
+
+      if("897".equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())){
+    	  data.setRestrictInd(usRestricted);
+      }
 
       if (changes.hasDataChanges() || isLegalNameUpdtd) {
         boolean hasCountryLogic = false;

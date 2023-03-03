@@ -138,6 +138,19 @@
     </cmr:column>
   </cmr:row>
 
+  <cmr:row addBackground="true">
+    <cmr:view forCountry="869">
+      <cmr:column span="2" containerForField="IBMBankNumber">
+        <p>
+          <label for="ibmBankNumber">
+            <cmr:fieldLabel fieldId="IBMBankNumber" />:
+          </label>
+          <cmr:field path="ibmBankNumber" id="ibmBankNumber" fieldId="IBMBankNumber" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+  </cmr:row>
+
   <c:if test="${reqentry.reqType != 'U'}">
     <cmr:row addBackground="true">
       <cmr:column span="2" containerForField="GovernmentType" forCountry="631">

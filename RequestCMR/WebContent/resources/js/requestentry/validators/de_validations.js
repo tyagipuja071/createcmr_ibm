@@ -9,6 +9,8 @@ var _ISUHandler = null;
 var _IMSHandler = null;
 var _deIsuCdHandler = null;
 var _subScenarioHandler = null;
+var oldVatExempt = null;
+var oldCustSubGrp = null;
 
 function afterConfigForDE() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -28,6 +30,7 @@ function afterConfigForDE() {
         console.log(">>> Process vatExempt add * >> ");
        // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       }
+      vatExemptIBMEmp();
     });
   }
 
@@ -52,6 +55,8 @@ function afterConfigForDE() {
   if (_subScenarioHandler == null) {
     _subScenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       setISUValues();
+      // CREATCMR-7424_7425
+      setAbbreviatedNameBasedOnAddressType();
     });
   }
 
@@ -89,6 +94,20 @@ function afterConfigForDE() {
   GEOHandler.disableCopyAddress();
 }
 
+function saveVatExemptStat() {
+  console.log(">>>> saveVatExemptStat");
+  if (isParamtNull(oldVatExempt)) {
+    oldVatExempt = dijit.byId('vatExempt').get('checked');
+  }
+}
+
+function saveCustSubStat() {
+  console.log(">>>> saveCustSubStat");
+  if (isParamtNull(oldCustSubGrp)) {
+    oldCustSubGrp = FormManager.getActualValue('custSubGrp');
+  }
+}
+
 function vatExemptIBMEmp() {
   if (!dijit.byId('vatExempt')) {
     return; 
@@ -96,6 +115,14 @@ function vatExemptIBMEmp() {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var vatExempt = dijit.byId('vatExempt').get('checked');
+  saveCustSubStat();
+  saveVatExemptStat();
+  if (oldCustSubGrp == custSubGrp && oldVatExempt == vatExempt) {
+    return;
+  }
+
   if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');
@@ -233,8 +260,9 @@ function defaultCapIndicator() {
 
 function disableVatExemptForScenarios() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
+  var scenario3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
   if (FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '') {
-    if (_custSubGrp != 'COMME' && _custSubGrp != '3PADC' && _custSubGrp != 'GOVMT' && _custSubGrp != 'BROKR' && _custSubGrp != 'CROSS') {
+    if (_custSubGrp != 'COMME' && !scenario3PADC.includes(_custSubGrp) && _custSubGrp != 'GOVMT' && _custSubGrp != 'BROKR' && _custSubGrp != 'CROSS') {
       FormManager.disable('vatExempt');
     } else {
       FormManager.enable('vatExempt');
@@ -267,12 +295,12 @@ function setISUValues(value) {
   reqType = FormManager.getActualValue('reqType');
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var value = FormManager.getActualValue('clientTier');
-
+  var scenario3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
   if (reqType != 'C') {
     return;
   }
 
-  if (_custSubGrp != 'PRIPE' && _custSubGrp != 'COMME' && _custSubGrp != '3PADC' && _custSubGrp != 'IBMEM' && _custSubGrp != 'CROSS') {
+  if (_custSubGrp != 'PRIPE' && _custSubGrp != 'COMME' && !scenario3PADC.includes(_custSubGrp) && _custSubGrp != 'IBMEM' && _custSubGrp != 'CROSS') {
 
     if (!value) {
       value = FormManager.getField('clientTier');
@@ -332,13 +360,14 @@ function setISUValues(value) {
 
 function limitClientTierValuesOnCreate() {
   var reqType = null;
+  var scenario3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
   reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
     return;
   }
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   if (_custSubGrp != 'undefined' && _custSubGrp != '') {
-    if (_custSubGrp == 'COMME' || _custSubGrp == '3PADC' || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
+    if (_custSubGrp == 'COMME' || scenario3PADC.includes(_custSubGrp) || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
       var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', '7', 'T', 'S', 'C', 'N' ];
       if (clientTierValues != null) {
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTierValues);
@@ -542,6 +571,7 @@ function validateAddressTypeForScenario() {
         var reqType = FormManager.getActualValue('reqType');
         var scenarioType = FormManager.getActualValue('custSubGrp');
         var systemId = FormManager.getActualValue('sourceSystId');
+        var scenarioType3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
         if (reqType == 'C' && scenarioType != undefined && scenarioType != '' && (scenarioType == 'PRIPE' || scenarioType == 'IBMEM')) {
           var qParams = {
             REQ_ID : requestId,
@@ -568,6 +598,20 @@ function validateAddressTypeForScenario() {
             return new ValidationResult(null, false, 'Only Sold To Address is allowed for ' + scenarioDesc + ' scenario. Please remove other addresses.');
           } else {
             return new ValidationResult(null, true);
+          }
+        } else if (reqType == 'C' && scenarioType != undefined && scenarioType != '' && scenarioType3PADC.includes(scenarioType)) {
+          /*
+           * Mandatory addresses ZS01/ZI01 *Sold-to *Installing (Install at)
+           */
+          var soldToCnt = getCountOfAddressByReqId(requestId, 'ZS01')
+          var installingCnt = getCountOfAddressByReqId(requestId, 'ZI01');
+
+          if (installingCnt == 0) {
+            return new ValidationResult(null, false, 'For ' + ((scenarioType == '3PA' || scenarioType == 'X3PA') ? ' Third Party' : ' Data Center')
+                + ' sub-scenarios installing address is mandatory. Please add it.');
+          }
+          if (soldToCnt == 0) {
+            return new ValidationResult(null, false, 'Sold-to address is mandatory.');
           }
         }
         return new ValidationResult(null, true);
@@ -1107,6 +1151,153 @@ function addVatIndValidator(){
 }
 }
 
+// CREATCMR-7424_7425
+function setAbbreviatedNameBasedOnAddressType() {
+  console.log(">>>> setAbbreviatedNameBasedOnAddressType");
+  var _reqId = FormManager.getActualValue('reqId');
+  var subCustGrp = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var custNm1 = getCustNmByReqIdAndAddrTyp(_reqId, "ZI01");
+  var custNm2 = getCustNmByReqIdAndAddrTyp(_reqId, "ZS01");
+
+  if (reqType == 'U') {
+    return;
+  }
+
+  if (custNm1 != undefined && custNm1 != '' && (subCustGrp == '3PA' || subCustGrp == 'X3PA')) {
+    FormManager.setValue('abbrevNm', "C/O " + custNm1.substring(0, 20) + " 3P");
+  } else if (custNm2 != undefined && custNm2 != '' && (subCustGrp == 'DC' || subCustGrp == 'XDC')) {
+    FormManager.setValue('abbrevNm', custNm2.substring(0, 20) + " DC");
+  } else if (((custNm1 == undefined || custNm1 == '') && (subCustGrp == '3PA' || subCustGrp == 'X3PA')) || ((custNm2 == undefined || custNm2 != '') && (subCustGrp == 'DC' || subCustGrp == 'XDC'))) {
+    FormManager.setValue('abbrevNm', '');
+  } else {
+    autoSetAbbrevNmLogic();
+  }
+}
+
+function getCountOfAddressByReqId(reqId, addrTyp) {
+  console.log(">>>> getCountOfAddressByReqId");
+  var count = 0;
+  var countRecord = null;
+  var qParams = {
+    REQ_ID : reqId,
+    ADDR_TYP : addrTyp
+  };
+  countRecord = cmr.query('GET_COUNT_OF_RECORDS_BY_ADDRTYP', qParams);
+  if (!isParamtNull(countRecord)) {
+    count = countRecord.ret1;
+  }
+  return count;
+}
+
+function getCustNmByReqIdAndAddrTyp(reqId, addrTyp) {
+  console.log(">>>> getCustNmByReqIdAndAddrTyp");
+  var results = null;
+  var custNmResult = null;
+  var custNmParams = {
+    REQ_ID : reqId,
+    ADDR_TYPE : addrTyp
+  };
+  results = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', custNmParams);
+  if (!isParamtNull(results)) {
+    custNmResult = results.ret1;
+  }
+  return custNmResult;
+}
+
+function isParamtNull(param) {
+  console.log(">>>> isParamtNull");
+  var isNull = false;
+  if (param == null || param == undefined || param == '') {
+    isNull = true;
+  }
+  return isNull;
+}
+
+// CREATCMR-7424_7425
+function similarAddrCheckValidator() {
+  console.log('>>>>> similarAddrCheckValidator');
+  FormManager.addFormValidator(
+      (function() {
+        return {
+          validate : function() {
+            var req_id = FormManager.getActualValue('reqId');
+            var req_type = FormManager.getActualValue('reqType');
+            var _custSubGrp = FormManager.getActualValue('custSubGrp');
+            var scenario3PADC = [ '3PA', 'DC', 'X3PA', 'XDC' ];
+            if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && scenario3PADC.includes(_custSubGrp)) {
+              var record = null;
+              var addrDupExists = [];
+              var custNm1 = '';
+              var custNm2 = '';
+              var addrTxt = '';
+              var city1 = '';
+              var addrTxt2 = '';
+              var stateProv = '';
+              var landCntry = '';
+              var importIndc = '';
+              var dept = '';
+              for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+                record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+                if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+                  record = _allAddressData[i];
+                }
+                custNm1 = record.custNm1[0];
+                custNm2 = record.custNm2[0] != null ? record.custNm2[0] : '';
+                addrTxt = record.addrTxt[0] != null ? record.addrTxt[0] : '';
+                city1 = record.city1[0] != null ? record.city1[0] : '';
+                stateProv = record.stateProv[0] != null ? record.stateProv[0] : '';
+                addrTxt2 = record.addrTxt2[0] != null ? record.addrTxt2[0] : '';
+                landCntry = record.landCntry[0];
+                dept = record.dept[0] != null ? record.dept[0] : '';
+                importIndc = record.importInd[0] != null ? record.importInd[0] : '';
+
+                if (req_type == 'U' && importIndc == 'Y') {
+                  continue; // skip the unique check for addresses in case of
+                  // import for Update requests.
+                }
+
+                var resultMatches = getSimilarAddressMatches(req_id, custNm1, custNm2, addrTxt, addrTxt2, city1, stateProv, dept, landCntry);
+                if (resultMatches > 1) {
+                  addrDupExists.push(record.addrTypeText);
+                }
+              }
+              if (addrDupExists.length > 0) {
+                return new ValidationResult(null, false, 'Duplicate address details exist for Addresses ' + addrDupExists
+                    + '. Please make sure Sold-To and Install-at address detail should be a unique.');
+              } else {
+                return new ValidationResult(null, true);
+              }
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        };
+      })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function getSimilarAddressMatches(req_id, custNm1, custNm2, addrTxt, addrTxt2, city1, stateProv, dept, landCntry) {
+  var results = null;
+  var countMatches = 0;
+  var qParams = {
+    REQ_ID : req_id,
+    CUST_NM1 : custNm1,
+    CUST_NM2 : custNm2,
+    ADDR_TXT : addrTxt,
+    ADDR_TXT_2 : addrTxt2,
+    CITY1 : city1,
+    STATE_PROV : stateProv,
+    DEPT : dept,
+    LAND_CNTRY : landCntry
+  };
+  results = cmr.query('GET.SME_ADDR_RECORDS_DE', qParams);
+  if (!isParamtNull(results)) {
+    countMatches = results.ret1;
+  }
+  return countMatches;
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -1156,13 +1347,16 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.GERMANY ]);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.GERMANY ], null, true);
+  GEOHandler.registerValidator(similarAddrCheckValidator, GEOHandler.DE, null, true);
 
   GEOHandler.addAfterConfig(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.registerValidator(validateEnterpriseNum, GEOHandler.DE, null, true);  
-  
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.DE, null, true);
+  GEOHandler.addAfterConfig(saveVatExemptStat, GEOHandler.DE);
+  GEOHandler.addAfterConfig(saveCustSubStat, GEOHandler.DE);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);

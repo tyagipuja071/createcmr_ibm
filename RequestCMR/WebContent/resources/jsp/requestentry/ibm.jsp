@@ -129,6 +129,7 @@ dojo.addOnLoad(function(){
 	      	<cmr:label fieldId="searchTerm">
 	        <cmr:fieldLabel fieldId="SearchTerm" />: 
 	        <cmr:delta text="${rdcdata.searchTerm}" oldValue="${reqentry.searchTerm}"/>
+	        <span id="cnsearchterminfoSpan" style="display:none"><cmr:info text="${ui.info.cnsearchterminfo}"></cmr:info></span>
 	      	</cmr:label>
 	      	<cmr:field fieldId="ChinaSearchTerm" id="searchTerm" path="searchTerm" tabId="MAIN_IBM_TAB" />
 	    	</p>
@@ -416,7 +417,8 @@ dojo.addOnLoad(function(){
         <cmr:button label="Retrieve Values" onClick="retrieveInterfaceValues()" highlight="true">
         </cmr:button>
       <%if ("Processor".equalsIgnoreCase(reqentry.getUserRole()) 
-      && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("631")){%>
+      && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("631") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("641") && reqentry.getCustSubGrp()!=null && 
+      (reqentry.getCustSubGrp().equalsIgnoreCase("ECOSY") || reqentry.getCustSubGrp().equalsIgnoreCase("NRMLC") || reqentry.getCustSubGrp().equalsIgnoreCase("AQSTN"))){%>
       <span class="ibm-required cmr-required-spacer">*</span>
       <%} else {%>
       <span class="ibm-required cmr-required-spacer" style="visibility:hidden">*</span>

@@ -128,6 +128,30 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
       name = "BP_NAME")
   private String bpName;
 
+  @Column(
+      name = "MEXICO_BILLING_NAME")
+  private String mexicoBillingName;
+
+  @Column(
+      name = "MEXICO_FISCAL_REGIME")
+  private String mexicoFiscalRegime;
+
+  public String getMexicoFiscalRegime() {
+    return mexicoFiscalRegime;
+  }
+
+  public void setMexicoFiscalRegime(String mexicoFiscalRegime) {
+    this.mexicoFiscalRegime = mexicoFiscalRegime;
+  }
+
+  public String getMexicoBillingName() {
+    return mexicoBillingName;
+  }
+
+  public void setMexicoBillingName(String mexicoBillingName) {
+    this.mexicoBillingName = mexicoBillingName;
+  }
+
   public String getTaxExemptStatus2() {
     return taxExemptStatus2;
   }

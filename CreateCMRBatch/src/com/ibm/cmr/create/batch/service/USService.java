@@ -1246,10 +1246,22 @@ public class USService extends TransConnService {
         PreparedQuery query = new PreparedQuery(entityManager, sql);
         query.setParameter("REQ_ID", admin.getId().getReqId());
         List<Addr> addresses = query.getResults(Addr.class);
-
+        // CREATCMR-7152
+        boolean isSkipFlg = false;
         if (addresses != null && addresses.size() > 0) {
           for (Addr addr : addresses) {
             // setting sequence no.
+            // CREATCMR-7152
+            isSkipFlg = false;
+            if ("ZS01".equals(addr.getId().getAddrType()) || "ZI01".equals(addr.getId().getAddrType()) || "ZZ01".equals(addr.getId().getAddrType())) {
+              if (!"001".equals(addr.getId().getAddrSeq()) && !"002".equals(addr.getId().getAddrSeq())) {
+                isSkipFlg = true;
+              }
+            }
+            if (isSkipFlg) {
+              LOG.debug("AddrType is " + addr.getId().getAddrType() + " and addrSeq is " + addr.getId().getAddrSeq() + " is skip.");
+              continue;
+            }
             response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, entityManager, isTempReactivate);
             respStatuses.add(response.getStatus());
           }
@@ -1264,6 +1276,17 @@ public class USService extends TransConnService {
 
         if (addresses != null && addresses.size() > 0) {
           for (Addr addr : addresses) {
+            // CREATCMR-7152
+            isSkipFlg = false;
+            if ("ZS01".equals(addr.getId().getAddrType()) || "ZI01".equals(addr.getId().getAddrType()) || "ZZ01".equals(addr.getId().getAddrType())) {
+              if (!"001".equals(addr.getId().getAddrSeq()) && !"002".equals(addr.getId().getAddrSeq())) {
+                isSkipFlg = true;
+              }
+            }
+            if (isSkipFlg) {
+              LOG.debug("AddrType is " + addr.getId().getAddrType() + " and addrSeq is " + addr.getId().getAddrSeq() + " is skip.");
+              continue;
+            }
             AddrRdc addrRdc = getAddrRdcRecords(entityManager, addr);
             boolean isAddrUpdated = false;
 
@@ -1291,6 +1314,17 @@ public class USService extends TransConnService {
         if (isDataUpdated && (notProcessed != null && notProcessed.size() > 0)) {
           LOG.debug("Processing CMR Data changes to " + notProcessed.size() + " addresses of CMR# " + data.getCmrNo());
           for (Addr addr : notProcessed) {
+            // CREATCMR-7152
+            isSkipFlg = false;
+            if ("ZS01".equals(addr.getId().getAddrType()) || "ZI01".equals(addr.getId().getAddrType()) || "ZZ01".equals(addr.getId().getAddrType())) {
+              if (!"001".equals(addr.getId().getAddrSeq()) && !"002".equals(addr.getId().getAddrSeq())) {
+                isSkipFlg = true;
+              }
+            }
+            if (isSkipFlg) {
+              LOG.debug("AddrType is " + addr.getId().getAddrType() + " and addrSeq is " + addr.getId().getAddrSeq() + " is skip.");
+              continue;
+            }
             response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, entityManager, isTempReactivate);
             respStatuses.add(response.getStatus());
           }

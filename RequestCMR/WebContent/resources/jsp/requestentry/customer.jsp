@@ -82,7 +82,7 @@
   </cmr:row>
 
   <cmr:row>
-    <cmr:view exceptForGEO="CEMEA" exceptForCountry="848,706">
+    <cmr:view exceptForGEO="CEMEA" exceptForCountry="706">
       <cmr:column span="2" containerForField="CustLang">
         <p>
           <cmr:label fieldId="custPrefLang">
