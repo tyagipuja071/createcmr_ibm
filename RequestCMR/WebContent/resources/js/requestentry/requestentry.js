@@ -1881,14 +1881,6 @@ function checkIfFinalDnBCheckRequired() {
       return true;
     }
   }
-  // CREATCMR-8430: do DNB check for NZ update
-  if (cmrCntry == '796') {
-    if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
-        && !isSkipDnbMatching()) {
-      // currently Enabled Only For US
-      return true;
-    }
-  }
   return false;
 }
 function checkIfDnBCheckReqForIndia() {

@@ -193,7 +193,8 @@ function isSkipDnbMatching() {
   var countryUse = FormManager.getActualValue("countryUse");
   var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
   // CREATCMR-8430: do DNB check for NZ update
-  if("796" == FormManager.getActualValue('cmrIssuingCntry')){
+  var reqType = FormManager.getActualValue('reqType');
+  if("796" == FormManager.getActualValue('cmrIssuingCntry') && reqType == 'U'){
     return false;
   }
   if(SysLoc.INDIA == FormManager.getActualValue('cmrIssuingCntry')){
