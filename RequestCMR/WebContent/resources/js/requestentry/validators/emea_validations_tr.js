@@ -385,7 +385,7 @@ function autoSetAbbrevNameUKIInterFSL(custType) {
     }
 
     FormManager.setValue('abbrevNm', abbrevNm);
-    // FormManager.readOnly('abbrevNm');
+    FormManager.readOnly('abbrevNm');
   } else if (('INTER' == custType || 'XINTR' == custType) && (SysLoc.IRELAND == cntry || SysLoc.UK == cntry)) {
     var dept = FormManager.getActualValue('ibmDeptCostCenter');
 
@@ -395,7 +395,7 @@ function autoSetAbbrevNameUKIInterFSL(custType) {
 
     abbrevNm = 'IBM/' + dept + '/' + tmInstallName1;
     FormManager.setValue('abbrevNm', abbrevNm);
-    // FormManager.readOnly('abbrevNm');
+    FormManager.readOnly('abbrevNm');
 
   } else {
     if (abbrevNmDBVal == '') {
@@ -880,38 +880,7 @@ function autoSetVAT(_custType, custTypeinDB) {
   }
 
   if (custTypeinDB != null && custTypeinDB == _custType) {
-    return
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
+    return;
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -1812,7 +1781,7 @@ function fieldsReadOnlyIsrael() {
     role = _pagemodel.userRole;
   }
   if (role == 'Requester') {
-    // FormManager.readOnly('abbrevNm');
+    FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
   } else if (role == 'Processor') {
     FormManager.enable('abbrevNm');
@@ -1864,7 +1833,7 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
     console.log("fieldsReadOnlyItaly for REQUESTER..");
 
     // Defect: 1461349 - For Lock and unlocked
-    // FormManager.readOnly('abbrevNm');
+    FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
     FormManager.resetValidations('abbrevNm');
 
@@ -4172,7 +4141,7 @@ function updateAddrTypeList(cntry, addressMode, saving) {
 function setFieldsToReadOnlyGRCYTR() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (role == 'REQUESTER') {
-    // FormManager.readOnly('abbrevNm');
+    FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
   }
   FormManager.readOnly('salesTeamCd');
