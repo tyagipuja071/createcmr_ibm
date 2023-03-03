@@ -3054,21 +3054,7 @@ function setClientTierValuesCY() {
   lockUnlockField();
 }
 
-function removeClientTireValidation() {
-  console.log(">>>> removeClientTireValidation");
-  var isuCd = FormManager.getActualValue('isuCd');
 
-  // Only for Request type create
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  } else {
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-  }
-}
 
 function setEnterpriseValues() {
   console.log(">>>> setEnterpriseValues");
@@ -3221,9 +3207,10 @@ function validatorEnterpriseCY(){
 function removeClientTireValidation() {
   console.log(">>>> removeClientTireValidation");
   var isuCd = FormManager.getActualValue('isuCd');
-
+  FormManager.resetValidations('clientTier');
   if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    $("#clientTierSpan").html('');
   } else {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
   }
