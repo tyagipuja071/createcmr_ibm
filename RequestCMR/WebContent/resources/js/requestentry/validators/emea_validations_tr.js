@@ -8092,19 +8092,17 @@ function addEmbargoCodeValidatorIT() {
 function addEmbargoCdValidatorForTR() {
   var role = FormManager.getActualValue('userRole');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (role == GEOHandler.ROLE_PROCESSOR) {
-    FormManager.addFormValidator((function() {
-      return {
-        validate : function() {
-          var embargoCd = FormManager.getActualValue('embargoCd');
-          if (embargoCd && !(embargoCd == 'Y' || embargoCd == 'C' || embargoCd == 'J' || embargoCd == '')) {
-            return new ValidationResult(null, false, 'Order Block Code should be only Y, C, J, Blank allowed');
-          }
-          return new ValidationResult(null, true);
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var embargoCd = FormManager.getActualValue('embargoCd');
+        if (embargoCd && !(embargoCd == 'Y' || embargoCd == 'C' || embargoCd == 'J' || embargoCd == '')) {
+          return new ValidationResult(null, false, 'Embargo Block Code should be only Y, C, J, Blank.');
         }
-      };
-    })(), 'MAIN_CUST_TAB', 'frmCMR');
-  }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 /**
