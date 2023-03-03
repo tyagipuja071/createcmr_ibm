@@ -580,7 +580,9 @@ function addHandlersForPTES() {
   console.log(">>>> addHandlersForPTES");
   _oldClientTier = FormManager.getActualValue('clientTier');
   _oldIsu = FormManager.getActualValue('isuCd');
-  _oldIsicCd = FormManager.getActualValue('isicCd')
+  _oldIsicCd = FormManager.getActualValue('isicCd');
+  removeClientTireValidation();
+  forceLockUnlock();
   if (_isicHandler == null) {
     _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
       console.log(">>>> onChange isicCd");
