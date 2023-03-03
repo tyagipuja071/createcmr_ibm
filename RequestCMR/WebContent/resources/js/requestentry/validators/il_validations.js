@@ -2872,7 +2872,7 @@ function lockUnlockFieldForISrael() {
 function removeClientTireValidation() {
   console.log(">>>> removeClientTireValidation");
   var isuCd = FormManager.getActualValue('isuCd');
-
+  FormManager.resetValidations('clientTier');
   if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
