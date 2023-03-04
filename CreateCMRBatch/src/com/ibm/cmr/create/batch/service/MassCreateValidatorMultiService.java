@@ -171,11 +171,17 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
           LOG.debug("Default Approval Response Code " + defaultApprovalResult);
         }
         if (StringUtils.isBlank(defaultApprovalResult)) {
-          request.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+          boolean isCMDERequester = isCMDERequester(entityManager, request.getRequesterId(), data.getCmrIssuingCntry());
+          if (isCMDERequester) {
+            request.setReqStatus(CmrConstants.REQUEST_STATUS.AUT.toString());
+            comment = "System validation succeeded. Request sent for Automated Processing.";
+          } else {
+            request.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+            comment = "System validation succeeded. Request sent for Processing.";
+          }
           processingCenter = getProcessingCenter(entityManager, data.getCmrIssuingCntry());
           request.setLastProcCenterNm(processingCenter);
 
-          comment = "System validation succeeded. Request sent for Processing.";
           sendToId = processingCenter;
         } else {
           approvalsNeeded = true;
@@ -486,5 +492,20 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
   protected boolean terminateOnLongExecution() {
     return false;
   }
+  
+  private boolean isCMDERequester(EntityManager em, String requester_id, String country) {
+    boolean isCMDE=false;
+    String sql = ExternalizedQuery.getSql("AUTO.CHECK_CMDE_REQUESTER");
+    PreparedQuery query = new PreparedQuery(em, sql);
+    query.setParameter("REQUESTER_ID", requester_id);
+    query.setParameter("CMR_ISSUING_CNTRY", country);
+    query.setForReadOnly(true);
+    Object result = query.getSingleResult(String.class);
+    if (result != null) {
+      isCMDE = true;
+    }
+    return isCMDE;
+  }
+
 
 }
