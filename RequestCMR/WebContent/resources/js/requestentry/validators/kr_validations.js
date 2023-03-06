@@ -1,9 +1,14 @@
 /* Register KR Javascripts */
+var _isicHandler = null;
 
 function afterConfigKR() {
   var role = null;
   var reqType = null;
   var _isuHandler = null;
+  
+  _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+    getIsuFromIsic();
+  });
 
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
@@ -78,7 +83,9 @@ function afterConfigKR() {
   // Non editable for requester role
   if (reqType == 'C' && role == 'Requester') {
     FormManager.readOnly('isuCd');
-    FormManager.readOnly('cmrNoPrefix');
+    if (custSubGrp != 'INTER') {
+      FormManager.readOnly('cmrNoPrefix');
+    }
   }
 
   if (reqType == 'C') {
@@ -117,6 +124,9 @@ function afterConfigKR() {
   handleObseleteExpiredDataForUpdate();
   // CREATCMR-788
   addressQuotationValidator();
+  FormManager.readOnly('clientTier');
+  FormManager.readOnly('isuCd');
+  FormManager.readOnly('mrcCd');
 }
 
 function setClientTierValues() {
@@ -126,14 +136,17 @@ function setClientTierValues() {
   isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.readOnly('clientTier');
   } else {
     var reqType = FormManager.getActualValue('reqType');
     if (reqType != 'U') {
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     }
-    FormManager.enable('clientTier');
   }
   handleObseleteExpiredDataForUpdate();
+  FormManager.readOnly('clientTier');
+  FormManager.readOnly('isuCd');
+  FormManager.readOnly('mrcCd');
 }
 
 function setChecklistStatus() {
@@ -509,6 +522,7 @@ function handleObseleteExpiredDataForUpdate() {
 
   }
 }
+
 function addressQuotationValidator() {
   // CREATCMR-788
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
@@ -600,9 +614,9 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('mrcCd');
         FormManager.setValue('isicCd', '8888');
         FormManager.readOnly('isicCd');
+        FormManager.readOnly('cmrNoPrefix');
         FormManager.readOnly('inacCd');
         FormManager.readOnly('inacType');
-        FormManager.enable('cmrNoPrefix');
         break;
       case "LKYN":  
         FormManager.limitDropdownValues(searchTerm, [ '09065' ]);
