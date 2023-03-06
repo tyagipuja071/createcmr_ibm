@@ -883,6 +883,14 @@ public class IERPProcessService extends BaseBatchService {
                       addr.setPairedAddrSeq(addrSeqs[0]);
                       addr.setSapNo(red.getSapNo());
                       addr.setIerpSitePrtyId(red.getIerpSitePartyId());
+                      if ((SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry()))
+                          && !StringUtils.isEmpty(response.getCmrNo()) && !StringUtils.isEmpty(addr.getId().getAddrSeq())) {
+                        String strPaygoNo = getPaygoSapnoForNZ(em, response.getCmrNo(), addr.getId().getAddrSeq());
+                        if (!StringUtils.isEmpty(strPaygoNo)) {
+                          addr.setSapNo(strPaygoNo);
+                          addr.setIerpSitePrtyId("S" + strPaygoNo);
+                        }
+                      }
                     }
                   }
                 }
@@ -1627,6 +1635,19 @@ public class IERPProcessService extends BaseBatchService {
 
   public void setMultiMode(boolean multiMode) {
     this.multiMode = multiMode;
+  }
+
+  private String getPaygoSapnoForNZ(EntityManager entityManager, String cmrNo, String seqNo) {
+    LOG.debug("getPaygoSapnoForNZ ");
+    String PaygoSapno = "";
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GET.NZ.PAYGOSAPNO"));
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", SystemLocation.NEW_ZEALAND);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setParameter("ZZKV_SEQNO", seqNo);
+    query.setForReadOnly(true);
+    PaygoSapno = query.getSingleResult(String.class);
+    return PaygoSapno;
   }
 
   // public List<Long> getPendingReqIds() {
