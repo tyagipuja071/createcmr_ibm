@@ -273,11 +273,11 @@ function setInacByCluster() {
       FormManager.removeValidator('inacType', Validators.REQUIRED);
       
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-      FormManager.resetDropdownValues(FormManager.getField('inacType'));
-      
+      FormManager.resetDropdownValues(FormManager.getField('inacType'));      
       clearInacOnClusterChange(_cluster);
       return;
     }
+    
 }
 
 
@@ -2166,8 +2166,7 @@ function setISUDropDownValues() {
         }
       }
     }
-  }
-  setIsuOnIsic();
+  }  
 }
 
 function validateStreetAddrCont2() {
@@ -2937,8 +2936,7 @@ function setDefaultOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-  
-   
+     
   if(scenarioChanged && scenario == 'KYNDR') {
     var isInacTypeReadOnlyFromScenarios = TemplateService.isFieldReadOnly('inacType');
     if(isInacTypeReadOnlyFromScenarios) {

@@ -1360,7 +1360,6 @@ function connectToCmrServices() {
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (cmrCntry == '744') {
     setClusterGlcCovIdMapNrmlc();
-    lockFieldsWithDefaultValuesByScenarioSubType();
   }
 }
 
