@@ -1813,6 +1813,13 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
   } else {
     cmr.hideNode('sboInfo');
   }
+   if(reqType == 'U'){
+	  var landcntry = getZS01LandCntry();
+	  if(landcntry != 'IT' && landcntry != null && landcntry != undefined && landcntry != ''){
+			FormManager.readOnly('taxCd1');
+      FormManager.setValue('taxCd1','');
+	}
+  }
   if (reqType != 'C') {
     return;
   }
@@ -5185,6 +5192,7 @@ function set34QYZlogicOnISUCtcChange() {
       FormManager.setValue('clientTier', 'Q');
       FormManager.readOnly('repTeamMemberNo');
       FormManager.setValue('repTeamMemberNo', '012345');
+      FormManager.enable('salesBusOffCd');
     } else if (ibmEmpCustSubTypes.includes(custSubType)) {
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
@@ -5281,14 +5289,12 @@ function setSBOSalesRepFor34QYZ() {
   }
 
   // GET LANDCNTRY in case of CB
-  if (custType == 'CROSS') {
     var result1 = cmr.query('LANDCNTRY.IT', {
       REQID : reqId
     });
     if (result1 != null && result1.ret1 != undefined) {
       landCntry = result1.ret1;
     }
-  }
 
   var commSubTypes = [ 'COMME', 'COMSM', 'COMVA', 'CROCM', 'GOVST', 'LOCEN', 'GOVSM', 'LOCSM', 'GOVVA', 'LOCVA', 'CROGO', 'NGOIT', 'NGOVA', 'NGOSM', '3PAIT', 'UNIVA', 'UNIVE', 'UNISM', '3PASM',
       '3PAVA', 'CRO3P', 'CROUN', 'CROLC' ];
