@@ -15,6 +15,7 @@
 package com.ibm.cio.cmr.request.filter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -236,6 +237,26 @@ public class SessionInactivityFilter implements Filter {
 
         if (!req.getRequestURI().contains("/sessioncheck")) {
           updateLastUserTriggeredRequestDate(req);
+        }
+
+        LocalDateTime tokenExpiringTime = (LocalDateTime) session.getAttribute("tokenExpiringTime");
+        if (tokenExpiringTime != null && LocalDateTime.now().isAfter(tokenExpiringTime)) {
+          LOG.debug("Access token expired!");
+          // revoke token
+          OAuthUtils.revokeToken((String) session.getAttribute("accessToken"));
+
+          AppUser.remove(req);
+          session.invalidate();
+          long reqId = extractRequestId((HttpServletRequest) request);
+          if (reqId > 0) {
+            req.setAttribute("r", reqId);
+          }
+          String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
+          if (!StringUtils.isBlank(findCmrParams)) {
+            req.setAttribute("c", findCmrParams);
+          }
+          req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
+          return;
         }
       } else {
         // LOG.debug("User has no session");

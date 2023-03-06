@@ -128,6 +128,10 @@ public class AppUserInjectFilter implements Filter {
             } else {
               LOG.trace("Invalid Token! Unable to proceed with the request.");
               // TODO what to do if token is invalid or expired?
+              OAuthUtils.revokeToken(tokens.getAccess_token());
+              AppUser.remove(req);
+              session.invalidate();
+              filterChain.doFilter(req, resp);
               return;
             }
           }
@@ -137,16 +141,8 @@ public class AppUserInjectFilter implements Filter {
           session.invalidate();
           httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
           return;
-        } else {
-          LOG.debug(url);
-          if (!OAuthUtils.isTokenActive((String) session.getAttribute("accessToken"))) {
-            // invalidate session and remove the user
-            AppUser.remove(req);
-            session.invalidate();
-          }
         }
       }
-
     } catch (Exception e) {
       LOG.error("Error processing AppUserInjectFilter", e);
     }
@@ -184,22 +180,10 @@ public class AppUserInjectFilter implements Filter {
   private boolean shouldFilter(HttpServletRequest request) {
     String url = request.getRequestURI();
 
-    if (url.endsWith("/api")) {
-      return false;
-    }
-    if (url.contains("/CreateCMR/query")) {
-      return false;
-    }
-    if (url.contains("/CreateCMR/dropdown/")) {
-      return false;
-    }
-    if (url.contains("/CreateCMR/resources")) {
+    if (url.endsWith("/update")) {
       return false;
     }
     if (url.endsWith("/logout")) {
-      return false;
-    }
-    if (url.endsWith("/CreateCMR/messages/client.json")) {
       return false;
     }
     // if (url.contains("/") &&
