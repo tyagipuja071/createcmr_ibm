@@ -364,17 +364,33 @@ public class AustraliaUtil extends AutomationUtil {
           output.setDetails(details.toString());
           engineData.addNegativeCheckStatus("ABNLegalName", "Customer name doesn't matches from API & DNB match");
         } else {
-          validation.setMessage("Not Validated");
-          details.append("The Customer Name and Former Customer Name doesn't match from API & DNB");
-          // company proof
-          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-            details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+          if (!"PayGo-Test".equals(admin.getSourceSystId()) && !"BSS".equals(admin.getSourceSystId())) {
+            validation.setMessage("Not Validated");
+            details.append("The Customer Name and Former Customer Name doesn't match from API & DNB");
+            // company proof
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+            } else {
+              details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
+                  + customerName + " update.");
+            }
+            output.setDetails(details.toString());
+            engineData.addNegativeCheckStatus("ABNLegalName", "The Customer Name and Former Customer Name doesn't match from API & DNB");
           } else {
-            details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
-                + customerName + " update.");
+            validation.setSuccess(true);
+            validation.setMessage("Successful");
+            output.setProcessOutput(validation);
+            details.append("The Customer Name and Former Customer Name doesn't match from API & DNB");
+            // company proof
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+            } else {
+              details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
+                  + customerName + " update.");
+            }
+            output.setDetails(details.toString());
           }
-          output.setDetails(details.toString());
-          engineData.addNegativeCheckStatus("ABNLegalName", "The Customer Name and Former Customer Name doesn't match from API & DNB");
+
         }
 
       } finally {
