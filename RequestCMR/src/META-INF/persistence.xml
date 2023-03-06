@@ -102,6 +102,8 @@
     <class>com.ibm.cio.cmr.request.entity.RequestChangeLogPK</class>
     <class>com.ibm.cio.cmr.request.entity.Changelog</class>
     <class>com.ibm.cio.cmr.request.entity.ChangelogPK</class>
+    <class>com.ibm.cio.cmr.request.entity.GenChangelog</class>
+    <class>com.ibm.cio.cmr.request.entity.GenChangelogPK</class>
     <class>com.ibm.cio.cmr.request.entity.DefaultApprovalConditions</class>
     <class>com.ibm.cio.cmr.request.entity.DefaultApprovalConditionsPK</class>
     <class>com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients</class>
