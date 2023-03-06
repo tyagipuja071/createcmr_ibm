@@ -62,9 +62,12 @@ String procCenter = reqentry.getProcCenter() != null ? reqentry.getProcCenter() 
       </cmr:row>
       <cmr:row topPad="5" addBackground="true">
           <div class="ibm-col-1-1 cmr-middle">
-<%if (!readOnly) {%>
+<%if (!readOnly ||  ("COM".equals(reqentry.getReqStatus()) && "P".equals(reqentry.getClaimRole()))) {%>
             <cmr:button label="${ui.btn.attachment}" onClick="doAddAttachment()" />
-            <cmr:button label="${ui.btn.addscreenshot}" onClick="doAddScreenshot()" pad="true"/>
+            <%if (!readOnly) {%>
+            	<cmr:button label="${ui.btn.addscreenshot}" onClick="doAddScreenshot()" pad="true"/>
+            <%}%>
+            
 <%}%>
           </div>
         <br><br>
