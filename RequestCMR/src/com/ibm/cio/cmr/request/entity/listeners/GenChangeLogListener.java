@@ -460,9 +460,9 @@ public class GenChangeLogListener {
 
     genChangelog.setChange_by(changeBy.toString());
 
-    genChangelog.setChange_src_typ("US COMPANY MAINTENANCE");// REQUEST TYPE
-    genChangelog.setChange_src_id("ADMIN");// REQUEST
-                                           // ID
+    genChangelog.setChange_src_typ("ADMIN");// REQUEST TYPE
+    genChangelog.setChange_src_id("");// REQUEST
+                                      // ID
 
     // create the log
     LOG.trace("Creating GEN_CHANGE_LOG Record: Table " + table + " Mandt: " + mandt + " Kunnr: " + tabKey + " Action: " + action + " Field: " + field
