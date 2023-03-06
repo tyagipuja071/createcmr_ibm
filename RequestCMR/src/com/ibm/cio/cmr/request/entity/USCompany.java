@@ -9,9 +9,13 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.ibm.cio.cmr.request.entity.listeners.GenChangeLogDetails;
+import com.ibm.cio.cmr.request.entity.listeners.GenChangeLogListener;
 
 /**
  * The persistent class for the US_Enterprise database table.
@@ -19,6 +23,9 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "US_COMPANY", schema = "SAPR3")
+@EntityListeners(GenChangeLogListener.class)
+@GenChangeLogDetails(mandt = "id.mandt", tab_key1 = "id.compNo", tab_key2 = "entNo", pk = "id", tab_nm = "US_COMPANY")
+
 public class USCompany extends BaseEntity<USCompanyPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
