@@ -49,7 +49,7 @@
         <input type="button" class="cmr-grid-btn-h" style="margin-left: 20px" onclick="Automation.viewResults()" value="View System Processing Results">
       <%}%>
         <input type="button" class="cmr-grid-btn" style="margin-left: 20px" onclick="CmrGrid.refresh('COMMENT_LIST_GRID')" value="Refresh Comments">
-      <%if (!readOnly){%>
+      <%if (!readOnly || ("COM".equals(reqentry.getReqStatus()) && "P".equals(reqentry.getClaimRole()))){%>
         <input type="button" class="cmr-grid-btn" style="margin-left: 20px" onclick="cmr.showModal('addCommentModal')" value="Add Comment">
       <%}%>
       </div>
