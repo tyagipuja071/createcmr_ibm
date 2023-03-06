@@ -3159,17 +3159,13 @@ function setEntAndSalesRep(entp, salRep) {
   var subIndCd = FormManager.getActualValue('subIndustryCd');
   var belongs = subIndValSpain.includes(subIndCd) ? 'Y' : 'N';
   var postcd = getPostalCode();
-  var result1 = cmr.query('GET.ENTP.SPAIN', {
+  return cmr.query('GET.ENTP.SPAIN', {
     _qall : 'Y',
     POST_CD : '%' + postcd + '%',
     CTC : isuCd.concat(clientTier),
     BELONGS : belongs
   });
 
-  if (result1 != null && result1 != '') {
-    entp = result1[0].ret1;
-    salRep = result1[0].ret2;
-  }
 }
 
 function getLandedCntry() {
@@ -3245,7 +3241,11 @@ function validatorEnterpriseES() {
   var entp = '';
   var salRep = '';
 
-  setEntAndSalesRep(entp, salRep);
+  var result1 = setEntAndSalesRep();
+  if (result1 != null && result1 != '') {
+    entp = result1[0].ret1;
+    salRep = result1[0].ret2;
+  }
 
   var condForEnt1 = isuCd == '34' && enterprise != '985204' && custGrp == 'CROSS' && landCntry == 'MT';
   var condForEnt2 = isuCd == '34' && !entFor34QES.has(enterprise) && enterprise != entp;
@@ -3269,7 +3269,7 @@ function validatorEnterpriseES() {
       id : 'enterprise',
       type : 'text',
       name : 'enterprise'
-    }, false, 'Enterprise can only accept \'986111\', \'986162\', \'986140\', \'986181\', \'986254\', \'986270\', \'986294\'.');
+    }, false, 'Enterprise can only accept \'986111\', \'986162\', \'986140\', \'986181\', \'986254\', \'986270\', \'986294\',' + " '" + entp + "'.");
   } else if (condForEnt3) {
     return new ValidationResult({
       id : 'enterprise',
