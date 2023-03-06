@@ -7515,30 +7515,16 @@ function toggleBPRelMemType() {
     if (_custType == 'BUSPR' || _custType == 'BUSSM' || _custType == 'BUSVA' || _custType == 'CROBP') {
       FormManager.show('PPSCEID', 'ppsceid');
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-      FormManager.show('MembLevel', 'memLvl');
-      FormManager.show('BPRelationType', 'bpRelType');
-      FormManager.resetValidations('bpRelType');
-      FormManager.resetValidations('memLvl');
       // FormManager.readOnly('bpRelType');
       // FormManager.readOnly('memLvl');
-      FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership Level' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation Type' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.resetValidations('ppsceid');
       FormManager.hide('PPSCEID', 'ppsceid');
-      FormManager.hide('MembLevel', 'memLvl');
-      FormManager.hide('BPRelationType', 'bpRelType');
       FormManager.removeValidator('ppsceid', Validators.REQUIRED);
-      FormManager.removeValidator('memLvl', Validators.REQUIRED);
-      FormManager.removeValidator('bpRelType', Validators.REQUIRED);
     }
   } else if ((reqType == 'U' || reqType == 'X') && role == 'REQUESTER') {
     FormManager.readOnly('ppsceid');
     FormManager.resetValidations('ppsceid');
-    FormManager.readOnly('memLvl');
-    FormManager.resetValidations('memLvl');
-    FormManager.readOnly('bpRelType');
-    FormManager.resetValidations('bpRelType');
   } else if ((reqType == 'U' || reqType == 'X') && role == 'PROCESSOR') {
     FormManager.enable('ppsceid');
     if (FormManager.getActualValue('ppsceid') != '') {
@@ -7558,29 +7544,15 @@ function toggleBPRelMemTypeForTurkey() {
     return;
   }
   if (reqType == 'U') {
-    FormManager.show('MembLevel', 'memLvl');
-    FormManager.show('BPRelationType', 'bpRelType');
-    FormManager.resetValidations('bpRelType');
-    FormManager.resetValidations('memLvl');
   } else {
     var _custType = FormManager.getActualValue('custSubGrp');
     if (_custType == 'BUSPR' || _custType == 'XBP') {
       FormManager.show('PPSCEID', 'ppsceid');
-      FormManager.show('MembLevel', 'memLvl');
-      FormManager.show('BPRelationType', 'bpRelType');
       FormManager.resetValidations('ppsceid');
-      FormManager.resetValidations('bpRelType');
-      FormManager.resetValidations('memLvl');
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership Level' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation Type' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.hide('PPSCEID', 'ppsceid');
-      FormManager.hide('MembLevel', 'memLvl');
-      FormManager.hide('BPRelationType', 'bpRelType');
       FormManager.removeValidator('ppsceid', Validators.REQUIRED);
-      FormManager.removeValidator('memLvl', Validators.REQUIRED);
-      FormManager.removeValidator('bpRelType', Validators.REQUIRED);
     }
   }
 }
