@@ -71,6 +71,10 @@ public class USHandler extends GEOHandler {
 
   private static final String[] US_TERRITORIES = new String[] { "PR", "AS", "GU", "MP", "UM", "VI" };
 
+  private static final List PROLIFERATION_CNTRY = Arrays.asList("AF", "AM", "AZ", "BH", "BY", "KH", "CN", "CU", "EG", "GE", "IR", "IQ", "IL", "JO",
+      "KZ", "KP", "KW", "KG", "LA", "LB", "LY", "MO", "MD", "MN", "MM", "OM", "PK", "QA", "RU", "SA", "SD", "SY", "TW", "TJ", "TM", "UA", "AE", "UZ",
+      "VE", "VN", "YE");
+
   private String legalName;
 
   private EntityManager entityManager;
@@ -2291,5 +2295,13 @@ public class USHandler extends GEOHandler {
       }
     }
     return isKynDataFlag;
+  }
+
+  public static boolean isProliferationLandedCntry(Addr addr) {
+    boolean isProliferationLandedCntry = false;
+    if (PROLIFERATION_CNTRY.contains(addr.getLandCntry())) {
+      isProliferationLandedCntry = true;
+    }
+    return isProliferationLandedCntry;
   }
 }
