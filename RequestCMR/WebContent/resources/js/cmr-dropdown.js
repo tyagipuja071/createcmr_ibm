@@ -82,8 +82,10 @@ var FilteringDropdown = (function() {
     }
 
   }, loadItems = function(fieldId, spinnerId, queryId, params, hasDefault, noValueText) {
-    FormManager.readOnly('cmrIssuingCntry');
-    FormManager.readOnly('reqType');
+    if (FormManager.getField('MAIN_GENERAL_TAB')) {
+      FormManager.readOnly('cmrIssuingCntry');
+      FormManager.readOnly('reqType');
+    }
     if (!fieldId) {
       var queryParams = {};
       queryParams.queryId = queryId;
