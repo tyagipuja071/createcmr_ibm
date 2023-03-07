@@ -858,7 +858,8 @@ function addHandlersForGR() {
   console.log(">>>> addHandlersForGR ");
 
   var custType = FormManager.getActualValue('custGrp');
-
+  removeClientTireValidation();
+  lockUnlockFieldForGR();
   if (_custSubTypeHandlerGr == null && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     _custSubTypeHandlerGr = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       FormManager.setValue('salesTeamCd', '');
@@ -1209,6 +1210,8 @@ function setFieldsBehaviourGR() {
   if (viewOnlyPage) {
     FormManager.readOnly('modeOfPayment');
   }
+  removeClientTireValidation();
+  lockUnlockFieldForGR();
 }
 
 function resetSubIndustryCdGR() {
