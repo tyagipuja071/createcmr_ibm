@@ -1077,11 +1077,18 @@ public class DnBUtil {
     LOG.debug("Address used for matching: " + address);
 
     String dnbAddress = dnbRecord.getDnbStreetLine1() != null ? dnbRecord.getDnbStreetLine1() : "";
+    LOG.debug("DNB address used for matching: " + dnbAddress);
     if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
       dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
     }
     dnbAddress = dnbAddress.trim();
-    // CREATCMR-8430: removed mailing address check
+    // CREATCMR-8430: if mailing address matches with address, take it as DNB
+    // address matches
+    Boolean matchWithDnbMailingAddr = false;
+    if (handler != null) {
+      matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
+    }
+    LOG.debug("matchWithDnbMailingAddr =  " + matchWithDnbMailingAddr);
     LOG.debug("DNB match country =  " + country);
     Boolean isReshuffledAddr = false;
     isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
@@ -1095,6 +1102,9 @@ public class DnBUtil {
     ) {
       map.put("dnbNmMatch", true);
       map.put("dnbAddrMatch", false);
+      if (matchWithDnbMailingAddr) {
+        map.put("dnbAddrMatch", true);
+      }
       return map;
     }
 
@@ -1105,6 +1115,9 @@ public class DnBUtil {
         if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode)) {
           map.put("dnbNmMatch", true);
           map.put("dnbAddrMatch", false);
+          if (matchWithDnbMailingAddr) {
+            map.put("dnbAddrMatch", true);
+          }
           return map;
         }
       }
@@ -1112,6 +1125,9 @@ public class DnBUtil {
         if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode)) {
           map.put("dnbNmMatch", true);
           map.put("dnbAddrMatch", false);
+          if (matchWithDnbMailingAddr) {
+            map.put("dnbAddrMatch", true);
+          }
           return map;
         }
       }
@@ -1121,6 +1137,9 @@ public class DnBUtil {
         && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6) {
       map.put("dnbNmMatch", true);
       map.put("dnbAddrMatch", false);
+      if (matchWithDnbMailingAddr) {
+        map.put("dnbAddrMatch", true);
+      }
       return map;
     }
 

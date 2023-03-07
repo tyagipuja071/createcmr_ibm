@@ -229,8 +229,6 @@ public class NewZealandUtil extends AutomationUtil {
     client.setReadTimeout(1000 * 60 * 5);
     client.setRequestMethod(Method.Get);
 
-    LOG.debug("Connecting to the NZBNValidation service at CMR_SERVICES_URL = " + SystemConfiguration.getValue("CMR_SERVICES_URL"));
-    LOG.debug("Connecting to the NZBNValidation service at BATCH_SERVICES_URL = " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
     NZBNValidationRequest request = new NZBNValidationRequest();
     String customerName = addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2());
     if (StringUtils.isNotBlank(data.getVat())) {
@@ -511,7 +509,13 @@ public class NewZealandUtil extends AutomationUtil {
                 }
                 if (matchesDnb || matchesAddAPI) {
                   if (matchesDnb) {
-                    checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.");
+                    checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                    for (DnBMatchingResponse dnb : matches) {
+                      checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                      checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                      checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                          + dnb.getDnbCountry() + "\n\n");
+                    }
                   } else {
                     checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches NZBN API records.\n");
                   }
@@ -555,7 +559,13 @@ public class NewZealandUtil extends AutomationUtil {
             }
 
             if (matchesDnb) {
-              checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.");
+              checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+              for (DnBMatchingResponse dnb : matches) {
+                checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                    + dnb.getDnbCountry() + "\n\n");
+              }
             } else {
               // CREATCMR-8430: add NZBN API check for new addresses
               LOG.debug(
