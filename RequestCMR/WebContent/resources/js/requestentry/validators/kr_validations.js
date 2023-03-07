@@ -614,7 +614,7 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('mrcCd');
         FormManager.setValue('isicCd', '8888');
         FormManager.readOnly('isicCd');
-        FormManager.readOnly('cmrNoPrefix');
+        FormManager.enable('cmrNoPrefix');
         FormManager.readOnly('inacCd');
         FormManager.readOnly('inacType');
         break;
