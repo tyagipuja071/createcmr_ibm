@@ -1658,6 +1658,9 @@ function setSBOValuesForIsuCtc() {
   var beSubGrpsList = [ 'BEINT', 'BEISO', 'BEPRI', 'IBMEM' ];
   var luSubGrpsList = [ 'LUINT', 'LUISO', 'LUPRI', 'LUIBM' ]
   if (role == 'Processor') {
+    if (oldIsu == null || oldCtc == null) {
+      saveOldIsuCtc();
+    }
     if (oldIsu == isuCd && oldCtc == clientTier) {
       return;
     }
@@ -1709,8 +1712,8 @@ function setSBOValuesForIsuCtc() {
       FormManager.setValue('commercialFinanced', 'LU0000');
     }
   }
-  FormManager.clearValue('oldIsu');
-  FormManager.clearValue('oldCtc');
+  oldIsu = FormManager.getActualValue('isuCd');
+  oldCtc = FormManager.getActualValue('clientTier');
 }
 
 function getLandCntryDesc(cntryCd) {
