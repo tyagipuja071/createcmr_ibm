@@ -124,14 +124,15 @@ public class DnBUtil {
     registerDnBVATCode("PE", 1382); // Peruvian Sole Commercial Registry Number
     // registerDnBVATCode("AU", 17890); // Business Registration Number
     // (Australia)
-    registerDnBVATCode("PL", 1385); // Polish Tax Identifier
+    // registerDnBVATCode("PL", 1385); // Polish Tax Identifier
+    registerDnBVATCode("PL", 1435); // Polish Tax Identifier
     registerDnBVATCode("PT", 11659); // Chamber Of Commerce Number
     registerDnBVATCode("PY", 1381); // Paraguayan Unique Tax Registration
     registerDnBVATCode("RO", 17278); // Tax Registration Number (Romania)
     registerDnBVATCode("RS", 0); // Unknown
     registerDnBVATCode("RW", 9404); // Business Registration Number (Rwanda)
     registerDnBVATCode("SI", 1439); // Tax Registration Number (Slovenia)
-    registerDnBVATCode("SK", 0); // Unknown
+    registerDnBVATCode("SK", 1438); // Unknown
     registerDnBVATCode("TH", 1391); // Registration Number (Thailand)
     registerDnBVATCode("TJ", 14260); // Tax Registration Number (Tajikistan)
     registerDnBVATCode("TR", 1442); // Tax Registration Number (Turkey)
@@ -285,7 +286,8 @@ public class DnBUtil {
     if (SystemLocation.CHINA.equalsIgnoreCase(issuingCntry)) {
       cmrRecord.setCmrState(StringUtils.isNotBlank(company.getPrimaryStateName()) ? company.getPrimaryStateName() : company.getMailingStateName());
     }
-    if (cmrRecord.getCmrState() == null && (SystemLocation.AUSTRIA.equalsIgnoreCase(issuingCntry) || SystemLocation.SWITZERLAND.equalsIgnoreCase(issuingCntry))) {
+    if (cmrRecord.getCmrState() == null
+        && (SystemLocation.AUSTRIA.equalsIgnoreCase(issuingCntry) || SystemLocation.SWITZERLAND.equalsIgnoreCase(issuingCntry))) {
       cmrRecord.setCmrState(StringUtils.isNotBlank(company.getPrimaryStateName()) ? company.getPrimaryStateName() : company.getMailingStateName());
     }
     cmrRecord.setCmrPostalCode(company.getPrimaryPostalCode() != null ? company.getPrimaryPostalCode() : company.getMailingPostalCode());
@@ -745,8 +747,7 @@ public class DnBUtil {
     }
 
     if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
-          && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6
-          && !matchWithDnbMailingAddr) {
+        && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6 && !matchWithDnbMailingAddr) {
       return false;
     }
 
