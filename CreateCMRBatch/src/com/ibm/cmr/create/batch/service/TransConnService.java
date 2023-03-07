@@ -1686,6 +1686,7 @@ public class TransConnService extends BaseBatchService {
       }
     } else if ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry())) {
       if ("ZP01".equals(record.getAddressType()) && record.getSeqNo() != null && Integer.parseInt(record.getSeqNo()) = 200) {
+        LOG.debug("Request ID " + admin.getId().getReqId() + " , address type is " + record.getAddressType() +  " , SeqNo is " + record.getSeqNo() );
         // If additional bill to handle accordingly
         addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
         addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
