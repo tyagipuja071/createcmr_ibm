@@ -129,8 +129,10 @@ public class NewZealandUtil extends AutomationUtil {
       try {
         response = getNZBNService(admin, data, zs01);
       } catch (Exception e) {
+        LOG.info("Failed to Connect to NZBN Service: " + e.getMessage());
         if (response == null || !response.isSuccess()) {
           LOG.debug("\nFailed to Connect to NZBN Service.");
+          details.append("\nFailed to Connect to NZBN Service.");
         }
       }
       if (response != null && response.isSuccess() && response.getRecord() != null) {
@@ -298,8 +300,10 @@ public class NewZealandUtil extends AutomationUtil {
           try {
             response = getNZBNService(admin, data, zs01);
           } catch (Exception e) {
+            LOG.info("Failed to Connect to NZBN Service: " + e.getMessage());
             if (response == null || !response.isSuccess()) {
               LOG.debug("\nFailed to Connect to NZBN Service.");
+              details.append("\nFailed to Connect to NZBN Service.");
             }
           }
           if (response != null && response.isSuccess()) {
@@ -456,8 +460,10 @@ public class NewZealandUtil extends AutomationUtil {
                   try {
                     nZBNAPIresponse = getNZBNService(admin, data, addr);
                   } catch (Exception e) {
+                    LOG.info("Failed to Connect to NZBN Service: " + e.getMessage());
                     if (nZBNAPIresponse == null || !nZBNAPIresponse.isSuccess()) {
                       LOG.debug("\nFailed to Connect to NZBN Service.");
+                      checkDetails.append("\nFailed to Connect to NZBN Service.");
                     }
                   }
 
@@ -559,8 +565,10 @@ public class NewZealandUtil extends AutomationUtil {
               try {
                 nZBNAPIresponse = getNZBNService(admin, data, addr);
               } catch (Exception e) {
+                LOG.info("Failed to Connect to NZBN Service: " + e.getMessage());
                 if (nZBNAPIresponse == null || !nZBNAPIresponse.isSuccess()) {
                   LOG.debug("\nFailed to Connect to NZBN Service.");
+                  checkDetails.append("\nFailed to Connect to NZBN Service.");
                 }
               }
 
