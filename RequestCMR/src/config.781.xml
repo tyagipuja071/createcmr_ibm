@@ -149,19 +149,19 @@
 				<column>
 					<label>Email1</label>
 					<dbColumn>EMAIL1</dbColumn>
-					<length>30</length>
+					<length>120</length>
 					<width>25</width>
 				</column>
 				<column>
 					<label>Email2</label>
 					<dbColumn>EMAIL2</dbColumn>
-					<length>30</length>
+					<length>120</length>
 					<width>25</width>
 				</column>
 				<column>
 					<label>Email3</label>
 					<dbColumn>EMAIL3</dbColumn>
-					<length>30</length>
+					<length>120</length>
 					<width>25</width>
 				</column>
 			</columns>
