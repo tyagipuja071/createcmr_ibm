@@ -511,6 +511,10 @@ function setSearchTermDropdownValues() {
         FormManager.limitDropdownValues(searchTerm, [ '00003' ]);
         FormManager.setValue('searchTerm', '00003');
         FormManager.readOnly('searchTerm');
+        FormManager.setValue('isuCd', '34');
+        FormManager.readOnly('isuCd');
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.readOnly('clientTier');
         break;
       case "MKTPC":
         FormManager.limitDropdownValues(searchTerm, [ '00003' ]);
@@ -543,7 +547,11 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('clientTier');
         break;
       case "ESA":
-        FormManager.limitDropdownValues(searchTerm, [ '08016', '09065', '01545' ]);
+    	FormManager.setValue('isuCd', '36');
+        FormManager.readOnly('isuCd');
+        FormManager.setValue('clientTier', 'Y');
+        FormManager.readOnly('clientTier');
+        FormManager.limitDropdownValues(searchTerm, [ '08016', '09065', '01545','04461','04466','05223','10139' ]);
         break;
       case "INTER":
         FormManager.setValue('isuCd', '21');
@@ -581,9 +589,9 @@ function setSearchTermDropdownValues() {
 }
 
 function LockDefaultISUClientTierMrcValues() {
-  FormManager.setValue('clientTier','');
-  FormManager.setValue('isuCd','');
-  FormManager.setValue('mrcCd','');
+//  FormManager.setValue('clientTier','');
+//  FormManager.setValue('isuCd','');
+//  FormManager.setValue('mrcCd','');
   var searchTerm = FormManager.getActualValue('searchTerm');
   var clientTier = FormManager.getField('clientTier');
   if (searchTerm == "00003") {
