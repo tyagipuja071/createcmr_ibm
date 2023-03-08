@@ -143,6 +143,25 @@ function addDnBMatchingAttachmentValidator() {
         var findDnbResult = FormManager.getActualValue('findDnbResult');
         var userRole = FormManager.getActualValue('userRole');
         var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+
+        // CREATCMR-8430: do DNB check for NZ update
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if("796" == cntry && reqType == 'U'){
+          if ( reqId > 0 && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+            && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
+            var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+              ID : reqId
+            });
+            if (ret == null || ret.ret1 == null) {
+              return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
+                  + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                  + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        }
+        
         if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
             && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
           // FOR CN
