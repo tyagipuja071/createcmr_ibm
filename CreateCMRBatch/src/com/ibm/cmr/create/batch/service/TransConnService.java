@@ -1684,20 +1684,6 @@ public class TransConnService extends BaseBatchService {
         // the ZI01 address
         addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
       }
-    } else if ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry())) {
-      if ("ZP01".equals(record.getAddressType()) && record.getSeqNo() != null && "200".equals(record.getSeqNo())) {
-        LOG.debug("Request ID " + admin.getId().getReqId() + " , address type is " + record.getAddressType() +  " , SeqNo is " + record.getSeqNo() );
-        // If additional bill to handle accordingly
-        addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
-        addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
-        addrQuery.setParameter("ADDR_TYPE", "PG01");
-        addrQuery.setParameter("ADDR_SEQ", record.getSeqNo());
-      } else {
-        // if returned is ZS01/ZI01, update the ZS01 address. Else,
-        // Update
-        // the ZI01 address
-        addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
-      }
     } else {
       addrQuery.setParameter("ADDR_TYPE", record.getAddressType());
     }
@@ -1711,6 +1697,27 @@ public class TransConnService extends BaseBatchService {
       LOG.info("Address Record Updated [Request ID: " + addr.getId().getReqId() + " Type: " + addr.getId().getAddrType() + " SAP No: "
           + record.getSapNo() + "]");
       updateEntity(addr, entityManager);
+    }
+
+    if ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry())) {
+      String strPaygoNo = getPaygoSapnoForNZ(entityManager, data.getCmrNo(), "200");
+      if (!StringUtils.isEmpty(strPaygoNo)) {
+        // If additional bill to handle accordingly
+        addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
+        addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+        addrQuery.setParameter("ADDR_TYPE", "PG01");
+        addrQuery.setParameter("ADDR_SEQ", "200");
+
+        List<Addr> addrListANZ = addrQuery.getResults(Addr.class);
+        for (Addr addr : addrListANZ) {
+          addr.setSapNo(strPaygoNo);
+          addr.setIerpSitePrtyId("S" + strPaygoNo.substring(1));
+          addr.setRdcCreateDt(record.getCreateDate());
+          addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
+          LOG.info("SET ANZ PG .");
+          updateEntity(addr, entityManager);
+        }
+      }
     }
   }
 
@@ -3139,5 +3146,18 @@ public class TransConnService extends BaseBatchService {
       admin.setReqStatus("PPN");
       admin.setProcessedFlag("E"); // set request status to error.
     }
+  }
+
+  private String getPaygoSapnoForNZ(EntityManager entityManager, String cmrNo, String seqNo) {
+    LOG.debug("getPaygoSapnoForNZ ");
+    String PaygoSapno = "";
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GET.NZ.PAYGOSAPNO"));
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", SystemLocation.NEW_ZEALAND);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setParameter("ZZKV_SEQNO", seqNo);
+    query.setForReadOnly(true);
+    PaygoSapno = query.getSingleResult(String.class);
+    return PaygoSapno;
   }
 }
