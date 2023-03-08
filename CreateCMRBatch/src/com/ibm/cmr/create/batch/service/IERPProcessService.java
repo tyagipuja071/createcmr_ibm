@@ -888,7 +888,7 @@ public class IERPProcessService extends BaseBatchService {
                         String strPaygoNo = getPaygoSapnoForNZ(em, response.getCmrNo(), addr.getId().getAddrSeq());
                         if (!StringUtils.isEmpty(strPaygoNo)) {
                           addr.setSapNo(strPaygoNo);
-                          addr.setIerpSitePrtyId("S" + strPaygoNo);
+                          addr.setIerpSitePrtyId("S" + strPaygoNo.substring(1));
                         }
                       }
                     }
