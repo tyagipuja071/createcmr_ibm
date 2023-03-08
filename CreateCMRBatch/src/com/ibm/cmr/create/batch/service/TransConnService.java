@@ -1700,7 +1700,7 @@ public class TransConnService extends BaseBatchService {
     }
 
     if ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry())) {
-      String strPaygoNo = getPaygoSapnoForNZ(entityManager, data.getCmrNo(), "200");
+      String strPaygoNo = getPaygoSapnoForNZ(entityManager, data.getCmrNo(), "200", data.getCmrIssuingCntry());
       if (!StringUtils.isEmpty(strPaygoNo)) {
         // If additional bill to handle accordingly
         addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
@@ -3148,12 +3148,12 @@ public class TransConnService extends BaseBatchService {
     }
   }
 
-  private String getPaygoSapnoForNZ(EntityManager entityManager, String cmrNo, String seqNo) {
+  private String getPaygoSapnoForNZ(EntityManager entityManager, String cmrNo, String seqNo, String cmrIssuingCntry) {
     LOG.debug("getPaygoSapnoForNZ ");
     String PaygoSapno = "";
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GET.NZ.PAYGOSAPNO"));
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    query.setParameter("KATR6", SystemLocation.NEW_ZEALAND);
+    query.setParameter("KATR6", cmrIssuingCntry);
     query.setParameter("ZZKV_CUSNO", cmrNo);
     query.setParameter("ZZKV_SEQNO", seqNo);
     query.setForReadOnly(true);
