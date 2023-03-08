@@ -471,8 +471,10 @@ function addClientTierDefaultLogic() {
         FormManager.setValue('isuCd', '32');
         FormManager.readOnly('isuCd');
       } else if (value == 'V' || value == '4' || value == 'A' || value == '6' || value == 'E' || value == 'Y') {
-        FormManager.setValue('isuCd', '34');
-        FormManager.readOnly('isuCd');
+        if (cntry != '766') {
+          FormManager.setValue('isuCd', '34');
+          FormManager.readOnly('isuCd');
+        }
       } else if (value == 'Z') {
         FormManager.setValue('isuCd', '21');
         FormManager.readOnly('isuCd');
