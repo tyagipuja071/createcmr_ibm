@@ -2063,6 +2063,13 @@ function setISUDropDownValues() {
       _cluster = _cluster.substring(0, _cluster.indexOf(" - "));
     }
     var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : _cmrIssuingCntry,
+        CLUSTER : _cluster,
+      };
+   // cluster description
+    var clusterDesc = cmr.query('GET.DESC_BY_CLUSTER', qParams);    
+    var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : _cmrIssuingCntry,
       CLUSTER : _cluster,
@@ -2165,6 +2172,9 @@ function setISUDropDownValues() {
            FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
         }
       }
+      if (clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || clusterDesc[0].ret1.includes('S&S') || clusterDesc[0].ret1.includes('Strategic'))) {
+        setIsuOnIsic();
+      } 
     }
   }  
 }

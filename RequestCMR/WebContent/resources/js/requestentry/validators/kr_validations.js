@@ -1,15 +1,16 @@
 /* Register KR Javascripts */
-var _isicHandler = null;
-
+ var _isicHandler = null;
+ 
 function afterConfigKR() {
   var role = null;
   var reqType = null;
   var _isuHandler = null;
+
   
   _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     getIsuFromIsic();
   });
-
+  
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues();
