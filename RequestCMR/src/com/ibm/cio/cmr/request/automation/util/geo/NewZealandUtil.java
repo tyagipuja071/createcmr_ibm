@@ -124,6 +124,7 @@ public class NewZealandUtil extends AutomationUtil {
 
       boolean custNmMatch = false;
       boolean matchesAddAPI = false;
+      boolean cmdeReview = false;
 
       LOG.debug("Checking CustNm with NZBN API to vrify CustNm update");
       try {
@@ -131,10 +132,12 @@ public class NewZealandUtil extends AutomationUtil {
       } catch (Exception e) {
         LOG.info("Failed to Connect to NZBN Service: " + e.getMessage());
         if (response == null || !response.isSuccess()) {
+          cmdeReview = true;
           LOG.debug("\nFailed to Connect to NZBN Service.");
           details.append("\nFailed to Connect to NZBN Service.");
         }
       }
+
       if (response != null && response.isSuccess() && response.getRecord() != null) {
         // custNm Validation
         LOG.debug("\nSuccess to Connect to NZBN Service.");
@@ -146,42 +149,69 @@ public class NewZealandUtil extends AutomationUtil {
             custNmMatch = true;
           }
         }
-        String regexForAddr = "\\s+|$";
-        String addressAll = zs01.getCustNm1() + (zs01.getCustNm2() == null ? "" : zs01.getCustNm2()) + zs01.getAddrTxt()
-            + (zs01.getAddrTxt2() == null ? "" : zs01.getAddrTxt2()) + (zs01.getStateProv() == null ? "" : zs01.getStateProv())
-            + (zs01.getCity1() == null ? "" : zs01.getCity1()) + (zs01.getPostCd() == null ? "" : zs01.getPostCd());
-        addressAll = addressAll.toUpperCase();
-        if (StringUtils.isNotEmpty(response.getRecord().getAddress())
-            && addressAll.replaceAll(regexForAddr, "").contains(response.getRecord().getAddress().replaceAll(regexForAddr, "").toUpperCase())
-            && StringUtils.isNotEmpty(response.getRecord().getCity())
-            && addressAll.replaceAll(regexForAddr, "").contains(response.getRecord().getCity().replaceAll(regexForAddr, "").toUpperCase())
-            && StringUtils.isNotEmpty(response.getRecord().getPostal())
-            && addressAll.replaceAll(regexForAddr, "").contains(response.getRecord().getPostal().replaceAll(regexForAddr, "").toUpperCase())) {
-          matchesAddAPI = true;
-          LOG.debug("\nSuccess to Connect to NZBN Service matchesAddAPI:true.");
+        if (!custNmMatch) {
+          details.append("\nThe Customer Name doesn't match NZBN API");
+          cmdeReview = true;
+          if (response != null && response.isSuccess() && response.getRecord() != null) {
+            details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
+            details.append(" - Name.:  " + response.getRecord().getName() + " \n");
+          }
         }
 
-        // CREATCMR-8430: checking if the address matches with
-        // service type address from API
-        LOG.debug("REGISTERED Address matched ?  " + matchesAddAPI);
-        String serviceAddr = response.getRecord().getServiceAddressDetail();
-        if (!matchesAddAPI && StringUtils.isNotEmpty(serviceAddr)) {
-          LOG.debug("****** addressOfRequest: " + addressAll);
-          LOG.debug("****** serviceAddr: " + serviceAddr);
-          String[] serviceAddrArr = serviceAddr.split("\\^");
-          boolean serviceFlag = false;
-          for (String partAddr : serviceAddrArr) {
-            serviceFlag = (addressAll.replaceAll(regexForAddr, "").contains(partAddr.replaceAll(regexForAddr, "").toUpperCase()));
-            if (!serviceFlag) {
-              break;
-            }
+        List<Addr> addresses = null;
+        String regexForAddr = "\\s+|$";
+        for (String addrType : RELEVANT_ADDRESSES) {
+          if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+            addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+          } else {
+            addresses = requestData.getAddresses(addrType);
           }
-          matchesAddAPI = serviceFlag;
-          LOG.debug("SERVICE Address matched ?  " + matchesAddAPI);
-        }
-      }
-      if (custNmMatch && matchesAddAPI) {
-        details.append("The Customer Name and address matched NZBN API.").append("\n");
+          LOG.debug("\nStart checking " + addrType);
+          for (Addr addr : addresses) {
+            String addressAll = addr.getCustNm1() + (addr.getCustNm2() == null ? "" : addr.getCustNm2()) + addr.getAddrTxt()
+                + (addr.getAddrTxt2() == null ? "" : addr.getAddrTxt2()) + (addr.getStateProv() == null ? "" : addr.getStateProv())
+                + (addr.getCity1() == null ? "" : addr.getCity1()) + (addr.getPostCd() == null ? "" : addr.getPostCd());
+            addressAll = addressAll.toUpperCase();
+            LOG.debug("\n Checking address " + addrType + "(" + addr.getId().getAddrSeq() + ") : " + addressAll);
+            if (StringUtils.isNotEmpty(response.getRecord().getAddress())
+                && addressAll.replaceAll(regexForAddr, "").contains(response.getRecord().getAddress().replaceAll(regexForAddr, "").toUpperCase())
+                && StringUtils.isNotEmpty(response.getRecord().getCity())
+                && addressAll.replaceAll(regexForAddr, "").contains(response.getRecord().getCity().replaceAll(regexForAddr, "").toUpperCase())
+                && StringUtils.isNotEmpty(response.getRecord().getPostal())
+                && addressAll.replaceAll(regexForAddr, "").contains(response.getRecord().getPostal().replaceAll(regexForAddr, "").toUpperCase())) {
+              matchesAddAPI = true;
+              LOG.debug("\n" + addrType + "(" + addr.getId().getAddrSeq() + ") matchesAddAPI:true.");
+            }
+
+            // CREATCMR-8430: checking if the address matches with
+            // service type address from API
+            LOG.debug("REGISTERED Address matched ?  " + matchesAddAPI);
+            String serviceAddr = response.getRecord().getServiceAddressDetail();
+            if (!matchesAddAPI && StringUtils.isNotEmpty(serviceAddr)) {
+              LOG.debug("****** addressOfRequest: " + addressAll);
+              LOG.debug("****** serviceAddr: " + serviceAddr);
+              String[] serviceAddrArr = serviceAddr.split("\\^");
+              boolean serviceFlag = false;
+              for (String partAddr : serviceAddrArr) {
+                serviceFlag = (addressAll.replaceAll(regexForAddr, "").contains(partAddr.replaceAll(regexForAddr, "").toUpperCase()));
+                if (!serviceFlag) {
+                  break;
+                }
+              }
+              matchesAddAPI = serviceFlag;
+              LOG.debug("SERVICE Address matched ?  " + matchesAddAPI);
+            }
+
+            if (!matchesAddAPI) {
+              details.append("\nThe address " + addrType + "(" + addr.getId().getAddrSeq() + ") doesn't match NZBN API");
+              cmdeReview = true;
+            }
+          } // End of addresses loop
+        } // End of RELEVANT_ADDRESSES
+      } // End of Success to Connect to NZBN Service
+
+      if (!cmdeReview) {
+        details.append("The Customer Name and addresses matched NZBN API.").append("\n");
         results.setResults("Calculated.");
         engineData.setNZBNAPICheck(true);
 
@@ -193,23 +223,15 @@ public class NewZealandUtil extends AutomationUtil {
         admin.setCompVerifiedIndc("Y");
         entityManager.merge(admin);
         entityManager.flush();
-        if (!custNmMatch) {
-          details.append("The Customer Name doesn't match NZBN API");
-          if (response != null && response.isSuccess() && response.getRecord() != null) {
-            details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
-            details.append(" - Name.:  " + response.getRecord().getName() + " \n");
-          }
-        } else if (!matchesAddAPI) {
-          details.append("The address doesn't match NZBN API");
-          // company proof
-          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-            details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
-          } else {
-            details.append("\nNo supporting documentation is provided by the requester for customer name " + " :" + customerName
-                + " update. Please provide Supporting documentation(Company Proof) as attachment.");
-          }
-          engineData.addNegativeCheckStatus("NZName", "The Customer Name doesn't match from NZBN API");
+
+        // company proof
+        if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+          details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+        } else {
+          details.append("\nNo supporting documentation is provided by the requester for customer name " + " :" + customerName
+              + " update. Please provide Supporting documentation(Company Proof) as attachment.");
         }
+        engineData.addNegativeCheckStatus("NZBNCheck", "The Customer Name or addresses doesn't match from NZBN API");
       }
     }
     results.setDetails(details.toString());
