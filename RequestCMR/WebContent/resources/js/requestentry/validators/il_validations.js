@@ -19,7 +19,7 @@ function addHandlersForIL() {
   console.log(">>>> addHandlersForIL ");
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldClientTier = FormManager.getActualValue('clientTier');
-  removeClientTireValidation();
+  addRemoveValidator();
   lockUnlockFieldForISrael();
   for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
     _gtcAddrTypeHandlerIL[i] = null;
@@ -344,7 +344,7 @@ function setClientTierValuesIL(value) {
   } else {
     FormManager.setValue('clientTier', '');
   }
-  removeClientTireValidation();
+  addRemoveValidator();
   lockUnlockFieldForISrael();
 }
 
@@ -2179,7 +2179,11 @@ function setEnterpriseSalesRepSBO() {
     FormManager.setValue('enterprise', '');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
-  } else if (isuCd == '21' && clientTier == '') {
+  } else if (isuCd == '32' && clientTier == 'T') {
+    FormManager.setValue('enterprise', '985985');
+    FormManager.setValue('salesBusOffCd', '006');
+    FormManager.setValue('repTeamMemberNo', '000651');
+  }else if (isuCd == '21' && clientTier == '') {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('salesBusOffCd', '009');
     FormManager.setValue('repTeamMemberNo', '000993');
@@ -2192,11 +2196,10 @@ function setEnterpriseSalesRepSBO() {
     FormManager.setValue('salesBusOffCd', '');
     FormManager.setValue('repTeamMemberNo', '');
   }
-  FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+  addRemoveValidator();
   lockUnlockFieldForISrael();
 }
+
 
 function checkCmrUpdateBeforeImport() {
   console.log(">>>>  checkCmrUpdateBeforeImport");
@@ -2533,7 +2536,7 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
       FormManager.setValue('clientTier', 'Q');
     }
   }
-  removeClientTireValidation();
+  addRemoveValidator();
   lockUnlockFieldForISrael();
 }
 
@@ -2871,8 +2874,8 @@ function lockUnlockFieldForISrael() {
   } 
 }
 
-function removeClientTireValidation() {
-  console.log(">>>> removeClientTireValidation");
+function addRemoveClientTierValidator() {
+  console.log(">>>> addRemoveClientTierValidator");
   var isuCd = FormManager.getActualValue('isuCd');
   FormManager.resetValidations('clientTier');
   if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
@@ -2880,6 +2883,17 @@ function removeClientTireValidation() {
   } else {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
   }
+}
+
+function addRemoveEnterperiseValidator() {
+  FormManager.resetValidations('enterprise');
+  FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+}
+
+function addRemoveValidator() {
+  addRemoveClientTierValidator();
+  addRemoveEnterperiseValidator();
+
 }
 
 function addressQuotationValidatorIsrael() {
