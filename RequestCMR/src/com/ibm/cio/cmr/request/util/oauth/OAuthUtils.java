@@ -265,7 +265,8 @@ public class OAuthUtils {
         in.close();
 
       } else if (statusCode > 299) {
-        throw new Exception("An error ocurred when trying to get AS Public key information");
+        throw new CmrException(MessageUtil.ERROR_GET_PUBLIC_KEY);
+
       }
 
       // closing connection

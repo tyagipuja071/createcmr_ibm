@@ -374,4 +374,7 @@ public class MessageUtil {
   public static final int ERROR_MASS_FILE_TAX_TEAM = 9054;
   public static final int ERROR_MASS_FILE_TAX_TEAM_STATUS = 9056;
   public static final int ERROR_MASS_FILE_CMR_IS_NOT_IBM = 9057;
+
+  // SSO Error
+  public static final int ERROR_GET_PUBLIC_KEY = 9058;
 }
