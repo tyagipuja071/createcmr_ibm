@@ -198,7 +198,9 @@ public class AustraliaUtil extends AutomationUtil {
     StringBuilder details = new StringBuilder();
     boolean CustNmChanged = changes.isLegalNameChanged();
     ChangeLogListener.setManager(entityManager);
-
+    if ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId())) {
+      CustNmChanged = false;
+    }
     if (CustNmChanged) {
       AutomationResponse<BNValidationResponse> response = null;
       Addr zs01 = requestData.getAddress("ZS01");

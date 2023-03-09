@@ -258,6 +258,9 @@ public class NewZealandUtil extends AutomationUtil {
     boolean CustNmChanged = changes.isLegalNameChanged();
     ChangeLogListener.setManager(entityManager);
     // CustNmChanged = false;
+    if ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId())) {
+      CustNmChanged = false;
+    }
     if (CustNmChanged) {
       AutomationResponse<NZBNValidationResponse> response = null;
       Addr zs01 = requestData.getAddress("ZS01");
