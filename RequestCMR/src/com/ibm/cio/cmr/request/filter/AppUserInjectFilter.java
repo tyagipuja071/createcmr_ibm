@@ -9,11 +9,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Set;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +20,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.tiles.request.servlet.ServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
@@ -89,7 +88,7 @@ public class AppUserInjectFilter implements Filter {
           // of
           // SSO and need to get access token
           if (paramNames.contains("code") && paramNames.contains("grant_id")) {
-            LOG.trace("Requesting access token for grant_id: " + request.getParameter("grant_id"));
+            LOG.trace("Requesting access token for grant_id : " + request.getParameter("grant_id"));
 
             // get access_token and id_token
             String code = request.getParameter("code");
