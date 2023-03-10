@@ -4677,6 +4677,10 @@ public class LAHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
               }
 
+              if (isInstallAtFilled && "@@@@@@@@".equals(addrNoSeq)) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
+              }
+
               // Name
               if (isInstallAtFilled && "@".equals(addrName)) {
                 error.addError((row.getRowNum() + 1), "<br>Name", "@ value for Name is not allowed.");
@@ -4739,6 +4743,10 @@ public class LAHandler extends GEOHandler {
               if ((isShipToFilled) && StringUtils.isBlank(addrNoSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isShipToFilled && "@@@@@@@@".equals(addrNoSeq)) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
               }
 
               // Name
@@ -4804,6 +4812,10 @@ public class LAHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
               }
 
+              if (isBillToFilled && "@@@@@@@@".equals(addrNoSeq)) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
+              }
+
               // Name
               if (isBillToFilled && "@".equals(addrName)) {
                 error.addError((row.getRowNum() + 1), "<br>Name", "@ value for Name is not allowed.");
@@ -4865,6 +4877,10 @@ public class LAHandler extends GEOHandler {
               if ((isSoldToFilled) && StringUtils.isBlank(addrNoSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isSoldToFilled && "@@@@@@@@".equals(addrNoSeq)) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
               }
 
               // Name
