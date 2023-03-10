@@ -108,15 +108,31 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       load : function(data, ioargs) {
         cmr.hideProgress();
         if (data && data.items) {
-          var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
-          if (byModel && byModel.ret1 == 'Y'){
+          var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {
+            CNTRY_CD : FormManager.getActualValue('issuingCntry')
+          });
+          if (byModel && byModel.ret1 == 'Y') {
             $scope.allowByModel = false;
-          } 
-          
-          var localLangDataFlg = cmr.query('HIDE_LOCAL_LANG_DATA', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
-          if (localLangDataFlg && localLangDataFlg.ret1 == 'Y'){
+          }
+          // CREATCMR-8567
+          console.log('>>Enabled/Disabled Create by model for Sub-Region.');
+          var subCntry = FormManager.getActualValue('issuingCntry');
+          var mainCntry = null;
+          if (subCntry.length > 3) {
+            mainCntry = subCntry.substr(0, 3);
+            var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {
+              CNTRY_CD : mainCntry
+            });
+            if (byModel && byModel.ret1 == 'Y') {
+              $scope.allowByModel = false;
+            }
+          }
+          var localLangDataFlg = cmr.query('HIDE_LOCAL_LANG_DATA', {
+            CNTRY_CD : FormManager.getActualValue('issuingCntry')
+          });
+          if (localLangDataFlg && localLangDataFlg.ret1 == 'Y') {
             $scope.hideLocalLangData = true;
-          } 
+          }
           if (data.items.length > 50) {
             alert('The search resulted to more than 50 matches. Only the top 50 matches will be shown. Please try to change the search parameters to get the other records you need.');
             console.log('splicing from 50, removing ' + (data.items.length - 50) + ' items');
@@ -140,7 +156,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
               if (item.altCity) {
                 item.altCity = item.altCity.replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, '');
               }
-              
+
             }
           });
           $scope.records = data.items;
@@ -152,7 +168,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
         cmr.hideProgress();
         $scope.searched = false;
         console.log('error');
-        console.log(error);
       }
     });
 
@@ -250,7 +265,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
               cmr.hideProgress();
               $scope.searched = false;
               console.log('error');
-              console.log(error);
               cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
             }
           });
@@ -279,7 +293,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
         cmr.hideProgress();
         $scope.searched = false;
         console.log('error');
-        console.log(error);
         cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
       }
     });
@@ -443,7 +456,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
         cmr.hideProgress();
         $scope.searched = false;
         console.log('error');
-        console.log(error);
         cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
       }
     });
@@ -549,15 +561,19 @@ app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout'
   $scope.dunsNo = $scope.getParameterByName('dunsNo');
   $scope.issuingCountry = $scope.getParameterByName('issuingCountry');
   $scope.viewMode = 'S';
-  var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : $scope.issuingCountry});
-  if (byModel && byModel.ret1 == 'Y'){
+  var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {
+    CNTRY_CD : $scope.issuingCountry
+  });
+  if (byModel && byModel.ret1 == 'Y') {
     $scope.allowByModel = false;
-  } 
-  
-  var localLangDataFlg = cmr.query('HIDE_LOCAL_LANG_DATA', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
-  if (localLangDataFlg && localLangDataFlg.ret1 == 'Y'){
+  }
+
+  var localLangDataFlg = cmr.query('HIDE_LOCAL_LANG_DATA', {
+    CNTRY_CD : FormManager.getActualValue('issuingCntry')
+  });
+  if (localLangDataFlg && localLangDataFlg.ret1 == 'Y') {
     $scope.hideLocalLangData = true;
-   } 
+  }
 
   $scope.loadDetails = function() {
     if ($scope.cmrNo) {
@@ -592,7 +608,6 @@ app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout'
           cmr.hideProgress();
           $scope.searched = false;
           console.log('error');
-          console.log(error);
           cmr.showAlert('A system error occurred during the retrieval of the details. Please try again later.');
         }
       });
@@ -618,7 +633,6 @@ app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout'
           cmr.hideProgress();
           $scope.searched = false;
           console.log('error');
-          console.log(error);
           cmr.showAlert('A system error occurred during the retrieval of the details. Please try again later.');
         }
       });
@@ -867,10 +881,10 @@ var US_STATES = [ {
   name : 'Wyoming'
 } ]
 dojo.addOnLoad(function() {
-  if (typeof(bypassqs) != 'undefined' && bypassqs){
+  if (typeof (bypassqs) != 'undefined' && bypassqs) {
     return;
   }
-  if (typeof(_furl) == 'undefined' || !_furl) {
+  if (typeof (_furl) == 'undefined' || !_furl) {
     return;
   }
   var findcmrUrl = _furl.substring(0, _furl.lastIndexOf('/')) + '/DnBSearch';
@@ -1040,7 +1054,6 @@ app.controller('FindCMRController', [ '$scope', '$document', '$http', '$timeout'
           cmr.hideProgress();
           $scope.searched = false;
           console.log('error');
-          console.log(error);
           cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
         }
       });
