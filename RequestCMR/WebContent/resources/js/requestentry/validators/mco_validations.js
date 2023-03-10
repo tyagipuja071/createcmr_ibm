@@ -581,7 +581,7 @@ function addHandlersForPTES() {
   _oldClientTier = FormManager.getActualValue('clientTier');
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldIsicCd = FormManager.getActualValue('isicCd');
-  removeClientTireValidation();
+  addRemoveValidator();
   forceLockUnlock();
   if (_isicHandler == null) {
     _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -1194,11 +1194,15 @@ function addEnterpriseValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var entNo = FormManager.getActualValue('enterprise');
-        if (entNo != '' && entNo.length != 6) {
-          return new ValidationResult(null, false, 'Enterprise Number should have exactly 6 digits.');
+        var enterpriseNo = FormManager.getActualValue('enterprise');
+
+        if (enterpriseNo != null && enterpriseNo != undefined && enterpriseNo != '') {
+          if ((enterpriseNo.length != 6) || !enterpriseNo.match("^[0-9]*$")) {
+            return new ValidationResult(null, false, 'Enterprise Number should be of 6 numeric characters.');
+          }
+        } else {
+          return new ValidationResult(null, true);
         }
-        return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
@@ -2873,13 +2877,13 @@ function lockUnlockFieldForEs() {
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet = new Set([ 'COMME', 'GOVRN', 'THDPT', 'IGSGS', 'GOVIG', 'THDIG' ]);
   if (role == 'PROCESSOR' && custSubGrpSet.has(custSubGroup)) {
-    FormManager.enable('isicCd');
+    // FormManager.enable('isicCd');
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     FormManager.enable('enterprise');
     FormManager.enable('repTeamMemberNo');
   } else {
-    FormManager.readOnly('isicCd');
+    // FormManager.readOnly('isicCd');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('enterprise');
@@ -2933,7 +2937,7 @@ function setClientTierValues() {
   } else {
     FormManager.setValue('clientTier', '');
   }
-  removeClientTireValidation();
+  addRemoveValidator();
   setEnterpriseValues();
   forceLockUnlock();
 }
@@ -3445,8 +3449,8 @@ function validatorEnterprisePT() {
   }
 }
 
-function removeClientTireValidation() {
-  console.log(">>>> removeClientTireValidation");
+function addRemoveClientTierValidator() {
+  console.log(">>>> addRemoveClientTierValidator");
   var isuCd = FormManager.getActualValue('isuCd');
   FormManager.resetValidations('clientTier');
   if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
@@ -3454,6 +3458,16 @@ function removeClientTireValidation() {
   } else {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
   }
+}
+function addRemoveEnterperiseValidator() {
+  FormManager.resetValidations('enterprise');
+  FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+}
+
+function addRemoveValidator() {
+  addRemoveClientTierValidator();
+  addRemoveEnterperiseValidator();
+
 }
 // CREATCMR-788
 function addressQuotationValidatorMCO() {
