@@ -4757,7 +4757,7 @@ public class LAHandler extends GEOHandler {
               }
 
               // State/Province
-              if (isInstallAtFilled && "@".equals(stateProv) && !Arrays.asList("DO", "PE", "NI", "CR", "PA", "GT", "HN", "SV").contains(landed)) {
+              if (isShipToFilled && "@".equals(stateProv) && !Arrays.asList("DO", "PE", "NI", "CR", "PA", "GT", "HN", "SV").contains(landed)) {
                 error.addError((row.getRowNum() + 1), "<br>State/Province", "@ value for State/Province is not allowed.");
               }
 
@@ -4820,7 +4820,7 @@ public class LAHandler extends GEOHandler {
               }
 
               // State/Province
-              if (isInstallAtFilled && "@".equals(stateProv) && !Arrays.asList("DO", "PE", "NI", "CR", "PA", "GT", "HN", "SV").contains(landed)) {
+              if (isBillToFilled && "@".equals(stateProv) && !Arrays.asList("DO", "PE", "NI", "CR", "PA", "GT", "HN", "SV").contains(landed)) {
                 error.addError((row.getRowNum() + 1), "<br>State/Province", "@ value for State/Province is not allowed.");
               }
 
@@ -4883,7 +4883,7 @@ public class LAHandler extends GEOHandler {
               }
 
               // State/Province
-              if (isInstallAtFilled && "@".equals(stateProv) && !Arrays.asList("DO", "PE", "NI", "CR", "PA", "GT", "HN", "SV").contains(landed)) {
+              if (isSoldToFilled && "@".equals(stateProv) && !Arrays.asList("DO", "PE", "NI", "CR", "PA", "GT", "HN", "SV").contains(landed)) {
                 error.addError((row.getRowNum() + 1), "<br>State/Province", "@ value for State/Province is not allowed.");
               }
 
