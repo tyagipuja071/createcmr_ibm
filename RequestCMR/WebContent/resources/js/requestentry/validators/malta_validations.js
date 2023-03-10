@@ -1067,7 +1067,7 @@ function setEnterpriseValues() {
     FormManager.setValue('enterprise', '985999');
   }
 
-  FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
+  addRemoveEnterperiseValidator()
 
   lockUnlockFieldForMALTA();
 }
