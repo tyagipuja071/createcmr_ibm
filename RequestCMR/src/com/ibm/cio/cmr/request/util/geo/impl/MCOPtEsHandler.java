@@ -621,7 +621,7 @@ public class MCOPtEsHandler extends MCOHandler {
 
         // Enterprise
         if (StringUtils.isEmpty(data.getEnterprise()) && !StringUtils.isEmpty(rdcData.getEnterprise())) {
-          data.setEnterprise(rdcData.getEnterprise());
+          // data.setEnterprise(rdcData.getEnterprise());
         }
 
         // sales rep

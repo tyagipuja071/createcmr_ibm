@@ -1236,7 +1236,8 @@ function disableVatIfNotEmptyPortugal() {
           var zs01Cntry = landCntry;
 
           var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
-            REQID : FormManager.getActualValue('reqId')
+            REQID : FormManager.getActualValue('reqId'),
+            TYPE : 'ZS01'
           });
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
@@ -2877,13 +2878,13 @@ function lockUnlockFieldForEs() {
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet = new Set([ 'COMME', 'GOVRN', 'THDPT', 'IGSGS', 'GOVIG', 'THDIG' ]);
   if (role == 'PROCESSOR' && custSubGrpSet.has(custSubGroup)) {
-    // FormManager.enable('isicCd');
+    FormManager.enable('isicCd');
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     FormManager.enable('enterprise');
     FormManager.enable('repTeamMemberNo');
   } else {
-    // FormManager.readOnly('isicCd');
+    FormManager.enable('isicCd');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('enterprise');
