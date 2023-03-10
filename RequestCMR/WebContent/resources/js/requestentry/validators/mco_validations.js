@@ -1236,7 +1236,8 @@ function disableVatIfNotEmptyPortugal() {
           var zs01Cntry = landCntry;
 
           var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
-            REQID : FormManager.getActualValue('reqId')
+            REQID : FormManager.getActualValue('reqId'),
+            TYPE : 'ZS01'
           });
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
