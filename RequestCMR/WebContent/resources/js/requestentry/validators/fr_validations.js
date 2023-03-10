@@ -133,7 +133,12 @@ function afterConfigForFR() {
       _isuHandler[0].onChange();
     }
   }
-
+  dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    if (value == undefined) {
+      return;
+    }
+    setCtcByIsu(value);
+  });
   var _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     // setAbbrevNmOnCustSubGrpChange();
     setAbbrevLocnOnCustSubGrpChange();
@@ -215,7 +220,7 @@ function afterConfigForFR() {
       } else if (custSubGrpArrayCbComm.includes(custSubGrp) && LandedCntryArray.includes(landedCountry)) {
         FormManager.setValue('isuCd', '34');
         FormManager.setValue('clientTier', 'Q');
-}
+      }
     }
   });
 }
@@ -478,21 +483,21 @@ function setSBOOnScenarioLD() {
       FormManager.setValue('salesBusOffCd', '860860');
     } else if (countyCd == "MQ") {
       FormManager.setValue('salesBusOffCd', '851851');
-      } else if (countyCd == "GP") {
-        FormManager.setValue('salesBusOffCd', '852852');
+    } else if (countyCd == "GP") {
+      FormManager.setValue('salesBusOffCd', '852852');
     } else if (countyCd == "GF" || countyCd == "PM") {
-        FormManager.setValue('salesBusOffCd', '853853');
-      } else if (countyCd == "YT") {
-        FormManager.setValue('salesBusOffCd', '864864');
+      FormManager.setValue('salesBusOffCd', '853853');
+    } else if (countyCd == "YT") {
+      FormManager.setValue('salesBusOffCd', '864864');
     } else if (countyCd == "NC" || countyCd == "WF" || countyCd == "VU") {
-        FormManager.setValue('salesBusOffCd', '872872');
+      FormManager.setValue('salesBusOffCd', '872872');
     } else if (countyCd == "PF") {
       FormManager.setValue('salesBusOffCd', '873873');
-      } else if (countyCd == "AD") {
+    } else if (countyCd == "AD") {
       FormManager.setValue('salesBusOffCd', 'IBOIBO');
     } else if (countyCd == "MC") {
       FormManager.setValue('salesBusOffCd', '18D18D');
-        }
+    }
     var sbo = FormManager.getActualValue('salesBusOffCd');
     if ((sbo == null || sbo == '' || sbo == undefined) && role != 'Requester' && custSubGrp != 'XBLUM') {
       FormManager.enable('salesBusOffCd');
@@ -3819,17 +3824,17 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
         FormManager.setValue('salesBusOffCd', '710710');
       } else if (landedCountry == 'RE' || landedCountry == "KM") {
         FormManager.setValue('salesBusOffCd', '860860');
-    } else if (landedCountry == 'MQ') {
+      } else if (landedCountry == 'MQ') {
         FormManager.setValue('salesBusOffCd', '851851');
-    } else if (landedCountry == 'GP') {
+      } else if (landedCountry == 'GP') {
         FormManager.setValue('salesBusOffCd', '852852');
-    } else if (landedCountry == 'GF' || landedCountry == 'PM') {
+      } else if (landedCountry == 'GF' || landedCountry == 'PM') {
         FormManager.setValue('salesBusOffCd', '853853');
-    } else if (landedCountry == 'YT') {
+      } else if (landedCountry == 'YT') {
         FormManager.setValue('salesBusOffCd', '864864');
-    } else if (landedCountry == 'NC' || landedCountry == 'WF' || landedCountry == 'VU') {
+      } else if (landedCountry == 'NC' || landedCountry == 'WF' || landedCountry == 'VU') {
         FormManager.setValue('salesBusOffCd', '872872');
-    } else if (landedCountry == 'PF') {
+      } else if (landedCountry == 'PF') {
         FormManager.setValue('salesBusOffCd', '873873');
       }
     } else if (custGrp == 'LOCAL') {
@@ -4053,7 +4058,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-       }, false, 'Client Tier can only accept \'Q\', \'Y\', \'T\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'T\' or blank.');
     }
   }
 }
@@ -4317,9 +4322,9 @@ function setCoverage2H23Sbo(fromAddress, currentLanded) {
     FormManager.setValue('clientTier', '');
     FormManager.setValue('salesBusOffCd', '98F98F');
   } else if (custSubGrpArrayCbIN.includes(custSubGrp)) {
-      FormManager.setValue('isuCd', '21');
-      FormManager.setValue('clientTier', '');
-      FormManager.setValue('salesBusOffCd', '200200');
+    FormManager.setValue('isuCd', '21');
+    FormManager.setValue('clientTier', '');
+    FormManager.setValue('salesBusOffCd', '200200');
   } else if (custSubGrpArrayCbComm.includes(custSubGrp) && !isCoverage2H22Subregion(landedCountry) && !isCoverage2H22MEACountry(landedCountry) && !LandedCntryArray.includes(landedCountry)) {
     // FormManager.setValue('isuCd', '21');
     // FormManager.setValue('clientTier', '');
