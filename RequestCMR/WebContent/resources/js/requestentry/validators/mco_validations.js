@@ -2752,24 +2752,24 @@ function forceLockScenariosSpain() {
   } else if (custSubGroup == 'BUSPR') {
     fieldsToDisable.push('custClass');
   } else if (custSubGroup == 'INTER') {
-    // fieldsToDisable.push('isicCd');
+    fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
   } else if (custSubGroup == 'INTSO') {
-    // fieldsToDisable.push('isicCd');
+    fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
   } else if (custSubGroup == 'PRICU') {
-    // fieldsToDisable.push('isicCd');
+    fieldsToDisable.push('isicCd');
     fieldsToDisable.push('vat');
   } else if (custSubGroup == 'XBP') {
     fieldsToDisable.push('custClass');
   } else if (custSubGroup == 'XINSO') {
-    // fieldsToDisable.push('isicCd');
+    fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
   } else if (custSubGroup == 'XINTR') {
-    // fieldsToDisable.push('isicCd');
+    fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
   } else if (custSubGroup == 'IBMEM') {
-    // fieldsToDisable.push('isicCd');
+    fieldsToDisable.push('isicCd');
   }
 
   // common to all scenarios
@@ -2828,17 +2828,17 @@ function forceLockScenariosPortugal() {
     fieldsToDisable.push('collectionCd');
 
   } else if (custSubGroup == 'INTSO') {
-    // fieldsToDisable.push('isicCd');
+    fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
 
   } else if (custSubGroup == 'INTER') {
-    // fieldsToDisable.push('isicCd');
+    fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
 
   } else if (custSubGroup == 'PRICU') {
-    // fieldsToDisable.push('isicCd');
+    fieldsToDisable.push('isicCd');
   } else if (custSubGroup == 'IBMEM') {
-    // fieldsToDisable.push('isicCd');
+    fieldsToDisable.push('isicCd');
   }
   // common to all scenarios
   if (role == 'REQUESTER') {
@@ -2877,13 +2877,13 @@ function lockUnlockFieldForEs() {
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet = new Set([ 'COMME', 'GOVRN', 'THDPT', 'IGSGS', 'GOVIG', 'THDIG' ]);
   if (role == 'PROCESSOR' && custSubGrpSet.has(custSubGroup)) {
-    // FormManager.enable('isicCd');
+    FormManager.enable('isicCd');
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     FormManager.enable('enterprise');
     FormManager.enable('repTeamMemberNo');
   } else {
-    // FormManager.readOnly('isicCd');
+    FormManager.enable('isicCd');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('enterprise');

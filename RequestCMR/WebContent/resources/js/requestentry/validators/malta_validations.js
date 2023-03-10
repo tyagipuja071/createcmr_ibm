@@ -1312,8 +1312,12 @@ function addRemoveClientTierValidator() {
 }
 
 function addRemoveEnterperiseValidator() {
+  var reqType = FormManager.getActualValue('reqType');
   FormManager.resetValidations('enterprise');
-  FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  if (reqType == 'C') {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  }
+
 }
 
 function addRemoveValidator() {
