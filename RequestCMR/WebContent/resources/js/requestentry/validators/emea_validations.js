@@ -8064,7 +8064,7 @@ function validateSBOForIT() {
     return {
       validate : function() {
         var isu = FormManager.getActualValue('isuCd');
-        var ctc = FormManager.getActualValue('clienTier');
+        var ctc = FormManager.getActualValue('clientTier');
         var isuCTC = isu.concat(ctc);
         var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
         var salRep = FormManager.getActualValue('repTeamMemberNo');
@@ -8079,8 +8079,8 @@ function validateSBOForIT() {
         var qParams = {
           _qall : 'Y',
           CNTRY : cntry,
-          SBO : '%' + sbo + '%',
-          SALES_REP : salRep,
+          SBO : sbo,
+          SALES_REP :'%' +  salRep  + '%',
           ISU : '%' + isuCTC + '%'
         };
         var results = cmr.query('GET.SR.SBO.BYISUCTC', qParams);
