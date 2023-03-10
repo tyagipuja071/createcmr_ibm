@@ -8093,7 +8093,7 @@ function validateSBOForIT() {
     return {
       validate : function() {
         var isu = FormManager.getActualValue('isuCd');
-        var ctc = FormManager.getActualValue('clienTier');
+        var ctc = FormManager.getActualValue('clientTier');
         var isuCTC = isu.concat(ctc);
         var sbo = FormManager.getActualValue('salesBusOffCd').toUpperCase();
         var salRep = FormManager.getActualValue('repTeamMemberNo');
