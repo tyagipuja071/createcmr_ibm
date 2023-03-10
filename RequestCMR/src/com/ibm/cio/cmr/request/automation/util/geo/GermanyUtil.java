@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
+import com.ibm.cio.cmr.request.automation.util.DACHFieldContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -628,27 +629,15 @@ public class GermanyUtil extends AutomationUtil {
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     Data data = requestData.getData();
-    Addr zs01 = requestData.getAddress("ZS01");
     String scenario = data.getCustSubGrp();
     String coverageId = container.getFinalCoverage();
     String coverage = data.getSearchTerm();
+    String bgId = data.getBgId();
     List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
-    LOG.debug("coverageId-------------" + coverageId);
-    LOG.debug("sortl-------------" + coverage);
+    LOG.debug("CovereageID -> " + coverageId);
 
     details.append("\n");
-    // if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom
-    // != null && CalculateCoverageElement.COV_BG.equals(covFrom)) {
-    // overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
-    // "SEARCH_TERM", data.getSearchTerm(), coverageId);
-    // details.append("Computed SORTL = " + coverageId).append("\n");
-    // results.setResults("Coverage Calculated");
-    // engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-    // } else if ("34".equals(data.getIsuCd()) &&
-    // "Q".equals(data.getClientTier())) {
-    // details.setLength(0); // clearing details
-    // overrides.clearOverrides();
-    details.append("Calculating coverage based on IMS Mapping rule.").append("\n");
+
     String sbo = "";
     String isuCd = null;
     String clientTier = null;
@@ -659,68 +648,96 @@ public class GermanyUtil extends AutomationUtil {
       isuCd = data.getIsuCd();
       clientTier = data.getClientTier();
     }
-    sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), isuCd, clientTier);
-    if (StringUtils.isNotBlank(sbo)) {
-      details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
-      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sbo);
-      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-      results.setResults("Calculated");
-    } else if (!isCoverageCalculated) {
-      String sboReq = data.getSalesBusOffCd();
-      if (!StringUtils.isBlank(sboReq)) {
-        String msg = "No valid SBO mapping from request data. Using SBO " + sboReq + " from request.";
-        details.append(msg);
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else {
-        String msg = "Coverage cannot be calculated. No valid SBO mapping from request data.";
-        details.append(msg);
-        results.setResults("Cannot Calculate");
-        results.setDetails(details.toString());
-        engineData.addNegativeCheckStatus("_atSbo", msg);
+
+    if (bgId != null && !"BGNONE".equals(bgId.trim())) {
+      List<DACHFieldContainer> queryResults = AutomationUtil.computeDACHCoverageElements(entityManager, "AUTO.COV.CALCULATE_COV_ELEMENTS_DACH", bgId,
+          data.getCmrIssuingCntry());
+      if (queryResults != null && !queryResults.isEmpty()) {
+        for (DACHFieldContainer result : queryResults) {
+          DACHFieldContainer queryResult = (DACHFieldContainer) result;
+          String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
+          String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
+          String queryIsu = queryResult.getIsuCd();
+          String queryCtc = queryResult.getClientTier();
+          if (containerIsu.equals(queryIsu) && containerCtc.equals(queryCtc)) {
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), queryResult.getSearchTerm());
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), queryResult.getInac());
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), queryResult.getEnterprise());
+            details.append("Data calculated based on CMR Data:").append("\n");
+            details.append(" - SORTL = " + queryResult.getSearchTerm()).append("\n");
+            details.append(" - INAC Code = " + queryResult.getInac()).append("\n");
+            details.append(" - Enterprise = " + queryResult.getEnterprise()).append("\n");
+            engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+            results.setResults("Calculated");
+            break;
+          }
+        }
       }
-      /*
-       * HashMap<String, String> response =
-       * getSORTLFromPostalCodeMapping(data.getSubIndustryCd(),
-       * zs01.getPostCd(), data.getIsuCd(), data.getClientTier());
-       * LOG.debug("Calculated SORTL: " + response.get(SORTL)); if
-       * (StringUtils.isNotBlank(response.get(MATCHING))) { switch
-       * (response.get(MATCHING)) { case "Exact Match": case "Nearest Match":
-       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
-       * "SEARCH_TERM", data.getSearchTerm(), response.get(SORTL));
-       * details.append("Coverage calculation Successful.").append("\n");
-       * details.append("Computed SORTL = " +
-       * response.get(SORTL)).append("\n\n");
-       * details.append("Matched Rule:").append("\n");
-       * details.append("Sub Industry = " +
-       * data.getSubIndustryCd()).append("\n"); details.append("ISU = " +
-       * data.getIsuCd()).append("\n"); details.append("CTC = " +
-       * data.getClientTier()).append("\n");
-       * details.append("Postal Code Range = " +
-       * response.get(POSTAL_CD_RANGE)).append("\n\n");
-       * details.append("Matching: " + response.get(MATCHING));
-       * results.setResults("Coverage Calculated");
-       * engineData.addPositiveCheckStatus(AutomationEngineData.
-       * COVERAGE_CALCULATED); break; case "No Match Found":
-       * engineData.addRejectionComment("OTH",
-       * "Coverage cannot be computed using 34Q-PostalCode logic.", "", "");
-       * details.
-       * append("Coverage cannot be computed using 34Q-PostalCode logic.").
-       * append("\n"); results.setResults("Coverage not calculated.");
-       * results.setOnError(true); break; } } else {
-       * engineData.addRejectionComment("OTH",
-       * "Coverage cannot be computed using 34Q-PostalCode logic.", "", "");
-       * details.
-       * append("Coverage cannot be computed using 34Q-PostalCode logic.").
-       * append("\n"); results.setResults("Coverage not calculated.");
-       * results.setOnError(true); }
-       */
     } else {
-      details.setLength(0);
-      overrides.clearOverrides();
-      details.append("Coverage could not be calculated IMS Mapping rule.\n Skipping coverage calculation.").append("\n");
-      results.setResults("Skipped");
+      sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), isuCd, clientTier);
+      if (StringUtils.isNotBlank(sbo)) {
+        details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sbo);
+        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+        results.setResults("Calculated");
+      } else if (!isCoverageCalculated) {
+        String sboReq = data.getSalesBusOffCd();
+        if (!StringUtils.isBlank(sboReq)) {
+          String msg = "No valid SBO mapping from request data. Using SBO " + sboReq + " from request.";
+          details.append(msg);
+          results.setResults("Calculated");
+          results.setDetails(details.toString());
+        } else {
+          String msg = "Coverage cannot be calculated. No valid SBO mapping from request data.";
+          details.append(msg);
+          results.setResults("Cannot Calculate");
+          results.setDetails(details.toString());
+          engineData.addNegativeCheckStatus("_atSbo", msg);
+        }
+      } else {
+        details.setLength(0);
+        overrides.clearOverrides();
+        details.append("Coverage could not be calculated IMS Mapping rule.\n Skipping coverage calculation.").append("\n");
+        results.setResults("Skipped");
+      }
     }
+
+    /*
+     * HashMap<String, String> response =
+     * getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(),
+     * data.getIsuCd(), data.getClientTier()); LOG.debug("Calculated SORTL: " +
+     * response.get(SORTL)); if (StringUtils.isNotBlank(response.get(MATCHING)))
+     * { switch (response.get(MATCHING)) { case "Exact Match": case
+     * "Nearest Match":
+     * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+     * "SEARCH_TERM", data.getSearchTerm(), response.get(SORTL));
+     * details.append("Coverage calculation Successful.").append("\n");
+     * details.append("Computed SORTL = " + response.get(SORTL)).append("\n\n");
+     * details.append("Matched Rule:").append("\n");
+     * details.append("Sub Industry = " + data.getSubIndustryCd()).append("\n");
+     * details.append("ISU = " + data.getIsuCd()).append("\n");
+     * details.append("CTC = " + data.getClientTier()).append("\n");
+     * details.append("Postal Code Range = " +
+     * response.get(POSTAL_CD_RANGE)).append("\n\n");
+     * details.append("Matching: " + response.get(MATCHING));
+     * results.setResults("Coverage Calculated");
+     * engineData.addPositiveCheckStatus(AutomationEngineData.
+     * COVERAGE_CALCULATED); break; case "No Match Found":
+     * engineData.addRejectionComment("OTH",
+     * "Coverage cannot be computed using 34Q-PostalCode logic.", "", "");
+     * details.
+     * append("Coverage cannot be computed using 34Q-PostalCode logic.").
+     * append("\n"); results.setResults("Coverage not calculated.");
+     * results.setOnError(true); break; } } else {
+     * engineData.addRejectionComment("OTH",
+     * "Coverage cannot be computed using 34Q-PostalCode logic.", "", "");
+     * details.
+     * append("Coverage cannot be computed using 34Q-PostalCode logic.").
+     * append("\n"); results.setResults("Coverage not calculated.");
+     * results.setOnError(true); }
+     */
+    // } else {
+    // }
     LOG.debug("---data.getSearchTerm---" + data.getSearchTerm());
     LOG.debug("---coverageId---" + coverageId);
     LOG.debug("---coverage---" + coverage);
@@ -777,48 +794,47 @@ public class GermanyUtil extends AutomationUtil {
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     boolean isNegativeCheckNeedeed = false;
     if (changes != null && changes.hasDataChanges()) {
-      if (changes.isDataChanged("VAT #")) {
+      if (changes.isDataChanged("VAT #")
+          || CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo)) {
         UpdatedDataModel vatChange = changes.getDataChange("VAT #");
-        if (vatChange != null) {
-          if ((StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
-              || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))) {
-            // check if the name + VAT exists in D&B
-            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-            if (matches.isEmpty()) {
-              // get DnB matches based on all address details
-              matches = getMatches(requestData, engineData, soldTo, false);
-            }
-            String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
-            if (!matches.isEmpty()) {
-              for (DnBMatchingResponse dnbRecord : matches) {
-                if ("Y".equals(dnbRecord.getOrgIdMatch()) && (StringUtils.isNotEmpty(custName) && StringUtils.isNotEmpty((dnbRecord.getDnbName()))
-                    && StringUtils.getLevenshteinDistance(custName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) <= 5)) {
-                  duns = dnbRecord.getDunsNo();
-                  isNegativeCheckNeedeed = false;
-                  break;
-                }
-                isNegativeCheckNeedeed = true;
+        if (isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo)
+            || (vatChange != null && (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
+                || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())))) {
+          // check if the name + VAT exists in D&B
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+          if (matches.isEmpty()) {
+            // get DnB matches based on all address details
+            matches = getMatches(requestData, engineData, soldTo, false);
+          }
+          String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
+          if (!matches.isEmpty()) {
+            for (DnBMatchingResponse dnbRecord : matches) {
+              if ("Y".equals(dnbRecord.getOrgIdMatch()) && (StringUtils.isNotEmpty(custName) && StringUtils.isNotEmpty((dnbRecord.getDnbName()))
+                  && StringUtils.getLevenshteinDistance(custName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) <= 5)) {
+                duns = dnbRecord.getDunsNo();
+                isNegativeCheckNeedeed = false;
+                break;
               }
+              isNegativeCheckNeedeed = true;
             }
-            if (isNegativeCheckNeedeed) {
-              detail.append("Updates to VAT need verification as VAT and legal name doesn't matches DnB.\n");
-              LOG.debug("Updates to VAT need verification as VAT and legal name doesn't matches DnB.");
-            } else {
-              detail.append("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
-              LOG.debug("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
-            }
-
-          } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
-            admin.setScenarioVerifiedIndc("N");
-            entityManager.merge(admin);
-            detail.append("Setting scenario verified indc= N as VAT is blank.\n");
-            LOG.debug("Setting scenario verified indc= N as VAT is blank.");
-          } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
-            isNegativeCheckNeedeed = true;
-            detail.append("Updates to VAT need verification.\n");
-            LOG.debug("Updates to VAT need verification.");
+          }
+          if (isNegativeCheckNeedeed) {
+            detail.append("Updates to VAT need verification as VAT and legal name doesn't matches DnB.\n");
+            LOG.debug("Updates to VAT need verification as VAT and legal name doesn't matches DnB.");
+          } else {
+            detail.append("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
+            LOG.debug("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
           }
 
+        } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
+          admin.setScenarioVerifiedIndc("N");
+          entityManager.merge(admin);
+          detail.append("Setting scenario verified indc= N as VAT is blank.\n");
+          LOG.debug("Setting scenario verified indc= N as VAT is blank.");
+        } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
+          isNegativeCheckNeedeed = true;
+          detail.append("Updates to VAT need verification.\n");
+          LOG.debug("Updates to VAT need verification.");
         }
       } else if (changes.isDataChanged("Order Block")) {
         UpdatedDataModel OBChange = changes.getDataChange("Order Block");

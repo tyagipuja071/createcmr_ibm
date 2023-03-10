@@ -1667,10 +1667,12 @@ public class IsraelHandler extends EMEAHandler {
           error.addError(rowIndex + 1, "<br>Embargo Code", "Invalid Embargo Code. Only D, J and @ are valid.");
         }
         // Client Tier
-        String ctc = validateColValFromCell(row.getCell(11));
-        if (StringUtils.isNotBlank(ctc) && (!"Q".equals(ctc) && !"Y".equals(ctc) && !"@".equals(ctc))) {
-          error.addError(rowIndex + 1, "<br>Client Tier", "Invalid Client Tier. Only uppercase Q, Y and @ are valid.");
-        }
+        // String ctc = validateColValFromCell(row.getCell(11));
+        // if (StringUtils.isNotBlank(ctc) && (!"Q".equals(ctc) &&
+        // !"Y".equals(ctc) && !"@".equals(ctc))) {
+        // error.addError(rowIndex + 1, "<br>Client Tier", "Invalid Client Tier.
+        // Only uppercase Q, Y and @ are valid.");
+        // }
         // Enterprise Number
         String enterpriseNumber = validateColValFromCell(row.getCell(12));
         if (StringUtils.isNotBlank(enterpriseNumber) && !StringUtils.isNumeric(enterpriseNumber)) {
@@ -1744,6 +1746,7 @@ public class IsraelHandler extends EMEAHandler {
 
         // validate ISU and CTC combination
         String isuCd = validateColValFromCell(row.getCell(10));
+        String ctc = validateColValFromCell(row.getCell(11));
         if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
           LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
           error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");

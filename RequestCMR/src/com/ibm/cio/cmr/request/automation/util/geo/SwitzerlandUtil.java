@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
+import com.ibm.cio.cmr.request.automation.util.DACHFieldContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -106,6 +107,16 @@ public class SwitzerlandUtil extends AutomationUtil {
     Data data = requestData.getData();
     Addr soldTo = requestData.getAddress("ZS01");
     String scenario = data.getCustSubGrp();
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if (soldTo != null) {
+      String landCntry = soldTo.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
+    }
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
 
     if (StringUtils.isBlank(scenario) || scenario.length() != 5) {
@@ -356,22 +367,28 @@ public class SwitzerlandUtil extends AutomationUtil {
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
       case "VAT #":
-        if (!StringUtils.isBlank(change.getNewData())) {
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+        if (requestData.getAddress("ZS01").getLandCntry().equals("GB")) {
+          if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)) {
+            engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+            details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
           }
-          if (!matchesDnb) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_chVATCheckFailed", "VAT # on the request did not match D&B");
-            details.append("VAT # on the request did not match D&B\n");
-          } else {
-            details.append("VAT # on the request matches D&B\n");
+        } else {
+          if (!StringUtils.isBlank(change.getNewData())) {
+            Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+            }
+            if (!matchesDnb) {
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_chVATCheckFailed", "VAT # on the request did not match D&B");
+              details.append("VAT # on the request did not match D&B\n");
+            } else {
+              details.append("VAT # on the request matches D&B\n");
+            }
           }
-
         }
         break;
       case "Order Block Code":
@@ -469,7 +486,6 @@ public class SwitzerlandUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     LOG.info("Starting coverage calculations for Request ID " + requestData.getData().getId().getReqId());
     String actualScenario = scenario.substring(2);
-    String coverageId = container.getFinalCoverage();
     String coverage = data.getSearchTerm();
     LOG.debug("coverageId--------------------" + container.getFinalCoverage());
     LOG.debug("sortl--------------------" + coverage);
@@ -485,49 +501,78 @@ public class SwitzerlandUtil extends AutomationUtil {
 
     List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
 
-    // ChMubotyMapping muboty = null;
-    String sortl = null;
-    switch (actualScenario) {
-    case SCENARIO_COMMERCIAL:
-      sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), isuCd, clientTier);
-      break;
-    case SCENARIO_PRIVATE_CUSTOMER:
-    case SCENARIO_IBM_EMPLOYEE:
-      sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), isuCd, clientTier);
-      break;
-    default:
-      if ("34".equals(data.getIsuCd()) && ("Q".equals(data.getClientTier())) && !isCoverageCalculated) {
-        if (SCENARIO_CROSS_BORDER.equals(scenario)) {
-          // verified all logic is based on 3000-9999 condition for crossborders
-          sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), "3000", data.getIsuCd(), data.getClientTier());
-
-        } else {
-          sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
-
+    if (data.getBgId() != null && !"BGNONE".equals(data.getBgId().trim())) {
+      List<DACHFieldContainer> queryResults = AutomationUtil.computeDACHCoverageElements(entityManager, "AUTO.COV.CALCULATE_COV_ELEMENTS_DACH",
+          data.getBgId(), data.getCmrIssuingCntry());
+      if (queryResults != null && !queryResults.isEmpty()) {
+        for (DACHFieldContainer result : queryResults) {
+          DACHFieldContainer queryResult = (DACHFieldContainer) result;
+          String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
+          String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
+          String queryIsu = queryResult.getIsuCd();
+          String queryCtc = queryResult.getClientTier();
+          if (containerIsu.equals(queryIsu) && containerCtc.equals(queryCtc)) {
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), queryResult.getSearchTerm());
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), queryResult.getInac());
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), queryResult.getEnterprise());
+            details.append("Data calculated based on CMR Data:").append("\n");
+            details.append(" - SORTL = " + queryResult.getSearchTerm()).append("\n");
+            details.append(" - INAC Code = " + queryResult.getInac()).append("\n");
+            details.append(" - Enterprise = " + queryResult.getEnterprise()).append("\n");
+            engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+            results.setResults("Calculated");
+            break;
+          }
         }
       }
-    }
+    } else {
 
-    LOG.debug("----CovId() + Coverage--" + data.getCovId());
-    if (sortl != null) {
-      details.append("Setting SORTL to " + sortl + " based on Postal Code rules.");
-      overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
-      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-      results.setResults("Calculated");
-    } else if (!isCoverageCalculated) {
-      String searchTerm = data.getSearchTerm();
-      if (!StringUtils.isBlank(searchTerm)) {
-        String msg = "No valid SORTL mapping from request data. Using SORTL " + searchTerm + " from request.";
-        details.append(msg);
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else {
-        String msg = "Coverage cannot be calculated. No valid SORTL mapping from request data.";
-        details.append(msg);
-        results.setResults("Cannot Calculate");
-        results.setDetails(details.toString());
-        engineData.addNegativeCheckStatus("_chMuboty", msg);
+      // ChMubotyMapping muboty = null;
+      String sortl = null;
+      switch (actualScenario) {
+      case SCENARIO_COMMERCIAL:
+        sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), isuCd, clientTier);
+        break;
+      case SCENARIO_PRIVATE_CUSTOMER:
+      case SCENARIO_IBM_EMPLOYEE:
+        sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), isuCd, clientTier);
+        break;
+      default:
+        if ("34".equals(data.getIsuCd()) && ("Q".equals(data.getClientTier())) && !isCoverageCalculated) {
+          if (SCENARIO_CROSS_BORDER.equals(scenario)) {
+            // verified all logic is based on 3000-9999 condition for
+            // crossborders
+            sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), "3000", data.getIsuCd(), data.getClientTier());
+
+          } else {
+            sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
+
+          }
+        }
       }
+
+      LOG.debug("----CovId() + Coverage--" + data.getCovId());
+      if (sortl != null) {
+        details.append("Setting SORTL to " + sortl + " based on Postal Code rules.");
+        overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
+        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+        results.setResults("Calculated");
+      } else if (!isCoverageCalculated) {
+        String searchTerm = data.getSearchTerm();
+        if (!StringUtils.isBlank(searchTerm)) {
+          String msg = "No valid SORTL mapping from request data. Using SORTL " + searchTerm + " from request.";
+          details.append(msg);
+          results.setResults("Calculated");
+          results.setDetails(details.toString());
+        } else {
+          String msg = "Coverage cannot be calculated. No valid SORTL mapping from request data.";
+          details.append(msg);
+          results.setResults("Cannot Calculate");
+          results.setDetails(details.toString());
+          engineData.addNegativeCheckStatus("_chMuboty", msg);
+        }
+      }
+
     }
 
     LOG.debug("Before Setting isu ctc to 28-7 for matched coverage from list");

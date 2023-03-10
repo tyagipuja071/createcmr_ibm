@@ -254,6 +254,8 @@ public class USUtil extends AutomationUtil {
 
       digester.addBeanPropertySetter("mappings/mapping/dnb-isic", "dnbIsic");
       digester.addBeanPropertySetter("mappings/mapping/cmr-isic", "cmrIsic");
+      digester.addBeanPropertySetter("mappings/mapping/dnb-subInd", "dnbSubInd");
+      digester.addBeanPropertySetter("mappings/mapping/cmr-subInd", "cmrSubInd");
       digester.addSetNext("mappings/mapping", "add");
       try {
         InputStream is = ConfigUtil.getResourceStream("us-fed-isic-mapping.xml");
@@ -2453,22 +2455,24 @@ public class USUtil extends AutomationUtil {
   }
 
   @Override
-  public String tweakDnBMatchingResponse(EntityManager entityManager, RequestData requestData) {
+  public void tweakDnBMatchingResponse(EntityManager entityManager, Data data, String field) {
     LOG.debug("tweakDnBMatchingResponse USUtil");
-    Data data = requestData.getData();
     String subScenario = data.getCustGrp();
-    String isicOverridedValue = data.getIsicCd();
     List<String> dnbIsicOverrideScenarios = Arrays.asList(CG_COMMERCIAL, CG_COMMERCIAL_FRANCHISE, CG_COMMERCIAL_RESTRICTED);
     if (!StringUtil.isBlank(subScenario) && dnbIsicOverrideScenarios.contains(subScenario)) {
       if (!usFedIsicMap.isEmpty()) {
         for (USFedIsicMapping mapping : usFedIsicMap) {
-          if (data.getIsicCd().equals(mapping.getDnbIsic()) && !mapping.getCmrIsic().isEmpty()) {
-            isicOverridedValue = mapping.getCmrIsic();
+          String isicOverridedValue = mapping.getCmrIsic();
+          String subIndOverrideValue = mapping.getCmrSubInd();
+          if (data.getIsicCd().equals(mapping.getDnbIsic()) && !isicOverridedValue.isEmpty() && "ISIC_CD".equals(field)) {
+            data.setIsicCd(isicOverridedValue);
+          }
+          if (data.getSubIndustryCd().equals(mapping.getDnbSubInd()) && "SUB_INDUSTRY_CD".equals(field) && !subIndOverrideValue.isEmpty()) {
+            data.setSubIndustryCd(subIndOverrideValue);
           }
         }
       }
     }
-    return isicOverridedValue;
   }
 
 }

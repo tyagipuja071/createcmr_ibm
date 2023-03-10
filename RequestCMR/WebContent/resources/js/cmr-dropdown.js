@@ -82,12 +82,16 @@ var FilteringDropdown = (function() {
     }
 
   }, loadItems = function(fieldId, spinnerId, queryId, params, hasDefault, noValueText) {
+    if (FormManager.getField('MAIN_GENERAL_TAB')) {
+      FormManager.readOnly('cmrIssuingCntry');
+      FormManager.readOnly('reqType');
+    }
     if (!fieldId) {
       var queryParams = {};
       queryParams.queryId = queryId;
       if (params) {
         var pairs = params.split('&');
-        for ( var i = 0; i < pairs.length; i++) {
+        for (var i = 0; i < pairs.length; i++) {
           var pair = pairs[i].split('=');
           if (pair.length == 2) {
             if (pair[1].substring(0, 1) == '_') {
@@ -142,7 +146,7 @@ var FilteringDropdown = (function() {
     queryParams.queryId = queryId;
     if (params) {
       var pairs = params.split('&');
-      for ( var i = 0; i < pairs.length; i++) {
+      for (var i = 0; i < pairs.length; i++) {
         var pair = pairs[i].split('=');
         if (pair.length == 2) {
           if (pair[1].substring(0, 1) == '_') {

@@ -19,9 +19,9 @@ function afterConfigForBELUX() {
     role = _pagemodel.userRole;
   }
 
-  if (custGrp != null && custGrp != '') {
-    FormManager.clearValue('inacCd');
-  }
+  /*
+   * if (custGrp != null && custGrp != '') { FormManager.clearValue('inacCd'); }
+   */
 
   if ((custSubGrp.substring(2, 5) == 'INT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO' || custSubGrp == 'BECOM' || custSubGrp == 'BEDAT'
       || custSubGrp == 'LUCOM' || custSubGrp == 'LUDAT')) {
@@ -1637,6 +1637,13 @@ function setSBO(searchTerm) {
  * 'CBCOM': case 'CBBUS': // do nothing break; default: break; } }
  */
 
+var oldIsu = null;
+var oldCtc = null;
+function saveOldIsuCtc() {
+  oldIsu = FormManager.getActualValue('isuCd');
+  oldCtc = FormManager.getActualValue('clientTier');
+}
+
 function setSBOValuesForIsuCtc() {
   var reqType = FormManager.getActualValue('reqType');
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType == 'U') {
@@ -1650,6 +1657,14 @@ function setSBOValuesForIsuCtc() {
   var isuList = [ '34', '36', '28', '32' ];
   var beSubGrpsList = [ 'BEINT', 'BEISO', 'BEPRI', 'IBMEM' ];
   var luSubGrpsList = [ 'LUINT', 'LUISO', 'LUPRI', 'LUIBM' ]
+  if (role == 'Processor') {
+    if (oldIsu == null || oldCtc == null) {
+      saveOldIsuCtc();
+    }
+    if (oldIsu == isuCd && oldCtc == clientTier) {
+      return;
+    }
+  }
   if (countryUse == '624') {
     if (isuCd == '34' && clientTier == 'Q') {
       FormManager.setValue('commercialFinanced', 'T0003601');
@@ -1697,6 +1712,8 @@ function setSBOValuesForIsuCtc() {
       FormManager.setValue('commercialFinanced', 'LU0000');
     }
   }
+  oldIsu = FormManager.getActualValue('isuCd');
+  oldCtc = FormManager.getActualValue('clientTier');
 }
 
 function getLandCntryDesc(cntryCd) {
@@ -2255,5 +2272,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(beluxSortlValidator, GEOHandler.BELUX, null, true);
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(lockFields, GEOHandler.BELUX);
-
+  GEOHandler.addAfterConfig(saveOldIsuCtc, GEOHandler.BELUX);
 });
