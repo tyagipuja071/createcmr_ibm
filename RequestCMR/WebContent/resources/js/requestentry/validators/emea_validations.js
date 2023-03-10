@@ -9396,6 +9396,12 @@ function autoSetAbbrNameUKI() {
         FormManager.setValue('abbrevNm', _abbrevNmValue);
         FormManager.readOnly('abbrevNm');
       }
+      // CREATCMR-8135
+      if (custSubGrp == 'DC' && _abbrevNmValue != null && _abbrevNmValue.length > 0) {
+        _abbrevNmValue = _abbrevNmValue.substr(0, 17) + " DC";
+        FormManager.setValue('abbrevNm', _abbrevNmValue);
+        FormManager.readOnly('abbrevNm');
+      }
     }
   }
 }
