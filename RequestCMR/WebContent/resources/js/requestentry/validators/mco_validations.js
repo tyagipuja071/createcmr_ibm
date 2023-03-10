@@ -2877,13 +2877,13 @@ function lockUnlockFieldForEs() {
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet = new Set([ 'COMME', 'GOVRN', 'THDPT', 'IGSGS', 'GOVIG', 'THDIG' ]);
   if (role == 'PROCESSOR' && custSubGrpSet.has(custSubGroup)) {
-    // FormManager.enable('isicCd');
+    FormManager.enable('isicCd');
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     FormManager.enable('enterprise');
     FormManager.enable('repTeamMemberNo');
   } else {
-    // FormManager.readOnly('isicCd');
+    FormManager.enable('isicCd');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('enterprise');
