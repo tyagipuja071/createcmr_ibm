@@ -481,6 +481,59 @@ function addressQuotationValidator() {
   FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
 
 }
+
+// CREATCMR-8581 
+
+function checkCmrUpdateBeforeImport() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var uptsrdc = '';
+        var lastupts = '';
+
+        if (reqType == 'C') {
+          // console.log('reqType = ' + reqType);
+          return new ValidationResult(null, true);
+        }
+
+        var resultsCC = cmr.query('GETUPTSRDC', {
+          COUNTRY : cntry,
+          CMRNO : cmrNo,
+          MANDT : cmr.MANDT
+        });
+
+        if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
+          uptsrdc = resultsCC.ret1;
+          // console.log('lastupdatets in RDC = ' + uptsrdc);
+        }
+
+        var results11 = cmr.query('GETUPTSADDR', {
+          REQ_ID : reqId
+        });
+        if (results11 != null && results11 != undefined && results11.ret1 != '') {
+          lastupts = results11.ret1;
+          // console.log('lastupdatets in CreateCMR = ' + lastupts);
+        }
+
+        if (lastupts != '' && uptsrdc != '') {
+          if (uptsrdc > lastupts) {
+            return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];
@@ -512,6 +565,10 @@ dojo.addOnLoad(function() {
   // GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.TW, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW);
+  
+  //  CREATCMR-8581
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.TW,null,true);
+  
   GEOHandler.addAfterConfig(setClientTierValuesTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(setClientTierValuesTW, GEOHandler.TW);
   // CREATCMR-6825
