@@ -38,6 +38,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -77,8 +78,10 @@ public class FranceUtil extends AutomationUtil {
   private static final Logger LOG = Logger.getLogger(FranceUtil.class);
   private static List<FrSboMapping> sortlMappings = new ArrayList<FrSboMapping>();
   private static final String MATCHING = "matching";
+  private static final String QUERY_BG_SBO_FR = "AUTO.COV.GET_SBO_FROM_BG_FR";
   private static final String ISIC_CD = "IsicCd";
   private static final String POSTAL_CD_STARTS = "postalCdStarts";
+  private static final String CITY = "city";
   private static final String SBO = "sbo";
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #", "Division/Department",
       "Attention to/Building/Floor/Office");
@@ -339,8 +342,14 @@ public class FranceUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     String coverageId = container.getFinalCoverage();
     Addr addr = requestData.getAddress("ZS01");
+    String bgId = data.getBgId();
+    String sbo = "";
     details.append("\n");
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
+      if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
+        sbo = computeSBOForCovFR(entityManager, QUERY_BG_SBO_FR, bgId, data.getCmrIssuingCntry(), false);
+      }
+
       FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
       String sboVal = "";
       if (overrides.getData().containsKey(sboKeyVal)) {
@@ -348,6 +357,10 @@ public class FranceUtil extends AutomationUtil {
         sboVal = sboVal.substring(0, 3);
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
         details.append("SORTL: " + sboVal + sboVal);
+      } else if (sbo != null && !sbo.isEmpty()) {
+        sbo = sbo.substring(0, 3);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo + sbo);
+        details.append("SORTL: " + sbo + sbo);
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else {
@@ -398,7 +411,8 @@ public class FranceUtil extends AutomationUtil {
 
       if (!isCoverageCalculated) {
         // if not calculated using siren as well
-        if (("34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier())) || ("34".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))
+        if (("34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier())) || ("36".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))
+            || ("32".equals(data.getIsuCd()) && "T".equals(data.getClientTier()))
             || ("5K".equals(data.getIsuCd()) || "14".equals(data.getIsuCd()) || "18".equals(data.getIsuCd()) || "19".equals(data.getIsuCd())
                 || "1R".equals(data.getIsuCd()) || "31".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()) || "4A".equals(data.getIsuCd()))) {
           details.setLength(0);
@@ -410,9 +424,9 @@ public class FranceUtil extends AutomationUtil {
           }
 
           String logicMsg = "";
-          if (("34".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))) {
-            details.append("Calculating coverage using 34Y-new logic.").append("\n");
-            logicMsg = "34Y logic.";
+          if (("36".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))) {
+            details.append("Calculating coverage using 36Y-new logic.").append("\n");
+            logicMsg = "36Y logic.";
           } else if ("5K".equals(data.getIsuCd()) || "14".equals(data.getIsuCd()) || "18".equals(data.getIsuCd()) || "19".equals(data.getIsuCd())
               || "1R".equals(data.getIsuCd()) || "31".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()) || "4A".equals(data.getIsuCd())) {
             details.append("Calculating coverage using 5K,14,18,19,1R,31,3T,4A-new logic.").append("\n");
@@ -423,7 +437,7 @@ public class FranceUtil extends AutomationUtil {
           }
 
           if ((COVERAGE_34Q.contains(addr.getLandCntry()) && custGrp.equals("CROSS") && !SCENARIO_CROSSBORDER_BUSINESS_PARTNER.equals(scenario)
-              && !SCENARIO_CROSSBORDER_INTERNAL.equals(scenario)) || ("34".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))
+              && !SCENARIO_CROSSBORDER_INTERNAL.equals(scenario)) || ("36".equals(data.getIsuCd()) && "Y".equals(data.getClientTier()))
               || ("5K".equals(data.getIsuCd()) || "14".equals(data.getIsuCd()) || "18".equals(data.getIsuCd()) || "19".equals(data.getIsuCd())
                   || "1R".equals(data.getIsuCd()) || "31".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()) || "4A".equals(data.getIsuCd()))) {
 
@@ -455,10 +469,11 @@ public class FranceUtil extends AutomationUtil {
               results.setResults("Coverage not calculated.");
             }
           } else if (("FR".equals(addr.getLandCntry()) && custGrp.equals("LOCAL") && !SCENARIO_BUSINESS_PARTNER.equals(scenario)
-              && !SCENARIO_INTERNAL.equals(scenario)) && "34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier())) {
+              && !SCENARIO_IBM_EMPLOYEE.equals(scenario) && !SCENARIO_INTERNAL.equals(scenario)) && "34".equals(data.getIsuCd())
+              && "Q".equals(data.getClientTier())) {
             // POSTAL CODE LOGIC
-            HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), addr.getPostCd(), data.getIsuCd(),
-                data.getClientTier());
+            HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), addr.getPostCd(), addr.getCity1(),
+                data.getIsuCd(), data.getClientTier());
             LOG.debug("Calculated SBO: " + response.get(SBO) + response.get(SBO));
             if (StringUtils.isNotBlank(response.get(MATCHING))) {
               switch (response.get(MATCHING)) {
@@ -472,6 +487,7 @@ public class FranceUtil extends AutomationUtil {
                 details.append("ISU = " + data.getIsuCd()).append("\n");
                 details.append("CTC = " + data.getClientTier()).append("\n");
                 details.append("Postal Code Starts = " + response.get(POSTAL_CD_STARTS)).append("\n\n");
+                details.append("City= " + response.get(CITY)).append("\n\n");
                 details.append("Matching: " + response.get(MATCHING));
                 results.setResults("Coverage Calculated");
                 engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
@@ -579,22 +595,61 @@ public class FranceUtil extends AutomationUtil {
     return true;
   }
 
-  private HashMap<String, String> getSBOFromPostalCodeMapping(String countryUse, String isicCd, String postCd, String isuCd, String clientTier) {
+  private String computeSBOForCovFR(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
+    String sortl = "";
+    String sql = ExternalizedQuery.getSql(queryBgFR);
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KEY", bgId);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", cmrIssuingCntry);
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    System.err.println("ISO: " + isoCntry);
+    query.setParameter("ISO_CNTRY", isoCntry);
+    query.setForReadOnly(true);
+
+    LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
+    List<Object[]> results = query.getResults(5);
+    List<String> sortlList = new ArrayList<String>();
+    if (results != null && !results.isEmpty()) {
+      for (Object[] result : results) {
+        sortl = (String) result[0];
+        sortlList.add(sortl);
+      }
+    }
+    sortl = sortlList.get(0);
+    return sortl;
+  }
+
+  private HashMap<String, String> getSBOFromPostalCodeMapping(String countryUse, String isicCd, String postCd, String city, String isuCd,
+      String clientTier) {
     HashMap<String, String> response = new HashMap<String, String>();
+    String regex = "\\s+$";
+    city = (city.toUpperCase()).replaceAll(regex, "");
     response.put(MATCHING, "");
     response.put(POSTAL_CD_STARTS, "");
+    response.put(CITY, "");
     response.put(SBO, "");
     if (!sortlMappings.isEmpty()) {
       for (FrSboMapping mapping : sortlMappings) {
         if (countryUse.equals(mapping.getCountryUse()) && isuCd.equals(mapping.getIsu()) && clientTier.equals(mapping.getCtc())) {
-          if (StringUtils.isNotBlank(mapping.getPostalCdStarts())) {
+          if (StringUtils.isNotBlank(mapping.getPostalCdStarts()) && StringUtils.isNotBlank(mapping.getCity())) {
             String[] postalCodeRanges = mapping.getPostalCdStarts().replaceAll("\n", "").replaceAll(" ", "").split(",");
+            String[] cityRanges = mapping.getCity().replaceAll("\n", "").replaceAll(" ", "").split(",");
             for (String postalCdRange : postalCodeRanges) {
-              if (postCd.startsWith(postalCdRange)) {
-                response.put(MATCHING, "Exact Match");
-                response.put(SBO, mapping.getSbo());
-                response.put(POSTAL_CD_STARTS, postalCdRange);
-                return response;
+              for (String cityRange : cityRanges) {
+                if (postCd.startsWith(postalCdRange) && city.equals(cityRange)) {
+                  response.put(MATCHING, "Exact Match");
+                  response.put(SBO, mapping.getSbo());
+                  response.put(CITY, cityRange);
+                  response.put(POSTAL_CD_STARTS, postalCdRange);
+                  return response;
+                } else if ("NIORT".equals(city)) {
+                  response.put(MATCHING, "Exact Match");
+                  response.put(SBO, "8CB");
+                  response.put(CITY, cityRange);
+                  response.put(POSTAL_CD_STARTS, "any postal code");
+                  return response;
+                }
               }
             }
           }
