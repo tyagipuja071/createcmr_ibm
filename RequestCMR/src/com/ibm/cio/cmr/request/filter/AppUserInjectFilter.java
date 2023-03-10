@@ -88,7 +88,7 @@ public class AppUserInjectFilter implements Filter {
           // of
           // SSO and need to get access token
           if (paramNames.contains("code") && paramNames.contains("grant_id")) {
-            LOG.trace("Requesting access token for grant_id : " + request.getParameter("grant_id"));
+            LOG.trace("Requesting access token for grant_id: " + request.getParameter("grant_id"));
 
             // get access_token and id_token
             String code = request.getParameter("code");
