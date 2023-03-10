@@ -186,6 +186,9 @@ public class AppUserInjectFilter implements Filter {
     if (url.endsWith("/logout")) {
       return false;
     }
+    if (url.endsWith("/external.json")) {
+      return false;
+    }
     // if (url.contains("/") &&
     // url.substring(url.lastIndexOf("/")).contains(".")) {
     // return false;
