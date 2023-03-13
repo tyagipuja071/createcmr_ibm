@@ -2435,6 +2435,218 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     // End of address type loop
     return map;
   }
+
+  /**
+   * matching ZS01 for create request for NewZealand
+   * 
+   * @param model
+   * @param reqId
+   * @param businessNumber
+   * @return
+   */
+  public ModelMap isDnBAPIMatchForNZCreate(AutoDNBDataModel model, long reqId, String businessNumber) {
+
+    ModelMap map = new ModelMap();
+    EntityManager entityManager = null;
+
+    boolean apiSuccess = false;
+    boolean apiCustNmMatch = false;
+    boolean apiAddressMatch = false;
+    String errorMsg = "";
+
+    try {
+      if (reqId > 0) {
+        // match DNB for ZS01
+        map = isDnBMatch(model, reqId, CmrConstants.RDC_SOLD_TO);
+        log.debug("success ? " + map.get("success"));
+        log.debug("isic match ? " + map.get("isicMatch"));
+        log.debug("dnbNmMatch ? " + map.get("dnbNmMatch"));
+        log.debug("dnbAddrMatch ? " + map.get("dnbAddrMatch"));
+        log.debug("tradeStyleMatch ? " + map.get("tradeStyleMatch"));
+        log.debug("confidenceCd ? " + map.get("confidenceCd"));
+        
+        entityManager = JpaManager.getEntityManager();
+
+        String regex = "\\s+$";
+        RequestData requestData = new RequestData(entityManager, reqId);
+        Addr zs01 = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+        String custNm = zs01.getCustNm1() + (StringUtils.isBlank(zs01.getCustNm2()) ? "" : " " + zs01.getCustNm2());
+
+        if (requestData != null && (!StringUtils.isBlank(businessNumber) || !StringUtils.isBlank(custNm))) {
+          log.debug("Validating Customer Name  " + custNm + " and Business Number " + businessNumber + " for New Zealand");
+
+          String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+          log.debug("Connecting to the NZBNValidation service at " + baseUrl);
+          AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(baseUrl, AutomationServiceClient.class);
+          autoClient.setReadTimeout(1000 * 60 * 5);
+          autoClient.setRequestMethod(Method.Get);
+
+          NZBNValidationRequest requestToAPI = new NZBNValidationRequest();
+          requestToAPI.setBusinessNumber(businessNumber);
+          requestToAPI.setName(custNm);
+          log.debug("requestToAPI: businessNumber = " + requestToAPI.getBusinessNumber() + ", custNm = " + custNm);
+
+          AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.NZ_BN_VALIDATION_SERVICE_ID, requestToAPI,
+              AutomationResponse.class);
+          ObjectMapper mapper = new ObjectMapper();
+          String json = mapper.writeValueAsString(rawResponse);
+
+          TypeReference<AutomationResponse<NZBNValidationResponse>> ref = new TypeReference<AutomationResponse<NZBNValidationResponse>>() {
+          };
+          AutomationResponse<NZBNValidationResponse> nzbnResponse = mapper.readValue(json, ref);
+          if (nzbnResponse != null && nzbnResponse.isSuccess()) {
+            apiSuccess = true;
+            NZBNValidationResponse nzbnResRec = nzbnResponse.getRecord();
+            if (nzbnResRec != null) {
+              String responseCustNm = StringUtils.isBlank(nzbnResRec.getName()) ? "" : nzbnResRec.getName().replaceAll(regex, "");
+              if (custNm.equalsIgnoreCase(responseCustNm)) {
+                apiCustNmMatch = true;
+                ModelMap zs01ApiMatchMap = this.addrNZBNAPIMatch(zs01, CmrConstants.RDC_SOLD_TO, nzbnResRec);
+                apiAddressMatch = (boolean) zs01ApiMatchMap.get("matchesAddAPI");
+              }
+
+              if (!apiAddressMatch) {
+                errorMsg = "NZBN Validation Failed - ZS01 address does not match with NZBN API.";
+              }
+              if (!apiCustNmMatch) {
+                errorMsg = "NZBN Validation Failed - Customer Name does not match with NZBN API.";
+              }
+            }
+          } else {
+            String respMsg = StringUtils.isNotBlank(nzbnResponse.getMessage()) ? nzbnResponse.getMessage() : "";
+            errorMsg = "NZBN Validation Failed - ";
+            if (respMsg.replaceAll(regex, "").contains("No Response on the Request".replaceAll(regex, ""))) {
+              errorMsg += "Invalid NZBN.";
+            } else {
+              errorMsg += respMsg;
+            }
+          }
+
+          // to check other addresses -- BEGIN
+          boolean otherAddrDNBMatch = true;
+          boolean otherAddrAPIMatch = true;
+          List<String> RELEVANT_ADDRESSES = Arrays.asList("MAIL", "ZP01", "ZI01", "ZF01", "CTYG", "CTYH");
+          List<Addr> addresses = null;
+          for (String addrType : RELEVANT_ADDRESSES) {
+            log.debug("Start matching for other addresses...");
+            addresses = requestData.getAddresses(addrType);
+            for (Addr addr : addresses) {
+              ModelMap otherAddrDNBMatchRes = isDnBMatch(model, reqId, addrType);
+              otherAddrDNBMatch = (boolean) otherAddrDNBMatchRes.get("dnbAddrMatch");
+              if (!otherAddrDNBMatch) {
+                log.debug("DNB Checking Addr match failed. Now Checking Addr with NZBN API with to vrify Addr add");
+                if (nzbnResponse != null && nzbnResponse.isSuccess() && nzbnResponse.getRecord() != null) {
+                  ModelMap zs01ApiMatchMap = this.addrNZBNAPIMatch(addr, addrType, nzbnResponse.getRecord());
+                  otherAddrAPIMatch = (boolean) zs01ApiMatchMap.get("matchesAddAPI");
+                  if (!otherAddrAPIMatch) {
+                    errorMsg = "New address for " + addrType + " (" + addr.getId().getAddrSeq() + ") does not match with DNB and NZAPI.";
+                    break;
+                  }
+                } else {
+                  otherAddrAPIMatch = false;
+                  errorMsg = "No data retrieved from NZBN API.";
+                  break;
+                }
+              }
+            } // End of addresses loop
+            if (!otherAddrDNBMatch && !otherAddrAPIMatch) {
+              break;
+            }
+          } // End of address type loop
+          // to check other addresses -- End
+
+          map.put("otherAddrDNBMatch", otherAddrDNBMatch);
+          map.put("otherAddrAPIMatch", otherAddrAPIMatch);
+        }
+
+      } else {
+        log.error("Invalid request Id");
+        map.put("apiSuccess", false);
+        map.put("success", false);
+        map.put("message", "Invalid request Id");
+        return map;
+      }
+
+    } catch (Exception e) {
+      log.error("Error occured in D&B & NZBN matching", e);
+      map.put("apiSuccess", false);
+      map.put("success", false);
+      map.put("message", "Error occured in D&B & NZBN matching");
+      return map;
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+
+    map.put("apiSuccess", apiSuccess);
+    map.put("apiCustNmMatch", apiCustNmMatch);
+    map.put("apiAddressMatch", apiAddressMatch);
+    map.put("message", errorMsg);
+    return map;
+
+  }
+
+  private ModelMap addrNZBNAPIMatch(Addr addr, String addrType, NZBNValidationResponse nzbnResp) {
+    String regexForAddr = "\\s+|$";
+    boolean matchesAddAPI = false;
+    ModelMap map = new ModelMap();
+    StringBuffer details = new StringBuffer();
+
+    String addressAll = addr.getCustNm1() + (addr.getCustNm2() == null ? "" : addr.getCustNm2()) + addr.getAddrTxt()
+        + (addr.getAddrTxt2() == null ? "" : addr.getAddrTxt2()) + (addr.getStateProv() == null ? "" : addr.getStateProv())
+        + (addr.getCity1() == null ? "" : addr.getCity1()) + (addr.getPostCd() == null ? "" : addr.getPostCd());
+    addressAll = addressAll.toUpperCase();
+    log.debug("\n Checking address " + addrType + "(" + addr.getId().getAddrSeq() + ") : " + addressAll);
+
+    if (StringUtils.isNotEmpty(nzbnResp.getAddress())
+        && addressAll.replaceAll(regexForAddr, "").contains(nzbnResp.getAddress().replaceAll(regexForAddr, "").toUpperCase())
+        && StringUtils.isNotEmpty(nzbnResp.getCity())
+        && addressAll.replaceAll(regexForAddr, "").contains(nzbnResp.getCity().replaceAll(regexForAddr, "").toUpperCase())
+        && StringUtils.isNotEmpty(nzbnResp.getPostal())
+        && addressAll.replaceAll(regexForAddr, "").contains(nzbnResp.getPostal().replaceAll(regexForAddr, "").toUpperCase())) {
+      matchesAddAPI = true;
+
+      details.append(" - Address.:  " + nzbnResp.getAddress() + " \n");
+      details.append(" - City.:  " + nzbnResp.getCity() + " \n");
+      details.append(" - Postal.:  " + nzbnResp.getPostal() + " \n");
+
+      log.debug("\n" + addrType + "(" + addr.getId().getAddrSeq() + ") matchesAddAPI:true.");
+    }
+
+    // CREATCMR-8430: checking if the address matches with
+    // service type address from API
+    log.debug("REGISTERED Address matched ?  " + matchesAddAPI);
+    String serviceAddr = nzbnResp.getServiceAddressDetail();
+    if (!matchesAddAPI && StringUtils.isNotEmpty(serviceAddr)) {
+      log.debug("****** addressOfRequest: " + addressAll);
+      log.debug("****** serviceAddr: " + serviceAddr);
+      String[] serviceAddrArr = serviceAddr.split("\\^");
+      boolean serviceFlag = false;
+      for (String partAddr : serviceAddrArr) {
+        serviceFlag = (addressAll.replaceAll(regexForAddr, "").contains(partAddr.replaceAll(regexForAddr, "").toUpperCase()));
+        if (!serviceFlag) {
+          break;
+        }
+      }
+
+      matchesAddAPI = serviceFlag;
+      if (serviceFlag) {
+        if (serviceAddrArr.length == 3) {
+          details.append(" - Address.:  " + serviceAddrArr[0] + " \n");
+          details.append(" - City.:  " + serviceAddrArr[1] + " \n");
+          details.append(" - Postal.:  " + serviceAddrArr[2] + " \n");
+        }
+      }
+      log.debug("SERVICE Address matched ?  " + serviceFlag);
+    }
+
+    map.put("matchesAddAPI", matchesAddAPI);
+    map.put("detail", details);
+
+    return map;
+  }
+
   //CREATCMR-8430: do DNB check for NZ update -- End
 
 }
