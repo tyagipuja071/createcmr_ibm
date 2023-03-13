@@ -34,6 +34,7 @@ function addISUHandler() {
   console.log(">>>> addISUHandler");
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldClientTier = FormManager.getActualValue('clientTier');
+  getExitingValueOfCTCAndIsuCD();
   addRemoveValidator();
   lockUnlockFieldForCY();
   if (_ISUHandler == null) {
@@ -2855,15 +2856,22 @@ function addEnterpriseValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var entNo = FormManager.getActualValue('enterprise');
-        if (entNo != '' && entNo.length != 6) {
-          return new ValidationResult(null, false, 'Enterprise Number should have exactly 6 digits.');
+        var enterpriseNo = FormManager.getActualValue('enterprise');
+
+        if (enterpriseNo != null && enterpriseNo != undefined && enterpriseNo != '') {
+          if (!enterpriseNo.match("^[0-9]*$")) {
+            return new ValidationResult(null, false, 'Enterprise Number should be numeric only.');
+          } else if ((enterpriseNo.length != 6)) {
+            return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
+          }
+        } else {
+          return new ValidationResult(null, true);
         }
-        return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 
 
 function clientTierValidator() {
@@ -3210,8 +3218,12 @@ function addRemoveClientTierValidator() {
 }
 
 function addRemoveEnterperiseValidator() {
+  var reqType = FormManager.getActualValue('reqType');
   FormManager.resetValidations('enterprise');
-  FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  if (reqType == 'C' || (reqType == 'U' && _oldEnt != null && _oldEnt != '')) {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  }
+
 }
 
 function addRemoveValidator() {

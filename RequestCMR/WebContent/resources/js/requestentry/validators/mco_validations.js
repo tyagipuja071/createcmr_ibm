@@ -581,6 +581,7 @@ function addHandlersForPTES() {
   _oldClientTier = FormManager.getActualValue('clientTier');
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldIsicCd = FormManager.getActualValue('isicCd');
+  getExitingValueOfCTCAndIsuCD();
   addRemoveValidator();
   forceLockUnlock();
   if (_isicHandler == null) {
@@ -1197,8 +1198,10 @@ function addEnterpriseValidator() {
         var enterpriseNo = FormManager.getActualValue('enterprise');
 
         if (enterpriseNo != null && enterpriseNo != undefined && enterpriseNo != '') {
-          if ((enterpriseNo.length != 6) || !enterpriseNo.match("^[0-9]*$")) {
-            return new ValidationResult(null, false, 'Enterprise Number should be of 6 numeric characters.');
+          if (!enterpriseNo.match("^[0-9]*$")) {
+            return new ValidationResult(null, false, 'Enterprise Number should be numeric only.');
+          } else if ((enterpriseNo.length != 6)) {
+            return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
           }
         } else {
           return new ValidationResult(null, true);
@@ -3461,8 +3464,12 @@ function addRemoveClientTierValidator() {
   }
 }
 function addRemoveEnterperiseValidator() {
+  var reqType = FormManager.getActualValue('reqType');
   FormManager.resetValidations('enterprise');
-  FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  if (reqType == 'C' || (reqType == 'U' && _oldEnt != null && _oldEnt != '')) {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  }
+
 }
 
 function addRemoveValidator() {
