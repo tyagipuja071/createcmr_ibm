@@ -599,6 +599,8 @@ public class OAuthUtils {
 			// // setPageKeys("PREFERENCE", "PREF_SUB", mv);
 			// }
 
+			LOG.debug("User roles and preferences set successfully: " + appUser.getIntranetId());
+
 			SystemParameters.logUserAccess("CreateCMR", appUser.getIntranetId());
 			AuthCodeRetriever authCode = new AuthCodeRetriever(loginUser.getUsername(), request.getSession());
 			Thread authThread = new Thread(authCode);

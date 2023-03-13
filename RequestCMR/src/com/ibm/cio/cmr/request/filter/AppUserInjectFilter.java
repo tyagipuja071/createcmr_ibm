@@ -63,19 +63,21 @@ public class AppUserInjectFilter implements Filter {
 
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse resp = (HttpServletResponse) response;
-		HttpSession session = req.getSession();
 
+		HttpSession session = shouldCreateSession(req);
 		String url = req.getRequestURI();
-		String userIntranetEmail = null;
+		String userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
 
 		try {
 			if (shouldFilter(req)) {
 
 				AppUser user = AppUser.getUser(req);
-				if (user == null) {
-					LOG.trace("Single Sign On injecting for this url: " + url);
 
-					LOG.warn("No user on the session yet. Checking IBM ID...");
+				LOG.debug(url);
+				LOG.debug(user);
+
+				if (user == null) {
+					LOG.warn("No user on the session yet...");
 
 					// try to get user Intranet
 					userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
@@ -134,7 +136,7 @@ public class AppUserInjectFilter implements Filter {
 						}
 					}
 
-					LOG.debug("No IBM ID detected. Redirecting to W3 ID Provisioner...");
+					LOG.debug("Redirecting to W3 ID Provisioner...");
 					HttpServletResponse httpResp = (HttpServletResponse) response;
 					session.invalidate();
 					httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
@@ -238,5 +240,13 @@ public class AppUserInjectFilter implements Filter {
 
 		body = stringBuilder.toString();
 		return body;
+	}
+
+	private HttpSession shouldCreateSession(HttpServletRequest req) {
+		HttpSession session = req.getSession(false);
+		if (session == null) {
+			return req.getSession();
+		}
+		return session;
 	}
 }
