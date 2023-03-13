@@ -569,7 +569,10 @@ public class LoginController extends BaseController {
 
 		ModelAndView mv = null;
 		AppUser appUser = AppUser.getUser(request);
-		LogInUserModel loginUser = (LogInUserModel) request.getSession().getAttribute("loggedInUserModel");
+		LogInUserModel loginUser = (LogInUserModel) request.getSession(false).getAttribute("loggedInUserModel");
+
+		LOG.debug("AppUser received at redirect: " + appUser.getIntranetId());
+		LOG.debug("LoginUser received at redirect: " + loginUser.getUsername());
 
 		if (appUser.isPreferencesSet()) {
 			if (loginUser.getR() > 0) {
