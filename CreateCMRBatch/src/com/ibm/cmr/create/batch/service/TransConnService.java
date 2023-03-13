@@ -1897,6 +1897,12 @@ public class TransConnService extends BaseBatchService {
                   if (StringUtils.isBlank(addr.getIerpSitePrtyId())) {
                     addr.setIerpSitePrtyId(response.getRecords().get(i).getIerpSitePartyId());
                   }
+                  if (("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))
+                      && ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry()))) {
+                    if ("200".equals(response.getRecords().get(i).getSeqNo())) {
+                      addr.getId().setAddrSeq(response.getRecords().get(i).getSeqNo());
+                    }
+                  }
                 }
               }
               if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
