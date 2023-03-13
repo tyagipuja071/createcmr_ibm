@@ -9377,16 +9377,10 @@ function autoSetAbbrNameUKI() {
     // Defect-6793
     autoSetAbbrevNmFrmDept();
   } else {
-    if (role == "PROCESSOR") {
-      var result = cmr.query('UKI.GET_ABBNAME_DATA', {
-        REQ_ID : reqId
-      });
-    } else if (role == "REQUESTER") {
-      var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
-        REQ_ID : reqId,
-        ADDR_TYPE : 'ZS01'
-      });
-    }
+    var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
+      REQ_ID : reqId,
+      ADDR_TYPE : 'ZS01'
+    });
     if ((result != null || result != undefined) && result.ret1 != undefined) {
       {
         var _abbrevNmValue = result.ret1 + (result.ret2 != undefined ? result.ret2 : '');
