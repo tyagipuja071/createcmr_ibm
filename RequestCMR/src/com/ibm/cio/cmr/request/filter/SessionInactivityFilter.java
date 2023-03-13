@@ -15,6 +15,7 @@
 package com.ibm.cio.cmr.request.filter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -37,6 +38,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
 
 /**
  * This filter can test to see if a session has expired, and if it has can
@@ -92,313 +94,344 @@ import com.ibm.cio.cmr.request.user.AppUser;
  */
 public class SessionInactivityFilter implements Filter {
 
-  private static final String HTTP_HEADER_AUTOMATED_REQUEST = "Automated-Request";
-  protected static final Logger LOG = Logger.getLogger(SessionInactivityFilter.class);
+	private static final String HTTP_HEADER_AUTOMATED_REQUEST = "Automated-Request";
+	protected static final Logger LOG = Logger.getLogger(SessionInactivityFilter.class);
 
-  /**
-   * This static initializer block tries to load all the classes this one
-   * depends on (those not from standard Java anyway) and prints an error
-   * meesage if any cannot be loaded for any reason.
-   */
-  static {
-    try {
-      Class.forName("javax.servlet.Filter");
-      Class.forName("javax.servlet.FilterChain");
-      Class.forName("javax.servlet.FilterConfig");
-      Class.forName("javax.servlet.http.HttpServletRequest");
-      Class.forName("javax.servlet.ServletException");
-      Class.forName("javax.servlet.ServletRequest");
-      Class.forName("javax.servlet.ServletResponse");
-      Class.forName("org.apache.commons.logging.Log");
-      Class.forName("org.apache.commons.logging.LogFactory");
-    } catch (ClassNotFoundException e) {
-      LOG.error(
-          "SessionInactivityFilter" + " could not be loaded by classloader because classes it depends" + " on could not be found in the classpath...",
-          e);
-    }
-  }
+	/**
+	 * This static initializer block tries to load all the classes this one
+	 * depends on (those not from standard Java anyway) and prints an error
+	 * meesage if any cannot be loaded for any reason.
+	 */
+	static {
+		try {
+			Class.forName("javax.servlet.Filter");
+			Class.forName("javax.servlet.FilterChain");
+			Class.forName("javax.servlet.FilterConfig");
+			Class.forName("javax.servlet.http.HttpServletRequest");
+			Class.forName("javax.servlet.ServletException");
+			Class.forName("javax.servlet.ServletRequest");
+			Class.forName("javax.servlet.ServletResponse");
+			Class.forName("org.apache.commons.logging.Log");
+			Class.forName("org.apache.commons.logging.LogFactory");
+		} catch (ClassNotFoundException e) {
+			LOG.error("SessionInactivityFilter" + " could not be loaded by classloader because classes it depends"
+					+ " on could not be found in the classpath...", e);
+		}
+	}
 
-  /**
-   * Whether pathList includes or excludes.
-   */
-  private String pathSpec;
+	/**
+	 * Whether pathList includes or excludes.
+	 */
+	private String pathSpec;
 
-  /**
-   * List of paths for filter functionality determination.
-   */
-  private List<String> pathList = new ArrayList<String>();
+	/**
+	 * List of paths for filter functionality determination.
+	 */
+	private List<String> pathList = new ArrayList<String>();
 
-  /**
-   * A path to forward the user to if the user's session has expired
-   */
-  private String sessionTimeoutPath;
+	/**
+	 * A path to forward the user to if the user's session has expired
+	 */
+	private String sessionTimeoutPath;
 
-  /**
-   * The number of minutes of inactivity allowed
-   */
-  public int timeoutLengthMinutes;
+	/**
+	 * The number of minutes of inactivity allowed
+	 */
+	public int timeoutLengthMinutes;
 
-  /**
-   * Destroy.
-   */
-  @Override
-  public void destroy() {
+	/**
+	 * Destroy.
+	 */
+	@Override
+	public void destroy() {
 
-  } // End destroy.
+	} // End destroy.
 
-  /**
-   * Initialize this filter.
-   * 
-   * @param filterConfig
-   *          The configuration information for this filter.
-   * @throws ServletException
-   *           ServletException.
-   */
-  @Override
-  public void init(FilterConfig filterConfig) throws ServletException {
+	/**
+	 * Initialize this filter.
+	 * 
+	 * @param filterConfig
+	 *            The configuration information for this filter.
+	 * @throws ServletException
+	 *             ServletException.
+	 */
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
 
-    // Do pathSpec and pathList init work.
-    pathSpec = filterConfig.getInitParameter("pathSpec");
-    pathList = Arrays.asList(filterConfig.getInitParameter("pathList").split(","));
+		// Do pathSpec and pathList init work.
+		pathSpec = filterConfig.getInitParameter("pathSpec");
+		pathList = Arrays.asList(filterConfig.getInitParameter("pathList").split(","));
 
-    sessionTimeoutPath = filterConfig.getInitParameter("sessionTimeoutPath");
-    timeoutLengthMinutes = Integer.parseInt(filterConfig.getInitParameter("timeoutLengthMinutes"));
+		sessionTimeoutPath = filterConfig.getInitParameter("sessionTimeoutPath");
+		timeoutLengthMinutes = Integer.parseInt(filterConfig.getInitParameter("timeoutLengthMinutes"));
 
-  } // End init().
+	} // End init().
 
-  /**
-   * Do filter's work.
-   * 
-   * @param request
-   *          The current request object.
-   * @param response
-   *          The current response object.
-   * @param filterChain
-   *          The current filter chain.
-   * @throws ServletException
-   *           ServletException.
-   * @throws IOException
-   *           IOException.
-   */
-  @Override
-  public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-    HttpServletRequest req = (HttpServletRequest) request;
-    if (filterPath(request)) {
+	/**
+	 * Do filter's work.
+	 * 
+	 * @param request
+	 *            The current request object.
+	 * @param response
+	 *            The current response object.
+	 * @param filterChain
+	 *            The current filter chain.
+	 * @throws ServletException
+	 *             ServletException.
+	 * @throws IOException
+	 *             IOException.
+	 */
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		HttpServletRequest req = (HttpServletRequest) request;
+		if (filterPath(request)) {
 
-      // LOG.debug("Inside the Filter: "+req.getRequestURI());
-      /*
-       * If user has a valid session, perform the addition check for last user
-       * triggered request
-       */
-      HttpSession session = req.getSession(false);
-      if (session != null) {
-        // if (session != null && req.isRequestedSessionIdValid()) {
+			// LOG.debug("Inside the Filter: "+req.getRequestURI());
+			/*
+			 * If user has a valid session, perform the addition check for last
+			 * user triggered request
+			 */
+			HttpSession session = req.getSession(false);
+			if (session != null) {
+				// if (session != null && req.isRequestedSessionIdValid()) {
 
-        if (session.getAttribute(CmrConstants.SESSION_APPUSER_KEY) == null) {
-          LOG.debug("No user session found");
-          session.invalidate();
-          long reqId = extractRequestId((HttpServletRequest) request);
-          if (reqId > 0) {
-            req.setAttribute("r", reqId);
-          }
-          String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
-          if (!StringUtils.isBlank(findCmrParams)) {
-            req.setAttribute("c", findCmrParams);
-          }
-          req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
-          return;
-        }
+				if (session.getAttribute(CmrConstants.SESSION_APPUSER_KEY) == null) {
+					LOG.debug("No user session found");
 
-        if (tooLongSinceLastUserTriggeredRequest(req)) {
-          LOG.debug("User session has expired");
-          AppUser.remove(req);
-          session.invalidate();
-          long reqId = extractRequestId((HttpServletRequest) request);
-          if (reqId > 0) {
-            req.setAttribute("r", reqId);
-          }
-          String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
-          if (!StringUtils.isBlank(findCmrParams)) {
-            req.setAttribute("c", findCmrParams);
-          }
-          req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
-          return;
-        }
+					// revoke token
+					OAuthUtils.revokeToken((String) session.getAttribute("accessToken"));
 
-        if (!req.getRequestURI().contains("/sessioncheck")) {
-          updateLastUserTriggeredRequestDate(req);
-        }
-      } else {
-        // LOG.debug("User has no session");
-        long reqId = extractRequestId((HttpServletRequest) request);
-        if (reqId > 0) {
-          req.setAttribute("r", reqId);
-        }
-        String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
-        if (!StringUtils.isBlank(findCmrParams)) {
-          req.setAttribute("c", findCmrParams);
-        }
-        req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
-        return;
-      }
-    }
+					session.invalidate();
+					long reqId = extractRequestId((HttpServletRequest) request);
+					if (reqId > 0) {
+						req.setAttribute("r", reqId);
+					}
+					String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
+					if (!StringUtils.isBlank(findCmrParams)) {
+						req.setAttribute("c", findCmrParams);
+					}
+					req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
+					return;
+				}
 
-    filterChain.doFilter(request, response);
+				if (tooLongSinceLastUserTriggeredRequest(req)) {
+					LOG.debug("User session has expired");
 
-  } // End doFilter().
+					// revoke token
+					OAuthUtils.revokeToken((String) session.getAttribute("accessToken"));
 
-  private long extractRequestId(HttpServletRequest request) {
-    String reqIdParam = request.getParameter("reqId");
-    if (reqIdParam != null && StringUtils.isNumeric(reqIdParam) && !"0".equals(reqIdParam)) {
-      return Long.parseLong(reqIdParam);
-    }
-    Object reqIdAtt = request.getAttribute("reqId");
-    if (reqIdAtt != null && StringUtils.isNumeric(reqIdAtt.toString()) && !"0".equals(reqIdAtt.toString())) {
-      return Long.parseLong(reqIdAtt.toString());
-    }
+					AppUser.remove(req);
+					session.invalidate();
+					long reqId = extractRequestId((HttpServletRequest) request);
+					if (reqId > 0) {
+						req.setAttribute("r", reqId);
+					}
+					String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
+					if (!StringUtils.isBlank(findCmrParams)) {
+						req.setAttribute("c", findCmrParams);
+					}
+					req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
+					return;
+				}
 
-    String url = request.getRequestURI();
-    if (url != null) {
-      if (url.contains("?")) {
-        url = url.substring(0, url.indexOf("?"));
-      }
-      if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
-        String reqId = url.substring(url.lastIndexOf("/") + 1);
-        if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
-          return Long.parseLong(reqId);
-        }
-      }
-    }
+				if (!req.getRequestURI().contains("/sessioncheck")) {
+					updateLastUserTriggeredRequestDate(req);
+				}
 
-    return 0;
-  }
+				LocalDateTime tokenExpiringTime = (LocalDateTime) session.getAttribute("tokenExpiringTime");
+				if (tokenExpiringTime != null && LocalDateTime.now().isAfter(tokenExpiringTime)) {
+					LOG.debug("Access token expired! ");
+					// revoke token
+					OAuthUtils.revokeToken((String) session.getAttribute("accessToken"));
 
-  private String extractFindCMRParams(HttpServletRequest request) {
-    String url = request.getRequestURI();
-    if (url.endsWith("findcmr")) {
-      String cmrNo = request.getParameter("cmrNo");
-      String cntry = request.getParameter("cntry");
-      if (!StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(cntry)) {
-        return Base64.getEncoder().encodeToString(("f&cmrNo=" + cmrNo + "&cntry=" + cntry).getBytes());
-      }
-    } else {
-      String reqType = request.getParameter("reqType");
-      String cntry = request.getParameter("cmrIssuingCntry");
-      if (!StringUtils.isBlank(reqType) && !StringUtils.isBlank(cntry)) {
-        return Base64.getEncoder().encodeToString(("r&cmrIssuingCntry=" + cntry + "&reqType=" + reqType).getBytes());
-      }
-    }
-    return null;
-  }
+					AppUser.remove(req);
+					session.invalidate();
+					long reqId = extractRequestId((HttpServletRequest) request);
+					if (reqId > 0) {
+						req.setAttribute("r", reqId);
+					}
+					String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
+					if (!StringUtils.isBlank(findCmrParams)) {
+						req.setAttribute("c", findCmrParams);
+					}
+					req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
+					return;
+				}
+			} else {
+				// LOG.debug("User has no session");
+				long reqId = extractRequestId((HttpServletRequest) request);
+				if (reqId > 0) {
+					req.setAttribute("r", reqId);
+				}
+				String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
+				if (!StringUtils.isBlank(findCmrParams)) {
+					req.setAttribute("c", findCmrParams);
+				}
+				req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
+				return;
+			}
+		}
 
-  /**
-   * Updates the last time the current user actually submitted a request. This
-   * is to distinguish from automatic timed checks for urgent messages that
-   * happen every two minutes. We don't want these kinds of requests to keep the
-   * session active forever.
-   * 
-   * @param request
-   *          Request object
-   */
-  public void updateLastUserTriggeredRequestDate(HttpServletRequest request) {
-    String automatedRequest = request.getHeader(HTTP_HEADER_AUTOMATED_REQUEST);
-    if (automatedRequest == null || !"true".equalsIgnoreCase(automatedRequest)) {
-      request.getSession().setAttribute("cmr.last.request.date", new Date());
-    }
-  }
+		filterChain.doFilter(request, response);
 
-  /**
-   * Returns true if it has been at least one hour since the user submitted an
-   * HTTP request. Note! The urgent message check requests submitted
-   * automatically by javascript don't count as user requests.
-   * 
-   * @param request
-   *          last user request date extracted from this object.
-   * @return true if session has expired
-   */
-  public boolean tooLongSinceLastUserTriggeredRequest(HttpServletRequest request) {
-    Date dateOfLastUserRequest = (Date) request.getSession().getAttribute("cmr.last.request.date");
-    if (dateOfLastUserRequest == null) {
-      return false;
-    }
-    long millisecondsSinceLastRequest = new Date().getTime() - dateOfLastUserRequest.getTime();
-    long secondsSinceLastRequest = millisecondsSinceLastRequest / (1000);
-    String timeout = SystemConfiguration.getValue("SESSION_TIMEOUT", String.valueOf(timeoutLengthMinutes));
-    boolean tooLong = secondsSinceLastRequest > Integer.parseInt(timeout) * 60; // convert
-    if (tooLong) {
-      AppUser user = AppUser.getUser(request);
-      LOG.debug("Session needs to be timed out for " + (user != null ? user.getIntranetId() : "(no user)") + " [" + secondsSinceLastRequest + "/"
-          + (Integer.parseInt(timeout) * 60) + "]");
-    }
-    return tooLong;
-  }
+	} // End doFilter().
 
-  /**
-   * Checks if the request path should be checked for session inactivity
-   * 
-   * @param request
-   * @param pathList
-   * @param inPathSpec
-   * @return
-   */
-  private boolean filterPath(ServletRequest request) {
+	private long extractRequestId(HttpServletRequest request) {
+		String reqIdParam = request.getParameter("reqId");
+		if (reqIdParam != null && StringUtils.isNumeric(reqIdParam) && !"0".equals(reqIdParam)) {
+			return Long.parseLong(reqIdParam);
+		}
+		Object reqIdAtt = request.getAttribute("reqId");
+		if (reqIdAtt != null && StringUtils.isNumeric(reqIdAtt.toString()) && !"0".equals(reqIdAtt.toString())) {
+			return Long.parseLong(reqIdAtt.toString());
+		}
 
-    // Quick check #1: if pathSpec and pathList are both null, return true
-    // because the generic filter mapping is in effect only.
-    if (pathList == null && pathSpec == null) {
-      return true;
-    }
+		String url = request.getRequestURI();
+		if (url != null) {
+			if (url.contains("?")) {
+				url = url.substring(0, url.indexOf("?"));
+			}
+			if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
+				String reqId = url.substring(url.lastIndexOf("/") + 1);
+				if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
+					return Long.parseLong(reqId);
+				}
+			}
+		}
 
-    // Quick check #2: If pathSpec is null but pathList IS NOT null, then
-    // we're going to pretend pathSpec is 'exclude'.
-    if (pathSpec == null && pathList != null) {
-      pathSpec = "exclude";
-    }
+		return 0;
+	}
 
-    // Quick check #3: If pathSpec is not null and pathList IS null, then
-    // we're going to just return false since this is really technically
-    // a configuration error and we don't know for sure what to do here.
-    if (pathSpec != null && pathList == null) {
-      return false;
-    }
+	private String extractFindCMRParams(HttpServletRequest request) {
+		String url = request.getRequestURI();
+		if (url.endsWith("findcmr")) {
+			String cmrNo = request.getParameter("cmrNo");
+			String cntry = request.getParameter("cntry");
+			if (!StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(cntry)) {
+				return Base64.getEncoder().encodeToString(("f&cmrNo=" + cmrNo + "&cntry=" + cntry).getBytes());
+			}
+		} else {
+			String reqType = request.getParameter("reqType");
+			String cntry = request.getParameter("cmrIssuingCntry");
+			if (!StringUtils.isBlank(reqType) && !StringUtils.isBlank(cntry)) {
+				return Base64.getEncoder()
+						.encodeToString(("r&cmrIssuingCntry=" + cntry + "&reqType=" + reqType).getBytes());
+			}
+		}
+		return null;
+	}
 
-    // Getting the requested path
-    HttpServletRequest req = (HttpServletRequest) request;
-    String path = req.getRequestURI();
+	/**
+	 * Updates the last time the current user actually submitted a request. This
+	 * is to distinguish from automatic timed checks for urgent messages that
+	 * happen every two minutes. We don't want these kinds of requests to keep
+	 * the session active forever.
+	 * 
+	 * @param request
+	 *            Request object
+	 */
+	public void updateLastUserTriggeredRequestDate(HttpServletRequest request) {
+		String automatedRequest = request.getHeader(HTTP_HEADER_AUTOMATED_REQUEST);
+		if (automatedRequest == null || !"true".equalsIgnoreCase(automatedRequest)) {
+			request.getSession().setAttribute("cmr.last.request.date", new Date());
+		}
+	}
 
-    if (path.toLowerCase().endsWith("css") || path.toLowerCase().endsWith("js") || path.toLowerCase().endsWith("jpg")
-        || path.toLowerCase().endsWith("png") || path.toLowerCase().endsWith("ico")) {
-      return false;
-    }
+	/**
+	 * Returns true if it has been at least one hour since the user submitted an
+	 * HTTP request. Note! The urgent message check requests submitted
+	 * automatically by javascript don't count as user requests.
+	 * 
+	 * @param request
+	 *            last user request date extracted from this object.
+	 * @return true if session has expired
+	 */
+	public boolean tooLongSinceLastUserTriggeredRequest(HttpServletRequest request) {
+		Date dateOfLastUserRequest = (Date) request.getSession().getAttribute("cmr.last.request.date");
+		if (dateOfLastUserRequest == null) {
+			return false;
+		}
+		long millisecondsSinceLastRequest = new Date().getTime() - dateOfLastUserRequest.getTime();
+		long secondsSinceLastRequest = millisecondsSinceLastRequest / (1000);
+		String timeout = SystemConfiguration.getValue("SESSION_TIMEOUT", String.valueOf(timeoutLengthMinutes));
+		boolean tooLong = secondsSinceLastRequest > Integer.parseInt(timeout) * 60; // convert
+		if (tooLong) {
+			AppUser user = AppUser.getUser(request);
+			LOG.debug("Session needs to be timed out for " + (user != null ? user.getIntranetId() : "(no user)") + " ["
+					+ secondsSinceLastRequest + "/" + (Integer.parseInt(timeout) * 60) + "]");
+		}
+		return tooLong;
+	}
 
-    if (path.toLowerCase().contains("auto/config")) {
-      return true;
-    }
+	/**
+	 * Checks if the request path should be checked for session inactivity
+	 * 
+	 * @param request
+	 * @param pathList
+	 * @param inPathSpec
+	 * @return
+	 */
+	private boolean filterPath(ServletRequest request) {
 
-    // See if the requested path matches any (or multiple) paths in the
-    // pathList collection.
-    boolean pathInCollection = false;
-    for (Iterator<String> it = pathList.iterator(); it.hasNext();) {
+		// Quick check #1: if pathSpec and pathList are both null, return true
+		// because the generic filter mapping is in effect only.
+		if (pathList == null && pathSpec == null) {
+			return true;
+		}
 
-      String np = it.next();
-      if (path.indexOf(np) > -1) {
-        pathInCollection = true;
-        break;
-      }
-    }
+		// Quick check #2: If pathSpec is null but pathList IS NOT null, then
+		// we're going to pretend pathSpec is 'exclude'.
+		if (pathSpec == null && pathList != null) {
+			pathSpec = "exclude";
+		}
 
-    // If the path was in the collection and the pathSpec is include, or if
-    // the path was NOT in the collection and pathSpec is exclude, then
-    // we want the calling filter to do its work, so return true, otherwise
-    // return false.
-    boolean retVal = false;
-    if ((pathInCollection && pathSpec.equalsIgnoreCase("include")) || (!pathInCollection && pathSpec.equalsIgnoreCase("exclude"))) {
-      retVal = true;
-    } else {
-      retVal = false;
-    }
-    return retVal;
+		// Quick check #3: If pathSpec is not null and pathList IS null, then
+		// we're going to just return false since this is really technically
+		// a configuration error and we don't know for sure what to do here.
+		if (pathSpec != null && pathList == null) {
+			return false;
+		}
 
-  } // Ebd filterPath().
+		// Getting the requested path
+		HttpServletRequest req = (HttpServletRequest) request;
+		String path = req.getRequestURI();
+
+		if (path.toLowerCase().endsWith("css") || path.toLowerCase().endsWith("js")
+				|| path.toLowerCase().endsWith("jpg") || path.toLowerCase().endsWith("png")
+				|| path.toLowerCase().endsWith("ico")) {
+			return false;
+		}
+
+		if (path.toLowerCase().contains("auto/config")) {
+			return true;
+		}
+
+		// See if the requested path matches any (or multiple) paths in the
+		// pathList collection.
+		boolean pathInCollection = false;
+		for (Iterator<String> it = pathList.iterator(); it.hasNext();) {
+
+			String np = it.next();
+			if (path.indexOf(np) > -1) {
+				pathInCollection = true;
+				break;
+			}
+		}
+
+		// If the path was in the collection and the pathSpec is include, or if
+		// the path was NOT in the collection and pathSpec is exclude, then
+		// we want the calling filter to do its work, so return true, otherwise
+		// return false.
+		boolean retVal = false;
+		if ((pathInCollection && pathSpec.equalsIgnoreCase("include"))
+				|| (!pathInCollection && pathSpec.equalsIgnoreCase("exclude"))) {
+			retVal = true;
+		} else {
+			retVal = false;
+		}
+		return retVal;
+
+	} // Ebd filterPath().
 
 } // End class.

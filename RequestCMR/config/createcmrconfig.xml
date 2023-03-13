@@ -1,477 +1,610 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!-- Configuration File for the CMR Application -->
 <config>
-  <item>
-    <id>SESSION_TIMEOUT</id>
-    <order>1</order>
-    <name>Session Timeout</name>
-    <description>The time (in minutes) until the user's inactive session
-      will expire.</description>
-    <type>integer</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>120</value>
-  </item>
-  <item>
-    <id>INFO</id>
-    <order>5</order>
-    <name>System Information</name>
-    <description>The System Information displayed on the home page.</description>
-    <type>string</type>
-    <editable>true</editable>
-    <hint>The value accepts HTML formatting. You can use [strong] tags for bold, [em] tags for italics.
-      Enclose each information item within [li] tags.</hint>
-    <required>true</required>
-    <editType>textarea</editType>
-    <value>&lt;li&gt;POC for Create CMR supporting USA will be in production by 4Q 2016.&lt;/li&gt;</value>
-  </item>
-  <item>
-    <id>HOME</id>
-    <order>5</order>
-    <name>Home Page Information</name>
-    <description>The main information displayed on the home page.</description>
-    <type>string</type>
-    <editable>true</editable>
-    <hint>The value accepts HTML formatting. You can use [strong] tags for bold, [em] tags for italics.
-      Enclose each information item within [li] tags.</hint>
-    <required>true</required>
-    <editType>textarea</editType>
-    <value>&lt;h2 style="border-top: 0px !important;"&gt;Create CMR&lt;/h2&gt;
-      &lt;p style="font-size: 1em;"&gt;
-      &lt;ul style="font-size: 1em !important;"&gt;
-      &lt;li&gt;The CreateCMR tool supports the request process to create and update CMRs at IBM.&lt;/li&gt;
-&lt;li&gt;This tool also accesses the FindCMR Search tool.&lt;/li&gt;
-      &lt;/ul&gt;
+	<item>
+		<id>SESSION_TIMEOUT</id>
+		<order>1</order>
+		<name>Session Timeout</name>
+		<description>The time (in minutes) until the user's inactive session
+			will expire.
+		</description>
+		<type>integer</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>120</value>
+	</item>
+	<item>
+		<id>INFO</id>
+		<order>5</order>
+		<name>System Information</name>
+		<description>The System Information displayed on the home page.
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<hint>The value accepts HTML formatting. You can use [strong] tags for
+			bold, [em] tags for italics.
+			Enclose each
+			information item within [li]
+			tags.
+		</hint>
+		<required>true</required>
+		<editType>textarea</editType>
+		<value>&lt;li&gt;POC for Create CMR supporting USA will be in
+			production by 4Q 2016.&lt;/li&gt;</value>
+	</item>
+	<item>
+		<id>HOME</id>
+		<order>5</order>
+		<name>Home Page Information</name>
+		<description>The main information displayed on the home page.
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<hint>The value accepts HTML formatting. You can use [strong] tags for
+			bold, [em] tags for italics.
+			Enclose each
+			information item within [li]
+			tags.
+		</hint>
+		<required>true</required>
+		<editType>textarea</editType>
+		<value>&lt;h2 style="border-top: 0px !important;"&gt;Create
+			CMR&lt;/h2&gt;
+			&lt;p style="font-size: 1em;"&gt;
+			&lt;ul
+			style="font-size: 1em !important;"&gt;
+			&lt;li&gt;The CreateCMR tool
+			supports the request process to create and update
+			CMRs at
+			IBM.&lt;/li&gt;
+			&lt;li&gt;This tool also accesses the FindCMR Search
+			tool.&lt;/li&gt;
+			&lt;/ul&gt;
 
-      &lt;/p&gt;
+			&lt;/p&gt;
 
-&lt;h2 style="border-top: 0px !important;"&gt;Help and Support&lt;/h2&gt;
-      &lt;p style="font-size: 1em;"&gt;
-      &lt;ul style="font-size: 1em !important;"&gt;
-      &lt;li&gt;Access to the tool can be requested using OneTeam. For access instructions please follow this &lt;a style="color:blue" href="https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/FindCMR Access and Support"&gt;link&lt;/a&gt;. &lt;/li&gt;
-&lt;li&gt;For support, please refer to the &lt;a style="color:blue" href="https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/FindCMR Access and Support"&gt;user guide&lt;/a&gt; or contact the help desk by sending an email to &lt;span style="text-decoration:underline"&gt;CCM Worldwide Support/Raleigh/Contr/IBM.&lt;/span&gt; &lt;em&gt;While this tool is in Production with 24/7 support, the data source that it uses is only supported 9/5. Please consider this when estimating response time.&lt;/em&gt;&lt;/li&gt;
-      &lt;/ul&gt;
+			&lt;h2 style="border-top: 0px
+			!important;"&gt;Help and Support&lt;/h2&gt;
+			&lt;p style="font-size:
+			1em;"&gt;
+			&lt;ul
+			style="font-size: 1em !important;"&gt;
+			&lt;li&gt;Access to the tool can be requested using OneTeam. For
+			access
+			instructions
+			please follow this &lt;a style="color:blue"
+			href="https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/FindCMR
+			Access and Support"&gt;link&lt;/a&gt;.
+			&lt;/li&gt;
+			&lt;li&gt;For
+			support, please refer to the &lt;a style="color:blue"
+			href="https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/FindCMR
+			Access and Support"&gt;user guide&lt;/a&gt;
+			or contact the help desk
+			by sending an email to &lt;span
+			style="text-decoration:underline"&gt;CCM Worldwide
+			Support/Raleigh/Contr/IBM.&lt;/span&gt; &lt;em&gt;While this tool is
+			in Production with 24/7 support, the data source
+			that it uses is only
+			supported 9/5. Please consider this when estimating response
+			time.&lt;/em&gt;&lt;/li&gt;
+			&lt;/ul&gt;
 
-      &lt;/p&gt;</value>
-  </item>
-  <item>
-    <id>ALERT</id>
-    <order>6</order>
-    <name>System Alert</name>
-    <description>The System Alert displayed on the home page.</description>
-    <type>string</type>
-    <editable>true</editable>
-    <hint>The value accepts HTML formatting. You can use [strong] tags for bold, [em] tags for italics.</hint>
-    <required>false</required>
-    <editType>textarea</editType>
-    <value></value>
-  </item>
-  <item>
-    <id>MANDT</id>
-    <order>10</order>
-    <name>Client (MANDT)</name>
-    <description>The Client (MANDT) value to be used by the system</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>230</value>
-  </item>
-  <item>
-    <id>MAIL_HOST</id>
-    <order>11</order>
-    <name>Mail Host</name>
-    <description>The SMPT server used for sending emails.</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>oop.uk.relay.ibm.com</value>
-  </item>
-  <item>
-    <id>DATE_FORMAT</id>
-    <order>12</order>
-    <name>Date Format</name>
-    <description>General date format to use for date display</description>
-    <type>dateformat</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>yyyy-MM-dd</value>
-  </item>
-  <item>
-    <id>DATE_TIME_FORMAT</id>
-    <order>13</order>
-    <name>Date/Time Format</name>
-    <description>General date/time format to use for timestamp display</description>
-    <type>dateformat</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>yyyy-MM-dd HH:mm:ss</value>
-  </item>
-  <item>
-    <id>DATE_TIMEZONE</id>
-    <order>13</order>
-    <name>Timezone</name>
-    <description>Time zone to displayed</description>
-    <type>String</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>GMT</value>
-  </item>
-  <item>
-    <id>MAIL_FROM</id>
-    <order>14</order>
-    <name>E-mail From</name>
-    <description>The From field to be used by system emails</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>CreateCMR DEV&lt;createcmr@us.ibm.com&gt;</value>
-  </item>
-  <item>
-    <id>FIND_CMR_URL</id>
-    <order>15</order>
-    <name>Find CMR URL</name>
-    <description>The URL of the Find CMR Tool to connect to</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>https://findcmr.c360-dev-cluster.us-south.containers.appdomain.cloud/FindCMR</value>
-  </item>
-  <item>
-    <id>MAIL_SUBJECT</id>
-    <order>15</order>
-    <name>E-mail Subject</name>
-    <description>The Subject to be used by system emails (change status)</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>Request {0} - Status Changed to {1}</value>
-  </item>
-  <item>
-    <id>ATTACHMENT_DIR</id>
-    <order>17</order>
-    <name>Attachments Root Directory</name>
-    <description>Root directory where attachments are placed (GSA Directory)</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>/ci/shared/file/attachments/2020</value>
-  </item>
-  <item>
-    <id>ATTACHMENT_MAX_SIZE</id>
-    <order>18</order>
-    <name>Max Attachment Size (MB)</name>
-    <description>Maximum file size (in MB) of attachments.</description>
-    <type>integer</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>2</value>
-  </item>
-  <item>
-    <id>DPL_CHECK_VALIDITY</id>
-    <order>20</order>
-    <name>DPL Check Validity (days)</name>
-    <description>The number of days until the DPL Check status is invalid</description>
-    <type>integer</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>30</value>
-  </item>
-  <item>
-    <id>DPL_CHECK_DB</id>
-    <order>21</order>
-    <name>DPL Database Location</name>
-    <description>The location of the DPL database, on Notes format.</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>Notes://D01DB004/852565520073AB30/</value>
-  </item>
-  <item>
-    <id>CMR_SERVICES_URL</id>
-    <order>22</order>
-    <name>CMR Services URL</name>
-    <description>Base URL of the CMR Services layer containing the WODM services</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>https://cmrservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRServices</value>
-  </item>
-  <item>
-    <id>ADDRESS_VERIFICATION_RULES_LINK</id>
-    <order>23</order>
-    <name>Address Verification Rules Link</name>
-    <description>Link to open the Address Verification Rules site</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>about:blank</value>
-  </item>
-  <item>
-    <id>BATCH_USERID</id>
-    <order>24</order>
-    <name>Batch User Id</name>
-    <description>User ID for the batch program</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>CreateCMR</value>
-  </item>
-  <item>
-    <id>BATCH_SERVICES_URL</id>
-    <order>25</order>
-    <name>Batch Services URL</name>
-    <description>Base URL of the Create CMR Services layer containing</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>https://cmrservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRServices</value>
-  </item>
-  <item>
-    <id>MASS_UPDATE_MAX_ROWS</id>
-    <order>26</order>
-    <name>Mass Update Maximum Rows</name>
-    <description>Maximum number of rows allowed in the update file</description>
-    <type>integer</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>500</value>
-  </item>
-  <item>
-    <id>MASS_UPDATE_FILES_DIR</id>
-    <order>27</order>
-    <name>Mass Update Files Directory</name>
-    <description>Absolute location on the file system where Mass Update XLS files are stored</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>/ci/shared/file/attachments/2020/masschange</value>
-  </item>
-  <item>
-    <id>REACTIVE_MAX_ROWS</id>
-    <order>28</order>
-    <name>Reactivate Maximum CMRs</name>
-    <description>Maximum number of CMR Nos allowed to be reactivated</description>
-    <type>integer</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>50</value>
-  </item>
-  <item>
-    <id>DELETE_MAX_ROWS</id>
-    <order>29</order>
-    <name>Delete Maximum CMRs</name>
-    <description>Maximum number of CMR Nos allowed to be deleted</description>
-    <type>integer</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>50</value>
-  </item>
-  <item>
-    <id>US_CMR_SCHEMA</id>
-    <order>30</order>
-    <name>US CMR Schema</name>
-    <description>Schema to use for US CMR</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>UATMST</value>
-  </item>
-  <item>
-    <id>MASS_CREATE_TEMPLATE_VER</id>
-    <order>31</order>
-    <name>Mass Create Template Version</name>
-    <description>Current version of the mass create template</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>2.1</value>
-  </item>
-  <item>
-    <id>MASS_CREATE_MAX_ROWS</id>
-    <order>32</order>
-    <name>Mass Create Maximum Rows</name>
-    <description>Maximum number of rows allowed in the create file</description>
-    <type>integer</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>500</value>
-  </item>
-  <item>
-    <id>APPLICATION_URL</id>
-    <order>33</order>
-    <name>Application URL</name>
-    <description>Application Base URL</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>https://localhost:9444/CreateCMR</value>
-  </item>
-  <item>
-    <id>SERVER_ALIAS</id>
-    <order>34</order>
-    <name>Server Alias</name>
-    <description>Alias of the server where this applicatoin is deployed</description>
-    <type>string</type>
-    <editable>false</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>DEV</value>
-  </item>
-  <item>
-    <id>CMR_HOME</id>
-    <order>35</order>
-    <name>CMR Home Directory</name>
-    <description>Root directory of CMMA applications</description>
-    <type>string</type>
-    <editable>false</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>/home</value>
-  </item>
-  <item>
-    <id>BATCH_CI_SERVICES_URL</id>
-    <order>36</order>
-    <name>Batch CI Services URL</name>
-    <description>Base URL of the CI Services layer</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>https://ciservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CISearchServices</value>
-  </item>
-  <item>
-    <id>CREATECMR_BP_URL</id>
-    <order>37</order>
-    <name>Create CMR BP URL</name>
-    <description>URL of the external CreateCMR BP Portal</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>https://ibmbp.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRBPPortal/home</value>
-  </item>
-  <item>
-    <id>BATCH_CMR_POOL_ISSUING_CNTRY</id>
-    <order>38</order>
-    <name>Batch CMR Pool Issuing Country</name>
-    <description>Issuing country used when picking up requests for automated CMR pool assignment</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>897</value>
-  </item>
-  <item>
-    <id>BATCH_CMR_POOL_PROCESSING_TYPE</id>
-    <order>39</order>
-    <name>Batch CMR Pool Processing Type</name>
-    <description>Processing type used when picking up requests for automated CMR pool assignment</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>TC</value>
-  </item>
-    <item>
-    <id>BATCH_CMR_POOL_CUST_NAME</id>
-    <order>40</order>
-    <name>Batch CMR Pool Customer name</name>
-    <description>Customer name used when searching for Pool record</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>MARKETPLACE*POOL</value>
-  </item>
-  <item>
-    <id>BATCH_CMR_POOL_STREET</id>
-    <order>41</order>
-    <name>Batch CMR Pool Street</name>
-    <description>Street used when searching for Pool record</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>150 KETTLETOWN RD</value>
-  </item>
-    <item>
-    <id>BATCH_CMR_POOL_CITY</id>
-    <order>42</order>
-    <name>Batch CMR Pool City</name>
-    <description>City used when searching for Pool record</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>SOUTHBURY</value>
-  </item>
-  <item>
-    <id>BATCH_CMR_POOL_STATE</id>
-    <order>43</order>
-    <name>Batch CMR Pool State</name>
-    <description>State used when searching for Pool record</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>CT</value>
-  </item>
-    <item>
-    <id>BATCH_CMR_POOL_POSTAL</id>
-    <order>44</order>
-    <name>Batch CMR Pool Postal Code</name>
-    <description>Postal code used when searching for Pool record</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>06488-2685</value>
-  </item>
-  <item>
-    <id>BATCH_CMR_POOL_LANDED_CNTRY_CD</id>
-    <order>45</order>
-    <name>Batch CMR Pool Country Code</name>
-    <description>Country code used when searching for Pool record</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>US</value>
-  </item>
-  <item>
-    <id>SYSTEM_TYPE</id>
-    <order>99</order>
-    <name>System Type</name>
-    <description>Identifier whether the system is on TEST or PROD environment</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>TEST</value>
-  </item>
+			&lt;/p&gt;</value>
+	</item>
+	<item>
+		<id>ALERT</id>
+		<order>6</order>
+		<name>System Alert</name>
+		<description>The System Alert displayed on the home page.
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<hint>The value accepts HTML formatting. You can use [strong] tags for
+			bold, [em] tags for italics.
+		</hint>
+		<required>false</required>
+		<editType>textarea</editType>
+		<value></value>
+	</item>
+	<item>
+		<id>MANDT</id>
+		<order>10</order>
+		<name>Client (MANDT)</name>
+		<description>The Client (MANDT) value to be used by the system
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>230</value>
+	</item>
+	<item>
+		<id>MAIL_HOST</id>
+		<order>11</order>
+		<name>Mail Host</name>
+		<description>The SMPT server used for sending emails.</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>oop.uk.relay.ibm.com</value>
+	</item>
+	<item>
+		<id>DATE_FORMAT</id>
+		<order>12</order>
+		<name>Date Format</name>
+		<description>General date format to use for date display</description>
+		<type>dateformat</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>yyyy-MM-dd</value>
+	</item>
+	<item>
+		<id>DATE_TIME_FORMAT</id>
+		<order>13</order>
+		<name>Date/Time Format</name>
+		<description>General date/time format to use for timestamp display
+		</description>
+		<type>dateformat</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>yyyy-MM-dd HH:mm:ss</value>
+	</item>
+	<item>
+		<id>DATE_TIMEZONE</id>
+		<order>13</order>
+		<name>Timezone</name>
+		<description>Time zone to displayed</description>
+		<type>String</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>GMT</value>
+	</item>
+	<item>
+		<id>MAIL_FROM</id>
+		<order>14</order>
+		<name>E-mail From</name>
+		<description>The From field to be used by system emails</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>CreateCMR DEV&lt;createcmr@us.ibm.com&gt;</value>
+	</item>
+	<item>
+		<id>FIND_CMR_URL</id>
+		<order>15</order>
+		<name>Find CMR URL</name>
+		<description>The URL of the Find CMR Tool to connect to</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>https://findcmr.c360-dev-cluster.us-south.containers.appdomain.cloud/FindCMR
+		</value>
+	</item>
+	<item>
+		<id>MAIL_SUBJECT</id>
+		<order>15</order>
+		<name>E-mail Subject</name>
+		<description>The Subject to be used by system emails (change status)
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>Request {0} - Status Changed to {1}</value>
+	</item>
+	<item>
+		<id>ATTACHMENT_DIR</id>
+		<order>17</order>
+		<name>Attachments Root Directory</name>
+		<description>Root directory where attachments are placed (GSA
+			Directory)
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>/ci/shared/file/attachments/2020</value>
+	</item>
+	<item>
+		<id>ATTACHMENT_MAX_SIZE</id>
+		<order>18</order>
+		<name>Max Attachment Size (MB)</name>
+		<description>Maximum file size (in MB) of attachments.</description>
+		<type>integer</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>2</value>
+	</item>
+	<item>
+		<id>DPL_CHECK_VALIDITY</id>
+		<order>20</order>
+		<name>DPL Check Validity (days)</name>
+		<description>The number of days until the DPL Check status is invalid
+		</description>
+		<type>integer</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>30</value>
+	</item>
+	<item>
+		<id>DPL_CHECK_DB</id>
+		<order>21</order>
+		<name>DPL Database Location</name>
+		<description>The location of the DPL database, on Notes format.
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>Notes://D01DB004/852565520073AB30/</value>
+	</item>
+	<item>
+		<id>CMR_SERVICES_URL</id>
+		<order>22</order>
+		<name>CMR Services URL</name>
+		<description>Base URL of the CMR Services layer containing the WODM
+			services
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>https://cmrservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRServices
+		</value>
+	</item>
+	<item>
+		<id>ADDRESS_VERIFICATION_RULES_LINK</id>
+		<order>23</order>
+		<name>Address Verification Rules Link</name>
+		<description>Link to open the Address Verification Rules site
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>about:blank</value>
+	</item>
+	<item>
+		<id>BATCH_USERID</id>
+		<order>24</order>
+		<name>Batch User Id</name>
+		<description>User ID for the batch program</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>CreateCMR</value>
+	</item>
+	<item>
+		<id>BATCH_SERVICES_URL</id>
+		<order>25</order>
+		<name>Batch Services URL</name>
+		<description>Base URL of the Create CMR Services layer containing
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>https://cmrservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRServices
+		</value>
+	</item>
+	<item>
+		<id>MASS_UPDATE_MAX_ROWS</id>
+		<order>26</order>
+		<name>Mass Update Maximum Rows</name>
+		<description>Maximum number of rows allowed in the update file
+		</description>
+		<type>integer</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>500</value>
+	</item>
+	<item>
+		<id>MASS_UPDATE_FILES_DIR</id>
+		<order>27</order>
+		<name>Mass Update Files Directory</name>
+		<description>Absolute location on the file system where Mass Update
+			XLS files are stored
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>/ci/shared/file/attachments/2020/masschange</value>
+	</item>
+	<item>
+		<id>REACTIVE_MAX_ROWS</id>
+		<order>28</order>
+		<name>Reactivate Maximum CMRs</name>
+		<description>Maximum number of CMR Nos allowed to be reactivated
+		</description>
+		<type>integer</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>50</value>
+	</item>
+	<item>
+		<id>DELETE_MAX_ROWS</id>
+		<order>29</order>
+		<name>Delete Maximum CMRs</name>
+		<description>Maximum number of CMR Nos allowed to be deleted
+		</description>
+		<type>integer</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>50</value>
+	</item>
+	<item>
+		<id>US_CMR_SCHEMA</id>
+		<order>30</order>
+		<name>US CMR Schema</name>
+		<description>Schema to use for US CMR</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>UATMST</value>
+	</item>
+	<item>
+		<id>MASS_CREATE_TEMPLATE_VER</id>
+		<order>31</order>
+		<name>Mass Create Template Version</name>
+		<description>Current version of the mass create template</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>2.1</value>
+	</item>
+	<item>
+		<id>MASS_CREATE_MAX_ROWS</id>
+		<order>32</order>
+		<name>Mass Create Maximum Rows</name>
+		<description>Maximum number of rows allowed in the create file
+		</description>
+		<type>integer</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>500</value>
+	</item>
+	<item>
+		<id>APPLICATION_URL</id>
+		<order>33</order>
+		<name>Application URL</name>
+		<description>Application Base URL</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>https://localhost:9444/CreateCMR</value>
+	</item>
+	<item>
+		<id>SERVER_ALIAS</id>
+		<order>34</order>
+		<name>Server Alias</name>
+		<description>Alias of the server where this applicatoin is deployed
+		</description>
+		<type>string</type>
+		<editable>false</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>DEV</value>
+	</item>
+	<item>
+		<id>CMR_HOME</id>
+		<order>35</order>
+		<name>CMR Home Directory</name>
+		<description>Root directory of CMMA applications</description>
+		<type>string</type>
+		<editable>false</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>/home</value>
+	</item>
+	<item>
+		<id>BATCH_CI_SERVICES_URL</id>
+		<order>36</order>
+		<name>Batch CI Services URL</name>
+		<description>Base URL of the CI Services layer</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>https://ciservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CISearchServices
+		</value>
+	</item>
+	<item>
+		<id>CREATECMR_BP_URL</id>
+		<order>37</order>
+		<name>Create CMR BP URL</name>
+		<description>URL of the external CreateCMR BP Portal</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>https://ibmbp.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRBPPortal/home
+		</value>
+	</item>
+	<item>
+		<id>BATCH_CMR_POOL_ISSUING_CNTRY</id>
+		<order>38</order>
+		<name>Batch CMR Pool Issuing Country</name>
+		<description>Issuing country used when picking up requests for
+			automated CMR pool assignment
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>897</value>
+	</item>
+	<item>
+		<id>BATCH_CMR_POOL_PROCESSING_TYPE</id>
+		<order>39</order>
+		<name>Batch CMR Pool Processing Type</name>
+		<description>Processing type used when picking up requests for
+			automated CMR pool assignment
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>TC</value>
+	</item>
+	<item>
+		<id>BATCH_CMR_POOL_CUST_NAME</id>
+		<order>40</order>
+		<name>Batch CMR Pool Customer name</name>
+		<description>Customer name used when searching for Pool record
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>MARKETPLACE*POOL</value>
+	</item>
+	<item>
+		<id>BATCH_CMR_POOL_STREET</id>
+		<order>41</order>
+		<name>Batch CMR Pool Street</name>
+		<description>Street used when searching for Pool record</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>150 KETTLETOWN RD</value>
+	</item>
+	<item>
+		<id>BATCH_CMR_POOL_CITY</id>
+		<order>42</order>
+		<name>Batch CMR Pool City</name>
+		<description>City used when searching for Pool record</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>SOUTHBURY</value>
+	</item>
+	<item>
+		<id>BATCH_CMR_POOL_STATE</id>
+		<order>43</order>
+		<name>Batch CMR Pool State</name>
+		<description>State used when searching for Pool record</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>CT</value>
+	</item>
+	<item>
+		<id>BATCH_CMR_POOL_POSTAL</id>
+		<order>44</order>
+		<name>Batch CMR Pool Postal Code</name>
+		<description>Postal code used when searching for Pool record
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>06488-2685</value>
+	</item>
+	<item>
+		<id>BATCH_CMR_POOL_LANDED_CNTRY_CD</id>
+		<order>45</order>
+		<name>Batch CMR Pool Country Code</name>
+		<description>Country code used when searching for Pool record
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>US</value>
+	</item>
+	<item>
+		<id>SYSTEM_TYPE</id>
+		<order>99</order>
+		<name>System Type</name>
+		<description>Identifier whether the system is on TEST or PROD
+			environment
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>TEST</value>
+	</item>
+	<item>
+		<id>ACTIVATE_SSO</id>
+		<order>99</order>
+		<name>SSO ISSUER URL</name>
+		<description>Issuer URL provided by SSO Self-Service Provisioner
+		</description>
+		<type>boolean</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>true</value>
+	</item>
+	<item>
+		<id>SSO_ISSUER_URL</id>
+		<order>99</order>
+		<name>SSO ISSUER URL</name>
+		<description>Issuer URL provided by SSO Self-Service Provisioner
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>https://preprod.login.w3.ibm.com/oidc/endpoint/default</value>
+	</item>
+	<item>
+		<id>SSO_REDIRECT_URL</id>
+		<order>99</order>
+		<name>SSO Redirect URL</name>
+		<description>Redirect URL set up at SSO Self-Service Provisioner
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>https://localhost:9444/CreateCMR/oidcclient/redirect/createcmr
+		</value>
+	</item>
+	<item>
+		<id>W3_CLIENT_ID</id>
+		<order>99</order>
+		<name>W3 CLIENT ID</name>
+		<description>Client ID provided by Authorization Server</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>ZjVjZDBiZDAtYzcyMS00</value>
+	</item>
+	<item>
+		<id>W3_CLIENT_SECRET</id>
+		<order>99</order>
+		<name>W3 SECRET ID</name>
+		<description>Client SECRET provided by Authorization Server
+		</description>
+		<type>string</type>
+		<editable>true</editable>
+		<required>true</required>
+		<editType>text</editType>
+		<value>ZTI0ZmE4MDYtMzE2NC00</value>
+	</item>
 </config>
