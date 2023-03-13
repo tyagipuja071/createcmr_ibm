@@ -7,36 +7,36 @@ import java.util.StringTokenizer;
 import com.ibm.json.java.JSONObject;
 
 public class SimpleJWT {
-	JSONObject _part1;
-	JSONObject _part2;
-	String _part3;
+	JSONObject _header;
+	JSONObject _payload;
+	String _signature;
 
 	public SimpleJWT(String s) throws IOException {
 		StringTokenizer st = new StringTokenizer(s, ".");
 		if (st.countTokens() == 3) {
-			String str = st.nextToken();
-			String decodedStr = decodeBase64(str);
-			_part1 = JSONObject.parse(decodedStr);
+			String nextToken = st.nextToken();
+			String decodedToken = decodeBase64(nextToken);
+			_header = JSONObject.parse(decodedToken);
 
-			str = st.nextToken();
-			decodedStr = decodeBase64(str);
+			nextToken = st.nextToken();
+			decodedToken = decodeBase64(nextToken);
 
-			_part2 = JSONObject.parse(decodedStr);
+			_payload = JSONObject.parse(decodedToken);
 
-			_part3 = st.nextToken();
+			_signature = st.nextToken();
 		}
 	}
 
 	public JSONObject getHeader() {
-		return _part1;
+		return _header;
 	}
 
 	public JSONObject getClaims() {
-		return _part2;
+		return _payload;
 	}
 
 	public String getPart3() {
-		return _part3;
+		return _signature;
 	}
 
 	public String decodeBase64(String s) {

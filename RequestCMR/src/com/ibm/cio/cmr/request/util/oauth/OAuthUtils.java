@@ -164,7 +164,7 @@ public class OAuthUtils {
 		List<Map<String, String>> keys = getKeysFromAS();
 
 		// generate public key using JWT Header's kid
-		String kid = (String) tokens.getId_token()._part1.get("kid");
+		String kid = (String) tokens.getId_token()._header.get("kid");
 		PublicKey publicKey = null;
 
 		for (Map<String, String> key : keys) {
