@@ -123,6 +123,12 @@ public class NewZealandUtil extends AutomationUtil {
     }
 
     LOG.debug(
+        "engineData.getPendingChecks()!= null ? " + (engineData.getPendingChecks() != null));
+    LOG.debug(
+        "engineData.getPendingChecks()!= null && (engineData.getPendingChecks().containsKey(\"DnBMatch\") ? "
+            + (engineData.getPendingChecks() != null
+                && (engineData.getPendingChecks().containsKey("DnBMatch"))));
+    LOG.debug(
         "engineData.getPendingChecks()!= null && (engineData.getPendingChecks().containsKey(\"DnBMatch\") || engineData.getPendingChecks().containsKey(\"DNBCheck\")) ? "
             + (engineData.getPendingChecks() != null
                 && (engineData.getPendingChecks().containsKey("DnBMatch") || engineData.getPendingChecks().containsKey("DNBCheck"))));
@@ -176,7 +182,7 @@ public class NewZealandUtil extends AutomationUtil {
     if ("C".equals(admin.getReqType()) && !RELEVANT_SCENARIO.contains(scenario) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
         && "LOCAL".equalsIgnoreCase(custType) && engineData.getPendingChecks() != null) {
       needNZBNAPICheck = true;
-
+      LOG.debug("Start matching for other addresses...");
       List<Addr> addresses = null;
       List<String> RELEVANT_ADDRESSES_CREATE = Arrays.asList("MAIL", "ZP01", "ZI01", "ZF01", "CTYG", "CTYH");
 
@@ -191,6 +197,8 @@ public class NewZealandUtil extends AutomationUtil {
             // check against D&B
             matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
           }
+
+          LOG.debug("matchesDnb : " + matchesDnb);
 
           if (matchesDnb) {
             details.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
@@ -227,7 +235,7 @@ public class NewZealandUtil extends AutomationUtil {
 
     if (needNZBNAPICheck) {
       if (!cmdeReview) {
-        details.append("The Customer Name and addresses matched NZBN API.").append("\n");
+        details.append("The Customer Name and addresses matched successfully.").append("\n");
         results.setResults("Calculated.");
         engineData.setNZBNAPICheck(true);
 
