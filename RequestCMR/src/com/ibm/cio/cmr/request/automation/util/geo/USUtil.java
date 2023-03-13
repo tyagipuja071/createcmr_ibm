@@ -2467,7 +2467,7 @@ public class USUtil extends AutomationUtil {
           if (data.getIsicCd().equals(mapping.getDnbIsic()) && !isicOverridedValue.isEmpty() && "ISIC_CD".equals(field)) {
             data.setIsicCd(isicOverridedValue);
           }
-          if (data.getSubIndustryCd().equals(mapping.getDnbSubInd()) && "SUB_INDUSTRY_CD".equals(field) && !subIndOverrideValue.isEmpty()) {
+          if (data.getSubIndustryCd().equals(mapping.getDnbSubInd()) && data.getIsicCd().equals(mapping.getCmrIsic()) && "SUB_INDUSTRY_CD".equals(field) && !subIndOverrideValue.isEmpty()) {
             data.setSubIndustryCd(subIndOverrideValue);
           }
         }
