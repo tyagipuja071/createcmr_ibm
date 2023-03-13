@@ -72,6 +72,10 @@ public class AppUserInjectFilter implements Filter {
 			if (shouldFilter(req)) {
 
 				AppUser user = AppUser.getUser(req);
+
+				LOG.debug(url);
+				LOG.debug(user);
+
 				if (user == null) {
 					LOG.warn("No user on the session yet...");
 
