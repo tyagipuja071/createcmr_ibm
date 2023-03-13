@@ -16,64 +16,64 @@ import com.ibm.cmr.services.client.ServiceClient;
 
 public class OAuthServices extends ServiceClient {
 
-  protected OAuthServices(String baseUrl) {
-    super(baseUrl);
-    // TODO Auto-generated constructor stub
-  }
+	protected OAuthServices(String baseUrl) {
+		super(baseUrl);
+		// TODO Auto-generated constructor stub
+	}
 
-  private static final Logger LOG = Logger.getLogger(OAuthServices.class);
+	private static final Logger LOG = Logger.getLogger(OAuthServices.class);
 
-  public String getAuthorizationCode(String url) throws Exception {
-    String authorizationCode = new String();
+	public String getAuthorizationCode(String url) throws Exception {
+		String authorizationCode = new String();
 
-    try (CloseableHttpClient httpClient = HttpClients.createSystem()) {
+		try (CloseableHttpClient httpClient = HttpClients.createSystem()) {
 
-      HttpGet get = new HttpGet(url);
+			HttpGet get = new HttpGet(url);
 
-      get.setHeader("Accept", "application/json");
-      get.setHeader("Content-Type", "application/json");
+			get.setHeader("Accept", "application/json");
+			get.setHeader("Content-Type", "application/json");
 
-      LOG.debug("Connecting to " + url);
-      HttpResponse httpResponse = httpClient.execute(get);
+			LOG.debug("Connecting to " + url);
+			HttpResponse httpResponse = httpClient.execute(get);
 
-      HttpEntity entity = httpResponse.getEntity();
+			HttpEntity entity = httpResponse.getEntity();
 
-      LOG.debug("Service call to " + url + " completed.");
-    }
+			LOG.debug("Service call to " + url + " completed.");
+		}
 
-    return null;
-  }
+		return null;
+	}
 
-  public String getAccessToken(String url, String code) throws IOException {
-    String accessToken = new String();
+	public String getAccessToken(String url, String code) throws IOException {
+		String accessToken = new String();
 
-    try {
+		try {
 
-      Map<String, String> headers = new HashMap<String, String>();
+			Map<String, String> headers = new HashMap<String, String>();
 
-      HttpPostForm httpPostForm = new HttpPostForm(url, "utf-8", headers);
+			HttpPostForm httpPostForm = new HttpPostForm(url, "utf-8", headers);
 
-      httpPostForm.addFormField("grant_type", "authorization_code");
-      httpPostForm.addFormField("code", code);
-      httpPostForm.addFormField("client_id", SystemConfiguration.getValue("W3_CLIENT_ID"));
-      httpPostForm.addFormField("client_secret", SystemConfiguration.getValue("W3_CLIENT_SECRET"));
-      httpPostForm.addFormField("redirect_uri", SystemConfiguration.getValue("SSO_REDIRECT_URL"));
+			httpPostForm.addFormField("grant_type", "authorization_code");
+			httpPostForm.addFormField("code", code);
+			httpPostForm.addFormField("client_id", SystemConfiguration.getValue("W3_CLIENT_ID"));
+			httpPostForm.addFormField("client_secret", SystemConfiguration.getValue("W3_CLIENT_SECRET"));
+			httpPostForm.addFormField("redirect_uri", SystemConfiguration.getValue("SSO_REDIRECT_URL"));
 
-      accessToken = httpPostForm.finish();
+			accessToken = httpPostForm.finish();
 
-      System.out.println(accessToken);
+			System.out.println(accessToken);
 
-      LOG.debug("Access token generated!");
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return accessToken;
-  }
+			LOG.debug("Access token generated!");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return accessToken;
+	}
 
-  @Override
-  protected String getServiceId() {
-    // TODO Auto-generated method stub
-    return "cmr";
-  }
+	@Override
+	protected String getServiceId() {
+		// TODO Auto-generated method stub
+		return "cmr";
+	}
 
 }

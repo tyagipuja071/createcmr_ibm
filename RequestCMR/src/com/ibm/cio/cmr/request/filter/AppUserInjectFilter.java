@@ -42,203 +42,204 @@ import com.ibm.cio.cmr.request.util.oauth.Tokens;
  *
  */
 @Component
-@WebFilter(
-    filterName = "AppUserInjectFilter",
-    urlPatterns = "/*")
+@WebFilter(filterName = "AppUserInjectFilter", urlPatterns = "/*")
 public class AppUserInjectFilter implements Filter {
 
-  @Autowired
-  private UserService userService;
+	@Autowired
+	private UserService userService;
 
-  protected static final Logger LOG = Logger.getLogger(AppUserInjectFilter.class);
+	protected static final Logger LOG = Logger.getLogger(AppUserInjectFilter.class);
 
-  @Override
-  public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+			throws IOException, ServletException {
 
-    // can be used to deactivate this filter completely
-    String activateFilter = SystemConfiguration.getValue("ACTIVATE_SSO");
-    if (activateFilter.equalsIgnoreCase("false")) {
-      filterChain.doFilter(request, response);
-      return;
-    }
+		// can be used to deactivate this filter completely
+		String activateFilter = SystemConfiguration.getValue("ACTIVATE_SSO");
+		if (activateFilter.equalsIgnoreCase("false")) {
+			filterChain.doFilter(request, response);
+			return;
+		}
 
-    HttpServletRequest req = (HttpServletRequest) request;
-    HttpServletResponse resp = (HttpServletResponse) response;
-    HttpSession session = req.getSession();
+		HttpServletRequest req = (HttpServletRequest) request;
+		HttpServletResponse resp = (HttpServletResponse) response;
+		HttpSession session = req.getSession();
 
-    String url = req.getRequestURI();
-    String userIntranetEmail = null;
+		String url = req.getRequestURI();
+		String userIntranetEmail = null;
 
-    try {
-      if (shouldFilter(req)) {
+		try {
+			if (shouldFilter(req)) {
 
-        AppUser user = AppUser.getUser(req);
-        if (user == null) {
-          LOG.trace("Single Sign On injecting for this url: " + url);
+				AppUser user = AppUser.getUser(req);
+				if (user == null) {
+					LOG.trace("Single Sign On injecting for this url: " + url);
 
-          LOG.warn("No user on the session yet. Checking IBM ID...");
+					LOG.warn("No user on the session yet. Checking IBM ID...");
 
-          // try to get user Intranet
-          userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
+					// try to get user Intranet
+					userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
 
-          // get all request params
-          Set<String> paramNames = request.getParameterMap().keySet();
+					// get all request params
+					Set<String> paramNames = request.getParameterMap().keySet();
 
-          // when request contains code and grant_id, means we are at second
-          // step
-          // of
-          // SSO and need to get access token
-          if (paramNames.contains("code") && paramNames.contains("grant_id")) {
-            LOG.trace("Requesting access token for grant_id: " + request.getParameter("grant_id"));
+					// when request contains code and grant_id, means we are at
+					// second
+					// step
+					// of
+					// SSO and need to get access token
+					if (paramNames.contains("code") && paramNames.contains("grant_id")) {
+						LOG.trace("Requesting access token for grant_id: " + request.getParameter("grant_id"));
 
-            // get access_token and id_token
-            String code = request.getParameter("code");
-            String rawToken = OAuthUtils.getAccessToken(code);
+						// get access_token and id_token
+						String code = request.getParameter("code");
+						String rawToken = OAuthUtils.getAccessToken(code);
 
-            // parse raw token
-            Tokens tokens = OAuthUtils.parseToken(rawToken);
+						// parse raw token
+						Tokens tokens = OAuthUtils.parseToken(rawToken);
 
-            // validate JWT signature
-            boolean isJWTValid = false;
-            try {
-              LOG.trace("Validating signature for grant_id: " + request.getParameter("grant_id"));
-              isJWTValid = OAuthUtils.validateSignature();
-              LOG.trace("JWT Signature validated successfully for grant_id: " + request.getParameter("grant_id"));
-            } catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException e) {
-              // TODO interrupt the thread here
-              LOG.error("An error occured when validating the signature: ", e);
-            }
+						// validate JWT signature
+						boolean isJWTValid = false;
+						try {
+							LOG.trace("Validating signature for grant_id: " + request.getParameter("grant_id"));
+							isJWTValid = OAuthUtils.validateSignature();
+							LOG.trace("JWT Signature validated successfully for grant_id: "
+									+ request.getParameter("grant_id"));
+						} catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException e) {
+							// TODO interrupt the thread here
+							LOG.error("An error occured when validating the signature: ", e);
+						}
 
-            // assign AppUser
-            if (isJWTValid) {
-              userIntranetEmail = (String) tokens.getId_token().getClaims().get("emailAddress");
-              session.setAttribute("userIntranetEmail", userIntranetEmail);
+						// assign AppUser
+						if (isJWTValid) {
+							userIntranetEmail = (String) tokens.getId_token().getClaims().get("emailAddress");
+							session.setAttribute("userIntranetEmail", userIntranetEmail);
 
-              LogInUserModel loginUser = new LogInUserModel();
-              loginUser.setUsername(userIntranetEmail);
+							LogInUserModel loginUser = new LogInUserModel();
+							loginUser.setUsername(userIntranetEmail);
 
-              new OAuthUtils().authorizeAndSetRoles(loginUser, userService, req, resp);
+							new OAuthUtils().authorizeAndSetRoles(loginUser, userService, req, resp);
 
-              session.setAttribute("loggedInUserModel", loginUser);
-              session.setAttribute("accessToken", tokens.getAccess_token());
-              session.setAttribute("tokenExpiringTime", tokens.getExpires_in());
+							session.setAttribute("loggedInUserModel", loginUser);
+							session.setAttribute("accessToken", tokens.getAccess_token());
+							session.setAttribute("tokenExpiringTime", tokens.getExpires_in());
 
-              filterChain.doFilter(req, resp);
-              return;
-            } else {
-              LOG.trace("Invalid Token! Unable to proceed with the request.");
-              // TODO what to do if token is invalid or expired?
-              OAuthUtils.revokeToken(tokens.getAccess_token());
-              AppUser.remove(req);
-              session.invalidate();
-              filterChain.doFilter(req, resp);
-              return;
-            }
-          }
+							filterChain.doFilter(req, resp);
+							return;
+						} else {
+							LOG.trace("Invalid Token! Unable to proceed with the request.");
+							// TODO what to do if token is invalid or expired?
+							OAuthUtils.revokeToken(tokens.getAccess_token());
+							AppUser.remove(req);
+							session.invalidate();
+							filterChain.doFilter(req, resp);
+							return;
+						}
+					}
 
-          LOG.debug("No IBM ID detected. Redirecting to W3 ID Provisioner...");
-          HttpServletResponse httpResp = (HttpServletResponse) response;
-          session.invalidate();
-          httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
-          return;
-        }
-      }
-    } catch (Exception e) {
-      LOG.error("Error processing AppUserInjectFilter", e);
-    }
+					LOG.debug("No IBM ID detected. Redirecting to W3 ID Provisioner...");
+					HttpServletResponse httpResp = (HttpServletResponse) response;
+					session.invalidate();
+					httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
+					return;
+				}
+			}
+		} catch (Exception e) {
+			LOG.error("Error processing AppUserInjectFilter", e);
+		}
 
-    filterChain.doFilter(req, resp);
+		filterChain.doFilter(req, resp);
 
-  }
+	}
 
-  private long extractRequestId(HttpServletRequest request) {
-    String reqIdParam = request.getParameter("reqId");
-    if (reqIdParam != null && StringUtils.isNumeric(reqIdParam) && !"0".equals(reqIdParam)) {
-      return Long.parseLong(reqIdParam);
-    }
-    Object reqIdAtt = request.getAttribute("reqId");
-    if (reqIdAtt != null && StringUtils.isNumeric(reqIdAtt.toString()) && !"0".equals(reqIdAtt.toString())) {
-      return Long.parseLong(reqIdAtt.toString());
-    }
+	private long extractRequestId(HttpServletRequest request) {
+		String reqIdParam = request.getParameter("reqId");
+		if (reqIdParam != null && StringUtils.isNumeric(reqIdParam) && !"0".equals(reqIdParam)) {
+			return Long.parseLong(reqIdParam);
+		}
+		Object reqIdAtt = request.getAttribute("reqId");
+		if (reqIdAtt != null && StringUtils.isNumeric(reqIdAtt.toString()) && !"0".equals(reqIdAtt.toString())) {
+			return Long.parseLong(reqIdAtt.toString());
+		}
 
-    String url = request.getRequestURI();
-    if (url != null) {
-      if (url.contains("?")) {
-        url = url.substring(0, url.indexOf("?"));
-      }
-      if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
-        String reqId = url.substring(url.lastIndexOf("/") + 1);
-        if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
-          return Long.parseLong(reqId);
-        }
-      }
-    }
+		String url = request.getRequestURI();
+		if (url != null) {
+			if (url.contains("?")) {
+				url = url.substring(0, url.indexOf("?"));
+			}
+			if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
+				String reqId = url.substring(url.lastIndexOf("/") + 1);
+				if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
+					return Long.parseLong(reqId);
+				}
+			}
+		}
 
-    return 0;
-  }
+		return 0;
+	}
 
-  private boolean shouldFilter(HttpServletRequest request) {
-    String url = request.getRequestURI();
+	private boolean shouldFilter(HttpServletRequest request) {
+		String url = request.getRequestURI();
 
-    if (url.endsWith("/update")) {
-      return false;
-    }
-    if (url.endsWith("/logout")) {
-      return false;
-    }
-    if (url.endsWith("/external.json")) {
-      return false;
-    }
-    // if (url.contains("/") &&
-    // url.substring(url.lastIndexOf("/")).contains(".")) {
-    // return false;
-    // }
+		if (url.endsWith("/update")) {
+			return false;
+		}
+		if (url.endsWith("/logout")) {
+			return false;
+		}
+		if (url.endsWith("/external.json")) {
+			return false;
+		}
+		// if (url.contains("/") &&
+		// url.substring(url.lastIndexOf("/")).contains(".")) {
+		// return false;
+		// }
 
-    return true;
-  }
+		return true;
+	}
 
-  @Override
-  public void destroy() {
-    // NOOP
-  }
+	@Override
+	public void destroy() {
+		// NOOP
+	}
 
-  @Override
-  public void init(FilterConfig config) throws ServletException {
-    SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
-    LOG.info("CreateCMR " + config.getFilterName() + " initialized.");
-  }
+	@Override
+	public void init(FilterConfig config) throws ServletException {
+		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
+		LOG.info("CreateCMR " + config.getFilterName() + " initialized.");
+	}
 
-  public String getBody(HttpServletRequest request) throws IOException {
+	public String getBody(HttpServletRequest request) throws IOException {
 
-    String body = null;
-    StringBuilder stringBuilder = new StringBuilder();
-    BufferedReader bufferedReader = null;
+		String body = null;
+		StringBuilder stringBuilder = new StringBuilder();
+		BufferedReader bufferedReader = null;
 
-    try {
-      InputStream inputStream = request.getInputStream();
-      if (inputStream != null) {
-        bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        char[] charBuffer = new char[128];
-        int bytesRead = -1;
-        while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
-          stringBuilder.append(charBuffer, 0, bytesRead);
-        }
-      } else {
-        stringBuilder.append("");
-      }
-    } catch (IOException ex) {
-      throw ex;
-    } finally {
-      if (bufferedReader != null) {
-        try {
-          bufferedReader.close();
-        } catch (IOException ex) {
-          throw ex;
-        }
-      }
-    }
+		try {
+			InputStream inputStream = request.getInputStream();
+			if (inputStream != null) {
+				bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+				char[] charBuffer = new char[128];
+				int bytesRead = -1;
+				while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+					stringBuilder.append(charBuffer, 0, bytesRead);
+				}
+			} else {
+				stringBuilder.append("");
+			}
+		} catch (IOException ex) {
+			throw ex;
+		} finally {
+			if (bufferedReader != null) {
+				try {
+					bufferedReader.close();
+				} catch (IOException ex) {
+					throw ex;
+				}
+			}
+		}
 
-    body = stringBuilder.toString();
-    return body;
-  }
+		body = stringBuilder.toString();
+		return body;
+	}
 }
