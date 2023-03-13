@@ -4090,7 +4090,7 @@ function sboValidator() {
             oldSbo = result.ret3 != null ? result.ret3 : '';
             oldISU = result.ret2 != null ? result.ret2 : '';
 
-            if (clientTier != oldClientTier || isuCd != oldISU || sbo != oldSbo) {
+            if (sbo != oldSbo) {
               valResult = sboCodeValidator();
             }
           }
