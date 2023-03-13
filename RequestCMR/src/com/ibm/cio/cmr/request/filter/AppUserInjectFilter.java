@@ -72,6 +72,10 @@ public class AppUserInjectFilter implements Filter {
 			if (shouldFilter(req)) {
 
 				AppUser user = AppUser.getUser(req);
+
+				LOG.debug(url);
+				LOG.debug(user);
+
 				if (user == null) {
 					LOG.trace("Single Sign On injecting for this url: " + url);
 
@@ -121,6 +125,10 @@ public class AppUserInjectFilter implements Filter {
 							session.setAttribute("accessToken", tokens.getAccess_token());
 							session.setAttribute("tokenExpiringTime", tokens.getExpires_in());
 
+							AppUser appUser2 = AppUser.getUser(req);
+							LOG.debug("User set successfully at the request: " + appUser2.getIntranetId());
+							LOG.debug("User set successfully at the request: " + session.getAttribute("cmrAppUser"));
+
 							filterChain.doFilter(req, resp);
 							return;
 						} else {
@@ -138,6 +146,7 @@ public class AppUserInjectFilter implements Filter {
 					HttpServletResponse httpResp = (HttpServletResponse) response;
 					session.invalidate();
 					httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
+					// filterChain.doFilter(req, resp);
 					return;
 				}
 			}
