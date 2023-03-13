@@ -6,16 +6,12 @@
 
 
 	<definition name="base" template="/resources/jsp/templates/template.jsp">
-		<put-attribute name="header"
-			value="/resources/jsp/templates/header.jsp" />
-		<put-attribute name="topnav"
-			value="/resources/jsp/templates/topnav.jsp" />
+		<put-attribute name="header" value="/resources/jsp/templates/header.jsp" />
+		<put-attribute name="topnav" value="/resources/jsp/templates/topnav.jsp" />
 		<put-attribute name="body" value="/resources/jsp/templates/blank.jsp" />
-		<put-attribute name="footer"
-			value="/resources/jsp/templates/footer.jsp" />
+		<put-attribute name="footer" value="/resources/jsp/templates/footer.jsp" />
 		<put-attribute name="tabs" value="/resources/jsp/templates/tabs.jsp" />
-		<put-attribute name="breadcrumbs"
-			value="/resources/jsp/templates/breadcrumbs.jsp" />
+		<put-attribute name="breadcrumbs" value="/resources/jsp/templates/breadcrumbs.jsp" />
 	</definition>
 
 	<definition name="loggedOut" extends="base">
@@ -45,37 +41,32 @@
 
 	<definition name="testfields" extends="base">
 		<put-attribute name="title" value="CreateCMR | Test Fields Page" />
-		<put-attribute name="body"
-			value="/resources/jsp/test/test_fields.jsp" />
+		<put-attribute name="body" value="/resources/jsp/test/test_fields.jsp" />
 	</definition>
 
 	<!-- User Preferences -->
 	<definition name="preferences" extends="base">
 		<put-attribute name="title" value="CreateCMR | User Preferences" />
-		<put-attribute name="body"
-			value="/resources/jsp/pref/preferences.jsp" />
+		<put-attribute name="body" value="/resources/jsp/pref/preferences.jsp" />
 	</definition>
 
 	<!-- Workflow History -->
 	<definition name="workflowhistory" extends="base">
 		<put-attribute name="title" value="CreateCMR | Workflow History" />
-		<put-attribute name="body"
-			value="/resources/jsp/workflow/workflowhistory.jsp" />
+		<put-attribute name="body" value="/resources/jsp/workflow/workflowhistory.jsp" />
 	</definition>
 
 
 	<!-- Request Entry -->
 	<definition name="requestentry" extends="base">
 		<put-attribute name="title" value="CreateCMR | Request Entry" />
-		<put-attribute name="body"
-			value="/resources/jsp/requestentry/request.jsp" />
+		<put-attribute name="body" value="/resources/jsp/requestentry/request.jsp" />
 	</definition>
 
 	<!-- Mass Request Entry -->
 	<definition name="massrequestentry" extends="base">
 		<put-attribute name="title" value="CreateCMR | Mass Request Entry" />
-		<put-attribute name="body"
-			value="/resources/jsp/massrequestentry/request.jsp" />
+		<put-attribute name="body" value="/resources/jsp/massrequestentry/request.jsp" />
 	</definition>
 
 
@@ -88,28 +79,23 @@
 	</definition>
 	<definition name="completedreq" extends="base">
 		<put-attribute name="title" value="CreateCMR | My Completed Requests" />
-		<put-attribute name="body"
-			value="/resources/jsp/workflow/completed.jsp" />
+		<put-attribute name="body" value="/resources/jsp/workflow/completed.jsp" />
 	</definition>
 	<definition name="rejectedreq" extends="base">
 		<put-attribute name="title" value="CreateCMR | My Rejected Requests" />
-		<put-attribute name="body"
-			value="/resources/jsp/workflow/rejected.jsp" />
+		<put-attribute name="body" value="/resources/jsp/workflow/rejected.jsp" />
 	</definition>
 	<definition name="allreq" extends="base">
 		<put-attribute name="title" value="CreateCMR | All My Requests" />
 		<put-attribute name="body" value="/resources/jsp/workflow/all.jsp" />
 	</definition>
 	<definition name="criteria" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Search Request Criteria Page" />
+		<put-attribute name="title" value="CreateCMR | Search Request Criteria Page" />
 		<put-attribute name="body" value="/resources/jsp/workflow/search.jsp" />
 	</definition>
 	<definition name="results" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Search Request Result Page" />
-		<put-attribute name="body"
-			value="/resources/jsp/workflow/results.jsp" />
+		<put-attribute name="title" value="CreateCMR | Search Request Result Page" />
+		<put-attribute name="body" value="/resources/jsp/workflow/results.jsp" />
 	</definition>
 
 
@@ -125,26 +111,22 @@
 
 	<definition name="systemParamEdit" extends="base">
 		<put-attribute name="title" value="CreateCMR | Edit System Parameter" />
-		<put-attribute name="body"
-			value="/resources/jsp/system/sysparedit.jsp" />
+		<put-attribute name="body" value="/resources/jsp/system/sysparedit.jsp" />
 	</definition>
 
 	<definition name="config" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR - Configuration (For Administrators Only)" />
+		<put-attribute name="title" value="CreateCMR - Configuration (For Administrators Only)" />
 		<put-attribute name="body" value="/resources/jsp/system/config.jsp" />
 	</definition>
 
 	<definition name="statuschange" extends="base">
 		<put-attribute name="title" value="CreateCMR | Forced Status Change" />
-		<put-attribute name="body"
-			value="/resources/jsp/system/statuschange.jsp" />
+		<put-attribute name="body" value="/resources/jsp/system/statuschange.jsp" />
 	</definition>
 
 	<definition name="revivedcmrs" extends="base">
 		<put-attribute name="title" value="CreateCMR | Revived CMRs" />
-		<put-attribute name="body"
-			value="/resources/jsp/revivedcmrs/revivedcmrs.jsp" />
+		<put-attribute name="body" value="/resources/jsp/revivedcmrs/revivedcmrs.jsp" />
 	</definition>
 
 	<definition name="metrics" extends="base">
@@ -164,16 +146,14 @@
 
 	<definition name="autostats" extends="base">
 		<put-attribute name="title" value="CreateCMR | Automation Statistics" />
-		<put-attribute name="body"
-			value="/resources/jsp/system/autostats.jsp" />
+		<put-attribute name="body" value="/resources/jsp/system/autostats.jsp" />
 	</definition>
 
 
 	<!-- Request Entry -->
 	<definition name="ibm" extends="base">
 		<put-attribute name="title" value="CreateCMR | IBM" />
-		<put-attribute name="body"
-			value="/resources/jsp/requestentry/ibm.jsp" />
+		<put-attribute name="body" value="/resources/jsp/requestentry/ibm.jsp" />
 	</definition>
 
 	<definition name="error" template="/resources/jsp/templates/errorPage.jsp">
@@ -191,8 +171,7 @@
 	</definition>
 
 	<definition name="validationurl" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/open_url.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/open_url.jsp" />
 	</definition>
 
 	<definition name="showcmrList" extends="window">
@@ -200,23 +179,19 @@
 	</definition>
 
 	<definition name="summaryupd" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/summary_upd.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/summary_upd.jsp" />
 	</definition>
 
 	<definition name="summarycrt" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/summary_crt.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/summary_crt.jsp" />
 	</definition>
 
 	<definition name="summarymass" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/mass_summary.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/mass_summary.jsp" />
 	</definition>
 
 	<definition name="summarydplmass" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/dpl_mass_summary.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/dpl_mass_summary.jsp" />
 	</definition>
 
 	<definition name="noaccess" extends="base">
@@ -247,111 +222,87 @@
 	</definition>
 
 	<definition name="addstatusdesc" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Status Description Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/addstatusdesc.jsp" />
+		<put-attribute name="title" value="CreateCMR | Status Description Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/addstatusdesc.jsp" />
 	</definition>
 
 	<definition name="bdslist" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | List of BDS Table Information" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/businessdatasrc.jsp" />
+		<put-attribute name="title" value="CreateCMR | List of BDS Table Information" />
+		<put-attribute name="body" value="/resources/jsp/code/businessdatasrc.jsp" />
 	</definition>
 
 	<definition name="addbds" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | BDS Table Information Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/addbusinessdatasrc.jsp" />
+		<put-attribute name="title" value="CreateCMR | BDS Table Information Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/addbusinessdatasrc.jsp" />
 	</definition>
 	<definition name="fieldInfolist" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | List of Field Information" />
+		<put-attribute name="title" value="CreateCMR | List of Field Information" />
 		<put-attribute name="body" value="/resources/jsp/code/fields.jsp" />
 	</definition>
 
 	<definition name="fieldInfomaintain" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Field Information Miantenance" />
+		<put-attribute name="title" value="CreateCMR | Field Information Miantenance" />
 		<put-attribute name="body" value="/resources/jsp/code/field.jsp" />
 	</definition>
 
 	<definition name="cmrinternaltypeslist" extends="base">
 		<put-attribute name="title" value="CreateCMR | CMR internal types" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/cmrinternaltypes.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/cmrinternaltypes.jsp" />
 	</definition>
 
 	<definition name="cmrinternaltypesmaintain" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Cmr Internal Types Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/cmrinternaltype.jsp" />
+		<put-attribute name="title" value="CreateCMR | Cmr Internal Types Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/cmrinternaltype.jsp" />
 	</definition>
 
 	<definition name="validationurlslist" extends="base">
 		<put-attribute name="title" value="CreateCMR | Cmr Validation Urls" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/validationurls.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/validationurls.jsp" />
 	</definition>
 
 	<definition name="validationurlsmaintain" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Cmr Validation Urls Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/validationurl.jsp" />
+		<put-attribute name="title" value="CreateCMR | Cmr Validation Urls Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/validationurl.jsp" />
 	</definition>
 
 	<definition name="claimroleslist" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Cmr Claim Roles Maintenance" />
+		<put-attribute name="title" value="CreateCMR | Cmr Claim Roles Maintenance" />
 		<put-attribute name="body" value="/resources/jsp/code/claimroles.jsp" />
 	</definition>
 
 	<definition name="claimrolesmaintain" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Cmr Claim Roles Maintenance" />
+		<put-attribute name="title" value="CreateCMR | Cmr Claim Roles Maintenance" />
 		<put-attribute name="body" value="/resources/jsp/code/claimrole.jsp" />
 	</definition>
 
 	<definition name="proccenterlist" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Cmr Proc Centers Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/proccenters.jsp" />
+		<put-attribute name="title" value="CreateCMR | Cmr Proc Centers Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/proccenters.jsp" />
 	</definition>
 
 	<definition name="proccentermaintain" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Cmr Proc Centers Maintenance" />
+		<put-attribute name="title" value="CreateCMR | Cmr Proc Centers Maintenance" />
 		<put-attribute name="body" value="/resources/jsp/code/proccenter.jsp" />
 	</definition>
 
 	<definition name="fieldlbllist" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | List of Field Label Table Information" />
+		<put-attribute name="title" value="CreateCMR | List of Field Label Table Information" />
 		<put-attribute name="body" value="/resources/jsp/code/fieldlabel.jsp" />
 	</definition>
 
 	<definition name="addfieldlbl" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Field Label Table Information Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/addfieldlabel.jsp" />
+		<put-attribute name="title" value="CreateCMR | Field Label Table Information Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/addfieldlabel.jsp" />
 	</definition>
 
 	<definition name="suppcountrylist" extends="base">
 		<put-attribute name="title" value="CreateCMR | Supporting Country" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/suppcountry.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/suppcountry.jsp" />
 	</definition>
 
 	<definition name="addsuppcountrypage" extends="base">
 		<put-attribute name="title" value="CreateCMR | Add Supporting Country" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/addsuppcountry.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/addsuppcountry.jsp" />
 	</definition>
 
 
@@ -366,8 +317,7 @@
 	</definition>
 	<definition name="restrictlist" extends="base">
 		<put-attribute name="title" value="CreateCMR | List of RST" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/restrictlist.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/restrictlist.jsp" />
 	</definition>
 
 
@@ -378,21 +328,17 @@
 
 	<definition name="cnaedetails" extends="base">
 		<put-attribute name="title" value="CreateCMR | BR CNAE Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/cnaedetails.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/cnaedetails.jsp" />
 	</definition>
 
 	<definition name="brSboCollector" extends="base">
 		<put-attribute name="title" value="CreateCMR | BR SBO/Collector Info" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/brSboCollector.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/brSboCollector.jsp" />
 	</definition>
 
 	<definition name="brSboCollectordetails" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | BR SBO/Collector Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/brSboCollectordetails.jsp" />
+		<put-attribute name="title" value="CreateCMR | BR SBO/Collector Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/brSboCollectordetails.jsp" />
 	</definition>
 
 	<definition name="sccdetails" extends="base">
@@ -426,46 +372,36 @@
 
 	<definition name="addStatusAct" extends="base">
 		<put-attribute name="title" value="CreateCMR | Add Status Act" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/addStatusAct.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/addStatusAct.jsp" />
 	</definition>
 
 	<!-- Approvals -->
-	<definition name="approval"
-		template="/resources/jsp/templates/approval_template.jsp">
-		<put-attribute name="header"
-			value="/resources/jsp/templates/header.jsp" />
-		<put-attribute name="topnav"
-			value="/resources/jsp/templates/topnav.jsp" />
+	<definition name="approval" template="/resources/jsp/templates/approval_template.jsp">
+		<put-attribute name="header" value="/resources/jsp/templates/header.jsp" />
+		<put-attribute name="topnav" value="/resources/jsp/templates/topnav.jsp" />
 		<put-attribute name="body" value="/resources/jsp/templates/blank.jsp" />
-		<put-attribute name="footer"
-			value="/resources/jsp/templates/footer.jsp" />
+		<put-attribute name="footer" value="/resources/jsp/templates/footer.jsp" />
 	</definition>
 
 	<definition name="approve" extends="approval">
 		<put-attribute name="title" value="CreateCMR | Approval" />
-		<put-attribute name="body"
-			value="/resources/jsp/approval/approval.jsp" />
+		<put-attribute name="body" value="/resources/jsp/approval/approval.jsp" />
 	</definition>
 	<definition name="reject" extends="approval">
 		<put-attribute name="title" value="CreateCMR | Rejection" />
-		<put-attribute name="body"
-			value="/resources/jsp/approval/rejection.jsp" />
+		<put-attribute name="body" value="/resources/jsp/approval/rejection.jsp" />
 	</definition>
 	<definition name="condapprove" extends="approval">
 		<put-attribute name="title" value="CreateCMR | Conditional Approval" />
-		<put-attribute name="body"
-			value="/resources/jsp/approval/condapproval.jsp" />
+		<put-attribute name="body" value="/resources/jsp/approval/condapproval.jsp" />
 	</definition>
 	<definition name="approvenotauth" extends="approval">
 		<put-attribute name="title" value="CreateCMR | Approval" />
-		<put-attribute name="body"
-			value="/resources/jsp/approval/unauthorized.jsp" />
+		<put-attribute name="body" value="/resources/jsp/approval/unauthorized.jsp" />
 	</definition>
 	<definition name="approvechanged" extends="approval">
 		<put-attribute name="title" value="CreateCMR | Status Changed" />
-		<put-attribute name="body"
-			value="/resources/jsp/approval/statuschanged.jsp" />
+		<put-attribute name="body" value="/resources/jsp/approval/statuschanged.jsp" />
 	</definition>
 	<definition name="approveerror" extends="approval">
 		<put-attribute name="title" value="CreateCMR | Status Changed" />
@@ -473,48 +409,39 @@
 	</definition>
 	<definition name="changelog" extends="base">
 		<put-attribute name="title" value="CreateCMR | Change Log" />
-		<put-attribute name="body"
-			value="/resources/jsp/changelog/changelog.jsp" />
+		<put-attribute name="body" value="/resources/jsp/changelog/changelog.jsp" />
 	</definition>
 	<definition name="approvalsadminlist" extends="base">
 		<put-attribute name="title" value="CreateCMR | Approvals Override" />
-		<put-attribute name="body"
-			value="/resources/jsp/system/approvalsadminlist.jsp" />
+		<put-attribute name="body" value="/resources/jsp/system/approvalsadminlist.jsp" />
 	</definition>
 	<definition name="approvalsadmin" extends="base">
 		<put-attribute name="title" value="CreateCMR | Approvals Override" />
-		<put-attribute name="body"
-			value="/resources/jsp/system/approvalsadmin.jsp" />
+		<put-attribute name="body" value="/resources/jsp/system/approvalsadmin.jsp" />
 	</definition>
 
 	<definition name="defaultapprlist" extends="base">
 		<put-attribute name="title" value="CreateCMR | Default Approvals" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/defaultapprovals.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/defaultapprovals.jsp" />
 	</definition>
 
 	<definition name="defaultapprdetails" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Default Approval Details" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/defaultapproval.jsp" />
+		<put-attribute name="title" value="CreateCMR | Default Approval Details" />
+		<put-attribute name="body" value="/resources/jsp/code/defaultapproval.jsp" />
 	</definition>
 
 	<definition name="approval_types" extends="base">
 		<put-attribute name="title" value="CreateCMR | Approval Types" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/approval_types.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/approval_types.jsp" />
 	</definition>
 
 	<definition name="approval_type_det" extends="base">
 		<put-attribute name="title" value="CreateCMR | Approval Type Details" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/approval_type_det.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/approval_type_det.jsp" />
 	</definition>
 
 	<definition name="reqchangelog" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/reqchangelog.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/reqchangelog.jsp" />
 	</definition>
 
 	<definition name="lovslist" extends="base">
@@ -529,27 +456,22 @@
 
 	<definition name="cntrygeodeflist" extends="base">
 		<put-attribute name="title" value="CreateCMR | Country Geo Default" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/cntrygeodefault.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/cntrygeodefault.jsp" />
 	</definition>
 
 	<definition name="cntrygeodefmaintain" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Country Geo Default Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/addcntrygeodef.jsp" />
+		<put-attribute name="title" value="CreateCMR | Country Geo Default Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/addcntrygeodef.jsp" />
 	</definition>
 
 	<definition name="sysparameterlist" extends="base">
 		<put-attribute name="title" value="CreateCMR | System Parameters" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/sysparameters.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/sysparameters.jsp" />
 	</definition>
 
 	<definition name="addsysparameterpage" extends="base">
 		<put-attribute name="title" value="CreateCMR | Add System Parameters" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/addsysparameters.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/addsysparameters.jsp" />
 	</definition>
 
 	<definition name="scenarios" extends="base">
@@ -568,42 +490,34 @@
 	</definition>
 
 	<definition name="collectornodeflist" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | LA Collector Number List" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/collectorno.jsp" />
+		<put-attribute name="title" value="CreateCMR | LA Collector Number List" />
+		<put-attribute name="body" value="/resources/jsp/code/collectorno.jsp" />
 	</definition>
 
 	<definition name="collectornamenomain" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | LA Collector Number Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/addcollectornodef.jsp" />
+		<put-attribute name="title" value="CreateCMR | LA Collector Number Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/addcollectornodef.jsp" />
 	</definition>
 
 	<definition name="geocitieslist" extends="base">
 		<put-attribute name="title" value="CreateCMR | Geo Cities List" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/geocitieslist.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/geocitieslist.jsp" />
 	</definition>
 	<definition name="geocitiesmain" extends="base">
 		<put-attribute name="title" value="CreateCMR | Geo Cities Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/geocitiesdef.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/geocitiesdef.jsp" />
 	</definition>
 	<definition name="connect" template="/resources/jsp/requestentry/connect.jsp">
 	</definition>
 
 	<definition name="div_dept" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Internal Division/Department (US)" />
+		<put-attribute name="title" value="CreateCMR | Internal Division/Department (US)" />
 		<put-attribute name="body" value="/resources/jsp/code/div_dept.jsp" />
 	</definition>
 
 	<definition name="germanyDept" extends="base">
 		<put-attribute name="title" value="CreateCMR | IBM Department" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/germanyDept.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/germanyDept.jsp" />
 	</definition>
 
 	<definition name="isic" extends="base">
@@ -618,43 +532,35 @@
 
 	<!-- CRIS windows -->
 	<definition name="crissearch" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/JP/crissearch.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/JP/crissearch.jsp" />
 	</definition>
 
 	<definition name="criscomplist" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/JP/criscomplist.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/JP/criscomplist.jsp" />
 	</definition>
 
 	<definition name="criscompdet" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/JP/criscompdet.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/JP/criscompdet.jsp" />
 	</definition>
 
 	<definition name="crisestablist" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/JP/crisestablist.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/JP/crisestablist.jsp" />
 	</definition>
 
 	<definition name="crisestabdet" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/JP/crisestabdet.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/JP/crisestabdet.jsp" />
 	</definition>
 
 	<definition name="crisaccountlist" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/JP/crisaccountlist.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/JP/crisaccountlist.jsp" />
 	</definition>
 
 	<definition name="crisaccountdet" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/JP/crisaccountdet.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/JP/crisaccountdet.jsp" />
 	</definition>
 
 	<definition name="crisnoresults" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/JP/crisnoresults.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/JP/crisnoresults.jsp" />
 	</definition>
 
 	<!-- CRIS end -->
@@ -663,40 +569,33 @@
 
 	<definition name="myapprovals" extends="base">
 		<put-attribute name="title" value="CreateCMR | Approvals List" />
-		<put-attribute name="body"
-			value="/resources/jsp/approval/myapprovals.jsp" />
+		<put-attribute name="body" value="/resources/jsp/approval/myapprovals.jsp" />
 	</definition>
 
 	<definition name="nps" extends="window">
-		<put-attribute name="title"
-			value="CreateCMR | Client Satisfaction Survey" />
+		<put-attribute name="title" value="CreateCMR | Client Satisfaction Survey" />
 		<put-attribute name="body" value="/resources/jsp/nps.jsp" />
 	</definition>
 
 	<!-- CreateCMR 2.0 -->
 	<definition name="auto_results" extends="window">
 		<put-attribute name="title" value="CreateCMR | Automation Results" />
-		<put-attribute name="body"
-			value="/resources/jsp/auto/auto_results.jsp" />
+		<put-attribute name="body" value="/resources/jsp/auto/auto_results.jsp" />
 	</definition>
 
 	<definition name="results_match_import" extends="window">
-		<put-attribute name="title"
-			value="CreateCMR | Automation Results Match Import" />
-		<put-attribute name="body"
-			value="/resources/jsp/auto/results_match_import.jsp" />
+		<put-attribute name="title" value="CreateCMR | Automation Results Match Import" />
+		<put-attribute name="body" value="/resources/jsp/auto/results_match_import.jsp" />
 	</definition>
 
 	<definition name="dup_req_chk" extends="window">
 		<put-attribute name="title" value="Match found(or not)." />
-		<put-attribute name="body"
-			value="/resources/jsp/auto/dup_req_chk.jsp" />
+		<put-attribute name="body" value="/resources/jsp/auto/dup_req_chk.jsp" />
 	</definition>
 
 	<definition name="dup_cmr_chk" extends="window">
 		<put-attribute name="title" value="Match found(or not)." />
-		<put-attribute name="body"
-			value="/resources/jsp/auto/dup_cmr_chk.jsp" />
+		<put-attribute name="body" value="/resources/jsp/auto/dup_cmr_chk.jsp" />
 	</definition>
 
 	<definition name="reqv2" extends="base">
@@ -705,72 +604,54 @@
 	</definition>
 
 	<definition name="auto_config_base" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Automation Engine | Configuration" />
-		<put-attribute name="body"
-			value="/resources/jsp/auto/code/auto_config_base.jsp" />
+		<put-attribute name="title" value="CreateCMR | Automation Engine | Configuration" />
+		<put-attribute name="body" value="/resources/jsp/auto/code/auto_config_base.jsp" />
 	</definition>
 
 	<definition name="auto_config_list" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Automation Engine | Configurations" />
-		<put-attribute name="body"
-			value="/resources/jsp/auto/code/auto_config_list.jsp" />
+		<put-attribute name="title" value="CreateCMR | Automation Engine | Configurations" />
+		<put-attribute name="body" value="/resources/jsp/auto/code/auto_config_list.jsp" />
 	</definition>
 
 	<definition name="auto_config_cntry" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Automation Engine | Configurations" />
-		<put-attribute name="body"
-			value="/resources/jsp/auto/code/auto_config_cntry.jsp" />
+		<put-attribute name="title" value="CreateCMR | Automation Engine | Configurations" />
+		<put-attribute name="body" value="/resources/jsp/auto/code/auto_config_cntry.jsp" />
 	</definition>
 
 	<definition name="auto_config_excep" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Automation Engine | Exceptions" />
-		<put-attribute name="body"
-			value="/resources/jsp/auto/code/auto_config_excep.jsp" />
+		<put-attribute name="title" value="CreateCMR | Automation Engine | Exceptions" />
+		<put-attribute name="body" value="/resources/jsp/auto/code/auto_config_excep.jsp" />
 	</definition>
 
 
 	<definition name="auto_config" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Automation Engine | Maintain Configuration" />
-		<put-attribute name="body"
-			value="/resources/jsp/auto/code/auto_config.jsp" />
+		<put-attribute name="title" value="CreateCMR | Automation Engine | Maintain Configuration" />
+		<put-attribute name="body" value="/resources/jsp/auto/code/auto_config.jsp" />
 	</definition>
 
 	<definition name="salesBoModel" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Sales Branch Off Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/salesbomaint.jsp" />
+		<put-attribute name="title" value="CreateCMR | Sales Branch Off Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/salesbomaint.jsp" />
 	</definition>
 
 	<definition name="apClusterModel" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | AP Customer CLuster Tier Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/apClusterMaint.jsp" />
+		<put-attribute name="title" value="CreateCMR | AP Customer CLuster Tier Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/apClusterMaint.jsp" />
 	</definition>
 
 	<definition name="salesBoMaintModel" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Sales Branch Off Maintenance" />
+		<put-attribute name="title" value="CreateCMR | Sales Branch Off Maintenance" />
 		<put-attribute name="body" value="/resources/jsp/code/addsalesbo.jsp" />
 	</definition>
 
 	<definition name="apClusterMaintModel" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | AP Customer CLuster Tier Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/addApCluster.jsp" />
+		<put-attribute name="title" value="CreateCMR | AP Customer CLuster Tier Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/addApCluster.jsp" />
 	</definition>
 
 	<definition name="repTeamModel" extends="base">
 		<put-attribute name="title" value="CreateCMR | Rep Team Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/repteammaint.jsp" />
+		<put-attribute name="body" value="/resources/jsp/code/repteammaint.jsp" />
 	</definition>
 
 	<definition name="repTeamMaintModel" extends="base">
@@ -785,61 +666,50 @@
 
 	<definition name="company_details" extends="window">
 		<put-attribute name="body" value="/resources/jsp/quick_search.jsp" />
-		<put-attribute name="body"
-			value="/resources/jsp/windows/company_details.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/company_details.jsp" />
 	</definition>
 
 	<!-- Single Reactivation Start -->
 	<definition name="singlereactsearch" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/singlereactsearch.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/singlereactsearch.jsp" />
 	</definition>
 
 	<definition name="singlereactlist" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/singlereactlist.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/singlereactlist.jsp" />
 	</definition>
 
 	<definition name="singlereactdet" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/singlereactdet.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/singlereactdet.jsp" />
 	</definition>
 
 	<definition name="singlereactnoresults" extends="window">
-		<put-attribute name="body"
-			value="/resources/jsp/windows/singlereactnoresults.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/singlereactnoresults.jsp" />
 	</definition>
 
 	<definition name="legacysearch" extends="base">
 		<put-attribute name="title" value="CreateCMR | Legacy Search" />
-		<put-attribute name="body"
-			value="/resources/jsp/legacy/legacysearch.jsp" />
+		<put-attribute name="body" value="/resources/jsp/legacy/legacysearch.jsp" />
 	</definition>
 
 	<definition name="legacydetails" extends="window">
 		<put-attribute name="title" value="CreateCMR | Details" />
-		<put-attribute name="body"
-			value="/resources/jsp/windows/legacydetails.jsp" />
+		<put-attribute name="body" value="/resources/jsp/windows/legacydetails.jsp" />
 	</definition>
 
 	<definition name="dplrequest" extends="window">
-		<put-attribute name="title"
-			value="CreateCMR | Denied Parties List Search" />
-		<put-attribute name="body"
-			value="/resources/jsp/windows/dplrequest.jsp" />
+		<put-attribute name="title" value="CreateCMR | Denied Parties List Search" />
+		<put-attribute name="body" value="/resources/jsp/windows/dplrequest.jsp" />
 	</definition>
 
 	<definition name="dplsearch" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | Denied Parties List Search" />
+		<put-attribute name="title" value="CreateCMR | Denied Parties List Search" />
 		<put-attribute name="body" value="/resources/jsp/dpl/dplsearch.jsp" />
 	</definition>
 
 
 	<definition name="searchhome" extends="base">
 		<put-attribute name="title" value="CreateCMR | Search" />
-		<put-attribute name="body"
-			value="/resources/jsp/legacy/searchhome.jsp" />
+		<put-attribute name="body" value="/resources/jsp/legacy/searchhome.jsp" />
 	</definition>
 
 	<definition name="mqsearch" extends="base">
@@ -849,29 +719,23 @@
 
 	<definition name="attachlist" extends="base">
 		<put-attribute name="title" value="CreateCMR | Get Attachments" />
-		<put-attribute name="body"
-			value="/resources/jsp/legacy/attachlist.jsp" />
+		<put-attribute name="body" value="/resources/jsp/legacy/attachlist.jsp" />
 	</definition>
 
 
 	<definition name="usbpmaster" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | List of US Business Partner Master Data" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/usbpmasterlist.jsp" />
+		<put-attribute name="title" value="CreateCMR | List of US Business Partner Master Data" />
+		<put-attribute name="body" value="/resources/jsp/code/usbpmasterlist.jsp" />
 	</definition>
 
 	<definition name="usbpmasterform" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | US Business Partner Master Maintenance" />
+		<put-attribute name="title" value="CreateCMR | US Business Partner Master Maintenance" />
 		<put-attribute name="body" value="/resources/jsp/code/usbpmaster.jsp" />
 	</definition>
 
 	<definition name="usibmbo" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | List of US US IBM BO Data" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/usibmbolist.jsp" />
+		<put-attribute name="title" value="CreateCMR | List of US US IBM BO Data" />
+		<put-attribute name="body" value="/resources/jsp/code/usibmbolist.jsp" />
 	</definition>
 
 	<definition name="usibmboform" extends="base">
@@ -880,10 +744,8 @@
 	</definition>
 
 	<definition name="usibmorg" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | List of US IBM ORG Data" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/usibmorglist.jsp" />
+		<put-attribute name="title" value="CreateCMR | List of US IBM ORG Data" />
+		<put-attribute name="body" value="/resources/jsp/code/usibmorglist.jsp" />
 	</definition>
 
 	<definition name="usibmorgform" extends="base">
@@ -892,31 +754,23 @@
 	</definition>
 
 	<definition name="ustcrupdtqueue" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | List of US TCR UPDT QUEUE Data" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/ustcrupdtqueuelist.jsp" />
+		<put-attribute name="title" value="CreateCMR | List of US TCR UPDT QUEUE Data" />
+		<put-attribute name="body" value="/resources/jsp/code/ustcrupdtqueuelist.jsp" />
 	</definition>
 
 	<definition name="ustcrupdtqueueform" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | US TCR UPDT QUEUE Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/ustcrupdtqueue.jsp" />
+		<put-attribute name="title" value="CreateCMR | US TCR UPDT QUEUE Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/ustcrupdtqueue.jsp" />
 	</definition>
 
 	<definition name="gcarsupdtqueue" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | List of GCARS UPDT QUEUE Data" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/gcarsupdtqueuelist.jsp" />
+		<put-attribute name="title" value="CreateCMR | List of GCARS UPDT QUEUE Data" />
+		<put-attribute name="body" value="/resources/jsp/code/gcarsupdtqueuelist.jsp" />
 	</definition>
 
 	<definition name="gcarsupdtqueueform" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | GCARS UPDT QUEUE Maintenance" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/gcarsupdtqueue.jsp" />
+		<put-attribute name="title" value="CreateCMR | GCARS UPDT QUEUE Maintenance" />
+		<put-attribute name="body" value="/resources/jsp/code/gcarsupdtqueue.jsp" />
 	</definition>
 
 	<definition name="dashboard" extends="base">
@@ -926,8 +780,7 @@
 
 	<definition name="corrections" extends="base">
 		<put-attribute name="title" value="CreateCMR | Corrections" />
-		<put-attribute name="body"
-			value="/resources/jsp/system/corrections.jsp" />
+		<put-attribute name="body" value="/resources/jsp/system/corrections.jsp" />
 	</definition>
 
 	<definition name="findcmr" extends="base">
@@ -936,10 +789,8 @@
 	</definition>
 
 	<definition name="uscompany" extends="base">
-		<put-attribute name="title"
-			value="CreateCMR | List of US Company Data" />
-		<put-attribute name="body"
-			value="/resources/jsp/code/uscompanylist.jsp" />
+		<put-attribute name="title" value="CreateCMR | List of US Company Data" />
+		<put-attribute name="body" value="/resources/jsp/code/uscompanylist.jsp" />
 	</definition>
 
 	<definition name="uscompanyform" extends="base">

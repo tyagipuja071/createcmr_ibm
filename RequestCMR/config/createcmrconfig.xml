@@ -24,7 +24,8 @@
 		<editable>true</editable>
 		<hint>The value accepts HTML formatting. You can use [strong] tags for
 			bold, [em] tags for italics.
-			Enclose each information item within [li]
+			Enclose each
+			information item within [li]
 			tags.
 		</hint>
 		<required>true</required>
@@ -42,7 +43,8 @@
 		<editable>true</editable>
 		<hint>The value accepts HTML formatting. You can use [strong] tags for
 			bold, [em] tags for italics.
-			Enclose each information item within [li]
+			Enclose each
+			information item within [li]
 			tags.
 		</hint>
 		<required>true</required>
@@ -66,20 +68,25 @@
 			!important;"&gt;Help and Support&lt;/h2&gt;
 			&lt;p style="font-size:
 			1em;"&gt;
-			&lt;ul style="font-size: 1em !important;"&gt;
+			&lt;ul
+			style="font-size: 1em !important;"&gt;
 			&lt;li&gt;Access to the tool can be requested using OneTeam. For
-			access instructions
+			access
+			instructions
 			please follow this &lt;a style="color:blue"
 			href="https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/FindCMR
-			Access and Support"&gt;link&lt;/a&gt;. &lt;/li&gt;
+			Access and Support"&gt;link&lt;/a&gt;.
+			&lt;/li&gt;
 			&lt;li&gt;For
 			support, please refer to the &lt;a style="color:blue"
 			href="https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/FindCMR
-			Access and Support"&gt;user guide&lt;/a&gt; or contact the help desk
+			Access and Support"&gt;user guide&lt;/a&gt;
+			or contact the help desk
 			by sending an email to &lt;span
 			style="text-decoration:underline"&gt;CCM Worldwide
 			Support/Raleigh/Contr/IBM.&lt;/span&gt; &lt;em&gt;While this tool is
-			in Production with 24/7 support, the data source that it uses is only
+			in Production with 24/7 support, the data source
+			that it uses is only
 			supported 9/5. Please consider this when estimating response
 			time.&lt;/em&gt;&lt;/li&gt;
 			&lt;/ul&gt;

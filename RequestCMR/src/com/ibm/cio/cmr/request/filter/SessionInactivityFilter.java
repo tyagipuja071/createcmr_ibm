@@ -241,7 +241,7 @@ public class SessionInactivityFilter implements Filter {
 
 				LocalDateTime tokenExpiringTime = (LocalDateTime) session.getAttribute("tokenExpiringTime");
 				if (tokenExpiringTime != null && LocalDateTime.now().isAfter(tokenExpiringTime)) {
-					LOG.debug("Access token expired!");
+					LOG.debug("Access token expired! ");
 					// revoke token
 					OAuthUtils.revokeToken((String) session.getAttribute("accessToken"));
 
