@@ -713,10 +713,12 @@ public class DnBUtil {
       dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
     }
     dnbAddress = dnbAddress.trim();
+    LOG.debug("DNB address : " + dnbAddress);
     Boolean matchWithDnbMailingAddr = false;
     if (handler != null) {
       matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
     }
+    LOG.debug("matchWithDnbMailingAddr : " + matchWithDnbMailingAddr);
     LOG.debug("DNB match country =  " + country);
     Boolean isReshuffledAddr = false;
     if ("897".equals(country) || "US".equals(country)) {
