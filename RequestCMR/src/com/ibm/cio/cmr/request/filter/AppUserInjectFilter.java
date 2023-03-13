@@ -84,10 +84,7 @@ public class AppUserInjectFilter implements Filter {
 					Set<String> paramNames = request.getParameterMap().keySet();
 
 					// when request contains code and grant_id, means we are at
-					// second
-					// step
-					// of
-					// SSO and need to get access token
+					// second step of SSO and need to get access token
 					if (paramNames.contains("code") && paramNames.contains("grant_id")) {
 						LOG.trace("Requesting access token for grant_id: " + request.getParameter("grant_id"));
 
