@@ -15,14 +15,14 @@ import com.ibm.websphere.security.cred.WSCredential;
 public class UserHelper {
 	private static final String BLUEID_ATTR_UNID = "uniqueSecurityName";
 	private static final String BLUEID_ATTR_EMAIL = "email";
-	Subject _s;
+	Subject _subject;
 
 	public UserHelper() {
 		try {
-			_s = WSSubject.getCallerSubject();
+			_subject = WSSubject.getCallerSubject();
 		} catch (WSSecurityException e) {
 			e.printStackTrace();
-			_s = null;
+			_subject = null;
 		}
 	}
 
@@ -33,8 +33,8 @@ public class UserHelper {
 		 * contains at least one WSCredential that is not unauthenticated, then
 		 * return true
 		 */
-		if (_s != null) {
-			Set<WSCredential> publicWSCreds = _s.getPublicCredentials(WSCredential.class);
+		if (_subject != null) {
+			Set<WSCredential> publicWSCreds = _subject.getPublicCredentials(WSCredential.class);
 			if (publicWSCreds != null) {
 				for (Iterator<WSCredential> i = publicWSCreds.iterator(); !result && i.hasNext();) {
 					WSCredential cred = i.next();
@@ -47,8 +47,8 @@ public class UserHelper {
 
 	public String getPrincipalName() {
 		String result = null;
-		if (_s != null) {
-			Set<Principal> principals = _s.getPrincipals();
+		if (_subject != null) {
+			Set<Principal> principals = _subject.getPrincipals();
 			if (principals != null && principals.size() > 0) {
 				result = principals.iterator().next().getName();
 			}
@@ -72,26 +72,24 @@ public class UserHelper {
 				result = null;
 			}
 		}
-
 		return result;
 	}
 
+	/*
+	 * Look for a private credential of type java.util.Hashtable, and then
+	 * within there for an entry with name "access_token". This was
+	 * reverse-engineered from looking at dump.jsp
+	 */
 	public String getAccessToken() {
-		/*
-		 * Look for a private credential of type java.util.Hashtable, and then
-		 * within there for an entry with name "access_token". This was
-		 * reverse-engineered from looking at dump.jsp
-		 */
 		String result = getPrivateHashtableAttr("access_token");
-
 		return result;
 	}
 
 	protected String getPrivateHashtableAttr(String attrName) {
 		String result = null;
-		if (_s != null) {
+		if (_subject != null) {
 			@SuppressWarnings("rawtypes")
-			Set<Hashtable> privateHTs = _s.getPrivateCredentials(Hashtable.class);
+			Set<Hashtable> privateHTs = _subject.getPrivateCredentials(Hashtable.class);
 			if (privateHTs != null && privateHTs.size() > 0) {
 				result = (String) privateHTs.iterator().next().get(attrName);
 			}
@@ -101,7 +99,6 @@ public class UserHelper {
 
 	protected String getIDTokenClaimsValue(String idTokenClaimsAttrName) {
 		String result = null;
-
 		SimpleJWT idtoken = getIDToken();
 		if (idtoken != null) {
 			JSONObject claims = idtoken.getClaims();
@@ -109,7 +106,6 @@ public class UserHelper {
 				result = (String) claims.get(idTokenClaimsAttrName);
 			}
 		}
-
 		return result;
 	}
 
@@ -122,29 +118,24 @@ public class UserHelper {
 		 */
 		// first try email claim
 		result = getIDTokenClaimsValue(BLUEID_ATTR_EMAIL);
-
 		if (result == null) {
 			// others to follow?
 		}
-
 		return result;
 	}
 
+	/*
+	 * Where the email address is located is going to depend somehwat on how the
+	 * user authenticated. This method tries to be a little clever about
+	 * figuring that out.
+	 */
 	public String getUNID() {
 		String result = null;
-
-		/*
-		 * Where the email address is located is going to depend somehwat on how
-		 * the user authenticated. This method tries to be a little clever about
-		 * figuring that out.
-		 */
 		// first try email claim
 		result = getIDTokenClaimsValue(BLUEID_ATTR_UNID);
-
 		if (result == null) {
 			// others to follow?
 		}
-
 		return result;
 	}
 
@@ -154,13 +145,10 @@ public class UserHelper {
 		 * principal name
 		 */
 		String result = null;
-
 		result = getIDTokenClaimsValue("displayName");
-
 		if (result == null) {
 			result = getPrincipalName();
 		}
-
 		return result;
 	}
 
@@ -170,13 +158,10 @@ public class UserHelper {
 		 * username
 		 */
 		String result = null;
-
 		result = getIDTokenClaimsValue("sub");
-
 		if (result == null) {
 			result = getIDTokenClaimsValue("preferred_username");
 		}
-
 		return result;
 	}
 }
