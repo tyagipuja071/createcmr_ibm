@@ -63,23 +63,17 @@ public class AppUserInjectFilter implements Filter {
 
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse resp = (HttpServletResponse) response;
-		HttpSession session = req.getSession();
 
+		HttpSession session = shouldCreateSession(req);
 		String url = req.getRequestURI();
-		String userIntranetEmail = null;
+		String userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
 
 		try {
 			if (shouldFilter(req)) {
 
 				AppUser user = AppUser.getUser(req);
-
-				LOG.debug(url);
-				LOG.debug(user);
-
 				if (user == null) {
-					LOG.trace("Single Sign On injecting for this url: " + url);
-
-					LOG.warn("No user on the session yet. Checking IBM ID...");
+					LOG.warn("No user on the session yet...");
 
 					// try to get user Intranet
 					userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
@@ -125,10 +119,6 @@ public class AppUserInjectFilter implements Filter {
 							session.setAttribute("accessToken", tokens.getAccess_token());
 							session.setAttribute("tokenExpiringTime", tokens.getExpires_in());
 
-							AppUser appUser2 = AppUser.getUser(req);
-							LOG.debug("User set successfully at the request: " + appUser2.getIntranetId());
-							LOG.debug("User set successfully at the request: " + session.getAttribute("cmrAppUser"));
-
 							filterChain.doFilter(req, resp);
 							return;
 						} else {
@@ -142,11 +132,10 @@ public class AppUserInjectFilter implements Filter {
 						}
 					}
 
-					LOG.debug("No IBM ID detected. Redirecting to W3 ID Provisioner...");
+					LOG.debug("Redirecting to W3 ID Provisioner...");
 					HttpServletResponse httpResp = (HttpServletResponse) response;
 					session.invalidate();
 					httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
-					// filterChain.doFilter(req, resp);
 					return;
 				}
 			}
@@ -247,5 +236,13 @@ public class AppUserInjectFilter implements Filter {
 
 		body = stringBuilder.toString();
 		return body;
+	}
+
+	private HttpSession shouldCreateSession(HttpServletRequest req) {
+		HttpSession session = req.getSession(false);
+		if (session == null) {
+			return req.getSession();
+		}
+		return session;
 	}
 }
