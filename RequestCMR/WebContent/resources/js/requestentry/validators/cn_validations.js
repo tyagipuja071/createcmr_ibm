@@ -1834,8 +1834,8 @@ function addAddrUpdateValidator() {
 
                   if (ret == null || ret.ret1 == null) {
                     return new ValidationResult(null, false, 'The additional address should be same with Sold to address (ZS01).'
-                        + ' If you insist on using different address with Sold to (ZS01),you need to attach the screenshot of customer official website,'
-                        + ' business license,government website,contract/purchase order with signature in attachment, file content must be "Name and Address Change(China Specific)". ');
+                        + ' If you insist on using different address from the Sold to (ZS01), you need to attach the screenshot of Customer Official Website,'
+                        + ' Business License, Government Website, Contract/Purchase order with signature, and file content selected must be "Name and Address Change(China Specific)". ');
                   } else {
                     return new ValidationResult(null, true);
                   }
@@ -1851,8 +1851,8 @@ function addAddrUpdateValidator() {
                     if (ret == null || ret.ret1 == null) {
                       return new ValidationResult(null, true);
                     } else {
-                      return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                          + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
+                      return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                          + 'and Address match with D&B 100%, but you still added an attachment of type "Name and Address Change(China Specific)". Please remove this Attachment then try again.'
                           );
                     }
                   }
@@ -2035,12 +2035,14 @@ function checkTianYanChaMatch() {
   var busnTypeResult = {};
   var nameResult = {};
   dojo.xhrGet({
-    url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+    url : cmr.CONTEXT_ROOT + '/cn/dnb.json',
     handleAs : 'json',
     method : 'GET',
     content : {
       busnType : busnType,
-      cnName : cnName
+      cnName : cnName,
+      cnAddress : cnAddrTxtZS01,
+      cnCity : cnCityZS01
     },
     timeout : 50000,
     sync : true,
@@ -2057,11 +2059,13 @@ function checkTianYanChaMatch() {
   
   if($.isEmptyObject(result)){
     dojo.xhrGet({
-      url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+      url : cmr.CONTEXT_ROOT + '/cn/dnb.json',
       handleAs : 'json',
       method : 'GET',
       content : {
-        cnName : cnName
+        cnName : cnName,
+        cnAddress : cnAddrTxtZS01,
+        cnCity : cnCityZS01
       },
       timeout : 50000,
       sync : true,
@@ -2083,6 +2087,7 @@ function checkTianYanChaMatch() {
     return false;
   } else {
     var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
+    var cnAddressRev = convert2SBCS(intlCustNm4ZS01 + cnAddrTxtZS01);
     var name2SBCS = convert2SBCS(result.name);
     var address2SBCS = convert2SBCS(result.regLocation);
     var apiCity = '';
@@ -2101,6 +2106,9 @@ function checkTianYanChaMatch() {
     }
     if (address2SBCS != cnAddress) {
       if (address2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+        addressEqualFlag = true;
+      } else if(apiCity.indexOf(cnCityZS01) >= 0 &&  (address2SBCS.indexOf(cnAddress) >= 0 || address2SBCS.indexOf(cnAddressRev) >= 0)){
+        // this check is to add the D&B format of Street = District + Street
         addressEqualFlag = true;
       } else if(address2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && address2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
           addressEqualFlag = true;
@@ -2722,6 +2730,7 @@ function validateCnNameAndAddr4Create() {
                 city2 = convert2SBCS(intlAddrRdcResult.ret6);
               }
               
+              console.log(intlAddrRdcResult);
               if(intlCustNm1 != convert2SBCS(cnCustName1ZS01) || intlCustNm2 != convert2SBCS(cnCustName2ZS01) 
                   || addrTxt != convert2SBCS(cnAddrTxtZS01) || intlCustNm4 != convert2SBCS(intlCustNm4ZS01)
                   || city1 != convert2SBCS(cnCityZS01) || city2 != convert2SBCS(cnDistrictZS01)){
@@ -2733,16 +2742,20 @@ function validateCnNameAndAddr4Create() {
             if (isValidate) {
               var busnType = FormManager.getActualValue('busnType');
               var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
+              var cnAddress = convert2SBCS(cnAddrTxtZS01);
+              var cnCity = convert2SBCS(cnCityZS01);
               var result = {};
               var busnTypeResult = {};
               var nameResult = {};
               dojo.xhrGet({
-                url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+                url : cmr.CONTEXT_ROOT + '/cn/dnb.json',
                 handleAs : 'json',
                 method : 'GET',
                 content : {
                   busnType : busnType,
-                  cnName : cnName
+                  cnName : cnName,
+                  cnAddress : cnAddress,
+                  cnCity : cnCity
                 },
                 timeout : 50000,
                 sync : true,
@@ -2758,12 +2771,15 @@ function validateCnNameAndAddr4Create() {
               result = busnTypeResult;
               
               if($.isEmptyObject(result)){
+                console.log('No match via SCC. Matching with name and address..');
                 dojo.xhrGet({
-                  url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+                  url : cmr.CONTEXT_ROOT + '/cn/dnb.json',
                   handleAs : 'json',
                   method : 'GET',
                   content : {
-                    cnName : cnName
+                    cnName : cnName,
+                    cnAddress : cnAddress,
+                    cnCity : cnCity
                   },
                   timeout : 50000,
                   sync : true,
@@ -2780,6 +2796,7 @@ function validateCnNameAndAddr4Create() {
               }
               
               if($.isEmptyObject(busnTypeResult) && !$.isEmptyObject(nameResult)) {
+                console.log('No match via SCC. Showing error on SCC..');
                 var apiName = '';
                 var apiAddress = '';
                 var apiBusnType = '';
@@ -2793,14 +2810,16 @@ function validateCnNameAndAddr4Create() {
                 });
                 
                 if(ret == null || ret.ret1 == null){
-                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the <b>Social credit Code</b> '
-                      + 'doesn\'t match with Tian Yan Cha 100%,or if you insist on using missmatched <b>Social credit Code</b>, you need to attach '
-                      + 'the screenshot of customer business license , government website in attachment, file content must be '
-                      + '"<b>Name and Address Change(China Specific)</b>", the correct information should be:'
+                  return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the <b>Social Credit Code</b> '
+                      + 'does not match with D&B 100%. If you insist on using a mismatched <b>Social Credit Code</b>, you need to attach '
+                      + 'the screenshot of the Customer Business License and/or Government Website, and the file content selected must be '
+                      + '"<b>Name and Address Change(China Specific)</b>". The correct information based on the checks:'
                       + apiBusnType + apiName + apiAddress);
                 }
               } else {
+                console.log('Checking name and address info...');
                 var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
+                var cnAddressRev = convert2SBCS(intlCustNm4ZS01+cnAddrTxtZS01);
                 var name2SBCS = convert2SBCS(result.name);
                 var address2SBCS = convert2SBCS(result.regLocation);
                 var apiCity = '';
@@ -2818,6 +2837,7 @@ function validateCnNameAndAddr4Create() {
                 var correctAddress = '';
                 
                 if (name2SBCS != cnName) {
+                  console.log('Name mismatch: '+name2SBCS+' : '+cnName);
                   nameEqualFlag = false;
                   if(!$.isEmptyObject(result)){
                     correctName = '<br/>Company Name: ' + result.name;
@@ -2825,10 +2845,13 @@ function validateCnNameAndAddr4Create() {
                     correctName = '<br/>Company Name: No Data';
                   }
                 }
-                if (address2SBCS != cnAddress) {
+                if (address2SBCS != cnAddress && address2SBCS != cnAddressRev) {
               // address2SBCS = address2SBCS.replace(apiCity,'');
               // address2SBCS = address2SBCS.replace(apiDistrict,'');
                   if (address2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+                    addressEqualFlag = true;
+                  } else if(apiCity.indexOf(cnCityZS01) >= 0 &&  (address2SBCS.indexOf(cnAddress) >= 0 || address2SBCS.indexOf(cnAddressRev) >= 0)){
+                    // this check is to add the D&B format of Street = District + Street
                     addressEqualFlag = true;
                   } else if(address2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && address2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
                       addressEqualFlag = true;
@@ -2840,6 +2863,9 @@ function validateCnNameAndAddr4Create() {
                       correctAddress = '<br/>Company Address: No Data';
                     }
                   }
+                  if (!addressEqualFlag){
+                    console.log('Address mismatch: '+address2SBCS+' : '+cnAddress);
+                  }
                 }
 
                 if(!nameEqualFlag || !addressEqualFlag){
@@ -2849,12 +2875,11 @@ function validateCnNameAndAddr4Create() {
                   });
         
                   if ((ret == null || ret.ret1 == null)) {
-                    return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                        + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
-                        + 'company name or address, you need attach the screenshot of customer official website, '
-                        + 'business license , government website,contract/purchase order with signature in attachment, '
-                        + 'file content must be "Name and Address Change(China Specific)", the correct company name and address '
-                        + 'should be:'
+                    return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                        + 'and Address do not match with D&B 100%. If you insist on using mismatched '
+                        + 'Company Name or Address, you need to attach the screenshot of Customer Official Website, '
+                        + 'Business License, Government Website, and/or Contract/Purchase Order with signature, and the '
+                        + 'file content selected must be "Name and Address Change(China Specific)". The correct information based on the checks:'
                         + correctName + correctAddress);
                   } else {
                     return new ValidationResult(null, true);
@@ -2868,8 +2893,8 @@ function validateCnNameAndAddr4Create() {
                     });
           
                     if (ret && ret.ret1 && ret.ret1 != '') {
-                      return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                          + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
+                      return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                          + 'and Address match with D&B 100%, but you still added an attachment of type  "Name and Address Change(China Specific)". <br>Please remove this Attachment, then try again.'
                           );
                     }else{
                       return new ValidationResult(null, true);
@@ -3046,10 +3071,10 @@ function validateCnNameAndAddr4Update() {
               apiAddress = '<br/>Company Chinese Address: ' + tycResultByCnNm.regLocation;
               
               if(!cnAttachFlag){
-                return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the <b>Social credit Code</b> '
-                    + 'doesn\'t match with Tian Yan Cha 100%,or if you insist on using missmatched <b>Social credit Code</b>, you need to attach '
-                    + 'the screenshot of customer business license , government website in attachment, file content must be '
-                    + '"<b>Name and Address Change(China Specific)</b>", the correct information should be:'
+                return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the <b>Social Credit Code</b> '
+                    + 'does not match with D&B 100%. If you insist on using mismatched <b>Social Credit Code</b>, you need to attach '
+                    + 'the screenshot of Customer Business License and/or Government Website, and the file content selected must be '
+                    + '"<b>Name and Address Change(China Specific)</b>". The correct information based on checks:'
                     + apiBusnType + apiName + apiAddress);
               }
             } else {
@@ -3099,20 +3124,19 @@ function validateCnNameAndAddr4Update() {
 
               if(!nameEqualFlag || !addressEqualFlag){
                 if(!cnAttachFlag){
-                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                      + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
-                      + 'company name or address, you need attach the screenshot of customer official website, '
-                      + 'business license , government website,contract/purchase order with signature in attachment, '
-                      + 'file content must be "Name and Address Change(China Specific)", the correct company name and address '
-                      + 'should be:'
+                  return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                      + 'and Address do not match with D&B 100%. If you insist on using mismatched '
+                      + 'Company Name or Address, you need to attach the screenshot of Customer Official Website, '
+                      + 'Business License, Government Website, Contract/Purchase order with signature, and '
+                      + 'the file content selected must be "Name and Address Change(China Specific)". The correct information based on checks: '
                       + correctName + correctAddress);
                 } else {
                   return new ValidationResult(null, true);
                 }
               } else if(nameEqualFlag && addressEqualFlag){
                 if(cnAttachFlag){
-                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                      + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
+                  return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                      + 'and Address match with D&B 100%, but you still added an attachment of type "Name and Address Change(China Specific)". Please remove this Attachment then try again.'
                       );
                 } else {
                   return new ValidationResult(null, true);
@@ -3133,10 +3157,10 @@ function validateCnNameAndAddr4Update() {
               apiAddress = '<br/>Company Chinese Address: ' + tycResultByCnNm.regLocation;
               
               if(!cnAttachFlag){
-                return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the <b>Social credit Code</b> '
-                    + 'doesn\'t match with Tian Yan Cha 100%,or if you insist on using missmatched <b>Social credit Code</b>, you need to attach '
-                    + 'the screenshot of customer business license , government website in attachment, file content must be '
-                    + '"<b>Name and Address Change(China Specific)</b>", the correct information should be:'
+                return new ValidationResult(null, false, 'Your request is not allowed to sent for processing if the <b>Social Credit Code</b> '
+                    + 'does not match with D&B 100%. If you insist on using mismatched <b>Social Credit Code</b>, you need to attach '
+                    + 'the screenshot of Customer Business License and/or Government Website, and tje file content selected must be '
+                    + '"<b>Name and Address Change(China Specific)</b>". The correct information based on checks:'
                     + apiBusnType + apiName + apiAddress);
               }
             } else {
@@ -3186,11 +3210,11 @@ function validateCnNameAndAddr4Update() {
 
               if(!nameEqualFlag || !addressEqualFlag){
                 if(!cnAttachFlag){
-                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                      + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
-                      + 'company name or address, you need attach the screenshot of customer official website, '
-                      + 'business license , government website,contract/purchase order with signature in attachment, '
-                      + 'file content must be "Name and Address Change(China Specific)", the correct company name and address '
+                  return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                      + 'and Address do not match with D&B 100%. If you insist on using mismatched '
+                      + 'Company Name or Address, you need to attach the screenshot of Customer Official Website, '
+                      + 'Business License, Government Website, Contract/Purchase order with signature, and the '
+                      + 'file content selected must be "Name and Address Change(China Specific)". The correct information based on checks: '
                       + 'should be:'
                       + correctName + correctAddress);
                 } else {
@@ -3207,16 +3231,16 @@ function validateCnNameAndAddr4Update() {
                 // and address match TianYanCha
                 if (cnAttachFlag) {
                   if (!failInd) {
-                    return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                        + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
+                    return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                        + 'and Address match with D&B 100%, but you still added an attachment of type "Name and Address Change(China Specific)". Please remove this Attachment then try again.'
                         );
                   }
                   return new ValidationResult(null, true);
                 } else {
                   if (failInd) {
                     return new ValidationResult(null, false, 'The additional address should be same with Sold to address (ZS01).'
-                        + ' If you insist on using different address with Sold to (ZS01),you need to attach the screenshot of customer official website,'
-                        + ' business license,government website,contract/purchase order with signature in attachment, file content must be "Name and Address Change(China Specific)". ');
+                        + ' If you insist on using a different address from the Sold to (ZS01), you need to attach the screenshot of Customer Official Website,'
+                        + ' Business License, Government Website, Contract/Purchase order with signature, and the file content selected must be "Name and Address Change(China Specific)". ');
                   }
                   return new ValidationResult(null, true);
                 }
@@ -3467,7 +3491,7 @@ function checkTycViaBusnType(cnName) {
   var busnType = FormManager.getActualValue('busnType');
   var result = {};
   dojo.xhrGet({
-    url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+    url : cmr.CONTEXT_ROOT + '/cn/dnb.json',
     handleAs : 'json',
     method : 'GET',
     content : {
@@ -3492,7 +3516,7 @@ function checkTycViaCnNm(cnName) {
   var busnType = FormManager.getActualValue('busnType');
   var result = {};
   dojo.xhrGet({
-    url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+    url : cmr.CONTEXT_ROOT + '/cn/dnb.json',
     handleAs : 'json',
     method : 'GET',
     content : {
