@@ -4061,8 +4061,8 @@ public class TurkeyHandler extends BaseSOFHandler {
                 error.addError((row.getRowNum() + 1), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
               }
               if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "Y".equals(ordBlk) || "C".equals(ordBlk) || "J".equals(ordBlk))) {
-                LOG.trace("Order Block Code should only @, Y, C, J. >> ");
-                error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should be only @, Y, C, J. ");
+                LOG.trace("Embargo should only @, Y, C, J. >> ");
+                error.addError((row.getRowNum() + 1), "Embargo Code", "Embargo Code should be only @, Y, C, J. ");
               }
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
