@@ -31,6 +31,8 @@ import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
@@ -151,17 +153,6 @@ public class AustraliaUtil extends AutomationUtil {
     results.setDetails(details.toString());
     results.setProcessOutput(overrides);
     
-    
-    if ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId())) {
-    	  LOG.debug("ANZ PAYGO ...");
-          Addr pg01 = requestData.getAddress("PG01");
-          if(pg01 != null){
-        	  pg01.getId().setAddrSeq("200");
-        	  entityManager.merge(pg01);
-              entityManager.flush();
-          }
-        }
-
     return results;
   }
 
@@ -415,6 +406,15 @@ public class AustraliaUtil extends AutomationUtil {
       output.setProcessOutput(validation);
       output.setDetails("Updates to the dataFields fields skipped validation");
     }
+    
+    if ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId())) {
+    	LOG.debug("ANZ PAYGO ...");
+        Addr pg01 = requestData.getAddress("PG01");
+        if(pg01 != null){
+        	checkANZPaygoAddr(entityManager, data.getId().getReqId());
+        }
+      }
+    
     return true;
   }
 
@@ -647,6 +647,12 @@ public class AustraliaUtil extends AutomationUtil {
     anzEcoNotifyList.append(SystemParameters.getString("ANZ_ECSYS_NOTIFY"));
     return anzEcoNotifyList;
   }
+  
+  public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
+	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO"));
+	    query.setParameter("REQ_ID", reqId);
+	    query.executeSql();
+	  }
 
   @Override
   protected List<String> getCountryLegalEndings() {

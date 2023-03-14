@@ -30,6 +30,8 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.AutomationServiceClient;
@@ -268,17 +270,6 @@ public class NewZealandUtil extends AutomationUtil {
       entityManager.flush();
     }
     
-    if ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId())) {
-    	LOG.debug("ANZ PAYGO ...");
-        Addr pg01 = requestData.getAddress("PG01");
-        if(pg01 != null){
-      	  pg01.getId().setAddrSeq("200");
-      	  entityManager.merge(pg01);
-          entityManager.flush();
-        }
-      }
-    
-    
     return results;
   }
 
@@ -495,6 +486,15 @@ public class NewZealandUtil extends AutomationUtil {
       output.setProcessOutput(validation);
       output.setDetails("Updates to the dataFields fields skipped validation");
     }
+    
+    if ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId())) {
+    	LOG.debug("ANZ PAYGO ...");
+        Addr pg01 = requestData.getAddress("PG01");
+        if(pg01 != null){
+        	checkANZPaygoAddr(entityManager, data.getId().getReqId());
+        }
+      }
+    
     return true;
   }
 
@@ -720,6 +720,12 @@ public class NewZealandUtil extends AutomationUtil {
     output.setProcessOutput(validation);
     return true;
   }
+  
+  public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
+	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO"));
+	    query.setParameter("REQ_ID", reqId);
+	    query.executeSql();
+	  }
 
   @Override
   protected List<String> getCountryLegalEndings() {
