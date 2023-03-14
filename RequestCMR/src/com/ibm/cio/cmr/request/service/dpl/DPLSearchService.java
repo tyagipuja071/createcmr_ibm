@@ -126,16 +126,14 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     scorecardPk.setReqId(reqId);
     Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
 
-    synchronized (scorecard) {
-      if (scorecard != null && resultCount == 0) {
-        LOG.debug("Auto assessinging DPL check results.");
-        scorecard.setDplAssessmentBy("CreateCMR");
-        scorecard.setDplAssessmentCmt("No actual results found during the search.");
-        scorecard.setDplAssessmentResult("N");
-        scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
-        entityManager.merge(scorecard);
-        entityManager.flush();
-      }
+    if (scorecard != null && resultCount == 0) {
+      LOG.debug("Auto assessinging DPL check results.");
+      scorecard.setDplAssessmentBy("CreateCMR");
+      scorecard.setDplAssessmentCmt("No actual results found during the search.");
+      scorecard.setDplAssessmentResult("N");
+      scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
+      entityManager.merge(scorecard);
+      entityManager.flush();
     }
 
     AttachmentService attachmentService = new AttachmentService();
