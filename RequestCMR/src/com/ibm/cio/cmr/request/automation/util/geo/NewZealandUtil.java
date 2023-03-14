@@ -269,6 +269,7 @@ public class NewZealandUtil extends AutomationUtil {
     }
     
     if ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId())) {
+    	LOG.debug("ANZ PAYGO ...");
         Addr pg01 = requestData.getAddress("PG01");
         if(pg01 != null){
       	  pg01.getId().setAddrSeq("200");
