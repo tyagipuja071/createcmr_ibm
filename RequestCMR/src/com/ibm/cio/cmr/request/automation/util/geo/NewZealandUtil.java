@@ -487,8 +487,7 @@ public class NewZealandUtil extends AutomationUtil {
       output.setDetails("Updates to the dataFields fields skipped validation");
     }
     
-    if ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId())) {
-    	LOG.debug("ANZ PAYGO ...");
+    if ("U".equals(admin.getReqType()) && ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))) {
         Addr pg01 = requestData.getAddress("PG01");
         if(pg01 != null){
         	checkANZPaygoAddr(entityManager, data.getId().getReqId());
