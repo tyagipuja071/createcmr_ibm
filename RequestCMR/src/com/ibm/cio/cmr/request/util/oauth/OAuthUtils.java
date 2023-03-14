@@ -48,7 +48,6 @@ import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
-import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cmr.services.client.AuthorizationClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.auth.Authorization;
@@ -598,13 +597,6 @@ public class OAuthUtils {
 			// mv = new ModelAndView("redirect:/preferences", "pref", pref);
 			// // setPageKeys("PREFERENCE", "PREF_SUB", mv);
 			// }
-
-			LOG.debug("User roles and preferences set successfully: " + appUser.getIntranetId());
-
-			SystemParameters.logUserAccess("CreateCMR", appUser.getIntranetId());
-			AuthCodeRetriever authCode = new AuthCodeRetriever(loginUser.getUsername(), request.getSession());
-			Thread authThread = new Thread(authCode);
-			authThread.start();
 
 		} catch (Exception e) {
 			LOG.error("Error in retrieving Preference settings.", e);
