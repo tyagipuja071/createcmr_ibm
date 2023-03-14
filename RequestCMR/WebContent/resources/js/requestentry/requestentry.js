@@ -11,6 +11,7 @@ var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
 var NORDX = [ '846', '806', '702', '678' ];
 var comp_proof_INAUSG = false;
 var flag = false;
+var addrMatchResultForNZCreate;
 
 dojo.require("dojo.io.iframe");
 
@@ -2664,6 +2665,7 @@ function matchDnBForNZ() {
         load : function(data, ioargs) {
           cmr.hideProgress();
           console.log(data);
+          addrMatchResultForNZCreate = data;
           if (data && data.success) {
             if (data.dnbNmMatch && data.dnbAddrMatch) {
               console.log("DNB name match and DNB address match.");
@@ -2728,10 +2730,16 @@ function matchDnBForNZ() {
 
 // check all address types for create request for Newzealand
 function matchOtherAddressesforNZCreate (data) {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var usSicmen = FormManager.getActualValue('usSicmen');
   if (!data.otherAddrDNBMatch) {
     if (!data.otherAddrAPIMatch) {
-      cmr.showAlert(data.message + '\nPlease attach company proof');
-      FormManager.setValue('matchOverrideIndc', 'Y');
+	  FormManager.setValue('matchOverrideIndc', 'Y');
+	  if(usSicmen && usSicmen=='DNBO') {
+		cmr.showAlert(data.message + '\nPlease attach company proof', 'Warning', 'doOverrideDnBMatch()');
+	  } else {
+		cmr.showAlert(data.message + '\nPlease attach company proof');
+	  }
     } else {
       console.log("DNB address match fail. NZAPI address match success.")
       if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
@@ -2747,37 +2755,6 @@ function matchOtherAddressesforNZCreate (data) {
       showAddressVerificationModal();
     }
   }
-}
-
-function matchNZAPICustNmAddrForNZ() {
-  // Get Fields
-  var reqId = FormManager.getActualValue('reqId');
-  var businessNumber = FormManager.getActualValue('vat');
-  var custNm = '';
-  var dataAPIRes = {};
-  var contractCustNm = cmr.query('GET.CUSTNM_ADDR', {
-    REQ_ID : reqId,
-    ADDR_TYPE : 'ZS01'
-  });
-  if (contractCustNm != undefined) {
-    custNm = contractCustNm.ret1.toUpperCase() + " " + contractCustNm.ret2.toUpperCase();
-  }
-  custNm = custNm.trim();
-  console.log("Checking if the request matches D&B...");
-  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
-  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
-  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
-    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
-    return;
-  }
-
-  // match with NZ API (customer name & address)
-  if (reqId != '' && custNm != '') {
-    dataAPIRes = cmr.validateNZBNFromAPI(businessNumber, reqId, custNm);
-  } else {
-    dataAPIRes.success = false;
-  }
-  return dataAPIRes;
 }
 
 // CREATCMR-7884
@@ -3043,9 +3020,7 @@ function doNZBNAPIMatch() {
   FormManager.setValue('usSicmen', 'DNBO');
   
   hideModaldnb_Window();
-  cmr.showProgress('Checking request data with NZBN API...');
   
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
   console.log("Checking if the request matches NZBN API...");
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
@@ -3053,18 +3028,15 @@ function doNZBNAPIMatch() {
     cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
     return;
   }
-  
 
-  var dataAPI = matchNZAPICustNmAddrForNZ();
-  console.log(dataAPI);
-  cmr.hideProgress();
-  if (dataAPI && dataAPI.success) {
-    if (!dataAPI.custNmMatch || !dataAPI.addressMatch) {
-      console.log('Customer name or address match fail in NZ API: ' + dataAPI.message);
+  console.log(addrMatchResultForNZCreate);
+  if (addrMatchResultForNZCreate && addrMatchResultForNZCreate.success) {
+    if (!addrMatchResultForNZCreate.apiCustNmMatch || !addrMatchResultForNZCreate.apiAddressMatch) {
+      console.log('Customer name or address match fail in NZ API: ' + addrMatchResultForNZCreate.message);
       cmr.showAlert('Name or address match fail in NZBN API.\nPlease attach company proof', 'Warning', 'doOverrideDnBMatch()');
     } else {
-      console.log('Customer name and address matched in NZBN API');
-      matchOtherAddressesforNZCreate();
+      console.log('ZS01 Customer name and address matched in NZBN API');
+      matchOtherAddressesforNZCreate(addrMatchResultForNZCreate);
     }
   } else {
     // continue
