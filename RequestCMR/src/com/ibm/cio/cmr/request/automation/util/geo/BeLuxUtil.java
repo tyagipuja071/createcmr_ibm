@@ -65,7 +65,7 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_BP_LOCAL_LU = "LUBUS";
   public static final String SCENARIO_DATA_CENTER_LU = "LUDAT";
   public static final String SCENARIO_IBMEM_LU = "LUIBM";
-  private static final String QUERY_BG_SBO_BENELUX = "AUTO.COV.GET_SBO_FROM_BG_FR";
+  private static final String QUERY_BG_SBO_BENELUX = "AUTO.COV.GET_COV_FROM_BG_ES_UK";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO, CmrConstants.RDC_PAYGO_BILLING);
@@ -315,7 +315,7 @@ public class BeLuxUtil extends AutomationUtil {
     if (results != null && !results.isEmpty()) {
       for (Object[] result : results) {
         // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
-        sortl = (String) result[0];
+        sortl = (String) result[3];
       }
     }
     return sortl;
