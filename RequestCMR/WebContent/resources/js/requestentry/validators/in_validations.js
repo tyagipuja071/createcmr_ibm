@@ -641,11 +641,10 @@ function onCustSubGrpChange() {
       }
       
     }  
-    
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custSubGrpInDB = _pagemodel.custSubGrp;
     if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB) {
-      FormManager.setValue('abbrevNm', _pagemodel.abbrevNm);
+      autoSetAbbrevNmLocnLogic();
       FormManager.setValue('abbrevLocn', _pagemodel.abbrevLocn);
       FormManager.setValue('isbuCd', _pagemodel.isbuCd);
       return;
@@ -980,7 +979,7 @@ function autoSetAbbrevNmLocnLogic() {
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
         _abbrevNm = "SOFTLAYER USE ONLY";
       } else if (custSubGrp == "ESOSW" || custSubGrp == "XESO") {
-        _abbrevNm = "ESA/OEM/SWG_" + custNm1;
+        _abbrevNm = "ESA Use Only";
       } else if (custSubGrp == "AQSTN") {
         _abbrevNm ="Acquisition Use Only";
       } else {
