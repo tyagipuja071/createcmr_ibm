@@ -1535,6 +1535,19 @@ public class TransConnService extends BaseBatchService {
 
           }
         }
+
+        if ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry())) {
+          String strPaygoNo = getPaygoSapnoForNZ(entityManager, data.getCmrNo(), "200", data.getCmrIssuingCntry());
+          if (!StringUtils.isEmpty(strPaygoNo)) {
+            PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGOSAPNO"));
+            addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+            addrQuery.setParameter("SAP_NO", strPaygoNo);
+            addrQuery.setParameter("IERP_SITE_PRTY_ID", "S" + strPaygoNo.substring(1));
+            addrQuery.executeSql();
+            LOG.info("SET ANZ PG SAP_NO .");
+          }
+        }
+
       }
 
       StringBuilder comment = new StringBuilder();
@@ -1699,29 +1712,6 @@ public class TransConnService extends BaseBatchService {
       updateEntity(addr, entityManager);
     }
 
-    // if ("616".equals(data.getCmrIssuingCntry()) ||
-    // "796".equals(data.getCmrIssuingCntry())) {
-    // String strPaygoNo = getPaygoSapnoForNZ(entityManager, data.getCmrNo(),
-    // "200", data.getCmrIssuingCntry());
-    // if (!StringUtils.isEmpty(strPaygoNo)) {
-    // // If additional bill to handle accordingly
-    // addrQuery = new PreparedQuery(entityManager,
-    // ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
-    // addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
-    // addrQuery.setParameter("ADDR_TYPE", "PG01");
-    // addrQuery.setParameter("ADDR_SEQ", "200");
-    //
-    // List<Addr> addrListANZ = addrQuery.getResults(Addr.class);
-    // for (Addr addr : addrListANZ) {
-    // addr.setSapNo(strPaygoNo);
-    // addr.setIerpSitePrtyId("S" + strPaygoNo.substring(1));
-    // addr.setRdcCreateDt(record.getCreateDate());
-    // addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
-    // LOG.info("SET ANZ PG .");
-    // updateEntity(addr, entityManager);
-    // }
-    // }
-    // }
   }
 
   /**
