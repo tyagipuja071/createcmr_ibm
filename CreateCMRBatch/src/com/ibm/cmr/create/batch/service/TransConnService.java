@@ -1699,26 +1699,29 @@ public class TransConnService extends BaseBatchService {
       updateEntity(addr, entityManager);
     }
 
-    if ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry())) {
-      String strPaygoNo = getPaygoSapnoForNZ(entityManager, data.getCmrNo(), "200", data.getCmrIssuingCntry());
-      if (!StringUtils.isEmpty(strPaygoNo)) {
-        // If additional bill to handle accordingly
-        addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
-        addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
-        addrQuery.setParameter("ADDR_TYPE", "PG01");
-        addrQuery.setParameter("ADDR_SEQ", "200");
-
-        List<Addr> addrListANZ = addrQuery.getResults(Addr.class);
-        for (Addr addr : addrListANZ) {
-          addr.setSapNo(strPaygoNo);
-          addr.setIerpSitePrtyId("S" + strPaygoNo.substring(1));
-          addr.setRdcCreateDt(record.getCreateDate());
-          addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
-          LOG.info("SET ANZ PG .");
-          updateEntity(addr, entityManager);
-        }
-      }
-    }
+    // if ("616".equals(data.getCmrIssuingCntry()) ||
+    // "796".equals(data.getCmrIssuingCntry())) {
+    // String strPaygoNo = getPaygoSapnoForNZ(entityManager, data.getCmrNo(),
+    // "200", data.getCmrIssuingCntry());
+    // if (!StringUtils.isEmpty(strPaygoNo)) {
+    // // If additional bill to handle accordingly
+    // addrQuery = new PreparedQuery(entityManager,
+    // ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
+    // addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+    // addrQuery.setParameter("ADDR_TYPE", "PG01");
+    // addrQuery.setParameter("ADDR_SEQ", "200");
+    //
+    // List<Addr> addrListANZ = addrQuery.getResults(Addr.class);
+    // for (Addr addr : addrListANZ) {
+    // addr.setSapNo(strPaygoNo);
+    // addr.setIerpSitePrtyId("S" + strPaygoNo.substring(1));
+    // addr.setRdcCreateDt(record.getCreateDate());
+    // addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
+    // LOG.info("SET ANZ PG .");
+    // updateEntity(addr, entityManager);
+    // }
+    // }
+    // }
   }
 
   /**
@@ -1897,12 +1900,15 @@ public class TransConnService extends BaseBatchService {
                   if (StringUtils.isBlank(addr.getIerpSitePrtyId())) {
                     addr.setIerpSitePrtyId(response.getRecords().get(i).getIerpSitePartyId());
                   }
-                  if (("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))
-                      && ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry()))) {
-                    if ("200".equals(response.getRecords().get(i).getSeqNo())) {
-                      addr.getId().setAddrSeq(response.getRecords().get(i).getSeqNo());
-                    }
-                  }
+                  // if (("PayGo-Test".equals(admin.getSourceSystId()) ||
+                  // "BSS".equals(admin.getSourceSystId()))
+                  // && ("616".equals(data.getCmrIssuingCntry()) ||
+                  // "796".equals(data.getCmrIssuingCntry()))) {
+                  // if ("200".equals(response.getRecords().get(i).getSeqNo()))
+                  // {
+                  // addr.getId().setAddrSeq(response.getRecords().get(i).getSeqNo());
+                  // }
+                  // }
                 }
               }
               if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
