@@ -65,16 +65,15 @@ public class DPLCheckElement extends ValidatingElement {
     StringBuilder details = new StringBuilder();
 
     log.debug("Performing DPL check on Request " + reqId);
-    if (engineData.hasPositiveCheckStatus("SKIP_DPL_CHECK")) {
-      validation.setSuccess(true);
-      validation.setMessage("Skipped");
-      output.setOnError(false);
-      output.setDetails("Skipping DPL check as requester is from CMDE team.");
-      output.setResults(validation.getMessage());
-      output.setProcessOutput(validation);
-      return output;
-    }
 
+    /*
+     * if (engineData.hasPositiveCheckStatus("SKIP_DPL_CHECK")) {
+     * validation.setSuccess(true); validation.setMessage("Skipped");
+     * output.setOnError(false);
+     * output.setDetails("Skipping DPL check as requester is from CMDE team.");
+     * output.setResults(validation.getMessage());
+     * output.setProcessOutput(validation); return output; }
+     */
     try {
       ChangeLogListener.setManager(entityManager);
       GEOHandler geoHandler = null;
