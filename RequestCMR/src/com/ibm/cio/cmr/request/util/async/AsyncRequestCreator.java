@@ -29,11 +29,13 @@ public class AsyncRequestCreator implements Runnable {
   private AppUser user;
   private String cmrNo;
   private String cmrIssuingCntry;
+  private String subRegion;
 
-  public AsyncRequestCreator(AppUser user, String cmrIssuingCntry, String cmrNo) {
+  public AsyncRequestCreator(AppUser user, String cmrIssuingCntry, String subRegion, String cmrNo) {
     this.user = user;
     this.cmrIssuingCntry = cmrIssuingCntry;
     this.cmrNo = cmrNo;
+    this.subRegion = subRegion;
   }
 
   @Override
@@ -46,6 +48,7 @@ public class AsyncRequestCreator implements Runnable {
     cmr.setCmrNo(this.cmrNo);
     cmr.setReqType(CmrConstants.REQ_TYPE_UPDATE);
     cmr.setIssuingCntry(this.cmrIssuingCntry);
+    cmr.setSubRegion(this.subRegion);
 
     ParamContainer params = new ParamContainer();
     params.addParam("model", cmr);
