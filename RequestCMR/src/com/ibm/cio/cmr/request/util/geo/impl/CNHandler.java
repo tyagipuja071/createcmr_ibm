@@ -26,6 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.GBGMatchingElement;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -324,7 +325,8 @@ public class CNHandler extends GEOHandler {
         soldToAddr = query.getSingleResult(Addr.class);
       }
       if (soldToAddr != null) {
-        getGBGId(entityManager, admin, data, soldToAddr);
+        getGBGIdViaLH(entityManager, admin, data, soldToAddr);
+        // getGBGId(entityManager, admin, data, soldToAddr);
       }
 
     }
@@ -548,6 +550,17 @@ public class CNHandler extends GEOHandler {
     }
   }
 
+  /**
+   * 
+   * @param entityManager
+   * @param admin
+   * @param data
+   * @param currentAddress
+   * @throws Exception
+   * @deprecated - Use the new method
+   *             {@link #getGBGIdViaLH(EntityManager, Admin, Data, Addr)}
+   */
+  @Deprecated
   private void getGBGId(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
 
     String companyName = null;
@@ -589,6 +602,93 @@ public class CNHandler extends GEOHandler {
     // getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null,
     // false);
     // }
+  }
+
+  /**
+   * Incrementally checks current DUNS and parent DUNS for GBG assignment.
+   * 
+   * @param entityManager
+   * @param admin
+   * @param data
+   * @param currentAddress
+   * @throws Exception
+   */
+  private void getGBGIdViaLH(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
+    String socialCreditCode = data.getBusnType();
+    String dunsNo = data.getDunsNo();
+    if (!StringUtils.isBlank(socialCreditCode)) {
+      LOG.debug("Find DUNS using Social Credit Code " + socialCreditCode + " for " + currentAddress.getLandCntry());
+      List<DnBMatchingResponse> matches = DnBUtil.findByOrgId(socialCreditCode, currentAddress.getLandCntry());
+      if (!matches.isEmpty()) {
+        dunsNo = matches.get(0).getDunsNo();
+      }
+    }
+    if (!StringUtils.isBlank(dunsNo)) {
+      boolean matched = false;
+      while (!matched) {
+
+        LOG.debug("Checking GBG assignment for DUNS " + dunsNo);
+        // iterate here base duns, then going up one parent at a time to get
+        // GBGs assigned
+        String sql = ExternalizedQuery.getSql("CN.FIND_GBG");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("DUNS_NO", dunsNo);
+        query.setForReadOnly(true);
+        List<Object[]> results = query.getResults();
+        if (results != null && !results.isEmpty()) {
+          // found here, stop
+          Object[] rec = results.get(0);
+
+          String bgId = (String) rec[0];
+          String bgDesc = (String) rec[1];
+          String gbgId = (String) rec[2];
+          String gbgDesc = (String) rec[3];
+          String ldeRule = (String) rec[4];
+
+          data.setGbgId(gbgId);
+          data.setGbgDesc(gbgDesc);
+          data.setBgId(bgId);
+          data.setBgDesc(bgDesc);
+          data.setBgRuleId(ldeRule);
+
+          String currBgId = bgId;
+          setBGValues(data, currentAddress);
+          if (currBgId != null && currBgId.equals(data.getBgId())) {
+            // bgId was not replaced, assign the LDE rules to fields
+            LOG.debug("Assigning field values based on LDE rules..");
+            GBGMatchingElement gbgElem = new GBGMatchingElement("", "", false, false);
+            RequestData requestData = RequestData.wrap(admin, data, null, currentAddress);
+            gbgElem.importLDE(entityManager, requestData, ldeRule);
+          }
+          entityManager.merge(data);
+          entityManager.flush();
+          matched = true;
+        } else {
+          DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+          if (dnbData != null) {
+            dunsNo = dnbData.getParDunsNo();
+            if (StringUtils.isBlank(dunsNo)) {
+              // break here to stop iteration
+              LOG.debug("No Parent for DUNS " + dnbData.getDunsNo());
+              break;
+            } else {
+              LOG.debug("Switching to Parent DUNS " + dunsNo);
+            }
+          }
+        }
+      }
+
+      if (matched) {
+        LOG.debug("Matched =  GBG ID: " + data.getGbgId() + " BG ID: " + data.getBgId());
+      } else {
+        LOG.debug("No GBG ID found.");
+      }
+
+    } else {
+      LOG.debug("No DUNS No. found for GBG matching.");
+    }
+
   }
 
   /**
