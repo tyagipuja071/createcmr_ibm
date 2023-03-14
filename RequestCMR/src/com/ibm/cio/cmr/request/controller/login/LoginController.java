@@ -120,6 +120,16 @@ public class LoginController extends BaseController {
 	 */
 	@RequestMapping(value = "/home", method = RequestMethod.GET)
 	public ModelAndView showHomePage(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
+		AppUser appUser = new AppUser();
+
+		AppUser user = appUser.getUser(request);
+
+		if (user != null) {
+			LOG.debug("Inside /home redirect" + user.getIntranetId());
+		} else {
+			LOG.debug("user is null inside /home");
+		}
+
 		ModelAndView mv = new ModelAndView("landingPage", "loginUser", new LogInUserModel());
 		setPageKeys("HOME", "OVERVIEW", mv);
 		return mv;
@@ -571,8 +581,8 @@ public class LoginController extends BaseController {
 		AppUser appUser = AppUser.getUser(request);
 		LogInUserModel loginUser = (LogInUserModel) request.getSession(false).getAttribute("loggedInUserModel");
 
-		LOG.debug("AppUser received at redirect: " + appUser.getIntranetId());
-		LOG.debug("LoginUser received at redirect: " + loginUser.getUsername());
+		LOG.debug("AppUser received at /oidcclient/redirect/createcmr: " + appUser.getIntranetId());
+		LOG.debug("LoginUser received at /oidcclient/redirect/createcmr: " + loginUser.getUsername());
 
 		if (appUser.isPreferencesSet()) {
 			if (loginUser.getR() > 0) {
@@ -600,6 +610,13 @@ public class LoginController extends BaseController {
 			mv = new ModelAndView("redirect:/preferences", "pref", pref);
 			// setPageKeys("PREFERENCE", "PREF_SUB", mv);
 		}
+
+		LOG.debug("User roles and preferences set successfully: " + appUser.getIntranetId());
+
+		SystemParameters.logUserAccess("CreateCMR", appUser.getIntranetId());
+		AuthCodeRetriever authCode = new AuthCodeRetriever(loginUser.getUsername(), request.getSession());
+		Thread authThread = new Thread(authCode);
+		authThread.start();
 
 		return mv;
 	}
