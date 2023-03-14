@@ -61,7 +61,6 @@ function addISUHandler() {
   console.log(">>>> addISUHandler");
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldClientTier = FormManager.getActualValue('clientTier');
-  getExitingValueOfCTCAndIsuCD();
   addRemoveValidator();
   lockUnlockFieldForMALTA();
   if (_ISUHandler == null) {
@@ -1315,7 +1314,7 @@ function addRemoveClientTierValidator() {
 function addRemoveEnterperiseValidator() {
   var reqType = FormManager.getActualValue('reqType');
   FormManager.resetValidations('enterprise');
-  if (reqType == 'C' || (reqType == 'U' && _oldEnt != null && _oldEnt != '')) {
+  if (reqType == 'C') {
     FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
   }
 
