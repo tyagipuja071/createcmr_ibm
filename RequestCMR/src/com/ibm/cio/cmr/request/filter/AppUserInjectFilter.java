@@ -75,6 +75,7 @@ public class AppUserInjectFilter implements Filter {
 
 				LOG.debug(url);
 				LOG.debug(user);
+				LOG.debug("session id: " + session.getId());
 
 				if (user == null) {
 					LOG.warn("No user on the session yet...");
