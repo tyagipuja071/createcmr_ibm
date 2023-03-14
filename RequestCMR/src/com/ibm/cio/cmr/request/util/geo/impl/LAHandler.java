@@ -1631,6 +1631,15 @@ public class LAHandler extends GEOHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getInacCd(), newData.getInacCd())) {
+      update = new UpdatedDataModel();
+      String cntry = null;
+      update.setDataField(PageManager.getLabel(cntry, "INACCode", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getInacCd(), "INACCode", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getInacCd(), "INACCode", cmrCountry));
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getIcmsInd(), newData.getIcmsInd())) {
       update = new UpdatedDataModel();
       String cntry = null;
