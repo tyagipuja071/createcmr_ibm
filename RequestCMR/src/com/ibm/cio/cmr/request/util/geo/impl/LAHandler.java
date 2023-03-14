@@ -257,7 +257,7 @@ public class LAHandler extends GEOHandler {
         data.setTaxCd1(taxCd1);
       }
 
-      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL);
+      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);
       data.setBgId(mainRecord.getCmrBuyingGroup());
       data.setGbgId(mainRecord.getCmrGlobalBuyingGroup());
       data.setBgRuleId(mainRecord.getCmrLde());
@@ -304,7 +304,7 @@ public class LAHandler extends GEOHandler {
 
       }
     } else {
-      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL);
+      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);                                                                                 // flow
       data.setBgId(mainRecord.getCmrBuyingGroup());
       data.setGbgId(mainRecord.getCmrGlobalBuyingGroup());
       data.setBgRuleId(mainRecord.getCmrLde());
@@ -1160,7 +1160,7 @@ public class LAHandler extends GEOHandler {
   }
 
   // STORY 1180239 1164429
-  public void doSolveMrcIsuClientTierLogicOnImport(Data data, String issuingCountry, String sORTL) {
+  public void doSolveMrcIsuClientTierLogicOnImport(Data data, String issuingCountry, String sORTL, FindCMRRecordModel mainRecord) {
     LOG.debug("doSolveMrcIsuClientTierLogic : start processing. . .");
     LOG.debug("issuing country :" + issuingCountry);
     LOG.debug("sortL/branch office code :" + sORTL);
@@ -1181,8 +1181,14 @@ public class LAHandler extends GEOHandler {
         }
         LOG.debug(retrievedClientTierCd);
       } else {
-        LOG.debug("No ISU_CODE retrieved or there are too many codes. . .");
-        data.setIsuCd("");
+        if (!isBRIssuingCountry(issuingCountry) && StringUtils.isNotBlank(mainRecord.getIsuCode())) {
+          // if there is value retrieve from findcmr set value
+          // creates model/updates
+          data.setIsuCd(mainRecord.getIsuCode());
+        } else {
+          LOG.debug("No ISU_CODE retrieved or there are too many codes. . .");
+          data.setIsuCd("");
+        }
       }
     } else {
       LOG.debug("No MRC_CODE retrieved or there are too many retrived codes. . . Setting default values");
@@ -1212,8 +1218,15 @@ public class LAHandler extends GEOHandler {
           }
           LOG.debug(retrievedClientTierCd);
         } else {
-          LOG.debug("No ISU_CODE retrieved or there are too many codes. . .");
-          data.setIsuCd("");
+          if (!isBRIssuingCountry(issuingCountry) && StringUtils.isNotBlank(mainRecord.getIsuCode())) {
+            // if there is value retrieve from findcmr set value
+            // creates model/updates
+            data.setIsuCd(mainRecord.getIsuCode());
+          } else {
+            LOG.debug("No ISU_CODE retrieved or there are too many codes. . .");
+            data.setIsuCd("");
+          }
+
         }
       }
     }
