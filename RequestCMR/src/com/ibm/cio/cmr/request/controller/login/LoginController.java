@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.controller.login;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -120,12 +121,11 @@ public class LoginController extends BaseController {
 	 */
 	@RequestMapping(value = "/home", method = RequestMethod.GET)
 	public ModelAndView showHomePage(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
-		AppUser appUser = new AppUser();
-
-		AppUser user = appUser.getUser(request);
+		AppUser user = AppUser.getUser(request);
 
 		if (user != null) {
 			LOG.debug("Inside /home redirect" + user.getIntranetId());
+			LOG.debug("session id: " + request.getSession().getId());
 		} else {
 			LOG.debug("user is null inside /home");
 		}
@@ -610,15 +610,15 @@ public class LoginController extends BaseController {
 			mv = new ModelAndView("redirect:/preferences", "pref", pref);
 			// setPageKeys("PREFERENCE", "PREF_SUB", mv);
 		}
-
-		LOG.debug("User roles and preferences set successfully: " + appUser.getIntranetId());
-
-		SystemParameters.logUserAccess("CreateCMR", appUser.getIntranetId());
-		AuthCodeRetriever authCode = new AuthCodeRetriever(loginUser.getUsername(), request.getSession());
-		Thread authThread = new Thread(authCode);
-		authThread.start();
-
-		return mv;
+		try {
+			response.sendRedirect("/CreateCMR/home");
+			return null;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// mv.addObject(request.getSession(false));
+		return null;
 	}
 
 }
