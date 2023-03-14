@@ -124,7 +124,11 @@ public class AppUserInjectFilter implements Filter {
 							session.setAttribute("accessToken", tokens.getAccess_token());
 							session.setAttribute("tokenExpiringTime", tokens.getExpires_in());
 
-							filterChain.doFilter(req, resp);
+							resp.sendRedirect("/CreateCMR/home");
+							// //
+							// req.getRequestDispatcher("/home").forward(request,
+							// // response);
+							// filterChain.doFilter(req, resp);
 							return;
 						} else {
 							LOG.trace("Invalid Token! Unable to proceed with the request.");
