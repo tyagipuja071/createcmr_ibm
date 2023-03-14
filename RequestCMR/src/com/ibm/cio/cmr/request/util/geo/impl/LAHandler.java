@@ -4677,7 +4677,7 @@ public class LAHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
               }
 
-              if (isInstallAtFilled && "@@@@@@@@".equals(addrNoSeq)) {
+              if (isInstallAtFilled && addrNoSeq.contains("@")) {
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
               }
 
@@ -4745,7 +4745,7 @@ public class LAHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
               }
 
-              if (isShipToFilled && "@@@@@@@@".equals(addrNoSeq)) {
+              if (isShipToFilled && addrNoSeq.contains("@")) {
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
               }
 
@@ -4812,7 +4812,7 @@ public class LAHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
               }
 
-              if (isBillToFilled && "@@@@@@@@".equals(addrNoSeq)) {
+              if (isBillToFilled && addrNoSeq.contains("@")) {
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
               }
 
@@ -4879,7 +4879,7 @@ public class LAHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
               }
 
-              if (isSoldToFilled && "@@@@@@@@".equals(addrNoSeq)) {
+              if (isSoldToFilled && addrNoSeq.contains("@")) {
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
               }
 
