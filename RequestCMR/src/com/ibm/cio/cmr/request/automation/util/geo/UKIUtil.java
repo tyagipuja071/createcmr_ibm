@@ -320,6 +320,13 @@ public class UKIUtil extends AutomationUtil {
       return true;
     }
     List<Addr> addresses = null;
+    int zi01count = 0;
+    int zp01count = 0;
+    int zd01count = 0;
+    List<Integer> addrCount = getAddressCount(entityManager, SystemLocation.UNITED_KINGDOM, data.getCmrIssuingCntry(), data.getCmrNo());
+    zi01count = addrCount.get(0);
+    zp01count = addrCount.get(1);
+    zd01count = addrCount.get(2);
     LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
@@ -345,7 +352,16 @@ public class UKIUtil extends AutomationUtil {
           if ("N".equals(addr.getImportInd())) {
             // new address
             // CREATCMR-6586 checking duplicate for all addresses
-            if (addressExists(entityManager, addr, requestData)) {
+            if (CmrConstants.RDC_BILL_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Addition of new Mailing and EPL (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+            } else if (((zi01count == 0 && CmrConstants.RDC_INSTALL_AT.equals(addrType))
+                || (zd01count == 0 && CmrConstants.RDC_SHIP_TO.equals(addrType))) && null == changes.getAddressChange(addrType, "Customer Name")
+                && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Addition of new " + (addrType.equalsIgnoreCase("ZI01") ? "Installing " : "Shipping ") + "("
+                  + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+            } else if (addressExists(entityManager, addr, requestData)) {
               LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
               resultCodes.add("R");
@@ -646,6 +662,8 @@ public class UKIUtil extends AutomationUtil {
         }
         details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
         details.append("SBO : " + fields.getSbo()).append("\n");
+        details.append("ISU : " + fields.getIsu()).append("\n");
+        details.append("Client Tier : " + fields.getCtc()).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), fields.getSalesRep());
         details.append("ISU : " + fields.getIsu()).append("\n");
@@ -982,4 +1000,24 @@ public class UKIUtil extends AutomationUtil {
     LOG.debug("client tier" + data.getClientTier());
   }
 
+  public List<Integer> getAddressCount(EntityManager entityManager, String cmrIssuingCntry, String realCntry, String cmrNo) {
+    int zi01count = 0;
+    int zp01count = 0;
+    int zd01count = 0;
+    String sql = ExternalizedQuery.getSql("QUERY.GET.COUNT.ADDRTYP");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REALCTY", realCntry);
+    query.setParameter("RCYAA", cmrIssuingCntry);
+    query.setParameter("RCUXA", cmrNo);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      zi01count = Integer.parseInt(sResult[0].toString());
+      zp01count = Integer.parseInt(sResult[1].toString());
+      zd01count = Integer.parseInt(sResult[2].toString());
+    }
+
+    return Arrays.asList(zi01count, zp01count, zd01count);
+  }
 }
