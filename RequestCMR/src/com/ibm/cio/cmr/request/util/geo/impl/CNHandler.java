@@ -623,69 +623,65 @@ public class CNHandler extends GEOHandler {
         dunsNo = matches.get(0).getDunsNo();
       }
     }
-    if (!StringUtils.isBlank(dunsNo)) {
-      boolean matched = false;
-      while (!matched) {
-
-        LOG.debug("Checking GBG assignment for DUNS " + dunsNo);
-        // iterate here base duns, then going up one parent at a time to get
-        // GBGs assigned
-        String sql = ExternalizedQuery.getSql("CN.FIND_GBG");
-        PreparedQuery query = new PreparedQuery(entityManager, sql);
-        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-        query.setParameter("DUNS_NO", dunsNo);
-        query.setForReadOnly(true);
-        List<Object[]> results = query.getResults();
-        if (results != null && !results.isEmpty()) {
-          // found here, stop
-          Object[] rec = results.get(0);
-
-          String bgId = (String) rec[0];
-          String bgDesc = (String) rec[1];
-          String gbgId = (String) rec[2];
-          String gbgDesc = (String) rec[3];
-          String ldeRule = (String) rec[4];
-
-          data.setGbgId(gbgId);
-          data.setGbgDesc(gbgDesc);
-          data.setBgId(bgId);
-          data.setBgDesc(bgDesc);
-          data.setBgRuleId(ldeRule);
-
-          String currBgId = bgId;
-          setBGValues(data, currentAddress);
-          if (currBgId != null && currBgId.equals(data.getBgId())) {
-            // bgId was not replaced, assign the LDE rules to fields
-            LOG.debug("Assigning field values based on LDE rules..");
-            GBGMatchingElement gbgElem = new GBGMatchingElement("", "", false, false);
-            RequestData requestData = RequestData.wrap(admin, data, null, currentAddress);
-            gbgElem.importLDE(entityManager, requestData, ldeRule);
+    boolean matchedFlag = false;
+    while (!matchedFlag) {
+      if (!StringUtils.isBlank(dunsNo)) {
+        DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+        if (dnbData != null) {
+          if (dunsNo != null && dunsNo.equals(dnbData.getDuDunsNo())) {
+            LOG.debug("No Parent for DUNS " + dnbData.getDunsNo());
+            break;
+          } else {
+            dunsNo = dnbData.getDuDunsNo();
           }
-          entityManager.merge(data);
-          entityManager.flush();
-          matched = true;
         } else {
-          DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
-          if (dnbData != null) {
-            if (dunsNo != null && dunsNo.equals(dnbData.getParDunsNo())) {
-              LOG.debug("No Parent for DUNS " + dnbData.getDunsNo());
-              break;
-            } else {
-              dunsNo = dnbData.getParDunsNo();
-              if (StringUtils.isBlank(dunsNo)) {
-                // break here to stop iteration
-                LOG.debug("No Parent for DUNS " + dnbData.getDunsNo());
-                break;
-              } else {
-                LOG.debug("Switching to Parent DUNS " + dunsNo);
-              }
-            }
-
-          }
+          break;
         }
+      } else {
+        break;
       }
+    }
+    if (!StringUtils.isBlank(dunsNo)) {
 
-      if (matched) {
+      LOG.debug("Checking GBG assignment for DUNS " + dunsNo);
+      // iterate here base duns, then going up one parent at a time to get
+      // GBGs assigned
+      String sql = ExternalizedQuery.getSql("CN.FIND_GBG");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("DUNS_NO", dunsNo);
+      query.setForReadOnly(true);
+      List<Object[]> results = query.getResults();
+      if (results != null && !results.isEmpty()) {
+        // found here, stop
+        Object[] rec = results.get(0);
+
+        String bgId = (String) rec[0];
+        String bgDesc = (String) rec[1];
+        String gbgId = (String) rec[2];
+        String gbgDesc = (String) rec[3];
+        String ldeRule = (String) rec[4];
+
+        data.setGbgId(gbgId);
+        data.setGbgDesc(gbgDesc);
+        data.setBgId(bgId);
+        data.setBgDesc(bgDesc);
+        data.setBgRuleId(ldeRule);
+
+        String currBgId = bgId;
+        setBGValues(data, currentAddress);
+        if (currBgId != null && currBgId.equals(data.getBgId())) {
+          // bgId was not replaced, assign the LDE rules to fields
+          LOG.debug("Assigning field values based on LDE rules..");
+          GBGMatchingElement gbgElem = new GBGMatchingElement("", "", false, false);
+          RequestData requestData = RequestData.wrap(admin, data, null, currentAddress);
+          gbgElem.importLDE(entityManager, requestData, ldeRule);
+        }
+        entityManager.merge(data);
+        entityManager.flush();
+        matchedFlag = true;
+      }
+      if (matchedFlag) {
         LOG.debug("Matched =  GBG ID: " + data.getGbgId() + " BG ID: " + data.getBgId());
       } else {
         LOG.debug("No GBG ID found.");
