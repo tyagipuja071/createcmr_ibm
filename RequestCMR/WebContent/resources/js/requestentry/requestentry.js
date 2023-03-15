@@ -200,20 +200,21 @@ function processRequestAction() {
         }
       } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
-       // CREATCMR-7884: NZ coverage - after company proof provided, also need to retrieve GLC
-      } else if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C') {
+        // CREATCMR-7884: NZ coverage - after company proof provided, also need
+        // to retrieve GLC
+      } else if (cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C') {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
-      	if(matchOverrideIndc=='Y') {
-      	  if(custSubGrp=='NRMLC' || custSubGrp=='AQSTN') {
+        if (matchOverrideIndc == 'Y') {
+          if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
             cmr.showProgress('Checking request data..');
             checkRetrievedForNZ();
           } else {
             showAddressVerificationModal();
           }
-      	} else {
-      	  showAddressVerificationModal();
-      	}
+        } else {
+          showAddressVerificationModal();
+        }
       } else if (cmrCntry == '897' || cmrCntry == '649') {
         // CREATCMR-6074
         // addUpdateChecksExecution(frmCMR);
@@ -1295,15 +1296,15 @@ function connectToCmrServices() {
         FormManager.setValue('geoLocationCd', data.glcCode);
         FormManager.setValue('geoLocDesc', data.glcDesc);
         dojo.byId('geoLocDescCont').innerHTML = data.glcDesc != null ? data.glcDesc : '(no description available)';
-        
-        //CREATCMR-7884:reset cluster after retrieve action for NZ
+
+        // CREATCMR-7884:reset cluster after retrieve action for NZ
         var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
-  		  var reqType = FormManager.getActualValue('reqType');
-  		  var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if(cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp=='NRMLC' || custSubGrp=='AQSTN')) {
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
           setClusterIDAfterRetrieveAction(data.glcCode);
         }
-        if (cmrCntry == SysLoc.CHINA && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN' || custSubGrp == 'ECOSY')) {
+        if (cmrCntry == SysLoc.CHINA && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN' || custSubGrp == 'ECOSY' || custSubGrp == 'EMBSA')) {
           setClusterIDAfterRetrieveAction4CN(custSubGrp, data.glcCode);
         }
       }
@@ -1351,7 +1352,6 @@ function connectToCmrServices() {
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (cmrCntry == '744') {
     setClusterGlcCovIdMapNrmlc();
-    lockFieldsWithDefaultValuesByScenarioSubType();
   }
 }
 
@@ -2620,7 +2620,7 @@ function setClusterIDAfterRetrieveAction(glcCode) {
   glcClusterMap['NZL0020'] = '10662';
   glcClusterMap['NZL0010'] = '10663';
   glcClusterMap['NZL9999'] = '01147';
-  
+
   FormManager.setValue('apCustClusterId', glcClusterMap[glcCode]);
   FormManager.setValue('clientTier', 'Q');
   FormManager.setValue('isuCd', '34');
@@ -2630,45 +2630,83 @@ function setClusterIDAfterRetrieveAction(glcCode) {
 function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
   console.log('>>> setClusterIDAfterRetrieveAction4CN >>>');
   var indc = 'C';
-  if (custSubGrp == 'ECOSY') {
-    indc = 'E';
-  }
-  var result = cmr.query('GLC.CN.SEARCHTERM', {
-    GLC_CD : '%' + glcCode + '%',
-    DEFAULT_INDC : indc
-  });
-  if (result != null && result.ret1 != undefined && result.ret1 != '') {
-    var searchTerm = result.ret1;
-    var clientTier = result.ret2;
-    var isuCd = result.ret3;
-    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm ]);
-    FormManager.setValue('searchTerm', searchTerm);
-    FormManager.readOnly('searchTerm');
-    FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
-    FormManager.setValue('clientTier', clientTier);
-    FormManager.readOnly('clientTier');
-    FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
-    FormManager.setValue('isuCd', isuCd);
-    FormManager.readOnly('isuCd');
-    if (clientTier == '00000' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
-      FormManager.setValue('clientTier', 'Q');
-      FormManager.setValue('isuCd', '34');
+  if(custSubGrp == 'EMBSA'){
+    var _GBGId = FormManager.getActualValue('gbgId');
+    if (FormManager.getActualValue('gbgId') != undefined && FormManager.getActualValue('gbgId') != '') {
+    var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
+      ID : _GBGId
+    });
+      if (ret && ret.ret1 && ret.ret1 != 0) {
+        indc = '';
+      }
     }
-  } else if (custSubGrp == 'ECOSY' && glcCode != undefined && glcCode != '') {
-    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
-    FormManager.setValue('searchTerm', '08036');
-    FormManager.readOnly('searchTerm');
-    FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
-    FormManager.setValue('clientTier', 'Y');
-    FormManager.readOnly('clientTier');
-    FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
-    FormManager.setValue('isuCd', '36');
-    FormManager.readOnly('isuCd');
+    if(indc == 'C'){
+      var result1 = cmr.query('GLC.CN.SEARCHTERM', {
+        GLC_CD : '%' + glcCode + '%',
+        DEFAULT_INDC : indc
+      });
+      indc = 'E';
+      var result2 = cmr.query('GLC.CN.SEARCHTERM', {
+        GLC_CD : '%' + glcCode + '%',
+        DEFAULT_INDC : indc
+      });
+      if (result1 != null && result1.ret1 != undefined && result1.ret1 != '' || result2 != null && result2.ret1 != undefined && result2.ret1 != '') {
+        var searchTerm1 = result1 != null ? result1.ret1 : '';
+        var searchTerm2 = result2 != null ? result2.ret1 : '';
+        var clientTier = result1.ret2;
+        var isuCd = result1.ret3;
+        FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm1,searchTerm2 ]);
+        FormManager.setValue('searchTerm', searchTerm1);
+        //FormManager.readOnly('searchTerm');
+        FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
+        FormManager.setValue('clientTier', clientTier);
+        FormManager.readOnly('clientTier');
+        FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
+        FormManager.setValue('isuCd', isuCd);
+        FormManager.readOnly('isuCd');
+      }
+    }
+  }else{
+    if (custSubGrp == 'ECOSY') {
+      indc = 'E';
+    }
+    var result = cmr.query('GLC.CN.SEARCHTERM', {
+      GLC_CD : '%' + glcCode + '%',
+      DEFAULT_INDC : indc
+    });
+    if (result != null && result.ret1 != undefined && result.ret1 != '') {
+      var searchTerm = result.ret1;
+      var clientTier = result.ret2;
+      var isuCd = result.ret3;
+      FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm ]);
+      FormManager.setValue('searchTerm', searchTerm);
+      FormManager.readOnly('searchTerm');
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
+      FormManager.setValue('clientTier', clientTier);
+      FormManager.readOnly('clientTier');
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
+      FormManager.setValue('isuCd', isuCd);
+      FormManager.readOnly('isuCd');
+      if (clientTier == '00000' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
+        FormManager.setValue('clientTier', 'Q');
+        FormManager.setValue('isuCd', '34');
+      }
+    } else if (custSubGrp == 'ECOSY' && glcCode != undefined && glcCode != '') {
+      FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
+      FormManager.setValue('searchTerm', '08036');
+      FormManager.readOnly('searchTerm');
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
+      FormManager.setValue('clientTier', 'Y');
+      FormManager.readOnly('clientTier');
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
+      FormManager.setValue('isuCd', '36');
+      FormManager.readOnly('isuCd');
+    }
   }
 }
 
 // CREATCMR-7884
-function checkRetrievedForNZ(){
+function checkRetrievedForNZ() {
   console.log('>>> checkRetrievedForNZ >>>');
   var glcClusterMap = {};
   glcClusterMap['NZL0005'] = '10662';
@@ -2679,43 +2717,47 @@ function checkRetrievedForNZ(){
   var oldGlcCode = FormManager.getActualValue('geoLocationCd');
   var oldClusterId = FormManager.getActualValue('apCustClusterId');
   console.log("hasRetrievedValue is ", hasRetrievedValue, "old GLC code is ", oldGlcCode);
-  
-  if(!hasRetrievedValue) {
-  	cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
+
+  if (!hasRetrievedValue) {
+    cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
   } else {
-  	console.log("Checking the GLC match... retrieve value again...")
-  	var data = CmrServices.getAll('reqentry');
-  	cmr.hideProgress();
-  	if (data) {
+    console.log("Checking the GLC match... retrieve value again...")
+    var data = CmrServices.getAll('reqentry');
+    cmr.hideProgress();
+    if (data) {
       console.log(data);
       if (data.error && data.error == 'Y') {
         cmr.showAlert('An error was encountered when retrieving the values.\nPlease contact your system administrator.', 'Create CMR');
       } else {
         if (data.glcError) {
-          //errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
+          // errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
         } else {
-          if(glcClusterMap[data.glcCode] != oldClusterId) {
+          if (glcClusterMap[data.glcCode] != oldClusterId) {
             console.log("The cluster id are different, then overwrite the GLC code and cluster id.")
             FormManager.setValue('geoLocationCd', data.glcCode);
-    	    FormManager.setValue('geoLocDesc', data.glcDesc);
-    	    FormManager.setValue('apCustClusterId', glcClusterMap[data.glcCode]);
-  		    FormManager.setValue('clientTier', 'Q');
-  		    FormManager.setValue('isuCd', '34');
-  		    //cmr.showAlert('The GLC and Cluster has been overwritten to ' + data.glcCode + '-' + glcClusterMap[data.glcCode] + ', please continue the process.\nPlease contact your system administrator.', 'Create CMR');
-  		    cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to ' + data.glcCode + '-' + glcClusterMap[data.glcCode] + '. Do you want to proceed with this request?', 'Warning', null, {
-	          OK : 'Yes',
-	          CANCEL : 'No'
-	        });
-		  } else {
-	        if (data.glcCode != oldGlcCode) {
-	          console.log("The GLC code are different, the cluster id are same, then overwrite the GLC code only.")
-	          FormManager.setValue('geoLocationCd', data.glcCode);
-	    	  FormManager.setValue('geoLocDesc', data.glcDesc);
-	        }
-	        showAddressVerificationModal();
+            FormManager.setValue('geoLocDesc', data.glcDesc);
+            FormManager.setValue('apCustClusterId', glcClusterMap[data.glcCode]);
+            FormManager.setValue('clientTier', 'Q');
+            FormManager.setValue('isuCd', '34');
+            // cmr.showAlert('The GLC and Cluster has been overwritten to ' +
+            // data.glcCode + '-' + glcClusterMap[data.glcCode] + ', please
+            // continue the process.\nPlease contact your system
+            // administrator.', 'Create CMR');
+            cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to ' + data.glcCode + '-' + glcClusterMap[data.glcCode]
+                + '. Do you want to proceed with this request?', 'Warning', null, {
+              OK : 'Yes',
+              CANCEL : 'No'
+            });
+          } else {
+            if (data.glcCode != oldGlcCode) {
+              console.log("The GLC code are different, the cluster id are same, then overwrite the GLC code only.")
+              FormManager.setValue('geoLocationCd', data.glcCode);
+              FormManager.setValue('geoLocDesc', data.glcDesc);
+            }
+            showAddressVerificationModal();
           }
         }
       }
-  	}
+    }
   }
 }

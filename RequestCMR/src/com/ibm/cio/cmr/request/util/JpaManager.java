@@ -64,4 +64,15 @@ public class JpaManager {
   public static synchronized void setDefaultUnitName(String unitName) {
     UNIT = unitName;
   }
+
+  /**
+   * Calls the JPA method to create the entity
+   * 
+   * @param entity
+   * @param entityManager
+   */
+  public static void createEntity(Object entity, EntityManager entityManager) {
+    entityManager.persist(entity);
+    entityManager.flush();
+  }
 }

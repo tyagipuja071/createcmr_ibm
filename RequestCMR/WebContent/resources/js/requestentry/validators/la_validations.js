@@ -2768,7 +2768,7 @@ function togglePPSCeid() {
       custSubGrp = _pagemodel.custSubGrp;
     }
     
-    if (custSubGrp == 'CROSS' && custType == 'BUSPR') {
+    if ((custSubGrp == 'CROSS' && custType == 'BUSPR') || custSubGrp == 'BUSPR') {
       FormManager.show('PPSCEID', 'ppsceid');
       FormManager.enable('ppsceid');
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');

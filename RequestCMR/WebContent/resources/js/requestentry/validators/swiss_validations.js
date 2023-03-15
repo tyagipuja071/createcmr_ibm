@@ -59,9 +59,6 @@ function addAfterConfigForSWISS() {
           || custSubGrp == 'XCHIB' || custSubGrp == 'LIIBM' || custSubGrp == 'CHBUS' || custSubGrp == 'XCHBP' || custSubGrp == 'LIBUS')) {
     FormManager.readOnly('clientTier');
   }
-  if (reqType == 'C' && (role == 'PROCESSOR')) {
-    FormManager.enable('clientTier');
-  }
 
   if (reqType == 'C') {
     FormManager.readOnly('custNm3');
@@ -140,7 +137,7 @@ function addAfterConfigForSWISS() {
   setVatValidatorSWISS();
   setFieldsMandtStatus();
   // setVatValueOnPrefLang();
-  setMubotyOnPostalCodeIMS();
+// setMubotyOnPostalCodeIMS();
   showDeptNoForInternalsOnlySWISS();
   if (impIndc != 'N') {
     // setPreferredLangAddr();
@@ -323,7 +320,18 @@ function addHandlersForSWISS() {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
       setMubotyOnPostalCodeIMS(value);
-      setSORTLOnIsuCtc();
+      if (!value) {
+        value = FormManager.getActualValue('isuCd');
+      }
+      if (value == '32') {
+        FormManager.setValue('clientTier', 'T');
+      } else if (value == '34') {
+        FormManager.setValue('clientTier', 'Q');
+      } else if (value == '36') {
+        FormManager.setValue('clientTier', 'Y');
+      } else {
+        FormManager.setValue('clientTier', '');
+      }
     });
   }
 
@@ -336,7 +344,6 @@ function addHandlersForSWISS() {
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setMubotyOnPostalCodeIMS(value);
-      setSORTLOnIsuCtc();
     });
   }
 
@@ -350,7 +357,7 @@ function addHandlersForSWISS() {
   if (_IMSHandler == null) {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
       setISUCTCOnIMSChange();
-      setMubotyOnPostalCodeIMS();
+      setMubotyOnPostalCodeIMS(value);
     });
   }
 
@@ -507,33 +514,6 @@ function checkEmbargoCd(value) {
   }
 }
 
-function setSORTLOnIsuCtc() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  var isuCd = FormManager.getActualValue('isuCd');
-  var clientTier = FormManager.getActualValue('clientTier');
-  var reqType = FormManager.getActualValue('reqType');
-  var isuList = [ '34', '5K', '18', '28' ];
-  if (!isuList.includes(isuCd)) {
-    return;
-  }
-  if (isuCd == '34' && clientTier == 'Y') {
-    FormManager.setValue('searchTerm', 'T0007971');
-  } else if (isuCd == '5K' && clientTier == '') {
-    FormManager.setValue('searchTerm', 'T0009084');
-  } else if (isuCd == '18' && clientTier == '') {
-    FormManager.setValue('searchTerm', 'A0004577');
-  } else if (isuCd == '28' && clientTier == '') {
-    FormManager.setValue('searchTerm', 'A0005227');
-  }
-  if ([ '18', '28' ].includes(isuCd) && reqType == 'C') {
-    FormManager.resetValidations('clientTier');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  }
-}
-
 /*
  * Swiss - sets Client_Tier based on ISU
  */
@@ -542,18 +522,6 @@ function setClientTierValues(isuCd) {
   isuCd = FormManager.getActualValue('isuCd');
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
-  }
-  var isuList = [ '18', '28' ];
-  var reqType = FormManager.getActualValue('reqType');
-  if (isuList.includes(isuCd)) {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (reqType == 'U' || (reqType != 'U' && role == 'PROCESSOR')) {
-      FormManager.enable('clientTier');
-    }
   }
 
   if (FormManager.getActualValue('reqType') != 'C') {
@@ -586,16 +554,13 @@ function setClientTierValues(isuCd) {
     }
 
     if (clientTiers != null && clientTiers.length > 0) {
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
       if (clientTiers.length == 1) {
         FormManager.setValue('clientTier', clientTiers[0]);
       }
     } else {
-      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
       FormManager.setValue('clientTier', '');
     }
   }
-
 }
 
 /*
@@ -603,9 +568,12 @@ function setClientTierValues(isuCd) {
  */
 var mubotyvalues = [];
 var postCdOld = '';
-function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
+function setMubotyOnPostalCodeIMS(value) {
 
   if (FormManager.getActualValue('reqType') != 'C' || (cmr.currentRequestType != undefined && cmr.currentRequestType != 'C') || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (value == undefined) {
     return;
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -656,14 +624,15 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
   }
 
   var result = cmr.query('SWISS.GET.SORTL_BY_ISUCTCIMS', {
+    _qall : 'Y',
     ISU_CD : '%' + isuCd + '%',
     CLIENT_TIER : '%' + clientTier + '%',
     IMS : '%' + ims + '%',
     POST_CD_RANGE : postCd
   });
 
-  if (result != null && Object.keys(result).length > 0 && result.ret1) {
-    FormManager.setValue('searchTerm', result.ret1);
+  if (result != null && Object.keys(result).length > 0 && Object.keys(result).length == 1) {
+    FormManager.setValue('searchTerm', result[0].ret1);
     if (role == 'REQUESTER') {
       FormManager.readOnly('searchTerm');
     }
@@ -672,6 +641,49 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
     FormManager.enable('searchTerm');
   }
 }
+
+function validateSBOValuesForIsuCtc() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('reqType') != 'C') {
+          return;
+        }
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var isuCd = FormManager.getActualValue('isuCd');
+        var sbo = FormManager.getActualValue('searchTerm');
+        var validSboList = [];
+        var qParams = null;
+        
+        if (isuCd != '') {
+          var results = null;
+          if (isuCd + clientTier != '34Q') {
+            qParams = {
+              _qall : 'Y',
+              ISSUING_CNTRY : cntry,
+              ISU : '%' + isuCd + '%',
+              CTC : '%' + clientTier + '%'
+            };
+            results = cmr.query('GET.SBOLIST.BYISU', qParams);
+          }
+        }
+        if (results == null || results.length == 0) {
+          return new ValidationResult(null, true);
+        } else {
+          for (let i=0; i<results.length; i++) {
+            validSboList.push(results[i].ret1);
+          }
+          if (!validSboList.includes(sbo)) {
+            return new ValidationResult(null, false, 
+                'The SORTL provided is invalid. It should be from the list: ' + validSboList);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 
 function onSavingAddress(cntry, addressMode, saving, finalSave, force) {
   console.log(">>>> onSavingAddress ");
@@ -1512,6 +1524,17 @@ function lockIBMTabForSWISS() {
       FormManager.enable('ibmDeptCostCenter');
     }
   }
+  if (reqType == 'C' && role == 'PROCESSOR') {
+    if (custSubType.includes('BUS') || custSubType.includes('INT') || custSubType.includes('PRI') || custSubType.includes('IBM')) {
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('searchTerm');
+    } else {
+      FormManager.enable('isuCd');
+      FormManager.enable('clientTier');
+      FormManager.enable('searchTerm');
+    }
+  }
 }
 
 function validateDeptAttnBldg() {
@@ -1563,7 +1586,7 @@ function setCTCValues() {
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '8B') {
       FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
-      if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+      if (reqType == 'U') {
         FormManager.enable('clientTier');
       }
     }
@@ -1578,7 +1601,7 @@ function setCTCValues() {
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '21') {
       FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
-      if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+      if (reqType == 'U') {
         FormManager.enable('clientTier');
       }
     }
@@ -1590,7 +1613,7 @@ function clientTierCodeValidator() {
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || (isuCode != '34' && reqType == 'U')) {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '32' && isuCode != '36') && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -1606,23 +1629,64 @@ function clientTierCodeValidator() {
     }
   } else if (isuCode == '34') {
     if (clientTierCode == '') {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+    } else if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+      }, false, 'Client Tier can only accept \'Q\'\'.');
+    }
+  } else if (isuCode == '32') {
+    if (clientTierCode == '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    } else if (clientTierCode == 'T') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'T\'\'.');
+    }
+  } else if (isuCode == '36') {
+    if (clientTierCode == '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    } else if (clientTierCode == 'Y') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'Y\'\'.');
+    }
+  } else if (isuCode != '36' || isuCode != '34' || isuCode != '32') {
+    if (clientTierCode == '') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank.');
     }
   } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == 'Y' || clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
@@ -1634,7 +1698,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'T\' or blank.');
     }
   }
 }
@@ -1725,6 +1789,7 @@ function resetSortlValidator() {
     FormManager.resetValidations('searchTerm');
   }
 }
+
 // CREATCMR-6378
 function retainVatValueAT() {
   var vat = FormManager.getActualValue('vat');
@@ -1882,7 +1947,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(displayHwMstrInstallFlag, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(checkHwMstrInstallFlag, GEOHandler.SWISS);
-  GEOHandler.addAddrFunction(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
+// GEOHandler.addAddrFunction(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
 
   GEOHandler.addAfterConfig(reqReasonOnChange, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(addHandlersForSWISS, GEOHandler.SWISS);
@@ -1892,7 +1957,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCustClassCd, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setVatValidatorSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(addAfterConfigForSWISS, GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
+// GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(defaultCapIndicator, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setAbbrvNmSwiss, GEOHandler.SWISS);
 
@@ -1939,6 +2004,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setPreferredLangSwiss, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onScenarioChangeHandler, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onPostalCodeChangeHandler, GEOHandler.SWISS);
+  GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
