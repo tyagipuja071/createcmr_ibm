@@ -119,7 +119,7 @@ public class AppUserInjectFilter implements Filter {
 
 							session.setAttribute("loginUser", loginUser);
 
-							req.getRequestDispatcher("/login").forward(req, response);
+							req.getRequestDispatcher("/oidcclient/redirect/createcmr").forward(req, response);
 							// filterChain.doFilter(req, resp);
 							return;
 						} else {
