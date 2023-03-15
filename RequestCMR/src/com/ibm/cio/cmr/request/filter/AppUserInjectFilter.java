@@ -22,13 +22,9 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.model.login.LogInUserModel;
-import com.ibm.cio.cmr.request.service.user.UserService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
 import com.ibm.cio.cmr.request.util.oauth.Tokens;
@@ -41,12 +37,8 @@ import com.ibm.cio.cmr.request.util.oauth.Tokens;
  * @author Hesller Huller
  *
  */
-@Component
 @WebFilter(filterName = "AppUserInjectFilter", urlPatterns = "/*")
 public class AppUserInjectFilter implements Filter {
-
-	@Autowired
-	private UserService userService;
 
 	protected static final Logger LOG = Logger.getLogger(AppUserInjectFilter.class);
 
@@ -62,7 +54,7 @@ public class AppUserInjectFilter implements Filter {
 		}
 
 		HttpServletRequest req = (HttpServletRequest) request;
-		HttpServletResponse resp = (HttpServletResponse) response;
+		// HttpServletResponse resp = (HttpServletResponse) response;
 
 		HttpSession session = shouldCreateSession(req);
 		String url = req.getRequestURI();
@@ -125,8 +117,10 @@ public class AppUserInjectFilter implements Filter {
 							session.setAttribute("accessToken", tokens.getAccess_token());
 							session.setAttribute("tokenExpiringTime", tokens.getExpires_in());
 
-							req.getRequestDispatcher("/oidcclient/redirect/createcmr").forward(req, resp);
-							// filterChain.doFilter(filteredRequest, resp);
+							session.setAttribute("loginUser", loginUser);
+
+							req.getRequestDispatcher("/oidcclient/redirect/createcmr").forward(req, response);
+							// filterChain.doFilter(req, resp);
 							return;
 						} else {
 							LOG.trace("Invalid Token! Unable to proceed with the request.");
@@ -134,7 +128,7 @@ public class AppUserInjectFilter implements Filter {
 							OAuthUtils.revokeToken(tokens.getAccess_token());
 							AppUser.remove(req);
 							session.invalidate();
-							filterChain.doFilter(req, resp);
+							filterChain.doFilter(req, response);
 							return;
 						}
 					}
@@ -150,7 +144,7 @@ public class AppUserInjectFilter implements Filter {
 			LOG.error("Error processing AppUserInjectFilter", e);
 		}
 
-		filterChain.doFilter(req, resp);
+		filterChain.doFilter(req, response);
 
 	}
 
@@ -207,7 +201,6 @@ public class AppUserInjectFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig config) throws ServletException {
-		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
 		LOG.info("CreateCMR " + config.getFilterName() + " initialized.");
 	}
 
