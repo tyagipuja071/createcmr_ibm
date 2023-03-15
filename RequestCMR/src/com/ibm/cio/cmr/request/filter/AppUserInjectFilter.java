@@ -118,17 +118,15 @@ public class AppUserInjectFilter implements Filter {
 							LogInUserModel loginUser = new LogInUserModel();
 							loginUser.setUsername(userIntranetEmail);
 
-							new OAuthUtils().authorizeAndSetRoles(loginUser, userService, req, resp);
+							// new OAuthUtils().authorizeAndSetRoles(loginUser,
+							// userService, req, resp);
 
 							session.setAttribute("loggedInUserModel", loginUser);
 							session.setAttribute("accessToken", tokens.getAccess_token());
 							session.setAttribute("tokenExpiringTime", tokens.getExpires_in());
 
-							resp.sendRedirect("/CreateCMR/home");
-							// //
-							// req.getRequestDispatcher("/home").forward(request,
-							// // response);
-							// filterChain.doFilter(req, resp);
+							req.getRequestDispatcher("/oidcclient/redirect/createcmr").forward(req, resp);
+							// filterChain.doFilter(filteredRequest, resp);
 							return;
 						} else {
 							LOG.trace("Invalid Token! Unable to proceed with the request.");
