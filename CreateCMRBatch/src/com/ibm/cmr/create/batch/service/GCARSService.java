@@ -58,6 +58,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   private static final String USERNAME = System.getProperty("GCARS_FTP_USER");
   private static final String PASSWORD = System.getProperty("GCARS_FTP_PASS");
   private static final String KNOWN_HOSTS = System.getProperty("GCARS_FTP_KNOWN_HOSTS");
+  private static final String PRIV_KEY = System.getProperty("GCARS_FTP_PRIV_KEY");
   private static final String GCARS_FILE = "bbcro.z010.gcars.inbound.txt";
   private static final int REMOTE_PORT = 22;
   private static final int SESSION_TIMEOUT = 10000;
@@ -171,13 +172,18 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       LOG.debug("Known Hosts File: " + KNOWN_HOSTS);
       LOG.debug("Connecting to FTP Server " + REMOTE_HOST + ":" + REMOTE_PORT + " using " + USERNAME);
       jsch.setKnownHosts(KNOWN_HOSTS);
+      jsch.addIdentity(PRIV_KEY);
+      LOG.debug("Identity added...");
+      LOG.debug("Opening session...");
       jschSession = jsch.getSession(USERNAME, REMOTE_HOST, REMOTE_PORT);
 
-      jschSession.setPassword(PASSWORD);
+      // jschSession.setPassword(PASSWORD);
       jschSession.connect(SESSION_TIMEOUT);
 
+      LOG.debug("Opening channel...");
       Channel sftp = jschSession.openChannel("sftp");
       sftp.connect(CHANNEL_TIMEOUT);
+      LOG.debug("Connected to " + REMOTE_HOST);
 
       String archiveDir = SystemConfiguration.getValue("GCARS_REMOTE_ARCHIVE_DIR");
       if (StringUtils.isBlank(archiveDir)) {
@@ -197,6 +203,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       channelSftp.rename(remoteFile, archiveDir + fileSubstring);
 
       channelSftp.exit();
+      LOG.debug("Download complete.");
 
     } catch (JSchException | SftpException e) {
       LOG.warn("An error has occurred when trying to download files from FTP server", e);
