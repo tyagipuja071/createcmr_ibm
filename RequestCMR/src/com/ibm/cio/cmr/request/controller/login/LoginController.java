@@ -13,7 +13,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -206,13 +205,8 @@ public class LoginController extends BaseController {
 
 		ModelAndView mv = null;
 		try {
-			Set<String> paramNames = request.getParameterMap().keySet();
-			boolean authenticated = false;
-			if (paramNames.contains("code") && paramNames.contains("grant_id")) {
-				authenticated = true;
-			} else {
-				authenticated = userService.authenticateUser(loginUser.getUsername(), loginUser.getPassword());
-			}
+
+			boolean authenticated = userService.authenticateUser(loginUser.getUsername(), loginUser.getPassword());
 
 			if (authenticated) {
 
