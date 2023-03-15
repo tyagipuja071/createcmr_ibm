@@ -246,7 +246,7 @@ public class NetherlandsUtil extends AutomationUtil {
     if (results != null && !results.isEmpty()) {
       for (Object[] result : results) {
         // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
-        sortl = (String) result[0];
+        sortl = (String) result[3];
       }
     }
     return sortl;

@@ -34,6 +34,9 @@ function addISUHandler() {
   console.log(">>>> addISUHandler");
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldClientTier = FormManager.getActualValue('clientTier');
+  getExitingValueOfCTCAndIsuCD();
+  addRemoveValidator();
+  lockUnlockFieldForCY();
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       if (_oldIsu != FormManager.getActualValue('isuCd') || typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
@@ -2853,15 +2856,22 @@ function addEnterpriseValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var entNo = FormManager.getActualValue('enterprise');
-        if (entNo != '' && entNo.length != 6) {
-          return new ValidationResult(null, false, 'Enterprise Number should have exactly 6 digits.');
+        var enterpriseNo = FormManager.getActualValue('enterprise');
+
+        if (enterpriseNo != null && enterpriseNo != undefined && enterpriseNo != '') {
+          if (!enterpriseNo.match("^[0-9]*$")) {
+            return new ValidationResult(null, false, 'Enterprise Number should be numeric only.');
+          } else if ((enterpriseNo.length != 6)) {
+            return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
+          }
+        } else {
+          return new ValidationResult(null, true);
         }
-        return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 
 
 function clientTierValidator() {
@@ -3005,7 +3015,7 @@ function lockUnlockFieldForCY() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var _custGrpSet = new Set([ 'COMME', 'GOVRN']);
 
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || (reqType == 'C' && !_custGrpSet.has(custSubGrp))) {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('enterprise');
@@ -3013,14 +3023,6 @@ function lockUnlockFieldForCY() {
     FormManager.readOnly('salesTeamCd');
     FormManager.readOnly('salesBusOffCd');
     FormManager.readOnly('ppsceid');
-
-  } else if (!_custGrpSet.has(custSubGrp)) {
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('enterprise');
-    FormManager.readOnly('repTeamMemberNo');
-    FormManager.readOnly('salesTeamCd');
-    FormManager.readOnly('salesBusOffCd');
 
   } else if (_custGrpSet.has(custSubGrp)) {
     FormManager.enable('isuCd');
@@ -3048,26 +3050,12 @@ function setClientTierValuesCY() {
   } else {
     FormManager.setValue('clientTier', '');
   }
-  removeClientTireValidation();
+  addRemoveValidator();
   setEnterpriseValues();
   lockUnlockField();
 }
 
-function removeClientTireValidation() {
-  console.log(">>>> removeClientTireValidation");
-  var isuCd = FormManager.getActualValue('isuCd');
 
-  // Only for Request type create
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  } else {
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-  }
-}
 
 function setEnterpriseValues() {
   console.log(">>>> setEnterpriseValues");
@@ -3217,15 +3205,30 @@ function validatorEnterpriseCY(){
   }
 }
 
-function removeClientTireValidation() {
-  console.log(">>>> removeClientTireValidation");
+function addRemoveClientTierValidator() {
+  console.log(">>>> addRemoveClientTierValidator");
   var isuCd = FormManager.getActualValue('isuCd');
-
+  FormManager.resetValidations('clientTier');
   if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
   }
+}
+
+function addRemoveEnterperiseValidator() {
+  var reqType = FormManager.getActualValue('reqType');
+  FormManager.resetValidations('enterprise');
+  if (reqType == 'C' || (reqType == 'U' && _oldEnt != null && _oldEnt != '')) {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  }
+
+}
+
+function addRemoveValidator() {
+  addRemoveClientTierValidator();
+  addRemoveEnterperiseValidator();
+
 }
 
 dojo.addOnLoad(function() {

@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -64,7 +65,7 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_BP_LOCAL_LU = "LUBUS";
   public static final String SCENARIO_DATA_CENTER_LU = "LUDAT";
   public static final String SCENARIO_IBMEM_LU = "LUIBM";
-  private static final String QUERY_BG_SBO_BENELUX = "AUTO.COV.GET_SBO_FROM_BG_FR";
+  private static final String QUERY_BG_SBO_BENELUX = "AUTO.COV.GET_COV_FROM_BG_ES_UK";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO, CmrConstants.RDC_PAYGO_BILLING);
@@ -296,29 +297,29 @@ public class BeLuxUtil extends AutomationUtil {
     }
     return true;
   }
-    
-    private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
-      String sortl = "";
-      String sql = ExternalizedQuery.getSql(queryBgFR);
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("KEY", bgId);
-      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-      query.setParameter("COUNTRY", cmrIssuingCntry);
-      String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
-      System.err.println("ISO: " + isoCntry);
-      query.setParameter("ISO_CNTRY", isoCntry);
-      query.setForReadOnly(true);
 
-      LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
-      List<Object[]> results = query.getResults(5);
-      if (results != null && !results.isEmpty()) {
-        for (Object[] result : results) {
-          // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
-          sortl = (String) result[0];
-        }
+  private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
+    String sortl = "";
+    String sql = ExternalizedQuery.getSql(queryBgFR);
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KEY", bgId);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", cmrIssuingCntry);
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    System.err.println("ISO: " + isoCntry);
+    query.setParameter("ISO_CNTRY", isoCntry);
+    query.setForReadOnly(true);
+
+    LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
+    List<Object[]> results = query.getResults(5);
+    if (results != null && !results.isEmpty()) {
+      for (Object[] result : results) {
+        // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
+        sortl = (String) result[3];
       }
-      return sortl;
     }
+    return sortl;
+  }
 
   private String chkFrAffiliateCntry(AutomationEngineData engineData, RequestData reqData, EntityManager entityManager) {
     GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
