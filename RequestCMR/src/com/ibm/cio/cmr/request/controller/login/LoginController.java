@@ -749,8 +749,9 @@ public class LoginController extends BaseController {
 
 				request.getSession().setMaxInactiveInterval(60 * 60 * 3);
 
-				response.addHeader("Set-Cookie",
-						"countryCode=" + appUser.getCountryCode() + "; HttpOnly; Secure; SameSite=Strict");
+				// response.addHeader("Set-Cookie",
+				// "countryCode=" + appUser.getCountryCode() + "; HttpOnly;
+				// Secure; SameSite=Strict");
 
 				if (appUser.isPreferencesSet()) {
 					if (loginUser.getR() > 0) {
@@ -764,12 +765,12 @@ public class LoginController extends BaseController {
 						} else if (decoded.startsWith("r")) {
 							mv = new ModelAndView("redirect:/request?" + params, "appUser", appUser);
 						} else {
-							mv = new ModelAndView("redirect:/home", "appUser", appUser);
+							mv = new ModelAndView("redirect:/login", "appUser", appUser);
 						}
 					} else if (appUser.isApprover()) {
 						mv = new ModelAndView("redirect:/myappr", "approval", new MyApprovalsModel());
 					} else {
-						mv = new ModelAndView("redirect:/home", "appUser", appUser);
+						mv = new ModelAndView("redirect:/login", "appUser", appUser);
 					}
 					// setPageKeys("HOME", "OVERVIEW", mv);
 				} else {
