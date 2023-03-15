@@ -175,7 +175,7 @@ public class NetherlandsUtil extends AutomationUtil {
       }
       if (commercialFin != null && !commercialFin.isEmpty()) {
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "COMMERCIAL_FINANCED", data.getSalesBusOffCd(), commercialFin);
-        details.append("SORTL: " + commercialFin + commercialFin);
+        details.append("SORTL: " + commercialFin);
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     
@@ -251,7 +251,7 @@ public class NetherlandsUtil extends AutomationUtil {
     query.setParameter("ISO_CNTRY", isoCntry);
     query.setForReadOnly(true);
 
-    LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
+    LOG.debug("Calculating SORTL using Netherlands query " + queryBgFR + " for key: " + bgId);
     List<Object[]> results = query.getResults(5);
     if (results != null && !results.isEmpty()) {
       for (Object[] result : results) {

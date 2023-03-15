@@ -238,7 +238,7 @@ public class BeLuxUtil extends AutomationUtil {
         }
         if (commercialFin != null && !commercialFin.isEmpty()) {
           overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "COMMERCIAL_FINANCED", data.getSalesBusOffCd(), commercialFin);
-          details.append("SORTL: " + commercialFin + commercialFin);
+          details.append("SORTL: " + commercialFin);
         }
         engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
       }
@@ -320,14 +320,17 @@ public class BeLuxUtil extends AutomationUtil {
     query.setParameter("ISO_CNTRY", isoCntry);
     query.setForReadOnly(true);
 
-    LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
+    LOG.debug("Calculating SORTL using Belgium query " + queryBgFR + " for key: " + bgId);
     List<Object[]> results = query.getResults(5);
+    List<String> sortlList = new ArrayList<String>();
     if (results != null && !results.isEmpty()) {
       for (Object[] result : results) {
-        // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
         sortl = (String) result[3];
+        sortlList.add(sortl);
+        // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
       }
     }
+    sortl = sortlList.get(0);
     return sortl;
   }
 
