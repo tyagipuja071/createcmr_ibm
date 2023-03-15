@@ -667,14 +667,20 @@ public class CNHandler extends GEOHandler {
         } else {
           DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
           if (dnbData != null) {
-            dunsNo = dnbData.getParDunsNo();
-            if (StringUtils.isBlank(dunsNo)) {
-              // break here to stop iteration
+            if (dunsNo != null && dunsNo.equals(dnbData.getParDunsNo())) {
               LOG.debug("No Parent for DUNS " + dnbData.getDunsNo());
               break;
             } else {
-              LOG.debug("Switching to Parent DUNS " + dunsNo);
+              dunsNo = dnbData.getParDunsNo();
+              if (StringUtils.isBlank(dunsNo)) {
+                // break here to stop iteration
+                LOG.debug("No Parent for DUNS " + dnbData.getDunsNo());
+                break;
+              } else {
+                LOG.debug("Switching to Parent DUNS " + dunsNo);
+              }
             }
+
           }
         }
       }
