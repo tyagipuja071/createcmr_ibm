@@ -646,10 +646,11 @@ function addGenericZIPValidator() {
         if (!cntry || cntry == '' || cntry.trim() == '' || (loc == '')) {
           return new ValidationResult(null, true);
         }
+
         var postCd = FormManager.getActualValue('postCd');
 
         // skip input validation when Postal Code field is emtpy for CR, EC
-        if (postCd == '' && cntry == 'CR' || cntry == 'EC') {
+        if (postCd == '' && (cntry == 'CR' || cntry == 'EC')) {
           return new ValidationResult(null, true);
         }
 
