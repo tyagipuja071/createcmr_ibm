@@ -180,7 +180,7 @@ public class AppUserInjectFilter implements Filter {
 
 		if (url.contains("/") && url.substring(url.lastIndexOf("/")).contains(".")) {
 			// static resources
-			return true;
+			return false;
 		}
 
 		// if (response.getStatus() == 302 && url.contains("/home")) {
