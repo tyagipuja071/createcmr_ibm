@@ -2272,26 +2272,6 @@ function addEnterpriseValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function getExitingValueOfCTCAndIsuCD() {
-  console.log(">>>> getExitingValueOfCTCAndIsuCD");
-  var reqType = FormManager.getActualValue('reqType');
-  var requestId = FormManager.getActualValue('reqId');
-
-  if (reqType != 'U' || _oldIsuCd != null || _oldCtc != null) {
-    return;
-  }
-
-  var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', {
-    REQ_ID : requestId,
-  });
-
-  if (result != null && result != '') {
-    _oldCtc = result.ret1;
-    _oldIsuCd = result.ret3;
-  }
-
-}
-
 // CREATCMR-4293
 
 function clientTierValidator() {
