@@ -3014,6 +3014,7 @@ function lockUnlockFieldForCY() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var _custGrpSet = new Set([ 'COMME', 'GOVRN']);
+  var reqType = FormManager.getActualValue('reqType');
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || (reqType == 'C' && !_custGrpSet.has(custSubGrp))) {
     FormManager.readOnly('isuCd');
