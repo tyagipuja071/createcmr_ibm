@@ -1313,8 +1313,10 @@ function addRemoveClientTierValidator() {
 
 function addRemoveEnterperiseValidator() {
   var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custGrpSet1 = new Set([ 'BUSPR', 'INTER' ]);
   FormManager.resetValidations('enterprise');
-  if (reqType == 'C') {
+  if (reqType == 'C' && !custGrpSet1.has(custSubGrp)) {
     FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
   }
 
