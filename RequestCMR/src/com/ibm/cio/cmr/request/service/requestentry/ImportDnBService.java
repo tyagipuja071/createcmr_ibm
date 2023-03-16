@@ -85,6 +85,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
   @Override
   protected ImportCMRModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
+    LOG.debug("Request - doProcess");
 
     if (reqEntryService == null) {
       reqEntryService = new RequestEntryService();
@@ -120,6 +121,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
       if (reqId <= 0) {
         // generate a Request ID for new requests
+        LOG.debug("Generate a Request ID for new requests and newRequest equal true");
         reqIdToUse = SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "REQ_ID");
         newRequest = true;
       }
@@ -130,6 +132,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
       if (!newRequest) {
         // get the current records
+        LOG.debug("Get the current records and newRequest equal false");
         RequestEntryModel model = new RequestEntryModel();
         model.setReqId(reqIdToUse);
         CompoundEntity entity = getCurrentRecord(model, entityManager, request);
@@ -141,6 +144,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
       } else {
         // create/update the records
+        LOG.debug("Create/update the records and newRequest equal true");
         admin = new Admin();
         AdminPK adminPK = new AdminPK();
         adminPK.setReqId(reqIdToUse);
@@ -201,9 +205,11 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
             || "846".equals(reqModel.getCmrIssuingCntry()) || SystemLocation.ISRAEL.equals(reqModel.getCmrIssuingCntry())) {
           if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(reqModel.getReqType())) {
             data.setDunsNo(mainRecord.getCmrDuns());
+            LOG.debug("- REQ_TYPE_CREATE DunsNo : " + data.getDunsNo());
           }
         } else {
           data.setDunsNo(mainRecord.getCmrDuns());
+          LOG.debug("-DunsNo : " + data.getDunsNo());
         }
       }
       if (!StringUtils.isBlank(mainRecord.getCmrVat()) && importAddress) {
@@ -313,16 +319,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         reqEntryService.updateEntity(scorecard, entityManager);
 
         // update the mirror
-        // 1851537: EMEA, LA, ASIA&Pacific - D&B import done on update requests
-        // is interfering with updates on UI
-        // jz - do NOT update the mirror
-
-        // DataRdc rdc = new DataRdc();
-        // DataPK rdcpk = new DataPK();
-        // rdcpk.setReqId(data.getId().getReqId());
-        // rdc.setId(rdcpk);
-        // PropertyUtils.copyProperties(rdc, data);
-        // reqEntryService.updateEntity(rdc, entityManager);
+        LOG.debug("Update the mirror - adding data into DATA rdc");
+        insertUpdateDataRdc(entityManager, newRequest, admin, data);
 
       } else {
         // clear cmt field in admin table
@@ -343,12 +341,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         reqEntryService.createEntity(scorecard, entityManager);
 
         // create the mirror
-        DataRdc rdc = new DataRdc();
-        DataPK rdcpk = new DataPK();
-        rdcpk.setReqId(data.getId().getReqId());
-        rdc.setId(rdcpk);
-        PropertyUtils.copyProperties(rdc, data);
-        reqEntryService.createEntity(rdc, entityManager);
+        LOG.debug("Create the mirror - adding data into DATA rdc");
+        insertUpdateDataRdc(entityManager, newRequest, admin, data);
 
       }
 
@@ -430,6 +424,26 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         transaction.rollback();
       }
       throw e;
+    }
+  }
+
+  private void insertUpdateDataRdc(EntityManager entityManager, boolean newRequest, Admin admin, Data data)
+      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    // update the mirror
+    // 1851537: EMEA, LA, ASIA&Pacific - D&B import done on update requests
+    // is interfering with updates on UI
+    // jz - do NOT update the mirror
+    DataRdc rdc = new DataRdc();
+    DataPK rdcpk = new DataPK();
+    rdcpk.setReqId(data.getId().getReqId());
+    rdc.setId(rdcpk);
+    PropertyUtils.copyProperties(rdc, data);
+    if (newRequest) {
+      LOG.debug("Adding data into DATA rdc - new request true ");
+      reqEntryService.createEntity(rdc, entityManager);
+    } else {
+      LOG.debug("Updating data into DATA rdc - new request false ");
+      reqEntryService.updateEntity(rdc, entityManager);
     }
   }
 
