@@ -20,6 +20,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -624,11 +625,11 @@ public class LoginController extends BaseController {
 
 				session.setAttribute("loginUser", loginUser);
 				HttpServletResponse resp = response;
-				resp.sendRedirect(resp.encodeRedirectURL(
-						SystemConfiguration.getValue("APPLICATION_URL") + "/setUserRolesAndPermissions"));
+				// resp.sendRedirect(resp.encodeRedirectURL(
+				// SystemConfiguration.getValue("APPLICATION_URL") +
+				// "/setUserRolesAndPermissions"));
 
-				// request.getRequestDispatcher("/setUserRolesAndPermissions").forward(request,
-				// response);
+				request.getRequestDispatcher("/setUserRolesAndPermissions").forward(request, response);
 				// filterChain.doFilter(req, resp);
 				return;
 			} else {
@@ -640,7 +641,7 @@ public class LoginController extends BaseController {
 				response.sendRedirect("/getAccessToken");
 				return;
 			}
-		} catch (IOException e) {
+		} catch (IOException | ServletException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -832,14 +833,14 @@ public class LoginController extends BaseController {
 						String decoded = new String(Base64.getDecoder().decode(c));
 						String params = decoded.substring(2);
 						if (decoded.startsWith("f")) {
-							mv = new ModelAndView("redirect:/findcmr?" + params, "appUser", appUser);
+							mv = new ModelAndView("forward:/findcmr?" + params, "appUser", appUser);
 						} else if (decoded.startsWith("r")) {
-							mv = new ModelAndView("redirect:/request?" + params, "appUser", appUser);
+							mv = new ModelAndView("forward:/request?" + params, "appUser", appUser);
 						} else {
 							mv = new ModelAndView("forward:/home", "appUser", appUser);
 						}
 					} else if (appUser.isApprover()) {
-						mv = new ModelAndView("redirect:/myappr", "approval", new MyApprovalsModel());
+						mv = new ModelAndView("forward:/myappr", "approval", new MyApprovalsModel());
 					} else {
 						mv = new ModelAndView("forward:/home", "appUser", appUser);
 					}
