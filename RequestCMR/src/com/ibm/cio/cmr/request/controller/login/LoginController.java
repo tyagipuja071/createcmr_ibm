@@ -4,10 +4,14 @@
 package com.ibm.cio.cmr.request.controller.login;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -51,6 +55,7 @@ import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
+import com.ibm.cio.cmr.request.util.oauth.Tokens;
 import com.ibm.cmr.services.client.AuthorizationClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.auth.Authorization;
@@ -575,13 +580,78 @@ public class LoginController extends BaseController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/oidcclient/redirect/createcmr")
+	public void getAccessToken(HttpServletRequest request, HttpServletResponse response) {
+		try {
+
+			String userIntranetEmail = "";
+			HttpSession session = request.getSession();
+
+			LOG.trace("Requesting access token for grant_id: " + request.getParameter("grant_id"));
+
+			// get access_token and id_token
+			String code = request.getParameter("code");
+			String rawToken = OAuthUtils.getAccessToken(code);
+
+			// parse raw token
+			Tokens tokens = OAuthUtils.parseToken(rawToken);
+
+			// validate JWT signature
+			boolean isJWTValid = false;
+
+			try {
+				LOG.trace("Validating signature for grant_id: " + request.getParameter("grant_id"));
+				isJWTValid = OAuthUtils.validateSignature();
+				LOG.trace("JWT Signature validated successfully for grant_id: " + request.getParameter("grant_id"));
+			} catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException e) {
+				// TODO interrupt the thread here
+				LOG.error("An error occured when validating the signature: ", e);
+			}
+
+			// assign AppUser
+			if (isJWTValid) {
+				userIntranetEmail = (String) tokens.getId_token().getClaims().get("emailAddress");
+				session.setAttribute("userIntranetEmail", userIntranetEmail);
+
+				LogInUserModel loginUser = new LogInUserModel();
+				loginUser.setUsername(userIntranetEmail);
+
+				// new OAuthUtils().authorizeAndSetRoles(loginUser,
+				// userService, req, resp);
+
+				session.setAttribute("loggedInUserModel", loginUser);
+				session.setAttribute("accessToken", tokens.getAccess_token());
+				session.setAttribute("tokenExpiringTime", tokens.getExpires_in());
+
+				session.setAttribute("loginUser", loginUser);
+				HttpServletResponse resp = response;
+				resp.sendRedirect("/CreateCMR/setUserRolesAndPermissions");
+
+				// req.getRequestDispatcher("/setUserRolesAndPermissions").forward(req,
+				// response);
+				// filterChain.doFilter(req, resp);
+				return;
+			} else {
+				LOG.trace("Invalid Token! Unable to proceed with the request.");
+				// TODO what to do if token is invalid or expired?
+				OAuthUtils.revokeToken(tokens.getAccess_token());
+				AppUser.remove(request);
+				session.invalidate();
+				response.sendRedirect("/getAccessToken");
+				return;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/setUserRolesAndPermissions")
 	public ModelAndView handleOIDCRedirect(HttpServletRequest request, HttpServletResponse response) {
 
 		ModelAndView mv = null;
 		AppUser appUser = new AppUser();
 		LogInUserModel loginUser = (LogInUserModel) request.getSession().getAttribute("loggedInUserModel");
-
-		LOG.debug("LoginUser received at /oidcclient/redirect/createcmr: " + loginUser.getUsername());
 
 		LOG.info("Logon Attempt (" + CmrConstants.DATE_TIME_FORMAT().format(SystemUtil.getCurrentTimestamp()) + ") by "
 				+ loginUser.getUsername());
@@ -765,12 +835,12 @@ public class LoginController extends BaseController {
 						} else if (decoded.startsWith("r")) {
 							mv = new ModelAndView("redirect:/request?" + params, "appUser", appUser);
 						} else {
-							mv = new ModelAndView("redirect:/login", "appUser", appUser);
+							mv = new ModelAndView("redirect:/home", "appUser", appUser);
 						}
 					} else if (appUser.isApprover()) {
 						mv = new ModelAndView("redirect:/myappr", "approval", new MyApprovalsModel());
 					} else {
-						mv = new ModelAndView("redirect:/login", "appUser", appUser);
+						mv = new ModelAndView("redirect:/home", "appUser", appUser);
 					}
 					// setPageKeys("HOME", "OVERVIEW", mv);
 				} else {

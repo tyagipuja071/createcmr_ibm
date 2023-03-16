@@ -20,9 +20,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.model.login.LogInUserModel;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -53,15 +53,15 @@ public class AppUserInjectFilter implements Filter {
 			return;
 		}
 
+		System.out.println("");
 		HttpServletRequest req = (HttpServletRequest) request;
-		// HttpServletResponse resp = (HttpServletResponse) response;
+		String url = req.getRequestURI();
 
 		HttpSession session = shouldCreateSession(req);
-		String url = req.getRequestURI();
 		String userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
 
 		try {
-			if (shouldFilter(req)) {
+			if (shouldFilter(req, (HttpServletResponse) response)) {
 
 				AppUser user = AppUser.getUser(req);
 
@@ -72,11 +72,16 @@ public class AppUserInjectFilter implements Filter {
 				if (user == null) {
 					LOG.warn("No user on the session yet...");
 
-					// try to get user Intranet
-					userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
-
 					// get all request params
 					Set<String> paramNames = request.getParameterMap().keySet();
+
+					if (paramNames.contains("code") && paramNames.contains("grant_id")) {
+						req.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, new AppUser());
+						// req.getRequestDispatcher("/oidcclient/redirect/createcmr").forward(req,
+						// response);
+						filterChain.doFilter(req, response);
+						return;
+					}
 
 					// when request contains code and grant_id, means we are at
 					// second step of SSO and need to get access token
@@ -118,8 +123,11 @@ public class AppUserInjectFilter implements Filter {
 							session.setAttribute("tokenExpiringTime", tokens.getExpires_in());
 
 							session.setAttribute("loginUser", loginUser);
+							HttpServletResponse resp = (HttpServletResponse) response;
+							resp.sendRedirect("/CreateCMR/setUserRolesAndPermissions");
 
-							req.getRequestDispatcher("/oidcclient/redirect/createcmr").forward(req, response);
+							// req.getRequestDispatcher("/setUserRolesAndPermissions").forward(req,
+							// response);
 							// filterChain.doFilter(req, resp);
 							return;
 						} else {
@@ -148,35 +156,19 @@ public class AppUserInjectFilter implements Filter {
 
 	}
 
-	private long extractRequestId(HttpServletRequest request) {
-		String reqIdParam = request.getParameter("reqId");
-		if (reqIdParam != null && StringUtils.isNumeric(reqIdParam) && !"0".equals(reqIdParam)) {
-			return Long.parseLong(reqIdParam);
-		}
-		Object reqIdAtt = request.getAttribute("reqId");
-		if (reqIdAtt != null && StringUtils.isNumeric(reqIdAtt.toString()) && !"0".equals(reqIdAtt.toString())) {
-			return Long.parseLong(reqIdAtt.toString());
-		}
-
-		String url = request.getRequestURI();
-		if (url != null) {
-			if (url.contains("?")) {
-				url = url.substring(0, url.indexOf("?"));
-			}
-			if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
-				String reqId = url.substring(url.lastIndexOf("/") + 1);
-				if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
-					return Long.parseLong(reqId);
-				}
-			}
-		}
-
-		return 0;
+	@Override
+	public void destroy() {
+		// NOOP
 	}
 
-	private boolean shouldFilter(HttpServletRequest request) {
-		String url = request.getRequestURI();
+	@Override
+	public void init(FilterConfig config) throws ServletException {
+		LOG.info("CreateCMR " + config.getFilterName() + " initialized.");
+	}
 
+	private boolean shouldFilter(HttpServletRequest request, HttpServletResponse response) {
+		String url = request.getRequestURI();
+		int status = response.getStatus();
 		if (url.endsWith("/update")) {
 			return false;
 		}
@@ -186,6 +178,11 @@ public class AppUserInjectFilter implements Filter {
 		if (url.endsWith("/external.json")) {
 			return false;
 		}
+
+		// if (response.getStatus() == 302 && url.contains("/home")) {
+		// request.getSession(true);
+		// return false;
+		// }
 		// if (url.contains("/") &&
 		// url.substring(url.lastIndexOf("/")).contains(".")) {
 		// return false;
@@ -194,14 +191,12 @@ public class AppUserInjectFilter implements Filter {
 		return true;
 	}
 
-	@Override
-	public void destroy() {
-		// NOOP
-	}
-
-	@Override
-	public void init(FilterConfig config) throws ServletException {
-		LOG.info("CreateCMR " + config.getFilterName() + " initialized.");
+	private HttpSession shouldCreateSession(HttpServletRequest req) {
+		HttpSession session = req.getSession(false);
+		if (session == null) {
+			return req.getSession();
+		}
+		return session;
 	}
 
 	public String getBody(HttpServletRequest request) throws IOException {
@@ -238,11 +233,4 @@ public class AppUserInjectFilter implements Filter {
 		return body;
 	}
 
-	private HttpSession shouldCreateSession(HttpServletRequest req) {
-		HttpSession session = req.getSession(false);
-		if (session == null) {
-			return req.getSession();
-		}
-		return session;
-	}
 }
