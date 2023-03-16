@@ -1208,6 +1208,8 @@ public class DnBUtil {
         }
       }
       return matchedIds;
+    } else {
+      LOG.error("D&B matching failed or no matched record inside findByOrgId. Org ID " + orgId);
     }
     return Collections.emptyList();
   }
@@ -1240,6 +1242,8 @@ public class DnBUtil {
     MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
     if (response != null && response.getSuccess() && response.getMatched()) {
       return response.getMatches();
+    } else {
+      LOG.error("D&B matching failed or no matched record inside findByAddress.");
     }
     return Collections.emptyList();
   }

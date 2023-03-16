@@ -589,7 +589,7 @@ public class ChinaUtil extends AutomationUtil {
    *         directly from KNA1
    * @throws Exception
    */
-  private List<FindCMRRecordModel> getExistingCMRs(EntityManager entityManager, String socialCreditCode, String localName, String localAddress,
+  public static List<FindCMRRecordModel> getExistingCMRs(EntityManager entityManager, String socialCreditCode, String localName, String localAddress,
       String localCity, String landedCountry) throws Exception {
 
     List<String> allDuns = new ArrayList<String>();
@@ -611,7 +611,6 @@ public class ChinaUtil extends AutomationUtil {
         matches.parallelStream().filter(match -> "10".equals(match.getConfidenceCode())).forEach(match -> {
           allDuns.add(match.getDunsNo());
         });
-        ;
       }
     }
 
