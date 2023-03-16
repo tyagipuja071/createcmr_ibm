@@ -588,9 +588,6 @@ function afterConfigForLA() {
   // }
 
   // var _reqType = FormManager.getActualValue('reqType');
-  if (FormManager.getActualValue('cmrIssuingCntry') == '683' && _pagemodel.userRole.toUpperCase() == 'REQUESTER') {
-    FormManager.addValidator('postCd', Validators.REQUIRED, [ 'PostalCode' ], '');
-  }
 
   if (FormManager.getActualValue('ordBlk') == '93' && _reqType == 'U') {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
