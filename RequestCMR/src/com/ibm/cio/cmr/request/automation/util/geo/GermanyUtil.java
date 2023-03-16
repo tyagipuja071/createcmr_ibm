@@ -203,8 +203,8 @@ public class GermanyUtil extends AutomationUtil {
                 person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName), data.getCmrIssuingCntry());
                 person = (person == null) ? BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry()) : person;
                 if (person == null) {
-                  engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-                  details.append("Employee details not found in IBM BluePages.").append("\n");
+                  engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+                  details.append("Employee details not found in IBM People.").append("\n");
                   valid = false;
                 } else {
                   details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
@@ -740,7 +740,7 @@ public class GermanyUtil extends AutomationUtil {
           data.getCmrIssuingCntry());
       if (queryResults != null && !queryResults.isEmpty()) {
         for (DACHFieldContainer result : queryResults) {
-          DACHFieldContainer queryResult = (DACHFieldContainer) result;
+          DACHFieldContainer queryResult = result;
           String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
           String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
           String queryIsu = queryResult.getIsuCd();
