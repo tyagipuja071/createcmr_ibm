@@ -624,9 +624,10 @@ public class LoginController extends BaseController {
 
 				session.setAttribute("loginUser", loginUser);
 				HttpServletResponse resp = response;
-				resp.sendRedirect("/CreateCMR/setUserRolesAndPermissions");
+				resp.sendRedirect(resp.encodeRedirectURL(
+						SystemConfiguration.getValue("APPLICATION_URL") + "/setUserRolesAndPermissions"));
 
-				// req.getRequestDispatcher("/setUserRolesAndPermissions").forward(req,
+				// request.getRequestDispatcher("/setUserRolesAndPermissions").forward(request,
 				// response);
 				// filterChain.doFilter(req, resp);
 				return;
@@ -835,12 +836,12 @@ public class LoginController extends BaseController {
 						} else if (decoded.startsWith("r")) {
 							mv = new ModelAndView("redirect:/request?" + params, "appUser", appUser);
 						} else {
-							mv = new ModelAndView("redirect:/home", "appUser", appUser);
+							mv = new ModelAndView("forward:/home", "appUser", appUser);
 						}
 					} else if (appUser.isApprover()) {
 						mv = new ModelAndView("redirect:/myappr", "approval", new MyApprovalsModel());
 					} else {
-						mv = new ModelAndView("redirect:/home", "appUser", appUser);
+						mv = new ModelAndView("forward:/home", "appUser", appUser);
 					}
 					// setPageKeys("HOME", "OVERVIEW", mv);
 				} else {
