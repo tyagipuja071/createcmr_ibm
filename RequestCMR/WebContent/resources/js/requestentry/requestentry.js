@@ -502,6 +502,13 @@ function doAcceptAddressVerification() {
  */
 function doCancelAddressVerification() {
   cmr.hideModal('addressVerificationModal');
+  // CREATCMR-8430: for NZ DNB overriding, refresh the page if use cancel the address confirm
+  var loc = FormManager.getActualValue('cmrIssuingCntry');
+  var usSicmen = FormManager.getActualValue('usSicmen');
+  if (loc == SysLoc.NEW_ZEALAND && usSicmen && usSicmen=='DNBO') {
+	  console.log("refresh this page...")
+    window.location.reload();
+  }
 }
 
 /**
