@@ -165,6 +165,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
             try {
               // 1, check DnB with cnCreditCd, single byte CNName
+              cnNameSingleByte = iAddr.getIntlCustNm1();
+              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
+                cnNameSingleByte += iAddr.getIntlCustNm2();
+              }
               checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
               log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
               existingCMRs = checkDNBResults;
@@ -341,6 +345,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, check DnB with cnCreditCd, single byte CNName
+              cnNameSingleByte = iAddr.getIntlCustNm1();
+              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
+                cnNameSingleByte += iAddr.getIntlCustNm2();
+              }
               checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
               log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
               existingCMRs = checkDNBResults;
@@ -488,6 +496,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
             try {
               // 1, check DnB with cnCreditCd, single byte CNName
+              cnNameSingleByte = iAddr.getIntlCustNm1();
+              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
+                cnNameSingleByte += iAddr.getIntlCustNm2();
+              }
               checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
               log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
               existingCMRs = checkDNBResults;
@@ -683,6 +695,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
             try {
               // 1, check DnB with cnCreditCd, single byte CNName
+              cnNameSingleByte = iAddr.getIntlCustNm1();
+              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
+                cnNameSingleByte += iAddr.getIntlCustNm2();
+              }
               checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
               log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
               existingCMRs = checkDNBResults;
@@ -861,6 +877,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
             try {
               // 1, check DnB with cnCreditCd, single byte CNName
+              cnNameSingleByte = iAddr.getIntlCustNm1();
+              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
+                cnNameSingleByte += iAddr.getIntlCustNm2();
+              }
               checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
               log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
               existingCMRs = checkDNBResults;
@@ -1054,6 +1074,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           if (validCNName(cnNameSingleByte)) {
             try {
               // 1, check DnB with cnCreditCd, single byte CNName
+              cnNameSingleByte = iAddr.getIntlCustNm1();
+              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
+                cnNameSingleByte += iAddr.getIntlCustNm2();
+              }
               checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
               log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
               existingCMRs = checkDNBResults;
@@ -1262,6 +1286,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
             try {
               // 1, check DnB with cnCreditCd, single byte CNName
+              cnNameSingleByte = iAddr.getIntlCustNm1();
+              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
+                cnNameSingleByte += iAddr.getIntlCustNm2();
+              }
               checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
               log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
               existingCMRs = checkDNBResults;
@@ -1356,6 +1384,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           if (validCNName(cnNameSingleByte)) {
             try {
               // 1, check DnB with cnCreditCd, single byte CNName
+              cnNameSingleByte = iAddr.getIntlCustNm1();
+              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
+                cnNameSingleByte += iAddr.getIntlCustNm2();
+              }
               checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
               log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
               existingCMRs = checkDNBResults;
