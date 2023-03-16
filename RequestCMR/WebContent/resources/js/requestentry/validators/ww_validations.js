@@ -648,6 +648,11 @@ function addGenericZIPValidator() {
         }
         var postCd = FormManager.getActualValue('postCd');
 
+        // skip input validation when Postal Code field is emtpy for CR, EC
+        if (postCd == '' && cntry == 'CR' || cntry == 'EC') {
+          return new ValidationResult(null, true);
+        }
+
         console.log('Country: ' + cntry + ' Postal Code: ' + postCd);
         if(cntry == 'LV') {
           if(postCd == ''){
