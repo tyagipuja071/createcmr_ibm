@@ -53,7 +53,6 @@ public class AppUserInjectFilter implements Filter {
 			return;
 		}
 
-		System.out.println("");
 		HttpServletRequest req = (HttpServletRequest) request;
 		String url = req.getRequestURI();
 
@@ -177,6 +176,11 @@ public class AppUserInjectFilter implements Filter {
 		}
 		if (url.endsWith("/external.json")) {
 			return false;
+		}
+
+		if (url.contains("/") && url.substring(url.lastIndexOf("/")).contains(".")) {
+			// static resources
+			return true;
 		}
 
 		// if (response.getStatus() == 302 && url.contains("/home")) {
