@@ -721,7 +721,7 @@ public class NewZealandUtil extends AutomationUtil {
   }
   
   public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
-	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO"));
+	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
 	    query.setParameter("REQ_ID", reqId);
 	    query.executeSql();
 	  }
