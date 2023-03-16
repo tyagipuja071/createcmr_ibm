@@ -4,7 +4,7 @@
 package com.ibm.cio.cmr.request.masschange.obj;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +21,7 @@ public class TemplateValidation {
   private List<ValidationRow> rows = new ArrayList<TemplateValidation.ValidationRow>();
   private final String tabName;
 
-  private Map<String, StringBuilder> allError = new HashMap<String, StringBuilder>();
+  private Map<String, StringBuilder> allError = new LinkedHashMap<String, StringBuilder>();
 
   public TemplateValidation(String tabName) {
     // only allow template to instantiate this

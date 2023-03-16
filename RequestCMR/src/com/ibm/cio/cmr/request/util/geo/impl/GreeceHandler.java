@@ -3807,18 +3807,33 @@ public class GreeceHandler extends BaseSOFHandler {
                 LOG.trace("Please input CMR No. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "CMR No.", "Please input CMR No. Please fix and upload the template again.");
               }
+
               if ((StringUtils.isNotBlank(dataIsu) && StringUtils.isBlank(dataCtc))
                   || (StringUtils.isNotBlank(dataCtc) && StringUtils.isBlank(dataIsu))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(dataIsu) && "34".equals(dataIsu)) {
-                if (StringUtils.isBlank(dataCtc) || !"QY".contains(dataCtc)) {
-                  LOG.trace("The row " + ((row.getRowNum() + 1))
-                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                  error.addError(((row.getRowNum() + 1)), "Client Tier",
-                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                if (StringUtils.isBlank(dataCtc) || !"Q".equals(dataCtc)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(dataIsu) && !"34".equals(dataIsu)) && !"@".equalsIgnoreCase(dataCtc)) {
+              } else if (!StringUtils.isBlank(dataIsu) && "36".equals(dataIsu)) {
+                if (StringUtils.isBlank(dataCtc) || !"Y".equals(dataCtc)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if (!StringUtils.isBlank(dataIsu) && "32".equals(dataIsu)) {
+                if (StringUtils.isBlank(dataCtc) || !"T".equals(dataCtc)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if ((!StringUtils.isBlank(dataIsu) && !Arrays.asList("32", "34", "36").contains(dataIsu)) && !"@".equalsIgnoreCase(dataCtc)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + dataIsu + ".<br>");
               }
@@ -3970,7 +3985,7 @@ public class GreeceHandler extends BaseSOFHandler {
 
   // START -- missing code greece code
   private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
-    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    Addr addrCopy = SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
     if (addrType.equals("ZP01")) {
