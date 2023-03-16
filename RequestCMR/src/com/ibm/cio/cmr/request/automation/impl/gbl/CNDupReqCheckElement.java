@@ -295,6 +295,20 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
   }
 
   private boolean isValidDupReq(EntityManager entityManager, ReqCheckResponse reqCheckRecord, String scenario) {
+    boolean output = false;
+    if (reqCheckRecord == null || StringUtils.isEmpty(scenario)) {
+      return false;
+    }
+    String reqCheckRecordScenario = getScenario(entityManager, reqCheckRecord.getReqId());
+    if (scenario != null && scenario.equals(reqCheckRecordScenario)) {
+      output = true;
+    }
+    String outputStr = String.valueOf(output);
+    LOG.debug("CNDupReqCheckElement... reqCheckRecord " + reqCheckRecord.getReqId() + " matches = " + outputStr);
+    return output;
+  }
+  
+  private boolean isValidDupReqOld(EntityManager entityManager, ReqCheckResponse reqCheckRecord, String scenario) {
     boolean output = true;
     if (reqCheckRecord == null || StringUtils.isBlank(scenario)) {
       return false;

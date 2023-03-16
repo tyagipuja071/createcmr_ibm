@@ -50,6 +50,7 @@ import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.Person;
@@ -1463,4 +1464,34 @@ public abstract class AutomationUtil {
     }
     return detailedResult;
   }
+  
+  public static List<DACHFieldContainer> computeDACHCoverageElements(EntityManager entityManager, String queryBgDACH, String bgId,
+      String cmrIssuingCntry) {
+    List<DACHFieldContainer> calculatedFields = new ArrayList<>();
+    String sql = ExternalizedQuery.getSql(queryBgDACH);
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KEY", bgId);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", cmrIssuingCntry);
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    System.err.println("ISO: " + isoCntry);
+    query.setParameter("ISO_CNTRY", isoCntry);
+    query.setForReadOnly(true);
+
+    LOG.debug("Calculating Fields using DACH query " + queryBgDACH + " for key: " + bgId);
+    List<Object[]> results = query.getResults(5);
+    if (results != null && !results.isEmpty()) {
+      for (Object[] result : results) {
+        DACHFieldContainer fieldValues = new DACHFieldContainer();
+        fieldValues.setIsuCd((String) result[0]);
+        fieldValues.setClientTier((String) result[1]);
+        fieldValues.setEnterprise((String) result[2]);
+        fieldValues.setSearchTerm((String) result[3]);
+        fieldValues.setInac((String) result[4]);
+        calculatedFields.add(fieldValues);
+      }
+    }
+    return calculatedFields;
+  }
+  
 }

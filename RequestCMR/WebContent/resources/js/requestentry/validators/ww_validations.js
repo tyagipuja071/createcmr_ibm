@@ -432,13 +432,18 @@ function addClientTierDefaultLogic() {
   if (_clientTierHandler == null) {
     _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       value = FormManager.getActualValue('clientTier');
-      FormManager.enable('isuCd');
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
+      if (cntry != '766') {
+        FormManager.enable('isuCd');
+      }
       if (value == 'B' || value == 'M' || value == 'W' || value == 'T' || value == 'S' || value == 'C' || value == 'N') {
         FormManager.setValue('isuCd', '32');
         FormManager.readOnly('isuCd');
       } else if (value == 'V' || value == '4' || value == 'A' || value == '6' || value == 'E' || value == 'Y') {
-        FormManager.setValue('isuCd', '34');
-        FormManager.readOnly('isuCd');
+        if (cntry != '766') {
+          FormManager.setValue('isuCd', '34');
+          FormManager.readOnly('isuCd');
+        }
       } else if (value == 'Z') {
         FormManager.setValue('isuCd', '21');
         FormManager.readOnly('isuCd');
@@ -446,7 +451,9 @@ function addClientTierDefaultLogic() {
         if (PageManager.isReadOnly()) {
           FormManager.readOnly('isuCd');
         } else {
-          FormManager.enable('isuCd');
+          if (cntry != '766') {
+            FormManager.enable('isuCd');
+          }
         }
       }
     });

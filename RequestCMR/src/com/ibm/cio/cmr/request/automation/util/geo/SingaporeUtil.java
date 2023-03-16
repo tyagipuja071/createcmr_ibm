@@ -809,4 +809,14 @@ public class SingaporeUtil extends AutomationUtil {
       return result;
     }
   }
+
+  @Override
+  public void emptyINAC(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    Data data = requestData.getData();
+    LOG.debug("INAC code value " + data.getInacCd());
+    data.setInacCd("");
+    LOG.debug("INAC type value " + data.getInacType());
+    data.setInacType("");
+  }
+
 }
