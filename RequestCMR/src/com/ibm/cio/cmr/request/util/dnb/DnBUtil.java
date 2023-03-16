@@ -1210,7 +1210,7 @@ public class DnBUtil {
     request.setStreetLine1("X");
     request.setCity("X");
     request.setLandedCountry(country);
-    request.setMinConfidence("5");
+    request.setMinConfidence("9");
     request.setOrgId(orgId);
 
     MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
@@ -1223,6 +1223,9 @@ public class DnBUtil {
     if (response != null && response.getSuccess() && response.getMatched()) {
       List<DnBMatchingResponse> matchedIds = new ArrayList<DnBMatchingResponse>();
       for (DnBMatchingResponse rec : response.getMatches()) {
+        LOG.debug("DUNS " + rec.getDunsNo() + " matched Org ID " + orgId);
+        LOG.debug("OrgIdMatch = " + rec.getOrgIdMatch() + ", ConfidenceCode = " + rec.getConfidenceCode() + ", MatchGrade = " + rec.getMatchGrade()
+            + ", MatchQuality = " + rec.getMatchQuality());
         if ("Y".equals(rec.getOrgIdMatch())) {
           LOG.debug("DUNS " + rec.getDunsNo() + " matched Org ID " + orgId);
           matchedIds.add(rec);
@@ -1252,7 +1255,7 @@ public class DnBUtil {
     request.setStreetLine1(street);
     request.setCity(city);
     request.setLandedCountry(country);
-    request.setMinConfidence("5");
+    request.setMinConfidence("9");
 
     MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
     ObjectMapper mapper = new ObjectMapper();
