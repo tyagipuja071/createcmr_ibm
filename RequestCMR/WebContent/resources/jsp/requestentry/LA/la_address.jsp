@@ -225,15 +225,6 @@
 </cmr:row>
 
 <cmr:row>
-  <cmr:column span="2">
-    <p>
-      <cmr:label fieldId="county">
-        <cmr:fieldLabel fieldId="County" />:
-             <cmr:delta text="-" id="delta-county" code="L" />
-      </cmr:label>
-      <cmr:field fieldId="County" id="county" path="county" />
-    </p>
-  </cmr:column>
   <!-- // 1164558 -->
   <cmr:view forCountry="631">
     <cmr:column span="2" containerForField="LocalTax2">
