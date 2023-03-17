@@ -557,6 +557,7 @@ function afterConfigForUKI() {
   if (_landCntryHandlerIE == null && issuingCntry == SysLoc.IE) {
     _landCntryHandlerIE = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       setClientTierBasedOnIsuUKI();
+      lockIsuCtcUKI();
       setSboValueBasedOnIsuCtcIE();
     });
   }
@@ -577,6 +578,7 @@ function afterConfigForUKI() {
   if (_isuCdHandlerIE == null && FormManager.getField('isuCd') && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
     _isuCdHandlerIE = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierBasedOnIsuUKI();
+      lockIsuCtcUKI();
       setSboValueBasedOnIsuCtcIE(value);
     });
   }
@@ -598,22 +600,40 @@ function afterConfigForUKI() {
 
 function setClientTierBasedOnIsuUKI() {
   var reqType = FormManager.getActualValue('reqType');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var isuCtcVals = {
+    '32' : 'T',
+    '34' : 'Q',
+    '36' : 'Y'
+  };
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  isuCd = FormManager.getActualValue('isuCd');
-  isuCtcVals = {
+  if (isuCd != null && isuCd != undefined && isuCd != '') {
+    // reset
+    FormManager.resetValidations('clientTier');
+    if (isuCtcVals.hasOwnProperty(isuCd)) {
+      FormManager.setValue('clientTier', isuCtcVals[isuCd]);
+    } else {
+      FormManager.setValue('clientTier', '');
+    }
+  }
+}
+function lockIsuCtcUKI() {
+  var reqType = FormManager.getActualValue('reqType');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var isuCtcVals = {
     '32' : 'T',
     '34' : 'Q',
     '36' : 'Y'
   };
   if (isuCd != null && isuCd != undefined && isuCd != '') {
+    // reset
+    FormManager.resetValidations('clientTier');
     if (isuCtcVals.hasOwnProperty(isuCd)) {
-      FormManager.setValue('clientTier', isuCtcVals[isuCd]);
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'ClientTier' ], 'MAIN_IBM_TAB');
     } else {
-      FormManager.setValue('clientTier', '');
-      FormManager.resetValidations('clientTier');
+      FormManager.removeValidator('clientTier', Validators.REQUIRED);
     }
   }
 }
@@ -621,6 +641,7 @@ function addHandlersForUK() {
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierBasedOnIsuUKI();
+      lockIsuCtcUKI();
       setSboValueBasedOnIsuCtcUK(value);
     });
   }
@@ -10797,10 +10818,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
-  // GEOHandler.addAfterConfig(setClientTierBasedOnIsuUKI, [ SysLoc.UK,
-  // SysLoc.IRELAND ]);
-  // GEOHandler.addAfterTemplateLoad(setClientTierBasedOnIsuUKI, [ SysLoc.UK,
-  // SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(lockIsuCtcUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(lockIsuCtcUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   // CREATCMR-1727
 
   GEOHandler.registerValidator(validateSalesRepForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
