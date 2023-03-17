@@ -627,7 +627,13 @@ public class ChinaUtil extends AutomationUtil {
       String sql = ExternalizedQuery.getSql("CN.FIND_DUPLICATE_BY_DUNS");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-      query.append((allDuns.size() > 0 ? " in " : " = ") + dunsIN.toString());
+      // query.append((allDuns.size() > 0 ? " in " : " = ") +
+      // dunsIN.toString());
+      if (allDuns.size() > 0) {
+        query.append(" in (" + dunsIN.toString() + ")");
+      } else {
+        query.append(" = " + dunsIN.toString());
+      }
       query.setForReadOnly(true);
 
       List<FindCMRRecordModel> cmrMatches = new ArrayList<FindCMRRecordModel>();
