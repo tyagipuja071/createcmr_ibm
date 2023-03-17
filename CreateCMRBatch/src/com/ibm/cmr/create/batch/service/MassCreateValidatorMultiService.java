@@ -176,7 +176,7 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
             request.setReqStatus(CmrConstants.REQUEST_STATUS.AUT.toString());
             comment = "System validation succeeded. Request sent for Automated Processing.";
           } else {
-            request.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
+            request.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
             comment = "System validation succeeded. Request sent for Processing.";
           }
           processingCenter = getProcessingCenter(entityManager, data.getCmrIssuingCntry());
