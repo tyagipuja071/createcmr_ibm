@@ -592,11 +592,15 @@ public class CEETransformer extends EMEATransformer {
     String line6 = "";
     String addrType = addrData.getId().getAddrType();
     String phone = "";
+    String stateProv = "";
     String addrLineT = "";
 
     LOG.trace("Handling " + (update ? "update" : "create") + " request.");
 
     // line1
+    if (!StringUtils.isBlank(addrData.getStateProv())) {
+      stateProv = addrData.getStateProv();
+    }
     line1 = addrData.getCustNm1();
 
     if (!StringUtils.isBlank(addrData.getCustNm2())) {
@@ -682,9 +686,6 @@ public class CEETransformer extends EMEATransformer {
       addrLineT = "";
     }
 
-    legacyAddr.setItCompanyProvCd((!StringUtils.isBlank(addrData.getStateProv()) && addrData.getStateProv().length() <= 2) ?
-        addrData.getStateProv() : "");
-
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
     legacyAddr.setAddrLine3(line3);
@@ -699,7 +700,10 @@ public class CEETransformer extends EMEATransformer {
     legacyAddr.setDistrict(addrData.getDept());
     // CMR-4937
     legacyAddr.setAddrLineU("");
-
+    if (!crossBorder) {
+      legacyAddr.setItCompanyProvCd(
+          (!StringUtils.isBlank(addrData.getStateProv()) && addrData.getStateProv().length() <= 2) ? addrData.getStateProv() : "");
+    }
   }
 
   @Override

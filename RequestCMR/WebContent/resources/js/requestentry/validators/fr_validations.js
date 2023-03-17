@@ -133,6 +133,12 @@ function afterConfigForFR() {
       _isuHandler[0].onChange();
     }
   }
+  dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    if (value == undefined) {
+      return;
+    }
+    setCtcByIsu(value);
+  });
 
   var _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     // setAbbrevNmOnCustSubGrpChange();
@@ -3376,9 +3382,9 @@ function setClassificationCode() {
 }
 
 function setTaxCd() {
-	if (FormManager.getActualValue('reqType') == 'U') {
-	  return;
-	}
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
   FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
   FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
 
