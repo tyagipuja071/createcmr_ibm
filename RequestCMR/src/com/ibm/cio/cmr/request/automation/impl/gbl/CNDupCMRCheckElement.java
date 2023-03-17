@@ -164,35 +164,14 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           if (iAddr != null) {
 
             try {
-              // 1, check DnB with cnCreditCd, single byte CNName
-              cnNameSingleByte = iAddr.getIntlCustNm1();
-              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
-                cnNameSingleByte += iAddr.getIntlCustNm2();
-              }
-              checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
-              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
+              // 1, check D&B matching with cnCreditCd, CNName
+              checkDNBResults = checkExistingCMRs(entityManager, cnCreditCd, iAddr, "CN");
+              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from D&B matching.");
               existingCMRs = checkDNBResults;
 
-              // 2, if need check DnB with double byte CNName
-              cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
-              if (StringUtils.isEmpty(cnCreditCd) && cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
-                for (FindCMRRecordModel temp : checkDNBResults) {
-                  cmrNumList.add(temp.getCmrNum() != null ? temp.getCmrNum() : "");
-                }
-                checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameDoubleByte, null, null, "CN");
-                log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or double byte CNName.");
-                for (FindCMRRecordModel cmr : checkDNBResults) {
-                  if (StringUtils.isNotEmpty(cmr.getCmrNum()) && !cmrNumList.contains(cmr.getCmrNum())) {
-                    FindCMRRecordModel temp = cmr;
-                    existingCMRs.add(temp);
-                    cmrNumList.add(cmr.getCmrNum());
-                  }
-                }
-              }
-
-              // 3, process duplicate cmr validate logic
+              // 2, process duplicate cmr validate logic
               if (existingCMRs != null && existingCMRs.size() > 0) {
-                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from FINDCMR.");
+                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from D&B matching.");
 
                 for (FindCMRRecordModel cmrsMods : existingCMRs) {
                   nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
@@ -200,7 +179,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                   }
 
-                  log.debug("FINDCMR retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
+                  log.debug("D&B matching retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
                       + trimChineseSpace(nameFindCmrCnResult) + ">");
 
                   kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -272,7 +251,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
               }
 
-              // 4, output
+              // 3, output
               if (shouldBeRejected) {
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate CMRs.");
@@ -343,43 +322,21 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           if (iAddr != null) {
 
             try {
-
-              // 1, check DnB with cnCreditCd, single byte CNName
-              cnNameSingleByte = iAddr.getIntlCustNm1();
-              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
-                cnNameSingleByte += iAddr.getIntlCustNm2();
-              }
-              checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
-              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
+              // 1, check D&B matching with cnCreditCd, CNName
+              checkDNBResults = checkExistingCMRs(entityManager, cnCreditCd, iAddr, "CN");
+              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from D&B matching.");
               existingCMRs = checkDNBResults;
 
-              // 2, if need check DnB with double byte CNName
-              cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
-              if (StringUtils.isEmpty(cnCreditCd) && cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
-                for (FindCMRRecordModel temp : checkDNBResults) {
-                  cmrNumList.add(temp.getCmrNum() != null ? temp.getCmrNum() : "");
-                }
-                checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameDoubleByte, null, null, "CN");
-                log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or double byte CNName.");
-                for (FindCMRRecordModel cmr : checkDNBResults) {
-                  if (StringUtils.isNotEmpty(cmr.getCmrNum()) && !cmrNumList.contains(cmr.getCmrNum())) {
-                    FindCMRRecordModel temp = cmr;
-                    existingCMRs.add(temp);
-                    cmrNumList.add(cmr.getCmrNum());
-                  }
-                }
-              }
-
-              // 3, process duplicate cmr validate logic
+              // 2, process duplicate cmr validate logic
               if (existingCMRs != null && existingCMRs.size() > 0) {
-                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from FINDCMR.");
+                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from D&B matching.");
 
                 for (FindCMRRecordModel cmrsMods : existingCMRs) {
                   nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
                   if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
                     nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                   }
-                  log.debug("FINDCMR retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
+                  log.debug("D&B matching retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
                       + trimChineseSpace(nameFindCmrCnResult) + ">");
 
                   kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -418,7 +375,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 }
               }
 
-              // output
+              // 3, output
               if (shouldBeRejected) {
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate CMRs.");
@@ -495,33 +452,12 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           if (iAddr != null) {
 
             try {
-              // 1, check DnB with cnCreditCd, single byte CNName
-              cnNameSingleByte = iAddr.getIntlCustNm1();
-              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
-                cnNameSingleByte += iAddr.getIntlCustNm2();
-              }
-              checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
-              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
+              // 1, check D&B matching with cnCreditCd, CNName
+              checkDNBResults = checkExistingCMRs(entityManager, cnCreditCd, iAddr, "CN");
+              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from D&B matching.");
               existingCMRs = checkDNBResults;
 
-              // 2, if need check DnB with double byte CNName
-              cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
-              if (StringUtils.isEmpty(cnCreditCd) && cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
-                for (FindCMRRecordModel temp : checkDNBResults) {
-                  cmrNumList.add(temp.getCmrNum() != null ? temp.getCmrNum() : "");
-                }
-                checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameDoubleByte, null, null, "CN");
-                log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or double byte CNName.");
-                for (FindCMRRecordModel cmr : checkDNBResults) {
-                  if (StringUtils.isNotEmpty(cmr.getCmrNum()) && !cmrNumList.contains(cmr.getCmrNum())) {
-                    FindCMRRecordModel temp = cmr;
-                    existingCMRs.add(temp);
-                    cmrNumList.add(cmr.getCmrNum());
-                  }
-                }
-              }
-
-              // 3, process duplicate cmr validate logic
+              // 2, process duplicate cmr validate logic
               boolean isSpecailSearchTerm = false;
               List<String> specialSearchTermList = getSpecialSearchTermList(entityManager, data.getCmrIssuingCntry());
 
@@ -620,7 +556,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 log.debug("There are 0 cmrs retrieved from FINDCMR.");
               }
 
-              // 4, output
+              // 3, output
               if (shouldBeRejected) {
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate CMRs.");
@@ -694,34 +630,12 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           if (iAddr != null) {
 
             try {
-              // 1, check DnB with cnCreditCd, single byte CNName
-              cnNameSingleByte = iAddr.getIntlCustNm1();
-              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
-                cnNameSingleByte += iAddr.getIntlCustNm2();
-              }
-              checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
-              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
+              // 1, check D&B matching with cnCreditCd, CNName
+              checkDNBResults = checkExistingCMRs(entityManager, cnCreditCd, iAddr, "CN");
+              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from D&B matching.");
               existingCMRs = checkDNBResults;
 
-              // 2, if need check DnB with double byte CNName
-              cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
-              if (StringUtils.isEmpty(cnCreditCd) && cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
-
-                for (FindCMRRecordModel temp : checkDNBResults) {
-                  cmrNumList.add(temp.getCmrNum() != null ? temp.getCmrNum() : "");
-                }
-                checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameDoubleByte, null, null, "CN");
-                log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or double byte CNName.");
-                for (FindCMRRecordModel cmr : checkDNBResults) {
-                  if (StringUtils.isNotEmpty(cmr.getCmrNum()) && !cmrNumList.contains(cmr.getCmrNum())) {
-                    FindCMRRecordModel temp = cmr;
-                    existingCMRs.add(temp);
-                    cmrNumList.add(cmr.getCmrNum());
-                  }
-                }
-              }
-
-              // 3, if check findcmr with CEID
+              // 2, if check findcmr with CEID
               if (cnCeid != null && !"".equals(cnCeid)) {
                 try {
                   CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
@@ -750,9 +664,9 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 }
               }
 
-              // 4, process duplicate cmr validate logic
+              // 3, process duplicate cmr validate logic
               if (existingCMRs != null && existingCMRs.size() > 0) {
-                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from FINDCMR.");
+                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from D&B matching or FINDCMR.");
 
                 for (FindCMRRecordModel cmrsMods : existingCMRs) {
                   nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
@@ -809,7 +723,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 }
               }
 
-              // 5, output
+              // 4, output
               if (shouldBeRejected) {
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate CMRs.");
@@ -876,35 +790,14 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           if (iAddr != null) {
 
             try {
-              // 1, check DnB with cnCreditCd, single byte CNName
-              cnNameSingleByte = iAddr.getIntlCustNm1();
-              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
-                cnNameSingleByte += iAddr.getIntlCustNm2();
-              }
-              checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
-              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
+              // 1, check D&B matching with cnCreditCd, CNName
+              checkDNBResults = checkExistingCMRs(entityManager, cnCreditCd, iAddr, "CN");
+              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from D&B matching.");
               existingCMRs = checkDNBResults;
 
-              // 2, if need check DnB with double byte CNName
-              cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
-              if (StringUtils.isEmpty(cnCreditCd) && cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
-                for (FindCMRRecordModel temp : checkDNBResults) {
-                  cmrNumList.add(temp.getCmrNum() != null ? temp.getCmrNum() : "");
-                }
-                checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameDoubleByte, null, null, "CN");
-                log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or double byte CNName.");
-                for (FindCMRRecordModel cmr : checkDNBResults) {
-                  if (StringUtils.isNotEmpty(cmr.getCmrNum()) && !cmrNumList.contains(cmr.getCmrNum())) {
-                    FindCMRRecordModel temp = cmr;
-                    existingCMRs.add(temp);
-                    cmrNumList.add(cmr.getCmrNum());
-                  }
-                }
-              }
-
-              // 3, process duplicate cmr validate logic
+              // 2, process duplicate cmr validate logic
               if (existingCMRs != null && existingCMRs.size() > 0) {
-                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from FINDCMR.");
+                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from D&B matching.");
 
                 for (FindCMRRecordModel cmrsMods : existingCMRs) {
                   nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
@@ -912,7 +805,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                   }
 
-                  log.debug("FINDCMR retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
+                  log.debug("D&B matching retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
                       + trimChineseSpace(nameFindCmrCnResult) + ">");
 
                   kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -988,7 +881,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
               }
 
-              // 4, output
+              // 3, output
               shouldGoToCMDE = true;
 
               if (shouldBeRejected && !shouldGoToCMDE) {
@@ -1073,35 +966,14 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // George, fix dup cmr not found CREATCMR-3133 on 20210802
           if (validCNName(cnNameSingleByte)) {
             try {
-              // 1, check DnB with cnCreditCd, single byte CNName
-              cnNameSingleByte = iAddr.getIntlCustNm1();
-              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
-                cnNameSingleByte += iAddr.getIntlCustNm2();
-              }
-              checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
-              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
+              // 1, check D&B matching with cnCreditCd, CNName
+              checkDNBResults = checkExistingCMRs(entityManager, cnCreditCd, iAddr, "CN");
+              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from D&B matching.");
               existingCMRs = checkDNBResults;
 
-              // 2, if need check DnB with double byte CNName
-              cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
-              if (StringUtils.isEmpty(cnCreditCd) && cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
-                for (FindCMRRecordModel temp : checkDNBResults) {
-                  cmrNumList.add(temp.getCmrNum() != null ? temp.getCmrNum() : "");
-                }
-                checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameDoubleByte, null, null, "CN");
-                log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or double byte CNName.");
-                for (FindCMRRecordModel cmr : checkDNBResults) {
-                  if (StringUtils.isNotEmpty(cmr.getCmrNum()) && !cmrNumList.contains(cmr.getCmrNum())) {
-                    FindCMRRecordModel temp = cmr;
-                    existingCMRs.add(temp);
-                    cmrNumList.add(cmr.getCmrNum());
-                  }
-                }
-              }
-
-              // 3, process duplicate cmr validate logic
+              // 2, process duplicate cmr validate logic
               if (existingCMRs != null && existingCMRs.size() > 0) {
-                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from FINDCMR.");
+                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from D&B matching.");
 
                 for (FindCMRRecordModel cmrsMods : existingCMRs) {
                   nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
@@ -1109,7 +981,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                   }
 
-                  log.debug("FINDCMR retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
+                  log.debug("D&B matching retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
                       + trimChineseSpace(nameFindCmrCnResult) + ">");
 
                   if (cmrsMods.getCmrNum() != null && cmrsMods.getCmrNum().startsWith("P")) {
@@ -1141,7 +1013,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 }
               }
 
-              // 4, output
+              // 3, output
               if (nameMatched || historyNmMatched) {
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate CMRs.");
@@ -1285,35 +1157,14 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           if (iAddr != null) {
 
             try {
-              // 1, check DnB with cnCreditCd, single byte CNName
-              cnNameSingleByte = iAddr.getIntlCustNm1();
-              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
-                cnNameSingleByte += iAddr.getIntlCustNm2();
-              }
-              checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
-              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
+              // 1, check D&B matching with cnCreditCd, CNName
+              checkDNBResults = checkExistingCMRs(entityManager, cnCreditCd, iAddr, "CN");
+              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from D&B matching.");
               existingCMRs = checkDNBResults;
 
-              // 2, if need check DnB with double byte CNName
-              cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
-              if (StringUtils.isEmpty(cnCreditCd) && cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
-                for (FindCMRRecordModel temp : checkDNBResults) {
-                  cmrNumList.add(temp.getCmrNum() != null ? temp.getCmrNum() : "");
-                }
-                checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameDoubleByte, null, null, "CN");
-                log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or double byte CNName.");
-                for (FindCMRRecordModel cmr : checkDNBResults) {
-                  if (StringUtils.isNotEmpty(cmr.getCmrNum()) && !cmrNumList.contains(cmr.getCmrNum())) {
-                    FindCMRRecordModel temp = cmr;
-                    existingCMRs.add(temp);
-                    cmrNumList.add(cmr.getCmrNum());
-                  }
-                }
-              }
-
-              // 3, process duplicate cmr validate logic
+              // 2, process duplicate cmr validate logic
               if (existingCMRs != null && existingCMRs.size() > 0) {
-                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from FINDCMR.");
+                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from D&B matching.");
 
                 for (FindCMRRecordModel cmrsMods : existingCMRs) {
                   nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
@@ -1321,7 +1172,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                   }
 
-                  log.debug("FINDCMR retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
+                  log.debug("D&B matching retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
                       + trimChineseSpace(nameFindCmrCnResult) + ">");
 
                   if (cmrsMods.getCmrNum() != null && cmrsMods.getCmrNum().startsWith("P")) {
@@ -1337,7 +1188,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 }
               }
 
-              // 4,output
+              // 3,output
               if (nameMatched || historyNmMatched) {
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate CMRs.");
@@ -1383,35 +1234,14 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // George, fix dup cmr not found CREATCMR-3133 on 20210802
           if (validCNName(cnNameSingleByte)) {
             try {
-              // 1, check DnB with cnCreditCd, single byte CNName
-              cnNameSingleByte = iAddr.getIntlCustNm1();
-              if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
-                cnNameSingleByte += iAddr.getIntlCustNm2();
-              }
-              checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameSingleByte, null, null, "CN");
-              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
+              // 1, check D&B matching with cnCreditCd, CNName
+              checkDNBResults = checkExistingCMRs(entityManager, cnCreditCd, iAddr, "CN");
+              log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from D&B matching.");
               existingCMRs = checkDNBResults;
 
-              // 2, if need check DnB with double byte CNName
-              cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
-              if (StringUtils.isEmpty(cnCreditCd) && cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
-                for (FindCMRRecordModel temp : checkDNBResults) {
-                  cmrNumList.add(temp.getCmrNum() != null ? temp.getCmrNum() : "");
-                }
-                checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, cnCreditCd, cnNameDoubleByte, null, null, "CN");
-                log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or double byte CNName.");
-                for (FindCMRRecordModel cmr : checkDNBResults) {
-                  if (StringUtils.isNotEmpty(cmr.getCmrNum()) && !cmrNumList.contains(cmr.getCmrNum())) {
-                    FindCMRRecordModel temp = cmr;
-                    existingCMRs.add(temp);
-                    cmrNumList.add(cmr.getCmrNum());
-                  }
-                }
-              }
-
-              // 3, process duplicate cmr validate logic
+              // 2, process duplicate cmr validate logic
               if (existingCMRs != null && existingCMRs.size() > 0) {
-                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from FINDCMR.");
+                log.debug("There are " + existingCMRs.size() + " cmrs retrieved from D&B matching.");
 
                 for (FindCMRRecordModel cmrsMods : existingCMRs) {
                   nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
@@ -1419,7 +1249,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + cmrsMods.getCmrIntlName2();
                   }
 
-                  log.debug("FINDCMR retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
+                  log.debug("D&B matching retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
                       + trimChineseSpace(nameFindCmrCnResult) + ">");
 
                   if (cmrsMods.getCmrNum() != null && cmrsMods.getCmrNum().startsWith("P")) {
@@ -1447,7 +1277,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
               }
 
-              // 4, output
+              // 3, output
               if (nameMatched || historyNmMatched) {
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate CMRs.");
@@ -2248,6 +2078,45 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     // engineData.setSkipChecks();
     result.setResults("Skip");
     result.setOnError(false);
+  }
+
+  private List<FindCMRRecordModel> checkExistingCMRs(EntityManager entityManager, String socialCreditCode, IntlAddr iAddr, String landedCountry)
+      throws Exception {
+    List<FindCMRRecordModel> output = new ArrayList<FindCMRRecordModel>();
+    List<FindCMRRecordModel> checkDNBResults = new ArrayList<FindCMRRecordModel>();
+    List<String> cmrNumList = new ArrayList<String>();
+
+    String cnNameSingleByte = iAddr.getIntlCustNm1();
+    if (StringUtils.isNotEmpty(iAddr.getIntlCustNm2())) {
+      cnNameSingleByte += iAddr.getIntlCustNm2();
+    }
+    String streetLine1 = iAddr.getAddrTxt();
+    String city = iAddr.getCity1();
+
+    // 1, check DnB with single byte CNName
+    checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, socialCreditCode, cnNameSingleByte, streetLine1, city, "CN");
+    log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
+    output = checkDNBResults;
+
+    // 2, check DnB with double byte CNName if needed
+    String cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
+    if (StringUtils.isEmpty(socialCreditCode) && cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
+      for (FindCMRRecordModel temp : checkDNBResults) {
+        cmrNumList.add(temp.getCmrNum() != null ? temp.getCmrNum() : "");
+      }
+      checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, "", cnNameDoubleByte, streetLine1, city, "CN");
+      log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or double byte CNName.");
+      for (FindCMRRecordModel cmr : checkDNBResults) {
+        if (StringUtils.isNotEmpty(cmr.getCmrNum()) && !cmrNumList.contains(cmr.getCmrNum())) {
+          FindCMRRecordModel temp = cmr;
+          output.add(temp);
+          cmrNumList.add(cmr.getCmrNum());
+        }
+      }
+    }
+
+    // 3, return output
+    return output;
   }
 
 }

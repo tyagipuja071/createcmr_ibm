@@ -1234,7 +1234,7 @@ public class DnBUtil {
     request.setStreetLine1(street);
     request.setCity(city);
     request.setLandedCountry(country);
-    request.setMinConfidence("9");
+    request.setMinConfidence("7");
 
     MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
     ObjectMapper mapper = new ObjectMapper();
