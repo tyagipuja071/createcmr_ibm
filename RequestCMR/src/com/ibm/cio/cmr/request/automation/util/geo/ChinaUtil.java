@@ -646,6 +646,8 @@ public class ChinaUtil extends AutomationUtil {
         String seqNo = (String) result[4];
         String name1 = (String) result[5];
         String name2 = (String) result[6];
+        String ppsceid = (String) result[7];
+        String sortl = (String) result[8];
 
         FindCMRRecordModel cmr = new FindCMRRecordModel();
         cmr.setCmrName1Plain(name1);
@@ -655,6 +657,8 @@ public class ChinaUtil extends AutomationUtil {
         cmr.setCmrOrderBlock(orderBlock);
         cmr.setCmrAddrTypeCode(addrType);
         cmr.setCmrAddrSeq(seqNo);
+        cmr.setCmrPpsceid(ppsceid);
+        cmr.setCmrSortl(sortl);
 
         cmrMatches.add(cmr);
 
