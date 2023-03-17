@@ -105,8 +105,8 @@ public class LAHandler extends GEOHandler {
 
   private static final String[] LA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Enterprise", "PPSCEID", "SitePartyID" };
 
-  protected static final String[] LA_MASS_UPDATE_SHEET_NAMES = { "Sold-To", "Bill-To", "Ship-To", "Install-At", "Email", "AccountReceivable",
-      "Data" };
+  protected static final String[] LA_MASS_UPDATE_SHEET_NAMES = { "Sold-To", "Bill-To", "Ship-To", "Install-At", "TaxInfo", "Email",
+      "AccountReceivable", "Data" };
 
   private static final String DEFAULT_SALES_REP = "111111";
 
@@ -4338,6 +4338,11 @@ public class LAHandler extends GEOHandler {
     boolean isDataFilled = false;
     boolean isARFilled = false;
     boolean isEmailFilled = false;
+    boolean isTaxInfoFilled = false;
+    boolean isSoldToFilled = false;
+    boolean isBillToFilled = false;
+    boolean isShipToFilled = false;
+    boolean isInstallAtFilled = false;
     boolean requesterFromCmdeGsi = false;
     boolean requesterFromAcctReciv = false;
     Map<String, HashSet<String>> mapCmrSeq = new HashMap<String, HashSet<String>>();
@@ -4385,6 +4390,21 @@ public class LAHandler extends GEOHandler {
             String email3 = "";
             String fiscalRegime = "";
             String mexBillingName = "";
+            String taxCode = "";
+            String taxNumber = "";
+            String taxSepIndc = "";
+            String billPrintIndc = "";
+            String contractPrintIndc = "";
+            String countryUse = "";
+            String addrNoSeq = "";
+            String addrName = "";
+            String addrNameCont = "";
+            String street = "";
+            String streetCont = "";
+            String city = "";
+            String stateProv = "";
+            String postal = "";
+            String landed = "";
 
             if (row.getRowNum() == 2001) {
               continue;
@@ -4443,6 +4463,51 @@ public class LAHandler extends GEOHandler {
               } else {
                 mapCmrSeq.put(cmrNo, new HashSet<String>());
               }
+
+              // Abbreviated Name
+              if (isDataFilled && "@".equals(abbrevname)) {
+                error.addError((row.getRowNum() + 1), "<br>Abbreviated Name", "@ value for Abbreviated Name is not allowed.");
+              }
+
+              // INAC/NAC
+              if (isDataFilled && "@@@@".equals(inac)) {
+                error.addError((row.getRowNum() + 1), "<br>INAC/NAC", "@@@@ value for INAC/NAC is not allowed.");
+              }
+
+              // Company
+              if (isDataFilled && "@".equals(company)) {
+                error.addError((row.getRowNum() + 1), "<br>Company", "@ value for Company is not allowed.");
+              }
+
+              // Client Tier
+              if (isDataFilled && "@".equals(clientTier)) {
+                error.addError((row.getRowNum() + 1), "<br>Client Tier", "@ value for Client Tier is not allowed.");
+              }
+
+              // SBO
+              if (isDataFilled && "@".equals(sbo)) {
+                error.addError((row.getRowNum() + 1), "<br>SBO", "@ value for SBO is not allowed.");
+              }
+
+              // Kukla
+              if (isDataFilled && "@".equals(kukla)) {
+                error.addError((row.getRowNum() + 1), "<br>Kukla", "@ value for Kukla is not allowed.");
+              }
+
+              // VAT
+              if (isDataFilled && "@".equals(vat)) {
+                error.addError((row.getRowNum() + 1), "<br>VAT", "@ value for VAT is not allowed.");
+              }
+
+              // Tax Regime
+              if (isDataFilled && "@".equals(fiscalRegime)) {
+                error.addError((row.getRowNum() + 1), "<br>Tax Regime", "@ value for Tax Regime is not allowed.");
+              }
+
+              // Mexico Billing Name
+              if (isDataFilled && "@".equals(mexBillingName)) {
+                error.addError((row.getRowNum() + 1), "<br>Mexico Billing Name", "@ value for Mexico Billing Name is not allowed.");
+              }
             }
 
             if ("AccountReceivable".equalsIgnoreCase(sheet.getSheetName())) {
@@ -4477,6 +4542,17 @@ public class LAHandler extends GEOHandler {
                 LOG.trace("CMR No. is required.");
                 error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
               }
+
+              // COD Reason
+              if (isARFilled && "@".equals(codReason)) {
+                error.addError((row.getRowNum() + 1), "<br>COD Reason", "@ value for COD Reason is not allowed.");
+              }
+
+              // Collector
+              if (isARFilled && "@".equals(collector)) {
+                error.addError((row.getRowNum() + 1), "<br>Collector", "@ value for Collector is not allowed.");
+              }
+
             }
 
             if ("Email".equalsIgnoreCase(sheet.getSheetName())) {
@@ -4496,6 +4572,340 @@ public class LAHandler extends GEOHandler {
               if ((isEmailFilled) && StringUtils.isBlank(cmrNo)) {
                 LOG.trace("CMR No. is required.");
                 error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              // Email1
+              if (isEmailFilled && "@".equals(email1)) {
+                error.addError((row.getRowNum() + 1), "<br>Email1", "@ value for Email1 is not allowed.");
+              }
+            }
+
+            if ("TaxInfo".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              taxCode = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              taxNumber = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              taxSepIndc = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              billPrintIndc = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              contractPrintIndc = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              countryUse = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(taxCode) || StringUtils.isNotBlank(taxNumber)
+                  || StringUtils.isNotBlank(taxSepIndc) || StringUtils.isNotBlank(billPrintIndc) || StringUtils.isNotBlank(contractPrintIndc)
+                  || StringUtils.isNotBlank(countryUse)) {
+                isTaxInfoFilled = true;
+              }
+
+              if ((isTaxInfoFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              // Tax Code
+              if (isTaxInfoFilled && "@".equals(taxCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Tax Code", "@ value for Tax Code is not allowed.");
+              }
+
+              // Tax Number
+              if (isTaxInfoFilled && "@".equals(taxNumber)) {
+                error.addError((row.getRowNum() + 1), "<br>Tax Number", "@ value for Tax Number is not allowed.");
+              }
+
+              // Tax Separation Indicator
+              if (isTaxInfoFilled && "@".equals(taxSepIndc)) {
+                error.addError((row.getRowNum() + 1), "<br>Tax Separation Indicator", "@ value for Tax Separation Indicator is not allowed.");
+              }
+
+              // Billing Print Indicator
+              if (isTaxInfoFilled && "@".equals(billPrintIndc)) {
+                error.addError((row.getRowNum() + 1), "<br>Billing Print Indicator", "@ value for Billing Print Indicator is not allowed.");
+              }
+
+              // Contract Print Indicator
+              if (isTaxInfoFilled && "@".equals(contractPrintIndc)) {
+                error.addError((row.getRowNum() + 1), "<br>Contract Print Indicator", "@ value for Contract Print Indicator is not allowed.");
+              }
+
+              // Country Use
+              if (isTaxInfoFilled && "@@@@".equals(countryUse)) {
+                error.addError((row.getRowNum() + 1), "<br>Country Use", "@ value for Country Use is not allowed.");
+              }
+
+            }
+
+            if ("Install-At".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              addrNoSeq = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              addrName = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              addrNameCont = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              street = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              streetCont = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              city = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              stateProv = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              postal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              landed = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
+                  || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
+                  || StringUtils.isNotBlank(city) || StringUtils.isNotBlank(stateProv) || StringUtils.isNotBlank(postal)) {
+                isInstallAtFilled = true;
+              }
+
+              if ((isInstallAtFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isInstallAtFilled) && StringUtils.isBlank(addrNoSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isInstallAtFilled && addrNoSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
+              }
+
+              // Name
+              if (isInstallAtFilled && "@".equals(addrName)) {
+                error.addError((row.getRowNum() + 1), "<br>Name", "@ value for Name is not allowed.");
+              }
+
+              // Street Address
+              if (isInstallAtFilled && "@".equals(street)) {
+                error.addError((row.getRowNum() + 1), "<br>Street Address", "@ value for Street Address is not allowed.");
+              }
+
+              // City
+              if (isInstallAtFilled && "@".equals(city)) {
+                error.addError((row.getRowNum() + 1), "<br>City", "@ value for City is not allowed.");
+              }
+
+              // State/Province
+              if (isInstallAtFilled && "@".equals(stateProv)) {
+                error.addError((row.getRowNum() + 1), "<br>State/Province", "@ value for State/Province is not allowed.");
+              }
+
+              // Postal Code
+              if (isInstallAtFilled && "@".equals(postal)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+            }
+            if ("Ship-To".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              addrNoSeq = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              addrName = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              addrNameCont = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              street = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              streetCont = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              city = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              stateProv = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              postal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              landed = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
+                  || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
+                  || StringUtils.isNotBlank(city) || StringUtils.isNotBlank(stateProv) || StringUtils.isNotBlank(postal)) {
+                isShipToFilled = true;
+              }
+
+              if ((isShipToFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isShipToFilled) && StringUtils.isBlank(addrNoSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isShipToFilled && addrNoSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
+              }
+
+              // Name
+              if (isShipToFilled && "@".equals(addrName)) {
+                error.addError((row.getRowNum() + 1), "<br>Name", "@ value for Name is not allowed.");
+              }
+
+              // Street Address
+              if (isShipToFilled && "@".equals(street)) {
+                error.addError((row.getRowNum() + 1), "<br>Street Address", "@ value for Street Address is not allowed.");
+              }
+
+              // City
+              if (isShipToFilled && "@".equals(city)) {
+                error.addError((row.getRowNum() + 1), "<br>City", "@ value for City is not allowed.");
+              }
+
+              // State/Province
+              if (isShipToFilled && "@".equals(stateProv)) {
+                error.addError((row.getRowNum() + 1), "<br>State/Province", "@ value for State/Province is not allowed.");
+              }
+
+              // Postal Code
+              if (isShipToFilled && "@".equals(postal)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+            }
+            if ("Bill-To".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              addrNoSeq = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              addrName = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              addrNameCont = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              street = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              streetCont = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              city = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              stateProv = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              postal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              landed = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
+                  || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
+                  || StringUtils.isNotBlank(city) || StringUtils.isNotBlank(stateProv) || StringUtils.isNotBlank(postal)) {
+                isBillToFilled = true;
+              }
+
+              if ((isBillToFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isBillToFilled) && StringUtils.isBlank(addrNoSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isBillToFilled && addrNoSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
+              }
+
+              // Name
+              if (isBillToFilled && "@".equals(addrName)) {
+                error.addError((row.getRowNum() + 1), "<br>Name", "@ value for Name is not allowed.");
+              }
+
+              // Street Address
+              if (isBillToFilled && "@".equals(street)) {
+                error.addError((row.getRowNum() + 1), "<br>Street Address", "@ value for Street Address is not allowed.");
+              }
+
+              // City
+              if (isBillToFilled && "@".equals(city)) {
+                error.addError((row.getRowNum() + 1), "<br>City", "@ value for City is not allowed.");
+              }
+
+              // State/Province
+              if (isBillToFilled && "@".equals(stateProv)) {
+                error.addError((row.getRowNum() + 1), "<br>State/Province", "@ value for State/Province is not allowed.");
+              }
+
+              // Postal Code
+              if (isBillToFilled && "@".equals(postal)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+            }
+            if ("Sold-To".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              addrNoSeq = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              addrName = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              addrNameCont = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              street = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              streetCont = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              city = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              stateProv = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              postal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              landed = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
+                  || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
+                  || StringUtils.isNotBlank(city) || StringUtils.isNotBlank(stateProv) || StringUtils.isNotBlank(postal)) {
+                isSoldToFilled = true;
+              }
+
+              if ((isSoldToFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isSoldToFilled) && StringUtils.isBlank(addrNoSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isSoldToFilled && addrNoSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@@@@@@@@ value for Address Sequence No is not allowed.");
+              }
+
+              // Name
+              if (isSoldToFilled && "@".equals(addrName)) {
+                error.addError((row.getRowNum() + 1), "<br>Name", "@ value for Name is not allowed.");
+              }
+
+              // Street Address
+              if (isSoldToFilled && "@".equals(street)) {
+                error.addError((row.getRowNum() + 1), "<br>Street Address", "@ value for Street Address is not allowed.");
+              }
+
+              // City
+              if (isSoldToFilled && "@".equals(city)) {
+                error.addError((row.getRowNum() + 1), "<br>City", "@ value for City is not allowed.");
+              }
+
+              // State/Province
+              if (isSoldToFilled && "@".equals(stateProv)) {
+                error.addError((row.getRowNum() + 1), "<br>State/Province", "@ value for State/Province is not allowed.");
+              }
+
+              // Postal Code
+              if (isSoldToFilled && "@".equals(postal)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
               }
             }
 
