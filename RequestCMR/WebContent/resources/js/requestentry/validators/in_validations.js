@@ -633,14 +633,15 @@ function onCustSubGrpChange() {
       FormManager.enable('isicCd');
        
     if (FormManager.getActualValue('reqType') == 'C') {  
-      
       setLockIsicfromDNB();
-      
       if (value == "KYNDR"){
         FormManager.readOnly('inacType');
       }
-      
-    }  
+    }
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    if(cntry == '744' && custSubGrp =='AQSTN'){
+      autoSetAbbrevNmLocnLogic();
+    }
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custSubGrpInDB = _pagemodel.custSubGrp;
     if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB) {
