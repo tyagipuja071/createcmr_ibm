@@ -592,21 +592,13 @@ public class VatUtilController {
 
     List<DnBMatchingResponse> nameMatches = DnBUtil.findByAddress("CN", cnName, cnAddress, cnCity);
     if (!nameMatches.isEmpty()) {
-      DnBMatchingResponse match = nameMatches.get(0);
-      LOG.debug("Got " + match.getDnbName() + " / " + match.getDnbStreetLine1() + " / " + match.getDnbCity());
-
       // only add if no orgId specified, or orgId specified and matches duns
-      if (trackedDuns == null || trackedDuns.equals(match.getDunsNo())) {
-        if (trackedDuns != null) {
-          LOG.debug(" - matched with DUNS " + match.getDunsNo() + ". Comparing name and address");
-        }
+      CNHandler handler = new CNHandler();
+      for (DnBMatchingResponse match : nameMatches) {
+        LOG.debug("Got " + match.getDunsNo() + " / " + match.getDnbName() + " / " + match.getDnbStreetLine1() + " / " + match.getDnbCity());
 
-        // only do name matching, if needed check only street
-        // note: account for dummy address and city
-        CNHandler handler = new CNHandler();
-        String dbcsInputName = handler.convert2DBCS(cnName);
-        String dbcsDnBName = handler.convert2DBCS(match.getDnbName());
-        if (dbcsInputName.equals(dbcsDnBName)) {
+        if (trackedDuns != null && trackedDuns.equals(match.getDunsNo())) {
+          LOG.debug(" - matched with DUNS " + match.getDunsNo() + ". Comparing name and address");
           // repurpose CNResponse here
           CNResponse cnResponse = new CNResponse();
           cnResponse.setCreditCode(!StringUtils.isBlank(busnType) ? busnType : DnBUtil.getVAT("CN", match.getOrgIdDetails()));
@@ -614,6 +606,22 @@ public class VatUtilController {
           cnResponse.setRegLocation(match.getDnbStreetLine1());
           cnResponse.setCity(match.getDnbCity());
           map.put("result", cnResponse);
+          break;
+        } else if (trackedDuns == null) {
+          // only do name matching, if needed check only street
+          // note: account for dummy address and city
+          String dbcsInputName = handler.convert2DBCS(cnName);
+          String dbcsDnBName = handler.convert2DBCS(match.getDnbName());
+          if (dbcsInputName.equals(dbcsDnBName)) {
+            // repurpose CNResponse here
+            CNResponse cnResponse = new CNResponse();
+            cnResponse.setCreditCode(!StringUtils.isBlank(busnType) ? busnType : DnBUtil.getVAT("CN", match.getOrgIdDetails()));
+            cnResponse.setName(match.getDnbName());
+            cnResponse.setRegLocation(match.getDnbStreetLine1());
+            cnResponse.setCity(match.getDnbCity());
+            map.put("result", cnResponse);
+            break;
+          }
         }
       }
     }
