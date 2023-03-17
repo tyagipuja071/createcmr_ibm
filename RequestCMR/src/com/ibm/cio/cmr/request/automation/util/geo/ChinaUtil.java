@@ -627,7 +627,13 @@ public class ChinaUtil extends AutomationUtil {
       String sql = ExternalizedQuery.getSql("CN.FIND_DUPLICATE_BY_DUNS");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-      query.append((allDuns.size() > 0 ? " in " : " = ") + dunsIN.toString());
+      // query.append((allDuns.size() > 0 ? " in " : " = ") +
+      // dunsIN.toString());
+      if (allDuns.size() > 0) {
+        query.append(" in (" + dunsIN.toString() + ")");
+      } else {
+        query.append(" = " + dunsIN.toString());
+      }
       query.setForReadOnly(true);
 
       List<FindCMRRecordModel> cmrMatches = new ArrayList<FindCMRRecordModel>();
@@ -640,6 +646,8 @@ public class ChinaUtil extends AutomationUtil {
         String seqNo = (String) result[4];
         String name1 = (String) result[5];
         String name2 = (String) result[6];
+        String ppsceid = (String) result[7];
+        String sortl = (String) result[8];
 
         FindCMRRecordModel cmr = new FindCMRRecordModel();
         cmr.setCmrName1Plain(name1);
@@ -649,6 +657,8 @@ public class ChinaUtil extends AutomationUtil {
         cmr.setCmrOrderBlock(orderBlock);
         cmr.setCmrAddrTypeCode(addrType);
         cmr.setCmrAddrSeq(seqNo);
+        cmr.setCmrPpsceid(ppsceid);
+        cmr.setCmrSortl(sortl);
 
         cmrMatches.add(cmr);
 
