@@ -1199,20 +1199,24 @@ public class DnBUtil {
     TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
     };
     MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
-    if (response != null && response.getSuccess() && response.getMatched()) {
-      List<DnBMatchingResponse> matchedIds = new ArrayList<DnBMatchingResponse>();
-      for (DnBMatchingResponse rec : response.getMatches()) {
-        LOG.debug("DUNS " + rec.getDunsNo() + " matched Org ID " + orgId);
-        LOG.debug("OrgIdMatch = " + rec.getOrgIdMatch() + ", ConfidenceCode = " + rec.getConfidenceCode() + ", MatchGrade = " + rec.getMatchGrade()
-            + ", MatchQuality = " + rec.getMatchQuality());
-        if ("Y".equals(rec.getOrgIdMatch())) {
+    if (response != null && response.getSuccess()) {
+      if (response.getMatched()) {
+        List<DnBMatchingResponse> matchedIds = new ArrayList<DnBMatchingResponse>();
+        for (DnBMatchingResponse rec : response.getMatches()) {
           LOG.debug("DUNS " + rec.getDunsNo() + " matched Org ID " + orgId);
-          matchedIds.add(rec);
+          LOG.debug("OrgIdMatch = " + rec.getOrgIdMatch() + ", ConfidenceCode = " + rec.getConfidenceCode() + ", MatchGrade = " + rec.getMatchGrade()
+              + ", MatchQuality = " + rec.getMatchQuality());
+          if ("Y".equals(rec.getOrgIdMatch())) {
+            LOG.debug("DUNS " + rec.getDunsNo() + " matched Org ID " + orgId);
+            matchedIds.add(rec);
+          }
         }
+        return matchedIds;
+      } else {
+        LOG.debug("D&B matching returned no matches inside findByOrgId. Org ID " + orgId);
       }
-      return matchedIds;
     } else {
-      LOG.error("D&B matching failed or no matched record inside findByOrgId. Org ID " + orgId);
+      LOG.error("D&B matching failed inside findByOrgId. Org ID " + orgId);
     }
     return Collections.emptyList();
   }
@@ -1243,10 +1247,14 @@ public class DnBUtil {
     TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
     };
     MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
-    if (response != null && response.getSuccess() && response.getMatched()) {
-      return response.getMatches();
+    if (response != null && response.getSuccess()) {
+      if (response.getMatched()) {
+        return response.getMatches();
+      } else {
+        LOG.debug("D&B matching returned no matches inside findByAddress.");
+      }
     } else {
-      LOG.error("D&B matching failed or no matched record inside findByAddress.");
+      LOG.error("D&B matching failed inside findByAddress.");
     }
     return Collections.emptyList();
   }

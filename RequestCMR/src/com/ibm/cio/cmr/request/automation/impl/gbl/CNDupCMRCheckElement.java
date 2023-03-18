@@ -1,6 +1,5 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,7 +39,6 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
@@ -641,7 +639,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                   searchModelFindCmrCN.setCied(cnCeid);
-                  findCMRResult = searchFindCMR(searchModelFindCmrCN);
+                  findCMRResult = ChinaUtil.searchFindCMR(searchModelFindCmrCN);
                   if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
 
                     ceidMatched = true;
@@ -1063,7 +1061,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             CompanyRecordModel searchModelFindCmr = new CompanyRecordModel();
             searchModelFindCmr.setIssuingCntry(data.getCmrIssuingCntry());
             searchModelFindCmr.setName(soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? (" " + soldTo.getCustNm2()) : ""));
-            findCMRResult = searchFindCMR(searchModelFindCmr);
+            findCMRResult = ChinaUtil.searchFindCMR(searchModelFindCmr);
             if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
               ceidMatched = true;
               List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
@@ -1230,6 +1228,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
             cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
+            cnAddrSingleByte = iAddr.getAddrTxt();
           }
           // George, fix dup cmr not found CREATCMR-3133 on 20210802
           if (validCNName(cnNameSingleByte)) {
@@ -1264,9 +1263,9 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   log.debug("FINDCMR retrieved address is " + addrFindCmrCnResult);
                   log.debug("cnAddrSingleByte is " + cnAddrSingleByte);
                   if (addrFindCmrCnResult.equals(cnAddrSingleByte)) {
-                    nameMatched = true;
+                    // nameMatched = true;
                   } else {
-                    nameMatched = false;
+                    // nameMatched = false;
                   }
 
                   if (nameMatched) {
@@ -1319,7 +1318,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           searchModelFindCmr.setName(soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? (" " + soldTo.getCustNm2()) : ""));
           searchModelFindCmr.setStreetAddress1(soldTo.getAddrTxt());
           searchModelFindCmr.setStreetAddress2(soldTo.getAddrTxt2());
-          findCMRResult = searchFindCMR(searchModelFindCmr);
+          findCMRResult = ChinaUtil.searchFindCMR(searchModelFindCmr);
           if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
             ceidMatched = true;
             List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
@@ -1370,7 +1369,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           searchModel.setIssuingCntry(data.getCmrIssuingCntry());
           searchModel.setName(soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? (" " + soldTo.getCustNm2()) : ""));
           searchModel.setCountryCd(soldTo.getLandCntry());
-          findCMRResult = searchFindCMR(searchModel);
+          findCMRResult = ChinaUtil.searchFindCMR(searchModel);
           if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
             ceidMatched = true;
             List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
@@ -1666,34 +1665,6 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       kunnr = record.get("KUNNR") != null ? record.get("KUNNR").toString() : "";
     }
     return kunnr;
-  }
-
-  protected static FindCMRResultModel searchFindCMR(CompanyRecordModel searchModel) throws Exception {
-    String cmrNo = searchModel.getCmrNo();
-    String issuingCntry = searchModel.getIssuingCntry();
-    String params = null;
-    if (!StringUtils.isBlank(searchModel.getCied())) {
-      params = "&ppsCeId=" + searchModel.getCied();
-    }
-    if (!StringUtils.isBlank(searchModel.getName())) {
-      String name = searchModel.getName();
-      name = StringUtils.replace(name, " ", "%20");
-      // params = "&customerName=" + name;
-      params = "&customerName=" + URLEncoder.encode(name, "UTF-8");
-    }
-    if (!StringUtils.isBlank(searchModel.getStreetAddress1())) {
-      String street = searchModel.getStreetAddress1();
-      street = StringUtils.replace(street, " ", "%20");
-      if (!StringUtils.isBlank(searchModel.getStreetAddress2())) {
-        String street2 = searchModel.getStreetAddress2();
-        street2 = StringUtils.replace(street2, " ", "%20");
-        street += street2;
-      }
-      params += "&streetAddress=" + street;
-    }
-    params += "&addressType=ZS01";
-    FindCMRResultModel results = SystemUtil.findCMRs(cmrNo, issuingCntry, 50, null, params);
-    return results;
   }
 
   private void sendManagerEmail(EntityManager entityManager, Admin admin, Data data, Addr soldTo, StringBuilder details) {
