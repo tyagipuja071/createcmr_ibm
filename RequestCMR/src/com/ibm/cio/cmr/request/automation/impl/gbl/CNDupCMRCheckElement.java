@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +25,6 @@ import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.DuplicateChecksUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
-import com.ibm.cio.cmr.request.automation.util.geo.ChinaUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -39,6 +39,8 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
@@ -48,6 +50,7 @@ import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
 
@@ -639,7 +642,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                   searchModelFindCmrCN.setCied(cnCeid);
-                  findCMRResult = ChinaUtil.searchFindCMR(searchModelFindCmrCN);
+                  findCMRResult = searchFindCMR(searchModelFindCmrCN);
                   if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
 
                     ceidMatched = true;
@@ -1061,7 +1064,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             CompanyRecordModel searchModelFindCmr = new CompanyRecordModel();
             searchModelFindCmr.setIssuingCntry(data.getCmrIssuingCntry());
             searchModelFindCmr.setName(soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? (" " + soldTo.getCustNm2()) : ""));
-            findCMRResult = ChinaUtil.searchFindCMR(searchModelFindCmr);
+            findCMRResult = searchFindCMR(searchModelFindCmr);
             if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
               ceidMatched = true;
               List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
@@ -1318,7 +1321,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           searchModelFindCmr.setName(soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? (" " + soldTo.getCustNm2()) : ""));
           searchModelFindCmr.setStreetAddress1(soldTo.getAddrTxt());
           searchModelFindCmr.setStreetAddress2(soldTo.getAddrTxt2());
-          findCMRResult = ChinaUtil.searchFindCMR(searchModelFindCmr);
+          findCMRResult = searchFindCMR(searchModelFindCmr);
           if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
             ceidMatched = true;
             List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
@@ -1369,7 +1372,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           searchModel.setIssuingCntry(data.getCmrIssuingCntry());
           searchModel.setName(soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? (" " + soldTo.getCustNm2()) : ""));
           searchModel.setCountryCd(soldTo.getLandCntry());
-          findCMRResult = ChinaUtil.searchFindCMR(searchModel);
+          findCMRResult = searchFindCMR(searchModel);
           if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
             ceidMatched = true;
             List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
@@ -2012,7 +2015,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     return result;
   }
 
-  public static boolean getSkipAndPpnInd(EntityManager entityManager, Data data) {
+  private boolean getSkipAndPpnInd(EntityManager entityManager, Data data) {
     boolean result = false;
     boolean hasCNSpecialAttach = checkCNSpecialAttach(entityManager, data.getId().getReqId());
     if (hasCNSpecialAttach && "Y".equals(data.getVatExempt())) {
@@ -2022,7 +2025,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     return result;
   }
 
-  private static boolean checkCNSpecialAttach(EntityManager entityManager, long reqId) {
+  private boolean checkCNSpecialAttach(EntityManager entityManager, long reqId) {
     boolean result = false;
     String sql = ExternalizedQuery.getSql("QUERY.CHECK_CN_API_ATTACHMENT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -2065,7 +2068,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     String city = iAddr.getCity1();
 
     // 1, check DnB with single byte CNName
-    checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, socialCreditCode, cnNameSingleByte, streetLine1, city, "CN");
+    checkDNBResults = getExistingCMRs(entityManager, socialCreditCode, cnNameSingleByte, streetLine1, city, "CN");
     log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or single byte CNName.");
     output = checkDNBResults;
 
@@ -2075,7 +2078,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       for (FindCMRRecordModel temp : checkDNBResults) {
         cmrNumList.add(temp.getCmrNum() != null ? temp.getCmrNum() : "");
       }
-      checkDNBResults = ChinaUtil.getExistingCMRs(entityManager, "", cnNameDoubleByte, streetLine1, city, "CN");
+      checkDNBResults = getExistingCMRs(entityManager, "", cnNameDoubleByte, streetLine1, city, "CN");
       log.debug("There are " + checkDNBResults.size() + " cmrs retrieved from FINDCMR using cnCreditCd and/or double byte CNName.");
       for (FindCMRRecordModel cmr : checkDNBResults) {
         if (StringUtils.isNotEmpty(cmr.getCmrNum()) && !cmrNumList.contains(cmr.getCmrNum())) {
@@ -2088,6 +2091,226 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
     // 3, return output
     return output;
+  }
+
+  /**
+   * Does a checking on existing CMRs based on the Social Credit Code. Each
+   * non-BP, non-3rd party CMR can only have one instance per Social Credit
+   * Code. The matching continues using the local language name and address when
+   * no DUNS is found via the Social Credit Code.
+   * 
+   * @param entityManager
+   * @param socialCreditCd
+   * @param localName
+   * @param localAddress
+   * @param localCity
+   * @return list of {@link FindCMRRecordModel} containing the CMR details
+   *         directly from KNA1
+   * @throws Exception
+   */
+  public List<FindCMRRecordModel> getExistingCMRs(EntityManager entityManager, String socialCreditCode, String localName, String localAddress,
+      String localCity, String landedCountry) throws Exception {
+
+    List<String> allDuns = new ArrayList<String>();
+
+    log.debug("Find DUNS using Social Credit Code " + socialCreditCode + " for " + landedCountry);
+    List<DnBMatchingResponse> matches = DnBUtil.findByOrgId(socialCreditCode, landedCountry);
+    if (!matches.isEmpty()) {
+
+      // it's expected to only be 1, but gather all just in case
+      matches.parallelStream().forEach(match -> {
+        allDuns.add(match.getDunsNo());
+      });
+    } else {
+      log.debug("Finding DUNS using local language information..");
+      matches = DnBUtil.findByAddress(landedCountry, localName, localAddress, localCity);
+      if (!matches.isEmpty()) {
+
+        // only get confidence code >= 7 for name/address matching
+        matches.parallelStream().filter(match -> match.getConfidenceCode() >= 7).forEach(match -> {
+          allDuns.add(match.getDunsNo());
+        });
+      }
+    }
+
+    if (allDuns.isEmpty()) {
+      // no duns matches, return
+      return Collections.emptyList();
+    } else {
+      // 1, query KNA1 and KDUNS_NEW
+      List<FindCMRRecordModel> cmrMatches = findDupByDuns(entityManager, allDuns);
+
+      // 2, if there is no social Credit Code, check FindCMR using CNName in
+      // case legal hierarchy not run yet
+      if (StringUtils.isEmpty(socialCreditCode) && cmrMatches.isEmpty()) {
+        List<FindCMRRecordModel> cnNameFindCMRs = checkFindCMRViaCNName(localName, "641", "CN");
+        for (FindCMRRecordModel tempCmr : cnNameFindCMRs) {
+          if (!isIncludedCmr(tempCmr, cmrMatches)) {
+            cmrMatches.add(tempCmr);
+          }
+        }
+      }
+
+      // 3, do cmr validations
+      validateCmrs(cmrMatches);
+
+      return cmrMatches;
+    }
+
+  }
+
+  private List<FindCMRRecordModel> findDupByDuns(EntityManager entityManager, List<String> allDuns) {
+    log.debug("DUNS LIST: " + allDuns);
+    StringBuilder dunsIN = new StringBuilder();
+    allDuns.stream().forEach(duns -> {
+      dunsIN.append(dunsIN.length() > 0 ? ", " : "");
+      dunsIN.append("'").append(duns).append("'");
+    });
+    String sql = ExternalizedQuery.getSql("CN.FIND_DUPLICATE_BY_DUNS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KTOKD", "ZS01");
+    query.setParameter("LAND1", "CN");
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    if (allDuns.size() > 0) {
+      query.append(" in (" + dunsIN.toString() + ")");
+    } else {
+      query.append(" = " + dunsIN.toString());
+    }
+    query.setForReadOnly(true);
+
+    List<FindCMRRecordModel> cmrMatches = new ArrayList<FindCMRRecordModel>();
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      for (Object[] result : results) {
+        String cmrNo = (String) result[0];
+        String orderBlock = (String) result[1];
+        String custClass = (String) result[2];
+        String addrType = (String) result[3];
+        String seqNo = (String) result[4];
+        String name1 = (String) result[5];
+        String name2 = (String) result[6];
+        String ppsceid = (String) result[7];
+        String sortl = (String) result[8];
+        String duns = (String) result[9];
+        String sadrAdrnr = (String) result[10];
+        String sadrName1 = (String) result[11];
+        String sadrName2 = (String) result[12];
+        String sadrOrt01 = (String) result[13];
+        String sadrOrt02 = (String) result[14];
+        String sadrStras = (String) result[15];
+        String sadrName4 = (String) result[16];
+
+        FindCMRRecordModel cmr = new FindCMRRecordModel();
+        cmr.setCmrName1Plain(name1);
+        cmr.setCmrName2Plain(name2);
+        cmr.setCmrClass(custClass);
+        cmr.setCmrNum(cmrNo);
+        cmr.setCmrOrderBlock(orderBlock);
+        cmr.setCmrAddrTypeCode(addrType);
+        cmr.setCmrAddrSeq(seqNo);
+        cmr.setCmrPpsceid(ppsceid);
+        cmr.setCmrSortl(sortl);
+        cmr.setCmrDuNumber(duns);
+        cmr.setCmrIntlName1(sadrName1);
+        cmr.setCmrIntlName2(sadrName2);
+
+        String intlAddress = getIntlAddress(sadrOrt01, sadrOrt02, sadrStras, sadrName4);
+        cmr.setCmrIntlAddress(intlAddress);
+
+        cmrMatches.add(cmr);
+      }
+    }
+    return cmrMatches;
+  }
+
+  private String getIntlAddress(String ort01, String ort02, String stras, String name4) {
+    String intlAddress = null;
+    if (StringUtils.isEmpty(stras)) {
+      intlAddress = ort01 + (StringUtils.isEmpty(ort02) ? "" : ort02);
+    } else {
+      intlAddress = stras + (StringUtils.isEmpty(name4) ? "" : name4);
+    }
+    return intlAddress;
+  }
+
+  private List<FindCMRRecordModel> checkFindCMRViaCNName(String localName, String issuingCntry, String landedCountry) throws Exception {
+    List<FindCMRRecordModel> outputCmrs = new ArrayList<FindCMRRecordModel>();
+    String resultCNName = null;
+    CompanyRecordModel searchModel = new CompanyRecordModel();
+    searchModel.setIssuingCntry(issuingCntry);
+    searchModel.setCountryCd(landedCountry);
+    searchModel.setName(localName);
+    FindCMRResultModel findCMRResult = searchFindCMR(searchModel);
+
+    if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+      List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+      for (FindCMRRecordModel cmrsMods : cmrs) {
+        resultCNName = cmrsMods.getCmrIntlName1() + (StringUtils.isEmpty(cmrsMods.getCmrIntlName2()) ? "" : cmrsMods.getCmrIntlName2());
+        if (localName.equals(resultCNName)) {
+          outputCmrs.add(cmrsMods);
+        }
+      }
+    }
+    return outputCmrs;
+  }
+
+  private boolean isIncludedCmr(FindCMRRecordModel temp, List<FindCMRRecordModel> cmrs) {
+    if (cmrs.isEmpty()) {
+      return false;
+    }
+    if (temp.getCmrNum().isEmpty()) {
+      return false;
+    }
+    String tempCmrNo = StringUtils.isEmpty(temp.getCmrNum()) ? "" : temp.getCmrNum();
+    for (FindCMRRecordModel cmr : cmrs) {
+      if (tempCmrNo.equals(cmr.getCmrNum())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public FindCMRResultModel searchFindCMR(CompanyRecordModel searchModel) throws Exception {
+    String cmrNo = searchModel.getCmrNo();
+    String issuingCntry = searchModel.getIssuingCntry();
+    String params = null;
+    if (!StringUtils.isBlank(searchModel.getCied())) {
+      params = "&ppsCeId=" + searchModel.getCied();
+    }
+    if (!StringUtils.isBlank(searchModel.getName())) {
+      String name = searchModel.getName();
+      name = StringUtils.replace(name, " ", "%20");
+      // params = "&customerName=" + name;
+      params = "&customerName=" + URLEncoder.encode(name, "UTF-8");
+    }
+    if (!StringUtils.isBlank(searchModel.getStreetAddress1())) {
+      String street = searchModel.getStreetAddress1();
+      street = StringUtils.replace(street, " ", "%20");
+      if (!StringUtils.isBlank(searchModel.getStreetAddress2())) {
+        String street2 = searchModel.getStreetAddress2();
+        street2 = StringUtils.replace(street2, " ", "%20");
+        street += street2;
+      }
+      params += "&streetAddress=" + street;
+    }
+    params += "&addressType=ZS01";
+    FindCMRResultModel results = SystemUtil.findCMRs(cmrNo, issuingCntry, 50, null, params);
+    return results;
+  }
+
+  private void validateCmrs(List<FindCMRRecordModel> cmrs) {
+    List<FindCMRRecordModel> tempList = new ArrayList<FindCMRRecordModel>();
+    for (FindCMRRecordModel cmr : cmrs) {
+      if ("93".equals(cmr.getCmrOrderBlock())) {
+        continue;
+      } else {
+        tempList.add(cmr);
+      }
+    }
+
+    cmrs.clear();
+    cmrs.addAll(tempList);
   }
 
 }
