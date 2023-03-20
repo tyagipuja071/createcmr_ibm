@@ -626,6 +626,13 @@ public class FRService extends TransConnService {
               if (red.getSeqNo() != null && red.getSeqNo() != "") {
                 addrSeqs = red.getSeqNo().split(",");
               }
+              if (("ZP01").equalsIgnoreCase(red.getAddressType()) && "PG01".equals(addr.getId().getAddrType())
+                  && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+                LOG.debug("ZP01 matched");
+                addr.setPairedAddrSeq(addrSeqs[0]);
+                addr.setSapNo(red.getSapNo());
+                addr.setIerpSitePrtyId(red.getIerpSitePartyId());
+              }
 
               if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                 addr.setPairedAddrSeq(addrSeqs[0]);
