@@ -258,7 +258,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 result.setResults("Found Duplicate CMRs.");
                 Collections.sort(matchedCMRs);
                 engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
+                // to allow overrides later
                 requestData.getAdmin().setMatchIndc("C");
                 result.setOnError(true);
                 result.setProcessOutput(output);
@@ -563,7 +563,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 result.setResults("Found Duplicate CMRs.");
                 Collections.sort(matchedCMRs);
                 engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
+                // to allow overrides later
                 requestData.getAdmin().setMatchIndc("C");
                 result.setOnError(true);
                 result.setProcessOutput(output);
@@ -890,7 +890,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 result.setResults("Found Duplicate CMRs.");
                 Collections.sort(matchedCMRs);
                 engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
+                // to allow overrides later
                 requestData.getAdmin().setMatchIndc("C");
                 result.setOnError(true);
                 result.setProcessOutput(output);
@@ -1020,7 +1020,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 result.setResults("Found Duplicate CMRs.");
                 Collections.sort(matchedCMRs);
                 engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
+                // to allow overrides later
                 requestData.getAdmin().setMatchIndc("C");
                 result.setOnError(true);
                 result.setProcessOutput(output);
@@ -1108,7 +1108,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 result.setResults("Found Duplicate CMRs.");
                 Collections.sort(matchedCMRs);
                 engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
+                // to allow overrides later
                 requestData.getAdmin().setMatchIndc("C");
                 result.setOnError(true);
                 result.setProcessOutput(output);
@@ -1194,7 +1194,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate CMRs.");
                 engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
+                // to allow overrides later
                 requestData.getAdmin().setMatchIndc("C");
                 result.setOnError(true);
                 result.setProcessOutput(output);
@@ -1284,7 +1284,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 result.setResults("Matches Found");
                 result.setResults("Found Duplicate CMRs.");
                 engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
+                // to allow overrides later
                 requestData.getAdmin().setMatchIndc("C");
                 result.setOnError(true);
                 result.setProcessOutput(output);
@@ -1349,7 +1349,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             result.setResults("Matches Found");
             result.setResults("Found Duplicate CMRs.");
             engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-            // to allow overides later
+            // to allow overrides later
             requestData.getAdmin().setMatchIndc("C");
             result.setOnError(true);
             result.setProcessOutput(output);
@@ -1416,7 +1416,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
               result.setResults("Found Duplicate CMRs.");
               Collections.sort(matchedCMRs);
               engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-              // to allow overides later
+              // to allow overrides later
               requestData.getAdmin().setMatchIndc("C");
               result.setOnError(true);
               result.setProcessOutput(output);
@@ -2140,13 +2140,23 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       // 1, query KNA1 and KDUNS_NEW
       List<FindCMRRecordModel> cmrMatches = findDupByDuns(entityManager, allDuns);
 
-      // 2, if there is no social Credit Code, check FindCMR using CNName in
-      // case legal hierarchy not run yet
-      if (StringUtils.isEmpty(socialCreditCode) && cmrMatches.isEmpty()) {
-        List<FindCMRRecordModel> cnNameFindCMRs = checkFindCMRViaCNName(localName, "641", "CN");
-        for (FindCMRRecordModel tempCmr : cnNameFindCMRs) {
-          if (!isIncludedCmr(tempCmr, cmrMatches)) {
-            cmrMatches.add(tempCmr);
+      // 2, check FindCMR in case legal hierarchy not run yet
+      if (cmrMatches.isEmpty()) {
+        if (!StringUtils.isEmpty(socialCreditCode)) {
+          List<FindCMRRecordModel> cnNameFindCMRs = checkFindCMRViaDuns(allDuns.get(0), "641", "CN");
+          for (FindCMRRecordModel tempCmr : cnNameFindCMRs) {
+            if (!isIncludedCmr(tempCmr, cmrMatches)) {
+              if (allDuns.get(0).equals(tempCmr.getCmrDuns())) {
+                cmrMatches.add(tempCmr);
+              }
+            }
+          }
+        } else {
+          List<FindCMRRecordModel> cnNameFindCMRs = checkFindCMRViaCNName(localName, "641", "CN");
+          for (FindCMRRecordModel tempCmr : cnNameFindCMRs) {
+            if (!isIncludedCmr(tempCmr, cmrMatches)) {
+              cmrMatches.add(tempCmr);
+            }
           }
         }
       }
@@ -2234,6 +2244,41 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     return intlAddress;
   }
 
+  private List<FindCMRRecordModel> checkFindCMRViaDuns(String duns, String issuingCntry, String landedCountry) throws Exception {
+    List<FindCMRRecordModel> outputCmrs = new ArrayList<FindCMRRecordModel>();
+    CompanyRecordModel searchModel = new CompanyRecordModel();
+    searchModel.setIssuingCntry(issuingCntry);
+    searchModel.setCountryCd(landedCountry);
+    searchModel.setDunsNo(duns);
+    FindCMRResultModel findCMRResult = searchFindCMR(searchModel);
+
+    if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+      List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+      String biggestRevenue = getBiggestRevenue(cmrs);
+      for (FindCMRRecordModel cmrsMods : cmrs) {
+        if (biggestRevenue.equals(cmrsMods.getCmrRevenue())) {
+          outputCmrs.add(cmrsMods);
+        }
+        outputCmrs.add(cmrsMods);
+      }
+    }
+    return outputCmrs;
+  }
+
+  private String getBiggestRevenue(List<FindCMRRecordModel> cmrs) {
+    String biggestRevenueStr = "";
+    float biggestRevenue = 0;
+    float revenue = 0;
+    for (FindCMRRecordModel cmr : cmrs) {
+      revenue = cmr.getCmrRevenueNumber();
+      if (revenue - biggestRevenue > 0) {
+        biggestRevenue = revenue;
+        biggestRevenueStr = cmr.getCmrRevenue();
+      }
+    }
+    return biggestRevenueStr;
+  }
+
   private List<FindCMRRecordModel> checkFindCMRViaCNName(String localName, String issuingCntry, String landedCountry) throws Exception {
     List<FindCMRRecordModel> outputCmrs = new ArrayList<FindCMRRecordModel>();
     String resultCNName = null;
@@ -2275,6 +2320,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     String cmrNo = searchModel.getCmrNo();
     String issuingCntry = searchModel.getIssuingCntry();
     String params = null;
+    if (!StringUtils.isBlank(searchModel.getDunsNo())) {
+      String duns = searchModel.getDunsNo();
+      params = "&dunsNumber=" + duns;
+    }
     if (!StringUtils.isBlank(searchModel.getCied())) {
       params = "&ppsCeId=" + searchModel.getCied();
     }
