@@ -1564,6 +1564,12 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
                  FormManager.readOnly('inacType');
                }
                
+            } else if(scenario == 'LOCAL' && _cmrIssuingCntry == '744' && (custSubGrp == 'AQSTN' || custSubGrp == 'NRMLC') && _cluster == '012D999') {
+              FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+              FormManager.setValue('clientTier','Q');
+              FormManager.setValue('isuCd','34');
             } else {
                FormManager.resetDropdownValues(FormManager.getField('clientTier'));
                FormManager.setValue('clientTier','');
@@ -2133,8 +2139,13 @@ function setISUDropDownValues() {
                FormManager.readOnly('inacCd');
                FormManager.readOnly('inacType');
              }
-          } 
-        else {
+          } else if(scenario == 'LOCAL' && _cmrIssuingCntry == '744' && (custSubGrp == 'AQSTN' || custSubGrp == 'NRMLC') && _cluster == '012D999') {
+            FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+            FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q']);
+            FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+            FormManager.setValue('clientTier','Q');
+            FormManager.setValue('isuCd','34');
+          } else {
              FormManager.resetDropdownValues(FormManager.getField('clientTier'));
              FormManager.setValue('clientTier','');
              FormManager.setValue('isuCd','');
