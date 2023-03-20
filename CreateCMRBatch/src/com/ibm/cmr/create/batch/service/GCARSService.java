@@ -177,7 +177,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       LOG.debug("Opening session...");
       jschSession = jsch.getSession(USERNAME, REMOTE_HOST, REMOTE_PORT);
 
-      // jschSession.setPassword(PASSWORD);
+      jschSession.setPassword(PASSWORD);
       jschSession.connect(SESSION_TIMEOUT);
 
       LOG.debug("Opening channel...");
