@@ -2627,9 +2627,9 @@ function setMrcCdToReadOnly() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-
+  var custSubGrpList = [ 'IBMEM', 'PRIPE', 'BUSPR', 'INTER', 'INTOU', 'INIBM' ];
   if (reqType == 'C') {
-    if(custSubGrp == 'IBMEM') {
+    if (custSubGrpList.includes(custSubGrp)) {
       if (role == 'REQUESTER') {
         FormManager.readOnly('mrcCd');
       } else {
