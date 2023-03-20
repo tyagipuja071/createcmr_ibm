@@ -639,13 +639,12 @@ function onCustSubGrpChange() {
       }
     }
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
-    if(cntry == '744' && custSubGrp =='AQSTN'){
-      autoSetAbbrevNmLocnLogic();
-    }
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custSubGrpInDB = _pagemodel.custSubGrp;
     if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB) {
-      autoSetAbbrevNmLocnLogic();
+      if (cntry == '744' && custSubGrp == "AQSTN") {
+        FormManager.setValue('abbrevNm', "Acquisition Use Only");
+      }
       FormManager.setValue('abbrevLocn', _pagemodel.abbrevLocn);
       FormManager.setValue('isbuCd', _pagemodel.isbuCd);
       return;
@@ -3202,7 +3201,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(applyClusterFilters, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, [ SysLoc.INDIA ]); 
   GEOHandler.addAfterTemplateLoad(lockInacNacFieldsByScenarioSubType, [ SysLoc.INDIA ]);
-  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChange, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChange, [ SysLoc.INDIA ]);   
   GEOHandler.addAfterConfig(lockInacType, [ SysLoc.INDIA ]);
  
 });
