@@ -127,19 +127,6 @@ public class NewZealandUtil extends AutomationUtil {
       }
     }
 
-    LOG.debug(
-        "engineData.getPendingChecks()!= null ? " + (engineData.getPendingChecks() != null));
-    LOG.debug(
-        "engineData.getPendingChecks()!= null && (engineData.getPendingChecks().containsKey(\"DnBMatch\") ? "
-            + (engineData.getPendingChecks() != null
-                && (engineData.getPendingChecks().containsKey("DnBMatch"))));
-    LOG.debug(
-        "engineData.getPendingChecks()!= null && (engineData.getPendingChecks().containsKey(\"DNBCheck\")) ? "
-            + (engineData.getPendingChecks() != null
-                && (engineData.getPendingChecks().containsKey("DNBCheck"))));
-    LOG.debug("data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase(\"DNBO\") ? " + data.getUsSicmen() != null
-        && data.getUsSicmen().equalsIgnoreCase("DNBO"));
-
     if ("C".equals(admin.getReqType()) && !RELEVANT_SCENARIO.contains(scenario) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
         && "LOCAL".equalsIgnoreCase(custType) && engineData.getPendingChecks() != null
         && (engineData.getPendingChecks().containsKey("DnBMatch") || engineData.getPendingChecks().containsKey("DNBCheck")
