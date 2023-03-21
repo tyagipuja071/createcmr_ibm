@@ -85,7 +85,7 @@ public class UserHelper {
 		return result;
 	}
 
-	protected String getPrivateHashtableAttr(String attrName) {
+	public String getPrivateHashtableAttr(String attrName) {
 		String result = null;
 		if (_subject != null) {
 			@SuppressWarnings("rawtypes")

@@ -4,7 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -18,11 +19,19 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.model.login.LogInUserModel;
+import com.ibm.cio.cmr.request.service.user.UserService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
+import com.ibm.cio.cmr.request.util.oauth.SimpleJWT;
+import com.ibm.cio.cmr.request.util.oauth.UserHelper;
+import com.ibm.json.java.JSONObject;
 
 /**
  * This filter ensures valid user is present at the request. If not, the request
@@ -32,8 +41,12 @@ import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
  * @author Hesller Huller
  *
  */
+@Component
 @WebFilter(filterName = "AppUserInjectFilter", urlPatterns = "/*")
 public class AppUserInjectFilter implements Filter {
+
+	@Autowired
+	UserService userService;
 
 	protected static final Logger LOG = Logger.getLogger(AppUserInjectFilter.class);
 
@@ -48,16 +61,18 @@ public class AppUserInjectFilter implements Filter {
 			return;
 		}
 
-		HttpServletRequest req = (HttpServletRequest) request;
-		String url = req.getRequestURI();
+		HttpServletRequest httpReq = (HttpServletRequest) request;
+		HttpServletResponse httpResp = (HttpServletResponse) response;
 
-		HttpSession session = shouldCreateSession(req);
+		String url = httpReq.getRequestURI();
+
+		HttpSession session = shouldCreateSession(httpReq);
 		String userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
 
 		try {
-			if (shouldFilter(req, (HttpServletResponse) response)) {
+			if (shouldFilter(httpReq, (HttpServletResponse) response)) {
 
-				AppUser user = AppUser.getUser(req);
+				AppUser user = AppUser.getUser(httpReq);
 
 				LOG.debug(url);
 				LOG.debug(user);
@@ -65,22 +80,29 @@ public class AppUserInjectFilter implements Filter {
 
 				if (user == null) {
 					LOG.warn("No user on the session yet...");
+					UserHelper userHelper = new UserHelper();
 
-					// get all request params
-					Set<String> paramNames = request.getParameterMap().keySet();
+					// connect to W3 to build user profile
+					String ibmUniqueId = userHelper.getUNID();
 
-					if (paramNames.contains("code") && paramNames.contains("grant_id")) {
-						req.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, new AppUser());
-						// req.getRequestDispatcher("/oidcclient/redirect/createcmr").forward(req,
-						// response);
-						filterChain.doFilter(req, response);
+					if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
+						// redirect to /ibmid
+						LOG.debug("No IBM ID detected. Redirecting to W3 ID intercept..");
+						httpReq.getSession().invalidate();
+						httpResp.sendRedirect("/CreateCMR/oidcclient/redirect/client01");
 						return;
+					} else {
+						LOG.debug("IBM ID found. Injecting App User");
+						LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmUniqueId is " + userHelper.getUNID());
+						LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmFullName is "
+								+ userHelper.getPrincipalName());
 					}
 
 					LOG.debug("Redirecting to W3 ID Provisioner...");
-					HttpServletResponse httpResp = (HttpServletResponse) response;
-					session.invalidate();
-					httpResp.sendRedirect(OAuthUtils.getAuthorizationCodeURL());
+
+					session.setAttribute("userHelper", userHelper);
+					setSessionAttributes(httpReq, httpResp);
+					filterChain.doFilter(httpReq, response);
 					return;
 				}
 			}
@@ -88,7 +110,7 @@ public class AppUserInjectFilter implements Filter {
 			LOG.error("Error processing AppUserInjectFilter", e);
 		}
 
-		filterChain.doFilter(req, response);
+		filterChain.doFilter(httpReq, response);
 
 	}
 
@@ -99,7 +121,35 @@ public class AppUserInjectFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig config) throws ServletException {
+		SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
 		LOG.info("CreateCMR " + config.getFilterName() + " initialized.");
+	}
+
+	private void setSessionAttributes(HttpServletRequest request, HttpServletResponse response)
+			throws CmrException, Exception {
+		HttpSession session = request.getSession();
+
+		UserHelper userHelper = (UserHelper) session.getAttribute("userHelper");
+		SimpleJWT idToken = userHelper.getIDToken();
+		String accessToken = userHelper.getAccessToken();
+		Long expiresIn = Long.parseLong(userHelper.getPrivateHashtableAttr("expires_in"));
+		JSONObject claims = idToken.getClaims();
+
+		String userIntranetEmail = ((String) claims.get("emailAddress")).toLowerCase();
+		session.setAttribute("userIntranetEmail", userIntranetEmail);
+
+		LogInUserModel loginUser = new LogInUserModel();
+		loginUser.setUsername(userIntranetEmail);
+
+		session.setAttribute("loggedInUserModel", loginUser);
+		session.setAttribute("accessToken", accessToken);
+		session.setAttribute("tokenExpiringTime", LocalDateTime.now().plus(expiresIn, ChronoUnit.SECONDS));
+
+		session.setAttribute("loginUser", loginUser);
+
+		OAuthUtils oAuthUtils = new OAuthUtils();
+		oAuthUtils.authorizeAndSetRoles(loginUser, userService, request, response);
+
 	}
 
 	private boolean shouldFilter(HttpServletRequest request, HttpServletResponse response) {
