@@ -220,13 +220,13 @@ public class FranceUtil extends AutomationUtil {
     String customerName = getCustomerFullName(zs01);
     Addr zi01 = requestData.getAddress("ZI01");
     String custGrp = data.getCustGrp();
-    if(zs01 != null){
-    	String landCntry = zs01.getLandCntry();
-    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
-                && ("CROSS".equals(custGrp))){
-        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
-        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
-        }
+    if (zs01 != null) {
+      String landCntry = zs01.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
     }
     String scenario = data.getCustSubGrp();
     if (StringUtils.isNotBlank(scenario)) {
@@ -1016,12 +1016,12 @@ public class FranceUtil extends AutomationUtil {
         details.append("Updates to one or more fields cannot be validated.\n");
         details.append("-" + change.getDataField() + " needs to be verified.\n");
         break;
-      case "VAT #" :
-    	  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData) && soldTo.getLandCntry().equals("GB")){
-          	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
-            details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
-          }
-    	  break;
+      case "VAT #":
+        if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData) && soldTo.getLandCntry().equals("GB")) {
+          engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+          details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+        }
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -1378,7 +1378,7 @@ public class FranceUtil extends AutomationUtil {
 
     PrivatePersonCheckResult checkResult = chkPrivatePersonRecordFR(country, landCntry, name, checkBluepages, reqData.getData());
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
-    
+
     String scenario = data.getCustSubGrp();
 
     switch (checkStatus) {
@@ -1396,8 +1396,8 @@ public class FranceUtil extends AutomationUtil {
       break;
     case NoIBMRecord:
       if (SCENARIO_IBM_EMPLOYEE.equalsIgnoreCase(scenario)) {
-        engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-        details.append("Employee details not found in IBM BluePages.").append("\n");
+        engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+        details.append("Employee details not found in IBM People.").append("\n");
         return false;
       }
     case Passed:
