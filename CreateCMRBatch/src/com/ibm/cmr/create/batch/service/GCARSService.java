@@ -176,7 +176,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       LOG.debug("Identity added...");
       LOG.debug("Opening session...");
       jschSession = jsch.getSession(USERNAME, REMOTE_HOST, REMOTE_PORT);
-
+      LOG.debug("Set Password...");
       jschSession.setPassword(PASSWORD);
       jschSession.connect(SESSION_TIMEOUT);
 
@@ -208,7 +208,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
     } catch (JSchException | SftpException e) {
       LOG.warn("An error has occurred when trying to download files from FTP server", e);
     } catch (Exception ex) {
-      LOG.debug("Error encountered in GCARS Download" + ex.getMessage());
+      LOG.debug("Error encountered in GCARS Download" + ex.getStackTrace());
     } finally {
       if (jschSession != null) {
         jschSession.disconnect();
