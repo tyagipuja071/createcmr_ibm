@@ -201,6 +201,55 @@ public class OAuthUtils {
 	}
 
 	/**
+	 * This method validates the signature of the JWT received from AS.
+	 * 
+	 * @throws SignatureException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeyException
+	 */
+	public static boolean validateSignature(SimpleJWT jwt)
+			throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+		// connect to jwks endpoint and get the Json Web Keys
+		List<Map<String, String>> keys = getKeysFromAS();
+
+		// generate public key using JWT Header's kid
+		String kid = (String) jwt._header.get("kid");
+		PublicKey publicKey = null;
+
+		for (Map<String, String> key : keys) {
+			if (key.get("kid").equalsIgnoreCase(kid)) {
+
+				publicKey = getPublicKey(key.get("n").toString(), key.get("e").toString());
+
+				break;
+			}
+		}
+
+		boolean isValid = false;
+
+		try {
+
+			String jwtToken = tokens.getEncodedJwtToken();
+
+			String header = jwtToken.substring(0, jwtToken.indexOf("."));
+			String payload = jwtToken.substring(jwtToken.indexOf(".") + 1, jwtToken.lastIndexOf("."));
+			String tokenSignature = jwtToken.substring(jwtToken.lastIndexOf(".") + 1);
+			byte[] tokenSignatureDecoded = java.util.Base64.getUrlDecoder().decode(tokenSignature);
+
+			isValid = verifySignatureFor(ALGORITHM, publicKey, header.getBytes(), payload.getBytes(),
+					tokenSignatureDecoded);
+
+			return isValid;
+
+		} catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			LOG.error(e.getMessage());
+			return false;
+		}
+	}
+
+	/**
 	 * Verify signature for JWT header and payload using a public key.
 	 *
 	 * @param algorithm
@@ -342,7 +391,7 @@ public class OAuthUtils {
 
 				String response = httpPostForm.finish();
 
-				System.out.println(response);
+				LOG.debug(response);
 				LOG.debug("Access Token revoked!");
 				return true;
 			} catch (Exception e) {

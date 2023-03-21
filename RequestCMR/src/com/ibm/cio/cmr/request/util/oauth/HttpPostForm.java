@@ -12,6 +12,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrException;
+
 public class HttpPostForm {
 	private HttpURLConnection httpConn;
 	private Map<String, Object> queryParams;
@@ -130,8 +132,9 @@ public class HttpPostForm {
 	 * @return String as response in case the server returned status OK,
 	 *         otherwise an exception is thrown.
 	 * @throws IOException
+	 * @throws CmrException
 	 */
-	public String finish() throws IOException {
+	public String finish() throws IOException, CmrException {
 		String response = "";
 		byte[] postDataBytes = this.getParamsByte(queryParams);
 		httpConn.setRequestMethod("POST");
@@ -149,6 +152,7 @@ public class HttpPostForm {
 			httpConn.disconnect();
 		} else if (status == HttpURLConnection.HTTP_BAD_REQUEST) {
 			LOG.debug("Bad request! It is likely the authorization code has expired.");
+			throw new CmrException(new Exception("Bad request! It is likely the authorization code has expired."));
 		} else {
 			throw new IOException("Server returned non-OK status: " + status);
 		}

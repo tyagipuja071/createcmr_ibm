@@ -7,4 +7,8 @@
  		<context-root>CreateCMR</context-root>
  	</web>
  </module> 
+	<security-role>
+		<description>Role for Servlet</description>
+		<role-name>authenticatedUsers</role-name>
+	</security-role>
  </application> 
