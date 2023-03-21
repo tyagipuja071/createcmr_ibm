@@ -641,9 +641,11 @@ function onCustSubGrpChange() {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custSubGrpInDB = _pagemodel.custSubGrp;
-    if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB) {
+    var abbrevNm = null;
+    if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB ) {
       if (cntry == '744' && custSubGrp == "AQSTN") {
-        FormManager.setValue('abbrevNm', "Acquisition Use Only");
+        abbrevNm ="Acquisition Use Only";
+        FormManager.setValue('abbrevNm', abbrevNm);
       }
       FormManager.setValue('abbrevLocn', _pagemodel.abbrevLocn);
       FormManager.setValue('isbuCd', _pagemodel.isbuCd);
