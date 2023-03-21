@@ -122,6 +122,9 @@ public class NewZealandUtil extends AutomationUtil {
       response = getNZBNService(admin, data, zs01);
     } catch (Exception e) {
       LOG.error("Failed to Connect to NZBN Service: " + e.getMessage());
+      if (response == null || !response.isSuccess()) {
+        details.append("\nFailed to Connect to NZBN Service.");
+      }
     }
 
     LOG.debug(
@@ -131,9 +134,9 @@ public class NewZealandUtil extends AutomationUtil {
             + (engineData.getPendingChecks() != null
                 && (engineData.getPendingChecks().containsKey("DnBMatch"))));
     LOG.debug(
-        "engineData.getPendingChecks()!= null && (engineData.getPendingChecks().containsKey(\"DnBMatch\") || engineData.getPendingChecks().containsKey(\"DNBCheck\")) ? "
+        "engineData.getPendingChecks()!= null && (engineData.getPendingChecks().containsKey(\"DNBCheck\")) ? "
             + (engineData.getPendingChecks() != null
-                && (engineData.getPendingChecks().containsKey("DnBMatch") || engineData.getPendingChecks().containsKey("DNBCheck"))));
+                && (engineData.getPendingChecks().containsKey("DNBCheck"))));
 
     if ("C".equals(admin.getReqType()) && !RELEVANT_SCENARIO.contains(scenario) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
         && "LOCAL".equalsIgnoreCase(custType) && engineData.getPendingChecks() != null
@@ -183,7 +186,6 @@ public class NewZealandUtil extends AutomationUtil {
     // to check all other address types
     if ("C".equals(admin.getReqType()) && !RELEVANT_SCENARIO.contains(scenario) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
         && "LOCAL".equalsIgnoreCase(custType) && engineData.getPendingChecks() != null) {
-      needNZBNAPICheck = true;
       LOG.debug("Start matching for other addresses...");
       List<Addr> addresses = null;
       List<String> RELEVANT_ADDRESSES_CREATE = Arrays.asList("MAIL", "ZP01", "ZI01", "ZF01", "CTYG", "CTYH");
@@ -191,6 +193,8 @@ public class NewZealandUtil extends AutomationUtil {
       for (String addrType : RELEVANT_ADDRESSES_CREATE) {
         addresses = requestData.getAddresses(addrType);
         for (Addr addr : addresses) {
+          LOG.debug("do matching for New address " + addrType + "(" + addr.getId().getAddrSeq() + ") ... ");
+          needNZBNAPICheck = true;
           boolean matchesAddAPI = false;
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
 
@@ -237,7 +241,8 @@ public class NewZealandUtil extends AutomationUtil {
 
     if (needNZBNAPICheck) {
       if (!cmdeReview) {
-        details.append("The Customer Name and addresses matched NZBN API.").append("\n");
+        // details.append("The Customer Name and addresses matched NZBN
+        // API.").append("\n");
         results.setResults("Calculated.");
         engineData.setNZBNAPICheck(true);
 
