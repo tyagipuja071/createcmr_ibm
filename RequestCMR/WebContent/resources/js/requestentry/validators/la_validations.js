@@ -591,9 +591,6 @@ function afterConfigForLA() {
   // }
 
   // var _reqType = FormManager.getActualValue('reqType');
-  if (FormManager.getActualValue('cmrIssuingCntry') == '683' && _pagemodel.userRole.toUpperCase() == 'REQUESTER') {
-    FormManager.addValidator('postCd', Validators.REQUIRED, [ 'PostalCode' ], '');
-  }
 
   if (FormManager.getActualValue('ordBlk') == '93' && _reqType == 'U') {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -2211,41 +2208,6 @@ function validateVATChile() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function addPostalCdValidator() {
-  console.log("addPostalCdValidator..............");
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('custGrp') != null && FormManager.getActualValue('custGrp') == "LOCAL") {
-          var postCd = FormManager.getActualValue('postCd');
-          if (postCd && postCd.length > 0 && !postCd.match(/^\d{6}$/)) {
-            return new ValidationResult(null, false, 'Postal Code should be 6 digits long.');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-}
-
-function addPostalCdValidatorPE() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var reqType = cmr.currentRequestType;
-        var postCd = FormManager.getActualValue('postCd');
-        if (postCd && postCd.length > 0 && !postCd.match(/^\d{5}$/)) {
-          return new ValidationResult(null, false, 'Postal Code should be 5 digits long.');
-        }
-        if (reqType != null && reqType == 'U' && (postCd.length == 0 || postCd == '')) {
-          return new ValidationResult(null, false, 'Postal Code is required.');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-}
-
 function validateCustNameChangeForDPLCheck() {
   // CRU
   console.log("validateCustNameChangeForDPLCheck..............");
@@ -2666,9 +2628,9 @@ function setMrcCdToReadOnly() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-
+  var custSubGrpList = [ 'IBMEM', 'PRIPE', 'BUSPR', 'INTER', 'INTOU', 'INIBM' ];
   if (reqType == 'C') {
-    if(custSubGrp == 'IBMEM') {
+    if (custSubGrpList.includes(custSubGrp)) {
       if (role == 'REQUESTER') {
         FormManager.readOnly('mrcCd');
       } else {
@@ -2912,8 +2874,6 @@ dojo.addOnLoad(function() {
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateVATChile, [ SysLoc.CHILE ], null, true);
-  GEOHandler.registerValidator(addPostalCdValidator, [ SysLoc.ECUADOR ], GEOHandler.ROLE_REQUESTER, true);
-  GEOHandler.registerValidator(addPostalCdValidatorPE, [ SysLoc.PERU ], null, true);
   GEOHandler.registerValidator(validateCustNameChangeForDPLCheck, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateAddlContactEmailFieldForReactivate, [ SysLoc.BRAZIL ], GEOHandler.ROLE_PROCESSOR, true);
     

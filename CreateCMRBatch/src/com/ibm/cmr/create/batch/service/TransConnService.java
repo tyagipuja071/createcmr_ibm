@@ -1535,6 +1535,19 @@ public class TransConnService extends BaseBatchService {
 
           }
         }
+
+        if ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry())) {
+          String strPaygoNo = getPaygoSapnoForNZ(entityManager, data.getCmrNo(), "200", data.getCmrIssuingCntry());
+          if (!StringUtils.isEmpty(strPaygoNo)) {
+            PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGOSAPNO"));
+            addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+            addrQuery.setParameter("SAP_NO", strPaygoNo);
+            addrQuery.setParameter("IERP_SITE_PRTY_ID", "S" + strPaygoNo.substring(1));
+            addrQuery.executeSql();
+            LOG.info("SET ANZ PG SAP_NO .");
+          }
+        }
+
       }
 
       StringBuilder comment = new StringBuilder();
@@ -1698,6 +1711,7 @@ public class TransConnService extends BaseBatchService {
           + record.getSapNo() + "]");
       updateEntity(addr, entityManager);
     }
+
   }
 
   /**
@@ -1876,6 +1890,15 @@ public class TransConnService extends BaseBatchService {
                   if (StringUtils.isBlank(addr.getIerpSitePrtyId())) {
                     addr.setIerpSitePrtyId(response.getRecords().get(i).getIerpSitePartyId());
                   }
+                  // if (("PayGo-Test".equals(admin.getSourceSystId()) ||
+                  // "BSS".equals(admin.getSourceSystId()))
+                  // && ("616".equals(data.getCmrIssuingCntry()) ||
+                  // "796".equals(data.getCmrIssuingCntry()))) {
+                  // if ("200".equals(response.getRecords().get(i).getSeqNo()))
+                  // {
+                  // addr.getId().setAddrSeq(response.getRecords().get(i).getSeqNo());
+                  // }
+                  // }
                 }
               }
               if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
@@ -3125,5 +3148,18 @@ public class TransConnService extends BaseBatchService {
       admin.setReqStatus("PPN");
       admin.setProcessedFlag("E"); // set request status to error.
     }
+  }
+
+  private String getPaygoSapnoForNZ(EntityManager entityManager, String cmrNo, String seqNo, String cmrIssuingCntry) {
+    LOG.debug("getPaygoSapnoForNZ ");
+    String PaygoSapno = "";
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GET.NZ.PAYGOSAPNO"));
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", cmrIssuingCntry);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setParameter("ZZKV_SEQNO", seqNo);
+    query.setForReadOnly(true);
+    PaygoSapno = query.getSingleResult(String.class);
+    return PaygoSapno;
   }
 }

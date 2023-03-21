@@ -19,7 +19,8 @@ function addHandlersForIL() {
   console.log(">>>> addHandlersForIL ");
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldClientTier = FormManager.getActualValue('clientTier');
-  removeClientTireValidation();
+  getExitingValueOfCTCAndIsuCD();
+  addRemoveValidator();
   lockUnlockFieldForISrael();
   for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
     _gtcAddrTypeHandlerIL[i] = null;
@@ -344,7 +345,7 @@ function setClientTierValuesIL(value) {
   } else {
     FormManager.setValue('clientTier', '');
   }
-  removeClientTireValidation();
+  addRemoveValidator();
   lockUnlockFieldForISrael();
 }
 
@@ -2151,8 +2152,10 @@ function validateEnterpriseNo() {
         var enterpriseNo = FormManager.getActualValue('enterprise');
 
         if (enterpriseNo != null && enterpriseNo != undefined && enterpriseNo != '') {
-          if ((enterpriseNo.length != 6) || !enterpriseNo.match("^[0-9]*$")) {
-            return new ValidationResult(null, false, 'Enterprise Number should be of 6 numeric characters.');
+          if (!enterpriseNo.match("^[0-9]*$")) {
+            return new ValidationResult(null, false, 'Enterprise Number should be numeric only.');
+          } else if ((enterpriseNo.length != 6)) {
+            return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
           }
         } else {
           return new ValidationResult(null, true);
@@ -2161,6 +2164,7 @@ function validateEnterpriseNo() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 
 function setEnterpriseSalesRepSBO() {
   console.log(">>>>  setEnterpriseSalesRepSBO");
@@ -2179,7 +2183,11 @@ function setEnterpriseSalesRepSBO() {
     FormManager.setValue('enterprise', '');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
-  } else if (isuCd == '21' && clientTier == '') {
+  } else if (isuCd == '32' && clientTier == 'T') {
+    FormManager.setValue('enterprise', '985985');
+    FormManager.setValue('salesBusOffCd', '006');
+    FormManager.setValue('repTeamMemberNo', '000651');
+  }else if (isuCd == '21' && clientTier == '') {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('salesBusOffCd', '009');
     FormManager.setValue('repTeamMemberNo', '000993');
@@ -2192,11 +2200,10 @@ function setEnterpriseSalesRepSBO() {
     FormManager.setValue('salesBusOffCd', '');
     FormManager.setValue('repTeamMemberNo', '');
   }
-  FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+  addRemoveValidator();
   lockUnlockFieldForISrael();
 }
+
 
 function checkCmrUpdateBeforeImport() {
   console.log(">>>>  checkCmrUpdateBeforeImport");
@@ -2533,7 +2540,7 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
       FormManager.setValue('clientTier', 'Q');
     }
   }
-  removeClientTireValidation();
+  addRemoveValidator();
   lockUnlockFieldForISrael();
 }
 
@@ -2871,8 +2878,8 @@ function lockUnlockFieldForISrael() {
   } 
 }
 
-function removeClientTireValidation() {
-  console.log(">>>> removeClientTireValidation");
+function addRemoveClientTierValidator() {
+  console.log(">>>> addRemoveClientTierValidator");
   var isuCd = FormManager.getActualValue('isuCd');
   FormManager.resetValidations('clientTier');
   if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
@@ -2880,6 +2887,21 @@ function removeClientTireValidation() {
   } else {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
   }
+}
+
+function addRemoveEnterperiseValidator() {
+  var reqType = FormManager.getActualValue('reqType');
+  FormManager.resetValidations('enterprise');
+  if (reqType == 'C' || (reqType == 'U' && _oldEnt != null && _oldEnt != '')) {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  }
+
+}
+
+function addRemoveValidator() {
+  addRemoveClientTierValidator();
+  addRemoveEnterperiseValidator();
+
 }
 
 function addressQuotationValidatorIsrael() {

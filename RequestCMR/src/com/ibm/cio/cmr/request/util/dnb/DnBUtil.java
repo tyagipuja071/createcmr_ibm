@@ -82,7 +82,7 @@ public class DnBUtil {
     registerDnBVATCode("SE", 1861); // SW Business Registration Number
     registerDnBVATCode("IL", 1365); // Israel Registration Number
     registerDnBVATCode("JP", 32475); // Corporate Number
-    registerDnBVATCode("CN", 22958); // Business Registration Number
+    registerDnBVATCode("CN", 32476); // United Social Credit Code (CN)
     registerDnBVATCode("BR", 1340); // Brazilian General Record of Taxpayers
     registerDnBVATCode("AU", 17891); // Business Number (Australia)
     registerDnBVATCode("AD", 1332); // Andorra Fiscal Code
@@ -340,7 +340,48 @@ public class DnBUtil {
     return cmrRecord;
   }
 
+  /**
+   * 
+   * @param cmrRecord
+   * @param organizationId
+   * @deprecated - TYC discontinued; use
+   *             {@link #getCNApiAddressDataViaDNB(FindCMRRecordModel, String)}
+   */
+  @Deprecated
   private static void getCNApiAddressData(FindCMRRecordModel cmrRecord, String organizationId) {
+    // TODO Auto-generated method stub
+    CompanyRecordModel companyRecordModel = new CompanyRecordModel();
+    companyRecordModel.setTaxCd1(organizationId);
+    try {
+      AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo(companyRecordModel, "TAXCD");
+      if (cmrsData != null && cmrsData.isSuccess()) {
+        LOG.debug("Get Chiese API Info successful>>>");
+        String cnName = StringUtils.isNotBlank(cmrsData.getRecord().getName()) ? cmrsData.getRecord().getName().trim() : "";
+        String cnStreet = StringUtils.isNotBlank(cmrsData.getRecord().getRegLocation()) ? cmrsData.getRecord().getRegLocation().trim() : "";
+        String cnCity1 = StringUtils.isNotBlank(cmrsData.getRecord().getCity()) ? cmrsData.getRecord().getCity().trim() : "";
+        String cnCity2 = StringUtils.isNotBlank(cmrsData.getRecord().getDistrict()) ? cmrsData.getRecord().getDistrict().trim() : "";
+        String cnCreditCode = StringUtils.isNotBlank(cmrsData.getRecord().getCreditCode()) ? cmrsData.getRecord().getCreditCode().trim() : "";
+        cmrRecord.setCmrIntlName(cnName);
+        cmrRecord.setCmrIntlAddress(cnStreet);
+        cmrRecord.setCmrIntlCity1(cnCity1);
+        cmrRecord.setCmrIntlCity2(cnCity2);
+        cmrRecord.setCreditCd(cnCreditCode);
+        LOG.debug("Get Chiese API Info Social credit code is " + cnCreditCode);
+      } else {
+        LOG.debug("No China API Data were found.");
+      }
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      LOG.error("Error in getting Chiese API details ", e);
+    }
+  }
+
+  /**
+   * Retrieves the CN Company information via D&B
+   * @param cmrRecord
+   * @param organizationId
+   */
+  private static void getCNApiAddressDataViaDNB(FindCMRRecordModel cmrRecord, String organizationId) {
     // TODO Auto-generated method stub
     CompanyRecordModel companyRecordModel = new CompanyRecordModel();
     companyRecordModel.setTaxCd1(organizationId);
@@ -713,10 +754,12 @@ public class DnBUtil {
       dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
     }
     dnbAddress = dnbAddress.trim();
+    LOG.debug("DNB address : " + dnbAddress);
     Boolean matchWithDnbMailingAddr = false;
     if (handler != null) {
       matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
     }
+    LOG.debug("matchWithDnbMailingAddr : " + matchWithDnbMailingAddr);
     LOG.debug("DNB match country =  " + country);
     Boolean isReshuffledAddr = false;
     if ("897".equals(country) || "US".equals(country)) {
@@ -1077,11 +1120,18 @@ public class DnBUtil {
     LOG.debug("Address used for matching: " + address);
 
     String dnbAddress = dnbRecord.getDnbStreetLine1() != null ? dnbRecord.getDnbStreetLine1() : "";
+    LOG.debug("DNB address used for matching: " + dnbAddress);
     if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
       dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
     }
     dnbAddress = dnbAddress.trim();
-    // CREATCMR-8430: removed mailing address check
+    // CREATCMR-8430: if mailing address matches with address, take it as DNB
+    // address matches
+    Boolean matchWithDnbMailingAddr = false;
+    if (handler != null) {
+      matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
+    }
+    LOG.debug("matchWithDnbMailingAddr =  " + matchWithDnbMailingAddr);
     LOG.debug("DNB match country =  " + country);
     Boolean isReshuffledAddr = false;
     isReshuffledAddr = handler.compareReshuffledAddress(dnbAddress, address, country);
@@ -1091,10 +1141,12 @@ public class DnBUtil {
     // address, country);
     if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
         && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
-        && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr
-    ) {
+        && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) && !isReshuffledAddr) {
       map.put("dnbNmMatch", true);
       map.put("dnbAddrMatch", false);
+      if (matchWithDnbMailingAddr) {
+        map.put("dnbAddrMatch", true);
+      }
       return map;
     }
 
@@ -1105,6 +1157,9 @@ public class DnBUtil {
         if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode)) {
           map.put("dnbNmMatch", true);
           map.put("dnbAddrMatch", false);
+          if (matchWithDnbMailingAddr) {
+            map.put("dnbAddrMatch", true);
+          }
           return map;
         }
       }
@@ -1112,6 +1167,9 @@ public class DnBUtil {
         if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode)) {
           map.put("dnbNmMatch", true);
           map.put("dnbAddrMatch", false);
+          if (matchWithDnbMailingAddr) {
+            map.put("dnbAddrMatch", true);
+          }
           return map;
         }
       }
@@ -1121,6 +1179,9 @@ public class DnBUtil {
         && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6) {
       map.put("dnbNmMatch", true);
       map.put("dnbAddrMatch", false);
+      if (matchWithDnbMailingAddr) {
+        map.put("dnbAddrMatch", true);
+      }
       return map;
     }
 
@@ -1131,4 +1192,92 @@ public class DnBUtil {
     return map;
 
   }
+
+  /**
+   * Returns the D&B results using the OrgID specified
+   * 
+   * @param orgId
+   * @return
+   * @throws Exception
+   */
+  public static List<DnBMatchingResponse> findByOrgId(String orgId, String country) throws Exception {
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
+        MatchingServiceClient.class);
+
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+    request.setCustomerName("X");
+    request.setStreetLine1("X");
+    request.setCity("X");
+    request.setLandedCountry(country);
+    request.setMinConfidence("9");
+    request.setOrgId(orgId);
+
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+
+    TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+    };
+    MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
+    if (response != null && response.getSuccess()) {
+      if (response.getMatched()) {
+        List<DnBMatchingResponse> matchedIds = new ArrayList<DnBMatchingResponse>();
+        for (DnBMatchingResponse rec : response.getMatches()) {
+          LOG.debug("DUNS " + rec.getDunsNo() + " matched Org ID " + orgId);
+          LOG.debug("OrgIdMatch = " + rec.getOrgIdMatch() + ", ConfidenceCode = " + rec.getConfidenceCode() + ", MatchGrade = " + rec.getMatchGrade()
+              + ", MatchQuality = " + rec.getMatchQuality());
+          if ("Y".equals(rec.getOrgIdMatch())) {
+            LOG.debug("DUNS " + rec.getDunsNo() + " matched Org ID " + orgId);
+            matchedIds.add(rec);
+          }
+        }
+        return matchedIds;
+      } else {
+        LOG.debug("D&B matching returned no matches inside findByOrgId. Org ID " + orgId);
+      }
+    } else {
+      LOG.error("D&B matching failed inside findByOrgId. Org ID " + orgId);
+    }
+    return Collections.emptyList();
+  }
+
+  /**
+   * Returns the D&B results using the OrgID specified
+   * 
+   * @param orgId
+   * @return
+   * @throws Exception
+   */
+  public static List<DnBMatchingResponse> findByAddress(String country, String name, String street, String city) throws Exception {
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
+        MatchingServiceClient.class);
+
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+    request.setCustomerName(name);
+    request.setStreetLine1(street);
+    request.setCity(city);
+    request.setLandedCountry(country);
+    request.setMinConfidence("7");
+
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+
+    TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+    };
+    MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
+    if (response != null && response.getSuccess()) {
+      if (response.getMatched()) {
+        return response.getMatches();
+      } else {
+        LOG.debug("D&B matching returned no matches inside findByAddress.");
+      }
+    } else {
+      LOG.error("D&B matching failed inside findByAddress.");
+    }
+    return Collections.emptyList();
+  }
+
 }

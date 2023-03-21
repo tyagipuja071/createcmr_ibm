@@ -581,7 +581,8 @@ function addHandlersForPTES() {
   _oldClientTier = FormManager.getActualValue('clientTier');
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldIsicCd = FormManager.getActualValue('isicCd');
-  removeClientTireValidation();
+  getExitingValueOfCTCAndIsuCD();
+  addRemoveValidator();
   forceLockUnlock();
   if (_isicHandler == null) {
     _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -1194,11 +1195,17 @@ function addEnterpriseValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var entNo = FormManager.getActualValue('enterprise');
-        if (entNo != '' && entNo.length != 6) {
-          return new ValidationResult(null, false, 'Enterprise Number should have exactly 6 digits.');
+        var enterpriseNo = FormManager.getActualValue('enterprise');
+
+        if (enterpriseNo != null && enterpriseNo != undefined && enterpriseNo != '') {
+          if (!enterpriseNo.match("^[0-9]*$")) {
+            return new ValidationResult(null, false, 'Enterprise Number should be numeric only.');
+          } else if ((enterpriseNo.length != 6)) {
+            return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
+          }
+        } else {
+          return new ValidationResult(null, true);
         }
-        return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
@@ -1232,7 +1239,8 @@ function disableVatIfNotEmptyPortugal() {
           var zs01Cntry = landCntry;
 
           var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
-            REQID : FormManager.getActualValue('reqId')
+            REQID : FormManager.getActualValue('reqId'),
+            TYPE : 'ZS01'
           });
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
@@ -2879,7 +2887,7 @@ function lockUnlockFieldForEs() {
     FormManager.enable('enterprise');
     FormManager.enable('repTeamMemberNo');
   } else {
-    FormManager.readOnly('isicCd');
+    FormManager.enable('isicCd');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('enterprise');
@@ -2933,7 +2941,7 @@ function setClientTierValues() {
   } else {
     FormManager.setValue('clientTier', '');
   }
-  removeClientTireValidation();
+  addRemoveValidator();
   setEnterpriseValues();
   forceLockUnlock();
 }
@@ -3159,17 +3167,13 @@ function setEntAndSalesRep(entp, salRep) {
   var subIndCd = FormManager.getActualValue('subIndustryCd');
   var belongs = subIndValSpain.includes(subIndCd) ? 'Y' : 'N';
   var postcd = getPostalCode();
-  var result1 = cmr.query('GET.ENTP.SPAIN', {
+  return cmr.query('GET.ENTP.SPAIN', {
     _qall : 'Y',
     POST_CD : '%' + postcd + '%',
     CTC : isuCd.concat(clientTier),
     BELONGS : belongs
   });
 
-  if (result1 != null && result1 != '') {
-    entp = result1[0].ret1;
-    salRep = result1[0].ret2;
-  }
 }
 
 function getLandedCntry() {
@@ -3245,7 +3249,11 @@ function validatorEnterpriseES() {
   var entp = '';
   var salRep = '';
 
-  setEntAndSalesRep(entp, salRep);
+  var result1 = setEntAndSalesRep();
+  if (result1 != null && result1 != '') {
+    entp = result1[0].ret1;
+    salRep = result1[0].ret2;
+  }
 
   var condForEnt1 = isuCd == '34' && enterprise != '985204' && custGrp == 'CROSS' && landCntry == 'MT';
   var condForEnt2 = isuCd == '34' && !entFor34QES.has(enterprise) && enterprise != entp;
@@ -3269,7 +3277,7 @@ function validatorEnterpriseES() {
       id : 'enterprise',
       type : 'text',
       name : 'enterprise'
-    }, false, 'Enterprise can only accept \'986111\', \'986162\', \'986140\', \'986181\', \'986254\', \'986270\', \'986294\'.');
+    }, false, 'Enterprise can only accept \'986111\', \'986162\', \'986140\', \'986181\', \'986254\', \'986270\', \'986294\',' + " '" + entp + "'.");
   } else if (condForEnt3) {
     return new ValidationResult({
       id : 'enterprise',
@@ -3445,8 +3453,8 @@ function validatorEnterprisePT() {
   }
 }
 
-function removeClientTireValidation() {
-  console.log(">>>> removeClientTireValidation");
+function addRemoveClientTierValidator() {
+  console.log(">>>> addRemoveClientTierValidator");
   var isuCd = FormManager.getActualValue('isuCd');
   FormManager.resetValidations('clientTier');
   if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
@@ -3454,6 +3462,20 @@ function removeClientTireValidation() {
   } else {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
   }
+}
+function addRemoveEnterperiseValidator() {
+  var reqType = FormManager.getActualValue('reqType');
+  FormManager.resetValidations('enterprise');
+  if (reqType == 'C' || (reqType == 'U' && _oldEnt != null && _oldEnt != '')) {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  }
+
+}
+
+function addRemoveValidator() {
+  addRemoveClientTierValidator();
+  addRemoveEnterperiseValidator();
+
 }
 // CREATCMR-788
 function addressQuotationValidatorMCO() {

@@ -607,8 +607,8 @@ public abstract class AutomationUtil {
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
       break;
     case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+      details.append("Employee details not found in IBM People.").append("\n");
       break;
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
@@ -683,8 +683,8 @@ public abstract class AutomationUtil {
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
       break;
     case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+      details.append("Employee details not found in IBM People.").append("\n");
       return false;
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");

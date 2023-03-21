@@ -31,6 +31,8 @@ import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
@@ -150,7 +152,7 @@ public class AustraliaUtil extends AutomationUtil {
     results.setResults(eleResults.toString());
     results.setDetails(details.toString());
     results.setProcessOutput(overrides);
-
+    
     return results;
   }
 
@@ -198,7 +200,9 @@ public class AustraliaUtil extends AutomationUtil {
     StringBuilder details = new StringBuilder();
     boolean CustNmChanged = changes.isLegalNameChanged();
     ChangeLogListener.setManager(entityManager);
-
+    if ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId())) {
+      CustNmChanged = false;
+    }
     if (CustNmChanged) {
       AutomationResponse<BNValidationResponse> response = null;
       Addr zs01 = requestData.getAddress("ZS01");
@@ -364,17 +368,33 @@ public class AustraliaUtil extends AutomationUtil {
           output.setDetails(details.toString());
           engineData.addNegativeCheckStatus("ABNLegalName", "Customer name doesn't matches from API & DNB match");
         } else {
-          validation.setMessage("Not Validated");
-          details.append("The Customer Name and Former Customer Name doesn't match from API & DNB");
-          // company proof
-          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-            details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+          if (!"PayGo-Test".equals(admin.getSourceSystId()) && !"BSS".equals(admin.getSourceSystId())) {
+            validation.setMessage("Not Validated");
+            details.append("The Customer Name and Former Customer Name doesn't match from API & DNB");
+            // company proof
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+            } else {
+              details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
+                  + customerName + " update.");
+            }
+            output.setDetails(details.toString());
+            engineData.addNegativeCheckStatus("ABNLegalName", "The Customer Name and Former Customer Name doesn't match from API & DNB");
           } else {
-            details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
-                + customerName + " update.");
+            validation.setSuccess(true);
+            validation.setMessage("Successful");
+            output.setProcessOutput(validation);
+            details.append("The Customer Name and Former Customer Name doesn't match from API & DNB");
+            // company proof
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+            } else {
+              details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
+                  + customerName + " update.");
+            }
+            output.setDetails(details.toString());
           }
-          output.setDetails(details.toString());
-          engineData.addNegativeCheckStatus("ABNLegalName", "The Customer Name and Former Customer Name doesn't match from API & DNB");
+
         }
 
       } finally {
@@ -386,6 +406,14 @@ public class AustraliaUtil extends AutomationUtil {
       output.setProcessOutput(validation);
       output.setDetails("Updates to the dataFields fields skipped validation");
     }
+    
+    if ("U".equals(admin.getReqType()) && ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))) {
+        Addr pg01 = requestData.getAddress("PG01");
+        if(pg01 != null){
+        	checkANZPaygoAddr(entityManager, data.getId().getReqId());
+        }
+      }
+    
     return true;
   }
 
@@ -618,6 +646,12 @@ public class AustraliaUtil extends AutomationUtil {
     anzEcoNotifyList.append(SystemParameters.getString("ANZ_ECSYS_NOTIFY"));
     return anzEcoNotifyList;
   }
+  
+  public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
+	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
+	    query.setParameter("REQ_ID", reqId);
+	    query.executeSql();
+	  }
 
   @Override
   protected List<String> getCountryLegalEndings() {

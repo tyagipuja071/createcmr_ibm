@@ -319,13 +319,11 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <!-- 
         <column number="true">
           <label>State/Province</label>
           <dbColumn>STATE_PROV</dbColumn>
           <length>3</length>
         </column>
-         -->
         <column>
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>

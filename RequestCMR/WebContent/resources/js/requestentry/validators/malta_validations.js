@@ -61,13 +61,13 @@ function addISUHandler() {
   console.log(">>>> addISUHandler");
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldClientTier = FormManager.getActualValue('clientTier');
-  removeClientTireValidation();
+  addRemoveValidator();
   lockUnlockFieldForMALTA();
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       if (_oldIsu != FormManager.getActualValue('isuCd') || typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
         setClientTierValuesMT(value);
-        setValuesWRTIsuCtc();
+        setEnterpriseValues();
         _oldIsu = FormManager.getActualValue('isuCd');
       }
     });
@@ -75,7 +75,7 @@ function addISUHandler() {
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       if (_oldClientTier != FormManager.getActualValue('clientTier') || typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
-        setValuesWRTIsuCtc(value);
+        setEnterpriseValues(value);
         _oldClientTier = FormManager.getActualValue('clientTier');
       }
     });
@@ -650,49 +650,22 @@ function enterpriseMalta() {
 
 function setClientTierValuesMT(isu) {
   console.log(">>>> setClientTierValuesMT");
+  console.log(">>>> setClientTierValuesGR");
   var reqType = FormManager.getActualValue('reqType');
-  var reqType = FormManager.getActualValue('reqType');
-  var clientTier = FormManager.getActualValue('clientTier');
-  var custSubGroup = FormManager.getActualValue('custSubGrp');
-  var custSubGroupSet = new Set([ 'CRINT', 'CRBUS', 'BUSPR', 'INTER', 'IBMEM' ]);
+  var isuCd = FormManager.getActualValue('isuCd');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
-  if (!isu) {
-    isu = FormManager.getActualValue('isuCd');
+  if (isuCd == '34') {
+    FormManager.setValue('clientTier', 'Q');
+  } else if (isuCd == '36') {
+    FormManager.setValue('clientTier', 'Y');
+  } else if (isuCd == '32') {
+    FormManager.setValue('clientTier', 'T');
+  } else {
+    FormManager.setValue('clientTier', '');
   }
-
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MALTA) {
-    if (isu == '34' && custSubGroup == 'PRICU') {
-      FormManager.setValue('clientTier', 'Q');
-      FormManager.setValue('enterprise', '985204');
-    } else if (isu == '36') {
-      FormManager.setValue('clientTier', 'Y');
-      FormManager.setValue('enterprise', '985205');
-    } else if (isu == '34') {
-      FormManager.setValue('clientTier', 'Q');
-      FormManager.setValue('enterprise', '985204');
-    } else if (isu == '32') {
-      FormManager.setValue('clientTier', 'T');
-      FormManager.setValue('enterprise', '');
-    } else if (isu == '5K') {
-      FormManager.setValue('clientTier', '');
-      FormManager.setValue('enterprise', '985999');
-      removeValidatorClientTier()
-    } else if (isu == '21' && custSubGroup == 'IBMEM') {
-      FormManager.setValue('clientTier', '');
-      FormManager.setValue('enterprise', '985999');
-      removeValidatorClientTier()
-    } else if (isu == '21' && (custSubGroup == 'INTER' || custSubGroup == 'BUSPR')) {
-      FormManager.setValue('clientTier', '');
-      FormManager.enable('clientTier');
-    } else {
-      FormManager.setValue('clientTier', '');
-      FormManager.setValue('enterprise', '');
-    }
-    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
-    removeClientTireValidation();
-    lockUnlockFieldForMALTA();
-  }
-
+  addRemoveValidator();
+  lockUnlockFieldForMALTA();
 }
 
 function enterpriseValidation() {
@@ -1073,18 +1046,16 @@ function setVatExemptValidatorMalta() {
   }
 }
 
-function setValuesWRTIsuCtc(ctc) {
+function setEnterpriseValues() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
     return;
   }
-  console.log(">>>> setValuesWRTIsuCtc");
+  console.log(">>>> setEnterpriseValues");
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var isu = FormManager.getActualValue('isuCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (ctc == null) {
-    var ctc = FormManager.getActualValue('clientTier');
-  }
+  var ctc = FormManager.getActualValue('clientTier');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (isu == '34' && ctc == 'Q') {
     FormManager.setValue('enterprise', '985204');
@@ -1096,7 +1067,7 @@ function setValuesWRTIsuCtc(ctc) {
     FormManager.setValue('enterprise', '985999');
   }
 
-  FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
+  addRemoveEnterperiseValidator()
 
   lockUnlockFieldForMALTA();
 }
@@ -1301,7 +1272,7 @@ function lockUnlockFieldForMALTA() {
     FormManager.readOnly('salesBusOffCd');
     FormManager.readOnly('ppsceid');
 
-  } else if (_custGrpSet1.has(custSubGrp)) {
+  } else if (_custGrpSet1.has(custSubGrp) && custSubGrp != '') {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('enterprise');
@@ -1329,8 +1300,8 @@ function lockUnlockFieldForMALTA() {
   }
 }
 
-function removeClientTireValidation() {
-  console.log(">>>> removeClientTireValidation");
+function addRemoveClientTierValidator() {
+  console.log(">>>> addRemoveClientTierValidator");
   var isuCd = FormManager.getActualValue('isuCd');
   FormManager.resetValidations('clientTier');
   if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
@@ -1338,6 +1309,23 @@ function removeClientTireValidation() {
   } else {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
   }
+}
+
+function addRemoveEnterperiseValidator() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custGrpSet1 = new Set([ 'BUSPR', 'INTER' ]);
+  FormManager.resetValidations('enterprise');
+  if (reqType == 'C' && !custGrpSet1.has(custSubGrp)) {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  }
+
+}
+
+function addRemoveValidator() {
+  addRemoveClientTierValidator();
+  addRemoveEnterperiseValidator();
+
 }
 // CREATCMR-788
 function addressQuotationValidatorMalta() {

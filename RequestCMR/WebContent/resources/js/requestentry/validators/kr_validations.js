@@ -1,10 +1,16 @@
 /* Register KR Javascripts */
-
+ var _isicHandler = null;
+ 
 function afterConfigKR() {
   var role = null;
   var reqType = null;
   var _isuHandler = null;
 
+  
+  _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+    getIsuFromIsic();
+  });
+  
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues();
@@ -78,7 +84,9 @@ function afterConfigKR() {
   // Non editable for requester role
   if (reqType == 'C' && role == 'Requester') {
     FormManager.readOnly('isuCd');
-    FormManager.readOnly('cmrNoPrefix');
+    if (custSubGrp != 'INTER') {
+      FormManager.readOnly('cmrNoPrefix');
+    }
   }
 
   if (reqType == 'C') {
@@ -117,6 +125,9 @@ function afterConfigKR() {
   handleObseleteExpiredDataForUpdate();
   // CREATCMR-788
   addressQuotationValidator();
+  FormManager.readOnly('clientTier');
+  FormManager.readOnly('isuCd');
+  FormManager.readOnly('mrcCd');
 }
 
 function setClientTierValues() {
@@ -126,14 +137,17 @@ function setClientTierValues() {
   isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.readOnly('clientTier');
   } else {
     var reqType = FormManager.getActualValue('reqType');
     if (reqType != 'U') {
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     }
-    FormManager.enable('clientTier');
   }
   handleObseleteExpiredDataForUpdate();
+  FormManager.readOnly('clientTier');
+  FormManager.readOnly('isuCd');
+  FormManager.readOnly('mrcCd');
 }
 
 function setChecklistStatus() {
@@ -509,6 +523,7 @@ function handleObseleteExpiredDataForUpdate() {
 
   }
 }
+
 function addressQuotationValidator() {
   // CREATCMR-788
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
@@ -554,6 +569,10 @@ function setSearchTermDropdownValues() {
         FormManager.limitDropdownValues(searchTerm, [ '00003' ]);
         FormManager.setValue('searchTerm', '00003');
         FormManager.readOnly('searchTerm');
+        FormManager.setValue('isuCd', '34');
+        FormManager.readOnly('isuCd');
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.readOnly('clientTier');
         break;
       case "MKTPC":
         FormManager.limitDropdownValues(searchTerm, [ '00003' ]);
@@ -586,7 +605,11 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('clientTier');
         break;
       case "ESA":
-        FormManager.limitDropdownValues(searchTerm, [ '08016', '09065', '01545' ]);
+    	  FormManager.setValue('isuCd', '36');
+          FormManager.readOnly('isuCd');
+          FormManager.setValue('clientTier', 'Y');
+          FormManager.readOnly('clientTier');
+        FormManager.limitDropdownValues(searchTerm, [ '08016', '09065', '01545','04461','04466','05223','10139' ]);
         break;
       case "INTER":
         FormManager.setValue('isuCd', '21');
@@ -600,9 +623,9 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('mrcCd');
         FormManager.setValue('isicCd', '8888');
         FormManager.readOnly('isicCd');
+        FormManager.enable('cmrNoPrefix');
         FormManager.readOnly('inacCd');
         FormManager.readOnly('inacType');
-        FormManager.enable('cmrNoPrefix');
         break;
       case "LKYN":  
         FormManager.limitDropdownValues(searchTerm, [ '09065' ]);
@@ -624,9 +647,9 @@ function setSearchTermDropdownValues() {
 }
 
 function LockDefaultISUClientTierMrcValues() {
-  FormManager.setValue('clientTier','');
-  FormManager.setValue('isuCd','');
-  FormManager.setValue('mrcCd','');
+//  FormManager.setValue('clientTier','');
+//  FormManager.setValue('isuCd','');
+//  FormManager.setValue('mrcCd','');
   var searchTerm = FormManager.getActualValue('searchTerm');
   var clientTier = FormManager.getField('clientTier');
   if (searchTerm == "00003") {
@@ -801,6 +824,59 @@ function getIsuFromIsic(){
     FormManager.readOnly('isuCd');
   }
 }
+
+// CREATCMR-8581 
+
+function checkCmrUpdateBeforeImport() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var uptsrdc = '';
+        var lastupts = '';
+
+        if (reqType == 'C') {
+          // console.log('reqType = ' + reqType);
+          return new ValidationResult(null, true);
+        }
+
+        var resultsCC = cmr.query('GETUPTSRDC', {
+          COUNTRY : cntry,
+          CMRNO : cmrNo,
+          MANDT : cmr.MANDT
+        });
+
+        if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
+          uptsrdc = resultsCC.ret1;
+          // console.log('lastupdatets in RDC = ' + uptsrdc);
+        }
+
+        var results11 = cmr.query('GETUPTSADDR', {
+          REQ_ID : reqId
+        });
+        if (results11 != null && results11 != undefined && results11.ret1 != '') {
+          lastupts = results11.ret1;
+          // console.log('lastupdatets in CreateCMR = ' + lastupts);
+        }
+
+        if (lastupts != '' && uptsrdc != '') {
+          if (uptsrdc > lastupts) {
+            return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
   console.log('adding KOREA functions...');
@@ -839,5 +915,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setInacNacValues, GEOHandler.KR);
   GEOHandler.addAfterConfig(getIsuFromIsic, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(getIsuFromIsic, GEOHandler.KR);
+  
+   //  CREATCMR-8581
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.KR,null,true);
 
 });
