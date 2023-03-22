@@ -139,6 +139,12 @@
 					<width>40</width>
 					<length>21</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
@@ -210,6 +216,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
@@ -280,6 +292,12 @@
 					<width>40</width>
 					<length>21</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
@@ -343,7 +361,13 @@
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
 					<length>21</length>
-				</column>			
+				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>			
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
@@ -413,6 +437,12 @@
 					<width>40</width>
 					<length>21</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>

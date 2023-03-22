@@ -202,11 +202,11 @@
 					<length>26</length>
 				</column>
 				<column>
-					<label>State/Province</label>
-					<dbColumn>STATE_PROV</dbColumn>
-					<width>25</width>
-					<length>3</length>
-				</column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Phone#</label>
 					<dbColumn>CUST_PHONE</dbColumn>
@@ -284,11 +284,11 @@
 					<length>26</length>
 				</column>
 				<column>
-					<label>State/Province</label>
-					<dbColumn>STATE_PROV</dbColumn>
-					<width>25</width>
-					<length>3</length>
-				</column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Phone#</label>
 					<dbColumn>CUST_PHONE</dbColumn>
@@ -366,11 +366,11 @@
 					<length>26</length>
 				</column>
 				<column>
-					<label>State/Province</label>
-					<dbColumn>STATE_PROV</dbColumn>
-					<width>25</width>
-					<length>3</length>
-				</column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Phone#</label>
 					<dbColumn>CUST_PHONE</dbColumn>
@@ -448,11 +448,11 @@
 					<length>26</length>
 				</column>
 				<column>
-					<label>State/Province</label>
-					<dbColumn>STATE_PROV</dbColumn>
-					<width>25</width>
-					<length>3</length>
-				</column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Phone#</label>
 					<dbColumn>CUST_PHONE</dbColumn>
@@ -530,11 +530,11 @@
 					<length>26</length>
 				</column>
 				<column>
-					<label>State/Province</label>
-					<dbColumn>STATE_PROV</dbColumn>
-					<width>25</width>
-					<length>3</length>
-				</column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Phone#</label>
 					<dbColumn>CUST_PHONE</dbColumn>
