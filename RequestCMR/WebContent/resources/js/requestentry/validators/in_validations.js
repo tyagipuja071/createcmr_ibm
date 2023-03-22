@@ -643,10 +643,7 @@ function onCustSubGrpChange() {
     var custSubGrpInDB = _pagemodel.custSubGrp;
     var abbrevNm = null;
     if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB ) {
-      if (cntry == '744' && custSubGrp == "AQSTN") {
-        abbrevNm ="Acquisition Use Only";
-        FormManager.setValue('abbrevNm', abbrevNm);
-      }
+      FormManager.setValue('abbrevNm', _pagemodel.abbrevNm); 
       FormManager.setValue('abbrevLocn', _pagemodel.abbrevLocn);
       FormManager.setValue('isbuCd', _pagemodel.isbuCd);
       return;
