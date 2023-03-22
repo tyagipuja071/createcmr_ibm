@@ -1103,7 +1103,8 @@ function autoSetAbbrevNmLocnLogic() {
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
         _abbrevNm = "SOFTLAYER USE ONLY";
       } else if (custSubGrp == "ESOSW" || custSubGrp == "XESO") {
-        _abbrevNm = "ESA/OEM/SWG_" + custNm1;
+        // _abbrevNm = "ESA/OEM/SWG_" + custNm1;
+        _abbrevNm = "ESA Use Only";
       } else if (custSubGrp == "AQSTN") {
         _abbrevNm ="Acquisition Use Only";
       } else {
@@ -4695,7 +4696,7 @@ function addressQuotationValidatorGCG() {
   }
 }
 
-// CREATCMR-8581 
+// CREATCMR-8581
 
 function checkCmrUpdateBeforeImport() {
   FormManager.addFormValidator((function() {
@@ -4934,7 +4935,7 @@ dojo.addOnLoad(function() {
 	
   GEOHandler.addAfterConfig(addCustGrpHandler, GEOHandler.APAC_1);
   
-  //CREATCMR-8581
+  // CREATCMR-8581
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.APAC_1,null,true);
   
   GEOHandler.addAddrFunction(displayVatRegistrartionStatus, [ SysLoc.SINGAPORE ]);
