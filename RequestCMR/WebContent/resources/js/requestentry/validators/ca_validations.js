@@ -1438,6 +1438,16 @@ function addressQuotationValidator() {
   FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
 
 }
+
+function setVatInd() {
+  var vat = FormManager.getActualValue('vat');
+  if (vat && dojo.string.trim(vat) != '') {
+    FormManager.setValue('vatInd', 'T');
+  } else if (vat && dojo.string.trim(vat) == '') {
+    FormManager.setValue('vatInd', 'N');
+  }
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
