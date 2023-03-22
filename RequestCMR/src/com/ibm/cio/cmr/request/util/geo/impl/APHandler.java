@@ -124,11 +124,11 @@ public abstract class APHandler extends GEOHandler {
                       record.setCmrAddrTypeCode(supportedAddrType);
                   }
                   record.setCmrAddrSeq(wtaasAddress.getAddressNo());
-                  
-                  if("MAIL".equals(record.getCmrAddrTypeCode())){
-                	  continue; 
+
+                  if ("MAIL".equals(record.getCmrAddrTypeCode())) {
+                    continue;
                   }
-                  
+
                   if (shouldAddWTAASAddess(record.getCmrIssuedBy(), wtaasAddress)) {
                     converted.add(record);
                   }
@@ -460,6 +460,10 @@ public abstract class APHandler extends GEOHandler {
           setAbbrevNM(data, "MARKETPLACE");
         } else if ("SOFT".equalsIgnoreCase(data.getCustSubGrp()) || "XSOFT".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "SOFTLAYER USE ONLY");
+        } else if ("AQSTN".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "Acquisition Use Only");
+        } else if ("ESOSW".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "ESA Use Only");
         } else {
           setAbbrevNM(data, addr.getCustNm1());
         }
