@@ -2253,6 +2253,7 @@ function setClientTierValuesIT(isuCd) {
   } else {
     FormManager.setValue('clientTier', '');
   }
+  setSBOSalesRepFor34QYZ();
 }
 
 function addSalesRepLogicUK2018() {
@@ -5205,9 +5206,7 @@ function set34QYZlogicOnISUCtcChange() {
     }
     setSBOSalesRepFor34QYZ();
   }
-  if (checkImportIndc == 'Y') {
-    return;
-  }
+ 
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setSBOSalesRepFor34QYZ();
@@ -5234,7 +5233,7 @@ function setSBOSalesRepFor34QYZ() {
     return;
   }
 
-  var result = cmr.query('VALIDATOR.POSTCODEIT', {
+  var result = cmr.query('VALIDATOR.COMPANY.POSTCODEIT', {
     REQID : reqId
   });
   var postCodeOrg = '';
@@ -5317,7 +5316,16 @@ function setSBOSalesRepFor34QYZ() {
       FormManager.setValue('salesBusOffCd', 'TF');
     } else if (isuCTC == '5K') {
       FormManager.setValue('salesBusOffCd', '99');
+    } else if (isuCTC == '04') {
+      FormManager.setValue('salesBusOffCd', 'HG');
+    } else if (isuCTC == '19') {
+      FormManager.setValue('salesBusOffCd', 'EB');
+    } else if (isuCTC == '28') {
+      FormManager.setValue('salesBusOffCd', 'EO');
+    }else if (isuCTC == '36Y') {
+      FormManager.setValue('salesBusOffCd', 'FL');
     }
+    
   } else if (bpCustTypes.includes(custSubType)) {
     FormManager.setValue('salesBusOffCd', 'ZP');
   } else if (internalCustSubTypes.includes(custSubType)) {
