@@ -2686,6 +2686,8 @@ function validateCnNameAndAddr4Create() {
             if (typeof (cnDistrictZS01) == 'object') {
               if (cnDistrictZS01[0] != '' && cnDistrictZS01[0] != null) {
                 cnDistrictZS01 = cnDistrictZS01[0];
+              } else {
+                cnDistrictZS01 = '';
               }
             }
 
@@ -2742,7 +2744,7 @@ function validateCnNameAndAddr4Create() {
             if (isValidate) {
               var busnType = FormManager.getActualValue('busnType');
               var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
-              var cnAddress = convert2SBCS(cnAddrTxtZS01);
+              var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
               var cnCity = convert2SBCS(cnCityZS01);
               var result = {};
               var busnTypeResult = {};
@@ -2845,26 +2847,40 @@ function validateCnNameAndAddr4Create() {
                     correctName = '<br/>Company Name: No Data';
                   }
                 }
-                if (address2SBCS != cnAddress && address2SBCS != cnAddressRev) {
-              // address2SBCS = address2SBCS.replace(apiCity,'');
-              // address2SBCS = address2SBCS.replace(apiDistrict,'');
-                  if (address2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+
+                var district = cnDistrictZS01.substr(-1) == '区' ? cnDistrictZS01 : cnDistrictZS01 + '区';
+                var districtReg = /.+?(区)/g;
+                var districtDNB = address2SBCS.match(districtReg);
+                var rmDistrictDnb = address2SBCS.replace(districtDNB,'');
+                var rmDistrictAddr = cnAddress.replace(districtDNB,'');
+                var parenthesisReg = /\((.+?)\)/g;
+                var rmParenthesis = rmDistrictDnb.replace(address2SBCS.match(parenthesisReg),'');
+
+                if(apiCity.indexOf(cnCityZS01) >= 0 && rmDistrictDnb == rmDistrictAddr){
+                  // this check is to add the D&B format of Street = District + Street
+                  if(district == '区' || districtDNB == district) {
                     addressEqualFlag = true;
-                  } else if(apiCity.indexOf(cnCityZS01) >= 0 &&  (address2SBCS.indexOf(cnAddress) >= 0 || address2SBCS.indexOf(cnAddressRev) >= 0)){
-                    // this check is to add the D&B format of Street = District + Street
-                    addressEqualFlag = true;
-                  } else if(address2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && address2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
-                      addressEqualFlag = true;
                   } else {
                     addressEqualFlag = false;
-                    if(!$.isEmptyObject(result)){
-                      correctAddress = '<br/>Company Address: ' + result.regLocation;
-                    } else {
-                      correctAddress = '<br/>Company Address: No Data';
-                    }
                   }
-                  if (!addressEqualFlag){
-                    console.log('Address mismatch: '+address2SBCS+' : '+cnAddress);
+                } else if(rmParenthesis == rmDistrictAddr && apiCity.indexOf(cnCityZS01) >= 0) {
+                  // to validate after removing dnb () if dnb address contains parenthesis
+                  if(district == '区' || districtDNB == district) {
+                    addressEqualFlag = true;
+                  } else {
+                    addressEqualFlag = false;
+                  }
+                } else if(address2SBCS == cnAddress && apiCity == '市辖区' && address2SBCS.indexOf(cnCityZS01) >= 0) {
+                    addressEqualFlag = true;
+                } else {
+                  addressEqualFlag = false;  
+                }
+                if (!addressEqualFlag){
+                  console.log('Address mismatch: '+address2SBCS+' : '+cnAddress);
+                  if(!$.isEmptyObject(result)){
+                    correctAddress = '<br/>Company Address: ' + result.regLocation;
+                  } else {
+                    correctAddress = '<br/>Company Address: No Data';
                   }
                 }
 
@@ -3007,6 +3023,8 @@ function validateCnNameAndAddr4Update() {
             if (typeof (cnDistrictZS01) == 'object') {
               if (cnDistrictZS01[0] != '' && cnDistrictZS01[0] != null) {
                 cnDistrictZS01 = cnDistrictZS01[0];
+              } else {
+                cnDistrictZS01 = '';
               }
             }
           }
@@ -3105,20 +3123,40 @@ function validateCnNameAndAddr4Update() {
                   correctName = '<br/>Company Name: No Data';
                 }
               }
-              if (apiAddress2SBCS != cnAddress) {
-                // address2SBCS = address2SBCS.replace(apiCity,'');
-                // address2SBCS = address2SBCS.replace(apiDistrict,'');
-                if (apiAddress2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+
+              var district = cnDistrictZS01.substr(-1) == '区' ? cnDistrictZS01 : cnDistrictZS01 + '区';
+              var districtReg = /.+?(区)/g;
+              var districtDNB = apiAddress2SBCS.match(districtReg);
+              var rmDistrictDnb = apiAddress2SBCS.replace(districtDNB,'');
+              var rmDistrictAddr = cnAddress.replace(districtDNB,'');
+              var parenthesisReg = /\((.+?)\)/g;
+              var rmParenthesis = rmDistrictDnb.replace(apiAddress2SBCS.match(parenthesisReg),'');
+
+              if(apiCity.indexOf(cnCityZS01) >= 0 && rmDistrictDnb == rmDistrictAddr){
+                // this check is to add the D&B format of Street = District + Street
+                if(district == '区' || districtDNB == district) {
                   addressEqualFlag = true;
-                } else if(apiAddress2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && apiAddress2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
-                    addressEqualFlag = true;
                 } else {
                   addressEqualFlag = false;
-                  if(!$.isEmptyObject(tycResult)){
-                    correctAddress = '<br/>Company Address: ' + tycResult.regLocation;
-                  } else {
-                    correctAddress = '<br/>Company Address: No Data';
-                  }
+                }
+              } else if(rmParenthesis == rmDistrictAddr && apiCity.indexOf(cnCityZS01) >= 0) {
+                // to validate after removing dnb () if dnb address contains parenthesis
+                if(district == '区' || districtDNB == district) {
+                  addressEqualFlag = true;
+                } else {
+                  addressEqualFlag = false;
+                }
+              } else if(apiAddress2SBCS == cnAddress && apiCity == '市辖区' && apiAddress2SBCS.indexOf(cnCityZS01) >= 0) {
+                  addressEqualFlag = true;
+              } else {
+                addressEqualFlag = false;  
+              }
+              if (!addressEqualFlag){
+                console.log('Address mismatch: '+apiAddress2SBCS+' : '+cnAddress);
+                if(!$.isEmptyObject(tycResult)){
+                  correctAddress = '<br/>Company Address: ' + tycResult.regLocation;
+                } else {
+                  correctAddress = '<br/>Company Address: No Data';
                 }
               }
 
