@@ -173,6 +173,12 @@
           <length>30</length>
         </column>
         <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
+       </column>
+        <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>15</width>
@@ -244,6 +250,12 @@
           <length>30</length>
         </column>
         <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
+       </column>
+        <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>15</width>
@@ -254,7 +266,7 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>20</width>
           <bdsId>LandedCountry</bdsId>
-        </column>        
+        </column>       
       </columns>
     </tab>
     
@@ -308,6 +320,12 @@
           <width>30</width>
           <length>30</length>
         </column>
+        <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
+       </column>
         <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
@@ -374,6 +392,12 @@
           <length>30</length>
         </column>
         <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
+       </column>
+        <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>15</width>
@@ -384,7 +408,7 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>20</width>
           <bdsId>LandedCountry</bdsId>
-        </column>        
+        </column>    
       </columns>
     </tab>
     
@@ -449,7 +473,7 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>20</width>
           <bdsId>LandedCountry</bdsId>
-        </column>        
+        </column>      
       </columns>
     </tab>
     
@@ -510,6 +534,12 @@
           <length>30</length>
         </column>
         <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
+       </column>
+        <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>15</width>
@@ -520,7 +550,7 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>20</width>
           <bdsId>LandedCountry</bdsId>
-        </column>        
+        </column>    
       </columns>
     </tab>
     
@@ -581,6 +611,12 @@
           <length>30</length>
         </column>
         <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
+       </column>
+        <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>15</width>
@@ -591,7 +627,7 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>20</width>
           <bdsId>LandedCountry</bdsId>
-        </column>        
+        </column>      
       </columns>
     </tab>
     
@@ -646,6 +682,12 @@
           <length>30</length>
         </column>
         <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
+       </column>
+        <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>15</width>
@@ -656,7 +698,7 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>20</width>
           <bdsId>LandedCountry</bdsId>
-        </column>        
+        </column>       
       </columns>
     </tab>
   </tabs>
