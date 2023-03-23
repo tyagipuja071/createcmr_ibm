@@ -16,7 +16,7 @@ function afterConfigForNORDX() {
   reqType = FormManager.getActualValue('reqType');
   var role = null;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var vat = FormManager.getActualValue('vat');  
+  var vat = FormManager.getActualValue('vat');
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -147,7 +147,7 @@ function afterConfigForNORDX() {
 
   // CREATCMR-1651
   setKukalValuesByCustSubGrp();
-  
+
   // CREATCMR-1689
   setAbbreviatedNameValue();
 
@@ -169,8 +169,8 @@ function afterConfigForNORDX() {
   setSortlLength();
   lockSalesRepAndSortl();
   hideACAdminDSC();
-  
-  //CREATCMR-788
+
+  // CREATCMR-788
   addressQuotationValidatorNORS();
 }
 
@@ -367,7 +367,7 @@ function addHandlersForNORDX() {
       setExpediteReason();
     });
   }
-  
+
   if (_landCntryHandler == null) {
     _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       skipStateProvForFO();
@@ -432,7 +432,8 @@ function vatAndVatExemptOnScenario(value) {
     var custType = FormManager.getActualValue('custGrp');
     if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 || (custType != '' && custType.includes('LOC'))) {
       FormManager.show('VATExempt', 'vatExempt');
-      //FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+      // 'MAIN_CUST_TAB');
       if (_isScenarioChanged) {
         if (isIBPriv) {
           FormManager.getField('vatExempt').set('checked', true);
@@ -2920,7 +2921,6 @@ function setKukalValuesByCustSubGrp() {
     } else {
       FormManager.setValue('custClass', '');
     }
-    
 
   } else if (reqType == 'U') {
     FormManager.limitDropdownValues(field, [ '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45',
@@ -3499,7 +3499,7 @@ function setCustPrefLangByCountry() {
 
 }
 
-function lockTaxCode(){
+function lockTaxCode() {
   var role = FormManager.getActualValue('userRole');
   if (role == 'Viewer') {
     FormManager.readOnly('taxCd1');
@@ -3510,11 +3510,10 @@ function lockTaxCode(){
 
 // CREATCMR-1709
 // CREATCMR-5128
-/*function resetCustPrefLang() {
-  _pagemodel.custPrefLang = null;
-}*/
+/*
+ * function resetCustPrefLang() { _pagemodel.custPrefLang = null; }
+ */
 // CREATCMR-1709
-
 function setInacCd() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -5147,8 +5146,8 @@ dojo.addOnLoad(function() {
   // CREATCMR-1709
   // CREATCMR-5128
   // commented for CREATCMR-7669
-  //GEOHandler.addAfterConfig(resetCustPrefLang, GEOHandler.NORDX);
-  //GEOHandler.addAfterTemplateLoad(resetCustPrefLang, GEOHandler.NORDX);
+  // GEOHandler.addAfterConfig(resetCustPrefLang, GEOHandler.NORDX);
+  // GEOHandler.addAfterTemplateLoad(resetCustPrefLang, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(onSubIndustryChange, GEOHandler.NORDX);//
   // CMR-1709
 
@@ -5180,11 +5179,11 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.NORDX);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.NORDX, null, true);
-  
+
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NORDX);
-  
+
   GEOHandler.addAfterConfig(skipStateProvForFO, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(lockTaxCode, GEOHandler.NORDX);
   GEOHandler.registerValidator(searchTermCodeValidator, GEOHandler.NORDX, null, true);
@@ -5192,7 +5191,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSalesRepValues, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(addCtcHandler, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(addIsuHandler, GEOHandler.NORDX);
-  
+
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.NORDX);
 });

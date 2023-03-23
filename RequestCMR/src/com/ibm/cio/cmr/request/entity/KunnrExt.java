@@ -510,5 +510,4 @@ public class KunnrExt extends BaseEntity<KunnrExtPK> implements Serializable {
   public void setVatInd(String vatInd) {
     this.vatInd = vatInd;
   }
-
 }

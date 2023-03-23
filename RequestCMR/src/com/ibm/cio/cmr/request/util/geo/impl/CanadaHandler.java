@@ -453,7 +453,12 @@ public class CanadaHandler extends GEOHandler {
     } else {
       data.setSizeCd("");
     }
-    data.setVatInd("N");
+    if (StringUtils.isBlank(data.getVat())){
+      data.setVatInd("N");
+    } else if (StringUtils.isNotBlank(data.getVat())){
+      data.setVatInd("T");
+    }  
+    
   }
 
   @Override
