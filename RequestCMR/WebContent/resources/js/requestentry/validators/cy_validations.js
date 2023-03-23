@@ -3333,6 +3333,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.CYPRUS ], null, true);
-  GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.CYPRUS ]);
-  GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.CYPRUS ]);
 });

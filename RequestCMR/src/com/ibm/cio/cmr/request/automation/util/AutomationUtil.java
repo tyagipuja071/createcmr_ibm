@@ -1499,7 +1499,7 @@ public abstract class AutomationUtil {
     LOG.debug("tweakDnBMatchingResponse");
     // NOOP
   }
-
+  
   public static List<DACHFieldContainer> computeDACHCoverageElements(EntityManager entityManager, String queryBgDACH, String bgId,
       String cmrIssuingCntry) {
     List<DACHFieldContainer> calculatedFields = new ArrayList<>();
