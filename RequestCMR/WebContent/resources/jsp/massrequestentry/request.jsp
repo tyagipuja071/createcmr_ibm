@@ -149,11 +149,6 @@ dojo.addOnLoad(function() {
     PageManager.setAlwaysAvailable(['yourAction']);
     
     var paramString = 'reqstatus=${reqentry.reqStatus}&lockind=${yourActionsLockInd}&reqtype=${reqentry.reqType}';
-    
-    if('${reqentry.reqStatus}' == 'COM') {
-    	paramString = 'reqstatus=${reqentry.reqStatus}&lockind=X&reqtype=${reqentry.reqType}';
-    }
-    
     paramString += '&sepvalind=' + ('${reqentry.sepValInd}'.trim() == '' ? 'N' : '${reqentry.sepValInd}');
     paramString += '&disableautoproc=' + ('${reqentry.disableAutoProc}'.trim() == '' ? 'N' : '${reqentry.disableAutoProc}');
     FilteringDropdown.loadItems('yourAction', 'yourAction_spinner', '${yourActionsSqlId}', paramString, false, '${ui.info.noneavailable}');

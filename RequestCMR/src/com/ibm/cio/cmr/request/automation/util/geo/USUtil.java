@@ -2474,7 +2474,7 @@ public class USUtil extends AutomationUtil {
     LOG.debug("tweakDnBMatchingResponse USUtil");
     String subScenario = data.getCustGrp();
     List<String> dnbIsicOverrideScenarios = Arrays.asList(CG_COMMERCIAL, CG_COMMERCIAL_FRANCHISE, CG_COMMERCIAL_RESTRICTED);
-    if (!StringUtil.isBlank(subScenario) && dnbIsicOverrideScenarios.contains(subScenario)) {
+    if (!StringUtils.isBlank(subScenario) && dnbIsicOverrideScenarios.contains(subScenario)) {
       if (!usFedIsicMap.isEmpty()) {
         for (USFedIsicMapping mapping : usFedIsicMap) {
           String isicOverridedValue = mapping.getCmrIsic();
@@ -2490,5 +2490,4 @@ public class USUtil extends AutomationUtil {
       }
     }
   }
-
 }
