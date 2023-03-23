@@ -5,6 +5,7 @@ function afterConfigKR() {
   var role = null;
   var reqType = null;
   var _isuHandler = null;
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   
   _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -430,9 +431,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('contactName2');
     FormManager.readOnly('contactName3');
-    if (custSubGrp != 'INTER') {
-      FormManager.readOnly('cmrNoPrefix');
-    }
+    FormManager.readOnly('cmrNoPrefix');
     FormManager.readOnly('bgId');
     FormManager.readOnly('gbgId');
     FormManager.readOnly('bgRuleId');
