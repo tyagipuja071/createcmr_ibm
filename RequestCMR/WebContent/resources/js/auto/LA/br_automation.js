@@ -185,9 +185,6 @@ function handleUpdateReason() {
     _updateReasonHandler = dojo.connect(FormManager.getField('updateReason4'), 'onChange', function(value) {
       var val = FormManager.getActualValue('updateReason');
       if (val == 'UPIC') {
-        FormManager.setValue('reqReason', 'UPIC');
-        FormManager.readOnly('reqReason');
-
         FormManager.show('Company', 'company');
         FormManager.show('INACCode', 'inacCd');
         FormManager.show('ISU', 'isuCd');
