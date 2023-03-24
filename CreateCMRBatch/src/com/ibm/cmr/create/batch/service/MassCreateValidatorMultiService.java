@@ -173,6 +173,11 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
         if (StringUtils.isBlank(defaultApprovalResult)) {
           boolean isCMDERequester = isCMDERequester(entityManager, request.getRequesterId(), data.getCmrIssuingCntry());
           if (isCMDERequester) {
+            request.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+            // For US, set rdcProcessingStatus
+            if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+              request.setRdcProcessingStatus(CmrConstants.RDC_STATUS_ABORTED);
+            }
             request.setReqStatus(CmrConstants.REQUEST_STATUS.AUT.toString());
             comment = "System validation succeeded. Request sent for Automated Processing.";
           } else {
