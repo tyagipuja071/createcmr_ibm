@@ -268,7 +268,7 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   @Column(
       name = "COLLECTOR_NO")
-  private String collectorNo;
+  private String collectorNameNo;
 
   @Column(
       name = "MARKETING_CHNL_INDC_VALUE")
@@ -1119,11 +1119,11 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   }
 
   public String getCollectorNo() {
-    return this.collectorNo;
+    return this.collectorNameNo;
   }
 
   public void setCollectorNo(String collectorNo) {
-    this.collectorNo = collectorNo;
+    this.collectorNameNo = collectorNo;
   }
 
   public String getMarketingChnlIndcValue() {

@@ -4116,75 +4116,36 @@ function validateStreetAddrCont2() {
 }
 
 // API call for validating GST for India on Save Request and Send for Processing
-function validateGSTForIndia() {
-
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        var reqTyp = FormManager.getActualValue('reqType');
-        var vat = FormManager.getActualValue('vat');
-        var reqId = FormManager.getActualValue('reqId');
-        if (dijit.byId('vatExempt').get('checked')) { 
-          return new ValidationResult(null, true); 
-        }
-        if (cntry != '744' || custSubGrp == 'CROSS') {
-          return new ValidationResult(null, true);
-        }
-        var country = "";
-        if (SysLoc.INDIA == FormManager.getActualValue('cmrIssuingCntry')) {
-        country = "IN";
-        if (country != '') {
-          if (vat == '') {
-            return new ValidationResult(null, true);
-          } else {
-            if (reqId != null) {
-              reqParam = {
-                REQ_ID : reqId
-              };
-            }
-            var results = cmr.query('GET_ZS01', reqParam);
-            if (results.ret1 != undefined) {
-              
-              var name = results.ret1;
-              var address = results.ret2;
-              var postal = results.ret3;
-              var city = results.ret4;
-              var state = results.ret5;
-              var country = '';
-              
-              if (state != null && state != '') {
-                reqParam = {
-                    STATE_PROV_CD : state,
-                  };
-              var stateResult = cmr.query('GET_STATE_DESC', reqParam);
-                if (stateResult != null) {
-                  country = stateResult.ret1;
-                }
-              }
-            var gstRet = cmr.validateGST(country, vat, name, address, postal, city);
-            if (!gstRet.success) {
-              return new ValidationResult({
-                id : 'vat',
-                type : 'text',
-                name : 'vat'
-              }, false, gstRet.errorMessage);
-            } else {
-              return new ValidationResult(null, true);
-            }
-            }else {
-              return new ValidationResult(null, true);
-            }
-          }
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-      }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
-}
+/*
+ * function validateGSTForIndia() {
+ * 
+ * FormManager.addFormValidator((function() { return { validate : function() {
+ * var cntry = FormManager.getActualValue('cmrIssuingCntry'); var custSubGrp =
+ * FormManager.getActualValue('custSubGrp'); var reqTyp =
+ * FormManager.getActualValue('reqType'); var vat =
+ * FormManager.getActualValue('vat'); var reqId =
+ * FormManager.getActualValue('reqId'); if
+ * (dijit.byId('vatExempt').get('checked')) { return new ValidationResult(null,
+ * true); } if (cntry != '744' || custSubGrp == 'CROSS') { return new
+ * ValidationResult(null, true); } var country = ""; if (SysLoc.INDIA ==
+ * FormManager.getActualValue('cmrIssuingCntry')) { country = "IN"; if (country !=
+ * '') { if (vat == '') { return new ValidationResult(null, true); } else { if
+ * (reqId != null) { reqParam = { REQ_ID : reqId }; } var results =
+ * cmr.query('GET_ZS01', reqParam); if (results.ret1 != undefined) {
+ * 
+ * var name = results.ret1; var address = results.ret2; var postal =
+ * results.ret3; var city = results.ret4; var state = results.ret5; var country =
+ * '';
+ * 
+ * if (state != null && state != '') { reqParam = { STATE_PROV_CD : state, };
+ * var stateResult = cmr.query('GET_STATE_DESC', reqParam); if (stateResult !=
+ * null) { country = stateResult.ret1; } } var gstRet = cmr.validateGST(country,
+ * vat, name, address, postal, city); if (!gstRet.success) { return new
+ * ValidationResult({ id : 'vat', type : 'text', name : 'vat' }, false,
+ * gstRet.errorMessage); } else { return new ValidationResult(null, true); }
+ * }else { return new ValidationResult(null, true); } } } else { return new
+ * ValidationResult(null, true); } } } }; })(), 'MAIN_CUST_TAB', 'frmCMR'); }
+ */
 
 // API call for validating ABN for Australia on Save Request and Send for
 // Processing
@@ -7053,7 +7014,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
   GEOHandler.addAfterConfig(addHandlersForANZ, GEOHandler.ANZ);
   GEOHandler.addAfterTemplateLoad(setInacByClusterHKMO, GEOHandler.GCG);
-  GEOHandler.registerValidator(validateGSTForIndia, [ SysLoc.INDIA ], null, true);
+  // GEOHandler.registerValidator(validateGSTForIndia, [ SysLoc.INDIA ], null,
+  // true);
   GEOHandler.registerValidator(validateABNForAU, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.addAfterConfig(afterConfigForIndia, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForIndia, SysLoc.INDIA);

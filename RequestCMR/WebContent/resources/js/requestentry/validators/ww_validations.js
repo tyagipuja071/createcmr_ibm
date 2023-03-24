@@ -641,13 +641,18 @@ function addGenericZIPValidator() {
     return {
       validate : function() {
         var cntry = FormManager.getActualValue('landCntry');
-        var loc = FormManager.getActualValue('cmrIssuingCntry'); // skipped for
-        // Brazil and
-        // Peru
-        if (!cntry || cntry == '' || cntry.trim() == '' || (loc == '631' || loc == '815' || loc == '681' || loc == '781')) {
+        var loc = FormManager.getActualValue('cmrIssuingCntry');
+
+        if (!cntry || cntry == '' || cntry.trim() == '' || (loc == '')) {
           return new ValidationResult(null, true);
         }
+
         var postCd = FormManager.getActualValue('postCd');
+
+        // skip input validation when Postal Code field is emtpy for CR, EC
+        if (postCd == '' && (cntry == 'CR' || cntry == 'EC')) {
+          return new ValidationResult(null, true);
+        }
 
         console.log('Country: ' + cntry + ' Postal Code: ' + postCd);
         if(cntry == 'LV') {
