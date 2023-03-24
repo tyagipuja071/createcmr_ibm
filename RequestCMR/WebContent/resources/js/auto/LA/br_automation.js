@@ -187,7 +187,7 @@ function handleUpdateReason() {
       if (val == 'UPIC') {
         FormManager.setValue('reqReason', 'UPIC');
         FormManager.readOnly('reqReason');
-        // JOYCE
+
         FormManager.show('Company', 'company');
         FormManager.show('INACCode', 'inacCd');
         FormManager.show('ISU', 'isuCd');
