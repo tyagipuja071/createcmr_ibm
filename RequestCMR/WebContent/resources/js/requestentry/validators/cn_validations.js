@@ -659,7 +659,7 @@ function onInacTypeChange() {
   reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     var custSubT = FormManager.getActualValue('custSubGrp');
-    if (_inacCdHandler == null && searchTerm != undefined && searchTerm != '') {
+    if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && _inacCdHandler == null && searchTerm != undefined && searchTerm != '') {
       _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
         var cmt = value + ','+ searchTerm +'%';
         var cntry = FormManager.getActualValue('cmrIssuingCntry');

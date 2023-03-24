@@ -107,15 +107,31 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       load : function(data, ioargs) {
         cmr.hideProgress();
         if (data && data.items) {
-          var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
-          if (byModel && byModel.ret1 == 'Y'){
+          var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {
+            CNTRY_CD : FormManager.getActualValue('issuingCntry')
+          });
+          if (byModel && byModel.ret1 == 'Y') {
             $scope.allowByModel = false;
-          } 
-          
-          var localLangDataFlg = cmr.query('HIDE_LOCAL_LANG_DATA', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
-          if (localLangDataFlg && localLangDataFlg.ret1 == 'Y'){
+          }
+          // CREATCMR-8567
+          console.log('>>Enabled/Disabled Create by model for Sub-Region.');
+          var subCntry = FormManager.getActualValue('issuingCntry');
+          var mainCntry = null;
+          if (subCntry.length > 3) {
+            mainCntry = subCntry.substr(0, 3);
+            var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {
+              CNTRY_CD : mainCntry
+            });
+            if (byModel && byModel.ret1 == 'Y') {
+              $scope.allowByModel = false;
+            }
+          }
+          var localLangDataFlg = cmr.query('HIDE_LOCAL_LANG_DATA', {
+            CNTRY_CD : FormManager.getActualValue('issuingCntry')
+          });
+          if (localLangDataFlg && localLangDataFlg.ret1 == 'Y') {
             $scope.hideLocalLangData = true;
-          } 
+          }
           if (data.items.length > 50) {
             alert('The search resulted to more than 50 matches. Only the top 50 matches will be shown. Please try to change the search parameters to get the other records you need.');
             console.log('splicing from 50, removing ' + (data.items.length - 50) + ' items');
@@ -150,7 +166,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
         cmr.hideProgress();
         $scope.searched = false;
         console.log('error');
-        console.log(error);
       }
     });
 
@@ -202,6 +217,21 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
   $scope.importRecord = function(rec, update) {
     var temp = JSON.stringify($scope.frozen);
     var model = JSON.parse(temp);
+    model.subRegion = $scope.getSubRegion(model.issuingCntry, model.countryCd && model.countryCd.length == 2 ? model.countryCd : $scope.frozen.countryCd);
+    model.reqType = update ? 'U' : 'C';
+    model.hasCmr = false;
+    model.hasDnb = false;
+    model.cmrNo = rec.cmrNo;
+    model.dunsNo = rec.dunsNo;
+    model.recType = rec.recType;
+    $scope.records.forEach(function(curr, i) {
+      if (curr.recType == 'CMR') {
+        model.hasCmr = true;
+      }
+      if (curr.recType == 'DNB') {
+        model.hasDnb = true;
+      }
+    });
 
     if (update) {
       var cmrNo = model.cmrNo;
@@ -233,7 +263,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
               cmr.hideProgress();
               $scope.searched = false;
               console.log('error');
-              console.log(error);
               cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
             }
           });
@@ -241,22 +270,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
         }
       }
     }
-    model.subRegion = $scope.getSubRegion(model.issuingCntry, model.countryCd && model.countryCd.length == 2 ? model.countryCd : $scope.frozen.countryCd);
-    model.reqType = update ? 'U' : 'C';
-    model.hasCmr = false;
-    model.hasDnb = false;
-    model.cmrNo = rec.cmrNo;
-    model.dunsNo = rec.dunsNo;
-    model.recType = rec.recType;
-    $scope.records.forEach(function(curr, i) {
-      if (curr.recType == 'CMR') {
-        model.hasCmr = true;
-      }
-      if (curr.recType == 'DNB') {
-        model.hasDnb = true;
-      }
-    });
-
     cmr.showProgress('Creating new request from the record, please wait..');
     dojo.xhrPost({
       url : cmr.CONTEXT_ROOT + '/quick_search/process.json',
@@ -278,7 +291,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
         cmr.hideProgress();
         $scope.searched = false;
         console.log('error');
-        console.log(error);
         cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
       }
     });
@@ -442,7 +454,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
         cmr.hideProgress();
         $scope.searched = false;
         console.log('error');
-        console.log(error);
         cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
       }
     });
@@ -453,16 +464,16 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     if (issuingCntry && issuingCntry.length > 3) {
       return issuingCntry;
     }
-    
- if(issuingCntry != "702" && issuingCntry != "678" &&  issuingCntry != "624"){
-    var ret = cmr.query('QUICK.CHECK_SUBREGION', {
-      CNTRY : issuingCntry,
-      CD : issuingCntry + countryCd
-    });
-    if (ret && ret.ret1) {
-      return issuingCntry + countryCd;
+
+    if (issuingCntry != "702" && issuingCntry != "678" && issuingCntry != "624") {
+      var ret = cmr.query('QUICK.CHECK_SUBREGION', {
+        CNTRY : issuingCntry,
+        CD : issuingCntry + countryCd
+      });
+      if (ret && ret.ret1) {
+        return issuingCntry + countryCd;
+      }
     }
-   }
     ret = cmr.query('QUICK.CHECK_SUBREGION_DEFLT', {
       CNTRY : issuingCntry,
       CD : issuingCntry
@@ -548,15 +559,19 @@ app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout'
   $scope.dunsNo = $scope.getParameterByName('dunsNo');
   $scope.issuingCountry = $scope.getParameterByName('issuingCountry');
   $scope.viewMode = 'S';
-  var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : $scope.issuingCountry});
-  if (byModel && byModel.ret1 == 'Y'){
+  var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {
+    CNTRY_CD : $scope.issuingCountry
+  });
+  if (byModel && byModel.ret1 == 'Y') {
     $scope.allowByModel = false;
-  } 
-  
-  var localLangDataFlg = cmr.query('HIDE_LOCAL_LANG_DATA', {CNTRY_CD : FormManager.getActualValue('issuingCntry')});
-  if (localLangDataFlg && localLangDataFlg.ret1 == 'Y'){
+  }
+
+  var localLangDataFlg = cmr.query('HIDE_LOCAL_LANG_DATA', {
+    CNTRY_CD : FormManager.getActualValue('issuingCntry')
+  });
+  if (localLangDataFlg && localLangDataFlg.ret1 == 'Y') {
     $scope.hideLocalLangData = true;
-   } 
+  }
 
   $scope.loadDetails = function() {
     if ($scope.cmrNo) {
@@ -591,7 +606,6 @@ app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout'
           cmr.hideProgress();
           $scope.searched = false;
           console.log('error');
-          console.log(error);
           cmr.showAlert('A system error occurred during the retrieval of the details. Please try again later.');
         }
       });
@@ -617,7 +631,6 @@ app.controller('DetailsController', [ '$scope', '$document', '$http', '$timeout'
           cmr.hideProgress();
           $scope.searched = false;
           console.log('error');
-          console.log(error);
           cmr.showAlert('A system error occurred during the retrieval of the details. Please try again later.');
         }
       });
@@ -866,10 +879,10 @@ var US_STATES = [ {
   name : 'Wyoming'
 } ]
 dojo.addOnLoad(function() {
-  if (typeof(bypassqs) != 'undefined' && bypassqs){
+  if (typeof (bypassqs) != 'undefined' && bypassqs) {
     return;
   }
-  if (typeof(_furl) == 'undefined' || !_furl) {
+  if (typeof (_furl) == 'undefined' || !_furl) {
     return;
   }
   var findcmrUrl = _furl.substring(0, _furl.lastIndexOf('/')) + '/DnBSearch';
@@ -989,65 +1002,63 @@ dojo.addOnLoad(function() {
 });
 
 app.controller('FindCMRController', [ '$scope', '$document', '$http', '$timeout', '$sanitize', '$filter', function($scope, $document, $http, $timeout, $sanitize, $filter) {
-   $scope.hello = 'Update request from FindCMR';
-   $scope.getParameterByName = function(name, url) {
-     if (!url) {
-       url = window.location.href;
-     }
-     name = name.replace(/[\[\]]/g, '\\$&');
-     var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
-     var results = regex.exec(url);
-     if (!results) {
-       return null;
-     }
-     if (!results[2]) {
-       return '';
-     }
-     return decodeURIComponent(results[2].replace(/\+/g, ' '));
-   };
+  $scope.hello = 'Update request from FindCMR';
+  $scope.getParameterByName = function(name, url) {
+    if (!url) {
+      url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+    var results = regex.exec(url);
+    if (!results) {
+      return null;
+    }
+    if (!results[2]) {
+      return '';
+    }
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+  };
 
-   $scope.createRequest = function(){
-     var cmrNo = $scope.getParameterByName('cmrNo');
-     var cntry = $scope.getParameterByName('cntry');
-     if (cmrNo && cntry){
-       $scope.hello = 'Update request from FindCMR for CMR '+cmrNo;
-       cmr.showProgress('Creating new update request for CMR '+cmrNo+', please wait..');
-       var model = {
-           recType : 'CMR',
-           cmrNo : cmrNo,
-           issuingCntry : cntry,
-           reqType : 'U'
-       };
-       dojo.xhrPost({
-         url : cmr.CONTEXT_ROOT + '/quick_search/process.json',
-         handleAs : 'json',
-         method : 'POST',
-         content : model,
-         timeout : 7 * 60000,
-         sync : false,
-         load : function(data, ioargs) {
-           console.log(data);
-           if (data && data.success) {
-             var reqId = data.model.reqId;
-             window.location = cmr.CONTEXT_ROOT + '/request/' + reqId + '?qs=Y&infoMessage=' + encodeURIComponent('Request created successfully.');
-           } else {
-             cmr.hideProgress();
-             cmr.showAlert(data.msg ? data.msg : 'An unexpected error occurred during the processing, pls try again later.');
-           }
-         },
-         error : function(error, ioargs) {
-           cmr.hideProgress();
-           $scope.searched = false;
-           console.log('error');
-           console.log(error);
-           cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
-         }
-       });
-     } else {
-       cmr.showAlert('Please check the CMR input.');
-     }
-   }
-   
-   $scope.createRequest();
-}]);
+  $scope.createRequest = function() {
+    var cmrNo = $scope.getParameterByName('cmrNo');
+    var cntry = $scope.getParameterByName('cntry');
+    if (cmrNo && cntry) {
+      $scope.hello = 'Update request from FindCMR for CMR ' + cmrNo;
+      cmr.showProgress('Creating new update request for CMR ' + cmrNo + ', please wait..');
+      var model = {
+        recType : 'CMR',
+        cmrNo : cmrNo,
+        issuingCntry : cntry,
+        reqType : 'U'
+      };
+      dojo.xhrPost({
+        url : cmr.CONTEXT_ROOT + '/quick_search/process.json',
+        handleAs : 'json',
+        method : 'POST',
+        content : model,
+        timeout : 7 * 60000,
+        sync : false,
+        load : function(data, ioargs) {
+          console.log(data);
+          if (data && data.success) {
+            var reqId = data.model.reqId;
+            window.location = cmr.CONTEXT_ROOT + '/request/' + reqId + '?qs=Y&infoMessage=' + encodeURIComponent('Request created successfully.');
+          } else {
+            cmr.hideProgress();
+            cmr.showAlert(data.msg ? data.msg : 'An unexpected error occurred during the processing, pls try again later.');
+          }
+        },
+        error : function(error, ioargs) {
+          cmr.hideProgress();
+          $scope.searched = false;
+          console.log('error');
+          cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
+        }
+      });
+    } else {
+      cmr.showAlert('Please check the CMR input.');
+    }
+  }
 
+  $scope.createRequest();
+} ]);
