@@ -1536,15 +1536,13 @@ public class TransConnService extends BaseBatchService {
           }
         }
 
-        if ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry())) {
-          String strPaygoNo = getPaygoSapnoForNZ(entityManager, data.getCmrNo(), "200", data.getCmrIssuingCntry());
-          if (!StringUtils.isEmpty(strPaygoNo)) {
-            PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGOSAPNO"));
-            addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
-            addrQuery.setParameter("SAP_NO", strPaygoNo);
-            addrQuery.setParameter("IERP_SITE_PRTY_ID", "S" + strPaygoNo.substring(1));
-            addrQuery.executeSql();
-            LOG.info("SET ANZ PG SAP_NO .");
+        if (("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))
+            && ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry()))) {
+          for (RDcRecord record : response.getRecords()) {
+            LOG.debug("CMR No. " + response.getCmrNo() + " address type " + record.getAddressType());
+            if ("ZP01".equals(record.getAddressType())) {
+              updateAnzPaygoAddress(entityManager, admin, record);
+            }
           }
         }
 
@@ -1712,6 +1710,25 @@ public class TransConnService extends BaseBatchService {
       updateEntity(addr, entityManager);
     }
 
+  }
+
+  protected void updateAnzPaygoAddress(EntityManager entityManager, Admin admin, RDcRecord record) {
+
+    String strExtwallet = "";
+    PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.GET.EXTWALLET_BYKUNNR"));
+    addrQuery.setParameter("KUNNR", record.getSapNo());
+    addrQuery.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    strExtwallet = addrQuery.getSingleResult(String.class);
+
+    if (StringUtils.isNotEmpty(strExtwallet) && StringUtils.isNotEmpty(record.getSapNo())) {
+      addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.SAPNO_BYEXTWALLET.U"));
+      addrQuery.setParameter("SAP_NO", record.getSapNo());
+      addrQuery.setParameter("IERP_SITE_PRTY_ID", "S" + record.getSapNo().substring(1));
+      addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+      addrQuery.setParameter("EXT_WALLET_ID", strExtwallet);
+      addrQuery.executeSql();
+      LOG.info("updateAnzPaygoAddress sapNo ." + record.getSapNo());
+    }
   }
 
   /**
