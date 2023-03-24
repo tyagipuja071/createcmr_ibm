@@ -1907,6 +1907,7 @@ public class TransConnService extends BaseBatchService {
                   if (StringUtils.isBlank(addr.getIerpSitePrtyId())) {
                     addr.setIerpSitePrtyId(response.getRecords().get(i).getIerpSitePartyId());
                   }
+
                   // if (("PayGo-Test".equals(admin.getSourceSystId()) ||
                   // "BSS".equals(admin.getSourceSystId()))
                   // && ("616".equals(data.getCmrIssuingCntry()) ||
@@ -1930,6 +1931,11 @@ public class TransConnService extends BaseBatchService {
             }
 
             updateEntity(addr, entityManager);
+            if (("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))
+                && ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry()))
+                && "PG01".equals(addr.getId().getAddrType())) {
+              updPaygoSeqNoForANZ(entityManager, addr.getSapNo(), reqId);
+            }
           } else {
             if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
               comment = comment.append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")
@@ -3178,5 +3184,24 @@ public class TransConnService extends BaseBatchService {
     query.setForReadOnly(true);
     PaygoSapno = query.getSingleResult(String.class);
     return PaygoSapno;
+  }
+
+  protected void updPaygoSeqNoForANZ(EntityManager entityManager, String sapNo, long reqId) {
+    LOG.debug("updPaygoSeqNoForANZ " + sapNo);
+    String payGoSeqNo = "";
+    PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.GET.PAYGOSEQ_BYKUNNR"));
+    addrQuery.setParameter("KUNNR", sapNo);
+    addrQuery.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    payGoSeqNo = addrQuery.getSingleResult(String.class);
+
+    if (StringUtils.isNotEmpty(payGoSeqNo) && StringUtils.isNotEmpty(sapNo)) {
+      addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.SEQNO_BYKUNNR.U"));
+      addrQuery.setParameter("SAP_NO", sapNo);
+      addrQuery.setParameter("REQ_ID", reqId);
+      addrQuery.setParameter("ADDR_SEQ", payGoSeqNo);
+      addrQuery.executeSql();
+      LOG.info("updPaygoSeqNoForANZ sapNo ." + sapNo);
+    }
+
   }
 }

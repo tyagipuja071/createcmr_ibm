@@ -485,7 +485,7 @@ public class NewZealandUtil extends AutomationUtil {
     if ("U".equals(admin.getReqType()) && ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))) {
         Addr pg01 = requestData.getAddress("PG01");
         if(pg01 != null){
-        	checkANZPaygoAddr(entityManager, data.getId().getReqId());
+        	// checkANZPaygoAddr(entityManager, data.getId().getReqId());
         }
       }
     
