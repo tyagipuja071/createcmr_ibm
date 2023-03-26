@@ -85,8 +85,9 @@ public class AppUserInjectFilter implements Filter {
 					// connect to W3 to build user profile
 					String ibmUniqueId = userHelper.getUNID();
 
+					LOG.debug("Subject is set: " + ibmUniqueId);
+
 					if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
-						// redirect to /ibmid
 						LOG.debug("No IBM ID detected. Redirecting to W3 ID intercept..");
 						httpReq.getSession().invalidate();
 						httpResp.sendRedirect("/CreateCMR/oidcclient/redirect/client01");
@@ -102,7 +103,8 @@ public class AppUserInjectFilter implements Filter {
 
 					session.setAttribute("userHelper", userHelper);
 					setSessionAttributes(httpReq, httpResp);
-					filterChain.doFilter(httpReq, response);
+					// filterChain.doFilter(httpReq, response);
+					httpResp.sendRedirect("/CreateCMR/oidcclient/redirect/client01");
 					return;
 				}
 			}
