@@ -2692,7 +2692,6 @@ function validateCnNameAndAddr4Create() {
                 cnDistrictZS01 = '';
               }
             }
-
           }
           var ret = cmr.query('ADDR.GET.INTLCUSTNM4.BY_REQID', {
             REQ_ID : FormManager.getActualValue('reqId')
@@ -2700,7 +2699,7 @@ function validateCnNameAndAddr4Create() {
           if (ret && ret.ret1 && ret.ret1 != '') {
             intlCustNm4ZS01 = ret.ret1;
           }
-          
+
           var busnType = FormManager.getActualValue('busnType');
           var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
           var scenarioValidation = true;
@@ -2737,7 +2736,6 @@ function validateCnNameAndAddr4Create() {
 
             var correctName = '';
             var correctAddress = '';
-            
             if (name2SBCS != cnName) {
               console.log('Name mismatch: '+name2SBCS+' : '+cnName);
               nameEqualFlag = false;
@@ -2748,35 +2746,7 @@ function validateCnNameAndAddr4Create() {
               }
             }
 
-            var city = cnCity.substr(-1) == '市' ? cnCity : cnCity + '市';
-            var cnAddressRmCity = cnAddress.replace(city,'');
-            var district = cnDistrictZS01.substr(-1) == '区' ? cnDistrictZS01 : cnDistrictZS01 + '区';
-            var districtReg = /.+?(区)/g;
-            var districtDNB = address2SBCS.match(districtReg);
-            var rmDistrictDnb = address2SBCS.replace(districtDNB,'');
-            var rmDistrictAddr = cnAddressRmCity.replace(districtDNB,'');
-            var parenthesisReg = /\((.+?)\)/g;
-            var rmParenthesis = rmDistrictDnb.replace(address2SBCS.match(parenthesisReg),'');
-
-            if(apiCity.indexOf(cnCity) >= 0 && rmDistrictDnb == rmDistrictAddr){
-              // this check is to add the D&B format of Street = District + Street
-              if(district == '区' || districtDNB == district) {
-                addressEqualFlag = true;
-              } else {
-                addressEqualFlag = false;
-              }
-            } else if(rmParenthesis == rmDistrictAddr && apiCity.indexOf(cnCity) >= 0) {
-              // to validate after removing dnb () if dnb address contains parenthesis
-              if(district == '区' || districtDNB == district) {
-                addressEqualFlag = true;
-              } else {
-                addressEqualFlag = false;
-              }
-            } else if(address2SBCS == cnAddress && apiCity == '市辖区' && address2SBCS.indexOf(cnCityZS01) >= 0) {
-                addressEqualFlag = true;
-            } else {
-              addressEqualFlag = false;  
-            }
+            addressEqualFlag = addressValidation(address2SBCS, apiCity, cnAddress, cnCity, cnDistrictZS01);
             if (!addressEqualFlag){
               console.log('Address mismatch: '+address2SBCS+' : '+cnAddress);
               if(!$.isEmptyObject(result)){
@@ -2831,6 +2801,38 @@ function validateCnNameAndAddr4Create() {
       }
     }
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
+function addressValidation(address2SBCS, apiCity, cnAddress, cnCity, cnDistrictZS01){
+  var city = cnCity.substr(-1) == '市' ? cnCity : cnCity + '市';
+  var cnAddressRmCity = cnAddress.replace(city,'');
+  var district = cnDistrictZS01.substr(-1) == '区' ? cnDistrictZS01 : cnDistrictZS01 + '区';
+  var districtReg = /.+?(区)/g;
+  var districtDNB = address2SBCS.match(districtReg).length > 0 ? address2SBCS.match(districtReg)[0] : address2SBCS.match(districtReg);
+  var rmDistrictDnb = address2SBCS.replace(districtDNB,'');
+  var rmDistrictAddr = cnAddressRmCity.replace(districtDNB,'');
+  var rmParenthesis = rmDistrictDnb.replace(/\([^\)]*\)/g,'');
+
+  if(rmDistrictDnb == rmDistrictAddr){
+    // this check is to add the D&B format of Street = District + Street
+    if(district == '区' || districtDNB == district) {
+      addressEqualFlag = true;
+    } else {
+      addressEqualFlag = false;
+    }
+  } else if(rmParenthesis == rmDistrictAddr) {
+    // to validate after removing dnb () if dnb address contains parenthesis
+    if(district == '区' || districtDNB == district) {
+      addressEqualFlag = true;
+    } else {
+      addressEqualFlag = false;
+    }
+  } else if(address2SBCS == cnAddress && apiCity == '市辖区' && address2SBCS.indexOf(cnCityZS01) >= 0) {
+      addressEqualFlag = true;
+  } else {
+    addressEqualFlag = false;  
+  }
+  return addressEqualFlag;
 }
 
 function validateCnNameAndAddr4Update() {
@@ -3001,36 +3003,8 @@ function validateCnNameAndAddr4Update() {
                 correctName = '<br/>Company Name: No Data';
               }
             }
+            addressEqualFlag = addressValidation(apiAddress2SBCS, apiCity, cnAddress, cnCity, cnDistrictZS01);
 
-            var city = cnCity.substr(-1) == '市' ? cnCity : cnCity + '市';
-            var cnAddressRmCity = cnAddress.replace(city,'');
-            var district = cnDistrictZS01.substr(-1) == '区' ? cnDistrictZS01 : cnDistrictZS01 + '区';
-            var districtReg = /.+?(区)/g;
-            var districtDNB = apiAddress2SBCS.match(districtReg);
-            var rmDistrictDnb = apiAddress2SBCS.replace(districtDNB,'');
-            var rmDistrictAddr = cnAddressRmCity.replace(districtDNB,'');
-            var parenthesisReg = /\((.+?)\)/g;
-            var rmParenthesis = rmDistrictDnb.replace(apiAddress2SBCS.match(parenthesisReg),'');
-
-            if(apiCity.indexOf(cnCity) >= 0 && rmDistrictDnb == rmDistrictAddr){
-              // this check is to add the D&B format of Street = District + Street
-              if(district == '区' || districtDNB == district) {
-                addressEqualFlag = true;
-              } else {
-                addressEqualFlag = false;
-              }
-            } else if(rmParenthesis == rmDistrictAddr && apiCity.indexOf(cnCity) >= 0) {
-              // to validate after removing dnb () if dnb address contains parenthesis
-              if(district == '区' || districtDNB == district) {
-                addressEqualFlag = true;
-              } else {
-                addressEqualFlag = false;
-              }
-            } else if(apiAddress2SBCS == cnAddress && apiCity == '市辖区' && apiAddress2SBCS.indexOf(cnCityZS01) >= 0) {
-                addressEqualFlag = true;
-            } else {
-              addressEqualFlag = false;  
-            }
             if (!addressEqualFlag){
               console.log('Address mismatch: '+apiAddress2SBCS+' : '+cnAddress);
               if(!$.isEmptyObject(dnbResult)){
@@ -3091,36 +3065,8 @@ function validateCnNameAndAddr4Update() {
                 correctName = '<br/>Company Name: No Data';
               }
             }
+            addressEqualFlag = addressValidation(apiAddress2SBCS, apiCity, cnAddress, cnCity, cnDistrictZS01);
 
-            var city = cnCity.substr(-1) == '市' ? cnCity : cnCity + '市';
-            var cnAddressRmCity = cnAddress.replace(city,'');
-            var district = cnDistrictZS01.substr(-1) == '区' ? cnDistrictZS01 : cnDistrictZS01 + '区';
-            var districtReg = /.+?(区)/g;
-            var districtDNB = apiAddress2SBCS.match(districtReg);
-            var rmDistrictDnb = apiAddress2SBCS.replace(districtDNB,'');
-            var rmDistrictAddr = cnAddressRmCity.replace(districtDNB,'');
-            var parenthesisReg = /\((.+?)\)/g;
-            var rmParenthesis = rmDistrictDnb.replace(apiAddress2SBCS.match(parenthesisReg),'');
-
-            if(apiCity.indexOf(cnCity) >= 0 && rmDistrictDnb == rmDistrictAddr){
-              // this check is to add the D&B format of Street = District + Street
-              if(district == '区' || districtDNB == district) {
-                addressEqualFlag = true;
-              } else {
-                addressEqualFlag = false;
-              }
-            } else if(rmParenthesis == rmDistrictAddr && apiCity.indexOf(cnCity) >= 0) {
-              // to validate after removing dnb () if dnb address contains parenthesis
-              if(district == '区' || districtDNB == district) {
-                addressEqualFlag = true;
-              } else {
-                addressEqualFlag = false;
-              }
-            } else if(apiAddress2SBCS == cnAddress && apiCity == '市辖区' && apiAddress2SBCS.indexOf(cnCityZS01) >= 0) {
-                addressEqualFlag = true;
-            } else {
-              addressEqualFlag = false;  
-            }
             if (!addressEqualFlag){
               console.log('Address mismatch: '+apiAddress2SBCS+' : '+cnAddress);
               if(!$.isEmptyObject(dnbResult)){
