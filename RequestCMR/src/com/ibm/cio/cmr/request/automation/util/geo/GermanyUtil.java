@@ -656,7 +656,7 @@ public class GermanyUtil extends AutomationUtil {
           data.getCmrIssuingCntry());
       if (queryResults != null && !queryResults.isEmpty()) {
         for (DACHFieldContainer result : queryResults) {
-          DACHFieldContainer queryResult = result;
+          DACHFieldContainer queryResult = (DACHFieldContainer) result;
           String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
           String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
           String queryIsu = queryResult.getIsuCd();
@@ -838,9 +838,7 @@ public class GermanyUtil extends AutomationUtil {
           detail.append("Updates to VAT need verification.\n");
           LOG.debug("Updates to VAT need verification.");
         }
-      } else if (changes.isDataChanged("Order Block"))
-
-      {
+      } else if (changes.isDataChanged("Order Block")) {
         UpdatedDataModel OBChange = changes.getDataChange("Order Block");
         if (OBChange != null) {
           if ("88".equals(OBChange.getOldData()) || "88".equals(OBChange.getNewData()) || "94".equals(OBChange.getOldData())
@@ -879,9 +877,7 @@ public class GermanyUtil extends AutomationUtil {
       }
 
     }
-    if (isNegativeCheckNeedeed)
-
-    {
+    if (isNegativeCheckNeedeed) {
       validation.setSuccess(false);
       validation.setMessage("Not validated");
       engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
