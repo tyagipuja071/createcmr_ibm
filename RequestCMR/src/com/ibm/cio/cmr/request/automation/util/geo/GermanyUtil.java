@@ -796,11 +796,11 @@ public class GermanyUtil extends AutomationUtil {
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     boolean isNegativeCheckNeedeed = false;
     if (changes != null && changes.hasDataChanges()) {
-      if (changes.isDataChanged("VAT #")) {
-        UpdatedDataModel vatChange = changes.getDataChange("VAT #");
-        if (vatChange != null) {
-          if ((StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
-              || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))) {
+      if (changes.isDataChanged("VAT #")
+          || (CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo))) {
+        UpdatedDataModel vatChange = changes.getDataChange("VAT #");}
+          if (isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo) || (vatChange != null && (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
+                            || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())))) {
             // check if the name + VAT exists in D&B
             List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
             if (matches.isEmpty()) {
