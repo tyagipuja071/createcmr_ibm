@@ -767,7 +767,46 @@ function autoSetFieldsForCustScenariosSSAMX() {
           FormManager.enable('collectorNameNo');
         }
       }
+      
+      // CREATCMR-8727 implement v7 mapping
+      if(_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR') {
+        var ssaSbo = ['663', '681', '829', '731', '735', '799', '811', '871'];        
+        if (_cmrCntry == SysLoc.MEXICO) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '484');
+        } else if (_cmrCntry == SysLoc.ARGENTINA) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '457');
+        } else if (_cmrCntry == SysLoc.PARAGUAY) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '492');
+        } else if (_cmrCntry == SysLoc.URUGUAY) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '508');
+        } else if (_cmrCntry == SysLoc.CHILE) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '342');
+        } else if (_cmrCntry == SysLoc.BOLIVIA) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '343');
+        } else if (_cmrCntry == SysLoc.COLOMBIA) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '346');
+        } else if (_cmrCntry == SysLoc.ECUADOR) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '345');
+        } else if (_cmrCntry == SysLoc.PERU) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '344');
+        } else if (ssaSbo.includes(_cmrCntry)) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '9A9');
+        }
+      }
     }
+    
+    // CREATCMR-8727 implement v7 mapping
+    if (_custSubGrp == 'XLEAS') {
+      if(_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR') {
+        if (_cmrCntry == SysLoc.MEXICO) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '484');
+        }
+      }
+      if(_custType == 'INTER') {
+        FormManager.setValue(FormManager.getField('salesBusOffCd'), '9A9');
+      }      
+    }
+    setSboMrcIsuToReadOnly();
 
     if (_custGrp == "LOCAL" && _custSubGrp != '') {
       var _collBoCd = FormManager.getActualValue('collBoId');
@@ -2809,6 +2848,31 @@ function setIBMBankNumberBasedScenarios(fromAddress, scenario, scenarioChanged) 
   }
 }
 
+// CREATCMR-8727 requester level readonly fields
+function setSboMrcIsuToReadOnly() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var _custType = FormManager.getActualValue('custType');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (reqType == 'C') {
+    if((custSubGrp == 'CROSS' || custSubGrp == 'XLEAS') && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR' || _custType == 'INTER' )) {
+      if (role == 'REQUESTER') {
+        FormManager.readOnly('salesBusOffCd');
+        FormManager.readOnly('mrcCd');
+        FormManager.readOnly('isuCd');
+      } else {
+        FormManager.enable('salesBusOffCd');
+        FormManager.enable('mrcCd');
+        FormManager.enable('isuCd');
+      }
+    } 
+  }
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2901,4 +2965,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setIBMBankNumberBasedScenarios, [ SysLoc.URUGUAY]);
+  GEOHandler.addAfterTemplateLoad(setSboMrcIsuToReadOnly, SSAMX_COUNTRIES);
+  
+  
+  
 });
