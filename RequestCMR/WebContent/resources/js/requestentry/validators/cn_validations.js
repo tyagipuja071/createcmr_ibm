@@ -2692,7 +2692,6 @@ function validateCnNameAndAddr4Create() {
                 cnDistrictZS01 = '';
               }
             }
-
           }
           var ret = cmr.query('ADDR.GET.INTLCUSTNM4.BY_REQID', {
             REQ_ID : FormManager.getActualValue('reqId')
@@ -2700,7 +2699,7 @@ function validateCnNameAndAddr4Create() {
           if (ret && ret.ret1 && ret.ret1 != '') {
             intlCustNm4ZS01 = ret.ret1;
           }
-          
+
           var busnType = FormManager.getActualValue('busnType');
           var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
           var scenarioValidation = true;
@@ -2722,42 +2721,41 @@ function validateCnNameAndAddr4Create() {
             console.log('Checking name and address info...');
             var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
             var cnAddressRev = convert2SBCS(intlCustNm4ZS01+cnAddrTxtZS01);
-           var name2SBCS = convert2SBCS(result.name);
-           var address2SBCS = convert2SBCS(result.regLocation);
-           var apiCity = '';
-           var apiDistrict = '';
-           var nameEqualFlag = true;
-           var addressEqualFlag = true;
-           if(result.city != null){
-             apiCity = result.city;
-           }
-           if(result.district != null){
-             apiDistrict = result.district;
-           }
+            var name2SBCS = convert2SBCS(result.name);
+            var address2SBCS = convert2SBCS(result.regLocation);
+            var apiCity = '';
+            var apiDistrict = '';
+            var nameEqualFlag = true;
+            var addressEqualFlag = true;
+            if(result.city != null){
+              apiCity = result.city;
+            }
+            if(result.district != null){
+              apiDistrict = result.district;
+            }
 
-           var correctName = '';
-           var correctAddress = '';
-           
-           if (name2SBCS != cnName) {
-             console.log('Name mismatch: '+name2SBCS+' : '+cnName);
-             nameEqualFlag = false;
-             if(!$.isEmptyObject(result)){
-               correctName = '<br/>Company Name: ' + result.name;
-             } else {
-               correctName = '<br/>Company Name: No Data';
-             }
-           }
+            var correctName = '';
+            var correctAddress = '';
+            if (name2SBCS != cnName) {
+              console.log('Name mismatch: '+name2SBCS+' : '+cnName);
+              nameEqualFlag = false;
+              if(!$.isEmptyObject(result)){
+                correctName = '<br/>Company Name: ' + result.name;
+              } else {
+                correctName = '<br/>Company Name: No Data';
+              }
+            }
 
-           addressEqualFlag = addressValidation(address2SBCS, apiCity, cnAddress, cnCity, cnDistrictZS01);
-           if (!addressEqualFlag){
-             console.log('Address mismatch: '+address2SBCS+' : '+cnAddress);
-             if(!$.isEmptyObject(result)){
-               correctAddress = '<br/>Company Address: ' + result.regLocation;
-             } else {
-               correctAddress = '<br/>Company Address: No Data';
-             }
-           }
-           
+            addressEqualFlag = addressValidation(address2SBCS, apiCity, cnAddress, cnCity, cnDistrictZS01);
+            if (!addressEqualFlag){
+              console.log('Address mismatch: '+address2SBCS+' : '+cnAddress);
+              if(!$.isEmptyObject(result)){
+                correctAddress = '<br/>Company Address: ' + result.regLocation;
+              } else {
+                correctAddress = '<br/>Company Address: No Data';
+              }
+            }
+
             if(!nameEqualFlag || !addressEqualFlag){
               var id = FormManager.getActualValue('reqId');
               var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
