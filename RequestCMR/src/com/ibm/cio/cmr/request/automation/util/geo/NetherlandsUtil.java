@@ -113,8 +113,8 @@ public class NetherlandsUtil extends AutomationUtil {
           String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
           person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
           if (person == null) {
-            engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-            details.append("Employee details not found in IBM BluePages.").append("\n");
+            engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+            details.append("Employee details not found in IBM People.").append("\n");
             return false;
           } else {
             details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");

@@ -193,8 +193,8 @@ public class GermanyUtil extends AutomationUtil {
                 person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName), data.getCmrIssuingCntry());
                 person = (person == null) ? BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry()) : person;
                 if (person == null) {
-                  engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-                  details.append("Employee details not found in IBM BluePages.").append("\n");
+                  engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+                  details.append("Employee details not found in IBM People.").append("\n");
                   valid = false;
                 } else {
                   details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
