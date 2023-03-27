@@ -752,7 +752,7 @@ public class NetherlandsUtil extends AutomationUtil {
         }
       }
     }
-    return null;
+    return "333D3";
   }
 
   @Override
