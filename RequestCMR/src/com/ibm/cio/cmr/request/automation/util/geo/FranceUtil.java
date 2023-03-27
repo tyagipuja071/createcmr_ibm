@@ -1318,6 +1318,7 @@ public class FranceUtil extends AutomationUtil {
       boolean checkBluepages, RequestData reqData) {
     EntityManager entityManager = JpaManager.getEntityManager();
     boolean legalEndingExists = false;
+    Data data = reqData.getData();
     for (Addr addr : reqData.getAddresses()) {
       String customerName = getCustomerFullName(addr);
       if (hasLegalEndings(customerName)) {
@@ -1354,7 +1355,7 @@ public class FranceUtil extends AutomationUtil {
 
     PrivatePersonCheckResult checkResult = chkPrivatePersonRecordFR(country, landCntry, name, checkBluepages, reqData.getData());
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
-
+    String scenario = data.getCustSubGrp();
     switch (checkStatus) {
     case BluepagesError:
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
