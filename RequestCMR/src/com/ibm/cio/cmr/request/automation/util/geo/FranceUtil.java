@@ -1369,9 +1369,11 @@ public class FranceUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
       break;
     case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
-      return false;
+      if (SCENARIO_IBM_EMPLOYEE.equalsIgnoreCase(scenario)) {
+        engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+        details.append("Employee details not found in IBM People.").append("\n");
+        return false;
+      }
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
       break;

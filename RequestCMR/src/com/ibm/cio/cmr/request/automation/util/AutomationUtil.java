@@ -592,9 +592,9 @@ public abstract class AutomationUtil {
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
     case DuplicateCMR:
-       if(SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(country)){
-    		return true;
-    	}
+      if (SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(country)) {
+        return true;
+      }
       details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
       engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
           checkResult.getCmrNo(), "");
@@ -604,8 +604,8 @@ public abstract class AutomationUtil {
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
       break;
     case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+      details.append("Employee details not found in IBM People.").append("\n");
       break;
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
@@ -680,8 +680,8 @@ public abstract class AutomationUtil {
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
       break;
     case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+      details.append("Employee details not found in IBM People.").append("\n");
       return false;
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
@@ -1469,7 +1469,7 @@ public abstract class AutomationUtil {
     LOG.debug("tweakDnBMatchingResponse");
     // NOOP
   }
-  
+
   public static List<DACHFieldContainer> computeDACHCoverageElements(EntityManager entityManager, String queryBgDACH, String bgId,
       String cmrIssuingCntry) {
     List<DACHFieldContainer> calculatedFields = new ArrayList<>();
@@ -1498,5 +1498,5 @@ public abstract class AutomationUtil {
     }
     return calculatedFields;
   }
-  
+
 }
