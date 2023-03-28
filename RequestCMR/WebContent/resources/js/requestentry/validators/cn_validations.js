@@ -2700,7 +2700,6 @@ function validateCnNameAndAddr4Create() {
             intlCustNm4ZS01 = ret.ret1;
           }
 
-          var busnType = FormManager.getActualValue('busnType');
           var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
           var scenarioValidation = true;
           if (custSubType == 'INTER' || custSubType == 'CROSS' || custSubType == 'PRIV') {
@@ -2711,7 +2710,6 @@ function validateCnNameAndAddr4Create() {
             }
           }
           if (scenarioValidation){
-            var busnType = FormManager.getActualValue('busnType');
             var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
             var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
             var cnCity = convert2SBCS(cnCityZS01);
@@ -2720,7 +2718,6 @@ function validateCnNameAndAddr4Create() {
 
             console.log('Checking name and address info...');
             var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
-            var cnAddressRev = convert2SBCS(intlCustNm4ZS01+cnAddrTxtZS01);
             var name2SBCS = convert2SBCS(result.name);
             var address2SBCS = convert2SBCS(result.regLocation);
             var apiCity = '';
@@ -2808,7 +2805,7 @@ function addressValidation(address2SBCS, apiCity, cnAddress, cnCity, cnDistrictZ
   var cnAddressRmCity = cnAddress.replace(city,'');
   var district = cnDistrictZS01.substr(-1) == '区' ? cnDistrictZS01 : cnDistrictZS01 + '区';
   var districtReg = /.+?(区)/g;
-  var districtDNB = address2SBCS.match(districtReg).length > 0 ? address2SBCS.match(districtReg)[0] : address2SBCS.match(districtReg);
+  var districtDNB = address2SBCS.match(districtReg) ? address2SBCS.match(districtReg)[0] : '';
   var rmDistrictDnb = address2SBCS.replace(districtDNB,'');
   var rmDistrictAddr = cnAddressRmCity.replace(districtDNB,'');
   var rmParenthesis = rmDistrictDnb.replace(/\([^\)]*\)/g,'');
@@ -2953,8 +2950,6 @@ function validateCnNameAndAddr4Update() {
           }
 
           var dnbResult = {};
-          var dnbResultByBusnType = {};
-          var dnbResultByCnNm = {};
           
           if (zs01Count > 1) {
             return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
