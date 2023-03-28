@@ -52,27 +52,20 @@ function afterConfigForIndia() {
         }
         }
     });
-    
-    
   }
-  
   // CREATCMR-7005
   var custSubGrp = FormManager.getActualValue('custSubGrp');
    if(custSubGrp == 'CROSS'){
      FormManager.readOnly('vat');
    } 
   // CREATCMR-7005
-  
-    
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if(custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
     dojo.connect(FormManager.getField('geoLocationCd'), 'onChange', function(value) {
       setClusterGlcCovIdMapNrmlc();
     });
   }
-  
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  
 }
 
 function resetGstExempt() {
@@ -2347,11 +2340,11 @@ function lockFieldsForIndia(){
   if (reqType == 'C'  && custSubGrp == 'KYNDR'){
     FormManager.readOnly('inacType');
   }
-  
-  
- 
+// CREATCMR-8755
+  if (role == 'REQUESTER' && (custSubGrp =='AQSTN' || custSubGrp =='ESOSW' || custSubGrp =='BLUMX' || custSubGrp =='MKTPC' || custSubGrp =='IGF')) {
+    FormManager.readOnly('abbrevNm');
+  }
 }
-
 
 // CMR-2830
 function addCompanyProofAttachValidation() {
