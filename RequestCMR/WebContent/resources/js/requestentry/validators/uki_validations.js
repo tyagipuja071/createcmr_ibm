@@ -239,6 +239,11 @@ function lockRequireFieldsUKI() {
     FormManager.readOnly('salesBusOffCd');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
+    FormManager.readOnly('collectionCd');
+  } else if (reqType == 'C' && role == 'PROCESSOR') {
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+    FormManager.enable('collectionCd');
   }
 
   if (reqType == 'C' && role == 'REQUESTER') {
@@ -329,18 +334,6 @@ function lockRequireFieldsUKI() {
   } else if (role == 'PROCESSOR') {
     FormManager.enable('abbrevNm');
     FormManager.enable('abbrevLocn');
-  }
-
-  if (reqType == 'C' && role == 'PROCESSOR') {
-    if (custSubGroup == 'IBMEM') {
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('company');
-      FormManager.readOnly('collectionCd');
-    } else {
-      FormManager.enable('clientTier');
-      FormManager.enable('company');
-      FormManager.enable('collectionCd');
-    }
   }
   
 }
@@ -906,14 +899,7 @@ function autoSetVAT() {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');
-  } else if (getZS01LandCntry() == 'GB') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.enable('vat');
-  } else {
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-    FormManager.enable('vat');
   }
-
 }
 
 function autoSetSBO(value, valueInDB) {
@@ -3837,7 +3823,7 @@ dojo.addOnLoad(function() {
   
   // For Legacy Direct
   GEOHandler.addAfterConfig(optionalFieldsForUpdateReqUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.registerValidator(addUKILandedCountryValidtor, [ SysLoc.UK ], null, true);
+//  GEOHandler.registerValidator(addUKILandedCountryValidtor, [ SysLoc.UK ], null, true);
   GEOHandler.registerValidator(restrictDuplicateAddrUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.registerValidator(validateNumericValueUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(lockCustClassUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
