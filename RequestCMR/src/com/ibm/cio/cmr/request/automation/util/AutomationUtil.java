@@ -1114,6 +1114,7 @@ public abstract class AutomationUtil {
     public PrivatePersonCheckResult(PrivatePersonCheckStatus status, String cmrNo, String kunnr) {
       this.status = status;
       this.cmrNo = cmrNo;
+      this.kunnr = kunnr;
     }
 
     public PrivatePersonCheckStatus getStatus() {
