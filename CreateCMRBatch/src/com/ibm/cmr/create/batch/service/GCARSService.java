@@ -458,6 +458,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       for (GCARSUpdtQueue queue : list) {
         Timestamp ts = SystemUtil.getActualTimestamp();
         boolean needToUpdate = false;
+        boolean hasError = false;
         queue.setUpdatedBy(GCARS_USER);
         queue.setUpdateDt(ts);
         try {
@@ -475,6 +476,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
             String kna1Codreas = record.getCodReason() != null ? record.getCodReason() : "";
             String gcarsCodcond = queue.getCodCondition() != null ? queue.getCodCondition() : "";
             String gcarsCodreas = queue.getCodRsn() != null ? queue.getCodRsn() : "";
+            String sourceName = queue.getId().getSourceName() != null ? queue.getId().getSourceName() : "";
 
             if (!StringUtils.isBlank(gcarsCodcond)) {
               if (!gcarsCodcond.equals(kna1Codcond)) {
@@ -492,6 +494,12 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
               }
             }
 
+            if (!StringUtils.isBlank(sourceName) && !sourceName.contains("XCARR08E")) {
+              queue.setProcStatus(STATUS_ERROR);
+              queue.setProcMsg("Invalid source name " + sourceName + " for CMR No. " + queue.getId().getCmrNo());
+              hasError = true;
+            }
+
             if (needToUpdate) {
               record.setUpdatedBy(GCARS_USER);
               record.setUpdateDt(ts);
@@ -501,7 +509,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
 
               queue.setProcStatus(STATUS_COMPLETED);
               queue.setProcMsg("Successfully processed");
-            } else {
+            } else if (!hasError) {
               queue.setProcStatus(STATUS_NOT_REQUIRED);
               queue.setProcMsg("Not Required");
             }
