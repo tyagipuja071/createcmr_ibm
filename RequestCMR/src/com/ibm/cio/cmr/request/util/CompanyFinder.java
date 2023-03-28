@@ -75,7 +75,7 @@ public class CompanyFinder {
   public static List<CompanyRecordModel> findCompanies(CompanyRecordModel searchModel) throws Exception {
     List<CompanyRecordModel> matches = new ArrayList<CompanyRecordModel>();
     if (!StringUtils.isBlank(searchModel.getCmrNo())) {
-      matches.addAll(findCMRsViaService(searchModel.getIssuingCntry(), searchModel.getCmrNo(), 3, null));
+      matches.addAll(findCMRsViaService(searchModel.getIssuingCntry(), searchModel.getCmrNo(), 10, null));
     } else if (isLatin(searchModel.getName())) {
       matches.addAll(findCMRs(searchModel));
       // CREATCMR-7388 - always append D&B results
