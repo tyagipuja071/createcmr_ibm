@@ -73,7 +73,10 @@
     _findCmrServer = '<%=findCmrServer%>';
     var _translateUrl = '<%=SystemParameters.getString("TRANSLATE.URL")%>';
     var _delayedLoadComplete = false;
-  dojo.addOnLoad(function() {
+  	dojo.addOnLoad(function() {
+    if (FormManager.getField('MAIN_GENERAL_TAB')) {
+      cmr.showProgress('Loading request data..');
+    }
     loadYourActionsDropDown();
     FormManager.setCheckFunction(promptForSaveBeforeLeave);
     FilteringDropdown.loadItems('rejectReason', 'rejectReason_spinner', 'lov', 'fieldId=RejectReasonProc');
