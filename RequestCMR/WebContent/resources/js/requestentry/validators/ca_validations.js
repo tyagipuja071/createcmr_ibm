@@ -757,7 +757,8 @@ function setIsuCtcFor5k() {
     return;
   }
   if (custSubGrp == 'ECO') {
-    return;
+    FormManager.readOnly('isuCd');
+    FormManager.setValue('isuCd', '36');
   }
   if (isuCd == '5K' || (custSubGrp == 'IBME' && isuCd == '21')) {
     FormManager.setValue('clientTier', '');

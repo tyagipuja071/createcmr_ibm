@@ -441,7 +441,6 @@ function addCustName1Validator() {
 var resetIsicFlag = -1;
 
 function afterConfigForUS() {
-
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -469,7 +468,7 @@ function afterConfigForUS() {
   }
 
   if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'ECOSYSTEM') {
-    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('isuCd', '36');
     FormManager.setValue('clientTier', 'Y');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
@@ -579,6 +578,7 @@ function afterConfigForUS() {
 
   if (_usIsuHandler == null && FormManager.getField('isuCd')) {
     _usIsuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      afterConfigForUS();
       setClientTierValuesUS();
     });
   }
