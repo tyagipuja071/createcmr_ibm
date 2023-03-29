@@ -1244,7 +1244,7 @@ public class BELUXHandler extends BaseSOFHandler {
       if (countryUse != null && !StringUtils.isEmpty(countryUse)) {
         data.setCountryUse(countryUse);
       }
-    } 
+    }
     data.setInstallBranchOff("");
     data.setInacType("");
     data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
@@ -1291,7 +1291,7 @@ public class BELUXHandler extends BaseSOFHandler {
     EntityManager entityManager = JpaManager.getEntityManager();
     try {
       String realcty = "";
-      String sql = ExternalizedQuery.getSql("BENELUX.CHECK_REALCTY");
+      String sql = ExternalizedQuery.getSql("BENELUX.GET_CHECK_REALCTY");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("COUNTRY", country);
       query.setParameter("CMR_NO", cmrNo);
@@ -1310,6 +1310,7 @@ public class BELUXHandler extends BaseSOFHandler {
     }
     return countryUse;
   }
+
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
   }
@@ -2301,11 +2302,9 @@ public class BELUXHandler extends BaseSOFHandler {
 
       currCell = row.getCell(cmrNoIndex);
       cmrNo = validateColValFromCell(currCell);
-
       if (isDivCMR(cmrNo)) {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.");
-        error.addError((row.getRowNum() + 1), "CMR No.",
-            "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
+        error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
       }
 
       if (is93CMR(cmrNo)) {
