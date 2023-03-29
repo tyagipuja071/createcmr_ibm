@@ -1907,23 +1907,6 @@ function sortlCheckValidator() {
   }
 }
 
-function addAfterConfigNl() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-    if (isuCd == '32') {
-      FormManager.setValue('clientTier', 'T');
-    } else if (isuCd == '34') {
-      FormManager.setValue('clientTier', 'Q');
-    } else if (isuCd == '36') {
-      FormManager.setValue('clientTier', 'Y');
-    } else {
-      FormManager.setValue('clientTier', '');
-    }
-  });
-}
-
 function clientTierValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -2080,5 +2063,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addNlIsuHandler, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.NL);
   GEOHandler.addAfterConfig(lockFields, GEOHandler.NL);
-  GEOHandler.addAfterConfig(addAfterConfigNl, GEOHandler.NL);
 });
