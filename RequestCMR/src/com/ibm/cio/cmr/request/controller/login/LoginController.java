@@ -582,7 +582,7 @@ public class LoginController extends BaseController {
 		return query.exists();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/oidcclient/redirect/client01")
+	@RequestMapping(method = RequestMethod.GET, value = "/oidc")
 	public void getAccessToken(HttpServletRequest request, HttpServletResponse response) {
 		try {
 
