@@ -2245,7 +2245,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addREALCTYValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.BELUX, null, true);
   // GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.BELUX);
-  GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate, GEOHandler.BELUX);
+  // GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate,
+  // GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, GEOHandler.BELUX);
 
   // CREATCMR-4293
