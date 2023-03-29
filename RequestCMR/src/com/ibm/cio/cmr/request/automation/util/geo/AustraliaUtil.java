@@ -625,4 +625,13 @@ public class AustraliaUtil extends AutomationUtil {
     return Arrays.asList("PTY LTD", "LTD", "company", "limited", "PT", "SDN BHD", "berhad", "CO. LTD", "company limited", "JSC", "JOINT STOCK",
         "INC.", "PTE LTD", "PVT LTD", "private limited", "CORPORATION", "hospital", "university");
   }
+
+  @Override
+  public void emptyINAC(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    Data data = requestData.getData();
+    LOG.debug("INAC code value " + data.getInacCd());
+    data.setInacCd("");
+    LOG.debug("INAC type value " + data.getInacType());
+    data.setInacType("");
+  }
 }
