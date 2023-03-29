@@ -2873,6 +2873,92 @@ function setSboMrcIsuToReadOnly() {
   }
 }
 
+function setSortlValuesForUser(fromAddress, scenario, scenarioChanged) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custGrp = FormManager.getActualValue('custGrp')
+  var sortlList = FormManager.getField('salesBusOffCd').loadedStore._arrayOfAllItems;
+  var valueList = new Array();
+  if (fromAddress || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  // CREATCMR-8727 remove some sortl for requester
+  for (var i = 0; i < sortlList.length; i++) {
+    valueList[i] = sortlList[i].id[0];
+  }
+  if (role == 'REQUESTER') {
+    for (var i = 0; i < valueList.length; i++) {
+      if(cntry == '781')  {
+        if ('777' == valueList[i]) {
+          valueList.splice(i, 1);
+        } 
+        if ('779' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '613') {
+        if ('703' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('704' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '629') {
+        if ('933' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '655') {
+        if ('686' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('687' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '661') {
+        if ('649' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('650' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '683') {
+        if ('495' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('496' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '799' || cntry == '811' || cntry == '681') {
+        if ('035' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '813') {
+        if ('926' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '815') {
+        if ('872' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('873' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '869') {
+        if ('701' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('702' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '871') {
+        if ('679' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      }
+    }
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), valueList);
+  }
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2966,7 +3052,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setIBMBankNumberBasedScenarios, [ SysLoc.URUGUAY]);
   GEOHandler.addAfterTemplateLoad(setSboMrcIsuToReadOnly, SSAMX_COUNTRIES);
-  
-  
+  GEOHandler.addAfterTemplateLoad(setSortlValuesForUser, GEOHandler.LA);
+  GEOHandler.addAfterConfig(setSortlValuesForUser, GEOHandler.LA);
   
 });
