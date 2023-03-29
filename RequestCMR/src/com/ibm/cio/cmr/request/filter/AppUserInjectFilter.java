@@ -90,7 +90,7 @@ public class AppUserInjectFilter implements Filter {
 					if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
 						LOG.debug("No IBM ID detected. Redirecting to W3 ID intercept..");
 						httpReq.getSession().invalidate();
-						httpResp.sendRedirect("/CreateCMR/oidc");
+						httpResp.sendRedirect("/CreateCMR/oidcclient/redirect/client01");
 						return;
 					} else {
 						LOG.debug("IBM ID found. Injecting App User");
@@ -104,7 +104,7 @@ public class AppUserInjectFilter implements Filter {
 					session.setAttribute("userHelper", userHelper);
 					setSessionAttributes(httpReq, httpResp);
 					// filterChain.doFilter(httpReq, response);
-					httpResp.sendRedirect("/CreateCMR/oidc");
+					httpResp.sendRedirect("/CreateCMR/oidcclient/redirect/client01");
 					return;
 				}
 			}
