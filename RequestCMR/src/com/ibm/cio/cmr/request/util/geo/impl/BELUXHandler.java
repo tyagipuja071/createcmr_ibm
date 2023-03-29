@@ -1239,6 +1239,12 @@ public class BELUXHandler extends BaseSOFHandler {
     data.setEnterprise(this.currentImportValues.get("EnterpriseNo"));
     LOG.trace("Enterprise: " + data.getEnterprise());
 
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      String countryUse = getCountryUseForUpdate(data.getCmrIssuingCntry(), data.getCmrNo());
+      if (countryUse != null && !StringUtils.isEmpty(countryUse)) {
+        data.setCountryUse(countryUse);
+      }
+    }
     data.setInstallBranchOff("");
     data.setInacType("");
     data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
@@ -1278,6 +1284,31 @@ public class BELUXHandler extends BaseSOFHandler {
       entityManager.close();
     }
     return department;
+  }
+
+  private String getCountryUseForUpdate(String country, String cmrNo) throws Exception {
+    String countryUse = "";
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      String realcty = "";
+      String sql = ExternalizedQuery.getSql("BENELUX.CHECK_REALCTY");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("COUNTRY", country);
+      query.setParameter("CMR_NO", cmrNo);
+      realcty = query.getSingleResult(String.class);
+      if (realcty != null && StringUtils.isNotEmpty(realcty)) {
+        if (realcty == "623") {
+          countryUse = "624LU";
+        } else if (realcty == "624") {
+          countryUse = "624";
+        }
+      }
+
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+    return countryUse;
   }
 
   @Override
