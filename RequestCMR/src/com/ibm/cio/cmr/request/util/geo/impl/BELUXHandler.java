@@ -1291,7 +1291,7 @@ public class BELUXHandler extends BaseSOFHandler {
     EntityManager entityManager = JpaManager.getEntityManager();
     try {
       String realcty = "";
-      String sql = ExternalizedQuery.getSql("BENELUX.CHECK_REALCTY");
+      String sql = ExternalizedQuery.getSql("BENELUX.GET_CHECK_REALCTY");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("COUNTRY", country);
       query.setParameter("CMR_NO", cmrNo);
