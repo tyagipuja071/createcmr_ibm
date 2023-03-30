@@ -1326,9 +1326,6 @@ function setPreferredLangAddr() {
   //
   // Cross Border it is E (English)
   var reqType = FormManager.getActualValue('reqType');
-  // if (reqType != 'C') {
-  // return;
-  // }
   var zs01ReqId = FormManager.getActualValue('reqId');
 
   var addrType = FormManager.getActualValue('addrType');
@@ -1336,36 +1333,20 @@ function setPreferredLangAddr() {
     addrType = 'ZS01';
   }
 
-  if (reqType == 'U' && addrType == 'ZS01') {
-    return;
-  }
+  var qParams = {
+    REQ_ID : zs01ReqId,
+    ADDR_TYPE : addrType
+  };
+  var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
+  var postCd = FormManager.getActualValue('postCd');
+  postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
 
-  var landCntry = FormManager.getActualValue('landCntry');
-  if (landCntry == null || landCntry == '' || landCntry == undefined) {
-    var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
-      REQ_ID : reqId,
-      ADDR_TYPE : addrType
-    });
-    landCntry = result.ret1;
-  }
-  if (landCntry == 'CH' || landCntry == 'LI') {
-    var qParams = {
-      REQ_ID : zs01ReqId,
-      ADDR_TYPE : addrType
-    };
-    var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
-    var postCd = FormManager.getActualValue('postCd');
-    postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
-
-    if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
-      FormManager.setValue('custLangCd', 'D');
-    } else if (postCd >= 6500 && postCd <= 6999) {
-      FormManager.setValue('custLangCd', 'I');
-    } else if (postCd >= 0000 && postCd <= 3000) {
-      FormManager.setValue('custLangCd', 'F');
-    }
-  } else {
-    FormManager.setValue('custLangCd', 'E');
+  if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <= 9999)) {
+    FormManager.setValue('custLangCd', 'D');
+  } else if (postCd >= 6500 && postCd <= 6999) {
+    FormManager.setValue('custLangCd', 'I');
+  } else if (postCd >= 0000 && postCd < 3000) {
+    FormManager.setValue('custLangCd', 'F');
   }
 }
 function reqReasonOnChange() {

@@ -1033,16 +1033,16 @@
     </cmr:view>
     <%}%> 
     
-     <%-- <cmr:view forGEO="SWISS">
+    <cmr:view forGEO="SWISS">
       <cmr:column span="1">
         <cmr:label fieldId="custLangCd_view">
-          <span class="lbl-CustLangCd">${ui.custLangCd}</span>
-        </cmr:label>:
+          <span class="lbl-CustLangCd">${ui.custLangCd}</span>:
+        </cmr:label>
       </cmr:column>
       <cmr:column span="2">
         <div id="custLangCd_view">-</div>
       </cmr:column>
-    </cmr:view> --%>
+    </cmr:view>
   </cmr:row>
   <!--DENNIS: START JAPAN SPECIFIC  -->
   <cmr:view forGEO="JP">
