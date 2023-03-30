@@ -4150,6 +4150,18 @@ public class LAHandler extends GEOHandler {
         }
       }
     }
+
+    // roll-back to new values to Update IBM Codes
+    if (admin.getReqType().equalsIgnoreCase("U")) {
+      data.setIsuCd(brModel.getIsuCd());
+      data.setInacCd(brModel.getInacCd());
+      data.setCompany(brModel.getCompany());
+      data.setCollectorNameNo(brModel.getCollectorNameNo());
+      data.setSalesBusOffCd(brModel.getSalesBusOffCd());
+
+      entityManager.merge(data);
+      entityManager.flush();
+    }
   }
 
   public void createNewEmailContact(EntityManager entityManager, Data data, Admin admin, String email, String contactType, String contactSequence) {

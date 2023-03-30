@@ -26,51 +26,11 @@ public class BrazilV2ReqModel extends BaseV2RequestModel {
   private String vatEndUser;
   private String municipalFiscalCodeEndUser;
 
-  private String inacCd;
   private String isuCd;
+  private String inacCd;
+  private String company;
   private String collectorNameNo;
   private String salesBusOffCd;
-  private String company;
-
-  public String getCompany() {
-    return company;
-  }
-
-  public void setCompany(String company) {
-    this.company = company;
-  }
-
-  public String getInacCd() {
-    return inacCd;
-  }
-
-  public void setInacCd(String inacCd) {
-    this.inacCd = inacCd;
-  }
-
-  public String getIsuCd() {
-    return isuCd;
-  }
-
-  public void setIsuCd(String isuCd) {
-    this.isuCd = isuCd;
-  }
-
-  public String getCollectorNameNo() {
-    return collectorNameNo;
-  }
-
-  public void setCollectorNameNo(String collectorNameNo) {
-    this.collectorNameNo = collectorNameNo;
-  }
-
-  public String getSalesBusOffCd() {
-    return salesBusOffCd;
-  }
-
-  public void setSalesBusOffCd(String salesBusOffCd) {
-    this.salesBusOffCd = salesBusOffCd;
-  }
 
   public String getVat() {
     return vat;
@@ -158,6 +118,46 @@ public class BrazilV2ReqModel extends BaseV2RequestModel {
 
   public void setUpdateReason(String updateReason) {
     this.updateReason = updateReason;
+  }
+
+  public String getIsuCd() {
+    return isuCd;
+  }
+
+  public void setIsuCd(String isuCd) {
+    this.isuCd = isuCd;
+  }
+
+  public String getInacCd() {
+    return inacCd;
+  }
+
+  public void setInacCd(String inacCd) {
+    this.inacCd = inacCd;
+  }
+
+  public String getCompany() {
+    return company;
+  }
+
+  public void setCompany(String company) {
+    this.company = company;
+  }
+
+  public String getCollectorNameNo() {
+    return collectorNameNo;
+  }
+
+  public void setCollectorNameNo(String collectorNameNo) {
+    this.collectorNameNo = collectorNameNo;
+  }
+
+  public String getSalesBusOffCd() {
+    return salesBusOffCd;
+  }
+
+  public void setSalesBusOffCd(String salesBusOffCd) {
+    this.salesBusOffCd = salesBusOffCd;
   }
 
 }
