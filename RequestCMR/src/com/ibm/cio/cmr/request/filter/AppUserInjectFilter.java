@@ -103,8 +103,8 @@ public class AppUserInjectFilter implements Filter {
 
 					session.setAttribute("userHelper", userHelper);
 					setSessionAttributes(httpReq, httpResp);
-					// filterChain.doFilter(httpReq, response);
-					httpResp.sendRedirect("/CreateCMR/home");
+					filterChain.doFilter(httpReq, response);
+					// httpResp.sendRedirect("/CreateCMR/home");
 					return;
 				}
 			}
