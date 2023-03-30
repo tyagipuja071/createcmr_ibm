@@ -566,7 +566,7 @@ function addGRAddressTypeValidator() {
             }
           }
 
-          if (zs01Cnt == 0 || zp01Cnt == 0 || zd01Cnt == 0 || zi01Cnt == 0) {
+          if (zp01Cnt == 0) {
             return new ValidationResult(null, false, 'Local Language translation of Sold-to is required');
           } else if (zs01Cnt > 1) {
             return new ValidationResult(null, false, 'Only one Sold To address is allowed.');
@@ -1044,7 +1044,7 @@ function setVatValidatorGRCYTR() {
     if (vatInd == 'N') {
       FormManager.clearValue('vat');
     }
-    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
+    if (undefined != vatInd && vatInd != '' && vatInd != 'N' && cntry == SysLoc.GREECE) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
       FormManager.enable('vat');
     }
@@ -1751,15 +1751,14 @@ function setCustSubTypeBpGRTRCY() {
     FormManager.enable('clientTier');
     FormManager.enable('isuCd');
   }
-
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE
-      && (FormManager.getActualValue('custSubGrp') != 'COMME' || FormManager.getActualValue('custSubGrp') != 'CROSS' || FormManager.getActualValue('custSubGrp') != 'GOVRN' || FormManager
-          .getActualValue('custSubGrp') != 'PRICU')) {
-    setISRValuesGR();
-  } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
-    console.log("skip set ISR.");
+  // Control Classification Code
+  if (custType == 'BUSPR' || custType == 'XBP') {
+    FormManager.show('CustClass', 'custClass');
+    FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
   } else {
-    setISRValues();
+    FormManager.hide('CustClass', 'custClass');
+    FormManager.setValue('custClass', '');
+    FormManager.resetValidations('custClass');
   }
 }
 
@@ -2720,4 +2719,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE ]);
 
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.GREECE ], null, true);
+  GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE ]);
 });

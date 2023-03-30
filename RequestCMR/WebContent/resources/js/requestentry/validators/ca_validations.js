@@ -691,7 +691,6 @@ function addFieldHandlers() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
-      setIsuCtcFor5k();
     });
   }
 
@@ -758,9 +757,10 @@ function setIsuCtcFor5k() {
     return;
   }
   if (custSubGrp == 'ECO') {
-    return;
+    FormManager.readOnly('isuCd');
+    FormManager.setValue('isuCd', '36');
   }
-  if (isuCd == '5K') {
+  if (isuCd == '5K' || (custSubGrp == 'IBME' && isuCd == '21')) {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
@@ -1310,6 +1310,8 @@ function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
       arFaar = '051Z';
     } else if (scenario == 'USA') {
       arFaar = '120V';
+    } else if (scenario == 'IBME') {
+      arFaar = '051Z';
     }
     FormManager.setValue('adminDeptCd', arFaar);
     _scenarioArFaar = arFaar;
@@ -1438,6 +1440,16 @@ function addressQuotationValidator() {
   FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
 
 }
+
+function setVatInd() {
+  var vat = FormManager.getActualValue('vat');
+  if (vat && dojo.string.trim(vat) != '') {
+    FormManager.setValue('vatInd', 'T');
+  } else if (vat && dojo.string.trim(vat) == '') {
+    FormManager.setValue('vatInd', 'N');
+  }
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -1464,8 +1476,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
   // ]);
   GEOHandler.addToggleAddrTypeFunction(addPostlCdLogic, [ SysLoc.CANADA ]);
-  GEOHandler.addAfterConfig(setIsuCtcFor5k, [ SysLoc.CANADA ]);
-  GEOHandler.addAfterTemplateLoad(setIsuCtcFor5k, [ SysLoc.CANADA ]);
 
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress([ SysLoc.CANADA ], validateCACopy, [ 'ZP01', 'ZP02' ]);
@@ -1480,6 +1490,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(limitDropdownOnScenarioChange, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setCSBranchValue, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setDefaultARFAARByScenario, SysLoc.CANADA);
+  GEOHandler.addAfterTemplateLoad(setVatInd, SysLoc.CANADA);
 
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addStateProvHandler, [ SysLoc.CANADA ]);

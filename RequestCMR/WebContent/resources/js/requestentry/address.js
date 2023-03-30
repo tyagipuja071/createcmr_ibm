@@ -329,7 +329,11 @@ function AddressDetailsModal_onLoad() {
   _assignDetailsValue('#AddressDetailsModal #addressType_view', details.ret35 && details.ret35 != '' ? details.ret35 : details.ret2);
 
   _assignDetailsValue('#AddressDetailsModal #stateProv_view', details.ret11 + '-' + details.ret36);
-  _assignDetailsValue('#AddressDetailsModal #county_view', details.ret37);
+  if (FormManager.getActualValue('cmrIssuingCntry') == '897') {
+    _assignDetailsValue('#AddressDetailsModal #county_view', details.ret45);
+  } else {
+    _assignDetailsValue('#AddressDetailsModal #county_view', details.ret37);
+  }
   _assignDetailsValue('#AddressDetailsModal #landCntry_view', details.ret13 + '-' + details.ret38);
   _assignDetailsValue('#AddressDetailsModal #transportZone_view', details.ret24);
 
@@ -717,8 +721,15 @@ function doAddToAddressList() {
         } else if (standardCity.suggested != null && standardCity.suggested.length > 0) {
           cmr.showModal('stdcityModal');
         } else {
-          cmr.showAlert('The system cannot find a match for the city name <strong>' + currentCity + '</strong>. Kindly recheck the address and specify a valid city and/or county name.');
-          return;
+          // CREATCMR-8323 : add SAVE when landedCntry!='US'
+          var landedCntry = FormManager.getActualValue('landCntry');
+          if(cntry=='897' && landedCntry!='US'){
+            // We can save here.
+            actualAddToAddressList();
+          } else {
+            cmr.showAlert('The system cannot find a match for the city name <strong>' + currentCity + '</strong>. Kindly recheck the address and specify a valid city and/or county name.');
+            return;
+          }
         }
       }
     }
@@ -1199,6 +1210,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('contact', details.ret71);
       FormManager.setValue('rol', details.ret72);
     }
+
     var cemeaCountries = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
         '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889' ];
 
@@ -2272,6 +2284,10 @@ function refreshAfterAddressCopy(result) {
 
   // call the addr std result calculation for score card here..
   SetAddrStdResult();
+  
+  // Ensure quick search parameter is preserved after reloading
+  var isFromQuickSearch = new URLSearchParams(location.search).get('qs');
+  dojo.cookie('qs', isFromQuickSearch ? isFromQuickSearch : 'N');
 }
 
 function removeSelectedAddresses() {

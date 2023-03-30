@@ -30,6 +30,14 @@ img.logo {
 }
 </style>
 <script>
+
+if (document.readyState == "loading") {
+var url = window.location.href;
+  if (url.includes("oidcclient/redirect/createcmr")) {
+  	window.location.href = url.replace(url.substring(url.lastIndexOf('CreateCMR/')), "CreateCMR/home");
+  }
+}
+
 dojo.addOnLoad(function(){
   dojo.cookie('lastTab', null);
 });

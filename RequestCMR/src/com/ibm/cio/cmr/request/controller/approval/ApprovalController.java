@@ -83,6 +83,7 @@ public class ApprovalController extends BaseController {
           // only show this when not yet processing
           tagUnauthorized(response);
         } else {
+          LOG.debug("Approval Code: " + approvalCode);
           String user = getUserIdFromAuth(request);
           approval = decodeUrlParam(approvalCode);
           if (approval != null && approval.getApproverId() != null && !approval.getApproverId().toUpperCase().equals(user.toUpperCase())) {
@@ -91,6 +92,8 @@ public class ApprovalController extends BaseController {
             // the URL
             // set to not authorized
             approval = null;
+          } else {
+            LOG.debug("Approval Details: " + approval.getApproverId() + " | " + approval.getApprovalId() + " | " + approval.getType());
           }
         }
       }

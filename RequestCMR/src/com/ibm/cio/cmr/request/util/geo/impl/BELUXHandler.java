@@ -1239,6 +1239,12 @@ public class BELUXHandler extends BaseSOFHandler {
     data.setEnterprise(this.currentImportValues.get("EnterpriseNo"));
     LOG.trace("Enterprise: " + data.getEnterprise());
 
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      String countryUse = getCountryUseForUpdate(data.getCmrIssuingCntry(), data.getCmrNo());
+      if (countryUse != null && !StringUtils.isEmpty(countryUse)) {
+        data.setCountryUse(countryUse);
+      }
+    }
     data.setInstallBranchOff("");
     data.setInacType("");
     data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
@@ -1278,6 +1284,31 @@ public class BELUXHandler extends BaseSOFHandler {
       entityManager.close();
     }
     return department;
+  }
+
+  private String getCountryUseForUpdate(String country, String cmrNo) throws Exception {
+    String countryUse = "";
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      String realcty = "";
+      String sql = ExternalizedQuery.getSql("BENELUX.GET_CHECK_REALCTY");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("COUNTRY", country);
+      query.setParameter("CMR_NO", cmrNo);
+      realcty = query.getSingleResult(String.class);
+      if (realcty != null && StringUtils.isNotEmpty(realcty)) {
+        if ("623".equals(realcty)) {
+          countryUse = "624LU";
+        } else if ("624".equals(realcty)) {
+          countryUse = "624";
+        }
+      }
+
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+    return countryUse;
   }
 
   @Override
@@ -2256,8 +2287,8 @@ public class BELUXHandler extends BaseSOFHandler {
       }
     }
 
-    TemplateValidation error = new TemplateValidation("Data");
     for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+      TemplateValidation error = new TemplateValidation("Data");
       row = sheet.getRow(rowIndex);
       if (row == null) {
         break; // stop immediately when row is blank
@@ -2266,15 +2297,19 @@ public class BELUXHandler extends BaseSOFHandler {
       String ordBlk = validateColValFromCell(currCell);
       if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "D".equals(ordBlk) || "P".equals(ordBlk) || "J".equals(ordBlk))) {
         LOG.trace("Order Block Code should only @, D, P, J. >> ");
-        error.addError(row.getRowNum() + 1, "Order Block Code", "Order Block Code should be only @, D, P, J. ");
+        error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should be only @, D, P, J. ");
       }
 
       currCell = row.getCell(cmrNoIndex);
       cmrNo = validateColValFromCell(currCell);
       if (isDivCMR(cmrNo)) {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.");
-        error.addError((row.getRowNum() + 1), "CMR No.",
-            "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
+        error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
+      }
+
+      if (is93CMR(cmrNo)) {
+        LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.");
+        error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.<br>");
       }
 
       currCell = row.getCell(7);
@@ -2283,30 +2318,33 @@ public class BELUXHandler extends BaseSOFHandler {
       currCell = row.getCell(6);
       isuCd = validateColValFromCell(currCell);
 
-            if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
-        LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
-        error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
-      } else if (!StringUtils.isBlank(isuCd) || !StringUtils.isBlank(ctc)) {
-        if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
-          if (StringUtils.isBlank(ctc) || !"QY".contains(ctc)) {
-            LOG.trace("The row " + (row.getRowNum() + 1)
-                + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-            error.addError((row.getRowNum() + 1), "Client Tier",
-                ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+      if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+        if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+          LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+          error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+        } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"Q".equals(ctc)) {
+            LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'Q' for the selected ISU code.");
+            error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'Q' for the selected ISU code:" + isuCd + ".<br>");
           }
-        } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
+        } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
+            LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'Y' for the selected ISU code.");
+            error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'Y' for the selected ISU code: " + isuCd + ".<br>");
+          }
+        } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+            LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'T' for the selected ISU code.");
+            error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'T' for the selected ISU code :" + isuCd + ".<br>");
+          }
+        } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("32", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
       }
-      if (is93CMR(cmrNo)) {
-        LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.");
-        error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.<br>");
-      }
       if (error.hasErrors()) {
         validations.add(error);
       }
-
     }
 
     for (String name : countryAddrss) {
@@ -2342,12 +2380,11 @@ public class BELUXHandler extends BaseSOFHandler {
         if (addrFldCnt1 > 1) {
           TemplateValidation errorAddr = new TemplateValidation(name);
           LOG.trace("Customer Name (3) and PO BOX should not be input at the sametime.");
-          errorAddr.addError((row.getRowNum() + 1), "PO BOX", "Customer Name 3, Attention person and PO Box - only 1 out of 3 can be filled.");
+          errorAddr.addError((rowIndex + 1), "PO BOX", "Customer Name 3, Attention person and PO Box - only 1 out of 3 can be filled.");
           validations.add(errorAddr);
         }
       }
     }
-
   }
 
   private static boolean isDivCMR(String cmrNo) {

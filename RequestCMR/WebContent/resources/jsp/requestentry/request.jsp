@@ -73,7 +73,10 @@
     _findCmrServer = '<%=findCmrServer%>';
     var _translateUrl = '<%=SystemParameters.getString("TRANSLATE.URL")%>';
     var _delayedLoadComplete = false;
-  dojo.addOnLoad(function() {
+  	dojo.addOnLoad(function() {
+    if (FormManager.getField('MAIN_GENERAL_TAB')) {
+      cmr.showProgress('Loading request data..');
+    }
     loadYourActionsDropDown();
     FormManager.setCheckFunction(promptForSaveBeforeLeave);
     FilteringDropdown.loadItems('rejectReason', 'rejectReason_spinner', 'lov', 'fieldId=RejectReasonProc');
@@ -366,6 +369,9 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <form:hidden path="dplChkTs" />
     </c:if>
     <form:hidden path="dplChkResult" />
+	<cmr:view forCountry="754,866,624,788,724,618,848">    
+    	<form:hidden path="vatAcknowledge" />
+    </cmr:view>
     <form:hidden path="dplChkUsrId" />
     <form:hidden path="dplChkUsrNm" />
 

@@ -1535,6 +1535,17 @@ public class TransConnService extends BaseBatchService {
 
           }
         }
+
+        if (("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))
+            && ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry()))) {
+          for (RDcRecord record : response.getRecords()) {
+            LOG.debug("CMR No. " + response.getCmrNo() + " address type " + record.getAddressType());
+            if ("ZP01".equals(record.getAddressType())) {
+              updateAnzPaygoAddress(entityManager, admin, record);
+            }
+          }
+        }
+
       }
 
       StringBuilder comment = new StringBuilder();
@@ -1697,6 +1708,26 @@ public class TransConnService extends BaseBatchService {
       LOG.info("Address Record Updated [Request ID: " + addr.getId().getReqId() + " Type: " + addr.getId().getAddrType() + " SAP No: "
           + record.getSapNo() + "]");
       updateEntity(addr, entityManager);
+    }
+
+  }
+
+  protected void updateAnzPaygoAddress(EntityManager entityManager, Admin admin, RDcRecord record) {
+
+    String strExtwallet = "";
+    PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.GET.EXTWALLET_BYKUNNR"));
+    addrQuery.setParameter("KUNNR", record.getSapNo());
+    addrQuery.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    strExtwallet = addrQuery.getSingleResult(String.class);
+
+    if (StringUtils.isNotEmpty(strExtwallet) && StringUtils.isNotEmpty(record.getSapNo())) {
+      addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.SAPNO_BYEXTWALLET.U"));
+      addrQuery.setParameter("SAP_NO", record.getSapNo());
+      addrQuery.setParameter("IERP_SITE_PRTY_ID", "S" + record.getSapNo().substring(1));
+      addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+      addrQuery.setParameter("EXT_WALLET_ID", strExtwallet);
+      addrQuery.executeSql();
+      LOG.info("updateAnzPaygoAddress sapNo ." + record.getSapNo());
     }
   }
 
@@ -1876,6 +1907,16 @@ public class TransConnService extends BaseBatchService {
                   if (StringUtils.isBlank(addr.getIerpSitePrtyId())) {
                     addr.setIerpSitePrtyId(response.getRecords().get(i).getIerpSitePartyId());
                   }
+
+                  // if (("PayGo-Test".equals(admin.getSourceSystId()) ||
+                  // "BSS".equals(admin.getSourceSystId()))
+                  // && ("616".equals(data.getCmrIssuingCntry()) ||
+                  // "796".equals(data.getCmrIssuingCntry()))) {
+                  // if ("200".equals(response.getRecords().get(i).getSeqNo()))
+                  // {
+                  // addr.getId().setAddrSeq(response.getRecords().get(i).getSeqNo());
+                  // }
+                  // }
                 }
               }
               if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
@@ -1890,6 +1931,11 @@ public class TransConnService extends BaseBatchService {
             }
 
             updateEntity(addr, entityManager);
+            if (("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))
+                && ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry()))
+                && "PG01".equals(addr.getId().getAddrType())) {
+              updPaygoSeqNoForANZ(entityManager, addr.getSapNo(), reqId);
+            }
           } else {
             if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
               comment = comment.append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")
@@ -3125,5 +3171,37 @@ public class TransConnService extends BaseBatchService {
       admin.setReqStatus("PPN");
       admin.setProcessedFlag("E"); // set request status to error.
     }
+  }
+
+  private String getPaygoSapnoForNZ(EntityManager entityManager, String cmrNo, String seqNo, String cmrIssuingCntry) {
+    LOG.debug("getPaygoSapnoForNZ ");
+    String PaygoSapno = "";
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GET.NZ.PAYGOSAPNO"));
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", cmrIssuingCntry);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setParameter("ZZKV_SEQNO", seqNo);
+    query.setForReadOnly(true);
+    PaygoSapno = query.getSingleResult(String.class);
+    return PaygoSapno;
+  }
+
+  protected void updPaygoSeqNoForANZ(EntityManager entityManager, String sapNo, long reqId) {
+    LOG.debug("updPaygoSeqNoForANZ " + sapNo);
+    String payGoSeqNo = "";
+    PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.GET.PAYGOSEQ_BYKUNNR"));
+    addrQuery.setParameter("KUNNR", sapNo);
+    addrQuery.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    payGoSeqNo = addrQuery.getSingleResult(String.class);
+
+    if (StringUtils.isNotEmpty(payGoSeqNo) && StringUtils.isNotEmpty(sapNo)) {
+      addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.SEQNO_BYKUNNR.U"));
+      addrQuery.setParameter("SAP_NO", sapNo);
+      addrQuery.setParameter("REQ_ID", reqId);
+      addrQuery.setParameter("ADDR_SEQ", payGoSeqNo);
+      addrQuery.executeSql();
+      LOG.info("updPaygoSeqNoForANZ sapNo ." + sapNo);
+    }
+
   }
 }

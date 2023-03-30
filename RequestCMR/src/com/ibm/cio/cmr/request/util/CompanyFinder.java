@@ -75,7 +75,7 @@ public class CompanyFinder {
   public static List<CompanyRecordModel> findCompanies(CompanyRecordModel searchModel) throws Exception {
     List<CompanyRecordModel> matches = new ArrayList<CompanyRecordModel>();
     if (!StringUtils.isBlank(searchModel.getCmrNo())) {
-      matches.addAll(findCMRsViaService(searchModel.getIssuingCntry(), searchModel.getCmrNo(), 3, null));
+      matches.addAll(findCMRsViaService(searchModel.getIssuingCntry(), searchModel.getCmrNo(), 10, null));
     } else if (isLatin(searchModel.getName())) {
       matches.addAll(findCMRs(searchModel));
       // CREATCMR-7388 - always append D&B results
@@ -282,6 +282,7 @@ public class CompanyFinder {
         cmr.setStreetAddress1(record.getCmrStreetAddress());
         cmr.setStreetAddress2(record.getCmrStreetAddressCont());
         cmr.setVat(record.getCmrVat());
+        cmr.setVatInd(record.getCmrVatInd());
         cmr.setAltName(record.getCmrIntlName1() + (record.getCmrIntlName2() != null ? record.getCmrIntlName2() : ""));
         cmr.setAltStreet(record.getCmrIntlAddress() + (record.getCmrIntlName3() != null ? record.getCmrIntlName3() : ""));
         cmr.setAltCity(record.getCmrIntlCity1());

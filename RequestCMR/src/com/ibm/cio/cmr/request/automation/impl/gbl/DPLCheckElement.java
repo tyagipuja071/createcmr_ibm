@@ -177,11 +177,7 @@ public class DPLCheckElement extends ValidatingElement {
             addr.setDplChkTs(SystemUtil.getCurrentTimestamp());
             entityManager.merge(addr);
           } else {
-            Boolean isPrivate = false;
-            if (StringUtils.isNotEmpty(data.getIsicCd()) && "9500".equals(data.getIsicCd())) {
-              isPrivate = true;
-            }
-
+            Boolean isPrivate = isPrivate(data);
             Boolean errorStatus = false;
             try {
               dplResult = addrService.dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
@@ -379,7 +375,7 @@ public class DPLCheckElement extends ValidatingElement {
       params.addParam("mainCustNam2", requestData.getAdmin().getMainCustNm2());
 
       try {
-        dplService.process(null, params);
+        dplService.doProcess(entityManager, null, params);
       } catch (Exception e) {
         log.warn("DPL results not attached to the request", e);
       }
@@ -410,6 +406,16 @@ public class DPLCheckElement extends ValidatingElement {
   @Override
   public String getProcessDesc() {
     return "DPL Check";
+  }
+
+  private boolean isPrivate(Data data) {
+    String subGrp = data.getCustSubGrp();
+    if (subGrp != null) {
+      if (subGrp.toUpperCase().contains("PRIV") || subGrp.toUpperCase().contains("PRIPE") || subGrp.toUpperCase().contains("PRICU")) {
+        return true;
+      }
+    }
+    return "60".equals(data.getCustClass()) || "9500".equals(data.getIsicCd());
   }
 
 }

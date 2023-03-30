@@ -475,7 +475,7 @@ public class CalculateCoverageElement extends OverridingElement {
                 break;
               case "LengthGreaterThan":
                 break;
-                
+
               case "NotIn":
                 break;
 

@@ -44,7 +44,7 @@ public class USBPDevelopHandler extends USBPHandler {
     LOG.debug(">>>> Executing inital validations <<<<");
     if (StringUtils.isNotBlank(data.getEnterprise())) {
       USCeIdMapping mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
-      if (mapping == null || !mapping.isDistributor()) {
+      if ((mapping == null || !mapping.isDistributor()) && (!EXCLUDE_2_ENTERPRISES.contains(data.getEnterprise()))) {
         output.setResults("Non-Distributor BP");
         output.setDetails(
             "BP Development records are only allowed to be created under Distributors, please check and confirm with the Distributor for this transaction.");

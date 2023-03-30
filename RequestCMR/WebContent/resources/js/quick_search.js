@@ -1,6 +1,7 @@
 var app = angular.module('QuickSearchApp', [ 'ngSanitize' ]);
 var _inscp = null;
 var _currQuickDet = null;
+
 app.filter('recFilter', function() {
   return function(items, search) {
     if (!search) {
@@ -155,6 +156,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
               if (item.altCity) {
                 item.altCity = item.altCity.replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, '');
               }
+
             }
           });
           $scope.records = data.items;

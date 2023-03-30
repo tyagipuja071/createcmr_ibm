@@ -17,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -123,6 +124,11 @@ public abstract class APHandler extends GEOHandler {
                       record.setCmrAddrTypeCode(supportedAddrType);
                   }
                   record.setCmrAddrSeq(wtaasAddress.getAddressNo());
+
+                  if ("MAIL".equals(record.getCmrAddrTypeCode())) {
+                    continue;
+                  }
+
                   if (shouldAddWTAASAddess(record.getCmrIssuedBy(), wtaasAddress)) {
                     converted.add(record);
                   }
@@ -319,7 +325,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(oldData.getAbbrevLocn());
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "SalRepNameNo", "-"));
@@ -327,7 +332,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getRepTeamMemberNo(), "SalRepNameNo", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CollectionCd", "-"));
@@ -335,7 +339,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getCollectionCd(), "CollectionCd", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getEngineeringBo(), newData.getEngineeringBo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "EngineeringBo", "-"));
@@ -343,7 +346,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEngineeringBo(), "EngineeringBo", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getApCustClusterId(), newData.getApCustClusterId())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Cluster", "-"));
@@ -351,6 +353,14 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(oldData.getApCustClusterId());
       results.add(update);
     }
+  }
+
+  public String getCodeAndDescription(String code, String fieldId, String cntry) {
+    String desc = DropdownListController.getDescription(fieldId, code, cntry);
+    if (!StringUtils.isEmpty(desc)) {
+      return desc;
+    }
+    return code;
   }
 
   public DataRdc getAPClusterDataRdc(long reqId) {
@@ -450,6 +460,10 @@ public abstract class APHandler extends GEOHandler {
           setAbbrevNM(data, "MARKETPLACE");
         } else if ("SOFT".equalsIgnoreCase(data.getCustSubGrp()) || "XSOFT".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "SOFTLAYER USE ONLY");
+        } else if ("AQSTN".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "Acquisition Use Only");
+        } else if ("ESOSW".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "ESA Use Only");
         } else {
           setAbbrevNM(data, addr.getCustNm1());
         }

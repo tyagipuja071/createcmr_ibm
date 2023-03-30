@@ -307,7 +307,7 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
     LOG.debug("CNDupReqCheckElement... reqCheckRecord " + reqCheckRecord.getReqId() + " matches = " + outputStr);
     return output;
   }
-  
+
   private boolean isValidDupReqOld(EntityManager entityManager, ReqCheckResponse reqCheckRecord, String scenario) {
     boolean output = true;
     if (reqCheckRecord == null || StringUtils.isBlank(scenario)) {

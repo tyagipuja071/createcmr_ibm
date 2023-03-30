@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.IndiaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.NetherlandsUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.NewZealandUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.NordicsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
@@ -124,6 +125,8 @@ public abstract class AutomationUtil {
       put(SystemLocation.NORWAY, NordicsUtil.class);
       put(SystemLocation.FINLAND, NordicsUtil.class);
       put(SystemLocation.DENMARK, NordicsUtil.class);
+
+      put(SystemLocation.NEW_ZEALAND, NewZealandUtil.class);
     }
   };
 
@@ -592,20 +595,20 @@ public abstract class AutomationUtil {
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
     case DuplicateCMR:
-       if(SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(country)){
-    		return true;
-    	}
+      if (SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(country)) {
+        return true;
+      }
       details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
       engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
-          checkResult.getCmrNo(), "");
+          checkResult.getCmrNo(), checkResult.getKunnr());
       return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
       break;
     case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+      details.append("Employee details not found in IBM People.").append("\n");
       break;
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
@@ -673,15 +676,15 @@ public abstract class AutomationUtil {
     case DuplicateCMR:
       details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
       engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
-          checkResult.getCmrNo(), "");
+          checkResult.getCmrNo(), checkResult.getKunnr());
       return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
       break;
     case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+      details.append("Employee details not found in IBM People.").append("\n");
       return false;
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
@@ -710,10 +713,10 @@ public abstract class AutomationUtil {
       if (checkResponse != null) {
         cmrNo = checkResponse.getCmrNo();
       }
-      // TODO find kunnr String kunnr = checkResponse.get
       if (!StringUtils.isBlank(cmrNo)) {
+        String kunnr = getZS01Kunnr(cmrNo, country);
         LOG.debug("Duplicate CMR No. found: " + checkResponse.getCmrNo());
-        return new PrivatePersonCheckResult(PrivatePersonCheckStatus.DuplicateCMR, cmrNo, null);
+        return new PrivatePersonCheckResult(PrivatePersonCheckStatus.DuplicateCMR, cmrNo, kunnr);
       }
     } catch (Exception e) {
       LOG.warn("Duplicate CMR check error.", e);
@@ -1111,6 +1114,7 @@ public abstract class AutomationUtil {
     public PrivatePersonCheckResult(PrivatePersonCheckStatus status, String cmrNo, String kunnr) {
       this.status = status;
       this.cmrNo = cmrNo;
+      this.kunnr = kunnr;
     }
 
     public PrivatePersonCheckStatus getStatus() {
@@ -1409,7 +1413,7 @@ public abstract class AutomationUtil {
 
   public boolean fillCoverageAttributes(RetrieveIBMValuesElement retrieveElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
-      AutomationEngineData engineData, String covType, String covId, String covDesc) throws Exception {
+      AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
     return false;
   }
 
@@ -1435,6 +1439,33 @@ public abstract class AutomationUtil {
       query.setParameter("NAME2", addrToCheck.getCustNm2());
     }
     return query.exists();
+  }
+
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong> return true if there are country specific logic
+   * 
+   * @param entityManager
+   * @param engineData
+   * @param requestData
+   * @param return
+   * @throws Exception
+   */
+  public static boolean isTaxManagerEmeaUpdateCheck(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData)
+      throws Exception {
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    String cmrIssuingCntry = data.getCmrIssuingCntry();
+    if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(admin.getReqType())) {
+      String sql = ExternalizedQuery.getSql("QUERY.GET.TAX_MANAGER.BY_ISSUING_CNTRY");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
+      List<String> taxManagers = query.getResults(String.class);
+      if (taxManagers != null) {
+        return taxManagers.stream().anyMatch(res -> res.equalsIgnoreCase(admin.getRequesterId()));
+      }
+    }
+    return false;
   }
 
   public static boolean validateLOVVal(EntityManager em, String issuingCntry, String fieldId, String code) {
@@ -1469,7 +1500,7 @@ public abstract class AutomationUtil {
     LOG.debug("tweakDnBMatchingResponse");
     // NOOP
   }
-  
+
   public static List<DACHFieldContainer> computeDACHCoverageElements(EntityManager entityManager, String queryBgDACH, String bgId,
       String cmrIssuingCntry) {
     List<DACHFieldContainer> calculatedFields = new ArrayList<>();
@@ -1498,5 +1529,5 @@ public abstract class AutomationUtil {
     }
     return calculatedFields;
   }
-  
+
 }

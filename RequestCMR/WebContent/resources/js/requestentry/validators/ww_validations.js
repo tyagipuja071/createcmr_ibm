@@ -5,6 +5,7 @@
  */
 
 var _GBL_NO_INIT = false;
+var _scenarioTypeHandler = null;
 /**
  * Validator for Address Standardization completion
  */
@@ -142,6 +143,25 @@ function addDnBMatchingAttachmentValidator() {
         var findDnbResult = FormManager.getActualValue('findDnbResult');
         var userRole = FormManager.getActualValue('userRole');
         var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+
+        // CREATCMR-8430: do DNB check for NZ update
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if("796" == cntry && reqType == 'U'){
+          if ( reqId > 0 && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+            && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
+            var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+              ID : reqId
+            });
+            if (ret == null || ret.ret1 == null) {
+              return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
+                  + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                  + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        }
+        
         if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
             && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
           // FOR CN
@@ -191,6 +211,11 @@ function isSkipDnbMatching() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue("countryUse");
   var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
+  // CREATCMR-8430: do DNB check for NZ update
+  var reqType = FormManager.getActualValue('reqType');
+  if("796" == FormManager.getActualValue('cmrIssuingCntry') && reqType == 'U'){
+    return false;
+  }
   if(SysLoc.INDIA == FormManager.getActualValue('cmrIssuingCntry')){
         return false;
     }
@@ -348,10 +373,16 @@ function addCovBGValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+var forceLockUnlock = function() {
+  console.log(">>>> forceLockUnlock");
+  FormManager.readOnly('cmrIssuingCntry');
+}
+
 function initGenericTemplateHandler() {
   // templates/scenarios initialization. connect onchange of the customer type
   // to load the template
   console.log('init init');
+  forceLockUnlock();
   if (_templateHandler == null && FormManager.getField('custSubGrp')) {
     _templateHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       if (_delayedLoadComplete) {
@@ -382,8 +413,8 @@ function addCrossBorderValidator() {
         var scenario = FormManager.getActualValue('custSubGrp');
         var mscenario = FormManager.getActualValue('custGrp');
 
-        if (mscenario == 'CROSS') {
-          scenario = 'CROSS';
+        if (mscenario == 'CROSS') {          
+            scenario = 'CROSS';           
         }
 
         var reqId = FormManager.getActualValue('reqId');
@@ -464,7 +495,7 @@ function addClientTierDefaultLogic() {
 }
 
 function addGenericVATValidator(cntry, tabName, formName, aType) {
-  return function() {
+  return function() {   
     FormManager.addFormValidator((function() {
       var landCntry = cntry;
       var addrType = aType;
@@ -489,8 +520,7 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
           }
-          console.log('ZS01 VAT Country: ' + zs01Cntry);
-
+          console.log('ZS01 VAT Country: ' + zs01Cntry);          
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
             if (result.errorPattern == null) {
@@ -513,18 +543,21 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
         }
       };
     })(), tabName, formName);
-  };
+  }; 
+
 }
 
 // TODO VAT is required for some cross landCntry
-function requireVATForCrossBorder() {
+function requireVATForCrossBorder() {  
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var reqType = FormManager.getActualValue('reqType');
         var scenario = FormManager.getActualValue('custGrp');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-
+        var vat = FormManager.getActualValue('vat');
+        var vatInd = FormManager.getActualValue('vatInd');
+        
         if (reqType != 'C') {
           return new ValidationResult(null, true);
         }
@@ -535,8 +568,11 @@ function requireVATForCrossBorder() {
         if (custSubGrp != null && (custSubGrp.includes('XSOFT') || custSubGrp.includes('XSL') || custSubGrp.includes('XPRIC') || custSubGrp.includes('XPC') || custSubGrp.includes('XGO'))) {
           return new ValidationResult(null, true);
         }
-
-        var vat = FormManager.getActualValue('vat');
+        
+        if (vatInd == 'N' && vat == '') { 
+          FormManager.resetValidations('vat');
+        }
+        
         var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
         var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
           REQID : FormManager.getActualValue('reqId'),
@@ -559,7 +595,8 @@ function requireVATForCrossBorder() {
         return new ValidationResult(null, true);
       }
     };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
+  })(), 'MAIN_CUST_TAB', 'frmCMR'); 
+
 }
 
 /**
@@ -646,7 +683,6 @@ function addGenericZIPValidator() {
         if (!cntry || cntry == '' || cntry.trim() == '' || (loc == '')) {
           return new ValidationResult(null, true);
         }
-
         var postCd = FormManager.getActualValue('postCd');
 
         // skip input validation when Postal Code field is emtpy for CR, EC
@@ -947,15 +983,22 @@ function resetVATValidationsForPayGo(){
   var systemId = FormManager.getActualValue('sourceSystId');
   var cntry= FormManager.getActualValue('cmrIssuingCntry');
   var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
   var results = cmr.query('GET_PARTNER_VAT_EXCEPTIONS', {
     COUNTRY : cntry,
-    SERVICE_ID : systemId
-  });
-  if(results!= null && results!= undefined && results.ret1!='' && results.ret1 == 'Y' && vat == ''){
-    FormManager.resetValidations('vat');
-    // FormManager.getField('vatExempt').checked = true;
+    SERVICE_ID : systemId   
+    
+  }); 
+  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'Y' && vat == ''){    
+   FormManager.resetValidations('vat');
+   // FormManager.getField('vatExempt').checked = true;
     console.log('VAT is non mandatory for PayGO');
+  } 
+  
+  if (vatInd == 'N' && vat == '') { 
+    FormManager.resetValidations('vat');
   }
+  
 }
 
 function addIsuCdObsoleteValidator(){
@@ -966,6 +1009,16 @@ function addIsuCdObsoleteValidator(){
         var reqType = FormManager.getActualValue('reqType');
                var isuCd = FormManager.getActualValue('isuCd');
                if (reqType == 'C' && isuCd == '32') {
+                 // CREATCMR-7884
+                 var cntry = FormManager.getActualValue('cmrIssuingCntry');
+                 if(cntry == '796'){
+                   var custSubGrp = FormManager.getActualValue('custSubGrp');
+                   var custSubGrpList = ['NRML','ESOSW','XESO','CROSS'];
+                   if(custSubGrpList.includes(custSubGrp)){
+                     console.log('>>> Skip ISU Obsolete Validator for NRML/ESOSW/XESO/CROSS when isuCd = 32');
+                     return new ValidationResult(null, true);
+                   }
+                 }
                  return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');
                }else  if (reqType == 'U' && isuCd == '32' && oldIsuCd != '32') {
                  return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');
@@ -976,6 +1029,200 @@ function addIsuCdObsoleteValidator(){
       }
     }
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+// CREATCMR-6244
+function vatOptionalForLandedUK() {
+  var _reqId = FormManager.getActualValue('reqId');
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  var params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01"
+  };
+
+  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+  landCntry = landCntryResult.ret1;
+
+  if (reqType == 'C') {
+    if (landCntry == 'GB') {
+      if ((issuingCntry != '866'  && custGrp == 'CROSS') || (issuingCntry == '866' && custGrp == 'LOCAL')) {
+        FormManager.resetValidations('vat');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+      }
+    }
+  } 
+  if (vatInd == 'N' && vat == '') { 
+    FormManager.resetValidations('vat');
+  }
+  
+}
+
+function afterConfigForEMEA(){
+// 6244
+  if (_scenarioTypeHandler == null && FormManager.getField('custGrp')) {
+    _scenarioTypeHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      vatOptionalForLandedUK();
+    });
+  }
+}
+
+
+function addVatIndValidator(){
+
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  var reqStatus = FormManager.getActualValue('reqStatus');     
+  var cntry= FormManager.getActualValue('cmrIssuingCntry');
+  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+    ISSUING_CNTRY : cntry
+  });
+  
+    
+  if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.setValue('vatInd', 'N');
+  } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+    FormManager.setValue('vatInd', 'T');
+    FormManager.enable('vatInd');
+  // FormManager.readOnly('vatInd');
+  } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
+    FormManager.setValue('vat', '');
+    FormManager.setValue('vatInd', '');
+  } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd == '') {
+    FormManager.setValue('vatInd', 'T');
+    FormManager.enable('vatInd');
+    // FormManager.readOnly('vatInd');
+  } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.setValue('vatInd', 'N');
+  }
+  
+  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
+    FormManager.resetValidations('vat');
+  }
+  
+}
+
+function setToReadOnly() {
+ 
+ var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+   
+ if (viewOnlyPage == 'true') {  
+   FormManager.resetValidations('vat');
+   FormManager.resetValidations('vatInd');
+   FormManager.readOnly('vat');
+   FormManager.readOnly('vatInd');
+ } 
+ 
+}
+
+function vatIndOnChange() {
+  
+  var _vatIndHandler = null;
+    
+    if (_vatIndHandler == null) {
+    _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(value) {
+      var vatInd = FormManager.getActualValue('vatInd');
+      var userRole = FormManager.getActualValue('userRole');
+      if (userRole == 'Viewer') {
+        return;
+      }
+      if (vatInd && dojo.string.trim(vatInd) == 'T') {
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'N');        
+        FormManager.setValue('vatInd', 'T');
+      } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.readOnly('vat');
+        FormManager.setValue('vat', '');        
+        FormManager.setValue('vatInd', 'N');
+      } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.enable('vat');
+        FormManager.setValue('vatExempt', 'Y');       
+        FormManager.setValue('vatInd', 'E');
+      }
+    });
+  }
+  
+  if (_vatIndHandler && _vatIndHandler[0]) {
+    _vatIndHandler[0].onChange();
+  }
+  
+var _vatHandler = null;
+  
+  if (_vatHandler == null){   
+    
+    dojo.byId('vat').onkeyup = function() {
+      var isReadOnly = dojo.byId('vat').readOnly;
+      var vat = FormManager.getActualValue('vat');
+      if (vat == '' && !isReadOnly) {
+        FormManager.enable('vatInd');
+        FormManager.setValue('vatInd', ''); 
+      }
+    }
+  }
+}
+
+function isViewOnly() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  return viewOnlyPage == 'true';
+}
+
+function isImportingFromQuickSearch() {
+  return dojo.cookie('qs') == 'Y' || new URLSearchParams(location.search).get('qs') == 'Y';
+}
+
+function isPrivateScenario() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  return ["PRICU", "PRIPE", "FIPRI", "DKPRI", "BEPRI", "CHPRI","LUPRI"].includes(custSubGrp);
+}
+
+function setVatIndFieldsForGrp1AndNordx() {
+  if (isViewOnly()) {
+    return;
+  }
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+
+  // CREATCMR-7944
+  if (isPrivateScenario()) {
+    FormManager.setValue('vatInd', 'N');
+    FormManager.enable('vatInd');
+    FormManager.setValue('vat', '');
+    FormManager.readOnly('vat');
+  }
+  // CREATCMR-7165
+  else if (isImportingFromQuickSearch()) {
+    dojo.cookie('qs', 'N');
+    FormManager.enable('vatInd');
+    
+    if (vat != '' && vatInd == '') {
+      FormManager.setValue('vatInd', 'T');
+    } else if (vat == '') {
+  	  // CREATCMR-7980 vatInd not imported for update request.
+  	  if (FormManager.getActualValue('reqType') != 'U') {
+        FormManager.setValue('vatInd', '');
+        FormManager.enable('vat');
+  	  }
+    }
+  } else if (vatInd == 'N') {
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
+  }
+  if('T'== FormManager.getActualValue('vatInd') && vat==''){
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');    
+  }
+  
+  if ('E' == FormManager.getActualValue('vatInd')) {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+  }
 }
 
 function updateProspectLegalInd() {
@@ -991,6 +1238,11 @@ function updateProspectLegalInd() {
   if (CMRDataRdc != '' && CMRDataRdc.includes("P") && reqType == 'C') {
     FormManager.setValue('prospLegalInd','Y');
   }
+}
+
+var forceLockUnlock = function() {
+  console.log(">>>> forceLockUnlock");
+  FormManager.readOnly('cmrIssuingCntry');
 }
 
 /* Register WW Validators */
@@ -1071,6 +1323,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerWWValidator(addGenericZIPValidator);
   // GEOHandler.registerValidator(addGenericZIPValidator,
   // GEOHandler.NO_ME_CEMEA, null, true);
+  GEOHandler.NEW_EMEA = [ '624', '788', '706', SysLoc.Switzerland, SysLoc.Sweden, SysLoc.FINLAND, SysLoc.NORWAY, SysLoc.AUSTRIA, SysLoc.GERMANY, SysLoc.SPAIN ];
+  GEOHandler.addAfterConfig(afterConfigForEMEA, GEOHandler.NEW_EMEA);
+  GEOHandler.addAfterTemplateLoad(afterConfigForEMEA, GEOHandler.NEW_EMEA);
 
   // Postal Code validation for Ireland as Landed Country - CMR - 6033
   GEOHandler.addAddrFunction(addGenericPostalCodeValidator, GEOHandler.GROUP1);
@@ -1079,7 +1334,12 @@ dojo.addOnLoad(function() {
   // Removing this for coverage-2023 as ISU -32 is no longer obsoleted
   // GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
   GEOHandler.addAfterConfig(updateProspectLegalInd,  GEOHandler.AllCountries);
-
+  
+  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']);  
+  GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']); 
+  GEOHandler.registerWWValidator(addVatIndValidator);
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];
+  
+  GEOHandler.registerWWValidator(forceLockUnlock);
 });

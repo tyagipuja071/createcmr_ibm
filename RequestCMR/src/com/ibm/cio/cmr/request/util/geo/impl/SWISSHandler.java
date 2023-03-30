@@ -283,11 +283,11 @@ public class SWISSHandler extends GEOHandler {
         if (StringUtils.isBlank(address.getCustLangCd()) && StringUtils.isNotBlank(address.getPostCd())
             && StringUtils.isNumeric(address.getPostCd())) {
           int postCd = Integer.parseInt(address.getPostCd());
-          if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+          if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <= 9999)) {
             address.setCustLangCd("D");
           } else if (postCd >= 6500 && postCd <= 6999) {
             address.setCustLangCd("I");
-          } else if (postCd >= 0000 && postCd <= 3000) {
+          } else if (postCd >= 0000 && postCd < 3000) {
             address.setCustLangCd("F");
           }
         }
@@ -477,49 +477,50 @@ public class SWISSHandler extends GEOHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
+    List<String> custSubGrps = Arrays.asList("COM", "IBM", "PRI");
     if ("C".equals(admin.getReqType())) {
       data.setCurrencyCd("CHF");
     }
-    if (StringUtils.isBlank(data.getCustPrefLang())) {
-      String sql = ExternalizedQuery.getSql("QUERY.ADDR.GET.POST_CD.BY_REQID");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("REQ_ID", admin.getId().getReqId());
-      query.setParameter("ADDR_TYPE", "ZS01");
-      List<Object[]> results = query.getResults();
-      if (!results.isEmpty() && results.get(0) != null) {
-        int postCd;
-        try {
-          postCd = Integer.parseInt((String) results.get(0)[0]);
-        } catch (NumberFormatException e) {
-          postCd = 0;
-          LOG.debug("Cannot parse postal code since it's alphanumeric.");
-        }
-        String landCntry = (String) results.get(0)[1];
-        if ("CH".equals(landCntry) || "LI".equals(landCntry)) {
-          if (StringUtils.isBlank(landCntry) && postCd != 0) {
-            if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
-              data.setCustPrefLang("D");
-            } else if (postCd >= 6500 && postCd <= 6999) {
-              data.setCustPrefLang("I");
-            } else if (postCd >= 0000 && postCd <= 3000) {
-              data.setCustPrefLang("F");
-            }
-          } else {
-            data.setCustPrefLang("E");
-          }
-        }
-      }
-    }
-
-    AddrPK addrPk = new AddrPK();
-    addrPk.setReqId(data.getId().getReqId());
-    addrPk.setAddrSeq("00001");
-    addrPk.setAddrType("ZS01");
-    Addr addr = entityManager.find(Addr.class, addrPk);
-    if (addr != null && !StringUtils.isEmpty(data.getCustPrefLang())) {
-      addr.setCustLangCd(data.getCustPrefLang());
-    }
-
+    // if (StringUtils.isBlank(data.getCustPrefLang())) {
+    // String sql = ExternalizedQuery.getSql("QUERY.ADDR.GET.POST_CD.BY_REQID");
+    // PreparedQuery query = new PreparedQuery(entityManager, sql);
+    // query.setParameter("REQ_ID", admin.getId().getReqId());
+    // query.setParameter("ADDR_TYPE", "ZS01");
+    // List<Object[]> results = query.getResults();
+    // if (!results.isEmpty() && results.get(0) != null) {
+    // int postCd;
+    // try {
+    // postCd = Integer.parseInt((String) results.get(0)[0]);
+    // } catch (NumberFormatException e) {
+    // postCd = 0;
+    // LOG.debug("Cannot parse postal code since it's alphanumeric.");
+    // }
+    // if ("C".equals(admin.getReqType())) {
+    // String landCntry = (String) results.get(0)[1];
+    // String custSubGrp = "";
+    // if (StringUtils.isNotBlank(cmrIssuingCntry) &&
+    // StringUtils.isNotBlank(data.getCustSubGrp())) {
+    // custSubGrp = data.getCustSubGrp().substring(2);
+    // }
+    // if ("CH".equals(landCntry) || "LI".equals(landCntry) &&
+    // custSubGrps.contains(custSubGrp)) {
+    // if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <=
+    // 9999)) {
+    // data.setCustPrefLang("D");
+    // } else if (postCd >= 6500 && postCd <= 6999) {
+    // data.setCustPrefLang("I");
+    // } else if (postCd >= 0000 && postCd < 3000) {
+    // data.setCustPrefLang("F");
+    // } else {
+    // data.setCustPrefLang("E");
+    // }
+    //
+    // } else {
+    // data.setCustPrefLang("E");
+    // }
+    // }
+    // }
+    // }
   }
 
   @Override
@@ -554,6 +555,21 @@ public class SWISSHandler extends GEOHandler {
     }
     if (addrDetailsList.isEmpty() && "C".equals(admin.getReqType())) {
       addr.setCustNm3("");
+    }
+
+    if ("CH".equals(addr.getLandCntry()) || "LI".equals(addr.getLandCntry())) {
+      if (StringUtils.isBlank(addr.getCustLangCd()) && StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNumeric(addr.getPostCd())) {
+        int postCd = Integer.parseInt(addr.getPostCd());
+        if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <= 9999)) {
+          addr.setCustLangCd("D");
+        } else if (postCd >= 6500 && postCd <= 6999) {
+          addr.setCustLangCd("I");
+        } else if (postCd >= 0000 && postCd < 3000) {
+          addr.setCustLangCd("F");
+        }
+      }
+    } else if (StringUtils.isBlank(addr.getCustLangCd())) {
+      addr.setCustLangCd("E");
     }
   }
 
@@ -1270,6 +1286,28 @@ public class SWISSHandler extends GEOHandler {
 
   @Override
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
+  }
+
+  @Override
+  public boolean isAddressChanged(EntityManager entityManager, Addr addr, String cmrIssuingCntry, boolean computedChangeInd) {
+    boolean city2Updated = false;
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDRRDC.SEARCH_BY_REQID_TYPE_SEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+    query.setParameter("ADDR_SEQ", addr.getId().getAddrSeq());
+    Addr addrRdc = query.getSingleResult(Addr.class);
+
+    if (addrRdc != null) {
+      String addrRdcCity2 = !StringUtils.isBlank(addrRdc.getCity2()) ? addrRdc.getCity2() : "";
+      String addrCity2 = !StringUtils.isBlank(addr.getCity2()) ? addr.getCity2() : "";
+
+      if (!addrRdcCity2.equals(addrCity2)) {
+        city2Updated = true;
+      }
+      return (city2Updated || computedChangeInd);
+    }
     return true;
   }
 

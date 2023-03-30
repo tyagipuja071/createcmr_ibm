@@ -108,4 +108,5 @@ public class BrazilUtil extends AutomationUtil {
   public static boolean hasScenarioCheck(String issuingCntry) {
     return true;
   }
+
 }

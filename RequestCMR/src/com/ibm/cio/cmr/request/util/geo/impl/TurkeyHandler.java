@@ -92,7 +92,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 
   private static final String[] TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode", "LocalTax1",
       "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building",
-      "County", "City2", "Department", "INACType", "SalRepNameNo" };
+      "County", "City2", "Department", "INACType", "SalRepNameNo", "MembLevel", "BPRelationType" };
 
   private static final List<String> EMEA_COUNTRY_VAL = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL,
       SystemLocation.TURKEY, SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
@@ -3624,7 +3624,6 @@ public class TurkeyHandler extends BaseSOFHandler {
     map.put("##GlobalBuyingGroupID", "gbgId");
     map.put("##CoverageID", "covId");
     map.put("##OriginatorID", "originatorId");
-    map.put("##BPRelationType", "bpRelType");
     map.put("##CAP", "capInd");
     map.put("##RequestReason", "reqReason");
     map.put("##SpecialTaxCd", "specialTaxCd");
@@ -3671,7 +3670,6 @@ public class TurkeyHandler extends BaseSOFHandler {
     map.put("##BuyingGroupID", "bgId");
     map.put("##RequesterID", "requesterId");
     map.put("##GeoLocationCode", "geoLocationCd");
-    map.put("##MembLevel", "memLvl");
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##EngineeringBo", "engineeringBo");
@@ -3680,6 +3678,8 @@ public class TurkeyHandler extends BaseSOFHandler {
     map.put("##CustClass", "custClass");
     map.put("##TypeOfCustomer", "crosSubTyp");
     map.put("##IERPSitePrtyId", "ierpSitePrtyId");
+    map.put("##BPRelationType", "bpRelType");
+    map.put("##MembLevel", "memLvl");
     return map;
   }
 
@@ -4049,16 +4049,23 @@ public class TurkeyHandler extends BaseSOFHandler {
               String isuCd = ""; // 10
               String clientTier = ""; // 11
               String cmrNo = ""; // 0
+              String ordBlk = "";
               currCell = (XSSFCell) row.getCell(0);
               cmrNo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(11);
               clientTier = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
               isuCd = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              ordBlk = validateColValFromCell(currCell);
               if (StringUtils.isEmpty(cmrNo)) {
                 LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
                 // validations.add(error);
+              }
+              if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "Y".equals(ordBlk) || "C".equals(ordBlk) || "J".equals(ordBlk))) {
+                LOG.trace("Embargo should only @, Y, C, J. >> ");
+                error.addError((row.getRowNum() + 1), "Embargo Code", "Embargo Code should be only @, Y, C, J. ");
               }
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {

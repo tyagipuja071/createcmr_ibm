@@ -6,5 +6,5 @@
  		<web-uri>CreateCMR.war</web-uri>
  		<context-root>CreateCMR</context-root>
  	</web>
- </module> 
+ </module>
  </application> 

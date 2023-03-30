@@ -58,6 +58,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   private static final String USERNAME = System.getProperty("GCARS_FTP_USER");
   private static final String PASSWORD = System.getProperty("GCARS_FTP_PASS");
   private static final String KNOWN_HOSTS = System.getProperty("GCARS_FTP_KNOWN_HOSTS");
+  private static final String PRIV_KEY = System.getProperty("GCARS_FTP_PRIV_KEY");
   private static final String GCARS_FILE = "bbcro.z010.gcars.inbound.txt";
   private static final int REMOTE_PORT = 22;
   private static final int SESSION_TIMEOUT = 10000;
@@ -171,13 +172,18 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       LOG.debug("Known Hosts File: " + KNOWN_HOSTS);
       LOG.debug("Connecting to FTP Server " + REMOTE_HOST + ":" + REMOTE_PORT + " using " + USERNAME);
       jsch.setKnownHosts(KNOWN_HOSTS);
+      jsch.addIdentity(PRIV_KEY);
+      LOG.debug("Identity added...");
+      LOG.debug("Opening session...");
       jschSession = jsch.getSession(USERNAME, REMOTE_HOST, REMOTE_PORT);
-
+      LOG.debug("Set Password...");
       jschSession.setPassword(PASSWORD);
       jschSession.connect(SESSION_TIMEOUT);
 
+      LOG.debug("Opening channel...");
       Channel sftp = jschSession.openChannel("sftp");
       sftp.connect(CHANNEL_TIMEOUT);
+      LOG.debug("Connected to " + REMOTE_HOST);
 
       String archiveDir = SystemConfiguration.getValue("GCARS_REMOTE_ARCHIVE_DIR");
       if (StringUtils.isBlank(archiveDir)) {
@@ -197,11 +203,12 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       channelSftp.rename(remoteFile, archiveDir + fileSubstring);
 
       channelSftp.exit();
+      LOG.debug("Download complete.");
 
     } catch (JSchException | SftpException e) {
       LOG.warn("An error has occurred when trying to download files from FTP server", e);
     } catch (Exception ex) {
-      LOG.debug("Error encountered in GCARS Download" + ex.getMessage());
+      LOG.debug("Error encountered in GCARS Download" + ex.getStackTrace());
     } finally {
       if (jschSession != null) {
         jschSession.disconnect();
@@ -451,6 +458,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       for (GCARSUpdtQueue queue : list) {
         Timestamp ts = SystemUtil.getActualTimestamp();
         boolean needToUpdate = false;
+        boolean hasError = false;
         queue.setUpdatedBy(GCARS_USER);
         queue.setUpdateDt(ts);
         try {
@@ -468,6 +476,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
             String kna1Codreas = record.getCodReason() != null ? record.getCodReason() : "";
             String gcarsCodcond = queue.getCodCondition() != null ? queue.getCodCondition() : "";
             String gcarsCodreas = queue.getCodRsn() != null ? queue.getCodRsn() : "";
+            String sourceName = queue.getId().getSourceName() != null ? queue.getId().getSourceName() : "";
 
             if (!StringUtils.isBlank(gcarsCodcond)) {
               if (!gcarsCodcond.equals(kna1Codcond)) {
@@ -485,6 +494,13 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
               }
             }
 
+            if (!StringUtils.isBlank(sourceName) && !sourceName.contains("XCARR08E")) {
+              queue.setProcStatus(STATUS_ERROR);
+              queue.setProcMsg("Invalid source name " + sourceName + " for CMR No. " + queue.getId().getCmrNo());
+              needToUpdate = false;
+              hasError = true;
+            }
+
             if (needToUpdate) {
               record.setUpdatedBy(GCARS_USER);
               record.setUpdateDt(ts);
@@ -494,9 +510,11 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
 
               queue.setProcStatus(STATUS_COMPLETED);
               queue.setProcMsg("Successfully processed");
-            } else {
+            } else if (!hasError) {
               queue.setProcStatus(STATUS_NOT_REQUIRED);
               queue.setProcMsg("Not Required");
+
+              LOG.debug("No changes required for KUNNR " + record.getId().getKunnr() + " and CMR No. " + queue.getId().getCmrNo());
             }
 
           } else {

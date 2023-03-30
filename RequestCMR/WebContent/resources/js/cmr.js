@@ -306,6 +306,14 @@ var cmr = {
         btn.setAttribute('value', 'OK');
       }
     }
+    var btn = dojo.byId("messagesOverlayButtonOK");
+    if (btn) {
+      if (buttonLabel && buttonLabel.OK) {
+        btn.setAttribute('value', buttonLabel.OK);
+      } else {
+        btn.setAttribute('value', 'OK');
+      }
+    }
     ibmweb.queue.push(function() {
       return dojo.query("div#dialog_messagesOverlay .dijitDialogCloseIcon").length == 1;
     }, function() {
@@ -795,6 +803,28 @@ var cmr = {
         if (data) {
           result = data;
         }
+      },
+      error : function(error, ioargs) {
+        result = {};
+      }
+    });
+    return result;
+  },
+  validateNZBNFromAPI: function(businessNumber, reqId, custNm) {
+    var result = {};
+    dojo.xhrGet({
+      url : cmr.CONTEXT_ROOT + '/nz/nzbnFromAPI.json',
+      handleAs : 'json',
+      method : 'GET',
+      content : {
+        businessNumber : businessNumber,
+        reqId : reqId,
+        custNm : custNm
+      },
+      timeout : 50000,
+      sync : true,
+      load : function(data, ioargs) {
+        result = data;
       },
       error : function(error, ioargs) {
         result = {};

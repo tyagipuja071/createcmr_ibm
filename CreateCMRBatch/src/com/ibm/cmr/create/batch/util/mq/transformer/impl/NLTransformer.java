@@ -862,6 +862,16 @@ public class NLTransformer extends EMEATransformer {
         legacyCust.setEmbargoCd("");
       }
 
+      if (!StringUtils.isEmpty(data.getIsuCd())) {
+        if (StringUtils.isEmpty(data.getClientTier())) {
+          legacyCust.setIsuCd(data.getIsuCd() + "7");
+        } else if (!StringUtils.isEmpty(data.getClientTier())) {
+          String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+              + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
+          legacyCust.setIsuCd(isuClientTier);
+        }
+      }
+
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
       // CREATCMR-845
       legacyCust.setModeOfPayment(data.getModeOfPayment() == null ? "" : data.getModeOfPayment());
@@ -940,6 +950,10 @@ public class NLTransformer extends EMEATransformer {
     if (!StringUtils.isEmpty(data.getIsuCd())) {
       if (StringUtils.isEmpty(data.getClientTier())) {
         legacyCust.setIsuCd(data.getIsuCd() + "7");
+      } else if (!StringUtils.isEmpty(data.getClientTier())) {
+        String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
+        legacyCust.setIsuCd(isuClientTier);
       }
     }
 
@@ -1024,6 +1038,8 @@ public class NLTransformer extends EMEATransformer {
         cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
       } else if (isuClientTier.contains("@")) {
         cust.setIsuCd("7");
+      } else if (isuClientTier != null && isuClientTier.length() == 3) {
+        cust.setIsuCd(isuClientTier);
       }
     }
 
@@ -1303,7 +1319,9 @@ public class NLTransformer extends EMEATransformer {
 
     Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
     addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
-
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
+      addrSeqToAddrUseMap = mapSeqNoToAddrUse(cmrObjects.getAddresses());
+    }
     LOG.debug("LEGACY -- ME OVERRIDE transformOtherData");
     LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
     for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {

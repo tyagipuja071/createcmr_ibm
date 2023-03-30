@@ -592,11 +592,15 @@ public class CEETransformer extends EMEATransformer {
     String line6 = "";
     String addrType = addrData.getId().getAddrType();
     String phone = "";
+    String stateProv = "";
     String addrLineT = "";
 
     LOG.trace("Handling " + (update ? "update" : "create") + " request.");
 
     // line1
+    if (!StringUtils.isBlank(addrData.getStateProv())) {
+      stateProv = addrData.getStateProv();
+    }
     line1 = addrData.getCustNm1();
 
     if (!StringUtils.isBlank(addrData.getCustNm2())) {
@@ -645,6 +649,21 @@ public class CEETransformer extends EMEATransformer {
         }
 
       }
+    }
+    if (SystemLocation.ROMANIA.equals(cmrData.getCmrIssuingCntry())) {
+      if (!StringUtils.isBlank(addrData.getPostCd())) {
+        line6 = addrData.getPostCd();
+        if (!StringUtils.isBlank(addrData.getCity1())) {
+          if (addrData.getCity1().length() <= 30) {
+            line6 = line6.concat(addrData.getCity1());
+          } else {
+            line6 = line6.concat(addrData.getCity1().substring(0, 22));
+          }
+        }
+        if (!StringUtils.isBlank(addrData.getStateProv())) {
+          line6 = line6.concat(addrData.getStateProv());
+        }
+      }
     } else {
       if ("ZP02".equals(addrData.getId().getAddrType())) {
         if (!StringUtils.isBlank(addrData.getBldg())) {
@@ -682,9 +701,6 @@ public class CEETransformer extends EMEATransformer {
       addrLineT = "";
     }
 
-    legacyAddr.setItCompanyProvCd((!StringUtils.isBlank(addrData.getStateProv()) && addrData.getStateProv().length() <= 2) ?
-        addrData.getStateProv() : "");
-
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
     legacyAddr.setAddrLine3(line3);
@@ -699,7 +715,10 @@ public class CEETransformer extends EMEATransformer {
     legacyAddr.setDistrict(addrData.getDept());
     // CMR-4937
     legacyAddr.setAddrLineU("");
-
+    if (!crossBorder && SystemLocation.ROMANIA.equals(cmrData.getCmrIssuingCntry())) {
+      legacyAddr.setItCompanyProvCd(
+          (!StringUtils.isBlank(addrData.getStateProv()) && addrData.getStateProv().length() <= 2) ? addrData.getStateProv() : "");
+    }
   }
 
   @Override

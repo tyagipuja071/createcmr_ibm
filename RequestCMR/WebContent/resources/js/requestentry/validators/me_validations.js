@@ -460,10 +460,10 @@ function afterConfigForCEMEA() {
     FormManager.setValue('defaultLandedCountry', landCntry);
   }
 
-  FormManager.readOnly('capInd');
-  if (FormManager.getActualValue('reqType') == 'C') {
-    FormManager.getField('capInd').set('checked', true);
-  }
+//  FormManager.readOnly('capInd');
+//  if (FormManager.getActualValue('reqType') == 'C') {
+//    FormManager.getField('capInd').set('checked', true);
+//  }
 
   FormManager.readOnly('subIndustryCd');
 
@@ -1786,7 +1786,7 @@ function setSBO(repTeamMemberNo) {
       FormManager.getField('templatevalue-repTeamMemberNo').style.display = 'none';
     }
     // FormManager.setValue('salesBusOffCd', '0000000');
-    // FormManager.setValue('repTeamMemberNo', '099998');
+//    FormManager.setValue('repTeamMemberNo', '099998');
     return;
   }
 
@@ -4205,7 +4205,6 @@ function hideDisableAutoProcessingCheckBox() {
 function afterConfigTemplateLoadForME() {
   filterCmrnoForME();
   togglePPSCeidME();
-  setClassificationCodeME();
   // disableSBO();
   setEngineeringBO();
   addLandCntryHandler();
@@ -4295,20 +4294,25 @@ function validatorsDIGITForDupField() {
 }
 
 function addEmbargoCdValidatorForME() {
-  var role = FormManager.getActualValue('userRole');
-  if (role == GEOHandler.ROLE_PROCESSOR) {
-    FormManager.addFormValidator((function() {
-      return {
-        validate : function() {
-          var embargoCd = FormManager.getActualValue('embargoCd');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var role = FormManager.getActualValue('userRole');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var embargoCd = FormManager.getActualValue('embargoCd');
+        if (cntry == '808' || cntry == '865') {
+          if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == 'J' || embargoCd == 'C' || embargoCd == '')) {
+            return new ValidationResult(null, false, 'Order Block Code should be only E, S, J, C, Blank allowed');
+          }
+        } else {
           if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == 'J' || embargoCd == '')) {
             return new ValidationResult(null, false, 'Order Block Code should be only E, S, J, Blank allowed');
           }
-          return new ValidationResult(null, true);
         }
-      };
-    })(), 'MAIN_CUST_TAB', 'frmCMR');
-  }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 // CMR-4606
 function checkGAddressExist() {
@@ -4818,6 +4822,7 @@ dojo
       GEOHandler.addAfterConfig(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
       GEOHandler.addAfterTemplateLoad(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
       GEOHandler.addAfterTemplateLoad(setIsuCtcOnScenarioChange, GEOHandler.ME);
+      GEOHandler.addAfterTemplateLoad(setClassificationCodeME, GEOHandler.ME);
       GEOHandler.registerValidator(addVATAttachValidation, [ SysLoc.EGYPT ], null, true);
       // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
       // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);

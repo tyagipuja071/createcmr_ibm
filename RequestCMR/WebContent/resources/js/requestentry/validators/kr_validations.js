@@ -5,6 +5,7 @@ function afterConfigKR() {
   var role = null;
   var reqType = null;
   var _isuHandler = null;
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   
   _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -54,6 +55,10 @@ function afterConfigKR() {
     setInacNacValues();
   });
   
+  var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
+    setInacNacValues();
+  });
+
   reqType = FormManager.getActualValue('reqType');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -85,10 +90,10 @@ function afterConfigKR() {
       FormManager.readOnly('cmrNoPrefix');
     }
   }
-  
+
   if (reqType == 'C') {
-  FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
-	  }
+    FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
+  }
 
   // story: attachment Company Proof required
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -243,8 +248,7 @@ function addKRChecklistValidator() {
           REQID : reqId
         });
         if (!record || !record.sectionA1) {
-          return new ValidationResult(null, false,
-              'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+          return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
         }
         return new ValidationResult(null, true);
       }
@@ -429,10 +433,62 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('covId');
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('contactName2');
+    FormManager.readOnly('contactName3'); 
+    FormManager.readOnly('cmrNoPrefix');
+    FormManager.readOnly('bgId');
+    FormManager.readOnly('gbgId');
+    FormManager.readOnly('bgRuleId');
+    FormManager.readOnly('geoLocationCd');
+    FormManager.readOnly('dunsNo');
+    FormManager.readOnly('orgNo');
+    FormManager.readOnly('creditCd');
+    FormManager.readOnly('dealerNo');
+
+    FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.removeValidator('isuCd', Validators.REQUIRED);
+    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
+    FormManager.removeValidator('inacType', Validators.REQUIRED);
+    FormManager.removeValidator('inacCd', Validators.REQUIRED);
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+    FormManager.removeValidator('covId', Validators.REQUIRED);
+    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
+    FormManager.removeValidator('contactName2', Validators.REQUIRED);
+    FormManager.removeValidator('contactName3', Validators.REQUIRED);
+    FormManager.removeValidator('bgId', Validators.REQUIRED);
+    FormManager.removeValidator('gbgId', Validators.REQUIRED);
+    FormManager.removeValidator('geoLocationId', Validators.REQUIRED);
+    FormManager.removeValidator('dunsNo', Validators.REQUIRED);
+    FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
+    FormManager.removeValidator('orgNo', Validators.REQUIRED);
+    FormManager.removeValidator('creditCd', Validators.REQUIRED);
+    FormManager.removeValidator('dealerNo', Validators.REQUIRED);
+
+  }
+}
+
+// CREATCMR -5269
+function handleObseleteExpiredDataForUpdate() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  // lock all the coverage fields and remove validator
+  if (reqType == 'U') {
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('mrcCd');
+    FormManager.readOnly('inacType');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('commercialFinanced');
+    FormManager.readOnly('contactName2');
     FormManager.readOnly('contactName3');
-    if (custSubGrp != 'INTER') {
-      FormManager.readOnly('cmrNoPrefix');
-    }
+    FormManager.readOnly('cmrNoPrefix');
     FormManager.readOnly('bgId');
     FormManager.readOnly('gbgId');
     FormManager.readOnly('bgRuleId');
@@ -547,10 +603,10 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('clientTier');
         break;
       case "ESA":
-    	FormManager.setValue('isuCd', '36');
-        FormManager.readOnly('isuCd');
-        FormManager.setValue('clientTier', 'Y');
-        FormManager.readOnly('clientTier');
+    	  FormManager.setValue('isuCd', '36');
+          FormManager.readOnly('isuCd');
+          FormManager.setValue('clientTier', 'Y');
+          FormManager.readOnly('clientTier');
         FormManager.limitDropdownValues(searchTerm, [ '08016', '09065', '01545','04461','04466','05223','10139' ]);
         break;
       case "INTER":
@@ -589,9 +645,9 @@ function setSearchTermDropdownValues() {
 }
 
 function LockDefaultISUClientTierMrcValues() {
-//  FormManager.setValue('clientTier','');
-//  FormManager.setValue('isuCd','');
-//  FormManager.setValue('mrcCd','');
+// FormManager.setValue('clientTier','');
+// FormManager.setValue('isuCd','');
+// FormManager.setValue('mrcCd','');
   var searchTerm = FormManager.getActualValue('searchTerm');
   var clientTier = FormManager.getField('clientTier');
   if (searchTerm == "00003") {
@@ -766,6 +822,59 @@ function getIsuFromIsic(){
     FormManager.readOnly('isuCd');
   }
 }
+
+// CREATCMR-8581
+
+function checkCmrUpdateBeforeImport() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var uptsrdc = '';
+        var lastupts = '';
+
+        if (reqType == 'C') {
+          // console.log('reqType = ' + reqType);
+          return new ValidationResult(null, true);
+        }
+
+        var resultsCC = cmr.query('GETUPTSRDC', {
+          COUNTRY : cntry,
+          CMRNO : cmrNo,
+          MANDT : cmr.MANDT
+        });
+
+        if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
+          uptsrdc = resultsCC.ret1;
+          // console.log('lastupdatets in RDC = ' + uptsrdc);
+        }
+
+        var results11 = cmr.query('GETUPTSADDR', {
+          REQ_ID : reqId
+        });
+        if (results11 != null && results11 != undefined && results11.ret1 != '') {
+          lastupts = results11.ret1;
+          // console.log('lastupdatets in CreateCMR = ' + lastupts);
+        }
+
+        if (lastupts != '' && uptsrdc != '') {
+          if (uptsrdc > lastupts) {
+            return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
   console.log('adding KOREA functions...');
@@ -804,5 +913,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setInacNacValues, GEOHandler.KR);
   GEOHandler.addAfterConfig(getIsuFromIsic, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(getIsuFromIsic, GEOHandler.KR);
+  
+   // CREATCMR-8581
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.KR,null,true);
 
 });

@@ -2076,7 +2076,6 @@ function setEconomicCode() {
   var result = cmr.query('GET.ECONOMIC_CD_BY_REQID', qParams);
   var economicCdResult = result.ret1;
   var economicCd = FormManager.getActualValue('economicCd');
-
   if (economicCdResult == '') {
     FormManager.setValue('economicCd', '');
   } else {
@@ -7516,30 +7515,16 @@ function toggleBPRelMemType() {
     if (_custType == 'BUSPR' || _custType == 'BUSSM' || _custType == 'BUSVA' || _custType == 'CROBP') {
       FormManager.show('PPSCEID', 'ppsceid');
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-      FormManager.show('MembLevel', 'memLvl');
-      FormManager.show('BPRelationType', 'bpRelType');
-      FormManager.resetValidations('bpRelType');
-      FormManager.resetValidations('memLvl');
       // FormManager.readOnly('bpRelType');
       // FormManager.readOnly('memLvl');
-      FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership Level' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation Type' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.resetValidations('ppsceid');
       FormManager.hide('PPSCEID', 'ppsceid');
-      FormManager.hide('MembLevel', 'memLvl');
-      FormManager.hide('BPRelationType', 'bpRelType');
       FormManager.removeValidator('ppsceid', Validators.REQUIRED);
-      FormManager.removeValidator('memLvl', Validators.REQUIRED);
-      FormManager.removeValidator('bpRelType', Validators.REQUIRED);
     }
   } else if ((reqType == 'U' || reqType == 'X') && role == 'REQUESTER') {
     FormManager.readOnly('ppsceid');
     FormManager.resetValidations('ppsceid');
-    FormManager.readOnly('memLvl');
-    FormManager.resetValidations('memLvl');
-    FormManager.readOnly('bpRelType');
-    FormManager.resetValidations('bpRelType');
   } else if ((reqType == 'U' || reqType == 'X') && role == 'PROCESSOR') {
     FormManager.enable('ppsceid');
     if (FormManager.getActualValue('ppsceid') != '') {
@@ -7559,29 +7544,15 @@ function toggleBPRelMemTypeForTurkey() {
     return;
   }
   if (reqType == 'U') {
-    FormManager.show('MembLevel', 'memLvl');
-    FormManager.show('BPRelationType', 'bpRelType');
-    FormManager.resetValidations('bpRelType');
-    FormManager.resetValidations('memLvl');
   } else {
     var _custType = FormManager.getActualValue('custSubGrp');
     if (_custType == 'BUSPR' || _custType == 'XBP') {
       FormManager.show('PPSCEID', 'ppsceid');
-      FormManager.show('MembLevel', 'memLvl');
-      FormManager.show('BPRelationType', 'bpRelType');
       FormManager.resetValidations('ppsceid');
-      FormManager.resetValidations('bpRelType');
-      FormManager.resetValidations('memLvl');
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership Level' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation Type' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.hide('PPSCEID', 'ppsceid');
-      FormManager.hide('MembLevel', 'memLvl');
-      FormManager.hide('BPRelationType', 'bpRelType');
       FormManager.removeValidator('ppsceid', Validators.REQUIRED);
-      FormManager.removeValidator('memLvl', Validators.REQUIRED);
-      FormManager.removeValidator('bpRelType', Validators.REQUIRED);
     }
   }
 }
@@ -8092,6 +8063,22 @@ function addEmbargoCodeValidatorIT() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addEmbargoCdValidatorForTR() {
+  var role = FormManager.getActualValue('userRole');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var embargoCd = FormManager.getActualValue('embargoCd');
+        if (embargoCd && !(embargoCd == 'Y' || embargoCd == 'C' || embargoCd == 'J' || embargoCd == '')) {
+          return new ValidationResult(null, false, 'Embargo Code should be only Y, C, J, Blank.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /**
  * Set Client Tier Value
  */
@@ -8473,6 +8460,7 @@ function setISUCTCBasedScenarios() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -9230,7 +9218,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(preFillTranslationAddrWithSoldToForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(addTurkishCharValidator, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addTRAddressTypeValidator, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
+  GEOHandler.registerValidator(vatValidatorTR, [ SysLoc.TURKEY ], null, true);
+  // GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY,
+  // 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addALPHANUMValidatorForEnterpriseNumber, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addALPHANUMValidatorForTypeOfCustomer, [ SysLoc.TURKEY ], null, true);
@@ -9264,6 +9254,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
+  GEOHandler.registerValidator(addEmbargoCdValidatorForTR, [ SysLoc.TURKEY ], null, true);
 
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
@@ -9429,4 +9420,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsuChangeHandler, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
-});
+ });
