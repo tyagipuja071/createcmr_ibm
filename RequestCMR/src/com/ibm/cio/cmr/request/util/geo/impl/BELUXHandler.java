@@ -1297,9 +1297,9 @@ public class BELUXHandler extends BaseSOFHandler {
       query.setParameter("CMR_NO", cmrNo);
       realcty = query.getSingleResult(String.class);
       if (realcty != null && StringUtils.isNotEmpty(realcty)) {
-        if (realcty == "623") {
+        if ("623".equals(realcty)) {
           countryUse = "624LU";
-        } else if (realcty == "624") {
+        } else if ("624".equals(realcty)) {
           countryUse = "624";
         }
       }
