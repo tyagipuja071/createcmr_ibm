@@ -279,15 +279,20 @@ public class SWISSHandler extends GEOHandler {
         address.setAddrTxt(currentRecord.getCmrStreet());
       }
       // if custLangCd is blank for create
-      if (StringUtils.isBlank(address.getCustLangCd()) && StringUtils.isNotBlank(address.getPostCd()) && StringUtils.isNumeric(address.getPostCd())) {
-        int postCd = Integer.parseInt(address.getPostCd());
-        if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <= 9999)) {
-          address.setCustLangCd("D");
-        } else if (postCd >= 6500 && postCd <= 6999) {
-          address.setCustLangCd("I");
-        } else if (postCd >= 0000 && postCd < 3000) {
-          address.setCustLangCd("F");
+      if ("CH".equals(address.getLandCntry()) || "LI".equals(address.getLandCntry())) {
+        if (StringUtils.isBlank(address.getCustLangCd()) && StringUtils.isNotBlank(address.getPostCd())
+            && StringUtils.isNumeric(address.getPostCd())) {
+          int postCd = Integer.parseInt(address.getPostCd());
+          if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <= 9999)) {
+            address.setCustLangCd("D");
+          } else if (postCd >= 6500 && postCd <= 6999) {
+            address.setCustLangCd("I");
+          } else if (postCd >= 0000 && postCd < 3000) {
+            address.setCustLangCd("F");
+          }
         }
+      } else if (StringUtils.isBlank(address.getCustLangCd())) {
+        address.setCustLangCd("E");
       }
     }
   }
@@ -552,15 +557,19 @@ public class SWISSHandler extends GEOHandler {
       addr.setCustNm3("");
     }
 
-    if (StringUtils.isBlank(addr.getCustLangCd()) && StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNumeric(addr.getPostCd())) {
-      int postCd = Integer.parseInt(addr.getPostCd());
-      if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <= 9999)) {
-        addr.setCustLangCd("D");
-      } else if (postCd >= 6500 && postCd <= 6999) {
-        addr.setCustLangCd("I");
-      } else if (postCd >= 0000 && postCd < 3000) {
-        addr.setCustLangCd("F");
+    if ("CH".equals(addr.getLandCntry()) || "LI".equals(addr.getLandCntry())) {
+      if (StringUtils.isBlank(addr.getCustLangCd()) && StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNumeric(addr.getPostCd())) {
+        int postCd = Integer.parseInt(addr.getPostCd());
+        if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <= 9999)) {
+          addr.setCustLangCd("D");
+        } else if (postCd >= 6500 && postCd <= 6999) {
+          addr.setCustLangCd("I");
+        } else if (postCd >= 0000 && postCd < 3000) {
+          addr.setCustLangCd("F");
+        }
       }
+    } else if (StringUtils.isBlank(addr.getCustLangCd())) {
+      addr.setCustLangCd("E");
     }
   }
 
