@@ -723,9 +723,10 @@ public class IERPProcessService extends BaseBatchService {
             // send email notif regardless of abort or complete
             LOG.debug("*** IERP Site IDs on EMAIL >> " + siteIds.toString());
             try {
-              sendEmailNotifications(em, admin, siteIds.toString(), statusMessage.toString());
               if ("CPR".equals(admin.getReqStatus())) {
                 RequestUtils.sendEmailNotifications(em, admin, history, false, false);
+              } else {
+                sendEmailNotifications(em, admin, siteIds.toString(), statusMessage.toString());
               }
             } catch (Exception e) {
               LOG.error("ERROR: " + e.getMessage());
