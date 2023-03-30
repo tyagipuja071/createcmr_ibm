@@ -5425,8 +5425,8 @@ function resetBPWPQValue() {
 
   if (custSubGrp == 'BPWPQ') {
     if (reqType == 'C' && (_role == 'Requester' || _role == 'Processor')) {
-      FormManager.setValue('salesTeamCd', _pagemodel.salesTeamCd == '' ? '' : _pagemodel.salesTeamCd);
-      //FormManager.readOnly('salesTeamCd');
+      // FormManager.setValue('salesTeamCd', _pagemodel.salesTeamCd == '' ? '' : _pagemodel.salesTeamCd);
+      FormManager.readOnly('salesTeamCd');
 
       FormManager.setValue('tier2', _pagemodel.clientTier == '' ? '' : _pagemodel.clientTier);
       FormManager.readOnly('tier2');
