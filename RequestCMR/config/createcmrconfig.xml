@@ -576,7 +576,7 @@
 		<editable>true</editable>
 		<required>true</required>
 		<editType>text</editType>
-		<value>true</value>
+		<value>false</value>
 	</item>
 	<item>
 		<id>SSO_ISSUER_URL</id>
