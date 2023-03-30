@@ -2062,5 +2062,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSORTLBasedOnIsuCtc, GEOHandler.NL);
   GEOHandler.addAfterConfig(addNlIsuHandler, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.NL);
-  GEOHandler.addAfterConfig(lockFields, GEOHandler.NL);
 });
