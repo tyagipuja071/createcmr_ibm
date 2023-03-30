@@ -490,6 +490,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
             if (!StringUtils.isBlank(sourceName) && !sourceName.contains("XCARR08E")) {
               queue.setProcStatus(STATUS_ERROR);
               queue.setProcMsg("Invalid source name " + sourceName + " for CMR No. " + queue.getId().getCmrNo());
+              needToUpdate = false;
               hasError = true;
             }
 
@@ -505,6 +506,8 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
             } else if (!hasError) {
               queue.setProcStatus(STATUS_NOT_REQUIRED);
               queue.setProcMsg("Not Required");
+
+              LOG.debug("No changes required for KUNNR " + record.getId().getKunnr() + " and CMR No. " + queue.getId().getCmrNo());
             }
 
           } else {
