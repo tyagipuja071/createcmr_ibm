@@ -14,6 +14,7 @@ var _vatRegisterHandlerSG = null;
 var _clusterHandlerINDONESIA = 0;
 var _inacHandlerANZSG = 0;
 var custSubGrpHandler = null;
+var oldClusterCd = null;
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
     _isicHandlerAP = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -357,7 +358,7 @@ function addAfterConfigAP() {
     onInacTypeChange();
     // CREATCMR-7883-7884
     _inacHandlerANZSG = 0;
-    setInacByCluster();
+//    setInacByCluster();
     setInacNacValuesIN();
     filterInacCd('744','10215','N','I529');
     applyClusterFilters();
@@ -416,9 +417,22 @@ function addAfterConfigAP() {
   }
 }
 
+function saveClusterVal() {
+  console.log(">>>> saveClusterVal");
+  if (oldClusterCd == null) {
+    oldClusterCd = FormManager.getActualValue('apCustClusterId');
+  }
+}
+
 function setInacByCluster() {
   console.log('>>>> setInacByCluster >>>>');
     var _cluster = FormManager.getActualValue('apCustClusterId');
+    if (oldClusterCd == null) {
+      saveClusterVal();
+    }
+    if (_cluster == oldClusterCd) {
+      return;
+    }
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     // CREATCMR-7884
@@ -8101,6 +8115,8 @@ function setInacCdTypeStatus(){
       console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
       FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+      FormManager.enable('inacCd');
+      FormManager.enable('inacType'); 
     }
     // LOCK GB Seg(QTC)/ISU
     FormManager.readOnly('clientTier');
