@@ -1319,9 +1319,6 @@ public class NLTransformer extends EMEATransformer {
 
     Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
     addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
-    if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) { 
-      addrSeqToAddrUseMap = mapSeqNoToAddrUse(cmrObjects.getAddresses()); 
-    }
     LOG.debug("LEGACY -- ME OVERRIDE transformOtherData");
     LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
     for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
