@@ -279,9 +279,6 @@ function autoSetDataCrosTypSubTypeSSAMX() {
 
 // Story :1278109- By Mukesh Kumar
 function autoSetSBOAndSalesTMNo() {
-  if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
-    return;
-  }
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var _custType = FormManager.getActualValue('custType');
   console.log(">>> Process _custSubGrp >> " + _custSubGrp);
@@ -1049,6 +1046,7 @@ function addTaxCode1ValidatorForOtherLACntries() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
+
 function addSalesRepNameNoValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -2555,6 +2553,7 @@ function setSortlForStateProvince() {
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqType = FormManager.getActualValue('reqType');
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   
   if (viewOnly != '' && viewOnly == 'true') {
     return;
@@ -2572,35 +2571,49 @@ function setSortlForStateProvince() {
   if (stateProv != null && stateProv.length > 2) {
     stateProv = stateProv.substring(0, 2);
   }
+  // CREATCMR-8728 implement setSortlForStateProvince-3.21.23-1 filter for
+  // requester
   if (stateProv == 'AM' || stateProv == 'PA' || stateProv == 'AC' || stateProv == 'RO' || stateProv == 'RR' || stateProv == 'AP' || stateProv == 'TO' || stateProv == 'MA' || stateProv == 'PI'
       || stateProv == 'CE' || stateProv == 'RN' || stateProv == 'PB' || stateProv == 'PE' || stateProv == 'AL' || stateProv == 'SE' || stateProv == 'BA') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '763', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '763', '515', '161', '461', '979', '010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '763');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'DF' || stateProv == 'GO' || stateProv == 'MT' || stateProv == 'MS') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '504', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '504', '515', '161', '461', '979', '010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '504');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'ES' || stateProv == 'MG') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '556', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '556', '515', '161', '461', '979', '010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '556');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'PR' || stateProv == 'SC' || stateProv == 'RS') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '758', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '758', '515', '161', '461', '979', '010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '758');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'RJ') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '761', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '761', '515', '161', '461', '979', '010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '761');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'SP') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '764', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '764', '515', '161', '461','979','010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '764');
     FormManager.enable('salesBusOffCd');
   } 
@@ -2659,6 +2672,7 @@ function checkForProspect(){
   }
   return ifProspect;
 }
+
 function setMrcCdToReadOnly() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
@@ -2668,12 +2682,19 @@ function setMrcCdToReadOnly() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrpList = [ 'IBMEM', 'PRIPE', 'BUSPR', 'INTER', 'INTOU', 'INIBM' ];
+  var _custType = FormManager.getActualValue('custType');
+
   if (reqType == 'C') {
     if (custSubGrpList.includes(custSubGrp)) {
       if (role == 'REQUESTER') {
         FormManager.readOnly('mrcCd');
       } else {
         FormManager.enable('mrcCd');
+      }
+    }
+    if((custSubGrp == 'CROSS' || custSubGrp == 'XLEAS') && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR' || _custType == 'INTER' )) {
+      if (role == 'REQUESTER') {
+        FormManager.readOnly('mrcCd');
       }
     }
   }
@@ -3034,12 +3055,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setMrcCdOptionalForRequester, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setMrcCdOptionalForRequester, [ SysLoc.BRAZIL ]);
   GEOHandler.addAddrFunction(setLocationNumberForBR, GEOHandler.LA);
-  GEOHandler.addAfterConfig(setLocNoLockedForRequesterBR, [ SysLoc.BRAZIL ]);
-  GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
-  GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
+  GEOHandler.addAfterConfig(setLocNoLockedForRequesterBR, [ SysLoc.BRAZIL ]);  
   GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
-
-  // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
+    // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
   GEOHandler.addAfterConfig(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
@@ -3054,5 +3072,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSboMrcIsuToReadOnly, SSAMX_COUNTRIES);
   GEOHandler.addAfterTemplateLoad(setSortlValuesForUser, GEOHandler.LA);
   GEOHandler.addAfterConfig(setSortlValuesForUser, GEOHandler.LA);
+  GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
+  GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   
 });
