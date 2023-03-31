@@ -2594,9 +2594,11 @@ function mandatoryForBusinessPartnerCY() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     var _custType = FormManager.getActualValue('custSubGrp');
+    var ppsceid = dijit.byId('ppsceid');
     if (_custType == 'BUSPR' || _custType == 'CRBUS') {
       FormManager.show('PPSCEID', 'ppsceid');
       FormManager.enable('ppsceid');
+      FormManager.setValue('ppsceid',ppsceid.params.value);
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.setValue('ppsceid', '');
