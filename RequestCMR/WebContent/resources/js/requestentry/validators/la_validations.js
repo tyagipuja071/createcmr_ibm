@@ -512,7 +512,7 @@ function afterConfigForLA() {
   if (_mrcCdHandler == null) {
     _mrcCdHandler = dojo.connect(FormManager.getField('mrcIsu'), 'onChange', function(value) {
       autoSetMrcIsuCov2018();
-      if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MEXICO) {
+      if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MEXICO || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL) {
         setMrcCdToReadOnly();
       }
     });
