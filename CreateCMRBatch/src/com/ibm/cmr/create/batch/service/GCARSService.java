@@ -476,6 +476,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
               String sourceSubStr = sourceName.substring(0, 8);
               LOG.debug("GCARS validate source name");
               if (sourceSubStr.equals("XCARR08E")) {
+                LOG.debug("Source name value is " + sourceSubStr);
                 if (!StringUtils.isBlank(gcarsCodcond)) {
                   if (!gcarsCodcond.equals(kna1Codcond)) {
                     createChangeLog(entityManager, record, queue, ts, "AD_BILLING", "CODCOND", record.getCodCondition(), queue.getCodCondition());
@@ -492,12 +493,14 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
                   }
                 }
               } else {
+                LOG.debug("Invalid source name " + sourceName + " for CMR No. " + queue.getId().getCmrNo());
                 errMessage = "Invalid source name " + sourceName + " for CMR No. " + queue.getId().getCmrNo();
                 hasError = true;
               }
             }
 
           } else {
+            LOG.debug("Records for CMR No. " + queue.getId().getCmrNo() + " not found.");
             errMessage = "Records for CMR No. " + queue.getId().getCmrNo() + " not found.";
             hasError = true;
           }
@@ -505,19 +508,17 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
           if (hasError && StringUtils.isNotBlank(errMessage)) {
             queue.setProcStatus(STATUS_ERROR);
             queue.setProcMsg(errMessage);
+            LOG.debug("GCARS - Encountered an error : " + errMessage);
           } else if (needToUpdate && !hasError) {
             record.setUpdatedBy(GCARS_USER);
             record.setUpdateDt(ts);
             updateEntity(record, entityManager);
-
-            LOG.debug("KUNNR " + record.getId().getKunnr() + " for CMR No. " + queue.getId().getCmrNo() + " done.");
-
+            LOG.debug("GCARS - KUNNR " + record.getId().getKunnr() + " for CMR No. " + queue.getId().getCmrNo() + " successfully processed.");
             queue.setProcStatus(STATUS_COMPLETED);
             queue.setProcMsg("Successfully processed");
           } else {
             queue.setProcStatus(STATUS_NOT_REQUIRED);
             queue.setProcMsg("Not Required");
-
             LOG.debug("GCARS - No changes required for KUNNR " + record.getId().getKunnr() + " and CMR No. " + queue.getId().getCmrNo());
           }
 
