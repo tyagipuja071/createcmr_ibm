@@ -198,16 +198,16 @@ function processRequestAction() {
           }
         } else {
           if (reqType == 'C') {
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-          if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
-            cmr.showProgress('Checking request data..');
-            checkRetrievedForNZ();
+            var custSubGrp = FormManager.getActualValue('custSubGrp');
+            if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
+              cmr.showProgress('Checking request data..');
+              checkRetrievedForNZ();
+            } else {
+              showAddressVerificationModal();
+            }
           } else {
             showAddressVerificationModal();
           }
-        } else {
-          showAddressVerificationModal();
-        }
         }
       } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
@@ -2849,7 +2849,7 @@ function checkRetrievedForNZ() {
       }
     }
   }
-  
+}
 // CREATCMR-8430: do DNB check for NZ update
 function matchDnBForNZUpdate() {
   console.log('>>> matchDnBForNZUpdate >>>');
@@ -2948,5 +2948,4 @@ function doNZBNAPIMatch() {
       CANCEL : 'No'
     });
   }
-}
 }
