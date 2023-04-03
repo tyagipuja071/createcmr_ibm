@@ -621,6 +621,30 @@ public class AutomationEngine {
   }
 
   /**
+   * Check the NZBN API and DNB result to judge new result
+   * 
+   * @param boolean
+   *          stopExecution
+   * @param List<ActionOnError>
+   *          actionsOnError
+   * @return
+   * @throws @throws
+   */
+  private void checkNZBNAPI(boolean stopExecution, List<ActionOnError> actionsOnError) {
+    if (engineData.get().isNZBNAPICheck()
+        && (engineData.get().getPendingChecks().containsKey("DnBMatch") || engineData.get().getPendingChecks().containsKey("DNBCheck"))) {
+      stopExecution = false;
+      if (engineData.get().getPendingChecks().containsKey("DnBMatch")) {
+        engineData.get().getPendingChecks().remove("DnBMatch");
+        if (actionsOnError != null && actionsOnError.size() > 0)
+          actionsOnError.remove(0);
+      }
+      if (engineData.get().getPendingChecks().containsKey("DNBCheck"))
+        engineData.get().getPendingChecks().remove("DNBCheck");
+    }
+  }
+
+  /**
    * Gets the next result id from sequence
    * 
    * @param entityManager
