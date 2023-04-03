@@ -3026,7 +3026,7 @@ function lockUnlockFieldForCY() {
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('salesTeamCd');
     FormManager.readOnly('salesBusOffCd');
-    if(custSubGrp != 'BUSPR') {
+    if(custSubGrp != 'BUSPR' && custSubGrp != 'CRBUS' ) {
       FormManager.readOnly('ppsceid');
     }
   } else if (_custGrpSet.has(custSubGrp)) {
