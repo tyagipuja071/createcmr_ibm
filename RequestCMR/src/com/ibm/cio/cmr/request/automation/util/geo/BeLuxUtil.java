@@ -305,18 +305,6 @@ public class BeLuxUtil extends AutomationUtil {
     }
     return true;
   }
-  
-  private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
-    String sortl = "";
-    String sql = ExternalizedQuery.getSql(queryBgFR);
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("KEY", bgId);
-    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    query.setParameter("COUNTRY", cmrIssuingCntry);
-    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
-    System.err.println("ISO: " + isoCntry);
-    query.setParameter("ISO_CNTRY", isoCntry);
-    query.setForReadOnly(true);
 
   private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
     String sortl = "";
@@ -343,6 +331,7 @@ public class BeLuxUtil extends AutomationUtil {
     sortl = sortlList.get(0);
     return sortl;
   }
+
   private String chkFrAffiliateCntry(AutomationEngineData engineData, RequestData reqData, EntityManager entityManager) {
     GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
     String gbgCntry = "";

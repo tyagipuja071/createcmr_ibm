@@ -238,32 +238,6 @@ public class NetherlandsUtil extends AutomationUtil {
     }
     return true;
   }
-  
-  private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
-    String sortl = "";
-    String sql = ExternalizedQuery.getSql(queryBgFR);
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("KEY", bgId);
-    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    query.setParameter("COUNTRY", cmrIssuingCntry);
-    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
-    System.err.println("ISO: " + isoCntry);
-    query.setParameter("ISO_CNTRY", isoCntry);
-    query.setForReadOnly(true);
-
-    LOG.debug("Calculating SORTL using Netherlands query " + queryBgFR + " for key: " + bgId);
-    List<Object[]> results = query.getResults(5);
-    List<String> sortlList = new ArrayList<String>();
-    if (results != null && !results.isEmpty()) {
-      for (Object[] result : results) {
-        sortl = (String) result[3];
-        sortlList.add(sortl);
-        // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
-      }
-    }
-    sortl = sortlList.get(0);
-    return sortl;
-  }
 
   private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
     String sortl = "";
