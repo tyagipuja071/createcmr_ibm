@@ -516,6 +516,8 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
             queue.setProcStatus(STATUS_ERROR);
             queue.setProcMsg(errMessage);
             LOG.debug("GCARS - Encountered an error : " + errMessage);
+            updateEntity(queue, entityManager);
+            LOG.debug("GCARS - Queue Updated with error message: " + errMessage);
           } else if (needToUpdate && !hasError) {
             record.setUpdatedBy(GCARS_USER);
             record.setUpdateDt(ts);
@@ -523,13 +525,15 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
             LOG.debug("GCARS - KUNNR " + record.getId().getKunnr() + " for CMR No. " + queue.getId().getCmrNo() + " successfully processed.");
             queue.setProcStatus(STATUS_COMPLETED);
             queue.setProcMsg("Successfully processed");
+            updateEntity(queue, entityManager);
+            LOG.debug("GCARS - Queue Updated with kunnr: " + errMessage);
           } else {
             queue.setProcStatus(STATUS_NOT_REQUIRED);
             queue.setProcMsg("Not Required");
+            updateEntity(queue, entityManager);
             LOG.debug("GCARS - No changes required for KUNNR " + record.getId().getKunnr() + " and CMR No. " + queue.getId().getCmrNo());
           }
 
-          updateEntity(queue, entityManager);
         } catch (Exception e) {
           LOG.debug("Error when processing queue record " + queue.getFileName() + "-" + queue.getId().getSeqNo(), e);
           queue.setProcMsg("Error in processing: " + e.getMessage());
