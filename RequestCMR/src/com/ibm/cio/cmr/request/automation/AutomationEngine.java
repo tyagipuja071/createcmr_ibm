@@ -331,6 +331,10 @@ public class AutomationEngine {
       lastElementIndex++;
     }
 
+    if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
+      checkNZBNAPI(stopExecution, actionsOnError);
+    }
+
     LOG.debug("Automation elements executed for Request " + reqId);
 
     Admin admin = requestData.getAdmin();
@@ -614,6 +618,30 @@ public class AutomationEngine {
     entityManager.merge(admin);
     entityManager.flush();
     LOG.debug("Automation engine for Request " + reqId + " finished");
+  }
+
+  /**
+   * Check the NZBN API and DNB result to judge new result
+   * 
+   * @param boolean
+   *          stopExecution
+   * @param List<ActionOnError>
+   *          actionsOnError
+   * @return
+   * @throws @throws
+   */
+  private void checkNZBNAPI(boolean stopExecution, List<ActionOnError> actionsOnError) {
+    if (engineData.get().isNZBNAPICheck()
+        && (engineData.get().getPendingChecks().containsKey("DnBMatch") || engineData.get().getPendingChecks().containsKey("DNBCheck"))) {
+      stopExecution = false;
+      if (engineData.get().getPendingChecks().containsKey("DnBMatch")) {
+        engineData.get().getPendingChecks().remove("DnBMatch");
+        if (actionsOnError != null && actionsOnError.size() > 0)
+          actionsOnError.remove(0);
+      }
+      if (engineData.get().getPendingChecks().containsKey("DNBCheck"))
+        engineData.get().getPendingChecks().remove("DNBCheck");
+    }
   }
 
   /**

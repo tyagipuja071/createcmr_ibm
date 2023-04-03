@@ -419,6 +419,11 @@
                   <cmr:info text="${ui.info.NordicsForSEVat}" />
                 </span>
               </c:if>
+              <c:if test="${reqentry.cmrIssuingCntry == '796'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NZBNForVat}" />
+                </span>
+              </c:if>
           </label>
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
         </p>
@@ -474,6 +479,17 @@
             </cmr:label>
           </p>
         </cmr:column>
+    </cmr:view>
+    <cmr:view forCountry="796">
+      <cmr:column span="1" containerForField="VATExempt">
+        <p>
+        <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+        <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
+        <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
+            <cmr:fieldLabel fieldId="VATExempt" />
+            <cmr:delta text="${rdcdata.vatExempt}" oldValue="${reqentry.vatExempt == 'Y' ? 'Yes' : 'No'}" />
+        </cmr:label>
+      </cmr:column>
     </cmr:view>
     <div id="vatRegisterStatus"> 
       <cmr:view forCountry="834">

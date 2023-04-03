@@ -1209,10 +1209,10 @@ public class LegacyDirectUtil {
     /*
      * fields covered
      */
-    // �?Fiscal code >> NEW_ENTP_NAME1
-    // �?Vat# >> VAT
-    // �?Intent. Cliente >> OUT_CITY_LIMIT
-    // �?Enterprise number >> ENTERPRISE
+    // • Fiscal code >> NEW_ENTP_NAME1
+    // • Vat# >> VAT
+    // • Intent. Cliente >> OUT_CITY_LIMIT
+    // • Enterprise number >> ENTERPRISE
     if (!StringUtils.isBlank(muData.getNewEntpName1()) || !StringUtils.isBlank(muData.getVat()) || !StringUtils.isBlank(muData.getOutCityLimit())
         || !StringUtils.isBlank(muData.getEnterprise())) {
       isITCompanyLevelMassUpdateEnabled = true;
