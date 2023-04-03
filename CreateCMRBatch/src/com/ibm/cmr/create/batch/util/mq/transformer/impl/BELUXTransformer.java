@@ -965,7 +965,6 @@ public class BELUXTransformer extends EMEATransformer {
      */
 
   }
-
   @Override
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) { // default
     LOG.debug("Mapping default Data values..");

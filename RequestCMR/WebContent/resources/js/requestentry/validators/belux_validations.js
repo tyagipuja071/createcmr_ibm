@@ -654,7 +654,6 @@ function addBeIsuHandler() {
     } else {
       FormManager.setValue('clientTier', '');
     }
-
     if (reqType == 'Processor') {
       FormManager.enable('commercialFinanced');
     }
@@ -2303,6 +2302,13 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.BELUX);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.BELUX, null, true);
+  GEOHandler.registerValidator(beluxSortlValidator, GEOHandler.BELUX, null, true);
+  GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.BELUX);
+  GEOHandler.addAfterConfig(lockFields, GEOHandler.BELUX);
+  GEOHandler.addAfterConfig(saveOldIsuCtc, GEOHandler.BELUX);
+  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, GEOHandler.BELUX);
+  GEOHandler.addAfterConfig(addBeIsuHandler, GEOHandler.BELUX);
 
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.BELUX, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX);

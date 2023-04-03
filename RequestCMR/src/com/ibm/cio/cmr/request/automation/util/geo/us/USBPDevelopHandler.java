@@ -310,8 +310,9 @@ public class USBPDevelopHandler extends USBPHandler {
       details.append(" - Dept/Attn: -----DEVELOPEMENT-----\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "-----DEVELOPMENT-----");
     }
-    //details.append(" - Restricted Ind: Y\n");
-    //overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
+    // details.append(" - Restricted Ind: Y\n");
+    // overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA",
+    // "RESTRICT_IND", data.getRestrictInd(), "Y");
     details.append(" - Restricted to: BPQS\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "BPQS");
     details.append(" - BP Account Type: " + "D" + "\n");

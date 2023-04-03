@@ -6,7 +6,6 @@ function afterConfigKR() {
   var reqType = null;
   var _isuHandler = null;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-
   
   _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     getIsuFromIsic();

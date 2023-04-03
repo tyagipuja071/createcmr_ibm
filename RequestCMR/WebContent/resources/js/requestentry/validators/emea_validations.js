@@ -568,6 +568,7 @@ function afterConfigForUKI() {
   if (_isuCdHandlerIE == null && FormManager.getField('isuCd') && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
     _isuCdHandlerIE = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierBasedOnIsuUKI();
+      lockIsuCtcUKI();
       setSboValueBasedOnIsuCtcIE(value);
     });
   }
