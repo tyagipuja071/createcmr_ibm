@@ -95,6 +95,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     $scope.cmrNo = crit.cmrNo;
     $scope.highMatchGrade = false
     $scope.records = [];
+    $scope.searched = false;
     cmr.showProgress('Searching for records, please wait..');
     $scope.allowByModel = true;
     $scope.hideLocalLangData = false;
