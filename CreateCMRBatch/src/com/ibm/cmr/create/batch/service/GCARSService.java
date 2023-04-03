@@ -479,31 +479,33 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
             String gcarsCodreas = queue.getCodRsn() != null ? queue.getCodRsn() : "";
             String sourceName = queue.getId().getSourceName() != null ? queue.getId().getSourceName() : "";
 
-            if (!StringUtils.isBlank(gcarsCodcond)) {
-              if (!gcarsCodcond.equals(kna1Codcond)) {
-                createChangeLog(entityManager, record, queue, ts, "AD_BILLING", "CODCOND", record.getCodCondition(), queue.getCodCondition());
-                record.setCodCondition(gcarsCodcond);
-                needToUpdate = true;
-              }
-            }
+            if (!StringUtils.isBlank(sourceName) && sourceName.length() > 8) {
+              String sourceSubStr = sourceName.substring(0, 8);
+              LOG.debug("GCARS validate source name");
+              if (sourceSubStr.equals("XCARR08E")) {
+                if (!StringUtils.isBlank(gcarsCodcond)) {
+                  if (!gcarsCodcond.equals(kna1Codcond)) {
+                    createChangeLog(entityManager, record, queue, ts, "AD_BILLING", "CODCOND", record.getCodCondition(), queue.getCodCondition());
+                    record.setCodCondition(gcarsCodcond);
+                    needToUpdate = true;
+                  }
+                }
 
-            if (!StringUtils.isBlank(gcarsCodreas)) {
-              if (!gcarsCodreas.equals(kna1Codreas)) {
-                createChangeLog(entityManager, record, queue, ts, "AD_BILLING", "CODREAS", record.getCodReason(), queue.getCodRsn());
-                record.setCodReason(gcarsCodreas);
-                needToUpdate = true;
+                if (!StringUtils.isBlank(gcarsCodreas)) {
+                  if (!gcarsCodreas.equals(kna1Codreas)) {
+                    createChangeLog(entityManager, record, queue, ts, "AD_BILLING", "CODREAS", record.getCodReason(), queue.getCodRsn());
+                    record.setCodReason(gcarsCodreas);
+                    needToUpdate = true;
+                  }
+                }
+              } else {
+                errMessage = "Invalid source name " + sourceName + " for CMR No. " + queue.getId().getCmrNo();
+                hasError = true;
               }
-            }
-
-            if (!StringUtils.isBlank(sourceName) && !sourceName.contains("XCARR08E")) {
-              errMessage = "Invalid source name " + sourceName + " for CMR No. " + queue.getId().getCmrNo();
-              needToUpdate = false;
-              hasError = true;
             }
 
           } else {
             errMessage = "Records for CMR No. " + queue.getId().getCmrNo() + " not found.";
-            needToUpdate = false;
             hasError = true;
           }
 
