@@ -1001,4 +1001,55 @@ public class RequestEntryController extends BaseController {
     }
     return mv;
   }
+
+  /**
+   * Processing DNB and NZAPI check for NZ update request
+   * 
+   * @param request
+   * @param response
+   * @param model
+   * @return
+   * @throws Exception
+   */
+  @RequestMapping(value = "/request/dnb/checkDNBAPIMatchUpdateForNZ")
+  public ModelMap checkIfCustNmMatchesUpdateForNZ(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
+    ModelMap map = new ModelMap();
+    try {
+      String reqIdString = request.getParameter("reqId");
+      long reqId = reqIdString != null ? Long.parseLong(reqIdString) : 0L;
+      String regex = "\\s+$";
+      String businessNumber = request.getParameter("businessNumber").replaceAll(regex, "");
+      map = service.isDnBAPIMatchAddrsUpdateNZ(model, reqId, businessNumber);
+    } catch (Exception e) {
+      LOG.error("Error occured in D&B matching", e);
+      map.put("success", false);
+    }
+    return map;
+  }
+
+  /**
+   * Processing DNB and NZAPI check for NZ create request
+   * 
+   * @param request
+   * @param response
+   * @param model
+   * @return
+   * @throws Exception
+   */
+  @RequestMapping(value = "/request/dnb/checkDNBAPIMatchForNZ")
+  public ModelMap checkIfCustNmMatchesCreateForNZ(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
+    ModelMap map = new ModelMap();
+    try {
+      String reqIdString = request.getParameter("reqId");
+      long reqId = reqIdString != null ? Long.parseLong(reqIdString) : 0L;
+      String regex = "\\s+$";
+      String businessNumber = request.getParameter("businessNumber").replaceAll(regex, "");
+      map = service.isDnBAPIMatchForNZCreate(model, reqId, businessNumber);
+    } catch (Exception e) {
+      LOG.error("Error occured in D&B / NZBN API matching", e);
+      map.put("success", false);
+    }
+    return map;
+  }
+
 }

@@ -69,7 +69,14 @@ public class FieldComputationElement extends OverridingElement {
       log.debug("Error On Field Calculation");
       // engineData.addRejectionComment(result.getResults());
       results = result;
-      if (result.getResults() != null && "Requester check fail".equals(result.getResults())) {
+
+      // CREATCMR-8430: don't set PRJ status for NZBN Check.
+      Data data = requestData.getData();
+      if ("796".equals(data.getCmrIssuingCntry()) && result.getResults() != null && "Request check failed".equals(result.getResults())) {
+        log.debug("For NZ -- to move to next step");
+        super.setStopOnError(false);
+        super.setActionOnError(ActionOnError.fromCode(""));
+      } else if (result.getResults() != null && "Requester check fail".equals(result.getResults())) {
         super.setStopOnError(true);
         super.setActionOnError(ActionOnError.fromCode("R"));
       }
