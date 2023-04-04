@@ -455,6 +455,10 @@ public abstract class APHandler extends GEOHandler {
           setAbbrevNM(data, "MARKETPLACE");
         } else if ("SOFT".equalsIgnoreCase(data.getCustSubGrp()) || "XSOFT".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "SOFTLAYER USE ONLY");
+        } else if ("AQSTN".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "Acquisition Use Only");
+        } else if ("ESOSW".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "ESA Use Only");
         } else {
           setAbbrevNM(data, addr.getCustNm1());
         }

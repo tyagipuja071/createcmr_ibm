@@ -980,7 +980,7 @@ function autoSetAbbrevNmLocnLogic() {
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
         _abbrevNm = "SOFTLAYER USE ONLY";
       } else if (custSubGrp == "ESOSW" || custSubGrp == "XESO") {
-        _abbrevNm = "ESA/OEM/SWG_" + custNm1;
+        _abbrevNm = "ESA Use Only";
       } else if (custSubGrp == "AQSTN") {
         _abbrevNm ="Acquisition Use Only";
       } else {
@@ -2349,9 +2349,10 @@ function lockFieldsForIndia(){
   if (reqType == 'C'  && custSubGrp == 'KYNDR'){
     FormManager.readOnly('inacType');
   }
-  
-  
- 
+// CREATCMR-8755
+  if (role == 'REQUESTER' && (custSubGrp =='AQSTN' || custSubGrp =='ESOSW' || custSubGrp =='BLUMX' || custSubGrp =='MKTPC' || custSubGrp =='IGF')) {
+    FormManager.readOnly('abbrevNm');
+  }
 }
 
 
