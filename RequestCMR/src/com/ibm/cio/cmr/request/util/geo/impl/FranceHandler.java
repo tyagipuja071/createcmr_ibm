@@ -143,7 +143,9 @@ public class FranceHandler extends GEOHandler {
             if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(tempRec.getExtWalletId())) {
               tempRec.setCmrAddrTypeCode("PG01");
             }
-            recordsToReturn.add(tempRec);
+            if (!CmrConstants.ADDR_TYPE.ZLST.toString().equals(tempRec.getCmrAddrTypeCode())) {
+              recordsToReturn.add(tempRec);
+            }
           }
         }
       }
