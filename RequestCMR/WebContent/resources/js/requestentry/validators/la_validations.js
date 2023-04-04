@@ -291,17 +291,28 @@ function autoSetSBOAndSalesTMNo() {
         FormManager.setValue('repTeamMemberNo', '010200');
         FormManager.setValue('salesBusOffCd', '010');
         FormManager.readOnly('repTeamMemberNo');
-        FormManager.readOnly('salesBusOffCd');
+        if (role == 'REQUESTER') {
+          FormManager.readOnly('salesBusOffCd');
+        }  else {
+          FormManager.enable('salesBusOffCd');
+        }
 
         FormManager.setValue('crosTyp', '9');
         console.log(">>> Process repTeamMemberNo >> " + FormManager.getActualValue('repTeamMemberNo'));
         console.log(">>> Process salesBusOffCd >> " + FormManager.getActualValue('salesBusOffCd'));
       }
-      if (_custType == 'BUSPR') {
-        FormManager.setValue('salesBusOffCd', '606');
-        FormManager.readOnly('salesBusOffCd');
+      if (_custType == 'BUSPR' || _custType == 'BUSPR' || _custType == 'PRIPE' || _custType == 'IBMEM') {
+        FormManager.setValue('salesBusOffCd', '461');
+        if (role == 'REQUESTER') {
+          FormManager.readOnly('salesBusOffCd');
+          FormManager.readOnly('mrcCd');
+          FormManager.readOnly('isuCd');
+        } else {
+          FormManager.enable('salesBusOffCd');
+          FormManager.enable('mrcCd');
+          FormManager.enable('isuCd');
+        }
         console.log(">>> Process salesBusOffCd >> " + FormManager.getActualValue('salesBusOffCd'));
-
       }
       /* #1355290 */
       if (_custType == 'BUSPR' || _custType == 'CC3CC' || _custType == 'COMME' || _custType == 'CROSB' || _custType == 'INTER' || _custType == 'LEASI' || _custType == 'SOFTL' || _custType == 'IBMEM'
@@ -544,6 +555,7 @@ function afterConfigForLA() {
       autoSetIcmsFieldForCrossBR();
       resetIbmBankNumber();
       autoSetFieldsForCustScenariosSSAMX();
+      autoSetFieldsForCustScenariosBR();
       setCrosTypSubTypSSAMXOnSecnarios();
       setAbbrevNameRequiredForProcessors();
       setMrcCdToReadOnly();
@@ -2695,6 +2707,12 @@ function setMrcCdToReadOnly() {
     if((custSubGrp == 'CROSS' || custSubGrp == 'XLEAS') && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR' || _custType == 'INTER' )) {
       if (role == 'REQUESTER') {
         FormManager.readOnly('mrcCd');
+        FormManager.readOnly('salesBusOffCd');
+        FormManager.readOnly('isuCd');
+      } else {
+        FormManager.enable('mrcCd');
+        FormManager.enable('salesBusOffCd');
+        FormManager.enable('isuCd');
       }
     }
   }
@@ -2980,6 +2998,33 @@ function setSortlValuesForUser(fromAddress, scenario, scenarioChanged) {
   }
 }
 
+function autoSetFieldsForCustScenariosBR() {
+  console.log('autoSetFieldsForCrossScenario br : processing. . .');
+  var _custSubGrp = FormManager.getActualValue('custSubGrp');
+  var _reqType = FormManager.getActualValue('reqType');
+  var _cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var _custType = FormManager.getActualValue('custType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (_cmrCntry == SysLoc.BRAZIL && _reqType == 'C') {
+    if(_custSubGrp == 'CROSS' && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR')) {
+      FormManager.setValue(FormManager.getField('salesBusOffCd'), '461');
+      if (role == 'REQUESTER') {
+        FormManager.readOnly('salesBusOffCd');
+        FormManager.readOnly('mrcCd');
+        FormManager.readOnly('isuCd');        
+      } else {
+        FormManager.readOnly('salesBusOffCd');
+        FormManager.readOnly('mrcCd');
+        FormManager.readOnly('isuCd'); 
+      }
+    }
+  }
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -3074,5 +3119,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSortlValuesForUser, GEOHandler.LA);
   GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
+  GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
   
 });
