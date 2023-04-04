@@ -140,11 +140,21 @@ var GEOHandler = (function() {
 
   var nameAddressType = 'ZS01';
 
+  var forceLockUnlock = function() {
+    console.log(">>>> forceLockUnlock");
+    if (FormManager.getField('MAIN_GENERAL_TAB')) {
+      FormManager.readOnly('cmrIssuingCntry');
+      FormManager.readOnly('reqType');
+    }
+  }
+
   var getCMRIssuingCountry = function() {
+    console.log(">>>> getCMRIssuingCountry");
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     if (cntry == '' && typeof (_pagemodel) != 'undefined') {
       cntry = _pagemodel.cmrIssuingCntry;
     }
+    forceLockUnlock();
     return cntry;
   };
 
@@ -246,6 +256,7 @@ var GEOHandler = (function() {
     },
 
     executeAfterConfigs : function() {
+      forceLockUnlock();
       if (dojo.byId("reqId").value == '0' && !_forceExecuteAfterConfigs) {
         console.log('skipping after configurations for new request..');
         return;
