@@ -188,6 +188,10 @@ dojo.addOnLoad(function(){
                 <cmr:button label="View Pending Requests" onClick="goToUrl('${contextPath}/workflow/open')" highlight="false" pad="true" />
               </div>
               <div class="home-btn">
+              <span>If you want to quickly search for an existing record in the IBM or D&B databases:</span>
+              <input class="ibm-btn-small cmr-quick-search-btn-horizontal" type="button" value="Quick Search" onclick="openQuickSearch()" title="Quick Search">
+               </div>
+              <div class="home-btn">
                 You can also check out some <strong><a href="https://w3.ibm.com/w3publisher/cmde-cmr/tutorials/createcmr-tutorials" target="_blank">tutorials</a></strong> from the 
                 CMDE site for more information on how to create/update CMRs or watch a <strong><a href="https://video.ibm.com/embed/recorded/131988262" target="_blank">live demo</a></strong> of the tool.
               </div>
