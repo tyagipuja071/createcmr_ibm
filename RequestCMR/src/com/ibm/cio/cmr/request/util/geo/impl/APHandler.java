@@ -123,6 +123,11 @@ public abstract class APHandler extends GEOHandler {
                       record.setCmrAddrTypeCode(supportedAddrType);
                   }
                   record.setCmrAddrSeq(wtaasAddress.getAddressNo());
+                  
+                  if ("MAIL".equals(record.getCmrAddrTypeCode())) {
+                      continue;
+                    }
+                  
                   if (shouldAddWTAASAddess(record.getCmrIssuedBy(), wtaasAddress)) {
                     converted.add(record);
                   }
