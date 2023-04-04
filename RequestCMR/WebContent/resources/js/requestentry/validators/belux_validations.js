@@ -749,15 +749,16 @@ function setVatValidatorBELUX() {
     if (custSubGrp.includes('IBM')) {
       FormManager.readOnly('vat');
     }
-    /*if (dijit.byId('vatExempt').get('checked')) {
-      FormManager.clearValue('vat');
-    }*/
+    /*
+     * if (dijit.byId('vatExempt').get('checked')) {
+     * FormManager.clearValue('vat'); }
+     */
     // if (!dijit.byId('vatExempt').get('checked')) {
-  /*  if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
-      // checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-      FormManager.enable('vat');
-    }
-*/  }
+    /*
+     * if (undefined != dijit.byId('vatExempt') &&
+     * !dijit.byId('vatExempt').get('checked')) { // checkAndAddValidator('vat',
+     * Validators.REQUIRED, [ 'VAT' ]); FormManager.enable('vat'); }
+     */}
 
 }
 
@@ -2302,13 +2303,6 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.BELUX);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.BELUX, null, true);
-  GEOHandler.registerValidator(beluxSortlValidator, GEOHandler.BELUX, null, true);
-  GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.BELUX);
-  GEOHandler.addAfterConfig(lockFields, GEOHandler.BELUX);
-  GEOHandler.addAfterConfig(saveOldIsuCtc, GEOHandler.BELUX);
-  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, GEOHandler.BELUX);
-  GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, GEOHandler.BELUX);
-  GEOHandler.addAfterConfig(addBeIsuHandler, GEOHandler.BELUX);
 
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.BELUX, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX);
@@ -2318,4 +2312,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(lockFields, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(saveOldIsuCtc, GEOHandler.BELUX);
+
 });
