@@ -5,7 +5,7 @@ function afterConfigKR() {
   var role = null;
   var reqType = null;
   var _isuHandler = null;
-
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   
   _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     getIsuFromIsic();
@@ -430,9 +430,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('contactName2');
     FormManager.readOnly('contactName3');
-    if (custSubGrp != 'INTER') {
-      FormManager.readOnly('cmrNoPrefix');
-    }
+    FormManager.readOnly('cmrNoPrefix');
     FormManager.readOnly('bgId');
     FormManager.readOnly('gbgId');
     FormManager.readOnly('bgRuleId');
@@ -589,9 +587,9 @@ function setSearchTermDropdownValues() {
 }
 
 function LockDefaultISUClientTierMrcValues() {
-//  FormManager.setValue('clientTier','');
-//  FormManager.setValue('isuCd','');
-//  FormManager.setValue('mrcCd','');
+// FormManager.setValue('clientTier','');
+// FormManager.setValue('isuCd','');
+// FormManager.setValue('mrcCd','');
   var searchTerm = FormManager.getActualValue('searchTerm');
   var clientTier = FormManager.getField('clientTier');
   if (searchTerm == "00003") {

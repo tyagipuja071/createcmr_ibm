@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -64,7 +65,8 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_BP_LOCAL_LU = "LUBUS";
   public static final String SCENARIO_DATA_CENTER_LU = "LUDAT";
   public static final String SCENARIO_IBMEM_LU = "LUIBM";
-
+  private static final String QUERY_BG_SBO_BENELUX = "AUTO.COV.GET_COV_FROM_BG_ES_UK";
+  
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO, CmrConstants.RDC_PAYGO_BILLING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone #");
@@ -154,8 +156,8 @@ public class BeLuxUtil extends AutomationUtil {
           String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
           person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
           if (person == null) {
-            engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-            details.append("Employee details not found in IBM BluePages.").append("\n");
+            engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+            details.append("Employee details not found in IBM People.").append("\n");
             return false;
           } else {
             details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
@@ -192,7 +194,10 @@ public class BeLuxUtil extends AutomationUtil {
     Data data = requestData.getData();
     String gbgCntry = chkFrAffiliateCntry(engineData, requestData, entityManager);
     String cmrCntry = data.getCountryUse().length() == 3 ? "Belgium" : "Luxembourg";
-
+    String bgId = data.getBgId();
+    String commercialFin = "";
+    String coverageId = container.getFinalCoverage();
+    
     if (StringUtils.isNotBlank(gbgCntry) && cmrCntry.equalsIgnoreCase(gbgCntry)) {
       details.append("Coverage calculated for: " + gbgCntry).append("\n");
     } else if (StringUtils.isNotBlank(gbgCntry) && !cmrCntry.equalsIgnoreCase(gbgCntry)) {
@@ -215,7 +220,17 @@ public class BeLuxUtil extends AutomationUtil {
         }
         details.append("SBO calculated from Account Team: " + sbo);
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
-
+      }
+      details.append("\n");
+      if (isCoverageCalculated && StringUtils.isNotBlank(coverageId)) {
+        if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
+          commercialFin = computeSBOForCovBelux(entityManager, QUERY_BG_SBO_BENELUX, bgId, data.getCmrIssuingCntry(), false);
+        }
+        if (commercialFin != null && !commercialFin.isEmpty()) {
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "COMMERCIAL_FINANCED", data.getSalesBusOffCd(), commercialFin);
+          details.append("SORTL: " + commercialFin);
+        }
+        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
       }
     }
 
@@ -282,7 +297,33 @@ public class BeLuxUtil extends AutomationUtil {
     }
     return true;
   }
+  
+  private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
+    String sortl = "";
+    String sql = ExternalizedQuery.getSql(queryBgFR);
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KEY", bgId);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", cmrIssuingCntry);
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    System.err.println("ISO: " + isoCntry);
+    query.setParameter("ISO_CNTRY", isoCntry);
+    query.setForReadOnly(true);
 
+    LOG.debug("Calculating SORTL using Belgium query " + queryBgFR + " for key: " + bgId);
+    List<Object[]> results = query.getResults(5);
+    List<String> sortlList = new ArrayList<String>();
+    if (results != null && !results.isEmpty()) {
+      for (Object[] result : results) {
+        sortl = (String) result[3];
+        sortlList.add(sortl);
+        // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
+      }
+    }
+    sortl = sortlList.get(0);
+    return sortl;
+  }
+  
   private String chkFrAffiliateCntry(AutomationEngineData engineData, RequestData reqData, EntityManager entityManager) {
     GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
     String gbgCntry = "";
