@@ -119,6 +119,8 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
           console.log('>>Enabled/Disabled Create by model for Sub-Region.');
           var subCntry = FormManager.getActualValue('issuingCntry');
           var mainCntry = null;
+          $scope.recordsDnb = [];
+          $scope.recordsCmr = [];
           if (subCntry.length > 3) {
             mainCntry = subCntry.substr(0, 3);
             var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {
@@ -157,10 +159,14 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
               if (item.altCity) {
                 item.altCity = item.altCity.replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, '');
               }
-
+            }
+            if (item.recType == 'DNB') {
+              $scope.recordsDnb.push(item);
+            } else if (item.recType == 'CMR') {
+              $scope.recordsCmr.push(item);
             }
           });
-          $scope.records = data.items;
+          $scope.records = $scope.recordsCmr.concat($scope.recordsDnb);
           $scope.searched = true;
           $scope.$apply();
         }
