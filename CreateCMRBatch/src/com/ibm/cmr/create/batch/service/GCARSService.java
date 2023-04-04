@@ -458,81 +458,71 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       for (GCARSUpdtQueue queue : list) {
         Timestamp ts = SystemUtil.getActualTimestamp();
         boolean needToUpdate = false;
-        boolean hasError = false;
-        String errMessage = "";
-        queue.setUpdatedBy(GCARS_USER);
-        queue.setUpdateDt(ts);
+
         try {
-          String sql = ExternalizedQuery.getSql("GCARS.GET_RECORDS.RDC");
-          PreparedQuery query = new PreparedQuery(entityManager, sql);
-          query.setParameter("ZZKV_CUSNO", queue.getId().getCmrNo());
-          query.setParameter("KATR6", queue.getId().getCmrIssuingCntry());
-          query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-          LOG.debug("GCARS Retrieve Kna1AddlBilling)");
-          Kna1AddlBilling record = query.getSingleResult(Kna1AddlBilling.class);
+          String sourceName = queue.getId().getSourceName() != null ? queue.getId().getSourceName() : "";
+          String srcNm = !StringUtils.isBlank(sourceName) && sourceName.length() > 8 ? sourceName.substring(0, 8) : sourceName;
 
-          if (record != null) {
-            // compare kna1billing vs flat file
-            String kna1Codcond = record.getCodCondition() != null ? record.getCodCondition() : "";
-            String kna1Codreas = record.getCodReason() != null ? record.getCodReason() : "";
-            String gcarsCodcond = queue.getCodCondition() != null ? queue.getCodCondition() : "";
-            String gcarsCodreas = queue.getCodRsn() != null ? queue.getCodRsn() : "";
-            String sourceName = queue.getId().getSourceName() != null ? queue.getId().getSourceName() : "";
+          LOG.debug("GCARS BR- Validate Source Name if XCARR08E");
+          if (srcNm.equals("XCARR08E")) {
+            LOG.debug("GCARS BR- Pull Kna1AddlBilling");
+            String sql = ExternalizedQuery.getSql("GCARS.GET_RECORDS.RDC");
+            PreparedQuery query = new PreparedQuery(entityManager, sql);
+            query.setParameter("ZZKV_CUSNO", queue.getId().getCmrNo());
+            query.setParameter("KATR6", queue.getId().getCmrIssuingCntry());
+            query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+            Kna1AddlBilling record = query.getSingleResult(Kna1AddlBilling.class);
 
-            if (!StringUtils.isBlank(sourceName) && sourceName.length() > 8) {
-              String sourceSubStr = sourceName.substring(0, 8);
-              LOG.debug("GCARS validate source name");
-              if (sourceSubStr.equals("XCARR08E")) {
-                LOG.debug("Source name value is " + sourceSubStr);
-                if (!StringUtils.isBlank(gcarsCodcond)) {
-                  if (!gcarsCodcond.equals(kna1Codcond)) {
-                    createChangeLog(entityManager, record, queue, ts, "AD_BILLING", "CODCOND", record.getCodCondition(), queue.getCodCondition());
-                    record.setCodCondition(gcarsCodcond);
-                    needToUpdate = true;
-                  }
+            if (record != null) {
+              // Compare Kna1billing vs flat file
+              String kna1Codcond = record.getCodCondition() != null ? record.getCodCondition() : "";
+              String kna1Codreas = record.getCodReason() != null ? record.getCodReason() : "";
+              String gcarsCodcond = queue.getCodCondition() != null ? queue.getCodCondition() : "";
+              String gcarsCodreas = queue.getCodRsn() != null ? queue.getCodRsn() : "";
+
+              if (!StringUtils.isBlank(gcarsCodcond)) {
+                if (!gcarsCodcond.equals(kna1Codcond)) {
+                  createChangeLog(entityManager, record, queue, ts, "AD_BILLING", "CODCOND", record.getCodCondition(), queue.getCodCondition());
+                  record.setCodCondition(gcarsCodcond);
+                  needToUpdate = true;
                 }
-
-                if (!StringUtils.isBlank(gcarsCodreas)) {
-                  if (!gcarsCodreas.equals(kna1Codreas)) {
-                    createChangeLog(entityManager, record, queue, ts, "AD_BILLING", "CODREAS", record.getCodReason(), queue.getCodRsn());
-                    record.setCodReason(gcarsCodreas);
-                    needToUpdate = true;
-                  }
-                }
-              } else {
-                LOG.debug("Invalid source name " + sourceName + " for CMR No. " + queue.getId().getCmrNo());
-                errMessage = "Invalid source name " + sourceName + " for CMR No. " + queue.getId().getCmrNo();
-                hasError = true;
               }
+
+              if (!StringUtils.isBlank(gcarsCodreas)) {
+                if (!gcarsCodreas.equals(kna1Codreas)) {
+                  createChangeLog(entityManager, record, queue, ts, "AD_BILLING", "CODREAS", record.getCodReason(), queue.getCodRsn());
+                  record.setCodReason(gcarsCodreas);
+                  needToUpdate = true;
+                }
+              }
+
+              if (needToUpdate) {
+                record.setUpdatedBy(GCARS_USER);
+                record.setUpdateDt(ts);
+                updateEntity(record, entityManager);
+
+                LOG.debug("GCARS BR- KUNNR " + record.getId().getKunnr() + " for CMR No. " + queue.getId().getCmrNo() + " done.");
+                queue.setProcStatus(STATUS_COMPLETED);
+                queue.setProcMsg("Successfully processed");
+              } else {
+                LOG.debug("GCARS BR- No Changes Required for CMR No. " + queue.getId().getCmrNo());
+                queue.setProcStatus(STATUS_NOT_REQUIRED);
+                queue.setProcMsg("Not Required");
+              }
+            } else {
+              LOG.debug("GCARS BR- Records for CMR No. " + queue.getId().getCmrNo() + " not found.");
+              queue.setProcStatus(STATUS_ERROR);
+              queue.setProcMsg("Records for CMR No. " + queue.getId().getCmrNo() + " not found.");
             }
-
           } else {
-            LOG.debug("Records for CMR No. " + queue.getId().getCmrNo() + " not found.");
-            errMessage = "Records for CMR No. " + queue.getId().getCmrNo() + " not found.";
-            hasError = true;
-          }
-
-          if (hasError && StringUtils.isNotBlank(errMessage)) {
+            LOG.debug("GCARS BR- Invalid source name " + sourceName + " for CMR No. " + queue.getId().getCmrNo());
             queue.setProcStatus(STATUS_ERROR);
-            queue.setProcMsg(errMessage);
-            LOG.debug("GCARS - Encountered an error : " + errMessage);
-            updateEntity(queue, entityManager);
-            LOG.debug("GCARS - Queue Updated with error message: " + errMessage);
-          } else if (needToUpdate && !hasError) {
-            record.setUpdatedBy(GCARS_USER);
-            record.setUpdateDt(ts);
-            updateEntity(record, entityManager);
-            LOG.debug("GCARS - KUNNR " + record.getId().getKunnr() + " for CMR No. " + queue.getId().getCmrNo() + " successfully processed.");
-            queue.setProcStatus(STATUS_COMPLETED);
-            queue.setProcMsg("Successfully processed");
-            updateEntity(queue, entityManager);
-            LOG.debug("GCARS - Queue Updated with kunnr: " + errMessage);
-          } else {
-            queue.setProcStatus(STATUS_NOT_REQUIRED);
-            queue.setProcMsg("Not Required");
-            updateEntity(queue, entityManager);
-            LOG.debug("GCARS - No changes required for KUNNR " + record.getId().getKunnr() + " and CMR No. " + queue.getId().getCmrNo());
+            queue.setProcMsg("Invalid source name " + sourceName + " for CMR No. " + queue.getId().getCmrNo());
           }
+
+          queue.setUpdatedBy(GCARS_USER);
+          queue.setUpdateDt(ts);
+          updateEntity(queue, entityManager);
 
         } catch (Exception e) {
           LOG.debug("Error when processing queue record " + queue.getFileName() + "-" + queue.getId().getSeqNo(), e);
