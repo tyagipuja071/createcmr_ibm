@@ -862,6 +862,16 @@ public class NLTransformer extends EMEATransformer {
         legacyCust.setEmbargoCd("");
       }
 
+      if (!StringUtils.isEmpty(data.getIsuCd())) {  
+        if (StringUtils.isEmpty(data.getClientTier())) {  
+          legacyCust.setIsuCd(data.getIsuCd() + "7"); 
+        } else if (!StringUtils.isEmpty(data.getClientTier())) {  
+          String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "") 
+              + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""); 
+          legacyCust.setIsuCd(isuClientTier); 
+        } 
+      } 
+      
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
       // CREATCMR-845
       legacyCust.setModeOfPayment(data.getModeOfPayment() == null ? "" : data.getModeOfPayment());
@@ -937,12 +947,16 @@ public class NLTransformer extends EMEATransformer {
       legacyCust.setMrcCd("3");
     }
     // CREATCMR-4293
-    if (!StringUtils.isEmpty(data.getIsuCd())) {
-      if (StringUtils.isEmpty(data.getClientTier())) {
-        legacyCust.setIsuCd(data.getIsuCd() + "7");
-      }
+    if (!StringUtils.isEmpty(data.getIsuCd())) {  
+      if (StringUtils.isEmpty(data.getClientTier())) {  
+        legacyCust.setIsuCd(data.getIsuCd() + "7"); 
+      } else if (!StringUtils.isEmpty(data.getClientTier())) {  
+        String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "") 
+            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""); 
+        legacyCust.setIsuCd(isuClientTier); 
+      } 
     }
-
+    
     List<String> isuCdList = Arrays.asList("5K", "15", "4A", "04", "28");
     if (!StringUtils.isEmpty(data.getIsuCd()) && isuCdList.contains(data.getIsuCd())) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
@@ -1023,8 +1037,10 @@ public class NLTransformer extends EMEATransformer {
       if (isuClientTier != null && isuClientTier.endsWith("@")) {
         cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
       } else if (isuClientTier.contains("@")) {
-        cust.setIsuCd("7");
-      }
+        cust.setIsuCd("7");  
+      } else if (isuClientTier != null && isuClientTier.length() == 3) {  
+        cust.setIsuCd(isuClientTier); 
+      } 
     }
 
     if (!StringUtils.isBlank(muData.getSearchTerm())) {
@@ -1303,7 +1319,6 @@ public class NLTransformer extends EMEATransformer {
 
     Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
     addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
-
     LOG.debug("LEGACY -- ME OVERRIDE transformOtherData");
     LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
     for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {

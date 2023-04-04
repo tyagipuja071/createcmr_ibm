@@ -1157,6 +1157,10 @@ function saveDisableProcSetting() {
  * field
  */
 function ensureCMRNoValue() {
+  if (FormManager.getField('MAIN_GENERAL_TAB')) {
+    cmr.hideProgress();
+  }
+
   if (FormManager.getActualValue('reqId') == '0') {
     return;
   }
