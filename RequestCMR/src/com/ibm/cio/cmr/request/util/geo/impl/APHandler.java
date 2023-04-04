@@ -124,7 +124,7 @@ public abstract class APHandler extends GEOHandler {
                   }
                   record.setCmrAddrSeq(wtaasAddress.getAddressNo());
                   
-                  if ("MAIL".equals(record.getCmrAddrTypeCode())) {
+                  if (("616".equals(reqEntry.getCmrIssuingCntry()) || "796".equals(reqEntry.getCmrIssuingCntry())) && "MAIL".equals(record.getCmrAddrTypeCode())) {
                       continue;
                     }
                   
