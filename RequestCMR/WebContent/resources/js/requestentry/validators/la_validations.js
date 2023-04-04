@@ -301,7 +301,7 @@ function autoSetSBOAndSalesTMNo() {
         console.log(">>> Process repTeamMemberNo >> " + FormManager.getActualValue('repTeamMemberNo'));
         console.log(">>> Process salesBusOffCd >> " + FormManager.getActualValue('salesBusOffCd'));
       }
-      if (_custType == 'BUSPR' || _custType == 'BUSPR' || _custType == 'PRIPE' || _custType == 'IBMEM') {
+      if (_custType == 'BUSPR' || _custType == 'PRIPE' || _custType == 'IBMEM') {
         FormManager.setValue('salesBusOffCd', '461');
         if (role == 'REQUESTER') {
           FormManager.readOnly('salesBusOffCd');
