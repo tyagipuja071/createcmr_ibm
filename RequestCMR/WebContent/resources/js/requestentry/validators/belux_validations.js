@@ -654,7 +654,6 @@ function addBeIsuHandler() {
     } else {
       FormManager.setValue('clientTier', '');
     }
-
     if (reqType == 'Processor') {
       FormManager.enable('commercialFinanced');
     }
@@ -750,15 +749,16 @@ function setVatValidatorBELUX() {
     if (custSubGrp.includes('IBM')) {
       FormManager.readOnly('vat');
     }
-    /*if (dijit.byId('vatExempt').get('checked')) {
-      FormManager.clearValue('vat');
-    }*/
+    /*
+     * if (dijit.byId('vatExempt').get('checked')) {
+     * FormManager.clearValue('vat'); }
+     */
     // if (!dijit.byId('vatExempt').get('checked')) {
-  /*  if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
-      // checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-      FormManager.enable('vat');
-    }
-*/  }
+    /*
+     * if (undefined != dijit.byId('vatExempt') &&
+     * !dijit.byId('vatExempt').get('checked')) { // checkAndAddValidator('vat',
+     * Validators.REQUIRED, [ 'VAT' ]); FormManager.enable('vat'); }
+     */}
 
 }
 
@@ -2312,4 +2312,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(lockFields, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(saveOldIsuCtc, GEOHandler.BELUX);
+
 });
