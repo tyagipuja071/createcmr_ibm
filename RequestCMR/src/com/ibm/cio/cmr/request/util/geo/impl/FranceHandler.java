@@ -386,8 +386,11 @@ public class FranceHandler extends GEOHandler {
               addrSeq = maxSeq + 1;
             }
           }
-          while (seqListRDC.contains(Integer.toString(addrSeq))) {
-            addrSeq++;
+          for (String rdcSeq : seqListRDC) {
+            if (Integer.parseInt(rdcSeq) >= 5 && Integer.parseInt(rdcSeq) < 9997 && seqListRDC.contains(rdcSeq)) {
+              addrSeq = Integer.parseInt(rdcSeq);
+              addrSeq++;
+            }
           }
         }
       }
