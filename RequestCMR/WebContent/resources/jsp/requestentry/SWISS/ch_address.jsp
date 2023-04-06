@@ -170,7 +170,7 @@
 	</cmr:column>
 	
 	<!-- Preferred Language for Swiss -->
-	<cmr:column span="2" containerForField="CustLangCd">
+	<cmr:column span="2">
 		<p>
 			<cmr:label fieldId="custLangCd">
 				<cmr:fieldLabel fieldId="CustLangCd" />:
