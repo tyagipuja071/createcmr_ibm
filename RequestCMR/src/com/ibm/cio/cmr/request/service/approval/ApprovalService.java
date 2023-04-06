@@ -504,9 +504,19 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     boolean approvalsRej = queryRej.exists();
     if (approvalsRej) {
       admin.setReqStatus("AUT");
+    } else if (isConditionApprovalCN(entityManager, admin.getId().getReqId())) {
+      admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
     } else {
       admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
     }
+  }
+
+  private boolean isConditionApprovalCN(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("APPROVAL.CHECKIFCONDAPPROVED");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    return query.exists();
   }
 
   /**
