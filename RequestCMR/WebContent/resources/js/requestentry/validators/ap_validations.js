@@ -470,10 +470,8 @@ function setInacByCluster() {
       setInacCdTypeStatus();
     } else {
       console.log('>>>> setInacByCluster ELSE scenario >>>>');
-      if (cntry != '744') {
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
       FormManager.removeValidator('inacType', Validators.REQUIRED);
-      }
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       updateMRCAseanAnzIsa();
@@ -1116,15 +1114,6 @@ function onCustSubGrpChange() {
     setISBUScenarioLogic();
     autoSetAbbrevNmLocnLogic();
     setCollectionCd();
-    
-    // CREATCMR-7885
- // CREATCMR-7878
-    if(FormManager.getActualValue('cmrIssuingCntry') == '834' || FormManager.getActualValue('cmrIssuingCntry') == '615' || FormManager.getActualValue('cmrIssuingCntry') == '652'){
-      console.log('No need to reset isuCd for 834/SG >>>>');
-    } else {
-      resetFieldsAfterCustSubGrpChange();
-    }
-    
     
   });
 }
