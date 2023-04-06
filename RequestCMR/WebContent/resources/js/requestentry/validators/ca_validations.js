@@ -590,7 +590,6 @@ function afterConfigForCA() {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('cmrNo');
   }
-
   addFieldHandlers();
 
   if ('U' == FormManager.getActualValue('reqType')) {
@@ -750,19 +749,25 @@ function addPSTExemptHandler() {
 }
 
 function setIsuCtcFor5k() {
-  isuCd = FormManager.getActualValue('isuCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var isuCd = FormManager.getActualValue('isuCd');
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (viewOnlyPage == 'true') {
     return;
   }
-  if (custSubGrp == 'ECO') {
-    FormManager.readOnly('isuCd');
-    FormManager.setValue('isuCd', '36');
-  }
   if (isuCd == '5K' || (custSubGrp == 'IBME' && isuCd == '21')) {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
+  } else if (custSubGrp == 'ECO' && (role == 'REQUESTER')) {
+    FormManager.readOnly('isuCd');
+    FormManager.setValue('isuCd', '36');
+    FormManager.setValue('clientTier', 'Y');
+  } else if (custSubGrp == 'ECO' && role == 'PROCESSOR') {
+    FormManager.setValue('isuCd', '36');
+    FormManager.enable('isuCd');
+    FormManager.setValue('clientTier', 'Y');
   } else {
     var reqType = FormManager.getActualValue('reqType');
     FormManager.enable('clientTier');
