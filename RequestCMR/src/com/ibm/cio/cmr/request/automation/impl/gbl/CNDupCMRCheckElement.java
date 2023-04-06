@@ -2143,6 +2143,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       // 2, check FindCMR in case legal hierarchy not run yet
       if (cmrMatches.isEmpty()) {
         if (!StringUtils.isEmpty(socialCreditCode)) {
+          // 2.1.1 check FindCMR using duns
           List<FindCMRRecordModel> cnNameFindCMRs = checkFindCMRViaDuns(allDuns.get(0), "641", "CN");
           for (FindCMRRecordModel tempCmr : cnNameFindCMRs) {
             if (!isIncludedCmr(tempCmr, cmrMatches)) {
@@ -2151,7 +2152,16 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
               }
             }
           }
+
+          // 2.1.2 check FindCMR using CN name
+          cnNameFindCMRs = checkFindCMRViaCNName(localName, "641", "CN");
+          for (FindCMRRecordModel tempCmr : cnNameFindCMRs) {
+            if (!isIncludedCmr(tempCmr, cmrMatches)) {
+              cmrMatches.add(tempCmr);
+            }
+          }
         } else {
+          // 2.2 check FindCMR using CN name
           List<FindCMRRecordModel> cnNameFindCMRs = checkFindCMRViaCNName(localName, "641", "CN");
           for (FindCMRRecordModel tempCmr : cnNameFindCMRs) {
             if (!isIncludedCmr(tempCmr, cmrMatches)) {
@@ -2254,29 +2264,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
     if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
       List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
-      String biggestRevenue = getBiggestRevenue(cmrs);
       for (FindCMRRecordModel cmrsMods : cmrs) {
-        if (biggestRevenue.equals(cmrsMods.getCmrRevenue())) {
-          outputCmrs.add(cmrsMods);
-        }
         outputCmrs.add(cmrsMods);
       }
     }
     return outputCmrs;
-  }
-
-  private String getBiggestRevenue(List<FindCMRRecordModel> cmrs) {
-    String biggestRevenueStr = "";
-    float biggestRevenue = 0;
-    float revenue = 0;
-    for (FindCMRRecordModel cmr : cmrs) {
-      revenue = cmr.getCmrRevenueNumber();
-      if (revenue - biggestRevenue > 0) {
-        biggestRevenue = revenue;
-        biggestRevenueStr = cmr.getCmrRevenue();
-      }
-    }
-    return biggestRevenueStr;
   }
 
   private List<FindCMRRecordModel> checkFindCMRViaCNName(String localName, String issuingCntry, String landedCountry) throws Exception {
