@@ -336,10 +336,10 @@ public class FranceHandler extends GEOHandler {
       query.setParameter("REQ_ID", reqId);
 
       List<Object[]> resultsCMR = query.getResults();
+      List<String> seqListCMR = new ArrayList<String>();
       int maxSeq = 0;
       if (resultsCMR != null && resultsCMR.size() > 0) {
         boolean seqExistCMR = false;
-        List<String> seqListCMR = new ArrayList<String>();
         // Get create cmr seq list
         for (int i = 0; i < resultsCMR.size(); i++) {
           String item = String.valueOf(resultsCMR.get(i));
@@ -365,6 +365,8 @@ public class FranceHandler extends GEOHandler {
         }
       }
       if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+        addrSeq = 0;
+        System.out.println("Assigning address sequence to newly added address..");
         String cmrNo = getCMRNo(entityManager, reqId);
         if (!StringUtils.isEmpty(cmrNo)) {
           String sqlRDC = ExternalizedQuery.getSql("FR.ADDRESS.GETMADDRSEQ_RDC");
@@ -379,15 +381,8 @@ public class FranceHandler extends GEOHandler {
               seqListRDC.add(item);
             }
           }
-          if (addrSeq < 5 && seqListRDC.contains(Integer.toString(addrSeq))) {
-            if (maxSeq < 5) {
-              addrSeq = 5;
-            } else {
-              addrSeq = maxSeq + 1;
-            }
-          }
-          for (String rdcSeq : seqListRDC) {
-            if (Integer.parseInt(rdcSeq) >= 5 && Integer.parseInt(rdcSeq) < 9997 && seqListRDC.contains(rdcSeq)) {
+          for (String rdcSeq : seqListCMR) {
+            if (Integer.parseInt(rdcSeq) >= 5 && Integer.parseInt(rdcSeq) < 9997 && Integer.parseInt(rdcSeq) >= addrSeq) {
               addrSeq = Integer.parseInt(rdcSeq);
               addrSeq++;
             }
