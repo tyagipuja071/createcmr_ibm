@@ -451,12 +451,17 @@ function afterConfigForUS() {
   if (reqType == 'C' && role == 'Requester' && custGrp == '9' && custSubGrp == 'POA') {
     FormManager.enable('miscBillCd');
   }
-
-  if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'ECOSYSTEM') {
-    FormManager.setValue('isuCd', '36');
-    FormManager.setValue('clientTier', 'Y');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
+  if (reqType == 'C' && custGrp == '1' && custSubGrp == 'ECOSYSTEM') {
+    if (role == 'Requester' || role == 'Viewer') {
+      FormManager.setValue('isuCd', '36');
+      FormManager.setValue('clientTier', 'Y');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (role == 'Processor') {
+      FormManager.setValue('isuCd', '36');
+      FormManager.enable('isuCd');
+      FormManager.setValue('clientTier', 'Y');
+    }
   } else if (reqType == 'C' && role == 'Requester' && custGrp == '15' && custSubGrp == 'FSP POOL') {
     FormManager.setValue('isuCd', '28');
     FormManager.setValue('clientTier', '');
