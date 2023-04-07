@@ -387,6 +387,9 @@ public class FranceHandler extends GEOHandler {
               addrSeq++;
             }
           }
+          if (addrSeq == 0) {
+            addrSeq = 5;
+          }
         }
       }
 
