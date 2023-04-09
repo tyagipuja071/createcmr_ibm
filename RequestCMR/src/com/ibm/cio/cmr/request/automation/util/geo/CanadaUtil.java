@@ -132,8 +132,8 @@ public class CanadaUtil extends AutomationUtil {
             String mainCustName = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
             person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
             if (person == null) {
-              engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-              details.append("Employee details not found in IBM BluePages.").append("\n");
+              engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+              details.append("Employee details not found in IBM People.").append("\n");
               return false;
             } else {
               details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
@@ -545,14 +545,12 @@ public class CanadaUtil extends AutomationUtil {
     if (isCoverageCalculated) {
       String coverageId = container.getFinalCoverage();
       // ISU CTC Based on Coverage
-      if (StringUtils.isNotBlank(coverageId)) {
-        String isu = "";
-        String ctc = "";
-
+      String isu = "";
+      String ctc = "";
+      if (StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
         String firstChar = coverageId.substring(0, 1);
 
         List<String> ECOSYSTEM_LIST = Arrays.asList("T0007992", "T0007993", "T0007994", "T0008059");
-
         if (("T").equalsIgnoreCase(firstChar) && !ECOSYSTEM_LIST.contains(coverageId)) {
           isu = "34";
           ctc = "Q";
@@ -601,6 +599,10 @@ public class CanadaUtil extends AutomationUtil {
           }
           setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
         }
+      } else if (scenario.equalsIgnoreCase("ECO")) {
+        isu = "36";
+        ctc = "Y";
+        setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
       }
       // Compute SBO based on Coverage if blank
       if (StringUtils.isNotBlank(coverageId) && StringUtils.isBlank(data.getSalesBusOffCd())) {
@@ -1254,9 +1256,10 @@ public class CanadaUtil extends AutomationUtil {
     }
 
     // ISU CTC Based on Coverage
-    if (StringUtils.isNotBlank(coverageId)) {
-      String isu = "";
-      String ctc = "";
+    String scenario = data.getCustSubGrp();
+    String isu = "";
+    String ctc = "";
+    if (StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
 
       String firstChar = coverageId.substring(0, 1);
 
@@ -1310,6 +1313,10 @@ public class CanadaUtil extends AutomationUtil {
         }
         setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
       }
+    } else if (scenario.equalsIgnoreCase("ECO")) {
+      isu = "36";
+      ctc = "Y";
+      setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
     }
     return true;
   }

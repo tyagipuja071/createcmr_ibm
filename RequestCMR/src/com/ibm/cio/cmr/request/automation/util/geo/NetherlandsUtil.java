@@ -125,8 +125,8 @@ public class NetherlandsUtil extends AutomationUtil {
           String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
           person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
           if (person == null) {
-            engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-            details.append("Employee details not found in IBM BluePages.").append("\n");
+            engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+            details.append("Employee details not found in IBM People.").append("\n");
             return false;
           } else {
             details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
@@ -170,16 +170,16 @@ public class NetherlandsUtil extends AutomationUtil {
       details.append("-BO Team: " + sortl);
     }
 
-      if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
-        commercialFin = computeSBOForCovBelux(entityManager, QUERY_BG_SBO_BENELUX, bgId, data.getCmrIssuingCntry(), false);
-      }
-      if (commercialFin != null && !commercialFin.isEmpty()) {
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "COMMERCIAL_FINANCED", data.getSalesBusOffCd(), commercialFin);
-        details.append("SORTL: " + commercialFin + commercialFin);
-      }
-      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-    
-    if(!isCoverageCalculated) {
+    if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
+      commercialFin = computeSBOForCovBelux(entityManager, QUERY_BG_SBO_BENELUX, bgId, data.getCmrIssuingCntry(), false);
+    }
+    if (commercialFin != null && !commercialFin.isEmpty()) {
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "COMMERCIAL_FINANCED", data.getSalesBusOffCd(), commercialFin);
+      details.append("SORTL: " + commercialFin);
+    }
+    engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+
+    if (!isCoverageCalculated) {
       // if not calculated using bg/gbg try calculation using 32/S logic
       details.setLength(0);// clear string builder
       overrides.clearOverrides(); // clear existing overrides
@@ -238,7 +238,7 @@ public class NetherlandsUtil extends AutomationUtil {
     }
     return true;
   }
-  
+
   private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
     String sortl = "";
     String sql = ExternalizedQuery.getSql(queryBgFR);
@@ -251,17 +251,19 @@ public class NetherlandsUtil extends AutomationUtil {
     query.setParameter("ISO_CNTRY", isoCntry);
     query.setForReadOnly(true);
 
-    LOG.debug("Calculating SORTL using France query " + queryBgFR + " for key: " + bgId);
+    LOG.debug("Calculating SORTL using Netherlands query " + queryBgFR + " for key: " + bgId);
     List<Object[]> results = query.getResults(5);
+    List<String> sortlList = new ArrayList<String>();
     if (results != null && !results.isEmpty()) {
       for (Object[] result : results) {
-        // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
         sortl = (String) result[3];
+        sortlList.add(sortl);
+        // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
       }
     }
+    sortl = sortlList.get(0);
     return sortl;
   }
-
 
   private NLFieldsContainer calculate32SValuesFromIMSNL(EntityManager entityManager, Data data) {
     NLFieldsContainer container = new NLFieldsContainer();
@@ -750,7 +752,7 @@ public class NetherlandsUtil extends AutomationUtil {
         }
       }
     }
-    return null;
+    return "333D3";
   }
 
   @Override

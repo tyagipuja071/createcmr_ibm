@@ -119,11 +119,30 @@ function afterConfigForBRV2() {
   FormManager.hide('GovernmentType', 'govType');
   GEOHandler.registerValidator(registerGovernmentValidator, [ '631' ]);
 
+  var val = FormManager.getActualValue('updateReason');
+  if (val == 'UPIC') {
+    FormManager.setValue('reqReason', 'UPIC');
+    FormManager.readOnly('reqReason');
+
+    FormManager.show('Company', 'company');
+    FormManager.show('INACCode', 'inacCd');
+    FormManager.show('ISU', 'isuCd');
+    FormManager.show('CollectorNameNo', 'collectorNameNo');
+    FormManager.show('SalesBusOff', 'salesBusOffCd');
+  } else {
+    FormManager.hide('Company', 'company');
+    FormManager.hide('INACCode', 'inacCd');
+    FormManager.hide('ISU', 'isuCd');
+    FormManager.hide('CollectorNameNo', 'collectorNameNo');
+    FormManager.hide('SalesBusOff', 'salesBusOffCd');
+  }
 }
 
 var _updateReason1Handler = null;
 var _updateReason2Handler = null;
 var _updateReason3Handler = null;
+var _updateReason4Handler = null;
+
 function handleUpdateReason() {
   if (_updateReason1Handler == null) {
     _updateReason1Handler = dojo.connect(FormManager.getField('updateReason1'), 'onChange', function(value) {
@@ -159,6 +178,27 @@ function handleUpdateReason() {
         FormManager.setValue('reqReason', 'REAC');
         FormManager.readOnly('reqReason');
       }
+    });
+  }
+
+  if (_updateReason4Handler == null) {
+    _updateReasonHandler = dojo.connect(FormManager.getField('updateReason4'), 'onChange', function(value) {
+      var val = FormManager.getActualValue('updateReason');
+      if (val == 'UPIC') {
+        FormManager.enable('reqReason');
+        FormManager.show('Company', 'company');
+        FormManager.show('INACCode', 'inacCd');
+        FormManager.show('ISU', 'isuCd');
+        FormManager.show('CollectorNameNo', 'collectorNameNo');
+        FormManager.show('SalesBusOff', 'salesBusOffCd');
+      } else {
+        FormManager.hide('Company', 'company');
+        FormManager.hide('INACCode', 'inacCd');
+        FormManager.hide('ISU', 'isuCd');
+        FormManager.hide('CollectorNameNo', 'collectorNameNo');
+        FormManager.hide('SalesBusOff', 'salesBusOffCd');
+      }
+
     });
   }
 }
@@ -224,6 +264,12 @@ var _vat = '';
 var _kukla = '';
 var _cmrNo = '';
 var _imported = false;
+var _company = '';
+var _inacCd = '';
+var _isuCd = '';
+var _collectorNo = '';
+var _salesBoCd = '';
+
 function doImport() {
   var cmrNo = FormManager.getActualValue('cmrNo');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -247,6 +293,7 @@ function doImport() {
     _vat = result.ret2;
     _kukla = result.ret1;
     _aufsd = result.ret4;
+    _collectorNo = result.ret8;
     // validate for leasing
     if (_kukla == '33' || _kukla == '34' || _kukla == '35') {
       FormManager.setValue('custClass', _kukla);
@@ -317,6 +364,12 @@ function doImport() {
           FormManager.setValue('email3', record.email3);
           FormManager.setValue('taxCode', record.taxSepInd);
           FormManager.setValue('proxiLocnNo', record.proxiLocnNo);
+
+          FormManager.setValue('company', record.company);
+          FormManager.setValue('inacCd', record.inacCd);
+          FormManager.setValue('isuCd', record.isuCd);
+          FormManager.setValue('collectorNameNo', record.collectorNameNo);
+          FormManager.setValue('salesBusOffCd', record.salesBusOffCd);
 
           _imported = true;
           _cmrNo = cmrNo;

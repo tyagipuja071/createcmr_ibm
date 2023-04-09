@@ -262,6 +262,9 @@ public class GBGMatchingElement extends MatchingElement {
 
         result.setProcessOutput(output);
         result.setDetails(details.toString());
+        if (!domesticGBGFound && countryUtil != null) {
+          countryUtil.emptyINAC(entityManager, requestData, engineData);
+        }
       } else {
         countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
         if (countryUtil != null) {
@@ -320,6 +323,10 @@ public class GBGMatchingElement extends MatchingElement {
    */
   private boolean importLDE(EntityManager entityManager, RequestData requestData, AutomationMatching match) {
     String ldeRule = match.getId().getMatchKeyValue();
+    return importLDE(entityManager, requestData, ldeRule);
+  }
+
+  public boolean importLDE(EntityManager entityManager, RequestData requestData, String ldeRule) {
     if (StringUtils.isBlank(ldeRule)) {
       LOG.warn("LDE rule for import is missing.");
       return false;

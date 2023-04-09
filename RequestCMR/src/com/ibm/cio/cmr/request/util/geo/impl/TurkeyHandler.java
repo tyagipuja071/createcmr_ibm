@@ -92,7 +92,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 
   private static final String[] TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode", "LocalTax1",
       "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building",
-      "County", "City2", "Department", "INACType", "SalRepNameNo" };
+      "County", "City2", "Department", "INACType", "SalRepNameNo", "MembLevel", "BPRelationType" };
 
   private static final List<String> EMEA_COUNTRY_VAL = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL,
       SystemLocation.TURKEY, SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
@@ -3678,6 +3678,8 @@ public class TurkeyHandler extends BaseSOFHandler {
     map.put("##CustClass", "custClass");
     map.put("##TypeOfCustomer", "crosSubTyp");
     map.put("##IERPSitePrtyId", "ierpSitePrtyId");
+    map.put("##BPRelationType", "bpRelType");
+    map.put("##MembLevel", "memLvl");
     return map;
   }
 
@@ -4062,8 +4064,8 @@ public class TurkeyHandler extends BaseSOFHandler {
                 // validations.add(error);
               }
               if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "Y".equals(ordBlk) || "C".equals(ordBlk) || "J".equals(ordBlk))) {
-                LOG.trace("Order Block Code should only @, Y, C, J. >> ");
-                error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should be only @, Y, C, J. ");
+                LOG.trace("Embargo should only @, Y, C, J. >> ");
+                error.addError((row.getRowNum() + 1), "Embargo Code", "Embargo Code should be only @, Y, C, J. ");
               }
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {

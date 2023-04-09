@@ -34,6 +34,7 @@ function addISUHandler() {
   console.log(">>>> addISUHandler");
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldClientTier = FormManager.getActualValue('clientTier');
+  getExitingValueOfCTCAndIsuCD();
   addRemoveValidator();
   lockUnlockFieldForCY();
   if (_ISUHandler == null) {
@@ -2593,9 +2594,11 @@ function mandatoryForBusinessPartnerCY() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     var _custType = FormManager.getActualValue('custSubGrp');
+    var ppsceid = dijit.byId('ppsceid');
     if (_custType == 'BUSPR' || _custType == 'CRBUS') {
       FormManager.show('PPSCEID', 'ppsceid');
       FormManager.enable('ppsceid');
+      FormManager.setValue('ppsceid',ppsceid.params.value);
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.setValue('ppsceid', '');
@@ -2855,15 +2858,22 @@ function addEnterpriseValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var entNo = FormManager.getActualValue('enterprise');
-        if (entNo != '' && entNo.length != 6) {
-          return new ValidationResult(null, false, 'Enterprise Number should have exactly 6 digits.');
+        var enterpriseNo = FormManager.getActualValue('enterprise');
+
+        if (enterpriseNo != null && enterpriseNo != undefined && enterpriseNo != '') {
+          if (!enterpriseNo.match("^[0-9]*$")) {
+            return new ValidationResult(null, false, 'Enterprise Number should be numeric only.');
+          } else if ((enterpriseNo.length != 6)) {
+            return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
+          }
+        } else {
+          return new ValidationResult(null, true);
         }
-        return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 
 
 function clientTierValidator() {
@@ -3007,6 +3017,7 @@ function lockUnlockFieldForCY() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var _custGrpSet = new Set([ 'COMME', 'GOVRN']);
+  var reqType = FormManager.getActualValue('reqType');
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || (reqType == 'C' && !_custGrpSet.has(custSubGrp))) {
     FormManager.readOnly('isuCd');
@@ -3015,8 +3026,9 @@ function lockUnlockFieldForCY() {
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('salesTeamCd');
     FormManager.readOnly('salesBusOffCd');
-    FormManager.readOnly('ppsceid');
-
+    if(custSubGrp != 'BUSPR' && custSubGrp != 'CRBUS') {
+      FormManager.readOnly('ppsceid');
+    }
   } else if (_custGrpSet.has(custSubGrp)) {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
@@ -3210,8 +3222,12 @@ function addRemoveClientTierValidator() {
 }
 
 function addRemoveEnterperiseValidator() {
+  var reqType = FormManager.getActualValue('reqType');
   FormManager.resetValidations('enterprise');
-  FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  if (reqType == 'C' || (reqType == 'U' && _oldEnt != null && _oldEnt != '')) {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  }
+
 }
 
 function addRemoveValidator() {
@@ -3320,6 +3336,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.CYPRUS ], null, true);
-  GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.CYPRUS ]);
-  GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.CYPRUS ]);
 });

@@ -58,7 +58,6 @@ import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
  *
  */
 public class SpainUtil extends AutomationUtil {
-
 	private static final Logger LOG = Logger.getLogger(SpainUtil.class);
 	public static final String SCENARIO_COMMERCIAL = "COMME";
 	public static final String SCENARIO_IGS_GSE = "IGSGS";

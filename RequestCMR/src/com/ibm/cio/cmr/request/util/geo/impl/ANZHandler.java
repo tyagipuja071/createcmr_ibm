@@ -584,6 +584,13 @@ public class ANZHandler extends APHandler {
         MailingDnbAddress += StringUtils.isNotBlank(dnbRecord.getMailingDnbStreetLine2()) ? " " + dnbRecord.getMailingDnbStreetLine2() : "";
       }
       MailingDnbAddress = MailingDnbAddress.trim();
+
+      // CREATCMR-8430: return false for mailing address matching if
+      // MailingDnbAddress is blank
+      if ("796".equals(issuingCountry) && StringUtils.isNotBlank(address) && StringUtils.isBlank(MailingDnbAddress)) {
+        return false;
+      }
+
       Boolean isReshuffledAddr = compareReshuffledAddress(MailingDnbAddress, address, issuingCountry);
       if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(MailingDnbAddress)
           && StringUtils.getLevenshteinDistance(address.toUpperCase(), MailingDnbAddress.toUpperCase()) > 8

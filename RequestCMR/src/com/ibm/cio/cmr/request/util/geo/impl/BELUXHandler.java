@@ -1239,6 +1239,12 @@ public class BELUXHandler extends BaseSOFHandler {
     data.setEnterprise(this.currentImportValues.get("EnterpriseNo"));
     LOG.trace("Enterprise: " + data.getEnterprise());
 
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      String countryUse = getCountryUseForUpdate(data.getCmrIssuingCntry(), data.getCmrNo());
+      if (countryUse != null && !StringUtils.isEmpty(countryUse)) {
+        data.setCountryUse(countryUse);
+      }
+    }
     data.setInstallBranchOff("");
     data.setInacType("");
     data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
@@ -1278,6 +1284,31 @@ public class BELUXHandler extends BaseSOFHandler {
       entityManager.close();
     }
     return department;
+  }
+
+  private String getCountryUseForUpdate(String country, String cmrNo) throws Exception {
+    String countryUse = "";
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      String realcty = "";
+      String sql = ExternalizedQuery.getSql("BENELUX.GET_CHECK_REALCTY");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("COUNTRY", country);
+      query.setParameter("CMR_NO", cmrNo);
+      realcty = query.getSingleResult(String.class);
+      if (realcty != null && StringUtils.isNotEmpty(realcty)) {
+        if ("623".equals(realcty)) {
+          countryUse = "624LU";
+        } else if ("624".equals(realcty)) {
+          countryUse = "624";
+        }
+      }
+
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+    return countryUse;
   }
 
   @Override
@@ -2271,11 +2302,9 @@ public class BELUXHandler extends BaseSOFHandler {
 
       currCell = row.getCell(cmrNoIndex);
       cmrNo = validateColValFromCell(currCell);
-
       if (isDivCMR(cmrNo)) {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.");
-        error.addError((row.getRowNum() + 1), "CMR No.",
-            "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
+        error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
       }
 
       if (is93CMR(cmrNo)) {

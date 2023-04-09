@@ -828,5 +828,4 @@ public class SingaporeUtil extends AutomationUtil {
     LOG.debug("INAC type value " + data.getInacType());
     data.setInacType("");
   }
-
 }

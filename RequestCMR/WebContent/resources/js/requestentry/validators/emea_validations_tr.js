@@ -8071,7 +8071,7 @@ function addEmbargoCdValidatorForTR() {
       validate : function() {
         var embargoCd = FormManager.getActualValue('embargoCd');
         if (embargoCd && !(embargoCd == 'Y' || embargoCd == 'C' || embargoCd == 'J' || embargoCd == '')) {
-          return new ValidationResult(null, false, 'Embargo Block Code should be only Y, C, J, Blank.');
+          return new ValidationResult(null, false, 'Embargo Code should be only Y, C, J, Blank.');
         }
         return new ValidationResult(null, true);
       }

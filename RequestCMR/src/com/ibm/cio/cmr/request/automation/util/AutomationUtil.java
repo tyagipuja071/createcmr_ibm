@@ -600,15 +600,15 @@ public abstract class AutomationUtil {
       }
       details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
       engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
-          checkResult.getCmrNo(), "");
+          checkResult.getCmrNo(), checkResult.getKunnr());
       return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
       break;
     case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+      details.append("Employee details not found in IBM People.").append("\n");
       break;
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
@@ -676,15 +676,15 @@ public abstract class AutomationUtil {
     case DuplicateCMR:
       details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
       engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
-          checkResult.getCmrNo(), "");
+          checkResult.getCmrNo(), checkResult.getKunnr());
       return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
       break;
     case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+      details.append("Employee details not found in IBM People.").append("\n");
       return false;
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
@@ -713,10 +713,10 @@ public abstract class AutomationUtil {
       if (checkResponse != null) {
         cmrNo = checkResponse.getCmrNo();
       }
-      // TODO find kunnr String kunnr = checkResponse.get
       if (!StringUtils.isBlank(cmrNo)) {
+        String kunnr = getZS01Kunnr(cmrNo, country);
         LOG.debug("Duplicate CMR No. found: " + checkResponse.getCmrNo());
-        return new PrivatePersonCheckResult(PrivatePersonCheckStatus.DuplicateCMR, cmrNo, null);
+        return new PrivatePersonCheckResult(PrivatePersonCheckStatus.DuplicateCMR, cmrNo, kunnr);
       }
     } catch (Exception e) {
       LOG.warn("Duplicate CMR check error.", e);
@@ -1114,6 +1114,7 @@ public abstract class AutomationUtil {
     public PrivatePersonCheckResult(PrivatePersonCheckStatus status, String cmrNo, String kunnr) {
       this.status = status;
       this.cmrNo = cmrNo;
+      this.kunnr = kunnr;
     }
 
     public PrivatePersonCheckStatus getStatus() {

@@ -5,7 +5,7 @@ function afterConfigKR() {
   var role = null;
   var reqType = null;
   var _isuHandler = null;
-
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   
   _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     getIsuFromIsic();
@@ -74,7 +74,8 @@ function afterConfigKR() {
   FormManager.addValidator('installRep', Validators.REQUIRED, [ 'Tax Invoice Type' ], 'MAIN_CUST_TAB');
 
   FormManager.addValidator('contactName3', Validators.REQUIRED, [ 'Product Type' ], 'MAIN_IBM_TAB');
-  //FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
+  // FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market
+  // Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('commercialFinanced', Validators.REQUIRED, [ 'ROL Code' ], 'MAIN_IBM_TAB');
 
   FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
@@ -432,9 +433,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('contactName2');
     FormManager.readOnly('contactName3'); 
-    if (custSubGrp != 'INTER') {
-      FormManager.readOnly('cmrNoPrefix');
-    }
+    FormManager.readOnly('cmrNoPrefix');
     FormManager.readOnly('bgId');
     FormManager.readOnly('gbgId');
     FormManager.readOnly('bgRuleId');
@@ -488,9 +487,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('contactName2');
     FormManager.readOnly('contactName3');
-    if (custSubGrp != 'INTER') {
-      FormManager.readOnly('cmrNoPrefix');
-    }
+    FormManager.readOnly('cmrNoPrefix');
     FormManager.readOnly('bgId');
     FormManager.readOnly('gbgId');
     FormManager.readOnly('bgRuleId');
@@ -647,9 +644,9 @@ function setSearchTermDropdownValues() {
 }
 
 function LockDefaultISUClientTierMrcValues() {
-//  FormManager.setValue('clientTier','');
-//  FormManager.setValue('isuCd','');
-//  FormManager.setValue('mrcCd','');
+// FormManager.setValue('clientTier','');
+// FormManager.setValue('isuCd','');
+// FormManager.setValue('mrcCd','');
   var searchTerm = FormManager.getActualValue('searchTerm');
   var clientTier = FormManager.getField('clientTier');
   if (searchTerm == "00003") {
@@ -825,7 +822,7 @@ function getIsuFromIsic(){
   }
 }
 
-// CREATCMR-8581 
+// CREATCMR-8581
 
 function checkCmrUpdateBeforeImport() {
   FormManager.addFormValidator((function() {
@@ -916,7 +913,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(getIsuFromIsic, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(getIsuFromIsic, GEOHandler.KR);
   
-   //  CREATCMR-8581
+   // CREATCMR-8581
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.KR,null,true);
 
 });

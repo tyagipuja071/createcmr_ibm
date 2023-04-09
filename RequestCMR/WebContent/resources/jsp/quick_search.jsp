@@ -508,7 +508,7 @@ form.ibm-column-form .dijitTextBox INPUT {
                    <tr>
                      <th scope="col" width="7%">Record</th>
                      <th scope="col" width="8%">CMR No./DUNS</th>
-                     <th scope="col" width="8%">Match Grade</th>
+                     <th scope="col" width="8%">Qualified Match</th>
                      <th scope="col" width="22%">Customer Name</th>
                      <th scope="col" width="*">Address</th>
                      <th scope="col" width="18%">VAT/Org IDs</th>
@@ -588,11 +588,11 @@ form.ibm-column-form .dijitTextBox INPUT {
                      </td>
                      <td>
                        <div ng-show="rec.recType == 'DNB'">
-                         <input ng-show="rec.operStatusCode != 'O'" type="button" class="cmr-grid-btn" value="Create New CMR" title="Request for a new CMR using this D&B record." ng-click="confirmImport(rec, false)">
+                         <input ng-show="rec.operStatusCode != 'O'" type="button" class="cmr-grid-btn" value="Create new CMR based on this Duns" title="Request for a new CMR using this D&B record." ng-click="confirmImport(rec, false)">
                          <span ng-show="rec.operStatusCode == 'O'" style="font-weight:bold;color:red">Out of business</span>
                        </div>
                        <div ng-show="rec.recType == 'CMR'">
-                         <input ng-show="rec.cmrNo.indexOf('P') != 0 && allowByModel" type="button" class="cmr-grid-btn" value="Create by Model" title="Request for a new CMR modeled after this record" ng-click="confirmImport(rec, false)">
+                         <input ng-show="rec.cmrNo.indexOf('P') != 0 && allowByModel" type="button" class="cmr-grid-btn" value="Create new CMR based on this CMR" title="Request for a new CMR modeled after this record" ng-click="confirmImport(rec, false)">
                          <input ng-show="rec.cmrNo.indexOf('P') == 0" type="button" class="cmr-grid-btn" value="Convert to Legal CMR" title="Request for conversion of this Prospect to Legal CMR" ng-click="confirmImport(rec, false)">
                          <input ng-show="rec.cmrNo.indexOf('P') != 0" type="button" class="cmr-grid-btn" value="Update CMR" title="Request for an Update of this CMR" ng-click="confirmImport(rec, true)">
                        </div>

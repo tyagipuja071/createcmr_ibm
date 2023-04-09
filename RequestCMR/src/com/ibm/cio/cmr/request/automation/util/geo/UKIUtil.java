@@ -45,7 +45,6 @@ import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 public class UKIUtil extends AutomationUtil {
-
 	private static final Logger LOG = Logger.getLogger(UKIUtil.class);
 	public static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
 	public static final String SCENARIO_COMMERCIAL = "COMME";
@@ -1155,4 +1154,3 @@ public class UKIUtil extends AutomationUtil {
 
 		return Arrays.asList(zi01count, zp01count, zd01count);
 	}
-}

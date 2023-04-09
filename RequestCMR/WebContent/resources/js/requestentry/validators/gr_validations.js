@@ -58,6 +58,7 @@ function addISUHandler() {
   console.log(">>>> addISUHandler");
   _oldIsu = FormManager.getActualValue('isuCd');
   _oldClientTier = FormManager.getActualValue('clientTier');
+  getExitingValueOfCTCAndIsuCD();
   addRemoveValidator();
   lockUnlockField();
   if (_ISUHandler == null) {
@@ -626,7 +627,7 @@ function addGRAddressGridValidatorStreetPOBox() {
 }
 
 function isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data) {
-  console.log(">>>> isTranslationAddrFieldsMatchForGR ");
+	console.log(">>>> isTranslationAddrFieldsMatchForGR ");
   if (zs01Data.custNm1[0] == zp01Data.custNm1[0] && zs01Data.custNm2[0] == zp01Data.custNm2[0] && zs01Data.custNm4[0] == zp01Data.custNm4[0] && zs01Data.addrTxt[0] == zp01Data.addrTxt[0]
       && zs01Data.addrTxt2[0] == zp01Data.addrTxt2[0] && zs01Data.poBox[0] == zp01Data.poBox[0] && zs01Data.postCd[0] == zp01Data.postCd[0] && zs01Data.city1[0] == zp01Data.city1[0]) {
     return true;
@@ -710,7 +711,7 @@ function isLandedCntryMatch(zs01Data, zp01Data) {
 }
 
 function populateTranslationAddrWithSoldToData() {
-  console.log(">>>> populateTranslationAddrWithSoldToData ");
+    console.log(">>>> populateTranslationAddrWithSoldToData ");
   if (FormManager.getActualValue('custGrp') == 'CROSS' && CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('addrType') == 'ZP01') {
     var record = null;
     var type = null;
@@ -2255,35 +2256,22 @@ function addEnterpriseValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var entNo = FormManager.getActualValue('enterprise');
-        if (entNo != '' && entNo.length != 6) {
-          return new ValidationResult(null, false, 'Enterprise Number should have exactly 6 digits.');
+        var enterpriseNo = FormManager.getActualValue('enterprise');
+
+        if (enterpriseNo != null && enterpriseNo != undefined && enterpriseNo != '') {
+          if (!enterpriseNo.match("^[0-9]*$")) {
+            return new ValidationResult(null, false, 'Enterprise Number should be numeric only.');
+          } else if ((enterpriseNo.length != 6)) {
+            return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
+          }
+        } else {
+          return new ValidationResult(null, true);
         }
-        return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function getExitingValueOfCTCAndIsuCD() {
-  console.log(">>>> getExitingValueOfCTCAndIsuCD");
-  var reqType = FormManager.getActualValue('reqType');
-  var requestId = FormManager.getActualValue('reqId');
-
-  if (reqType != 'U' || _oldIsuCd != null || _oldCtc != null) {
-    return;
-  }
-
-  var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', {
-    REQ_ID : requestId,
-  });
-
-  if (result != null && result != '') {
-    _oldCtc = result.ret1;
-    _oldIsuCd = result.ret3;
-  }
-
-}
 
 // CREATCMR-4293
 
@@ -2637,8 +2625,12 @@ function addRemoveClientTierValidator() {
 }
 
 function addRemoveEnterperiseValidator() {
+  var reqType = FormManager.getActualValue('reqType');
   FormManager.resetValidations('enterprise');
-  FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  if (reqType == 'C' || (reqType == 'U' && _oldEnt != null && _oldEnt != '')) {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+  }
+
 }
 
 function addRemoveValidator() {

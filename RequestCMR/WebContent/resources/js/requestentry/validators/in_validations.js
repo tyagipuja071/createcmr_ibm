@@ -52,27 +52,20 @@ function afterConfigForIndia() {
         }
         }
     });
-    
-    
   }
-  
   // CREATCMR-7005
   var custSubGrp = FormManager.getActualValue('custSubGrp');
    if(custSubGrp == 'CROSS'){
      FormManager.readOnly('vat');
    } 
   // CREATCMR-7005
-  
-    
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if(custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
     dojo.connect(FormManager.getField('geoLocationCd'), 'onChange', function(value) {
       setClusterGlcCovIdMapNrmlc();
     });
   }
-  
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  
 }
 
 function resetGstExempt() {
@@ -633,19 +626,17 @@ function onCustSubGrpChange() {
       FormManager.enable('isicCd');
        
     if (FormManager.getActualValue('reqType') == 'C') {  
-      
       setLockIsicfromDNB();
-      
       if (value == "KYNDR"){
         FormManager.readOnly('inacType');
       }
-      
-    }  
-    
+    }
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custSubGrpInDB = _pagemodel.custSubGrp;
-    if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB) {
-      FormManager.setValue('abbrevNm', _pagemodel.abbrevNm);
+    var abbrevNm = null;
+    if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB ) {
+      FormManager.setValue('abbrevNm', _pagemodel.abbrevNm); 
       FormManager.setValue('abbrevLocn', _pagemodel.abbrevLocn);
       FormManager.setValue('isbuCd', _pagemodel.isbuCd);
       return;
@@ -980,7 +971,7 @@ function autoSetAbbrevNmLocnLogic() {
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
         _abbrevNm = "SOFTLAYER USE ONLY";
       } else if (custSubGrp == "ESOSW" || custSubGrp == "XESO") {
-        _abbrevNm = "ESA/OEM/SWG_" + custNm1;
+        _abbrevNm = "ESA Use Only";
       } else if (custSubGrp == "AQSTN") {
         _abbrevNm ="Acquisition Use Only";
       } else {
@@ -1565,6 +1556,12 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
                  FormManager.readOnly('inacType');
                }
                
+            } else if(scenario == 'LOCAL' && _cmrIssuingCntry == '744' && (custSubGrp == 'AQSTN' || custSubGrp == 'NRMLC') && _cluster == '012D999') {
+              FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+              FormManager.setValue('clientTier','Q');
+              FormManager.setValue('isuCd','34');
             } else {
                FormManager.resetDropdownValues(FormManager.getField('clientTier'));
                FormManager.setValue('clientTier','');
@@ -2134,8 +2131,13 @@ function setISUDropDownValues() {
                FormManager.readOnly('inacCd');
                FormManager.readOnly('inacType');
              }
-          } 
-        else {
+          } else if(scenario == 'LOCAL' && _cmrIssuingCntry == '744' && (custSubGrp == 'AQSTN' || custSubGrp == 'NRMLC') && _cluster == '012D999') {
+            FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+            FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q']);
+            FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+            FormManager.setValue('clientTier','Q');
+            FormManager.setValue('isuCd','34');
+          } else {
              FormManager.resetDropdownValues(FormManager.getField('clientTier'));
              FormManager.setValue('clientTier','');
              FormManager.setValue('isuCd','');
@@ -2338,11 +2340,11 @@ function lockFieldsForIndia(){
   if (reqType == 'C'  && custSubGrp == 'KYNDR'){
     FormManager.readOnly('inacType');
   }
-  
-  
- 
+// CREATCMR-8755
+  if (role == 'REQUESTER' && (custSubGrp =='AQSTN' || custSubGrp =='ESOSW' || custSubGrp =='BLUMX' || custSubGrp =='MKTPC' || custSubGrp =='IGF')) {
+    FormManager.readOnly('abbrevNm');
+  }
 }
-
 
 // CMR-2830
 function addCompanyProofAttachValidation() {
@@ -3202,7 +3204,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(applyClusterFilters, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, [ SysLoc.INDIA ]); 
   GEOHandler.addAfterTemplateLoad(lockInacNacFieldsByScenarioSubType, [ SysLoc.INDIA ]);
-  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChange, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChange, [ SysLoc.INDIA ]);   
   GEOHandler.addAfterConfig(lockInacType, [ SysLoc.INDIA ]);
  
 });

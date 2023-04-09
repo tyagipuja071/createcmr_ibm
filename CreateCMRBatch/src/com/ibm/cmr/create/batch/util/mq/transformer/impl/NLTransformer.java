@@ -861,12 +861,16 @@ public class NLTransformer extends EMEATransformer {
       } else {
         legacyCust.setEmbargoCd("");
       }
-      
+
       if (!StringUtils.isEmpty(data.getIsuCd())) {
-          if (StringUtils.isEmpty(data.getClientTier())) {
-            legacyCust.setIsuCd(data.getIsuCd() + "7");
-          }
+        if (StringUtils.isEmpty(data.getClientTier())) {
+          legacyCust.setIsuCd(data.getIsuCd() + "7");
+        } else if (!StringUtils.isEmpty(data.getClientTier())) {
+          String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+              + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
+          legacyCust.setIsuCd(isuClientTier);
         }
+      }
 
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
       // CREATCMR-845
@@ -946,9 +950,13 @@ public class NLTransformer extends EMEATransformer {
     if (!StringUtils.isEmpty(data.getIsuCd())) {
       if (StringUtils.isEmpty(data.getClientTier())) {
         legacyCust.setIsuCd(data.getIsuCd() + "7");
+      } else if (!StringUtils.isEmpty(data.getClientTier())) {
+        String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
+        legacyCust.setIsuCd(isuClientTier);
       }
     }
-
+    
     List<String> isuCdList = Arrays.asList("5K", "15", "4A", "04", "28");
     if (!StringUtils.isEmpty(data.getIsuCd()) && isuCdList.contains(data.getIsuCd())) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
@@ -1030,6 +1038,8 @@ public class NLTransformer extends EMEATransformer {
         cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
       } else if (isuClientTier.contains("@")) {
         cust.setIsuCd("7");
+      } else if (isuClientTier != null && isuClientTier.length() == 3) {
+        cust.setIsuCd(isuClientTier);
       }
     }
 

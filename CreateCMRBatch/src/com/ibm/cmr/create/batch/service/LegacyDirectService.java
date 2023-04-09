@@ -1340,7 +1340,7 @@ public class LegacyDirectService extends TransConnService {
     cust.setSalesGroupRep(data.getSalesTeamCd());
 
     if (!StringUtils.isEmpty(data.getEnterprise())) {
-      cust.setEnterpriseNo(data.getEnterprise());
+      cust.setEnterpriseNo(data.getEnterprise().length() > 6 ? data.getEnterprise().substring(0, 6) : data.getEnterprise());
     }
     cust.setCeBo(data.getEngineeringBo());
     cust.setIbo((!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd() : ""));

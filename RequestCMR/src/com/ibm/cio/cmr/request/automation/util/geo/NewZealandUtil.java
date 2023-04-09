@@ -30,6 +30,8 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.AutomationServiceClient;
@@ -120,22 +122,15 @@ public class NewZealandUtil extends AutomationUtil {
       response = getNZBNService(admin, data, zs01);
     } catch (Exception e) {
       LOG.error("Failed to Connect to NZBN Service: " + e.getMessage());
+      if (response == null || !response.isSuccess()) {
+        details.append("\nFailed to Connect to NZBN Service.");
+      }
     }
-
-    LOG.debug(
-        "engineData.getPendingChecks()!= null ? " + (engineData.getPendingChecks() != null));
-    LOG.debug(
-        "engineData.getPendingChecks()!= null && (engineData.getPendingChecks().containsKey(\"DnBMatch\") ? "
-            + (engineData.getPendingChecks() != null
-                && (engineData.getPendingChecks().containsKey("DnBMatch"))));
-    LOG.debug(
-        "engineData.getPendingChecks()!= null && (engineData.getPendingChecks().containsKey(\"DnBMatch\") || engineData.getPendingChecks().containsKey(\"DNBCheck\")) ? "
-            + (engineData.getPendingChecks() != null
-                && (engineData.getPendingChecks().containsKey("DnBMatch") || engineData.getPendingChecks().containsKey("DNBCheck"))));
 
     if ("C".equals(admin.getReqType()) && !RELEVANT_SCENARIO.contains(scenario) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
         && "LOCAL".equalsIgnoreCase(custType) && engineData.getPendingChecks() != null
-        && (engineData.getPendingChecks().containsKey("DnBMatch") || engineData.getPendingChecks().containsKey("DNBCheck"))) {
+        && (engineData.getPendingChecks().containsKey("DnBMatch") || engineData.getPendingChecks().containsKey("DNBCheck")
+            || (data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase("DNBO")))) {
       LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
       needNZBNAPICheck = true;
       String regex = "\\s+$";
@@ -181,7 +176,6 @@ public class NewZealandUtil extends AutomationUtil {
     // to check all other address types
     if ("C".equals(admin.getReqType()) && !RELEVANT_SCENARIO.contains(scenario) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
         && "LOCAL".equalsIgnoreCase(custType) && engineData.getPendingChecks() != null) {
-      needNZBNAPICheck = true;
       LOG.debug("Start matching for other addresses...");
       List<Addr> addresses = null;
       List<String> RELEVANT_ADDRESSES_CREATE = Arrays.asList("MAIL", "ZP01", "ZI01", "ZF01", "CTYG", "CTYH");
@@ -189,6 +183,8 @@ public class NewZealandUtil extends AutomationUtil {
       for (String addrType : RELEVANT_ADDRESSES_CREATE) {
         addresses = requestData.getAddresses(addrType);
         for (Addr addr : addresses) {
+          LOG.debug("do matching for New address " + addrType + "(" + addr.getId().getAddrSeq() + ") ... ");
+          needNZBNAPICheck = true;
           boolean matchesAddAPI = false;
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
 
@@ -235,7 +231,8 @@ public class NewZealandUtil extends AutomationUtil {
 
     if (needNZBNAPICheck) {
       if (!cmdeReview) {
-        details.append("The Customer Name and addresses matched NZBN API.").append("\n");
+        // details.append("The Customer Name and addresses matched NZBN
+        // API.").append("\n");
         results.setResults("Calculated.");
         engineData.setNZBNAPICheck(true);
 
@@ -267,6 +264,7 @@ public class NewZealandUtil extends AutomationUtil {
       entityManager.merge(data);
       entityManager.flush();
     }
+    
     return results;
   }
 
@@ -483,6 +481,14 @@ public class NewZealandUtil extends AutomationUtil {
       output.setProcessOutput(validation);
       output.setDetails("Updates to the dataFields fields skipped validation");
     }
+    
+    if ("U".equals(admin.getReqType()) && ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))) {
+        Addr pg01 = requestData.getAddress("PG01");
+        if(pg01 != null){
+        	// checkANZPaygoAddr(entityManager, data.getId().getReqId());
+        }
+      }
+    
     return true;
   }
 
@@ -708,6 +714,12 @@ public class NewZealandUtil extends AutomationUtil {
     output.setProcessOutput(validation);
     return true;
   }
+  
+  public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
+	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
+	    query.setParameter("REQ_ID", reqId);
+	    query.executeSql();
+	  }
 
   @Override
   protected List<String> getCountryLegalEndings() {

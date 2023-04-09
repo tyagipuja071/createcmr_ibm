@@ -635,8 +635,8 @@ public class USUtil extends AutomationUtil {
           String mainCustName = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
           person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
           if (person == null) {
-            engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-            details.append("Employee details not found in IBM BluePages.").append("\n");
+            engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+            details.append("Employee details not found in IBM People.").append("\n");
             return false;
           } else {
             details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
@@ -2474,7 +2474,7 @@ public class USUtil extends AutomationUtil {
     LOG.debug("tweakDnBMatchingResponse USUtil");
     String subScenario = data.getCustGrp();
     List<String> dnbIsicOverrideScenarios = Arrays.asList(CG_COMMERCIAL, CG_COMMERCIAL_FRANCHISE, CG_COMMERCIAL_RESTRICTED);
-    if (!StringUtil.isBlank(subScenario) && dnbIsicOverrideScenarios.contains(subScenario)) {
+    if (!StringUtils.isBlank(subScenario) && dnbIsicOverrideScenarios.contains(subScenario)) {
       if (!usFedIsicMap.isEmpty()) {
         for (USFedIsicMapping mapping : usFedIsicMap) {
           String isicOverridedValue = mapping.getCmrIsic();
@@ -2482,12 +2482,12 @@ public class USUtil extends AutomationUtil {
           if (data.getIsicCd().equals(mapping.getDnbIsic()) && !isicOverridedValue.isEmpty() && "ISIC_CD".equals(field)) {
             data.setIsicCd(isicOverridedValue);
           }
-          if (data.getSubIndustryCd().equals(mapping.getDnbSubInd()) && data.getIsicCd().equals(mapping.getCmrIsic()) && "SUB_INDUSTRY_CD".equals(field) && !subIndOverrideValue.isEmpty()) {
+          if (data.getSubIndustryCd().equals(mapping.getDnbSubInd()) && data.getIsicCd().equals(mapping.getCmrIsic())
+              && "SUB_INDUSTRY_CD".equals(field) && !subIndOverrideValue.isEmpty()) {
             data.setSubIndustryCd(subIndOverrideValue);
           }
         }
       }
     }
   }
-
 }
