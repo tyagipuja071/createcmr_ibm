@@ -551,7 +551,7 @@ public class ChinaUtil extends AutomationUtil {
     return true;
   }
 
-  public String geDocContent(EntityManager entityManager, long req_id) {
+  public static String geDocContent(EntityManager entityManager, long req_id) {
     String sql = ExternalizedQuery.getSql("QUERY.CHECK_CN_API_ATTACHMENT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", req_id);
