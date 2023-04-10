@@ -75,6 +75,7 @@ public class RetrieveIBMValuesElement extends OverridingElement {
     }
     model.setGeoLocationCd(glcCode);
 
+    // bg
     success = odmService.getBuyingGroup(entityManager, soldTo, model, response);
     String bgId = (String) response.get("buyingGroupID");
     String bgDesc = (String) response.get("buyingGroupDesc");
