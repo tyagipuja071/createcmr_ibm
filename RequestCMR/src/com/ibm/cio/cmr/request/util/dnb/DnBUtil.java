@@ -1131,6 +1131,9 @@ public class DnBUtil {
     if (handler != null) {
       matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
     }
+    // CREATCMR-8553: if the address matches with mailing address in DNB, show
+    // mailing address in automation details.
+    map.put("dnbAddrMatchWithMailing", matchWithDnbMailingAddr);
     LOG.debug("matchWithDnbMailingAddr =  " + matchWithDnbMailingAddr);
     LOG.debug("DNB match country =  " + country);
     Boolean isReshuffledAddr = false;
