@@ -5297,17 +5297,7 @@ function setSBOSalesRepFor34QYZ() {
   var result = cmr.query('VALIDATOR.POSTCODEIT', {
     REQID : reqId
   });
-  var postCodeOrg = '';
-  if (result != null && result.ret1 != undefined) {
-    postCodeOrg = result.ret1;
-  } else {
-    postCodeOrg = '';
-  }
-  var postCode = (postCodeOrg.startsWith("200") || postCodeOrg.startsWith("201")) ? postCodeOrg.substring(0, 3) : postCodeOrg.substring(0, 2);
-
-  if (postCode == '' || postCode == undefined || postCode == null) {
-    return;
-  }
+ 
 
   // GET LANDCNTRY in case of CB
   var result1 = cmr.query('LANDCNTRY.IT', {
@@ -5317,6 +5307,7 @@ function setSBOSalesRepFor34QYZ() {
     landCntry = result1.ret1;
   }
 
+  postCode = parseInt(postCode);
   var commSubTypes = [ 'COMME', 'COMSM', 'COMVA', 'CROCM', 'GOVST', 'LOCEN', 'GOVSM', 'LOCSM', 'GOVVA', 'LOCVA', 'CROGO', 'NGOIT', 'NGOVA', 'NGOSM', '3PAIT', 'UNIVA', 'UNIVE', 'UNISM', '3PASM',
       '3PAVA', 'CRO3P', 'CROUN', 'CROLC' ];
   var ibmEmpCustSubTypes = [ 'IBMIT', 'XIBM' ];
