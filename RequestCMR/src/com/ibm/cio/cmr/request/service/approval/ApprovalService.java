@@ -27,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.util.geo.ChinaUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.ApprovalComments;
@@ -505,7 +506,11 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     if (approvalsRej) {
       admin.setReqStatus("AUT");
     } else if (isConditionApprovalCN(entityManager, admin.getId().getReqId())) {
-      admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+      if (hasCNAttachment(entityManager, admin.getId().getReqId())) {
+        admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+      } else {
+        admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
+      }
     } else {
       admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
     }
@@ -517,6 +522,14 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
     return query.exists();
+  }
+
+  private boolean hasCNAttachment(EntityManager entityManager, long reqId) {
+    String ret = ChinaUtil.geDocContent(entityManager, reqId);
+    if ("Y".equals(ret)) {
+      return true;
+    }
+    return false;
   }
 
   /**
