@@ -1606,9 +1606,9 @@ public class LegacyDirectService extends TransConnService {
     if (!StringUtils.isBlank(data.getAcAdminBo())) {
       cust.setAccAdminBo(data.getAcAdminBo());
     }
-
+    LOG.debug("LegacyDirectService - data.getEmbargoCd() : " + data.getEmbargoCd());
     cust.setEmbargoCd(data.getEmbargoCd() != null ? data.getEmbargoCd() : "");
-
+    LOG.debug("LegacyDirectService - cust.setEmbargoCd() : " + cust.getEmbargoCd());
     if (!StringUtils.isBlank(data.getIsicCd())) {
       cust.setIsicCd(data.getIsicCd());
     }
