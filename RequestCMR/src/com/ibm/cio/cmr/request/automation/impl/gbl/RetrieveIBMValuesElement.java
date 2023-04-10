@@ -75,7 +75,6 @@ public class RetrieveIBMValuesElement extends OverridingElement {
     }
     model.setGeoLocationCd(glcCode);
 
-    // bg
     success = odmService.getBuyingGroup(entityManager, soldTo, model, response);
     String bgId = (String) response.get("buyingGroupID");
     String bgDesc = (String) response.get("buyingGroupDesc");
@@ -92,7 +91,7 @@ public class RetrieveIBMValuesElement extends OverridingElement {
         if (gbg != null && !bgId.equals(gbg.getBgId())) {
           details.append(" - Mismatch against calculated BG: " + gbg.getBgId() + "\n");
         } else {
-          overrides.addOverride(getProcessCode(), "DATA", "BG_ID", model.getBgId(), bgId);
+          overrides.addOverride(getProcessCode(), "DATA", "BG_ID", model.getBgId(), bgId.trim());
           overrides.addOverride(getProcessCode(), "DATA", "BG_DESC", model.getBgDesc(), bgDesc);
         }
       }
@@ -101,7 +100,7 @@ public class RetrieveIBMValuesElement extends OverridingElement {
         if (gbg != null && !gbgId.equals(gbg.getGbgId())) {
           details.append(" - Mismatch against calculated GBG: " + gbg.getBgId() + "\n");
         } else {
-          overrides.addOverride(getProcessCode(), "DATA", "GBG_ID", model.getGbgId(), gbgId);
+          overrides.addOverride(getProcessCode(), "DATA", "GBG_ID", model.getGbgId(), gbgId.trim());
           overrides.addOverride(getProcessCode(), "DATA", "GBG_DESC", model.getGbgDesc(), gbgDesc);
         }
       }
@@ -129,12 +128,13 @@ public class RetrieveIBMValuesElement extends OverridingElement {
       details.append("Coverage details were not successfully retrieved.\n");
     } else {
       if (covId != null) {
-        details.append("Coverage = " + covType + covId + " (" + covDesc + ")\n");
+        LOG.debug("Coverage = " + covType + covId + " (" + covDesc + ")\n");
+        details.append("Coverage = " + covType.trim() + covId.trim() + " (" + covDesc + ")\n");
         String calculatedCovId = (String) engineData.get(AutomationEngineData.COVERAGE_CALCULATED);
         if (calculatedCovId != null && !(covType + covId).equals(calculatedCovId)) {
           details.append(" - Mismatch against calculated Coverage: " + calculatedCovId + "\n");
         } else {
-          overrides.addOverride(getProcessCode(), "DATA", "COV_ID", model.getCovId(), covType + covId);
+          overrides.addOverride(getProcessCode(), "DATA", "COV_ID", model.getCovId(), covType.trim() + covId.trim());
           overrides.addOverride(getProcessCode(), "DATA", "COV_DESC", model.getCovDesc(), covDesc);
         }
       }
