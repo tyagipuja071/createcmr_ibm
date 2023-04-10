@@ -18,6 +18,11 @@
 		<put-attribute name="body" value="/resources/jsp/logout/logout.jsp" />
 	</definition>
 
+	<definition name="createCMRSSO" extends="base">
+		<put-attribute name="title" value="CreateCMR | Single Sign On" />
+		<put-attribute name="body" value="/resources/jsp/createCMRSSO/createcmrsso.jsp" />
+	</definition>
+
 	<definition name="login" extends="base">
 		<put-attribute name="title" value="CreateCMR | Please Log in" />
 		<put-attribute name="body" value="/resources/jsp/login/login.jsp" />
