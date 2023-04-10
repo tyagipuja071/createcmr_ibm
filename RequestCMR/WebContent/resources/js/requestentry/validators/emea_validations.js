@@ -5314,7 +5314,7 @@ function setSBOSalesRepFor34QYZ() {
   var bpCustTypes = [ 'BUSPR', 'BUSSM', 'BUSVA', 'CROBP' ];
   var internalCustSubTypes = [ 'INTER', 'INTVA', 'INTSM', 'CROIN' ]
   var pripeCustSubTypes = [ 'CROPR', 'PRICU', 'PRISM', 'PRIVA' ];
-
+  var sbo = FormManager.getActualValue('salesBusOffCd');
   if (commSubTypes.includes(custSubType) || pripeCustSubTypes.includes(custSubType)) {
     if (isuCTC == '34Q') {
       if ((postCode >= 05 && postCode <= 06) || (postCode >= 50 && postCode <= 59)) {
@@ -5369,10 +5369,10 @@ function setSBOSalesRepFor34QYZ() {
       FormManager.setValue('salesBusOffCd', 'HG');
     } else if (isuCTC == '19') {
       FormManager.setValue('salesBusOffCd', 'EB');
-    } else if (isuCTC == '28') {
-      FormManager.setValue('salesBusOffCd', 'EO');
-    }else if (isuCTC == '36Y') {
-      FormManager.setValue('salesBusOffCd', 'FL');
+    } else if (isuCTC == '28' && !['EO','TQ','TX'].includes(sbo)) {
+      FormManager.setValue('salesBusOffCd', '');
+    } else if (isuCTC == '36Y' && !['FL','FP','FM'].includes(sbo) ) {
+      FormManager.setValue('salesBusOffCd', '');
     }
     
   } else if (bpCustTypes.includes(custSubType)) {
