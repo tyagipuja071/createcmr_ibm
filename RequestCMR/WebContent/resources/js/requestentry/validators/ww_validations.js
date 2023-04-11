@@ -470,11 +470,6 @@ function addClientTierDefaultLogic() {
       if (value == 'B' || value == 'M' || value == 'W' || value == 'T' || value == 'S' || value == 'C' || value == 'N') {
         FormManager.setValue('isuCd', '32');
         FormManager.readOnly('isuCd');
-      } else if (value == 'V' || value == '4' || value == 'A' || value == '6' || value == 'E' || value == 'Y') {
-        if (cntry != '766') {
-          FormManager.setValue('isuCd', '34');
-          FormManager.readOnly('isuCd');
-        }
       } else if (value == 'Z') {
         FormManager.setValue('isuCd', '21');
         FormManager.readOnly('isuCd');
