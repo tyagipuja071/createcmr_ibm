@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.impl.DuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.ProcessWaitingElement;
-import com.ibm.cio.cmr.request.automation.impl.gbl.GBGMatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationOutput;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
@@ -232,10 +231,6 @@ public class AutomationEngine {
       boolean skipVerification = scenarioExceptions != null && scenarioExceptions.isSkipCompanyVerification();
       skipVerification = skipVerification && (element instanceof CompanyVerifier);
 
-      boolean skipFindGbgForPrivates = scenarioExceptions != null ? scenarioExceptions.isSkipFindGbgForPrivates() : false;
-      boolean skipFindGbgElement = skipFindGbgForPrivates
-          && (ProcessType.Matching.equals(element.getProcessType()) && (element instanceof GBGMatchingElement));
-
       // CREATCMR-4872
       if (isUsTaxSkipToPcp) {
         break;
@@ -253,8 +248,6 @@ public class AutomationEngine {
           result = element.createSkippedResult(reqId, "Checks skipped because of scenario exceptions and/or previous element results.");
         } else if (skipVerification) {
           result = element.createSkippedResult(reqId, "Company verification skipped for this request scenario.");
-        } else if (skipFindGbgElement) {
-          result = element.createSkippedResult(reqId, "Find GBG skipped for this request scenario.");
         } else {
           try {
             result = element.executeAutomationElement(entityManager, requestData, engineData.get());
