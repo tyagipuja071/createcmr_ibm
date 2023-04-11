@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.automation.impl.MatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -78,29 +79,41 @@ public class GBGMatchingElement extends MatchingElement {
     GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
 
+    ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
+    boolean skipFindGbgForPrivates = scenarioExceptions != null ? scenarioExceptions.isSkipFindGbgForPrivates() : false;
+
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
 
-    // added flow to skip gbg matching
-    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_GBG)) {
-      // ensure a GBG is set
-      GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
-      if (gbg != null) {
-        StringBuilder details = new StringBuilder();
-        details.append("GBG already computed by external process: ");
-        details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
-        details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
-        details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
-        result.setDetails(details.toString());
-        result.setResults("Skipped");
-        result.setProcessOutput(output);
-      } else {
-        result.setDetails("GBG Matching skipped due to previous element execution results.");
-        result.setResults("Skipped");
-        result.setProcessOutput(output);
+    if (skipFindGbgForPrivates) {
+      StringBuilder details = new StringBuilder();
+      details.append("Find GBG skipped for this request scenario.");
+      result.setDetails(details.toString());
+      result.setResults("Skipped");
+      result.setProcessOutput(output);
+      LOG.debug("Skip processing of element for privates.");
+    } else {
+
+      // added flow to skip gbg matching
+      if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_GBG)) {
+        // ensure a GBG is set
+        GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
+        if (gbg != null) {
+          StringBuilder details = new StringBuilder();
+          details.append("GBG already computed by external process: ");
+          details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
+          details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
+          details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
+          result.setDetails(details.toString());
+          result.setResults("Skipped");
+          result.setProcessOutput(output);
+        } else {
+          result.setDetails("GBG Matching skipped due to previous element execution results.");
+          result.setResults("Skipped");
+          result.setProcessOutput(output);
+        }
+        return result;
       }
-      return result;
-    }
 
     if (currentAddress != null) {
 
@@ -279,6 +292,7 @@ public class GBGMatchingElement extends MatchingElement {
       engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
       result.setResults("Missing Address");
       result.setOnError(true);
+    }
     }
     return result;
   }
