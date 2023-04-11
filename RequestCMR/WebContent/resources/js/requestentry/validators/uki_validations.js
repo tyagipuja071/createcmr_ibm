@@ -876,27 +876,27 @@ function autoSetVAT() {
     return;
   }
 
-  if (_custType == 'SOFTL') {
-    FormManager.getField('vatExempt').checked = true;
-    FormManager.enable('vatExempt');
-  } else if (_custType == 'INTER') {
-    FormManager.getField('vatExempt').checked = true;
-    if (role == 'REQUESTER') {
-      FormManager.readOnly('vatExempt');
-    } else {
-      FormManager.enable('vatExempt');
-    }
-  } else if (_custType == 'PRICU' || _custType == 'XPRIC') {
-    FormManager.getField('vatExempt').checked = true;
-    FormManager.readOnly('vatExempt');
-  } else {
-    FormManager.enable('vatExempt')
-  }
+//  if (_custType == 'SOFTL') {
+//    FormManager.getField('vatExempt').checked = true;
+//    FormManager.enable('vatExempt');
+//  } else if (_custType == 'INTER') {
+//    FormManager.getField('vatExempt').checked = true;
+//    if (role == 'REQUESTER') {
+//      FormManager.readOnly('vatExempt');
+//    } else {
+//      FormManager.enable('vatExempt');
+//    }
+//  } else if (_custType == 'PRICU' || _custType == 'XPRIC') {
+//    FormManager.getField('vatExempt').checked = true;
+//    FormManager.readOnly('vatExempt');
+//  } else {
+//    FormManager.enable('vatExempt')
+//  }
 
   if (vatInd && dojo.string.trim(vatInd) == 'T') {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     FormManager.enable('vat');
-    FormManager.setValue('vatExempt', 'N');        
+//    FormManager.setValue('vatExempt', 'N');        
     FormManager.setValue('vatInd', 'T');
   } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
