@@ -5331,7 +5331,7 @@ function setSBOSalesRepFor34QYZ() {
       if (postCode >= 80 && postCode <= 84) {
         FormManager.setValue('salesBusOffCd', 'NG');
       }
-      if ((postCode >= 30 && postCode <= 37) || postCode == 45 && (postCode == 33 && postCode == '34')) {
+      if ([ 30, 31, 32, 35, 36, 37, 45 ].includes(postCode)) {
         FormManager.setValue('salesBusOffCd', 'NI');
       }
       if ([ 33, 34, 38, 39, 46 ].includes(postCode)) {
