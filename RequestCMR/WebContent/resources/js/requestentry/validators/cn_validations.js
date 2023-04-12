@@ -2803,14 +2803,21 @@ function validateCnNameAndAddr4Create() {
 function addressValidation(address2SBCS, apiCity, cnAddress, cnCity, cnDistrictZS01){
   var city = cnCity.substr(-1) == '市' ? cnCity : cnCity + '市';
   var cnAddressRmCity = cnAddress.replace(city,'');
+  var cityReg = /.+?(市)/g;
+  var cityDNB = address2SBCS.match(cityReg) ? address2SBCS.match(cityReg)[0] : '';
+  var rmCityDnb = address2SBCS.replace(cityDNB,'');
+  var rmCityAddr = cnAddress.replace(cityDNB,'');
+
   var district = cnDistrictZS01.substr(-1) == '区' ? cnDistrictZS01 : cnDistrictZS01 + '区';
   var districtReg = /.+?(区)/g;
-  var districtDNB = address2SBCS.match(districtReg) ? address2SBCS.match(districtReg)[0] : '';
-  var rmDistrictDnb = address2SBCS.replace(districtDNB,'');
-  var rmDistrictAddr = cnAddressRmCity.replace(districtDNB,'');
+  var districtDNB = rmCityDnb.match(districtReg) ? rmCityDnb.match(districtReg)[0] : '';
+  var rmDistrictDnb = rmCityDnb.replace(districtDNB,'');
+  var rmDistrictAddr = rmCityAddr.replace(districtDNB,'');
   var rmParenthesis = rmDistrictDnb.replace(/\([^\)]*\)/g,'');
-
-  if(rmDistrictDnb == rmDistrictAddr){
+  var addressEqualFlag = false;
+  if (address2SBCS == cnAddress && (cnDistrictZS01 == '' || districtDNB == district)) {
+    addressEqualFlag = true;
+  } else if(rmDistrictDnb == rmDistrictAddr){
     // this check is to add the D&B format of Street = District + Street
     if(district == '区' || districtDNB == district) {
       addressEqualFlag = true;
@@ -2865,24 +2872,24 @@ function validateCnNameAndAddr4Update() {
           
           var zs01Count = 0;
           
-          var addrTxtZS01 = null;
-          var addrTxt2ZS01 = null;
+          var addrTxtZS01 = '';
+          var addrTxt2ZS01 = '';
           
-          var cnCustName1ZS01 = null;
-          var cnCustName2ZS01 = null;
-          var cnCustName4ZS01 = null;
-          var cnAddrTxtZS01 = null;
-          var cnAddrTxt2ZS01 = null;
+          var cnCustName1ZS01 = '';
+          var cnCustName2ZS01 = '';
+          var cnCustName4ZS01 = '';
+          var cnAddrTxtZS01 = '';
+          var cnAddrTxt2ZS01 = '';
           
-          var addrTypeOther = null;
-          var addrSeqOther = null;
+          var addrTypeOther = '';
+          var addrSeqOther = '';
           
-          var addrTxtOther = null;
-          var addrTxt2Other = null;
-          var cnAddrTxtOther = null;
-          var cnAddrTxt2Other = null;
-          var cnCityZS01 = null;
-          var cnDistrictZS01 = null;
+          var addrTxtOther = '';
+          var addrTxt2Other = '';
+          var cnAddrTxtOther = '';
+          var cnAddrTxt2Other = '';
+          var cnCityZS01 = '';
+          var cnDistrictZS01 = '';
           
           addrList = getAddrList();
           addrRdcList = getAddrRdcList();
