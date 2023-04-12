@@ -290,6 +290,14 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           } else if (highestCloseMatch != null && scenarioExceptions.isCheckVATForDnB()
               && ((!isTaxCdMatch && (StringUtils.isNotBlank(data.getVat()) && !"Y".equals(data.getVatExempt())))
                   || (isTaxCdMatch && StringUtils.isNotBlank(data.getTaxCd1())))) {
+            // CREATCMR-8553: if the address matches with mailing address in
+            // DNB, show mailing address in automation details.
+            if (SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())) {
+              if (handler != null) {
+                matchWithDnbMailingAddr = handler.matchDnbMailingAddr(highestCloseMatch, soldTo, data.getCmrIssuingCntry(), false);
+              }
+            }
+
             LOG.debug(
                 "High quality match was found with DUNS " + highestCloseMatch.getDunsNo() + " but incorrect " + (isTaxCdMatch ? "Org ID " : "VAT "));
             result.setResults((isTaxCdMatch ? "Org ID " : "VAT ") + " not matched");
@@ -318,7 +326,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             details.append("Showing D&B matches:\n");
             int itemNo = 1;
             for (DnBMatchingResponse dnbRecord : dnbMatches) {
-              processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo, matchWithDnbMailingAddr);
+              processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo, false);
               itemNo++;
             }
             if (StringUtils.isBlank(data.getVat()) || "CROSS".equals(scenario)) {
@@ -337,7 +345,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             details.append("Showing D&B matches:\n");
             int itemNo = 1;
             for (DnBMatchingResponse dnbRecord : dnbMatches) {
-              processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo, matchWithDnbMailingAddr);
+              processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo, false);
               if (processDnbFlag == true) {
                 /*
                  * scorecard.setDnbMatchingResult("Y");
