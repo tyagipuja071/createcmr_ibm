@@ -5,6 +5,11 @@
 <c:set var="resourcesPath" value="${contextPath}/resources" />
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
 <script src="${resourcesPath}/js/system/chart.bundle.js?${cmrv}" type="text/javascript"></script>
+<script>
+addEventListener("DOMContentLoaded", function() {
+    dojo.byId('quick_search_btn').style.display = 'none';
+});
+</script>
 <style>
 div.cmr-alert {
  border:1px Solid #FF7777; 

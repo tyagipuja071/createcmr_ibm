@@ -120,7 +120,8 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
           var subCntry = FormManager.getActualValue('issuingCntry');
           var mainCntry = null;
           $scope.recordsDnb = [];
-          $scope.recordsCmr = [];
+          $scope.recordsCmrL = [];
+          $scope.recordsCmrP = [];
           if (subCntry.length > 3) {
             mainCntry = subCntry.substr(0, 3);
             var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {
@@ -163,9 +164,14 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
             if (item.recType == 'DNB') {
               $scope.recordsDnb.push(item);
             } else if (item.recType == 'CMR') {
-              $scope.recordsCmr.push(item);
+              if (item.cmrNo.indexOf('P') == 0) {
+                $scope.recordsCmrP.push(item);
+              } else {
+                $scope.recordsCmrL.push(item);
+              }
             }
           });
+          $scope.recordsCmr = $scope.recordsCmrL.concat($scope.recordsCmrP);
           $scope.records = $scope.recordsCmr.concat($scope.recordsDnb);
           $scope.searched = true;
           $scope.$apply();
