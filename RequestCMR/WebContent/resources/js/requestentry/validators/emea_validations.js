@@ -1830,6 +1830,8 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqId = FormManager.getActualValue('reqId');
+  var vat =  FormManager.getActualValue('vat');
+
   if (custSubType == 'INTER' || custSubType == 'CROIN' || custSubType == 'INTSM' || custSubType == 'INTVA') {
     cmr.showNode('sboInfo');
   } else {
@@ -1859,17 +1861,20 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
     FormManager.resetValidations('abbrevNm');
     FormManager.resetValidations('salesBusOffCd');
 
-    if (checkImportIndc == "Y") {
-      // fields for Legacy consolidation
-      FormManager.readOnly('taxCd1');
-      FormManager.enable('collectionCd');
-      FormManager.readOnly('enterprise');
-      FormManager.resetValidations('vat');
-      FormManager.readOnly('identClient');
-      FormManager.resetValidations('taxCd1');
-      FormManager.resetValidations('enterprise');
-      FormManager.resetValidations('identClient');
-    }
+		if (checkImportIndc == "Y") {
+			// fields for Legacy consolidation
+			FormManager.readOnly('taxCd1');
+			FormManager.enable('collectionCd');
+			FormManager.readOnly('enterprise');
+			FormManager.resetValidations('vat');
+			FormManager.readOnly('identClient');
+			FormManager.resetValidations('taxCd1');
+			FormManager.resetValidations('enterprise');
+			FormManager.resetValidations('identClient');
+			if (vat == '') {
+				FormManager.readOnly('vat');
+			}
+		}
 
   } else if (reqType == 'C' && role == 'PROCESSOR') {
     if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CROCM' || custSubType == 'CROBP' || custSubType == 'CROGO' || custSubType == 'CROLC'
@@ -10509,6 +10514,7 @@ function addVatIndValidator() {
       // FormManager.readOnly('vatInd');
     } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
       FormManager.setValue('vat', '');
+      FormManager.readOnly('vat')
       FormManager.setValue('vatInd', '');
     } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd == '') {
       FormManager.setValue('vatInd', 'T');
