@@ -70,7 +70,7 @@ public class RetrieveIBMValuesElement extends OverridingElement {
     } else {
       if (glcCode != null) {
         details.append("GLC = " + glcCode + " (" + (glcDesc != null ? glcDesc : "no description") + ")\n");
-        overrides.addOverride(getProcessCode(), "DATA", "GEO_LOCATION_CD", model.getGeoLocationCd(), glcCode);
+        overrides.addOverride(getProcessCode(), "DATA", "GEO_LOCATION_CD", model.getGeoLocationCd(), glcCode.trim());
       }
     }
     model.setGeoLocationCd(glcCode);
