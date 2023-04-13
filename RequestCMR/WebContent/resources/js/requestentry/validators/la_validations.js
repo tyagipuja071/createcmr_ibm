@@ -281,8 +281,13 @@ function autoSetDataCrosTypSubTypeSSAMX() {
 function autoSetSBOAndSalesTMNo() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var _custType = FormManager.getActualValue('custType');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
   console.log(">>> Process _custSubGrp >> " + _custSubGrp);
   console.log(">>> Process _custType >> " + _custType);
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
   if (FormManager.getActualValue('cmrIssuingCntry') == '631' && FormManager.getActualValue('reqType') == 'C') {
     if (_custSubGrp != 'undefined' && _custSubGrp == 'CROSS') {
       FormManager.enable('repTeamMemberNo');
@@ -2566,11 +2571,16 @@ function setSortlForStateProvince() {
   var reqType = FormManager.getActualValue('reqType');
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
   if (cmrIssuingCntry != '631' || reqType != 'C') {
+    return;
+  }  
+
+  if (custSubGrp == 'IBMEM' || custSubGrp == 'PRIPE' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
     return;
   }
   var _reqId = FormManager.getActualValue('reqId');
@@ -3017,9 +3027,9 @@ function autoSetFieldsForCustScenariosBR() {
         FormManager.readOnly('mrcCd');
         FormManager.readOnly('isuCd');        
       } else {
-        FormManager.readOnly('salesBusOffCd');
-        FormManager.readOnly('mrcCd');
-        FormManager.readOnly('isuCd'); 
+        FormManager.enable('salesBusOffCd');
+        FormManager.enable('mrcCd');
+        FormManager.enable('isuCd'); 
       }
     }
   }
@@ -3117,8 +3127,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSboMrcIsuToReadOnly, SSAMX_COUNTRIES);
   GEOHandler.addAfterTemplateLoad(setSortlValuesForUser, GEOHandler.LA);
   GEOHandler.addAfterConfig(setSortlValuesForUser, GEOHandler.LA);
-  GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
-  GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
+  GEOHandler.addAddrFunction(setSortlForStateProvince, SysLoc.BRAZIL);
   GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
   
 });
