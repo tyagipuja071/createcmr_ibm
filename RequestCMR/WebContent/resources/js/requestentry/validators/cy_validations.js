@@ -2594,9 +2594,11 @@ function mandatoryForBusinessPartnerCY() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     var _custType = FormManager.getActualValue('custSubGrp');
+    var ppsceid = dijit.byId('ppsceid');
     if (_custType == 'BUSPR' || _custType == 'CRBUS') {
       FormManager.show('PPSCEID', 'ppsceid');
       FormManager.enable('ppsceid');
+      FormManager.setValue('ppsceid',ppsceid.params.value);
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.setValue('ppsceid', '');
@@ -3024,8 +3026,9 @@ function lockUnlockFieldForCY() {
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('salesTeamCd');
     FormManager.readOnly('salesBusOffCd');
-    FormManager.readOnly('ppsceid');
-
+    if(custSubGrp != 'BUSPR' && custSubGrp != 'CRBUS') {
+      FormManager.readOnly('ppsceid');
+    }
   } else if (_custGrpSet.has(custSubGrp)) {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
@@ -3333,5 +3336,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.CYPRUS ], null, true);
-
 });

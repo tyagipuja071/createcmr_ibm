@@ -2002,56 +2002,6 @@ public class IsraelHandler extends EMEAHandler {
     }
   }
 
-  private static String validateMassKna1AddrSeqExist(String cmrNo, String seqNo, String addrType) {
-    LOG.info("Israel MU validate rdc address sequence " + seqNo + " for CMR No. " + cmrNo);
-    String errMessage = "";
-
-    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
-      EntityManager entityManager = JpaManager.getEntityManager();
-      if (entityManager != null) {
-        String sql = ExternalizedQuery.getSql("IL.MASS.GET.KNA1.ADDR.SEQ");
-        PreparedQuery query = new PreparedQuery(entityManager, sql);
-        query.setParameter("KATR6", SystemLocation.ISRAEL);
-        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-        query.setParameter("ZZKV_CUSNO", cmrNo);
-        query.setParameter("ZZKV_SEQNO", Integer.valueOf(seqNo));
-        query.setParameter("ZZKV_SEQNO_PAD", seqNo);
-        query.setForReadOnly(true);
-        String result = query.getSingleResult(String.class);
-
-        if (StringUtils.isBlank(result)) {
-          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
-              + " does not exist in RDC. Please raise single update for CMR " + cmrNo + " so the address can be inserted to RDC.";
-        }
-      }
-    }
-    return errMessage;
-  }
-
-  private static String validateMassLegacyAddrSeqExist(String cmrNo, String seqNo, String addrType) {
-    LOG.info("Israel MU validate legacy address sequence " + seqNo + " for CMR No. " + cmrNo);
-    String errMessage = "";
-
-    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
-      EntityManager entityManager = JpaManager.getEntityManager();
-      if (entityManager != null) {
-        String sql = ExternalizedQuery.getSql("IL.MASS.GET.LEGACY.ADDR.SEQ");
-        PreparedQuery query = new PreparedQuery(entityManager, sql);
-        query.setParameter("RCYAA", SystemLocation.ISRAEL);
-        query.setParameter("RCUXA", cmrNo);
-        query.setParameter("SEQ", seqNo);
-        query.setForReadOnly(true);
-        String result = query.getSingleResult(String.class);
-
-        if (StringUtils.isBlank(result)) {
-          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
-              + " does not exist in DB2. Please contact CMDE team to review the CMR.";
-        }
-      }
-    }
-    return errMessage;
-  }
-
   private void validateAddrRequiredFields(XSSFRow row, TemplateValidation error, String sheetName) {
     // Check required fields
     boolean checkRequiredFields = false;
@@ -2190,6 +2140,56 @@ public class IsraelHandler extends EMEAHandler {
       }
     }
     return isDivestiture;
+  }
+
+  private static String validateMassKna1AddrSeqExist(String cmrNo, String seqNo, String addrType) {
+    LOG.info("Israel MU validate rdc address sequence " + seqNo + " for CMR No. " + cmrNo);
+    String errMessage = "";
+
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("IL.MASS.GET.KNA1.ADDR.SEQ");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("KATR6", SystemLocation.ISRAEL);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("ZZKV_CUSNO", cmrNo);
+        query.setParameter("ZZKV_SEQNO", Integer.valueOf(seqNo));
+        query.setParameter("ZZKV_SEQNO_PAD", seqNo);
+        query.setForReadOnly(true);
+        String result = query.getSingleResult(String.class);
+
+        if (StringUtils.isBlank(result)) {
+          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
+              + " does not exist in RDC. Please raise single update for CMR " + cmrNo + " so the address can be inserted to RDC.";
+        }
+      }
+    }
+    return errMessage;
+  }
+
+  private static String validateMassLegacyAddrSeqExist(String cmrNo, String seqNo, String addrType) {
+    LOG.info("Israel MU validate legacy address sequence " + seqNo + " for CMR No. " + cmrNo);
+    String errMessage = "";
+
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("IL.MASS.GET.LEGACY.ADDR.SEQ");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("RCYAA", SystemLocation.ISRAEL);
+        query.setParameter("RCUXA", cmrNo);
+        query.setParameter("SEQ", seqNo);
+        query.setForReadOnly(true);
+        String result = query.getSingleResult(String.class);
+
+        if (StringUtils.isBlank(result)) {
+          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
+              + " does not exist in DB2. Please contact CMDE team to review the CMR.";
+        }
+      }
+    }
+    return errMessage;
   }
 
   private static String validateISICKukla(String cmrNo, String cntry, String usrIsic, String usrKukla) {

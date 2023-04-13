@@ -285,7 +285,7 @@ function processApprovalModal_onLoad() {
     cmr.hideNode('rejectMainLine');
     cmr.showNode('approveMainLine');
   }
-  
+
   if (reqId != '0') {
     CmrGrid.refresh('ATTACHMENT_GRID', cmr.CONTEXT_ROOT + '/search/attachment.json', 'reqId=' + reqId);
   }

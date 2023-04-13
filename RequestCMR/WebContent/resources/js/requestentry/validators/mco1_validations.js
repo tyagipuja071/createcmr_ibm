@@ -1,3 +1,4 @@
+
 /* Register MCO1 Javascripts */
 var localScenarios = [ "LSLOC", "NALOC", "SZLOC", "ZALOC" ];
 var crossScenarios = [ "LSCRO", "NACRO", "SZCRO", "ZACRO" ];
@@ -98,6 +99,8 @@ function addHandlersForZA() {
         setEnterpriseBehaviour();
       }
       setClientTierValues(value);
+     
+      
     });
   }
   if (_ctcHandler == null) {
@@ -1933,7 +1936,8 @@ function vatExemptOnScenario() {
 
 /* End 1430539 */
 
-// CREATCMR-4293
+
+ // CREATCMR-4293
 function setCTCValues() {
  
  FormManager.removeValidator('clientTier', Validators.REQUIRED);

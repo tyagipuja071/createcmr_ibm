@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.IndiaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.NetherlandsUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.NewZealandUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.NordicsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
@@ -124,6 +125,8 @@ public abstract class AutomationUtil {
       put(SystemLocation.NORWAY, NordicsUtil.class);
       put(SystemLocation.FINLAND, NordicsUtil.class);
       put(SystemLocation.DENMARK, NordicsUtil.class);
+
+      put(SystemLocation.NEW_ZEALAND, NewZealandUtil.class);
     }
   };
 
@@ -1410,7 +1413,7 @@ public abstract class AutomationUtil {
 
   public boolean fillCoverageAttributes(RetrieveIBMValuesElement retrieveElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
-      AutomationEngineData engineData, String covType, String covId, String covDesc) throws Exception {
+      AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
     return false;
   }
 
@@ -1436,6 +1439,33 @@ public abstract class AutomationUtil {
       query.setParameter("NAME2", addrToCheck.getCustNm2());
     }
     return query.exists();
+  }
+
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong> return true if there are country specific logic
+   * 
+   * @param entityManager
+   * @param engineData
+   * @param requestData
+   * @param return
+   * @throws Exception
+   */
+  public static boolean isTaxManagerEmeaUpdateCheck(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData)
+      throws Exception {
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    String cmrIssuingCntry = data.getCmrIssuingCntry();
+    if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(admin.getReqType())) {
+      String sql = ExternalizedQuery.getSql("QUERY.GET.TAX_MANAGER.BY_ISSUING_CNTRY");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
+      List<String> taxManagers = query.getResults(String.class);
+      if (taxManagers != null) {
+        return taxManagers.stream().anyMatch(res -> res.equalsIgnoreCase(admin.getRequesterId()));
+      }
+    }
+    return false;
   }
 
   public static boolean validateLOVVal(EntityManager em, String issuingCntry, String fieldId, String code) {

@@ -1,6 +1,7 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import javax.persistence.EntityManager;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -59,9 +60,14 @@ public class IndiaTransformer extends ISATransformer {
       }
     } else if (!StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId())) {
       // for correlated requests, add the CN
-      LOG.debug("Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. "
-          + handler.mqIntfReqQueue.getCmrNo());
-      handler.messageHash.put("CustNo", handler.mqIntfReqQueue.getCmrNo());
+      LOG.debug(
+          "Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. " + handler.mqIntfReqQueue.getCmrNo());
+      // CREATCMR - 8980
+      String cmrNo = handler.mqIntfReqQueue.getCmrNo();
+      if (StringUtils.isNotEmpty(cmrNo) && cmrNo.startsWith("P")) {
+        cmrNo = "";
+      }
+      handler.messageHash.put("CustNo", cmrNo);
       handler.messageHash.put("TransCode", "N");
     }
   }

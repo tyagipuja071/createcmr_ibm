@@ -1237,6 +1237,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
     return ke;
   }
+
   @Override
   public int getName2Length() {
     return 35;
@@ -1312,7 +1313,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       address.setStateProv("");
     }
 
-    }
+  }
 
   @Override
   public void setAdminDefaultsOnCreate(Admin admin) {
@@ -1739,7 +1740,7 @@ public class CEMEAHandler extends BaseSOFHandler {
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
-        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
+        "SUB_INDUSTRY_CD", "VAT","VAT_IND", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
         "DUNS_NO", "ABBREV_LOCN", "TAX_CD1", "ORD_BLK"));// CMR-1947:add
     // Abbrev_locn
     // field

@@ -853,6 +853,12 @@ public class USHandler extends GEOHandler {
       address.setDivn(cmr.getCmrName());
     }
     // CREATCMR-8142
+    // CREATCMR-8799
+    if ("U".equals(admin.getReqType()) && "E".equals(cmr.getUsCmrBpAccountType()) && "IRMR".equals(cmr.getUsCmrBpAbbrevNm())
+        && "FSP".equals(cmr.getUsCmrRestrictTo()) && "ZS01".equals(address.getId().getAddrType())) {
+      address.setDivn(cmr.getCmrName());
+    }
+    // CREATCMR-8799
 
   }
 
@@ -892,6 +898,14 @@ public class USHandler extends GEOHandler {
       admin.setMainCustNm2(parts[1]);
     }
     // CREATCMR-8142
+    // CREATCMR-8799
+    if ("U".equals(admin.getReqType()) && "E".equals(currentRecord.getUsCmrBpAccountType()) && "IRMR".equals(currentRecord.getUsCmrBpAbbrevNm())
+        && "FSP".equals(currentRecord.getUsCmrRestrictTo())) {
+      parts = splitName(currentRecord.getUsCmrCompanyNm(), null, 28, 24);
+      admin.setMainCustNm1(parts[0]);
+      admin.setMainCustNm2(parts[1]);
+    }
+    // CREATCMR-8799
   }
 
   public boolean checkIfTerritory(String land1) throws CmrException {
@@ -1226,6 +1240,7 @@ public class USHandler extends GEOHandler {
           || ("BYMODEL".equalsIgnoreCase(data.getCustSubGrp()) && "KYN".equalsIgnoreCase(data.getRestrictTo()))) {
         admin.setMainCustNm1("KYNDRYL INC");
       }
+      data.setVatInd("N");
     }
 
     if (admin != null && "CSP".equals(admin.getReqReason())) {
@@ -1267,6 +1282,11 @@ public class USHandler extends GEOHandler {
         data.setSearchTerm("");
       }
 
+      // CREATCMR-7145
+      if ("KYN".equals(data.getCustSubGrp())) {
+        data.setCustClass("11");
+      }
+
     }
 
     data.setTaxExemptStatus1(data.getSpecialTaxCd());
@@ -1276,11 +1296,21 @@ public class USHandler extends GEOHandler {
     String scc = getSCCByReqId(entityManager, data.getId().getReqId());
     data.setCompanyNm(scc);
     // CREATCMR-6342
-    
-    
-    
-    if("U".equals(admin.getReqType())){
-    	data.setCustSubGrp("");
+
+    // CREATCMR-7581
+    if (!StringUtils.isEmpty(admin.getMainCustNm2())) {
+      if (admin.getMainCustNm1().length() > 25) {
+        String custNm1 = admin.getMainCustNm1().substring(0, 25);
+        admin.setMainCustNm1(custNm1);
+      }
+      if (admin.getMainCustNm2().length() > 24) {
+        String custNm2 = admin.getMainCustNm2().substring(0, 24);
+        admin.setMainCustNm2(custNm2);
+      }
+    }
+
+    if ("U".equals(admin.getReqType())) {
+      data.setCustSubGrp("");
     }
 
   }

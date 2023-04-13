@@ -10,7 +10,7 @@
 
 <script src="${resourcesPath}/js/auto/automation.js?${cmrv}"
 	type="text/javascript"></script>
-<script src="${resourcesPath}/js/auto/br_automation.js?${cmrv}"
+<script src="${resourcesPath}/js/auto/LA/br_automation.js?${cmrv}"
 	type="text/javascript"></script>
 	<cmr:view forCountry="631">
 <cmr:modal id="dupReq_modal" title="Request Matches found."

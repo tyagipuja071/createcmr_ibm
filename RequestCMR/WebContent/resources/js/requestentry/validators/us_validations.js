@@ -419,6 +419,21 @@ function addCtcObsoleteValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addCustName1Validator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custName1 = FormManager.getActualValue('mainCustNm1');
+        if (custName1.length > 25) {
+          return new ValidationResult(null, false, 'Customer Name has exceeded the maximum characters allowed(the Length is 25). Please check and valid value.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    }
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 /**
  * After configuration for US
  */
@@ -426,7 +441,6 @@ function addCtcObsoleteValidator() {
 var resetIsicFlag = -1;
 
 function afterConfigForUS() {
-
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -452,14 +466,24 @@ function afterConfigForUS() {
   if (reqType == 'C' && role == 'Requester' && custGrp == '9' && custSubGrp == 'POA') {
     FormManager.enable('miscBillCd');
   }
-
-  if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'ECOSYSTEM') {
-    FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier', 'Y');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
+  if (reqType == 'C' && custGrp == '1' && custSubGrp == 'ECOSYSTEM') {
+    if (role == 'Requester' || role == 'Viewer') {
+      FormManager.setValue('isuCd', '36');
+      FormManager.setValue('clientTier', 'Y');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (role == 'Processor') {
+      FormManager.setValue('isuCd', '36');
+      FormManager.enable('isuCd');
+      FormManager.setValue('clientTier', 'Y');
+    }
   } else if (reqType == 'C' && role == 'Requester' && custGrp == '15' && custSubGrp == 'FSP POOL') {
     FormManager.setValue('isuCd', '28');
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  } else if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'IBMEM') {
+    FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
@@ -497,8 +521,8 @@ function afterConfigForUS() {
     usCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       if (FormManager.getActualValue('landCntry') != '' && FormManager.getActualValue('landCntry') != 'US') {
         FormManager.setValue('postCd', '00000');
-        //CreateCMR-8143
-        //FormManager.readOnly('postCd');
+        // CreateCMR-8143
+        // FormManager.readOnly('postCd');
       } else {
         var readOnly = false;
         try {
@@ -526,6 +550,10 @@ function afterConfigForUS() {
       var _custType = FormManager.getActualValue('custSubGrp');
       if (_custType == 'OEMHW' || _custType == 'OEM-SW' || _custType == 'TPD' || _custType == 'SSD' || _custType == 'DB4') {
         FormManager.setValue('isicCd', '357X');
+      } else if (_custType == 'IBMEM') {
+        FormManager.setValue('isicCd', '9500');
+        FormManager.setValue('subIndustryCd', 'WQ');
+        FormManager.readOnly('subIndustryCd');
       } else {
         var currIsic = FormManager.getActualValue('isicCd');
         if (currIsic != '357X') {
@@ -642,7 +670,7 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'N');
     FormManager.readOnly('isuCd');
-  } else if (scenario != 'FSP POOL') {
+  } else if (scenario != 'FSP POOL' && scenario != 'IBMEM') {
     FormManager.enable('isuCd');
   }
 }
@@ -1047,6 +1075,7 @@ function orderBlockValidation() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 // CREATCMR-5447
 function TaxTeamUpdateAddrValidation() {
   FormManager.addFormValidator((function() {
@@ -1371,6 +1400,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(addCustName1Validator, [ SysLoc.USA ], null,
+  // true);
+  // GEOHandler.registerValidator(clientTierValidator, [ SysLoc.USA ], null,
+  // true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(initUSTemplateHandler, [ SysLoc.USA ]);
@@ -1385,7 +1418,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
   // CREATCMR-4466
-  GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA
   // ], null, true);
   GEOHandler.addAfterConfig(lockOrdBlk, [ SysLoc.USA ]);
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.USA ], null, true);

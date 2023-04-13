@@ -21,6 +21,7 @@ import com.ibm.cio.cmr.request.service.code.SysParametersAdminService;
 import com.ibm.cio.cmr.request.service.code.SysParametersMaintainService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 
 /**
  * @author Priy Ranjan
@@ -36,9 +37,12 @@ public class SysParametersController extends BaseController {
   @Autowired
   private SysParametersAdminService sysParametersAdminService;
 
-  @RequestMapping(value = "/code/sysparameters", method = RequestMethod.GET)
-  public @ResponseBody
-  ModelAndView showCountryListing(HttpServletRequest request, ModelMap model) {
+  private String currentParam;
+
+  @RequestMapping(
+      value = "/code/sysparameters",
+      method = RequestMethod.GET)
+  public @ResponseBody ModelAndView showCountryListing(HttpServletRequest request, ModelMap model) {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the maintain Validation_Urls Table function.");
@@ -52,9 +56,10 @@ public class SysParametersController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(value = "/code/addsysparameterpage")
-  public @ResponseBody
-  ModelAndView maintainSuppCountry(HttpServletRequest request, HttpServletResponse response, SysParametersModel model) throws CmrException {
+  @RequestMapping(
+      value = "/code/addsysparameterpage")
+  public @ResponseBody ModelAndView maintainSuppCountry(HttpServletRequest request, HttpServletResponse response, SysParametersModel model)
+      throws CmrException {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the maintain SYST_PARAMETERS Table function.");
@@ -76,6 +81,13 @@ public class SysParametersController extends BaseController {
 
           SysParametersModel newModel = sysParametersMaintainService.save(model, request);
           mv = new ModelAndView("redirect:/code/sysparameters", "sysparametersmodel", newModel);
+          if (newModel.getParameterCd().contains("XRUN")) {
+            int dotIndex = newModel.getParameterCd().indexOf(".");
+            String batchname = newModel.getParameterCd().substring(dotIndex + 1);
+            String message = "@here Batch *" + batchname + "* switched from *" + this.currentParam + "* to *" + newModel.getParameterValue() + "* by "
+                + user.getBluePagesName();
+            SlackAlertsUtil.recordBatchAlert("CreateCMR", "BATCH", message);
+          }
           MessageUtil.setInfoMessage(mv, MessageUtil.INFO_RECORD_SAVED, model.getRecordDescription());
         } catch (Exception e) {
           mv = new ModelAndView("addsysparameterpage", "sysparametersmodel", model);
@@ -86,6 +98,7 @@ public class SysParametersController extends BaseController {
         List<SysParametersModel> current = sysParametersMaintainService.search(model, request);
         if (current != null && current.size() > 0) {
           currentModel = current.get(0);
+          this.currentParam = currentModel.getParameterValue();
         }
         if (currentModel.getCmdeMaintainableIndc().equalsIgnoreCase("Y")) {
           currentModel.setCmdeMaintIndcCheckBox(true);
@@ -103,7 +116,9 @@ public class SysParametersController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(value = "/code/systemparameterlisting", method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(
+      value = "/code/systemparameterlisting",
+      method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap getSuppCountryListing(HttpServletRequest request, HttpServletResponse response, SysParametersModel model) throws CmrException {
 
     List<SysParametersModel> results = sysParametersAdminService.search(model, request);

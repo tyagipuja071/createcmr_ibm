@@ -2,6 +2,7 @@
 var _addrTypesForNL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZP02' ];
 var _poBOXHandler = [];
 var _reqReasonHandler = null;
+
 function afterConfigForNL() {
   var reqType = FormManager.getActualValue('reqType');
   var role = null;
@@ -80,8 +81,7 @@ function afterConfigForNL() {
   setVatValidatorNL();
 
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
-  var vatExempt = dojo.byId('vatExempt');
-  var vatExemptChecked = dojo.byId('vatExempt').checked;
+  var vatInd = FormManager.getActualValue('vatInd');
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -94,7 +94,7 @@ function afterConfigForNL() {
   var paygoUser = cmr.query('PAYGO.CHECK.CRN', qParams);
   var countpaygo = paygoUser.ret1;
   if ((custSubScnrio == 'PUBCU' && role == 'Processor') || custSubScnrio == 'PRICU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS' || custSubScnrio == 'IBMEM'
-      || (custSubScnrio == 'INTER' && vatExempt && vatExemptChecked) || viewOnlyPage == 'true' || (Number(countpaygo) == 1 && role == 'Processor')) {
+      || (custSubScnrio == 'INTER' && dojo.string.trim(vatInd) == 'N') || viewOnlyPage == 'true' || (Number(countpaygo) == 1 && role == 'Processor')) {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   } else if (reqType != 'U') {
     FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
@@ -116,7 +116,6 @@ function afterConfigForNL() {
   }
   lockDunsNo();
   disableIBMTab();
-
   // CREATCMR-788
   addressQuotationValidatorNL();
 }
@@ -257,10 +256,17 @@ function setVatValidatorNL() {
       FormManager.readOnly('vat');
       return;
     }
-    FormManager.resetValidations('vat');
-    if (!dojo.byId('vatExempt').checked) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    if (custSubGrp == 'IBMEM' && dojo.byId('vatExempt').checked) {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
     }
+
+    // FormManager.resetValidations('vat');
+    // if (!dojo.byId('vatExempt').checked) {
+    // checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    // FormManager.enable('vat');
+    // }
   }
 }
 
@@ -274,8 +280,7 @@ function setKVKValidatorNL() {
     return;
   }
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
-  var vatExempt = dojo.byId('vatExempt');
-  var vatExemptChecked = dojo.byId('vatExempt').checked;
+  var vatInd = FormManager.getActualValue('vatInd');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
@@ -284,7 +289,7 @@ function setKVKValidatorNL() {
     return;
   }
   if (custSubScnrio == 'INTER') {
-    if (vatExempt && vatExemptChecked) {
+    if (vatInd == 'N') {
       FormManager.removeValidator('taxCd2', Validators.REQUIRED);
     } else {
       FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
@@ -487,8 +492,7 @@ function setClientTierValues(isuCd) {
 /**
  * NL - sets BO Team based on isuCtc
  */
-function setBOTeamValues(clientTier) {
-
+ function setBOTeamValues(clientTier) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -520,13 +524,6 @@ function setBOTeamValues(clientTier) {
         ISSUING_CNTRY : cntry,
         ISU : '%' + isuCd + clientTier + '%'
       // CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
-      };
-      results = cmr.query('GET.BOTEAMLIST.BYISU', qParams);
-    } else {
-      qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry,
-        ISU : '%' + isuCd + clientTier + '%'
       };
       results = cmr.query('GET.BOTEAMLIST.BYISU', qParams);
     }
@@ -1684,6 +1681,7 @@ function addNlIsuHandler() {
     } else {
       FormManager.setValue('clientTier', '');
     }
+
     if (reqType == 'Processor') {
       FormManager.enable('commercialFinanced');
     }
@@ -1745,7 +1743,7 @@ function setSORTLBasedOnIsuCtc() {
  * FormManager.getActualValue('reqType'); if
  * (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C' ||
  * FormManager.getActualValue('custSubGrp') == 'IBMEM') { return; } var isuList = [
- * '15', '4A', '04', '28' ]; var isuCd = FormManager.getActualValue('isuCd'); if
+ * '21', '5K', '28' ]; var isuCd = FormManager.getActualValue('isuCd'); if
  * (isuList.includes(isuCd)) { FormManager.setValue('clientTier', '');
  * FormManager.readOnly('clientTier'); } else {
  * FormManager.enable('clientTier'); } }
@@ -1831,7 +1829,6 @@ function clientTierCodeValidator() {
     }
   }
 }
-
 // CREATCMR-4293
 
 function lockFields() {
@@ -1905,6 +1902,23 @@ function sortlCheckValidator() {
       }
     }
   }
+}
+
+function addAfterConfigNl() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    if (isuCd == '32') {
+      FormManager.setValue('clientTier', 'T');
+    } else if (isuCd == '34') {
+      FormManager.setValue('clientTier', 'Q');
+    } else if (isuCd == '36') {
+      FormManager.setValue('clientTier', 'Y');
+    } else {
+      FormManager.setValue('clientTier', '');
+    }
+  });
 }
 
 function clientTierValidator() {
@@ -1985,6 +1999,46 @@ function setEcoCodeBasedOnSubScenario() {
   }
 }
 
+function addVatIndValidator() {
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnlyPage == 'true') {
+    FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
+  } else {
+
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+      ISSUING_CNTRY : cntry
+    });
+
+    if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.readOnly('vatInd');
+    } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
+      FormManager.setValue('vat', '');
+      FormManager.setValue('vatInd', '');
+    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.readOnly('vatInd');
+    } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    }
+
+    if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null) && vatInd == 'N') {
+      FormManager.resetValidations('vat');
+    }
+  }
+}
+
 // CREATCMR-788
 function addressQuotationValidatorNL() {
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
@@ -2057,9 +2111,15 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addIGFZP02Validator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.NL, null, true);
+
+  GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NL, null, true);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
   GEOHandler.registerValidator(sortlValidator, GEOHandler.NL, null, true);
+  GEOHandler.addAfterConfig(addAfterConfigNl, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setSORTLBasedOnIsuCtc, GEOHandler.NL);
   GEOHandler.addAfterConfig(setSORTLBasedOnIsuCtc, GEOHandler.NL);
   GEOHandler.addAfterConfig(addNlIsuHandler, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.NL);
+  GEOHandler.addAfterConfig(lockFields, GEOHandler.NL);
 });

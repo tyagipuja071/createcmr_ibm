@@ -575,6 +575,7 @@ public class IERPProcessService extends BaseBatchService {
                 LOG.debug("no Of Working days before check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
                 noOFWorkingDays = IERPRequestUtils.checkNoOfWorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
                 LOG.debug("no Of Working days after check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
+
               }
               int tempReactThres = SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) ? 2 : 3;
               if (noOFWorkingDays >= tempReactThres) {
@@ -710,8 +711,10 @@ public class IERPProcessService extends BaseBatchService {
                   "COM".equals(admin.getReqStatus()));
             }
 
+            WfHist history = null;
+
             if (!CmrConstants.RDC_STATUS_IGNORED.equals(overallStatus) && firstRun) {
-              IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
+              history = IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
                   "CPR".equals(admin.getReqStatus()));
             }
 
@@ -720,7 +723,11 @@ public class IERPProcessService extends BaseBatchService {
             // send email notif regardless of abort or complete
             LOG.debug("*** IERP Site IDs on EMAIL >> " + siteIds.toString());
             try {
-              sendEmailNotifications(em, admin, siteIds.toString(), statusMessage.toString());
+              if ("CPR".equals(admin.getReqStatus())) {
+                RequestUtils.sendEmailNotifications(em, admin, history, false, false);
+              } else {
+                sendEmailNotifications(em, admin, siteIds.toString(), statusMessage.toString());
+              }
             } catch (Exception e) {
               LOG.error("ERROR: " + e.getMessage());
             }
@@ -877,6 +884,14 @@ public class IERPProcessService extends BaseBatchService {
                       addr.setPairedAddrSeq(addrSeqs[0]);
                       addr.setSapNo(red.getSapNo());
                       addr.setIerpSitePrtyId(red.getIerpSitePartyId());
+                      if ((SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry()))
+                          && !StringUtils.isEmpty(response.getCmrNo()) && !StringUtils.isEmpty(addr.getId().getAddrSeq())) {
+                        String strPaygoNo = getPaygoSapnoForNZ(em, response.getCmrNo(), addr.getId().getAddrSeq(), data.getCmrIssuingCntry());
+                        if (!StringUtils.isEmpty(strPaygoNo)) {
+                          addr.setSapNo(strPaygoNo);
+                          addr.setIerpSitePrtyId("S" + strPaygoNo.substring(1));
+                        }
+                      }
                     }
                   }
                 }
@@ -1282,7 +1297,7 @@ public class IERPProcessService extends BaseBatchService {
       // cmrNo = "TEMP";
       // } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
       // cmrNo = data.getCmrNo();
-      // }
+      // }if (!StringUtils.isBlank(prospectCMR)) {
       cmrNo = data.getCmrNo();
       synchronized (IERPProcessService.class) {
         if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && "C".equals(requestType)
@@ -1621,6 +1636,19 @@ public class IERPProcessService extends BaseBatchService {
 
   public void setMultiMode(boolean multiMode) {
     this.multiMode = multiMode;
+  }
+
+  private String getPaygoSapnoForNZ(EntityManager entityManager, String cmrNo, String seqNo, String cmrIssuingCntry) {
+    LOG.debug("getPaygoSapnoForNZ ");
+    String PaygoSapno = "";
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GET.NZ.PAYGOSAPNO"));
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", cmrIssuingCntry);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setParameter("ZZKV_SEQNO", seqNo);
+    query.setForReadOnly(true);
+    PaygoSapno = query.getSingleResult(String.class);
+    return PaygoSapno;
   }
 
   // public List<Long> getPendingReqIds() {

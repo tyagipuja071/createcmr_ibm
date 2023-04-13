@@ -681,7 +681,7 @@ function addHandlersForCEMEA() {
             FormManager.enable('clientTier');
           }
         }
-
+       
         // CREATCMR-4293
         if (GEOHandler.CEE.includes(cntry)) {
           var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -690,6 +690,11 @@ function addHandlersForCEMEA() {
             FormManager.removeValidator('clientTier', Validators.REQUIRED);
           }
         }
+
+        if (cntry == '618') {
+          FormManager.removeValidator('clientTier', Validators.REQUIRED);
+        }
+        // CREATCMR-4293
       }
       if (cntry == '618') {
         setClientTierValuesAT(value);
@@ -745,7 +750,7 @@ function addHandlersForCEMEA() {
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       setVatValidatorCEMEA();
-      customVATMandatoryForAT();
+      // customVATMandatoryForAT();
     });
   }
 
@@ -755,7 +760,10 @@ function setClientTierValuesAT(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  }
 }
 
 function addAfterConfigCEE() {
@@ -1942,6 +1950,7 @@ function setSBOValuesForIsuCtc(value) {
     return;
   }
 
+
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
@@ -1950,7 +1959,7 @@ function setSBOValuesForIsuCtc(value) {
   var isuCtc = isuCd + clientTier;
   var qParams = null;
   var sbo = [];
-
+ 
   // SBO will be based on IMS
   if (isuCd != '') {
     var results = null;
@@ -2317,9 +2326,9 @@ function afterConfigForRussia() {
 }
 
 function setSBOafterAddrConfig() {
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
+   if (FormManager.getActualValue('reqType') != 'C') {
+   return;
+   }
   if (FormManager.getActualValue('addrType') == 'ZS01') {
 
     var custType = FormManager.getActualValue('custGrp');
@@ -2374,9 +2383,9 @@ function setSBOafterAddrConfig() {
 }
 
 function setSBOValues() {
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
+   if (FormManager.getActualValue('reqType') != 'C') {
+   return;
+   }
   var custType = FormManager.getActualValue('custGrp');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
@@ -3543,7 +3552,7 @@ function resetVatExempt() {
 
 function resetVatExemptOnchange() {
   dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
-    resetVatExempt();
+//    resetVatExempt();
   });
 }
 
@@ -5400,7 +5409,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGaddrValidatorForCEE, GEOHandler.CEE, null, true);
   // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
   // true);
-  GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
+  // GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA
+  // ], null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741',
       '787', '820', '821', '826', '889', '358', '359', '363' ]);
   GEOHandler.registerValidator(cemeaCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
@@ -5431,8 +5441,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(validatorsDIGIT, GEOHandler.CEE);
   // CMR-1912 Vat should be required for AT local-BP and Commercial
-  GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
+  // GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
+  // GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA
+  // ]);
   /*
    * GEOHandler.addAfterConfig(cemeaCustomVATMandatory, GEOHandler.CEMEA);
    * GEOHandler.addAfterTemplateLoad(cemeaCustomVATMandatory, GEOHandler.CEMEA);
@@ -5457,8 +5468,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(lockIBMtab, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(lockIBMtab, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(resetVatExemptOnScenario, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(resetVatExemptOnScenario, SysLoc.AUSTRIA);
+// GEOHandler.addAfterConfig(resetVatExemptOnScenario, [ SysLoc.AUSTRIA ]);
+// GEOHandler.addAfterTemplateLoad(resetVatExemptOnScenario, SysLoc.AUSTRIA);
   // CEE
   GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
@@ -5530,4 +5541,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, [ SysLoc.AUSTRIA ]);
   GEOHandler.registerValidator(validateSortl, [ SysLoc.AUSTRIA ], null, true);
 
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
 });

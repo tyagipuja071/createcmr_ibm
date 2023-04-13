@@ -833,7 +833,7 @@ public class UnitedKingdomTransformer extends EMEATransformer {
 
   @Override
   public String getFixedAddrSeqForProspectCreation() {
-    return "00002";
+    return "00001";
   }
 
   @Override

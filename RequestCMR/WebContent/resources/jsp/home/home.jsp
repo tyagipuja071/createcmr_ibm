@@ -5,6 +5,11 @@
 <c:set var="resourcesPath" value="${contextPath}/resources" />
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
 <script src="${resourcesPath}/js/system/chart.bundle.js?${cmrv}" type="text/javascript"></script>
+<script>
+addEventListener("DOMContentLoaded", function() {
+    dojo.byId('quick_search_btn').style.display = 'none';
+});
+</script>
 <style>
 div.cmr-alert {
  border:1px Solid #FF7777; 
@@ -30,6 +35,14 @@ img.logo {
 }
 </style>
 <script>
+
+if (document.readyState == "loading") {
+var url = window.location.href;
+  if (url.includes("oidcclient/redirect/createcmr")) {
+  	window.location.href = url.replace(url.substring(url.lastIndexOf('CreateCMR/')), "CreateCMR/home");
+  }
+}
+
 dojo.addOnLoad(function(){
   dojo.cookie('lastTab', null);
 });
@@ -187,6 +200,10 @@ dojo.addOnLoad(function(){
                 <span>If you want to view your open requests:</span>
                 <cmr:button label="View Pending Requests" onClick="goToUrl('${contextPath}/workflow/open')" highlight="false" pad="true" />
               </div>
+              <div class="home-btn">
+              <span>If you want to quickly search for an existing record in the IBM or D&B databases:</span>
+              <input class="ibm-btn-small cmr-quick-search-btn-horizontal" type="button" value="Quick Search" onclick="openQuickSearch()" title="Quick Search">
+               </div>
               <div class="home-btn">
                 You can also check out some <strong><a href="https://w3.ibm.com/w3publisher/cmde-cmr/tutorials/createcmr-tutorials" target="_blank">tutorials</a></strong> from the 
                 CMDE site for more information on how to create/update CMRs or watch a <strong><a href="https://video.ibm.com/embed/recorded/131988262" target="_blank">live demo</a></strong> of the tool.

@@ -626,6 +626,13 @@ public class FRService extends TransConnService {
               if (red.getSeqNo() != null && red.getSeqNo() != "") {
                 addrSeqs = red.getSeqNo().split(",");
               }
+              if (("ZP01").equalsIgnoreCase(red.getAddressType()) && "PG01".equals(addr.getId().getAddrType())
+                  && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+                LOG.debug("ZP01 matched");
+                addr.setPairedAddrSeq(addrSeqs[0]);
+                addr.setSapNo(red.getSapNo());
+                addr.setIerpSitePrtyId(red.getIerpSitePartyId());
+              }
 
               if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                 addr.setPairedAddrSeq(addrSeqs[0]);
@@ -924,13 +931,13 @@ public class FRService extends TransConnService {
           }
 
           updateEntity(admin, entityManager);
-
+          WfHist history = null;
           if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
-            RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
+            history = RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
                 "Some errors occurred during RDc processing. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
                 "CPR".equals(admin.getReqStatus()));
           } else {
-            RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
+            history = RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
                 "RDc  Processing has been completed(First batch run). Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
                 "CPR".equals(admin.getReqStatus()));
           }
@@ -938,6 +945,10 @@ public class FRService extends TransConnService {
           partialCommit(entityManager);
           LOG.debug(
               "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
+
+          if ("CPR".equals(admin.getReqStatus())) {
+            RequestUtils.sendEmailNotifications(entityManager, admin, history, false, false);
+          }
 
         } catch (Exception e) {
           LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
@@ -1859,9 +1870,17 @@ public class FRService extends TransConnService {
               if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
                 comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
                     + " was SUCCESSFULLY processed:\n");
+                LOG.info("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
+                    + " was SUCCESSFULLY processed:\n");
                 for (RDcRecord pRecord : response.getRecords()) {
-                  comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
-                  comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  if (comment.length() > 9900) {
+                    LOG.info("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    LOG.info(" address type: " + pRecord.getAddressType() + "\n");
+                  } else {
+                    comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  }
+
                 }
               }
             } else {

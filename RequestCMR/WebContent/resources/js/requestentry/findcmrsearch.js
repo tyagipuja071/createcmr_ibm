@@ -278,13 +278,13 @@ function importCMRConfirm(result) {
     cmr.showAlert('The chosen record is not from the same CMR Issuing Country. The record cannot be processed by the system. Please choose another record to import.');
     return;
   }
-  
+
   var allowByModel = true;
   var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {CNTRY_CD : reqCmrIssuingCntry});
   if (byModel && byModel.ret1 == 'Y') {
     allowByModel = false;
-  } 
-  if (!allowByModel){
+  }
+  if (!allowByModel) {
     cmr.currentCmrResult = result;
     continueUpdateCMR();
   } else {
@@ -294,9 +294,9 @@ function importCMRConfirm(result) {
       OK : 'Create New CMR',
       CANCEL : 'Update CMR'
     });
+    }
   }
-  
-}
+
 /**
  * Continue importing the record with Create type
  */

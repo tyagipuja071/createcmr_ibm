@@ -1834,8 +1834,8 @@ function addAddrUpdateValidator() {
 
                   if (ret == null || ret.ret1 == null) {
                     return new ValidationResult(null, false, 'The additional address should be same with Sold to address (ZS01).'
-                        + ' If you insist on using different address with Sold to (ZS01),you need to attach the screenshot of customer official website,'
-                        + ' business license,government website,contract/purchase order with signature in attachment, file content must be "Name and Address Change(China Specific)". ');
+                        + ' If you insist on using different address from the Sold to (ZS01), you need to attach the screenshot of Customer Official Website,'
+                        + ' Business License, Government Website, Contract/Purchase order with signature, and file content selected must be "Name and Address Change(China Specific)". ');
                   } else {
                     return new ValidationResult(null, true);
                   }
@@ -1851,8 +1851,8 @@ function addAddrUpdateValidator() {
                     if (ret == null || ret.ret1 == null) {
                       return new ValidationResult(null, true);
                     } else {
-                      return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                          + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
+                      return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                          + 'and Address match with D&B 100%, but you still added an attachment of type "Name and Address Change(China Specific)". Please remove this Attachment then try again.'
                           );
                     }
                   }
@@ -2035,12 +2035,14 @@ function checkTianYanChaMatch() {
   var busnTypeResult = {};
   var nameResult = {};
   dojo.xhrGet({
-    url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+    url : cmr.CONTEXT_ROOT + '/cn/dnb.json',
     handleAs : 'json',
     method : 'GET',
     content : {
       busnType : busnType,
-      cnName : cnName
+      cnName : cnName,
+      cnAddress : cnAddrTxtZS01,
+      cnCity : cnCityZS01
     },
     timeout : 50000,
     sync : true,
@@ -2057,11 +2059,13 @@ function checkTianYanChaMatch() {
   
   if($.isEmptyObject(result)){
     dojo.xhrGet({
-      url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+      url : cmr.CONTEXT_ROOT + '/cn/dnb.json',
       handleAs : 'json',
       method : 'GET',
       content : {
-        cnName : cnName
+        cnName : cnName,
+        cnAddress : cnAddrTxtZS01,
+        cnCity : cnCityZS01
       },
       timeout : 50000,
       sync : true,
@@ -2083,6 +2087,7 @@ function checkTianYanChaMatch() {
     return false;
   } else {
     var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
+    var cnAddressRev = convert2SBCS(intlCustNm4ZS01 + cnAddrTxtZS01);
     var name2SBCS = convert2SBCS(result.name);
     var address2SBCS = convert2SBCS(result.regLocation);
     var apiCity = '';
@@ -2101,6 +2106,9 @@ function checkTianYanChaMatch() {
     }
     if (address2SBCS != cnAddress) {
       if (address2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+        addressEqualFlag = true;
+      } else if(apiCity.indexOf(cnCityZS01) >= 0 &&  (address2SBCS.indexOf(cnAddress) >= 0 || address2SBCS.indexOf(cnAddressRev) >= 0)){
+        // this check is to add the D&B format of Street = District + Street
         addressEqualFlag = true;
       } else if(address2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && address2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
           addressEqualFlag = true;
@@ -2672,15 +2680,18 @@ function validateCnNameAndAddr4Create() {
             if (typeof (cnCityZS01) == 'object') {
               if (cnCityZS01[0] != '' && cnCityZS01[0] != null) {
                 cnCityZS01 = cnCityZS01[0];
+              } else {
+                cnCityZS01 = '';
               }
             }
             
             if (typeof (cnDistrictZS01) == 'object') {
               if (cnDistrictZS01[0] != '' && cnDistrictZS01[0] != null) {
                 cnDistrictZS01 = cnDistrictZS01[0];
+              } else {
+                cnDistrictZS01 = '';
               }
             }
-
           }
           var ret = cmr.query('ADDR.GET.INTLCUSTNM4.BY_REQID', {
             REQ_ID : FormManager.getActualValue('reqId')
@@ -2688,8 +2699,7 @@ function validateCnNameAndAddr4Create() {
           if (ret && ret.ret1 && ret.ret1 != '') {
             intlCustNm4ZS01 = ret.ret1;
           }
-          
-          var busnType = FormManager.getActualValue('busnType');
+
           var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
           var scenarioValidation = true;
           if (custSubType == 'INTER' || custSubType == 'CROSS' || custSubType == 'PRIV') {
@@ -2700,189 +2710,85 @@ function validateCnNameAndAddr4Create() {
             }
           }
           if (scenarioValidation){
-            var isValidate = false;
-            if (FormManager.getActualValue('reqType') == 'U') {
-              var intlAddrRdcResult = cmr.query('ADDR.GET.INTLINFO.BY_REQID',  {
-                REQ_ID : FormManager.getActualValue('reqId')
-              });
-              
-              var intlCustNm1 = '';
-              var intlCustNm2 = '';
-              var addrTxt = '';
-              var intlCustNm4 = '';
-              var city1 = '';
-              var city2 = '';
-              
-              if(!$.isEmptyObject(intlAddrRdcResult)){
-                intlCustNm1 = convert2SBCS(intlAddrRdcResult.ret1);
-                intlCustNm2 = convert2SBCS(intlAddrRdcResult.ret2);
-                addrTxt = convert2SBCS(intlAddrRdcResult.ret3);
-                intlCustNm4 = convert2SBCS(intlAddrRdcResult.ret4);
-                city1 = convert2SBCS(intlAddrRdcResult.ret5);
-                city2 = convert2SBCS(intlAddrRdcResult.ret6);
-              }
-              
-              if(intlCustNm1 != convert2SBCS(cnCustName1ZS01) || intlCustNm2 != convert2SBCS(cnCustName2ZS01) 
-                  || addrTxt != convert2SBCS(cnAddrTxtZS01) || intlCustNm4 != convert2SBCS(intlCustNm4ZS01)
-                  || city1 != convert2SBCS(cnCityZS01) || city2 != convert2SBCS(cnDistrictZS01)){
-                isValidate = true;
-              }
-            } else if (FormManager.getActualValue('reqType') == 'C') {
-              isValidate = true;
+            var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
+            var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
+            var cnCity = convert2SBCS(cnCityZS01);
+            var result = {};
+            result = checkDnb(cnName, cnAddress, cnCity);
+
+            console.log('Checking name and address info...');
+            var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
+            var name2SBCS = convert2SBCS(result.name);
+            var address2SBCS = convert2SBCS(result.regLocation);
+            var apiCity = '';
+            var apiDistrict = '';
+            var nameEqualFlag = true;
+            var addressEqualFlag = true;
+            if(result.city != null){
+              apiCity = result.city;
             }
-            if (isValidate) {
-              var busnType = FormManager.getActualValue('busnType');
-              var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
-              var result = {};
-              var busnTypeResult = {};
-              var nameResult = {};
-              dojo.xhrGet({
-                url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
-                handleAs : 'json',
-                method : 'GET',
-                content : {
-                  busnType : busnType,
-                  cnName : cnName
-                },
-                timeout : 50000,
-                sync : true,
-                load : function(data, ioargs) {
-                  if (data && data.result) {
-                    busnTypeResult = data.result;
-                  }
-                },
-                error : function(error, ioargs) {
-                  busnTypeResult = {};
-                }
-              });
-              result = busnTypeResult;
-              
-              if($.isEmptyObject(result)){
-                dojo.xhrGet({
-                  url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
-                  handleAs : 'json',
-                  method : 'GET',
-                  content : {
-                    cnName : cnName
-                  },
-                  timeout : 50000,
-                  sync : true,
-                  load : function(data, ioargs) {
-                    if (data && data.result) {
-                      nameResult = data.result;
-                    }
-                  },
-                  error : function(error, ioargs) {
-                    nameResult = {};
-                  }
-                });
-                result = nameResult;
+            if(result.district != null){
+              apiDistrict = result.district;
+            }
+
+            var correctName = '';
+            var correctAddress = '';
+            if (name2SBCS != cnName) {
+              console.log('Name mismatch: '+name2SBCS+' : '+cnName);
+              nameEqualFlag = false;
+              if(!$.isEmptyObject(result)){
+                correctName = '<br/>Company Name: ' + result.name;
+              } else {
+                correctName = '<br/>Company Name: No Data';
               }
-              
-              if($.isEmptyObject(busnTypeResult) && !$.isEmptyObject(nameResult)) {
-                var apiName = '';
-                var apiAddress = '';
-                var apiBusnType = '';
-                apiBusnType = '<br/>Social Credit Code: ' + nameResult.creditCode;
-                apiName = '<br/>Company Chinese Name: ' + nameResult.name;
-                apiAddress = '<br/>Company Chinese Address: ' + nameResult.regLocation;
-                
+            }
+
+            addressEqualFlag = addressValidation(address2SBCS, apiCity, cnAddress, cnCity, cnDistrictZS01);
+            if (!addressEqualFlag){
+              console.log('Address mismatch: '+address2SBCS+' : '+cnAddress);
+              if(!$.isEmptyObject(result)){
+                correctAddress = '<br/>Company Address: ' + result.regLocation;
+              } else {
+                correctAddress = '<br/>Company Address: No Data';
+              }
+            }
+
+            if(!nameEqualFlag || !addressEqualFlag){
+              var id = FormManager.getActualValue('reqId');
+              var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
+                ID : id
+              });
+    
+              if ((ret == null || ret.ret1 == null)) {
+                return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                    + 'and Address do not match with D&B 100%. If you insist on using mismatched '
+                    + 'Company Name or Address, you need to attach the screenshot of Customer Official Website, '
+                    + 'Business License, Government Website, and/or Contract/Purchase Order with signature, and the '
+                    + 'file content selected must be "Name and Address Change(China Specific)". The correct information based on the checks:'
+                    + correctName + correctAddress);
+              } else {
+                return new ValidationResult(null, true);
+              }
+            } else if(nameEqualFlag && addressEqualFlag){
+              var rowCount = CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount;
+              if (rowCount == 1) {
                 var id = FormManager.getActualValue('reqId');
                 var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
                   ID : id
                 });
-                
-                if(ret == null || ret.ret1 == null){
-                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the <b>Social credit Code</b> '
-                      + 'doesn\'t match with Tian Yan Cha 100%,or if you insist on using missmatched <b>Social credit Code</b>, you need to attach '
-                      + 'the screenshot of customer business license , government website in attachment, file content must be '
-                      + '"<b>Name and Address Change(China Specific)</b>", the correct information should be:'
-                      + apiBusnType + apiName + apiAddress);
-                }
-              } else {
-                var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
-                var name2SBCS = convert2SBCS(result.name);
-                var address2SBCS = convert2SBCS(result.regLocation);
-                var apiCity = '';
-                var apiDistrict = '';
-                var nameEqualFlag = true;
-                var addressEqualFlag = true;
-                if(result.city != null){
-                  apiCity = result.city;
-                }
-                if(result.district != null){
-                  apiDistrict = result.district;
-                }
-
-                var correctName = '';
-                var correctAddress = '';
-                
-                if (name2SBCS != cnName) {
-                  nameEqualFlag = false;
-                  if(!$.isEmptyObject(result)){
-                    correctName = '<br/>Company Name: ' + result.name;
-                  } else {
-                    correctName = '<br/>Company Name: No Data';
-                  }
-                }
-                if (address2SBCS != cnAddress) {
-              // address2SBCS = address2SBCS.replace(apiCity,'');
-              // address2SBCS = address2SBCS.replace(apiDistrict,'');
-                  if (address2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
-                    addressEqualFlag = true;
-                  } else if(address2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && address2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
-                      addressEqualFlag = true;
-                  } else {
-                    addressEqualFlag = false;
-                    if(!$.isEmptyObject(result)){
-                      correctAddress = '<br/>Company Address: ' + result.regLocation;
-                    } else {
-                      correctAddress = '<br/>Company Address: No Data';
-                    }
-                  }
-                }
-
-                if(!nameEqualFlag || !addressEqualFlag){
-                  var id = FormManager.getActualValue('reqId');
-                  var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
-                    ID : id
-                  });
-        
-                  if ((ret == null || ret.ret1 == null)) {
-                    return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                        + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
-                        + 'company name or address, you need attach the screenshot of customer official website, '
-                        + 'business license , government website,contract/purchase order with signature in attachment, '
-                        + 'file content must be "Name and Address Change(China Specific)", the correct company name and address '
-                        + 'should be:'
-                        + correctName + correctAddress);
-                  } else {
-                    return new ValidationResult(null, true);
-                  }
-                } else if(nameEqualFlag && addressEqualFlag){
-                  var rowCount = CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount;
-                  if (rowCount == 1) {
-                    var id = FormManager.getActualValue('reqId');
-                    var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
-                      ID : id
-                    });
-          
-                    if (ret && ret.ret1 && ret.ret1 != '') {
-                      return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                          + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
-                          );
-                    }else{
-                      return new ValidationResult(null, true);
-                    }
-                  } else if (rowCount > 1) {
-                    // var addrDiffIndc = checkAddrDiffIndc();
-                    return new ValidationResult(null, true);
-                  }
-                }else {
+      
+                if (ret && ret.ret1 && ret.ret1 != '') {
+                  return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                      + 'and Address match with D&B 100%, but you still added an attachment of type  "Name and Address Change(China Specific)". <br>Please remove this Attachment, then try again.'
+                      );
+                }else{
                   return new ValidationResult(null, true);
                 }
+              } else if (rowCount > 1) {
+                // var addrDiffIndc = checkAddrDiffIndc();
+                return new ValidationResult(null, true);
               }
-            } else {
+            }else {
               return new ValidationResult(null, true);
             }
           } else {
@@ -2892,6 +2798,45 @@ function validateCnNameAndAddr4Create() {
       }
     }
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
+function addressValidation(address2SBCS, apiCity, cnAddress, cnCity, cnDistrictZS01){
+  var city = cnCity.substr(-1) == '市' ? cnCity : cnCity + '市';
+  var cnAddressRmCity = cnAddress.replace(city,'');
+  var cityReg = /.+?(市)/g;
+  var cityDNB = address2SBCS.match(cityReg) ? address2SBCS.match(cityReg)[0] : '';
+  var rmCityDnb = address2SBCS.replace(cityDNB,'');
+  var rmCityAddr = cnAddress.replace(cityDNB,'');
+
+  var district = cnDistrictZS01.substr(-1) == '区' ? cnDistrictZS01 : cnDistrictZS01 + '区';
+  var districtReg = /.+?(区)/g;
+  var districtDNB = rmCityDnb.match(districtReg) ? rmCityDnb.match(districtReg)[0] : '';
+  var rmDistrictDnb = rmCityDnb.replace(districtDNB,'');
+  var rmDistrictAddr = rmCityAddr.replace(districtDNB,'');
+  var rmParenthesis = rmDistrictDnb.replace(/\([^\)]*\)/g,'');
+  var addressEqualFlag = false;
+  if (address2SBCS == cnAddress && (cnDistrictZS01 == '' || districtDNB == district)) {
+    addressEqualFlag = true;
+  } else if(rmDistrictDnb == rmDistrictAddr){
+    // this check is to add the D&B format of Street = District + Street
+    if(district == '区' || districtDNB == district) {
+      addressEqualFlag = true;
+    } else {
+      addressEqualFlag = false;
+    }
+  } else if(rmParenthesis == rmDistrictAddr) {
+    // to validate after removing dnb () if dnb address contains parenthesis
+    if(district == '区' || districtDNB == district) {
+      addressEqualFlag = true;
+    } else {
+      addressEqualFlag = false;
+    }
+  } else if(address2SBCS == cnAddress && apiCity == '市辖区' && address2SBCS.indexOf(cnCityZS01) >= 0) {
+      addressEqualFlag = true;
+  } else {
+    addressEqualFlag = false;  
+  }
+  return addressEqualFlag;
 }
 
 function validateCnNameAndAddr4Update() {
@@ -2927,24 +2872,24 @@ function validateCnNameAndAddr4Update() {
           
           var zs01Count = 0;
           
-          var addrTxtZS01 = null;
-          var addrTxt2ZS01 = null;
+          var addrTxtZS01 = '';
+          var addrTxt2ZS01 = '';
           
-          var cnCustName1ZS01 = null;
-          var cnCustName2ZS01 = null;
-          var cnCustName4ZS01 = null;
-          var cnAddrTxtZS01 = null;
-          var cnAddrTxt2ZS01 = null;
+          var cnCustName1ZS01 = '';
+          var cnCustName2ZS01 = '';
+          var cnCustName4ZS01 = '';
+          var cnAddrTxtZS01 = '';
+          var cnAddrTxt2ZS01 = '';
           
-          var addrTypeOther = null;
-          var addrSeqOther = null;
+          var addrTypeOther = '';
+          var addrSeqOther = '';
           
-          var addrTxtOther = null;
-          var addrTxt2Other = null;
-          var cnAddrTxtOther = null;
-          var cnAddrTxt2Other = null;
-          var cnCityZS01 = null;
-          var cnDistrictZS01 = null;
+          var addrTxtOther = '';
+          var addrTxt2Other = '';
+          var cnAddrTxtOther = '';
+          var cnAddrTxt2Other = '';
+          var cnCityZS01 = '';
+          var cnDistrictZS01 = '';
           
           addrList = getAddrList();
           addrRdcList = getAddrRdcList();
@@ -2982,6 +2927,8 @@ function validateCnNameAndAddr4Update() {
             if (typeof (cnDistrictZS01) == 'object') {
               if (cnDistrictZS01[0] != '' && cnDistrictZS01[0] != null) {
                 cnDistrictZS01 = cnDistrictZS01[0];
+              } else {
+                cnDistrictZS01 = '';
               }
             }
           }
@@ -3008,14 +2955,8 @@ function validateCnNameAndAddr4Update() {
               }
             }
           }
-          
-          // var cnNmChanged = getCnNmChangedIndc(cnAddrList, cnAddrRdcList);
-          // var cnAddrChanged = getCnAddrChangedIndc(cnAddrList,
-          // cnAddrRdcList);
-          
-          var tycResult = {};
-          var tycResultByBusnType = {};
-          var tycResultByCnNm = {};
+
+          var dnbResult = {};
           
           if (zs01Count > 1) {
             return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
@@ -3025,205 +2966,157 @@ function validateCnNameAndAddr4Update() {
           
           // check TianYanCha via Social Credit Code
           var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
-          tycResultByBusnType = checkTycViaBusnType(cnName);
-          tycResult = tycResultByBusnType;
-          
-          if ($.isEmptyObject(tycResultByBusnType)) {
-            // check TianYanCha via cn name
-            tycResultByCnNm = checkTycViaCnNm(cnName);
-            tycResult = tycResultByCnNm;
-          }
+          var cnAddress = convert2SBCS(cnAddrTxtZS01 + cnAddrTxt2ZS01);
+          var cnCity = convert2SBCS(cnCityZS01);
+          dnbResult = checkDnb(cnName, cnAddress, cnCity);
+          // if ($.isEmptyObject(tycResultByBusnType)) {
+          // // check TianYanCha via cn name
+          // tycResultByCnNm = checkTycViaCnNm(cnName);
+          // tycResult = tycResultByCnNm;
+          // }
           
           // **** handle validation here ****
           if (addrList != null && addrList.length == 1) {
             // case 1, single address logic
-            if($.isEmptyObject(tycResultByBusnType) && !$.isEmptyObject(tycResultByCnNm)) {
-              var apiName = '';
-              var apiAddress = '';
-              var apiBusnType = '';
-              apiBusnType = '<br/>Social Credit Code: ' + tycResultByCnNm.creditCode;
-              apiName = '<br/>Company Chinese Name: ' + tycResultByCnNm.name;
-              apiAddress = '<br/>Company Chinese Address: ' + tycResultByCnNm.regLocation;
-              
-              if(!cnAttachFlag){
-                return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the <b>Social credit Code</b> '
-                    + 'doesn\'t match with Tian Yan Cha 100%,or if you insist on using missmatched <b>Social credit Code</b>, you need to attach '
-                    + 'the screenshot of customer business license , government website in attachment, file content must be '
-                    + '"<b>Name and Address Change(China Specific)</b>", the correct information should be:'
-                    + apiBusnType + apiName + apiAddress);
-              }
-            } else {
-              var cnAddress = convert2SBCS(cnAddrTxtZS01 + cnCustName4ZS01);
-              var apiName2SBCS = convert2SBCS(tycResult.name);
-              var apiAddress2SBCS = convert2SBCS(tycResult.regLocation);
-              var apiCity = '';
-              var apiDistrict = '';
-              
-              var nameEqualFlag = true;
-              var addressEqualFlag = true;
-              
-              if(tycResult.city != null){
-                apiCity = tycResult.city;
-              }
-              if(tycResult.district != null){
-                apiDistrict = tycResult.district;
-              }
+            var cnAddress = convert2SBCS(cnAddrTxtZS01 + cnAddrTxt2ZS01);
+            var apiName2SBCS = convert2SBCS(dnbResult.name);
+            var apiAddress2SBCS = convert2SBCS(dnbResult.regLocation);
+            var apiCity = '';
+            var apiDistrict = '';
+            
+            var nameEqualFlag = true;
+            var addressEqualFlag = true;
+            
+            if(dnbResult.city != null){
+              apiCity = dnbResult.city;
+            }
+            if(dnbResult.district != null){
+              apiDistrict = dnbResult.district;
+            }
 
-              var correctName = '';
-              var correctAddress = '';
-              
-              if (apiName2SBCS != cnName) {
-                nameEqualFlag = false;
-                if(!$.isEmptyObject(tycResult)){
-                  correctName = '<br/>Company Name: ' + tycResult.name;
-                } else {
-                  correctName = '<br/>Company Name: No Data';
-                }
-              }
-              if (apiAddress2SBCS != cnAddress) {
-                // address2SBCS = address2SBCS.replace(apiCity,'');
-                // address2SBCS = address2SBCS.replace(apiDistrict,'');
-                if (apiAddress2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
-                  addressEqualFlag = true;
-                } else if(apiAddress2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && apiAddress2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
-                    addressEqualFlag = true;
-                } else {
-                  addressEqualFlag = false;
-                  if(!$.isEmptyObject(tycResult)){
-                    correctAddress = '<br/>Company Address: ' + tycResult.regLocation;
-                  } else {
-                    correctAddress = '<br/>Company Address: No Data';
-                  }
-                }
-              }
-
-              if(!nameEqualFlag || !addressEqualFlag){
-                if(!cnAttachFlag){
-                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                      + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
-                      + 'company name or address, you need attach the screenshot of customer official website, '
-                      + 'business license , government website,contract/purchase order with signature in attachment, '
-                      + 'file content must be "Name and Address Change(China Specific)", the correct company name and address '
-                      + 'should be:'
-                      + correctName + correctAddress);
-                } else {
-                  return new ValidationResult(null, true);
-                }
-              } else if(nameEqualFlag && addressEqualFlag){
-                if(cnAttachFlag){
-                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                      + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
-                      );
-                } else {
-                  return new ValidationResult(null, true);
-                }
+            var correctName = '';
+            var correctAddress = '';
+            
+            if (apiName2SBCS != cnName) {
+              nameEqualFlag = false;
+              if(!$.isEmptyObject(dnbResult)){
+                correctName = '<br/>Company Name: ' + dnbResult.name;
               } else {
-                return new ValidationResult(null, true);
+                correctName = '<br/>Company Name: No Data';
               }
             }
-            
-          } else if (addrList != null && addrList.length > 1) {
-            // case 2, multiple addresses logic
-            if($.isEmptyObject(tycResultByBusnType) && !$.isEmptyObject(tycResultByCnNm)) {
-              var apiName = '';
-              var apiAddress = '';
-              var apiBusnType = '';
-              apiBusnType = '<br/>Social Credit Code: ' + tycResultByCnNm.creditCode;
-              apiName = '<br/>Company Chinese Name: ' + tycResultByCnNm.name;
-              apiAddress = '<br/>Company Chinese Address: ' + tycResultByCnNm.regLocation;
-              
+            addressEqualFlag = addressValidation(apiAddress2SBCS, apiCity, cnAddress, cnCity, cnDistrictZS01);
+
+            if (!addressEqualFlag){
+              console.log('Address mismatch: '+apiAddress2SBCS+' : '+cnAddress);
+              if(!$.isEmptyObject(dnbResult)){
+                correctAddress = '<br/>Company Address: ' + dnbResult.regLocation;
+              } else {
+                correctAddress = '<br/>Company Address: No Data';
+              }
+            }
+
+            if(!nameEqualFlag || !addressEqualFlag){
               if(!cnAttachFlag){
-                return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the <b>Social credit Code</b> '
-                    + 'doesn\'t match with Tian Yan Cha 100%,or if you insist on using missmatched <b>Social credit Code</b>, you need to attach '
-                    + 'the screenshot of customer business license , government website in attachment, file content must be '
-                    + '"<b>Name and Address Change(China Specific)</b>", the correct information should be:'
-                    + apiBusnType + apiName + apiAddress);
-              }
-            } else {
-              var cnAddress = convert2SBCS(cnAddrTxtZS01 + cnCustName4ZS01);
-              var apiName2SBCS = convert2SBCS(tycResult.name);
-              var apiAddress2SBCS = convert2SBCS(tycResult.regLocation);
-              var apiCity = '';
-              var apiDistrict = '';
-              
-              var nameEqualFlag = true;
-              var addressEqualFlag = true;
-              
-              if(tycResult.city != null){
-                apiCity = tycResult.city;
-              }
-              if(tycResult.district != null){
-                apiDistrict = tycResult.district;
-              }
-
-              var correctName = '';
-              var correctAddress = '';
-              
-              if (apiName2SBCS != cnName) {
-                nameEqualFlag = false;
-                if(!$.isEmptyObject(tycResult)){
-                  correctName = '<br/>Company Name: ' + tycResult.name;
-                } else {
-                  correctName = '<br/>Company Name: No Data';
-                }
-              }
-              if (apiAddress2SBCS != cnAddress) {
-                // address2SBCS = address2SBCS.replace(apiCity,'');
-                // address2SBCS = address2SBCS.replace(apiDistrict,'');
-                if (apiAddress2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
-                  addressEqualFlag = true;
-                } else if(apiAddress2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && apiAddress2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
-                    addressEqualFlag = true;
-                } else {
-                  addressEqualFlag = false;
-                  if(!$.isEmptyObject(tycResult)){
-                    correctAddress = '<br/>Company Address: ' + tycResult.regLocation;
-                  } else {
-                    correctAddress = '<br/>Company Address: No Data';
-                  }
-                }
-              }
-
-              if(!nameEqualFlag || !addressEqualFlag){
-                if(!cnAttachFlag){
-                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                      + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
-                      + 'company name or address, you need attach the screenshot of customer official website, '
-                      + 'business license , government website,contract/purchase order with signature in attachment, '
-                      + 'file content must be "Name and Address Change(China Specific)", the correct company name and address '
-                      + 'should be:'
-                      + correctName + correctAddress);
-                } else {
-                  return new ValidationResult(null, true);
-                }
-              } else if(nameEqualFlag && addressEqualFlag){
-                // 100% match TianYanCha logic
-                // 1, should add CN attachment -
-                // 1.1, when 'failInd' is true, that means other address is not
-                // same with ZS01.
-                // 2, should remove CN attachment -
-                // 2.1, when other address is same with ZS01
-                // 2.2, when English/Chinese address is not changed
-                // and address match TianYanCha
-                if (cnAttachFlag) {
-                  if (!failInd) {
-                    return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                        + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
-                        );
-                  }
-                  return new ValidationResult(null, true);
-                } else {
-                  if (failInd) {
-                    return new ValidationResult(null, false, 'The additional address should be same with Sold to address (ZS01).'
-                        + ' If you insist on using different address with Sold to (ZS01),you need to attach the screenshot of customer official website,'
-                        + ' business license,government website,contract/purchase order with signature in attachment, file content must be "Name and Address Change(China Specific)". ');
-                  }
-                  return new ValidationResult(null, true);
-                }
-                return new ValidationResult(null, true);
+                return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                    + 'and Address do not match with D&B 100%. If you insist on using mismatched '
+                    + 'Company Name or Address, you need to attach the screenshot of Customer Official Website, '
+                    + 'Business License, Government Website, Contract/Purchase order with signature, and '
+                    + 'the file content selected must be "Name and Address Change(China Specific)". The correct information based on checks: '
+                    + correctName + correctAddress);
               } else {
                 return new ValidationResult(null, true);
               }
+            } else if(nameEqualFlag && addressEqualFlag){
+              if(cnAttachFlag){
+                return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                    + 'and Address match with D&B 100%, but you still added an attachment of type "Name and Address Change(China Specific)". Please remove this Attachment then try again.'
+                    );
+              } else {
+                return new ValidationResult(null, true);
+              }
+            } else {
+              return new ValidationResult(null, true);
+            }
+          } else if (addrList != null && addrList.length > 1) {
+            // case 2, multiple addresses logic
+            var cnAddress = convert2SBCS(cnAddrTxtZS01 + cnAddrTxt2ZS01);
+            var apiName2SBCS = convert2SBCS(dnbResult.name);
+            var apiAddress2SBCS = convert2SBCS(dnbResult.regLocation);
+            var apiCity = '';
+            var apiDistrict = '';
+            
+            var nameEqualFlag = true;
+            var addressEqualFlag = true;
+            
+            if(dnbResult.city != null){
+              apiCity = dnbResult.city;
+            }
+            if(dnbResult.district != null){
+              apiDistrict = dnbResult.district;
+            }
+
+            var correctName = '';
+            var correctAddress = '';
+            
+            if (apiName2SBCS != cnName) {
+              nameEqualFlag = false;
+              if(!$.isEmptyObject(dnbResult)){
+                correctName = '<br/>Company Name: ' + dnbResult.name;
+              } else {
+                correctName = '<br/>Company Name: No Data';
+              }
+            }
+            addressEqualFlag = addressValidation(apiAddress2SBCS, apiCity, cnAddress, cnCity, cnDistrictZS01);
+
+            if (!addressEqualFlag){
+              console.log('Address mismatch: '+apiAddress2SBCS+' : '+cnAddress);
+              if(!$.isEmptyObject(dnbResult)){
+                correctAddress = '<br/>Company Address: ' + dnbResult.regLocation;
+              } else {
+                correctAddress = '<br/>Company Address: No Data';
+              }
+            }
+
+            if(!nameEqualFlag || !addressEqualFlag){
+              if(!cnAttachFlag){
+                return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                    + 'and Address do not match with D&B 100%. If you insist on using mismatched '
+                    + 'Company Name or Address, you need to attach the screenshot of Customer Official Website, '
+                    + 'Business License, Government Website, Contract/Purchase order with signature, and the '
+                    + 'file content selected must be "Name and Address Change(China Specific)". The correct information based on checks: '
+                    + 'should be:'
+                    + correctName + correctAddress);
+              } else {
+                return new ValidationResult(null, true);
+              }
+            } else if(nameEqualFlag && addressEqualFlag){
+              // 100% match TianYanCha logic
+              // 1, should add CN attachment -
+              // 1.1, when 'failInd' is true, that means other address is not
+              // same with ZS01.
+              // 2, should remove CN attachment -
+              // 2.1, when other address is same with ZS01
+              // 2.2, when English/Chinese address is not changed
+              // and address match TianYanCha
+              if (cnAttachFlag) {
+                if (!failInd) {
+                  return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
+                      + 'and Address match with D&B 100%, but you still added an attachment of type "Name and Address Change(China Specific)". Please remove this Attachment then try again.'
+                      );
+                }
+                return new ValidationResult(null, true);
+              } else {
+                if (failInd) {
+                  return new ValidationResult(null, false, 'The additional address should be same with Sold to address (ZS01).'
+                      + ' If you insist on using a different address from the Sold to (ZS01), you need to attach the screenshot of Customer Official Website,'
+                      + ' Business License, Government Website, Contract/Purchase order with signature, and the file content selected must be "Name and Address Change(China Specific)". ');
+                }
+                return new ValidationResult(null, true);
+              }
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult(null, true);
             }
           }
           return new ValidationResult(null, true);
@@ -3463,16 +3356,18 @@ function checkCnAttach() {
   return false;
 }
 
-function checkTycViaBusnType(cnName) {
+function checkDnb(cnName, cnAddress, cnCity) {
   var busnType = FormManager.getActualValue('busnType');
   var result = {};
   dojo.xhrGet({
-    url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+    url : cmr.CONTEXT_ROOT + '/cn/dnb.json',
     handleAs : 'json',
     method : 'GET',
     content : {
       busnType : busnType,
-      cnName : cnName
+      cnName : cnName,
+      cnAddress : cnAddress,
+      cnCity : cnCity
     },
     timeout : 50000,
     sync : true,
@@ -3492,7 +3387,7 @@ function checkTycViaCnNm(cnName) {
   var busnType = FormManager.getActualValue('busnType');
   var result = {};
   dojo.xhrGet({
-    url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+    url : cmr.CONTEXT_ROOT + '/cn/dnb.json',
     handleAs : 'json',
     method : 'GET',
     content : {
@@ -3945,6 +3840,58 @@ function retrievedForCNValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+// CREATCMR-8581 
+
+function checkCmrUpdateBeforeImport() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var uptsrdc = '';
+        var lastupts = '';
+
+        if (reqType == 'C') {
+          // console.log('reqType = ' + reqType);
+          return new ValidationResult(null, true);
+        }
+
+        var resultsCC = cmr.query('GETUPTSRDC', {
+          COUNTRY : cntry,
+          CMRNO : cmrNo,
+          MANDT : cmr.MANDT
+        });
+
+        if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
+          uptsrdc = resultsCC.ret1;
+          // console.log('lastupdatets in RDC = ' + uptsrdc);
+        }
+
+        var results11 = cmr.query('GETUPTSADDR', {
+          REQ_ID : reqId
+        });
+        if (results11 != null && results11 != undefined && results11.ret1 != '') {
+          lastupts = results11.ret1;
+          // console.log('lastupdatets in CreateCMR = ' + lastupts);
+        }
+
+        if (lastupts != '' && uptsrdc != '') {
+          if (uptsrdc > lastupts) {
+            return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -4005,6 +3952,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(convertOffice, GEOHandler.CN);
   GEOHandler.addToggleAddrTypeFunction(convertPoBox, GEOHandler.CN);
   
+  //  CREATCMR-8581
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.CN,null,true);
+  
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHINA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHINA ], null, true);
   GEOHandler.registerValidator(addChecklistValidator, GEOHandler.CN);
@@ -4032,7 +3982,7 @@ dojo.addOnLoad(function() {
   //GEOHandler.registerValidator(validateSearchTermForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateISICForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN, null, false, false);
-  //GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
+  GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
 });

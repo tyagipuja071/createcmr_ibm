@@ -1211,6 +1211,7 @@ public class ItalyTransformer extends EMEATransformer {
     } else {
       legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : "");
     }
+
     formatAddressLinesLD(dummyHandler, legacyAddr);
   }
 
