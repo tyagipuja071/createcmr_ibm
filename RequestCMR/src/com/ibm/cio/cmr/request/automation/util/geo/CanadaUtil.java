@@ -90,6 +90,7 @@ public class CanadaUtil extends AutomationUtil {
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> results, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     boolean valid = true;
     String scenario = data.getCustSubGrp();
@@ -517,14 +518,12 @@ public class CanadaUtil extends AutomationUtil {
     if (isCoverageCalculated) {
       String coverageId = container.getFinalCoverage();
       // ISU CTC Based on Coverage
-      if (StringUtils.isNotBlank(coverageId)) {
-        String isu = "";
-        String ctc = "";
-
+      String isu = "";
+      String ctc = "";
+      if (StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
         String firstChar = coverageId.substring(0, 1);
 
         List<String> ECOSYSTEM_LIST = Arrays.asList("T0007992", "T0007993", "T0007994", "T0008059");
-
         if (("T").equalsIgnoreCase(firstChar) && !ECOSYSTEM_LIST.contains(coverageId)) {
           isu = "34";
           ctc = "Q";
@@ -573,6 +572,10 @@ public class CanadaUtil extends AutomationUtil {
           }
           setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
         }
+      } else if (scenario.equalsIgnoreCase("ECO")) {
+        isu = "36";
+        ctc = "Y";
+        setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
       }
       // Compute SBO based on Coverage if blank
       if (StringUtils.isNotBlank(coverageId) && StringUtils.isBlank(data.getSalesBusOffCd())) {
@@ -1226,9 +1229,10 @@ public class CanadaUtil extends AutomationUtil {
     }
 
     // ISU CTC Based on Coverage
-    if (StringUtils.isNotBlank(coverageId)) {
-      String isu = "";
-      String ctc = "";
+    String scenario = data.getCustSubGrp();
+    String isu = "";
+    String ctc = "";
+    if (StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
 
       String firstChar = coverageId.substring(0, 1);
 
@@ -1282,6 +1286,10 @@ public class CanadaUtil extends AutomationUtil {
         }
         setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
       }
+    } else if (scenario.equalsIgnoreCase("ECO")) {
+      isu = "36";
+      ctc = "Y";
+      setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
     }
     return true;
   }
