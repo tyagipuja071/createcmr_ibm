@@ -33,9 +33,11 @@ import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -537,6 +539,11 @@ public class AustraliaUtil extends AutomationUtil {
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
+
+    // CREATCMR-8553: if the address matches with mailing address in DNB, show
+    // mailing address in automation details.
+    GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
@@ -575,8 +582,24 @@ public class AustraliaUtil extends AutomationUtil {
                   for (DnBMatchingResponse dnb : matches) {
                     checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
                     checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                        + dnb.getDnbCountry() + "\n\n");
+
+                    // CREATCMR-8553: if the address matches with mailing
+                    // address in DNB, show mailing address in automation
+                    // details.
+                    Boolean matchWithDnbMailingAddr = false;
+                    if (handler != null) {
+                      matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnb, addr, data.getCmrIssuingCntry(), false);
+                    }
+                    if (matchWithDnbMailingAddr) {
+                      checkDetails.append(" - Mailing Address:  " + dnb.getMailingDnbStreetLine1() + " "
+                          + (dnb.getMailingDnbStreetLine2() == null ? "" : dnb.getMailingDnbStreetLine2()) + " "
+                          + (dnb.getMailingDnbCity() == null ? "" : dnb.getMailingDnbCity()) + " "
+                          + (dnb.getMailingDnbPostalCd() == null ? "" : dnb.getMailingDnbPostalCd()) + " "
+                          + (dnb.getMailingDnbCountry() == null ? "" : dnb.getMailingDnbCountry()) + "\n\n");
+                    } else {
+                      checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                          + dnb.getDnbCountry() + "\n\n");
+                    }
                   }
                 }
 
@@ -614,8 +637,23 @@ public class AustraliaUtil extends AutomationUtil {
               for (DnBMatchingResponse dnb : matches) {
                 checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
                 checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                    + dnb.getDnbCountry() + "\n\n");
+
+                // CREATCMR-8553: if the address matches with mailing address
+                // in DNB, show mailing address in automation details.
+                Boolean matchWithDnbMailingAddr = false;
+                if (handler != null) {
+                  matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnb, addr, data.getCmrIssuingCntry(), false);
+                }
+                if (matchWithDnbMailingAddr) {
+                  checkDetails.append(" - Mailing Address:  " + dnb.getMailingDnbStreetLine1() + " "
+                      + (dnb.getMailingDnbStreetLine2() == null ? "" : dnb.getMailingDnbStreetLine2()) + " "
+                      + (dnb.getMailingDnbCity() == null ? "" : dnb.getMailingDnbCity()) + " "
+                      + (dnb.getMailingDnbPostalCd() == null ? "" : dnb.getMailingDnbPostalCd()) + " "
+                      + (dnb.getMailingDnbCountry() == null ? "" : dnb.getMailingDnbCountry()) + "\n\n");
+                } else {
+                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                      + dnb.getDnbCountry() + "\n\n");
+                }
               }
             }
           }

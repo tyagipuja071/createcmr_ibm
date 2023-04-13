@@ -154,7 +154,7 @@ public class NewZealandUtil extends AutomationUtil {
           details.append("\nThe Customer Name doesn't match NZBN API");
           cmdeReview = true;
           details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
-          details.append(" - Name.:  " + response.getRecord().getName() + " \n");
+          details.append(" - Name:  " + response.getRecord().getName() + " \n");
         }
 
         ModelMap apiMatchMap = addrNZBNAPIMatch(zs01, CmrConstants.RDC_SOLD_TO, response.getRecord());
@@ -216,13 +216,17 @@ public class NewZealandUtil extends AutomationUtil {
             // DNB, show mailing address in automation details.
             if (matchedDNBRecord != null) {
               details.append(" - DUNS No.:  " + matchedDNBRecord.getDunsNo() + " \n");
-              details.append(" - Name.:  " + matchedDNBRecord.getDnbName() + " \n");
+              details.append(" - Name:  " + matchedDNBRecord.getDnbName() + " \n");
               if ((boolean) map.get("dnbAddrMatchWithMailing")) {
-                details.append(" - Address:  " + matchedDNBRecord.getMailingDnbStreetLine1() + " " + matchedDNBRecord.getMailingDnbCity() + " "
-                    + matchedDNBRecord.getMailingDnbPostalCd() + " " + matchedDNBRecord.getMailingDnbCountry() + "\n\n");
+                details.append(" - Mailing Address:  " + matchedDNBRecord.getMailingDnbStreetLine1() + " "
+                    + (matchedDNBRecord.getMailingDnbStreetLine2() == null ? "" : matchedDNBRecord.getMailingDnbStreetLine2()) + " "
+                    + (matchedDNBRecord.getMailingDnbCity() == null ? "" : matchedDNBRecord.getMailingDnbCity()) + " "
+                    + (matchedDNBRecord.getMailingDnbPostalCd() == null ? "" : matchedDNBRecord.getMailingDnbPostalCd()) + " "
+                    + (matchedDNBRecord.getMailingDnbCountry() == null ? "" : matchedDNBRecord.getMailingDnbCountry()) + "\n\n");
               } else {
-                details.append(" - Address:  " + matchedDNBRecord.getDnbStreetLine1() + " " + matchedDNBRecord.getDnbCity() + " "
-                    + matchedDNBRecord.getDnbPostalCode() + " " + matchedDNBRecord.getDnbCountry() + "\n\n");
+                details.append(" - Address:  " + matchedDNBRecord.getDnbStreetLine1() + " "
+                    + (matchedDNBRecord.getDnbStreetLine2() == null ? "" : matchedDNBRecord.getDnbStreetLine2()) + " "
+                    + matchedDNBRecord.getDnbCity() + " " + matchedDNBRecord.getDnbPostalCode() + " " + matchedDNBRecord.getDnbCountry() + "\n\n");
               }
             }
           } else {
@@ -472,7 +476,7 @@ public class NewZealandUtil extends AutomationUtil {
           details.append("The Customer Name and Former Customer Name doesn't match from DNB & NZBN API");
           if (response != null && response.isSuccess() && response.getRecord() != null) {
             details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
-            details.append(" - Name.:  " + response.getRecord().getName() + " \n");
+            details.append(" - Name:  " + response.getRecord().getName() + " \n");
             if (response.getRecord().getPreviousEntityNames() != null) {
               String[] historicalNameList = new String[response.getRecord().getPreviousEntityNames().length];
               historicalNameList = response.getRecord().getPreviousEntityNames();
@@ -631,13 +635,18 @@ public class NewZealandUtil extends AutomationUtil {
                     // details
                     if (matchedDNBRecord != null) {
                       checkDetails.append(" - DUNS No.:  " + matchedDNBRecord.getDunsNo() + " \n");
-                      checkDetails.append(" - Name.:  " + matchedDNBRecord.getDnbName() + " \n");
+                      checkDetails.append(" - Name:  " + matchedDNBRecord.getDnbName() + " \n");
                       if ((boolean) map.get("dnbAddrMatchWithMailing")) {
-                        checkDetails.append(" - Mailing Address:  " + matchedDNBRecord.getMailingDnbStreetLine1() + " " + matchedDNBRecord.getMailingDnbCity() + " "
-                            + matchedDNBRecord.getMailingDnbPostalCd() + " " + matchedDNBRecord.getMailingDnbCountry() + "\n\n");
+                        checkDetails.append(" - Mailing Address:  " + matchedDNBRecord.getMailingDnbStreetLine1() + " "
+                            + (matchedDNBRecord.getMailingDnbStreetLine2() == null ? "" : matchedDNBRecord.getMailingDnbStreetLine2()) + " "
+                            + (matchedDNBRecord.getMailingDnbCity() == null ? "" : matchedDNBRecord.getMailingDnbCity()) + " "
+                            + (matchedDNBRecord.getMailingDnbPostalCd() == null ? "" : matchedDNBRecord.getMailingDnbPostalCd()) + " "
+                            + (matchedDNBRecord.getMailingDnbCountry() == null ? "" : matchedDNBRecord.getMailingDnbCountry()) + "\n\n");
                       } else {
-                        checkDetails.append(" - Address:  " + matchedDNBRecord.getDnbStreetLine1() + " " + matchedDNBRecord.getDnbCity() + " " + matchedDNBRecord.getDnbPostalCode() + " "
-                            + matchedDNBRecord.getDnbCountry() + "\n\n");
+                        checkDetails.append(" - Address:  " + matchedDNBRecord.getDnbStreetLine1() + " "
+                            + (matchedDNBRecord.getDnbStreetLine2() == null ? "" : matchedDNBRecord.getDnbStreetLine2()) + " "
+                            + matchedDNBRecord.getDnbCity() + " " + matchedDNBRecord.getDnbPostalCode() + " " + matchedDNBRecord.getDnbCountry()
+                            + "\n\n");
                       }
                     }
                   } else {
@@ -705,13 +714,17 @@ public class NewZealandUtil extends AutomationUtil {
               // DNB, show mailing address in automation details
               if (matchedDNBRecord != null) {
                 checkDetails.append(" - DUNS No.:  " + matchedDNBRecord.getDunsNo() + " \n");
-                checkDetails.append(" - Name.:  " + matchedDNBRecord.getDnbName() + " \n");
+                checkDetails.append(" - Name:  " + matchedDNBRecord.getDnbName() + " \n");
                 if ((boolean) map.get("dnbAddrMatchWithMailing")) {
-                  checkDetails.append(" - Address:  " + matchedDNBRecord.getMailingDnbStreetLine1() + " " + matchedDNBRecord.getMailingDnbCity() + " "
-                      + matchedDNBRecord.getMailingDnbPostalCd() + " " + matchedDNBRecord.getMailingDnbCountry() + "\n\n");
+                  checkDetails.append(" - Mailing Address:  " + matchedDNBRecord.getMailingDnbStreetLine1() + " "
+                      + (matchedDNBRecord.getMailingDnbStreetLine2() == null ? "" : matchedDNBRecord.getMailingDnbStreetLine2()) + " "
+                      + (matchedDNBRecord.getMailingDnbCity() == null ? "" : matchedDNBRecord.getMailingDnbCity()) + " "
+                      + (matchedDNBRecord.getMailingDnbPostalCd() == null ? "" : matchedDNBRecord.getMailingDnbPostalCd()) + " "
+                      + (matchedDNBRecord.getMailingDnbCountry() == null ? "" : matchedDNBRecord.getMailingDnbCountry()) + "\n\n");
                 } else {
-                  checkDetails.append(" - Address:  " + matchedDNBRecord.getDnbStreetLine1() + " " + matchedDNBRecord.getDnbCity() + " "
-                      + matchedDNBRecord.getDnbPostalCode() + " " + matchedDNBRecord.getDnbCountry() + "\n\n");
+                  checkDetails.append(" - Address:  " + matchedDNBRecord.getDnbStreetLine1() + " "
+                      + (matchedDNBRecord.getDnbStreetLine2() == null ? "" : matchedDNBRecord.getDnbStreetLine2()) + " "
+                      + matchedDNBRecord.getDnbCity() + " " + matchedDNBRecord.getDnbPostalCode() + " " + matchedDNBRecord.getDnbCountry() + "\n\n");
                 }
               }
             } else {
