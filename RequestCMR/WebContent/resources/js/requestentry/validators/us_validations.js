@@ -507,8 +507,8 @@ function afterConfigForUS() {
     usCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       if (FormManager.getActualValue('landCntry') != '' && FormManager.getActualValue('landCntry') != 'US') {
         FormManager.setValue('postCd', '00000');
-        //CreateCMR-8143
-        //FormManager.readOnly('postCd');
+        // CreateCMR-8143
+        // FormManager.readOnly('postCd');
       } else {
         var readOnly = false;
         try {
@@ -565,7 +565,6 @@ function afterConfigForUS() {
 
   if (_usIsuHandler == null && FormManager.getField('isuCd')) {
     _usIsuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      afterConfigForUS();
       setClientTierValuesUS();
     });
   }
@@ -1396,7 +1395,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
   // CREATCMR-4466
-  //GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA
+  // ], null, true);
   // ], null, true);
   GEOHandler.addAfterConfig(lockOrdBlk, [ SysLoc.USA ]);
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.USA ], null, true);
