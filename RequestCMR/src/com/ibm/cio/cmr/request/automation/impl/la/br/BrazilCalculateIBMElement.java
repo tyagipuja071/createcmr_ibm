@@ -110,7 +110,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
     // skip setting of sbo via state for this scenarios
     final List<String> skipScenarios = Arrays.asList("IBMEM", "PRIPE", "BUSPR", "INTER");
-    final List<String> skipSBO = Arrays.asList("515", "979");
+    final List<String> skipSBO = Arrays.asList("515", "979", "461", "010");
 
     // Set Data.SALES_BO_CD for stateProv Coverage change !!
     final List<String> STATEPROV_763 = Arrays.asList("AM", "PA", "AC", "RO", "RR", "AP", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA");
