@@ -151,7 +151,7 @@ boolean approver = user != null && user.isApprover();
 						<tiles:insertAttribute name="body" />
 
 <%if (user != null) {%>
-            <div id="quick_search_btn" onclick="openQuickSearch()" class="cmr-feedback-btn cmr-quick-search-btn" 
+            <div id="quick_search_btn" style="top:260px" onclick="openQuickSearch()" class="cmr-feedback-btn cmr-quick-search-btn" 
               title="Easily search for existing CMRs or company information via D&B and create new requests directly from the results." >Quick Search</div>
 <%} %>             
 						<!--  The Export Form -->
