@@ -108,11 +108,16 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       overrides.addOverride(getProcessCode(), "DATA", "LOCN_NO", data.getLocationNumber(), "");
     }
 
+    // skip setting of sbo via state for this scenarios
+    final List<String> skipScenarios = Arrays.asList("IBMEM", "PRIPE", "BUSPR", "INTER");
+    final List<String> skipSBO = Arrays.asList("515", "979");
+
     // Set Data.SALES_BO_CD for stateProv Coverage change !!
     final List<String> STATEPROV_763 = Arrays.asList("AM", "PA", "AC", "RO", "RR", "AP", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA");
     final List<String> STATEPROV_504 = Arrays.asList("DF", "GO", "MT", "MS");
     final List<String> STATEPROV_758 = Arrays.asList("PR", "SC", "RS");
-    if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && reqType.equals("C") ) {
+    if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && reqType.equals("C")
+        && (!skipScenarios.contains(data.getCustSubGrp()) && !skipSBO.contains(data.getSalesBusOffCd()))) {
       if ("RJ".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "761");
       } else if ("SP".equals(soldTo.getStateProv())) {
@@ -923,8 +928,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       } else if ("CC3CC".equalsIgnoreCase(scenarioSubType)) {
         if (midasResponse != null && midasResponse.isSuccess()) {
           String abbrevName = (midasResponse.getRecord().getCompanyName().length() > 26)
-              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26)
-              : "CC3/" + (midasResponse.getRecord().getCompanyName());
+              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26) : "CC3/" + (midasResponse.getRecord().getCompanyName());
           LOG.debug("Sold To Company Name : " + midasResponse.getRecord().getCompanyName());
           // SET Abbreviated Name
           details.append("Abbreviated Name (TELX1) = " + abbrevName + "\n");
@@ -1307,23 +1311,23 @@ public class BrazilCalculateIBMElement extends OverridingElement {
             LOG.debug("Warning: State Fiscal Code cannot be determined from Sintegra .\n");
           }
         } else {
-            consultaResponse = BrazilUtil.querySintegraByConsulata(vat, state);
-            if (consultaResponse.isSuccess()) {
-              ConsultaCCCResponse consulta = consultaResponse.getRecord();
-              if (consulta != null) {
-                status = consulta.getStateFiscalCodeStatus();
-                if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
-                    || "Ativa".equalsIgnoreCase(status)) {
-                  stateFiscalCode = consulta.getStateFiscalCode();
-                } else {
-          status = "ISENTO";
-          stateFiscalCode = "ISENTO";
-                }
+          consultaResponse = BrazilUtil.querySintegraByConsulata(vat, state);
+          if (consultaResponse.isSuccess()) {
+            ConsultaCCCResponse consulta = consultaResponse.getRecord();
+            if (consulta != null) {
+              status = consulta.getStateFiscalCodeStatus();
+              if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
+                  || "Ativa".equalsIgnoreCase(status)) {
+                stateFiscalCode = consulta.getStateFiscalCode();
+              } else {
+                status = "ISENTO";
+                stateFiscalCode = "ISENTO";
               }
-            } else {
-              status = "ISENTO";
-              stateFiscalCode = "ISENTO";
             }
+          } else {
+            status = "ISENTO";
+            stateFiscalCode = "ISENTO";
+          }
 
           details.append(addrTypeDesc + " State Fiscal Code cannot be determined from Sintegra.Setting to ISENTO\n");
           details.append(addrTypeDesc + " State Fiscal Code Status = " + status + "\n");
