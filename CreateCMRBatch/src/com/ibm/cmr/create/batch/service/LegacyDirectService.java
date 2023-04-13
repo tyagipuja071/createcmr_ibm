@@ -245,7 +245,6 @@ public class LegacyDirectService extends TransConnService {
         continue;
       }
       try {
-
         CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin, true);
         data = cmrObjects.getData();
 
@@ -1341,7 +1340,7 @@ public class LegacyDirectService extends TransConnService {
     cust.setSalesGroupRep(data.getSalesTeamCd());
 
     if (!StringUtils.isEmpty(data.getEnterprise())) {
-      cust.setEnterpriseNo(data.getEnterprise());
+      cust.setEnterpriseNo(data.getEnterprise().length() > 6 ? data.getEnterprise().substring(0, 6) : data.getEnterprise());
     }
     cust.setCeBo(data.getEngineeringBo());
     cust.setIbo((!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd() : ""));
@@ -1412,6 +1411,13 @@ public class LegacyDirectService extends TransConnService {
         legacyAddrPk.setCustomerNo(cmrNo);
         legacyAddrPk.setSofCntryCode(cntry);
         String newSeqNo = StringUtils.leftPad(Integer.toString(seqNo), 5, '0');
+        
+        // CREATCMR - 8014 -> for API Requests
+    	String reqAddrSeq = addr.getId().getAddrSeq(); 
+        if(StringUtils.isNotEmpty(reqAddrSeq) && reqAddrSeq.length() < 5) {
+        	String paddedSeq = StringUtils.leftPad(reqAddrSeq, 5, '0');
+        	addr.getId().setAddrSeq(paddedSeq);
+        }
         // Mukesh:Story 1698123
         if ("00001".equals(addr.getId().getAddrSeq()))
           legacyAddrPk.setAddrNo(newSeqNo);
@@ -1600,9 +1606,9 @@ public class LegacyDirectService extends TransConnService {
     if (!StringUtils.isBlank(data.getAcAdminBo())) {
       cust.setAccAdminBo(data.getAcAdminBo());
     }
-
+    LOG.debug("LegacyDirectService - data.getEmbargoCd() : " + data.getEmbargoCd());
     cust.setEmbargoCd(data.getEmbargoCd() != null ? data.getEmbargoCd() : "");
-
+    LOG.debug("LegacyDirectService - cust.setEmbargoCd() : " + cust.getEmbargoCd());
     if (!StringUtils.isBlank(data.getIsicCd())) {
       cust.setIsicCd(data.getIsicCd());
     }
@@ -2564,7 +2570,7 @@ public class LegacyDirectService extends TransConnService {
             response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
           } else {
             try {
-              this.serviceClient.setReadTimeout(60 * 30 * 1000); // 30 mins
+              this.serviceClient.setReadTimeout(60 * 60 * 1000); // 60 mins
               response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
 
               if (response != null && response.getStatus().equals("A")
@@ -2607,9 +2613,17 @@ public class LegacyDirectService extends TransConnService {
               if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
                 comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
                     + " was SUCCESSFULLY processed:\n");
+                LOG.info("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
+                    + " was SUCCESSFULLY processed:\n");
                 for (RDcRecord pRecord : response.getRecords()) {
-                  comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
-                  comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  if (comment.length() > 9900) {
+                    LOG.info("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    LOG.info(" address type: " + pRecord.getAddressType() + "\n");
+                  } else {
+                    comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  }
+
                 }
               }
             } else {

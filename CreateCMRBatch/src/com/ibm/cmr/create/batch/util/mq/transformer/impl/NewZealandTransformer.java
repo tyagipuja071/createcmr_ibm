@@ -50,7 +50,9 @@ public class NewZealandTransformer extends ANZTransformer {
       }
 
       String line2 = "";
-      if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      if (!StringUtils.isBlank(addrData.getAddrTxt()) && !StringUtils.isBlank(addrData.getAddrTxt2())) {
+        line2 += "AT " + addrData.getAddrTxt();
+      } else if (!StringUtils.isBlank(addrData.getAddrTxt())) {
         line2 += addrData.getAddrTxt();
       }
 
@@ -90,12 +92,12 @@ public class NewZealandTransformer extends ANZTransformer {
             line4 += " " + "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
         }
       }
-      
+
       line4 = StringUtils.rightPad(line4, 24, ' ');
       line4 += postCd;
-      
+
       handler.messageHash.put("AddrLine4", line4);
-      
+
       // move up and remove blank links
       List<String> lines = new ArrayList<>();
       String line = null;
@@ -164,7 +166,9 @@ public class NewZealandTransformer extends ANZTransformer {
     }
 
     String line4 = "";
-    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+    if (!StringUtils.isBlank(addrData.getAddrTxt()) && !StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line4 += "AT " + addrData.getAddrTxt();
+    } else if (!StringUtils.isBlank(addrData.getAddrTxt())) {
       line4 += addrData.getAddrTxt();
     }
 

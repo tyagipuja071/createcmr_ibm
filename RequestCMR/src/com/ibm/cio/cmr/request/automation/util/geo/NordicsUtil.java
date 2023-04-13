@@ -252,6 +252,16 @@ public class NordicsUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     Addr zp01 = requestData.getAddress("ZP01");
     String customerName = getCustomerFullName(zs01);
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if (zs01 != null) {
+      String landCntry = zs01.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
+    }
 
     if (zp01 != null && !compareCustomerNames(zs01, zp01)) {
       details.append("Sold-to and Bill-to name are not identical. Request will require CMDE review before proceeding.").append("\n");
@@ -380,6 +390,9 @@ public class NordicsUtil extends AutomationUtil {
 
     if (Arrays.asList(bpScenariosToBeChecked).contains(scenario)) {
       for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
         if (StringUtils.isNotBlank(match.getCustClass())) {
           String kukla = match.getCustClass() != null ? match.getCustClass() : "";
           if (Arrays.asList(kuklaBUSPR).contains(kukla) || isuCTCMatch(match.getCmrNo(), entityManager, cntry)) {
@@ -419,6 +432,9 @@ public class NordicsUtil extends AutomationUtil {
     if (response.getMatches() != null) {
       for (DuplicateCMRCheckResponse res : response.getMatches()) {
         List<CmrtCust> results = null;
+        if (res.getCmrNo() != null && res.getCmrNo().startsWith("P") && "75".equals(res.getOrderBlk())) {
+          subScenarioMatches.add(res);
+        }
         try {
           String sql = ExternalizedQuery.getSql("LEGACYD.GETCUST");
           PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -568,22 +584,29 @@ public class NordicsUtil extends AutomationUtil {
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
       case "VAT #":
-        if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
-          // ADD
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+        if (requestData.getAddress("ZS01").getLandCntry().equals("GB")) {
+          if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)) {
+            engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+            details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
           }
-          if (!matchesDnb) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
-            details.append("VAT # on the request did not match D&B\n");
-          } else {
-            details.append("VAT # on the request matches D&B\n");
-            engineData.setVatVerified(true, "VAT Verified");
+        } else {
+          if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+            // ADD
+            Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+            }
+            if (!matchesDnb) {
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
+              details.append("VAT # on the request did not match D&B\n");
+            } else {
+              details.append("VAT # on the request matches D&B\n");
+              engineData.setVatVerified(true, "VAT Verified");
+            }
           }
         }
         break;
@@ -747,12 +770,10 @@ public class NordicsUtil extends AutomationUtil {
         AutomationServiceClient.class);
     client.setReadTimeout(1000 * 60 * 5);
     client.setRequestMethod(Method.Get);
-
     String vat = data.getVat();
     if (StringUtils.isNotBlank(vat) && SystemLocation.NORWAY.equalsIgnoreCase(data.getCmrIssuingCntry()) && vat.contains("MVA")) {
       vat = vat.replaceAll("MVA", "").trim();
     }
-
     NorwayVatRequest request = new NorwayVatRequest();
     String vatReq = StringUtils.isNumeric(vat) ? vat : vat.substring(2);
     request.setVat(vatReq);

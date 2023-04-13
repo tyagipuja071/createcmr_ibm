@@ -81,7 +81,7 @@ dojo.addOnLoad(function(){
 	         </cmr:view>
 	         <cmr:view forCountry="852,856,818">
             	<cmr:info text="${ui.info.clusterReminderMsgTH_VN_PH}"></cmr:info>
-        	 </cmr:view>
+        	 </cmr:view> 
 	        </cmr:label>
 	        <cmr:field path="apCustClusterId" id="apCustClusterId" fieldId="Cluster" tabId="MAIN_IBM_TAB" />
 	      	</p>
@@ -471,5 +471,15 @@ dojo.addOnLoad(function(){
     </cmr:view>
    --%>
 		</cmr:view>
+
+	  <!-- // CREATCMR-8430 -->
+	  <cmr:view forCountry="796">
+		<cmr:row addBackground="true" topPad="10">
+		  <cmr:column span="1" width="220">
+			<form:hidden path="usSicmen"/>
+		  </cmr:column>
+		</cmr:row>
+	  </cmr:view>
+	  <!-- // CREATCMR-8430 -->
      
 	</cmr:section>

@@ -287,7 +287,8 @@ public class AutomationEngine {
           } else {
             actionsOnError.add(element.getActionOnError());
             if (element.isStopOnError()) {
-              if ((element instanceof CompanyVerifier) && payGoAddredited) {
+              //if ((element instanceof CompanyVerifier) && payGoAddredited) {
+              if (element instanceof CompanyVerifier) {
                 // don't stop for paygo accredited and verifier element
                 LOG.debug("Error in " + element.getProcessDesc() + " but continuing process for PayGo.");
               } else {
@@ -329,6 +330,16 @@ public class AutomationEngine {
         LOG.trace("Skipping element " + element.getProcessDesc() + " for request type " + reqType);
       }
       lastElementIndex++;
+    }
+
+    boolean sccIsValid = false;
+    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+      String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
+      if ("N".equals(setPPNFlag)) {
+        sccIsValid = true;
+      }
+    } else if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
+      checkNZBNAPI(stopExecution, actionsOnError);
     }
 
     LOG.debug("Automation elements executed for Request " + reqId);
@@ -412,22 +423,21 @@ public class AutomationEngine {
 
         if ("U".equals(admin.getReqType())) {
           if ("PG".equals(data.getOrdBlk())) {
-            admin.setPaygoProcessIndc("Y");
+            // admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited) {
-            admin.setPaygoProcessIndc("Y");
+            // admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           }
         }
 
-        if (moveForPayGo) {
+        if ("C".equals(admin.getReqType()) && moveForPayGo) {
           createComment(entityManager, "Pay-Go accredited partner. Request passed all other checks, moving to processing.", reqId, appUser);
           admin.setPaygoProcessIndc("Y");
           // data.setIsicCd("8888");
           // data.setUsSicmen("8888");
           // data.setSubIndustryCd("ZZ");
         } else {
-
           if (!actionsOnError.isEmpty()) {
             // an error has occurred
             if (actionsOnError.contains(ActionOnError.Reject)) {
@@ -500,7 +510,7 @@ public class AutomationEngine {
           }
         }
         if (moveToNextStep) {
-
+          LOG.debug("Moving to next step for " + reqId + ", Cntry is " + data.getCmrIssuingCntry());
           // if there is anything that changed on the request via automated
           // import of overrides /match /standard output, do a save
           if (hasOverrideOrMatchingApplied) {
@@ -614,6 +624,30 @@ public class AutomationEngine {
     entityManager.merge(admin);
     entityManager.flush();
     LOG.debug("Automation engine for Request " + reqId + " finished");
+  }
+
+  /**
+   * Check the NZBN API and DNB result to judge new result
+   * 
+   * @param boolean
+   *          stopExecution
+   * @param List<ActionOnError>
+   *          actionsOnError
+   * @return
+   * @throws @throws
+   */
+  private void checkNZBNAPI(boolean stopExecution, List<ActionOnError> actionsOnError) {
+    if (engineData.get().isNZBNAPICheck()
+        && (engineData.get().getPendingChecks().containsKey("DnBMatch") || engineData.get().getPendingChecks().containsKey("DNBCheck"))) {
+      stopExecution = false;
+      if (engineData.get().getPendingChecks().containsKey("DnBMatch")) {
+        engineData.get().getPendingChecks().remove("DnBMatch");
+        if (actionsOnError != null && actionsOnError.size() > 0)
+          actionsOnError.remove(0);
+      }
+      if (engineData.get().getPendingChecks().containsKey("DNBCheck"))
+        engineData.get().getPendingChecks().remove("DNBCheck");
+    }
   }
 
   /**

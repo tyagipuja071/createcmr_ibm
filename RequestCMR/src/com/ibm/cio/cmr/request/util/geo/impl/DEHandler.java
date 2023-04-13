@@ -91,7 +91,6 @@ public class DEHandler extends GEOHandler {
         }
       }
     }
-
   }
 
   @SuppressWarnings("unchecked")
@@ -203,6 +202,7 @@ public class DEHandler extends GEOHandler {
 
   @Override
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = null;
     if (!StringUtils.isEmpty(addrType)) {
       if ("ZD02".equals(addrType)) {
         return "598";
@@ -210,11 +210,8 @@ public class DEHandler extends GEOHandler {
         return "599";
       }
     }
-
-    // CREATCMR-6139
     // return super.generateAddrSeq(entityManager, addrType, reqId,
     // cmrIssuingCntry);
-    String newAddrSeq = null;
     int addrSeq = 0;
     String maxAddrSeq = null;
     String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_CEE");
@@ -242,8 +239,6 @@ public class DEHandler extends GEOHandler {
 
     newAddrSeq = Integer.toString(addrSeq);
     return newAddrSeq;
-    // CREATCMR-6139
-
   }
 
   @Override
@@ -430,8 +425,8 @@ public class DEHandler extends GEOHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX",
-        "ADDR_TXT", "CUST_PHONE"));
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "POST_CD",
+        "LAND_CNTRY", "PO_BOX", "ADDR_TXT", "CUST_PHONE"));
     return fields;
   }
 

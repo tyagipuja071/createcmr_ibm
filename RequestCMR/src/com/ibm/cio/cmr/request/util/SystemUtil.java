@@ -605,4 +605,16 @@ public class SystemUtil {
     }
     return dateToSave;
   }
+
+  /**
+   * Determines if KYC or EVS will be used for DPL checks
+   * 
+   * @return
+   */
+  public static boolean useKYCForDPLChecks() {
+    // check system parameter. By Default use KYC
+    boolean kyc = !"EVS".equals(SystemParameters.getString("DPL.SYSTEM"));
+    LOG.debug("Using " + (kyc ? "KYC" : "EVS") + " for DPL Checks..");
+    return kyc;
+  }
 }

@@ -1,7 +1,7 @@
 <%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
 <%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %> 
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
@@ -220,6 +220,13 @@ dojo.addOnLoad(function(){
             </cmr:view>
           </cmr:label>
           <cmr:field fieldId="SearchTerm" id="searchTerm" path="searchTerm" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      
+      <cmr:column span="2" containerForField="IndustryClass" forCountry="858" >
+        <p>
+          <label style="">IndustryClass:</label>
+          <input type="text" id="IndustryClass" name ="IndustryClass" value="${fn:substring(reqentry.subIndustryCd, 0, 1)}" readonly="readonly" style="width:15px;BACKGROUND: #FFFFEE;border: 1px Solid #DDDDDD"/>
         </p>
       </cmr:column>
 
@@ -442,7 +449,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
   				</p>
   			</cmr:column>
-        <cmr:column exceptForGEO="MCO2,NORDX" span="2" containerForField="MembLevel" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858,766,755,897,724,618,848">
+        <cmr:column exceptForGEO="MCO2,NORDX" span="2" containerForField="MembLevel" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858,766,755,897,724,618,848,862">
           <p>
             <cmr:label fieldId="memLvl">
               <cmr:fieldLabel fieldId="MembLevel" />:
@@ -451,7 +458,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="MembLevel" id="memLvl" path="memLvl" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
-        <cmr:column exceptForGEO="MCO2,NORDX" span="2" containerForField="BPRelationType" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858,755,724,618,848">
+        <cmr:column exceptForGEO="MCO2,NORDX" span="2" containerForField="BPRelationType" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858,755,724,618,848,862">
           <p>
             <cmr:label fieldId="bpRelType">
               <cmr:fieldLabel fieldId="BPRelationType" />:

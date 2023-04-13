@@ -140,6 +140,12 @@
           <width>40</width>
           <length>30</length>
         </column>
+        <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
+       </column>
         <column exactLength="true">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
@@ -156,7 +162,7 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>18</width>
           <bdsId>LandedCountry</bdsId>
-        </column>        
+        </column>     
         <column>
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
@@ -227,6 +233,12 @@
           <width>40</width>
           <length>30</length>
         </column>
+        <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
+       </column>
         <column exactLength="true">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
@@ -243,7 +255,7 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>18</width>
           <bdsId>LandedCountry</bdsId>
-        </column>        
+        </column>      
         <column>
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
@@ -308,6 +320,12 @@
           <width>40</width>
           <length>30</length>
         </column>
+        <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
+       </column>
         <column exactLength="true">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
@@ -388,6 +406,12 @@
           <width>40</width>
           <length>30</length>
         </column>
+        <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
+       </column>
         <column exactLength="true">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>

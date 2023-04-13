@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -8,6 +9,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -20,6 +22,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.IntlAddrPK;
+import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -41,11 +44,10 @@ public class ChinaUtil extends AutomationUtil {
   public static final String SCENARIO_LOCAL_INTER = "INTER";
   public static final String SCENARIO_LOCAL_PRIV = "PRIV";
   public static final String SCENARIO_ECOSYTEM_PARNER = "ECOSY";
-  // private static final List<String> RELEVANT_ADDRESSES =
-  // Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-  // CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
-  // private static final List<String> NON_RELEVANT_ADDRESS_FIELDS =
-  // Arrays.asList("Attention Person", "Phone #", "Collection Code");
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
+  private static final List<String> RELEVANT_ADDRESS_FIELDS_ENHANCEMENT = Arrays.asList("City English", "City Chinese", "District English",
+      "District Chinese", "Department English", "Building English");
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -483,6 +485,35 @@ public class ChinaUtil extends AutomationUtil {
         || zd01EnAddr1 || zd01CnAddr1 || zd01EnAddr2 || zd01CnAddr2) {
 
       return true;
+    } else if (checkExtraUpdateFields(requestData, changes)) {
+      return true;
+    }
+    return false;
+  }
+
+  private boolean checkExtraUpdateFields(RequestData requestData, RequestChangeContainer changes) {
+    List<Addr> addresses = null;
+    for (String addrType : RELEVANT_ADDRESSES) {
+      if (changes.isAddressChanged(addrType)) {
+        if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+        } else {
+          addresses = requestData.getAddresses(addrType);
+        }
+        for (Addr addr : addresses) {
+          if (addr != null) {
+            List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+            if (addrChanges == null) {
+              return false;
+            }
+            for (UpdatedNameAddrModel change : addrChanges) {
+              if (RELEVANT_ADDRESS_FIELDS_ENHANCEMENT.contains(change.getDataField())) {
+                return true;
+              }
+            }
+          }
+        }
+      }
     }
     return false;
   }
@@ -551,7 +582,7 @@ public class ChinaUtil extends AutomationUtil {
     return true;
   }
 
-  public String geDocContent(EntityManager entityManager, long req_id) {
+  public static String geDocContent(EntityManager entityManager, long req_id) {
     String sql = ExternalizedQuery.getSql("QUERY.CHECK_CN_API_ATTACHMENT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", req_id);

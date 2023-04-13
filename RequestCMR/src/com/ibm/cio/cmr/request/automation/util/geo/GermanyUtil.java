@@ -105,6 +105,16 @@ public class GermanyUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     boolean valid = true;
     String scenario = data.getCustSubGrp();
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if(zs01 != null){
+    	String landCntry = zs01.getLandCntry();
+    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
+                && ("CROSS".equals(custGrp))){
+        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+        }
+    }
     // cmr-2067 fix
     engineData.setMatchDepartment(true);
     // if (admin.getSourceSystId() != null &&
@@ -301,7 +311,81 @@ public class GermanyUtil extends AutomationUtil {
       case "DC":
       case "XDC":
         // Duplicate CMR checks Based on Name and Addresses
-        valid = duplicateCmrCheck3PADC(requestData, engineData, details, data, zs01, zi01, valid, scenario);
+        // Duplicate CMR checks Based on Name and Addresses
+        try {
+          String zs01Kunnr = null;
+          String zi01Kunnr = null;
+          String dupCMRzS01 = null;
+          String dupCMRzI01 = null;
+          for (Addr addr : requestData.getAddresses()) {
+            String addrTyp = addr.getId().getAddrType();
+            if (StringUtils.isNotBlank(addrTyp) && (addrTyp.equalsIgnoreCase("ZS01") || addrTyp.equalsIgnoreCase("ZI01"))) {
+              String custNm = addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
+              String duplicateCMRNo = null;
+              // getting fuzzy matches on basis of name
+              MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+                  MatchingServiceClient.class);
+              DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
+              request.setCustomerName(custNm);
+              request.setIssuingCountry(data.getCmrIssuingCntry());
+              request.setLandedCountry(addr.getLandCntry());
+              request.setPostalCode(addr.getPostCd());
+              request.setStateProv(addr.getStateProv());
+              request.setStreetLine1(addr.getAddrTxt());
+              request.setStreetLine2(addr.getAddrTxt2());
+              request.setCity(addr.getCity1());
+              request.setAddrType(addrTyp);
+              client.setReadTimeout(1000 * 60 * 5);
+              LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+              MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
+              ObjectMapper mapper = new ObjectMapper();
+              String json = mapper.writeValueAsString(rawResponse);
+
+              TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> ref = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
+              };
+
+              MatchingResponse<DuplicateCMRCheckResponse> resp = mapper.readValue(json, ref);
+
+              if (resp.getSuccess()) {
+                if (resp.getMatched() && resp.getMatches().size() > 0) {
+                  duplicateCMRNo = resp.getMatches().get(0).getCmrNo();
+                  if (addrTyp.equalsIgnoreCase("ZS01")) {
+                    dupCMRzS01 = duplicateCMRNo;
+                    zs01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.GERMANY);
+                  } else if (addrTyp.equalsIgnoreCase("ZI01")) {
+                    dupCMRzI01 = duplicateCMRNo;
+                    zi01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.GERMANY);
+                  }
+                }
+              }
+            }
+          }
+          if (zs01Kunnr != null && zi01Kunnr != null && StringUtils.isNotBlank(dupCMRzS01) && StringUtils.isNotBlank(dupCMRzI01)
+              && dupCMRzS01.equals(dupCMRzI01)) {
+            details.append("The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
+                + " already has a record with CMR No. for Sold-To " + dupCMRzS01 + " and for Install-At " + dupCMRzI01).append("\n");
+            engineData.addRejectionComment("DUPC",
+                "The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
+                    + " already has a record with CMR No. for Sold-To " + dupCMRzS01,
+                dupCMRzS01, zs01Kunnr);
+            engineData.addRejectionComment("DUPC",
+                "The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
+                    + " already has a record with CMR No. for Install-At " + dupCMRzI01,
+                dupCMRzI01, zi01Kunnr);
+            valid = false;
+          } else {
+            details.append("No Duplicate CMRs were found.").append("\n");
+          }
+        } catch (Exception e) {
+          details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
+          engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+        }
+        // Sold-To and Install-At cannot be same for these scenarios
+        if (zs01 != null && zi01 != null && addressEquals(zs01, zi01)) {
+          engineData.addRejectionComment("OTH", "For this scenario, Sold-to and Install-at need to be different", "", "");
+          details.append("For 3rd Party and Data Center Sold-To and Install-At address should be different");
+          return false;
+        }
         break;
       }
 
@@ -656,7 +740,7 @@ public class GermanyUtil extends AutomationUtil {
           data.getCmrIssuingCntry());
       if (queryResults != null && !queryResults.isEmpty()) {
         for (DACHFieldContainer result : queryResults) {
-          DACHFieldContainer queryResult = (DACHFieldContainer) result;
+          DACHFieldContainer queryResult = result;
           String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
           String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
           String queryIsu = queryResult.getIsuCd();
@@ -799,45 +883,57 @@ public class GermanyUtil extends AutomationUtil {
       if (changes.isDataChanged("VAT #")
           || (CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo))) {
         UpdatedDataModel vatChange = changes.getDataChange("VAT #");
-        if (isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo)
-            || (vatChange != null && (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
-                || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())))) {
-          // check if the name + VAT exists in D&B
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          if (matches.isEmpty()) {
-            // get DnB matches based on all address details
-            matches = getMatches(requestData, engineData, soldTo, false);
-          }
-          String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
-          if (!matches.isEmpty()) {
-            for (DnBMatchingResponse dnbRecord : matches) {
-              if ("Y".equals(dnbRecord.getOrgIdMatch()) && (StringUtils.isNotEmpty(custName) && StringUtils.isNotEmpty((dnbRecord.getDnbName()))
-                  && StringUtils.getLevenshteinDistance(custName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) <= 5)) {
-                duns = dnbRecord.getDunsNo();
-                isNegativeCheckNeedeed = false;
-                break;
-              }
-              isNegativeCheckNeedeed = true;
-            }
-          }
-          if (isNegativeCheckNeedeed) {
-            detail.append("Updates to VAT need verification as VAT and legal name doesn't matches DnB.\n");
-            LOG.debug("Updates to VAT need verification as VAT and legal name doesn't matches DnB.");
-          } else {
-            detail.append("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
-            LOG.debug("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
-          }
+        	if(vatChange != null && requestData.getAddress("ZS01").getLandCntry().equals("GB")){
+        		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
+                      engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+                      detail.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+                      isNegativeCheckNeedeed = true;
+                      }
+                }
+          if (isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo) || (vatChange != null && (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
+                            || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())))) {
+                          // check if the name + VAT exists in D&B
+                          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+                          if (matches.isEmpty()) {
+                            // get DnB matches based on all address details
+                            matches = getMatches(requestData, engineData, soldTo, false);
+                          }
+                          String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
+                          if (!matches.isEmpty()) {
+                            boolean matchesDnb = false;
+                            for (DnBMatchingResponse dnbRecord : matches) {
+                              if ("Y".equals(dnbRecord.getOrgIdMatch()) && (StringUtils.isNotEmpty(custName) && StringUtils.isNotEmpty((dnbRecord.getDnbName()))
+                                  && StringUtils.getLevenshteinDistance(custName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) <= 5)) {
+                                duns = dnbRecord.getDunsNo();
+                                isNegativeCheckNeedeed = false;
+                                matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+                                if (!matchesDnb) {
+                                  isNegativeCheckNeedeed = true;
+                                  engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
+                                }
+                                break;
+                              }
+                              isNegativeCheckNeedeed = true;
+                            }
+                          }
+                          if (isNegativeCheckNeedeed) {
+                            detail.append("Updates to VAT need verification as VAT and legal name doesn't matches DnB.\n");
+                            LOG.debug("Updates to VAT need verification as VAT and legal name doesn't matches DnB.");
+                          } else {
+                            detail.append("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
+                            LOG.debug("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
+                          }
 
-        } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
-          admin.setScenarioVerifiedIndc("N");
-          entityManager.merge(admin);
-          detail.append("Setting scenario verified indc= N as VAT is blank.\n");
-          LOG.debug("Setting scenario verified indc= N as VAT is blank.");
-        } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
-          isNegativeCheckNeedeed = true;
-          detail.append("Updates to VAT need verification.\n");
-          LOG.debug("Updates to VAT need verification.");
-        }
+                        } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
+                          admin.setScenarioVerifiedIndc("N");
+                          entityManager.merge(admin);
+                          detail.append("Setting scenario verified indc= N as VAT is blank.\n");
+                          LOG.debug("Setting scenario verified indc= N as VAT is blank.");
+                        } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
+                          isNegativeCheckNeedeed = true;
+                          detail.append("Updates to VAT need verification.\n");
+                          LOG.debug("Updates to VAT need verification.");
+                        }
       } else if (changes.isDataChanged("Order Block")) {
         UpdatedDataModel OBChange = changes.getDataChange("Order Block");
         if (OBChange != null) {
@@ -961,6 +1057,20 @@ public class GermanyUtil extends AutomationUtil {
           output.setProcessOutput(validation);
           return true;
         }
+
+        if (StringUtils.isNotBlank(data.getCustSubGrp()) && "3PA".contains(data.getCustSubGrp())
+            && ((changes.isAddressChanged("ZI01") && isOnlyDnBRelevantFieldUpdated(changes, "ZI01")) || isAddressAdded(installAt))) {
+          // Check if address closely matches DnB
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installAt, false);
+          if (matches != null) {
+            isBillToMatchesDnb = ifaddressCloselyMatchesDnb(matches, installAt, admin, data.getCmrIssuingCntry());
+            if (!isBillToMatchesDnb) {
+              isNegativeCheckNeedeed = true;
+              detail.append("Updates to Install-at address need verification as it does not matches D&B");
+              LOG.debug("Updates to Install-at address need verification as it does not matches D&B");
+            }
+          }
+        }
       }
 
       if (billTo != null && (changes.isAddressChanged("ZP01") || isAddressAdded(billTo))) {
@@ -1036,6 +1146,7 @@ public class GermanyUtil extends AutomationUtil {
           }
         }
       }
+
       if (isNegativeCheckNeedeed || isShipToExistOnReq || isInstallAtExistOnReq || isBillToExistOnReq || isPayGoBillToExistOnReq) {
         validation.setSuccess(false);
         validation.setMessage("Not validated");

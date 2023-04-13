@@ -7,8 +7,13 @@ function addAfterConfigForSWISS() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var impIndc = getImportedIndcForSwiss();
-
+  var impIndc = getImportedIndcForSwiss();  
+  if (role == 'REQUESTER') {
+    FormManager.removeValidator('custLangCd', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('custLangCd', Validators.REQUIRED, [ 'Prefered Langauge' ], null);
+  }
+ 
   if (role == 'REQUESTER') {
     FormManager.readOnly('subIndustryCd');
   } else {
@@ -145,12 +150,12 @@ function addAfterConfigForSWISS() {
       FormManager.setValue('vat', '');
     } else {
       // FormManager.enable('vat');
-      if (!dijit.byId('vatExempt').get('checked')) {
+      if (dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
         dijit.byId('vatExempt').set('checked', false);
         setVatValidatorSWISS();
       }
     }
-  }
+  }  
 }
 
 function resetAddrTypeValidation() {
@@ -366,7 +371,7 @@ function addHandlersForSWISS() {
     _vatHandler = dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
       if (value.length >= 15) {
         addVatSuffixForCustLangCdScrtch();
-      }
+      }           
     });
   }
 
@@ -445,14 +450,27 @@ function addVatSuffixForCustLangCdScrtch() {
 }
 
 /* Vat Exempt Handler */
-function setVatValidatorSWISS() {
-  var vatInd = FormManager.getActualValue('vatInd');
+function setVatValidatorSWISS() {  
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+
+  var _reqId = FormManager.getActualValue('reqId');
+  var params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01"
+  };
+
+  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+  landCntry = landCntryResult.ret1;
+
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+
     FormManager.resetValidations('vat');
-    if (!dijit.byId('vatExempt').get('checked')) {
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-    }
+
+    // if (!dijit.byId('vatExempt').get('checked') && landCntry != 'GB') {
+    // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+    // 'MAIN_CUST_TAB');
+    // }
+
   }
 }
 
@@ -658,7 +676,7 @@ function validateSBOValuesForIsuCtc() {
           }
           if (!validSboList.includes(sbo)) {
             return new ValidationResult(null, false, 
-                'The SORTL provided is invalid. It should be from the list: ' + validSboList);
+                'The SBO provided is invalid. It should be from the list: ' + validSboList);
           }
         }
       }
@@ -948,9 +966,6 @@ function addVatSuffixForCustLangCd() {
         FormManager.setValue('vat', vatOnly.concat(" TVA"));
       }
     }
-  } else {
-    FormManager.readOnly('vat');
-    FormManager.setValue('vat', '');
   }
 }
 
@@ -1311,18 +1326,11 @@ function setPreferredLangAddr() {
   //
   // Cross Border it is E (English)
   var reqType = FormManager.getActualValue('reqType');
-  // if (reqType != 'C') {
-  // return;
-  // }
   var zs01ReqId = FormManager.getActualValue('reqId');
 
   var addrType = FormManager.getActualValue('addrType');
   if (addrType == null || addrType == '' || addrType == undefined) {
     addrType = 'ZS01';
-  }
-
-  if (reqType == 'U' && addrType == 'ZS01') {
-    return;
   }
 
   var landCntry = FormManager.getActualValue('landCntry');
@@ -1342,11 +1350,11 @@ function setPreferredLangAddr() {
     var postCd = FormManager.getActualValue('postCd');
     postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
 
-    if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+    if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <= 9999)) {
       FormManager.setValue('custLangCd', 'D');
     } else if (postCd >= 6500 && postCd <= 6999) {
       FormManager.setValue('custLangCd', 'I');
-    } else if (postCd >= 0000 && postCd <= 3000) {
+    } else if (postCd >= 0000 && postCd < 3000) {
       FormManager.setValue('custLangCd', 'F');
     }
   } else {
@@ -1451,16 +1459,18 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
       })(), null, 'frmCMR_addressModal');
 }
 
+// CREATCMR - 6215 -> Duplicate function causing error , no CB condition in this
+// method
 // function setPreferredLangAddr() {
-// Based on the value of postal code Customer Language field should be
-// populated on each address:
+// // Based on the value of postal code Customer Language field should be
+// // populated on each address:
+// //
+// // 3000 - 6499 and 6999 - 9999 it is D (German)
+// // 6500 - 6999 it is I (Italian)
+// // 0000 - 3000 it is F (French)
+// //
+// // Cross Border it is E (English)
 //
-// 3000 - 6499 and 6999 - 9999 it is D (German)
-// 6500 - 6999 it is I (Italian)
-// 0000 - 3000 it is F (French)
-//
-// Cross Border it is E (English)
-
 // var zs01ReqId = FormManager.getActualValue('reqId');
 // var qParams = {
 // REQ_ID : zs01ReqId,
@@ -1510,7 +1520,7 @@ function lockIBMTabForSWISS() {
     }
   }
   if (reqType == 'C' && role == 'PROCESSOR') {
-    if (custSubType.includes('BUS') || custSubType.includes('INT') || custSubType.includes('PRI') || custSubType.includes('IBM')) {
+    if (custSubType.includes('BUS') || custSubType.includes('INT') || custSubType.includes('PRI')) {
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
       FormManager.readOnly('searchTerm');
@@ -1838,6 +1848,47 @@ function checkCmrUpdateBeforeImport() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+
+function addVatIndValidator(){
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');  
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage'); 
+ 
+  if (viewOnlyPage =='true'){
+   FormManager.resetValidations('vat');
+   FormManager.readOnly('vat');
+ } else {
+   
+  var cntry= FormManager.getActualValue('cmrIssuingCntry');
+  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+    ISSUING_CNTRY : cntry
+  });
+
+      
+  if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.readOnly('vatInd');
+    } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
+      FormManager.setValue('vat', '');
+      FormManager.setValue('vatInd', '');
+    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.readOnly('vatInd');
+    } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    }
+    
+  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
+    FormManager.resetValidations('vat');
+  }
+}
+}
 var _custGrpHandler = null;
 function onScenarioChangeHandler() {
   if (_custGrpHandler == null) {
@@ -1859,13 +1910,15 @@ function setPreferredLangSwiss() {
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp').toUpperCase();
   var flag = custGrp == 'CHLOC' || custGrp == '' || (custGrp == '' && reqType == 'U');
+  
   var zs01ReqId = FormManager.getActualValue('reqId');
   var qParams = {
-    REQ_ID : zs01ReqId,
+      REQ_ID : zs01ReqId,
   };
   var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
   var postCd = FormManager.getActualValue('postCd');
   postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
+
   if (custGrp == 'CROSS') {
     FormManager.setValue('custPrefLang', 'E');
     role == 'PROCESSOR' ? FormManager.enable('custPrefLang') : FormManager.readOnly('custPrefLang');
@@ -1880,6 +1933,7 @@ function setPreferredLangSwiss() {
     role == 'PROCESSOR' && flag ? FormManager.enable('custPrefLang') : FormManager.readOnly('custPrefLang');
   }
 }
+
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
@@ -1944,10 +1998,14 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.SWISS);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.SWISS, null, true);
-
+  GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
+  GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.SWISS, null, true);
   GEOHandler.addAfterConfig(setPreferredLangSwiss, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setPreferredLangSwiss, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onScenarioChangeHandler, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onPostalCodeChangeHandler, GEOHandler.SWISS);
-  GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.SWISS, null, true);
+  GEOHandler.addAfterConfig(setPreferredLangAddr, GEOHandler.SWISS);
+  
 });

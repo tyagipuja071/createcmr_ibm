@@ -73,6 +73,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
   @Override
   public AutomationResult<MatchingOutput> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
+    LOG.debug("USDupcCheckElement");
     boolean dupReqFound = false;
     boolean reqChkSrvError = false;
     boolean dupCMRFound = false;
@@ -80,7 +81,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     String matchType = "NA";
     Admin admin = requestData.getAdmin();
+    String isProspectCmr = admin.getProspLegalInd();
     Data data = requestData.getData();
+    String issuingCntry = data.getCmrIssuingCntry();
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
@@ -162,15 +165,18 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         } else {
           responseCMR = getCMRMatches(entityManager, requestData, engineData);
           if (responseCMR != null && responseCMR.getSuccess()) {
-            if (responseCMR.getMatched() && !responseCMR.getMatches().isEmpty()) {
-              cmrCheckMatches = responseCMR.getMatches();
+            result = DupCMRCheckElement.checkDupcProspectCmr(cmrCheckMatches, soldTo, isProspectCmr, engineData, result, issuingCntry);
+            if (result.isOnError()) {
+              return result;
+            }
+            if (responseCMR.getMatched() && !responseCMR.getMatches().isEmpty() && cmrCheckMatches.size() != 0 && !"Y".equals(isProspectCmr)) {
               details.append(cmrCheckMatches.size() + " record(s) found.");
               if (cmrCheckMatches.size() > 5) {
                 cmrCheckMatches = cmrCheckMatches.subList(0, 5);
                 details.append("Showing top 5 matches only.");
               }
 
-              // int itemNo = 1;
+              itemNo = 1;
               for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
                 details.append("\n");
                 LOG.debug("Duplicate CMRs Found..");

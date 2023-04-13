@@ -315,7 +315,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
           String codCondition = line.substring(13, 14);
           String codReason = line.substring(15, 17);
           String codEffDate = line.substring(18, 23);
-          String programName = line.substring(23, 31);
+          String programName = !"XCARR08E".equals(line.substring(23, 31)) ? "XCARR08E" : line.substring(23, 31);
 
           String year = codEffDate.substring(0, 2);
           String month = codEffDate.substring(2, 4);

@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -41,10 +42,11 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.pdf.impl.DPLSearchPDFConverter;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.DPLCheckClient;
+import com.ibm.cmr.services.client.dpl.DPLCheckRequest;
 import com.ibm.cmr.services.client.dpl.DPLRecord;
-import com.ibm.cmr.services.client.dpl.DPLSearchRequest;
 import com.ibm.cmr.services.client.dpl.DPLSearchResponse;
 import com.ibm.cmr.services.client.dpl.DPLSearchResults;
+import com.ibm.cmr.services.client.dpl.KycScreeningResponse;
 
 /**
  * @author JeffZAMORA
@@ -119,9 +121,11 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         resultCount += result.getDeniedPartyRecords().size();
       }
     }
+
     ScorecardPK scorecardPk = new ScorecardPK();
     scorecardPk.setReqId(reqId);
     Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
+
     if (scorecard != null && resultCount == 0) {
       LOG.debug("Auto assessinging DPL check results.");
       scorecard.setDplAssessmentBy("CreateCMR");
@@ -286,13 +290,14 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     List<DPLSearchResults> results = new ArrayList<DPLSearchResults>();
 
     Long reqId = (Long) params.getParam("reqId");
+    RequestData reqData = null;
     if (reqId == null || reqId == 0) {
       String searchString = (String) params.getParam("searchString");
       if (searchString != null) {
         names.add(searchString.toUpperCase().trim());
       }
     } else {
-      RequestData reqData = processRequest(entityManager, params);
+      reqData = processRequest(entityManager, params);
       GEOHandler handler = RequestUtils.getGEOHandler(reqData.getData().getCmrIssuingCntry());
       if (handler != null && !handler.customerNamesOnAddress()) {
         String cntry = reqData.getData().getCmrIssuingCntry();
@@ -366,14 +371,24 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     }
     names.addAll(minimizedList);
 
+    boolean isPrivate = reqData != null ? isPrivate(reqData) : false;
     String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     DPLCheckClient client = CmrServicesFactory.getInstance().createClient(baseUrl, DPLCheckClient.class);
     for (String searchString : names) {
-      DPLSearchRequest request = new DPLSearchRequest();
+      DPLCheckRequest request = new DPLCheckRequest();
+      request.setId(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
       request.setCompanyName(searchString);
+      request.setIncludeScreening(true);
+      request.setPrivate(isPrivate);
       try {
         LOG.debug("Performing DPL Search on " + searchString);
-        DPLSearchResponse resp = client.executeAndWrap(DPLCheckClient.DPL_SEARCH_APP_ID, request, DPLSearchResponse.class);
+        DPLSearchResponse resp = null;
+        if (SystemUtil.useKYCForDPLChecks()) {
+          KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
+          resp = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
+        } else {
+          resp = client.executeAndWrap(DPLCheckClient.DPL_SEARCH_APP_ID, request, DPLSearchResponse.class);
+        }
         if (resp.isSuccess()) {
           DPLSearchResults result = resp.getResults();
           result.setSearchArgument(searchString);
@@ -646,11 +661,19 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     DPLCheckClient client = CmrServicesFactory.getInstance().createClient(baseUrl, DPLCheckClient.class);
     for (String searchString : names) {
-      DPLSearchRequest request = new DPLSearchRequest();
+      DPLCheckRequest request = new DPLCheckRequest();
+      request.setId(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
       request.setCompanyName(searchString);
+      request.setIncludeScreening(true);
       try {
         LOG.debug("Performing DPL Search on " + searchString);
-        DPLSearchResponse resp = client.executeAndWrap(DPLCheckClient.DPL_SEARCH_APP_ID, request, DPLSearchResponse.class);
+        DPLSearchResponse resp = null;
+        if (SystemUtil.useKYCForDPLChecks()) {
+          KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
+          resp = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
+        } else {
+          resp = client.executeAndWrap(DPLCheckClient.DPL_SEARCH_APP_ID, request, DPLSearchResponse.class);
+        }
         if (resp.isSuccess()) {
           DPLSearchResults result = resp.getResults();
           result.setSearchArgument(searchString);
@@ -696,6 +719,17 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       }
     }
     return resultCount;
+  }
+
+  private boolean isPrivate(RequestData reqData) {
+    Data data = reqData.getData();
+    String subGrp = data.getCustSubGrp();
+    if (subGrp != null) {
+      if (subGrp.toUpperCase().contains("PRIV") || subGrp.toUpperCase().contains("PRIPE")) {
+        return true;
+      }
+    }
+    return "60".equals(data.getCustClass()) || "9500".equals(data.getIsicCd());
   }
 
 }

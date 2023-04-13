@@ -47,6 +47,7 @@ import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+
 /**
  * {@link AutomationElement} implementation for the advanced D&B matching
  *
@@ -81,6 +82,23 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     scorecard.setDnbMatchingResult("");
     Boolean override = false;
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+
+    // CREATCMR-8553: if the address matches with mailing address in DNB, show
+    // mailing address in automation details.
+    Boolean matchWithDnbMailingAddr = false;
+
+    // CREATCMR-8430: use usSicmen to save the dnboverride flag for NZ
+    // the requester choose override dnb and did NZBN API in UI, automation will use this flag to skip DNB matching for this case
+    if (SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry()) && data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase("DNBO")) {
+      LOG.debug("DNB Overriden from UI - NZ");
+      result.setResults("Overriden");
+      result.setDetails(
+          "D&B matches were chosen to be overridden by the requester.");
+      // engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were
+      // chosen to be overridden by the requester.");
+      return result;
+    }
+
     // skip dnb matching if dnb matches on UI are overriden and attachment is
     // provided
     if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
@@ -128,8 +146,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
           } else if (payGoAddredited && !hasValidMatches) {
             LOG.debug("DnB Matches not found for PayGo.");
-            
-            result.setOnError(false); 
+
+            result.setOnError(false);
             result.setResults("DnB Matches not found for PayGo.");
             result.setDetails("DnB Matches not found for PayGo.");
           }
@@ -218,10 +236,18 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
 
           }
-          
+
           Boolean processDnbFlag = false;
           // assess the matches here
           if (perfectMatch != null) {
+            // CREATCMR-8553: if the address matches with mailing address in
+            // DNB, show mailing address in automation details.
+            if (SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())) {
+              if (handler != null) {
+                matchWithDnbMailingAddr = handler.matchDnbMailingAddr(perfectMatch, soldTo, data.getCmrIssuingCntry(), false);
+              }
+            }
+
             // Cmr-1701-AU_SG Dnb matches found & Isic doesn't match dnb record.
             // Supporting doc provided requires cmde review
             if (((SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry()) && AuIsicScenarioList.contains(data.getCustSubGrp()))
@@ -250,7 +276,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                   + (isTaxCdMatch ? "Org ID " : "VAT ") + ".\n");
             }
             scorecard.setDnbMatchingResult("Y");
-            processDnbFlag = processDnBFields(entityManager, data, perfectMatch, output, details, 1);
+            processDnbFlag = processDnBFields(entityManager, data, perfectMatch, output, details, 1, matchWithDnbMailingAddr);
             if (scenarioExceptions.isImportDnbInfo()) {
               // Create Address Records only if Levenshtein Distance
               List<String> eligibleAddresses = getAddrSatisfyingLevenshteinDistance(data.getCmrIssuingCntry(), admin, requestData.getAddresses(),
@@ -264,13 +290,21 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           } else if (highestCloseMatch != null && scenarioExceptions.isCheckVATForDnB()
               && ((!isTaxCdMatch && (StringUtils.isNotBlank(data.getVat()) && !"Y".equals(data.getVatExempt())))
                   || (isTaxCdMatch && StringUtils.isNotBlank(data.getTaxCd1())))) {
+            // CREATCMR-8553: if the address matches with mailing address in
+            // DNB, show mailing address in automation details.
+            if (SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())) {
+              if (handler != null) {
+                matchWithDnbMailingAddr = handler.matchDnbMailingAddr(highestCloseMatch, soldTo, data.getCmrIssuingCntry(), false);
+              }
+            }
+
             LOG.debug(
                 "High quality match was found with DUNS " + highestCloseMatch.getDunsNo() + " but incorrect " + (isTaxCdMatch ? "Org ID " : "VAT "));
             result.setResults((isTaxCdMatch ? "Org ID " : "VAT ") + " not matched");
             details.append("High Quality match D&B record matched the request name/address information but the " + (isTaxCdMatch ? "Org ID " : "VAT ")
                 + " on record did not match request data.\n");
             scorecard.setDnbMatchingResult("Y");
-            processDnbFlag = processDnBFields(entityManager, data, highestCloseMatch, output, details, 1);
+            processDnbFlag = processDnBFields(entityManager, data, highestCloseMatch, output, details, 1, matchWithDnbMailingAddr);
             if (scenarioExceptions.isImportDnbInfo()) {
               // Create Address Records only if Levenshtein Distance
               List<String> eligibleAddresses = getAddrSatisfyingLevenshteinDistance(data.getCmrIssuingCntry(), admin, requestData.getAddresses(),
@@ -292,7 +326,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             details.append("Showing D&B matches:\n");
             int itemNo = 1;
             for (DnBMatchingResponse dnbRecord : dnbMatches) {
-              processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
+              processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo, false);
               itemNo++;
             }
             if (StringUtils.isBlank(data.getVat()) || "CROSS".equals(scenario)) {
@@ -311,7 +345,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             details.append("Showing D&B matches:\n");
             int itemNo = 1;
             for (DnBMatchingResponse dnbRecord : dnbMatches) {
-              processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
+              processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo, false);
               if (processDnbFlag == true) {
                 /*
                  * scorecard.setDnbMatchingResult("Y");
@@ -429,10 +463,13 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
    * @param output
    * @param details
    * @param itemNo
+   * @param matchWithDnbMailingAddr
+   *          CREATCMR-8553: if the address matches with mailing address in DNB,
+   *          show mailing address in automation details.
    * @throws Exception
    */
   private boolean processDnBFields(EntityManager entityManager, Data data, DnBMatchingResponse dnbRecord, MatchingOutput output,
-      StringBuilder details, int itemNo) throws Exception {
+      StringBuilder details, int itemNo, Boolean matchWithDnbMailingAddr) throws Exception {
     details.append("\n");
     Boolean highConfidenceDnb = false;
     if (dnbRecord.getConfidenceCode() > 7) {
@@ -444,22 +481,45 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     details.append("DUNS No. = " + dnbRecord.getDunsNo()).append("\n");
     details.append("Confidence Code = " + dnbRecord.getConfidenceCode()).append("\n");
     details.append("Company Name =  " + dnbRecord.getDnbName()).append("\n");
-    details.append("Address =  " + dnbRecord.getDnbStreetLine1()).append("\n");
-    if (!StringUtils.isBlank(dnbRecord.getDnbStreetLine2())) {
-      details.append("Address (cont)=  " + dnbRecord.getDnbStreetLine2()).append("\n");
+
+    // CREATCMR-8553: if the address matches with mailing address in
+    // DNB, show mailing address in automation details.
+    if (matchWithDnbMailingAddr && !StringUtils.isBlank(dnbRecord.getMailingDnbStreetLine1())) {
+      details.append("Address =  " + dnbRecord.getMailingDnbStreetLine1()).append("\n");
+      if (!StringUtils.isBlank(dnbRecord.getMailingDnbStreetLine2())) {
+        details.append("Address (cont)=  " + dnbRecord.getMailingDnbStreetLine2()).append("\n");
+      }
+      if (!StringUtils.isBlank(dnbRecord.getMailingDnbCity())) {
+        details.append("City =  " + dnbRecord.getMailingDnbCity()).append("\n");
+      }
+      if (!StringUtils.isBlank(dnbRecord.getMailingDnbStateProv())) {
+        details.append("State =  " + dnbRecord.getMailingDnbStateProv()).append("\n");
+      }
+      if (!StringUtils.isBlank(dnbRecord.getMailingDnbPostalCd())) {
+        details.append("Postal Code =  " + dnbRecord.getMailingDnbPostalCd()).append("\n");
+      }
+      if (!StringUtils.isBlank(dnbRecord.getMailingDnbCountry())) {
+        details.append("Country =  " + dnbRecord.getMailingDnbCountry()).append("\n");
+      }
+    } else {
+      details.append("Address =  " + dnbRecord.getDnbStreetLine1()).append("\n");
+      if (!StringUtils.isBlank(dnbRecord.getDnbStreetLine2())) {
+        details.append("Address (cont)=  " + dnbRecord.getDnbStreetLine2()).append("\n");
+      }
+      if (!StringUtils.isBlank(dnbRecord.getDnbCity())) {
+        details.append("City =  " + dnbRecord.getDnbCity()).append("\n");
+      }
+      if (!StringUtils.isBlank(dnbRecord.getDnbStateProv())) {
+        details.append("State =  " + dnbRecord.getDnbStateProv()).append("\n");
+      }
+      if (!StringUtils.isBlank(dnbRecord.getDnbPostalCode())) {
+        details.append("Postal Code =  " + dnbRecord.getDnbPostalCode()).append("\n");
+      }
+      if (!StringUtils.isBlank(dnbRecord.getDnbCountry())) {
+        details.append("Country =  " + dnbRecord.getDnbCountry()).append("\n");
+      }
     }
-    if (!StringUtils.isBlank(dnbRecord.getDnbCity())) {
-      details.append("City =  " + dnbRecord.getDnbCity()).append("\n");
-    }
-    if (!StringUtils.isBlank(dnbRecord.getDnbStateProv())) {
-      details.append("State =  " + dnbRecord.getDnbStateProv()).append("\n");
-    }
-    if (!StringUtils.isBlank(dnbRecord.getDnbPostalCode())) {
-      details.append("Postal Code =  " + dnbRecord.getDnbPostalCode()).append("\n");
-    }
-    if (!StringUtils.isBlank(dnbRecord.getDnbCountry())) {
-      details.append("Country =  " + dnbRecord.getDnbCountry()).append("\n");
-    }
+
     String orgIdMatch = "Y".equals(dnbRecord.getOrgIdMatch()) ? "Matched" : ("N".equals(dnbRecord.getOrgIdMatch()) ? "Not Matched" : "Not Done");
     details.append("Org ID Matching =  " + orgIdMatch).append("\n");
 

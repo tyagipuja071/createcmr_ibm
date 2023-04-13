@@ -75,6 +75,12 @@ AppUser user = AppUser.getUser(request);
             <%
               }
             %>
+            <%if (!"PROD".equals(SystemConfiguration.getValue("SYSTEM_TYPE"))){%>
+              <tr>
+                <td><a style="cursor:pointer;font-size:13px" title="KYC Compare" href="${contextPath}/kyccompare">KYC vs EVS</a></td>
+                <td style="font-size:13px">Compare KYC results against EVS (NON PROD FUNCTION)</td>
+              </tr>
+            <%}%>
             </tbody>
           </table>
           </div>

@@ -1,6 +1,7 @@
 var app = angular.module('QuickSearchApp', [ 'ngSanitize' ]);
 var _inscp = null;
 var _currQuickDet = null;
+
 app.filter('recFilter', function() {
   return function(items, search) {
     if (!search) {
@@ -94,6 +95,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     $scope.cmrNo = crit.cmrNo;
     $scope.highMatchGrade = false
     $scope.records = [];
+    $scope.searched = false;
     cmr.showProgress('Searching for records, please wait..');
     $scope.allowByModel = true;
     $scope.hideLocalLangData = false;
@@ -117,6 +119,9 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
           console.log('>>Enabled/Disabled Create by model for Sub-Region.');
           var subCntry = FormManager.getActualValue('issuingCntry');
           var mainCntry = null;
+          $scope.recordsDnb = [];
+          $scope.recordsCmrL = [];
+          $scope.recordsCmrP = [];
           if (subCntry.length > 3) {
             mainCntry = subCntry.substr(0, 3);
             var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {
@@ -156,8 +161,18 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
                 item.altCity = item.altCity.replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, '');
               }
             }
+            if (item.recType == 'DNB') {
+              $scope.recordsDnb.push(item);
+            } else if (item.recType == 'CMR') {
+              if (item.cmrNo.indexOf('P') == 0) {
+                $scope.recordsCmrP.push(item);
+              } else {
+                $scope.recordsCmrL.push(item);
+              }
+            }
           });
-          $scope.records = data.items;
+          $scope.recordsCmr = $scope.recordsCmrL.concat($scope.recordsCmrP);
+          $scope.records = $scope.recordsCmr.concat($scope.recordsDnb);
           $scope.searched = true;
           $scope.$apply();
         }

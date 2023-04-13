@@ -7,8 +7,7 @@
 var _addrTypesForFR = [ 'ZP01', 'ZS01', 'ZI01', 'ZD01' ];
 var _poBOXHandler = [];
 var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "GR", "FI", "FR", "GB", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK" ];
-var VAT_EU_COUNTRY = [ "AT", "BE", "BG", "HR", "CY", "CZ", "EG", "FR", "DE", "GR", "HU", "IE", "IL", "IT", "LU", "MT", "NL", "PK", "PL", "PT", "RO", "RU", "RS", "SK", "SI", "ZA", "ES", "TR", "GB",
-    "UA" ];
+var VAT_EU_COUNTRY = [ "AT", "BE", "BG", "HR", "CY", "CZ", "EG", "FR", "DE", "GR", "HU", "IE", "IL", "IT", "LU", "MT", "NL", "PK", "PL", "PT", "RO", "RU", "RS", "SK", "SI", "ZA", "ES", "TR", "UA" ];
 var SUB_REGIONS = new Set([ 'MQ', 'GP', 'GF', 'PM', 'RE', 'TF', 'KM', 'YT', 'NC', 'VU', 'WF', 'PF', 'MC', 'AD', 'DZ' ]);
 
 function afterConfigForFR() {
@@ -139,6 +138,7 @@ function afterConfigForFR() {
     }
     setCtcByIsu(value);
   });
+
   var _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     // setAbbrevNmOnCustSubGrpChange();
     setAbbrevLocnOnCustSubGrpChange();
@@ -147,7 +147,7 @@ function afterConfigForFR() {
     setINACOnScenario();
     setISICAndSubindustryOnScenario();
     setVATOnScenario();
-    // setSBOOnScenario();
+    // setSBOOnScenarioLD();
     setSalesRepLogic();
     setTaxCdOnScnrio();
     affacturageLogic();
@@ -625,9 +625,9 @@ function autoSetValuesOnPostalCode(postCd, city1) {
   var PostCdList1 = [ '02', '14', '27', '50', '59', '60', '61', '62', '76', '80' ];
   var PostCdList2 = [ '18', '22', '28', '29', '35', '36', '37', '41', '44', '45', '49', '53', '56', '72', '79', '85', '86' ];
   var PostCdList3 = [ '01', '03', '07', '15', '26', '38', '42', '43', '63', '69', '73', '74' ];
-  var PostCdList4 = [ '08', '10', '21', '25', '39', '51', '52', '54', '55', '57', '58', '67', '68', '70', '71', '88', '89', '90' ];
+  var PostCdList4 = [ '08', ' 10', ' 21', ' 25', ' 39', ' 51', ' 52', ' 54', ' 55', ' 57', ' 58', ' 67', ' 68', ' 70', ' 71', ' 88', ' 89', ' 90' ];
   var PostCdList5 = [ '09', ' 12', ' 16', ' 17', ' 19', ' 23', ' 24', ' 31', ' 32', ' 33', ' 40', ' 46', ' 47', ' 64', ' 65', ' 81', ' 82', ' 87' ];
-  var PostCdList6 = [ '04', '05', '06', '11', '13', '20', '30', '34', '48', '66', '83', '84' ];
+  var PostCdList6 = [ '04', ' 05', ' 06', ' 11', ' 13', ' 20', ' 30', ' 34', ' 48', ' 66', ' 83', ' 84' ];
   city1 = city1.toUpperCase();
   var sboSetbyPostalCdLogic = false;
   if (city1.includes('NIORT')) {
@@ -4295,7 +4295,6 @@ function setCoverage2H23Sbo(fromAddress, currentLanded) {
   } else {
     landedCountry = getSoldToLanded();
   }
-
   var countyCd = null;
   var countryUse = FormManager.getActualValue('countryUse');
   if (countryUse.length > 3) {
@@ -4303,7 +4302,6 @@ function setCoverage2H23Sbo(fromAddress, currentLanded) {
   } else {
     countyCd = "FR";
   }
-
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpArrayBP = [ 'BUSPR', 'XBUSP' ];

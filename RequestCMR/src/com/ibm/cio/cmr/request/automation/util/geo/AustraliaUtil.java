@@ -31,9 +31,13 @@ import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -150,7 +154,7 @@ public class AustraliaUtil extends AutomationUtil {
     results.setResults(eleResults.toString());
     results.setDetails(details.toString());
     results.setProcessOutput(overrides);
-
+    
     return results;
   }
 
@@ -198,7 +202,9 @@ public class AustraliaUtil extends AutomationUtil {
     StringBuilder details = new StringBuilder();
     boolean CustNmChanged = changes.isLegalNameChanged();
     ChangeLogListener.setManager(entityManager);
-
+    if ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId())) {
+      CustNmChanged = false;
+    }
     if (CustNmChanged) {
       AutomationResponse<BNValidationResponse> response = null;
       Addr zs01 = requestData.getAddress("ZS01");
@@ -364,17 +370,33 @@ public class AustraliaUtil extends AutomationUtil {
           output.setDetails(details.toString());
           engineData.addNegativeCheckStatus("ABNLegalName", "Customer name doesn't matches from API & DNB match");
         } else {
-          validation.setMessage("Not Validated");
-          details.append("The Customer Name and Former Customer Name doesn't match from API & DNB");
-          // company proof
-          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-            details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+          if (!"PayGo-Test".equals(admin.getSourceSystId()) && !"BSS".equals(admin.getSourceSystId())) {
+            validation.setMessage("Not Validated");
+            details.append("The Customer Name and Former Customer Name doesn't match from API & DNB");
+            // company proof
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+            } else {
+              details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
+                  + customerName + " update.");
+            }
+            output.setDetails(details.toString());
+            engineData.addNegativeCheckStatus("ABNLegalName", "The Customer Name and Former Customer Name doesn't match from API & DNB");
           } else {
-            details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
-                + customerName + " update.");
+            validation.setSuccess(true);
+            validation.setMessage("Successful");
+            output.setProcessOutput(validation);
+            details.append("The Customer Name and Former Customer Name doesn't match from API & DNB");
+            // company proof
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              details.append("\nSupporting documentation is provided by the requester as attachment for " + customerName).append("\n");
+            } else {
+              details.append("\nNo supporting documentation is provided by the requester for customer name update from " + formerCustName + " to "
+                  + customerName + " update.");
+            }
+            output.setDetails(details.toString());
           }
-          output.setDetails(details.toString());
-          engineData.addNegativeCheckStatus("ABNLegalName", "The Customer Name and Former Customer Name doesn't match from API & DNB");
+
         }
 
       } finally {
@@ -386,6 +408,14 @@ public class AustraliaUtil extends AutomationUtil {
       output.setProcessOutput(validation);
       output.setDetails("Updates to the dataFields fields skipped validation");
     }
+    
+    if ("U".equals(admin.getReqType()) && ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))) {
+        Addr pg01 = requestData.getAddress("PG01");
+        if(pg01 != null){
+        	// checkANZPaygoAddr(entityManager, data.getId().getReqId());
+        }
+      }
+    
     return true;
   }
 
@@ -443,7 +473,6 @@ public class AustraliaUtil extends AutomationUtil {
     case SCENARIO_INTERNAL:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
-
     case SCENARIO_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
@@ -510,6 +539,11 @@ public class AustraliaUtil extends AutomationUtil {
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
+
+    // CREATCMR-8553: if the address matches with mailing address in DNB, show
+    // mailing address in automation details.
+    GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
@@ -548,8 +582,25 @@ public class AustraliaUtil extends AutomationUtil {
                   for (DnBMatchingResponse dnb : matches) {
                     checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
                     checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                        + dnb.getDnbCountry() + "\n\n");
+
+                    // CREATCMR-8553: if the address matches with mailing
+                    // address in DNB, show mailing address in automation
+                    // details.
+                    Boolean matchWithDnbMailingAddr = false;
+                    if (handler != null) {
+                      matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnb, addr, data.getCmrIssuingCntry(), false);
+                    }
+                    if (matchWithDnbMailingAddr) {
+                      checkDetails.append(" - Mailing Address:  " + dnb.getMailingDnbStreetLine1() + " "
+                          + (dnb.getMailingDnbStreetLine2() == null ? "" : dnb.getMailingDnbStreetLine2()) + " "
+                          + (dnb.getMailingDnbCity() == null ? "" : dnb.getMailingDnbCity()) + " "
+                          + (dnb.getMailingDnbPostalCd() == null ? "" : dnb.getMailingDnbPostalCd()) + " "
+                          + (dnb.getMailingDnbCountry() == null ? "" : dnb.getMailingDnbCountry()) + "\n\n");
+                    } else {
+                      checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " "
+                          + (dnb.getDnbStreetLine2() == null ? "" : dnb.getDnbStreetLine2()) + " " + dnb.getDnbCity() + " "
+                          + dnb.getDnbPostalCode() + " " + dnb.getDnbCountry() + "\n\n");
+                    }
                   }
                 }
 
@@ -587,8 +638,24 @@ public class AustraliaUtil extends AutomationUtil {
               for (DnBMatchingResponse dnb : matches) {
                 checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
                 checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                    + dnb.getDnbCountry() + "\n\n");
+
+                // CREATCMR-8553: if the address matches with mailing address
+                // in DNB, show mailing address in automation details.
+                Boolean matchWithDnbMailingAddr = false;
+                if (handler != null) {
+                  matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnb, addr, data.getCmrIssuingCntry(), false);
+                }
+                if (matchWithDnbMailingAddr) {
+                  checkDetails.append(" - Mailing Address:  " + dnb.getMailingDnbStreetLine1() + " "
+                      + (dnb.getMailingDnbStreetLine2() == null ? "" : dnb.getMailingDnbStreetLine2()) + " "
+                      + (dnb.getMailingDnbCity() == null ? "" : dnb.getMailingDnbCity()) + " "
+                      + (dnb.getMailingDnbPostalCd() == null ? "" : dnb.getMailingDnbPostalCd()) + " "
+                      + (dnb.getMailingDnbCountry() == null ? "" : dnb.getMailingDnbCountry()) + "\n\n");
+                } else {
+                  checkDetails
+                      .append(" - Address:  " + dnb.getDnbStreetLine1() + " " + (dnb.getDnbStreetLine2() == null ? "" : dnb.getDnbStreetLine2()) + " "
+                          + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " " + dnb.getDnbCountry() + "\n\n");
+                }
               }
             }
           }
@@ -619,6 +686,12 @@ public class AustraliaUtil extends AutomationUtil {
     anzEcoNotifyList.append(SystemParameters.getString("ANZ_ECSYS_NOTIFY"));
     return anzEcoNotifyList;
   }
+  
+  public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
+	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
+	    query.setParameter("REQ_ID", reqId);
+	    query.executeSql();
+	  }
 
   @Override
   protected List<String> getCountryLegalEndings() {

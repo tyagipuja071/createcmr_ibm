@@ -213,7 +213,11 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         }
       }
       if (!StringUtils.isBlank(mainRecord.getCmrVat()) && importAddress) {
-        data.setVat(mainRecord.getCmrVat());
+        if (LAHandler.isLACountry(reqModel.getCmrIssuingCntry())) {
+          data.setTaxCd1(mainRecord.getCmrVat());
+        } else {
+          data.setVat(mainRecord.getCmrVat());
+        }
       }
       if (!StringUtils.isBlank(mainRecord.getCmrBusinessReg()) && importAddress) {
         data.setTaxCd1(mainRecord.getCmrBusinessReg());
@@ -570,7 +574,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       cnHandler.convertChinaStateNameToStateCode(addr, cmr, entityManager);
     }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3
-        && (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()))) {
+        && (Arrays.asList(SystemLocation.AUSTRIA, SystemLocation.SWITZERLAND, SystemLocation.NORWAY, SystemLocation.FINLAND, SystemLocation.DENMARK,
+            SystemLocation.SWEDEN).contains(reqModel.getCmrIssuingCntry()))) {
       convertStateNameToStateCode(addr, cmr, entityManager);
     }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {

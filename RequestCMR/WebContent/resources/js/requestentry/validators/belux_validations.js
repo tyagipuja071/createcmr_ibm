@@ -3,6 +3,7 @@
 var reqType = null;
 var role = null;
 var _reqReasonHandler = null;
+
 function afterConfigForBELUX() {
   var cntryUse = FormManager.getActualValue('countryUse');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -19,9 +20,9 @@ function afterConfigForBELUX() {
     role = _pagemodel.userRole;
   }
 
-  if (custGrp != null && custGrp != '') {
-    FormManager.clearValue('inacCd');
-  }
+  /*
+   * if (custGrp != null && custGrp != '') { FormManager.clearValue('inacCd'); }
+   */
 
   if ((custSubGrp.substring(2, 5) == 'INT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO' || custSubGrp == 'BECOM' || custSubGrp == 'BEDAT'
       || custSubGrp == 'LUCOM' || custSubGrp == 'LUDAT')) {
@@ -135,8 +136,6 @@ function afterConfigForBELUX() {
   addAccTemNumValidate();
   disableSBO();
   disableIBMTab();
-
-  // CREATCMR-788
   addressQuotationValidatorBELUX();
 
 }
@@ -729,6 +728,15 @@ function setExpediteReason() {
 function setVatValidatorBELUX() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var _reqId = FormManager.getActualValue('reqId');
+  var params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01"
+  };
+
+  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+  landCntry = landCntryResult.ret1;
+
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
     if (custSubGrp == 'BEPRI' || custSubGrp == 'LUPRI') {
@@ -741,15 +749,17 @@ function setVatValidatorBELUX() {
     if (custSubGrp.includes('IBM')) {
       FormManager.readOnly('vat');
     }
-    if (dijit.byId('vatExempt').get('checked')) {
-      FormManager.clearValue('vat');
-    }
+    /*
+     * if (dijit.byId('vatExempt').get('checked')) {
+     * FormManager.clearValue('vat'); }
+     */
     // if (!dijit.byId('vatExempt').get('checked')) {
-    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-      FormManager.enable('vat');
-    }
-  }
+    /*
+     * if (undefined != dijit.byId('vatExempt') &&
+     * !dijit.byId('vatExempt').get('checked')) { // checkAndAddValidator('vat',
+     * Validators.REQUIRED, [ 'VAT' ]); FormManager.enable('vat'); }
+     */}
+
 }
 
 /**
@@ -2170,6 +2180,46 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addVatIndValidator() {
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnlyPage == 'true') {
+    FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
+  } else {
+
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+      ISSUING_CNTRY : cntry
+    });
+
+    if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.readOnly('vatInd');
+    } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
+      FormManager.setValue('vat', '');
+      FormManager.setValue('vatInd', '');
+    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.readOnly('vatInd');
+    } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    }
+
+    if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null) && vatInd == 'N') {
+      FormManager.resetValidations('vat');
+    }
+  }
+}
+
 // CREATCMR-788
 function addressQuotationValidatorBELUX() {
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
@@ -2244,20 +2294,23 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDepartmentNumberValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addREALCTYValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.BELUX, null, true);
-  // GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.BELUX);
-  // GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate,
-  // GEOHandler.BELUX);
+  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setVatValidatorBELUX, GEOHandler.BELUX);
+  GEOHandler.addAfterConfig(addBeIsuHandler, GEOHandler.BELUX);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.BELUX);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.BELUX, null, true);
+
+  GEOHandler.registerValidator(addVatIndValidator, GEOHandler.BELUX, null, true);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX);
+
   GEOHandler.registerValidator(beluxSortlValidator, GEOHandler.BELUX, null, true);
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(lockFields, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(saveOldIsuCtc, GEOHandler.BELUX);
-  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, GEOHandler.BELUX);
-  GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, GEOHandler.BELUX);
-  GEOHandler.addAfterConfig(addBeIsuHandler, GEOHandler.BELUX);
 
 });

@@ -16,6 +16,8 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.SuppCntryPK;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
@@ -122,7 +124,12 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
         } else if (!StringUtils.isEmpty(admin.getMatchOverrideIndc()) && admin.getMatchOverrideIndc().equalsIgnoreCase(MATCH_INDC_YES)) {
           validation.setSuccess(true);
           String message = "D&B matches were chosen to be overridden by the requester.";
-          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, reqId)) {
+          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, reqId) && isReqRejectedBefore(requestData, entityManager)) {
+            validation.setMessage("Review required.");
+            result.setDetails(message + "\nProcessor review is required for data quality purpose");
+            engineData.addNegativeCheckStatus("DNBCheck", "Processor review is required since request has already been rejected for data quality.");
+            LOG.debug("Processor review is required since request has already been rejected for data quality.");
+          } else if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, reqId)) {
             validation.setMessage("Overridden");
             result.setDetails(message + "\nSupporting documentation is provided by the requester as attachment.");
           } else {
@@ -181,6 +188,17 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
     result.setResults(validation.getMessage());
     result.setProcessOutput(validation);
     return result;
+  }
+
+  private boolean isReqRejectedBefore(RequestData requestData, EntityManager entityManager) {
+    if ("897".equals(requestData.getData().getCmrIssuingCntry()) || "649".equals(requestData.getData().getCmrIssuingCntry())) {
+      String sql = ExternalizedQuery.getSql("QUERY.GET_IF_REQ_IS_REJECT_BEFORE");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQID", requestData.getAdmin().getId().getReqId());
+      String reqid = query.getSingleResult(String.class);
+      return reqid != null;
+    }
+    return false;
   }
 
   @Override

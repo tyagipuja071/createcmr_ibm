@@ -36,6 +36,9 @@ public class KunnrExt extends BaseEntity<KunnrExtPK> implements Serializable {
     this.id = id;
   }
 
+  @Column(name = "VAT_IND")
+  private String vatInd; 
+
   @Column(name = "GOE_IND")
   private String goeInd;
 
@@ -500,4 +503,11 @@ public class KunnrExt extends BaseEntity<KunnrExtPK> implements Serializable {
     this.hwInstlMstrFlg = hwInstlMstrFlg;
   }
 
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
+  }
 }

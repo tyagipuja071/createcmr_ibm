@@ -143,13 +143,6 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <!-- 
-        <column number="true">
-          <label>State/Province</label>
-          <dbColumn>STATE_PROV</dbColumn>
-          <length>3</length>
-        </column>
-         -->
         <column>
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
@@ -161,6 +154,12 @@
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
           <length>20</length>
+        </column>
+        <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
         </column>
         <column>
           <label>Local Postal Code</label>
@@ -231,13 +230,6 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <!-- 
-        <column number="true">
-          <label>State/Province</label>
-          <dbColumn>STATE_PROV</dbColumn>
-          <length>3</length>
-        </column>
-         -->
         <column>
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
@@ -249,6 +241,12 @@
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
           <length>20</length>
+        </column>
+        <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
         </column>
         <column>
           <label>Local Postal Code</label>
@@ -319,13 +317,6 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <!-- 
-        <column number="true">
-          <label>State/Province</label>
-          <dbColumn>STATE_PROV</dbColumn>
-          <length>3</length>
-        </column>
-         -->
         <column>
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
@@ -337,6 +328,12 @@
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
           <length>20</length>
+        </column>
+        <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
         </column>
         <column>
           <label>Local Postal Code</label>
@@ -407,13 +404,6 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <!-- 
-        <column number="true">
-          <label>State/Province</label>
-          <dbColumn>STATE_PROV</dbColumn>
-          <length>3</length>
-        </column>
-         -->
         <column>
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
@@ -425,6 +415,12 @@
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
           <length>20</length>
+        </column>
+        <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
         </column>
         <column>
           <label>Local Postal Code</label>
@@ -495,13 +491,6 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <!-- 
-        <column number="true">
-          <label>State/Province</label>
-          <dbColumn>STATE_PROV</dbColumn>
-          <length>3</length>
-        </column>
-         -->
         <column>
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
@@ -513,6 +502,12 @@
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
           <length>20</length>
+        </column>
+        <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <width>40</width>
+          <bdsId>StateProv</bdsId>      
         </column>
         <column>
           <label>Local Postal Code</label>
