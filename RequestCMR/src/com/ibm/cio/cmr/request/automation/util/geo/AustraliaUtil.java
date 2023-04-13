@@ -597,8 +597,9 @@ public class AustraliaUtil extends AutomationUtil {
                           + (dnb.getMailingDnbPostalCd() == null ? "" : dnb.getMailingDnbPostalCd()) + " "
                           + (dnb.getMailingDnbCountry() == null ? "" : dnb.getMailingDnbCountry()) + "\n\n");
                     } else {
-                      checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                          + dnb.getDnbCountry() + "\n\n");
+                      checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " "
+                          + (dnb.getDnbStreetLine2() == null ? "" : dnb.getDnbStreetLine2()) + " " + dnb.getDnbCity() + " "
+                          + dnb.getDnbPostalCode() + " " + dnb.getDnbCountry() + "\n\n");
                     }
                   }
                 }
@@ -651,8 +652,9 @@ public class AustraliaUtil extends AutomationUtil {
                       + (dnb.getMailingDnbPostalCd() == null ? "" : dnb.getMailingDnbPostalCd()) + " "
                       + (dnb.getMailingDnbCountry() == null ? "" : dnb.getMailingDnbCountry()) + "\n\n");
                 } else {
-                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                      + dnb.getDnbCountry() + "\n\n");
+                  checkDetails
+                      .append(" - Address:  " + dnb.getDnbStreetLine1() + " " + (dnb.getDnbStreetLine2() == null ? "" : dnb.getDnbStreetLine2()) + " "
+                          + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " " + dnb.getDnbCountry() + "\n\n");
                 }
               }
             }
