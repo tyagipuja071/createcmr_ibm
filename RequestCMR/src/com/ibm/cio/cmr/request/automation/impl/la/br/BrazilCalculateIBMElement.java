@@ -108,11 +108,16 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       overrides.addOverride(getProcessCode(), "DATA", "LOCN_NO", data.getLocationNumber(), "");
     }
 
+    // skip setting of sbo via state for this scenarios
+    final List<String> skipScenarios = Arrays.asList("IBMEM", "PRIPE", "BUSPR", "INTER");
+    final List<String> skipSBO = Arrays.asList("515", "979");
+
     // Set Data.SALES_BO_CD for stateProv Coverage change !!
     final List<String> STATEPROV_763 = Arrays.asList("AM", "PA", "AC", "RO", "RR", "AP", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA");
     final List<String> STATEPROV_504 = Arrays.asList("DF", "GO", "MT", "MS");
     final List<String> STATEPROV_758 = Arrays.asList("PR", "SC", "RS");
-    if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && reqType.equals("C")) {
+    if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && reqType.equals("C")
+        && (!skipScenarios.contains(data.getCustSubGrp()) && !skipSBO.contains(data.getSalesBusOffCd()))) {
       if ("RJ".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "761");
       } else if ("SP".equals(soldTo.getStateProv())) {
