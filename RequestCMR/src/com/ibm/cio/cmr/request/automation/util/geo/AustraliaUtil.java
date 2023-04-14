@@ -645,6 +645,7 @@ public class AustraliaUtil extends AutomationUtil {
                 if (handler != null) {
                   matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnb, addr, data.getCmrIssuingCntry(), false);
                 }
+                LOG.debug("matchWithDnbMailingAddr: " + matchWithDnbMailingAddr);
                 if (matchWithDnbMailingAddr) {
                   checkDetails.append(" - Mailing Address:  " + dnb.getMailingDnbStreetLine1() + " "
                       + (dnb.getMailingDnbStreetLine2() == null ? "" : dnb.getMailingDnbStreetLine2()) + " "
