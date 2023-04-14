@@ -1201,7 +1201,7 @@ public class CanadaUtil extends AutomationUtil {
   @Override
   public boolean fillCoverageAttributes(RetrieveIBMValuesElement retrieveElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
-      AutomationEngineData engineData, String covType, String covId, String covDesc) throws Exception {
+      AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
     LOG.debug("Performing Canada final fillCoverageAttributes...");
     Data data = requestData.getData();
     String coverageId = covType + covId;
