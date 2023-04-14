@@ -2572,6 +2572,7 @@ function setSortlForStateProvince() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var sbo = FormManager.getActualValue('salesBusOffCd');
   
   if (viewOnly != '' && viewOnly == 'true') {
     return;
@@ -2583,6 +2584,11 @@ function setSortlForStateProvince() {
   if (custSubGrp == 'IBMEM' || custSubGrp == 'PRIPE' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
     return;
   }
+  
+  if(sbo == '979' || sbo == '515') {
+    return;
+  }
+  
   var _reqId = FormManager.getActualValue('reqId');
   var stateProvParams = {
     REQ_ID : _reqId,
