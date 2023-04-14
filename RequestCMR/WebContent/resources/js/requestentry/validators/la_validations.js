@@ -281,8 +281,13 @@ function autoSetDataCrosTypSubTypeSSAMX() {
 function autoSetSBOAndSalesTMNo() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var _custType = FormManager.getActualValue('custType');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
   console.log(">>> Process _custSubGrp >> " + _custSubGrp);
   console.log(">>> Process _custType >> " + _custType);
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
   if (FormManager.getActualValue('cmrIssuingCntry') == '631' && FormManager.getActualValue('reqType') == 'C') {
     if (_custSubGrp != 'undefined' && _custSubGrp == 'CROSS') {
       FormManager.enable('repTeamMemberNo');
@@ -291,17 +296,28 @@ function autoSetSBOAndSalesTMNo() {
         FormManager.setValue('repTeamMemberNo', '010200');
         FormManager.setValue('salesBusOffCd', '010');
         FormManager.readOnly('repTeamMemberNo');
-        FormManager.readOnly('salesBusOffCd');
+        if (role == 'REQUESTER') {
+          FormManager.readOnly('salesBusOffCd');
+        }  else {
+          FormManager.enable('salesBusOffCd');
+        }
 
         FormManager.setValue('crosTyp', '9');
         console.log(">>> Process repTeamMemberNo >> " + FormManager.getActualValue('repTeamMemberNo'));
         console.log(">>> Process salesBusOffCd >> " + FormManager.getActualValue('salesBusOffCd'));
       }
-      if (_custType == 'BUSPR') {
-        FormManager.setValue('salesBusOffCd', '606');
-        FormManager.readOnly('salesBusOffCd');
+      if (_custType == 'BUSPR' || _custType == 'PRIPE' || _custType == 'IBMEM') {
+        FormManager.setValue('salesBusOffCd', '461');
+        if (role == 'REQUESTER') {
+          FormManager.readOnly('salesBusOffCd');
+          FormManager.readOnly('mrcCd');
+          FormManager.readOnly('isuCd');
+        } else {
+          FormManager.enable('salesBusOffCd');
+          FormManager.enable('mrcCd');
+          FormManager.enable('isuCd');
+        }
         console.log(">>> Process salesBusOffCd >> " + FormManager.getActualValue('salesBusOffCd'));
-
       }
       /* #1355290 */
       if (_custType == 'BUSPR' || _custType == 'CC3CC' || _custType == 'COMME' || _custType == 'CROSB' || _custType == 'INTER' || _custType == 'LEASI' || _custType == 'SOFTL' || _custType == 'IBMEM'
@@ -512,7 +528,7 @@ function afterConfigForLA() {
   if (_mrcCdHandler == null) {
     _mrcCdHandler = dojo.connect(FormManager.getField('mrcIsu'), 'onChange', function(value) {
       autoSetMrcIsuCov2018();
-      if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MEXICO) {
+      if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MEXICO || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL) {
         setMrcCdToReadOnly();
       }
     });
@@ -544,6 +560,7 @@ function afterConfigForLA() {
       autoSetIcmsFieldForCrossBR();
       resetIbmBankNumber();
       autoSetFieldsForCustScenariosSSAMX();
+      autoSetFieldsForCustScenariosBR();
       setCrosTypSubTypSSAMXOnSecnarios();
       setAbbrevNameRequiredForProcessors();
       setMrcCdToReadOnly();
@@ -764,7 +781,46 @@ function autoSetFieldsForCustScenariosSSAMX() {
           FormManager.enable('collectorNameNo');
         }
       }
+      
+      // CREATCMR-8727 implement v7 mapping
+      if(_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR') {
+        var ssaSbo = ['663', '681', '829', '731', '735', '799', '811', '871'];        
+        if (_cmrCntry == SysLoc.MEXICO) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '484');
+        } else if (_cmrCntry == SysLoc.ARGENTINA) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '457');
+        } else if (_cmrCntry == SysLoc.PARAGUAY) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '492');
+        } else if (_cmrCntry == SysLoc.URUGUAY) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '508');
+        } else if (_cmrCntry == SysLoc.CHILE) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '342');
+        } else if (_cmrCntry == SysLoc.BOLIVIA) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '343');
+        } else if (_cmrCntry == SysLoc.COLOMBIA) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '346');
+        } else if (_cmrCntry == SysLoc.ECUADOR) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '345');
+        } else if (_cmrCntry == SysLoc.PERU) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '344');
+        } else if (ssaSbo.includes(_cmrCntry)) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '9A9');
+        }
+      }
     }
+    
+    // CREATCMR-8727 implement v7 mapping
+    if (_custSubGrp == 'XLEAS') {
+      if(_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR') {
+        if (_cmrCntry == SysLoc.MEXICO) {
+          FormManager.setValue(FormManager.getField('salesBusOffCd'), '484');
+        }
+      }
+      if(_custType == 'INTER') {
+        FormManager.setValue(FormManager.getField('salesBusOffCd'), '9A9');
+      }      
+    }
+    setSboMrcIsuToReadOnly();
 
     if (_custGrp == "LOCAL" && _custSubGrp != '') {
       var _collBoCd = FormManager.getActualValue('collBoId');
@@ -2514,13 +2570,25 @@ function setSortlForStateProvince() {
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqType = FormManager.getActualValue('reqType');
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
-
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var sbo = FormManager.getActualValue('salesBusOffCd');
+  
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
   if (cmrIssuingCntry != '631' || reqType != 'C') {
     return;
+  }  
+
+  if (custSubGrp == 'IBMEM' || custSubGrp == 'PRIPE' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
+    return;
   }
+  
+  if(sbo == '979' || sbo == '515') {
+    return;
+  }
+  
   var _reqId = FormManager.getActualValue('reqId');
   var stateProvParams = {
     REQ_ID : _reqId,
@@ -2531,35 +2599,49 @@ function setSortlForStateProvince() {
   if (stateProv != null && stateProv.length > 2) {
     stateProv = stateProv.substring(0, 2);
   }
+  // CREATCMR-8728 implement setSortlForStateProvince-3.21.23-1 filter for
+  // requester
   if (stateProv == 'AM' || stateProv == 'PA' || stateProv == 'AC' || stateProv == 'RO' || stateProv == 'RR' || stateProv == 'AP' || stateProv == 'TO' || stateProv == 'MA' || stateProv == 'PI'
       || stateProv == 'CE' || stateProv == 'RN' || stateProv == 'PB' || stateProv == 'PE' || stateProv == 'AL' || stateProv == 'SE' || stateProv == 'BA') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '763', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '763', '515', '161', '461', '979', '010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '763');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'DF' || stateProv == 'GO' || stateProv == 'MT' || stateProv == 'MS') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '504', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '504', '515', '161', '461', '979', '010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '504');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'ES' || stateProv == 'MG') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '556', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '556', '515', '161', '461', '979', '010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '556');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'PR' || stateProv == 'SC' || stateProv == 'RS') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '758', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '758', '515', '161', '461', '979', '010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '758');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'RJ') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '761', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '761', '515', '161', '461', '979', '010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '761');
     FormManager.enable('salesBusOffCd');
   } else if (stateProv == 'SP') {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '764', '515', '161' ]);
+    if (role == 'REQUESTER') {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '764', '515', '161', '461','979','010' ]);
+    }
     FormManager.setValue('salesBusOffCd', '764');
     FormManager.enable('salesBusOffCd');
   } 
@@ -2627,13 +2709,26 @@ function setMrcCdToReadOnly() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrpList = [ 'IBMEM', 'PRIPE', 'BUSPR', 'INTER', 'INTOU', 'INIBM' ];
+  var _custType = FormManager.getActualValue('custType');
 
   if (reqType == 'C') {
-    if(custSubGrp == 'IBMEM') {
+    if (custSubGrpList.includes(custSubGrp)) {
       if (role == 'REQUESTER') {
         FormManager.readOnly('mrcCd');
       } else {
         FormManager.enable('mrcCd');
+      }
+    }
+    if((custSubGrp == 'CROSS' || custSubGrp == 'XLEAS') && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR' || _custType == 'INTER' )) {
+      if (role == 'REQUESTER') {
+        FormManager.readOnly('mrcCd');
+        FormManager.readOnly('salesBusOffCd');
+        FormManager.readOnly('isuCd');
+      } else {
+        FormManager.enable('mrcCd');
+        FormManager.enable('salesBusOffCd');
+        FormManager.enable('isuCd');
       }
     }
   }
@@ -2808,6 +2903,144 @@ function setIBMBankNumberBasedScenarios(fromAddress, scenario, scenarioChanged) 
   }
 }
 
+// CREATCMR-8727 requester level readonly fields
+function setSboMrcIsuToReadOnly() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var _custType = FormManager.getActualValue('custType');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (reqType == 'C') {
+    if((custSubGrp == 'CROSS' || custSubGrp == 'XLEAS') && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR' || _custType == 'INTER' )) {
+      if (role == 'REQUESTER') {
+        FormManager.readOnly('salesBusOffCd');
+        FormManager.readOnly('mrcCd');
+        FormManager.readOnly('isuCd');
+      } else {
+        FormManager.enable('salesBusOffCd');
+        FormManager.enable('mrcCd');
+        FormManager.enable('isuCd');
+      }
+    } 
+  }
+}
+
+function setSortlValuesForUser(fromAddress, scenario, scenarioChanged) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custGrp = FormManager.getActualValue('custGrp')
+  var sortlList = FormManager.getField('salesBusOffCd').loadedStore._arrayOfAllItems;
+  var valueList = new Array();
+  if (fromAddress || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  // CREATCMR-8727 remove some sortl for requester
+  for (var i = 0; i < sortlList.length; i++) {
+    valueList[i] = sortlList[i].id[0];
+  }
+  if (role == 'REQUESTER') {
+    for (var i = 0; i < valueList.length; i++) {
+      if(cntry == '781')  {
+        if ('777' == valueList[i]) {
+          valueList.splice(i, 1);
+        } 
+        if ('779' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '613') {
+        if ('703' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('704' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '629') {
+        if ('933' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '655') {
+        if ('686' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('687' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '661') {
+        if ('649' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('650' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '683') {
+        if ('495' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('496' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '799' || cntry == '811' || cntry == '681') {
+        if ('035' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '813') {
+        if ('926' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '815') {
+        if ('872' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('873' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '869') {
+        if ('701' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+        if ('702' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      } else if (cntry == '871') {
+        if ('679' == valueList[i]) {
+          valueList.splice(i, 1);
+        }
+      }
+    }
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), valueList);
+  }
+}
+
+function autoSetFieldsForCustScenariosBR() {
+  console.log('autoSetFieldsForCrossScenario br : processing. . .');
+  var _custSubGrp = FormManager.getActualValue('custSubGrp');
+  var _reqType = FormManager.getActualValue('reqType');
+  var _cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var _custType = FormManager.getActualValue('custType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (_cmrCntry == SysLoc.BRAZIL && _reqType == 'C') {
+    if(_custSubGrp == 'CROSS' && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR')) {
+      FormManager.setValue(FormManager.getField('salesBusOffCd'), '461');
+      if (role == 'REQUESTER') {
+        FormManager.readOnly('salesBusOffCd');
+        FormManager.readOnly('mrcCd');
+        FormManager.readOnly('isuCd');        
+      } else {
+        FormManager.enable('salesBusOffCd');
+        FormManager.enable('mrcCd');
+        FormManager.enable('isuCd'); 
+      }
+    }
+  }
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2883,9 +3116,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setMrcCdOptionalForRequester, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setMrcCdOptionalForRequester, [ SysLoc.BRAZIL ]);
   GEOHandler.addAddrFunction(setLocationNumberForBR, GEOHandler.LA);
-  GEOHandler.addAfterConfig(setLocNoLockedForRequesterBR, [ SysLoc.BRAZIL ]);
-  GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
-  GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
+  GEOHandler.addAfterConfig(setLocNoLockedForRequesterBR, [ SysLoc.BRAZIL ]);  
   GEOHandler.addAfterTemplateLoad(setTaxRegimeMX, [ SysLoc.MEXICO ]);
     // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
   GEOHandler.addAfterConfig(makeMrcSboOptionalForProspectLA, GEOHandler.LA);
@@ -2899,4 +3130,10 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setIBMBankNumberBasedScenarios, [ SysLoc.URUGUAY]);
+  GEOHandler.addAfterTemplateLoad(setSboMrcIsuToReadOnly, SSAMX_COUNTRIES);
+  GEOHandler.addAfterTemplateLoad(setSortlValuesForUser, GEOHandler.LA);
+  GEOHandler.addAfterConfig(setSortlValuesForUser, GEOHandler.LA);
+  GEOHandler.addAddrFunction(setSortlForStateProvince, SysLoc.BRAZIL);
+  GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
+  
 });
