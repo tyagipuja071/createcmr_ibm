@@ -83,7 +83,7 @@ public class ScenarioExceptionsUtil {
     }
 
     if (StringUtils.isNotBlank(custSubGroup)) {
-      if (PRIVATE_SCENARIOS.contains(subScenario)) {
+      if (PRIVATE_SCENARIOS.contains(custSubGroup)) {
         setSkipFindGbgForPrivates(true);
       }
     }
