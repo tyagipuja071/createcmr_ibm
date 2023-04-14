@@ -138,7 +138,6 @@ dojo.addOnLoad(function(){
     </cmr:view>
    <!-- ISU, Client Tier, INAC Type/Code -->
    <cmr:row topPad="10">
-   <cmr:view exceptForGEO="JP">
    <cmr:column span="2" containerForField="ISU">
         <p>
           <cmr:label fieldId="isuCd">
@@ -158,7 +157,6 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="ClientTier" id="clientTier" path="clientTier" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
-    </cmr:view>
       <cmr:column span="1" width="120" containerForField="INACType" exceptForCountry="666,726,862,822,838,618,758,848,755" exceptForGEO="MCO1,MCO2,FR,CEMEA,NORDX,BELUX,NL">
               <p>
           <cmr:label fieldId="inacType">
@@ -220,6 +218,13 @@ dojo.addOnLoad(function(){
             </cmr:view>
           </cmr:label>
           <cmr:field fieldId="SearchTerm" id="searchTerm" path="searchTerm" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      
+      <cmr:column span="2" containerForField="MrcCd" forCountry="760">
+        <p>
+          <cmr:label fieldId="mrcCd"> <cmr:fieldLabel fieldId="MrcCd" />: </cmr:label>
+          <cmr:field path="mrcCd" id="mrcCd" fieldId="MrcCd" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
       
