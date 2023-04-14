@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -32,6 +33,7 @@ import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
 import com.ibm.cio.cmr.request.util.oauth.SimpleJWT;
 import com.ibm.cio.cmr.request.util.oauth.UserHelper;
 import com.ibm.json.java.JSONObject;
+import com.sun.istack.internal.Nullable;
 
 /**
  * This filter ensures valid user is present at the request. If not, the request
@@ -42,193 +44,269 @@ import com.ibm.json.java.JSONObject;
  *
  */
 @Component
-@WebFilter(filterName = "AppUserInjectFilter", urlPatterns = "/*")
+@WebFilter(
+    filterName = "AppUserInjectFilter",
+    urlPatterns = "/*")
 public class AppUserInjectFilter implements Filter {
 
-	@Autowired
-	UserService userService;
+  @Autowired
+  UserService userService;
 
-	protected static final Logger LOG = Logger.getLogger(AppUserInjectFilter.class);
+  protected static final Logger LOG = Logger.getLogger(AppUserInjectFilter.class);
 
-	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
-			throws IOException, ServletException {
+  @Nullable
+  private String encoding;
 
-		// can be used to deactivate this filter completely
-		String activateFilter = SystemConfiguration.getValue("ACTIVATE_SSO");
-		if (activateFilter.equalsIgnoreCase("false")) {
-			filterChain.doFilter(request, response);
-			return;
-		}
+  private boolean forceRequestEncoding = false;
 
-		HttpServletRequest httpReq = (HttpServletRequest) request;
-		HttpServletResponse httpResp = (HttpServletResponse) response;
+  private boolean forceResponseEncoding = false;
 
-		String url = httpReq.getRequestURI();
+  public AppUserInjectFilter() {
 
-		HttpSession session = shouldCreateSession(httpReq);
-		String userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
+  }
 
-		try {
-			if (shouldFilter(httpReq, (HttpServletResponse) response)) {
+  public AppUserInjectFilter(String encoding) {
+    this(encoding, false);
+  }
 
-				AppUser user = AppUser.getUser(httpReq);
+  public AppUserInjectFilter(String encoding, boolean forceEncoding) {
+    this(encoding, forceEncoding, forceEncoding);
+  }
 
-				LOG.debug(url);
-				LOG.debug(user);
-				LOG.debug("session id: " + session.getId());
+  public AppUserInjectFilter(String encoding, boolean forceRequestEncoding, boolean forceResponseEncoding) {
+    this.encoding = encoding;
+    this.forceRequestEncoding = forceRequestEncoding;
+    this.forceResponseEncoding = forceResponseEncoding;
+  }
 
-				if (user == null) {
-					LOG.warn("No user on the session yet...");
-					UserHelper userHelper = new UserHelper();
+  @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-					// connect to W3 to build user profile
-					String ibmUniqueId = userHelper.getUNID();
+    // can be used to deactivate this filter completely
+    String activateFilter = SystemConfiguration.getValue("ACTIVATE_SSO");
+    if (activateFilter.equalsIgnoreCase("false")) {
+      filterChain.doFilter(request, response);
+      return;
+    }
 
-					LOG.debug("Subject is set: " + ibmUniqueId);
+    HttpServletRequest httpReq = (HttpServletRequest) request;
+    HttpServletResponse httpResp = (HttpServletResponse) response;
 
-					if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
-						LOG.debug("No IBM ID detected. Redirecting to W3 ID intercept..");
-						httpReq.getSession().invalidate();
-						httpResp.sendRedirect("/CreateCMR/oidc");
-						return;
-					} else {
-						LOG.debug("IBM ID found. Injecting App User");
-						LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmUniqueId is " + userHelper.getUNID());
-						LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmFullName is "
-								+ userHelper.getPrincipalName());
-					}
+    // verify and force encoding
+    verifyAndAssignEnconding(this.encoding, httpReq, httpResp);
 
-					LOG.debug("Redirecting to W3 ID Provisioner...");
+    String url = httpReq.getRequestURI();
 
-					session.setAttribute("userHelper", userHelper);
-					setSessionAttributes(httpReq, httpResp);
-					filterChain.doFilter(httpReq, response);
-					// httpResp.sendRedirect("/CreateCMR/home");
-					return;
-				}
-			}
-		} catch (Exception e) {
-			LOG.error("Error processing AppUserInjectFilter", e);
-		}
+    HttpSession session = shouldCreateSession(httpReq);
+    String userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
 
-		filterChain.doFilter(httpReq, response);
+    try {
+      if (shouldFilter(httpReq, httpResp)) {
 
-	}
+        AppUser user = AppUser.getUser(httpReq);
 
-	@Override
-	public void destroy() {
-		// NOOP
-	}
+        LOG.debug(url);
+        LOG.debug(user);
+        LOG.debug("session id: " + session.getId());
 
-	@Override
-	public void init(FilterConfig config) throws ServletException {
-		SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
-		LOG.info("CreateCMR " + config.getFilterName() + " initialized.");
-	}
+        if (user == null) {
+          LOG.warn("No user on the session yet...");
+          UserHelper userHelper = new UserHelper();
 
-	private void setSessionAttributes(HttpServletRequest request, HttpServletResponse response)
-			throws CmrException, Exception {
-		HttpSession session = request.getSession();
+          // connect to W3 to build user profile
+          String ibmUniqueId = userHelper.getUNID();
 
-		UserHelper userHelper = (UserHelper) session.getAttribute("userHelper");
-		SimpleJWT idToken = userHelper.getIDToken();
-		String accessToken = userHelper.getAccessToken();
-		Long expiresIn = Long.parseLong(userHelper.getPrivateHashtableAttr("expires_in"));
-		JSONObject claims = idToken.getClaims();
+          LOG.debug("Subject is set: " + ibmUniqueId);
 
-		String userIntranetEmail = ((String) claims.get("emailAddress")).toLowerCase();
-		session.setAttribute("userIntranetEmail", userIntranetEmail);
+          if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
+            LOG.debug("No IBM ID detected. Redirecting to W3 ID intercept..");
+            httpReq.getSession().invalidate();
+            httpResp.sendRedirect("/CreateCMR/oidc");
+            return;
+          } else {
+            LOG.debug("IBM ID found. Injecting App User");
+            LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmUniqueId is " + userHelper.getUNID());
+            LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmFullName is " + userHelper.getPrincipalName());
+          }
 
-		LogInUserModel loginUser = new LogInUserModel();
-		loginUser.setUsername(userIntranetEmail);
+          LOG.debug("Redirecting to W3 ID Provisioner...");
 
-		session.setAttribute("loggedInUserModel", loginUser);
-		session.setAttribute("accessToken", accessToken);
-		session.setAttribute("tokenExpiringTime", LocalDateTime.now().plus(expiresIn, ChronoUnit.SECONDS));
+          session.setAttribute("userHelper", userHelper);
+          setSessionAttributes(httpReq, httpResp);
+          filterChain.doFilter(httpReq, httpResp);
+          // httpResp.sendRedirect("/CreateCMR/home");
+          return;
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("Error processing AppUserInjectFilter", e);
+    }
 
-		session.setAttribute("loginUser", loginUser);
+    filterChain.doFilter(httpReq, httpResp);
 
-		OAuthUtils oAuthUtils = new OAuthUtils();
-		oAuthUtils.authorizeAndSetRoles(loginUser, userService, request, response);
+  }
 
-	}
+  @Override
+  public void destroy() {
+    // NOOP
+  }
 
-	private boolean shouldFilter(HttpServletRequest request, HttpServletResponse response) {
-		String url = request.getRequestURI();
-		int status = response.getStatus();
-		if (url.endsWith("/update")) {
-			return false;
-		}
-		if (url.endsWith("/logout")) {
-			return false;
-		}
-		if (url.endsWith("/external.json")) {
-			return false;
-		}
+  @Override
+  public void init(FilterConfig config) throws ServletException {
+    SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
+    LOG.info("CreateCMR " + config.getFilterName() + " initialized.");
+    setEncoding("UTF-8");
+    setForceEncoding(true);
+  }
 
-		if (request.getParameterMap().keySet().contains("errorMessage") && url.endsWith("/login")) {
+  private void setSessionAttributes(HttpServletRequest request, HttpServletResponse response) throws CmrException, Exception {
+    HttpSession session = request.getSession();
 
-			return false;
-		}
+    UserHelper userHelper = (UserHelper) session.getAttribute("userHelper");
+    SimpleJWT idToken = userHelper.getIDToken();
+    String accessToken = userHelper.getAccessToken();
+    Long expiresIn = Long.parseLong(userHelper.getPrivateHashtableAttr("expires_in"));
+    JSONObject claims = idToken.getClaims();
 
-		if (url.contains("/") && url.substring(url.lastIndexOf("/")).contains(".")) {
-			// static resources
-			return false;
-		}
+    String userIntranetEmail = ((String) claims.get("emailAddress")).toLowerCase();
+    session.setAttribute("userIntranetEmail", userIntranetEmail);
 
-		// if (response.getStatus() == 302 && url.contains("/home")) {
-		// request.getSession(true);
-		// return false;
-		// }
-		// if (url.contains("/") &&
-		// url.substring(url.lastIndexOf("/")).contains(".")) {
-		// return false;
-		// }
+    LogInUserModel loginUser = new LogInUserModel();
+    loginUser.setUsername(userIntranetEmail);
 
-		return true;
-	}
+    session.setAttribute("loggedInUserModel", loginUser);
+    session.setAttribute("accessToken", accessToken);
+    session.setAttribute("tokenExpiringTime", LocalDateTime.now().plus(expiresIn, ChronoUnit.SECONDS));
 
-	private HttpSession shouldCreateSession(HttpServletRequest req) {
-		HttpSession session = req.getSession(false);
-		if (session == null) {
-			return req.getSession();
-		}
-		return session;
-	}
+    session.setAttribute("loginUser", loginUser);
 
-	public String getBody(HttpServletRequest request) throws IOException {
+    OAuthUtils oAuthUtils = new OAuthUtils();
+    oAuthUtils.authorizeAndSetRoles(loginUser, userService, request, response);
 
-		String body = null;
-		StringBuilder stringBuilder = new StringBuilder();
-		BufferedReader bufferedReader = null;
+  }
 
-		try {
-			InputStream inputStream = request.getInputStream();
-			if (inputStream != null) {
-				bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-				char[] charBuffer = new char[128];
-				int bytesRead = -1;
-				while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
-					stringBuilder.append(charBuffer, 0, bytesRead);
-				}
-			} else {
-				stringBuilder.append("");
-			}
-		} catch (IOException ex) {
-			throw ex;
-		} finally {
-			if (bufferedReader != null) {
-				try {
-					bufferedReader.close();
-				} catch (IOException ex) {
-					throw ex;
-				}
-			}
-		}
+  private boolean shouldFilter(HttpServletRequest request, HttpServletResponse response) {
+    String url = request.getRequestURI();
+    int status = response.getStatus();
+    if (url.endsWith("/update")) {
+      return false;
+    }
+    if (url.endsWith("/logout")) {
+      return false;
+    }
+    if (url.endsWith("/external.json")) {
+      return false;
+    }
 
-		body = stringBuilder.toString();
-		return body;
-	}
+    if (request.getParameterMap().keySet().contains("errorMessage") && url.endsWith("/login")) {
+
+      return false;
+    }
+
+    if (url.contains("/") && url.substring(url.lastIndexOf("/")).contains(".")) {
+      // static resources
+      return false;
+    }
+
+    // if (response.getStatus() == 302 && url.contains("/home")) {
+    // request.getSession(true);
+    // return false;
+    // }
+    // if (url.contains("/") &&
+    // url.substring(url.lastIndexOf("/")).contains(".")) {
+    // return false;
+    // }
+
+    return true;
+  }
+
+  private HttpSession shouldCreateSession(HttpServletRequest req) {
+    HttpSession session = req.getSession(false);
+    if (session == null) {
+      return req.getSession();
+    }
+    return session;
+  }
+
+  public String getBody(HttpServletRequest request) throws IOException {
+
+    String body = null;
+    StringBuilder stringBuilder = new StringBuilder();
+    BufferedReader bufferedReader = null;
+
+    try {
+      InputStream inputStream = request.getInputStream();
+      if (inputStream != null) {
+        bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        char[] charBuffer = new char[128];
+        int bytesRead = -1;
+        while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+          stringBuilder.append(charBuffer, 0, bytesRead);
+        }
+      } else {
+        stringBuilder.append("");
+      }
+    } catch (IOException ex) {
+      throw ex;
+    } finally {
+      if (bufferedReader != null) {
+        try {
+          bufferedReader.close();
+        } catch (IOException ex) {
+          throw ex;
+        }
+      }
+    }
+
+    body = stringBuilder.toString();
+    return body;
+  }
+
+  public void setEncoding(@Nullable String encoding) {
+    this.encoding = encoding;
+  }
+
+  @Nullable
+  public String getEncoding() {
+    return this.encoding;
+  }
+
+  public void setForceEncoding(boolean forceEncoding) {
+    this.forceRequestEncoding = forceEncoding;
+    this.forceResponseEncoding = forceEncoding;
+  }
+
+  public void setForceRequestEncoding(boolean forceRequestEncoding) {
+    this.forceRequestEncoding = forceRequestEncoding;
+  }
+
+  public boolean isForceRequestEncoding() {
+    return this.forceRequestEncoding;
+  }
+
+  public void setForceResponseEncoding(boolean forceResponseEncoding) {
+    this.forceResponseEncoding = forceResponseEncoding;
+  }
+
+  public boolean isForceResponseEncoding() {
+    return this.forceResponseEncoding;
+  }
+
+  private void verifyAndAssignEnconding(String enconding, HttpServletRequest httpReq, HttpServletResponse httpResp) {
+
+    try {
+      if (encoding != null) {
+        if (isForceRequestEncoding() || httpReq.getCharacterEncoding() == null) {
+          httpReq.setCharacterEncoding(encoding);
+        }
+        if (isForceResponseEncoding()) {
+          httpResp.setCharacterEncoding(encoding);
+        }
+      }
+    } catch (UnsupportedEncodingException e) {
+      LOG.error("Unsuported enconding operation: " + e);
+    }
+
+  }
 
 }
