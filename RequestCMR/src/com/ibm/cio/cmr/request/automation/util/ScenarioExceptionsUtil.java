@@ -43,6 +43,7 @@ public class ScenarioExceptionsUtil {
 
   public ScenarioExceptionsUtil(EntityManager entityManager, String cmrIssuingCntry, String subRegion, String scenario, String subScenario) {
 
+    String custSubGroup = subScenario;
     if (StringUtils.isNotBlank(subScenario) && SystemLocation.UNITED_STATES.equals(cmrIssuingCntry)) {
       String sqlKey = ExternalizedQuery.getSql("AUTOMATION.GET.US_SUBSCENARIO_KEY");
       PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
@@ -81,7 +82,7 @@ public class ScenarioExceptionsUtil {
       getAddressTypesForDuplicateCMRCheck().put("ZS01", Arrays.asList("ZS01"));
     }
 
-    if (StringUtils.isNotBlank(subScenario)) {
+    if (StringUtils.isNotBlank(custSubGroup)) {
       if (PRIVATE_SCENARIOS.contains(subScenario)) {
         setSkipFindGbgForPrivates(true);
       }
