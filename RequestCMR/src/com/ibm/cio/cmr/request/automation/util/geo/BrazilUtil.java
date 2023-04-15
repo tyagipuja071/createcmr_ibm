@@ -124,10 +124,10 @@ public class BrazilUtil extends AutomationUtil {
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
     Data data = requestData.getData();
-    String isu = null;
-    String ctc = null;
-    String mrc = null;
-    String salesBoCd = null;
+    String isu = "";
+    String ctc = "";
+    String mrc = "";
+    String salesBoCd = "";
     LOG.debug("BR performing fillCoverageAttributes based on GBG");
     LOG.debug("GBG Id: " + gbgId);
 
