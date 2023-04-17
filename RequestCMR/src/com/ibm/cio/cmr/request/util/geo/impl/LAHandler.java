@@ -4154,7 +4154,7 @@ public class LAHandler extends GEOHandler {
 
     // roll-back to new values to Update IBM Codes
     // mexicoBillingName is a temporary placeholder for Update Reason
-    if (admin.getReqType().equalsIgnoreCase("U") && data.getMexicoBillingName().equalsIgnoreCase("UPIC")) {
+    if ("U".equalsIgnoreCase(admin.getReqType()) && "UPIC".equalsIgnoreCase(data.getMexicoBillingName())) {
       data.setIsuCd(brModel.getIsuCd());
       data.setInacCd(brModel.getInacCd());
       data.setCompany(brModel.getCompany());
