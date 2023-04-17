@@ -342,6 +342,10 @@ public class AutomationEngine {
       checkNZBNAPI(stopExecution, actionsOnError);
     }
 
+    if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
+      checkNZBNAPI(stopExecution, actionsOnError);
+    }
+
     LOG.debug("Automation elements executed for Request " + reqId);
 
     Admin admin = requestData.getAdmin();

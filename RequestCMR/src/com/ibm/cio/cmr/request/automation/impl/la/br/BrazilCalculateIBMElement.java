@@ -928,8 +928,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       } else if ("CC3CC".equalsIgnoreCase(scenarioSubType)) {
         if (midasResponse != null && midasResponse.isSuccess()) {
           String abbrevName = (midasResponse.getRecord().getCompanyName().length() > 26)
-              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26)
-              : "CC3/" + (midasResponse.getRecord().getCompanyName());
+              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26) : "CC3/" + (midasResponse.getRecord().getCompanyName());
           LOG.debug("Sold To Company Name : " + midasResponse.getRecord().getCompanyName());
           // SET Abbreviated Name
           details.append("Abbreviated Name (TELX1) = " + abbrevName + "\n");
@@ -1312,23 +1311,23 @@ public class BrazilCalculateIBMElement extends OverridingElement {
             LOG.debug("Warning: State Fiscal Code cannot be determined from Sintegra .\n");
           }
         } else {
-            consultaResponse = BrazilUtil.querySintegraByConsulata(vat, state);
-            if (consultaResponse.isSuccess()) {
-              ConsultaCCCResponse consulta = consultaResponse.getRecord();
-              if (consulta != null) {
-                status = consulta.getStateFiscalCodeStatus();
-                if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
-                    || "Ativa".equalsIgnoreCase(status)) {
-                  stateFiscalCode = consulta.getStateFiscalCode();
-                } else {
-          status = "ISENTO";
-          stateFiscalCode = "ISENTO";
-                }
+          consultaResponse = BrazilUtil.querySintegraByConsulata(vat, state);
+          if (consultaResponse.isSuccess()) {
+            ConsultaCCCResponse consulta = consultaResponse.getRecord();
+            if (consulta != null) {
+              status = consulta.getStateFiscalCodeStatus();
+              if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
+                  || "Ativa".equalsIgnoreCase(status)) {
+                stateFiscalCode = consulta.getStateFiscalCode();
+              } else {
+                status = "ISENTO";
+                stateFiscalCode = "ISENTO";
               }
-            } else {
-              status = "ISENTO";
-              stateFiscalCode = "ISENTO";
             }
+          } else {
+            status = "ISENTO";
+            stateFiscalCode = "ISENTO";
+          }
 
           details.append(addrTypeDesc + " State Fiscal Code cannot be determined from Sintegra.Setting to ISENTO\n");
           details.append(addrTypeDesc + " State Fiscal Code Status = " + status + "\n");
