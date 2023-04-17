@@ -83,8 +83,8 @@ public class ScenarioExceptionsUtil {
       getAddressTypesForDuplicateCMRCheck().put("ZS01", Arrays.asList("ZS01"));
     }
 
-    if (StringUtils.isNotBlank(subScenario)) {
-      if (PRIVATE_SCENARIOS.contains(subScenario)) {
+    if (StringUtils.isNotBlank(custSubGroup)) {
+      if (PRIVATE_SCENARIOS.contains(custSubGroup)) {
         setSkipFindGbgForPrivates(true);
         setPrivateSubScenario(true);
       }
@@ -317,7 +317,7 @@ public class ScenarioExceptionsUtil {
     this.skipFindGbgForPrivates = skipFindGbgForPrivates;
   }
 
-	public boolean isPrivateSubScenario() {
+  public boolean isPrivateSubScenario() {
     return isPrivateSubScenario;
   }
 
