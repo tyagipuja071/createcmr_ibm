@@ -2,15 +2,22 @@ package com.ibm.cio.cmr.request.entity;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 import org.apache.commons.lang3.StringUtils;
 
 @Embeddable
-public class USEnterPrisePK implements Serializable {
+public class USEnterPrisePK extends BaseEntityPk implements Serializable {
   private static final long serialVersionUID = 1L;
 
+  @Column(
+      name = "ENT_NO")
   private String entNo;
+
+  @Column(
+      name = "MANDT")
+  private String mandt;
 
   public String getEntNo() {
     return entNo;
@@ -18,6 +25,14 @@ public class USEnterPrisePK implements Serializable {
 
   public void setEntNo(String entNo) {
     this.entNo = entNo;
+  }
+
+  public String getMandt() {
+    return mandt;
+  }
+
+  public void setMandt(String mandt) {
+    this.mandt = mandt;
   }
 
   @Override
@@ -29,7 +44,7 @@ public class USEnterPrisePK implements Serializable {
       return false;
     }
     USEnterPrisePK o = (USEnterPrisePK) other;
-    return this.entNo.equals(o.entNo) && this.entNo.equals(o.entNo);
+    return this.mandt.equals(o.mandt) && this.entNo.equals(o.entNo);
 
   }
 
@@ -37,6 +52,7 @@ public class USEnterPrisePK implements Serializable {
   public int hashCode() {
     final int prime = 31;
     int hash = 17;
+    hash = hash * prime + (this.mandt != null ? this.mandt.hashCode() : 0);
     hash = hash * prime + (this.entNo != null ? this.entNo.hashCode() : 0);
 
     return hash;
@@ -48,6 +64,6 @@ public class USEnterPrisePK implements Serializable {
   }
 
   protected boolean allKeysAssigned() {
-    return !StringUtils.isEmpty(this.entNo);
+    return !StringUtils.isEmpty(this.mandt) && !StringUtils.isEmpty(this.entNo);
   }
 }

@@ -21,7 +21,7 @@ import javax.persistence.TemporalType;
 @Table(
     name = "US_ENTERPRISE",
     schema = "SAPR3")
-public class USEnterprise implements Serializable {
+public class USEnterprise extends BaseEntity<USEnterPrisePK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @EmbeddedId
