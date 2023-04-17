@@ -3915,6 +3915,7 @@ public class LAHandler extends GEOHandler {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     BrazilV2ReqModel model = new BrazilV2ReqModel();
+
     try {
       PropertyUtils.copyProperties(model, admin);
       PropertyUtils.copyProperties(model, data);
@@ -4152,7 +4153,8 @@ public class LAHandler extends GEOHandler {
     }
 
     // roll-back to new values to Update IBM Codes
-    if (admin.getReqType().equalsIgnoreCase("U")) {
+    // mexicoBillingName is a temporary placeholder for Update Reason
+    if (admin.getReqType().equalsIgnoreCase("U") && data.getMexicoBillingName().equalsIgnoreCase("UPIC")) {
       data.setIsuCd(brModel.getIsuCd());
       data.setInacCd(brModel.getInacCd());
       data.setCompany(brModel.getCompany());
