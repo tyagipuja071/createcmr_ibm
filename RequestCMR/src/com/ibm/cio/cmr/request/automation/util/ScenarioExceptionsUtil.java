@@ -40,6 +40,7 @@ public class ScenarioExceptionsUtil {
   boolean manualReviewIndc;
   boolean reviewExtReqIndc;
   boolean skipFindGbgForPrivates;
+  boolean isPrivateSubScenario;
 
   public ScenarioExceptionsUtil(EntityManager entityManager, String cmrIssuingCntry, String subRegion, String scenario, String subScenario) {
 
@@ -82,9 +83,10 @@ public class ScenarioExceptionsUtil {
       getAddressTypesForDuplicateCMRCheck().put("ZS01", Arrays.asList("ZS01"));
     }
 
-    if (StringUtils.isNotBlank(custSubGroup)) {
-      if (PRIVATE_SCENARIOS.contains(custSubGroup)) {
+    if (StringUtils.isNotBlank(subScenario)) {
+      if (PRIVATE_SCENARIOS.contains(subScenario)) {
         setSkipFindGbgForPrivates(true);
+        setPrivateSubScenario(true);
       }
     }
 
@@ -315,4 +317,11 @@ public class ScenarioExceptionsUtil {
     this.skipFindGbgForPrivates = skipFindGbgForPrivates;
   }
 
+	public boolean isPrivateSubScenario() {
+    return isPrivateSubScenario;
+  }
+
+  public void setPrivateSubScenario(boolean isPrivateSubScenario) {
+    this.isPrivateSubScenario = isPrivateSubScenario;
+  }
 }
