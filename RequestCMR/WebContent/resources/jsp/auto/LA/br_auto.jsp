@@ -193,4 +193,7 @@
 			</p>
 		</cmr:column>
 	</cmr:row>
+
+	<!-- temporary placeholder for Update Reason value -->
+	<form:hidden path="mexicoBillingName" id="mexicoBillingName"/>
 </cmr:view>
