@@ -5202,6 +5202,9 @@ function set34QYZlogicOnISUCtcChange() {
     var bpCustTypes = [ 'BUSPR', 'BUSSM', 'BUSVA', 'CROBP' ];
     var internalCustSubTypes = [ 'INTER', 'INTVA', 'INTSM', 'CROIN' ]
     var pripeCustSubTypes = [ 'CROPR', 'PRICU', 'PRISM', 'PRIVA' ];
+    var validIsuCTCs = ['34Q','04','19','28','4A','14','3T','5K','36Y','32T'];
+    var isu = FormManager.getActualValue('isuCd');
+    var ctc = FormManager.getActualValue('clientTier');
     if (internalCustSubTypes.includes(custSubType)) {
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
@@ -5215,12 +5218,14 @@ function set34QYZlogicOnISUCtcChange() {
     } else if (commSubTypes.includes(custSubType)) {
       FormManager.enable('isuCd');
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '32', '34', '36', '04', '19', '28', '14', '4A', '3T', '5K' ]);
-      FormManager.setValue('isuCd', '34');
       FormManager.enable('clientTier');
-      FormManager.setValue('clientTier', 'Q');
       FormManager.readOnly('repTeamMemberNo');
       FormManager.setValue('repTeamMemberNo', '012345');
       FormManager.enable('salesBusOffCd');
+      if(!validIsuCTCs.includes(isu.concat(ctc))){
+	      FormManager.setValue('isuCd', '34');
+        FormManager.setValue('clientTier', 'Q');
+     }
     } else if (ibmEmpCustSubTypes.includes(custSubType)) {
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
@@ -5370,13 +5375,13 @@ function setSBOSalesRepFor34QYZ() {
       FormManager.setValue('salesBusOffCd', 'TF');
     } else if (isuCTC == '5K') {
       FormManager.setValue('salesBusOffCd', '99');
-    } else if (isuCTC == '04') {
-      FormManager.setValue('salesBusOffCd', 'HG');
     } else if (isuCTC == '19') {
       FormManager.setValue('salesBusOffCd', 'EB');
     } else if (isuCTC == '28' && !['EO','TQ','TX'].includes(sbo)) {
       FormManager.setValue('salesBusOffCd', '');
     } else if (isuCTC == '36Y' && !['FL','FP','FM'].includes(sbo) ) {
+      FormManager.setValue('salesBusOffCd', '');
+    }else if (isuCTC == '04' && !['HG','GF','GG'].includes(sbo) ) {
       FormManager.setValue('salesBusOffCd', '');
     }
     
