@@ -95,7 +95,8 @@ function processRequestAction() {
       }
       doSaveRequest();
     } else {
-      cmr.showAlert('Request Status mismatch from database. Please reload the page.');
+      cmr.showAlert("Unable to save the request. Request Status mismatch from database." +
+      "<br><br>Please reload the page.");
     }
 
   } else if (action == YourActions.Validate) {
