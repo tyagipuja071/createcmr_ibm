@@ -8766,7 +8766,7 @@ function turkish(input) {
     return true;
   }
   // var reg =
-  // /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/;
+  // /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|�?|‘|’|�?|＂|．|？|：|。|，]+/;
   var reg = /[a-zA-Z0-9ğüşöçİĞÜŞÖÇ]+/;
   if (!value.match(reg)) {
     return new ValidationResult(input, false, '{1} is not a valid value for {0}. Please enter turkish characters only.');
