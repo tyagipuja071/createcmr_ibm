@@ -509,7 +509,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       if (hasCNAttachment(entityManager, admin.getId().getReqId())) {
         admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
       } else {
-        admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
+        admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
       }
     } else {
       admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
