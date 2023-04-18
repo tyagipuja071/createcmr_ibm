@@ -331,7 +331,7 @@
         </p>
       </cmr:column>
       </cmr:view>
-      <cmr:column span="2" containerForField="VAT" exceptForCountry="897,649">
+      <cmr:column span="2" containerForField="VAT" exceptForCountry="897,649,641">
         <p>
           <label for="vat"> <cmr:fieldLabel fieldId="VAT" />: <cmr:delta text="${rdcdata.vat}" oldValue="${reqentry.vat}" /> <cmr:view
               forCountry="755">

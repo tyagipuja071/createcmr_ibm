@@ -23,6 +23,8 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -38,6 +40,7 @@ import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
 import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerRequest;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.validator.PostalCodeValidateRequest;
@@ -53,8 +56,7 @@ public class VatUtilController {
 
   private static final Logger LOG = Logger.getLogger(VatUtilController.class);
 
-  @RequestMapping(
-      value = "/vat")
+  @RequestMapping(value = "/vat")
   public ModelMap checkVat(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -83,8 +85,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/vat/vies")
+  @RequestMapping(value = "/vat/vies")
   public ModelMap validateVATUsingVies(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -133,8 +134,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/in/gst")
+  @RequestMapping(value = "/in/gst")
   public ModelMap validateGST(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -204,8 +204,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/zip")
+  @RequestMapping(value = "/zip")
   public ModelMap checkPostalCode(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -241,8 +240,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/au/abn")
+  @RequestMapping(value = "/au/abn")
   public ModelMap validateABN(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -328,8 +326,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/au/custNm")
+  @RequestMapping(value = "/au/custNm")
   public ModelMap validateCustNmFromVat(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String regex = "\\s+$";
@@ -427,8 +424,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/au/custNmFromAPI")
+  @RequestMapping(value = "/au/custNmFromAPI")
   public ModelMap validateCustNmFromAPI(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String regex = "\\s+$";
@@ -511,8 +507,17 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/cn/tyc")
+  /**
+   * 
+   * @param request
+   * @param response
+   * @return
+   * @throws Exception
+   * @deprecated - TYC discontinued; Use
+   *             {@link #checkCnAddrViaDNB(HttpServletRequest, HttpServletResponse)}
+   */
+  @Deprecated
+  @RequestMapping(value = "/cn/tyc")
   public ModelMap checkCnAddr(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     // ValidationResult validation = null;
@@ -542,6 +547,83 @@ public class VatUtilController {
 
     if (tycResponse != null && tycResponse.isSuccess()) {
       map.addAttribute("result", tycResponse.getRecord());
+    }
+    return map;
+  }
+
+  /**
+   * Connects to D&B and tries to do a local language retrieval using D&B
+   * 
+   * @param request
+   * @param response
+   * @return
+   * @throws Exception
+   */
+  @RequestMapping(value = "/cn/dnb")
+  public ModelMap checkCnAddrViaDNB(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelMap map = new ModelMap();
+    map.put("result", null);
+
+    // ValidationResult validation = null;
+    String busnType = request.getParameter("busnType");
+    String cnName = request.getParameter("cnName");
+    String cnAddress = request.getParameter("cnAddress");
+    String cnCity = request.getParameter("cnCity");
+
+    // dummyfy street and city when not supplied
+    if (StringUtils.isBlank(cnAddress)) {
+      cnAddress = "dummy";
+    }
+    if (StringUtils.isBlank(cnCity)) {
+      cnCity = "dummy";
+    }
+
+    String trackedDuns = null;
+    if (!StringUtils.isBlank(busnType)) {
+      LOG.debug("Finding D&B records with Org ID " + busnType);
+      List<DnBMatchingResponse> orgIdMatches = DnBUtil.findByOrgId(busnType, "CN");
+      // use only the top match here
+      if (!orgIdMatches.isEmpty()) {
+        DnBMatchingResponse dnb = orgIdMatches.get(0);
+        LOG.debug("DUNS " + dnb.getDunsNo() + " found for Org ID " + busnType);
+        trackedDuns = dnb.getDunsNo();
+      }
+    }
+
+    List<DnBMatchingResponse> nameMatches = DnBUtil.findByAddress("CN", cnName, cnAddress, cnCity);
+    if (!nameMatches.isEmpty()) {
+      // only add if no orgId specified, or orgId specified and matches duns
+      CNHandler handler = new CNHandler();
+      for (DnBMatchingResponse match : nameMatches) {
+        LOG.debug("Got " + match.getDunsNo() + " / " + match.getDnbName() + " / " + match.getDnbStreetLine1() + " / " + match.getDnbCity());
+
+        if (trackedDuns != null && trackedDuns.equals(match.getDunsNo())) {
+          LOG.debug(" - matched with DUNS " + match.getDunsNo() + ". Comparing name and address");
+          // repurpose CNResponse here
+          CNResponse cnResponse = new CNResponse();
+          cnResponse.setCreditCode(!StringUtils.isBlank(busnType) ? busnType : DnBUtil.getVAT("CN", match.getOrgIdDetails()));
+          cnResponse.setName(match.getDnbName());
+          cnResponse.setRegLocation(match.getDnbStreetLine1());
+          cnResponse.setCity(match.getDnbCity());
+          map.put("result", cnResponse);
+          break;
+        } else if (trackedDuns == null) {
+          // only do name matching, if needed check only street
+          // note: account for dummy address and city
+          String dbcsInputName = handler.convert2DBCS(cnName);
+          String dbcsDnBName = handler.convert2DBCS(match.getDnbName());
+          if (dbcsInputName.equals(dbcsDnBName)) {
+            // repurpose CNResponse here
+            CNResponse cnResponse = new CNResponse();
+            cnResponse.setCreditCode(!StringUtils.isBlank(busnType) ? busnType : DnBUtil.getVAT("CN", match.getOrgIdDetails()));
+            cnResponse.setName(match.getDnbName());
+            cnResponse.setRegLocation(match.getDnbStreetLine1());
+            cnResponse.setCity(match.getDnbCity());
+            map.put("result", cnResponse);
+            break;
+          }
+        }
+      }
     }
     return map;
   }
