@@ -505,11 +505,11 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     boolean approvalsRej = queryRej.exists();
     if (approvalsRej) {
       admin.setReqStatus("AUT");
-    } else if (isConditionApprovalCN(entityManager, admin.getId().getReqId())) {
+    }else if (isConditionApprovalCN(entityManager, admin.getId().getReqId())) {
       if (hasCNAttachment(entityManager, admin.getId().getReqId())) {
         admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
       } else {
-        admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
+        admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
       }
     } else {
       admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
@@ -522,6 +522,14 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
     return query.exists();
+  }
+  
+  private boolean hasCNAttachment(EntityManager entityManager, long reqId) {
+    String ret = ChinaUtil.geDocContent(entityManager, reqId);
+    if ("Y".equals(ret)) {
+      return true;
+    }
+    return false;
   }
 
   private boolean hasCNAttachment(EntityManager entityManager, long reqId) {
