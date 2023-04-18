@@ -40,7 +40,6 @@ public class ScenarioExceptionsUtil {
   boolean manualReviewIndc;
   boolean reviewExtReqIndc;
   boolean skipFindGbgForPrivates;
- 
   public ScenarioExceptionsUtil(EntityManager entityManager, String cmrIssuingCntry, String subRegion, String scenario, String subScenario) {
 
     String custSubGroup = subScenario;
