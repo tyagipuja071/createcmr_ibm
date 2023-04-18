@@ -228,6 +228,8 @@ public class AutomationEngine {
           && (ProcessType.StandardProcess.equals(element.getProcessType()) || ProcessType.DataOverride.equals(element.getProcessType())
               || (ProcessType.Matching.equals(element.getProcessType()) && !(element instanceof DuplicateCheckElement)));
 
+      boolean skipVerification = scenarioExceptions != null && scenarioExceptions.isSkipCompanyVerification();
+      skipVerification = skipVerification && (element instanceof CompanyVerifier);
 
       // CREATCMR-4872
       if (isUsTaxSkipToPcp) {
@@ -244,6 +246,8 @@ public class AutomationEngine {
 
         if (skipElement) {
           result = element.createSkippedResult(reqId, "Checks skipped because of scenario exceptions and/or previous element results.");
+        } else if (skipVerification) {
+          result = element.createSkippedResult(reqId, "Company verification skipped for this request scenario.");
         } else {
           try {
             result = element.executeAutomationElement(entityManager, requestData, engineData.get());

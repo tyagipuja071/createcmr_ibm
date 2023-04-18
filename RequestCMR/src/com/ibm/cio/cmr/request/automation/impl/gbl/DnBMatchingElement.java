@@ -76,7 +76,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     String scenario = data.getCustSubGrp();
     GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
-    boolean isPrivateSubScenario = scenarioExceptions != null ? scenarioExceptions.isPrivateSubScenario() : false;
+
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
     Scorecard scorecard = requestData.getScorecard();
@@ -168,19 +168,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           DnBMatchingResponse perfectMatch = null;
 
           for (DnBMatchingResponse dnbRecord : dnbMatches) {
-
-            if (isPrivateSubScenario) {
-              // call a method to check customer name and address
-              boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
-              if (closelyMatches) {
-                result.setDetails("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
-                engineData.addRejectionComment("OTH",
-                    "DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.", "", "");
-                result.setOnError(true);
-                result.setResults("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
-                return result;
-              }
-            }
 
             // CREATCMR-6958
             if (dnbRecord.getConfidenceCode() >= 9 && isHighConfidenceCntry(entityManager, data)) {
