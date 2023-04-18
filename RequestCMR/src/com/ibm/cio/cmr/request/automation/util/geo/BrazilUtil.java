@@ -132,7 +132,7 @@ public class BrazilUtil extends AutomationUtil {
     LOG.debug("GBG Id: " + gbgId);
 
     if (gbgId != null && !"BGNONE".equals(gbgId.trim())) {
-      BrazilFieldsContainer sortl = getGbgSortlMapping(entityManager, requestData, gbgId);
+      BrazilFieldsContainer sortl = getGbgSortlMapping(entityManager, requestData, gbgId.trim());
       String comment = StringUtils.isNotBlank(sortl.getComment()) ? sortl.getComment() : "";
       if (StringUtils.isNotBlank(sortl.getText()) && !comment.equals("Signature-Strategic")) {
         List<BrazilFieldsContainer> isuCtcResults = computeIsuCtcFromSbo(entityManager, data, sortl.getText());
@@ -155,16 +155,20 @@ public class BrazilUtil extends AutomationUtil {
           LOG.debug("SBO : " + salesBoCd + " " + "ISU : " + isu + " " + "CTC : " + ctc + " " + "MRC : " + mrc);
         }
       } else {
-        LOG.debug("Setting SORTL ISU CTC MRC based on GBG. (Signature-Strategic)");
-        details.append("Setting SORTL ISU CTC MRC based on GBG.");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MRC_CD", data.getMrcCd(), "A");
+        if (StringUtils.isNotBlank(sortl.getText()) && comment.equals("Signature-Strategic")) {
+          LOG.debug("Setting SORTL ISU CTC MRC based on GBG. (Signature-Strategic)");
+          details.append("Setting SORTL ISU CTC MRC based on GBG.");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sortl.getText());
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MRC_CD", data.getMrcCd(), "A");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "");
+        }
       }
     } else {
       LOG.debug("GBG is BGNONE...");
       LOG.debug("SBO : " + requestData.getData().getSalesBusOffCd());
-      String coverageId = covType.trim() + covId.trim();
-      LOG.debug("Coverage Id: " + coverageId);
       if (covId != null) {
+        String coverageId = covType.trim() + covId.trim();
+        LOG.debug("Coverage Id: " + coverageId);
         BrazilFieldsContainer sortl = getGbgSortlMapping(entityManager, requestData, coverageId);
         if (StringUtils.isNotBlank(sortl.getText())) {
           List<BrazilFieldsContainer> isuCtcResults = computeIsuCtcFromSbo(entityManager, data, requestData.getData().getSalesBusOffCd());
