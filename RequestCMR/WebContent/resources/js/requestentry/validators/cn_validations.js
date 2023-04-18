@@ -2552,8 +2552,8 @@ function validateEnNameForInter() {
             }
             var enName = custNm1ZS01 + ' ' + custNm2ZS01;
             var custSubType = FormManager.getActualValue('custSubGrp');
-            if (enName.toUpperCase().indexOf("IBM CHINA") == -1){
-              return new ValidationResult(null, false, "Customer Name English should include 'IBM China' for Internal Sub_scenario.");
+            if (enName.toUpperCase().indexOf("IBM CHINA") == -1 && enName.toUpperCase().indexOf("IBM (CHINA)") == -1){
+              return new ValidationResult(null, false, "Customer Name English should include 'IBM China' or 'IBM (CHINA)' for Internal Sub_scenario."); 
             } else {
               return new ValidationResult(null, true);
             }
@@ -2576,8 +2576,8 @@ function validateEnNameInAddrTab() {
             var custNm2 = FormManager.getActualValue('custNm2');
             var enName = custNm1 + ' ' + custNm2;
             var custSubType = FormManager.getActualValue('custSubGrp');
-            if (enName.toUpperCase().indexOf("IBM CHINA") == -1){
-              return new ValidationResult(null, false, "Customer Name English should include 'IBM China' for Internal Sub_scenario.");
+            if (enName.toUpperCase().indexOf("IBM CHINA") == -1 && enName.toUpperCase().indexOf("IBM (CHINA)") == -1){
+              return new ValidationResult(null, false, "Customer Name English should include 'IBM China' or 'IBM (CHINA)' for Internal Sub_scenario.");
             } else {
               return new ValidationResult(null, true);
             }
