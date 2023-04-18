@@ -64,17 +64,19 @@ public class GBLScenarioCheckElement extends ValidatingElement {
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(cmrIssuingCntry);
       log.debug("Automation Util for " + data.getCmrIssuingCntry() + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
       boolean isPrivateSubScenario = scenarioExceptions != null ? scenarioExceptions.isSkipFindGbgForPrivates() : false;
-      boolean checkDunsMatchOnPrivates = checkDunsMatchOnPrivates(requestData, engineData, "ZS01", isPrivateSubScenario);
-      if (checkDunsMatchOnPrivates) {
-        output.setSuccess(false);
-        output.setMessage("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
-        result.setDetails("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
-        result.setOnError(true);
-        result.setResults("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
-        engineData.addRejectionComment("OTH", "DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.", "",
-            "");
-        log.debug("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
-        return result;
+      if (isPrivateSubScenario) {
+        boolean foundCloseMatch = checkDunsMatchOnPrivates(requestData, engineData, "ZS01");
+        if (foundCloseMatch) {
+          output.setSuccess(false);
+          output.setMessage("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
+          result.setDetails("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
+          result.setOnError(true);
+          result.setResults("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
+          engineData.addRejectionComment("OTH", "DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.", "",
+              "");
+          log.debug("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
+          return result;
+        }
       }
       if (countryUtil != null) {
         boolean countryCheck = false;
@@ -109,8 +111,7 @@ public class GBLScenarioCheckElement extends ValidatingElement {
     return result;
   }
 
-  public boolean checkDunsMatchOnPrivates(RequestData requestData, AutomationEngineData engineData, String addrType, boolean hasCloselyMatch)
-      throws Exception {
+  public boolean checkDunsMatchOnPrivates(RequestData requestData, AutomationEngineData engineData, String addrType) throws Exception {
     boolean hasValidMatches = false;
     MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, "ZS01");
     if (response != null && response.getMatched()) {
@@ -119,16 +120,13 @@ public class GBLScenarioCheckElement extends ValidatingElement {
 
       if (hasValidMatches) {
         for (DnBMatchingResponse dnbRecord : dnbMatches) {
-
-          if (hasCloselyMatch) {
-            Addr soldTo = requestData.getAddress("ZS01");
-            Admin admin = requestData.getAdmin();
-            Data data = requestData.getData();
-            // call a method to check customer name and address
-            boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
-            if (closelyMatches) {
-              return true;
-            }
+          Addr soldTo = requestData.getAddress("ZS01");
+          Admin admin = requestData.getAdmin();
+          Data data = requestData.getData();
+          // call a method to check customer name and address
+          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
+          if (closelyMatches) {
+            return true;
           }
         }
       }
