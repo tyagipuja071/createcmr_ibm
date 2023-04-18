@@ -532,6 +532,14 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     return false;
   }
 
+  private boolean hasCNAttachment(EntityManager entityManager, long reqId) {
+    String ret = ChinaUtil.geDocContent(entityManager, reqId);
+    if ("Y".equals(ret)) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Checks if this country will go to processing automatically on successful
    * execution or not
