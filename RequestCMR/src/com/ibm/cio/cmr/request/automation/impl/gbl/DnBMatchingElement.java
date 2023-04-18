@@ -76,7 +76,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     String scenario = data.getCustSubGrp();
     GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
-
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
     Scorecard scorecard = requestData.getScorecard();
