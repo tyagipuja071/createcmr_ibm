@@ -1064,14 +1064,6 @@ function autoSetSboSrOnAddrSaveUK() {
       setSrAndSboOnIsicUK();
     }
 
-    // 1482148 - add Scotland and Northern Ireland logic
-    if (isuCd == '32' && clientTier == 'Y') {
-      // if (postCd != '' && isNorthernIrelandPostCd(postCd)) {
-      // FormManager.setValue('clientTier', "C");
-      setSrAndSboOnIsicUK();
-      // }
-    }
-
     var clientTier = FormManager.getActualValue('clientTier');
     if (postCd != '' && isNorthernIrelandPostCd(postCd)) {
       if (isuCd == '34' && clientTier == 'Q') {
