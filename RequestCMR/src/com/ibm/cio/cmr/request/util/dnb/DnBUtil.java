@@ -1203,7 +1203,7 @@ public class DnBUtil {
     request.setStreetLine1("X");
     request.setCity("X");
     request.setLandedCountry(country);
-    request.setMinConfidence("5");
+    request.setMinConfidence("9");
     request.setOrgId(orgId);
 
     MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
@@ -1213,15 +1213,24 @@ public class DnBUtil {
     TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
     };
     MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
-    if (response != null && response.getSuccess() && response.getMatched()) {
-      List<DnBMatchingResponse> matchedIds = new ArrayList<DnBMatchingResponse>();
-      for (DnBMatchingResponse rec : response.getMatches()) {
-        if ("Y".equals(rec.getOrgIdMatch())) {
+    if (response != null && response.getSuccess()) {
+      if (response.getMatched()) {
+        List<DnBMatchingResponse> matchedIds = new ArrayList<DnBMatchingResponse>();
+        for (DnBMatchingResponse rec : response.getMatches()) {
           LOG.debug("DUNS " + rec.getDunsNo() + " matched Org ID " + orgId);
-          matchedIds.add(rec);
+          LOG.debug("OrgIdMatch = " + rec.getOrgIdMatch() + ", ConfidenceCode = " + rec.getConfidenceCode() + ", MatchGrade = " + rec.getMatchGrade()
+              + ", MatchQuality = " + rec.getMatchQuality());
+          if ("Y".equals(rec.getOrgIdMatch())) {
+            LOG.debug("DUNS " + rec.getDunsNo() + " matched Org ID " + orgId);
+            matchedIds.add(rec);
+          }
         }
+        return matchedIds;
+      } else {
+        LOG.debug("D&B matching returned no matches inside findByOrgId. Org ID " + orgId);
       }
-      return matchedIds;
+    } else {
+      LOG.error("D&B matching failed inside findByOrgId. Org ID " + orgId);
     }
     return Collections.emptyList();
   }
@@ -1243,7 +1252,7 @@ public class DnBUtil {
     request.setStreetLine1(street);
     request.setCity(city);
     request.setLandedCountry(country);
-    request.setMinConfidence("5");
+    request.setMinConfidence("7");
 
     MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
     ObjectMapper mapper = new ObjectMapper();
@@ -1252,8 +1261,14 @@ public class DnBUtil {
     TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
     };
     MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
-    if (response != null && response.getSuccess() && response.getMatched()) {
-      return response.getMatches();
+    if (response != null && response.getSuccess()) {
+      if (response.getMatched()) {
+        return response.getMatches();
+      } else {
+        LOG.debug("D&B matching returned no matches inside findByAddress.");
+      }
+    } else {
+      LOG.error("D&B matching failed inside findByAddress.");
     }
     return Collections.emptyList();
   }

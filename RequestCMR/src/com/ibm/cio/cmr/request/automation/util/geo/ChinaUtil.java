@@ -1,8 +1,6 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -17,13 +15,11 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
-import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.IntlAddrPK;
-import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -31,7 +27,6 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
-import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 public class ChinaUtil extends AutomationUtil {
 
@@ -574,88 +569,4 @@ public class ChinaUtil extends AutomationUtil {
     return Arrays.asList("C", "U", "M", "D", "R");
   }
 
-  /**
-   * Does a checking on existing CMRs based on the Social Credit Code. Each
-   * non-BP, non-3rd party CMR can only have one instance per Social Credit
-   * Code. The matching continues using the local language name and address when
-   * no DUNS is found via the Social Credit Code.
-   * 
-   * @param entityManager
-   * @param socialCreditCd
-   * @param localName
-   * @param localAddress
-   * @param localCity
-   * @return list of {@link FindCMRRecordModel} containing the CMR details
-   *         directly from KNA1
-   * @throws Exception
-   */
-  private List<FindCMRRecordModel> getExistingCMRs(EntityManager entityManager, String socialCreditCode, String localName, String localAddress,
-      String localCity, String landedCountry) throws Exception {
-
-    List<String> allDuns = new ArrayList<String>();
-
-    LOG.debug("Find DUNS using Social Credit Code " + socialCreditCode + " for " + landedCountry);
-    List<DnBMatchingResponse> matches = DnBUtil.findByOrgId(socialCreditCode, landedCountry);
-    if (!matches.isEmpty()) {
-
-      // it's expected to only be 1, but gather all just in case
-      matches.parallelStream().forEach(match -> {
-        allDuns.add(match.getDunsNo());
-      });
-    } else {
-      LOG.debug("Finding DUNS using local language information..");
-      matches = DnBUtil.findByAddress(landedCountry, localName, localAddress, localCity);
-      if (!matches.isEmpty()) {
-
-        // only get confidence code = 10 for name/address matching
-        matches.parallelStream().filter(match -> "10".equals(match.getConfidenceCode())).forEach(match -> {
-          allDuns.add(match.getDunsNo());
-        });
-        ;
-      }
-    }
-
-    StringBuilder dunsIN = new StringBuilder();
-    if (allDuns.isEmpty()) {
-      // no duns matches, return
-      return Collections.emptyList();
-    } else {
-      LOG.debug("DUNS LIST: " + allDuns);
-      allDuns.stream().forEach(duns -> {
-        dunsIN.append(dunsIN.length() > 0 ? ", " : "");
-        dunsIN.append("'").append(duns).append("'");
-      });
-      String sql = ExternalizedQuery.getSql("CN.FIND_DUPLICATE_BY_DUNS");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-      query.append((allDuns.size() > 0 ? " in " : " = ") + dunsIN.toString());
-      query.setForReadOnly(true);
-
-      List<FindCMRRecordModel> cmrMatches = new ArrayList<FindCMRRecordModel>();
-      List<Object[]> results = query.getResults();
-      results.parallelStream().forEach(result -> {
-        String cmrNo = (String) result[0];
-        String orderBlock = (String) result[1];
-        String custClass = (String) result[2];
-        String addrType = (String) result[3];
-        String seqNo = (String) result[4];
-        String name1 = (String) result[5];
-        String name2 = (String) result[6];
-
-        FindCMRRecordModel cmr = new FindCMRRecordModel();
-        cmr.setCmrName1Plain(name1);
-        cmr.setCmrName2Plain(name2);
-        cmr.setCmrClass(custClass);
-        cmr.setCmrNum(cmrNo);
-        cmr.setCmrOrderBlock(orderBlock);
-        cmr.setCmrAddrTypeCode(addrType);
-        cmr.setCmrAddrSeq(seqNo);
-
-        cmrMatches.add(cmr);
-
-      });
-      return cmrMatches;
-    }
-
-  }
 }
