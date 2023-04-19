@@ -37,6 +37,7 @@ public class CMRRefreshService extends BaseBatchService {
 
   private static final Logger LOG = Logger.getLogger(CMRRefreshService.class);
   private static final SimpleDateFormat LOG_FORMATTER = new SimpleDateFormat("yyyyMMddHHmm");
+  private static final SimpleDateFormat TIME_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
   private String country;
   private int hours;
 
@@ -92,19 +93,23 @@ public class CMRRefreshService extends BaseBatchService {
     sql += "and ( ";
     sql += "  k.SHAD_UPDATE_TS > :TS or ";
     sql += "  x.CHG_TS > :TS or ";
-    sql += "  x.CREATE_DATE > date(:TS) or ";
+    sql += " x.CREATE_DATE > :DT or ";
     sql += "  bg.UPDATE_TS > :TS or ";
-    sql += "  bg.CREATE_TS > :TS or ";
-    sql += "  duns.UPDATE_TS > :TS or ";
-    sql += "  duns.CREATE_TS > :TS ";
+    sql += "  bg.CREATE_TS >  :TS  or ";
+    sql += "  duns.UPDATE_TS >  :TS or ";
+    sql += "  duns.CREATE_TS >  :TS ";
     sql += ") ";
     if (this.country != null) {
       sql += " and k.KATR6 = :KATR6";
     }
+
+    String hrBeforeDate = TIME_FORMATTER.format(cal.getTime());
+    Timestamp hrBeforeTime = new Timestamp(cal.getTimeInMillis());
     query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KATR6", this.country);
-    query.setParameter("TS", cal.getTime());
+    query.setParameter("TS", hrBeforeTime);
+    query.setParameter("DT", hrBeforeDate);
     query.setForReadOnly(true);
     List<Object[]> results = query.getResults();
 
