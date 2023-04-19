@@ -1916,12 +1916,6 @@ public abstract class APHandler extends GEOHandler {
   }
 
   @Override
-  public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
   public String buildAddressForDnbMatching(String country, Addr addr) {
     if (SystemLocation.INDIA.equals(country) || SystemLocation.AUSTRALIA.equals(country) || SystemLocation.SINGAPORE.equals(country)
         || SystemLocation.NEW_ZEALAND.equals(country)) {
