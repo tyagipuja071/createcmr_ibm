@@ -523,14 +523,6 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     query.setParameter("REQ_ID", reqId);
     return query.exists();
   }
-  
-  private boolean hasCNAttachment(EntityManager entityManager, long reqId) {
-    String ret = ChinaUtil.geDocContent(entityManager, reqId);
-    if ("Y".equals(ret)) {
-      return true;
-    }
-    return false;
-  }
 
   private boolean hasCNAttachment(EntityManager entityManager, long reqId) {
     String ret = ChinaUtil.geDocContent(entityManager, reqId);
