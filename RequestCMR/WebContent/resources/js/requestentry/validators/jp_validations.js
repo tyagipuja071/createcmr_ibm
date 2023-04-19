@@ -2967,6 +2967,7 @@ function addLogicOnOfficeCdChange() {
     setINACCodeMandatory();
     // addJSICLogic();
     setClusterOnOfcdChange();
+    setIsicValueLogic();
   });
 }
 function setINACCodeMandatory() {
@@ -3090,9 +3091,11 @@ function getJSIC(sector) {
   }
 }
 function addJsicIsicLogic() {
-  setISICOnJSIC();
+  setIsicValueLogic();
+  // setISICOnJSIC();
   dojo.connect(FormManager.getField('jsicCd'), 'onChange', function(value) {
-    setISICOnJSIC();
+    setIsicValueLogic();
+    // setISICOnJSIC();
   });
 }
 function setISICOnJSIC() {
@@ -3107,6 +3110,82 @@ function setISICOnJSIC() {
     isic = results[0].ret1;
     FormManager.setValue('isicCd', isic);
   }
+}
+function setIsicValueLogic() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp) {
+    return;
+  }
+  if (inJpts37Ofcd()) {
+    var isicCd = getTs37IsicByOfcd();
+    if (isicCd != '') {
+      FormManager.setValue('isicCd', isicCd);
+    }
+  } else {
+    var isicCd = getTs31IsicByJsic();
+    if (isicCd != '') {
+      FormManager.setValue('isicCd', isicCd);
+    }
+    if (!inJpts31Jsic() && 'U' == reqType) {
+      FormManager.setValue('isicCd', '0000');
+    }
+  }
+}
+function inJpts37Ofcd() {
+  var ofcd = FormManager.getActualValue('salesBusOffCd');
+  var qParams = {
+    CD : ofcd
+  };
+  var results = cmr.query('CHECK.JPTS37', qParams);
+  if (results != null && results.length > 0) {
+    return true;
+  }
+  return false;
+}
+function getTs37IsicByOfcd() {
+  var ofcd = FormManager.getActualValue('salesBusOffCd');
+  var isicCd = '';
+  var qParams = {
+    _qall : 'Y',
+    CD : ofcd,
+  };
+  var results = cmr.query('GET.ISIC_JPTS37', qParams);
+  if (results != null && results.length > 0) {
+    for (var i = 0; i < results.length; i++) {
+      if (results[i].ret2 != ' ') {
+        isicCd = results[0].ret2;
+      }
+    }
+  }
+  return isicCd;
+}
+function inJpts31Jsic() {
+  var jsicCd = FormManager.getActualValue('jsicCd');
+  var qParams = {
+    CD : jsicCd
+  };
+  var results = cmr.query('CKECK.JPTS37', qParams);
+  if (results != null && results.length > 0) {
+    return true;
+  }
+  return false;
+}
+function getTs31IsicByJsic() {
+  var jsicCd = FormManager.getActualValue('jsicCd');
+  var isicCd = '';
+  var qParams = {
+    _qall : 'Y',
+    CD : jsicCd,
+  };
+  var results = cmr.query('GET.ISIC_JPTS31', qParams);
+  if (results != null && results.length > 0) {
+    for (var i = 0; i < results.length; i++) {
+      if (results[i].ret2 != ' ') {
+        isicCd = results[0].ret2;
+      }
+    }
+  }
+  return isicCd;
 }
 
 function setClusterOnOfcdChange() {
@@ -5510,6 +5589,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setOutsourcingServiceRequired, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSalesBusOffCdRequired, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(addScenarioDriven, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(setIsicValueLogic, GEOHandler.JP);
 
   // CREATCMR-6694
   GEOHandler.addAfterConfig(setAdminDeptOptional, GEOHandler.JP);
