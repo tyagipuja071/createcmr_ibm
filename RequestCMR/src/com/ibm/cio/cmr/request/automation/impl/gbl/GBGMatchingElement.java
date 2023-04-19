@@ -318,13 +318,17 @@ public class GBGMatchingElement extends MatchingElement {
    * @param match
    * @return
    */
-  private boolean importLDE(EntityManager entityManager, RequestData requestData, AutomationMatching match) {
-    String ldeRule = match.getId().getMatchKeyValue();
-    if (StringUtils.isBlank(ldeRule)) {
-      LOG.warn("LDE rule for import is missing.");
-      return false;
-    }
-    LOG.debug("Importing data for LDE Rule " + ldeRule);
+  	private boolean importLDE(EntityManager entityManager, RequestData requestData, AutomationMatching match) {
+	    String ldeRule = match.getId().getMatchKeyValue();
+	    return importLDE(entityManager, requestData, ldeRule);
+	  }
+
+	  public boolean importLDE(EntityManager entityManager, RequestData requestData, String ldeRule) {
+	    if (StringUtils.isBlank(ldeRule)) {
+	      LOG.warn("LDE rule for import is missing.");
+	      return false;
+	    }
+	    LOG.debug("Importing data for LDE Rule " + ldeRule);
 
     // format of LDE is BG_CNTRY_<CNTRY VALUE>_FIELD_VALUE for country BGs
     // and BG_FIELD_VALUE for global BGs
