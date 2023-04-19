@@ -1914,4 +1914,18 @@ public abstract class APHandler extends GEOHandler {
     map.put("##RegionCode", "miscBillCd");
     return map;
   }
+
+  @Override
+  public String buildAddressForDnbMatching(String country, Addr addr) {
+    if (SystemLocation.INDIA.equals(country) || SystemLocation.AUSTRALIA.equals(country) || SystemLocation.SINGAPORE.equals(country)
+        || SystemLocation.NEW_ZEALAND.equals(country)) {
+      String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
+      address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
+      address += StringUtils.isNotBlank(addr.getDept()) ? " " + addr.getDept() : "";
+      address = address.trim();
+      return address;
+    }
+    return null;
+  }
+
 }
