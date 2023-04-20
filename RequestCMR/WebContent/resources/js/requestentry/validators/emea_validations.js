@@ -5209,7 +5209,7 @@ function set34QYZlogicOnISUCtcChange() {
       FormManager.enable('isuCd');
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '32', '34', '36', '04', '19', '28', '14', '4A', '3T', '5K' ]);
       FormManager.enable('clientTier');
-      FormManager.setValue('clientTier', 'Q');
+      FormManager.readOnly('repTeamMemberNo');
       FormManager.setValue('repTeamMemberNo', '012345');
       FormManager.enable('salesBusOffCd');
       if (!validIsuCTCs.includes(isu.concat(ctc))) {
