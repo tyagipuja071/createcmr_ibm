@@ -504,4 +504,10 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     this.skipExit = skipExit;
   }
 
+  public String modifyCommentLength(String message) {
+    if (message != null && message.length() > 10000) {
+      return message.substring(0, 9999);
+    }
+    return message;
+  }
 }
