@@ -306,7 +306,7 @@ public class LAHandler extends GEOHandler {
 
       }
     } else {
-      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord); // flow
+      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);
       data.setBgId(mainRecord.getCmrBuyingGroup());
       data.setGbgId(mainRecord.getCmrGlobalBuyingGroup());
       data.setBgRuleId(mainRecord.getCmrLde());
