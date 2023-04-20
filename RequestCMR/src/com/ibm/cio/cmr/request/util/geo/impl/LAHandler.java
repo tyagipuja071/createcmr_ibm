@@ -225,8 +225,10 @@ public class LAHandler extends GEOHandler {
 
     if (StringUtils.isNotBlank(mainRecord.getCmrCollectorNo()) && mainRecord.getCmrCollectorNo().length() > 6) {
       data.setCollectorNameNo(mainRecord.getCmrCollectorNo().substring(0, 6));
+      LOG.debug("Collector No Value in setDataValuesOnImport (mainRecord) --> " + mainRecord.getCmrCollectorNo().substring(0, 6));
     } else {
       data.setCollectorNameNo(mainRecord.getCmrCollectorNo());
+      LOG.debug("Collector No Value in setDataValuesOnImport (mainRecord) --> " + mainRecord.getCmrCollectorNo());
     }
 
     data.setCollBoId(mainRecord.getCmrCollBo());
@@ -304,7 +306,7 @@ public class LAHandler extends GEOHandler {
 
       }
     } else {
-      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);                                                                                 // flow
+      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord); // flow
       data.setBgId(mainRecord.getCmrBuyingGroup());
       data.setGbgId(mainRecord.getCmrGlobalBuyingGroup());
       data.setBgRuleId(mainRecord.getCmrLde());
