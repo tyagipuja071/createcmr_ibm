@@ -3334,7 +3334,7 @@ function inJpts31Jsic() {
   var qParams = {
     CD : jsicCd
   };
-  var results = cmr.query('CKECK.JPTS37', qParams);
+  var results = cmr.query('CHECK.JPTS31', qParams);
   if (results != null && results.length > 0) {
     return true;
   }
