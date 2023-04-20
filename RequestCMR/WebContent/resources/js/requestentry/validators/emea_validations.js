@@ -5208,6 +5208,9 @@ function set34QYZlogicOnISUCtcChange() {
     var bpCustTypes = [ 'BUSPR', 'BUSSM', 'BUSVA', 'CROBP' ];
     var internalCustSubTypes = [ 'INTER', 'INTVA', 'INTSM', 'CROIN' ]
     var pripeCustSubTypes = [ 'CROPR', 'PRICU', 'PRISM', 'PRIVA' ];
+    var validIsuCTCs = ['34Q','04','19','28','4A','14','3T','5K','36Y','32T'];
+    var isu = FormManager.getActualValue('isuCd');
+    var ctc = FormManager.getActualValue('clientTier');
     if (internalCustSubTypes.includes(custSubType)) {
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
@@ -5221,12 +5224,14 @@ function set34QYZlogicOnISUCtcChange() {
     } else if (commSubTypes.includes(custSubType)) {
       FormManager.enable('isuCd');
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '32', '34', '36', '04', '19', '28', '14', '4A', '3T', '5K' ]);
-      FormManager.setValue('isuCd', '34');
       FormManager.enable('clientTier');
       FormManager.setValue('clientTier', 'Q');
-      FormManager.readOnly('repTeamMemberNo');
       FormManager.setValue('repTeamMemberNo', '012345');
       FormManager.enable('salesBusOffCd');
+      if(!validIsuCTCs.includes(isu.concat(ctc))){
+	      FormManager.setValue('isuCd', '34');
+        FormManager.setValue('clientTier', 'Q');
+     }
     } else if (ibmEmpCustSubTypes.includes(custSubType)) {
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
@@ -5280,18 +5285,17 @@ function set34QYZlogicOnISUCtcChange() {
 function setSBOSalesRepFor34QYZ() {
   var custType = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
+  var reqId = FormManager.getActualValue('reqId');
   var subRegion = FormManager.getActualValue('countryUse');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
   var landCntry = '';
   var isuCTC = isu.concat(ctc);
   var reqType = FormManager.getActualValue('reqType');
-  var reqId = FormManager.getActualValue('reqId');
   if (reqType == 'U') {
     return;
   }
-
-  var result = cmr.query('VALIDATOR.POSTCODEIT', {
+  var result = cmr.query('VALIDATOR.COMPANY.POSTCODEIT', {
     REQID : reqId
   });
   var postCodeOrg = '';
@@ -5301,11 +5305,10 @@ function setSBOSalesRepFor34QYZ() {
     postCodeOrg = '';
   }
   var postCode = (postCodeOrg.startsWith("200") || postCodeOrg.startsWith("201")) ? postCodeOrg.substring(0, 3) : postCodeOrg.substring(0, 2);
-
   if (postCode == '' || postCode == undefined || postCode == null) {
     return;
   }
-
+ 
   // GET LANDCNTRY in case of CB
   var result1 = cmr.query('LANDCNTRY.IT', {
     REQID : reqId
@@ -5313,14 +5316,14 @@ function setSBOSalesRepFor34QYZ() {
   if (result1 != null && result1.ret1 != undefined) {
     landCntry = result1.ret1;
   }
-
+  postCode = parseInt(postCode);
   var commSubTypes = [ 'COMME', 'COMSM', 'COMVA', 'CROCM', 'GOVST', 'LOCEN', 'GOVSM', 'LOCSM', 'GOVVA', 'LOCVA', 'CROGO', 'NGOIT', 'NGOVA', 'NGOSM', '3PAIT', 'UNIVA', 'UNIVE', 'UNISM', '3PASM',
       '3PAVA', 'CRO3P', 'CROUN', 'CROLC' ];
   var ibmEmpCustSubTypes = [ 'IBMIT', 'XIBM' ];
   var bpCustTypes = [ 'BUSPR', 'BUSSM', 'BUSVA', 'CROBP' ];
   var internalCustSubTypes = [ 'INTER', 'INTVA', 'INTSM', 'CROIN' ]
   var pripeCustSubTypes = [ 'CROPR', 'PRICU', 'PRISM', 'PRIVA' ];
-
+  var sbo = FormManager.getActualValue('salesBusOffCd');
   if (commSubTypes.includes(custSubType) || pripeCustSubTypes.includes(custSubType)) {
     if (isuCTC == '34Q') {
       if ((postCode >= 05 && postCode <= 06) || (postCode >= 50 && postCode <= 59)) {
@@ -5332,7 +5335,7 @@ function setSBOSalesRepFor34QYZ() {
       if (postCode >= 80 && postCode <= 84) {
         FormManager.setValue('salesBusOffCd', 'NG');
       }
-      if ((postCode >= 30 && postCode <= 37) || postCode == 45 && (postCode == 33 && postCode == '34')) {
+      if ([ 30, 31, 32, 35, 36, 37, 45 ].includes(postCode)) {
         FormManager.setValue('salesBusOffCd', 'NI');
       }
       if ([ 33, 34, 38, 39, 46 ].includes(postCode)) {
@@ -5353,10 +5356,9 @@ function setSBOSalesRepFor34QYZ() {
       if ((postCode >= 00 && postCode <= 04)) {
         FormManager.setValue('salesBusOffCd', 'NC');
       }
-
-      if ((custType == 'CROSS') || subRegion == '758SM') {
+      if ((custType == 'CROSS' && landCntry == 'SM') || subRegion == '758SM') {
         FormManager.setValue('salesBusOffCd', 'DU');
-      } else if ((custType == 'CROSS') || subRegion == '758VA') {
+      } else if ((custType == 'CROSS' && landCntry == 'VA') || subRegion == '758VA') {
         FormManager.setValue('salesBusOffCd', 'NC');
       } else if (custType == 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'NB');
@@ -5371,7 +5373,16 @@ function setSBOSalesRepFor34QYZ() {
       FormManager.setValue('salesBusOffCd', 'TF');
     } else if (isuCTC == '5K') {
       FormManager.setValue('salesBusOffCd', '99');
+    } else if (isuCTC == '19') {
+      FormManager.setValue('salesBusOffCd', 'EB');
+    } else if (isuCTC == '28' && !['EO','TQ','TX'].includes(sbo)) {
+      FormManager.setValue('salesBusOffCd', '');
+    } else if (isuCTC == '36Y' && !['FL','FP','FM'].includes(sbo) ) {
+      FormManager.setValue('salesBusOffCd', '');
+    }else if (isuCTC == '04' && !['HG','GF','GG'].includes(sbo) ) {
+      FormManager.setValue('salesBusOffCd', '');
     }
+
   } else if (bpCustTypes.includes(custSubType)) {
     FormManager.setValue('salesBusOffCd', 'ZP');
   } else if (internalCustSubTypes.includes(custSubType)) {
