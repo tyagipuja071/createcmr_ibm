@@ -751,10 +751,12 @@ public class DnBUtil {
       dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
     }
     dnbAddress = dnbAddress.trim();
+    LOG.debug("DNB address : " + dnbAddress);
     Boolean matchWithDnbMailingAddr = false;
     if (handler != null) {
       matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
     }
+    LOG.debug("matchWithDnbMailingAddr : " + matchWithDnbMailingAddr);
     LOG.debug("DNB match country =  " + country);
     Boolean isReshuffledAddr = false;
     if ("897".equals(country) || "US".equals(country)) {
@@ -1124,6 +1126,9 @@ public class DnBUtil {
     if (handler != null) {
       matchWithDnbMailingAddr = handler.matchDnbMailingAddr(dnbRecord, addr, country, allowLongNameAddress);
     }
+    // CREATCMR-8553: if the address matches with mailing address in DNB, show
+    // mailing address in automation details.
+    map.put("dnbAddrMatchWithMailing", matchWithDnbMailingAddr);
     LOG.debug("matchWithDnbMailingAddr =  " + matchWithDnbMailingAddr);
     LOG.debug("DNB match country =  " + country);
     Boolean isReshuffledAddr = false;
