@@ -1130,6 +1130,7 @@ function setISUByMrcSubInd() {
   var isuCd = FormManager.getActualValue('isuCd');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
   var geoInd = subIndustryCd ? '' : subIndustryCd.substr(0, 1);
+  var isuCode = null;
 
   if (custType == 'IBMTP' && custSubGrp == 'BPWPQ') {
     return;
