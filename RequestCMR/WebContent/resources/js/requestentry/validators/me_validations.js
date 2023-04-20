@@ -803,6 +803,46 @@ function addVatExemptHandler() {
   }
 }
 
+var _checklistBtnHandler = [];
+function addChecklistBtnHandler() {
+  for (var i = 2; i <= 15; i++) {
+    _checklistBtnHandler[i] = null;
+    if (_checklistBtnHandler[i] == null) {
+      _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
+        freeTxtFieldShowHide(Number(value.target.id.split("_").pop()));
+      });
+    }
+  }
+}
+
+function freeTxtFieldShowHide(buttonNo) {
+  var shouldDisplay = false;
+  if (buttonNo <= 5) {
+    buttonNo = buttonNo + 2;
+    element = document.getElementById('checklist_txt_field_6');
+    for (var i=2; i<=4; i=i+2) {
+      if (FormManager.getField('dijit_form_RadioButton_' + i).checked) {
+        shouldDisplay = true;
+        break;
+      } else {
+        shouldDisplay = false;
+      }
+    }
+  } else {
+    element = document.getElementById('checklist_txt_field_' + (buttonNo + 2 - buttonNo%2));
+    if (buttonNo%2 == 0) {
+      shouldDisplay = true;
+    } else {
+      shouldDisplay = false;
+    }
+  }
+  if (shouldDisplay) {
+    element.style.display = 'block';
+  } else {
+    element.style.display = 'none';
+  }
+}
+
 var _cisHandler = null;
 function addCISHandler() {
   if (!FormManager.getField('cisServiceCustIndc')) {
@@ -4638,6 +4678,7 @@ dojo
 
       GEOHandler.addAfterConfig(afterConfigForCEMEA, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(addHandlersForCEMEA, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(addVatExemptHandler, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(addCISHandler, [ SysLoc.RUSSIA ]);
       GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.CEMEA);
