@@ -1830,7 +1830,6 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqId = FormManager.getActualValue('reqId');
-  var vat =  FormManager.getActualValue('vat');
 
   if (custSubType == 'INTER' || custSubType == 'CROIN' || custSubType == 'INTSM' || custSubType == 'INTVA') {
     cmr.showNode('sboInfo');
@@ -1871,9 +1870,7 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
 			FormManager.resetValidations('taxCd1');
 			FormManager.resetValidations('enterprise');
 			FormManager.resetValidations('identClient');
-			if (vat == '') {
-				FormManager.readOnly('vat');
-			}
+			FormManager.readOnly('vat');
 		}
 
   } else if (reqType == 'C' && role == 'PROCESSOR') {
