@@ -4490,7 +4490,6 @@ function afterConfigForIT() {
       setAffiliateEnterpriseRequired();
       ibmFieldsBehaviourInCreateByScratchIT();
       lockCollectionCode();
-      setSboValueBasedOnIsuCtcIT();
     });
   }
 
@@ -4498,7 +4497,6 @@ function afterConfigForIT() {
     _CTCHandlerIT = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       ibmFieldsBehaviourInCreateByScratchIT();
       lockCollectionCode();
-      setSboValueBasedOnIsuCtcIT();
     });
   }
 
@@ -4687,37 +4685,37 @@ function afterConfigForIT() {
   }
 }
 
-function setSboValueBasedOnIsuCtcIT() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  var isuCd = FormManager.getActualValue('isuCd');
-  var clientTier = FormManager.getActualValue('clientTier');
-  var reqType = FormManager.getActualValue('reqType');
-  var isuList = [ '34', '5K', '14', '19', '3T', '4A' ];
-  if (!isuList.includes(isuCd)) {
-    // FormManager.setValue('salesBusOffCd', '');
-    return;
-  }
-  if (isuCd == '34' && clientTier == 'Y') {
-    FormManager.setValue('salesBusOffCd', 'FL');
-  } else if (isuCd == '5K' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', '99');
-  } else if (isuCd == '14' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', 'TX');
-  } else if (isuCd == '19' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', 'EB');
-  } else if (isuCd == '3T' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', 'TF');
-  } else if (isuCd == '4A' && clientTier == '') {
-    FormManager.setValue('salesBusOffCd', 'XD');
-  }
-  if (isuList.slice(2, 6).includes(isuCd) && reqType == 'C') {
-    FormManager.resetValidations('clientTier');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  }
-}
+	/* function setSboValueBasedOnIsuCtcIT() {
+	  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    return;
+	  }
+	  var isuCd = FormManager.getActualValue('isuCd');
+	  var clientTier = FormManager.getActualValue('clientTier');
+	  var reqType = FormManager.getActualValue('reqType');
+	  var isuList = [ '34', '5K', '14', '19', '3T', '4A' ];
+	  if (!isuList.includes(isuCd)) {
+	    // FormManager.setValue('salesBusOffCd', '');
+	    return;
+	  }
+	  if (isuCd == '34' && clientTier == 'Y') {
+	    FormManager.setValue('salesBusOffCd', 'FL');
+	  } else if (isuCd == '5K' && clientTier == '') {
+	    FormManager.setValue('salesBusOffCd', '99');
+	  } else if (isuCd == '14' && clientTier == '') {
+	    FormManager.setValue('salesBusOffCd', 'TX');
+	  } else if (isuCd == '19' && clientTier == '') {
+	    FormManager.setValue('salesBusOffCd', 'EB');
+	  } else if (isuCd == '3T' && clientTier == '') {
+	    FormManager.setValue('salesBusOffCd', 'TF');
+	  } else if (isuCd == '4A' && clientTier == '') {
+	    FormManager.setValue('salesBusOffCd', 'XD');
+	  }
+	  if (isuList.slice(2, 6).includes(isuCd) && reqType == 'C') {
+	    FormManager.resetValidations('clientTier');
+	    FormManager.setValue('clientTier', '');
+	    FormManager.readOnly('clientTier');
+	  }
+	} */
 
 var oldIsuCdValueUK = null;
 function setSboValueBasedOnIsuCtcUK(value) {
