@@ -1846,7 +1846,8 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
       FormManager.readOnly('identClient');
       FormManager.resetValidations('taxCd1');
       FormManager.resetValidations('enterprise');
-      FormManager.resetValidations('identClient');
+      FormManager.resetValidations('identClient')
+			FormManager.readOnly('vat');
     }
 
   } else if (reqType == 'C' && role == 'PROCESSOR') {
