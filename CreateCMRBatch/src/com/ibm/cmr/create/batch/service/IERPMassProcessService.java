@@ -431,9 +431,9 @@ public class IERPMassProcessService extends TransConnService {
             }
 
             if (StringUtils.isEmpty(sMassUpdt.getErrorTxt())) {
-              sMassUpdt.setErrorTxt(comment.toString());
+              sMassUpdt.setErrorTxt(modifyCommentLength(comment.toString()));
             } else {
-              sMassUpdt.setErrorTxt(sMassUpdt.getErrorTxt() + comment.toString());
+              sMassUpdt.setErrorTxt(modifyCommentLength(sMassUpdt.getErrorTxt() + comment.toString()));
             }
 
             sMassUpdt.setRowStatusCd(MASS_UPDATE_DONE);
@@ -443,22 +443,22 @@ public class IERPMassProcessService extends TransConnService {
             if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
               comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " was ABORTED.");
               sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
-              sMassUpdt.setErrorTxt(comment.toString());
+              sMassUpdt.setErrorTxt(modifyCommentLength(comment.toString()));
               rdcProcessStatusMsgs.add(resultCode);
             } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
               comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " was ABORTED.");
               sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
-              sMassUpdt.setErrorTxt(comment.toString());
+              sMassUpdt.setErrorTxt(modifyCommentLength(comment.toString()));
               rdcProcessStatusMsgs.add(resultCode);
             } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
               comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " is NOT COMPLETED.");
               sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
               rdcProcessStatusMsgs.add(resultCode);
-              sMassUpdt.setErrorTxt(comment.toString());
+              sMassUpdt.setErrorTxt(modifyCommentLength(comment.toString()));
             } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
               comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " is IGNORED.");
               sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE);
-              sMassUpdt.setErrorTxt(comment.toString());
+              sMassUpdt.setErrorTxt(modifyCommentLength(comment.toString()));
               rdcProcessStatusMsgs.add(resultCode);
             } else {
               sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_DONE);
