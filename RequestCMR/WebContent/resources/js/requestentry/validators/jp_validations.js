@@ -1066,7 +1066,7 @@ function inTs38Ofcd() {
     OFCD : ofcd
   };
   var results = cmr.query('CHECK.OFCD.JPTS38', qParams);
-  if (results != null && results.length > 0) {
+  if (results.ret1 != null && '1' == results.ret1) {
     return true;
   }
   return false;
@@ -3168,7 +3168,7 @@ function setINACCodeMandatory() {
       }
     }
     if (isRequired) {
-	  if(!( FormManager.getActualValue('custGrp')=='SUBSI' && FormManager.getActualValue('custSubGrp')=='BQICL') ){
+      if (!(FormManager.getActualValue('custGrp') == 'SUBSI' && FormManager.getActualValue('custSubGrp') == 'BQICL')) {
         FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
       }
       FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCd);
@@ -3180,11 +3180,11 @@ function setINACCodeMandatory() {
     FormManager.resetValidations('inacCd');
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
   }
-  
+
   var setInacRequiredForOfficeCd = "FT,GK, GN,GV, HD,JS,KL, KQ, LC, LG, LJ, PL, PR, QE";
   var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
-  if(setInacRequiredForOfficeCd.includes(salesBusOffCd)){
-	FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');	
+  if (setInacRequiredForOfficeCd.includes(salesBusOffCd)) {
+    FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
   }
 }
 function addJSICLogic() {
@@ -3307,7 +3307,7 @@ function inJpts37Ofcd() {
     CD : ofcd
   };
   var results = cmr.query('CHECK.JPTS37', qParams);
-  if (results != null && results.length > 0) {
+  if (results.ret1 != null && '1' == results.ret1) {
     return true;
   }
   return false;
@@ -3335,7 +3335,7 @@ function inJpts31Jsic() {
     CD : jsicCd
   };
   var results = cmr.query('CHECK.JPTS31', qParams);
-  if (results != null && results.length > 0) {
+  if (results.ret1 != null && '1' == results.ret1) {
     return true;
   }
   return false;
@@ -3357,14 +3357,22 @@ function getTs31IsicByJsic() {
   }
   return isicCd;
 }
+
 function setSortlOnOfcdChange() {
+  var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp) {
     return;
   }
-  var sortl = getSortlByOfcd();
-  if (sortl != '') {
-    FormManager.setValue('searchTerm', sortl);
+
+  if (custGrp == 'IBMTP' || custGrp == 'BUSPR') {
+    var sortl = getSortlByOfcd();
+    if (sortl != '') {
+      FormManager.setValue('searchTerm', sortl);
+    }
+  } else if (custGrp == 'SUBSI') {
+    FormManager.setValue('searchTerm', '91454');
   }
 }
 function getSortlByOfcd() {
@@ -3402,7 +3410,7 @@ function addClusterOfcdLogic() {
   var results = cmr.query('GET.INACCD_SECTOR_CLUSTER_BY_OFCD', qParams);
   if (results != null && results.length > 0) {
     for (var i = 0; i < results.length; i++) {
-	  if ( results[i].ret4 != ' ') {
+      if (results[i].ret4 != ' ') {
         cluster = results[i].ret4;
       }
     }
@@ -5701,7 +5709,8 @@ function resetBPWPQValue() {
 
   if (custSubGrp == 'BPWPQ') {
     if (reqType == 'C' && (_role == 'Requester' || _role == 'Processor')) {
-      // FormManager.setValue('salesTeamCd', _pagemodel.salesTeamCd == '' ? '' : _pagemodel.salesTeamCd);
+      // FormManager.setValue('salesTeamCd', _pagemodel.salesTeamCd == '' ? '' :
+      // _pagemodel.salesTeamCd);
       FormManager.readOnly('salesTeamCd');
 
       FormManager.setValue('tier2', _pagemodel.clientTier == '' ? '' : _pagemodel.clientTier);
