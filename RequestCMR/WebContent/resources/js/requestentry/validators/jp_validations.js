@@ -1066,7 +1066,7 @@ function inTs38Ofcd() {
     OFCD : ofcd
   };
   var results = cmr.query('CHECK.OFCD.JPTS38', qParams);
-  if (results != null && results.length > 0) {
+  if (results.ret1 != null && '1' == results.ret1) {
     return true;
   }
   return false;
@@ -3307,7 +3307,7 @@ function inJpts37Ofcd() {
     CD : ofcd
   };
   var results = cmr.query('CHECK.JPTS37', qParams);
-  if (results != null && results.length > 0) {
+  if (results.ret1 != null && '1' == results.ret1) {
     return true;
   }
   return false;
@@ -3335,7 +3335,7 @@ function inJpts31Jsic() {
     CD : jsicCd
   };
   var results = cmr.query('CHECK.JPTS31', qParams);
-  if (results != null && results.length > 0) {
+  if (results.ret1 != null && '1' == results.ret1) {
     return true;
   }
   return false;
@@ -3358,13 +3358,20 @@ function getTs31IsicByJsic() {
   return isicCd;
 }
 function setSortlOnOfcdChange() {
+  var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp) {
     return;
   }
-  var sortl = getSortlByOfcd();
-  if (sortl != '') {
-    FormManager.setValue('searchTerm', sortl);
+
+  if (custGrp == 'IBMTP' || custGrp == 'BUSPR') {
+    var sortl = getSortlByOfcd();
+    if (sortl != '') {
+      FormManager.setValue('searchTerm', sortl);
+    }
+  } else if (custGrp == 'SUBSI') {
+    FormManager.setValue('searchTerm', '91454');
   }
 }
 function getSortlByOfcd() {
