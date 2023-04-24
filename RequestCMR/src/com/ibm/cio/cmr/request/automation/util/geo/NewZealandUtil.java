@@ -134,9 +134,11 @@ public class NewZealandUtil extends AutomationUtil {
     LOG.debug("data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase(\"DNBO\") ? "
         + (data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase("DNBO")));
 
-    // CREATCMR-9157： do NZAPI matching no matter the result of DNBMatch
+    // CREATCMR-9157： do NZAPI matching
     if ("C".equals(admin.getReqType()) && !RELEVANT_SCENARIO.contains(scenario) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
-        && "LOCAL".equalsIgnoreCase(custType) && engineData.getPendingChecks() != null) {
+        && "LOCAL".equalsIgnoreCase(custType) && engineData.getPendingChecks() != null
+        && (engineData.getPendingChecks().containsKey("DnBMatch") || engineData.getPendingChecks().containsKey("DNBCheck")
+            || (data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase("DNBO")))) {
       LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
       needNZBNAPICheck = true;
       String regex = "\\s+$";
