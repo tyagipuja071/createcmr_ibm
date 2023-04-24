@@ -75,29 +75,10 @@ function processRequestAction() {
 
   if (action == YourActions.Save) {
     var hasError = !FormManager.validate('frmCMR', null, true);
-
-    var uiReqStatus = FormManager.getActualValue('reqStatus');
-    var reqId = FormManager.getActualValue('reqId');
-    var dbReqStatus = "";
-
-    var result = cmr.query("WW.GET_REQ_STATUS", {
-      REQ_ID: reqId
-    });
-    if (result != null && result.ret1 != '' && result.ret1 != null) {
-      dbReqStatus = result.ret1;
+    if (hasError) {
+      FormManager.setValue('hasError', 'Y');
     }
-
-    // prevent from overwriting the DB REQ_STATUS
-    // if another tab is open with different UI REQ_STATUS
-    if (uiReqStatus == dbReqStatus) {
-      if (hasError) {
-        FormManager.setValue('hasError', 'Y');
-      }
-      doSaveRequest();
-    } else {
-      cmr.showAlert("Unable to save the request. Request Status mismatch from database." +
-      "<br><br>Please reload the page.");
-    }
+    doSaveRequest();
 
   } else if (action == YourActions.Validate) {
     doValidateRequest();
