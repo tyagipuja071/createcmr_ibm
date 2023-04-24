@@ -36,6 +36,9 @@ var _oldIsicCd = null;
 var _CTCHandlerIL = null;
 var _isuCdHandlerIL = null;
 var _CTCHandlerIE = null;
+
+var _specialTaxCdHandlerIE = null;
+
 function addHandlersForIL() {
   for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
     _gtcAddrTypeHandlerIL[i] = null;
@@ -79,6 +82,12 @@ function addHandlersForIE() {
     _CTCHandlerIE = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       addSBOSRLogicIE(value);
       setSboValueBasedOnIsuCtcIE(value);
+    });
+  }
+
+  if (_specialTaxCdHandlerIE == null) {
+    _specialTaxCdHandlerIE = dojo.connect(FormManager.getField('specialTaxCd'), 'onChange', function(value) {
+      toggleLicenseFields();
     });
   }
 }
@@ -10465,6 +10474,20 @@ function clientTierCodeValidator() {
   }
 }
 
+function toggleLicenseFields() {
+  var taxCode = FormManager.getActualValue('specialTaxCd');
+
+  if (FormManager.getActualValue('reqType') != 'U' || FormManager.getActualValue('cmrIssuingCntry') != '754') {
+    cmr.hideNode('licenseFieldsDiv');
+  }
+
+  if (taxCode == 'Z') {
+    cmr.showNode('licenseAddNewDiv');
+  } else {
+    cmr.hideNode('licenseAddNewDiv');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -10744,6 +10767,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(addHandlersForIE, [ SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(toggleLicenseFields, [ SysLoc.IRELAND ]);
 
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
