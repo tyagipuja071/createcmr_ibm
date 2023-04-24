@@ -585,6 +585,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     data.setSubIndustryCd(record.getCmrSubIndustry());
     data.setTaxCd1(record.getCmrBusinessReg());
     data.setVat(record.getCmrVat());
+    data.setVatInd(record.getCmrVatInd());
     data.setCustPrefLang(record.getCmrPrefLang());
     data.setTaxCd2(record.getCmrLocalTax2());
     if (record.getCmrSensitiveFlag() != null) {
