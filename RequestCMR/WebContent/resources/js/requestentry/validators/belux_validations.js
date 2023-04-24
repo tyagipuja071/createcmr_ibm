@@ -2312,5 +2312,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(lockFields, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(saveOldIsuCtc, GEOHandler.BELUX);
-
 });
