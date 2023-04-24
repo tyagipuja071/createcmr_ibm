@@ -86,8 +86,8 @@ function processRequestAction() {
   } else if (action == YourActions.Claim) {
     if (approvalResult == 'Cond. Approved') {
       cmr.showConfirm('doYourAction()', 'The request was conditionally approved by ERO.', 'Warning', null, {
-        OK : 'Ok',
-        CANCEL : 'Cancel'
+        OK: 'Ok',
+        CANCEL: 'Cancel'
       });
     } else {
       doYourAction();
