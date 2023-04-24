@@ -809,9 +809,9 @@ public class ItalyHandler extends BaseSOFHandler {
     String modePayment = this.currentImportValues.get("ModeOfPayment");
     String embargo = this.currentImportValues.get("EmbargoCode");
     String inac = this.currentImportValues.get("INAC");
-    String enterprise = this.currentImportValues.get("EnterpriseNo");
-    String affiliate = this.currentImportValues.get("Affiliate");
 
+    String enterprise = null;
+    String affiliate = null;
     String tipoClinte = null;
     String coddes = null;
     String pec = null;
@@ -879,8 +879,7 @@ public class ItalyHandler extends BaseSOFHandler {
       }
     }
     // no data from RDc? get DB2
-    data.setEnterprise(!StringUtils.isEmpty(enterprise) ? enterprise : "");
-    data.setAffiliate(!StringUtils.isEmpty(affiliate) ? affiliate : "");
+
     data.setRepTeamMemberNo(salesRep);
     data.setCollectionCd(!StringUtils.isEmpty(collectionCd) ? collectionCd : "");
     data.setSitePartyId("");
@@ -941,6 +940,9 @@ public class ItalyHandler extends BaseSOFHandler {
         affiliate = result.getCmrAffiliate();
       }
     }
+
+    data.setEnterprise(!StringUtils.isEmpty(enterprise) ? enterprise : "");
+    data.setAffiliate(!StringUtils.isEmpty(affiliate) ? affiliate : "");
     // String collectionCode = this.currentImportValues.get("CollectionCode");
 
     if (StringUtils.isEmpty(data.getTaxCd1())) {
