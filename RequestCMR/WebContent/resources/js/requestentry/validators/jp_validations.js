@@ -1078,12 +1078,12 @@ function getCtcByOfcd() {
   var qParams = {
     _qall : 'Y',
     ISSUING_CNTRY : cntry,
-    OFFICE_CD : salesBusOffCd
+    OFFICE_CD : ofcd
   };
   var results = cmr.query('GET.CTC_BY_OFFICE_CD', qParams);
   if (results != null && results.length > 0) {
     for (var i = 0; i < results.length; i++) {
-      if (results[i].ret2 != '') {
+      if (results[i].ret1 != '') {
         clientTier = results[i].ret1;
       }
     }
@@ -3389,6 +3389,8 @@ function setSortlOnOfcdChange() {
     var sortl = getSortlByOfcd();
     if (sortl != '') {
       FormManager.setValue('searchTerm', sortl);
+    } else {
+      FormManager.setValue('searchTerm', '91454');
     }
   } else if (custGrp == 'SUBSI') {
     FormManager.setValue('searchTerm', '91454');
