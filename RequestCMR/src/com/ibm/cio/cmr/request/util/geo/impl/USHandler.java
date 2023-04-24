@@ -853,6 +853,12 @@ public class USHandler extends GEOHandler {
       address.setDivn(cmr.getCmrName());
     }
     // CREATCMR-8142
+    // CREATCMR-8799
+    if ("U".equals(admin.getReqType()) && "E".equals(cmr.getUsCmrBpAccountType()) && "IRMR".equals(cmr.getUsCmrBpAbbrevNm())
+        && "FSP".equals(cmr.getUsCmrRestrictTo()) && "ZS01".equals(address.getId().getAddrType())) {
+      address.setDivn(cmr.getCmrName());
+    }
+    // CREATCMR-8799
 
   }
 
@@ -892,6 +898,14 @@ public class USHandler extends GEOHandler {
       admin.setMainCustNm2(parts[1]);
     }
     // CREATCMR-8142
+    // CREATCMR-8799
+    if ("U".equals(admin.getReqType()) && "E".equals(currentRecord.getUsCmrBpAccountType()) && "IRMR".equals(currentRecord.getUsCmrBpAbbrevNm())
+        && "FSP".equals(currentRecord.getUsCmrRestrictTo())) {
+      parts = splitName(currentRecord.getUsCmrCompanyNm(), null, 28, 24);
+      admin.setMainCustNm1(parts[0]);
+      admin.setMainCustNm2(parts[1]);
+    }
+    // CREATCMR-8799
   }
 
   public boolean checkIfTerritory(String land1) throws CmrException {

@@ -926,6 +926,19 @@ div.cmr-feedback-btn {
   text-shadow: none;
 }
 
+input.cmr-quick-search-btn-horizontal {
+  color: white;
+  cursor: pointer;
+  font-weight: 300 !important;
+  background-color: #a9db80; /* Old browsers */
+  background: -moz-linear-gradient(top, #a9db80 0%, #96c56f 100%);
+  background: -webkit-linear-gradient(top, #a9db80 0%, #96c56f 100%);
+  background: linear-gradient(to bottom, #a9db80 0%, #96c56f 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a9db80',
+    endColorstr='#96c56f', GradientType=0); /* IE6-9 */
+  text-shadow: none;
+}
+
 div.cmr-quick-search-btn {
   right: -42px;
   top: 50%;

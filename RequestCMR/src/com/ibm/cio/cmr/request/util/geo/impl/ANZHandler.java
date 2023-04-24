@@ -17,6 +17,10 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
+import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -413,8 +417,11 @@ public class ANZHandler extends APHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-    Addr mailing = getAddressByType(entityManager, "MAIL", addr.getId().getReqId());
+    
+	 
+	//Addr mailing = getAddressByType(entityManager, "MAIL", addr.getId().getReqId());
     if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
+      /*	
       if (mailing == null) {
         // create a dummy mailing
         AddrPK pk = new AddrPK();
@@ -431,6 +438,17 @@ public class ANZHandler extends APHandler {
           LOG.debug("Creating dummy mailing address..");
           entityManager.persist(mailing);
           entityManager.flush();
+        }
+      }
+      */
+      
+
+      AdminPK adminPK = new AdminPK();
+      adminPK.setReqId(addr.getId().getReqId());
+      Admin admin = entityManager.find(Admin.class, adminPK);
+      if (admin.getReqType().equals("C") && !addr.getLandCntry().equalsIgnoreCase("NZ")) {
+        if (addr.getPostCd().length() > 6) {
+          addr.setPostCd("0121");
         }
       }
     }
@@ -554,7 +572,7 @@ public class ANZHandler extends APHandler {
 
   @Override
   public boolean matchDnbMailingAddr(DnBMatchingResponse dnbRecord, Addr addr, String issuingCountry, Boolean allowLongNameAddress) {
-    if ("616".equals(issuingCountry)) {
+    if ("616".equals(issuingCountry) || "796".equals(issuingCountry)) {
       // match address
       String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
       address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
@@ -571,6 +589,14 @@ public class ANZHandler extends APHandler {
         MailingDnbAddress += StringUtils.isNotBlank(dnbRecord.getMailingDnbStreetLine2()) ? " " + dnbRecord.getMailingDnbStreetLine2() : "";
       }
       MailingDnbAddress = MailingDnbAddress.trim();
+
+      // CREATCMR-8430: return false for mailing address matching if
+      // MailingDnbAddress is blank
+      // CREATCMR-8553: for AU, if mailing address is null in DNB, return false;
+      if (StringUtils.isNotBlank(address) && StringUtils.isBlank(MailingDnbAddress)) {
+        return false;
+      }
+
       Boolean isReshuffledAddr = compareReshuffledAddress(MailingDnbAddress, address, issuingCountry);
       if ((StringUtils.isNotBlank(address) && StringUtils.isNotBlank(MailingDnbAddress)
           && StringUtils.getLevenshteinDistance(address.toUpperCase(), MailingDnbAddress.toUpperCase()) > 8
@@ -629,6 +655,109 @@ public class ANZHandler extends APHandler {
       res = false;
     }
     return res;
+  }
+
+  @Override
+  public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+    String sql = ExternalizedQuery.getSql("DNB.GET_CURR_SOLD_TO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", data.getId().getReqId());
+    query.setForReadOnly(true);
+    Addr soldTo = query.getSingleResult(Addr.class);
+    if (soldTo != null) {
+      setAbbrevLocNMBeforeAddrSave(entityManager, soldTo, data.getCmrIssuingCntry());
+    }
+  }
+
+  private void setAbbrevLocNMBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) {
+    DataPK dataPK = new DataPK();
+    dataPK.setReqId(addr.getId().getReqId());
+    Data data = entityManager.find(Data.class, dataPK);
+
+    AdminPK adminPK = new AdminPK();
+    adminPK.setReqId(addr.getId().getReqId());
+    Admin admin = entityManager.find(Admin.class, adminPK);
+    // Need to check if ZS01
+    if (addr.getId().getAddrType().equals("ZS01")) {
+      // set Abb Location
+      switch (cmrIssuingCntry) {
+      case SystemLocation.AUSTRALIA:
+        if (admin.getReqType().equals("C")) {
+          if (addr.getLandCntry().equalsIgnoreCase("AU")) {
+            if (addr.getStateProv() != null) {
+              data.setAbbrevLocn(addr.getStateProv());
+            }
+            if (addr.getCity1() != null) {
+              data.setAbbrevLocn(addr.getCity1());
+            }
+          }
+          if (!addr.getLandCntry().equalsIgnoreCase("AU")) {
+            data.setAbbrevLocn(getLandCntryDesc(entityManager, addr.getLandCntry()));
+          }
+        }
+        if ("BLUMX".equalsIgnoreCase(data.getCustSubGrp()) || "XBLUM".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "Bluemix Use Only");
+        } else if ("MKTPC".equalsIgnoreCase(data.getCustSubGrp()) || "XMKTP".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "Marketplace Use Only");
+        } else if ("SOFT".equalsIgnoreCase(data.getCustSubGrp()) || "XSOFT".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "Softlayer Use Only");
+        } else {
+          setAbbrevNM(data, addr.getCustNm1());
+        }
+        break;
+      case SystemLocation.NEW_ZEALAND:
+        if (admin.getReqType().equals("C")) {
+          if (addr.getLandCntry().equalsIgnoreCase("NZ")) {
+            if (addr.getStateProv() != null) {
+              data.setAbbrevLocn(addr.getStateProv());
+            }
+            if (addr.getCity1() != null) {
+              data.setAbbrevLocn(addr.getCity1());
+            }
+          }
+          if (!addr.getLandCntry().equalsIgnoreCase("NZ")) {
+            data.setAbbrevLocn(getLandCntryDesc(entityManager, addr.getLandCntry()));
+          }
+        }
+        if ("BLUMX".equalsIgnoreCase(data.getCustSubGrp()) || "XBLUM".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "Bluemix Use Only");
+        } else if ("MKTPC".equalsIgnoreCase(data.getCustSubGrp()) || "XMKTP".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "Marketplace Use Only");
+        } else if ("SOFT".equalsIgnoreCase(data.getCustSubGrp()) || "XSOFT".equalsIgnoreCase(data.getCustSubGrp())) {
+          setAbbrevNM(data, "Softlayer Use Only");
+        } else {
+          // CREATCMR-7653: for NZ, don't overwrite abbv name
+        }
+        break;
+      }
+      if (data.getAbbrevLocn() != null && data.getAbbrevLocn().length() > 12) {
+        data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 12));
+      }
+    }
+    entityManager.merge(data);
+    entityManager.flush();
+  }
+
+  private String getLandCntryDesc(EntityManager entityManager, String landCntryCd) {
+    String landCntryDesc = null;
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETCNTRY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY", landCntryCd);
+    List<String> results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      landCntryDesc = results.get(0);
+    }
+    entityManager.flush();
+    return landCntryDesc;
+  }
+
+  private void setAbbrevNM(Data data, String abbrevNM) {
+
+    if (!StringUtils.isBlank(abbrevNM))
+      if (abbrevNM.length() > 21)
+        data.setAbbrevNm(abbrevNM.substring(0, 21));
+      else
+        data.setAbbrevNm(abbrevNM);
   }
 
 }

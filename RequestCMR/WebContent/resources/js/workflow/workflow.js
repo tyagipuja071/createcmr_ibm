@@ -169,6 +169,11 @@ function claimFormatter(value, rowIndex) {
   var canClaim = rowData.canClaim;
   var canClaimAll = rowData.canClaimAll;
 
+  if (status == 'Completed') {
+    canClaim = 'N';
+    canClaimAll = 'N';
+  }
+
   if ('[R]' == value || '[P]' == value) {
     var action = '';
     if (canClaim == 'Y' || canClaimAll == 'Y') {

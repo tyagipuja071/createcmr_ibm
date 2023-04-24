@@ -472,4 +472,14 @@ dojo.addOnLoad(function(){
    --%>
 		</cmr:view>
      
+	  <!-- // CREATCMR-8430 -->
+	  <cmr:view forCountry="796">
+		<cmr:row addBackground="true" topPad="10">
+		  <cmr:column span="1" width="220">
+			<form:hidden path="usSicmen"/>
+		  </cmr:column>
+		</cmr:row>
+	  </cmr:view>
+	  <!-- // CREATCMR-8430 -->
+     
 	</cmr:section>

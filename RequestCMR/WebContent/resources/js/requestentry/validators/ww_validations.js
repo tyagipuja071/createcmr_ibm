@@ -142,6 +142,25 @@ function addDnBMatchingAttachmentValidator() {
         var findDnbResult = FormManager.getActualValue('findDnbResult');
         var userRole = FormManager.getActualValue('userRole');
         var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+
+        // CREATCMR-8430: do DNB check for NZ update
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if("796" == cntry && reqType == 'U'){
+          if ( reqId > 0 && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+            && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
+            var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+              ID : reqId
+            });
+            if (ret == null || ret.ret1 == null) {
+              return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
+                  + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                  + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        }
+        
         if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
             && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
           // FOR CN
@@ -191,6 +210,11 @@ function isSkipDnbMatching() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue("countryUse");
   var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
+  // CREATCMR-8430: do DNB check for NZ update
+  var reqType = FormManager.getActualValue('reqType');
+  if("796" == FormManager.getActualValue('cmrIssuingCntry') && reqType == 'U'){
+    return false;
+  }
   if(SysLoc.INDIA == FormManager.getActualValue('cmrIssuingCntry')){
         return false;
     }
@@ -436,18 +460,6 @@ function addClientTierDefaultLogic() {
       if (cntry != '766') {
         FormManager.enable('isuCd');
       }
-      if (value == 'B' || value == 'M' || value == 'W' || value == 'T' || value == 'S' || value == 'C' || value == 'N') {
-        FormManager.setValue('isuCd', '32');
-        FormManager.readOnly('isuCd');
-      } else if (value == 'V' || value == '4' || value == 'A' || value == '6' || value == 'E' || value == 'Y') {
-        if (cntry != '766') {
-          FormManager.setValue('isuCd', '34');
-          FormManager.readOnly('isuCd');
-        }
-      } else if (value == 'Z') {
-        FormManager.setValue('isuCd', '21');
-        FormManager.readOnly('isuCd');
-      } else {
         if (PageManager.isReadOnly()) {
           FormManager.readOnly('isuCd');
         } else {
@@ -455,7 +467,6 @@ function addClientTierDefaultLogic() {
             FormManager.enable('isuCd');
           }
         }
-      }
     });
   }
   if (_clientTierHandler && _clientTierHandler[0]) {
@@ -979,6 +990,16 @@ function addIsuCdObsoleteValidator(){
         var reqType = FormManager.getActualValue('reqType');
                var isuCd = FormManager.getActualValue('isuCd');
                if (reqType == 'C' && isuCd == '32') {
+                 // CREATCMR-7884
+                 var cntry = FormManager.getActualValue('cmrIssuingCntry');
+                 if(cntry == '796'){
+                   var custSubGrp = FormManager.getActualValue('custSubGrp');
+                   var custSubGrpList = ['NRML','ESOSW','XESO','CROSS'];
+                   if(custSubGrpList.includes(custSubGrp)){
+                     console.log('>>> Skip ISU Obsolete Validator for NRML/ESOSW/XESO/CROSS when isuCd = 32');
+                     return new ValidationResult(null, true);
+                   }
+                 }
                  return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');
                }else  if (reqType == 'U' && isuCd == '32' && oldIsuCd != '32') {
                  return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');

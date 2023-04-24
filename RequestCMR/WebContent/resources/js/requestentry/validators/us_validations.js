@@ -452,10 +452,20 @@ function afterConfigForUS() {
   if (reqType == 'C' && role == 'Requester' && custGrp == '9' && custSubGrp == 'POA') {
     FormManager.enable('miscBillCd');
   }
-
-  if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'ECOSYSTEM') {
-    FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier', 'Y');
+  if (reqType == 'C' && custGrp == '1' && custSubGrp == 'ECOSYSTEM') {
+    if (role == 'Requester' || role == 'Viewer') {
+      FormManager.setValue('isuCd', '36');
+      FormManager.setValue('clientTier', 'Y');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (role == 'Processor') {
+      FormManager.setValue('isuCd', '36');
+      FormManager.enable('isuCd');
+      FormManager.setValue('clientTier', 'Y');
+    }
+  } else if (reqType == 'C' && role == 'Requester' && custGrp == '15' && custSubGrp == 'FSP POOL') {
+    FormManager.setValue('isuCd', '28');
+    FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
   } else if (reqType == 'C' && role == 'Requester' && custGrp == '15' && custSubGrp == 'FSP POOL') {
@@ -497,8 +507,8 @@ function afterConfigForUS() {
     usCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       if (FormManager.getActualValue('landCntry') != '' && FormManager.getActualValue('landCntry') != 'US') {
         FormManager.setValue('postCd', '00000');
-        //CreateCMR-8143
-        //FormManager.readOnly('postCd');
+        // CreateCMR-8143
+        // FormManager.readOnly('postCd');
       } else {
         var readOnly = false;
         try {
@@ -1385,7 +1395,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
   // CREATCMR-4466
-  GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA
+  // ], null, true);
   // ], null, true);
   GEOHandler.addAfterConfig(lockOrdBlk, [ SysLoc.USA ]);
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.USA ], null, true);

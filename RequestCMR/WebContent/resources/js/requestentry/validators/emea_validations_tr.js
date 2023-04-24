@@ -8092,6 +8092,22 @@ function addEmbargoCodeValidatorIT() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addEmbargoCdValidatorForTR() {
+  var role = FormManager.getActualValue('userRole');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var embargoCd = FormManager.getActualValue('embargoCd');
+        if (embargoCd && !(embargoCd == 'Y' || embargoCd == 'C' || embargoCd == 'J' || embargoCd == '')) {
+          return new ValidationResult(null, false, 'Embargo Code should be only Y, C, J, Blank.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /**
  * Set Client Tier Value
  */
@@ -8778,7 +8794,7 @@ function turkish(input) {
     return true;
   }
   // var reg =
-  // /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/;
+  // /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|�?|‘|’|�?|＂|．|？|：|。|，]+/;
   var reg = /[a-zA-Z0-9ğüşöçİĞÜŞÖÇ]+/;
   if (!value.match(reg)) {
     return new ValidationResult(input, false, '{1} is not a valid value for {0}. Please enter turkish characters only.');
@@ -9264,6 +9280,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
+  GEOHandler.registerValidator(addEmbargoCdValidatorForTR, [ SysLoc.TURKEY ], null, true);
 
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);

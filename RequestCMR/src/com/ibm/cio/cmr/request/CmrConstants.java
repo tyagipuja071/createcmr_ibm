@@ -126,7 +126,11 @@ public class CmrConstants {
     /**
      * Secondary Sold-To (AT)
      */
-    ZS03
+    ZS03,
+    /**
+     * List Price Record
+     */
+    ZLST
   }
 
   public static final String DNBSEARCH_NOT_DONE = "Not Done";

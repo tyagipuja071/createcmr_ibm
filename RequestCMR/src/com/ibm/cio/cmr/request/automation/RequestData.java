@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.automation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -38,6 +39,30 @@ public class RequestData {
   private Scorecard scorecard;
   private List<Addr> addresses = new ArrayList<>();
   private List<MassUpdtAddr> muAddr = new ArrayList<>();
+
+  /**
+   * Constructor to wrap the current entities into a {@link RequestData} object
+   * 
+   * @param admin
+   * @param data
+   * @param addrs
+   * @return
+   */
+  public static RequestData wrap(Admin admin, Data data, Scorecard scorecard, Addr... addresses) {
+    RequestData requestData = new RequestData();
+    requestData.admin = admin;
+    requestData.data = data;
+    requestData.scorecard = scorecard;
+    requestData.addresses.addAll(Arrays.asList(addresses));
+    return requestData;
+  }
+
+  /**
+   * Private constructor to avoid blank entities
+   */
+  private RequestData() {
+    // noop
+  }
 
   /**
    * Constructs a {@link RequestData} instance based on the reqId supplied. This

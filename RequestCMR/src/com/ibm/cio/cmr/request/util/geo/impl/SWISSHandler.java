@@ -283,11 +283,11 @@ public class SWISSHandler extends GEOHandler {
         if (StringUtils.isBlank(address.getCustLangCd()) && StringUtils.isNotBlank(address.getPostCd())
             && StringUtils.isNumeric(address.getPostCd())) {
           int postCd = Integer.parseInt(address.getPostCd());
-          if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+          if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <= 9999)) {
             address.setCustLangCd("D");
           } else if (postCd >= 6500 && postCd <= 6999) {
             address.setCustLangCd("I");
-          } else if (postCd >= 0000 && postCd <= 3000) {
+          } else if (postCd >= 0000 && postCd < 3000) {
             address.setCustLangCd("F");
           }
         }
@@ -480,48 +480,37 @@ public class SWISSHandler extends GEOHandler {
     if ("C".equals(admin.getReqType())) {
       data.setCurrencyCd("CHF");
     }
-    if (StringUtils.isBlank(data.getCustPrefLang())) {
-      String sql = ExternalizedQuery.getSql("QUERY.ADDR.GET.POST_CD.BY_REQID");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("REQ_ID", admin.getId().getReqId());
-      query.setParameter("ADDR_TYPE", "ZS01");
-      List<Object[]> results = query.getResults();
-      if (!results.isEmpty() && results.get(0) != null) {
-        int postCd;
-        try {
-          postCd = Integer.parseInt((String) results.get(0)[0]);
-        } catch (NumberFormatException e) {
-          postCd = 0;
-          LOG.debug("Cannot parse postal code since it's alphanumeric.");
-        }
-        if ("C".equals(admin.getReqType())) {
-        String landCntry = (String) results.get(0)[1];
-        if ("CH".equals(landCntry) || "LI".equals(landCntry)) {
-          if (StringUtils.isBlank(landCntry) && postCd != 0) {
-            if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
-              data.setCustPrefLang("D");
-            } else if (postCd >= 6500 && postCd <= 6999) {
-              data.setCustPrefLang("I");
-            } else if (postCd >= 0000 && postCd <= 3000) {
-              data.setCustPrefLang("F");
-            }
-          } else {
-            data.setCustPrefLang("E");
-          }
-        }
-        }
-      }
-    }
-
-    AddrPK addrPk = new AddrPK();
-    addrPk.setReqId(data.getId().getReqId());
-    addrPk.setAddrSeq("00001");
-    addrPk.setAddrType("ZS01");
-    Addr addr = entityManager.find(Addr.class, addrPk);
-    if (addr != null && !StringUtils.isEmpty(data.getCustPrefLang())) {
-      addr.setCustLangCd(data.getCustPrefLang());
-    }
-
+    // if (StringUtils.isBlank(data.getCustPrefLang())) {
+    // String sql = ExternalizedQuery.getSql("QUERY.ADDR.GET.POST_CD.BY_REQID");
+    // PreparedQuery query = new PreparedQuery(entityManager, sql);
+    // query.setParameter("REQ_ID", admin.getId().getReqId());
+    // query.setParameter("ADDR_TYPE", "ZS01");
+    // List<Object[]> results = query.getResults();
+    // if (!results.isEmpty() && results.get(0) != null) {
+    // int postCd;
+    // try {
+    // postCd = Integer.parseInt((String) results.get(0)[0]);
+    // } catch (NumberFormatException e) {
+    // postCd = 0;
+    // LOG.debug("Cannot parse postal code since it's alphanumeric.");
+    // }
+    // String landCntry = (String) results.get(0)[1];
+    // if ("CH".equals(landCntry) || "LI".equals(landCntry)) {
+    // if (StringUtils.isBlank(landCntry) && postCd != 0) {
+    // if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <=
+    // 9999)) {
+    // data.setCustPrefLang("D");
+    // } else if (postCd >= 6500 && postCd <= 6999) {
+    // data.setCustPrefLang("I");
+    // } else if (postCd >= 0000 && postCd <= 3000) {
+    // data.setCustPrefLang("F");
+    // }
+    // } else {
+    // data.setCustPrefLang("E");
+    // }
+    // }
+    // }
+    // }
   }
 
   @Override
@@ -556,6 +545,21 @@ public class SWISSHandler extends GEOHandler {
     }
     if (addrDetailsList.isEmpty() && "C".equals(admin.getReqType())) {
       addr.setCustNm3("");
+    }
+
+    if ("CH".equals(addr.getLandCntry()) || "LI".equals(addr.getLandCntry())) {
+      if (StringUtils.isBlank(addr.getCustLangCd()) && StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNumeric(addr.getPostCd())) {
+        int postCd = Integer.parseInt(addr.getPostCd());
+        if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <= 9999)) {
+          addr.setCustLangCd("D");
+        } else if (postCd >= 6500 && postCd <= 6999) {
+          addr.setCustLangCd("I");
+        } else if (postCd >= 0000 && postCd < 3000) {
+          addr.setCustLangCd("F");
+        }
+      }
+    } else if (StringUtils.isBlank(addr.getCustLangCd())) {
+      addr.setCustLangCd("E");
     }
   }
 
