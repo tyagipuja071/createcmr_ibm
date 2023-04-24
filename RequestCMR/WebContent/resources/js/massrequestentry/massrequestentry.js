@@ -65,7 +65,7 @@ function processRequestAction() {
   // prevent from overwriting the DB REQ_STATUS
   // if another tab is open with different UI REQ_STATUS
   if (!isReqStatusEqualBetweenUIandDB()) {
-    cmr.showAlert("Unable to save the request. Request Status mismatch from database." +
+    cmr.showAlert("Unable to execute the action. Request Status mismatch from database." +
       "<br><br>Please reload the page.");
 
     return;
