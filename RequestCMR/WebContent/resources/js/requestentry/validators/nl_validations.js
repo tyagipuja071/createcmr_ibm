@@ -5,7 +5,7 @@ var _reqReasonHandler = null;
 
 function afterConfigForNL() {
   var reqType = FormManager.getActualValue('reqType');
-  var role = null;  
+  var role = null;
   FormManager.readOnly('capInd');
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
@@ -262,12 +262,12 @@ function setVatValidatorNL() {
     if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
-    
-    //FormManager.resetValidations('vat');
-    //if (!dojo.byId('vatExempt').checked) {
-      //checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-      //FormManager.enable('vat');
-    //}
+
+    // FormManager.resetValidations('vat');
+    // if (!dojo.byId('vatExempt').checked) {
+    // checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    // FormManager.enable('vat');
+    // }
   }
 }
 
@@ -1114,7 +1114,7 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
         }
       };
     })(), tabName, formName);
-  }; 
+  };
 }
 
 function addAddressFieldValidators() {
@@ -1992,25 +1992,24 @@ function setEcoCodeBasedOnSubScenario() {
   }
 }
 
-function addVatIndValidator(){
+function addVatIndValidator() {
   var _vatHandler = null;
   var _vatIndHandler = null;
   var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');  
+  var vatInd = FormManager.getActualValue('vatInd');
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  
-  if (viewOnlyPage == 'true'){
-   FormManager.resetValidations('vat');
-   FormManager.readOnly('vat');
- } else {
-   
-  var cntry= FormManager.getActualValue('cmrIssuingCntry');
-  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
-    ISSUING_CNTRY : cntry
-  });
-  
 
-      if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+  if (viewOnlyPage == 'true') {
+    FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
+  } else {
+
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+      ISSUING_CNTRY : cntry
+    });
+
+    if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
     } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
@@ -2026,11 +2025,11 @@ function addVatIndValidator(){
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
     }
-    
-  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
-    FormManager.resetValidations('vat');
+
+    if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null) && vatInd == 'N') {
+      FormManager.resetValidations('vat');
+    }
   }
-}
 }
 
 dojo.addOnLoad(function() {
@@ -2095,8 +2094,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSORTLBasedOnIsuCtc, GEOHandler.NL);
   GEOHandler.addAfterConfig(addNlIsuHandler, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.NL);
-  
+
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NL, null, true);
-  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
-  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
+
 });
