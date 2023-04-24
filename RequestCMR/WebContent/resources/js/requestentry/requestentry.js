@@ -71,6 +71,15 @@ function processRequestAction() {
     cmr.showAlert('Please select an action from the choices.');
   }
 
+  // prevent from overwriting the DB REQ_STATUS
+  // if another tab is open with different UI REQ_STATUS
+  if (!isReqStatusEqualBetweenUIandDB()) {
+    cmr.showAlert("Unable to save the request. Request Status mismatch from database." +
+      "<br><br>Please reload the page.");
+
+    return;
+  }
+
   /* Your Actions processing here */
 
   if (action == YourActions.Save) {
