@@ -3034,3 +3034,19 @@ function doNZBNAPIMatch() {
     });
   }
 }
+
+function isReqStatusEqualBetweenUIandDB() {
+
+  var uiReqStatus = FormManager.getActualValue('reqStatus');
+  var reqId = FormManager.getActualValue('reqId');
+  var dbReqStatus = "";
+
+  var result = cmr.query("WW.GET_REQ_STATUS", {
+    REQ_ID: reqId
+  });
+  if (result != null && result.ret1 != '' && result.ret1 != null) {
+    dbReqStatus = result.ret1;
+  }
+
+  return uiReqStatus == dbReqStatus;
+}
