@@ -1048,6 +1048,10 @@ function setCTCByOfficeCd() {
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp) {
     return;
   }
+  if (custSubGrp == 'ISOCU' || custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC') {
+    return;
+  }
+
   if (inTs38Ofcd()) {
     var clientTier = getCtcByOfcd();
     if (clientTier != '') {
@@ -1103,7 +1107,7 @@ function setMrcByOfficeCd() {
   var results = cmr.query('GET.MRC_BY_OFFICE_CD', qParams);
   if (results != null && results.length > 0) {
     for (var i = 0; i < results.length; i++) {
-        mrc = results[i].ret1;
+      mrc = results[i].ret1;
     }
   }
   FormManager.setValue('mrcCd', mrc);
@@ -1115,7 +1119,7 @@ function setMrcByOfficeCd() {
 function setISUByOfficeCd() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
-  var custType = FormManager.getActualValue('custType');
+  var custGrp = FormManager.getActualValue('custGrp');
 
   var qParams = {
     _qall : 'Y',
@@ -1131,7 +1135,7 @@ function setISUByOfficeCd() {
       FormManager.setValue('isuCd', '34');
     }
   }
-  if (custType == 'SUBSI' && salesBusOffCd == 'A9') {
+  if (custGrp == 'SUBSI' && salesBusOffCd == 'A9') {
     FormManager.setValue('isuCd', '5K');
   }
 }
@@ -1140,61 +1144,59 @@ function setISUByOfficeCd() {
  * Set ISU Code Values based On MRC, GEO_IND and Subindustry
  */
 function setISUByMrcSubInd() {
-  var custType = FormManager.getActualValue('custType');
+  var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var mrcCd = FormManager.getActualValue('mrcCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-  var geoInd = subIndustryCd ? '' : subIndustryCd.substr(0, 1);
-  var isuCode = null;
+  var geoInd = subIndustryCd ? subIndustryCd.substr(0, 1) : '';
 
-  if (custType == 'IBMTP' && custSubGrp == 'BPWPQ') {
+  if (custGrp == 'IBMTP' && (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU')) {
     return;
   }
 
-  if (custType == 'SUBSI' && custSubGrp == 'BQICL') {
+  if (custGrp == 'SUBSI' && (custSubGrp == 'BQICL' || custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC')) {
     return;
   }
 
   if (subIndustryCd != '') {
-    if (mrcCd == '3') {
-      if (subIndustryCd == 'ZZ' || geoInd != 'Z') {
-        setISUByOfficeCd();
-      } else if (subIndustryCd == 'ZC') {
-        FormManager.setValue('isuCd', '21');
-      } else {
-        FormManager.setValue('isuCd', '60');
-      }
-    } else {
-      if (mrcCd != '3' && (geoInd == 'X' || geoInd == 'Z')) {
-        console.log("get ISU Code based On MRC, GEO_IND and Subindustry");
-      } else {
-        console.log("get ISU Code based On MRC and GEO_IND");
-        subIndustryCd = '';
-      }
-
-      // MRC_CD : mrcCd,
-      var qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry,
-        GEOIND : geoInd,
-        SUBIND : subIndustryCd
-      };
-      var results = cmr.query('GET.ISU_BY_SUBIND', qParams);
-      if (results != null) {
-        for (var i = 0; i < results.length; i++) {
-          isuCode.push(results[i].ret1);
+    if (custGrp == 'IBMTP' || custGrp == 'BUSPR') {
+      if (mrcCd == '3') {
+        if (subIndustryCd == 'ZZ' || geoInd != 'Z') {
+          setISUByOfficeCd();
+        } else if (subIndustryCd == 'ZC') {
+          FormManager.setValue('isuCd', '21');
+        } else {
+          FormManager.setValue('isuCd', '60');
         }
-        if (isuCode != null) {
-          FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCode);
+      } else {
+        if (mrcCd != '3' && (geoInd == 'X' || geoInd == 'Z')) {
+          console.log("get ISU Code based On MRC, GEO_IND and Subindustry");
+        } else {
+          console.log("get ISU Code based On MRC and GEO_IND");
+          subIndustryCd = '';
+        }
 
-          if (isuCode.length == 1) {
-            FormManager.setValue('isuCd', isuCode[0]);
+        // MRC_CD : mrcCd,
+        var qParams = {
+          _qall : 'Y',
+          ISSUING_CNTRY : cntry,
+          GEOIND : geoInd,
+          SUBIND : subIndustryCd
+        };
+        var results = cmr.query('GET.ISU_BY_SUBIND', qParams);
+        if (results != null && results.length > 0) {
+          for (var i = 0; i < results.length; i++) {
+            if (results[i].ret1 != '') {
+              FormManager.setValue('isuCd', results[i].ret1);
+            }
           }
         }
       }
+    } else if (custGrp == 'SUBSI') {
+      FormManager.setValue('isuCd', '60');
     }
   }
 }
