@@ -3153,10 +3153,10 @@ function addLogicOnOfficeCdChange() {
     // addJSICLogic();
     // setClusterOnOfcdChange();
     setIsicValueLogic();
-    setISUByMrcSubInd();
     setCTCByOfficeCd();
     setMrcByOfficeCd();
     setSortlOnOfcdChange();
+    setISUByMrcSubInd();
   });
 }
 function setINACCodeMandatory() {
