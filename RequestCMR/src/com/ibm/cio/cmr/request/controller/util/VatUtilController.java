@@ -41,6 +41,7 @@ import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
 import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerRequest;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.validator.PostalCodeValidateRequest;
