@@ -2573,11 +2573,16 @@ function setSortlForStateProvince() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var sbo = FormManager.getActualValue('salesBusOffCd');
+  var gbgId = FormManager.getActualValue('gbgId');
   
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
   if (cmrIssuingCntry != '631' || reqType != 'C') {
+    return;
+  }
+
+  if (gbgId != '' && gbgId != 'BGNONE') {
     return;
   }
 
