@@ -94,8 +94,10 @@ public class NewZealandUtil extends AutomationUtil {
     boolean companyProofProvided = DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId());
     if (companyProofProvided) {
       details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
-      details.append("This Request will be routed to CMDE.\n");
-      engineData.addRejectionComment("OTH", "This Request will be routed to CMDE.", "", "");
+      // CREATCMR-9157: remove the 'routed to CMDE' related messages
+      // details.append("This Request will be routed to CMDE.\n");
+      // engineData.addRejectionComment("OTH", "This Request will be routed to
+      // CMDE.", "", "");
       admin.setCompVerifiedIndc("Y");
       entityManager.merge(admin);
       entityManager.flush();
@@ -130,7 +132,7 @@ public class NewZealandUtil extends AutomationUtil {
     LOG.debug("engineData.getPendingChecks() != null ? " + (engineData.getPendingChecks() != null));
     LOG.debug("engineData.getPendingChecks().containsKey(\"DnBMatch\") ? " + (engineData.getPendingChecks().containsKey("DnBMatch")));
     LOG.debug("engineData.getPendingChecks().containsKey(\"DNBCheck\") ? " + (engineData.getPendingChecks().containsKey("DNBCheck")));
-
+    LOG.debug("engineData.getPendingChecks().containsKey(\"_dnbOverride\") ? " + (engineData.getPendingChecks().containsKey("_dnbOverride")));
     LOG.debug("data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase(\"DNBO\") ? "
         + (data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase("DNBO")));
 
