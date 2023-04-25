@@ -47,9 +47,9 @@ public class GOEAssignmentElement extends OverridingElement {
     boolean computed = false;
     if (dnbMatching == null) {
       details.append("No D&B matches found.\nGOE Indicator will be set to U - Unknown");
-      output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_IND", data.getGoeInd(), "U");
-      output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_SRC_CD", data.getGoeSrcCd(), "NA");
-      output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_RSN_CD", data.getGoeRsnCd(), "C");
+      output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_IND", data.getGoeInd(), "U");
+      output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_SRC_CD", data.getGoeSrcCd(), "NA");
+      output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_RSN_CD", data.getGoeRsnCd(), "C");
     } else {
       try {
         String duns = dnbMatching.getDunsNo();
@@ -57,31 +57,31 @@ public class GOEAssignmentElement extends OverridingElement {
         GOEResponse goeResponse = findGOE(duns, country);
         if (!goeResponse.isSuccess()) {
           details.append("Error from FindGOE service. : " + goeResponse.getMessage() + "\nGOE Indicator will be set to U - Unknown");
-          output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_IND", data.getGoeInd(), "U");
-          output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_SRC_CD", data.getGoeSrcCd(), "NA");
-          output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_RSN_CD", data.getGoeRsnCd(), "C");
+          output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_IND", data.getGoeInd(), "U");
+          output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_SRC_CD", data.getGoeSrcCd(), "NA");
+          output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_RSN_CD", data.getGoeRsnCd(), "C");
         } else {
           LOG.debug("GOE Response: " + goeResponse.getGoeStatusCd() + " / " + goeResponse.getGoeSrcCd() + " / " + goeResponse.getGoeReasonCd());
           details.append("FindGOE Results:\n");
           details.append("Overall Status: " + goeResponse.getGoeStatusCd() + " - " + goeResponse.getGoeStatusDesc() + "\n");
           details.append("Source: " + goeResponse.getGoeSrcCd() + " - " + goeResponse.getGoeSrcDesc() + "\n");
           details.append("Reason: " + goeResponse.getGoeReasonCd() + " - " + goeResponse.getGoeReasonDesc());
-          output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_IND", data.getGoeInd(), goeResponse.getGoeStatusCd());
+          output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_IND", data.getGoeInd(), goeResponse.getGoeStatusCd());
           if ("U".equals(goeResponse.getGoeStatusCd())) {
-            output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_SRC_CD", data.getGoeSrcCd(), "NA");
-            output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_RSN_CD", data.getGoeRsnCd(), "C");
+            output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_SRC_CD", data.getGoeSrcCd(), "NA");
+            output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_RSN_CD", data.getGoeRsnCd(), "C");
           } else {
-            output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_SRC_CD", data.getGoeSrcCd(), goeResponse.getGoeSrcCd());
-            output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_RSN_CD", data.getGoeRsnCd(), goeResponse.getGoeReasonCd());
+            output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_SRC_CD", data.getGoeSrcCd(), goeResponse.getGoeSrcCd());
+            output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_RSN_CD", data.getGoeRsnCd(), goeResponse.getGoeReasonCd());
           }
           computed = true;
         }
       } catch (Exception e) {
         LOG.error("Error in connecting to FindGOE service", e);
         details.append("Cannot connect to FindGOE service.\nGOE Indicator will be set to U - Unknown");
-        output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_IND", data.getGoeInd(), "U");
-        output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_SRC_CD", data.getGoeSrcCd(), "NA");
-        output.addOverride(AutomationElementRegistry.GBL_GOE, null, "GOE_RSN_CD", data.getGoeRsnCd(), "C");
+        output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_IND", data.getGoeInd(), "U");
+        output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_SRC_CD", data.getGoeSrcCd(), "NA");
+        output.addOverride(AutomationElementRegistry.GBL_GOE, "DATA", "GOE_RSN_CD", data.getGoeRsnCd(), "C");
       }
     }
 
