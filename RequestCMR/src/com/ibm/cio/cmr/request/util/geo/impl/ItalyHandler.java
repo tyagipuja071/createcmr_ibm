@@ -155,7 +155,7 @@ public class ItalyHandler extends BaseSOFHandler {
         String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
         if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
 
-          if (INSTALLING_ADDR_TYPE.equals(mainRecord.getCmrAddrType())) {
+          if (INSTALLING_ADDR_TYPE.equals(mainRecord.getCmrAddrTypeCode())) {
             this.currentZS01Addr = mainRecord;
           }
           importCreateDataLD(entityManager, source, reqEntry, mainRecord, converted, searchModel);
