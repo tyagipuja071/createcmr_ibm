@@ -81,6 +81,8 @@ public class ItalyHandler extends BaseSOFHandler {
 
   private RequestEntryModel currentReqEntryModel;
 
+  private FindCMRRecordModel currentZS01Addr;
+
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
@@ -152,6 +154,10 @@ public class ItalyHandler extends BaseSOFHandler {
       } else {
         String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
         if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
+
+          if (INSTALLING_ADDR_TYPE.equals(mainRecord.getCmrAddrType())) {
+            this.currentZS01Addr = mainRecord;
+          }
           importCreateDataLD(entityManager, source, reqEntry, mainRecord, converted, searchModel);
         } else {
           String chosenType = searchModel.getAddrType();
@@ -936,9 +942,13 @@ public class ItalyHandler extends BaseSOFHandler {
         countryLanded = result.getCmrCountryLanded();
       }
       if (result.getCmrAddrTypeCode().equals(INSTALLING_ADDR_TYPE)) {
-        enterprise = result.getCmrEnterpriseNumber();
         affiliate = result.getCmrAffiliate();
+      } else if (this.currentZS01Addr != null) {
+        // for Create By model
+        affiliate = this.currentZS01Addr.getCmrAffiliate();
       }
+
+      enterprise = result.getCmrEnterpriseNumber();
     }
 
     data.setEnterprise(!StringUtils.isEmpty(enterprise) ? enterprise : "");
@@ -1591,7 +1601,7 @@ public class ItalyHandler extends BaseSOFHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "CUST_CLASS", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD",
         "ABBREV_NM", "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID",
-        "MEM_LVL", "BP_REL_TYPE", "CROS_SUB_TYP", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE"));
+        "MEM_LVL", "BP_REL_TYPE", "CROS_SUB_TYP", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE", "AFFILIATE"));
     return fields;
   }
 
