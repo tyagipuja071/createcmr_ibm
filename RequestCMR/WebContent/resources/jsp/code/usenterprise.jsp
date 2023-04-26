@@ -83,6 +83,10 @@
   function backToList(){
     window.location = '${contextPath}/code/us_enterprise';
   }
+  
+  function addAnotherEnterprise() {
+  	window.location = '${contextPath}/code/us_enterprise_form';
+  }
 
 </script>
 <cmr:boxContent>
@@ -210,6 +214,7 @@
       } else {
     %>
       <cmr:button label="Update" onClick="actions.save(false)" highlight="true" />
+      <cmr:button label="Add NEW US ENTERPRISE" onClick="addAnotherEnterprise()" pad="true"/>
     <%
       }
     %>
