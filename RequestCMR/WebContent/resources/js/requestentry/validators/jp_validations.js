@@ -5902,6 +5902,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCTCByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
 
   // CREATCMR-6694
   GEOHandler.addAfterConfig(setAdminDeptOptional, GEOHandler.JP);
