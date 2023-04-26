@@ -94,8 +94,10 @@ public class NewZealandUtil extends AutomationUtil {
     boolean companyProofProvided = DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId());
     if (companyProofProvided) {
       details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
-      details.append("This Request will be routed to CMDE.\n");
-      engineData.addRejectionComment("OTH", "This Request will be routed to CMDE.", "", "");
+      // CREATCMR-9157: remove the 'routed to CMDE' related messages
+      // details.append("This Request will be routed to CMDE.\n");
+      // engineData.addRejectionComment("OTH", "This Request will be routed to
+      // CMDE.", "", "");
       admin.setCompVerifiedIndc("Y");
       entityManager.merge(admin);
       entityManager.flush();
@@ -127,6 +129,14 @@ public class NewZealandUtil extends AutomationUtil {
       }
     }
 
+    LOG.debug("engineData.getPendingChecks() != null ? " + (engineData.getPendingChecks() != null));
+    LOG.debug("engineData.getPendingChecks().containsKey(\"DnBMatch\") ? " + (engineData.getPendingChecks().containsKey("DnBMatch")));
+    LOG.debug("engineData.getPendingChecks().containsKey(\"DNBCheck\") ? " + (engineData.getPendingChecks().containsKey("DNBCheck")));
+    LOG.debug("engineData.getPendingChecks().containsKey(\"_dnbOverride\") ? " + (engineData.getPendingChecks().containsKey("_dnbOverride")));
+    LOG.debug("data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase(\"DNBO\") ? "
+        + (data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase("DNBO")));
+
+    // CREATCMR-9157： do NZAPI matching
     if ("C".equals(admin.getReqType()) && !RELEVANT_SCENARIO.contains(scenario) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
         && "LOCAL".equalsIgnoreCase(custType) && engineData.getPendingChecks() != null
         && (engineData.getPendingChecks().containsKey("DnBMatch") || engineData.getPendingChecks().containsKey("DNBCheck")
@@ -510,7 +520,7 @@ public class NewZealandUtil extends AutomationUtil {
     if ("U".equals(admin.getReqType()) && ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))) {
         Addr pg01 = requestData.getAddress("PG01");
         if(pg01 != null){
-          // checkANZPaygoAddr(entityManager, data.getId().getReqId());
+        	// checkANZPaygoAddr(entityManager, data.getId().getReqId());
         }
       }
     
@@ -795,10 +805,10 @@ public class NewZealandUtil extends AutomationUtil {
   }
   
   public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
-      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
-      query.setParameter("REQ_ID", reqId);
-      query.executeSql();
-    }
+	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
+	    query.setParameter("REQ_ID", reqId);
+	    query.executeSql();
+	  }
 
   @Override
   protected List<String> getCountryLegalEndings() {

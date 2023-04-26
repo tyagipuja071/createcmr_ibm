@@ -365,6 +365,13 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             } else {
               result.setOnError(false);
             }
+
+            // CREATCMR-9157: for New Zealand, add NegativeCheck if there is no
+            // matched DNB, it should be removed if NZAPI matched;
+            if (SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())) {
+              engineData.addNegativeCheckStatus("DnBMatch", "Matches against D&B were found but no record matched the request data.");
+              result.setOnError(false);
+            }
             engineData.put("dnbMatching", dnbMatches.get(0));
           }
 
