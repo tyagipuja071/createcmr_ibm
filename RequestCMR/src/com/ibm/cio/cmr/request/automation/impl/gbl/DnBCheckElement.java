@@ -195,8 +195,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
       String sql = ExternalizedQuery.getSql("QUERY.GET_IF_REQ_IS_REJECT_BEFORE");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQID", requestData.getAdmin().getId().getReqId());
-      String reqid = query.getSingleResult(String.class);
-      return reqid != null;
+      return query.getSingleResult(String.class) != null;
     }
     return false;
   }
