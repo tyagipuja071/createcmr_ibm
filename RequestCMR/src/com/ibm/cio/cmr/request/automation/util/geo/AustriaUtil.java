@@ -36,6 +36,8 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 /**
@@ -78,13 +80,13 @@ public class AustriaUtil extends AutomationUtil {
     String customerName = custNm1 + custNm2 + custNm3;
     String custGrp = data.getCustGrp();
     // CREATCMR-6244 LandCntry UK(GB)
-    if(soldTo != null){
-    	String landCntry = soldTo.getLandCntry();
-    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
-                && ("CROSS".equals(custGrp))){
-        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
-        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
-        }
+    if (soldTo != null) {
+      String landCntry = soldTo.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
     }
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
@@ -500,7 +502,7 @@ public class AustriaUtil extends AutomationUtil {
     System.out.println("coverageId----------" + coverageId);
     List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
     LOG.info("Starting coverage calculations for Request ID " + requestData.getData().getId().getReqId());
-        if (bgId != null && !"BGNONE".equals(bgId.trim())) {
+    if (bgId != null && !"BGNONE".equals(bgId.trim())) {
       List<DACHFieldContainer> queryResults = AutomationUtil.computeDACHCoverageElements(entityManager, "AUTO.COV.CALCULATE_COV_ELEMENTS_DACH", bgId,
           data.getCmrIssuingCntry());
       if (queryResults != null && !queryResults.isEmpty()) {
@@ -566,6 +568,7 @@ public class AustriaUtil extends AutomationUtil {
     return true;
 
   }
+
   private String getSBOFromIMS(EntityManager entityManager, String subIndustryCd, String isuCd, String clientTier) {
     List<String> sboValues = new ArrayList<>();
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
@@ -655,6 +658,37 @@ public class AustriaUtil extends AutomationUtil {
       }
     }
     return false;
+  }
+
+  @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+
+    String[] scenariosToBeChecked = { "PRICU", "IBMEM" };
+    String scenario = requestData.getData().getCustSubGrp();
+    String[] kuklaPriv = { "60" };
+    String[] kuklaIBMEM = { "71" };
+
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      List<DuplicateCMRCheckResponse> matches = response.getMatches();
+      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaPriv).contains(kukla) && "PRICU".equals(scenario)) {
+            filteredMatches.add(match);
+          } else if (Arrays.asList(kuklaIBMEM).contains(kukla) && "IBMEM".equals(scenario)) {
+            filteredMatches.add(match);
+          }
+        }
+
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
+    }
   }
 
 }

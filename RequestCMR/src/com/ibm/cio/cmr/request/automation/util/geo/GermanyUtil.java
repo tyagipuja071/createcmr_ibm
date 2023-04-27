@@ -107,13 +107,13 @@ public class GermanyUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     String custGrp = data.getCustGrp();
     // CREATCMR-6244 LandCntry UK(GB)
-    if(zs01 != null){
-    	String landCntry = zs01.getLandCntry();
-    	if(data.getVat()!=null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null && StringUtils.isNotEmpty(custGrp)
-                && ("CROSS".equals(custGrp))){
-        	engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
-        	details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
-        }
+    if (zs01 != null) {
+      String landCntry = zs01.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
     }
     // cmr-2067 fix
     engineData.setMatchDepartment(true);
@@ -487,6 +487,37 @@ public class GermanyUtil extends AutomationUtil {
       return false;
     }
     return valid;
+  }
+
+  @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+
+    String[] scenariosToBeChecked = { "PRIPE", "IBMEM" };
+    String scenario = requestData.getData().getCustSubGrp();
+    String[] kuklaPriv = { "60" };
+    String[] kuklaIBMEM = { "71" };
+
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      List<DuplicateCMRCheckResponse> matches = response.getMatches();
+      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaPriv).contains(kukla) && ("PRIPE".equals(scenario))) {
+            filteredMatches.add(match);
+          } else if (Arrays.asList(kuklaIBMEM).contains(kukla) && ("IBMEM".equals(scenario))) {
+            filteredMatches.add(match);
+          }
+        }
+
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
+    }
   }
 
   @Override
@@ -883,57 +914,58 @@ public class GermanyUtil extends AutomationUtil {
       if (changes.isDataChanged("VAT #")
           || (CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo))) {
         UpdatedDataModel vatChange = changes.getDataChange("VAT #");
-        	if(vatChange != null && requestData.getAddress("ZS01").getLandCntry().equals("GB")){
-        		  if(!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)){
-                      engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
-                      detail.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
-                      isNegativeCheckNeedeed = true;
-                      }
+        if (vatChange != null && requestData.getAddress("ZS01").getLandCntry().equals("GB")) {
+          if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)) {
+            engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+            detail.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+            isNegativeCheckNeedeed = true;
+          }
+        }
+        if (isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo)
+            || (vatChange != null && (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
+                || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())))) {
+          // check if the name + VAT exists in D&B
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+          if (matches.isEmpty()) {
+            // get DnB matches based on all address details
+            matches = getMatches(requestData, engineData, soldTo, false);
+          }
+          String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
+          if (!matches.isEmpty()) {
+            boolean matchesDnb = false;
+            for (DnBMatchingResponse dnbRecord : matches) {
+              if ("Y".equals(dnbRecord.getOrgIdMatch()) && (StringUtils.isNotEmpty(custName) && StringUtils.isNotEmpty((dnbRecord.getDnbName()))
+                  && StringUtils.getLevenshteinDistance(custName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) <= 5)) {
+                duns = dnbRecord.getDunsNo();
+                isNegativeCheckNeedeed = false;
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+                if (!matchesDnb) {
+                  isNegativeCheckNeedeed = true;
+                  engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
                 }
-          if (isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo) || (vatChange != null && (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
-                            || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())))) {
-                          // check if the name + VAT exists in D&B
-                          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-                          if (matches.isEmpty()) {
-                            // get DnB matches based on all address details
-                            matches = getMatches(requestData, engineData, soldTo, false);
-                          }
-                          String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
-                          if (!matches.isEmpty()) {
-                            boolean matchesDnb = false;
-                            for (DnBMatchingResponse dnbRecord : matches) {
-                              if ("Y".equals(dnbRecord.getOrgIdMatch()) && (StringUtils.isNotEmpty(custName) && StringUtils.isNotEmpty((dnbRecord.getDnbName()))
-                                  && StringUtils.getLevenshteinDistance(custName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) <= 5)) {
-                                duns = dnbRecord.getDunsNo();
-                                isNegativeCheckNeedeed = false;
-                                matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-                                if (!matchesDnb) {
-                                  isNegativeCheckNeedeed = true;
-                                  engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
-                                }
-                                break;
-                              }
-                              isNegativeCheckNeedeed = true;
-                            }
-                          }
-                          if (isNegativeCheckNeedeed) {
-                            detail.append("Updates to VAT need verification as VAT and legal name doesn't matches DnB.\n");
-                            LOG.debug("Updates to VAT need verification as VAT and legal name doesn't matches DnB.");
-                          } else {
-                            detail.append("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
-                            LOG.debug("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
-                          }
+                break;
+              }
+              isNegativeCheckNeedeed = true;
+            }
+          }
+          if (isNegativeCheckNeedeed) {
+            detail.append("Updates to VAT need verification as VAT and legal name doesn't matches DnB.\n");
+            LOG.debug("Updates to VAT need verification as VAT and legal name doesn't matches DnB.");
+          } else {
+            detail.append("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
+            LOG.debug("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
+          }
 
-                        } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
-                          admin.setScenarioVerifiedIndc("N");
-                          entityManager.merge(admin);
-                          detail.append("Setting scenario verified indc= N as VAT is blank.\n");
-                          LOG.debug("Setting scenario verified indc= N as VAT is blank.");
-                        } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
-                          isNegativeCheckNeedeed = true;
-                          detail.append("Updates to VAT need verification.\n");
-                          LOG.debug("Updates to VAT need verification.");
-                        }
+        } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
+          admin.setScenarioVerifiedIndc("N");
+          entityManager.merge(admin);
+          detail.append("Setting scenario verified indc= N as VAT is blank.\n");
+          LOG.debug("Setting scenario verified indc= N as VAT is blank.");
+        } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
+          isNegativeCheckNeedeed = true;
+          detail.append("Updates to VAT need verification.\n");
+          LOG.debug("Updates to VAT need verification.");
+        }
       } else if (changes.isDataChanged("Order Block")) {
         UpdatedDataModel OBChange = changes.getDataChange("Order Block");
         if (OBChange != null) {
