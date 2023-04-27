@@ -93,11 +93,12 @@ public class LicenseService extends BaseService<LicenseModel, Licenses> {
   public void deleteAllLicense(List<Licenses> licenseList, EntityManager entityManager) {
     if (licenseList != null && licenseList.size() > 0) {
       for (int i = 0; i < licenseList.size(); i++) {
-        Licenses contactInfo = licenseList.get(i);
-        Licenses merged = entityManager.merge(contactInfo);
+        Licenses license = licenseList.get(i);
+        Licenses merged = entityManager.merge(license);
         if (merged != null) {
           entityManager.remove(merged);
         }
+        entityManager.flush();
       }
     }
   }

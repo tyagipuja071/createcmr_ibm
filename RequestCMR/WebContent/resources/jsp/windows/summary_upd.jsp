@@ -342,13 +342,13 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 							id="summaryNewLicenseGrid" span="6" width="750" height="200"
 							innerWidth="750" usePaging="false" useFilter="false">
 							<cmr:gridParam fieldId="reqId" value="${summary.admin.id.reqId}" />
-							<cmr:gridCol width="200px" field="licenseNumber"
+							<cmr:gridCol width="200px" field="licenseNum"
 								header="${ui.grid.licenseNumber}" />
-							<cmr:gridCol width="200px" field="validDateFrom"
+							<cmr:gridCol width="200px" field="validFrom"
 								header="${ui.grid.validDateFrom}" />
-							<cmr:gridCol width="200px" field="validDateTo"
+							<cmr:gridCol width="200px" field="validTo"
 								header="${ui.grid.validDateTo}" />
-							<cmr:gridCol width="150px" field="importInd"
+							<cmr:gridCol width="150px" field="currentIndc"
 								header="${ui.grid.change}">
 								<cmr:formatter functionName="licenseFormatter" />
 							</cmr:gridCol>

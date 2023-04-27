@@ -307,7 +307,6 @@
 					<cmr:grid url="/request/license/list.json" id="LICENSES_GRID"
 						span="4" height="220" usePaging="false">
 
-						<!-- Machine Type -->
 						<cmr:gridParam fieldId="reqId" value="${reqentry.reqId}" />
 						<cmr:gridCol width="150px" field="licenseNum"
 							header="${ui.grid.licenseNumber}" />
@@ -332,7 +331,7 @@
 			<div id="licenseAddNewDiv">
 
 				<cmr:row topPad="15">
-					<cmr:column span="4">
+					<cmr:column span="5">
 						<p>
 							<cmr:label fieldId="licenseInfo">
 								<strong>${ui.addNewLicense}</strong>
@@ -342,14 +341,14 @@
 					</cmr:column>
 				</cmr:row>
 				<cmr:row>
-					<cmr:column span="1" containerForField="LicenseNumber" width="130">
+					<cmr:column span="1" containerForField="LicenseNumber" width="150">
 						<p>
 							<cmr:label fieldId="LicenseNumber">
 								<cmr:fieldLabel fieldId="LicenseNumber" />:
-
+				                <cmr:info text="${ui.info.licenseNumFormat}" />
               </cmr:label>
 							<cmr:field fieldId="LicenseNumber" id="licenseNumber"
-								path="licenseNumber" size='120' />
+								path="licenseNumber" size='130' />
 						</p>
 					</cmr:column>
 					<cmr:column span="1" containerForField="LicenseValidFrom"

@@ -1811,6 +1811,11 @@ public class EMEAHandler extends BaseSOFHandler {
         if (records != null && records.size() >= 0) {
           data.setSpecialTaxCd("Bl");
         }
+
+        if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+          CmrtCust cust = this.legacyObjects.getCustomer();
+          data.setSpecialTaxCd(StringUtils.isNotEmpty(cust.getTaxCd()) ? cust.getTaxCd() : "Bl");
+        }
       }
       // Changed abbreviated location if cross border to country
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
@@ -2301,6 +2306,17 @@ public class EMEAHandler extends BaseSOFHandler {
         } else {
           data.setCrosSubTyp(null);
         }
+      }
+    }
+
+    if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      // Update the ZS01 indicator so that the batch process will pick up this
+      // request even if only the licenses were updated
+      LicenseService licService = new LicenseService();
+      long reqId = data.getId().getReqId();
+      List<Licenses> newLicenses = licService.getLicensesByIndc(entityManager, reqId, "N");
+      if (!newLicenses.isEmpty()) {
+        updateChangeIndc(entityManager, reqId);
       }
     }
   }
@@ -3144,6 +3160,13 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
     }
+  }
+
+  private void updateChangeIndc(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.CHANGED_INDC.IE"));
+    query.setParameter("CHANGED_INDC", "Y");
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
   }
 
   private void updateImportIndicatior(EntityManager entityManager, long reqId) {
