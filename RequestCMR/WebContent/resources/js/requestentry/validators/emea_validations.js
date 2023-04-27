@@ -10481,11 +10481,45 @@ function toggleLicenseFields() {
     cmr.hideNode('licenseFieldsDiv');
   }
 
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage) {
+    cmr.hideNode('licenseAddNewDiv');
+    return;
+  }
+
   if (taxCode == 'Z') {
     cmr.showNode('licenseAddNewDiv');
   } else {
     cmr.hideNode('licenseAddNewDiv');
   }
+}
+
+function addChangeToTaxCdZValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'U') {
+          var taxCd = FormManager.getActualValue('specialTaxCd');
+          if (taxCd == 'Z') {
+            var reqId = FormManager.getActualValue('reqId');
+            var qParams = {
+              REQ_ID : reqId,
+            };
+
+            var oldTaxRes = cmr.query('GET_SPECIAL_TAX_CD_OLD', qParams);
+            var attachRes = cmr.query('CHECK_TAX_LICENSE_ATTACHMENT', qParams);
+            var oldTaxCd = oldTaxRes.ret1;
+
+            if (oldTaxCd != 'Z' && attachRes.ret1 == null) {
+              return new ValidationResult(null, false, 'Tax License attachment required. Please provide the mandatory Tax License attachment when changing the Tax Code to Z.');
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
 
 dojo.addOnLoad(function() {
@@ -10768,6 +10802,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(addHandlersForIE, [ SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(toggleLicenseFields, [ SysLoc.IRELAND ]);
+  GEOHandler.registerValidator(addChangeToTaxCdZValidator, [ SysLoc.IRELAND ], null, true);
 
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
