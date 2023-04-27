@@ -142,8 +142,9 @@ public class IndiaUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           String custNmTrimmed = getCustomerFullName(addr).toUpperCase();
           if (hasINLegalEndings(custNmTrimmed)) {
-            details.append(
-                "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .")
+            details
+                .append(
+                    "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .")
                 .append("\n");
             engineData.addRejectionComment("OTH",
                 "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .",
@@ -184,7 +185,8 @@ public class IndiaUtil extends AutomationUtil {
   @Override
   public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<DuplicateCMRCheckResponse> response) {
-    String[] scenariosToBeChecked = { "ESOSW" };
+    String[] scenariosToBeChecked = { "ESOSW", "PRIV" };
+    String[] kuklaPriv = { "60" };
     String scenario = requestData.getData().getCustSubGrp();
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
       List<DuplicateCMRCheckResponse> matches = response.getMatches();
@@ -193,9 +195,15 @@ public class IndiaUtil extends AutomationUtil {
         if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
           filteredMatches.add(match);
         }
-        if (StringUtils.isNotBlank(match.getCmrNo())) {
+        if (StringUtils.isNotBlank(match.getCmrNo()) && "ESOSW".equals(scenario)) {
           String cmrFound = match.getCmrNo().substring(0, 3);
           if ("800".equals(cmrFound)) {
+            filteredMatches.add(match);
+          }
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaPriv).contains(kukla) && ("PRIV".equals(scenario))) {
             filteredMatches.add(match);
           }
         }

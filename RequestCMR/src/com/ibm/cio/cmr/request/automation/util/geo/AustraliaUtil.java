@@ -44,6 +44,7 @@ import com.ibm.cmr.services.client.automation.ap.anz.BNValidationRequest;
 import com.ibm.cmr.services.client.automation.ap.anz.BNValidationResponse;
 import com.ibm.cmr.services.client.automation.ap.anz.NMValidationRequest;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 public class AustraliaUtil extends AutomationUtil {
@@ -152,7 +153,7 @@ public class AustraliaUtil extends AutomationUtil {
     results.setResults(eleResults.toString());
     results.setDetails(details.toString());
     results.setProcessOutput(overrides);
-    
+
     return results;
   }
 
@@ -406,14 +407,14 @@ public class AustraliaUtil extends AutomationUtil {
       output.setProcessOutput(validation);
       output.setDetails("Updates to the dataFields fields skipped validation");
     }
-    
+
     if ("U".equals(admin.getReqType()) && ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))) {
-        Addr pg01 = requestData.getAddress("PG01");
-        if(pg01 != null){
-        	// checkANZPaygoAddr(entityManager, data.getId().getReqId());
-        }
+      Addr pg01 = requestData.getAddress("PG01");
+      if (pg01 != null) {
+        // checkANZPaygoAddr(entityManager, data.getId().getReqId());
       }
-    
+    }
+
     return true;
   }
 
@@ -479,6 +480,34 @@ public class AustraliaUtil extends AutomationUtil {
       addToNotifyListANZ(entityManager, data.getId().getReqId());
     }
     return true;
+  }
+
+  @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+
+    String[] scenariosToBeChecked = { "PRIV", "XPRIV" };
+    String scenario = requestData.getData().getCustSubGrp();
+    String[] kuklaPriv = { "60" };
+
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      List<DuplicateCMRCheckResponse> matches = response.getMatches();
+      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaPriv).contains(kukla) && ("PRIV".equals(scenario) || "XPRIV".equals(scenario))) {
+            filteredMatches.add(match);
+          }
+        }
+
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
+    }
   }
 
   private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
@@ -646,12 +675,12 @@ public class AustraliaUtil extends AutomationUtil {
     anzEcoNotifyList.append(SystemParameters.getString("ANZ_ECSYS_NOTIFY"));
     return anzEcoNotifyList;
   }
-  
+
   public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
-	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
-	    query.setParameter("REQ_ID", reqId);
-	    query.executeSql();
-	  }
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
 
   @Override
   protected List<String> getCountryLegalEndings() {
