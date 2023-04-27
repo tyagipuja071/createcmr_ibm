@@ -961,7 +961,7 @@ function resetVATValidationsForPayGo(){
   }); 
   if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'Y' && vat == ''){    
    FormManager.resetValidations('vat');
-   //FormManager.getField('vatExempt').checked = true;
+   // FormManager.getField('vatExempt').checked = true;
     console.log('VAT is non mandatory for PayGO');
   } 
   
@@ -1070,7 +1070,7 @@ function addVatIndValidator(){
   } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd == '') {
     FormManager.setValue('vatInd', 'T');
     FormManager.enable('vatInd');
-    //  FormManager.readOnly('vatInd');
+    // FormManager.readOnly('vatInd');
   } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.setValue('vatInd', 'N');
@@ -1278,11 +1278,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addGenericPostalCodeValidator, GEOHandler.GROUP1);
   
   GEOHandler.registerWWValidator(addINACValidator);
-  //Removing this for coverage-2023 as ISU -32 is no longer obsoleted
-  //GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
+  // Removing this for coverage-2023 as ISU -32 is no longer obsoleted
+  // GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
   GEOHandler.addAfterConfig(updateProspectLegalInd,  GEOHandler.AllCountries);
-  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']);  
-  GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']); 
+  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706']);  
+  GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706']); 
   GEOHandler.registerWWValidator(addVatIndValidator);
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];

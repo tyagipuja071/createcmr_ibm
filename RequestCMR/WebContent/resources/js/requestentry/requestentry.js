@@ -9,6 +9,7 @@
  */
 var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
 var NORDX = [ '846', '806', '702', '678' ];
+var ROW = [ '706' ];
 var comp_proof_INAUSG = false;
 var flag = false;
 
@@ -137,7 +138,7 @@ function processRequestAction() {
     var vatInd = FormManager.getActualValue('vatInd');
     var custGrp = FormManager.getActualValue('custGrp');
     var reqId = FormManager.getActualValue('reqId');
-    var crossScenTyp = ['CROSS','LUCRO','EECRO','LTCRO','LVCRO','FOCRO','GLCRO','ISCRO'];
+    var crossScenTyp = [ 'CROSS', 'LUCRO', 'EECRO', 'LTCRO', 'LVCRO', 'FOCRO', 'GLCRO', 'ISCRO' ];
     if (custGrp == null || custGrp == '') {
       custGrp = getCustGrp();
     }
@@ -150,8 +151,9 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
       cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
-      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry'))) && (vatInd == 'N') && (!crossScenTyp.includes(custGrp))
-          && ((oldVatValue=='' && reqType=='U') || (reqType=='C'))) {
+      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
+          .getActualValue('cmrIssuingCntry')))
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && ((oldVatValue == '' && reqType == 'U') || (reqType == 'C'))) {
         findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
@@ -391,7 +393,7 @@ function verifyGlcChangeIN() {
 }
 
 function getCustGrp() {
-  var custGrp=null;
+  var custGrp = null;
   var issueCntry = getIssuingCntry();
   var zs01LandCntry = getZS01LandCntry();
 
@@ -400,7 +402,7 @@ function getCustGrp() {
   } else {
     custGrp = 'CROSS'
   }
-return custGrp;
+  return custGrp;
 }
 
 function getZS01LandCntry() {
@@ -416,13 +418,13 @@ function getZS01LandCntry() {
 }
 
 function getIssuingCntry() {
-var cntry= FormManager.getActualValue('cmrIssuingCntry');
-reqParam1 = {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  reqParam1 = {
     SYS_LOC_CD : cntry,
   };
-var results1 = cmr.query('GET.ISSUING.CNTRY.NAME', reqParam1);
-var issueCntry = results1.ret1 != undefined ? results1.ret1 : '';
-return issueCntry;
+  var results1 = cmr.query('GET.ISSUING.CNTRY.NAME', reqParam1);
+  var issueCntry = results1.ret1 != undefined ? results1.ret1 : '';
+  return issueCntry;
 }
 
 function findVatInd() {
@@ -2630,21 +2632,21 @@ function setClusterIDAfterRetrieveAction(glcCode) {
   FormManager.setValue('isuCd', '34');
 }
 
-//CREATCMR-7879
+// CREATCMR-7879
 function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
   console.log('>>> setClusterIDAfterRetrieveAction4CN >>>');
   var indc = 'C';
-  if(custSubGrp == 'EMBSA'){
+  if (custSubGrp == 'EMBSA') {
     var _GBGId = FormManager.getActualValue('gbgId');
     if (FormManager.getActualValue('gbgId') != undefined && FormManager.getActualValue('gbgId') != '') {
-    var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
-      ID : _GBGId
-    });
+      var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
+        ID : _GBGId
+      });
       if (ret && ret.ret1 && ret.ret1 != 0) {
         indc = '';
       }
     }
-    if(indc == 'C'){
+    if (indc == 'C') {
       var result1 = cmr.query('GLC.CN.SEARCHTERM', {
         GLC_CD : '%' + glcCode + '%',
         DEFAULT_INDC : indc
@@ -2659,9 +2661,9 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
         var searchTerm2 = result2 != null ? result2.ret1 : '';
         var clientTier = result1.ret2;
         var isuCd = result1.ret3;
-        FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm1,searchTerm2 ]);
+        FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm1, searchTerm2 ]);
         FormManager.setValue('searchTerm', searchTerm1);
-        //FormManager.readOnly('searchTerm');
+        // FormManager.readOnly('searchTerm');
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
         FormManager.setValue('clientTier', clientTier);
         FormManager.readOnly('clientTier');
@@ -2670,7 +2672,7 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
         FormManager.readOnly('isuCd');
       }
     }
-  }else{
+  } else {
     if (custSubGrp == 'ECOSY') {
       indc = 'E';
     }
