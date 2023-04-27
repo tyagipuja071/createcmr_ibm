@@ -452,9 +452,14 @@ public class USAddrStdElement extends OverridingElement {
     }
 
     String sql = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
+    if (!"US".equals(landCntry)) {
+      sql = sql.replace("AND N_ST = :N_ST", " ");
+    }
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("LAND_CNTRY", landCntry);
-    query.setParameter("N_ST", stateProv);
+    if ("US".equals(landCntry)) {
+      query.setParameter("N_ST", stateProv);
+    }
     query.setParameter("C_CNTY", county);
     query.setParameter("N_CITY", city1.toUpperCase());
 
