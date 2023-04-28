@@ -7,6 +7,8 @@
 var _usSicmenHandler = null;
 var _usIsuHandler = null;
 var _usTaxcd1Handler = null;
+var _usIsicHandler = null;
+var _usCustClassHandler = null;
 var _usSicm = "";
 var _kukla = "";
 var _enterpriseHandler = null;
@@ -590,6 +592,18 @@ function afterConfigForUS() {
   if (_usTaxcd1Handler == null && FormManager.getField('taxCd1')) {
     _usTaxcd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
       setTaxcd1Status();
+    });
+  }
+
+  if (_usCustClassHandler == null && FormManager.getActualValue('reqType') == 'U') {
+    _usCustClassHandler = dojo.connect(FormManager.getField('custClass'), 'onChange', function(value) {
+      onChangeCustClassOrKukla();
+    });
+  }
+
+  if (_usIsicHandler == null && FormManager.getActualValue('reqType') == 'U') {
+    _usIsicHandler = dojo.connect(FormManager.getField('usSicmen'), 'onChange', function(value) {
+      onChangeIsicCd();
     });
   }
 
@@ -1325,6 +1339,57 @@ function setTaxcd1Status() {
   }
 
 }
+
+function onChangeCustClassOrKukla() {
+  var result = null;
+  var rdcKukla = null;
+  var onChangedKukla = null;
+  onChangedKukla = FormManager.getActualValue('custClass');
+  var result = getIsicAndKuklaFromDataRdc("custClass");
+
+  if (result != null) {
+    rdcKukla = result;
+  }
+
+  if (onChangedKukla != rdcKukla && onChangedKukla != '60') {
+    if (FormManager.getActualValue('custType') == 'Commercial') {
+      cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
+    } else {
+      cmr.showAlert('Customer Classification Code/SICMEN of Consumer record is selected, please ensure Customer Classification Code 60 and SICMEN 9500 are selected');
+    }
+  }
+}
+
+function onChangeIsicCd() {
+  var result = null;
+  var rdcIsic = null;
+  var onChangedIsic = null;
+  onChangedIsic = FormManager.getActualValue('usSicmen');
+  var result = getIsicAndKuklaFromDataRdc("usSicmen");
+
+  if (result != null) {
+    rdcIsic = result;
+  }
+  if (onChangedIsic != rdcIsic && onChangedIsic != '9500') {
+    if (FormManager.getActualValue('custType') == 'Commercial') {
+      cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
+    } else {
+      cmr.showAlert('Customer Classification Code/SICMEN of Consumer record is selected, please ensure Customer Classification Code 60 and SICMEN 9500 are selected');
+    }
+  }
+}
+
+function getIsicAndKuklaFromDataRdc(value) {
+  var result = null;
+  result = cmr.query('DATA_RDC.ISIC', {
+    REQ_ID : FormManager.getActualValue('reqId')
+  });
+  if (result != null && result != '' && result.ret1 != undefined) {
+    return value == 'custClass' ? result.ret1 : result.ret2;
+  }
+  return null;
+}
+
 // CREATCMR-6987
 function setMainName1ForKYN() {
   var reqType = FormManager.getActualValue('reqType');
