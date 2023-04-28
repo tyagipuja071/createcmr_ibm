@@ -21,6 +21,7 @@ import java.util.StringTokenizer;
 
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.ObjectUtils;
