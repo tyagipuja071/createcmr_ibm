@@ -384,7 +384,7 @@ public class RequestUtils {
     }
 
     // add to this list in the future if needed
-    List<String> forceSendTypes = Arrays.asList("LD", "MD", "MA");
+    List<String> forceSendTypes = Arrays.asList("LD", "MD", "MA", "FR");
 
     if (!StringUtils.isBlank(admin.getSourceSystId())) {
       // for external creations, ensure that the requesterId is always notified,
