@@ -1967,7 +1967,8 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
   case 'STOSC':
   case 'STOSI':
   case 'INTER':
-    showOrHideAddrFieldInter(addrType, custSubGrp, role);
+    // showOrHideAddrFieldInter(addrType, custSubGrp, role);
+    showOrHideAddrFieldInterOld(addrType, custSubGrp, role);
     break;
   case 'ABIJS':
   case 'AHIJE':
