@@ -130,7 +130,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
           validation.setSuccess(true);
           if ("C".equals(admin.getReqType()) && payGoAddredited && ("ZI01".equals(addrType) || ("ZS01".equals(addrType)))) {
             output.setOnError(false);
-            admin.setPaygoProcessIndc("Y");
+          //  admin.setPaygoProcessIndc("Y");
             details.append("Skipping checks for PayGo Addredited Customers.");
           }
           if ("O".equals(admin.getCompVerifiedIndc()) || "Y".equals(admin.getCompVerifiedIndc())) {
