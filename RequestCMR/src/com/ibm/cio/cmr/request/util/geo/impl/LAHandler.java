@@ -4154,14 +4154,14 @@ public class LAHandler extends GEOHandler {
       }
     }
 
-    // roll-back to new values to Update IBM Codes
+    // roll-back to user's new values to Update IBM Codes
     // mexicoBillingName is a temporary placeholder for Update Reason
     if ("U".equalsIgnoreCase(admin.getReqType()) && "UPIC".equalsIgnoreCase(data.getMexicoBillingName())) {
+      data.setSalesBusOffCd(brModel.getSalesBusOffCd());
       data.setIsuCd(brModel.getIsuCd());
       data.setInacCd(brModel.getInacCd());
       data.setCompany(brModel.getCompany());
       data.setCollectorNameNo(brModel.getCollectorNameNo());
-      data.setSalesBusOffCd(brModel.getSalesBusOffCd());
 
       entityManager.merge(data);
 
