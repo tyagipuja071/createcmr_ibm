@@ -162,14 +162,6 @@
 					<cmr:field size="80" fieldId="INACCode" id="inacCd" path="inacCd" />
 				</p>
 			</cmr:column>
-			<cmr:column span="2" containerForField="ISU">
-				<p>
-					<cmr:label fieldId="isuCd">
-						<cmr:fieldLabel fieldId="ISU" />:
-          </cmr:label>
-					<cmr:field fieldId="ISU" id="isuCd" path="isuCd" />
-				</p>
-			</cmr:column>
 		</cmr:row>
 	
 
@@ -193,7 +185,7 @@
 			</p>
 		</cmr:column>
 	</cmr:row>
-
+	<form:hidden path="isuCd" id="isuCd" />
 	<!-- temporary placeholder for Update Reason value -->
-	<form:hidden path="mexicoBillingName" id="mexicoBillingName"/>
+	<form:hidden path="mexicoBillingName" id="mexicoBillingName" />
 </cmr:view>
