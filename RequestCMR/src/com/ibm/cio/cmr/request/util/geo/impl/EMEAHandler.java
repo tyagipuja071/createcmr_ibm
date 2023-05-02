@@ -4175,6 +4175,15 @@ public class EMEAHandler extends BaseSOFHandler {
             validations.add(error);
           }
         }
+
+        if ("Data".equalsIgnoreCase(sheet.getSheetName()) && country.equals(SystemLocation.IRELAND)) {
+          String taxCode = validateColValFromCell(row.getCell(5));
+          if (StringUtils.isNotBlank(taxCode) && !"Z".equalsIgnoreCase(taxCode) && isZTaxCdDB2Legacy(cmrNo)
+              && hasValidLicenseDate(cmrNo, SystemLocation.IRELAND)) {
+            error.addError((row.getRowNum() + 1), "Tax Code", "CMR No. " + cmrNo + " license(s) are still valid. Tax Code value should remain = Z");
+            validations.add(error);
+          }
+        }
       }
     }
 
@@ -4317,6 +4326,42 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
     }
+  }
+
+  private boolean isZTaxCdDB2Legacy(String cmrNo) {
+    if (StringUtils.isNotBlank(cmrNo)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("GET.LEGACYTAXCD.IE");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("RCUXA", cmrNo);
+        query.setForReadOnly(true);
+        String result = query.getSingleResult(String.class);
+        if (StringUtils.isNotBlank(result) && "Z".equalsIgnoreCase(result)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private boolean hasValidLicenseDate(String cmrNo, String issuingCntry) {
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(issuingCntry)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("COUNT.VALID.LICENSEDATE");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("KATR6", issuingCntry);
+        query.setParameter("ZZKV_CUSNO", cmrNo);
+
+        int count = query.getSingleResult(Integer.class);
+        if (count > 0) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   @Override
