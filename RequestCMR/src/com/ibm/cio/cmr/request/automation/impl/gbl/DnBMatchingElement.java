@@ -84,12 +84,12 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
 
     // CREATCMR-8430: use usSicmen to save the dnboverride flag for NZ
-    // the requester choose override dnb and did NZBN API in UI, automation will use this flag to skip DNB matching for this case
+    // the requester choose override dnb and did NZBN API in UI, automation will
+    // use this flag to skip DNB matching for this case
     if (SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry()) && data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase("DNBO")) {
       LOG.debug("DNB Overriden from UI - NZ");
       result.setResults("Overriden");
-      result.setDetails(
-          "D&B matches were chosen to be overridden by the requester.");
+      result.setDetails("D&B matches were chosen to be overridden by the requester.");
       // engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were
       // chosen to be overridden by the requester.");
       return result;
@@ -138,8 +138,18 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             if (!(SystemLocation.INDIA.equals(data.getCmrIssuingCntry()) && !(StringUtils.isBlank(data.getVat()) || "CROSS".equals(scenario)))) {
               engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
             }
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId()) && isReqRejectedBefore(requestData, entityManager)) {
+              result.setDetails("Processor review is required for data quality purpose");
+              engineData.addNegativeCheckStatus("DNBCheck", "Processor review is required since request has already been rejected for data quality.");
+              LOG.debug("Processor review is required since request has already been rejected for data quality.");
+            }
           } else if (!payGoAddredited) {
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId()) && isReqRejectedBefore(requestData, entityManager)) {
+              result.setDetails("Processor review is required for data quality purpose");
+              engineData.addNegativeCheckStatus("DNBCheck", "Processor review is required since request has already been rejected for data quality.");
+              LOG.debug("Processor review is required since request has already been rejected for data quality.");
+            }
           } else if (payGoAddredited && !hasValidMatches) {
             LOG.debug("DnB Matches not found for PayGo.");
 
@@ -386,7 +396,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           result.setOnError(false);
         }
       }
-      
+
       AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
       if (automationUtil != null && automationUtil instanceof SingaporeUtil && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
         SingaporeUtil singaporeUtil = (SingaporeUtil) automationUtil;
@@ -663,6 +673,16 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         }
       }
     }
+  }
+
+  private boolean isReqRejectedBefore(RequestData requestData, EntityManager entityManager) {
+    if ("897".equals(requestData.getData().getCmrIssuingCntry()) || "649".equals(requestData.getData().getCmrIssuingCntry())) {
+      String sql = ExternalizedQuery.getSql("QUERY.GET_IF_REQ_IS_REJECT_BEFORE");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQID", requestData.getAdmin().getId().getReqId());
+      return query.getSingleResult(String.class) != null;
+    }
+    return false;
   }
 
   @Override
