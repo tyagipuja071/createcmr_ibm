@@ -36,6 +36,9 @@ var _oldIsicCd = null;
 var _CTCHandlerIL = null;
 var _isuCdHandlerIL = null;
 var _CTCHandlerIE = null;
+
+var _specialTaxCdHandlerIE = null;
+
 function addHandlersForIL() {
   for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
     _gtcAddrTypeHandlerIL[i] = null;
@@ -79,6 +82,12 @@ function addHandlersForIE() {
     _CTCHandlerIE = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       addSBOSRLogicIE(value);
       setSboValueBasedOnIsuCtcIE(value);
+    });
+  }
+
+  if (_specialTaxCdHandlerIE == null) {
+    _specialTaxCdHandlerIE = dojo.connect(FormManager.getField('specialTaxCd'), 'onChange', function(value) {
+      toggleLicenseFields();
     });
   }
 }
@@ -10532,6 +10541,93 @@ function addVatIndValidator() {
   }
 }
 
+function toggleLicenseFields() {
+  var taxCode = FormManager.getActualValue('specialTaxCd');
+
+  if (FormManager.getActualValue('reqType') != 'U' || FormManager.getActualValue('cmrIssuingCntry') != '754') {
+    cmr.hideNode('licenseFieldsDiv');
+  }
+
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage) {
+    cmr.hideNode('licenseAddNewDiv');
+    return;
+  }
+
+  if (taxCode == 'Z') {
+    cmr.showNode('licenseAddNewDiv');
+  } else {
+    cmr.hideNode('licenseAddNewDiv');
+  }
+}
+
+function addChangeToTaxCdZValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'U') {
+          var taxCd = FormManager.getActualValue('specialTaxCd');
+          if (taxCd == 'Z') {
+            var reqId = FormManager.getActualValue('reqId');
+            var qParams = {
+              REQ_ID : reqId,
+            };
+
+            var oldTaxRes = cmr.query('GET_SPECIAL_TAX_CD_OLD', qParams);
+            var attachRes = cmr.query('CHECK_TAX_LICENSE_ATTACHMENT', qParams);
+            var oldTaxCd = oldTaxRes.ret1;
+
+            if (oldTaxCd != 'Z' && attachRes.ret1 == null) {
+              return new ValidationResult(null, false, 'Tax License attachment required. Please provide the mandatory Tax License attachment when changing the Tax Code to Z.');
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
+function addChangeTaxCdValidLicenseValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'U') {
+          var taxCd = FormManager.getActualValue('specialTaxCd');
+          if (taxCd != 'Z') {
+            var reqId = FormManager.getActualValue('reqId');
+            var qParams = {
+              REQ_ID : reqId,
+            };
+            var oldTaxRes = cmr.query('GET_SPECIAL_TAX_CD_OLD', qParams);
+            var oldTaxCd = oldTaxRes.ret1;
+
+            if (oldTaxCd == 'Z' && hasValidLicenseDate()) {
+              return new ValidationResult(null, false, 'The license(s) are still valid. Tax code changes are not allowed. Please change the Tax Code back to Z.');
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+function hasValidLicenseDate() {
+  var today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  if (CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount > 0) {
+    for (var i = 0; i < CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount; i++) {
+      var record = CmrGrid.GRIDS.LICENSES_GRID_GRID.getItem(i);
+      var validTo = record.validTo[0]
+      if (today > validTo) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -10820,6 +10916,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(addHandlersForIE, [ SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(toggleLicenseFields, [ SysLoc.IRELAND ]);
+  GEOHandler.registerValidator(addChangeToTaxCdZValidator, [ SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(addChangeTaxCdValidLicenseValidator, [ SysLoc.IRELAND ], null, true);
 
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.ITALY, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);

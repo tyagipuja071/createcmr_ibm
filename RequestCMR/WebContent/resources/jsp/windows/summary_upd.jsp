@@ -18,6 +18,16 @@
       return value;
     }
   }
+  
+  
+  function licenseFormatter(value, rowIndex) {
+    if (value == 'N') {
+      return '<span style="color:green;font-weight:bold">New License</span>';
+    } else {
+      return '';
+    }
+  }
+
   function addressTypeComparator(a1, b1) {
     var a = a1 == 'Sold To' ? 'ZS01' : (a1 == 'Install At' ? 'ZI01' : (a1 == 'Bill To' ? 'ZP01' : (a1 == 'Ship To' ? 'ZD01' : a1)));
     var b = b1 == 'Sold To' ? 'ZS01' : (b1 == 'Install At' ? 'ZI01' : (b1 == 'Bill To' ? 'ZP01' : (b1 == 'Ship To' ? 'ZD01' : b1)));
@@ -321,7 +331,33 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           </cmr:column>
         </cmr:row>
       </cmr:view>
-    </cmr:form>
+
+			<cmr:view forCountry="754">
+				<cmr:row addBackground="false" topPad="10">
+					<cmr:column span="1" width="130">
+						<label>License Details:</label>
+					</cmr:column>
+					<cmr:column span="5" width="750">
+						<cmr:grid url="/summary/newlicenses.json"
+							id="summaryNewLicenseGrid" span="6" width="750" height="200"
+							innerWidth="750" usePaging="false" useFilter="false">
+							<cmr:gridParam fieldId="reqId" value="${summary.admin.id.reqId}" />
+							<cmr:gridCol width="200px" field="licenseNum"
+								header="${ui.grid.licenseNumber}" />
+							<cmr:gridCol width="200px" field="validFrom"
+								header="${ui.grid.validDateFrom}" />
+							<cmr:gridCol width="200px" field="validTo"
+								header="${ui.grid.validDateTo}" />
+							<cmr:gridCol width="150px" field="currentIndc"
+								header="${ui.grid.change}">
+								<cmr:formatter functionName="licenseFormatter" />
+							</cmr:gridCol>
+						</cmr:grid>
+					</cmr:column>
+				</cmr:row>
+			</cmr:view>
+
+		</cmr:form>
   </div>
   <cmr:windowClose>
     <cmr:button label="${ui.btn.refresh}" onClick="window.location = window.location.href" pad="true" highlight="true" />

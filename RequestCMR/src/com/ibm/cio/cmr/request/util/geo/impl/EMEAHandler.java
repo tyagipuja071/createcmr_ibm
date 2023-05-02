@@ -40,7 +40,9 @@ import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Knvl;
 import com.ibm.cio.cmr.request.entity.KunnrExt;
+import com.ibm.cio.cmr.request.entity.Licenses;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
@@ -53,6 +55,8 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.AddressService;
+import com.ibm.cio.cmr.request.service.requestentry.LicenseService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -1807,6 +1811,11 @@ public class EMEAHandler extends BaseSOFHandler {
         if (records != null && records.size() >= 0) {
           data.setSpecialTaxCd("Bl");
         }
+
+        if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+          CmrtCust cust = this.legacyObjects.getCustomer();
+          data.setSpecialTaxCd(StringUtils.isNotEmpty(cust.getTaxCd()) ? cust.getTaxCd() : "Bl");
+        }
       }
       // Changed abbreviated location if cross border to country
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
@@ -2297,6 +2306,17 @@ public class EMEAHandler extends BaseSOFHandler {
         } else {
           data.setCrosSubTyp(null);
         }
+      }
+    }
+
+    if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      // Update the ZS01 indicator so that the batch process will pick up this
+      // request even if only the licenses were updated
+      LicenseService licService = new LicenseService();
+      long reqId = data.getId().getReqId();
+      List<Licenses> newLicenses = licService.getLicensesByIndc(entityManager, reqId, "N");
+      if (!newLicenses.isEmpty()) {
+        updateChangeIndc(entityManager, reqId);
       }
     }
   }
@@ -3112,6 +3132,41 @@ public class EMEAHandler extends BaseSOFHandler {
       autoSetHwMasterInstallFlagAfterImport(entityManager, admin, data);
     }
 
+    if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      AddressService addrSvc = new AddressService();
+      String reqId = String.valueOf(data.getId().getReqId());
+
+      String sapNumber = addrSvc.getAddressSapNo(entityManager, reqId, "ZS01");
+      importLicenses(entityManager, data, data.getId().getReqId(), sapNumber, admin.getRequesterId());
+    }
+  }
+
+  private void importLicenses(EntityManager entityManager, Data data, long reqId, String sapNumber, String requesterId) {
+    if (entityManager != null && sapNumber != null) {
+      LicenseService licenseService = new LicenseService();
+
+      List<Knvl> knvlList = licenseService.getKnvlByKunnr(entityManager, sapNumber);
+      if (knvlList != null && knvlList.size() > 0) {
+        List<Licenses> licensesResult = licenseService.getAllLicenses(entityManager, reqId);
+
+        // clear licenses
+        if (licensesResult != null && !licensesResult.isEmpty() && licensesResult.size() > 0) {
+          licenseService.deleteAllLicense(licensesResult, entityManager);
+        }
+
+        // create licenses
+        for (Knvl knvl : knvlList) {
+          licenseService.createLicenseFromKnvl(entityManager, knvl, reqId, requesterId);
+        }
+      }
+    }
+  }
+
+  private void updateChangeIndc(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.CHANGED_INDC.IE"));
+    query.setParameter("CHANGED_INDC", "Y");
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
   }
 
   private void updateImportIndicatior(EntityManager entityManager, long reqId) {
@@ -4120,6 +4175,15 @@ public class EMEAHandler extends BaseSOFHandler {
             validations.add(error);
           }
         }
+
+        if ("Data".equalsIgnoreCase(sheet.getSheetName()) && country.equals(SystemLocation.IRELAND)) {
+          String taxCode = validateColValFromCell(row.getCell(5));
+          if (StringUtils.isNotBlank(taxCode) && !"Z".equalsIgnoreCase(taxCode) && isZTaxCdDB2Legacy(cmrNo)
+              && hasValidLicenseDate(cmrNo, SystemLocation.IRELAND)) {
+            error.addError((row.getRowNum() + 1), "Tax Code", "CMR No. " + cmrNo + " license(s) are still valid. Tax Code value should remain = Z");
+            validations.add(error);
+          }
+        }
       }
     }
 
@@ -4262,6 +4326,42 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
     }
+  }
+
+  private boolean isZTaxCdDB2Legacy(String cmrNo) {
+    if (StringUtils.isNotBlank(cmrNo)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("GET.LEGACYTAXCD.IE");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("RCUXA", cmrNo);
+        query.setForReadOnly(true);
+        String result = query.getSingleResult(String.class);
+        if (StringUtils.isNotBlank(result) && "Z".equalsIgnoreCase(result)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private boolean hasValidLicenseDate(String cmrNo, String issuingCntry) {
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(issuingCntry)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("COUNT.VALID.LICENSEDATE");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("KATR6", issuingCntry);
+        query.setParameter("ZZKV_CUSNO", cmrNo);
+
+        int count = query.getSingleResult(Integer.class);
+        if (count > 0) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   @Override
