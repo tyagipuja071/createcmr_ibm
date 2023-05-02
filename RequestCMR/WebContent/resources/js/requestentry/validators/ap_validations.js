@@ -2511,6 +2511,10 @@ function updateMRCAseanAnzIsa() {
     if(scenario == 'LOCAL' &&(cntry == '744' || cntry == '615' || cntry == '652') && custSubGrp == 'INTER'){
       FormManager.setValue('mrcCd', '3');
     }
+    
+    if (scenario == 'LOCAL' && cntry == '744' && ['10654', '10655', '10656', '10657'].includes(cluster)) {
+       FormManager.setValue('mrcCd', '3');
+    }
   }
   
   // CREATCMR-7885
