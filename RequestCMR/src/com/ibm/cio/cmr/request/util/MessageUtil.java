@@ -378,4 +378,8 @@ public class MessageUtil {
 
 	// SSO Error
 	public static final int ERROR_GET_PUBLIC_KEY = 9058;
+
+  // Licenses
+  public static final int INFO_LICENSE_ADD_LIST = 9059;
+  public static final int INFO_LICENSE_REMOVE_LIST = 9060;
 }
