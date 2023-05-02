@@ -431,14 +431,16 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getVat());
               results.add(update);
             }
-            /*if (TYPE_CUSTOMER.equals(type) && (StringUtils.isNoneBlank(oldData.getVatInd()) && !equals(oldData.getVatInd(), newData.getVatInd()))
-                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "VATInd"))) {
-              update = new UpdatedDataModel();
-              update.setDataField(PageManager.getLabel(cmrCountry, "VATInd", "-"));
-              update.setNewData(newData.getVatInd());
-              update.setOldData(oldData.getVatInd());
-              results.add(update);
-            }*/
+            /*
+             * if (TYPE_CUSTOMER.equals(type) &&
+             * (StringUtils.isNoneBlank(oldData.getVatInd()) &&
+             * !equals(oldData.getVatInd(), newData.getVatInd())) && (geoHandler
+             * == null || !geoHandler.skipOnSummaryUpdate(cmrCountry,
+             * "VATInd"))) { update = new UpdatedDataModel();
+             * update.setDataField(PageManager.getLabel(cmrCountry, "VATInd",
+             * "-")); update.setNewData(newData.getVatInd());
+             * update.setOldData(oldData.getVatInd()); results.add(update); }
+             */
             if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxPayerCustCd(), newData.getTaxPayerCustCd())
                 && !CmrConstants.REQ_TYPE_UPDATE.equals(reqType)
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "PSTExemptLicNum"))) {
@@ -1661,6 +1663,11 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
   public List<LicenseModel> getNewLicenses(HttpServletRequest request, long reqId) {
     LicenseService service = new LicenseService();
     EntityManager entityManager = JpaManager.getEntityManager();
+    return service.getNewLicenses(reqId, entityManager);
+  }
+
+  public List<LicenseModel> getNewLicenses(EntityManager entityManager, long reqId) throws CmrException {
+    LicenseService service = new LicenseService();
     return service.getNewLicenses(reqId, entityManager);
   }
 

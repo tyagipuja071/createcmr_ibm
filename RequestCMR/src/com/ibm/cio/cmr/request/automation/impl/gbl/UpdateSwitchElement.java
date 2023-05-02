@@ -98,8 +98,8 @@ public class UpdateSwitchElement extends ValidatingElement {
       boolean isLegalNameUpdtd = handler != null && !handler.customerNamesOnAddress() && AutomationUtil.isLegalNameChanged(admin);
       RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, requestData);
 
-      if("897".equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())){
-    	  data.setRestrictInd(usRestricted);
+      if ("897".equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
+        data.setRestrictInd(usRestricted);
       }
 
       if (changes.hasDataChanges() || isLegalNameUpdtd) {
@@ -153,7 +153,7 @@ public class UpdateSwitchElement extends ValidatingElement {
 
       }
 
-      if (!output.isOnError() && changes.hasAddressChanges()) {        
+      if (!output.isOnError() && changes.hasAddressChanges()) {
         List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
         String addrTypeCode = null;
         // Start CREATCMR-6229
@@ -298,7 +298,7 @@ public class UpdateSwitchElement extends ValidatingElement {
         String details = output.getDetails() + "\n" + "Legal Name changes made on request.";
         output.setDetails(details);
         log.debug("Legal Name changes made on request.");
-      } else if (!changes.hasDataChanges() && !changes.hasAddressChanges()) {
+      } else if (!changes.hasDataChanges() && !changes.hasAddressChanges() && !changes.hasNewLicenses()) {
         // no updates/changes at all on the request
         validation.setSuccess(false);
         validation.setMessage("Not Validated");
