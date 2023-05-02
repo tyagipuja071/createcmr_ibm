@@ -597,13 +597,13 @@ function afterConfigForUS() {
 
   if (_usCustClassHandler == null && FormManager.getActualValue('reqType') == 'U') {
     _usCustClassHandler = dojo.connect(FormManager.getField('custClass'), 'onChange', function(value) {
-      onChangeCustClassOrKukla();
+      onChangeCustClassOrKuklaAndIsic();
     });
   }
 
   if (_usIsicHandler == null && FormManager.getActualValue('reqType') == 'U') {
     _usIsicHandler = dojo.connect(FormManager.getField('usSicmen'), 'onChange', function(value) {
-      onChangeIsicCd();
+      onChangeCustClassOrKuklaAndIsic();
     });
   }
 
@@ -1340,42 +1340,32 @@ function setTaxcd1Status() {
 
 }
 
-function onChangeCustClassOrKukla() {
-  var result = null;
+function onChangeCustClassOrKuklaAndIsic() {
+  var result1 = null;
   var rdcKukla = null;
   var onChangedKukla = null;
-  onChangedKukla = FormManager.getActualValue('custClass');
-  var result = getIsicAndKuklaFromDataRdc("custClass");
-
-  if (result != null) {
-    rdcKukla = result;
-  }
-
-  if (onChangedKukla != rdcKukla && onChangedKukla != '60') {
-    if (FormManager.getActualValue('custType') == 'Commercial') {
-      cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
-    } else {
-      cmr.showAlert('Customer Classification Code/SICMEN of Consumer record is selected, please ensure Customer Classification Code 60 and SICMEN 9500 are selected');
-    }
-  }
-}
-
-function onChangeIsicCd() {
-  var result = null;
+  var result2 = null;
   var rdcIsic = null;
   var onChangedIsic = null;
-  onChangedIsic = FormManager.getActualValue('usSicmen');
-  var result = getIsicAndKuklaFromDataRdc("usSicmen");
 
-  if (result != null) {
-    rdcIsic = result;
+  onChangedKukla = FormManager.getActualValue('custClass');
+  var result1 = getIsicAndKuklaFromDataRdc("custClass");
+
+  onChangedIsic = FormManager.getActualValue('usSicmen');
+  var result2 = getIsicAndKuklaFromDataRdc("usSicmen");
+
+  if (result1 != null) {
+    rdcKukla = result1;
   }
-  if (onChangedIsic != rdcIsic && onChangedIsic != '9500') {
-    if (FormManager.getActualValue('custType') == 'Commercial') {
-      cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
-    } else {
-      cmr.showAlert('Customer Classification Code/SICMEN of Consumer record is selected, please ensure Customer Classification Code 60 and SICMEN 9500 are selected');
-    }
+
+  if (result2 != null) {
+    rdcIsic = result2;
+  }
+
+  if (onChangedIsic == '9500' && rdcIsic == onChangedIsic && onChangedKukla != '60' || onChangedIsic != '9500' && onChangedKukla == '60') {
+    cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
+  } else {
+    cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are selected.');
   }
 }
 
