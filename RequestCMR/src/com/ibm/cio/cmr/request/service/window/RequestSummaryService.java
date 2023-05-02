@@ -1676,4 +1676,9 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
     return service.getNewLicenses(reqId, entityManager);
   }
 
+  public List<LicenseModel> getNewLicenses(EntityManager entityManager, long reqId) throws CmrException {
+    LicenseService service = new LicenseService();
+    return service.getNewLicenses(reqId, entityManager);
+  }
+
 }

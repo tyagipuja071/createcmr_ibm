@@ -182,6 +182,8 @@
     <class>com.ibm.cio.cmr.request.entity.Kna1AddlBillingPK</class>
     <class>com.ibm.cio.cmr.request.entity.TaxData</class>
     <class>com.ibm.cio.cmr.request.entity.TaxDataPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Licenses</class>
+    <class>com.ibm.cio.cmr.request.entity.LicensesPK</class>
 
     <properties>
       
