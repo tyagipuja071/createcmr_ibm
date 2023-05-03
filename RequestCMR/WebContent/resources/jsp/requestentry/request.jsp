@@ -374,7 +374,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <form:hidden path="dplChkTs" />
     </c:if>
     <form:hidden path="dplChkResult" />
-	<cmr:view forCountry="754,866,624,788,724,618,848">    
+	<cmr:view forCountry="754,866,624,788,724,618,848,706">    
     	<form:hidden path="vatAcknowledge" />
     </cmr:view>
     <form:hidden path="dplChkUsrId" />

@@ -29,7 +29,8 @@ function afterConfigForDE() {
         FormManager.resetValidations('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
-       // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+       // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+        // 'MAIN_CUST_TAB');
       }
       vatExemptIBMEmp();
     });
@@ -124,7 +125,8 @@ function vatExemptIBMEmp() {
       dijit.byId('vatExempt').set('checked', false);
       FormManager.resetValidations('vat');
       if (!dijit.byId('vatExempt').get('checked')) {
-      //  FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+      // 'MAIN_CUST_TAB');
       }
     }
   }
@@ -280,12 +282,12 @@ function autoSetTax() {
   if (reqType != 'C') {
     return;
   }
-//  if (dijit.byId('vatExempt').get('checked')) {
-//    FormManager.resetValidations('vat');
-//  } else {
-//    // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
-//    // 'MAIN_CUST_TAB');
-//  }
+// if (dijit.byId('vatExempt').get('checked')) {
+// FormManager.resetValidations('vat');
+// } else {
+// // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+// // 'MAIN_CUST_TAB');
+// }
 }
 
 function setPrivacyIndcReqdForProc() {
@@ -1383,8 +1385,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);
   // GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
-//  GEOHandler.addAfterTemplateLoad(lockCtcFieldOnIsu, GEOHandler.DE);
-//  GEOHandler.addAfterConfig(lockCtcFieldOnIsu, SysLoc.GERMANY);
+// GEOHandler.addAfterTemplateLoad(lockCtcFieldOnIsu, GEOHandler.DE);
+// GEOHandler.addAfterConfig(lockCtcFieldOnIsu, SysLoc.GERMANY);
   GEOHandler.addAfterTemplateLoad(vatExemptIBMEmp, GEOHandler.DE);
 
   // CREATCMR-4293
@@ -1394,7 +1396,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
-//  GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
+// GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.registerValidator(validateEnterpriseNum, GEOHandler.DE, null, true);  
@@ -1404,6 +1406,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(saveVatExemptStat, GEOHandler.DE);
   GEOHandler.addAfterConfig(saveCustSubStat, GEOHandler.DE);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
-  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
-  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
+
 });

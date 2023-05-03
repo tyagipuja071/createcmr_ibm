@@ -4499,5 +4499,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(set2H23CoverageChanges, '706');
   GEOHandler.addAfterTemplateLoad(setCoverage2H23FieldBehaviour, '706');
 
-  GEOHandler.registerValidator(addVatIndValidator, '706');
+  GEOHandler.registerValidator(addVatIndValidator, [ '706' ], null, true);
+
 });

@@ -2006,6 +2006,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onPostalCodeChangeHandler, GEOHandler.SWISS);
   GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
-  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
+
 });
