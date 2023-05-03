@@ -951,8 +951,7 @@ public class CmrConstants {
   public static final List<String> LA_COUNTRIES = Arrays.asList("613", "629", "655", "661", "663", "681", "683", "829", "731", "735", "799", "811",
       "813", "815", "869", "871", "631", "781");
 
-  public static final List<String> CROSS_BORDER_COUNTRIES_GROUP1 = Arrays.asList("866", "754", "724", "848", "618", "788", "624", "678", "702", "806",
-      "846");
+  public static final List<String> CROSS_BORDER_COUNTRIES_GROUP1 = Arrays.asList("866", "754", "724", "848", "618", "788", "624", "678", "702", "806","846","706");
 
   public static final String VAT_ACKNOWLEDGE_YES = "Yes";
   public static final String VAT_ACKNOWLEDGE_NA = "N/A";
