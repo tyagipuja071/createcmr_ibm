@@ -2879,7 +2879,7 @@ function lockUnlockFieldForEs() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGroup = FormManager.getActualValue('custSubGrp');
-  var custSubGrpSet = new Set([ 'COMME', 'GOVRN', 'THDPT', 'IGSGS', 'GOVIG', 'THDIG' ]);
+  var custSubGrpSet = new Set([ 'COMME', 'GOVRN', 'THDPT', 'IGSGS', 'GOVIG', 'THDIG', 'XCRO', 'XIGS' ]);
   if (role == 'PROCESSOR' && custSubGrpSet.has(custSubGroup)) {
     FormManager.enable('isicCd');
     FormManager.enable('isuCd');
@@ -2971,6 +2971,7 @@ function setEntepriseAndSalesRepES() {
   console.log(">>>> setEntepriseAndSalesRepES");
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
+  var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet21 = new Set([ 'INTER', 'INTSO', 'IBMEM' ]);
   var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'THDPT', 'IGSGS', 'GOVIG', 'THDIG', 'PRICU', 'XIGS' ]);
@@ -2999,7 +3000,7 @@ function setEntepriseAndSalesRepES() {
   } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '5K') {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
-  } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '34Q') {
+  } else if ((custGrp == 'CROSS' || custSubGrpSet34.has(custSubGrp)) && isuCtc == '34Q') {
     setEnterpriseValues34Q();
     FormManager.setValue('repTeamMemberNo', '1FICTI');
   } else {
@@ -3178,7 +3179,7 @@ function setEntAndSalesRep(entp, salRep) {
 
 function getLandedCntry() {
   var result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', {
-    REQ_ID : reqId
+    REQ_ID : FormManager.getActualValue('reqId')
   });
   if (result != null && result != '' && result.ret1 != undefined) {
     return result.ret1;
@@ -3248,6 +3249,8 @@ function validatorEnterpriseES() {
   var landCntry = getLandedCntry();
   var entp = '';
   var salRep = '';
+  var enterpriseSetForCB = new Set([ '985111', '985107', '985902', '985504', '985404', '985403', '985603', '985703', '985303', '985212', '986111', '986162', '986140', '986181', '986254', '986270',
+      '986294', '985204' ])
 
   var result1 = setEntAndSalesRep();
   if (result1 != null && result1 != '') {
@@ -3255,8 +3258,8 @@ function validatorEnterpriseES() {
     salRep = result1[0].ret2;
   }
 
-  var condForEnt1 = isuCd == '34' && enterprise != '985204' && custGrp == 'CROSS' && landCntry == 'MT';
-  var condForEnt2 = isuCd == '34' && !entFor34QES.has(enterprise) && enterprise != entp;
+  var condForEntCross1 = isuCd == '34' && !enterpriseSetForCB.has(enterprise) && custGrp == 'CROSS';
+  var condForEnt2 = isuCd == '34' && !entFor34QES.has(enterprise) && enterprise != entp && custGrp != 'CROSS';
   var condForEnt3 = isuCd == '36' && !entFor36YES.has(enterprise);
   var condForEnt4 = isuCd == '32' && enterprise != '985985';
   var condForEnt5 = isuCd == '04' && !entFor04ES.has(enterprise);
@@ -3266,12 +3269,15 @@ function validatorEnterpriseES() {
   var condForEnt9 = isuCd == '3T' && enterprise != '045250';
   var condForEnt10 = isuCd == '5K' && enterprise != '985999';
 
-  if (condForEnt1) {
-    return new ValidationResult({
-      id : 'enterprise',
-      type : 'text',
-      name : 'enterprise'
-    }, false, 'Enterprise can only accept \'985204\'.');
+  if (condForEntCross1) {
+    return new ValidationResult(
+        {
+          id : 'enterprise',
+          type : 'text',
+          name : 'enterprise'
+        },
+        false,
+        'Enterprise can only accept \'985111\', \'985107\', \'985902\', \'985504\', \'985404\', \'985403\', \'985603\', \'985703\', \'985303\', \'985212\', \'986111\', \'986162\', \'986140\', \'986181\', \'986254\', \'986270\', \'986294\', \'985204\'.');
   } else if (condForEnt2) {
     return new ValidationResult({
       id : 'enterprise',
