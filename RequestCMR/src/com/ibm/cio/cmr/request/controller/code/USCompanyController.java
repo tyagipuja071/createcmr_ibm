@@ -18,7 +18,6 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.controller.BaseController;
 import com.ibm.cio.cmr.request.model.BaseModel;
 import com.ibm.cio.cmr.request.model.code.USCompanyModel;
-import com.ibm.cio.cmr.request.model.code.USIbmBoModel;
 import com.ibm.cio.cmr.request.service.code.USCompanyMaintainService;
 import com.ibm.cio.cmr.request.service.code.USCompanyService;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -33,7 +32,7 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 @Controller
 public class USCompanyController extends BaseController {
 
-  private static final Logger LOG = Logger.getLogger(USIbmBoController.class);
+  private static final Logger LOG = Logger.getLogger(USCompanyController.class);
 
   @Autowired
   private USCompanyService service;
@@ -41,7 +40,9 @@ public class USCompanyController extends BaseController {
   @Autowired
   private USCompanyMaintainService maintainService;
 
-  @RequestMapping(value = "/code/us_company", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/code/us_company",
+      method = RequestMethod.GET)
   public @ResponseBody ModelAndView showUSCompany(HttpServletRequest request, ModelMap model) {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin() && !user.isCmde()) {
@@ -57,7 +58,9 @@ public class USCompanyController extends BaseController {
 
   }
 
-  @RequestMapping(value = "/code/us_company_list", method = { RequestMethod.GET, RequestMethod.POST })
+  @RequestMapping(
+      value = "/code/us_company_list",
+      method = { RequestMethod.GET, RequestMethod.POST })
   public ModelMap getUSCompanyList(HttpServletRequest request, HttpServletResponse response, USCompanyModel model) throws CmrException {
 
     List<USCompanyModel> results = service.search(model, request);
@@ -65,13 +68,15 @@ public class USCompanyController extends BaseController {
 
   }
 
-  @RequestMapping(value = "/code/us_company_form", method = { RequestMethod.GET, RequestMethod.POST })
+  @RequestMapping(
+      value = "/code/us_company_form",
+      method = { RequestMethod.GET, RequestMethod.POST })
   public ModelAndView usCompanyMaintenance(HttpServletRequest request, HttpServletResponse response, USCompanyModel model) throws CmrException {
 
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin() && !user.isCmde()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the US COMPANY Maintenance system function.");
-      ModelAndView mv = new ModelAndView("noaccess", "us_company", new USIbmBoModel());
+      ModelAndView mv = new ModelAndView("noaccess", "us_company", new USCompanyModel());
       return mv;
     }
 
