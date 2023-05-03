@@ -60,8 +60,8 @@
 	</filter-mapping>
 
 	<filter>
-		<filter-name>AppUserInjectFilter</filter-name>
-		<filter-class>com.ibm.cio.cmr.request.filter.AppUserInjectFilter</filter-class>
+		<filter-name>UserInjectFilter</filter-name>
+		<filter-class>com.ibm.cio.cmr.request.filter.UserInjectFilter</filter-class>
 		<init-param>
 			<param-name>encoding</param-name>
 			<param-value>UTF-8</param-value>
@@ -72,7 +72,7 @@
 	    </init-param>
 	</filter>
 	<filter-mapping>
-		<filter-name>AppUserInjectFilter</filter-name>
+		<filter-name>UserInjectFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
