@@ -161,6 +161,7 @@ public class BrazilUtil extends AutomationUtil {
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sortl.getText());
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MRC_CD", data.getMrcCd(), "A");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "");
+          LOG.debug("SBO : " + sortl.getText() + " " + "ISU : " + data.getIsuCd() + " " + "CTC : " + "" + " " + "MRC : " + "A");
         }
       }
     } else {
