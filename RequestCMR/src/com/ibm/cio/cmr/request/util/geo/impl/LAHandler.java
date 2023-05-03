@@ -4154,16 +4154,43 @@ public class LAHandler extends GEOHandler {
       }
     }
 
-    // roll-back to new values to Update IBM Codes
+    // roll-back to user's new values to Update IBM Codes
     // mexicoBillingName is a temporary placeholder for Update Reason
     if ("U".equalsIgnoreCase(admin.getReqType()) && "UPIC".equalsIgnoreCase(data.getMexicoBillingName())) {
+      data.setSalesBusOffCd(brModel.getSalesBusOffCd());
       data.setIsuCd(brModel.getIsuCd());
       data.setInacCd(brModel.getInacCd());
       data.setCompany(brModel.getCompany());
       data.setCollectorNameNo(brModel.getCollectorNameNo());
-      data.setSalesBusOffCd(brModel.getSalesBusOffCd());
 
       entityManager.merge(data);
+
+      if (StringUtils.isNotBlank(data.getSalesBusOffCd())) {
+
+        String isuCd = "";
+        String clientTier = "";
+        String mrcCd = "";
+
+        // set ISU_CD, CLIENT_TIER, MRC_CD values based on SALES_BO_CD value
+        // as per BR Coverage / SORTL Rules Combination 1H2023
+        LOG.debug("Getting ISU_CD, CLIENT_TIER, MRC_CD values...");
+        String extQuery = ExternalizedQuery.getSql("BR.GET_SORTL_RULES");
+        PreparedQuery prepQuery = new PreparedQuery(entityManager, extQuery);
+        prepQuery.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+        prepQuery.setParameter("SALES_BO_CD", data.getSalesBusOffCd());
+        List<Object[]> results = prepQuery.getResults();
+
+        if (results != null && results.size() == 1) {
+          isuCd = (String) results.get(0)[0];
+          clientTier = (String) results.get(0)[1];
+          mrcCd = (String) results.get(0)[2];
+
+          data.setIsuCd(isuCd);
+          data.setClientTier(clientTier);
+          data.setMrcCd(mrcCd);
+        }
+      }
+
       entityManager.flush();
     }
   }

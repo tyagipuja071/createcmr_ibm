@@ -1041,6 +1041,7 @@ public class NLHandler extends BaseSOFHandler {
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
     data.setCmrOwner("IBM");
+    data.setEngineeringBo("333D3");// CREATCMR-8926
   }
 
   @Override
