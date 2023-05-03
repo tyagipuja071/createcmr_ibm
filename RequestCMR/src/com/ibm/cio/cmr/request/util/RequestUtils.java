@@ -65,6 +65,7 @@ import com.ibm.cio.cmr.request.util.mail.MessageType;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFile;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileParser;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileRow;
+import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.StandardCityServiceClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
@@ -1805,6 +1806,18 @@ public class RequestUtils {
     }
 
     return legacy;
+  }
+
+  /**
+   * Performs logout actions by cleaning up sessions and cookies. TODO: should
+   * this method be in another class?
+   * 
+   * @param request
+   */
+  public static void performLogoutActivities(HttpServletRequest request) {
+    OAuthUtils.ssoTokenCleanUP(request);
+    AppUser.remove(request);
+    request.getSession().invalidate();
   }
 
 }

@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.ibm.cio.cmr.request.CmrException;
-import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.model.login.LogInUserModel;
 import com.ibm.cio.cmr.request.service.user.UserService;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -44,15 +43,13 @@ import com.sun.istack.internal.Nullable;
  *
  */
 @Component
-@WebFilter(
-    filterName = "AppUserInjectFilter",
-    urlPatterns = "/*")
-public class AppUserInjectFilter implements Filter {
+@WebFilter(filterName = "UserInjectFilter", urlPatterns = "/*")
+public class UserInjectFilter implements Filter {
 
   @Autowired
   UserService userService;
 
-  protected static final Logger LOG = Logger.getLogger(AppUserInjectFilter.class);
+  protected static final Logger LOG = Logger.getLogger(UserInjectFilter.class);
 
   @Nullable
   private String encoding;
@@ -61,19 +58,19 @@ public class AppUserInjectFilter implements Filter {
 
   private boolean forceResponseEncoding = false;
 
-  public AppUserInjectFilter() {
+  public UserInjectFilter() {
 
   }
 
-  public AppUserInjectFilter(String encoding) {
+  public UserInjectFilter(String encoding) {
     this(encoding, false);
   }
 
-  public AppUserInjectFilter(String encoding, boolean forceEncoding) {
+  public UserInjectFilter(String encoding, boolean forceEncoding) {
     this(encoding, forceEncoding, forceEncoding);
   }
 
-  public AppUserInjectFilter(String encoding, boolean forceRequestEncoding, boolean forceResponseEncoding) {
+  public UserInjectFilter(String encoding, boolean forceRequestEncoding, boolean forceResponseEncoding) {
     this.encoding = encoding;
     this.forceRequestEncoding = forceRequestEncoding;
     this.forceResponseEncoding = forceResponseEncoding;
@@ -82,26 +79,20 @@ public class AppUserInjectFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-    // can be used to deactivate this filter completely
-    String activateFilter = SystemConfiguration.getValue("ACTIVATE_SSO");
-    if (activateFilter.equalsIgnoreCase("false")) {
-      filterChain.doFilter(request, response);
-      return;
-    }
+    shouldExecuteSSOFilter(request, response, filterChain);
 
     HttpServletRequest httpReq = (HttpServletRequest) request;
     HttpServletResponse httpResp = (HttpServletResponse) response;
 
     // verify and force encoding
-    verifyAndAssignEnconding(this.encoding, httpReq, httpResp);
+    assignEncoding(this.encoding, httpReq, httpResp);
 
     String url = httpReq.getRequestURI();
 
     HttpSession session = shouldCreateSession(httpReq);
-    String userIntranetEmail = (String) session.getAttribute("userIntranetEmail");
 
     try {
-      if (shouldFilter(httpReq, httpResp)) {
+      if (shouldFilterURLEndpoint(httpReq, httpResp)) {
 
         AppUser user = AppUser.getUser(httpReq);
 
@@ -119,7 +110,7 @@ public class AppUserInjectFilter implements Filter {
           LOG.debug("Subject is set: " + ibmUniqueId);
 
           if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
-            LOG.debug("No IBM ID detected. Redirecting to W3 ID intercept..");
+            LOG.debug("No IBM ID detected. Redirecting to W3 ID ...");
             httpReq.getSession().invalidate();
             httpResp.sendRedirect("/CreateCMR/oidc");
             return;
@@ -138,8 +129,11 @@ public class AppUserInjectFilter implements Filter {
           return;
         }
       }
+    } catch (IllegalStateException e) {
+      LOG.error("Error when attempting to redirect to W3 ID ", e);
+      return;
     } catch (Exception e) {
-      LOG.error("Error processing AppUserInjectFilter", e);
+      LOG.error("Error processing UserInjectFilter", e);
     }
 
     filterChain.doFilter(httpReq, httpResp);
@@ -185,7 +179,31 @@ public class AppUserInjectFilter implements Filter {
 
   }
 
-  private boolean shouldFilter(HttpServletRequest request, HttpServletResponse response) {
+  /**
+   * Checks if SSO filter is activated or not. If SSO is not activated then this
+   * Filter will be skipped.
+   * 
+   * @param request
+   * @param response
+   * @param filterChain
+   * @throws IOException
+   * @throws ServletException
+   */
+  public void shouldExecuteSSOFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    if (!OAuthUtils.isSSOActivated()) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+  }
+
+  /**
+   * Verifies if the current URL should be filtered by SSO
+   * 
+   * @param request
+   * @param response
+   * @return
+   */
+  private boolean shouldFilterURLEndpoint(HttpServletRequest request, HttpServletResponse response) {
     String url = request.getRequestURI();
     int status = response.getStatus();
     if (url.endsWith("/update")) {
@@ -199,7 +217,6 @@ public class AppUserInjectFilter implements Filter {
     }
 
     if (request.getParameterMap().keySet().contains("errorMessage") && url.endsWith("/login")) {
-
       return false;
     }
 
@@ -207,15 +224,6 @@ public class AppUserInjectFilter implements Filter {
       // static resources
       return false;
     }
-
-    // if (response.getStatus() == 302 && url.contains("/home")) {
-    // request.getSession(true);
-    // return false;
-    // }
-    // if (url.contains("/") &&
-    // url.substring(url.lastIndexOf("/")).contains(".")) {
-    // return false;
-    // }
 
     return true;
   }
@@ -292,7 +300,7 @@ public class AppUserInjectFilter implements Filter {
     return this.forceResponseEncoding;
   }
 
-  private void verifyAndAssignEnconding(String enconding, HttpServletRequest httpReq, HttpServletResponse httpResp) {
+  private void assignEncoding(String enconding, HttpServletRequest httpReq, HttpServletResponse httpResp) {
 
     try {
       if (encoding != null) {
