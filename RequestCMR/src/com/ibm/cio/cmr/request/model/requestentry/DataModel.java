@@ -1251,11 +1251,26 @@ public class DataModel extends BaseModel {
     this.customerIdCd = customerIdCd;
   }
   
+  public String getCollectorNameNo() {
+	return collectorNameNo;
+  }
 
+  public void setCollectorNameNo(String collectorNameNo) {
+    this.collectorNameNo = collectorNameNo;
+  }
+  
+  public String getMrktChannelInd() {
+    return mrktChannelInd;
+  }
+  
+  public void setMrktChannelInd(String mrktChannelInd) {
+    this.mrktChannelInd = mrktChannelInd;
+  } 
+  
   public String getVatInd() {
     return vatInd;
   }
-
+  
   public void setVatInd(String vatInd) {
     this.vatInd = vatInd;
   }
