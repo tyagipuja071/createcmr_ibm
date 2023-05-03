@@ -1084,7 +1084,8 @@ function addVatIndValidator(){
     FormManager.setValue('vatInd', 'N');
   } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
     FormManager.setValue('vatInd', 'T');
-    FormManager.readOnly('vatInd');
+    FormManager.enable('vatInd');
+    // FormManager.readOnly('vatInd');
   } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
     FormManager.setValue('vat', '');
     FormManager.setValue('vatInd', '');
@@ -1105,6 +1106,7 @@ function addVatIndValidator(){
 
 function setToReadOnly() {
  
+  
  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
    
  if (viewOnlyPage == 'true') {  
