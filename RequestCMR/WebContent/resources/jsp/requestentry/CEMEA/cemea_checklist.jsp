@@ -14,7 +14,13 @@
      readOnly = false;
    }
    %>
-<cmr:checklist title1="CMR Military and Proliferation Screening Checklist" title2="CUSTOMER ELIGIBILITY CHECKLIST">
+	<cmr:checklist title1="MULTIPURPOSE PROLIFERATION AND MILITARY SCREENING CHECKLIST (Supplement 2.5 to USERP Section 4 Part 2)">
+		<cmr:chk-block>Applicable to the following countries:<br>
+	Abu Dhabi, Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, Cambodia, People's Republic of China (including Hong Kong), 
+	Egypt, Georgia, Iran, Iraq, Israel, Jordan, Kazakhstan, Kuwait, Kyrgyzstan, Laos, Lebanon, Libya, Macau, Moldova, Mongolia, 
+	Myanmar (Burma), Oman, Pakistan, Palestine, Qatar, Russia, Saudi Arabia, Sudan, Syrian Arab Republic, Taiwan, Tajikistan, 
+	Turkmenistan, Ukraine, United Arab Emirates, Uzbekistan, Venezuela, Vietnam, Yemen
+		</cmr:chk-block>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Company Full Name: ">
       <%=RequestUtils.generateChecklistLocalAddress(request)%>
    </cmr:chk-lbl-field>
@@ -38,14 +44,14 @@
          To the best of your knowledge or belief is your customer involved in any activity related to the design, development, repair, manufacture of chemical weapons precursors?
          <br><i>Note: This includes any activity related to or in support of rocket systems or unmanned aerial vehicles for the delivery of chemical, biological, or nuclear weapons</i> 
          <span id="checklist_txt_field_6" style="display:none"><label for="dijit_form_TextBox_6">If yes, please provide an explanation below detailing this customer's business:</label>
-         <input type="text" id="dijit_form_TextBox_6" name="freeTxtField5" tabindex="0" class="dijitReset dijitInputField" style="width:70%"> 
+         <%=RequestUtils.generateChecklistFreeTxtField6(request)%>
          </span>
       </cmr:chk-entry>
       <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Nuclear:</span></cmr:chk-entry>
       <cmr:chk-entry number="4" section="B">
          To the best of your knowledge or belief, is this customer involved in any activity (design, development, manufacture etc.) of nuclear weapons or nuclear explosive devices?  
-         <span id="checklist_txt_field_8" style="display:none"><label for="dijit_form_TextBox_7">If yes, please provide an explanation below detailing this customer's business:</label>
-         <input type="text" id="dijit_form_TextBox_7" name="freeTxtField6" tabindex="0" class="dijitReset dijitInputField" style="width:70%">
+         <span id="checklist_txt_field_7" style="display:none"><label for="dijit_form_TextBox_7">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField7(request)%>
          </span>
       </cmr:chk-entry>
       <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Missile:</span></cmr:chk-entry>
@@ -55,15 +61,15 @@
             <li>"Rocket Systems" include, but are not limited to: ballistic missiles, space launch vehicles, and sounding rockets</li>
             <li>"Unmanned Air Vehicles" include, but are not limited to: cruise missiles, target drones and reconnaissance drones</li>
          </ul>
-         <span id="checklist_txt_field_10" style="display:none"><label for="dijit_form_TextBox_8">If yes, please provide an explanation below detailing this customer's business:</label>
-         <input type="text" id="dijit_form_TextBox_8" name="freeTxtField7" tabindex="0" class="dijitReset dijitInputField" style="width:70%">
+         <span id="checklist_txt_field_8" style="display:none"><label for="dijit_form_TextBox_8">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField8(request)%>
          </span>
       </cmr:chk-entry>
       <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Military- Intelligence End user/Military-intelligence End Use:</span></cmr:chk-entry>
       <cmr:chk-entry number="6" section="B">
          To the best of your knowledge or belief is your customer involved business activities with a Intelligence and/or military-intelligence end user or items with military-intelligence end uses?
-         <span id="checklist_txt_field_12" style="display:none"><label for="dijit_form_TextBox_9">If yes, please provide an explanation below detailing this customer's business:</label>
-         <input type="text" id="dijit_form_TextBox_9" name="freeTxtField8" tabindex="0" class="dijitReset dijitInputField" style="width:70%">
+         <span id="checklist_txt_field_9" style="display:none"><label for="dijit_form_TextBox_9">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField9(request)%>
          </span>
          <br>
          <span style="font-weight: bold;">DEFINITIONS-</span>
@@ -76,8 +82,8 @@
       <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Military End user/Military End Use:</span></cmr:chk-entry>
       <cmr:chk-entry number="7" section="B">
          To the best of your knowledge, is the customer a military end user or involved in business activities with a military end user or items with military end uses? 
-         <span id="checklist_txt_field_14" style="display:none"><label for="dijit_form_TextBox_10">If yes, please provide an explanation below detailing this customer's business:</label>
-         <input type="text" id="dijit_form_TextBox_10" name="freeTxtField9" tabindex="0" class="dijitReset dijitInputField" style="width:70%">
+         <span id="checklist_txt_field_10" style="display:none"><label for="dijit_form_TextBox_10">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField10(request)%>
          </span>
          <br>
          <span style="font-weight: bold;">DEFINITIONS-</span>
@@ -145,8 +151,8 @@
                <td>Weapon </td>
             </tr>
          </table>
-         <span id="checklist_txt_field_16" style="display:none"><label for="dijit_form_TextBox_11">If yes, please provide an explanation below detailing this customer's business:</label>
-         <input type="text" id="dijit_form_TextBox_11" name="freeTxtField10" tabindex="0" class="dijitReset dijitInputField" style="width:70%">
+         <span id="checklist_txt_field_11" style="display:none"><label for="dijit_form_TextBox_11">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField11(request)%>
          </span>
       </cmr:chk-entry>
    </cmr:chk-section>

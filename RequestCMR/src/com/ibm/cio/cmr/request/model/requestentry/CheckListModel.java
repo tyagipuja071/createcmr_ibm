@@ -80,6 +80,16 @@ public class CheckListModel extends BaseModel {
   private String freeTxtField3;
   private String freeTxtField4;
   private String freeTxtField5;
+  private String freeTxtField6;
+  private String freeTxtField7;
+  private String freeTxtField8;
+  private String freeTxtField9;
+  private String freeTxtField10;
+  private String freeTxtField11;
+  private String freeTxtField12;
+  private String freeTxtField13;
+  private String freeTxtField14;
+  private String freeTxtField15;
 
   @Override
   public boolean allKeysAssigned() {
@@ -593,6 +603,86 @@ public class CheckListModel extends BaseModel {
 
   public void setFreeTxtField5(String freeTxtField5) {
     this.freeTxtField5 = freeTxtField5;
+  }
+
+  public String getFreeTxtField6() {
+    return freeTxtField6;
+  }
+
+  public void setFreeTxtField6(String freeTxtField6) {
+    this.freeTxtField6 = freeTxtField6;
+  }
+
+  public String getFreeTxtField7() {
+    return freeTxtField7;
+  }
+
+  public void setFreeTxtField7(String freeTxtField7) {
+    this.freeTxtField7 = freeTxtField7;
+  }
+
+  public String getFreeTxtField8() {
+    return freeTxtField8;
+  }
+
+  public void setFreeTxtField8(String freeTxtField8) {
+    this.freeTxtField8 = freeTxtField8;
+  }
+
+  public String getFreeTxtField9() {
+    return freeTxtField9;
+  }
+
+  public void setFreeTxtField9(String freeTxtField9) {
+    this.freeTxtField9 = freeTxtField9;
+  }
+
+  public String getFreeTxtField10() {
+    return freeTxtField10;
+  }
+
+  public void setFreeTxtField10(String freeTxtField10) {
+    this.freeTxtField10 = freeTxtField10;
+  }
+
+  public String getFreeTxtField11() {
+    return freeTxtField11;
+  }
+
+  public void setFreeTxtField11(String freeTxtField11) {
+    this.freeTxtField11 = freeTxtField11;
+  }
+
+  public String getFreeTxtField12() {
+    return freeTxtField12;
+  }
+
+  public void setFreeTxtField12(String freeTxtField12) {
+    this.freeTxtField12 = freeTxtField12;
+  }
+
+  public String getFreeTxtField13() {
+    return freeTxtField13;
+  }
+
+  public void setFreeTxtField13(String freeTxtField13) {
+    this.freeTxtField13 = freeTxtField13;
+  }
+
+  public String getFreeTxtField14() {
+    return freeTxtField14;
+  }
+
+  public void setFreeTxtField14(String freeTxtField14) {
+    this.freeTxtField14 = freeTxtField14;
+  }
+
+  public String getFreeTxtField15() {
+    return freeTxtField15;
+  }
+
+  public void setFreeTxtField15(String freeTxtField15) {
+    this.freeTxtField15 = freeTxtField15;
   }
 
 }
