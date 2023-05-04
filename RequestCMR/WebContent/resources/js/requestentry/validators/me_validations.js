@@ -803,6 +803,87 @@ function addVatExemptHandler() {
   }
 }
 
+var _checklistBtnHandler = [];
+function addChecklistBtnHandler() {
+  for (var i = 2; i <= 15; i++) {
+    _checklistBtnHandler[i] = null;
+    if (_checklistBtnHandler[i] == null) {
+      _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
+        freeTxtFieldShowHide(Number(value.target.id.split("_").pop()));
+      });
+    }
+  }
+}
+
+function freeTxtFieldShowHide(buttonNo) {
+  var shouldDisplay = false;
+  
+  if (buttonNo == 0 || buttonNo == 1) {
+    return;
+  }
+  var fieldIdNo = getCheckListFieldNo(buttonNo);
+  var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
+  var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
+  
+  if (buttonNo%2 == 0) {
+    shouldDisplay = true;
+  } else {
+    shouldDisplay = false;
+  }
+  
+  if (fieldIdNo == 6) {
+    for (var i=2; i<=4; i=i+2) {
+      if (FormManager.getField('dijit_form_RadioButton_' + i).checked) {
+        shouldDisplay = true;
+        break;
+      } else {
+        shouldDisplay = false;
+      }
+    }
+  }
+
+  if (shouldDisplay) {
+    element.style.display = 'block';
+  } else {
+    element.style.display = 'none';
+    textFieldElement.value = '';
+  }
+}
+
+function getCheckListFieldNo(buttonNo) {
+  switch (buttonNo) {
+  case 2:
+  case 3:
+  case 4:
+  case 5: fieldIdNo = 6;
+  break;
+  case 6:
+  case 7: fieldIdNo = 7;
+  break;
+  case 8:
+  case 9: fieldIdNo = 8;
+  break;
+  case 10:
+  case 11: fieldIdNo = 9;
+  break;
+  case 12:
+  case 13: fieldIdNo = 10;
+  break;
+  case 14:
+  case 15: fieldIdNo = 11;
+  break;
+  }
+  return fieldIdNo;
+}
+
+function checkChecklistButtons() {
+  for (var i = 2; i<=14; i=i+2) {
+    if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
+      document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
+    }
+  }
+}
+
 var _cisHandler = null;
 function addCISHandler() {
   if (!FormManager.getField('cisServiceCustIndc')) {
@@ -4638,6 +4719,7 @@ dojo
 
       GEOHandler.addAfterConfig(afterConfigForCEMEA, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(addHandlersForCEMEA, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(addVatExemptHandler, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(addCISHandler, [ SysLoc.RUSSIA ]);
       GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.CEMEA);
@@ -4836,5 +4918,7 @@ dojo
       // CREATCMR-4293
       GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.ME);
       GEOHandler.registerValidator(clientTierValidator, GEOHandler.ME, null, true);
+      
+      GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.ME);
 
     });
