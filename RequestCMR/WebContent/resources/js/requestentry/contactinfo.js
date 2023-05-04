@@ -89,7 +89,7 @@ function addToContactInfoList() {
         }// create req
 
         if (cmr.currentRequestType == 'U') {
-          if (cmr.currentModalAction == 'ADD' || cmr.currentModalAction == 'COPY') {
+          if (cmr.currentModalAction == 'ADD' || cmr.currentModalAction == 'COPY' || cmr.currentModalAction == 'UPDATE') {
             queryParams = {
               REQ_ID : cmr.currentReqId,
               TYPE : contactTypeVal
