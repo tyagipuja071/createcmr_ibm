@@ -4437,11 +4437,6 @@ public class LAHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Company", "@ value for Company is not allowed.");
               }
 
-              // Client Tier
-              if (isDataFilled && "@".equals(clientTier)) {
-                error.addError((row.getRowNum() + 1), "<br>Client Tier", "@ value for Client Tier is not allowed.");
-              }
-
               // SBO
               if (isDataFilled && "@".equals(sbo)) {
                 error.addError((row.getRowNum() + 1), "<br>SBO", "@ value for SBO is not allowed.");
