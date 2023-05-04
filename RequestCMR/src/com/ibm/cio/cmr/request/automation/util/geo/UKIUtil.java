@@ -1079,7 +1079,6 @@ public class UKIUtil extends AutomationUtil {
       zp01count = Integer.parseInt(sResult[1].toString());
       zd01count = Integer.parseInt(sResult[2].toString());
     }
-
     return Arrays.asList(zi01count, zp01count, zd01count);
   }
 }
