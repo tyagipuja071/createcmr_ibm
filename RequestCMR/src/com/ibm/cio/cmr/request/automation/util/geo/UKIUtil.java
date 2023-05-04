@@ -632,6 +632,9 @@ public class UKIUtil extends AutomationUtil {
   @Override
   public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<DuplicateCMRCheckResponse> response) {
+    String[] scenariosToBeChecked = { "IBMEM", "PRICU" };
+    String[] kuklaPriv = { "60" };
+    String[] kuklaIBMEM = { "71" };
     String scenario = requestData.getData().getCustSubGrp();
     String[] custClassValuesToCheck = { "43", "45", "46" };
     if (UKIUtil.SCENARIO_BUSINESS_PARTNER.equals(scenario)) {
@@ -644,6 +647,27 @@ public class UKIUtil extends AutomationUtil {
         if (StringUtils.isNotBlank(match.getCustClass())) {
           String custClass = match.getCustClass();
           if (Arrays.asList(custClassValuesToCheck).contains(custClass)) {
+            filteredMatches.add(match);
+          }
+        }
+
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
+    }
+
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      List<DuplicateCMRCheckResponse> matches = response.getMatches();
+      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaPriv).contains(kukla) && ("PRICU".equals(scenario))) {
+            filteredMatches.add(match);
+          } else if (Arrays.asList(kuklaIBMEM).contains(kukla) && ("IBMEM".equals(scenario))) {
             filteredMatches.add(match);
           }
         }
@@ -1058,5 +1082,4 @@ public class UKIUtil extends AutomationUtil {
 
     return Arrays.asList(zi01count, zp01count, zd01count);
   }
-
 }
