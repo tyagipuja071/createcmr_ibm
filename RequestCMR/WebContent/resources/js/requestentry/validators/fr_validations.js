@@ -146,7 +146,7 @@ function afterConfigForFR() {
     setHideFieldForFR();
     setINACOnScenario();
     setISICAndSubindustryOnScenario();
-   // setVATOnScenario();
+    // setVATOnScenario();
     // setSBOOnScenario();
     setSalesRepLogic();
     setTaxCdOnScnrio();
@@ -202,7 +202,7 @@ function afterConfigForFR() {
   } else {
     FormManager.readOnly('taxCd1');
   }
-  //addVatExemptHandler();
+  // addVatExemptHandler();
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     if (value != '' || value != 'undefined') {
       var landedCountry = getSoldToLanded();
@@ -1475,7 +1475,7 @@ function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, for
     if (addrType == 'ZS01' || copyingToA) {
       addAbbrevLocnlogic();
       // add32SBODependcyOnPostCdOnAddrSave();
-     // addVATScenarioOnAddrSave();
+      // addVATScenarioOnAddrSave();
       setTaxCdOnAddrSave();
     }
   }
@@ -3668,7 +3668,7 @@ function addVatExemptHandler() {
           FormManager.enable('vat');
           FormManager.removeValidator('vat', Validators.REQUIRED);
         } else {
-       //   setVATOnScenario(true);
+          // setVATOnScenario(true);
         }
       });
     }
@@ -4502,5 +4502,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCoverage2H23FieldBehaviour, '706');
 
   GEOHandler.registerValidator(addVatIndValidator, [ '706' ], null, true);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, '706');
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [ '706' ]);
 
 });

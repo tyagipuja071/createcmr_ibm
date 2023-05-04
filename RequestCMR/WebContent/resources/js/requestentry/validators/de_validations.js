@@ -1406,5 +1406,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(saveVatExemptStat, GEOHandler.DE);
   GEOHandler.addAfterConfig(saveCustSubStat, GEOHandler.DE);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
-
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
 });

@@ -2096,5 +2096,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.NL);
 
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NL, null, true);
-
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
 });
