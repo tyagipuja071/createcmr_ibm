@@ -36,6 +36,8 @@ import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
@@ -835,6 +837,37 @@ public class BeLuxUtil extends AutomationUtil {
       return commercialFinanced;
     } else {
       return null;
+    }
+  }
+
+  @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+
+    String[] scenariosToBeChecked = { "BEPRI", "IBMEM", "LUIBM", "LUPRI" };
+    String scenario = requestData.getData().getCustSubGrp();
+    String[] kuklaPriv = { "60" };
+    String[] kuklaIBMEM = { "71" };
+
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      List<DuplicateCMRCheckResponse> matches = response.getMatches();
+      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaPriv).contains(kukla) && ("BEPRI".equals(scenario) || "LUPRI".equals(scenario))) {
+            filteredMatches.add(match);
+          } else if (Arrays.asList(kuklaIBMEM).contains(kukla) && ("IBMEM".equals(scenario) || "LUIBM".equals(scenario))) {
+            filteredMatches.add(match);
+          }
+        }
+
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
     }
   }
 }

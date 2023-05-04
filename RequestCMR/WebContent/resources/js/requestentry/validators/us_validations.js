@@ -7,6 +7,8 @@
 var _usSicmenHandler = null;
 var _usIsuHandler = null;
 var _usTaxcd1Handler = null;
+var _usIsicHandler = null;
+var _usCustClassHandler = null;
 var _usSicm = "";
 var _kukla = "";
 var _enterpriseHandler = null;
@@ -590,6 +592,18 @@ function afterConfigForUS() {
   if (_usTaxcd1Handler == null && FormManager.getField('taxCd1')) {
     _usTaxcd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
       setTaxcd1Status();
+    });
+  }
+
+  if (_usCustClassHandler == null && FormManager.getActualValue('reqType') == 'U') {
+    _usCustClassHandler = dojo.connect(FormManager.getField('custClass'), 'onChange', function(value) {
+      onChangeCustClassOrKuklaAndIsic();
+    });
+  }
+
+  if (_usIsicHandler == null && FormManager.getActualValue('reqType') == 'U') {
+    _usIsicHandler = dojo.connect(FormManager.getField('usSicmen'), 'onChange', function(value) {
+      onChangeCustClassOrKuklaAndIsic();
     });
   }
 
@@ -1325,6 +1339,47 @@ function setTaxcd1Status() {
   }
 
 }
+
+function onChangeCustClassOrKuklaAndIsic() {
+  var result1 = null;
+  var rdcKukla = null;
+  var onChangedKukla = null;
+  var result2 = null;
+  var rdcIsic = null;
+  var onChangedIsic = null;
+
+  onChangedKukla = FormManager.getActualValue('custClass');
+  var result1 = getIsicAndKuklaFromDataRdc("custClass");
+
+  onChangedIsic = FormManager.getActualValue('usSicmen');
+  var result2 = getIsicAndKuklaFromDataRdc("usSicmen");
+
+  if (result1 != null) {
+    rdcKukla = result1;
+  }
+
+  if (result2 != null) {
+    rdcIsic = result2;
+  }
+
+  if (onChangedIsic == '9500' && rdcIsic == onChangedIsic && onChangedKukla != '60' || onChangedIsic != '9500' && onChangedKukla == '60') {
+    cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
+  } else {
+    cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are selected.');
+  }
+}
+
+function getIsicAndKuklaFromDataRdc(value) {
+  var result = null;
+  result = cmr.query('DATA_RDC.ISIC', {
+    REQ_ID : FormManager.getActualValue('reqId')
+  });
+  if (result != null && result != '' && result.ret1 != undefined) {
+    return value == 'custClass' ? result.ret1 : result.ret2;
+  }
+  return null;
+}
+
 // CREATCMR-6987
 function setMainName1ForKYN() {
   var reqType = FormManager.getActualValue('reqType');
@@ -1384,6 +1439,40 @@ function federalIsicCheck() {
         if (reqType == 'C' && custGrp == '15' && !subIndustryCd.startsWith('Y')) {
           genericMsg = 'Only Federal ISIC can be used with Federal Strategic Partner scenarios.';
           return new ValidationResult(null, false, genericMsg);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function custClassIsicValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var result1 = null;
+        var rdcKukla = null;
+        var onChangedKukla = null;
+        var result2 = null;
+        var rdcIsic = null;
+        var onChangedIsic = null;
+
+        onChangedKukla = FormManager.getActualValue('custClass');
+        var result1 = getIsicAndKuklaFromDataRdc("custClass");
+
+        onChangedIsic = FormManager.getActualValue('usSicmen');
+        var result2 = getIsicAndKuklaFromDataRdc("usSicmen");
+
+        if (result1 != null) {
+          rdcKukla = result1;
+        }
+
+        if (result2 != null) {
+          rdcIsic = result2;
+        }
+
+        if (onChangedIsic != '9500' || onChangedKukla != '60') {
+          return new ValidationResult(null, false, 'Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
         }
         return new ValidationResult(null, true);
       }
@@ -1451,4 +1540,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.USA ]);
   // CREATCMR-7213
   GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
+  GEOHandler.registerValidator(custClassIsicValidator, [ SysLoc.USA ], null, true);
 });

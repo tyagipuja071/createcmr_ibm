@@ -378,6 +378,7 @@ public class DnBUtil {
 
   /**
    * Retrieves the CN Company information via D&B
+   * 
    * @param cmrRecord
    * @param organizationId
    */
@@ -999,7 +1000,7 @@ public class DnBUtil {
   public static boolean isDnbOverrideAttachmentProvided(EntityManager entityManager, long reqId) {
     String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_MATCH_ATTACHMENT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("ID", reqId);
+    query.setParameter("ID", String.valueOf(reqId));
 
     return query.exists();
   }
