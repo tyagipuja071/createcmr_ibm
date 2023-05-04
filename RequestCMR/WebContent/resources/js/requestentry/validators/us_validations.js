@@ -1446,6 +1446,40 @@ function federalIsicCheck() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function custClassIsicValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var result1 = null;
+        var rdcKukla = null;
+        var onChangedKukla = null;
+        var result2 = null;
+        var rdcIsic = null;
+        var onChangedIsic = null;
+
+        onChangedKukla = FormManager.getActualValue('custClass');
+        var result1 = getIsicAndKuklaFromDataRdc("custClass");
+
+        onChangedIsic = FormManager.getActualValue('usSicmen');
+        var result2 = getIsicAndKuklaFromDataRdc("usSicmen");
+
+        if (result1 != null) {
+          rdcKukla = result1;
+        }
+
+        if (result2 != null) {
+          rdcIsic = result2;
+        }
+
+        if (onChangedIsic != '9500' || onChangedKukla != '60') {
+          return new ValidationResult(null, false, 'Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
@@ -1506,4 +1540,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.USA ]);
   // CREATCMR-7213
   GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
+  GEOHandler.registerValidator(custClassIsicValidator, [ SysLoc.USA ], null, true);
 });
