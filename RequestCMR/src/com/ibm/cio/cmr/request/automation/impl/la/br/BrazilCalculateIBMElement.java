@@ -807,31 +807,31 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
         // SET SBO
         if (!sboToBeUnchanged) {
-          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "606");
+          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "461");
         }
-        details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
+        details.append("Search Term/Sales Branch Office = " + "461" + "\n");
 
         // SET MRC
         if (!sboToBeUnchanged) {
-          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "9");
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "Z");
         }
-        details.append("Market Responsibility Code (MRC) = " + data.getMrcCd() + "\n");
+        details.append("Market Responsibility Code (MRC) = " + "Z" + "\n");
 
         // SET Country Use based on MRC
         if (!sboToBeUnchanged) {
-          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "9");
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Z");
         }
-        details.append("Country Use = " + data.getMrcCd() + "\n");
+        details.append("Country Use = " + "Z" + "\n");
 
         // SET ISU based on MRC
-        String isu = getISUCode(entityManager, "9", "");
+        String isu = getISUCode(entityManager, "Z", "");
         if (!sboToBeUnchanged) {
           overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
         }
-        details.append("ISU = " + data.getIsuCd() + "\n");
+        details.append("ISU = " + isu + "\n");
 
         // SET Client Tier based on MRC and ISU
-        String clientTier = getClientTier(entityManager, "9", isu);
+        String clientTier = getClientTier(entityManager, "Z", isu);
         details.append("Client Tier = " + clientTier + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
 
