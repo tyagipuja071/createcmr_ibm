@@ -157,11 +157,19 @@ public class BrazilUtil extends AutomationUtil {
       } else {
         if (StringUtils.isNotBlank(sortl.getText()) && comment.equals("Signature-Strategic")) {
           LOG.debug("Setting SORTL ISU CTC MRC based on GBG. (Signature-Strategic)");
-          details.append("Setting SORTL ISU CTC MRC based on GBG.");
+          details.append("Setting SORTL ISU CTC MRC based on GBG. ");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sortl.getText());
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MRC_CD", data.getMrcCd(), "A");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "");
-          LOG.debug("SBO : " + sortl.getText() + " " + "ISU : " + data.getIsuCd() + " " + "CTC : " + "" + " " + "MRC : " + "A");
+          if ("GB0011BV".equals(gbgId.trim()) || "GB0015AG".equals(gbgId.trim()) || "GB00141X".equals(gbgId.trim())
+              || "GB000F0S".equals(gbgId.trim())) {
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "04");
+            LOG.debug("ISU : 04");
+          } else if ("GB000XP3".equals(gbgId.trim()) || "GB00184E".equals(gbgId.trim()) || "GB0011Q8".equals(gbgId.trim())) {
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "3T");
+            LOG.debug("ISU : 3T");
+          }
+          LOG.debug("SBO : " + sortl.getText() + " " + "CTC : " + "" + " " + "MRC : " + "A");
         }
       }
     } else {
