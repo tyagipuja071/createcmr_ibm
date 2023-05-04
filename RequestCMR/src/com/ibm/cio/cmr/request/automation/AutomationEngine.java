@@ -287,8 +287,8 @@ public class AutomationEngine {
           } else {
             actionsOnError.add(element.getActionOnError());
             if (element.isStopOnError()) {
-              //if ((element instanceof CompanyVerifier) && payGoAddredited) {
-              if (element instanceof CompanyVerifier) {
+              if ((element instanceof CompanyVerifier) && payGoAddredited) {
+                // if (element instanceof CompanyVerifier) {
                 // don't stop for paygo accredited and verifier element
                 LOG.debug("Error in " + element.getProcessDesc() + " but continuing process for PayGo.");
               } else {
