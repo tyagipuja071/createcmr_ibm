@@ -1175,7 +1175,7 @@ function isImportingFromQuickSearch() {
 
 function isPrivateScenario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  return ["PRICU", "PRIPE", "FIPRI", "DKPRI", "BEPRI", "CHPRI"].includes(custSubGrp);
+  return ["PRICU", "PRIPE", "FIPRI", "DKPRI", "BEPRI", "CHPRI","LUPRI"].includes(custSubGrp);
 }
 
 function setVatIndFieldsForGrp1AndNordx() {
