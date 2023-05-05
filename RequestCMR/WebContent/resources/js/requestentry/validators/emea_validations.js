@@ -6070,6 +6070,32 @@ function ibmFieldsBehaviourInCreateByModelIT() {
       return;
     }
     if ('C' == FormManager.getActualValue('reqType') && checkImportIndc == 'Y') {
+
+      if (role == "REQUESTER" && !(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
+        // FormManager.enable('isuCd');
+        // FormManager.readOnly('inacCd');
+        // FormManager.enable('clientTier');
+        FormManager.enable('collectionCd');
+        // FormManager.enable('repTeamMemberNo');
+        // FormManager.enable('salesBusOffCd');
+        FormManager.enable('affiliate');
+        FormManager.removeValidator('isuCd', Validators.REQUIRED);
+        FormManager.removeValidator('clientTier', Validators.REQUIRED);
+        FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+        FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+      } else {
+        // FormManager.enable('isuCd');
+        FormManager.enable('inacCd');
+        FormManager.enable('affiliate');
+        // FormManager.enable('clientTier');
+        // FormManager.enable('salesBusOffCd');
+        // FormManager.enable('repTeamMemberNo');
+        FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU' ], 'MAIN_IBM_TAB');
+        FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+        // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
+        // Tier' ], 'MAIN_IBM_TAB');
+        FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
+      }
       if (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA'
           || custSubType == 'CROBP') {
         FormManager.readOnly('inacCd');
@@ -6095,30 +6121,6 @@ function ibmFieldsBehaviourInCreateByModelIT() {
         FormManager.enable('collectionCd');
       }
 
-      if (role == "REQUESTER" && !(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
-        // FormManager.enable('isuCd');
-        // FormManager.readOnly('inacCd');
-        // FormManager.enable('clientTier');
-        FormManager.enable('collectionCd');
-        // FormManager.enable('repTeamMemberNo');
-        // FormManager.enable('salesBusOffCd');
-        FormManager.removeValidator('isuCd', Validators.REQUIRED);
-        FormManager.removeValidator('clientTier', Validators.REQUIRED);
-        FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
-        FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-      } else {
-        // FormManager.enable('isuCd');
-        FormManager.enable('inacCd');
-        FormManager.enable('affiliate');
-        // FormManager.enable('clientTier');
-        // FormManager.enable('salesBusOffCd');
-        // FormManager.enable('repTeamMemberNo');
-        FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU' ], 'MAIN_IBM_TAB');
-        FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
-        // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
-        // Tier' ], 'MAIN_IBM_TAB');
-        FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
-      }
       if (custSubType == 'IBMIT' || custSubType == 'XIBM') {
         FormManager.readOnly('identClient');
         FormManager.enable('collectionCd');
