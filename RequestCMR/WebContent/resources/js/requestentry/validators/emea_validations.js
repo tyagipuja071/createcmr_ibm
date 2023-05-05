@@ -10502,35 +10502,6 @@ function addVatIndValidator(){
   }
 }
 
-function vatOptionalForLandedUK() {
-  var _reqId = FormManager.getActualValue('reqId');
-  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var reqType = FormManager.getActualValue('reqType');
-  var custGrp = FormManager.getActualValue('custGrp');
-  var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');
-  
-  var params = {
-    REQ_ID : _reqId,
-    ADDR_TYPE : "ZS01"
-  };
-
-  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
-  landCntry = landCntryResult.ret1;
-
-  if (reqType == 'C') {
-    if (landCntry == 'GB') {
-      if ((issuingCntry != '866'  && custGrp == 'CROSS') || (issuingCntry == '866' && custGrp == 'LOCAL')) {
-        FormManager.resetValidations('vat');
-        FormManager.removeValidator('vat', Validators.REQUIRED);
-      }
-    }
-  } 
-  if (vatInd == 'N' && vat == '') { 
-    FormManager.resetValidations('vat');
-  }
-  
-}
 
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
