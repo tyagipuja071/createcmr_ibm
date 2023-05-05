@@ -2933,6 +2933,20 @@ function setSboMrcIsuToReadOnly() {
   }
 }
 
+function setIsuMrcFor161A() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (reqType == 'C') {
+    if (role == 'PROCESSOR') {
+      autoSetISUBasedOnSubindustry();
+    }
+  }
+}
+
 function setSortlValuesForUser(fromAddress, scenario, scenarioChanged) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -3140,5 +3154,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSortlValuesForUser, GEOHandler.LA);
   GEOHandler.addAddrFunction(setSortlForStateProvince, SysLoc.BRAZIL);
   GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
+  GEOHandler.addAfterTemplateLoad(setIsuMrcFor161A, SysLoc.BRAZIL);
+  
   
 });
