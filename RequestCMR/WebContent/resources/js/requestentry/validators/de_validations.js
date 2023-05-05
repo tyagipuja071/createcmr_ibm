@@ -272,7 +272,7 @@ function disableVatExemptForScenarios() {
       FormManager.disable('vatExempt');
     } else {
       FormManager.enable('vatExempt');
-      autoSetTax();
+    //  autoSetTax();
     }
   }
 }
@@ -1230,7 +1230,7 @@ function addVatIndValidator(){
     } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
       FormManager.setValue('vat', '');
       FormManager.setValue('vatInd', '');
-    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' &&  vatInd == '') {
       FormManager.setValue('vatInd', 'T');
       FormManager.enable('vatInd');
       //  FormManager.readOnly('vatInd');
@@ -1399,7 +1399,7 @@ dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
   GEOHandler.addAfterConfig(afterConfigForDE, GEOHandler.DE);
-  GEOHandler.addAfterConfig(autoSetTax, GEOHandler.DE);
+  //GEOHandler.addAfterConfig(autoSetTax, GEOHandler.DE);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.DE);
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.DE);
   GEOHandler.addAddrFunction(setAbbrevNameDEUpdate, GEOHandler.DE);
