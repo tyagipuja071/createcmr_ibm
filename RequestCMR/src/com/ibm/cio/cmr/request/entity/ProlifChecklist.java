@@ -25,9 +25,13 @@ import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
  * @author Jeffrey Zamora
  */
 @Entity
-@Table(name = "PROLIF_CHECKLIST", schema = "CREQCMR")
+@Table(
+    name = "PROLIF_CHECKLIST",
+    schema = "CREQCMR")
 @EntityListeners({ TrimListener.class, ChangeLogListener.class })
-@ChangeLogDetails(childTable = true, reqId = "id.reqId")
+@ChangeLogDetails(
+    childTable = true,
+    reqId = "id.reqId")
 public class ProlifChecklist extends BaseEntity<ProlifChecklistPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -44,204 +48,309 @@ public class ProlifChecklist extends BaseEntity<ProlifChecklistPK> implements Se
     this.id = id;
   }
 
-  @Column(name = "US_DPL_SANCTIONED")
+  @Column(
+      name = "US_DPL_SANCTIONED")
   private String usDplSanctioned;
 
-  @Column(name = "POTENTIAL_MATCH")
+  @Column(
+      name = "POTENTIAL_MATCH")
   private String potentialMatch;
 
-  @Column(name = "LOCAL_CUST_NM")
+  @Column(
+      name = "LOCAL_CUST_NM")
   private String localCustNm;
 
-  @Column(name = "LOCAL_ADDR")
+  @Column(
+      name = "LOCAL_ADDR")
   private String localAddr;
 
-  @Column(name = "TAX_CD")
+  @Column(
+      name = "TAX_CD")
   private String taxCd;
 
-  @Column(name = "SECTION_A1")
+  @Column(
+      name = "SECTION_A1")
   private String sectionA1;
 
-  @Column(name = "SECTION_A2")
+  @Column(
+      name = "SECTION_A2")
   private String sectionA2;
 
-  @Column(name = "SECTION_A3")
+  @Column(
+      name = "SECTION_A3")
   private String sectionA3;
 
-  @Column(name = "SECTION_A4")
+  @Column(
+      name = "SECTION_A4")
   private String sectionA4;
 
-  @Column(name = "SECTION_A5")
+  @Column(
+      name = "SECTION_A5")
   private String sectionA5;
 
-  @Column(name = "SECTION_A6")
+  @Column(
+      name = "SECTION_A6")
   private String sectionA6;
 
-  @Column(name = "SECTION_A7")
+  @Column(
+      name = "SECTION_A7")
   private String sectionA7;
 
-  @Column(name = "SECTION_A8")
+  @Column(
+      name = "SECTION_A8")
   private String sectionA8;
 
-  @Column(name = "SECTION_A9")
+  @Column(
+      name = "SECTION_A9")
   private String sectionA9;
 
-  @Column(name = "SECTION_A10")
+  @Column(
+      name = "SECTION_A10")
   private String sectionA10;
 
-  @Column(name = "SECTION_B1")
+  @Column(
+      name = "SECTION_B1")
   private String sectionB1;
 
-  @Column(name = "SECTION_B2")
+  @Column(
+      name = "SECTION_B2")
   private String sectionB2;
 
-  @Column(name = "SECTION_B3")
+  @Column(
+      name = "SECTION_B3")
   private String sectionB3;
 
-  @Column(name = "SECTION_B4")
+  @Column(
+      name = "SECTION_B4")
   private String sectionB4;
 
-  @Column(name = "SECTION_B5")
+  @Column(
+      name = "SECTION_B5")
   private String sectionB5;
 
-  @Column(name = "SECTION_B6")
+  @Column(
+      name = "SECTION_B6")
   private String sectionB6;
 
-  @Column(name = "SECTION_B7")
+  @Column(
+      name = "SECTION_B7")
   private String sectionB7;
 
-  @Column(name = "SECTION_B8")
+  @Column(
+      name = "SECTION_B8")
   private String sectionB8;
 
-  @Column(name = "SECTION_B9")
+  @Column(
+      name = "SECTION_B9")
   private String sectionB9;
 
-  @Column(name = "SECTION_B10")
+  @Column(
+      name = "SECTION_B10")
   private String sectionB10;
 
-  @Column(name = "SECTION_C1")
+  @Column(
+      name = "SECTION_C1")
   private String sectionC1;
 
-  @Column(name = "SECTION_C2")
+  @Column(
+      name = "SECTION_C2")
   private String sectionC2;
 
-  @Column(name = "SECTION_C3")
+  @Column(
+      name = "SECTION_C3")
   private String sectionC3;
 
-  @Column(name = "SECTION_C4")
+  @Column(
+      name = "SECTION_C4")
   private String sectionC4;
 
-  @Column(name = "SECTION_C5")
+  @Column(
+      name = "SECTION_C5")
   private String sectionC5;
 
-  @Column(name = "SECTION_C6")
+  @Column(
+      name = "SECTION_C6")
   private String sectionC6;
 
-  @Column(name = "SECTION_C7")
+  @Column(
+      name = "SECTION_C7")
   private String sectionC7;
 
-  @Column(name = "SECTION_C8")
+  @Column(
+      name = "SECTION_C8")
   private String sectionC8;
 
-  @Column(name = "SECTION_C9")
+  @Column(
+      name = "SECTION_C9")
   private String sectionC9;
 
-  @Column(name = "SECTION_C10")
+  @Column(
+      name = "SECTION_C10")
   private String sectionC10;
 
-  @Column(name = "SECTION_D1")
+  @Column(
+      name = "SECTION_D1")
   private String sectionD1;
 
-  @Column(name = "SECTION_D2")
+  @Column(
+      name = "SECTION_D2")
   private String sectionD2;
 
-  @Column(name = "SECTION_D3")
+  @Column(
+      name = "SECTION_D3")
   private String sectionD3;
 
-  @Column(name = "SECTION_D4")
+  @Column(
+      name = "SECTION_D4")
   private String sectionD4;
 
-  @Column(name = "SECTION_D5")
+  @Column(
+      name = "SECTION_D5")
   private String sectionD5;
 
-  @Column(name = "SECTION_D6")
+  @Column(
+      name = "SECTION_D6")
   private String sectionD6;
 
-  @Column(name = "SECTION_D7")
+  @Column(
+      name = "SECTION_D7")
   private String sectionD7;
 
-  @Column(name = "SECTION_D8")
+  @Column(
+      name = "SECTION_D8")
   private String sectionD8;
 
-  @Column(name = "SECTION_D9")
+  @Column(
+      name = "SECTION_D9")
   private String sectionD9;
 
-  @Column(name = "SECTION_D10")
+  @Column(
+      name = "SECTION_D10")
   private String sectionD10;
 
-  @Column(name = "SECTION_E1")
+  @Column(
+      name = "SECTION_E1")
   private String sectionE1;
 
-  @Column(name = "SECTION_E2")
+  @Column(
+      name = "SECTION_E2")
   private String sectionE2;
 
-  @Column(name = "SECTION_E3")
+  @Column(
+      name = "SECTION_E3")
   private String sectionE3;
 
-  @Column(name = "SECTION_E4")
+  @Column(
+      name = "SECTION_E4")
   private String sectionE4;
 
-  @Column(name = "SECTION_E5")
+  @Column(
+      name = "SECTION_E5")
   private String sectionE5;
 
-  @Column(name = "SECTION_E6")
+  @Column(
+      name = "SECTION_E6")
   private String sectionE6;
 
-  @Column(name = "SECTION_E7")
+  @Column(
+      name = "SECTION_E7")
   private String sectionE7;
 
-  @Column(name = "SECTION_E8")
+  @Column(
+      name = "SECTION_E8")
   private String sectionE8;
 
-  @Column(name = "SECTION_E9")
+  @Column(
+      name = "SECTION_E9")
   private String sectionE9;
 
-  @Column(name = "SECTION_E10")
+  @Column(
+      name = "SECTION_E10")
   private String sectionE10;
 
-  @Column(name = "SALES_MGR_ID")
+  @Column(
+      name = "SALES_MGR_ID")
   private String salesMgrId;
 
-  @Column(name = "CREATE_TS")
+  @Column(
+      name = "CREATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
   @NoLog
   private Date createTs;
 
-  @Column(name = "CREATE_BY")
+  @Column(
+      name = "CREATE_BY")
   private String createBy;
 
-  @Column(name = "LAST_UPDT_TS")
+  @Column(
+      name = "LAST_UPDT_TS")
   @Temporal(TemporalType.TIMESTAMP)
   @NoLog
   private Date lastUpdtTs;
 
-  @Column(name = "LAST_UPDT_BY")
+  @Column(
+      name = "LAST_UPDT_BY")
   private String lastUpdtBy;
 
-  @Column(name = "FREE_TXT_FIELD_1")
+  @Column(
+      name = "FREE_TXT_FIELD_1")
   private String freeTxtField1;
 
-  @Column(name = "FREE_TXT_FIELD_2")
+  @Column(
+      name = "FREE_TXT_FIELD_2")
   private String freeTxtField2;
 
-  @Column(name = "FREE_TXT_FIELD_3")
+  @Column(
+      name = "FREE_TXT_FIELD_3")
   private String freeTxtField3;
 
-  @Column(name = "FREE_TXT_FIELD_4")
+  @Column(
+      name = "FREE_TXT_FIELD_4")
   private String freeTxtField4;
 
-  @Column(name = "FREE_TXT_FIELD_5")
+  @Column(
+      name = "FREE_TXT_FIELD_5")
   private String freeTxtField5;
+
+  @Column(
+      name = "FREE_TXT_FIELD_6")
+  private String freeTxtField6;
+
+  @Column(
+      name = "FREE_TXT_FIELD_7")
+  private String freeTxtField7;
+
+  @Column(
+      name = "FREE_TXT_FIELD_8")
+  private String freeTxtField8;
+
+  @Column(
+      name = "FREE_TXT_FIELD_9")
+  private String freeTxtField9;
+
+  @Column(
+      name = "FREE_TXT_FIELD_10")
+  private String freeTxtField10;
+
+  @Column(
+      name = "FREE_TXT_FIELD_11")
+  private String freeTxtField11;
+
+  @Column(
+      name = "FREE_TXT_FIELD_12")
+  private String freeTxtField12;
+
+  @Column(
+      name = "FREE_TXT_FIELD_13")
+  private String freeTxtField13;
+
+  @Column(
+      name = "FREE_TXT_FIELD_14")
+  private String freeTxtField14;
+
+  @Column(
+      name = "FREE_TXT_FIELD_15")
+  private String freeTxtField15;
 
   public String getUsDplSanctioned() {
     return this.usDplSanctioned;
@@ -761,6 +870,86 @@ public class ProlifChecklist extends BaseEntity<ProlifChecklistPK> implements Se
 
   public void setFreeTxtField5(String freeTxtField5) {
     this.freeTxtField5 = freeTxtField5;
+  }
+
+  public String getFreeTxtField6() {
+    return freeTxtField6;
+  }
+
+  public void setFreeTxtField6(String freeTxtField6) {
+    this.freeTxtField6 = freeTxtField6;
+  }
+
+  public String getFreeTxtField7() {
+    return freeTxtField7;
+  }
+
+  public void setFreeTxtField7(String freeTxtField7) {
+    this.freeTxtField7 = freeTxtField7;
+  }
+
+  public String getFreeTxtField8() {
+    return freeTxtField8;
+  }
+
+  public void setFreeTxtField8(String freeTxtField8) {
+    this.freeTxtField8 = freeTxtField8;
+  }
+
+  public String getFreeTxtField9() {
+    return freeTxtField9;
+  }
+
+  public void setFreeTxtField9(String freeTxtField9) {
+    this.freeTxtField9 = freeTxtField9;
+  }
+
+  public String getFreeTxtField10() {
+    return freeTxtField10;
+  }
+
+  public void setFreeTxtField10(String freeTxtField10) {
+    this.freeTxtField10 = freeTxtField10;
+  }
+
+  public String getFreeTxtField11() {
+    return freeTxtField11;
+  }
+
+  public void setFreeTxtField11(String freeTxtField11) {
+    this.freeTxtField11 = freeTxtField11;
+  }
+
+  public String getFreeTxtField12() {
+    return freeTxtField12;
+  }
+
+  public void setFreeTxtField12(String freeTxtField12) {
+    this.freeTxtField12 = freeTxtField12;
+  }
+
+  public String getFreeTxtField13() {
+    return freeTxtField13;
+  }
+
+  public void setFreeTxtField13(String freeTxtField13) {
+    this.freeTxtField13 = freeTxtField13;
+  }
+
+  public String getFreeTxtField14() {
+    return freeTxtField14;
+  }
+
+  public void setFreeTxtField14(String freeTxtField14) {
+    this.freeTxtField14 = freeTxtField14;
+  }
+
+  public String getFreeTxtField15() {
+    return freeTxtField15;
+  }
+
+  public void setFreeTxtField15(String freeTxtField15) {
+    this.freeTxtField15 = freeTxtField15;
   }
 
 }
