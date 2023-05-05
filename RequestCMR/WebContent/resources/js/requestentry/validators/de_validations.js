@@ -1223,7 +1223,7 @@ function addVatIndValidator(){
     if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
-    } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+    } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd == '') {
       FormManager.setValue('vatInd', 'T');
       FormManager.enable('vatInd');
       // FormManager.readOnly('vatInd');
@@ -1456,8 +1456,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.DE, null, true);
 
-  GEOHandler.addAfterConfig(saveVatExemptStat, GEOHandler.DE);
-  GEOHandler.addAfterConfig(saveCustSubStat, GEOHandler.DE);
+  //GEOHandler.addAfterConfig(saveVatExemptStat, GEOHandler.DE);
+  //GEOHandler.addAfterConfig(saveCustSubStat, GEOHandler.DE);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
