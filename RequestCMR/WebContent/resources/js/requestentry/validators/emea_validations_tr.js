@@ -880,8 +880,7 @@ function autoSetVAT(_custType, custTypeinDB) {
   }
 
   if (custTypeinDB != null && custTypeinDB == _custType) {
-    return
-
+    return;
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -7543,7 +7542,6 @@ function toggleBPRelMemTypeForTurkey() {
     return;
   }
   if (reqType == 'U') {
-
   } else {
     var _custType = FormManager.getActualValue('custSubGrp');
     if (_custType == 'BUSPR' || _custType == 'XBP') {
