@@ -598,8 +598,11 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       }
     }
     data.setPpsceid(record.getCmrPpsceid());
+    //CREATCMR-8243
+    if(!SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())){
     data.setMemLvl(record.getCmrMembLevel());
     data.setBpRelType(record.getCmrBPRelType());
+    }
 
     data.setCovId(record.getCmrCoverage());
     data.setBgId(record.getCmrBuyingGroup());
