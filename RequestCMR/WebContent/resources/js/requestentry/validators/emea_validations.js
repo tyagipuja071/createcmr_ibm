@@ -10460,9 +10460,11 @@ function addVatIndValidator(){
   var _vatHandler = null;
   var _vatIndHandler = null;
   var vat = FormManager.getActualValue('vat');
+  var reqType = FormManager.getActualValue('reqType');
   var vatInd = FormManager.getActualValue('vatInd');  
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage'); 
- 
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custGrp = FormManager.getActualValue('custGrp');
   if (viewOnlyPage =='true'){
    FormManager.resetValidations('vat');
    FormManager.readOnly('vat');
@@ -10473,7 +10475,10 @@ function addVatIndValidator(){
     ISSUING_CNTRY : cntry
   });
 
-      if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+    if (issuingCntry == '866' || issuingCntry == '754' && custGrp == 'LOCAL' && vatInd!='N' && vatInd!='T' && vatInd!='E' ) {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', '');
+    } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
     } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
@@ -10495,6 +10500,36 @@ function addVatIndValidator(){
       FormManager.resetValidations('vat');
     }
   }
+}
+
+function vatOptionalForLandedUK() {
+  var _reqId = FormManager.getActualValue('reqId');
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  
+  var params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01"
+  };
+
+  var landCntryResult = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', params);
+  landCntry = landCntryResult.ret1;
+
+  if (reqType == 'C') {
+    if (landCntry == 'GB') {
+      if ((issuingCntry != '866'  && custGrp == 'CROSS') || (issuingCntry == '866' && custGrp == 'LOCAL')) {
+        FormManager.resetValidations('vat');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+      }
+    }
+  } 
+  if (vatInd == 'N' && vat == '') { 
+    FormManager.resetValidations('vat');
+  }
+  
 }
 
 dojo.addOnLoad(function() {
