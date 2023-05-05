@@ -10465,6 +10465,7 @@ function addVatIndValidator(){
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage'); 
   var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var custGrp = FormManager.getActualValue('custGrp');
+  var landCntry = FormManager.getActualValue('landCntry');
   if (viewOnlyPage =='true'){
    FormManager.resetValidations('vat');
    FormManager.readOnly('vat');
@@ -10475,7 +10476,7 @@ function addVatIndValidator(){
     ISSUING_CNTRY : cntry
   });
 
-    if (issuingCntry == '866' || issuingCntry == '754' && custGrp == 'LOCAL' && vatInd!='N' && vatInd!='T' && vatInd!='E' ) {
+    if ((issuingCntry == '866' || issuingCntry == '754') && (custGrp == 'LOCAL' || (landCntry!='866' && landCntry!='754'))  && vatInd!='N' && vatInd!='T' && vatInd!='E' ) {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', '');
     } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
