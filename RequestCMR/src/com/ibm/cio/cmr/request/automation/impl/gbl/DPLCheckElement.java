@@ -272,9 +272,15 @@ public class DPLCheckElement extends ValidatingElement {
       case "SF":
         validation.setSuccess(false);
         if (dplService.getResultCount(entityManager, reqId, user) == 0) {
-          details.append(details.length() > 0 ? "\n" : "");
-          details.append("No actual results found during the search.");
-          output.setOnError(false);
+          if ("Y".equals(SystemParameters.getString("DPLSEARCH.GO"))) {
+            details.append(details.length() > 0 ? "\n" : "");
+            details.append("No actual results found during the search.");
+            output.setOnError(false);
+          } else {
+            details.append("DPL Search cannot be executed at the moment.");
+            engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
+            output.setOnError(true);
+          }
         } else {
           output.setOnError(true);
           engineData.addRejectionComment("OTH", "DPL Check Failed for some addresses.", "", "");
@@ -284,9 +290,15 @@ public class DPLCheckElement extends ValidatingElement {
       case "AF":
         validation.setSuccess(false);
         if (dplService.getResultCount(entityManager, reqId, user) == 0) {
-          details.append(details.length() > 0 ? "\n" : "");
-          details.append("No actual results found during the search.");
-          output.setOnError(false);
+          if ("Y".equals(SystemParameters.getString("DPLSEARCH.GO"))) {
+            details.append(details.length() > 0 ? "\n" : "");
+            details.append("No actual results found during the search.");
+            output.setOnError(false);
+          } else {
+            details.append("DPL Search cannot be executed at the moment.");
+            engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
+            output.setOnError(true);
+          }
         } else {
           output.setOnError(true);
           engineData.addRejectionComment("OTH", "DPL Check Failed for all addresses.", "", "");
