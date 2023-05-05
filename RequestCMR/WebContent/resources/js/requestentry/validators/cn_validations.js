@@ -3012,7 +3012,7 @@ function validateCnNameAndAddr4Update() {
             if(!addressEqualFlag){
               var rmProvince = cnAddress.replace(/.+?(省)/,'');
               var rmCity = rmProvince.replace(/.+?(市)/,'');
-              addressEqualFlag = addressValidation(address2SBCS, apiCity, rmCity, cnCity, cnDistrictZS01);
+              addressEqualFlag = addressValidation(apiAddress2SBCS, apiCity, rmCity, cnCity, cnDistrictZS01);
             }
 
             if (!addressEqualFlag){
@@ -3079,7 +3079,7 @@ function validateCnNameAndAddr4Update() {
             if(!addressEqualFlag){
               var rmProvince = cnAddress.replace(/.+?(省)/,'');
               var rmCity = rmProvince.replace(/.+?(市)/,'');
-              addressEqualFlag = addressValidation(address2SBCS, apiCity, rmCity, cnCity, cnDistrictZS01);
+              addressEqualFlag = addressValidation(apiAddress2SBCS, apiCity, rmCity, cnCity, cnDistrictZS01);
             }
 
             if (!addressEqualFlag){
