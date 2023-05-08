@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -310,76 +311,20 @@ public class GermanyUtil extends AutomationUtil {
       case "X3PA":
       case "DC":
       case "XDC":
-        // Duplicate CMR checks Based on Name and Addresses
-        // Duplicate CMR checks Based on Name and Addresses
-        try {
-          String zs01Kunnr = null;
-          String zi01Kunnr = null;
-          String dupCMRzS01 = null;
-          String dupCMRzI01 = null;
-          for (Addr addr : requestData.getAddresses()) {
-            String addrTyp = addr.getId().getAddrType();
-            if (StringUtils.isNotBlank(addrTyp) && (addrTyp.equalsIgnoreCase("ZS01") || addrTyp.equalsIgnoreCase("ZI01"))) {
-              String custNm = addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
-              String duplicateCMRNo = null;
-              // getting fuzzy matches on basis of name
-              MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-                  MatchingServiceClient.class);
-              DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
-              request.setCustomerName(custNm);
-              request.setIssuingCountry(data.getCmrIssuingCntry());
-              request.setLandedCountry(addr.getLandCntry());
-              request.setPostalCode(addr.getPostCd());
-              request.setStateProv(addr.getStateProv());
-              request.setStreetLine1(addr.getAddrTxt());
-              request.setStreetLine2(addr.getAddrTxt2());
-              request.setCity(addr.getCity1());
-              request.setAddrType(addrTyp);
-              client.setReadTimeout(1000 * 60 * 5);
-              LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-              MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
-              ObjectMapper mapper = new ObjectMapper();
-              String json = mapper.writeValueAsString(rawResponse);
-
-              TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> ref = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
-              };
-
-              MatchingResponse<DuplicateCMRCheckResponse> resp = mapper.readValue(json, ref);
-
-              if (resp.getSuccess()) {
-                if (resp.getMatched() && resp.getMatches().size() > 0) {
-                  duplicateCMRNo = resp.getMatches().get(0).getCmrNo();
-                  if (addrTyp.equalsIgnoreCase("ZS01")) {
-                    dupCMRzS01 = duplicateCMRNo;
-                    zs01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.GERMANY);
-                  } else if (addrTyp.equalsIgnoreCase("ZI01")) {
-                    dupCMRzI01 = duplicateCMRNo;
-                    zi01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.GERMANY);
-                  }
-                }
-              }
-            }
-          }
-          if (zs01Kunnr != null && zi01Kunnr != null && StringUtils.isNotBlank(dupCMRzS01) && StringUtils.isNotBlank(dupCMRzI01)
-              && dupCMRzS01.equals(dupCMRzI01)) {
-            details.append("The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
-                + " already has a record with CMR No. for Sold-To " + dupCMRzS01 + " and for Install-At " + dupCMRzI01).append("\n");
-            engineData.addRejectionComment("DUPC",
-                "The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
-                    + " already has a record with CMR No. for Sold-To " + dupCMRzS01,
-                dupCMRzS01, zs01Kunnr);
-            engineData.addRejectionComment("DUPC",
-                "The " + ((scenario.equals("3PA") || scenario.equals("X3PA")) ? "Third Party Person" : "Data Center")
-                    + " already has a record with CMR No. for Install-At " + dupCMRzI01,
-                dupCMRzI01, zi01Kunnr);
-            valid = false;
+        // Duplicate Request checks Based on Name and Addresses for DC and XDC
+        if (scenario.equals("DC") || scenario.equals("XDC")) {
+          List<String> dupReqIds = checkDuplicateRequestForDC(entityManager, requestData);
+          if (!dupReqIds.isEmpty()) {
+            details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
+            details.append(StringUtils.join(dupReqIds, "\n"));
+            engineData.addRejectionComment("DUPR", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
+            return false;
           } else {
-            details.append("No Duplicate CMRs were found.").append("\n");
+            details.append("No duplicate requests found");
           }
-        } catch (Exception e) {
-          details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
-          engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
         }
+        // Duplicate CMR checks Based on Name and Addresses
+        valid = duplicateCmrCheck3PADC(requestData, engineData, details, data, zs01, zi01, valid, scenario);
         // Sold-To and Install-At cannot be same for these scenarios
         if (zs01 != null && zi01 != null && addressEquals(zs01, zi01)) {
           engineData.addRejectionComment("OTH", "For this scenario, Sold-to and Install-at need to be different", "", "");
@@ -479,12 +424,6 @@ public class GermanyUtil extends AutomationUtil {
     } catch (Exception e) {
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
-    }
-    // Sold-To and Install-At cannot be same for these scenarios
-    if (zs01 != null && zi01 != null && addressEquals(zs01, zi01)) {
-      engineData.addRejectionComment("OTH", "For this scenario, Sold-to and Install-at need to be different", "", "");
-      details.append("For 3rd Party and Data Center Sold-To and Install-At address should be different");
-      return false;
     }
     return valid;
   }
@@ -1373,4 +1312,62 @@ public class GermanyUtil extends AutomationUtil {
     return false;
   }
 
+  public List<String> checkDuplicateRequestForDC(EntityManager entityManager, RequestData requestData) {
+    LOG.debug("checkDuplicateRequestForDC");
+    List<String> dupReqIds = new ArrayList<>();
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    Addr zs01 = requestData.getAddress("ZS01");
+    List<Addr> results = getRecentAddrBasedOnIssuingAndLandedCntries(entityManager, zs01, data, admin);
+    if (results != null && !results.isEmpty()) {
+      Iterator<Addr> it = results.iterator();
+      while (it.hasNext()) {
+        Addr addr = it.next();
+        if (addressEquals(zs01, addr)) {
+          List<Addr> addrToCheck = getAddressBasedOnAddrTypAndReqId(entityManager, "ZI01", Long.toString(addr.getId().getReqId()));
+          if (addrToCheck != null && !addrToCheck.isEmpty()) {
+            Iterator<Addr> itr = addrToCheck.iterator();
+            while (itr.hasNext()) {
+              Addr addrItr = itr.next();
+              boolean hasDup = false;
+              for (Addr addrCheck : requestData.getAddresses()) {
+                if (addressEquals(addrCheck, addrItr)) {
+                  hasDup = true;
+                }
+              }
+              if (hasDup) {
+                dupReqIds.add(Long.toString(addr.getId().getReqId()));
+              }
+            }
+          }
+        }
+      }
+    }
+    return dupReqIds;
+  }
+
+  public List<Addr> getAddressBasedOnAddrTypAndReqId(EntityManager entityManager, String addrTyp, String reqId) {
+    LOG.debug("getAddressBasedOnAddrTypAndReqId");
+    String sql = ExternalizedQuery.getSql("GET.ADDR.ADDR_TYP.FROM.REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ADDR_TYPE", addrTyp);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    List<Addr> results = query.getResults(Addr.class);
+    return results;
+  }
+
+  public List<Addr> getRecentAddrBasedOnIssuingAndLandedCntries(EntityManager entityManager, Addr addr, Data data, Admin admin) {
+    LOG.debug("getRecentAddrBasedOnIssuingAndLandedCntries");
+    String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("LAND_CNTRY", addr.getLandCntry().toUpperCase());
+    query.setParameter("SCENARIO", StringUtils.isNotBlank(data.getCustSubGrp()) ? data.getCustSubGrp().toUpperCase() : "%%");
+    query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setForReadOnly(true);
+    List<Addr> results = query.getResults(Addr.class);
+    return results;
+  }
 }
