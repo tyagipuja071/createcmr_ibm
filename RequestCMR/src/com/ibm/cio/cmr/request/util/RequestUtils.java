@@ -1820,4 +1820,59 @@ public class RequestUtils {
     request.getSession().invalidate();
   }
 
+  public static long extractRequestId(HttpServletRequest request) {
+
+    String reqIdParam = request.getParameter("reqId");
+    if (reqIdParam != null && StringUtils.isNumeric(reqIdParam) && !"0".equals(reqIdParam)) {
+      return Long.parseLong(reqIdParam);
+    }
+
+    Object reqIdAtt = request.getAttribute("reqId");
+
+    if (reqIdAtt != null && StringUtils.isNumeric(reqIdAtt.toString()) && !"0".equals(reqIdAtt.toString())) {
+      return Long.parseLong(reqIdAtt.toString());
+    }
+
+    String url = request.getRequestURI();
+
+    if (url != null) {
+      if (url.contains("?")) {
+        url = url.substring(0, url.indexOf("?"));
+      }
+      if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
+        String reqId = url.substring(url.lastIndexOf("/") + 1);
+        if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
+          return Long.parseLong(reqId);
+        }
+      }
+    }
+
+    url = request.getHeader("referer");
+
+    if (url != null) {
+      if (url.contains("?")) {
+        url = url.substring(0, url.indexOf("?"));
+      }
+      if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
+        String reqId = url.substring(url.lastIndexOf("/") + 1);
+        if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
+          return Long.parseLong(reqId);
+        }
+      }
+    }
+
+    url = request.getHeader("referer");
+
+    if (url != null) {
+      if (url.matches("(.*)logout\\?r=([0-9]+)")) {
+        String reqId = url.substring(url.lastIndexOf("?r=") + 3);
+        if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
+          return Long.parseLong(reqId);
+        }
+      }
+    }
+
+    return 0;
+  }
+
 }
