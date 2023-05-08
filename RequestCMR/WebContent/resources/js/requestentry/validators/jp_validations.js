@@ -76,6 +76,10 @@ function afterConfigForJP() {
   FormManager.addValidator('email2', Validators.NO_HALF_ANGLE, [ 'Customer Name_Detail' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('abbrevNm', Validators.LATIN, [ 'Account Abbreviated Name' ]);
 
+  FormManager.readOnly('isuCd');
+  FormManager.readOnly('clientTier');
+  FormManager.readOnly('searchTerm');
+
   var _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     setCustNmDetailOnScenario();
     setFieldsRequired();
@@ -1160,7 +1164,7 @@ function setISUByMrcSubInd() {
   }
 
   if (subIndustryCd != '') {
-    if (custGrp == 'IBMTP' || custGrp == 'BUSPR') {
+    if (custGrp == 'IBMTP' || custGrp == 'BUSPR' || (custGrp == 'SUBSI' && custSubGrp == 'BVMDS')) {
       if (mrcCd == '3') {
         if (subIndustryCd == 'ZZ' || geoInd != 'Z') {
           setISUByOfficeCd();
@@ -1193,7 +1197,7 @@ function setISUByMrcSubInd() {
           }
         }
       }
-    } else if (custGrp == 'SUBSI') {
+    } else if (custGrp == 'SUBSI' && custSubGrp != 'BVMDS') {
       FormManager.setValue('isuCd', '60');
     }
   }
