@@ -1048,11 +1048,13 @@ function setCTCByOfficeCd() {
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp) {
     return;
   }
+  if (custSubGrp == 'ISOCU' || custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC') {
+    return;
+  }
+
   if (inTs38Ofcd()) {
     var clientTier = getCtcByOfcd();
-    if (clientTier != '') {
-      FormManager.setValue('clientTier', clientTier);
-    }
+    FormManager.setValue('clientTier', clientTier);
   } else {
     FormManager.setValue('clientTier', 'Z');
   }
@@ -1103,7 +1105,7 @@ function setMrcByOfficeCd() {
   var results = cmr.query('GET.MRC_BY_OFFICE_CD', qParams);
   if (results != null && results.length > 0) {
     for (var i = 0; i < results.length; i++) {
-        mrc = results[i].ret1;
+      mrc = results[i].ret1;
     }
   }
   FormManager.setValue('mrcCd', mrc);
@@ -1115,7 +1117,7 @@ function setMrcByOfficeCd() {
 function setISUByOfficeCd() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
-  var custType = FormManager.getActualValue('custType');
+  var custGrp = FormManager.getActualValue('custGrp');
 
   var qParams = {
     _qall : 'Y',
@@ -1131,7 +1133,7 @@ function setISUByOfficeCd() {
       FormManager.setValue('isuCd', '34');
     }
   }
-  if (custType == 'SUBSI' && salesBusOffCd == 'A9') {
+  if (custGrp == 'SUBSI' && salesBusOffCd == 'A9') {
     FormManager.setValue('isuCd', '5K');
   }
 }
@@ -1140,61 +1142,59 @@ function setISUByOfficeCd() {
  * Set ISU Code Values based On MRC, GEO_IND and Subindustry
  */
 function setISUByMrcSubInd() {
-  var custType = FormManager.getActualValue('custType');
+  var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var mrcCd = FormManager.getActualValue('mrcCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-  var geoInd = subIndustryCd ? '' : subIndustryCd.substr(0, 1);
-  var isuCode = null;
+  var geoInd = subIndustryCd ? subIndustryCd.substr(0, 1) : '';
 
-  if (custType == 'IBMTP' && custSubGrp == 'BPWPQ') {
+  if (custGrp == 'IBMTP' && (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU')) {
     return;
   }
 
-  if (custType == 'SUBSI' && custSubGrp == 'BQICL') {
+  if (custGrp == 'SUBSI' && (custSubGrp == 'BQICL' || custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC')) {
     return;
   }
 
   if (subIndustryCd != '') {
-    if (mrcCd == '3') {
-      if (subIndustryCd == 'ZZ' || geoInd != 'Z') {
-        setISUByOfficeCd();
-      } else if (subIndustryCd == 'ZC') {
-        FormManager.setValue('isuCd', '21');
-      } else {
-        FormManager.setValue('isuCd', '60');
-      }
-    } else {
-      if (mrcCd != '3' && (geoInd == 'X' || geoInd == 'Z')) {
-        console.log("get ISU Code based On MRC, GEO_IND and Subindustry");
-      } else {
-        console.log("get ISU Code based On MRC and GEO_IND");
-        subIndustryCd = '';
-      }
-
-      // MRC_CD : mrcCd,
-      var qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry,
-        GEOIND : geoInd,
-        SUBIND : subIndustryCd
-      };
-      var results = cmr.query('GET.ISU_BY_SUBIND', qParams);
-      if (results != null) {
-        for (var i = 0; i < results.length; i++) {
-          isuCode.push(results[i].ret1);
+    if (custGrp == 'IBMTP' || custGrp == 'BUSPR') {
+      if (mrcCd == '3') {
+        if (subIndustryCd == 'ZZ' || geoInd != 'Z') {
+          setISUByOfficeCd();
+        } else if (subIndustryCd == 'ZC') {
+          FormManager.setValue('isuCd', '21');
+        } else {
+          FormManager.setValue('isuCd', '60');
         }
-        if (isuCode != null) {
-          FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCode);
+      } else {
+        if (mrcCd != '3' && (geoInd == 'X' || geoInd == 'Z')) {
+          console.log("get ISU Code based On MRC, GEO_IND and Subindustry");
+        } else {
+          console.log("get ISU Code based On MRC and GEO_IND");
+          subIndustryCd = '';
+        }
 
-          if (isuCode.length == 1) {
-            FormManager.setValue('isuCd', isuCode[0]);
+        // MRC_CD : mrcCd,
+        var qParams = {
+          _qall : 'Y',
+          ISSUING_CNTRY : cntry,
+          GEOIND : geoInd,
+          SUBIND : subIndustryCd
+        };
+        var results = cmr.query('GET.ISU_BY_SUBIND', qParams);
+        if (results != null && results.length > 0) {
+          for (var i = 0; i < results.length; i++) {
+            if (results[i].ret1 != '') {
+              FormManager.setValue('isuCd', results[i].ret1);
+            }
           }
         }
       }
+    } else if (custGrp == 'SUBSI') {
+      FormManager.setValue('isuCd', '60');
     }
   }
 }
@@ -3270,7 +3270,7 @@ function setINACCodeMandatory() {
       }
     }
     if (isRequired) {
-	  if(!( FormManager.getActualValue('custGrp')=='SUBSI' && FormManager.getActualValue('custSubGrp')=='BQICL') ){
+      if (!(FormManager.getActualValue('custGrp') == 'SUBSI' && FormManager.getActualValue('custSubGrp') == 'BQICL')) {
         FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
       }
       FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCd);
@@ -3282,11 +3282,11 @@ function setINACCodeMandatory() {
     FormManager.resetValidations('inacCd');
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
   }
-  
+
   var setInacRequiredForOfficeCd = "FT,GK, GN,GV, HD,JS,KL, KQ, LC, LG, LJ, PL, PR, QE";
   var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
-  if(setInacRequiredForOfficeCd.includes(salesBusOffCd)){
-	FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');	
+  if (setInacRequiredForOfficeCd.includes(salesBusOffCd)) {
+    FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
   }
 }
 function addJSICLogic() {
@@ -3459,6 +3459,7 @@ function getTs31IsicByJsic() {
   }
   return isicCd;
 }
+
 function setSortlOnOfcdChange() {
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -3513,7 +3514,7 @@ function addClusterOfcdLogic() {
   var results = cmr.query('GET.INACCD_SECTOR_CLUSTER_BY_OFCD', qParams);
   if (results != null && results.length > 0) {
     for (var i = 0; i < results.length; i++) {
-	  if ( results[i].ret4 != ' ') {
+      if (results[i].ret4 != ' ') {
         cluster = results[i].ret4;
       }
     }
@@ -5812,7 +5813,8 @@ function resetBPWPQValue() {
 
   if (custSubGrp == 'BPWPQ') {
     if (reqType == 'C' && (_role == 'Requester' || _role == 'Processor')) {
-      // FormManager.setValue('salesTeamCd', _pagemodel.salesTeamCd == '' ? '' : _pagemodel.salesTeamCd);
+      // FormManager.setValue('salesTeamCd', _pagemodel.salesTeamCd == '' ? '' :
+      // _pagemodel.salesTeamCd);
       FormManager.readOnly('salesTeamCd');
 
       FormManager.setValue('tier2', _pagemodel.clientTier == '' ? '' : _pagemodel.clientTier);
