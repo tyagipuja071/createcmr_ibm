@@ -1054,9 +1054,7 @@ function setCTCByOfficeCd() {
 
   if (inTs38Ofcd()) {
     var clientTier = getCtcByOfcd();
-    if (clientTier != '') {
-      FormManager.setValue('clientTier', clientTier);
-    }
+    FormManager.setValue('clientTier', clientTier);
   } else {
     FormManager.setValue('clientTier', 'Z');
   }
