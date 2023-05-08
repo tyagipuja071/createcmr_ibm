@@ -2948,12 +2948,19 @@ function addCEMEAChecklistValidator() {
         var checklist = dojo.query('table.checklist');
 
         var questions = checklist.query('input[type="radio"]');
-        if (questions.length > 0) {
+        var textBoxes = checklist.query('input[type="text"]');
+        if (questions.length > 0 && textBoxes.length > 0) {
           var noOfQuestions = questions.length / 2;
+          var noOfTextBoxes = textBoxes.length;
           var checkCount = 0;
           for (var i = 0; i < questions.length; i++) {
             if (questions[i].checked) {
               checkCount++;
+            }
+          }
+          for (var i=0; i < noOfTextBoxes; i++) {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block') {
+              return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
             }
           }
           if (noOfQuestions != checkCount) {
