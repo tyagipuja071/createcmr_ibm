@@ -9,7 +9,7 @@
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
-<%
+<% 
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
   Boolean readOnly = (Boolean) request.getAttribute("yourActionsViewOnly");
   if (readOnly == null) {
