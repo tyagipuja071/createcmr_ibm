@@ -4712,7 +4712,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -4751,7 +4751,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -4801,7 +4801,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -4850,7 +4850,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -5056,7 +5056,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -5109,7 +5109,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -5160,7 +5160,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -5223,7 +5223,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -5275,7 +5275,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
