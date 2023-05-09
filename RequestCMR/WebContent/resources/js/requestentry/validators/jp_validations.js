@@ -99,7 +99,8 @@ function afterConfigForJP() {
     setSalesTeamCdEditoble();
     // CREATCMR-6694
     setAdminDeptOptional();
-    addScenarioDriven()
+    addScenarioDriven();
+    setSortlOnOfcdChange();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -3483,7 +3484,7 @@ function setSortlOnOfcdChange() {
       FormManager.setValue('searchTerm', '91454');
     }
   } else if (custGrp == 'SUBSI') {
-    FormManager.setValue('searchTerm', '91454');
+    FormManager.setValue('searchTerm', custSubGrp.substr(0, 2));
   }
 }
 function getSortlByOfcd() {
