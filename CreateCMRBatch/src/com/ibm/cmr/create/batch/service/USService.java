@@ -576,7 +576,8 @@ public class USService extends TransConnService {
     // if status is completed, we need to do something
     LOG.debug("Updating Admin table. Current Status: " + currProcStatus);
 
-    if (CmrConstants.RDC_STATUS_COMPLETED.equals(response.getStatus())) {
+    if (CmrConstants.RDC_STATUS_COMPLETED.equals(response.getStatus())
+        || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(response.getStatus())) {
       overallStatus = CmrConstants.RDC_STATUS_COMPLETED;
       statusMessage
           .append("Record with request ID " + admin.getId().getReqId() + " and CMR Number " + response.getCmrNo() + " created SUCCESSFULLY. ");
@@ -593,6 +594,13 @@ public class USService extends TransConnService {
             siteIds.append(response.getRecords().get(i).getIerpSitePartyId());
           } else {
             siteIds.append(", " + response.getRecords().get(i).getIerpSitePartyId());
+          }
+        }
+        if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(response.getStatus())) {
+          if (StringUtils.isEmpty(siteIds.toString())) {
+            siteIds.append("\nWarning Message: " + response.getMessage());
+          } else {
+            siteIds.append(", " + "\nWarning Message: " + response.getMessage());
           }
         }
 
@@ -1359,7 +1367,7 @@ public class USService extends TransConnService {
           overallStatus = (String) overallResponse.get("overallStatus");
           responses = (List<ProcessResponse>) overallResponse.get("responses");
 
-          if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)) {
+          if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(overallStatus)) {
             wfHistCmt = "All address records on request ID " + admin.getId().getReqId() + " were SUCCESSFULLY processed";
             statusMessage.append("Record with the following CMR number, Address sequence and address types on request ID " + admin.getId().getReqId()
                 + " was SUCCESSFULLY processed:\n");
@@ -1373,6 +1381,9 @@ public class USService extends TransConnService {
                   }
                   statusMessage.append("CMR Number " + resp.getCmrNo() + ", sequence number " + resp.getRecords().get(0).getSeqNo() + ", ");
                   statusMessage.append(" address type " + resp.getRecords().get(0).getAddressType() + "\n");
+                }
+                if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(overallStatus)) {
+                  statusMessage.append("\nWarning Message: " + resp.getMessage());
                 }
               }
             }
