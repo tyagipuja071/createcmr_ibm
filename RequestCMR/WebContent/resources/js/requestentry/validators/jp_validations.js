@@ -76,10 +76,6 @@ function afterConfigForJP() {
   FormManager.addValidator('email2', Validators.NO_HALF_ANGLE, [ 'Customer Name_Detail' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('abbrevNm', Validators.LATIN, [ 'Account Abbreviated Name' ]);
 
-  FormManager.readOnly('isuCd');
-  FormManager.readOnly('clientTier');
-  FormManager.readOnly('searchTerm');
-
   var _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     setCustNmDetailOnScenario();
     setFieldsRequired();
@@ -1113,6 +1109,13 @@ function setMrcByOfficeCd() {
     }
   }
   FormManager.setValue('mrcCd', mrc);
+}
+
+// CREATCMR-9327
+function disableFields() {
+  FormManager.readOnly('isuCd');
+  FormManager.readOnly('clientTier');
+  FormManager.readOnly('searchTerm');
 }
 
 /*
@@ -5910,6 +5913,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
+
+  // CREATCMR-9327
+  GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(disableFields, GEOHandler.JP);
 
   // CREATCMR-6694
   GEOHandler.addAfterConfig(setAdminDeptOptional, GEOHandler.JP);
