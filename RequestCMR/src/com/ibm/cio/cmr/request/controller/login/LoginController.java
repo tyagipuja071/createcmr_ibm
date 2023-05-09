@@ -158,6 +158,7 @@ public class LoginController extends BaseController {
     }
 
     if (OAuthUtils.isSSOActivated()) {
+      RequestUtils.performLogoutActivities(request);
       return new ModelAndView("redirect:/logout", "loginUser", new LogInUserModel());
     }
 
