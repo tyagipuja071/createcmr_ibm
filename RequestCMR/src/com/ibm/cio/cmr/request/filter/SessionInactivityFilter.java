@@ -202,7 +202,7 @@ public class SessionInactivityFilter implements Filter {
 
           RequestUtils.performLogoutActivities(req);
 
-          long reqId = extractRequestId((HttpServletRequest) request);
+          long reqId = RequestUtils.extractRequestId((HttpServletRequest) request);
           if (reqId > 0) {
             req.setAttribute("r", reqId);
           }
@@ -219,14 +219,17 @@ public class SessionInactivityFilter implements Filter {
 
           RequestUtils.performLogoutActivities(req);
 
-          long reqId = extractRequestId((HttpServletRequest) request);
+          long reqId = RequestUtils.extractRequestId((HttpServletRequest) request);
+
           if (reqId > 0) {
             req.setAttribute("r", reqId);
           }
+
           String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
           if (!StringUtils.isBlank(findCmrParams)) {
             req.setAttribute("c", findCmrParams);
           }
+
           req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
           return;
         }
@@ -237,7 +240,7 @@ public class SessionInactivityFilter implements Filter {
 
           RequestUtils.performLogoutActivities(req);
 
-          long reqId = extractRequestId((HttpServletRequest) request);
+          long reqId = RequestUtils.extractRequestId((HttpServletRequest) request);
           if (reqId > 0) {
             req.setAttribute("r", reqId);
           }
@@ -255,7 +258,7 @@ public class SessionInactivityFilter implements Filter {
 
       } else {
         // LOG.debug("User has no session");
-        long reqId = extractRequestId((HttpServletRequest) request);
+        long reqId = RequestUtils.extractRequestId((HttpServletRequest) request);
         if (reqId > 0) {
           req.setAttribute("r", reqId);
         }
@@ -271,32 +274,6 @@ public class SessionInactivityFilter implements Filter {
     filterChain.doFilter(request, response);
 
   } // End doFilter().
-
-  private long extractRequestId(HttpServletRequest request) {
-    String reqIdParam = request.getParameter("reqId");
-    if (reqIdParam != null && StringUtils.isNumeric(reqIdParam) && !"0".equals(reqIdParam)) {
-      return Long.parseLong(reqIdParam);
-    }
-    Object reqIdAtt = request.getAttribute("reqId");
-    if (reqIdAtt != null && StringUtils.isNumeric(reqIdAtt.toString()) && !"0".equals(reqIdAtt.toString())) {
-      return Long.parseLong(reqIdAtt.toString());
-    }
-
-    String url = request.getRequestURI();
-    if (url != null) {
-      if (url.contains("?")) {
-        url = url.substring(0, url.indexOf("?"));
-      }
-      if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
-        String reqId = url.substring(url.lastIndexOf("/") + 1);
-        if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
-          return Long.parseLong(reqId);
-        }
-      }
-    }
-
-    return 0;
-  }
 
   private String extractFindCMRParams(HttpServletRequest request) {
     String url = request.getRequestURI();
