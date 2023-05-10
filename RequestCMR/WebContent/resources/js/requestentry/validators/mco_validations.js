@@ -655,8 +655,10 @@ function addHandlersForPTES() {
 
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      autoSetVatExemptFrPriCust();
-      setVatValidatorPTES();
+      if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.SPAIN) {
+        autoSetVatExemptFrPriCust();
+        setVatValidatorPTES();
+      }
     });
   }
 
@@ -3178,6 +3180,7 @@ function setEntAndSalesRep(entp, salRep) {
 }
 
 function getLandedCntry() {
+  var reqId = FormManager.getActualValue('reqId');
   var result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', {
     REQ_ID : FormManager.getActualValue('reqId')
   });
@@ -3504,6 +3507,62 @@ function addressQuotationValidatorMCO() {
   FormManager.addValidator('prefSeqNo', Validators.NO_QUOTATION, [ 'Sequence Number' ]);
 
 }
+
+function addVatIndValidator() {
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnlyPage == 'true') {
+    FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
+  } else {
+
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+      ISSUING_CNTRY : cntry
+    });
+
+    if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.readOnly('vatInd');
+    } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
+      FormManager.setValue('vat', '');
+      FormManager.setValue('vatInd', '');
+    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.readOnly('vatInd');
+    } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    }
+
+    if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null) && vatInd == 'N') {
+      FormManager.resetValidations('vat');
+    }
+  }
+}
+
+function lockUnlockVatBasedOnVatInd() {
+  var vatInd = FormManager.getActualValue('vatInd');
+  if (vatInd == 'T') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.enable('vat');
+  } else if (vatInd == 'N') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
+  } else if (vatInd == 'E') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('vat');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -3534,14 +3593,14 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(abbrvNmProcessorMandatoryOnChange, GEOHandler.MCO);
   GEOHandler.addAfterConfig(setCollectionCode, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(disableVatIfNotEmptyPortugal, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAfterConfig(disableVatIfNotEmptySpain, [ SysLoc.SPAIN ]);
+  // GEOHandler.addAfterConfig(disableVatIfNotEmptySpain, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(forceLockScenariosPortugal, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(forceLockScenariosSpain, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLocOnChange, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
-  GEOHandler.addAfterConfig(setVatValidatorPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(setVatValidatorPTES, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setAbbrvPortugal, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setDPCEBObasedOnCntry, [ SysLoc.SPAIN ]);
   // GEOHandler.addAfterConfig(setDPCEBObasedOnCntryOnChange, [ SysLoc.SPAIN ]);
@@ -3566,7 +3625,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(setSalesRepValues, [ SysLoc.SPAIN,
   // SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setDPCEBObasedOnCntry, [ SysLoc.SPAIN ]);
-  GEOHandler.addAfterTemplateLoad(setVatValidatorPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.addAfterTemplateLoad(setVatValidatorPTES, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(forceLockScenariosPortugal, [ SysLoc.PORTUGAL ]);
 
   GEOHandler.registerValidator(addEnterpriseValidator, [ SysLoc.PORTUGAL, SysLoc.SPAIN ], null, true);
@@ -3608,7 +3667,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addValidatorForCollectionCdUpdateSpain, [ SysLoc.SPAIN ], null, true);
 
   GEOHandler.addAfterTemplateLoad(retainImportValuesPT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAfterTemplateLoad(autoSetVatExemptFrPriCust, [ SysLoc.SPAIN ]);
+  // GEOHandler.addAfterTemplateLoad(autoSetVatExemptFrPriCust, [ SysLoc.SPAIN
+  // ]);
   GEOHandler.addAfterTemplateLoad(configureVATExemptOnScenariosPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.registerValidator(addAbbrevNmValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addAbbrevLocationValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
@@ -3631,5 +3691,9 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(addISUHandlerEs, [ SysLoc.SPAIN ]);
   // GEOHandler.addAfterConfig(addISUHandlerEs, [ SysLoc.SPAIN ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.PORTUGAL, SysLoc.SPAIN ], null, true);
+  GEOHandler.registerValidator(addVatIndValidator, [ SysLoc.SPAIN ], null, true);
+
+  GEOHandler.addAfterConfig(lockUnlockVatBasedOnVatInd, [ SysLoc.SPAIN ]);
+  GEOHandler.addAfterTemplateLoad(lockUnlockVatBasedOnVatInd, [ SysLoc.SPAIN ]);
 
 });

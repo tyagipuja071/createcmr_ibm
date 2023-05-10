@@ -1322,8 +1322,8 @@ dojo.addOnLoad(function() {
   // Removing this for coverage-2023 as ISU -32 is no longer obsoleted
   // GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
   GEOHandler.addAfterConfig(updateProspectLegalInd,  GEOHandler.AllCountries);
-  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706']);  
-  GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706']); 
+  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706', '838']);  
+  GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706','838']); 
   GEOHandler.registerWWValidator(addVatIndValidator);
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];
