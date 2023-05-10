@@ -5789,6 +5789,7 @@ function replaceCrossbarSymbol(value) {
   if (value != null && value.length > 0) {
     modifiedVal = value;
     modifiedVal = modifiedVal.replace(/-/g, '－');
+    modifiedVal = modifiedVal.replace(/−/g, "－");
     modifiedVal = modifiedVal.replace(/･/g, '・');
     // Story CMR-1660
     modifiedVal = modifiedVal.replace(/,/g, '，');
