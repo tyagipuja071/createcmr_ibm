@@ -1457,9 +1457,9 @@ public class JPHandler extends GEOHandler {
     String custNm1 = addr.getCustNm1() == null ? "" : addr.getCustNm1();
     String custNm2 = addr.getCustNm2() == null ? "" : addr.getCustNm2();
     String custNm12 = custNm1 + custNm2;
-    addr.setCustNm1(custNm12.length() > 15 ? custNm12.substring(0, 15) : custNm12);
+    addr.setCustNm1(custNm12.length() > 17 ? custNm12.substring(0, 17) : custNm12);
     addr.setCustNm2(
-        custNm12.length() > 15 ? custNm12.substring(15).length() > 15 ? custNm12.substring(15).substring(0, 15) : custNm12.substring(15) : "");
+        custNm12.length() > 17 ? custNm12.substring(17).length() > 17 ? custNm12.substring(17).substring(0, 17) : custNm12.substring(17) : "");
     String nameTemp = null;
     if (addr.getCustNm4() != null && addr.getCustNm4().trim().length() > 23) {
       nameTemp = addr.getCustNm4().trim().substring(23);
@@ -1783,9 +1783,9 @@ public class JPHandler extends GEOHandler {
       String output = matcher.replaceFirst("$1　$2");
       addr.setCustNm1(output);
     }
-    if (addr.getCustNm1() != null && addr.getCustNm1().length() > 15) {
-      addr.setCustNm2(addr.getCustNm1().substring(15) + addr.getCustNm2());
-      addr.setCustNm1(addr.getCustNm1().substring(0, 15));
+    if (addr.getCustNm1() != null && addr.getCustNm1().length() > 17) {
+      addr.setCustNm2(addr.getCustNm1().substring(17) + addr.getCustNm2());
+      addr.setCustNm1(addr.getCustNm1().substring(0, 17));
     }
   }
 
@@ -2511,11 +2511,11 @@ public class JPHandler extends GEOHandler {
   @Override
   public String[] dividingCustName1toName2(String name1, String name2) {
     String[] nameArray = new String[2];
-    if (name1 != null && name1.length() > 15 || name1 != null && name2 != null && (name1.length() + name2.length()) > 30
-        || name2 != null && name2.length() > 15) {
+    if (name1 != null && name1.length() > 17 || name1 != null && name2 != null && (name1.length() + name2.length()) > 30
+        || name2 != null && name2.length() > 17) {
       String nameTotal = name1 + (name2 == null ? "" : name2);
-      nameArray[0] = nameTotal.substring(0, 15);
-      nameArray[1] = nameTotal.substring(15).length() > 15 ? nameTotal.substring(15, 30) : nameTotal.substring(15);
+      nameArray[0] = nameTotal.substring(0, 17);
+      nameArray[1] = nameTotal.substring(17).length() > 17 ? nameTotal.substring(17, 30) : nameTotal.substring(17);
     } else {
       nameArray[0] = name1;
       nameArray[1] = name2;
