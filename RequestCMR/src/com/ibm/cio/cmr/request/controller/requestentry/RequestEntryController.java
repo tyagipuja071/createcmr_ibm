@@ -470,12 +470,14 @@ public class RequestEntryController extends BaseController {
   public ModelAndView processYourAction(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model, CheckListModel checklist) {
     ModelAndView mv = null;
     try {
-      service.setChecklist(checklist);
+      String action = model.getAction();
+      if (!"CLM".equals(action)) {
+        service.setChecklist(checklist);
+      }
       service.processTransaction(model, request);
 
       mv = new ModelAndView("redirect:/request/" + model.getReqId(), "reqentry", new RequestEntryModel());
 
-      String action = model.getAction();
       if (CmrConstants.Save().equalsIgnoreCase(action)) {
         mv = new ModelAndView("redirect:/request/" + model.getReqId(), "reqentry", new RequestEntryModel());
         if ("Y".equals(model.getHasError())) {
@@ -915,7 +917,8 @@ public class RequestEntryController extends BaseController {
     return map;
   }
 
-  @RequestMapping(value = "/request/dnb/custNmUpdate")
+  @RequestMapping(
+      value = "/request/dnb/custNmUpdate")
   public ModelMap checkIfCustNMMatchesDnBUpdate(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
     ModelMap map = new ModelMap();
     try {
@@ -1024,7 +1027,8 @@ public class RequestEntryController extends BaseController {
    * @return
    * @throws Exception
    */
-  @RequestMapping(value = "/request/dnb/checkDNBAPIMatchUpdateForNZ")
+  @RequestMapping(
+      value = "/request/dnb/checkDNBAPIMatchUpdateForNZ")
   public ModelMap checkIfCustNmMatchesUpdateForNZ(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
     ModelMap map = new ModelMap();
     try {
@@ -1049,7 +1053,8 @@ public class RequestEntryController extends BaseController {
    * @return
    * @throws Exception
    */
-  @RequestMapping(value = "/request/dnb/checkDNBAPIMatchForNZ")
+  @RequestMapping(
+      value = "/request/dnb/checkDNBAPIMatchForNZ")
   public ModelMap checkIfCustNmMatchesCreateForNZ(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
     ModelMap map = new ModelMap();
     try {
