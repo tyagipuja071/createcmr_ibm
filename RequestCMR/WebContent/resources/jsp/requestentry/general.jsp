@@ -245,7 +245,7 @@ if (readOnly){
                 <td>${reqentry.approvalResult}</td>
                 <td>${reqentry.approvalDateStr}</td>
               </tr>
-              <cmr:view forCountry="866,754,724,848,618,788,624,678,702,806,846">
+              <cmr:view forCountry="866,754,724,848,618,788,624,678,702,806,846,838">
 	              <tr>
 	                <td>VAT Acknowledge</td>
 	                <td id='vatAckknowledge'>${reqentry.vatAcknowledge}</td>
