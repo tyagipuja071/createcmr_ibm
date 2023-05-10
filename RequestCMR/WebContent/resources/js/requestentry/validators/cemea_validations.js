@@ -3402,8 +3402,17 @@ function addCEMEAChecklistValidator() {
         var checklist = dojo.query('table.checklist');
 
         var questions = checklist.query('input[type="radio"]');
+        var textBoxes = checklist.query('input[type="text"]');
         if (questions.length > 0) {
           var noOfQuestions = questions.length / 2;
+          var noOfTextBoxes = textBoxes.length;
+          
+          for (var i=0; i < noOfTextBoxes; i++) {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 9) || ((i >= 3 || i < 9) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+              return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+            }
+          }
+          
           var checkCount = 0;
           for (var i = 0; i < questions.length; i++) {
             if (questions[i].checked) {
