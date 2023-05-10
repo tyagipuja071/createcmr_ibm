@@ -17,8 +17,8 @@
 	<cmr:checklist title1="MULTIPURPOSE PROLIFERATION AND MILITARY SCREENING CHECKLIST (Supplement 2.5 to USERP Section 4 Part 2)">
 		<cmr:chk-block>Applicable to the following countries:<br>
 	Abu Dhabi, Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, Cambodia, People's Republic of China (including Hong Kong), 
-	Egypt, Georgia, Iran, Iraq, Israel, Jordan, Kazakhstan, Kuwait, Kyrgyzstan, Laos, Lebanon, Libya, Macau, Moldova, Mongolia, 
-	Myanmar (Burma), Oman, Pakistan, Palestine, Qatar, Russia, Saudi Arabia, Sudan, Syrian Arab Republic, Taiwan, Tajikistan, 
+	Egypt, Georgia, Iraq, Israel, Jordan, Kazakhstan, Kuwait, Kyrgyzstan, Laos, Lebanon, Libya, Macau, Moldova, Mongolia, 
+	Myanmar (Burma), Oman, Pakistan, Palestine, Qatar, Russia, Saudi Arabia, Sudan, Taiwan, Tajikistan, 
 	Turkmenistan, Ukraine, United Arab Emirates, Uzbekistan, Venezuela, Vietnam, Yemen
 		</cmr:chk-block>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Company Full Name: ">

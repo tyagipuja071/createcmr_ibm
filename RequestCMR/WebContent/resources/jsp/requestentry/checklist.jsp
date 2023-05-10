@@ -91,7 +91,7 @@ table.checklist span.checklist-radio {
     <cmr:view forCountry="714">
       <jsp:include page="AP/laos_checklist.jsp" />
     </cmr:view>
-    <cmr:view forCountry="358,359,363,607,620,626,651,675,677,680,694,695,713,741,752,762,767,768,772,787,805,808,821,823,832,842,849,850,865,889">
+    <cmr:view forCountry="358,359,363,607,620,626,651,675,677,680,694,695,713,741,752,762,767,768,772,787,805,808,821,823,832,842,849,865,889">
       <jsp:include page="CEMEA/cemea_checklist.jsp" />
     </cmr:view> 
     <cmr:view forCountry="641">
