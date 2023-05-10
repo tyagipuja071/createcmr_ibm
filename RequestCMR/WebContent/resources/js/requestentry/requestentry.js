@@ -71,6 +71,15 @@ function processRequestAction() {
     cmr.showAlert('Please select an action from the choices.');
   }
 
+  // prevent from overwriting the DB REQ_STATUS
+  // if another tab is open with different UI REQ_STATUS
+  if (!isReqStatusEqualBetweenUIandDB()) {
+    cmr.showAlert("Unable to execute the action. Request Status mismatch from database." +
+      "<br><br>Please reload the page.");
+
+    return;
+  }
+
   /* Your Actions processing here */
 
   if (action == YourActions.Save) {
@@ -87,8 +96,8 @@ function processRequestAction() {
   } else if (action == YourActions.Claim) {
     if (approvalResult == 'Cond. Approved') {
       cmr.showConfirm('doYourAction()', 'The request was conditionally approved by ERO.', 'Warning', null, {
-        OK : 'Ok',
-        CANCEL : 'Cancel'
+        OK: 'Ok',
+        CANCEL: 'Cancel'
       });
     } else {
       doYourAction();
@@ -138,21 +147,22 @@ function processRequestAction() {
     var vatInd = FormManager.getActualValue('vatInd');
     var custGrp = FormManager.getActualValue('custGrp');
     var reqId = FormManager.getActualValue('reqId');
-    var crossScenTyp = ['CROSS','LUCRO','EECRO','LTCRO','LVCRO','FOCRO','GLCRO','ISCRO'];
+    var crossScenTyp = [ 'CROSS', 'LUCRO', 'EECRO', 'LTCRO', 'LVCRO', 'FOCRO', 'GLCRO', 'ISCRO' ];
     if (custGrp == null || custGrp == '') {
       custGrp = getCustGrp();
     }
     var oldVat = cmr.query('GET.OLD.VAT.VALUE', {
-      REQ_ID : reqId
+      REQ_ID: reqId
     });
     var oldVatValue = oldVat.ret1 != undefined ? oldVat.ret1 : '';
+    var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
       cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
-      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry'))) && (vatInd == 'N') && (!crossScenTyp.includes(custGrp))
-          && ((oldVatValue=='' && reqType=='U') || (reqType=='C'))) {
+      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry'))) && (vatInd == 'N')
+          && (!crossScenTyp.includes(custGrp)) && ((oldVatValue == '' && reqType == 'U') || (reqType == 'C'))) {
         findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
@@ -274,6 +284,7 @@ function processRequestAction() {
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
+
   } else if (action == YourActions.Processing_Create_Up_Complete) {
     var cmrNo = FormManager.getActualValue('cmrNo');
     var disAutoProc = FormManager.getActualValue('disableAutoProc');
@@ -313,8 +324,8 @@ function processRequestAction() {
       // proceed
       if (result == '' || (result.toUpperCase() != 'AP' && result.toUpperCase() != 'NR')) {
         cmr.showConfirm('doYourAction()', 'This request has not passed all DPL checks. Are you sure you want to process this request?', 'Warning', null, {
-          OK : 'Yes',
-          CANCEL : 'No'
+          OK: 'Yes',
+          CANCEL: 'No'
         });
       } else {
         // if the customer names have changed since last save and it is being
@@ -339,6 +350,7 @@ function processRequestAction() {
 
   } else if (action == YourActions.Exit) {
     exitWithoutSaving();
+
   } else if (action == YourActions.Reprocess_Checks) {
     var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
     if (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') {
@@ -3014,4 +3026,20 @@ function doNZBNAPIMatch() {
       CANCEL : 'No'
     });
   }
+}
+
+function isReqStatusEqualBetweenUIandDB() {
+
+  var uiReqStatus = FormManager.getActualValue('reqStatus');
+  var reqId = FormManager.getActualValue('reqId');
+  var dbReqStatus = "";
+
+  var result = cmr.query("WW.GET_REQ_STATUS", {
+    REQ_ID: reqId
+  });
+  if (result != null && result.ret1 != '' && result.ret1 != null) {
+    dbReqStatus = result.ret1;
+  }
+
+  return uiReqStatus == dbReqStatus;
 }

@@ -56,10 +56,22 @@ function processRequestAction() {
     cmr.showAlert('CMR Issuing Country and Request Type need to be specified to execute actions.');
     return;
   }
+
   var action = FormManager.getActualValue('yourAction');
   if (action == '') {
     cmr.showAlert('Please select an action from the choices.');
   }
+
+  // prevent from overwriting the DB REQ_STATUS
+  // if another tab is open with different UI REQ_STATUS
+  if (!isReqStatusEqualBetweenUIandDB()) {
+    cmr.showAlert("Unable to execute the action. Request Status mismatch from database." +
+      "<br><br>Please reload the page.");
+
+    return;
+  }
+
+  /* Your Actions processing here */
 
   if (action == YourActions.Save) {
     var hasError = !FormManager.validate('frmCMR', null, true);
@@ -74,8 +86,8 @@ function processRequestAction() {
   } else if (action == YourActions.Claim) {
     if (approvalResult == 'Cond. Approved') {
       cmr.showConfirm('doYourAction()', 'The request was conditionally approved by ERO.', 'Warning', null, {
-        OK : 'Ok',
-        CANCEL : 'Cancel'
+        OK: 'Ok',
+        CANCEL: 'Cancel'
       });
     } else {
       doYourAction();
@@ -917,3 +929,19 @@ function showDPLSummaryScreen() {
 // GEOHandler.ROLE_REQUESTER, false, false);
 // GEOHandler.registerValidator(isDPLCheckNeeded, [ SysLoc.SPAIN, SysLoc. ]);
 // });
+
+function isReqStatusEqualBetweenUIandDB() {
+
+  var uiReqStatus = FormManager.getActualValue('reqStatus');
+  var reqId = FormManager.getActualValue('reqId');
+  var dbReqStatus = "";
+
+  var result = cmr.query("WW.GET_REQ_STATUS", {
+    REQ_ID: reqId
+  });
+  if (result != null && result.ret1 != '' && result.ret1 != null) {
+    dbReqStatus = result.ret1;
+  }
+
+  return uiReqStatus == dbReqStatus;
+}
