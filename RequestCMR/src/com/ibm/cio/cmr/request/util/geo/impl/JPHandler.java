@@ -311,6 +311,7 @@ public class JPHandler extends GEOHandler {
         }
         addr.setAddrTxt(company.getAddress() == null ? company.getAddress()
             : company.getAddress().trim().length() > 23 ? company.getAddress().trim().substring(0, 23) : company.getAddress().trim());
+        addr.setAddrTxt(convert2DBCS(addr.getAddrTxt()));
         addr.setAddrTxt2(addrTxt);
         sbPhone = new StringBuilder();
         sbPhone.append(!StringUtils.isEmpty(company.getPhoneShi()) ? company.getPhoneShi() : "");
@@ -376,6 +377,7 @@ public class JPHandler extends GEOHandler {
           addr.setAddrTxt(establishment.getAddress() == null ? establishment.getAddress()
               : establishment.getAddress().trim().length() > 23 ? establishment.getAddress().trim().substring(0, 23)
                   : establishment.getAddress().trim());
+          addr.setAddrTxt(convert2DBCS(addr.getAddrTxt()));
           addr.setAddrTxt2(estAddrTxt);
           addr.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
           addr.setImportInd(CmrConstants.YES_NO.Y.toString());
@@ -777,6 +779,7 @@ public class JPHandler extends GEOHandler {
     address.setAddrTxt(currentRecord.getCmrStreetAddress() == null ? currentRecord.getCmrStreetAddress()
         : currentRecord.getCmrStreetAddress().trim().length() > 23 ? currentRecord.getCmrStreetAddress().trim().substring(0, 23)
             : currentRecord.getCmrStreetAddress().trim());
+    address.setAddrTxt(convert2DBCS(address.getAddrTxt()));
     address.setAddrTxt2(addrTxt);
     // 1652081
     convertKATAKANA(currentRecord.getCmrName2Plain(), address);
@@ -1475,6 +1478,7 @@ public class JPHandler extends GEOHandler {
     }
     addr.setAddrTxt(addr.getAddrTxt() == null ? addr.getAddrTxt()
         : addr.getAddrTxt().trim().length() > 23 ? addr.getAddrTxt().trim().substring(0, 23) : addr.getAddrTxt().trim());
+    addr.setAddrTxt(convert2DBCS(addr.getAddrTxt()));
 
     setCSBOBeforeAddrSave(entityManager, addr);
     setCustNmDetailBeforeAddrSave(entityManager, addr);
@@ -1878,6 +1882,8 @@ public class JPHandler extends GEOHandler {
       modifiedVal = modifiedVal.replaceAll("Y", "Ｙ");
       modifiedVal = modifiedVal.replaceAll("Z", "Ｚ");
       modifiedVal = modifiedVal.replaceAll(" ", "　");
+      modifiedVal = modifiedVal.replaceAll("-", "－");
+      modifiedVal = modifiedVal.replaceAll("−", "－");
     }
     return modifiedVal;
   }
