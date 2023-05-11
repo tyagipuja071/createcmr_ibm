@@ -26,6 +26,7 @@
         <cmr:field fieldId="SalesBusOff" id="salesBusOffCd" path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>  --> 
+    <c:if test="${reqentry.reqType == 'U'}">
         <cmr:column span="2" containerForField="EngineeringBo">
       <p>
         <cmr:label fieldId="engineeringBo">
@@ -35,6 +36,7 @@
         <cmr:field fieldId="EngineeringBo" id="engineeringBo" path="engineeringBo" tabId="MAIN_IBM_TAB"/>
       </p>
     </cmr:column>  
+    </c:if>
   </cmr:row>
     <form:hidden path="salesBusOffCd" id="salesBusOffCd"/>
   
