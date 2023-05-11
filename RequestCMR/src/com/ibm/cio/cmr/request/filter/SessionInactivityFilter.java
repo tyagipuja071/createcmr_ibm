@@ -29,7 +29,9 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
@@ -185,6 +187,8 @@ public class SessionInactivityFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse resp = (HttpServletResponse) response;
+
     if (filterPath(request)) {
 
       // LOG.debug("Inside the Filter: "+req.getRequestURI());
@@ -196,9 +200,10 @@ public class SessionInactivityFilter implements Filter {
       if (session != null) {
         // if (session != null && req.isRequestedSessionIdValid()) {
 
-        String accessToken = (String) session.getAttribute("accessToken");
         if (session.getAttribute(CmrConstants.SESSION_APPUSER_KEY) == null) {
           LOG.debug("No user session found");
+
+          deleteWASCookies(req, resp);
 
           RequestUtils.performLogoutActivities(req);
 
@@ -216,6 +221,8 @@ public class SessionInactivityFilter implements Filter {
 
         if (tooLongSinceLastUserTriggeredRequest(req)) {
           LOG.debug("User session has expired");
+
+          deleteWASCookies(req, resp);
 
           RequestUtils.performLogoutActivities(req);
 
@@ -237,6 +244,8 @@ public class SessionInactivityFilter implements Filter {
         LocalDateTime tokenExpiringTime = (LocalDateTime) session.getAttribute("tokenExpiringTime");
         if (tokenExpiringTime != null && LocalDateTime.now().isAfter(tokenExpiringTime)) {
           LOG.debug("Access token expired! ");
+
+          deleteWASCookies(req, resp);
 
           RequestUtils.performLogoutActivities(req);
 
@@ -402,5 +411,15 @@ public class SessionInactivityFilter implements Filter {
     return retVal;
 
   } // Ebd filterPath().
+
+  public static void deleteWASCookies(HttpServletRequest request, HttpServletResponse response) {
+    Cookie[] cookies = request.getCookies();
+    for (Cookie cookie : cookies) {
+      if (cookie.getName().contains("WAS")) {
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+      }
+    }
+  }
 
 } // End class.
