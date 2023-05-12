@@ -287,6 +287,22 @@ public class SpainUtil extends AutomationUtil {
       results.setResults("Skipped.");
       results.setProcessOutput(overrides);
     }
+
+    // for P2L Conversions - checking of mandatory fields
+    if ("Y".equalsIgnoreCase(admin.getProspLegalInd()) && "Saas-Test".equalsIgnoreCase(admin.getSourceSystId())) {
+      if ("COMME".equalsIgnoreCase(data.getCustSubGrp())) {
+        Addr soldtoAddr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+        if (StringUtils.isBlank(soldtoAddr.getStateProv())) {
+          details.append("\nState Prov is a mandatory field. Processor Review will be required.");
+          engineData.addNegativeCheckStatus("_stateMissing", "State Prov is a mandatory field.");
+        }
+        if (StringUtils.isBlank(data.getEnterprise())) {
+          details.append("\nEnterprise is a mandatory field. Processor Review will be required.");
+          engineData.addNegativeCheckStatus("_enterpriseMissing", "Enterprise is a mandatory field.");
+        }
+      }
+    }
+
     results.setDetails(details.toString());
     LOG.debug(results.getDetails());
     return results;
