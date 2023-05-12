@@ -1808,10 +1808,6 @@ public class RequestUtils {
     return legacy;
   }
 
-  private static String obtainURI(String url) {
-    return null;
-  }
-
   /**
    * Performs logout actions by cleaning up sessions and cookies. TODO: should
    * this method be in another class?
