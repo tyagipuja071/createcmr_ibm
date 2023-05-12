@@ -156,7 +156,7 @@ function processRequestAction() {
       REQ_ID: reqId
     });
     var oldVatValue = oldVat.ret1 != undefined ? oldVat.ret1 : '';
-    var personalInfoPrivacyNoticeCntryList = ['858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760'];
+    var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
