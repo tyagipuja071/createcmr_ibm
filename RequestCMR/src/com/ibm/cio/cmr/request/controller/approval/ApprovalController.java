@@ -39,6 +39,7 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
+import com.ibm.cio.cmr.request.util.oauth.UserHelper;
 import com.ibm.cmr.services.client.auth.Authorization;
 
 /**
@@ -76,17 +77,23 @@ public class ApprovalController extends BaseController {
     String view = "approve";
     String title = UIMgr.getText("title.approval");
     ApprovalResponseModel approval = new ApprovalResponseModel();
+
+    // connect to W3 to build user profile
+    UserHelper userHelper = new UserHelper();
+    String ibmUniqueId = userHelper.getUNID();
     try {
       approval = modelFromRequest;
       if (!processing) {
-        if (!authorize(request)) {
+        // if (!authorize(request) || ) {
+        if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
           // only show this when not yet processing
           tagUnauthorized(response);
         } else {
           LOG.debug("Approval Code: " + approvalCode);
-          String user = getUserIdFromAuth(request);
+          // String user = getUserIdFromAuth(request);
+          String userId = userHelper.getRegistrationId();
           approval = decodeUrlParam(approvalCode);
-          if (approval != null && approval.getApproverId() != null && !approval.getApproverId().toUpperCase().equals(user.toUpperCase())) {
+          if (approval != null && approval.getApproverId() != null && !approval.getApproverId().toUpperCase().equals(userId.toUpperCase())) {
             // if the approver on the request is not the same as the one who
             // accessed
             // the URL
@@ -107,7 +114,7 @@ public class ApprovalController extends BaseController {
         approval.setType("L");
         approvalService.processTransaction(approval, request);
 
-        System.err.println("Req ID " + approval.getReqId());
+        System.out.println("Req ID  " + approval.getReqId());
         createAppUser(approval, request);
         if (!approval.isProcessed()) {
           // show status changed if status is now invalid
@@ -155,21 +162,23 @@ public class ApprovalController extends BaseController {
   }
 
   private void createAppUser(ApprovalResponseModel approval, HttpServletRequest request) throws CmrException {
-    AppUser user = new AppUser();
-    user.setIntranetId(approval.getApproverId().toLowerCase());
-    Person person = BluePagesHelper.getPerson(approval.getApproverId());
-    if (person != null) {
-      user.setBluePagesName(person.getName());
-      user.setNotesEmailId(person.getNotesEmail());
-    } else {
-      user.setBluePagesName(approval.getApproverId().toLowerCase());
-      user.setNotesEmailId(approval.getApproverId().toLowerCase());
-    }
-    user.setApprover(true);
-    user.setAuth(new Authorization());
-    request.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
-    request.getSession().setAttribute("displayName", user.getBluePagesName());
 
+    AppUser user = AppUser.getUser(request);
+    if (user == null) {
+      user.setIntranetId(approval.getApproverId().toLowerCase());
+      Person person = BluePagesHelper.getPerson(approval.getApproverId());
+      if (person != null) {
+        user.setBluePagesName(person.getName());
+        user.setNotesEmailId(person.getNotesEmail());
+      } else {
+        user.setBluePagesName(approval.getApproverId().toLowerCase());
+        user.setNotesEmailId(approval.getApproverId().toLowerCase());
+      }
+      user.setApprover(true);
+      user.setAuth(new Authorization());
+      request.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+      request.getSession().setAttribute("displayName", user.getBluePagesName());
+    }
   }
 
   /**

@@ -84,7 +84,7 @@ public class UserInjectFilter implements Filter {
     HttpServletRequest httpReq = (HttpServletRequest) request;
     HttpServletResponse httpResp = (HttpServletResponse) response;
 
-    // verify and force encoding
+    // verify and force e ncoding
     assignEncoding(this.encoding, httpReq, httpResp);
 
     HttpSession session = shouldCreateSession(httpReq);
@@ -105,7 +105,9 @@ public class UserInjectFilter implements Filter {
 
           if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
             LOG.debug("No IBM ID detected. Redirecting to W3 ID ...");
+            String requestURL = httpReq.getRequestURI();
             httpReq.getSession().invalidate();
+            httpReq.getSession().setAttribute("previousURI", requestURL);
             httpResp.sendRedirect("/CreateCMR/oidc");
             return;
           } else {
@@ -118,8 +120,14 @@ public class UserInjectFilter implements Filter {
 
           session.setAttribute("userHelper", userHelper);
           setSessionAttributes(httpReq, httpResp);
+
+          if (shouldRedirectToURI(httpReq)) {
+            String previousURI = (String) httpReq.getSession(false).getAttribute("previousURI");
+            httpResp.sendRedirect(previousURI);
+            return;
+          }
+
           filterChain.doFilter(httpReq, httpResp);
-          // httpResp.sendRedirect("/CreateCMR/home");
           return;
         }
       }
@@ -182,7 +190,6 @@ public class UserInjectFilter implements Filter {
    */
   private boolean shouldFilterURLEndpoint(HttpServletRequest request, HttpServletResponse response) {
     String url = request.getRequestURI();
-    int status = response.getStatus();
     if (url.endsWith("/update")) {
       return false;
     }
@@ -257,7 +264,15 @@ public class UserInjectFilter implements Filter {
     } catch (UnsupportedEncodingException e) {
       LOG.error("Unsuported enconding operation: " + e);
     }
+  }
 
+  private boolean shouldRedirectToURI(HttpServletRequest request) {
+    String previousURI = (String) request.getSession(false).getAttribute("previousURI");
+    if (previousURI.matches("(.*)/request/[0-9]+(.*)") || previousURI.matches("(.*)/massrequest/[0-9]+(.*)")
+        || previousURI.matches("(.*)CreateCMR/approval/(.*)")) {
+      return true;
+    }
+    return false;
   }
 
 }
