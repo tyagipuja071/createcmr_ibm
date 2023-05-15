@@ -3,14 +3,23 @@
  */
 package com.ibm.cio.cmr.request.service.code;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
 import com.ibm.cio.cmr.request.CmrException;
@@ -21,6 +30,7 @@ import com.ibm.cio.cmr.request.model.code.SCCModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
+import com.ibm.cio.cmr.request.util.system.StatXLSConfig;
 
 /**
  * @author Jeffrey Zamora
@@ -28,6 +38,8 @@ import com.ibm.cio.cmr.request.service.BaseService;
  */
 @Component
 public class SCCService extends BaseService<SCCModel, USCMRScc> {
+
+  private static List<StatXLSConfig> config1 = null;
 
   @Override
   protected Logger initLogger() {
@@ -128,4 +140,131 @@ public class SCCService extends BaseService<SCCModel, USCMRScc> {
     return true;
   }
 
+  // CREATCMR-9311:export the scc list to excel file
+  public void exportToExcel(List<SCCModel> results, HttpServletResponse response) throws IOException {
+    if (config1 == null) {
+      initConfig1();
+    }
+
+    log.info("Exporting records to excel..");
+
+    XSSFWorkbook report = new XSSFWorkbook();
+    try {
+
+      XSSFSheet sheet0 = report.createSheet("SCCList");
+
+      XSSFFont bold = report.createFont();
+      bold.setBold(true);
+      bold.setFontHeight(10);
+      XSSFCellStyle boldStyle = report.createCellStyle();
+      boldStyle.setFont(bold);
+
+      XSSFFont regular = report.createFont();
+      regular.setFontHeight(11);
+      XSSFCellStyle regularStyle = report.createCellStyle();
+      regularStyle.setFont(regular);
+      regularStyle.setWrapText(true);
+      regularStyle.setVerticalAlignment(VerticalAlignment.TOP);
+
+      StatXLSConfig sc0 = null;
+      for (int i = 0; i < config1.size(); i++) {
+        sc0 = config1.get(i);
+        sheet0.setColumnWidth(i, sc0.getWidth() * 256);
+      }
+
+      // create headers
+      XSSFRow header1 = sheet0.createRow(0);
+      createHeaders(header1, boldStyle, config1);
+
+      // add the data
+      XSSFRow row0 = null;
+      int current0 = 1;
+
+      for (SCCModel obj : results) {
+        row0 = sheet0.createRow(current0);
+
+        int cellInd = 0;
+        XSSFCell cell = row0.createCell(cellInd++);
+        cell.setCellStyle(regularStyle);
+        cell.setCellValue(obj.getnLand());
+        cell = row0.createCell(cellInd++);
+        cell.setCellStyle(regularStyle);
+        float cSt = obj.getcSt();
+        String formattedSt = String.format("%02d", (int) cSt);
+        formattedSt = formattedSt.substring(0, 2);
+        cell.setCellValue(formattedSt);
+
+        cell = row0.createCell(cellInd++);
+        cell.setCellStyle(regularStyle);
+        float cCnty = obj.getcCnty();
+        String formattedCnty = String.format("%03d", (int) cCnty);
+        formattedCnty = formattedCnty.substring(0, 3);
+        cell.setCellValue(formattedCnty);
+
+        cell = row0.createCell(cellInd++);
+        cell.setCellStyle(regularStyle);
+        float cCity = obj.getcCity();
+        String formattedCity = String.format("%04d", (int) cCity);
+        formattedCity = formattedCity.substring(0, 4);
+        cell.setCellValue(formattedCity);
+
+        cell = row0.createCell(cellInd++);
+        cell.setCellStyle(regularStyle);
+        cell.setCellValue(obj.getnSt());
+
+        cell = row0.createCell(cellInd++);
+        cell.setCellStyle(regularStyle);
+        cell.setCellValue(obj.getnCnty());
+
+        cell = row0.createCell(cellInd++);
+        cell.setCellStyle(regularStyle);
+        cell.setCellValue(obj.getnCity());
+
+        cell = row0.createCell(cellInd++);
+        cell.setCellStyle(regularStyle);
+        int cZip = obj.getcZip();
+        String formattedZip = String.format("%05d", cZip);
+        formattedZip = formattedZip.substring(0, 5);
+        cell.setCellValue(formattedZip);
+
+        current0++;
+      }
+
+      if (response != null) {
+        response.setContentType("application/octet-stream");
+        response.addHeader("Content-Type", "application/octet-stream");
+        response.addHeader("Content-Disposition", "attachment; filename=\"SCC List.xlsx\"");
+        report.write(response.getOutputStream());
+      }
+      log.info("Export records to excel successfully.");
+    } finally {
+      report.close();
+    }
+  }
+
+  private void initConfig1() {
+    config1 = new ArrayList<StatXLSConfig>();
+
+    config1.add(new StatXLSConfig("Land Cntry", "LAND_CNTRY", 12, null));
+    config1.add(new StatXLSConfig("State Code", "C_ST", 12, null));
+    config1.add(new StatXLSConfig("County Code", "C_CNTY", 12, null));
+    config1.add(new StatXLSConfig("City Code", "C_CITY", 12, null));
+    config1.add(new StatXLSConfig("State", "N_ST", 20, null));
+    config1.add(new StatXLSConfig("County / Country", "N_CNTY", 20, null));
+    config1.add(new StatXLSConfig("City", "N_CITY", 20, null));
+    config1.add(new StatXLSConfig("Zip Code", "C_ZIP", 12, null));
+  }
+
+  private void createHeaders(XSSFRow header, XSSFCellStyle style, List<StatXLSConfig> config) {
+    XSSFCell cell = null;
+
+    StatXLSConfig sc = null;
+    for (int i = 0; i < config.size(); i++) {
+      sc = config.get(i);
+      cell = header.createCell(i);
+      cell.setCellValue(sc.getLabel());
+      cell.setCellStyle(style);
+    }
+  }
+  // CREATCMR-9311 end
 }
