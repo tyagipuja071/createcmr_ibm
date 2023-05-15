@@ -154,11 +154,13 @@ public class NetherlandsUtil extends AutomationUtil {
     String bgId = data.getBgId();
     String commercialFin = "";
 
-    if (StringUtils.isNotBlank(coverageId)) {
-      String sortl = getSORTLfromCoverage(entityManager, container.getFinalCoverage());
-      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENGINEERING_BO", data.getEngineeringBo(), sortl);
-      details.append("-BO Team: " + sortl);
-    }
+    /*
+     * if (StringUtils.isNotBlank(coverageId)) { String sortl =
+     * getSORTLfromCoverage(entityManager, container.getFinalCoverage());
+     * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+     * "ENGINEERING_BO", data.getEngineeringBo(), sortl);
+     * details.append("-BO Team: " + sortl); }
+     */
 
     if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
       commercialFin = computeSBOForCovBelux(entityManager, QUERY_BG_SBO_BENELUX, bgId, data.getCmrIssuingCntry(), false);
@@ -198,10 +200,14 @@ public class NetherlandsUtil extends AutomationUtil {
         
       if (fields != null) {
         details.append("Coverage calculated successfully using 32S logic.").append("\n");
-        if (StringUtils.isNotBlank(fields.getEngineeringBO())) {
-          details.append("BO Team : " + fields.getEngineeringBO()).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENGINEERING_BO", data.getEngineeringBo(), fields.getEngineeringBO());
-        }
+        /*
+         * if (StringUtils.isNotBlank(fields.getEngineeringBO())) {
+         * details.append("BO Team : " +
+         * fields.getEngineeringBO()).append("\n");
+         * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+         * "ENGINEERING_BO", data.getEngineeringBo(),
+         * fields.getEngineeringBO()); }
+         */
         if (StringUtils.isNotBlank(fields.getInac())) {
           details.append(" INAC/NAC Code : " + fields.getInac()).append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), fields.getInac());
@@ -279,10 +285,11 @@ public class NetherlandsUtil extends AutomationUtil {
       query.setParameter("ISSUING_CNTRY", SystemLocation.NETHERLANDS);
       engineeringBOs = query.getResults();
     }
-    if (engineeringBOs != null && engineeringBOs.size() == 1) {
-      String engineeringBO = (String) engineeringBOs.get(0)[0];
-      container.setEngineeringBO(engineeringBO);
-    }
+    /*
+     * if (engineeringBOs != null && engineeringBOs.size() == 1) { String
+     * engineeringBO = (String) engineeringBOs.get(0)[0];
+     * container.setEngineeringBO(engineeringBO); }
+     */
 
     // setINACValues
     List<Object[]> inacValues = new ArrayList<>();

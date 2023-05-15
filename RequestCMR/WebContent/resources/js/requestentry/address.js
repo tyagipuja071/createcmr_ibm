@@ -2272,6 +2272,10 @@ function refreshAfterAddressCopy(result) {
 
   // call the addr std result calculation for score card here..
   SetAddrStdResult();
+  
+  // Ensure quick search parameter is preserved after reloading
+  var isFromQuickSearch = new URLSearchParams(location.search).get('qs');
+  dojo.cookie('qs', isFromQuickSearch ? isFromQuickSearch : 'N');
 }
 
 function removeSelectedAddresses() {

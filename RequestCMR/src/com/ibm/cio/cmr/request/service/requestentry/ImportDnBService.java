@@ -154,11 +154,13 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         DataPK dataPK = new DataPK();
         dataPK.setReqId(reqIdToUse);
         data.setId(dataPK);
+
+        savePageData(reqModel, admin, data);
+
         if (geoHandler != null) {
           geoHandler.setDataDefaultsOnCreate(data, entityManager);
         }
 
-        savePageData(reqModel, admin, data);
         setAdminDefaults(admin, user, request);
         if (geoHandler != null) {
           geoHandler.setAdminDefaultsOnCreate(admin);

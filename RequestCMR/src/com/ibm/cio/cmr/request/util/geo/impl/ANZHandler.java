@@ -592,7 +592,8 @@ public class ANZHandler extends APHandler {
 
       // CREATCMR-8430: return false for mailing address matching if
       // MailingDnbAddress is blank
-      if ("796".equals(issuingCountry) && StringUtils.isNotBlank(address) && StringUtils.isBlank(MailingDnbAddress)) {
+      // CREATCMR-8553: for AU, if mailing address is null in DNB, return false;
+      if (StringUtils.isNotBlank(address) && StringUtils.isBlank(MailingDnbAddress)) {
         return false;
       }
 

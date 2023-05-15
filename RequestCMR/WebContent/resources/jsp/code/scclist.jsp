@@ -78,6 +78,22 @@
     FilteringDropdown.loadFixedItems('nLand', null, dropdown1);
     
   });
+
+  // CREATCMR-9311: export the scc list to excel file
+  var filterParams = '';
+  function sccListGrid_GRID_onLoad(data){
+    if(data && data.length>0) {
+      var nSt = FormManager.getActualValue('nSt');
+	    var cCity = FormManager.getActualValue('cCity');
+      var cCnty = FormManager.getActualValue('cCnty');
+      var nLand = FormManager.getActualValue('nLand');
+      
+      filterParams = 'nSt=' + nSt + '&nCity=' + cCity + '&nCnty=' + cCnty + '&nLand=' + nLand;
+    } else {
+      filterParams = '';
+    }
+  }
+  // CREATCMR-9311 end
 </script>
 <cmr:boxContent>
   <cmr:tabs />
@@ -191,6 +207,7 @@
     <% if(showFlag) { %>
     <cmr:button label="Add US SCC" onClick="SCCService.addSCC(false)" highlight="true" />
     <cmr:button label="Add Non-US SCC" onClick="SCCService.addSCC(true)" pad="true" />
+    <cmr:button label="Export SCC to Excel" onClick="SCCService.exportToExcel(filterParams)" pad="true" />
     <% } %>  
     <% if("Y".equals(taxTeamFlag)) { %>
     <cmr:button label="Back to Search Home" onClick="backToSearchHome()" pad="true" />
@@ -203,3 +220,7 @@
     %>
   </cmr:buttonsRow>
 </cmr:section>
+
+<form _csrf="GhtjeYhfngleOImde2" id="sccListDownLoad" name="sccListDownLoad" method="POST">
+  <input type="hidden" name="_csrf" id="_csrf" value="GhtjeYhfngleOImde2" />
+</form>

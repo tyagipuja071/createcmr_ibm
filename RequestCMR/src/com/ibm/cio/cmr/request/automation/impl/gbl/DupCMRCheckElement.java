@@ -29,6 +29,7 @@ import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
@@ -58,8 +59,12 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
   @Override
   public AutomationResult<MatchingOutput> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
+    log.debug("DupcCmrCheckElement");
     Addr soldTo = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String isProspectCmr = admin.getProspLegalInd();
+    String issuingCntry = data.getCmrIssuingCntry();
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     boolean matchDepartment = false;
@@ -97,7 +102,11 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                 }
                 Collections.copy(cmrCheckMatches, cmrCheckMatchesDept);
               }
-              if (cmrCheckMatches.size() != 0) {
+              result = checkDupcProspectCmr(cmrCheckMatches, soldTo, isProspectCmr, engineData, result, issuingCntry);
+              if (result.isOnError()) {
+                return result;
+              }
+              if (cmrCheckMatches.size() != 0 && !"Y".equals(isProspectCmr)) {
                 result.setResults("Matches Found");
                 details.append(cmrCheckMatches.size() + " record(s) found.");
                 List<String> dupCMRNos = new ArrayList<>();
@@ -237,6 +246,43 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     return "Duplicate CMR Check";
   }
 
+  public static AutomationResult<MatchingOutput> checkDupcProspectCmr(List<DuplicateCMRCheckResponse> cmrCheckMatches, Addr soldTo,
+      String isProspectCmr, AutomationEngineData engineData, AutomationResult<MatchingOutput> result, String issuingCntry) {
+    // cmr - 4512 match dupc prospect cmr
+    log.debug("checkDupcProspectCmr");
+    StringBuilder details = new StringBuilder();
+    MatchingOutput output = new MatchingOutput();
+    int itemNo = 1;
+    for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+      String regex = "\\s+$";
+      String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
+      String cmrRecCustName = StringUtils.isBlank(cmrCheckRecord.getCustomerName()) ? "" : cmrCheckRecord.getCustomerName();
+      custName = custName.replaceAll(regex, "");
+      cmrRecCustName = cmrRecCustName.replaceAll(regex, "");
+      if (!"Y".equals(isProspectCmr) && cmrCheckRecord.getCmrNo() != null && cmrCheckRecord.getCmrNo().startsWith("P")
+          && "75".equals(cmrCheckRecord.getOrderBlk())) {
+        log.debug("Duplicate Prospect CMR Found..");
+        details.append(cmrCheckMatches.size() + " record(s) found. \n");
+        if (issuingCntry.equals(SystemLocation.UNITED_STATES)) {
+          output.addMatch("US_DUP_CHK", "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR", itemNo++);
+        } else {
+          output.addMatch("GBL_DUP_CMR_CHECK", "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
+              itemNo++);
+        }
+        logDuplicateCMR(details, cmrCheckRecord);
+        engineData.put("cmrCheckMatches", cmrCheckMatches);
+        engineData.addRejectionComment("DUPC", "There is an existing CMR " + cmrCheckRecord.getCmrNo()
+            + " , please convert this Prospect CMR to Legal CMR instead of creating a new Legal CMR", "", "");
+        result.setOnError(true);
+        result.setResults("Found Duplicate CMRs.");
+        result.setProcessOutput(output);
+        result.setDetails(details.toString().trim());
+        return result;
+      }
+    }
+    return result;
+  }
+
   public MatchingResponse<DuplicateCMRCheckResponse> getMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
     Admin admin = requestData.getAdmin();
@@ -349,6 +395,16 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
 
   private void updateMatches(MatchingResponse<DuplicateCMRCheckResponse> global, MatchingResponse<DuplicateCMRCheckResponse> iteration) {
     List<DuplicateCMRCheckResponse> updated = new ArrayList<DuplicateCMRCheckResponse>();
+    for (DuplicateCMRCheckResponse match : global.getMatches()) {
+      if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+        updated.add(match);
+      }
+    }
+    for (DuplicateCMRCheckResponse match2 : iteration.getMatches()) {
+      if (match2.getCmrNo() != null && match2.getCmrNo().startsWith("P") && "75".equals(match2.getOrderBlk())) {
+        updated.add(match2);
+      }
+    }
     for (DuplicateCMRCheckResponse resp1 : global.getMatches()) {
       for (DuplicateCMRCheckResponse resp2 : iteration.getMatches()) {
         if (resp1.getCmrNo().equals(resp2.getCmrNo())) {

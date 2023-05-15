@@ -29,6 +29,9 @@ public class ScenarioExceptionsUtil {
   List<String> addressTypesForDuplicateRequestCheck = new ArrayList<String>();
   List<String> addressTypesForSkipChecks = new ArrayList<String>();
   Map<String, List<String>> addressTypesForDuplicateCMRCheck = new HashMap<>();
+  private static final List<String> PRIVATE_SCENARIOS = Arrays.asList("AFPC", "BEPRI", "CHPRI", "CROPR", "CRPRI", "CSPC", "DKPRI", "EEPRI", "FIPRI",
+      "FOPRI", "GLPRI", "ISPRI", "JOPC", "LIPRI", "LSPC", "LSXPC", "LTPRI", "LUPRI", "LVPRI", "MEPC", "NAPC", "NAXPC", "PKPC", "PRICU", "PRIPE",
+      "PRISM", "PRIV", "PRIVA", "PSPC", "RSPC", "RSXPC", "SZPC", "SZXPC", "XPC", "XPRIC", "XPRIV", "ZAPC", "ZAXPC");
   boolean skipDuplicateChecks;
   boolean importDnbInfo;
   boolean skipChecks;
@@ -36,9 +39,11 @@ public class ScenarioExceptionsUtil {
   boolean skipCompanyVerification;
   boolean manualReviewIndc;
   boolean reviewExtReqIndc;
+  boolean skipFindGbgForPrivates;
 
   public ScenarioExceptionsUtil(EntityManager entityManager, String cmrIssuingCntry, String subRegion, String scenario, String subScenario) {
 
+    String custSubGroup = subScenario;
     if (StringUtils.isNotBlank(subScenario) && SystemLocation.UNITED_STATES.equals(cmrIssuingCntry)) {
       String sqlKey = ExternalizedQuery.getSql("AUTOMATION.GET.US_SUBSCENARIO_KEY");
       PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
@@ -76,6 +81,13 @@ public class ScenarioExceptionsUtil {
     if (getAddressTypesForDuplicateCMRCheck().size() == 0) {
       getAddressTypesForDuplicateCMRCheck().put("ZS01", Arrays.asList("ZS01"));
     }
+
+    if (StringUtils.isNotBlank(custSubGroup)) {
+      if (PRIVATE_SCENARIOS.contains(custSubGroup)) {
+        setSkipFindGbgForPrivates(true);
+      }
+    }
+
   }
 
   private void parseAddressResults(ScenarioExceptions exceptions) {
@@ -293,6 +305,14 @@ public class ScenarioExceptionsUtil {
 
   public void setReviewExtReqIndc(boolean reviewExtReqIndc) {
     this.reviewExtReqIndc = reviewExtReqIndc;
+  }
+
+  public boolean isSkipFindGbgForPrivates() {
+    return skipFindGbgForPrivates;
+  }
+
+  public void setSkipFindGbgForPrivates(boolean skipFindGbgForPrivates) {
+    this.skipFindGbgForPrivates = skipFindGbgForPrivates;
   }
 
 }

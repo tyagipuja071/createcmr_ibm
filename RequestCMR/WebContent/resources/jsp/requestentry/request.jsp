@@ -214,7 +214,26 @@
         cb[i].removeAttribute('disabled');
       }
     }
-    FormManager.doAction('frmCMR', YourActions.Save, true);
+
+    var uiReqStatus = FormManager.getActualValue('reqStatus');
+    var reqId = FormManager.getActualValue('reqId');
+    var dbReqStatus = "";
+
+    var result = cmr.query("WW.GET_REQ_STATUS", {
+      REQ_ID: reqId
+    });
+    if (result != null && result.ret1 != '' && result.ret1 != null) {
+      dbReqStatus = result.ret1;
+    }
+
+    // prevent from overwriting the DB REQ_STATUS
+    // if another tab is open with different UI REQ_STATUS
+    if (uiReqStatus == dbReqStatus) {
+      FormManager.doAction('frmCMR', YourActions.Save, true);
+    } else {
+      cmr.showAlert("Unable to save the request. Request Status mismatch from database." +
+      "<br><br>Please reload the page.");
+    }
   }
   
   function noSaveBeforeLeave(){
@@ -374,6 +393,9 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <form:hidden path="dplChkTs" />
     </c:if>
     <form:hidden path="dplChkResult" />
+	<cmr:view forCountry="754,866,624,788,724,618,848">    
+    	<form:hidden path="vatAcknowledge" />
+    </cmr:view>
     <form:hidden path="dplChkUsrId" />
     <form:hidden path="dplChkUsrNm" />
 

@@ -2,9 +2,10 @@
 var _addrTypesForNL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZP02' ];
 var _poBOXHandler = [];
 var _reqReasonHandler = null;
+
 function afterConfigForNL() {
   var reqType = FormManager.getActualValue('reqType');
-  var role = null;
+  var role = null;  
   FormManager.readOnly('capInd');
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
@@ -31,7 +32,7 @@ function afterConfigForNL() {
     FormManager.readOnly('inacCd');
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('subIndustryCd');
-    FormManager.resetValidations('engineeringBo');
+    // FormManager.resetValidations('engineeringBo');
   } else {
     FormManager.enable('inacCd');
   }
@@ -50,7 +51,8 @@ function afterConfigForNL() {
      * FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
      * Tier' ], 'MAIN_IBM_TAB'); }
      */
-    FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'BO Team' ], 'MAIN_IBM_TAB');
+    // FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'BO
+    // Team' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('isuCd', Validators.REQUIRED);
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
@@ -81,7 +83,7 @@ function afterConfigForNL() {
 
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   var vatExempt = dojo.byId('vatExempt');
-  var vatExemptChecked = dojo.byId('vatExempt').checked;
+  var vatExemptChecked = dojo.byId('vatExempt') && dojo.byId('vatExempt').checked;
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -112,7 +114,7 @@ function afterConfigForNL() {
     role = _pagemodel.userRole;
   }
   if (role == 'Processor' && clientTier != null) {
-    setBOTeamValues(clientTier);
+    // setBOTeamValues(clientTier);
   }
   lockDunsNo();
   disableIBMTab();
@@ -258,9 +260,15 @@ function setVatValidatorNL() {
       return;
     }
     FormManager.resetValidations('vat');
-    if (!dojo.byId('vatExempt').checked) {
+   /* if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-    }
+    }*/
+    
+    //FormManager.resetValidations('vat');
+    //if (!dojo.byId('vatExempt').checked) {
+      //checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      //FormManager.enable('vat');
+    //}
   }
 }
 
@@ -275,7 +283,7 @@ function setKVKValidatorNL() {
   }
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   var vatExempt = dojo.byId('vatExempt');
-  var vatExemptChecked = dojo.byId('vatExempt').checked;
+  var vatExemptChecked = dojo.byId('vatExempt') && dojo.byId('vatExempt').checked;
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
@@ -389,20 +397,20 @@ function addHandlersForNL() {
       setClientTierValues(value);
       // setClientTierValuesForUpdate();
       setSORTLBasedOnIsuCtc();
-      setBOTeamValues();
+      // setBOTeamValues();
     });
   }
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setBOTeamValues(value);
+      // setBOTeamValues(value);
       setSORTLBasedOnIsuCtc();
     });
   }
 
   if (_IMSHandler == null && FormManager.getActualValue('cmrIssuingCntry')) {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      setBOTeamValues(value);
+      // setBOTeamValues(value);
     });
   }
 
@@ -413,12 +421,12 @@ function addHandlersForNL() {
       setSORTL();
     });
   }
-  if (_vatExemptHandler == null) {
+ /* if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       setVatValidatorNL();
       setKVKValidatorNL();
     });
-  }
+  }*/
 
   if (_ExpediteHandler == null) {
     _ExpediteHandler = dojo.connect(FormManager.getField('expediteInd'), 'onChange', function(value) {
@@ -487,109 +495,67 @@ function setClientTierValues(isuCd) {
 /**
  * NL - sets BO Team based on isuCtc
  */
-function setBOTeamValues(clientTier) {
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  var clientTier = FormManager.getActualValue('clientTier');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var isuCd = FormManager.getActualValue('isuCd');
-  var ims = FormManager.getActualValue('subIndustryCd');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-
-  var boTeam = [];
-  var selectedBoTeam = [];
-  if (isuCd != '') {
-    var isuCtc = isuCd + clientTier;
-    var qParams = null;
-    var results = null;
-    var selectedResults = null;
-
-    // 32S changed to 34Q on 2021 2H coverage
-    // BO Team will be based on IMS for 32S
-    // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
-    if (ims != '' && ims.length > 1 && (isuCtc == '34Q')) {
-      qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry,
-        ISU : '%' + isuCd + clientTier + '%'
-      // CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
-      };
-      results = cmr.query('GET.BOTEAMLIST.BYISU', qParams);
-    } else {
-      qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry,
-        ISU : '%' + isuCd + clientTier + '%'
-      };
-      results = cmr.query('GET.BOTEAMLIST.BYISU', qParams);
-    }
-
-    // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
-    if (ims != '' && ims.length > 1 && (isuCtc == '34Q')) {
-      qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry,
-        ISU : '%' + isuCd + clientTier + '%',
-        CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
-      };
-      selectedResults = cmr.query('GET.BOTEAMLIST.BYISUCTC', qParams);
-    }
-
-    if (results != null || selectedResults != null) {
-
-      if (results != null) {
-        for (var i = 0; i < results.length; i++) {
-          boTeam.push(results[i].ret1);
-        }
-      }
-
-      if (selectedResults != null) {
-        for (var i = 0; i < selectedResults.length; i++) {
-          selectedBoTeam.push(selectedResults[i].ret1);
-          FormManager.setValue('engineeringBo', selectedBoTeam[0]);
-        }
-      }
-
-      FormManager.limitDropdownValues(FormManager.getField('engineeringBo'), boTeam);
-      if (boTeam.length == 1) {
-        FormManager.setValue('engineeringBo', boTeam[0]);
-      }
-      // 2020-09-18 CMR-5004
-      console.log('custSubGrp==' + FormManager.getActualValue('custSubGrp'));
-      console.log('pagemodel custSubGrp==' + _pagemodel.custSubGrp);
-
-      if (FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp
-          || (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp && FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd)) {
-        FormManager.setValue('engineeringBo', selectedBoTeam[0]);
-
-        var custSubScnrio = FormManager.getActualValue('custSubGrp');
-        if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
-          FormManager.setValue('engineeringBo', '33P01');
-          FormManager.readOnly('engineeringBo');
-          FormManager.readOnly('economicCd');
-        } else if (custSubScnrio == 'INTER' || custSubScnrio == 'PRICU') {
-          FormManager.setValue('engineeringBo', '33U00');
-          FormManager.readOnly('engineeringBo');
-          FormManager.readOnly('economicCd');
-        } else if (custSubScnrio == 'PUBCU' && role != 'PROCESSOR') {
-          FormManager.enable('economicCd');
-        } else {
-          FormManager.enable('engineeringBo');
-          if (custSubScnrio != 'CBBUS' && role != 'REQUESTER')
-            FormManager.enable('economicCd');
-        }
-      }
-    }
-    lockEngineeringBo();
-  }
-}
+/*
+ * function setBOTeamValues(clientTier) { if
+ * (FormManager.getActualValue('viewOnlyPage') == 'true') { return; }
+ * 
+ * if (FormManager.getActualValue('reqType') != 'C') { return; }
+ * 
+ * var clientTier = FormManager.getActualValue('clientTier'); var cntry =
+ * FormManager.getActualValue('cmrIssuingCntry'); var isuCd =
+ * FormManager.getActualValue('isuCd'); var ims =
+ * FormManager.getActualValue('subIndustryCd'); var role =
+ * FormManager.getActualValue('userRole').toUpperCase();
+ * 
+ * var boTeam = []; var selectedBoTeam = []; if (isuCd != '') { var isuCtc =
+ * isuCd + clientTier; var qParams = null; var results = null; var
+ * selectedResults = null;
+ *  // 32S changed to 34Q on 2021 2H coverage // BO Team will be based on IMS
+ * for 32S // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) { if (ims != '' &&
+ * ims.length > 1 && (isuCtc == '34Q')) { qParams = { _qall : 'Y', ISSUING_CNTRY :
+ * cntry, ISU : '%' + isuCd + clientTier + '%' // CLIENT_TIER : '%' +
+ * ims.substring(0, 1) + '%' }; results = cmr.query('GET.BOTEAMLIST.BYISU',
+ * qParams); }
+ *  // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) { if (ims != '' &&
+ * ims.length > 1 && (isuCtc == '34Q')) { qParams = { _qall : 'Y', ISSUING_CNTRY :
+ * cntry, ISU : '%' + isuCd + clientTier + '%', CLIENT_TIER : '%' +
+ * ims.substring(0, 1) + '%' }; selectedResults =
+ * cmr.query('GET.BOTEAMLIST.BYISUCTC', qParams); }
+ * 
+ * if (results != null || selectedResults != null) {
+ * 
+ * if (results != null) { for (var i = 0; i < results.length; i++) {
+ * boTeam.push(results[i].ret1); } }
+ * 
+ * if (selectedResults != null) { for (var i = 0; i < selectedResults.length;
+ * i++) { selectedBoTeam.push(selectedResults[i].ret1);
+ * FormManager.setValue('engineeringBo', selectedBoTeam[0]); } }
+ * 
+ * FormManager.limitDropdownValues(FormManager.getField('engineeringBo'),
+ * boTeam); if (boTeam.length == 1) { FormManager.setValue('engineeringBo',
+ * boTeam[0]); } // 2020-09-18 CMR-5004 console.log('custSubGrp==' +
+ * FormManager.getActualValue('custSubGrp')); console.log('pagemodel
+ * custSubGrp==' + _pagemodel.custSubGrp);
+ * 
+ * if (FormManager.getActualValue('custSubGrp') != null &&
+ * FormManager.getActualValue('custSubGrp') != '' &&
+ * FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp ||
+ * (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp &&
+ * FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd)) {
+ * FormManager.setValue('engineeringBo', selectedBoTeam[0]);
+ * 
+ * var custSubScnrio = FormManager.getActualValue('custSubGrp'); if
+ * (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
+ * FormManager.setValue('engineeringBo', '33P01');
+ * FormManager.readOnly('engineeringBo'); FormManager.readOnly('economicCd'); }
+ * else if (custSubScnrio == 'INTER' || custSubScnrio == 'PRICU') {
+ * FormManager.setValue('engineeringBo', '33U00');
+ * FormManager.readOnly('engineeringBo'); FormManager.readOnly('economicCd'); }
+ * else if (custSubScnrio == 'PUBCU' && role != 'PROCESSOR') {
+ * FormManager.enable('economicCd'); } else {
+ * FormManager.enable('engineeringBo'); if (custSubScnrio != 'CBBUS' && role !=
+ * 'REQUESTER') FormManager.enable('economicCd'); } } } lockEngineeringBo(); } }
+ */
 
 function lockEngineeringBo() {
   var role = null;
@@ -1107,7 +1073,7 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
         }
       };
     })(), tabName, formName);
-  };
+  }; 
 }
 
 function addAddressFieldValidators() {
@@ -1985,7 +1951,49 @@ function setEcoCodeBasedOnSubScenario() {
   }
 }
 
-// CREATCMR-788
+function addVatIndValidator(){
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');  
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  
+  if (viewOnlyPage == 'true'){
+   FormManager.resetValidations('vat');
+   FormManager.readOnly('vat');
+ } else {
+   
+  var cntry= FormManager.getActualValue('cmrIssuingCntry');
+  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+    ISSUING_CNTRY : cntry
+  });
+  
+
+      if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.enable('vatInd');
+      // FormManager.readOnly('vatInd');
+    } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
+      FormManager.setValue('vat', '');
+      FormManager.setValue('vatInd', '');
+    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.enable('vatInd');
+      //  FormManager.readOnly('vatInd');
+    } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    }
+    
+  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
+    FormManager.resetValidations('vat');
+  }
+}
+}
+
 function addressQuotationValidatorNL() {
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
@@ -2023,7 +2031,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(afterConfigForNL, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NL);
-  GEOHandler.addAfterTemplateLoad(setBOTeamValues, GEOHandler.NL);
+  // GEOHandler.addAfterTemplateLoad(setBOTeamValues, GEOHandler.NL);
   // GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.NL);
   // GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setFieldsMandtOnSc, GEOHandler.NL);
@@ -2062,4 +2070,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSORTLBasedOnIsuCtc, GEOHandler.NL);
   GEOHandler.addAfterConfig(addNlIsuHandler, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.NL);
+  
+  GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NL, null, true);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
 });

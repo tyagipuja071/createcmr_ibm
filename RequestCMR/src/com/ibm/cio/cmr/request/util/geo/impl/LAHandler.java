@@ -225,8 +225,10 @@ public class LAHandler extends GEOHandler {
 
     if (StringUtils.isNotBlank(mainRecord.getCmrCollectorNo()) && mainRecord.getCmrCollectorNo().length() > 6) {
       data.setCollectorNameNo(mainRecord.getCmrCollectorNo().substring(0, 6));
+      LOG.debug("Collector No Value in setDataValuesOnImport (mainRecord) --> " + mainRecord.getCmrCollectorNo().substring(0, 6));
     } else {
       data.setCollectorNameNo(mainRecord.getCmrCollectorNo());
+      LOG.debug("Collector No Value in setDataValuesOnImport (mainRecord) --> " + mainRecord.getCmrCollectorNo());
     }
 
     data.setCollBoId(mainRecord.getCmrCollBo());
@@ -304,7 +306,7 @@ public class LAHandler extends GEOHandler {
 
       }
     } else {
-      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);                                                                                 // flow
+      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);
       data.setBgId(mainRecord.getCmrBuyingGroup());
       data.setGbgId(mainRecord.getCmrGlobalBuyingGroup());
       data.setBgRuleId(mainRecord.getCmrLde());
@@ -1195,6 +1197,12 @@ public class LAHandler extends GEOHandler {
       if (SystemLocation.BRAZIL.equals(issuingCountry) || SystemLocation.ARGENTINA.equals(issuingCountry)
           || SystemLocation.MEXICO.equals(issuingCountry) || SystemLocation.PERU.equals(issuingCountry)) {
         data.setMrcCd("M");
+        // 1H2023 handling for update duplicate 161 sortls
+        if (SystemLocation.BRAZIL.equals(issuingCountry) && "161".equals(sORTL) && StringUtils.isNotBlank(mainRecord.getIsuCode())) {
+          if ("32".equals(mainRecord.getIsuCode())) {
+            data.setMrcCd("T");
+          }
+        }
       } else if (SystemLocation.ECUADOR.equals(issuingCountry) || SystemLocation.PARAGUAY.equals(issuingCountry)
           || SystemLocation.URUGUAY.equals(issuingCountry)) {
         data.setMrcCd("P");
@@ -1206,7 +1214,11 @@ public class LAHandler extends GEOHandler {
       }
 
       if (!StringUtils.isEmpty(data.getMrcCd())) {
-        String retrievedISUCode = (String) cmrClientService.getISUCode(issuingCountry, data.getMrcCd());
+        String retrievedISUCode = (String) cmrClientService.getISUCode(issuingCountry, data.getMrcCd()); // skip
+         if (SystemLocation.BRAZIL.equals(issuingCountry) && "161".equals(sORTL)) {
+          // set to blank to get the findcmr values for isu/ctc
+          retrievedISUCode = "";
+        }
         if (!StringUtils.isEmpty(retrievedISUCode)) {
           data.setIsuCd(retrievedISUCode);
           String retrievedClientTierCd = (String) cmrClientService.getClientTierCode(data.getMrcCd(), retrievedISUCode);
@@ -1218,10 +1230,11 @@ public class LAHandler extends GEOHandler {
           }
           LOG.debug(retrievedClientTierCd);
         } else {
-          if (!isBRIssuingCountry(issuingCountry) && StringUtils.isNotBlank(mainRecord.getIsuCode())) {
+          if (StringUtils.isNotBlank(mainRecord.getIsuCode()) || StringUtils.isNotBlank(mainRecord.getCmrTier())) {
             // if there is value retrieve from findcmr set value
             // creates model/updates
             data.setIsuCd(mainRecord.getIsuCode());
+            data.setClientTier(mainRecord.getCmrTier());
           } else {
             LOG.debug("No ISU_CODE retrieved or there are too many codes. . .");
             data.setIsuCd("");
@@ -4490,11 +4503,6 @@ public class LAHandler extends GEOHandler {
               // Company
               if (isDataFilled && "@".equals(company)) {
                 error.addError((row.getRowNum() + 1), "<br>Company", "@ value for Company is not allowed.");
-              }
-
-              // Client Tier
-              if (isDataFilled && "@".equals(clientTier)) {
-                error.addError((row.getRowNum() + 1), "<br>Client Tier", "@ value for Client Tier is not allowed.");
               }
 
               // SBO

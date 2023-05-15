@@ -85,7 +85,7 @@ public class RequestUtils {
   public static final String STATUS_INPUT_REQUIRED = "Input Required";
   public static final String US_CMRISSUINGCOUNTRY = "897";
   private static Map<String, String> rejectionReasons = new HashMap<String, String>();
-	public static final List<String> EMEA_CNTRY_DACH = Arrays.asList("724", "618", "848");
+  public static final List<String> EMEA_CNTRY_DACH = Arrays.asList("724", "618", "848");
 
   public static void refresh() {
     emailTemplate = null;
@@ -375,7 +375,7 @@ public class RequestUtils {
     }
 
     // add to this list in the future if needed
-    List<String> forceSendTypes = Arrays.asList("LD", "MD", "MA");
+    List<String> forceSendTypes = Arrays.asList("LD", "MD", "MA", "FR");
 
     if (!StringUtils.isBlank(admin.getSourceSystId())) {
       // for external creations, ensure that the requesterId is always notified,
