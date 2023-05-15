@@ -269,7 +269,7 @@ public class UserInjectFilter implements Filter {
 
   /**
    * To evaluate if should redirect back to URI given just before redirecting to
-   * SSO IP.
+   * SSO's Identity Provider.
    * 
    * @param previousURI
    * @return
