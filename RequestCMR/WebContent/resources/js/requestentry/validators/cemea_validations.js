@@ -3326,7 +3326,7 @@ function setChecklistStatus() {
       var noOfTextBoxes = textBoxes.length;
       
       for (var i=0; i < noOfTextBoxes; i++) {
-        if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 9) || ((i >= 3 || i < 9) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+        if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
           return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
         }
       }
@@ -3374,7 +3374,7 @@ function addCEMEAChecklistValidator() {
           var noOfTextBoxes = textBoxes.length;
           
           for (var i=0; i < noOfTextBoxes; i++) {
-            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 9) || ((i >= 3 || i < 9) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
               return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
             }
           }
