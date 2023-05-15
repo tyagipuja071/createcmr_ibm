@@ -267,13 +267,27 @@ public class UserInjectFilter implements Filter {
     }
   }
 
+  /**
+   * To evaluate if should redirect back to URI given just before redirecting to
+   * SSO IP.
+   * 
+   * @param previousURI
+   * @return
+   */
   private boolean shouldRedirectToURI(String previousURI) {
     if (StringUtils.isBlank(previousURI)) {
       return false;
     }
 
-    if (previousURI.matches("(.*)/request/[0-9]+(.*)") || previousURI.matches("(.*)/massrequest/[0-9]+(.*)")
-        || previousURI.matches("(.*)CreateCMR/approval/(.*)")) {
+    if (previousURI.matches("(.*)/request/[0-9]+(.*)")) {
+      return true;
+    }
+
+    if (previousURI.matches("(.*)/massrequest/[0-9]+(.*)")) {
+      return true;
+    }
+
+    if (previousURI.matches("(.*)CreateCMR/approval/(.*)")) {
       return true;
     }
 
