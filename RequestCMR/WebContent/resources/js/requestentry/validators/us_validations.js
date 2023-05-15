@@ -595,13 +595,13 @@ function afterConfigForUS() {
     });
   }
 
-  if (_usCustClassHandler == null && FormManager.getActualValue('reqType') == 'U') {
+  if (_usCustClassHandler == null && FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER') {
     _usCustClassHandler = dojo.connect(FormManager.getField('custClass'), 'onChange', function(value) {
-      onChangeCustClassOrKuklaAndIsic();
+      onChangeCustClassOrKuklaAndIsic(value);
     });
   }
 
-  if (_usIsicHandler == null && FormManager.getActualValue('reqType') == 'U') {
+  if (_usIsicHandler == null && FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER') {
     _usIsicHandler = dojo.connect(FormManager.getField('usSicmen'), 'onChange', function(value) {
       onChangeCustClassOrKuklaAndIsic();
     });
@@ -1340,31 +1340,31 @@ function setTaxcd1Status() {
 
 }
 
+var oldKukla = FormManager.getActualValue('custClass');
+var oldIsic = null;
+function setPreviousKuklaValue(newval) {
+  oldKukla = newval;
+}
+function setPreviousIsicValue(newval) {
+  oldIsic = newval;
+}
+
 function onChangeCustClassOrKuklaAndIsic() {
-  var result1 = null;
-  var rdcKukla = null;
-  var onChangedKukla = null;
-  var result2 = null;
-  var rdcIsic = null;
-  var onChangedIsic = null;
 
-  onChangedKukla = FormManager.getActualValue('custClass');
-  var result1 = getIsicAndKuklaFromDataRdc("custClass");
+  var onChangedKukla = FormManager.getActualValue('custClass');
+  var onChangedIsic = FormManager.getActualValue('usSicmen');
+  var pvtKukla = '60';
+  var pvtIsic = '9500';
+  var previousKukla = oldKukla;
+  setPreviousKuklaValue(onChangedKukla);
+  var previousIsic = oldIsic;
+  setPreviousIsicValue(onChangedIsic);
 
-  onChangedIsic = FormManager.getActualValue('usSicmen');
-  var result2 = getIsicAndKuklaFromDataRdc("usSicmen");
-
-  if (result1 != null) {
-    rdcKukla = result1;
-  }
-
-  if (result2 != null) {
-    rdcIsic = result2;
-  }
-
-  if (onChangedIsic == '9500' && rdcIsic == onChangedIsic && onChangedKukla != '60' || onChangedIsic != '9500' && onChangedKukla == '60') {
+  if ((onChangedIsic == pvtIsic && previousKukla == pvtKukla && onChangedKukla == '11') || (onChangedIsic != pvtIsic && onChangedKukla == pvtKukla && previousIsic == pvtIsic)
+      || (onChangedIsic == pvtIsic && onChangedKukla == '11' && previousIsic != pvtIsic)) {
     cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
-  } else {
+  } else if ((previousKukla == pvtKukla && previousIsic != pvtIsic && onChangedKukla == pvtKukla && onChangedIsic != pvtIsic)
+      || (previousKukla != pvtKukla && previousIsic == pvtIsic && onChangedKukla != pvtKukla && onChangedIsic == pvtIsic)) {
     cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are selected.');
   }
 }
@@ -1540,5 +1540,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.USA ]);
   // CREATCMR-7213
   GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
-  GEOHandler.registerValidator(custClassIsicValidator, [ SysLoc.USA ], null, true);
+  GEOHandler.registerValidator(custClassIsicValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
 });
