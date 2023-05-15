@@ -99,7 +99,8 @@ function afterConfigForJP() {
     setSalesTeamCdEditoble();
     // CREATCMR-6694
     setAdminDeptOptional();
-    addScenarioDriven()
+    addScenarioDriven();
+    setSortlOnOfcdChange();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -1111,6 +1112,13 @@ function setMrcByOfficeCd() {
   FormManager.setValue('mrcCd', mrc);
 }
 
+// CREATCMR-9327
+function disableFields() {
+  FormManager.readOnly('isuCd');
+  FormManager.readOnly('clientTier');
+  FormManager.readOnly('searchTerm');
+}
+
 /*
  * Set ISU Code Values based On Office Code
  */
@@ -1160,7 +1168,7 @@ function setISUByMrcSubInd() {
   }
 
   if (subIndustryCd != '') {
-    if (custGrp == 'IBMTP' || custGrp == 'BUSPR') {
+    if (custGrp == 'IBMTP' || custGrp == 'BUSPR' || (custGrp == 'SUBSI' && custSubGrp == 'BVMDS')) {
       if (mrcCd == '3') {
         if (subIndustryCd == 'ZZ' || geoInd != 'Z') {
           setISUByOfficeCd();
@@ -1193,7 +1201,7 @@ function setISUByMrcSubInd() {
           }
         }
       }
-    } else if (custGrp == 'SUBSI') {
+    } else if (custGrp == 'SUBSI' && custSubGrp != 'BVMDS') {
       FormManager.setValue('isuCd', '60');
     }
   }
@@ -3476,7 +3484,7 @@ function setSortlOnOfcdChange() {
       FormManager.setValue('searchTerm', '91454');
     }
   } else if (custGrp == 'SUBSI') {
-    FormManager.setValue('searchTerm', '91454');
+    FormManager.setValue('searchTerm', custSubGrp.substr(0, 2));
   }
 }
 function getSortlByOfcd() {
@@ -4705,7 +4713,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -4744,7 +4752,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -4794,7 +4802,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -4843,7 +4851,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -5049,7 +5057,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -5102,7 +5110,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -5153,7 +5161,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -5216,7 +5224,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -5268,7 +5276,7 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
     FormManager.enable('leasingCompanyIndc');
-    FormManager.enable('searchTerm');
+    // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('govType');
@@ -5781,6 +5789,7 @@ function replaceCrossbarSymbol(value) {
   if (value != null && value.length > 0) {
     modifiedVal = value;
     modifiedVal = modifiedVal.replace(/-/g, '－');
+    modifiedVal = modifiedVal.replace(/−/g, "－");
     modifiedVal = modifiedVal.replace(/･/g, '・');
     // Story CMR-1660
     modifiedVal = modifiedVal.replace(/,/g, '，');
@@ -5906,6 +5915,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
+
+  // CREATCMR-9327
+  GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(disableFields, GEOHandler.JP);
 
   // CREATCMR-6694
   GEOHandler.addAfterConfig(setAdminDeptOptional, GEOHandler.JP);
