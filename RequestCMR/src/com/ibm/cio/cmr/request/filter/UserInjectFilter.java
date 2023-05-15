@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -121,8 +122,8 @@ public class UserInjectFilter implements Filter {
           session.setAttribute("userHelper", userHelper);
           setSessionAttributes(httpReq, httpResp);
 
-          if (shouldRedirectToURI(httpReq)) {
-            String previousURI = (String) httpReq.getSession(false).getAttribute("previousURI");
+          String previousURI = (String) httpReq.getSession(false).getAttribute("previousURI");
+          if (shouldRedirectToURI(previousURI)) {
             httpResp.sendRedirect(previousURI);
             return;
           }
@@ -266,12 +267,30 @@ public class UserInjectFilter implements Filter {
     }
   }
 
-  private boolean shouldRedirectToURI(HttpServletRequest request) {
-    String previousURI = (String) request.getSession(false).getAttribute("previousURI");
-    if (previousURI.matches("(.*)/request/[0-9]+(.*)") || previousURI.matches("(.*)/massrequest/[0-9]+(.*)")
-        || previousURI.matches("(.*)CreateCMR/approval/(.*)")) {
+  /**
+   * To evaluate if should redirect back to URI given just before redirecting to
+   * SSO's Identity Provider.
+   * 
+   * @param previousURI
+   * @return
+   */
+  private boolean shouldRedirectToURI(String previousURI) {
+    if (StringUtils.isBlank(previousURI)) {
+      return false;
+    }
+
+    if (previousURI.matches("(.*)/request/[0-9]+(.*)")) {
       return true;
     }
+
+    if (previousURI.matches("(.*)/massrequest/[0-9]+(.*)")) {
+      return true;
+    }
+
+    if (previousURI.matches("(.*)CreateCMR/approval/(.*)")) {
+      return true;
+    }
+
     return false;
   }
 
