@@ -441,7 +441,7 @@ public class CmrConstants {
 
   }
 
-  public static final List<String> CONTACT_TYPE_BR_LST = Arrays.asList("LE", "EM", "CF");
+  public static final List<String> CONTACT_TYPE_BR_LST = Arrays.asList("EM");
 
   public static Map<String, Object> HARDWARE_BO_REPTEAM_MAP;
   public static Map<String, Object> ES_POSTAL_CUSLOC_EBO_MAP;

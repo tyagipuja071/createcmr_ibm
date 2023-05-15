@@ -1086,8 +1086,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
   private void checkContactsForAutomationRequest(EntityManager entityManager, Admin admin, Data data, LAHandler geoHandler) {
 
     boolean hasEM001 = false;
-    boolean hasLE001 = false;
-    boolean hasCF001 = false;
     LOG.debug("Getting contact info from V2 inputs..");
     String sql = ExternalizedQuery.getSql("BR.GET_DISTINCT_MAILS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1102,20 +1100,9 @@ public class BrazilCalculateIBMElement extends OverridingElement {
           if (type.equals("EM")) {
             LOG.debug("Found EM-001 Contact on the request.");
             hasEM001 = true;
-          } else if (type.equals("CF")) {
-            LOG.debug("Found CF-001 Contact on the request.");
-            hasCF001 = true;
-          } else if (type.equals("LE")) {
-            LOG.debug("Found LE-001 Contact on the request.");
-            hasLE001 = true;
           }
         }
       }
-    }
-
-    if (hasEM001 && hasCF001 && hasLE001) {
-      LOG.debug("Request has all 3 required contacts, skipping contact creation.");
-      return;
     }
 
     String email = data.getEmail1();
@@ -1125,16 +1112,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         geoHandler.createNewEmailContact(entityManager, data, admin, email, "EM", "001");
         LOG.debug("Created contact EM-001 for request id: " + admin.getId().getReqId());
       }
-      if (!hasLE001) {
-        geoHandler.createNewEmailContact(entityManager, data, admin, email, "LE", "001");
-        LOG.debug("Created contact LE-001 for request id: " + admin.getId().getReqId());
-      }
-      if (!hasCF001) {
-        geoHandler.createNewEmailContact(entityManager, data, admin, email, "CF", "001");
-        LOG.debug("Created contact CF-001 for request id: " + admin.getId().getReqId());
-      }
     }
-
   }
 
   /**
