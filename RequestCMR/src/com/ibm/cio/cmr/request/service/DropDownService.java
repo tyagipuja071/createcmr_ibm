@@ -331,6 +331,14 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     }
 
+    // CREATCMR-8323
+    if ("StateProvUS".equalsIgnoreCase(fieldId)) {
+      query.append(" and LAND1 = :LAND1 ");
+      query.append(" and MANDT = :MANDT ");
+      query.setParameter("LAND1", params.getParam("landCntry"));
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    }
+    
     if ("TransportZone".equalsIgnoreCase(fieldId)) {
       // no dependency for now
       // query.append(" and SPRAS = 'E' ");

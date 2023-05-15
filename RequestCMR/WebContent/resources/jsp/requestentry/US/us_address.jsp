@@ -119,11 +119,13 @@
   <cmr:column span="2">
     <p>
       <cmr:label fieldId="stateProv">
-        <cmr:fieldLabel fieldId="StateProv" />:
+      <!--CREATCMR-8323 change StateProv to StateProvUS-->
+        <cmr:fieldLabel fieldId="StateProvUS" />:
              <cmr:delta text="-" id="delta-stateProv" code="L" />
         <cmr:info text="${ui.info.addrStateProv}" />
       </cmr:label>
-      <cmr:field fieldId="StateProv" id="stateProv" path="stateProv" />
+      <!--CREATCMR-8323 change StateProv to StateProvUS-->
+      <cmr:field fieldId="StateProvUS" id="stateProv" path="stateProv" />
     </p>
   </cmr:column>
 
