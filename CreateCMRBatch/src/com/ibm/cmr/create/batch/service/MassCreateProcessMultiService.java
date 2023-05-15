@@ -442,7 +442,8 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
       overallStatus = CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS;
       statusMessage = "One or more records failed in RDc processing.";
     } else if ((!resultCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED) && !resultCodes.contains(CmrConstants.RDC_STATUS_ABORTED))
-        && (resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED) || resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED))) {
+        && (resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED) || resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED)
+            || resultCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS))) {
       overallStatus = CmrConstants.RDC_STATUS_COMPLETED;
       adminEntity.setReqStatus("COM");
       statusMessage = "All records processed successfully.";
