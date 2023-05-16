@@ -1212,7 +1212,7 @@ public class LAHandler extends GEOHandler {
 
       if (!StringUtils.isEmpty(data.getMrcCd())) {
         String retrievedISUCode = (String) cmrClientService.getISUCode(issuingCountry, data.getMrcCd()); // skip
-         if (SystemLocation.BRAZIL.equals(issuingCountry) && "161".equals(sORTL)) {
+        if (SystemLocation.BRAZIL.equals(issuingCountry) && "161".equals(sORTL)) {
           // set to blank to get the findcmr values for isu/ctc
           retrievedISUCode = "";
         }
@@ -1830,48 +1830,6 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
-
-    if (LAHandler.isMXIssuingCountry(cmrIssuingCntry) && "PPN".equalsIgnoreCase(admin.getReqStatus())
-        && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      GeoContactInfoService contactService = new GeoContactInfoService();
-      List<GeoContactInfo> leContacts = contactService.getCurrentLeRecords(entityManager, admin.getId().getReqId());
-
-      if (leContacts == null || leContacts.size() == 0) {
-        GeoContactInfoModel mod = new GeoContactInfoModel();
-        mod.setCmrIssuingCntry(cmrIssuingCntry);
-        mod.setContactEmail("");
-        mod.setContactName("n");
-        mod.setContactPhone(".");
-        mod.setContactFunc("Sr.");
-        mod.setContactTreatment("Sr.");
-        List<GeoContactInfoModel> tempL = doContactInfoCreateStyle(mod);
-
-        if (tempL != null && tempL.size() > 0) {
-          GeoContactInfo e = new GeoContactInfo();
-          GeoContactInfoPK ePk = new GeoContactInfoPK();
-          GeoContactInfoModel ciModel = tempL.get(0);
-          e.setContactEmail(ciModel.getContactEmail());
-          e.setContactName(ciModel.getContactName());
-          e.setContactPhone(ciModel.getContactPhone());
-          e.setContactFunc(ciModel.getContactFunc());
-          e.setContactTreatment(ciModel.getContactTreatment());
-          e.setContactType(ciModel.getContactType());
-          e.setContactSeqNum(ciModel.getContactSeqNum());
-          e.setCreateById(admin.getRequesterId());
-          e.setCreateTs(SystemUtil.getCurrentTimestamp());
-          try {
-            int contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null, String.valueOf(admin.getId().getReqId()));
-            ePk.setContactInfoId(contactId);
-          } catch (CmrException ex) {
-            LOG.debug("Exception while getting contactId : " + ex.getMessage(), ex);
-          }
-          ePk.setReqId(admin.getId().getReqId());
-          e.setId(ePk);
-          entityManager.persist(e);
-          entityManager.flush();
-        }
-      }
-    }
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       // DENNIS: recalculate the the DPL by updating the sold to DPL flags
