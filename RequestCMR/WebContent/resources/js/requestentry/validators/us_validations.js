@@ -1366,6 +1366,8 @@ function onChangeCustClassOrKuklaAndIsic() {
   } else if ((previousKukla == pvtKukla && previousIsic != pvtIsic && onChangedKukla == pvtKukla && onChangedIsic != pvtIsic)
       || (previousKukla != pvtKukla && previousIsic == pvtIsic && onChangedKukla != pvtKukla && onChangedIsic == pvtIsic)) {
     cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are selected.');
+  } else if (onChangedKukla != pvtKukla && onChangedIsic == pvtIsic && previousIsic == pvtIsic) {
+    cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
   }
 }
 
