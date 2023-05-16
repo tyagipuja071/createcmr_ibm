@@ -1818,6 +1818,34 @@ public class RequestUtils {
     OAuthUtils.ssoTokenCleanUP(request);
     AppUser.remove(request);
     request.getSession().invalidate();
+    storePreviousURI(request);
+  }
+
+  public static void storePreviousURI(HttpServletRequest request) {
+    String requestURI = request.getRequestURI();
+    if (RequestUtils.filterPreviousURI(requestURI)) {
+      request.getSession().setAttribute("previousURI", requestURI);
+    }
+  }
+
+  public static Boolean filterPreviousURI(String previousURI) {
+    if (StringUtils.isBlank(previousURI)) {
+      return false;
+    }
+
+    if (previousURI.matches("(.*)/request/[0-9]+(.*)")) {
+      return true;
+    }
+
+    if (previousURI.matches("(.*)/massrequest/[0-9]+(.*)")) {
+      return true;
+    }
+
+    if (previousURI.matches("(.*)CreateCMR/approval/(.*)")) {
+      return true;
+    }
+
+    return false;
   }
 
   public static long extractRequestId(HttpServletRequest request) {

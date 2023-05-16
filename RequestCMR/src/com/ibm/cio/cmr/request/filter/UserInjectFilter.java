@@ -12,11 +12,11 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -106,9 +106,9 @@ public class UserInjectFilter implements Filter {
 
           if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
             LOG.debug("No IBM ID detected. Redirecting to W3 ID ...");
-            String requestURL = httpReq.getRequestURI();
             httpReq.getSession().invalidate();
-            httpReq.getSession().setAttribute("previousURI", requestURL);
+            setupPreviousURICookie(httpReq, httpResp);
+
             httpResp.sendRedirect("/CreateCMR/oidc");
             return;
           } else {
@@ -121,12 +121,6 @@ public class UserInjectFilter implements Filter {
 
           session.setAttribute("userHelper", userHelper);
           setSessionAttributes(httpReq, httpResp);
-
-          String previousURI = (String) httpReq.getSession(false).getAttribute("previousURI");
-          if (shouldRedirectToURI(previousURI)) {
-            httpResp.sendRedirect(previousURI);
-            return;
-          }
 
           filterChain.doFilter(httpReq, httpResp);
           return;
@@ -143,17 +137,36 @@ public class UserInjectFilter implements Filter {
 
   }
 
-  @Override
-  public void destroy() {
-    // NOOP
+  private void assignEncoding(String enconding, HttpServletRequest httpReq, HttpServletResponse httpResp) {
+
+    try {
+      if (encoding != null) {
+        if (isForceRequestEncoding() || httpReq.getCharacterEncoding() == null) {
+          httpReq.setCharacterEncoding(encoding);
+        }
+        if (isForceResponseEncoding()) {
+          httpResp.setCharacterEncoding(encoding);
+        }
+      }
+    } catch (UnsupportedEncodingException e) {
+      LOG.error("Unsuported enconding operation: " + e);
+    }
   }
 
-  @Override
-  public void init(FilterConfig config) throws ServletException {
-    SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
-    LOG.info("CreateCMR " + config.getFilterName() + " initialized.");
-    setEncoding("UTF-8");
-    setForceEncoding(true);
+  public boolean isForceResponseEncoding() {
+    return this.forceResponseEncoding;
+  }
+
+  public boolean isForceRequestEncoding() {
+    return this.forceRequestEncoding;
+  }
+
+  private HttpSession shouldCreateSession(HttpServletRequest req) {
+    HttpSession session = req.getSession(false);
+    if (session == null) {
+      return req.getSession();
+    }
+    return session;
   }
 
   private void setSessionAttributes(HttpServletRequest request, HttpServletResponse response) throws CmrException, Exception {
@@ -213,21 +226,36 @@ public class UserInjectFilter implements Filter {
     return true;
   }
 
-  private HttpSession shouldCreateSession(HttpServletRequest req) {
-    HttpSession session = req.getSession(false);
-    if (session == null) {
-      return req.getSession();
-    }
-    return session;
+  @Nullable
+  public String getEncoding() {
+    return this.encoding;
+  }
+
+  public void setForceRequestEncoding(boolean forceRequestEncoding) {
+    this.forceRequestEncoding = forceRequestEncoding;
+  }
+
+  public void setForceResponseEncoding(boolean forceResponseEncoding) {
+    this.forceResponseEncoding = forceResponseEncoding;
+  }
+
+  private void setupPreviousURICookie(HttpServletRequest request, HttpServletResponse response) {
+    String requestURI = request.getRequestURI();
+    System.out.println(requestURI);
+    response.addCookie(new Cookie("previousURI", requestURI));
+    request.getSession().setAttribute("previousURI", requestURI);
+  }
+
+  @Override
+  public void init(FilterConfig config) throws ServletException {
+    SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
+    LOG.info("CreateCMR " + config.getFilterName() + " initialized.");
+    setEncoding("UTF-8");
+    setForceEncoding(true);
   }
 
   public void setEncoding(@Nullable String encoding) {
     this.encoding = encoding;
-  }
-
-  @Nullable
-  public String getEncoding() {
-    return this.encoding;
   }
 
   public void setForceEncoding(boolean forceEncoding) {
@@ -235,63 +263,9 @@ public class UserInjectFilter implements Filter {
     this.forceResponseEncoding = forceEncoding;
   }
 
-  public void setForceRequestEncoding(boolean forceRequestEncoding) {
-    this.forceRequestEncoding = forceRequestEncoding;
-  }
-
-  public boolean isForceRequestEncoding() {
-    return this.forceRequestEncoding;
-  }
-
-  public void setForceResponseEncoding(boolean forceResponseEncoding) {
-    this.forceResponseEncoding = forceResponseEncoding;
-  }
-
-  public boolean isForceResponseEncoding() {
-    return this.forceResponseEncoding;
-  }
-
-  private void assignEncoding(String enconding, HttpServletRequest httpReq, HttpServletResponse httpResp) {
-
-    try {
-      if (encoding != null) {
-        if (isForceRequestEncoding() || httpReq.getCharacterEncoding() == null) {
-          httpReq.setCharacterEncoding(encoding);
-        }
-        if (isForceResponseEncoding()) {
-          httpResp.setCharacterEncoding(encoding);
-        }
-      }
-    } catch (UnsupportedEncodingException e) {
-      LOG.error("Unsuported enconding operation: " + e);
-    }
-  }
-
-  /**
-   * To evaluate if should redirect back to URI given just before redirecting to
-   * SSO's Identity Provider.
-   * 
-   * @param previousURI
-   * @return
-   */
-  private boolean shouldRedirectToURI(String previousURI) {
-    if (StringUtils.isBlank(previousURI)) {
-      return false;
-    }
-
-    if (previousURI.matches("(.*)/request/[0-9]+(.*)")) {
-      return true;
-    }
-
-    if (previousURI.matches("(.*)/massrequest/[0-9]+(.*)")) {
-      return true;
-    }
-
-    if (previousURI.matches("(.*)CreateCMR/approval/(.*)")) {
-      return true;
-    }
-
-    return false;
+  @Override
+  public void destroy() {
+    // NOOP
   }
 
 }
