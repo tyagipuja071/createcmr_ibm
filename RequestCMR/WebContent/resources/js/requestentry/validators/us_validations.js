@@ -603,7 +603,7 @@ function afterConfigForUS() {
 
   if (_usIsicHandler == null && FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER') {
     _usIsicHandler = dojo.connect(FormManager.getField('usSicmen'), 'onChange', function(value) {
-      onChangeCustClassOrKuklaAndIsic();
+      onChangeCustClassOrKuklaAndIsic(value);
     });
   }
 
