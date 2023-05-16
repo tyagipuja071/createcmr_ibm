@@ -597,13 +597,13 @@ function afterConfigForUS() {
 
   if (_usCustClassHandler == null && FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER') {
     _usCustClassHandler = dojo.connect(FormManager.getField('custClass'), 'onChange', function(value) {
-      onChangeCustClassOrKuklaAndIsic(value);
+      onChangeCustClassOrKuklaAndIsic();
     });
   }
 
   if (_usIsicHandler == null && FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER') {
     _usIsicHandler = dojo.connect(FormManager.getField('usSicmen'), 'onChange', function(value) {
-      onChangeCustClassOrKuklaAndIsic(value);
+      onChangeCustClassOrKuklaAndIsic();
     });
   }
 
