@@ -1353,21 +1353,15 @@ function onChangeCustClassOrKuklaAndIsic() {
 
   var onChangedKukla = FormManager.getActualValue('custClass');
   var onChangedIsic = FormManager.getActualValue('usSicmen');
-  var pvtKukla = '60';
-  var pvtIsic = '9500';
   var previousKukla = oldKukla;
   setPreviousKuklaValue(onChangedKukla);
   var previousIsic = oldIsic;
   setPreviousIsicValue(onChangedIsic);
 
-  if ((onChangedIsic == pvtIsic && previousKukla == pvtKukla && onChangedKukla == '11') || (onChangedIsic != pvtIsic && onChangedKukla == pvtKukla && previousIsic == pvtIsic)
-      || (onChangedIsic == pvtIsic && onChangedKukla == '11' && previousIsic != pvtIsic)) {
+  if (onChangedKukla == '11' && onChangedIsic == '9500') {
     cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
-  } else if ((previousKukla == pvtKukla && previousIsic != pvtIsic && onChangedKukla == pvtKukla && onChangedIsic != pvtIsic)
-      || (previousKukla != pvtKukla && previousIsic == pvtIsic && onChangedKukla != pvtKukla && onChangedIsic == pvtIsic)) {
+  } else if ((onChangedKukla != '60' && onChangedIsic == '9500') || (onChangedKukla == '60' && onChangedIsic != '9500')) {
     cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are selected.');
-  } else if (onChangedKukla != pvtKukla && onChangedIsic == pvtIsic && previousIsic == pvtIsic) {
-    cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
   }
 }
 
