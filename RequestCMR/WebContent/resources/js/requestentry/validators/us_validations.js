@@ -1353,8 +1353,6 @@ function onChangeCustClassOrKuklaAndIsic() {
 
   var onChangedKukla = FormManager.getActualValue('custClass');
   var onChangedIsic = FormManager.getActualValue('usSicmen');
-  var pvtKukla = '60';
-  var pvtIsic = '9500';
   var previousKukla = oldKukla;
   setPreviousKuklaValue(onChangedKukla);
   var previousIsic = oldIsic;
