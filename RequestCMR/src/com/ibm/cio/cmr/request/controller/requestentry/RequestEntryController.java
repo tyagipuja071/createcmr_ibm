@@ -467,12 +467,14 @@ public class RequestEntryController extends BaseController {
   public ModelAndView processYourAction(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model, CheckListModel checklist) {
     ModelAndView mv = null;
     try {
-      service.setChecklist(checklist);
+      String action = model.getAction();
+      if (!"CLM".equals(action)) {
+        service.setChecklist(checklist);
+      }
       service.processTransaction(model, request);
 
       mv = new ModelAndView("redirect:/request/" + model.getReqId(), "reqentry", new RequestEntryModel());
 
-      String action = model.getAction();
       if (CmrConstants.Save().equalsIgnoreCase(action)) {
         mv = new ModelAndView("redirect:/request/" + model.getReqId(), "reqentry", new RequestEntryModel());
         if ("Y".equals(model.getHasError())) {

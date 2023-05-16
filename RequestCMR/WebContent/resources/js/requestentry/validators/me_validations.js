@@ -803,6 +803,53 @@ function addVatExemptHandler() {
   }
 }
 
+var _checklistBtnHandler = [];
+function addChecklistBtnHandler() {
+  for (var i = 2; i <= 15; i++) {
+    _checklistBtnHandler[i] = null;
+    if (_checklistBtnHandler[i] == null) {
+      _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
+        freeTxtFieldShowHide(Number(value.target.id.split("_").pop()));
+      });
+    }
+  }
+}
+
+function freeTxtFieldShowHide(buttonNo) {
+var shouldDisplay = false;
+  
+  if (buttonNo <= 1) {
+    return;
+  }
+  var fieldIdNo = getCheckListFieldNo(buttonNo);
+  var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
+  var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
+  
+  if (buttonNo%2 == 0) {
+    shouldDisplay = true;
+  } else {
+    shouldDisplay = false;
+  }
+  if (shouldDisplay) {
+    element.style.display = 'block';
+  } else {
+    element.style.display = 'none';
+    textFieldElement.value = '';
+  }
+}
+
+function getCheckListFieldNo(buttonNo) {
+  return ((buttonNo - (buttonNo % 2))/2) + 5;
+}
+
+function checkChecklistButtons() {
+  for (var i = 2; i<=14; i=i+2) {
+    if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
+      document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
+    }
+  }
+}
+
 var _cisHandler = null;
 function addCISHandler() {
   if (!FormManager.getField('cisServiceCustIndc')) {
@@ -2867,12 +2914,19 @@ function addCEMEAChecklistValidator() {
         var checklist = dojo.query('table.checklist');
 
         var questions = checklist.query('input[type="radio"]');
-        if (questions.length > 0) {
+        var textBoxes = checklist.query('input[type="text"]');
+        if (questions.length > 0 && textBoxes.length > 0) {
           var noOfQuestions = questions.length / 2;
+          var noOfTextBoxes = textBoxes.length;
           var checkCount = 0;
           for (var i = 0; i < questions.length; i++) {
             if (questions[i].checked) {
               checkCount++;
+            }
+          }
+          for (var i=0; i < noOfTextBoxes; i++) {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+              return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
             }
           }
           if (noOfQuestions != checkCount) {
@@ -4639,6 +4693,7 @@ dojo
 
       GEOHandler.addAfterConfig(afterConfigForCEMEA, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(addHandlersForCEMEA, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(addVatExemptHandler, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(addCISHandler, [ SysLoc.RUSSIA ]);
       GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.CEMEA);
