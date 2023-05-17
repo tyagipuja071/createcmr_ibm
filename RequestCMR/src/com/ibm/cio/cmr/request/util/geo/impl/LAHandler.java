@@ -225,10 +225,23 @@ public class LAHandler extends GEOHandler {
 
     if (StringUtils.isNotBlank(mainRecord.getCmrCollectorNo()) && mainRecord.getCmrCollectorNo().length() > 6) {
       data.setCollectorNameNo(mainRecord.getCmrCollectorNo().substring(0, 6));
-      LOG.debug("Collector No Value in setDataValuesOnImport (mainRecord) --> " + mainRecord.getCmrCollectorNo().substring(0, 6));
+      LOG.debug("Collector No (substr) Value in setDataValuesOnImport (mainRecord) --> " + mainRecord.getCmrCollectorNo().substring(0, 6));
     } else {
       data.setCollectorNameNo(mainRecord.getCmrCollectorNo());
       LOG.debug("Collector No Value in setDataValuesOnImport (mainRecord) --> " + mainRecord.getCmrCollectorNo());
+    }
+
+    if (StringUtils.isBlank(data.getCollectorNameNo())) {
+      LOG.debug("No collector number value found from findcmr object, will now pull from RDC database");
+      String collectorNo = getRDCCollectorNo(mainRecord.getCmrNum(), data.getCmrIssuingCntry());
+
+      if (StringUtils.isNotBlank(collectorNo)) {
+        collectorNo = collectorNo.length() > 6 ? collectorNo.substring(0, 6) : collectorNo;
+        data.setCollectorNameNo(collectorNo);
+        LOG.debug("Set collector number from RDC value (setDataValuesOnImport) --> " + collectorNo);
+      } else {
+        LOG.debug("No collector number value found from RDC database (setDataValuesOnImport) for request id " + admin.getRequesterId());
+      }
     }
 
     data.setCollBoId(mainRecord.getCmrCollBo());
@@ -2733,6 +2746,30 @@ public class LAHandler extends GEOHandler {
     }
     LOG.debug("Returning " + (StringUtils.isEmpty(bahnsVal) ? "EMPTY" : bahnsVal) + " as Trains value for " + kunnr);
     return bahnsVal;
+  }
+
+  private String getRDCCollectorNo(String cmrNo, String issuingCntry) throws Exception {
+    String collectorNo = "";
+
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(issuingCntry)) {
+      EntityManager em = JpaManager.getEntityManager();
+
+      if (em != null) {
+        String mandt = SystemConfiguration.getValue("MANDT");
+        String sql = ExternalizedQuery.getSql("LA.GET_COLLECTORNO_ON_IMPORT");
+
+        sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+        sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+        sql = StringUtils.replace(sql, ":KATR6", "'" + issuingCntry + "'");
+        sql = StringUtils.replace(sql, ":KTOKD", "'ZS01'");
+
+        PreparedQuery query = new PreparedQuery(em, sql);
+        query.setForReadOnly(true);
+
+        collectorNo = query.getSingleResult(String.class);
+      }
+    }
+    return collectorNo;
   }
 
   public String[] getRDcName1Name2Values(String kunnr) throws Exception {
