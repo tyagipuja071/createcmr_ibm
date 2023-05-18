@@ -2910,9 +2910,9 @@ function hasDuplicates(array) {
 function lockUnlockFieldForISrael() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var _custGrpSet1 = new Set([ 'COMME','GOVRN','THDPT']);
+  var _custGrpSet1 = new Set([ 'COMME','GOVRN','THDPT', 'BUSPR']);
   var reqType = FormManager.getActualValue('reqType');
-
+  
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || (reqType == 'C' && !_custGrpSet1.has(custSubGrp))) {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
@@ -2929,6 +2929,7 @@ function lockUnlockFieldForISrael() {
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('salesTeamCd');
     FormManager.enable('salesBusOffCd');
+    FormManager.enable('ppsceid');
   } 
 }
 
@@ -3054,7 +3055,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showHideKuklaField, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(lockCustomerClassByLob, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(finalizeAbbrevName, [ SysLoc.ISRAEL ]);
-//  GEOHandler.addAfterTemplateLoad(adjustChecklistContact, [ SysLoc.ISRAEL ]);
+// GEOHandler.addAfterTemplateLoad(adjustChecklistContact, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(setSalesRepEnterpriseNoSBO, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(lockCMROwner, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(setCTCByScenario, [ SysLoc.ISRAEL ]);
