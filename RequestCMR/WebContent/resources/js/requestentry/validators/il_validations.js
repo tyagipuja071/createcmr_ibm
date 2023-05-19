@@ -14,6 +14,13 @@ var _oldCtc = null;
 var _oldEnt = null;
 var _oldIsu = null;
 var _oldClientTier = null;
+var _isrealCustGrpHandler = null;
+
+if (_isrealCustGrpHandler == null && FormManager.getActualValue('reqType') == 'C' && FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER') {
+  _isrealCustGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+    lockUnlockFieldForISrael();
+  });
+}
 
 function addHandlersForIL() {
   console.log(">>>> addHandlersForIL ");
@@ -2910,7 +2917,8 @@ function hasDuplicates(array) {
 function lockUnlockFieldForISrael() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var _custGrpSet1 = new Set([ 'COMME','GOVRN','THDPT', 'BUSPR']);
+  var _custGrpSet1 = new Set([ 'COMME','GOVRN','THDPT']);
+  var _custGrpSet2 = new Set(['BUSPR']);
   var reqType = FormManager.getActualValue('reqType');
   
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || (reqType == 'C' && !_custGrpSet1.has(custSubGrp))) {
@@ -2920,17 +2928,22 @@ function lockUnlockFieldForISrael() {
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('salesTeamCd');
     FormManager.readOnly('salesBusOffCd');
+    FormManager.clearValue('ppsceid');
     FormManager.readOnly('ppsceid');
-
-  } else if (_custGrpSet1.has(custSubGrp)) {
+  } 
+  else if (_custGrpSet1.has(custSubGrp)) {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     FormManager.enable('enterprise');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('salesTeamCd');
     FormManager.enable('salesBusOffCd');
+    FormManager.clearValue('ppsceid');
+    FormManager.readOnly('ppsceid');
+  }
+  if(_custGrpSet2.has(custSubGrp)){
     FormManager.enable('ppsceid');
-  } 
+  }
 }
 
 function addRemoveClientTierValidator() {

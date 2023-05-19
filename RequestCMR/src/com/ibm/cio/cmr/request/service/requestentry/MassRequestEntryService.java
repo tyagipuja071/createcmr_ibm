@@ -3218,6 +3218,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
               ordBlkVal.append("I");
             } else if (ordBlkTxt.contains("BOTH")) {
               ordBlkVal.append("B");
+            } else if (ordBlkTxt.contains("LOEVM")) {
+              ordBlkVal.append("X");
             }
           }
           model.setOrdBlk(ordBlkVal.toString());
