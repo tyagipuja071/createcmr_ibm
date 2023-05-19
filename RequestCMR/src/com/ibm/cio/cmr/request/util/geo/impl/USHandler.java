@@ -1240,7 +1240,7 @@ public class USHandler extends GEOHandler {
           || ("BYMODEL".equalsIgnoreCase(data.getCustSubGrp()) && "KYN".equalsIgnoreCase(data.getRestrictTo()))) {
         admin.setMainCustNm1("KYNDRYL INC");
       }
-      data.setVatInd("N");
+      
     }
 
     if (admin != null && "CSP".equals(admin.getReqReason())) {
@@ -1311,6 +1311,11 @@ public class USHandler extends GEOHandler {
 
     if ("U".equals(admin.getReqType())) {
       data.setCustSubGrp("");
+    }
+    
+    // CREATCMR-9433
+    if (StringUtils.isEmpty(data.getVatInd())){
+      data.setVatInd("N");
     }
 
   }
