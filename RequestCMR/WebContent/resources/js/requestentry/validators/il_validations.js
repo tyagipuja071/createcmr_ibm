@@ -2922,6 +2922,7 @@ function lockUnlockFieldForISrael() {
   var reqType = FormManager.getActualValue('reqType');
   
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || (reqType == 'C' && !_custGrpSet1.has(custSubGrp))) {
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('enterprise');
@@ -2932,6 +2933,7 @@ function lockUnlockFieldForISrael() {
     FormManager.readOnly('ppsceid');
   } 
   else if (_custGrpSet1.has(custSubGrp)) {
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     FormManager.enable('enterprise');
@@ -2942,6 +2944,7 @@ function lockUnlockFieldForISrael() {
     FormManager.readOnly('ppsceid');
   }
   if(_custGrpSet2.has(custSubGrp)){
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'ppsceid' ], 'MAIN_IBM_TAB');
     FormManager.enable('ppsceid');
   }
 }
