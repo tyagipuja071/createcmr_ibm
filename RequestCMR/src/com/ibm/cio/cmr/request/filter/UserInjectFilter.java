@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -107,7 +110,7 @@ public class UserInjectFilter implements Filter {
           if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
             LOG.debug("No IBM ID detected. Redirecting to W3 ID ...");
             httpReq.getSession().invalidate();
-            setupPreviousURICookie(httpReq, httpResp);
+            setupPreviousReqID(httpReq, httpResp);
 
             httpResp.sendRedirect("/CreateCMR/oidc");
             return;
@@ -121,7 +124,6 @@ public class UserInjectFilter implements Filter {
 
           session.setAttribute("userHelper", userHelper);
           setSessionAttributes(httpReq, httpResp);
-
           filterChain.doFilter(httpReq, httpResp);
           return;
         }
@@ -239,11 +241,35 @@ public class UserInjectFilter implements Filter {
     this.forceResponseEncoding = forceResponseEncoding;
   }
 
-  private void setupPreviousURICookie(HttpServletRequest request, HttpServletResponse response) {
+  private void setupPreviousReqID(HttpServletRequest request, HttpServletResponse response) {
     String requestURI = request.getRequestURI();
-    System.out.println(requestURI);
     response.addCookie(new Cookie("previousURI", requestURI));
     request.getSession().setAttribute("previousURI", requestURI);
+    String referer = request.getHeader("referer");
+    setReqIDFromReferer(referer).ifPresent(reqID -> request.setAttribute("r", reqID));
+    setReqId(referer).ifPresent(reqID -> request.getSession().setAttribute("previousURI", "/CreateCMR/request/" + reqID));
+  }
+
+  private Optional<String> setReqIDFromReferer(String referer) {
+    if (referer.matches("(.*)logout\\?r=[0-9]+")) {
+      Pattern pattern = Pattern.compile("\\?r=[0-9]+");
+      Matcher matcher = pattern.matcher(referer);
+      if (matcher.find()) {
+        return Optional.of(matcher.group().substring(3));
+      }
+    }
+    return Optional.empty();
+  }
+
+  private Optional<String> setReqId(String referer) {
+    if (referer.matches("(.*)logout\\?r=[0-9]+")) {
+      Pattern pattern = Pattern.compile("\\?r=[0-9]+");
+      Matcher matcher = pattern.matcher(referer);
+      if (matcher.find()) {
+        return Optional.of(matcher.group().substring(3));
+      }
+    }
+    return Optional.empty();
   }
 
   @Override

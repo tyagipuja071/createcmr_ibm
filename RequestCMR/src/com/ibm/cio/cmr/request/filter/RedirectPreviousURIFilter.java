@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
 
 /**
  * To redirect to previous URI when necessary.
@@ -36,6 +37,11 @@ public class RedirectPreviousURIFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
+    if (!OAuthUtils.isSSOActivated()) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     HttpServletRequest httpReq = (HttpServletRequest) request;
     HttpServletResponse httpResp = (HttpServletResponse) response;
 
@@ -48,6 +54,7 @@ public class RedirectPreviousURIFilter implements Filter {
 
     if (!redirectToPreviousURI(httpReq, httpResp)) {
       filterChain.doFilter(request, response);
+      return;
     }
 
   }

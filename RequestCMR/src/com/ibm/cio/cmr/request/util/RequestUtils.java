@@ -1818,14 +1818,6 @@ public class RequestUtils {
     OAuthUtils.ssoTokenCleanUP(request);
     AppUser.remove(request);
     request.getSession().invalidate();
-    storePreviousURI(request);
-  }
-
-  public static void storePreviousURI(HttpServletRequest request) {
-    String requestURI = request.getRequestURI();
-    if (RequestUtils.filterPreviousURI(requestURI)) {
-      request.getSession().setAttribute("previousURI", requestURI);
-    }
   }
 
   public static Boolean filterPreviousURI(String previousURI) {
