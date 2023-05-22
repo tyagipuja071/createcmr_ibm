@@ -3259,8 +3259,8 @@ function validatorEnterpriseES() {
     salRep = result1[0].ret2;
   }
 
-  var condForEntCross1 = isuCd == '34' && !enterpriseSetForCB.has(enterprise) && (custGrp == 'CROSS' || (role != 'REQUESTER' && custGrp != 'CROSS'));
-  var condForEnt2 = isuCd == '34' && !entFor34QES.has(enterprise) && enterprise != entp && custGrp != 'CROSS';
+  var condForEntCross1 = isuCd == '34' && !enterpriseSetForCB.has(enterprise);
+  var condForEnt2 = isuCd == '34' && !enterpriseSetForCB.has(enterprise) && enterprise != entp && custGrp != 'CROSS';
   var condForEnt3 = isuCd == '36' && !entFor36YES.has(enterprise);
   var condForEnt4 = isuCd == '32' && enterprise != '985985';
   var condForEnt5 = isuCd == '04' && !entFor04ES.has(enterprise);
