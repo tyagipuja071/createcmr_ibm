@@ -34,8 +34,9 @@ import com.ibm.json.java.JSONObject;
  * customer is a government owned entity or not
  * 
  * @author JeffZAMORA
- * 
+ * @deprecated -Use {@link GOEAssignmentElement}
  */
+@Deprecated
 public class GOEDeterminationElement extends MatchingElement {
 
   private static final Logger LOG = Logger.getLogger(GOEDeterminationElement.class);
