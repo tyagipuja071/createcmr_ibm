@@ -1940,6 +1940,26 @@ public class RequestUtils {
     request.getSession().invalidate();
   }
 
+  public static Boolean filterPreviousURI(String previousURI) {
+    if (StringUtils.isBlank(previousURI)) {
+      return false;
+    }
+
+    if (previousURI.matches("(.*)/request/[0-9]+(.*)")) {
+      return true;
+    }
+
+    if (previousURI.matches("(.*)/massrequest/[0-9]+(.*)")) {
+      return true;
+    }
+
+    if (previousURI.matches("(.*)CreateCMR/approval/(.*)")) {
+      return true;
+    }
+
+    return false;
+  }
+
   public static long extractRequestId(HttpServletRequest request) {
 
     String reqIdParam = request.getParameter("reqId");
