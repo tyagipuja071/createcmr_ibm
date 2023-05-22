@@ -184,10 +184,7 @@ public class DPLCheckElement extends ValidatingElement {
             addr.setDplChkTs(SystemUtil.getCurrentTimestamp());
             entityManager.merge(addr);
           } else {
-            Boolean isPrivate = false;
-            if (StringUtils.isNotEmpty(data.getIsicCd()) && "9500".equals(data.getIsicCd())) {
-              isPrivate = true;
-            }
+            Boolean isPrivate = isPrivate(data);
 
             Boolean errorStatus = false;
             try {
@@ -429,6 +426,16 @@ public class DPLCheckElement extends ValidatingElement {
   @Override
   public String getProcessDesc() {
     return "DPL Check";
+  }
+
+  private boolean isPrivate(Data data) {
+    String subGrp = data.getCustSubGrp();
+    if (subGrp != null) {
+      if (subGrp.toUpperCase().contains("PRIV") || subGrp.toUpperCase().contains("PRIPE") || subGrp.toUpperCase().contains("PRICU")) {
+        return true;
+      }
+    }
+    return "60".equals(data.getCustClass()) || "9500".equals(data.getIsicCd());
   }
 
 }
