@@ -67,12 +67,21 @@
 			<param-value>UTF-8</param-value>
 		</init-param>
 		<init-param>
-	        <param-name>forceEncoding</param-name>
-	        <param-value>true</param-value>
-	    </init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
 	</filter>
 	<filter-mapping>
 		<filter-name>UserInjectFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>RedirectPreviousURIFilter</filter-name>
+		<filter-class>com.ibm.cio.cmr.request.filter.RedirectPreviousURIFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>RedirectPreviousURIFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 

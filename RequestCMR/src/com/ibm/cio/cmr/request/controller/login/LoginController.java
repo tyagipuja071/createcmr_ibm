@@ -176,10 +176,15 @@ public class LoginController extends BaseController {
   public ModelAndView performLogout(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
 
     if (OAuthUtils.isSSOActivated()) {
+
       // revoke token
       RequestUtils.performLogoutActivities(request);
 
-      ModelAndView mv = new ModelAndView("loggedOut", "loginUser", new LogInUserModel());
+      updateTimeout(request);
+
+      LogInUserModel userModel = new LogInUserModel();
+      setReqIdIntoUserModel(request, userModel);
+      ModelAndView mv = new ModelAndView("loggedOut", "loginUser", userModel);
       return mv;
     }
 
@@ -188,6 +193,23 @@ public class LoginController extends BaseController {
     ModelAndView mv = new ModelAndView("redirect:/login", "loginUser", new LogInUserModel());
     MessageUtil.setInfoMessage(mv, MessageUtil.INFO_LOGOUT);
     return mv;
+  }
+
+  private void updateTimeout(HttpServletRequest request) {
+    SessionInactivityFilter filterInstance = new SessionInactivityFilter();
+    filterInstance.timeoutLengthMinutes = 120;
+    filterInstance.updateLastUserTriggeredRequestDate(request);
+  }
+
+  private void setReqIdIntoUserModel(HttpServletRequest request, LogInUserModel userModel) {
+    try {
+      long reqId = 0;
+      reqId = Long.parseLong(request.getParameter("r"));
+      if (reqId != 0) {
+        userModel.setR(reqId);
+      }
+    } catch (Exception e) {
+    }
   }
 
   /**
