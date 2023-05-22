@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -246,8 +247,11 @@ public class UserInjectFilter implements Filter {
     response.addCookie(new Cookie("previousURI", requestURI));
     request.getSession().setAttribute("previousURI", requestURI);
     String referer = request.getHeader("referer");
-    setReqIDFromReferer(referer).ifPresent(reqID -> request.setAttribute("r", reqID));
-    setReqId(referer).ifPresent(reqID -> request.getSession().setAttribute("previousURI", "/CreateCMR/request/" + reqID));
+
+    if (StringUtils.isNotBlank(referer)) {
+      setReqIDFromReferer(referer).ifPresent(reqID -> request.setAttribute("r", reqID));
+      setReqId(referer).ifPresent(reqID -> request.getSession().setAttribute("previousURI", "/CreateCMR/request/" + reqID));
+    }
   }
 
   private Optional<String> setReqIDFromReferer(String referer) {
