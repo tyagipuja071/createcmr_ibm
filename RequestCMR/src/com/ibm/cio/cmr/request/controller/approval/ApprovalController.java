@@ -202,6 +202,7 @@ public class ApprovalController extends BaseController {
 
     AppUser user = AppUser.getUser(request);
     if (user == null) {
+      user = new AppUser();
       user.setIntranetId(approval.getApproverId().toLowerCase());
       Person person = BluePagesHelper.getPerson(approval.getApproverId());
       if (person != null) {
