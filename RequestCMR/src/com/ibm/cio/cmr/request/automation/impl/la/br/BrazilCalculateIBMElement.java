@@ -38,7 +38,6 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.la.br.ConsultaCCCResponse;
 import com.ibm.cmr.services.client.automation.la.br.MidasRequest;
@@ -118,11 +117,11 @@ public class BrazilCalculateIBMElement extends OverridingElement {
     final List<String> STATEPROV_758 = Arrays.asList("PR", "SC", "RS");
     if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && reqType.equals("C")
         && (!skipScenarios.contains(data.getCustSubGrp()) && !skipSBO.contains(data.getSalesBusOffCd()))) {
-      if ("RJ".equals(soldTo.getStateProv())) {
+      if ("ES".equals(soldTo.getStateProv()) || "RJ".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "761");
       } else if ("SP".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "764");
-      } else if ("ES".equals(soldTo.getStateProv()) || "MG".equals(soldTo.getStateProv())) {
+      } else if ("MG".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "556");
       } else if (STATEPROV_758.contains(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "758");
@@ -1086,6 +1085,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
   private void checkContactsForAutomationRequest(EntityManager entityManager, Admin admin, Data data, LAHandler geoHandler) {
 
     boolean hasEM001 = false;
+
     LOG.debug("Getting contact info from V2 inputs..");
     String sql = ExternalizedQuery.getSql("BR.GET_DISTINCT_MAILS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
