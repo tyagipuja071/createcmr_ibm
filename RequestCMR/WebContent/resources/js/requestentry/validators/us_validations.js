@@ -1446,8 +1446,10 @@ function custClassIsicValidator() {
           rdcIsic = result2;
         }
 
-        if (onChangedIsic == '9500' && onChangedKukla != '60' || onChangedIsic != '9500' && onChangedKukla == '60') {
-          return new ValidationResult(null, false, 'Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
+        if (FormManager.getActualValue('reqType') == 'U') {
+          if (onChangedIsic == '9500' && onChangedKukla != '60' || onChangedIsic != '9500' && onChangedKukla == '60') {
+            return new ValidationResult(null, false, 'Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
+          }
         }
         return new ValidationResult(null, true);
       }

@@ -1830,7 +1830,6 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
-
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       // DENNIS: recalculate the the DPL by updating the sold to DPL flags
       if (admin != null) {
