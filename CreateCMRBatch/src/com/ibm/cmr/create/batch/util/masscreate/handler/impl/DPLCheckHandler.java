@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.MassCreateAddr;
 import com.ibm.cio.cmr.request.entity.MassCreateData;
+import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileRow;
 import com.ibm.cmr.create.batch.util.masscreate.handler.RowHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.RowResult;
@@ -57,7 +58,8 @@ public class DPLCheckHandler implements RowHandler {
         try {
           LOG.debug("Performing DPL Check on Mass Create ID " + data.getId().getParReqId() + " Type " + addr.getId().getAddrType() + " Sequence "
               + addr.getId().getSeqNo());
-          response = dplClient.executeAndWrap(DPLCheckClient.EVS_APP_ID, request, DPLCheckResponse.class);
+          String dplSystemId = SystemUtil.useKYCForDPLChecks() ? DPLCheckClient.KYC_APP_ID : DPLCheckClient.EVS_APP_ID;
+          response = dplClient.executeAndWrap(dplSystemId, request, DPLCheckResponse.class);
           if (response.isSuccess() && !response.getResult().isPassed()) {
             dplCheckPassed = false;
           } else if (!response.isSuccess()) {
