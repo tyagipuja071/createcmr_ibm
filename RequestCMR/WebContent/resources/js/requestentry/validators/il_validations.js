@@ -2921,7 +2921,7 @@ function lockUnlockFieldForISrael() {
   var _custGrpSet2 = new Set(['BUSPR']);
   var reqType = FormManager.getActualValue('reqType');
   
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || (reqType == 'C' && !_custGrpSet1.has(custSubGrp))) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || (reqType == 'C' && !_custGrpSet1.has(custSubGrp) && custSubGrp != 'BUSPR')) {
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
