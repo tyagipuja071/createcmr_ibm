@@ -118,11 +118,11 @@ public class BrazilCalculateIBMElement extends OverridingElement {
     final List<String> STATEPROV_758 = Arrays.asList("PR", "SC", "RS");
     if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && reqType.equals("C")
         && (!skipScenarios.contains(data.getCustSubGrp()) && !skipSBO.contains(data.getSalesBusOffCd()))) {
-      if ("RJ".equals(soldTo.getStateProv())) {
+      if ("ES".equals(soldTo.getStateProv()) || "RJ".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "761");
       } else if ("SP".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "764");
-      } else if ("ES".equals(soldTo.getStateProv()) || "MG".equals(soldTo.getStateProv())) {
+      } else if ("MG".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "556");
       } else if (STATEPROV_758.contains(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "758");
