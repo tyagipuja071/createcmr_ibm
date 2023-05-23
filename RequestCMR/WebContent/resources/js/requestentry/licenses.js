@@ -23,6 +23,26 @@ function doAddLicense() {
     return;
   }
   
+  var fromDateIsValidFormat = isValidDate(licenseValidFrom);
+  var toDateIsValidFormat = isValidDate(licenseValidTo);
+  if(!fromDateIsValidFormat || !toDateIsValidFormat) {
+    var invalidDateStr = '';
+    if(!fromDateIsValidFormat && !toDateIsValidFormat) {
+      invalidDateStr = `Invalid dates for 'Date Valid From' and 'Valid To Date'`
+    } else if(!fromDateIsValidFormat) {
+      invalidDateStr = `Invalid date for 'Date Valid From'`
+    } else if (!toDateIsValidFormat) {
+      invalidDateStr = `Invalid date for 'Valid To Date'`
+    }
+    cmr.showAlert(`${invalidDateStr}. Please enter a valid date in the format 'YYYYMMDD'.`);
+    return;
+  }
+  
+  if(licenseValidFrom > licenseValidTo) {
+    cmr.showAlert(`'Date Valid From' must be on or before 'Valid To Date'.`);
+    return;
+  }
+  
   var licenseDtls = `License Number: ${licenseNumber}, Date Valid From: ${licenseValidFrom} and Valid To Date: ${licenseValidTo}`;
   var addLicFunc = `actualAddLicense(${licenseValidFrom}, ${licenseValidTo})`;
   cmr.showConfirm(addLicFunc, 'Add <strong>' + licenseDtls + '</strong> to the License List?');
@@ -106,4 +126,21 @@ function licenseImportIndFormatter(value, rowIndex) {
   } else {
     return '';
   }
+}
+
+function isValidDate(dateString) {
+  var regex = /^(19|20)\d\d(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/;
+  if(!regex.test(dateString)) return false;
+
+  var year = Number(dateString.slice(0,4));
+  var month = Number(dateString.slice(4,6)) - 1; // months are 0-based in
+                                                  // JavaScript
+  var day = Number(dateString.slice(6,8));
+
+  var dateObject = new Date(year, month, day);
+
+  // check if the dates match (JS will correct invalid dates like February 30 )
+  return dateObject.getFullYear() === year && 
+         dateObject.getMonth() === month && 
+         dateObject.getDate() === day;
 }
