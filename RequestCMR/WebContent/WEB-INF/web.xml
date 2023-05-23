@@ -150,6 +150,9 @@
 	<!-- Global timeout of session for App -->
 	<session-config>
 		<session-timeout>120</session-timeout>
+		<cookie-config>
+			<path>/CreateCMR</path>
+		</cookie-config>
 	</session-config>
 	<jsp-config>
 		<taglib>
