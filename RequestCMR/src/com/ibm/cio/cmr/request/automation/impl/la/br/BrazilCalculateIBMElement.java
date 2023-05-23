@@ -38,6 +38,7 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.la.br.ConsultaCCCResponse;
 import com.ibm.cmr.services.client.automation.la.br.MidasRequest;
