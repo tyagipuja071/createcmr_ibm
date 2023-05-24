@@ -121,7 +121,7 @@
          There is an indication that the products/services/technologies are destined for a sanctioned country/region:
          <span style="font-weight: bold">Cuba, Iran, North Korea,
 				Syria, the Crimea, Donetsk and Luhansk regions of Ukraine, Russia
-				and Belaus.</span>
+				and Belarus.</span>
 		</cmr:chk-entry>
 		<cmr:chk-entry number="6" section="A">
          有迹象表明客户或供应商由受制裁国家或地区的政府拥有或控制？<br>
@@ -294,11 +294,11 @@
 		<cmr:chk-entry number="5" section="B">
 			<span style="font-weight: bold; text-decoration: underline">
 				军事最终用户/军事最终用途 ---</span>
-			<br> 据您所知，客户是否军事最终用户或与以下国家的军事最终用户或具有军事最终用途的物品一起参与商业活动？
+			 据您所知，客户是否军事最终用户或与以下国家的军事最终用户或具有军事最终用途的物品一起参与商业活动？
        <br>
 			<span style="font-weight: bold; text-decoration: underline">Military
 				End user/Military End Use ---</span>
-			<br>To the best of your knowledge, is the customer a military end user or involved in business activities with a military end user or items with military end uses in the following countries?  
+			To the best of your knowledge, is the customer a military end user or involved in business activities with a military end user or items with military end uses in the following countries?  
            <br>
 			<br>
 			<span style="font-weight: bold; text-decoration: underline">定义
