@@ -10621,7 +10621,7 @@ function hasValidLicenseDate() {
     for (var i = 0; i < CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount; i++) {
       var record = CmrGrid.GRIDS.LICENSES_GRID_GRID.getItem(i);
       var validTo = record.validTo[0]
-      if (today > validTo) {
+      if (today < validTo) {
         return true;
       }
     }

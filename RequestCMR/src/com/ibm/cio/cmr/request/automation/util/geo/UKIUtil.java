@@ -44,6 +44,10 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
+import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
+
+
 public class UKIUtil extends AutomationUtil {
   private static final Logger LOG = Logger.getLogger(UKIUtil.class);
   public static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
@@ -339,6 +343,18 @@ public class UKIUtil extends AutomationUtil {
         details.append(" - " + field + "\n");
       }
     }
+    
+    if ("U".equals(admin.getReqType()) && SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      DataRdc rdcData = LegacyDirectUtil.getOldData(entityManager, String.valueOf(data.getId().getReqId()));
+      if (rdcData != null && !"Z".equals(rdcData.getSpecialTaxCd()) && "Z".equals(data.getSpecialTaxCd())) {
+        details.append("The Tax Code has been updated to 'Z', so the request will now be placed in CMDE's queue.\n");
+        engineData.addNegativeCheckStatus("_updatedToZTaxCode",
+            "The Tax Code has been updated to 'Z', so the request will now be placed in CMDE's queue.");
+        validation.setSuccess(false);
+        validation.setMessage("Review Required");
+      }
+    }
+    
     output.setDetails(details.toString());
     output.setProcessOutput(validation);
     return true;
