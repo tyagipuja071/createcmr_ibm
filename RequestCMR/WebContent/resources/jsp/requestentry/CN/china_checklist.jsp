@@ -45,7 +45,7 @@
 
 </style>
 <cmr:checklist title1="中国最终用户/最终用途检查清单"
-	title2="China End User/End Use Screening Checklis">
+	title2="China End User/End Use Screening Checklist">
 	<!--   <cmr:chk-block>
       Customer Company Full Name
       </cmr:chk-block>
@@ -214,13 +214,13 @@
          --- To the best of your knowledge or belief is your customer involved in any activity related to or in 
          support of rocket systems and/or unmanned air vehicles in the following countries?
          <ul>
-				<li>“火箭系统”包括但不限于：弹道导弹、太空运载火箭和探空火箭 <br> “Rocket Systems”
-					include, but are not limited to: ballistic missiles, space launch
-					vehicles, and sounding rockets
+				<li><em>“火箭系统”包括但不限于：弹道导弹、太空运载火箭和探空火箭 
+				<br>“Rocket Systems” include, but are not limited to: ballistic missiles, space launch
+					vehicles, and sounding rockets</em>
 				</li>
-				<li>“无人飞行器”包括但不限于：巡航导弹、目标无人机和侦察无人机 <br> “Unmanned Air
+				<li><em>“无人飞行器”包括但不限于：巡航导弹、目标无人机和侦察无人机 <br> “Unmanned Air
 					Vehicles” include, but are not limited to: cruise missiles, target
-					drones and reconnaissance drones
+					drones and reconnaissance drones </em>
 				</li>
 			</ul>
 		</cmr:chk-entry>
@@ -298,7 +298,7 @@
        <br>
 			<span style="font-weight: bold; text-decoration: underline">Military
 				End user/Military End Use ---</span>
-			To the best of your knowledge, is the customer a military end user or involved in business activities with a military end user or items with military end uses in the following countries?  
+			To the best of your knowledge, is the customer a <strong>military end user</strong> or involved in business activities with a <strong>military end user</strong> or items with <strong>military end uses</strong> in the following countries?  
            <br>
 			<br>
 			<span style="font-weight: bold; text-decoration: underline">定义
@@ -325,9 +325,9 @@ incorporation into a military item; or any item that supports or contributes to 
       </cmr:chk-entry>
 	</cmr:chk-section>
 	<cmr:chk-section name="Section C">
-		<cmr:chk-entry number="1" section="C">
-			<strong>超级计算机 ---</strong> 据你所知或所信，你的客户是否参与了“超级计算机”的设计、开发、制造、测试等？<br />
-			<strong>Supercomputer ---</strong> To the best of your knowledge or belief is your customer involved in the design, development, 
+		<cmr:chk-entry number="1" displayNumber="1.1" dplField="" section="C">
+			<span style="font-weight: bold; text-decoration: underline">超级计算机 ---</span> 据你所知或所信，你的客户是否参与了“超级计算机”的设计、开发、制造、测试等？<br />
+			<span style="font-weight: bold; text-decoration: underline">Supercomputer ---</span>To the best of your knowledge or belief is your customer involved in the design, development, 
     manufacturing, testing, etc. of a “supercomputer”?
     <br>
 			<br>
@@ -340,7 +340,7 @@ incorporation into a military item; or any item that supports or contributes to 
 				</li>
 			</ul>
 		</cmr:chk-entry>
-		<cmr:chk-entry number="2" section="C">
+		<cmr:chk-entry number="2" displayNumber="1.2" section="C">
 		据您所知或所信，您的客户是否参与了将物品纳入超级计算机的任何活动，或将用于“超级计算机”的任何组件/物品的设计、开发、制造、测试等？ 
 <br>
 To the best of your knowledge or belief, is your customer involved in any activity to incorporate items into a supercomputer, or the design, development, manufacturing, testing, etc. of any components/items that will be used in a ‘‘supercomputer’’?
@@ -359,21 +359,21 @@ To the best of your knowledge or belief, is your customer involved in any activi
 			<br>
 			<br>
 
-			<strong>超级计算机：</strong>一种高性能的多机架系统，具有数千个紧密耦合的计算核心，通过网络技术并联连接，并具有需要冷却元件的高峰值功率容量。它们用于计算密集型任务，包括科学和工程工作。超级计算机可能包括共享内存、分布式内存或两者的组合。 
+			<span style="font-weight: bold; text-decoration: underline">超级计算机：</span>一种高性能的多机架系统，具有数千个紧密耦合的计算核心，通过网络技术并联连接，并具有需要冷却元件的高峰值功率容量。它们用于计算密集型任务，包括科学和工程工作。超级计算机可能包括共享内存、分布式内存或两者的组合。 
 <br>
 			<strong>Supercomputer:</strong> a high-performance multi-rack system having thousands of closely coupled compute cores connected in parallel with networking technology and having a high peak power capacity requiring cooling elements. They are used for computationally intensive tasks including scientific and engineering work. Supercomputers may include shared memory, distributed memory, or a combination of both.
 		
 		</cmr:chk-entry>
-		<cmr:chk-entry number="3" section="C">
-			<strong>半导体制造业 --- </strong>据您所知或所信，您的客户是否参与了集成电路的设计、开发、制造、测试等？<br>
-			<strong>Semiconductor Manufacturing --- </strong>To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of integrated circuits? 
+		<cmr:chk-entry number="3" displayNumber="2.1" section="C">
+			<span style="font-weight: bold; text-decoration: underline">半导体制造业 --- </span>，您的客户是否参与了集成电路的设计、开发、制造、测试等？<br>
+			<span style="font-weight: bold; text-decoration: underline">Semiconductor Manufacturing ---</span>To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of integrated circuits? 
 <br>
 			<br>
 			<strong>注意： </strong>这个问题是问客户是否参与了半导体或集成电路的制造过程。<br>
 			<strong>Note:</strong> This question is asking if the customer is involved in the semiconductor or integrated circuit manufacturing process.
 		
 		</cmr:chk-entry>
-		<cmr:chk-entry number="4" section="C">
+		<cmr:chk-entry number="4" displayNumber="2.2" section="C">
 		据您所知或所信，您的客户是否参与了半导体生产、制造、测试等所用工具的任何零件、组件或设备的设计、开发、制造和测试等。<br>
 To the best of your knowledge or belief is your customer involved with the design, development, manufacturing, testing, etc. of any parts, components, or equipment of the tools that are used in the production, manufacturing, testing, etc. of semiconductors. 
 <br>
@@ -385,9 +385,9 @@ To the best of your knowledge or belief is your customer involved with the desig
 		</cmr:chk-entry>
 	</cmr:chk-section>
 	<cmr:chk-section name="Section D">
-		<cmr:chk-entry number="1" section="D">
-			<strong>转移到俄罗斯的风险 ---</strong> 据您所知或所信，您的客户直接或间接参与俄罗斯业务是否属于以下任何标准<br>
-			<strong>Diversion Risk to Russia --- </strong>To the best of your knowledge or belief is your customer involved directly or indirectly in Russia fallen into any of the circumstances as
+		<cmr:chk-entry number="1" displayNumber=" " section="D">
+			<span style="font-weight: bold; text-decoration: underline">转移到俄罗斯的风险 ---</span>据您所知或所信，您的客户直接或间接参与俄罗斯业务是否属于以下任何标准<br>
+			<span style="font-weight: bold; text-decoration: underline">Diversion Risk to Russia --- </span>To the best of your knowledge or belief is your customer involved directly or indirectly in Russia fallen into any of the circumstances as
 			<br>
 			<ul>
 				<li>a) 实体法人、股东或管理层是否为俄罗斯国籍？<br> If the entity legal

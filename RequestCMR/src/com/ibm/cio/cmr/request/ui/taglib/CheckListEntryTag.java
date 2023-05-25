@@ -27,6 +27,11 @@ public class CheckListEntryTag extends TagSupport {
   private int number = -1;
   private boolean dplField;
   private boolean matchField;
+  private String displayNumber;
+
+  public static long getSerialversionuid() {
+    return serialVersionUID;
+  }
 
   @Override
   public int doStartTag() throws JspException {
@@ -55,7 +60,8 @@ public class CheckListEntryTag extends TagSupport {
 
     StringBuilder sb = new StringBuilder();
     sb.append("        <tr>\n");
-    sb.append("          <td width=\"5%\">" + (this.number > 0 ? this.number : "&nbsp;") + "</td>\n");
+    sb.append(
+        "          <td width=\"5%\">" + (this.number > 0 ? (this.displayNumber == null ? this.number : this.displayNumber) : "&nbsp;") + "</td>\n");
     sb.append("          <td width=\"*\">\n");
     try {
       this.pageContext.getOut().write(sb.toString());
@@ -161,5 +167,13 @@ public class CheckListEntryTag extends TagSupport {
 
   public void setMatchField(boolean matchField) {
     this.matchField = matchField;
+  }
+
+  public String getDisplayNumber() {
+    return displayNumber;
+  }
+
+  public void setDisplayNumber(String displayNumber) {
+    this.displayNumber = displayNumber;
   }
 }
