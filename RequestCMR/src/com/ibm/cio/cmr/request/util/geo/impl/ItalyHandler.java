@@ -81,6 +81,8 @@ public class ItalyHandler extends BaseSOFHandler {
 
   private RequestEntryModel currentReqEntryModel;
 
+  private FindCMRRecordModel currentZS01Addr;
+
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
@@ -152,6 +154,10 @@ public class ItalyHandler extends BaseSOFHandler {
       } else {
         String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
         if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
+
+          if (INSTALLING_ADDR_TYPE.equals(mainRecord.getCmrAddrTypeCode())) {
+            this.currentZS01Addr = mainRecord;
+          }
           importCreateDataLD(entityManager, source, reqEntry, mainRecord, converted, searchModel);
         } else {
           String chosenType = searchModel.getAddrType();
@@ -809,9 +815,9 @@ public class ItalyHandler extends BaseSOFHandler {
     String modePayment = this.currentImportValues.get("ModeOfPayment");
     String embargo = this.currentImportValues.get("EmbargoCode");
     String inac = this.currentImportValues.get("INAC");
-    String enterprise = this.currentImportValues.get("EnterpriseNo");
-    String affiliate = this.currentImportValues.get("Affiliate");
 
+    String enterprise = null;
+    String affiliate = null;
     String tipoClinte = null;
     String coddes = null;
     String pec = null;
@@ -825,6 +831,7 @@ public class ItalyHandler extends BaseSOFHandler {
     String processingType = PageManager.getProcessingType(SystemLocation.ITALY, "U");
     boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
     String billinglandCntry = "";
+    boolean isUpdateReq = CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType());
     if (results != null && !results.getItems().isEmpty()) {
       FindCMRRecordModel billingRecord = results.getItems().stream().filter(item -> "ZP01".equalsIgnoreCase(item.getCmrAddrTypeCode())).findAny()
           .orElse(null);
@@ -868,46 +875,32 @@ public class ItalyHandler extends BaseSOFHandler {
         collectionCd = cExt.getItCodeSSV();
       }
     }
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      String isu = mainRecord != null && mainRecord.getIsuCode() != null ? mainRecord.getIsuCode() : "";
-      String ctc = mainRecord != null && mainRecord.getCmrTier() != null ? mainRecord.getCmrTier() : "";
+    // no data from RDc? get DB2
 
-      data.setIsuCd(isu);
-      data.setClientTier(ctc);
-    }
-    if (sbo != null && sbo.length() == 7) {
-      sbo = sbo.substring(1, 3);
-    }
+    data.setRepTeamMemberNo(salesRep);
+    data.setCollectionCd(!StringUtils.isEmpty(collectionCd) ? collectionCd : "");
+    data.setSitePartyId("");
 
-    // String collectionCode = this.currentImportValues.get("CollectionCode");
-
-    if (StringUtils.isEmpty(data.getTaxCd1())) {
-      // no data from RDc? get SOF
-      data.setTaxCd1(fiscalCode);
-    }
-    if (StringUtils.isEmpty(data.getVat())) {
-      // no data from RDc? get SOF
-      data.setVat(vat);
-    }
-    data.setIdentClient(identClient);
-    data.setSpecialTaxCd(taxCode);
-
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(admin.getReqType())) {
-      data.setModeOfPayment(modePayment);
-    } else {
-      data.setModeOfPayment("");
+    // check if currentReqEntryModel is not null, check existing values
+    if (this.currentReqEntryModel != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      if (!StringUtils.isEmpty(this.currentReqEntryModel.getAbbrevNm())) {
+        LOG.debug("Preserving existing Abbreviated Name " + this.currentReqEntryModel.getAbbrevNm());
+        data.setAbbrevNm(this.currentReqEntryModel.getAbbrevNm());
+      }
+      if (!StringUtils.isEmpty(this.currentReqEntryModel.getAbbrevLocn())) {
+        LOG.debug("Preserving existing Abbreviated Location " + this.currentReqEntryModel.getAbbrevLocn());
+        data.setAbbrevLocn(this.currentReqEntryModel.getAbbrevLocn());
+      }
     }
 
-    // Defect 1492027: The Abbreviated Name (TELX1) field should be blank when
-    // Installing address is not there in address tab :Mukesh
-    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      data.setAbbrevNm("");
-      data.setAbbrevLocn("");
-      data.setPpsceid("");
-    } else {
-      data.setAbbrevNm(abbrevNm);
-      data.setAbbrevLocn(abbrevLoc);
-    }
+    data.setEmbargoCd(embargo);
+    // new IT fields
+    data.setIcmsInd(tipoClinte);
+    data.setHwSvcsRepTeamNo(coddes);
+    data.setEmail2(pec);
+    data.setEmail3(indiemail);
+    data.setCrosSubTyp(customerType);
+
     // Defect 1474362/1582107: Update Request: not all data imported :Mukesh
     // Collection code getting from Anagrafico2SSVCode
     String collectionCode = "";
@@ -940,46 +933,73 @@ public class ItalyHandler extends BaseSOFHandler {
         countryLanded = result.getCmrCountryLanded();
       }
       if (result.getCmrAddrTypeCode().equals(INSTALLING_ADDR_TYPE)) {
-        enterprise = result.getCmrEnterpriseNumber();
         affiliate = result.getCmrAffiliate();
+      } else if (this.currentZS01Addr != null) {
+        // for Create By model
+        affiliate = this.currentZS01Addr.getCmrAffiliate();
       }
+
+      enterprise = result.getCmrEnterpriseNumber();
     }
-    // no data from RDc? get DB2
+
     data.setEnterprise(!StringUtils.isEmpty(enterprise) ? enterprise : "");
     data.setAffiliate(!StringUtils.isEmpty(affiliate) ? affiliate : "");
-    data.setInacCd(!StringUtils.isEmpty(inac) ? inac : "");
+    // String collectionCode = this.currentImportValues.get("CollectionCode");
 
-    data.setSalesBusOffCd(sbo);
-    data.setRepTeamMemberNo(salesRep);
-
-    data.setCollectionCd(!StringUtils.isEmpty(collectionCd) ? collectionCd : "");
-    data.setSitePartyId("");
-
-    // check if currentReqEntryModel is not null, check existing values
-    if (this.currentReqEntryModel != null && "C".equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(this.currentReqEntryModel.getAbbrevNm())) {
-        LOG.debug("Preserving existing Abbreviated Name " + this.currentReqEntryModel.getAbbrevNm());
-        data.setAbbrevNm(this.currentReqEntryModel.getAbbrevNm());
-      }
-      if (!StringUtils.isEmpty(this.currentReqEntryModel.getAbbrevLocn())) {
-        LOG.debug("Preserving existing Abbreviated Location " + this.currentReqEntryModel.getAbbrevLocn());
-        data.setAbbrevLocn(this.currentReqEntryModel.getAbbrevLocn());
-      }
+    if (StringUtils.isEmpty(data.getTaxCd1())) {
+      // no data from RDc? get SOF
+      data.setTaxCd1(fiscalCode);
     }
-
-    data.setEmbargoCd(embargo);
-    // new IT fields
-    data.setIcmsInd(tipoClinte);
-    data.setHwSvcsRepTeamNo(coddes);
-    data.setEmail2(pec);
-    data.setEmail3(indiemail);
-    data.setCrosSubTyp(customerType);
+    if (StringUtils.isEmpty(data.getVat())) {
+      // no data from RDc? get SOF
+      data.setVat(vat);
+    }
+    data.setIdentClient(identClient);
+    data.setSpecialTaxCd(taxCode);
 
     if (!"IT".equals(countryLanded)) {
       data.setTaxCd1("");
       if (!StringUtils.isEmpty(vat) && vat.length() > 2) {
         data.setVat(vat);
       }
+    }
+
+    if (sbo != null && sbo.length() == 7) {
+      sbo = sbo.substring(1, 3);
+    }
+
+    if (isUpdateReq) {
+      String isu = mainRecord != null && mainRecord.getIsuCode() != null ? mainRecord.getIsuCode() : "";
+      String ctc = mainRecord != null && mainRecord.getCmrTier() != null ? mainRecord.getCmrTier() : "";
+      String inacRdc = mainRecord != null && mainRecord.getCmrInac() != null ? mainRecord.getCmrInac() : "";
+      String sboRdc = mainRecord != null && mainRecord.getCmrSortl() != null ? mainRecord.getCmrSortl() : "";
+      if (sboRdc != null && sboRdc.length() >= 7) {
+        sboRdc = sboRdc.substring(1, 3);
+      }
+      data.setIsuCd(isu);
+      data.setClientTier(ctc);
+      data.setInacCd(inacRdc);
+      data.setSalesBusOffCd(sboRdc);
+    } else {
+      data.setInacCd(!StringUtils.isEmpty(inac) ? inac : "");
+      data.setSalesBusOffCd(sbo);
+    }
+
+    if (isUpdateReq || CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(admin.getReqType())) {
+      data.setModeOfPayment(modePayment);
+    } else {
+      data.setModeOfPayment("");
+    }
+
+    // Defect 1492027: The Abbreviated Name (TELX1) field should be blank when
+    // Installing address is not there in address tab :Mukesh
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setAbbrevNm("");
+      data.setAbbrevLocn("");
+      data.setPpsceid("");
+    } else {
+      data.setAbbrevNm(abbrevNm);
+      data.setAbbrevLocn(abbrevLoc);
     }
 
     LOG.trace("EmbargoCode: " + data.getEmbargoCd());
@@ -1572,7 +1592,7 @@ public class ItalyHandler extends BaseSOFHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "CUST_CLASS", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD",
         "ABBREV_NM", "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID",
-        "MEM_LVL", "BP_REL_TYPE", "CROS_SUB_TYP", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE"));
+        "MEM_LVL", "BP_REL_TYPE", "CROS_SUB_TYP", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE", "AFFILIATE"));
     return fields;
   }
 

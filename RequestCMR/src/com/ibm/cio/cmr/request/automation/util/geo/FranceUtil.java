@@ -246,6 +246,8 @@ public class FranceUtil extends AutomationUtil {
       switch (scenario) {
       case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
       case SCENARIO_PRIVATE_PERSON:
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, false, requestData);
       case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
       case SCENARIO_IBM_EMPLOYEE:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
@@ -1318,6 +1320,7 @@ public class FranceUtil extends AutomationUtil {
       boolean checkBluepages, RequestData reqData) {
     EntityManager entityManager = JpaManager.getEntityManager();
     boolean legalEndingExists = false;
+    Data data = reqData.getData();
     for (Addr addr : reqData.getAddresses()) {
       String customerName = getCustomerFullName(addr);
       if (hasLegalEndings(customerName)) {
@@ -1354,7 +1357,7 @@ public class FranceUtil extends AutomationUtil {
 
     PrivatePersonCheckResult checkResult = chkPrivatePersonRecordFR(country, landCntry, name, checkBluepages, reqData.getData());
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
-
+    String scenario = data.getCustSubGrp();
     switch (checkStatus) {
     case BluepagesError:
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
@@ -1362,16 +1365,18 @@ public class FranceUtil extends AutomationUtil {
     case DuplicateCMR:
       details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
       engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
-          checkResult.getCmrNo(), "");
+          checkResult.getCmrNo(), checkResult.getKunnr());
       return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
       break;
     case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
-      return false;
+      if (SCENARIO_IBM_EMPLOYEE.equalsIgnoreCase(scenario)) {
+        engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+        details.append("Employee details not found in IBM People.").append("\n");
+        return false;
+      }
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
       break;

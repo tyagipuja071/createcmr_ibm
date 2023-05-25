@@ -717,8 +717,15 @@ function doAddToAddressList() {
         } else if (standardCity.suggested != null && standardCity.suggested.length > 0) {
           cmr.showModal('stdcityModal');
         } else {
-          cmr.showAlert('The system cannot find a match for the city name <strong>' + currentCity + '</strong>. Kindly recheck the address and specify a valid city and/or county name.');
-          return;
+          // CREATCMR-8323 : add SAVE when landedCntry!='US'
+          var landedCntry = FormManager.getActualValue('landCntry');
+          if(cntry=='897' && landedCntry!='US'){
+            // We can save here.
+            actualAddToAddressList();
+          } else {
+            cmr.showAlert('The system cannot find a match for the city name <strong>' + currentCity + '</strong>. Kindly recheck the address and specify a valid city and/or county name.');
+            return;
+          }
         }
       }
     }
@@ -2272,6 +2279,10 @@ function refreshAfterAddressCopy(result) {
 
   // call the addr std result calculation for score card here..
   SetAddrStdResult();
+  
+  // Ensure quick search parameter is preserved after reloading
+  var isFromQuickSearch = new URLSearchParams(location.search).get('qs');
+  dojo.cookie('qs', isFromQuickSearch ? isFromQuickSearch : 'N');
 }
 
 function removeSelectedAddresses() {

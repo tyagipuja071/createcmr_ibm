@@ -823,8 +823,12 @@ public class NLHandler extends BaseSOFHandler {
 
     super.setDataValuesOnImport(admin, data, results, mainRecord);
 
-    // data.setEngineeringBo(this.currentImportValues.get("DPCEBO"));
-    // LOG.trace("DPCEBO: " + data.getEngineeringBo());
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setEngineeringBo("333D3");
+    } else {
+      data.setEngineeringBo(this.currentImportValues.get("DPCEBO"));
+    }
+    LOG.trace("DPCEBO: " + data.getEngineeringBo());
 
     String kna1KVK = getKna1KVK(mainRecord.getCmrNum());
     String cmrtcextKVK = getCmrtcextKVK(mainRecord.getCmrNum());
@@ -843,7 +847,11 @@ public class NLHandler extends BaseSOFHandler {
     data.setEconomicCd(this.currentImportValues.get("EconomicCd"));
     LOG.trace("EconomicCd: " + data.getEconomicCd());
 
-    data.setEngineeringBo(this.currentImportValues.get("SBO"));
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setEngineeringBo("333D3");
+    } else {
+      data.setEngineeringBo(this.currentImportValues.get("SBO"));
+    }
     LOG.trace("BOTeam: " + data.getEngineeringBo());
 
     data.setIbmDeptCostCenter(this.currentImportValues.get("DepartmentNumber"));
@@ -1041,6 +1049,7 @@ public class NLHandler extends BaseSOFHandler {
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
     data.setCmrOwner("IBM");
+    data.setEngineeringBo("333D3");// CREATCMR-8926
   }
 
   @Override
@@ -1066,6 +1075,10 @@ public class NLHandler extends BaseSOFHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+    // CREATCMR-8926
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setEngineeringBo("333D3");
+    }
 
   }
 
@@ -2261,8 +2274,8 @@ public class NLHandler extends BaseSOFHandler {
         }
       }
 
-      TemplateValidation error = new TemplateValidation("Data");
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+        TemplateValidation error = new TemplateValidation("Data");
         row = sheet.getRow(rowIndex);
         if (row == null) {
           break; // stop immediately when row is blank
@@ -2295,19 +2308,29 @@ public class NLHandler extends BaseSOFHandler {
               "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.<br>");
         }
 
-        if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
-          LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
-          error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
-        } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
-          if (StringUtils.isBlank(ctc) || !"QY".contains(ctc)) {
-            LOG.trace("The row " + (row.getRowNum() + 1)
-                + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-            error.addError((row.getRowNum() + 1), "Client Tier",
-                ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+        if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+          if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+            LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+            error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+          } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+            if (StringUtils.isBlank(ctc) || !"Q".equals(ctc)) {
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'Q' for the selected ISU code.");
+              error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'Q' for the selected ISU code:" + isuCd + ".<br>");
+            }
+          } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+            if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'Y' for the selected ISU code.");
+              error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'Y' for the selected ISU code:" + isuCd + ".<br>");
+            }
+          } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+            if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'T' for the selected ISU code.");
+              error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'T' for the selected ISU code:" + isuCd + ".<br>");
+            }
+          } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("32", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
+            LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+            error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
           }
-        } else if ((!StringUtils.isBlank(isuCd) && !"34".equals(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
-          LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-          error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
 
         if (error.hasErrors()) {

@@ -2215,9 +2215,17 @@ public class MEHandler extends BaseSOFHandler {
         isuCd = validateColValFromCell(currCell);
         currCell = row.getCell(7);
         clientTier = validateColValFromCell(currCell);
-        if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "J".equals(ordBlk) || "E".equals(ordBlk) || "S".equals(ordBlk))) {
-          LOG.trace("Order Block Code should only @, E, S, J. >> ");
-          error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should be only @, E, S, J. ");
+        if ("808".equals(country) || "865".equals(country)) {
+          if (StringUtils.isNotBlank(ordBlk)
+              && !("@".equals(ordBlk) || "J".equals(ordBlk) || "C".equals(ordBlk) || "E".equals(ordBlk) || "S".equals(ordBlk))) {
+            LOG.trace("Order Block Code should only @, E, S, J, C. >> ");
+            error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should be only @, E, S, J, C. ");
+          }
+        } else {
+          if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "J".equals(ordBlk) || "E".equals(ordBlk) || "S".equals(ordBlk))) {
+            LOG.trace("Order Block Code should only @, E, S, J. >> ");
+            error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should be only @, E, S, J. ");
+          }
         }
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
           if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))

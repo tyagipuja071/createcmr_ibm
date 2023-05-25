@@ -134,7 +134,26 @@ dojo.addOnLoad(function() {
     }
     dojo.byId('redirectUrl').value = url;
     dojo.cookie('lastTab', '', {expires: -1});
-    FormManager.doAction('frmCMR', YourActions.Save, true);
+
+    var uiReqStatus = FormManager.getActualValue('reqStatus');
+    var reqId = FormManager.getActualValue('reqId');
+    var dbReqStatus = "";
+
+    var result = cmr.query("WW.GET_REQ_STATUS", {
+      REQ_ID: reqId
+    });
+    if (result != null && result.ret1 != '' && result.ret1 != null) {
+      dbReqStatus = result.ret1;
+    }
+
+    // prevent from overwriting the DB REQ_STATUS
+    // if another tab is open with different UI REQ_STATUS
+    if (uiReqStatus == dbReqStatus) {
+      FormManager.doAction('frmCMR', YourActions.Save, true);
+    } else {
+      cmr.showAlert("Unable to save the request. Request Status mismatch from database." +
+      "<br><br>Please reload the page.");
+    }
   }
   
   function noSaveBeforeLeave(){
@@ -149,6 +168,11 @@ dojo.addOnLoad(function() {
     PageManager.setAlwaysAvailable(['yourAction']);
     
     var paramString = 'reqstatus=${reqentry.reqStatus}&lockind=${yourActionsLockInd}&reqtype=${reqentry.reqType}';
+    
+    if('${reqentry.reqStatus}' == 'COM') {
+    	paramString = 'reqstatus=${reqentry.reqStatus}&lockind=X&reqtype=${reqentry.reqType}';
+    }
+    
     paramString += '&sepvalind=' + ('${reqentry.sepValInd}'.trim() == '' ? 'N' : '${reqentry.sepValInd}');
     paramString += '&disableautoproc=' + ('${reqentry.disableAutoProc}'.trim() == '' ? 'N' : '${reqentry.disableAutoProc}');
     FilteringDropdown.loadItems('yourAction', 'yourAction_spinner', '${yourActionsSqlId}', paramString, false, '${ui.info.noneavailable}');

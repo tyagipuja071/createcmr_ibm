@@ -412,6 +412,16 @@ var SCCService = (function() {
     },
     addSCC : function(nonUS) {
       window.location = cmr.CONTEXT_ROOT + '/code/sccdetails' + (nonUS ? '?nonUS=Y' : '');
+    },
+    exportToExcel : function(filterParams) {
+	    console.log("to export the search results to Excel file ..." + filterParams)
+      if (!filterParams || filterParams == '') {
+        cmr.showAlert('Please select the State or Land Cntry to filter results.');
+        return;
+      }
+      document.forms['sccListDownLoad'].action = cmr.CONTEXT_ROOT + '/code/exportToExcel?' + filterParams;
+      document.forms['sccListDownLoad'].target = "exportFrame";
+      document.forms['sccListDownLoad'].submit();
     }
   };
 })();

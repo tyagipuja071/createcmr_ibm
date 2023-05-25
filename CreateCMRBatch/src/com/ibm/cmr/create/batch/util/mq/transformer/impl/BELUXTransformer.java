@@ -948,18 +948,21 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setMrcCd("3");
     }
     // CREATCMR-4293
-    if (!StringUtils.isEmpty(data.getIsuCd())) {
-      if (StringUtils.isEmpty(data.getClientTier())) {
-        legacyCust.setIsuCd(data.getIsuCd() + "7");
-      }
-    }
-
-    if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "28".equals(data.getIsuCd()))) {
-      legacyCust.setIsuCd(data.getIsuCd() + "7");
-    }
-
+    if (!StringUtils.isEmpty(data.getIsuCd())) {  
+      if (StringUtils.isEmpty(data.getClientTier())) {  
+        legacyCust.setIsuCd(data.getIsuCd() + "7"); 
+      } else if (!StringUtils.isEmpty(data.getClientTier())) {  
+        String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "") 
+            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""); 
+        legacyCust.setIsuCd(isuClientTier); 
+      } 
+    } 
+    /*  
+     * if (!StringUtils.isEmpty(data.getIsuCd()) && 
+     * ("5K".equals(data.getIsuCd()) || "28".equals(data.getIsuCd()))) {  
+     * legacyCust.setIsuCd(data.getIsuCd() + "7"); }  
+     */ 
   }
-
   @Override
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) { // default
     LOG.debug("Mapping default Data values..");

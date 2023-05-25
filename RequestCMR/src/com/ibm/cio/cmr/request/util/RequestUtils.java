@@ -85,7 +85,7 @@ public class RequestUtils {
   public static final String STATUS_INPUT_REQUIRED = "Input Required";
   public static final String US_CMRISSUINGCOUNTRY = "897";
   private static Map<String, String> rejectionReasons = new HashMap<String, String>();
-	public static final List<String> EMEA_CNTRY_DACH = Arrays.asList("724", "618", "848");
+  public static final List<String> EMEA_CNTRY_DACH = Arrays.asList("724", "618", "848");
 
   public static void refresh() {
     emailTemplate = null;
@@ -375,7 +375,7 @@ public class RequestUtils {
     }
 
     // add to this list in the future if needed
-    List<String> forceSendTypes = Arrays.asList("LD", "MD", "MA");
+    List<String> forceSendTypes = Arrays.asList("LD", "MD", "MA", "FR");
 
     if (!StringUtils.isBlank(admin.getSourceSystId())) {
       // for external creations, ensure that the requesterId is always notified,
@@ -1336,6 +1336,126 @@ public class RequestUtils {
       value = StringUtils.replace(checklist.getFreeTxtField3(), "\"", "&quot;");
     }
     return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField3\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField4(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField4() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField4(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField4\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField5(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField5() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField5(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField5\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField6(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField6() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField6(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField6\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField7(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField7() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField7(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField7\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField8(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField8() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField8(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField8\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField9(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField9() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField9(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField9\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField10(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField10() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField10(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField10\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField11(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField11() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField11(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField11\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField12(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField12() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField12(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField12\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField13(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField13() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField13(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField13\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField14(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField14() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField14(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField14\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField15(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField15() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField15(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField15\" value=\"" + value
         + "\">";
   }
 

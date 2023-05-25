@@ -112,6 +112,7 @@ public abstract class USBPHandler {
   public static final String SUB_TYPE_LEASE_IPMA = "IPMA";
   public static final String SUB_TYPE_LEASE_LPMA = "LPMA";
   public static final String SUB_TYPE_LEASE_SVR_CONT = "SVR CONT";
+  public static final String EXCLUDE_2_ENTERPRISES = "8205752,7692259";
 
   public static final List<String> DEPARTMENT_IDENTIFIERS = Arrays.asList("E-HOST", "EHOST", "DEMO DEVELOPMENT", "DEMO DEV", "DEVELOPMENT",
       "ICC LEASE DEV", "IDL LEASE DEV", "POOL");

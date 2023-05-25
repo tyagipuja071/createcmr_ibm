@@ -17,10 +17,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -29,12 +33,16 @@ import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.ap.anz.BNValidationRequest;
 import com.ibm.cmr.services.client.automation.ap.anz.BNValidationResponse;
 import com.ibm.cmr.services.client.automation.ap.anz.NMValidationRequest;
+import com.ibm.cmr.services.client.automation.ap.nz.NZBNValidationRequest;
+import com.ibm.cmr.services.client.automation.ap.nz.NZBNValidationResponse;
 import com.ibm.cmr.services.client.automation.cn.CNRequest;
 import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
 import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerRequest;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.validator.PostalCodeValidateRequest;
 import com.ibm.cmr.services.client.validator.ValidationResult;
 import com.ibm.cmr.services.client.validator.VatValidateRequest;
@@ -48,8 +56,7 @@ public class VatUtilController {
 
   private static final Logger LOG = Logger.getLogger(VatUtilController.class);
 
-  @RequestMapping(
-      value = "/vat")
+  @RequestMapping(value = "/vat")
   public ModelMap checkVat(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -78,8 +85,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/vat/vies")
+  @RequestMapping(value = "/vat/vies")
   public ModelMap validateVATUsingVies(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -128,8 +134,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/in/gst")
+  @RequestMapping(value = "/in/gst")
   public ModelMap validateGST(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -199,8 +204,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/zip")
+  @RequestMapping(value = "/zip")
   public ModelMap checkPostalCode(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -236,8 +240,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/au/abn")
+  @RequestMapping(value = "/au/abn")
   public ModelMap validateABN(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -323,8 +326,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/au/custNm")
+  @RequestMapping(value = "/au/custNm")
   public ModelMap validateCustNmFromVat(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String regex = "\\s+$";
@@ -422,8 +424,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/au/custNmFromAPI")
+  @RequestMapping(value = "/au/custNmFromAPI")
   public ModelMap validateCustNmFromAPI(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String regex = "\\s+$";
@@ -506,8 +507,17 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/cn/tyc")
+  /**
+   * 
+   * @param request
+   * @param response
+   * @return
+   * @throws Exception
+   * @deprecated - TYC discontinued; Use
+   *             {@link #checkCnAddrViaDNB(HttpServletRequest, HttpServletResponse)}
+   */
+  @Deprecated
+  @RequestMapping(value = "/cn/tyc")
   public ModelMap checkCnAddr(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     // ValidationResult validation = null;
@@ -541,6 +551,83 @@ public class VatUtilController {
     return map;
   }
 
+  /**
+   * Connects to D&B and tries to do a local language retrieval using D&B
+   * 
+   * @param request
+   * @param response
+   * @return
+   * @throws Exception
+   */
+  @RequestMapping(value = "/cn/dnb")
+  public ModelMap checkCnAddrViaDNB(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelMap map = new ModelMap();
+    map.put("result", null);
+
+    // ValidationResult validation = null;
+    String busnType = request.getParameter("busnType");
+    String cnName = request.getParameter("cnName");
+    String cnAddress = request.getParameter("cnAddress");
+    String cnCity = request.getParameter("cnCity");
+
+    // dummyfy street and city when not supplied
+    if (StringUtils.isBlank(cnAddress)) {
+      cnAddress = "dummy";
+    }
+    if (StringUtils.isBlank(cnCity)) {
+      cnCity = "dummy";
+    }
+
+    String trackedDuns = null;
+    if (!StringUtils.isBlank(busnType)) {
+      LOG.debug("Finding D&B records with Org ID " + busnType);
+      List<DnBMatchingResponse> orgIdMatches = DnBUtil.findByOrgId(busnType, "CN");
+      // use only the top match here
+      if (!orgIdMatches.isEmpty()) {
+        DnBMatchingResponse dnb = orgIdMatches.get(0);
+        LOG.debug("DUNS " + dnb.getDunsNo() + " found for Org ID " + busnType);
+        trackedDuns = dnb.getDunsNo();
+      }
+    }
+
+    List<DnBMatchingResponse> nameMatches = DnBUtil.findByAddress("CN", cnName, cnAddress, cnCity);
+    if (!nameMatches.isEmpty()) {
+      // only add if no orgId specified, or orgId specified and matches duns
+      CNHandler handler = new CNHandler();
+      for (DnBMatchingResponse match : nameMatches) {
+        LOG.debug("Got " + match.getDunsNo() + " / " + match.getDnbName() + " / " + match.getDnbStreetLine1() + " / " + match.getDnbCity());
+
+        if (trackedDuns != null && trackedDuns.equals(match.getDunsNo())) {
+          LOG.debug(" - matched with DUNS " + match.getDunsNo() + ". Comparing name and address");
+          // repurpose CNResponse here
+          CNResponse cnResponse = new CNResponse();
+          cnResponse.setCreditCode(!StringUtils.isBlank(busnType) ? busnType : DnBUtil.getVAT("CN", match.getOrgIdDetails()));
+          cnResponse.setName(match.getDnbName());
+          cnResponse.setRegLocation(match.getDnbStreetLine1());
+          cnResponse.setCity(match.getDnbCity());
+          map.put("result", cnResponse);
+          break;
+        } else if (trackedDuns == null) {
+          // only do name matching, if needed check only street
+          // note: account for dummy address and city
+          String dbcsInputName = handler.convert2DBCS(cnName);
+          String dbcsDnBName = handler.convert2DBCS(match.getDnbName());
+          if (dbcsInputName.equals(dbcsDnBName)) {
+            // repurpose CNResponse here
+            CNResponse cnResponse = new CNResponse();
+            cnResponse.setCreditCode(!StringUtils.isBlank(busnType) ? busnType : DnBUtil.getVAT("CN", match.getOrgIdDetails()));
+            cnResponse.setName(match.getDnbName());
+            cnResponse.setRegLocation(match.getDnbStreetLine1());
+            cnResponse.setCity(match.getDnbCity());
+            map.put("result", cnResponse);
+            break;
+          }
+        }
+      }
+    }
+    return map;
+  }
+
   // CREATCMR 3176 company Proof
   public static boolean isDnbOverrideAttachmentProvided(String reqId) {
     EntityManager entityManager = JpaManager.getEntityManager();
@@ -548,5 +635,131 @@ public class VatUtilController {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", reqId);
     return query.exists();
+  }
+
+  @RequestMapping(value = "/nz/nzbnFromAPI")
+  public ModelMap validateNZBNFromAPI(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelMap map = new ModelMap();
+    boolean apiSuccess = false;
+    boolean apiCustNmMatch = false;
+    boolean apiAddressMatch = false;
+    String errorMsg = "";
+
+    String regex = "\\s+$";
+    String reqIdStr = request.getParameter("reqId").replaceAll(regex, "");
+    String businessNumber = request.getParameter("businessNumber").replaceAll(regex, "");
+    String custNm = request.getParameter("custNm").replaceAll(regex, "");
+
+    EntityManager entityManager = null;
+    try {
+      if (reqIdStr != null) {
+        long reqId = Long.parseLong(reqIdStr);
+        entityManager = JpaManager.getEntityManager();
+        RequestData requestData = new RequestData(entityManager, reqId);
+
+        if (requestData != null && (!StringUtils.isBlank(businessNumber) || !StringUtils.isBlank(custNm))) {
+          LOG.debug("Validating Customer Name  " + custNm + " and Business Number " + businessNumber + " for New Zealand");
+          Addr addr = requestData.getAddress("ZS01");
+
+          String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+          AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(baseUrl, AutomationServiceClient.class);
+          autoClient.setReadTimeout(1000 * 60 * 5);
+          autoClient.setRequestMethod(Method.Get);
+
+          NZBNValidationRequest requestToAPI = new NZBNValidationRequest();
+          requestToAPI.setBusinessNumber(businessNumber);
+          requestToAPI.setName(custNm);
+          LOG.debug("requestToAPI: businessNumber = " + requestToAPI.getBusinessNumber() + ", custNm = " + custNm);
+
+          LOG.debug("Connecting to the NZBNValidation service at " + SystemConfiguration.getValue("CMR_SERVICES_URL"));
+          AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.NZ_BN_VALIDATION_SERVICE_ID, requestToAPI,
+              AutomationResponse.class);
+          ObjectMapper mapper = new ObjectMapper();
+          String json = mapper.writeValueAsString(rawResponse);
+
+          TypeReference<AutomationResponse<NZBNValidationResponse>> ref = new TypeReference<AutomationResponse<NZBNValidationResponse>>() {
+          };
+          AutomationResponse<NZBNValidationResponse> nzbnResponse = mapper.readValue(json, ref);
+          if (nzbnResponse != null && nzbnResponse.isSuccess()) {
+            apiSuccess = true;
+            NZBNValidationResponse nzbnResRec = nzbnResponse.getRecord();
+            if (nzbnResRec != null) {
+              String responseCustNm = StringUtils.isBlank(nzbnResRec.getName()) ? "" : nzbnResRec.getName().replaceAll(regex, "");
+              if (custNm.equalsIgnoreCase(responseCustNm)) {
+                apiCustNmMatch = true;
+
+                // Address matching - BEGIN
+                String regexForAddr = "\\s+|$";
+                String addressAll = addr.getCustNm1() + (addr.getCustNm2() == null ? "" : addr.getCustNm2())
+                    + (addr.getAddrTxt() != null ? addr.getAddrTxt() : "") + (addr.getAddrTxt2() == null ? "" : addr.getAddrTxt2())
+                    + (addr.getStateProv() == null ? "" : addr.getStateProv()) + (addr.getCity1() == null ? "" : addr.getCity1())
+                    + (addr.getPostCd() == null ? "" : addr.getPostCd());
+                LOG.debug("****** addressAll: " + addressAll);
+                addressAll = addressAll.toUpperCase();
+                LOG.debug("Address used for NZ API matching: " + addressAll + " VS " + nzbnResRec.getAddress());
+                if (StringUtils.isNotEmpty(nzbnResRec.getAddress())
+                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getAddress().replaceAll(regexForAddr, "").toUpperCase())
+                    && StringUtils.isNotEmpty(nzbnResRec.getCity())
+                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getCity().replaceAll(regexForAddr, "").toUpperCase())
+                    && StringUtils.isNotEmpty(nzbnResRec.getPostal())
+                    && addressAll.replaceAll(regexForAddr, "").contains(nzbnResRec.getPostal().replaceAll(regexForAddr, "").toUpperCase())) {
+                  apiAddressMatch = true;
+                }
+
+                // CREATCMR-8430: checking if the address matches with service
+                // type address from API
+                LOG.debug("REGISTERED Address matched ?  " + apiAddressMatch);
+
+                String serviceAddr = nzbnResRec.getServiceAddressDetail();
+                if (!apiAddressMatch && StringUtils.isNotEmpty(serviceAddr)) {
+                  LOG.debug("****** addressOfRequest: " + addressAll);
+                  LOG.debug("****** serviceAddr: " + serviceAddr);
+                  String[] serviceAddrArr = serviceAddr.split("\\^");
+                  boolean serviceFlag = false;
+                  for (String partAddr : serviceAddrArr) {
+                    serviceFlag = (addressAll.replaceAll(regexForAddr, "").contains(partAddr.replaceAll(regexForAddr, "").toUpperCase()));
+                    if (!serviceFlag) {
+                      break;
+                    }
+                  }
+                  apiAddressMatch = serviceFlag;
+                  LOG.debug("SERVICE Address matched ?  " + apiAddressMatch);
+                }
+              }
+            }
+
+            if (!apiAddressMatch) {
+              errorMsg = "NZBN Validation Failed - Address does not match with NZ API.";
+            }
+            if (!apiCustNmMatch) {
+              errorMsg = "NZBN Validation Failed - Customer Name does not match with NZ API.";
+            }
+          } else {
+            String respMsg = StringUtils.isNotBlank(nzbnResponse.getMessage()) ? nzbnResponse.getMessage() : "";
+            errorMsg = "NZBN Validation Failed - ";
+            if (respMsg.replaceAll(regex, "").contains("No Response on the Request".replaceAll(regex, ""))) {
+              errorMsg += "Invalid NZBN.";
+            } else {
+              errorMsg += respMsg;
+            }
+          }
+        }
+      } else {
+        errorMsg = "Invalid request Id";
+      }
+    } catch (Exception e) {
+      LOG.debug("Error occurred while checking NZ API Matches." + e);
+      errorMsg = "An error occurred while matching with NZ API.";
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+
+    map.put("success", apiSuccess);
+    map.put("custNmMatch", apiCustNmMatch);
+    map.put("addressMatch", apiAddressMatch);
+    map.put("message", errorMsg);
+    return map;
   }
 }

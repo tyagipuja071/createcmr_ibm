@@ -31,26 +31,13 @@ import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
  * @author Jeffrey Zamora
  */
 @Entity
-@Table(
-    name = "DATA",
-    schema = "CREQCMR")
-@SqlResultSetMappings({ @SqlResultSetMapping(
-    name = Data.REQUEST_SUMMARY_MAPPING,
-    entities = { @EntityResult(
-        entityClass = Admin.class),
-        @EntityResult(
-            entityClass = Data.class) },
-    columns = { @ColumnResult(
-        name = "COUNTRY_DESC"),
-        @ColumnResult(
-            name = "PROCESSING_DESC"),
-        @ColumnResult(
-            name = "ISIC_DESC") }) })
+@Table(name = "DATA", schema = "CREQCMR")
+@SqlResultSetMappings({ @SqlResultSetMapping(name = Data.REQUEST_SUMMARY_MAPPING, entities = { @EntityResult(entityClass = Admin.class),
+    @EntityResult(entityClass = Data.class) }, columns = { @ColumnResult(name = "COUNTRY_DESC"), @ColumnResult(name = "PROCESSING_DESC"),
+        @ColumnResult(name = "ISIC_DESC") }) })
 @EntityListeners({ TrimListener.class, ChangeLogListener.class })
 @AutoTrimStrings
-@ChangeLogDetails(
-    childTable = true,
-    reqId = "id.reqId")
+@ChangeLogDetails(childTable = true, reqId = "id.reqId")
 public class Data extends BaseEntity<DataPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -70,417 +57,319 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
     this.id = id;
   }
 
-  @Column(
-      name = "ABBREV_NM")
+  @Column(name = "ABBREV_NM")
   private String abbrevNm;
 
-  @Column(
-      name = "AFFILIATE")
+  @Column(name = "AFFILIATE")
   private String affiliate;
 
-  @Column(
-      name = "BP_REL_TYPE")
+  @Column(name = "BP_REL_TYPE")
   private String bpRelType;
 
-  @Column(
-      name = "CAP_IND")
+  @Column(name = "CAP_IND")
   private String capInd;
 
-  @Column(
-      name = "CLIENT_TIER")
+  @Column(name = "CLIENT_TIER")
   private String clientTier;
 
-  @Column(
-      name = "CMR_ISSUING_CNTRY")
+  @Column(name = "CMR_ISSUING_CNTRY")
   private String cmrIssuingCntry;
 
-  @Column(
-      name = "CMR_NO")
+  @Column(name = "CMR_NO")
   private String cmrNo;
 
-  @Column(
-      name = "CMR_OWNER")
+  @Column(name = "CMR_OWNER")
   private String cmrOwner;
 
-  @Column(
-      name = "COMPANY")
+  @Column(name = "COMPANY")
   private String company;
 
-  @Column(
-      name = "CUST_CLASS")
+  @Column(name = "CUST_CLASS")
   private String custClass;
 
-  @Column(
-      name = "ENTERPRISE")
+  @Column(name = "ENTERPRISE")
   private String enterprise;
 
-  @Column(
-      name = "CUST_PREF_LANG")
+  @Column(name = "CUST_PREF_LANG")
   private String custPrefLang;
 
-  @Column(
-      name = "INAC_CD")
+  @Column(name = "INAC_CD")
   private String inacCd;
 
-  @Column(
-      name = "INAC_TYPE")
+  @Column(name = "INAC_TYPE")
   private String inacType;
 
-  @Column(
-      name = "ISU_CD")
+  @Column(name = "ISU_CD")
   private String isuCd;
 
-  @Column(
-      name = "TAX_CD1")
+  @Column(name = "TAX_CD1")
   private String taxCd1;
 
-  @Column(
-      name = "TAX_CD2")
+  @Column(name = "TAX_CD2")
   private String taxCd2;
 
-  @Column(
-      name = "MEM_LVL")
+  @Column(name = "MEM_LVL")
   private String memLvl;
 
   private String ppsceid;
 
-  @Column(
-      name = "SEARCH_TERM")
+  @Column(name = "SEARCH_TERM")
   private String searchTerm;
 
-  @Column(
-      name = "SENSITIVE_FLAG")
+  @Column(name = "SENSITIVE_FLAG")
   private String sensitiveFlag;
 
-  @Column(
-      name = "ISIC_CD")
+  @Column(name = "ISIC_CD")
   private String isicCd;
 
-  @Column(
-      name = "SITE_PARTY_ID")
+  @Column(name = "SITE_PARTY_ID")
   private String sitePartyId;
 
-  @Column(
-      name = "SUB_INDUSTRY_CD")
+  @Column(name = "SUB_INDUSTRY_CD")
   private String subIndustryCd;
 
   private String vat;
 
-  @Column(
-      name = "COV_ID")
+  @Column(name = "COV_ID")
   private String covId;
 
-  @Column(
-      name = "BG_ID")
+  @Column(name = "BG_ID")
   private String bgId;
 
-  @Column(
-      name = "GEO_LOCATION_CD")
+  @Column(name = "GEO_LOCATION_CD")
   private String geoLocationCd;
 
-  @Column(
-      name = "DUNS_NO")
+  @Column(name = "DUNS_NO")
   private String dunsNo;
 
-  @Column(
-      name = "CUST_GRP")
+  @Column(name = "CUST_GRP")
   private String custGrp;
 
-  @Column(
-      name = "CUST_SUB_GRP")
+  @Column(name = "CUST_SUB_GRP")
   private String custSubGrp;
 
-  @Column(
-      name = "RESTRICT_IND")
+  @Column(name = "RESTRICT_IND")
   @NullValue("N")
   private String restrictInd;
 
-  @Column(
-      name = "RESTRICT_TO")
+  @Column(name = "RESTRICT_TO")
   private String restrictTo;
 
-  @Column(
-      name = "OEM_IND")
+  @Column(name = "OEM_IND")
   @NullValue("N")
   private String oemInd;
 
-  @Column(
-      name = "BP_ACCT_TYP")
+  @Column(name = "BP_ACCT_TYP")
   private String bpAcctTyp;
 
-  @Column(
-      name = "MKTG_DEPT")
+  @Column(name = "MKTG_DEPT")
   private String mktgDept;
 
-  @Column(
-      name = "MTKG_AR_DEPT")
+  @Column(name = "MTKG_AR_DEPT")
   private String mtkgArDept;
 
-  @Column(
-      name = "PCC_MKTG_DEPT")
+  @Column(name = "PCC_MKTG_DEPT")
   private String pccMktgDept;
 
-  @Column(
-      name = "PCC_AR_DEPT")
+  @Column(name = "PCC_AR_DEPT")
   private String pccArDept;
 
-  @Column(
-      name = "SVC_AR_OFFICE")
+  @Column(name = "SVC_AR_OFFICE")
   private String svcArOffice;
 
-  @Column(
-      name = "OUT_CITY_LIMIT")
+  @Column(name = "OUT_CITY_LIMIT")
   @NullValue("N")
   private String outCityLimit;
 
-  @Column(
-      name = "CSO_SITE")
+  @Column(name = "CSO_SITE")
   private String csoSite;
 
-  @Column(
-      name = "FED_SITE_IND")
+  @Column(name = "FED_SITE_IND")
   @NullValue("N")
   private String fedSiteInd;
 
-  @Column(
-      name = "SIZE_CD")
+  @Column(name = "SIZE_CD")
   private String sizeCd;
 
-  @Column(
-      name = "SVC_TERRITORY_ZONE")
+  @Column(name = "SVC_TERRITORY_ZONE")
   private String svcTerritoryZone;
 
-  @Column(
-      name = "MISC_BILL_CD")
+  @Column(name = "MISC_BILL_CD")
   private String miscBillCd;
 
-  @Column(
-      name = "TAX_CD3")
+  @Column(name = "TAX_CD3")
   private String taxCd3;
 
-  @Column(
-      name = "BP_NAME")
+  @Column(name = "BP_NAME")
   private String bpName;
 
-  @Column(
-      name = "ICC_TAX_CLASS")
+  @Column(name = "ICC_TAX_CLASS")
   private String iccTaxClass;
 
-  @Column(
-      name = "ICC_TAX_EXEMPT_STATUS")
+  @Column(name = "ICC_TAX_EXEMPT_STATUS")
   private String iccTaxExemptStatus;
 
-  @Column(
-      name = "NON_IBM_COMPANY_IND")
+  @Column(name = "NON_IBM_COMPANY_IND")
   private String nonIbmCompanyInd;
 
-  @Column(
-      name = "COMPANY_NM")
+  @Column(name = "COMPANY_NM")
   private String companyNm;
 
-  @Column(
-      name = "BUSN_TYP")
+  @Column(name = "BUSN_TYP")
   private String busnType;
 
-  @Column(
-      name = "ICMS_IND")
+  @Column(name = "ICMS_IND")
   private String icmsInd;
 
-  @Column(
-      name = "GOVERNMENT")
+  @Column(name = "GOVERNMENT")
   private String govType;
 
-  @Column(
-      name = "IBM_DEPT_COST_CENTER")
+  @Column(name = "IBM_DEPT_COST_CENTER")
   private String ibmDeptCostCenter;
 
   private String div;
 
   private String dept;
 
-  @Column(
-      name = "FUNC")
+  @Column(name = "FUNC")
   private String func;
 
-  @Column(
-      name = "\"USER\"")
+  @Column(name = "\"USER\"")
   private String user;
 
   private String loc;
 
-  @Column(
-      name = "ORD_BLK")
+  @Column(name = "ORD_BLK")
   private String ordBlk;
 
-  @Column(
-      name = "BG_RULE_ID")
+  @Column(name = "BG_RULE_ID")
   private String bgRuleId;
 
   @NoLog
-  @Column(
-      name = "COV_DESC")
+  @Column(name = "COV_DESC")
   private String covDesc;
 
   @NoLog
-  @Column(
-      name = "BG_DESC")
+  @Column(name = "BG_DESC")
   private String bgDesc;
 
   @NoLog
-  @Column(
-      name = "GEO_LOC_DESC")
+  @Column(name = "GEO_LOC_DESC")
   private String geoLocDesc;
 
-  @Column(
-      name = "GBG_ID")
+  @Column(name = "GBG_ID")
   private String gbgId;
 
   @NoLog
-  @Column(
-      name = "GBG_DESC")
+  @Column(name = "GBG_DESC")
   private String gbgDesc;
 
-  @Column(
-      name = "MARKETING_CHNL_INDC_VALUE")
+  @Column(name = "MARKETING_CHNL_INDC_VALUE")
   private String MrktChannelInd;
 
-  @Column(
-      name = "CONTACT_NAME1")
+  @Column(name = "CONTACT_NAME1")
   private String contactName1;
 
-  @Column(
-      name = "CONTACT_NAME2")
+  @Column(name = "CONTACT_NAME2")
   private String contactName2;
 
-  @Column(
-      name = "CONTACT_NAME3")
+  @Column(name = "CONTACT_NAME3")
   private String contactName3;
 
-  @Column(
-      name = "PHONE1")
+  @Column(name = "PHONE1")
   private String phone1;
 
-  @Column(
-      name = "PHONE2")
+  @Column(name = "PHONE2")
   private String phone2;
 
-  @Column(
-      name = "PHONE3")
+  @Column(name = "PHONE3")
   private String phone3;
 
-  @Column(
-      name = "EMAIL1")
+  @Column(name = "EMAIL1")
   private String email1;
 
-  @Column(
-      name = "EMAIL2")
+  @Column(name = "EMAIL2")
   private String email2;
 
-  @Column(
-      name = "EMAIL3")
+  @Column(name = "EMAIL3")
   private String email3;
 
-  @Column(
-      name = "COLL_BO_ID")
+  @Column(name = "COLL_BO_ID")
   private String collBoId;
 
-  @Column(
-      name = "SALES_BO_CD")
+  @Column(name = "SALES_BO_CD")
   private String salesBusOffCd;
 
-  @Column(
-      name = "COLLECTOR_NO")
+  @Column(name = "COLLECTOR_NO")
   private String collectorNameNo;
 
-  @Column(
-      name = "REP_TEAM_MEMBER_NO")
+  @Column(name = "REP_TEAM_MEMBER_NO")
   private String repTeamMemberNo;
 
-  @Column(
-      name = "MRC_CD")
+  @Column(name = "MRC_CD")
   private String mrcCd;
 
-  @Column(
-      name = "CROS_TYP")
+  @Column(name = "CROS_TYP")
   private String crosTyp;
 
-  @Column(
-      name = "LEGACY_IND_CD")
+  @Column(name = "LEGACY_IND_CD")
   private String legacyIndustryCode;
 
-  @Column(
-      name = "LEGAL_IND")
+  @Column(name = "LEGAL_IND")
   private String legalIndicator;
 
-  @Column(
-      name = "CUSTOMER_ID_CD")
+  @Column(name = "CUSTOMER_ID_CD")
   private String customerIdCd;
 
-  @Column(
-      name = "NATIONAL_CUS_IND")
+  @Column(name = "NATIONAL_CUS_IND")
   private String nationalCusId;
 
-  @Column(
-      name = "TERRITORY_CD")
+  @Column(name = "TERRITORY_CD")
   private String territoryCd;
 
-  @Column(
-      name = "PARTNERSHIP_IND")
+  @Column(name = "PARTNERSHIP_IND")
   private String partnershipInd;
 
-  @Column(
-      name = "MARKETING_CONT_CD")
+  @Column(name = "MARKETING_CONT_CD")
   private String marketingContCd;
 
-  @Column(
-      name = "CROS_SUB_TYP")
+  @Column(name = "CROS_SUB_TYP")
   private String crosSubTyp;
 
-  @Column(
-      name = "INSTALL_BRANCH_OFF")
+  @Column(name = "INSTALL_BRANCH_OFF")
   private String installBranchOff;
 
   // @Column(name = "TERRITORY_CD")
   // private String installTerritoryCd;
 
-  @Column(
-      name = "LEASING_COMP_INDC")
+  @Column(name = "LEASING_COMP_INDC")
   private String leasingCompanyIndc;
 
-  @Column(
-      name = "CNTRY_USE")
+  @Column(name = "CNTRY_USE")
   private String countryUse;
 
-  @Column(
-      name = "SALES_TERRITORY_CD")
+  @Column(name = "SALES_TERRITORY_CD")
   private String salesTerritoryCd;
 
-  @Column(
-      name = "SALES_TEAM_CD")
+  @Column(name = "SALES_TEAM_CD")
   private String salesTeamCd;
 
-  @Column(
-      name = "SECONDARY_SALES_TEAM_CD")
+  @Column(name = "SECONDARY_SALES_TEAM_CD")
   private String secondarySalesTeamCd;
 
-  @Column(
-      name = "SALES_REP_TM_DATE_OF_ASSIGN")
+  @Column(name = "SALES_REP_TM_DATE_OF_ASSIGN")
   private Date salesRepTeamDateOfAssignment;
 
-  @Column(
-      name = "TEAM_CD")
+  @Column(name = "TEAM_CD")
   private String installTeamCd;
 
-  @Column(
-      name = "SECONDARY_INSTALL_TEAM_CD")
+  @Column(name = "SECONDARY_INSTALL_TEAM_CD")
   private String secondaryInstallTeamCd;
 
-  @Column(
-      name = "REP_TEAM_ASSIGN_DATE")
+  @Column(name = "REP_TEAM_ASSIGN_DATE")
   private Date installRepTeamDateOfAssignment;
 
-  @Column(
-      name = "INSTALL_REP")
+  @Column(name = "INSTALL_REP")
   private String installRep;
 
   // @Column(
@@ -488,395 +377,313 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
   // @NoLog
   // private Timestamp hwSvcsRepTeamDateOfAssign;
 
-  @Column(
-      name = "MODE_OF_PAYMENT")
+  @Column(name = "MODE_OF_PAYMENT")
   private String modeOfPayment;
 
-  @Column(
-      name = "LOCN_NO")
+  @Column(name = "LOCN_NO")
   private String locationNumber;
 
-  @Column(
-      name = "TAX_PAYER_CUST_CD")
+  @Column(name = "TAX_PAYER_CUST_CD")
   private String taxPayerCustCd;
 
-  @Column(
-      name = "IBM_BANK_NO")
+  @Column(name = "IBM_BANK_NO")
   private String ibmBankNumber;
 
-  @Column(
-      name = "HW_SVC_REP_TM_DATE_OF_ASSIGN")
+  @Column(name = "HW_SVC_REP_TM_DATE_OF_ASSIGN")
   @NoLog
   private Date hwSvcRepTmDateOfAssign;
 
-  @Column(
-      name = "HW_SVCS_REP_TEAM_NO")
+  @Column(name = "HW_SVCS_REP_TEAM_NO")
   private String hwSvcsRepTeamNo;
 
-  @Column(
-      name = "HW_SVCS_TEAM_CD")
+  @Column(name = "HW_SVCS_TEAM_CD")
   private String hwSvcsTeamCd;
 
-  @Column(
-      name = "HW_SVCS_BO_NO")
+  @Column(name = "HW_SVCS_BO_NO")
   private String hwSvcsBoNo;
 
-  @Column(
-      name = "COLLECTION_CD")
+  @Column(name = "COLLECTION_CD")
   private String collectionCd;
 
-  @Column(
-      name = "SPECIAL_TAX_CD")
+  @Column(name = "SPECIAL_TAX_CD")
   private String specialTaxCd;
 
-  @Column(
-      name = "CURRENCY_CD")
+  @Column(name = "CURRENCY_CD")
   private String currencyCd;
 
-  @Column(
-      name = "LEGACY_CURRENCY_CD")
+  @Column(name = "LEGACY_CURRENCY_CD")
   private String legacyCurrencyCd;
 
-  @Column(
-      name = "ECONOMIC_CD")
+  @Column(name = "ECONOMIC_CD")
   private String economicCd;
 
-  @Column(
-      name = "AC_ADMIN_BO")
+  @Column(name = "AC_ADMIN_BO")
   private String acAdminBo;
 
-  @Column(
-      name = "ENGINEERING_BO")
+  @Column(name = "ENGINEERING_BO")
   private String engineeringBo;
 
-  @Column(
-      name = "SOURCE_CD")
+  @Column(name = "SOURCE_CD")
   private String sourceCd;
 
-  @Column(
-      name = "ORG_NO")
+  @Column(name = "ORG_NO")
   private String orgNo;
 
-  @Column(
-      name = "COMMERCIAL_FINANCED")
+  @Column(name = "COMMERCIAL_FINANCED")
   private String commercialFinanced;
 
-  @Column(
-      name = "ABBREV_LOCN")
+  @Column(name = "ABBREV_LOCN")
   private String abbrevLocn;
 
-  @Column(
-      name = "FOME_ZERO")
+  @Column(name = "FOME_ZERO")
   private String fomeZero;
 
-  @Column(
-      name = "CREDIT_CD")
+  @Column(name = "CREDIT_CD")
   private String creditCd;
 
-  @Column(
-      name = "COD_CONDITION")
+  @Column(name = "COD_CONDITION")
   private String codCondition;
 
-  @Column(
-      name = "COD_RSN")
+  @Column(name = "COD_RSN")
   private String codReason;
 
-  @Column(
-      name = "REMOTE_CUST_INDC")
+  @Column(name = "REMOTE_CUST_INDC")
   private String remoteCustInd;
 
-  @Column(
-      name = "VAT_EXEMPT")
+  @Column(name = "VAT_EXEMPT")
   private String vatExempt;
+
+  @Column(
+      name = "VAT_IND")
+  private String vatInd;
 
   @Column(
       name = "PROSPECT_SEQ_NO")
   private String prospectSeqNo;
 
-  @Column(
-      name = "DENIAL_CUS_IND")
+  @Column(name = "DENIAL_CUS_IND")
   private String denialCusInd;
 
-  @Column(
-      name = "ISBU_CD")
+  @Column(name = "ISBU_CD")
   private String isbuCd;
 
-  @Column(
-      name = "SECTOR_CD")
+  @Column(name = "SECTOR_CD")
   private String sectorCd;
 
-  @Column(
-      name = "PRIVACY_INDC")
+  @Column(name = "PRIVACY_INDC")
   private String privIndc;
 
-  @Column(
-      name = "MAILING_COND")
+  @Column(name = "MAILING_COND")
   private String mailingCondition;
 
-  @Column(
-      name = "CMR_NO_PREFIX")
+  @Column(name = "CMR_NO_PREFIX")
   private String cmrNoPrefix;
 
-  @Column(
-      name = "AP_CUST_CLUSTER_ID")
+  @Column(name = "AP_CUST_CLUSTER_ID")
   private String apCustClusterId;
 
-  @Column(
-      name = "PAYMENT_ADDR_CD")
+  @Column(name = "PAYMENT_ADDR_CD")
   private String paymentAddrCd;
 
   /* LA -> (SSA & MX) */
-  @Column(
-      name = "CUST_INVOICE_COPIES")
+  @Column(name = "CUST_INVOICE_COPIES")
   private String cusInvoiceCopies;
 
-  @Column(
-      name = "INTL_USE_INVOICE_COPIES")
+  @Column(name = "INTL_USE_INVOICE_COPIES")
   private String intlUseInvoiceCopies;
 
-  @Column(
-      name = "DECENTRALIZED_OPERATION_INDC")
+  @Column(name = "DECENTRALIZED_OPERATION_INDC")
   private String decentralizedOptIndc;
 
-  @Column(
-      name = "NUCLEAR_CUST_CD_BY_RISK_LEVEL")
+  @Column(name = "NUCLEAR_CUST_CD_BY_RISK_LEVEL")
   private String nuclCustCdByRiskLevel;
 
-  @Column(
-      name = "BIO_CHEMICAL_MISSILE_MFG")
+  @Column(name = "BIO_CHEMICAL_MISSILE_MFG")
   private String bioChemMissleMfg;
 
-  @Column(
-      name = "RISK_DIVERS_PROFILE")
+  @Column(name = "RISK_DIVERS_PROFILE")
   private String diversionRiskProf;
 
-  @Column(
-      name = "NUCLEAR_CHECKLIST_DATE")
+  @Column(name = "NUCLEAR_CHECKLIST_DATE")
   @Temporal(TemporalType.DATE)
   private Date nuclChecklstDate;
 
-  @Column(
-      name = "IMPORT_ACTIVITY_INDC")
+  @Column(name = "IMPORT_ACTIVITY_INDC")
   private String importActIndc;
 
-  @Column(
-      name = "GENERAL_TC_CD")
+  @Column(name = "GENERAL_TC_CD")
   private String genTermConCd;
 
-  @Column(
-      name = "EDUC_ALLOW_CD")
+  @Column(name = "EDUC_ALLOW_CD")
   private String educAllowCd;
 
-  @Column(
-      name = "FOOTNOTE_NO")
+  @Column(name = "FOOTNOTE_NO")
   private String footnoteNo;
 
-  @Column(
-      name = "FOOTNOTE_TXT_LINE_1")
+  @Column(name = "FOOTNOTE_TXT_LINE_1")
   private String footnoteTxt1;
 
-  @Column(
-      name = "FOOTNOTE_TXT_LINE_2")
+  @Column(name = "FOOTNOTE_TXT_LINE_2")
   private String footnoteTxt2;
 
-  @Column(
-      name = "CUST_ACCT_TYP")
+  @Column(name = "CUST_ACCT_TYP")
   private String custAcctType;
 
-  @Column(
-      name = "IDENT_CLIENT")
+  @Column(name = "IDENT_CLIENT")
   private String identClient;
 
-  @Column(
-      name = "INVOICE_DISTRIBUTION_CD")
+  @Column(name = "INVOICE_DISTRIBUTION_CD")
   private String invoiceDistCd;
 
-  @Column(
-      name = "BP_SALES_REP_NO")
+  @Column(name = "BP_SALES_REP_NO")
   private String bpSalesRepNo;
 
-  @Column(
-      name = "DUP_CMR_INDC")
+  @Column(name = "DUP_CMR_INDC")
   private String dupCmrIndc;
 
-  @Column(
-      name = "DUP_ISSUING_CNTRY_CD")
+  @Column(name = "DUP_ISSUING_CNTRY_CD")
   private String dupIssuingCntryCd;
 
-  @Column(
-      name = "DUP_SALES_REP_NO")
+  @Column(name = "DUP_SALES_REP_NO")
   private String dupSalesRepNo;
 
-  @Column(
-      name = "DUP_ENTERPRISE_NO")
+  @Column(name = "DUP_ENTERPRISE_NO")
   private String dupEnterpriseNo;
 
-  @Column(
-      name = "DUP_SALES_BO_CD")
+  @Column(name = "DUP_SALES_BO_CD")
   private String dupSalesBoCd;
 
-  @Column(
-      name = "DUP_ISU_CD")
+  @Column(name = "DUP_ISU_CD")
   private String dupIsuCd;
 
-  @Column(
-      name = "DUP_CLIENT_TIER_CD")
+  @Column(name = "DUP_CLIENT_TIER_CD")
   private String dupClientTierCd;
 
-  @Column(
-      name = "EMBARGO_CD")
+  @Column(name = "EMBARGO_CD")
   private String embargoCd;
 
-  @Column(
-      name = "AGREEMENT_SIGN_DATE")
+  @Column(name = "AGREEMENT_SIGN_DATE")
   private String agreementSignDate;
 
-  @Column(
-      name = "CIS_SERVICE_CUST_INDC")
+  @Column(name = "CIS_SERVICE_CUST_INDC")
   private String cisServiceCustIndc;
 
-  @Column(
-      name = "FISCAL_DATA_STATUS")
+  @Column(name = "FISCAL_DATA_STATUS")
   private String fiscalDataStatus;
 
-  @Column(
-      name = "FISCAL_DATA_COMPANY_NO")
+  @Column(name = "FISCAL_DATA_COMPANY_NO")
   private String fiscalDataCompanyNo;
 
-  @Column(
-      name = "RDC_COMMENT")
+  @Column(name = "RDC_COMMENT")
   private String rdcComment;
 
-  @Column(
-      name = "SECONDARY_LOCN_NO")
+  @Column(name = "SECONDARY_LOCN_NO")
   private String proxiLocnNo;
 
   // @Column(name = "ESTAB_NO")
   // private String estabNo;
 
-  @Column(
-      name = "JSIC_CD")
+  @Column(name = "JSIC_CD")
   private String jsicCd;
 
-  @Column(
-      name = "TIER_2")
+  @Column(name = "TIER_2")
   private String tier2;
 
-  @Column(
-      name = "CS_BO")
+  @Column(name = "CS_BO")
   private String csBo;
 
-  @Column(
-      name = "CS_DIV")
+  @Column(name = "CS_DIV")
   private String csDiv;
 
-  @Column(
-      name = "IIN_IND")
+  @Column(name = "IIN_IND")
   private String iinInd;
 
-  @Column(
-      name = "VALUE_ADD_REM")
+  @Column(name = "VALUE_ADD_REM")
   private String valueAddRem;
 
-  @Column(
-      name = "SI_IND")
+  @Column(name = "SI_IND")
   private String siInd;
 
-  @Column(
-      name = "CRS_CD")
+  @Column(name = "CRS_CD")
   private String crsCd;
 
-  @Column(
-      name = "BILLING_PROC_CD")
+  @Column(name = "BILLING_PROC_CD")
   private String billingProcCd;
 
-  @Column(
-      name = "CHANNEL_CD")
+  @Column(name = "CHANNEL_CD")
   private String channelCd;
 
-  @Column(
-      name = "INVOICE_SPLIT_CD")
+  @Column(name = "INVOICE_SPLIT_CD")
   private String invoiceSplitCd;
 
-  @Column(
-      name = "BILL_TO_CUST_NO")
+  @Column(name = "BILL_TO_CUST_NO")
   private String billToCustNo;
 
-  @Column(
-      name = "CREDIT_TO_CUST_NO")
+  @Column(name = "CREDIT_TO_CUST_NO")
   private String creditToCustNo;
 
-  @Column(
-      name = "GOV_OFFICE_DIV_CD")
+  @Column(name = "GOV_OFFICE_DIV_CD")
   private String goeType;
 
-  @Column(
-      name = "DEALER_NO")
+  @Column(name = "DEALER_NO")
   private String dealerNo;
 
-  @Column(
-      name = "SO_PRJ_CD")
+  @Column(name = "SO_PRJ_CD")
   private String soProjectCd;
 
-  @Column(
-      name = "PROD_TYPE")
+  @Column(name = "PROD_TYPE")
   private String prodType;
 
-  @Column(
-      name = "ADMIN_DEPT_CD")
+  @Column(name = "ADMIN_DEPT_CD")
   private String adminDeptCd;
 
-  @Column(
-      name = "ADMIN_DEPT_LN")
+  @Column(name = "ADMIN_DEPT_LN")
   private String adminDeptLine;
 
-  @Column(
-      name = "CHARGE_CD")
+  @Column(name = "CHARGE_CD")
   private String chargeCd;
 
-  @Column(
-      name = "OUTSOURCING_SERV")
+  @Column(name = "OUTSOURCING_SERV")
   private String outsourcingService;
 
-  @Column(
-      name = "CREDIT_BP")
+  @Column(name = "CREDIT_BP")
   private String creditBp;
 
-  @Column(
-      name = "ZSERIES_SW")
+  @Column(name = "ZSERIES_SW")
   private String zseriesSw;
 
-  @Column(
-      name = "REQUEST_DUE_DATE")
+  @Column(name = "REQUEST_DUE_DATE")
   private Date requestDueDate;
 
-  @Column(
-      name = "CMR_NO_2")
+  @Column(name = "CMR_NO_2")
   private String cmrNo2;
 
-  @Column(
-      name = "DEFLT_COLLECTOR_NO")
+  @Column(name = "DEFLT_COLLECTOR_NO")
   private String defltCollectorNo;
 
-  @Column(
-      name = "US_SICMEN")
+  @Column(name = "US_SICMEN")
   private String usSicmen;
 
-  @Column(
-      name = "TAX_EXEMPT_STATUS_1")
+  @Column(name = "TAX_EXEMPT_STATUS_1")
   private String taxExemptStatus1;
 
-  @Column(
-      name = "TAX_EXEMPT_STATUS_2")
+  @Column(name = "TAX_EXEMPT_STATUS_2")
   private String taxExemptStatus2;
 
-  @Column(
-      name = "TAX_EXEMPT_STATUS_3")
+  @Column(name = "TAX_EXEMPT_STATUS_3")
   private String taxExemptStatus3;
 
-  @Column(
-      name = "MEXICO_BILLING_NAME")
+  @Column(name = "MEXICO_BILLING_NAME")
   private String mexicoBillingName;
+
+  @Column(name = "GOE_IND")
+  private String goeInd;
+
+  @Column(name = "GOE_SRC_CD")
+  private String goeSrcCd;
+
+  @Column(name = "GOE_RSN_CD")
+  private String goeRsnCd;
 
   public String getMexicoBillingName() {
     return mexicoBillingName;
@@ -918,6 +725,14 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
 
   public void setVatExempt(String vatExempt) {
     this.vatExempt = vatExempt;
+  }
+
+  public String getVatInd() {
+    return vatInd;
+  }
+
+  public void setVatInd(String vatInd) {
+    this.vatInd = vatInd;
   }
 
   public String getCrosSubTyp() {
@@ -2503,6 +2318,30 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
 
   public void setMilitary(String military) {
     this.military = military;
+  }
+
+  public String getGoeInd() {
+    return goeInd;
+  }
+
+  public void setGoeInd(String goeInd) {
+    this.goeInd = goeInd;
+  }
+
+  public String getGoeSrcCd() {
+    return goeSrcCd;
+  }
+
+  public void setGoeSrcCd(String goeSrcCd) {
+    this.goeSrcCd = goeSrcCd;
+  }
+
+  public String getGoeRsnCd() {
+    return goeRsnCd;
+  }
+
+  public void setGoeRsnCd(String goeRsnCd) {
+    this.goeRsnCd = goeRsnCd;
   }
 
 }

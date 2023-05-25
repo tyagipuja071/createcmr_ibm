@@ -585,6 +585,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     data.setSubIndustryCd(record.getCmrSubIndustry());
     data.setTaxCd1(record.getCmrBusinessReg());
     data.setVat(record.getCmrVat());
+    data.setVatInd(record.getCmrVatInd());
     data.setCustPrefLang(record.getCmrPrefLang());
     data.setTaxCd2(record.getCmrLocalTax2());
     if (record.getCmrSensitiveFlag() != null) {
@@ -597,8 +598,11 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       }
     }
     data.setPpsceid(record.getCmrPpsceid());
+    //CREATCMR-8243
+    if(!SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())){
     data.setMemLvl(record.getCmrMembLevel());
     data.setBpRelType(record.getCmrBPRelType());
+    }
 
     data.setCovId(record.getCmrCoverage());
     data.setBgId(record.getCmrBuyingGroup());

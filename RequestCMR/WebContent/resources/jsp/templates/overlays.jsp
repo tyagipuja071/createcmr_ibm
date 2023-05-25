@@ -47,9 +47,11 @@
 					<div class="ibm-overlay-rule"><hr /></div>
 					<div class="ibm-buttons-row">
 					<p>
-							<input id="dialogOverlayButtonCancel"  value="Cancel" type="button" name="ibm-cancel" class="ibm-btn-cancel-sec" onclick="cmr.hideConfirm()"/>
-							<span class="ibm-sep">&nbsp;</span>
 							<input id="dialogOverlayButtonOK"  value="OK" type="button" name="ibm-continue" class="ibm-btn-arrow-pri"/>
+							<span class="ibm-sep">&nbsp;</span>
+							<input id="dialogOverlayButtonCancel"  value="Cancel" type="button" name="ibm-cancel" class="ibm-btn-cancel-sec" onclick="cmr.hideConfirm()"/>
+							
+							
 					</p>
 					</div>
 				</div>

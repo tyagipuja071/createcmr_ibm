@@ -31,6 +31,8 @@ import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.KunnrExt;
+import com.ibm.cio.cmr.request.entity.KunnrExtPK;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
@@ -1177,6 +1179,7 @@ public class SWISSService extends BaseBatchService {
         if (isDataUpdated && (notProcessed != null && notProcessed.size() > 0)) {
           LOG.debug("Processing CMR Data changes to " + notProcessed.size() + " addresses of CMR# " + data.getCmrNo());
           for (Addr addr : notProcessed) {
+            addVatIndToKunnrExtForCB(entityManager, request.getMandt(), data, addr);
             response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, entityManager, isTempReactivate);
             respStatuses.add(response.getStatus());
           }
@@ -1331,6 +1334,18 @@ public class SWISSService extends BaseBatchService {
     }
   }
 
+  // CREATCMR-8052 - Item 3
+  private void addVatIndToKunnrExtForCB(EntityManager entityManager, String mandt, Data data, Addr addr) {
+    KunnrExtPK pk = new KunnrExtPK();
+    pk.setMandt(mandt);
+    pk.setKunnr(addr.getSapNo());
+    KunnrExt kunnrExt = entityManager.find(KunnrExt.class, pk);
+    if (kunnrExt != null) {
+      kunnrExt.setVatInd(StringUtils.isEmpty(data.getVatInd()) ? "" : data.getVatInd());
+      entityManager.merge(kunnrExt);
+    }
+  }
+  
   private long checked2WorkingDays(Date processedDate, Timestamp currentTimestamp) {
     LOG.debug("processedTs=" + processedDate + " currentTimestamp=" + currentTimestamp);
     if (processedDate == null)

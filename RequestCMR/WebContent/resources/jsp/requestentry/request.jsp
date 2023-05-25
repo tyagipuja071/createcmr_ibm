@@ -73,7 +73,10 @@
     _findCmrServer = '<%=findCmrServer%>';
     var _translateUrl = '<%=SystemParameters.getString("TRANSLATE.URL")%>';
     var _delayedLoadComplete = false;
-  dojo.addOnLoad(function() {
+  	dojo.addOnLoad(function() {
+    if (FormManager.getField('MAIN_GENERAL_TAB')) {
+      cmr.showProgress('Loading request data..');
+    }
     loadYourActionsDropDown();
     FormManager.setCheckFunction(promptForSaveBeforeLeave);
     FilteringDropdown.loadItems('rejectReason', 'rejectReason_spinner', 'lov', 'fieldId=RejectReasonProc');
@@ -211,7 +214,26 @@
         cb[i].removeAttribute('disabled');
       }
     }
-    FormManager.doAction('frmCMR', YourActions.Save, true);
+
+    var uiReqStatus = FormManager.getActualValue('reqStatus');
+    var reqId = FormManager.getActualValue('reqId');
+    var dbReqStatus = "";
+
+    var result = cmr.query("WW.GET_REQ_STATUS", {
+      REQ_ID: reqId
+    });
+    if (result != null && result.ret1 != '' && result.ret1 != null) {
+      dbReqStatus = result.ret1;
+    }
+
+    // prevent from overwriting the DB REQ_STATUS
+    // if another tab is open with different UI REQ_STATUS
+    if (uiReqStatus == dbReqStatus) {
+      FormManager.doAction('frmCMR', YourActions.Save, true);
+    } else {
+      cmr.showAlert("Unable to save the request. Request Status mismatch from database." +
+      "<br><br>Please reload the page.");
+    }
   }
   
   function noSaveBeforeLeave(){
@@ -226,6 +248,11 @@
     PageManager.setAlwaysAvailable(['yourAction']);
     
     var paramString = 'reqstatus=${reqentry.reqStatus}&lockind=${yourActionsLockInd}&reqtype=${reqentry.reqType}';
+    
+    if('${reqentry.reqStatus}' == 'COM') {
+    	paramString = 'reqstatus=${reqentry.reqStatus}&lockind=X&reqtype=${reqentry.reqType}';
+    }
+    
     paramString += '&sepvalind=' + ('${reqentry.sepValInd}'.trim() == '' ? 'N' : '${reqentry.sepValInd}');
     paramString += '&disableautoproc=' + ('${reqentry.disableAutoProc}'.trim() == '' ? 'N' : '${reqentry.disableAutoProc}');
     FilteringDropdown.loadItems('yourAction', 'yourAction_spinner', '${yourActionsSqlId}', paramString, false, '${ui.info.noneavailable}');
@@ -366,6 +393,9 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <form:hidden path="dplChkTs" />
     </c:if>
     <form:hidden path="dplChkResult" />
+	<cmr:view forCountry="754,866,624,788,724,618,848">    
+    	<form:hidden path="vatAcknowledge" />
+    </cmr:view>
     <form:hidden path="dplChkUsrId" />
     <form:hidden path="dplChkUsrNm" />
 
@@ -591,7 +621,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <cmr:view forGEO="LA">
         <cmr:tab label="${ui.tab.contactInfo}" id="MAIN_CONTACTINFO_TAB" sectionId="CONTACTINFO_REQ_TAB" gridIds="CONTACTINFO_GRID" />
       </cmr:view>
-      <cmr:view forCountry="852,720,834,738,736,714,646,358,359,363,607,620,626,651,675,677,680,694,695,713,741,752,762,767,768,772,787,805,808,821,823,832,849,850,865,889,641,766,858,755">
+      <cmr:view forCountry="852,720,834,738,736,714,646,358,359,363,607,620,626,651,675,677,680,694,695,713,741,752,762,767,768,772,787,805,808,821,823,832,849,865,889,641,766,858,755">
         <cmr:tab label="${ui.tab.checklist}" id="MAIN_CHECKLIST_TAB" sectionId="CHECKLIST_TAB" />
       </cmr:view>
       <cmr:tab label="${ui.tab.attach}" id="MAIN_ATTACH_TAB" sectionId="ATTACH_REQ_TAB" gridIds="ATTACHMENT_GRID" />

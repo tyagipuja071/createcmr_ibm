@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -48,6 +49,7 @@ public class NetherlandsUtil extends AutomationUtil {
   public static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
   public static final String SCENARIO_INTERNAL = "INTER";
   public static final String SCENARIO_IBM_EMPLOYEE = "IBMEM";
+  private static final String QUERY_BG_SBO_BENELUX = "AUTO.COV.GET_COV_FROM_BG_ES_UK";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_PAYGO_BILLING);
@@ -113,8 +115,8 @@ public class NetherlandsUtil extends AutomationUtil {
           String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
           person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
           if (person == null) {
-            engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-            details.append("Employee details not found in IBM BluePages.").append("\n");
+            engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+            details.append("Employee details not found in IBM People.").append("\n");
             return false;
           } else {
             details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
@@ -149,16 +151,27 @@ public class NetherlandsUtil extends AutomationUtil {
 
     Data data = requestData.getData();
     String coverageId = container.getFinalCoverage();
+    String bgId = data.getBgId();
+    String commercialFin = "";
 
-    if (StringUtils.isNotBlank(coverageId)) {
-      String sortl = getSORTLfromCoverage(entityManager, container.getFinalCoverage());
-      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENGINEERING_BO", data.getEngineeringBo(), sortl);
-      details.append("-BO Team: " + sortl);
+    /*
+     * if (StringUtils.isNotBlank(coverageId)) { String sortl =
+     * getSORTLfromCoverage(entityManager, container.getFinalCoverage());
+     * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+     * "ENGINEERING_BO", data.getEngineeringBo(), sortl);
+     * details.append("-BO Team: " + sortl); }
+     */
+
+    if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
+      commercialFin = computeSBOForCovBelux(entityManager, QUERY_BG_SBO_BENELUX, bgId, data.getCmrIssuingCntry(), false);
     }
-
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId)) {
-      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-    } else if (!isCoverageCalculated) {
+    if (commercialFin != null && !commercialFin.isEmpty()) {
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "COMMERCIAL_FINANCED", data.getSalesBusOffCd(), commercialFin);
+      details.append("SORTL: " + commercialFin);
+    
+    } 
+    
+      if (!isCoverageCalculated) {
       // if not calculated using bg/gbg try calculation using 32/S logic
       details.setLength(0);// clear string builder
       overrides.clearOverrides(); // clear existing overrides
@@ -187,10 +200,14 @@ public class NetherlandsUtil extends AutomationUtil {
         
       if (fields != null) {
         details.append("Coverage calculated successfully using 32S logic.").append("\n");
-        if (StringUtils.isNotBlank(fields.getEngineeringBO())) {
-          details.append("BO Team : " + fields.getEngineeringBO()).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENGINEERING_BO", data.getEngineeringBo(), fields.getEngineeringBO());
-        }
+        /*
+         * if (StringUtils.isNotBlank(fields.getEngineeringBO())) {
+         * details.append("BO Team : " +
+         * fields.getEngineeringBO()).append("\n");
+         * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+         * "ENGINEERING_BO", data.getEngineeringBo(),
+         * fields.getEngineeringBO()); }
+         */
         if (StringUtils.isNotBlank(fields.getInac())) {
           details.append(" INAC/NAC Code : " + fields.getInac()).append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), fields.getInac());
@@ -217,6 +234,32 @@ public class NetherlandsUtil extends AutomationUtil {
     }
     return true;
   }
+  
+  private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
+    String sortl = "";
+    String sql = ExternalizedQuery.getSql(queryBgFR);
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KEY", bgId);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", cmrIssuingCntry);
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    System.err.println("ISO: " + isoCntry);
+    query.setParameter("ISO_CNTRY", isoCntry);
+    query.setForReadOnly(true);
+
+    LOG.debug("Calculating SORTL using Netherlands query " + queryBgFR + " for key: " + bgId);
+    List<Object[]> results = query.getResults(5);
+    List<String> sortlList = new ArrayList<String>();
+    if (results != null && !results.isEmpty()) {
+      for (Object[] result : results) {
+        sortl = (String) result[3];
+        sortlList.add(sortl);
+        // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
+      }
+    }
+    sortl = sortlList.get(0);
+    return sortl;
+  }
 
   private NLFieldsContainer calculate32SValuesFromIMSNL(EntityManager entityManager, Data data) {
     NLFieldsContainer container = new NLFieldsContainer();
@@ -242,10 +285,11 @@ public class NetherlandsUtil extends AutomationUtil {
       query.setParameter("ISSUING_CNTRY", SystemLocation.NETHERLANDS);
       engineeringBOs = query.getResults();
     }
-    if (engineeringBOs != null && engineeringBOs.size() == 1) {
-      String engineeringBO = (String) engineeringBOs.get(0)[0];
-      container.setEngineeringBO(engineeringBO);
-    }
+    /*
+     * if (engineeringBOs != null && engineeringBOs.size() == 1) { String
+     * engineeringBO = (String) engineeringBOs.get(0)[0];
+     * container.setEngineeringBO(engineeringBO); }
+     */
 
     // setINACValues
     List<Object[]> inacValues = new ArrayList<>();
@@ -699,7 +743,7 @@ public class NetherlandsUtil extends AutomationUtil {
         }
       }
     }
-    return null;
+    return "333D3";
   }
 
   @Override

@@ -745,11 +745,59 @@ function addHandlersForCEMEA() {
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       setVatValidatorCEMEA();
-      customVATMandatoryForAT();
+     // customVATMandatoryForAT();
     });
   }
 
 }
+
+var _checklistBtnHandler = [];
+function addChecklistBtnHandler() {
+  for (var i = 2; i <= 15; i++) {
+    _checklistBtnHandler[i] = null;
+    if (_checklistBtnHandler[i] == null) {
+      _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
+        freeTxtFieldShowHide(Number(value.target.id.split("_").pop()));
+      });
+    }
+  }
+}
+
+function freeTxtFieldShowHide(buttonNo) {
+  var shouldDisplay = false;
+  
+  if (buttonNo <= 1) {
+    return;
+  }
+  var fieldIdNo = getCheckListFieldNo(buttonNo);
+  var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
+  var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
+  
+  if (buttonNo%2 == 0) {
+    shouldDisplay = true;
+  } else {
+    shouldDisplay = false;
+  }
+  if (shouldDisplay) {
+    element.style.display = 'block';
+  } else {
+    element.style.display = 'none';
+    textFieldElement.value = '';
+  }
+}
+
+function getCheckListFieldNo(buttonNo) {
+  return ((buttonNo - (buttonNo % 2))/2) + 5;
+}
+
+function checkChecklistButtons() {
+  for (var i = 2; i<=14; i=i+2) {
+    if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
+      document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
+    }
+  }
+}
+
 
 function setClientTierValuesAT(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -3261,10 +3309,19 @@ function setChecklistStatus() {
   document.getElementById("checklistStatus").innerHTML = "Not Done";
   var reqId = FormManager.getActualValue('reqId');
   var questions = checklist.query('input[type="radio"]');
+  var textBoxes = checklist.query('input[type="text"]');
 
   if (reqId != null && reqId.length > 0 && reqId != 0) {
     if (questions.length > 0) {
       var noOfQuestions = questions.length / 2;
+      var noOfTextBoxes = textBoxes.length;
+      
+      for (var i=0; i < noOfTextBoxes; i++) {
+        if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+      }
+      
       var checkCount = 0;
       for (var i = 0; i < questions.length; i++) {
         if (questions[i].checked) {
@@ -3302,8 +3359,17 @@ function addCEMEAChecklistValidator() {
         var checklist = dojo.query('table.checklist');
 
         var questions = checklist.query('input[type="radio"]');
+        var textBoxes = checklist.query('input[type="text"]');
         if (questions.length > 0) {
           var noOfQuestions = questions.length / 2;
+          var noOfTextBoxes = textBoxes.length;
+          
+          for (var i=0; i < noOfTextBoxes; i++) {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+              return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+            }
+          }
+          
           var checkCount = 0;
           for (var i = 0; i < questions.length; i++) {
             if (questions[i].checked) {
@@ -5296,7 +5362,7 @@ dojo.addOnLoad(function() {
   GEOHandler.CEMEA = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762',
       '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618' ];
   GEOHandler.CEMEA_CHECKLIST = [ '358', '359', '363', '607', '620', '626', '651', '675', '677', '680', '694', '695', '713', '741', '752', '762', '767', '768', '772', '787', '805', '808', '821',
-      '823', '832', '849', '850', '865', '889' ];
+      '823', '832', '849', '865', '889' ];
   GEOHandler.NON_CEE_CHECK = [ '620', '675', '677', '680', '713', '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850', '865' ];
   GEOHandler.CEE = [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ];
   GEOHandler.CEMEA_EXCLUDE_CEE = GEOHandler.CEMEA.filter(function(v) {
@@ -5400,7 +5466,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGaddrValidatorForCEE, GEOHandler.CEE, null, true);
   // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
   // true);
-  GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
+  //GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741',
       '787', '820', '821', '826', '889', '358', '359', '363' ]);
   GEOHandler.registerValidator(cemeaCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
@@ -5431,8 +5497,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(validatorsDIGIT, GEOHandler.CEE);
   // CMR-1912 Vat should be required for AT local-BP and Commercial
-  GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
+  //GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
+  //GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
   /*
    * GEOHandler.addAfterConfig(cemeaCustomVATMandatory, GEOHandler.CEMEA);
    * GEOHandler.addAfterTemplateLoad(cemeaCustomVATMandatory, GEOHandler.CEMEA);
@@ -5529,5 +5595,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetSortlValidator, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, [ SysLoc.AUSTRIA ]);
   GEOHandler.registerValidator(validateSortl, [ SysLoc.AUSTRIA ], null, true);
+  
+  GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.CEMEA_CHECKLIST);
+  GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.CEMEA_CHECKLIST);
 
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
 });
