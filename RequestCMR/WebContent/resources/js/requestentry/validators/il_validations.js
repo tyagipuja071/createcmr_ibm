@@ -2929,7 +2929,6 @@ function lockUnlockFieldForISrael() {
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('salesTeamCd');
     FormManager.readOnly('salesBusOffCd');
-    FormManager.clearValue('ppsceid');
     FormManager.readOnly('ppsceid');
   } 
   else if (_custGrpSet1.has(custSubGrp)) {
@@ -2943,7 +2942,7 @@ function lockUnlockFieldForISrael() {
     FormManager.clearValue('ppsceid');
     FormManager.readOnly('ppsceid');
   }
-  if(_custGrpSet2.has(custSubGrp)){
+  if((_custGrpSet2.has(custSubGrp)) && FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER'){
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'ppsceid' ], 'MAIN_IBM_TAB');
     FormManager.enable('ppsceid');
   }
