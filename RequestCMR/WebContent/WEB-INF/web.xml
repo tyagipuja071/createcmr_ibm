@@ -77,15 +77,6 @@
 	</filter-mapping>
 
 	<filter>
-		<filter-name>RedirectPreviousURIFilter</filter-name>
-		<filter-class>com.ibm.cio.cmr.request.filter.RedirectPreviousURIFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>RedirectPreviousURIFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
-	<filter>
 		<filter-name>SessionInactivityFilter</filter-name>
 		<filter-class>com.ibm.cio.cmr.request.filter.SessionInactivityFilter</filter-class>
 		<init-param>
