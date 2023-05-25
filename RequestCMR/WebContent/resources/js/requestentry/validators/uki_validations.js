@@ -211,6 +211,8 @@ function lockRequireFieldsUKI() {
   var fieldsToDisable = new Array();
   var lockedFieldsForAllRoles = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM' ];
   var cmrNo = FormManager.getActualValue('cmrNo');
+  
+  FormManager.readOnly('inacCd');
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
