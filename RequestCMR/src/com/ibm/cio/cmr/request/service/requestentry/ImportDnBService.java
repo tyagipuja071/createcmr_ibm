@@ -588,7 +588,6 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     if (reqModel.getCmrIssuingCntry() != null && LAHandler.isLACountry(reqModel.getCmrIssuingCntry())) {
       String postalCode = cmr.getCmrPostalCode();
       String street = cmr.getCmrStreet();
-      Arrays.as
 
       postalCode = postalCode != null ? postalCode.replace("-", "") : "";
       addr.setPostCd(postalCode);
