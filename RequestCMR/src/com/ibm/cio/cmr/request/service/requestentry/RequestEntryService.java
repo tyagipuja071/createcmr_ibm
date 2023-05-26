@@ -606,8 +606,6 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
     saveAccessToken(admin, request);
     setLockByName(admin);
-    RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
-    updateEntity(admin, entityManager);
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(model.getReqType()) && LAHandler.isLACountry(model.getCmrIssuingCntry())
         && CmrConstants.Create_Update_CMR().equals(model.getAction())) {
@@ -626,6 +624,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         model.setStatusChgCmt(model.getStatusChgCmt().substring(20));
       }
     }
+    RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
+    updateEntity(admin, entityManager);
     updateEntity(data, entityManager);
 
     long reqId = model.getReqId();

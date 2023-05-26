@@ -418,6 +418,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         admin.setSepValInd(type.getSepValInd());
       }
 
+      RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
       reqEntryService.updateEntity(admin, entityManager);
 
       reqEntryService.computeInternalType(entityManager, reqModel, admin);
@@ -598,10 +599,10 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       }
     }
     data.setPpsceid(record.getCmrPpsceid());
-    //CREATCMR-8243
-    if(!SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())){
-    data.setMemLvl(record.getCmrMembLevel());
-    data.setBpRelType(record.getCmrBPRelType());
+    // CREATCMR-8243
+    if (!SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
+      data.setMemLvl(record.getCmrMembLevel());
+      data.setBpRelType(record.getCmrBPRelType());
     }
 
     data.setCovId(record.getCmrCoverage());
