@@ -438,9 +438,14 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     // jz - do NOT update the mirror
     DataRdc rdc = new DataRdc();
     DataPK rdcpk = new DataPK();
+    String cmrNo = rdc.getCmrNo();
     rdcpk.setReqId(data.getId().getReqId());
     rdc.setId(rdcpk);
     PropertyUtils.copyProperties(rdc, data);
+    if (!StringUtils.isBlank(cmrNo) && cmrNo.startsWith("P")){
+      // put back the cmr no on data rdc for prospect conversions
+      rdc.setCmrNo(cmrNo);
+    }
     if (newRequest) {
       LOG.debug("Adding data into DATA rdc - new request true ");
       reqEntryService.createEntity(rdc, entityManager);
