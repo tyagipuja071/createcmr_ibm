@@ -335,12 +335,21 @@ incorporation into a military item; or any item that supports or contributes to 
 				<li>你的客户制造超级计算机吗？<br> <span>a) Does your customer
 						build supercomputers?</span>
 				</li>
+			</ul>
+		</cmr:chk-entry>
+		<cmr:chk-entry number="2" displayNumber="1.2" dplField="" section="C">
+			<span style="font-weight: bold; text-decoration: underline">超级计算机 ---</span> 据你所知或所信，你的客户是否参与了“超级计算机”的设计、开发、制造、测试等？<br />
+			<span style="font-weight: bold; text-decoration: underline">Supercomputer ---</span>To the best of your knowledge or belief is your customer involved in the design, development, 
+    manufacturing, testing, etc. of a “supercomputer”?
+    <br>
+			<br>
+			<ul>
 				<li>您的客户拥有超级计算机吗？<br> <span>b) Does your customer
 						own supercomputers?</span>
 				</li>
 			</ul>
 		</cmr:chk-entry>
-		<cmr:chk-entry number="2" displayNumber="1.2" section="C">
+		<cmr:chk-entry number="3" displayNumber="1.3" section="C">
 		据您所知或所信，您的客户是否参与了将物品纳入超级计算机的任何活动，或将用于“超级计算机”的任何组件/物品的设计、开发、制造、测试等？ 
 <br>
 To the best of your knowledge or belief, is your customer involved in any activity to incorporate items into a supercomputer, or the design, development, manufacturing, testing, etc. of any components/items that will be used in a ‘‘supercomputer’’?
@@ -364,7 +373,7 @@ To the best of your knowledge or belief, is your customer involved in any activi
 			<strong>Supercomputer:</strong> a high-performance multi-rack system having thousands of closely coupled compute cores connected in parallel with networking technology and having a high peak power capacity requiring cooling elements. They are used for computationally intensive tasks including scientific and engineering work. Supercomputers may include shared memory, distributed memory, or a combination of both.
 		
 		</cmr:chk-entry>
-		<cmr:chk-entry number="3" displayNumber="2.1" section="C">
+		<cmr:chk-entry number="4" displayNumber="2.1" section="C">
 			<span style="font-weight: bold; text-decoration: underline">半导体制造业 --- </span>，您的客户是否参与了集成电路的设计、开发、制造、测试等？<br>
 			<span style="font-weight: bold; text-decoration: underline">Semiconductor Manufacturing ---</span>To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of integrated circuits? 
 <br>
@@ -373,7 +382,7 @@ To the best of your knowledge or belief, is your customer involved in any activi
 			<strong>Note:</strong> This question is asking if the customer is involved in the semiconductor or integrated circuit manufacturing process.
 		
 		</cmr:chk-entry>
-		<cmr:chk-entry number="4" displayNumber="2.2" section="C">
+		<cmr:chk-entry number="5" displayNumber="2.2" section="C">
 		据您所知或所信，您的客户是否参与了半导体生产、制造、测试等所用工具的任何零件、组件或设备的设计、开发、制造和测试等。<br>
 To the best of your knowledge or belief is your customer involved with the design, development, manufacturing, testing, etc. of any parts, components, or equipment of the tools that are used in the production, manufacturing, testing, etc. of semiconductors. 
 <br>
