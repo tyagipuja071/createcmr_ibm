@@ -2946,6 +2946,9 @@ function lockUnlockFieldForISrael() {
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'ppsceid' ], 'MAIN_IBM_TAB');
     FormManager.enable('ppsceid');
   }
+  if(FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER'){
+    FormManager.readOnly('ppsceid');
+  }
 }
 
 function addRemoveClientTierValidator() {
