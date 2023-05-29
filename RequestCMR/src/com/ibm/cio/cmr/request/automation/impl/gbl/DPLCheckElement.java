@@ -382,6 +382,9 @@ public class DPLCheckElement extends ValidatingElement {
       scorecard.setDplChkUsrId(user.getIntranetId());
       scorecard.setDplChkUsrNm(user.getBluePagesName());
     }
+    log.debug("Flushing changes to DB for DPL Check..");
+    updateEntity(scorecard, entityManager);
+    entityManager.flush();
     if (failed > 0) {
       log.debug("Performing DPL Search for Request " + reqId + " with DPL Status: " + scorecard.getDplChkResult());
 
