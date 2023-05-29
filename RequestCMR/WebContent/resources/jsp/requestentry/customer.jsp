@@ -332,7 +332,7 @@
         </p>
       </cmr:column>
       </cmr:view>
-      <cmr:view  exceptForCountry="897,649,641,618,624,678,702,724,754,788,806,846,848,866">
+      <cmr:view  exceptForCountry="897,649,618,624,678,702,706,724,754,788,806,846,848,866">
       <cmr:column span="2" containerForField="VAT">
         <p>
           <label for="vat"> <cmr:fieldLabel fieldId="VAT" />: <cmr:delta text="${rdcdata.vat}" oldValue="${reqentry.vat}" /> <cmr:view
@@ -431,7 +431,7 @@
         </p>
       </cmr:column>
       </cmr:view>       
-      <cmr:view forGEO="MCO,CEMEA,FR" exceptForCountry="755,618">
+      <cmr:view forGEO="MCO,CEMEA" exceptForCountry="755,618">
         <cmr:column span="1" containerForField="VATExempt" >
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label> 
@@ -493,7 +493,7 @@
         </cmr:label>
       </cmr:column>
     </cmr:view>
-      <cmr:view forCountry="618,624,678,702,724,754,788,806,846,848,866">
+      <cmr:view forCountry="618,624,678,702,706,724,754,788,806,846,848,866">
       <cmr:column span="2" containerForField="VATInd" >
        <p>                    
            <label for="vatInd">
