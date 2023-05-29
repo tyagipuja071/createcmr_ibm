@@ -85,7 +85,7 @@ public class CNHandler extends GEOHandler {
 
   private static final Logger LOG = Logger.getLogger(CNHandler.class);
   private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
-      "City2", "Affiliate", "Company", "INACType" };
+      "Affiliate", "Company", "INACType" };
   public static final int CN_STREET_ADD_TXT = 70;
   public static final int CN_STREET_ADD_TXT2 = 70;
   public static final int CN_CUST_NAME_1 = 70;
