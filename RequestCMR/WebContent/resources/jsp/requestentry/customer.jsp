@@ -431,7 +431,7 @@
         </p>
       </cmr:column>
       </cmr:view>       
-      <cmr:view forGEO="MCO,CEMEA,FR" exceptForCountry="618">
+      <cmr:view forGEO="MCO,CEMEA" exceptForCountry="618">
         <cmr:column span="1" containerForField="VATExempt" >
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label> 
