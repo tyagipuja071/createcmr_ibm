@@ -1918,4 +1918,36 @@ public class RequestUtils {
     return legacy;
   }
 
+  public static boolean fromBPPortal(long reqId) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      return fromBPPortal(entityManager, reqId);
+    } finally {
+      // empty the manager
+      entityManager.clear();
+      entityManager.close();
+    }
+  }
+
+  private static boolean fromBPPortal(EntityManager entityManager, long reqId) {
+    String sourceSystId = getSourceSystId(entityManager, reqId);
+    if (CmrConstants.CMRBPPortal.equals(sourceSystId)) {
+      return true;
+    }
+    return false;
+  }
+
+  private static String getSourceSystId(EntityManager entityManager, long reqId) {
+    String output = null;
+    String sql = ExternalizedQuery.getSql("QUERY.GET.SOURCESYSTID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      output = result;
+    }
+    return output;
+  }
+
 }

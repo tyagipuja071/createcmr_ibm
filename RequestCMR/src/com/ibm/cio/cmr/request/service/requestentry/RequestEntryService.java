@@ -1399,9 +1399,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
 
     try {
-      if (!fromBPPortal(entityManager, reqId)) {
-        PropertyUtils.copyProperties(checklist, this.checklist);
-      }
+      PropertyUtils.copyProperties(checklist, this.checklist);
     } catch (Exception e) {
       this.log.warn("Cannot copy properties.", e);
     }
@@ -1415,27 +1413,6 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       updateEntity(checklist, entityManager);
     }
 
-  }
-
-  private boolean fromBPPortal(EntityManager entityManager, long reqId) {
-    String sourceSystId = getSourceSystId(entityManager, reqId);
-    if ("CreateCMR-BP".equals(sourceSystId)) {
-      return true;
-    }
-    return false;
-  }
-
-  private String getSourceSystId(EntityManager entityManager, long reqId) {
-    String output = null;
-    String sql = ExternalizedQuery.getSql("QUERY.GET.SOURCESYSTID");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    String result = query.getSingleResult(String.class);
-
-    if (result != null) {
-      output = result;
-    }
-    return output;
   }
 
   /**
