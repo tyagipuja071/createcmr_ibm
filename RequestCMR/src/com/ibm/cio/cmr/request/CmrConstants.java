@@ -956,4 +956,5 @@ public class CmrConstants {
   public static final String VAT_ACKNOWLEDGE_YES = "Yes";
   public static final String VAT_ACKNOWLEDGE_NA = "N/A";
   public static final List<String> BP_GBM_SBM_COUNTRIES = Arrays.asList("620", "677", "680", "767", "805", "823", "832");
+  public static final String CMRBPPortal = "CreateCMR-BP";
 }
