@@ -438,6 +438,14 @@ public class CorrectionsService extends BaseSimpleService<CorrectionsModel> {
                 value != null ? value.getClass() : String.class);
           } catch (Exception e) {
             LOG.warn("Setter method for " + field.getName() + " not found.");
+            try {
+              // try secondary, diff naming convention
+              set = findSetter(field.getName(), source.getClass());
+//            set = target.getClass().getDeclaredMethod("set" + field.getName(),
+//                value != null ? value.getClass() : String.class);
+            } catch (Exception e1) {
+              LOG.warn("Setter method2 for " + field.getName() + " not found.");
+            }
           }
           if (set != null) {
             if (Long.class.equals(value.getClass()) || Integer.class.equals(value.getClass())) {
@@ -457,6 +465,14 @@ public class CorrectionsService extends BaseSimpleService<CorrectionsModel> {
     }
   }
 
+  private Method findSetter(String fieldName, Class<?> clazz){
+    for (Method method : clazz.getDeclaredMethods()){
+      if (("SET"+fieldName.toUpperCase()).equals(method.getName().toUpperCase())){
+        return method;
+      }
+    }
+    return null;
+  }
   @Override
   protected boolean isTransactional() {
     return true;
