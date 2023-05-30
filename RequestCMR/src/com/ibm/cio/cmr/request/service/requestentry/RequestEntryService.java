@@ -637,7 +637,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       addr = new Addr();
     boolean iscrossBorder = isCrossBorder(entityManager, model.getCmrIssuingCntry(), addr.getLandCntry());
 
-    if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())) {
+    if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && (CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())
+        || SystemLocation.SPAIN.equals(model.getCmrIssuingCntry()))) {
       String oldVatValue = getOldVatValue(entityManager, reqId);
       if (admin.getReqType().equals("C")) {
         if ("N".equals(data.getVatInd()) && (!iscrossBorder)) {

@@ -162,7 +162,7 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
       cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
-      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
+      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || cmrCntry == SysLoc.SPAIN || ROW.includes(FormManager
           .getActualValue('cmrIssuingCntry')))
           && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && ((oldVatValue == '' && reqType == 'U') || (reqType == 'C'))) {
         findVatInd();
