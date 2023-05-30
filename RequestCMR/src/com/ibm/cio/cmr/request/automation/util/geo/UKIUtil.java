@@ -590,6 +590,16 @@ public class UKIUtil extends AutomationUtil {
       results.setProcessOutput(overrides);
     }
 
+    // for P2L Conversions , checking mandatory fields
+
+    // first identity if P2L
+    if ("Y".equalsIgnoreCase(admin.getProspLegalInd())) {
+      if ("COMME".equalsIgnoreCase(data.getCustSubGrp()) && StringUtils.isEmpty(data.getTaxCd1()) && !"Y".equalsIgnoreCase(data.getRestrictInd())) {
+        details.append("CRN is a mandatory field. Processor Review will be required.\n");
+        engineData.addNegativeCheckStatus("_crnMissing", "CRN is a mandatory field.");
+      }
+    }
+
     results.setDetails(details.toString());
     LOG.debug(results.getDetails());
     return results;
