@@ -192,6 +192,9 @@ public class CalculateCoverageElement extends OverridingElement {
         coverages = computeCoverageFromRDCQuery(entityManager, QUERY_BG, bgId, data.getCmrIssuingCntry(), false);
         if (coverages != null && !coverages.isEmpty()) {
           CoverageContainer preferredCoverage = coverages.get(0);
+          if (StringUtils.isNotBlank(preferredCoverage.getFinalCoverage())) {
+            setCoverageEsUKI(data, preferredCoverage.getFinalCoverage());
+          }
           if (preferredCoverage.getFinalCoverageRules() == null) {
             details.append("The preferred coverage '" + preferredCoverage.getFinalCoverage() + "' determined using Buying Group '" + bgId
                 + "' was not found in coverage rules.").append("\n");
@@ -358,6 +361,13 @@ public class CalculateCoverageElement extends OverridingElement {
       result.setProcessOutput(new OverrideOutput(false));
 
       return result;
+    }
+  }
+
+  private void setCoverageEsUKI(Data data, String finalCoverage) {
+    if (SystemLocation.SPAIN.equals(data.getCmrIssuingCntry()) || SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())
+        || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      data.setCovId(finalCoverage);
     }
   }
 

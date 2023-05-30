@@ -7273,6 +7273,11 @@ function lockRequireFieldsUKI() {
   var fieldsToDisable = new Array();
   var lokedFieldsForAllRoles = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM' ]
 
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('inacCd');
+    return;
+  }
+  
   if (reqType == 'C') {
     if (custSubGroup == 'PRICU' || custSubGroup == 'BUSPR' || custSubGroup == 'INTER') {
       FormManager.readOnly('inacCd');

@@ -1,3 +1,4 @@
+
 /* Define the global variables here */
 
 var _customerTypeHandler = null;
@@ -211,8 +212,9 @@ function lockRequireFieldsUKI() {
   var fieldsToDisable = new Array();
   var lockedFieldsForAllRoles = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM' ];
   var cmrNo = FormManager.getActualValue('cmrNo');
-
+  
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('inacCd');
     return;
   }
 
