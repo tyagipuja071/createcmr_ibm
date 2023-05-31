@@ -125,7 +125,7 @@ public class UserInjectFilter implements Filter {
 
           session.setAttribute("userHelper", userHelper);
           setSessionAttributes(httpReq, httpResp);
-          filterChain.doFilter(httpReq, httpResp);
+          filterChain.doFilter(request, response);
           return;
         }
       }
@@ -135,7 +135,7 @@ public class UserInjectFilter implements Filter {
       LOG.error("Error processing UserInjectFilter", e);
     }
 
-    filterChain.doFilter(httpReq, httpResp);
+    filterChain.doFilter(request, response);
 
   }
 
