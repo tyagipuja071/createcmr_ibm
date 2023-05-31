@@ -298,6 +298,9 @@ public class ApprovalUtil {
     case "NCO":
       sql = sql.append("trim(upper(" + fieldName + ")) not like '%" + value.toUpperCase() + "%'");
       break;
+    case "STA":
+      sql = sql.append("trim(upper(" + fieldName + ")) like '" + value.toUpperCase() + "%'");
+      break;
     case "CHG":
       if (fieldName.equals("ADMIN.MAIN_CUST_NM1")) {
         sql = sql.append("nvl(" + fieldName + ",'') <> nvl(ADMIN.OLD_CUST_NM1,'')");
