@@ -236,6 +236,16 @@ boolean autoProcCapable = PageManager.autoProcEnabled(reqentry.getCmrIssuingCntr
               <cmr:date id="requestDueDateTemp" path="requestDueDateTemp" format="yyyy-MM-dd" />
             </p>
           </cmr:column>
+          <%if (reqentry.getReqType().equalsIgnoreCase("M")){ %>
+            <cmr:column span="2">
+              <p>
+              <cmr:label fieldId="taxCd3">
+                <cmr:fieldLabel fieldId="LocalTax3" />:<cmr:info text="${ui.info.taxCd3}" />
+              </cmr:label>
+              <cmr:field id="taxCd3" path="taxCd3" fieldId="LocalTax3" tabId="MAIN_GENERAL_TAB"/>
+              </p>
+            </cmr:column>
+          <%}%>
         </cmr:row>
       </cmr:view>
       <cmr:view forCountry='862'>
