@@ -131,7 +131,6 @@ public class UserInjectFilter implements Filter {
       }
     } catch (IllegalStateException e) {
       LOG.error("Error when attempting to redirect to W3 ID ", e);
-      return;
     } catch (Exception e) {
       LOG.error("Error processing UserInjectFilter", e);
     }
