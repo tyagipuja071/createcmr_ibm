@@ -66,7 +66,7 @@ function afterConfigForDE() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
-      setSearchTermDE();
+
       lockCtcFieldOnIsu();
     });
   }
