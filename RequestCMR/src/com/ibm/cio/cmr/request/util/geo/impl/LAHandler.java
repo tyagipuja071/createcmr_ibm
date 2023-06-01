@@ -128,6 +128,13 @@ public class LAHandler extends GEOHandler {
         }
       }
       source.setItems(converted);
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
+      for (FindCMRRecordModel record : records) {
+        if ("ZS01".equals(record.getCmrAddrTypeCode()) && !"90".equals(record.getCmrOrderBlock())) {
+          converted.add(record);
+        }
+      }
+      source.setItems(converted);
     }
   }
 
