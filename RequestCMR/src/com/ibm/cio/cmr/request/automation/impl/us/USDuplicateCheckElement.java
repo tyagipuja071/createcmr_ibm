@@ -164,12 +164,13 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           return result;
         } else {
           responseCMR = getCMRMatches(entityManager, requestData, engineData);
+          cmrCheckMatches = responseCMR.getMatches();
           if (responseCMR != null && responseCMR.getSuccess()) {
             result = DupCMRCheckElement.checkDupcProspectCmr(cmrCheckMatches, soldTo, isProspectCmr, engineData, result, issuingCntry);
             if (result.isOnError()) {
               return result;
             }
-            if (responseCMR.getMatched() && !responseCMR.getMatches().isEmpty() && cmrCheckMatches.size() != 0 && !"Y".equals(isProspectCmr)) {
+            if (responseCMR.getMatched() && !responseCMR.getMatches().isEmpty() && cmrCheckMatches.size() != 0) {
               details.append(cmrCheckMatches.size() + " record(s) found.");
               if (cmrCheckMatches.size() > 5) {
                 cmrCheckMatches = cmrCheckMatches.subList(0, 5);
