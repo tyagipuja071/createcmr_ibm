@@ -128,6 +128,13 @@ public class LAHandler extends GEOHandler {
         }
       }
       source.setItems(converted);
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
+      for (FindCMRRecordModel record : records) {
+        if ("ZS01".equals(record.getCmrAddrTypeCode()) && !"90".equals(record.getCmrOrderBlock())) {
+          converted.add(record);
+        }
+      }
+      source.setItems(converted);
     }
   }
 
@@ -983,12 +990,9 @@ public class LAHandler extends GEOHandler {
         loopCount++;
       }
     } else if (SystemLocation.PERU.equalsIgnoreCase(modToCopy.getCmrIssuingCntry())) {
-      while (loopCount < 2) {
-        tempMod = new GeoContactInfoModel();
-        copyContactModelProps(modToCopy, tempMod, loopCount);
-        tempList.add(tempMod);
-        loopCount++;
-      }
+      tempMod = new GeoContactInfoModel();
+      copyContactModelProps(modToCopy, tempMod, loopCount);
+      tempList.add(tempMod);
     } else if (isMXIssuingCountry(modToCopy.getCmrIssuingCntry())) {
       tempMod = new GeoContactInfoModel();
       copyContactModelProps(modToCopy, tempMod, loopCount);

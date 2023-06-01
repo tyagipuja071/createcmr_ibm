@@ -5,7 +5,6 @@ package com.ibm.cio.cmr.request.service.requestentry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -72,9 +71,6 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
 
   private static final Logger LOG = Logger.getLogger(ImportCMRService.class);
-
-  private static final List<String> LA_ISSUING_COUNTRY_VAL = Arrays.asList("613", "629", "631", "655", "661", "663", "681", "683", "829", "731",
-      "735", "781", "799", "811", "813", "815", "869", "871");
 
   @Autowired
   RequestEntryService reqEntryService;
@@ -670,159 +666,146 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         continue;
       }
 
-      String cmrAddrTypeCode = "";
-      String cmrOrderBlock = "";
-      boolean shouldPersist = true;
-      if (cmr != null) {
-        cmrAddrTypeCode = cmr != null && cmr.getCmrAddrTypeCode() != null ? cmr.getCmrAddrTypeCode() : "";
-        cmrOrderBlock = cmr != null && cmr.getCmrOrderBlock() != null ? cmr.getCmrOrderBlock() : "";
-      }
-      if (LA_ISSUING_COUNTRY_VAL.contains(cmr.getCmrIssuedBy()) && (cmrAddrTypeCode.equals("ZS01") && cmrOrderBlock.equals("90"))) {
-        shouldPersist = false;
-      }
-
       // CREATCMR-7152
       if ("897".equals(cmr.getCmrIssuedBy())) {
         if (!"ZS01".equals(cmr.getCmrAddrTypeCode()) && !"ZI01".equals(cmr.getCmrAddrTypeCode()) && !"PG01".equals(cmr.getCmrAddrTypeCode())) {
           continue;
         }
       }
-      if (shouldPersist) {
-        addr = new Addr();
-        addrPk = new AddrPK();
-        addrPk.setReqId(reqId);
-        type = cmr.getCmrAddrTypeCode();
-        addrPk.setAddrType(type);
-        if (("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) && converter != null && converter.useSeqNoFromImport()) {
-          addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      addr = new Addr();
+      addrPk = new AddrPK();
+      addrPk.setReqId(reqId);
+      type = cmr.getCmrAddrTypeCode();
+      addrPk.setAddrType(type);
+      if (("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) && converter != null && converter.useSeqNoFromImport()) {
+        addrPk.setAddrSeq(cmr.getCmrAddrSeq());
 
-        } else {
-          if (seqMap.get(type) == null) {
-            seqMap.put(type, new Integer(0));
-          }
-          seq = seqMap.get(type);
-          addrPk.setAddrSeq((seq + 1) + "");
-          seqMap.put(type, new Integer(seq + 1));
+      } else {
+        if (seqMap.get(type) == null) {
+          seqMap.put(type, new Integer(0));
         }
-        // if ("618".equals(reqModel.getCmrIssuingCntry()) &&
-        // "C".equals(reqModel.getReqType())) {
-        // addrPk.setAddrSeq(cmr.getCmrAddrSeq());
-        // }
-        // if
-        // (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry())
-        // && CmrConstants.RDC_BILL_TO.equals(type)) {
-        // addrPk.setAddrSeq(cmr.getCmrAddrSeq());
-        // }
-
-        // if (Arrays.asList("897", "866", "754", "618", "624", "788", "706",
-        // "848").contains(reqModel.getCmrIssuingCntry())
-        // && ("C".equals(reqModel.getReqType()) ||
-        // "U".equals(reqModel.getReqType()))) {
-        // addrPk.setAddrSeq(cmr.getCmrAddrSeq());
-        // }
-
-        /*
-         * GEOHandler geoHandler =
-         * RequestUtils.getGEOHandler(reqModel.getCmrIssuingCntry()); if
-         * (geoHandler.setAddrSeqByImport(addrPk, entityManager, result) &&
-         * ("C".equals(reqModel.getReqType()) ||
-         * "U".equals(reqModel.getReqType()))) {
-         * addrPk.setAddrSeq(cmr.getCmrAddrSeq()); }
-         */
-        // start- US ZI01 null sequence Import fix - 8 Apr 2022 - garima
-        if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && CmrConstants.RDC_BILL_TO.equals(type)) {
-          addrPk.setAddrSeq(cmr.getCmrAddrSeq());
-        }
-        if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && "C".equals(reqModel.getReqType())
-            && (CmrConstants.RDC_SOLD_TO.equals(type) || CmrConstants.RDC_INSTALL_AT.equals(type))) {
-          if (StringUtils.isBlank(cmr.getCmrAddrSeq())) {
-            String addrSeq = type.equalsIgnoreCase("ZS01") ? "001" : "002";
-            addrPk.setAddrSeq(addrSeq);
-          } else {
-            addrPk.setAddrSeq(cmr.getCmrAddrSeq());
-          }
-        }
-        if (!StringUtils.isBlank(cmr.getCmrAddrSeq())) {
-          addrPk.setAddrSeq(cmr.getCmrAddrSeq());
-        } else if (StringUtils.isBlank(cmr.getCmrAddrSeq()) && "897".equals(reqModel.getCmrIssuingCntry())) {
-          addrPk.setAddrSeq("ZI01".equals(type) ? "002" : ("ZP01".equals(type) ? "1" : "001"));
-        }
-
-        // end -US ZI01 null sequence Import fix - 8 Apr 2022 - garima
-        addr.setId(addrPk);
-
-        addr.setCity1(cmr.getCmrCity());
-        addr.setCity2(cmr.getCmrCity2());
-        addr.setStateProv(cmr.getCmrState());
-        addr.setPostCd(cmr.getCmrPostalCode());
-        addr.setLandCntry(cmr.getCmrCountryLanded());
-        if ("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) {
-          addr.setSapNo(cmr.getCmrSapNumber());
-          addr.setIerpSitePrtyId(cmr.getCmrSitePartyID()); // ierpSitePrtyId
-          addr.setExtWalletId(cmr.getExtWalletId());
-          addr.setAddrStdResult("X");
-          addr.setRdcCreateDt(cmr.getCmrRdcCreateDate());
-          addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp()); // placeholder
-                                                                   // for now
-        }
-
-        // CREATCMR-5741 - no addr std
-        addr.setAddrStdResult("X");
-        addr.setCounty(cmr.getCmrCountyCode());
-        addr.setCountyName(cmr.getCmrCounty());
-        // addr.setCustNm1(cmr.getCmrName1Plain());
-        // addr.setCustNm2(cmr.getCmrName2Plain());
-        // addr.setCustNm3(cmr.getCmrName3());
-        // addr.setCustNm4(cmr.getCmrName4());
-        addr.setAddrTxt(cmr.getCmrStreetAddress());
-        addr.setImportInd(CmrConstants.YES_NO.Y.toString());
-
-        if (!StringUtils.isBlank(cmr.getCmrCustPhone()) && cmr.getCmrCustPhone().length() > 16) {
-          addr.setCustPhone(cmr.getCmrCustPhone().substring(0, 16));
-        } else {
-          addr.setCustPhone(cmr.getCmrCustPhone());
-        }
-        if (!StringUtils.isBlank(cmr.getCmrCustFax()) && cmr.getCmrCustFax().length() > 16) {
-          addr.setCustFax(cmr.getCmrCustFax().substring(0, 16));
-        } else {
-          addr.setCustFax(cmr.getCmrCustFax());
-        }
-        addr.setTransportZone(cmr.getCmrTransportZone());
-        addr.setPoBox(cmr.getCmrPOBox());
-        addr.setPoBoxCity(cmr.getCmrPOBoxCity());
-        addr.setPoBoxPostCd(cmr.getCmrPOBoxPostCode());
-        addr.setBldg(cmr.getCmrBldg());
-        addr.setFloor(cmr.getCmrFloor());
-        addr.setOffice(cmr.getCmrOffice());
-        addr.setExtWalletId(cmr.getExtWalletId());
-        addr.setDept(cmr.getCmrDept());
-        if (converter != null) {
-          converter.setAddressValuesOnImport(addr, admin, cmr, cmrNo);
-        }
-
-        // Ed|1043386| Only require DPL check for Create requests
-        if (!CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(reqModel.getReqType()) && !PageManager.fromGeo("LA", reqModel.getCmrIssuingCntry())) {
-          addr.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
-          addr.setDplChkInfo(null);
-        }
-
-        AddrRdc rdc = new AddrRdc();
-        AddrPK rdcpk = new AddrPK();
-        PropertyUtils.copyProperties(rdc, addr);
-        PropertyUtils.copyProperties(rdcpk, addr.getId());
-        rdc.setId(rdcpk);
-        reqEntryService.updateEntity(rdc, entityManager);
-        // if (this.autoEngineProcess) {
-        // } else {
-        // reqEntryService.createEntity(rdc, entityManager);
-        // }
-
-        reqEntryService.updateEntity(addr, entityManager);
-        // if (this.autoEngineProcess) {
-        // } else {
-        // reqEntryService.createEntity(addr, entityManager);
-        // }
+        seq = seqMap.get(type);
+        addrPk.setAddrSeq((seq + 1) + "");
+        seqMap.put(type, new Integer(seq + 1));
       }
+      // if ("618".equals(reqModel.getCmrIssuingCntry()) &&
+      // "C".equals(reqModel.getReqType())) {
+      // addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      // }
+      // if
+      // (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry())
+      // && CmrConstants.RDC_BILL_TO.equals(type)) {
+      // addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      // }
+
+      // if (Arrays.asList("897", "866", "754", "618", "624", "788", "706",
+      // "848").contains(reqModel.getCmrIssuingCntry())
+      // && ("C".equals(reqModel.getReqType()) ||
+      // "U".equals(reqModel.getReqType()))) {
+      // addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      // }
+
+      /*
+       * GEOHandler geoHandler =
+       * RequestUtils.getGEOHandler(reqModel.getCmrIssuingCntry()); if
+       * (geoHandler.setAddrSeqByImport(addrPk, entityManager, result) &&
+       * ("C".equals(reqModel.getReqType()) ||
+       * "U".equals(reqModel.getReqType()))) {
+       * addrPk.setAddrSeq(cmr.getCmrAddrSeq()); }
+       */
+      // start- US ZI01 null sequence Import fix - 8 Apr 2022 - garima
+      if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && CmrConstants.RDC_BILL_TO.equals(type)) {
+        addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      }
+      if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && "C".equals(reqModel.getReqType())
+          && (CmrConstants.RDC_SOLD_TO.equals(type) || CmrConstants.RDC_INSTALL_AT.equals(type))) {
+        if (StringUtils.isBlank(cmr.getCmrAddrSeq())) {
+          String addrSeq = type.equalsIgnoreCase("ZS01") ? "001" : "002";
+          addrPk.setAddrSeq(addrSeq);
+        } else {
+          addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+        }
+      }
+      if (!StringUtils.isBlank(cmr.getCmrAddrSeq())) {
+        addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      } else if (StringUtils.isBlank(cmr.getCmrAddrSeq()) && "897".equals(reqModel.getCmrIssuingCntry())) {
+        addrPk.setAddrSeq("ZI01".equals(type) ? "002" : ("ZP01".equals(type) ? "1" : "001"));
+      }
+
+      // end -US ZI01 null sequence Import fix - 8 Apr 2022 - garima
+      addr.setId(addrPk);
+
+      addr.setCity1(cmr.getCmrCity());
+      addr.setCity2(cmr.getCmrCity2());
+      addr.setStateProv(cmr.getCmrState());
+      addr.setPostCd(cmr.getCmrPostalCode());
+      addr.setLandCntry(cmr.getCmrCountryLanded());
+      if ("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) {
+        addr.setSapNo(cmr.getCmrSapNumber());
+        addr.setIerpSitePrtyId(cmr.getCmrSitePartyID()); // ierpSitePrtyId
+        addr.setExtWalletId(cmr.getExtWalletId());
+        addr.setAddrStdResult("X");
+        addr.setRdcCreateDt(cmr.getCmrRdcCreateDate());
+        addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp()); // placeholder
+                                                                 // for now
+      }
+
+      // CREATCMR-5741 - no addr std
+      addr.setAddrStdResult("X");
+      addr.setCounty(cmr.getCmrCountyCode());
+      addr.setCountyName(cmr.getCmrCounty());
+      // addr.setCustNm1(cmr.getCmrName1Plain());
+      // addr.setCustNm2(cmr.getCmrName2Plain());
+      // addr.setCustNm3(cmr.getCmrName3());
+      // addr.setCustNm4(cmr.getCmrName4());
+      addr.setAddrTxt(cmr.getCmrStreetAddress());
+      addr.setImportInd(CmrConstants.YES_NO.Y.toString());
+
+      if (!StringUtils.isBlank(cmr.getCmrCustPhone()) && cmr.getCmrCustPhone().length() > 16) {
+        addr.setCustPhone(cmr.getCmrCustPhone().substring(0, 16));
+      } else {
+        addr.setCustPhone(cmr.getCmrCustPhone());
+      }
+      if (!StringUtils.isBlank(cmr.getCmrCustFax()) && cmr.getCmrCustFax().length() > 16) {
+        addr.setCustFax(cmr.getCmrCustFax().substring(0, 16));
+      } else {
+        addr.setCustFax(cmr.getCmrCustFax());
+      }
+      addr.setTransportZone(cmr.getCmrTransportZone());
+      addr.setPoBox(cmr.getCmrPOBox());
+      addr.setPoBoxCity(cmr.getCmrPOBoxCity());
+      addr.setPoBoxPostCd(cmr.getCmrPOBoxPostCode());
+      addr.setBldg(cmr.getCmrBldg());
+      addr.setFloor(cmr.getCmrFloor());
+      addr.setOffice(cmr.getCmrOffice());
+      addr.setExtWalletId(cmr.getExtWalletId());
+      addr.setDept(cmr.getCmrDept());
+      if (converter != null) {
+        converter.setAddressValuesOnImport(addr, admin, cmr, cmrNo);
+      }
+
+      // Ed|1043386| Only require DPL check for Create requests
+      if (!CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(reqModel.getReqType()) && !PageManager.fromGeo("LA", reqModel.getCmrIssuingCntry())) {
+        addr.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
+        addr.setDplChkInfo(null);
+      }
+
+      AddrRdc rdc = new AddrRdc();
+      AddrPK rdcpk = new AddrPK();
+      PropertyUtils.copyProperties(rdc, addr);
+      PropertyUtils.copyProperties(rdcpk, addr.getId());
+      rdc.setId(rdcpk);
+      reqEntryService.updateEntity(rdc, entityManager);
+      // if (this.autoEngineProcess) {
+      // } else {
+      // reqEntryService.createEntity(rdc, entityManager);
+      // }
+
+      reqEntryService.updateEntity(addr, entityManager);
+      // if (this.autoEngineProcess) {
+      // } else {
+      // reqEntryService.createEntity(addr, entityManager);
+      // }
     }
 
     // Ed|1043386| Only require DPL check for Create requests
