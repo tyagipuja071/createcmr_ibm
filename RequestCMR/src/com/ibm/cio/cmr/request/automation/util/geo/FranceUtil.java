@@ -104,6 +104,7 @@ public class FranceUtil extends AutomationUtil {
       digester.addBeanPropertySetter("mappings/mapping/isu", "isu");
       digester.addBeanPropertySetter("mappings/mapping/ctc", "ctc");
       digester.addBeanPropertySetter("mappings/mapping/sbo", "sbo");
+      digester.addBeanPropertySetter("mappings/mapping/isicCds", "isicCds");
       digester.addBeanPropertySetter("mappings/mapping/countryLanded", "countryLanded");
       digester.addSetNext("mappings/mapping", "add");
       try {
