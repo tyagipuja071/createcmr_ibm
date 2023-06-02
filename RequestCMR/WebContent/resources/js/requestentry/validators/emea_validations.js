@@ -442,6 +442,9 @@ function afterConfigForUKI() {
     reqType = FormManager.getActualValue('reqType');
     role = _pagemodel.userRole;
   }
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('inacCd');
+  } 
   cmr.hideNode('deptInfo');
   // autoSetAbbrevLocnHandler();
   if (reqType == 'U' || reqType == 'X') {
