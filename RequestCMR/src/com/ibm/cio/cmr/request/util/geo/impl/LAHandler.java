@@ -975,22 +975,10 @@ public class LAHandler extends GEOHandler {
     List<GeoContactInfoModel> tempList = new ArrayList<GeoContactInfoModel>();
     GeoContactInfoModel tempMod = null;
     int loopCount = 0;
-    if (isBRIssuingCountry(modToCopy.getCmrIssuingCntry())) {
-      while (loopCount < 3) {
-        tempMod = new GeoContactInfoModel();
-        copyContactModelProps(modToCopy, tempMod, loopCount);
-        tempList.add(tempMod);
-        loopCount++;
-      }
-    } else if (SystemLocation.PERU.equalsIgnoreCase(modToCopy.getCmrIssuingCntry())) {
-      tempMod = new GeoContactInfoModel();
-      copyContactModelProps(modToCopy, tempMod, loopCount);
-      tempList.add(tempMod);
-    } else if (isMXIssuingCountry(modToCopy.getCmrIssuingCntry())) {
-      tempMod = new GeoContactInfoModel();
-      copyContactModelProps(modToCopy, tempMod, loopCount);
-      tempList.add(tempMod);
-    }
+    tempMod = new GeoContactInfoModel();
+    copyContactModelProps(modToCopy, tempMod, loopCount);
+    tempList.add(tempMod);
+
     return tempList;
   }
 
