@@ -1385,6 +1385,35 @@ function similarAddrCheckValidator() {
       })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function setCoverageValuesForAPI() {
+	var ssid = FormManager.getActualValue('sourceSystId');
+	if(ssid != '' && (ssid == 'Saas-Test' || ssid == 'PayGo-Test')) {
+	      setISUValues();
+	      setAbbreviatedNameBasedOnAddressType();
+	      setSboOnIMS();
+	      lockCtcFieldOnIsu();
+	      setSboOnIMS(FormManager.getField('clientTier'));
+	      var value = FormManager.getField('isuCd');
+	      setSboOnIMS(value);
+	      setSboOnIMS(FormManager.getField('isicCd'));
+	      if (!value) {
+	        value = FormManager.getActualValue('isuCd');
+	      }
+	      if (value == '32') {
+	        FormManager.setValue('clientTier', 'T');
+	      } else if (value == '34') {
+	        FormManager.setValue('clientTier', 'Q');
+	      } else if (value == '36') {
+	        FormManager.setValue('clientTier', 'Y');
+	      } else {
+	        FormManager.setValue('clientTier', '');
+	      }
+	      limitClientTierValuesOnUpdate();
+	      lockCtcFieldOnIsu();
+	      limitClientTierValuesOnCreate();
+	}
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -1450,6 +1479,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
-
+  GEOHandler.addAfterConfig(setCoverageValuesForAPI, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(setCoverageValuesForAPI, GEOHandler.DE);
+  
 
 });
