@@ -9,7 +9,7 @@
  */
 var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
 var NORDX = [ '846', '806', '702', '678' ];
-var ROW = [ '706' ];
+var ROW = [ '706', '838' ];
 var comp_proof_INAUSG = false;
 var flag = false;
 var addrMatchResultForNZCreate;
@@ -75,8 +75,7 @@ function processRequestAction() {
   // prevent from overwriting the DB REQ_STATUS
   // if another tab is open with different UI REQ_STATUS
   if (!isReqStatusEqualBetweenUIandDB()) {
-    cmr.showAlert("Unable to execute the action. Request Status mismatch from database." +
-      "<br><br>Please reload the page.");
+    cmr.showAlert("Unable to execute the action. Request Status mismatch from database." + "<br><br>Please reload the page.");
 
     return;
   }
@@ -97,8 +96,8 @@ function processRequestAction() {
   } else if (action == YourActions.Claim) {
     if (approvalResult == 'Cond. Approved') {
       cmr.showConfirm('doYourAction()', 'The request was conditionally approved by ERO.', 'Warning', null, {
-        OK: 'Ok',
-        CANCEL: 'Cancel'
+        OK : 'Ok',
+        CANCEL : 'Cancel'
       });
     } else {
       doYourAction();
@@ -146,6 +145,7 @@ function processRequestAction() {
     var findDnbResult = FormManager.getActualValue('findDnbResult');
     var reqType = FormManager.getActualValue('reqType');
     var vatInd = FormManager.getActualValue('vatInd');
+    var vat = FormManager.getActualValue('vat');
     var custGrp = FormManager.getActualValue('custGrp');
     var reqId = FormManager.getActualValue('reqId');
     var crossScenTyp = [ 'CROSS', 'LUCRO', 'EECRO', 'LTCRO', 'LVCRO', 'FOCRO', 'GLCRO', 'ISCRO' ];
@@ -153,7 +153,7 @@ function processRequestAction() {
       custGrp = getCustGrp();
     }
     var oldVat = cmr.query('GET.OLD.VAT.VALUE', {
-      REQ_ID: reqId
+      REQ_ID : reqId
     });
     var oldVatValue = oldVat.ret1 != undefined ? oldVat.ret1 : '';
     var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
@@ -162,9 +162,9 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
       cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
-      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || cmrCntry == SysLoc.SPAIN || ROW.includes(FormManager
+      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
           .getActualValue('cmrIssuingCntry')))
-          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && ((oldVatValue == '' && reqType == 'U') || (reqType == 'C'))) {
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && ((oldVatValue != vat && reqType == 'U') || (reqType == 'C'))) {
         findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
@@ -326,8 +326,8 @@ function processRequestAction() {
       // proceed
       if (result == '' || (result.toUpperCase() != 'AP' && result.toUpperCase() != 'NR')) {
         cmr.showConfirm('doYourAction()', 'This request has not passed all DPL checks. Are you sure you want to process this request?', 'Warning', null, {
-          OK: 'Yes',
-          CANCEL: 'No'
+          OK : 'Yes',
+          CANCEL : 'No'
         });
       } else {
         // if the customer names have changed since last save and it is being
@@ -515,11 +515,12 @@ function doAcceptAddressVerification() {
  */
 function doCancelAddressVerification() {
   cmr.hideModal('addressVerificationModal');
-  // CREATCMR-8430: for NZ DNB overriding, refresh the page if use cancel the address confirm
+  // CREATCMR-8430: for NZ DNB overriding, refresh the page if use cancel the
+  // address confirm
   var loc = FormManager.getActualValue('cmrIssuingCntry');
   var usSicmen = FormManager.getActualValue('usSicmen');
-  if (loc == SysLoc.NEW_ZEALAND && usSicmen && usSicmen=='DNBO') {
-	  console.log("refresh this page...")
+  if (loc == SysLoc.NEW_ZEALAND && usSicmen && usSicmen == 'DNBO') {
+    console.log("refresh this page...")
     window.location.reload();
   }
 }
@@ -1656,14 +1657,10 @@ function overrideDnBMatch() {
               'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
               'Warning', null, null);
     }
-  // CREATCMR-8430: do NZBN API check after override dnb
+    // CREATCMR-8430: do NZBN API check after override dnb
   } else if (loc == SysLoc.NEW_ZEALAND && reqType == 'C') {
     console.log(">>> for NZ, do NZBN API check after doOverrideDnBMatch >>>")
-    cmr
-        .showConfirm(
-            'doNZBNAPIMatch()',
-            'This action will override the D&B Matching Process.<br>Proceed?',
-            'Warning', null, null);
+    cmr.showConfirm('doNZBNAPIMatch()', 'This action will override the D&B Matching Process.<br>Proceed?', 'Warning', null, null);
   } else {
     cmr
         .showConfirm(
@@ -2672,7 +2669,7 @@ function matchDnBForNZ() {
   }
   cmr.showProgress('Checking request data with D&B...');
   // CREATCMR-8430: reset usSicmen when start DNB matching
-  FormManager.setValue('usSicmen', '');  
+  FormManager.setValue('usSicmen', '');
 
   dojo
       .xhrGet({
@@ -2753,17 +2750,17 @@ function matchDnBForNZ() {
 }
 
 // check all address types for create request for Newzealand
-function matchOtherAddressesforNZCreate (data) {
+function matchOtherAddressesforNZCreate(data) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var usSicmen = FormManager.getActualValue('usSicmen');
   if (!data.otherAddrDNBMatch) {
     if (!data.otherAddrAPIMatch) {
-	  FormManager.setValue('matchOverrideIndc', 'Y');
-	  if(usSicmen && usSicmen=='DNBO') {
-		cmr.showAlert(data.message + '\nPlease attach company proof', 'Warning', 'doOverrideDnBMatch()');
-	  } else {
-		cmr.showAlert(data.message + '\nPlease attach company proof');
-	  }
+      FormManager.setValue('matchOverrideIndc', 'Y');
+      if (usSicmen && usSicmen == 'DNBO') {
+        cmr.showAlert(data.message + '\nPlease attach company proof', 'Warning', 'doOverrideDnBMatch()');
+      } else {
+        cmr.showAlert(data.message + '\nPlease attach company proof');
+      }
     } else {
       console.log("DNB address match fail. NZAPI address match success.")
       if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
@@ -2897,7 +2894,7 @@ function checkRetrievedForNZ() {
 function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
   console.log('>>> setClusterIDAfterRetrieveAction4CN >>>');
   var indc = 'C';
-  if(custSubGrp == 'EMBSA'){
+  if (custSubGrp == 'EMBSA') {
     var _GBGId = FormManager.getActualValue('gbgId');
     if (FormManager.getActualValue('gbgId') != undefined && FormManager.getActualValue('gbgId') != '') {
       var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
@@ -3040,11 +3037,12 @@ function matchDnBForNZUpdate() {
 function doNZBNAPIMatch() {
   console.log('>>> doNZBNAPIMacht >>>');
   FormManager.setValue('findDnbResult', 'Rejected');
-  // CREATCMR-8430: use usSicmen to save the dnboverride flag for NZ, automation will use this flag to skip DNB matching
+  // CREATCMR-8430: use usSicmen to save the dnboverride flag for NZ, automation
+  // will use this flag to skip DNB matching
   FormManager.setValue('usSicmen', 'DNBO');
-  
+
   hideModaldnb_Window();
-  
+
   console.log("Checking if the request matches NZBN API...");
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
@@ -3079,7 +3077,7 @@ function isReqStatusEqualBetweenUIandDB() {
   var dbReqStatus = "";
 
   var result = cmr.query("WW.GET_REQ_STATUS", {
-    REQ_ID: reqId
+    REQ_ID : reqId
   });
   if (result != null && result.ret1 != '' && result.ret1 != null) {
     dbReqStatus = result.ret1;
