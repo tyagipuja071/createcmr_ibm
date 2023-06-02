@@ -168,15 +168,8 @@ function saveOldIsic() {
 }
 
 function setSboOnIMS(value) {
-
-  if (FormManager.getActualValue('reqType') != 'C' || (cmr.currentRequestType != undefined && cmr.currentRequestType != 'C')) {
+  if (FormManager.getActualValue('reqType') != 'C' || (cmr.currentRequestType != undefined && cmr.currentRequestType != 'C') || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
-  }
-  var ssid = FormManager.getActualValue('sourceSystId');
-  if (!(ssid != '' && (ssid == 'Saas-Test' || ssid == 'PayGo-Test'))) {
-    if (FormManager.getActualValue('viewOnlyPage') == 'true'){
-      return;
-    }
   }
   if (value == undefined) {
     return;
