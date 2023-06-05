@@ -2942,11 +2942,14 @@ function lockUnlockFieldForISrael() {
     FormManager.clearValue('ppsceid');
     FormManager.readOnly('ppsceid');
   }
-  if((_custGrpSet2.has(custSubGrp)) && (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' || 'PROCESSOR')){
+  if (custSubGrp != 'BUSPR'){
+    FormManager.clearValue('ppsceid');
+  }
+  if ((_custGrpSet2.has(custSubGrp)) && (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' || 'PROCESSOR')){
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'ppsceid' ], 'MAIN_IBM_TAB');
     FormManager.enable('ppsceid');
   }
-  if(FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER'){
+  if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER'){
     FormManager.readOnly('ppsceid');
   }
 }
