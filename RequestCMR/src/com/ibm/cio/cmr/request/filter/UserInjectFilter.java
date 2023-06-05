@@ -125,18 +125,17 @@ public class UserInjectFilter implements Filter {
 
           session.setAttribute("userHelper", userHelper);
           setSessionAttributes(httpReq, httpResp);
-          filterChain.doFilter(httpReq, httpResp);
+          filterChain.doFilter(request, response);
           return;
         }
       }
     } catch (IllegalStateException e) {
       LOG.error("Error when attempting to redirect to W3 ID ", e);
-      return;
     } catch (Exception e) {
       LOG.error("Error processing UserInjectFilter", e);
     }
 
-    filterChain.doFilter(httpReq, httpResp);
+    filterChain.doFilter(request, response);
 
   }
 
