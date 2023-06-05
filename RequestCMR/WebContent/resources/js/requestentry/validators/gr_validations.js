@@ -509,7 +509,7 @@ function addGRAddressTypeValidator() {
           return new ValidationResult(null, true);
         }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-          return new ValidationResult(null, false, 'Local Language translation of Sold-to is required');
+          return new ValidationResult(null, false, 'All addresses are mandatory');
         }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           var record = null;
