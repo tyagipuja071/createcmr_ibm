@@ -2952,7 +2952,7 @@ function lockUnlockFieldForISrael() {
   if(FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER'){
     FormManager.readOnly('ppsceid');
   }
- }
+}
 
 function addRemoveClientTierValidator() {
   console.log(">>>> addRemoveClientTierValidator");
