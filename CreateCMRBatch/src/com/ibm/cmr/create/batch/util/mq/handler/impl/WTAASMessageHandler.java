@@ -181,13 +181,10 @@ public class WTAASMessageHandler extends MQMessageHandler {
     // handling for CustNo (CMR No)
     // commented coz of Defect 1829425: Vietnam: Create requests (Prospect CMR
     // conversion) failed be to auto-processed.
-    /*
-     * if
-     * (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType())
-     * && "Y".equals(this.adminData.getProspLegalInd())) {
-     * this.messageHash.put("CustNo", ""); } else
-     */
-    if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
+
+    if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && "Y".equals(this.adminData.getProspLegalInd())) {
+      this.messageHash.put("CustNo", "");
+    } else if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
         && !StringUtils.isEmpty(this.cmrData.getCmrNo())) {
       LOG.debug("Setting CMR No to user supplied value: " + this.cmrData.getCmrNo());
       this.messageHash.put("CustNo", this.cmrData.getCmrNo());
