@@ -253,8 +253,14 @@ public class ApprovalUtil {
     } else if (!fieldName.contains("ADMIN.") && !"CHG".equalsIgnoreCase(operator)) {
       if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(requestTyp.trim()) && checkPrev)
         fieldName = "old." + fieldName;
-      else
-        fieldName = "curr." + fieldName;
+      else {
+        // speical rquirement:JP MassUpdate CREATCMR-9438
+        if (CmrConstants.REQ_TYPE_MASS_UPDATE.equalsIgnoreCase(requestTyp.trim()) && "Y".equals(value) && "TAX_CD3".equals(fieldName))
+          fieldName = "data." + fieldName;
+        else {
+          fieldName = "curr." + fieldName;
+        }
+      }
     }
 
     switch (operator) {
