@@ -64,11 +64,16 @@ public class IndiaTransformer extends ISATransformer {
           "Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. " + handler.mqIntfReqQueue.getCmrNo());
       // CREATCMR - 8980
       String cmrNo = handler.mqIntfReqQueue.getCmrNo();
-      if (StringUtils.isNotEmpty(cmrNo) && cmrNo.startsWith("P")) {
-        cmrNo = "";
-      }
       handler.messageHash.put("CustNo", cmrNo);
       handler.messageHash.put("TransCode", "N");
+    }
+
+    // CREATCMR - 9495
+    if (StringUtils.isNotEmpty(handler.cmrData.getCmrNo()) && handler.cmrData.getCmrNo().startsWith("P")
+        && "C".equals(handler.mqIntfReqQueue.getReqType())) {
+      String cmrNo = "";
+      handler.messageHash.put("CustNo", cmrNo);
+
     }
   }
 
@@ -123,10 +128,9 @@ public class IndiaTransformer extends ISATransformer {
     // should be
     // a. not a correlated request
     // b. create and scenario is ASL/OEM
-    return StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId())
-        && !SystemLocation.SINGAPORE.equals(cmrData.getCmrIssuingCntry())
-        && (create && !StringUtils.isEmpty(cmrData.getCustSubGrp()) && ("ESOSW".equalsIgnoreCase(cmrData.getCustSubGrp()) || "XESO"
-            .equalsIgnoreCase(cmrData.getCustSubGrp())));
+    return StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId()) && !SystemLocation.SINGAPORE.equals(cmrData.getCmrIssuingCntry())
+        && (create && !StringUtils.isEmpty(cmrData.getCustSubGrp())
+            && ("ESOSW".equalsIgnoreCase(cmrData.getCustSubGrp()) || "XESO".equalsIgnoreCase(cmrData.getCustSubGrp())));
   }
 
   @Override
