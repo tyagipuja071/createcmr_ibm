@@ -69,11 +69,10 @@ public class IndiaTransformer extends ISATransformer {
     }
 
     // CREATCMR - 9495
-    if (StringUtils.isNotEmpty(handler.cmrData.getCmrNo()) && handler.cmrData.getCmrNo().startsWith("P")
-        && "C".equals(handler.mqIntfReqQueue.getReqType())) {
-      LOG.debug("setting Cust No. as blank for prospect cmr.");
-      handler.messageHash.put("CustNo", "");
-
+    if (StringUtils.isNotEmpty(handler.cmrData.getCmrNo()) && "C".equals(handler.mqIntfReqQueue.getReqType())
+        && "Y".equalsIgnoreCase(handler.adminData.getProspLegalInd()) && handler.messageHash.containsKey("CustNo")) {
+      LOG.debug("removing Cust No. from message hashmap for Prospect CMR conversion create requests...");
+      handler.messageHash.remove("CustNo");
     }
   }
 
