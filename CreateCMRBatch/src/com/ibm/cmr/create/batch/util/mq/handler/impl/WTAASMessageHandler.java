@@ -178,19 +178,21 @@ public class WTAASMessageHandler extends MQMessageHandler {
       }
     }
 
-    if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
-        && !StringUtils.isEmpty(this.cmrData.getCmrNo())) {
-      LOG.debug("Setting CMR No to user supplied value: " + this.cmrData.getCmrNo());
-      this.messageHash.put("CustNo", this.cmrData.getCmrNo());
-    } else if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
-        && !StringUtils.isEmpty(this.cmrData.getCmrNoPrefix())) {
-      LOG.debug("Setting CMR No Prefix to user supplied value: " + this.cmrData.getCmrNoPrefix());
-      this.messageHash.put("CustNo", this.cmrData.getCmrNoPrefix());
-    } else if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence > 0) {
-      LOG.debug("Setting CMR No to generated value: " + this.mqIntfReqQueue.getCmrNo());
-      this.messageHash.put("CustNo", this.mqIntfReqQueue.getCmrNo());
-    } else if ("U".equals(this.mqIntfReqQueue.getReqType())) {
-      this.messageHash.put("CustNo", this.mqIntfReqQueue.getCmrNo());
+    if (!"Y".equalsIgnoreCase(this.adminData.getProspLegalInd())) {
+      if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
+          && !StringUtils.isEmpty(this.cmrData.getCmrNo())) {
+        LOG.debug("Setting CMR No to user supplied value: " + this.cmrData.getCmrNo());
+        this.messageHash.put("CustNo", this.cmrData.getCmrNo());
+      } else if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
+          && !StringUtils.isEmpty(this.cmrData.getCmrNoPrefix())) {
+        LOG.debug("Setting CMR No Prefix to user supplied value: " + this.cmrData.getCmrNoPrefix());
+        this.messageHash.put("CustNo", this.cmrData.getCmrNoPrefix());
+      } else if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence > 0) {
+        LOG.debug("Setting CMR No to generated value: " + this.mqIntfReqQueue.getCmrNo());
+        this.messageHash.put("CustNo", this.mqIntfReqQueue.getCmrNo());
+      } else if ("U".equals(this.mqIntfReqQueue.getReqType())) {
+        this.messageHash.put("CustNo", this.mqIntfReqQueue.getCmrNo());
+      }
     }
 
     MessageTransformer transformer = TransformerManager.getTransformer(this.mqIntfReqQueue.getCmrIssuingCntry());
