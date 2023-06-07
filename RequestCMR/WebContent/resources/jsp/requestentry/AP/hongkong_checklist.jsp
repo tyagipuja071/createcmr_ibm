@@ -251,7 +251,7 @@
 			</em>
 		</cmr:chk-entry>
 		<cmr:chk-entry number="3" section="B">
-			<span style="font-weight: bold; text-decoration: underline">核</span>
+			<span style="font-weight: bold; text-decoration: underline">核能</span>
          --- 据您所知或所信，该客户是否参与了以下国家的核武器或核爆炸装置的任何活动（设计、开发、制造等）？
          <br>
 			<span style="font-weight: bold; text-decoration: underline">Nuclear</span>
@@ -416,7 +416,7 @@ To the best of your knowledge or belief is your customer involved with the desig
 				</li>
 				<li>e) 所提供的IBM设备配置是否来源于任何俄罗斯企业或国籍之前购买的清单？<br> If the
 					provided IBM equipment configuration originated from the list
-					previously purchased by any Russia-owned enterprises or
+					previously purchased by any Russia owned enterprises or
 					nationalities?
 				</li>
 			</ul>
