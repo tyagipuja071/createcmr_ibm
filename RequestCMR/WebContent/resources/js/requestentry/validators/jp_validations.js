@@ -80,8 +80,8 @@ function afterConfigForJP() {
     setCustNmDetailOnScenario();
     setFieldsRequired();
     setCmrNoCmrNo2Required();
-    setAccntAbbNmOnScrnarioChange();
-    setAccountAbbNmRequired();
+    // setAccntAbbNmOnScrnarioChange();
+    // setAccountAbbNmRequired();
     performDPLCheck4JP();
     setDefaultValueForChargeCode();
     setTier2Required();
@@ -732,7 +732,7 @@ function setAccntAbbNmOnScrnarioChange() {
     // FormManager.setValue('abbrevNm', _pagemodel.abbrevNm);
     return;
   } else {
-    setAccountAbbNm();
+    // setAccountAbbNm();
   }
 }
 
@@ -878,18 +878,18 @@ function getZS01CustNm3() {
 function resetAccountAbbNmOnFieldChange() {
   dojo.connect(FormManager.getField('salesTeamCd'), 'onChange', function(value) {
     if (value != _pagemodel.salesTeamCd) {
-      setAccountAbbNm();
+      // setAccountAbbNm();
     }
     setTier2Required();
   });
   dojo.connect(FormManager.getField('tier2'), 'onChange', function(value) {
     if (value != _pagemodel.tier2) {
-      setAccountAbbNm();
+      // setAccountAbbNm();
     }
   });
   dojo.connect(FormManager.getField('chargeCd'), 'onChange', function(value) {
     if (value != _pagemodel.chargeCd) {
-      setAccountAbbNm();
+      // setAccountAbbNm();
       setCustNmDetailOnScenario();
     }
   });
@@ -3001,7 +3001,7 @@ function setFieldValueOnAddrSave(cntry, addressMode, saving, finalSave, force) {
       setCSBOOnAddrSave();
       if (role != 'Processor') {
         setCustNmDetailOnAddrSave();
-        setAccountAbbNmOnAddrSave();
+        // setAccountAbbNmOnAddrSave();
       }
     }
   }
@@ -5888,7 +5888,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(showHideSubindustry, GEOHandler.JP);
   // CREATCMR-6854
   // GEOHandler.addAfterConfig(updateBillToCustomerNo, GEOHandler.JP);
-  GEOHandler.addAfterConfig(accountAbbNmUpperCase, GEOHandler.JP);
+  // GEOHandler.addAfterConfig(accountAbbNmUpperCase, GEOHandler.JP);
   GEOHandler.addAfterConfig(disableFieldsForUpdate, GEOHandler.JP);
   GEOHandler.addAfterConfig(setEnterCMRNoForupdate, GEOHandler.JP);
   GEOHandler.addAfterConfig(setTier2Required, GEOHandler.JP);
