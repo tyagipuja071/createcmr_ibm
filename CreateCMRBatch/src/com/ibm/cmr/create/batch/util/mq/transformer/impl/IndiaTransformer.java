@@ -67,13 +67,6 @@ public class IndiaTransformer extends ISATransformer {
       handler.messageHash.put("CustNo", cmrNo);
       handler.messageHash.put("TransCode", "N");
     }
-
-    // CREATCMR - 9495
-    if (StringUtils.isNotEmpty(handler.cmrData.getCmrNo()) && "C".equals(handler.mqIntfReqQueue.getReqType())
-        && "Y".equalsIgnoreCase(handler.adminData.getProspLegalInd()) && handler.messageHash.containsKey("CustNo")) {
-      LOG.debug("removing Cust No. from message hashmap for Prospect CMR conversion create requests...");
-      handler.messageHash.remove("CustNo");
-    }
   }
 
   /**
