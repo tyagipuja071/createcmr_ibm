@@ -18,7 +18,9 @@ public class HongKongTransformer extends GCGTransformer {
   public void formatDataLines(MQMessageHandler handler) {
     handleDataDefaults(handler);
     String isu = handler.cmrData.getIsuCd();
-    if ("5B".equalsIgnoreCase(isu)) {
+    if ("32".equalsIgnoreCase(isu)) {
+      handler.messageHash.put("ISUChar", "#");
+    } else if ("5B".equalsIgnoreCase(isu)) {
       handler.messageHash.put("ISUChar", "%");
       handler.messageHash.put("MrktRespCode", "2");
     } else
