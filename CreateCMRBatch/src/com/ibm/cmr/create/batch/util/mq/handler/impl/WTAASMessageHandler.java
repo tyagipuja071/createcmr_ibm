@@ -193,6 +193,17 @@ public class WTAASMessageHandler extends MQMessageHandler {
       } else if ("U".equals(this.mqIntfReqQueue.getReqType())) {
         this.messageHash.put("CustNo", this.mqIntfReqQueue.getCmrNo());
       }
+    } else if ("Y".equalsIgnoreCase(this.adminData.getProspLegalInd()) && MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType())) {
+      // CREATCMR - 9495
+      // setting cmr no null in request xml for prospect conversion create
+      // requests
+      LOG.debug("setting cmr no null in request xml for prospect conversion create requests.");
+      LOG.debug("Original value CMR DATA: " + this.cmrData.getCmrNo());
+      LOG.debug("Original value mqIntfReqQueue: " + this.mqIntfReqQueue.getCmrNo());
+
+      this.cmrData.setCmrNo(null);
+      this.mqIntfReqQueue.setCmrNo(null);
+      this.messageHash.put("CustNo", this.mqIntfReqQueue.getCmrNo());
     }
 
     MessageTransformer transformer = TransformerManager.getTransformer(this.mqIntfReqQueue.getCmrIssuingCntry());
