@@ -25,6 +25,7 @@ import org.xml.sax.SAXException;
 
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
+import com.ibm.cio.cmr.request.util.EnvUtil;
 
 /**
  * Class for handling system configuration
@@ -45,11 +46,15 @@ public class SystemConfiguration {
 
   /**
    * Loads the config from the configuration file
-   *
-   * @throws IOException
+   * 
    * @throws SAXException
+   * @throws IOException
+   * @throws IllegalAccessException
+   * @throws IllegalArgumentException
+   * 
+   * @throws Exception
    */
-  private static void load() throws IOException, SAXException {
+  private static void load() throws IOException, SAXException, IllegalArgumentException, IllegalAccessException {
     configurations.clear();
     ConfigItemDigester digester = new ConfigItemDigester();
 
@@ -59,6 +64,7 @@ public class SystemConfiguration {
       @SuppressWarnings("unchecked")
       List<ConfigItem> items = (List<ConfigItem>) digester.parse(is);
       for (ConfigItem item : items) {
+        EnvUtil.injectEnvVariables(item);
         configurations.put(item.getId(), item);
       }
 
