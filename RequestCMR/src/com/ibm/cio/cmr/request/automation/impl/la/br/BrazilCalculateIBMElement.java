@@ -756,6 +756,13 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
     // scenario fields start
     if ("C".equals(admin.getReqType()) || ("U".equals(admin.getReqType()) && "REAC".equalsIgnoreCase(admin.getReqReason()))) {
+      if (!sboToBeUnchanged) {
+        if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && "ES".equals(soldTo.getStateProv())) {
+          LOG.debug("Setting DATA.SALES_BO_CD for StateProv 'ES' to '761'");
+          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "761");
+        }
+      }
+
       if ("COMME".equalsIgnoreCase(scenarioSubType)) {
         // SET IBM Bank Number
         details.append("IBM BANK NO = " + "34A" + "\n");
