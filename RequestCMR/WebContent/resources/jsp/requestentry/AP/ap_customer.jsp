@@ -26,5 +26,13 @@
         <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+        <cmr:column span="2" containerForField="CustClass" forCountry="616,796">
+        <p>
+          <cmr:label fieldId="custClass">
+            <cmr:fieldLabel fieldId="CustClass" />:
+          </cmr:label>
+          <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_CUST_TAB" />
+        </p>
+    </cmr:column>
   </cmr:row>
 </cmr:view>

@@ -358,7 +358,7 @@ function addAfterConfigAP() {
     onInacTypeChange();
     // CREATCMR-7883-7884
     _inacHandlerANZSG = 0;
-//    setInacByCluster();
+// setInacByCluster();
     setInacNacValuesIN();
     filterInacCd('744','10215','N','I529');
     applyClusterFilters();
@@ -6089,7 +6089,27 @@ function addressQuotationValidatorAP() {
     FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Address Con\'t' ]);
     FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'Suburb' ]);
     FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+    
+    // CREATCMR-9637，CREATCMR-9638
+    FormManager.show('CustClass', 'custClass');
+    FormManager.readOnly('custClass');
+    if(FormManager.getActualValue('reqType') == 'U'){
+      FormManager.setValue('custClass',_pagemodel.custClass );
+    }else{
+      FormManager.setValue('custClass','' );
+    }
+    FormManager.setValue('cmrOwner', 'IBM');
+    FormManager.readOnly('cmrOwner');
+    FormManager.setValue('miscBillCd', '');
+    FormManager.readOnly('miscBillCd');
+    if(cntry == SysLoc.AUSTRALIA){
+      var industryClass = FormManager.getActualValue('IndustryClass');
+      if( industryClass == 'G' || industryClass == 'Y'){
+        FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'Government Customer Type' ], 'MAIN_IBM_TAB');
+      }
+    }
   }
+  
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
 }
