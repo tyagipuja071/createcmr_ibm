@@ -557,6 +557,7 @@ public class ANZHandler extends APHandler {
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##RegionCode", "miscBillCd");
+    map.put("##CustClass", "custClass");
     return map;
   }
 
