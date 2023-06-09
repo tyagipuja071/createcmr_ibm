@@ -3153,6 +3153,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSortlValuesForUser, GEOHandler.LA);
   GEOHandler.addAfterConfig(setSortlValuesForUser, GEOHandler.LA);
   GEOHandler.addAddrFunction(setSortlForStateProvince, SysLoc.BRAZIL);
+  GEOHandler.addAfterConfig(setSortlForStateProvince, SysLoc.BRAZIL);
   GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setIsuMrcFor161A, SysLoc.BRAZIL);
   
