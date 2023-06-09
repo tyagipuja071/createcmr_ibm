@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -49,6 +50,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
@@ -1611,5 +1613,52 @@ public abstract class AutomationUtil {
     }
     return calculatedFields;
   }
+
+  /**
+   * Validates PPS CEID on Update request.
+   * @param engineData
+   * @param data
+   * @param details
+   * @param resultCodes
+   * @param change
+   * @param reject
+   * @return cmdeReview = true, for Update / Delete.
+   */
+  protected boolean validatePpsCeidForUpdateRequest(AutomationEngineData engineData, Data data, StringBuilder details, 
+		  Set<String> resultCodes, UpdatedDataModel change, String reject) {
+	  String newppsceid = change.getNewData();
+	  String oldppsceid = change.getOldData();
+	  String kukla = data.getCustClass();
+	  List<String> kuklaValuesStartingWith4 = Arrays.asList("41", "42", "43", "44", "45", "46", "47", "48", "49");
+	  boolean cmdeReview = false;
+
+	  // ADD
+	  if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
+		  if (kuklaValuesStartingWith4.contains(kukla)) {
+			  if (checkPPSCEID(data.getPpsceid())) {
+				  details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
+			  } else {
+				  resultCodes.add(reject);
+				  details.append("PPS ceid on the request is invalid").append("\n");
+			  }
+		  } else {
+			  resultCodes.add(reject);
+			  details.append("PPS CE ID added for CMR with Kukla other than 41, 42, 43, 44, 45, 46, 47, 48, 49.").append("\n");
+		  }
+	  } else if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
+		  // DELETE
+		  cmdeReview = true;
+		  engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
+		  details.append("Deletion of ppsceid needs cmde review.\n");
+	  } else if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)) {
+		  // UPDATE
+		  cmdeReview = true;
+		  engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
+		  details.append("Update of ppsceid needs cmde review.\n");
+	  }
+
+	  return cmdeReview;
+  }
+  
 
 }
