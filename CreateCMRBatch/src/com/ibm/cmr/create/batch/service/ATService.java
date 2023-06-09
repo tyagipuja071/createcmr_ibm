@@ -1004,9 +1004,9 @@ public class ATService extends TransConnService {
         if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
           noOFWorkingHours = checked2WorkingDays(admin.getRdcProcessingTs(), SystemUtil.getCurrentTimestamp());
         }
-        if (noOFWorkingHours >= 24) {
+        if (noOFWorkingHours >= 72) {
           lockRecordUpdt(entityManager, admin);
-          LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
+          LOG.info("RDc: Temporary Reactivate Embargo process: run after 3 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
 

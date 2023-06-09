@@ -553,7 +553,7 @@ public class LegacyDirectService extends TransConnService {
             noOFWorkingDays = checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
           }
 
-          if (noOFWorkingDays >= 3) {
+          if (noOFWorkingDays >= 4) {
             // lock
             lockRecord(entityManager, admin);
             // admin.setProcessedTs(SystemUtil.getCurrentTimestamp());
@@ -3008,8 +3008,8 @@ public class LegacyDirectService extends TransConnService {
         if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
           noOFWorkingDays = checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
         }
-        if (noOFWorkingDays >= 3) {
-          LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
+        if (noOFWorkingDays >= 4) {
+          LOG.info("RDc: Temporary Reactivate Embargo process: run after 3 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setProcessedTs(SystemUtil.getCurrentTimestamp());
             List<Addr> addresses = cmrObjects.getAddresses();
