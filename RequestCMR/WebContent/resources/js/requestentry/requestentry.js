@@ -162,9 +162,9 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
       cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
-      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
+      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || cmrCntry == SysLoc.SPAIN || ROW.includes(FormManager
           .getActualValue('cmrIssuingCntry')))
-          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && ((oldVatValue != vat && reqType == 'U') || (reqType == 'C'))) {
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && ((oldVatValue == '' && reqType == 'U') || (reqType == 'C'))) {
         findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
@@ -515,13 +515,12 @@ function doAcceptAddressVerification() {
  */
 function doCancelAddressVerification() {
   cmr.hideModal('addressVerificationModal');
-  // CREATCMR-8430: for NZ DNB overriding, refresh the page if use cancel the
-  // address confirm
+  // CREATCMR-8430: for NZ DNB overriding, refresh the page if use cancel the address confirm
   var loc = FormManager.getActualValue('cmrIssuingCntry');
   var usSicmen = FormManager.getActualValue('usSicmen');
-  if (loc == SysLoc.NEW_ZEALAND && usSicmen && usSicmen == 'DNBO') {
-    console.log("refresh this page...")
-    window.location.reload();
+  if (loc == SysLoc.NEW_ZEALAND && usSicmen && usSicmen=='DNBO') {
+	  console.log("refresh this page...")
+      window.location.reload();
   }
 }
 
@@ -1657,10 +1656,14 @@ function overrideDnBMatch() {
               'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
               'Warning', null, null);
     }
-    // CREATCMR-8430: do NZBN API check after override dnb
+  // CREATCMR-8430: do NZBN API check after override dnb
   } else if (loc == SysLoc.NEW_ZEALAND && reqType == 'C') {
     console.log(">>> for NZ, do NZBN API check after doOverrideDnBMatch >>>")
-    cmr.showConfirm('doNZBNAPIMatch()', 'This action will override the D&B Matching Process.<br>Proceed?', 'Warning', null, null);
+    cmr
+        .showConfirm(
+            'doNZBNAPIMatch()',
+            'This action will override the D&B Matching Process.<br>Proceed?',
+            'Warning', null, null);
   } else {
     cmr
         .showConfirm(
@@ -2669,7 +2672,7 @@ function matchDnBForNZ() {
   }
   cmr.showProgress('Checking request data with D&B...');
   // CREATCMR-8430: reset usSicmen when start DNB matching
-  FormManager.setValue('usSicmen', '');
+  FormManager.setValue('usSicmen', '');  
 
   dojo
       .xhrGet({
@@ -2750,17 +2753,17 @@ function matchDnBForNZ() {
 }
 
 // check all address types for create request for Newzealand
-function matchOtherAddressesforNZCreate(data) {
+function matchOtherAddressesforNZCreate (data) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var usSicmen = FormManager.getActualValue('usSicmen');
   if (!data.otherAddrDNBMatch) {
     if (!data.otherAddrAPIMatch) {
-      FormManager.setValue('matchOverrideIndc', 'Y');
-      if (usSicmen && usSicmen == 'DNBO') {
-        cmr.showAlert(data.message + '\nPlease attach company proof', 'Warning', 'doOverrideDnBMatch()');
-      } else {
-        cmr.showAlert(data.message + '\nPlease attach company proof');
-      }
+	  FormManager.setValue('matchOverrideIndc', 'Y');
+	  if(usSicmen && usSicmen=='DNBO') {
+		cmr.showAlert(data.message + '\nPlease attach company proof', 'Warning', 'doOverrideDnBMatch()');
+	  } else {
+		cmr.showAlert(data.message + '\nPlease attach company proof');
+	  }
     } else {
       console.log("DNB address match fail. NZAPI address match success.")
       if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
@@ -3037,12 +3040,11 @@ function matchDnBForNZUpdate() {
 function doNZBNAPIMatch() {
   console.log('>>> doNZBNAPIMacht >>>');
   FormManager.setValue('findDnbResult', 'Rejected');
-  // CREATCMR-8430: use usSicmen to save the dnboverride flag for NZ, automation
-  // will use this flag to skip DNB matching
+  // CREATCMR-8430: use usSicmen to save the dnboverride flag for NZ, automation will use this flag to skip DNB matching
   FormManager.setValue('usSicmen', 'DNBO');
-
+  
   hideModaldnb_Window();
-
+  
   console.log("Checking if the request matches NZBN API...");
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
