@@ -301,6 +301,9 @@ public class UKIUtil extends AutomationUtil {
           // noop, for switch handling only
         }
         break;
+      case "PPS CEID":
+		cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
+	    break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;

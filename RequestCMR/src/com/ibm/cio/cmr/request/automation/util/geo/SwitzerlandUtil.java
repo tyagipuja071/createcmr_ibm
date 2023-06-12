@@ -365,6 +365,7 @@ public class SwitzerlandUtil extends AutomationUtil {
 
     StringBuilder details = new StringBuilder();
     boolean cmdeReview = false;
+    Set<String> resultCodes = new HashSet<String>();
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
@@ -415,13 +416,20 @@ public class SwitzerlandUtil extends AutomationUtil {
       case "SORTL":
         // noop, for switch handling only
         break;
+      case "PPS CEID":
+    	cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
+    	break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
       }
     }
 
-    if (cmdeReview) {
+    if (resultCodes.contains("D")) {
+    	output.setOnError(true);
+    	validation.setSuccess(false);
+    	validation.setMessage("Rejected");
+    } else if (cmdeReview) {
       engineData.addNegativeCheckStatus("_chDataCheckFailed", "Updates to one or more fields cannot be validated.");
       details.append("Updates to one or more fields cannot be validated.\n");
       validation.setSuccess(false);

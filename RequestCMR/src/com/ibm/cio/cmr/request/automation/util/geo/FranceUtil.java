@@ -968,6 +968,7 @@ public class FranceUtil extends AutomationUtil {
 
     StringBuilder details = new StringBuilder();
     boolean cmdeReview = false;
+    Set<String> resultCodes = new HashSet<String>();
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
@@ -1026,13 +1027,20 @@ public class FranceUtil extends AutomationUtil {
           details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
         }
         break;
+      case "PPS CEID":
+    	cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
+    	break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
       }
     }
 
-    if (cmdeReview) {
+    if (resultCodes.contains("R")) {
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
+    } else if (cmdeReview) {
       engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
