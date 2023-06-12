@@ -228,6 +228,9 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         data.setBusnType(mainRecord.getCreditCd());
       }
 
+      if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && !StringUtils.isBlank(mainRecord.getCmrVat()) && importAddress) {
+        data.setBusnType(mainRecord.getCmrVat());
+      }
       if (newRequest) {
         admin.setMainAddrType(mainRecord.getCmrAddrTypeCode());
 
