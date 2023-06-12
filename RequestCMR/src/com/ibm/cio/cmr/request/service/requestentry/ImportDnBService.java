@@ -446,9 +446,11 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     if (!newRequest) {
       // find the current cmr no
       DataRdc rdcCurr = entityManager.find(DataRdc.class, rdcpk);
-      cmrNo = rdcCurr.getCmrNo();
-      LOG.debug("Found CMR No " + cmrNo + " on current DATA RDC for Request " + admin.getId().getReqId());
-      entityManager.detach(rdcCurr);
+      if (rdcCurr != null) {
+        cmrNo = rdcCurr.getCmrNo();
+        LOG.debug("Found CMR No " + cmrNo + " on current DATA RDC for Request " + admin.getId().getReqId());
+        entityManager.detach(rdcCurr);
+      }
     }
     DataRdc rdc = new DataRdc();
     PropertyUtils.copyProperties(rdc, data);
