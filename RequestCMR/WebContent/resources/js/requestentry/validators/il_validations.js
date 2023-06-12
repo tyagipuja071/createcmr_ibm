@@ -2942,7 +2942,7 @@ function lockUnlockFieldForISrael() {
     FormManager.clearValue('ppsceid');
     FormManager.readOnly('ppsceid');
   }
-  if (custSubGrp != 'BUSPR'){
+  if (custSubGrp != 'BUSPR' && reqType == 'C'){
     FormManager.clearValue('ppsceid');
   }
   if ((_custGrpSet2.has(custSubGrp)) && (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' || 'PROCESSOR')){
