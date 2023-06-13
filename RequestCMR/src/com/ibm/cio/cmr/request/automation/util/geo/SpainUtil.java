@@ -436,6 +436,9 @@ public class SpainUtil extends AutomationUtil {
           // noop, for switch handling only
         }
         break;
+      case "PPS CEID":
+  		cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
+  	    break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;

@@ -577,7 +577,7 @@ public class IERPProcessService extends BaseBatchService {
                 LOG.debug("no Of Working days after check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
 
               }
-              int tempReactThres = SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) ? 2 : 3;
+              int tempReactThres = 4;
               if (noOFWorkingDays >= tempReactThres) {
                 LOG.debug("Processing 2nd time ,no Of Working days = " + noOFWorkingDays);
                 createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
