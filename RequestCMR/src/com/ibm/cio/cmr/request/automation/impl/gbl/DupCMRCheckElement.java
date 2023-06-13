@@ -357,8 +357,9 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       if (countryUtil != null) {
         countryUtil.filterDuplicateCMRMatches(entityManager, requestData, engineData, response);
       }
-      if ("Y".equals(isProspectCmr)) {
+      if ("Y".equals(isProspectCmr) || !StringUtils.isBlank(admin.getSourceSystId())) {
         // remove all prospect cmr found in DUPC matches if it's an prospect cmr
+        // CREATCMR-9640 - remove also for requests created via API
         filterProspectCMRMatches(entityManager, requestData, engineData, response, isProspectCmr);
       }
     }
