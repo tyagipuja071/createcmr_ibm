@@ -394,7 +394,7 @@ function addAfterConfigAP() {
   if (cntry == '796' && reqType == 'C') { 
     setLockIsicNZfromDNB();
     // CREATCMR-7656
-    setDefaultValueforCustomerServiceCode();
+    // setDefaultValueforCustomerServiceCode();
     // setLockStatusforSalesReqNo();
     // removeSalesReqNoValidation();
     
@@ -6112,6 +6112,13 @@ function addressQuotationValidatorAP() {
         FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'Government Customer Type' ], 'MAIN_IBM_TAB');
       }
     }
+    if(cntry == SysLoc.NEW_ZEALAND){
+      FormManager.hide('CustomerServiceCd', 'engineeringBo');
+    }
+    FormManager.hide('SalRepNameNo', 'repTeamMemberNo');
+    FormManager.hide('RestrictedInd', 'restrictInd');
+    FormManager.hide('GovIndicator', 'govType');    
+    
   }
   
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
@@ -8314,8 +8321,8 @@ dojo.addOnLoad(function() {
   // setting collection code for ASEAN
   GEOHandler.addAfterConfig(onISBUCdChange, GEOHandler.ASEAN);
 
-  GEOHandler.addAfterConfig(addGovIndcHanlder, [ SysLoc.AUSTRALIA ]);
-  GEOHandler.addAfterConfig(addGovCustTypHanlder, [ SysLoc.AUSTRALIA ]);
+  // GEOHandler.addAfterConfig(addGovIndcHanlder, [ SysLoc.AUSTRALIA ]);
+  // GEOHandler.addAfterConfig(addGovCustTypHanlder, [ SysLoc.AUSTRALIA ]);
   GEOHandler.addAfterConfig(onInacTypeChange, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.INDIA, SysLoc.SINGAPORE, SysLoc.THAILAND]);
 
   // ERO specific
