@@ -166,7 +166,7 @@ public class USCMRNumGen {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("LOC", SystemLocation.UNITED_STATES);
-    List<String> records = query.getResults(500, String.class);
+    List<String> records = query.getResults(300, String.class);
 
     if (records != null && records.size() > 0) {
       for (String missCmrNo : records) {
@@ -257,7 +257,7 @@ public class USCMRNumGen {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("LOC", SystemLocation.UNITED_STATES);
-    List<String> records = query.getResults(500, String.class);
+    List<String> records = query.getResults(300, String.class);
 
     // for (int i = 1; i < 9; i++) {
     // query.setParameter("ZZKV_CUSNO1", i + "%");
@@ -360,7 +360,7 @@ public class USCMRNumGen {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("LOC", SystemLocation.UNITED_STATES);
-    List<String> records = query.getResults(500, String.class);
+    List<String> records = query.getResults(300, String.class);
 
     // List<String> records = query.getResults(String.class);
     if (records != null && records.size() > 0) {
