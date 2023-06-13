@@ -796,7 +796,7 @@
 			</cmr:column>
 		</cmr:row>
 		<cmr:row addBackground="true">
-			<cmr:column span="1" exceptForCountry="724">
+            <cmr:column span="1" exceptForGEO="CEMEA,BELUX" exceptForCountry="724,618,848,706,758, 726,755,822,838,666,788">
 				<cmr:label fieldId="stateProv_view">
 					<span class="lbl-StateProv">${ui.stateProve}</span>:</cmr:label>
 			</cmr:column>
@@ -1431,7 +1431,7 @@
   </cmr:row> --%>
 
   <cmr:row addBackground="true">
-    <cmr:view exceptForGEO="CEMEA,CN,JP,SWISS,TW,KR,NORDX" exceptForCountry="862,858,766,758">
+	<cmr:view exceptForGEO="CEMEA,CN,JP,SWISS,TW,KR,NORDX,BELUX" exceptForCountry="862,858,766,758,618,848,706,726,755,822,838,666,788">
       <cmr:column span="1">
         <cmr:label fieldId="stateProv_view">
           <span class="lbl-StateProv">${ui.stateProve}</span>:</cmr:label>
