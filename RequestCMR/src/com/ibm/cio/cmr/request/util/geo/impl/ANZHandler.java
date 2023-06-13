@@ -729,6 +729,15 @@ public class ANZHandler extends APHandler {
       if (data.getAbbrevLocn() != null && data.getAbbrevLocn().length() > 12) {
         data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 12));
       }
+
+      String custSubGrp = data.getCustSubGrp();
+      List<String> custSubGrpList = Arrays.asList("NRML", "INTER", "DUMMY", "AQSTN", "BLUMX", "MKTPC", "ECSYS", "ESOSW", "CROSS", "XAQST", "XBLUM",
+          "XMKTP", "XESO", "PRIV", "NRMLC", "KYND");
+      if (custSubGrpList.contains(custSubGrp) && SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
+        data.setEngineeringBo("9920");
+      }
+      data.setRepTeamMemberNo("000000");
+
     }
     entityManager.merge(data);
     entityManager.flush();
