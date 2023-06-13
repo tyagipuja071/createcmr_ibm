@@ -908,7 +908,7 @@ public class FranceUtil extends AutomationUtil {
   @Override
   public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<DuplicateCMRCheckResponse> response) {
-    String[] scenariosToBeChecked = { "COMME", "CBMME", "GOVRN", "CBVRN", "BPIEU", "CBIEU", "CBIEM", "XBLUM" };
+    String[] scenariosToBeChecked = { "COMME", "CBMME", "GOVRN", "CBVRN", "BPIEU", "CBIEU", "CBIEM", "XBLUM", "IBMEM", "PRICU" };
     String scenario = requestData.getData().getCustSubGrp();
     String[] kuklaComme = { "11" };
     String[] kuklaGovrn = { "13", "14", "17" };
@@ -920,6 +920,9 @@ public class FranceUtil extends AutomationUtil {
       List<DuplicateCMRCheckResponse> matches = response.getMatches();
       List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
       for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
         if (StringUtils.isNotBlank(match.getCustClass())) {
           String kukla = match.getCustClass() != null ? match.getCustClass() : "";
           if (Arrays.asList(kuklaComme).contains(kukla) && ("COMME".equals(scenario) || "CBMME".equals(scenario))) {
@@ -929,9 +932,9 @@ public class FranceUtil extends AutomationUtil {
           } else if (Arrays.asList(kuklaBuspr).contains(kukla)
               && ("BPIEU".equals(scenario) || "CBIEU".equals(scenario) || "BUSPR".equals(scenario) || "XBUSP".equals(scenario))) {
             filteredMatches.add(match);
-          } else if (Arrays.asList(kuklaCBIEM).contains(kukla) && ("CBIEM".equals(scenario))) {
+          } else if (Arrays.asList(kuklaCBIEM).contains(kukla) && ("CBIEM".equals(scenario) || "IBMEM".equals(scenario))) {
             filteredMatches.add(match);
-          } else if (Arrays.asList(kuklaXBLUM).contains(kukla) && ("XBLUM".equals(scenario))) {
+          } else if (Arrays.asList(kuklaXBLUM).contains(kukla) && ("XBLUM".equals(scenario) || "PRICU".equals(scenario))) {
             filteredMatches.add(match);
           }
         }
@@ -1363,11 +1366,6 @@ public class FranceUtil extends AutomationUtil {
     case BluepagesError:
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
-    case DuplicateCMR:
-      details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
-      engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
-          checkResult.getCmrNo(), checkResult.getKunnr());
-      return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
