@@ -290,16 +290,29 @@ public class SpainUtil extends AutomationUtil {
   @Override
   public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<DuplicateCMRCheckResponse> response) {
-    String[] scenariosToBeChecked = { "THDIG", "GOVIG", "XIGS", "IGSGS" };
+    String[] scenariosToBeChecked = { "THDIG", "GOVIG", "XIGS", "IGSGS", "PRICU", "IBMEM" };
     String scenario = requestData.getData().getCustSubGrp();
+    String[] kuklaPriv = { "60" };
+    String[] kuklaIBMEM = { "71" };
     String[] sboValuesToCheck = { "109", "209", "309" };
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
       List<DuplicateCMRCheckResponse> matches = response.getMatches();
       List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
       for (DuplicateCMRCheckResponse match : matches) {
-        if (StringUtils.isNotBlank(match.getSortl())) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
+        if (StringUtils.isNotBlank(match.getSortl()) && !("PRICU".equals(scenario)) && !("IBMEM".equals(scenario))) {
           String sortl = match.getSortl().length() > 3 ? match.getSortl().substring(0, 3) : match.getSortl();
           if (Arrays.asList(sboValuesToCheck).contains(sortl)) {
+            filteredMatches.add(match);
+          }
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaPriv).contains(kukla) && ("PRICU".equals(scenario))) {
+            filteredMatches.add(match);
+          } else if (Arrays.asList(kuklaIBMEM).contains(kukla) && ("IBMEM".equals(scenario))) {
             filteredMatches.add(match);
           }
         }

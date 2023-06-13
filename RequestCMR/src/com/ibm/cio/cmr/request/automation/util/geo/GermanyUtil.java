@@ -404,6 +404,37 @@ public class GermanyUtil extends AutomationUtil {
     }
     return valid;
   }
+  
+    @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+
+    String[] scenariosToBeChecked = { "PRIPE", "IBMEM" };
+    String scenario = requestData.getData().getCustSubGrp();
+    String[] kuklaPriv = { "60" };
+    String[] kuklaIBMEM = { "71" };
+
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      List<DuplicateCMRCheckResponse> matches = response.getMatches();
+      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaPriv).contains(kukla) && ("PRIPE".equals(scenario))) {
+            filteredMatches.add(match);
+          } else if (Arrays.asList(kuklaIBMEM).contains(kukla) && ("IBMEM".equals(scenario))) {
+            filteredMatches.add(match);
+          }
+        }
+
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
+    }
+  }
 
   @Override
   public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
