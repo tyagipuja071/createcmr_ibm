@@ -102,7 +102,10 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                 }
                 Collections.copy(cmrCheckMatches, cmrCheckMatchesDept);
               }
-              result = checkDupcProspectCmr(cmrCheckMatches, soldTo, isProspectCmr, engineData, result, issuingCntry);
+              // CREATCMR-9640 - exclude requests created via API
+              if (StringUtils.isBlank(admin.getSourceSystId())) {
+                result = checkDupcProspectCmr(cmrCheckMatches, soldTo, isProspectCmr, engineData, result, issuingCntry);
+              }
               if (result.isOnError()) {
                 return result;
               }
