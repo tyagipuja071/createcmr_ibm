@@ -5144,7 +5144,11 @@ function lockFieldsForAU() {
   console.log('>>>> lockFieldsForAU >>>>');
   var clusterCd = FormManager.getActualValue('apCustClusterId');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (['ESOSW', 'NRML', 'AQSTN', 'SOFT', 'XAQST', 'CROSS'].includes(custSubGrp) && ['04500', '01150', '08039', '09057'].includes(clusterCd)) {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if ([ 'ESOSW', 'NRML', 'AQSTN', 'SOFT', 'XAQST', 'CROSS' ].includes(custSubGrp) && [ '04500', '01150', '08039', '09057' ].includes(clusterCd)) {
+    FormManager.readOnly('repTeamMemberName');
+  } else if (cntry = '796' && role == 'REQUESTER') {
     FormManager.readOnly('repTeamMemberName');
   } else {
     FormManager.enable('repTeamMemberName');
