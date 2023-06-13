@@ -619,7 +619,6 @@ public class UKIUtil extends AutomationUtil {
         }
       }
     }
-    
     // List<String> isicList = Arrays.asList("7230", "7240", "7290", "7210",
     // "7221", "7229", "7250", "7123", "9802");
     // if (!(SCENARIO_INTERNAL.equals(scenario) ||
