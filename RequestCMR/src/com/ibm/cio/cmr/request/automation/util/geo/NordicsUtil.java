@@ -454,6 +454,9 @@ public class NordicsUtil extends AutomationUtil {
     if (response.getMatches() != null) {
       for (DuplicateCMRCheckResponse res : response.getMatches()) {
         List<CmrtCust> results = null;
+        if (res.getCmrNo() != null && res.getCmrNo().startsWith("P") && "75".equals(res.getOrderBlk())) {
+          subScenarioMatches.add(res);
+        }
         try {
           String sql = ExternalizedQuery.getSql("LEGACYD.GETCUST");
           PreparedQuery query = new PreparedQuery(entityManager, sql);
