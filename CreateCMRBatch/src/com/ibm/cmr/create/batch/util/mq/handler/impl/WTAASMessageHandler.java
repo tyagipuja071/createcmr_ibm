@@ -178,31 +178,18 @@ public class WTAASMessageHandler extends MQMessageHandler {
       }
     }
 
-    if (!"Y".equalsIgnoreCase(this.adminData.getProspLegalInd())) {
-      if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
-          && !StringUtils.isEmpty(this.cmrData.getCmrNo())) {
-        LOG.debug("Setting CMR No to user supplied value: " + this.cmrData.getCmrNo());
-        this.messageHash.put("CustNo", this.cmrData.getCmrNo());
-      } else if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
-          && !StringUtils.isEmpty(this.cmrData.getCmrNoPrefix())) {
-        LOG.debug("Setting CMR No Prefix to user supplied value: " + this.cmrData.getCmrNoPrefix());
-        this.messageHash.put("CustNo", this.cmrData.getCmrNoPrefix());
-      } else if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence > 0) {
-        LOG.debug("Setting CMR No to generated value: " + this.mqIntfReqQueue.getCmrNo());
-        this.messageHash.put("CustNo", this.mqIntfReqQueue.getCmrNo());
-      } else if ("U".equals(this.mqIntfReqQueue.getReqType())) {
-        this.messageHash.put("CustNo", this.mqIntfReqQueue.getCmrNo());
-      }
-    } else if ("Y".equalsIgnoreCase(this.adminData.getProspLegalInd()) && MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType())) {
-      // CREATCMR - 9495
-      // setting cmr no null in request xml for prospect conversion create
-      // requests
-      LOG.debug("setting cmr no null in request xml for prospect conversion create requests.");
-      LOG.debug("Original value CMR DATA: " + this.cmrData.getCmrNo());
-      LOG.debug("Original value mqIntfReqQueue: " + this.mqIntfReqQueue.getCmrNo());
-
-      this.cmrData.setCmrNo(null);
-      this.mqIntfReqQueue.setCmrNo(null);
+    if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
+        && !StringUtils.isEmpty(this.cmrData.getCmrNo())) {
+      LOG.debug("Setting CMR No to user supplied value: " + this.cmrData.getCmrNo());
+      this.messageHash.put("CustNo", this.cmrData.getCmrNo());
+    } else if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
+        && !StringUtils.isEmpty(this.cmrData.getCmrNoPrefix())) {
+      LOG.debug("Setting CMR No Prefix to user supplied value: " + this.cmrData.getCmrNoPrefix());
+      this.messageHash.put("CustNo", this.cmrData.getCmrNoPrefix());
+    } else if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence > 0) {
+      LOG.debug("Setting CMR No to generated value: " + this.mqIntfReqQueue.getCmrNo());
+      this.messageHash.put("CustNo", this.mqIntfReqQueue.getCmrNo());
+    } else if ("U".equals(this.mqIntfReqQueue.getReqType())) {
       this.messageHash.put("CustNo", this.mqIntfReqQueue.getCmrNo());
     }
 
