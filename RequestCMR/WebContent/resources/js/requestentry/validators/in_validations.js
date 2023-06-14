@@ -2961,6 +2961,10 @@ function setDefaultOnScenarioChange(fromAddress, scenario, scenarioChanged) {
 
 
 function setLockIsicfromDNB() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
   var isDnbRecord = FormManager.getActualValue('findDnbResult');
   if (isDnbRecord =='Accepted' && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
