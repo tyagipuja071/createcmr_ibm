@@ -62,10 +62,14 @@ public class IndiaTransformer extends ISATransformer {
       // for correlated requests, add the CN
       LOG.debug(
           "Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. " + handler.mqIntfReqQueue.getCmrNo());
-      // CREATCMR - 8980
       String cmrNo = handler.mqIntfReqQueue.getCmrNo();
       handler.messageHash.put("CustNo", cmrNo);
       handler.messageHash.put("TransCode", "N");
+    }
+    if ("Y".equalsIgnoreCase(handler.adminData.getProspLegalInd()) && MQMsgConstants.REQ_TYPE_CREATE.equals(handler.mqIntfReqQueue.getReqType())
+        && StringUtils.isNotBlank(handler.mqIntfReqQueue.getCmrNo()) && !"M".equalsIgnoreCase(handler.messageHash.get("TransCode"))) {
+      String cmr = null;
+      handler.messageHash.put("CustNo", cmr);
     }
   }
 
