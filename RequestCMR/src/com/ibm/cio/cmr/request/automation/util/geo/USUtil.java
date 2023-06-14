@@ -1390,71 +1390,72 @@ public class USUtil extends AutomationUtil {
             validation.setMessage("Validated.");
             validation.setSuccess(true);
           } else {
-            // company proof
-            // if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager,
-            // admin.getId().getReqId())) {
-            validation.setMessage("Validated");
-            details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
-            details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
-            validation.setSuccess(true);
-            /*
-             * } else { validation.setMessage("Rejected");
-             * validation.setSuccess(false);
-             * details.append("High confidence D&B matches did not match the " +
-             * addrDesc + " address data.").append("\n"); details.
-             * append("\nNo supporting documentation is provided by the requester for "
-             * + addrDesc + " address."); engineData.addRejectionComment("OTH",
-             * "No supporting documentation is provided by the requester for " +
-             * addrDesc + " address.", "", ""); output.setOnError(true);
-             * output.setDetails(details.toString()); if (payGoAddredited) {
-             * admin.setPaygoProcessIndc("Y"); } LOG.
-             * debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed"
-             * ); }
-             */
+        	// company proof
+        	  //CREATCMR-9466
+              if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                validation.setMessage("Validated");
+                details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
+                details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+                validation.setSuccess(true);
+              } else {
+                validation.setMessage("Rejected");
+                validation.setSuccess(false);
+                details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
+                details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
+                engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+                output.setOnError(true);
+                output.setDetails(details.toString());
+                if (payGoAddredited) {
+                  admin.setPaygoProcessIndc("Y");
+                }
+                LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+              }
+        	  //CREATCMR-9466
           }
         } else {
-          // company proof
-          // if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager,
-          // admin.getId().getReqId())) {
-          validation.setMessage("Validated");
-          details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
-          details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
-          validation.setSuccess(true);
-          /*
-           * } else { validation.setMessage("Rejected");
-           * validation.setSuccess(false);
-           * details.append("No High Quality D&B Matches were found for " +
-           * addrDesc + " address.").append("\n"); details.
-           * append("\nNo supporting documentation is provided by the requester for "
-           * + addrDesc + " address."); engineData.addRejectionComment("OTH",
-           * "No supporting documentation is provided by the requester for " +
-           * addrDesc + " address.", "", ""); output.setOnError(true);
-           * output.setDetails(details.toString()); if (payGoAddredited) {
-           * admin.setPaygoProcessIndc("Y"); } LOG.
-           * debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed"
-           * ); }
-           */
+        	// company proof
+        	//CREATCMR-9466
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              validation.setMessage("Validated");
+              details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+              details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+              validation.setSuccess(true);
+            } else {
+              validation.setMessage("Rejected");
+              validation.setSuccess(false);
+              details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+              details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
+              engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+              output.setOnError(true);
+              output.setDetails(details.toString());
+              if (payGoAddredited) {
+                admin.setPaygoProcessIndc("Y");
+              }
+              LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+            }
+      	  	//CREATCMR-9466
         }
       } else {
-        // company proof
-        // if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager,
-        // admin.getId().getReqId())) {
-        validation.setMessage("Validated");
-        details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
-        details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
-        validation.setSuccess(true);
-        /*
-         * } else { validation.setMessage("Rejected");
-         * validation.setSuccess(false);
-         * details.append("No D&B Matches were found for " + addrDesc +
-         * " address.").append("\n"); engineData.addRejectionComment("OTH",
-         * "No supporting documentation is provided by the requester for " +
-         * addrDesc + " address.", "", ""); output.setOnError(true);
-         * output.setDetails(details.toString()); if (payGoAddredited) {
-         * admin.setPaygoProcessIndc("Y"); } LOG.
-         * debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed"
-         * ); }
-         */
+    	// company proof
+    	  //CREATCMR-9466
+          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+            validation.setMessage("Validated");
+            details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+            details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+            validation.setSuccess(true);
+          } else {
+            validation.setMessage("Rejected");
+            validation.setSuccess(false);
+            details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+            engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+            output.setOnError(true);
+            output.setDetails(details.toString());
+            if (payGoAddredited) {
+              admin.setPaygoProcessIndc("Y");
+            }
+            LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+          }
+          //CREATCMR-9466
       }
     } else {
       engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + "ZS01", "D&B Matching couldn't be performed for " + addrDesc + " address.");
