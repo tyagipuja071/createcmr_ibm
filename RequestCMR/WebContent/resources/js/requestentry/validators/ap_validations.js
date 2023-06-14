@@ -6113,6 +6113,7 @@ function addressQuotationValidatorAP() {
       }
     }
     if(cntry == SysLoc.NEW_ZEALAND){
+      FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
       FormManager.hide('CustomerServiceCd', 'engineeringBo');
     }
     FormManager.hide('SalRepNameNo', 'repTeamMemberNo');
