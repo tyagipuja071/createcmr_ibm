@@ -653,9 +653,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
          // scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
         } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue != null) && (!oldVatIndValue.equals('N'))) {
-          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
-        } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue == null || oldVatValue.isEmpty()) && (oldVatIndValue.equals('E'))) {
-          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);        
         } else {
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
         }
