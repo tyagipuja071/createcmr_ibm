@@ -2337,7 +2337,6 @@ function makeFieldManadatoryLAReactivate() {
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '629') {
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '655') {
@@ -2345,32 +2344,25 @@ function makeFieldManadatoryLAReactivate() {
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '661') {
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '663') {
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '681') {
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '683') {
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collBoId', Validators.REQUIRED, [ 'CollBranchOff' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '829') {
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '731') {
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '735') {
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '781') {
@@ -2392,11 +2384,9 @@ function makeFieldManadatoryLAReactivate() {
     FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '799') {
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '811') {
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('mrcCd', Validators.REQUIRED, [ lblMrcCd ], 'MAIN_IBM_TAB');
@@ -2406,7 +2396,6 @@ function makeFieldManadatoryLAReactivate() {
     FormManager.addValidator('mrcCd', Validators.REQUIRED, [ lblMrcCd ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '815') {
     FormManager.addValidator('email1', Validators.REQUIRED, [ 'Email1' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('mrcCd', Validators.REQUIRED, [ lblMrcCd ], 'MAIN_IBM_TAB');
@@ -2415,7 +2404,6 @@ function makeFieldManadatoryLAReactivate() {
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '871') {
-    FormManager.addValidator('mrktChannelInd', Validators.REQUIRED, [ 'MrktChannelInd' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collBoId', Validators.REQUIRED, [ 'CollBranchOff' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
