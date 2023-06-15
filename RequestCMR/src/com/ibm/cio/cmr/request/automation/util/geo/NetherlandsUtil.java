@@ -146,6 +146,14 @@ public class NetherlandsUtil extends AutomationUtil {
       break;
     }
 
+    if ("LOCAL".equals(data.getCustGrp()) && !(SCENARIO_PRIVATE_CUSTOMER.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario))
+        && StringUtils.isEmpty(data.getTaxCd2())) {
+      details.append("KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.\n");
+      engineData.addNegativeCheckStatus("_missingKvkValue",
+          "KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.");
+      return false;
+    }
+
     return true;
   }
 
