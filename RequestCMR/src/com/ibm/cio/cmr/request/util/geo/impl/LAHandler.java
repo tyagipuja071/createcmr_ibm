@@ -1610,15 +1610,6 @@ public class LAHandler extends GEOHandler {
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getMarketingChnlIndcValue(), newData.getMrktChannelInd())) {
-      update = new UpdatedDataModel();
-      String cntry = null;
-      update.setDataField(PageManager.getLabel(cntry, "MrktChannelInd", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getMrktChannelInd(), "MrktChannelInd", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getMarketingChnlIndcValue(), "MrktChannelInd", cmrCountry));
-      results.add(update);
-    }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollBoId(), newData.getCollBoId())) {
       update = new UpdatedDataModel();
       String cntry = null;
@@ -3352,7 +3343,6 @@ public class LAHandler extends GEOHandler {
     map.put("##RequestReason", "reqReason");
     map.put("##CustomerType", "custType");
     map.put("##POBox", "poBox");
-    map.put("##MrktChannelInd", "mrktChannelInd");
     map.put("##LandedCountry", "landCntry");
     map.put("##CMRIssuingCountry", "cmrIssuingCntry");
     map.put("##INACCode", "inacCd");
