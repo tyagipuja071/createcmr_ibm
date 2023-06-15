@@ -176,10 +176,6 @@ function processRequestAction() {
           .getActualValue('cmrIssuingCntry')))
           && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatInd != 'N' && oldVat != '' && reqType == 'U')) {
         findVatInd();
-      } else if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
-          .getActualValue('cmrIssuingCntry')))
-          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatInd == 'E' && oldVat == '' && reqType == 'U')) {
-        findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
       } else if (cmrCntry == SysLoc.INDIA) {
