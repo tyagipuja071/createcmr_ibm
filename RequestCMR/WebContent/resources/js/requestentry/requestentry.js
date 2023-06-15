@@ -155,7 +155,13 @@ function processRequestAction() {
     var oldVat = cmr.query('GET.OLD.VAT.VALUE', {
       REQ_ID : reqId
     });
-    var oldVatValue = oldVat.ret1 != undefined ? oldVat.ret1 : '';
+
+    var oldVatInd = cmr.query('GET.OLD.VATIND.VALUE', {
+      REQ_ID : reqId
+    });
+
+    // var oldVatValue = oldVat.ret1 != undefined ? oldVat.ret1 : '';
+
     var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
@@ -164,7 +170,15 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
       if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
           .getActualValue('cmrIssuingCntry')))
-          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && ((oldVatValue != vat && reqType == 'U') || (reqType == 'C'))) {
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (reqType == 'C')) {
+        findVatInd();
+      } else if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
+          .getActualValue('cmrIssuingCntry')))
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatInd != 'N' && oldVat != '' && reqType == 'U')) {
+        findVatInd();
+      } else if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
+          .getActualValue('cmrIssuingCntry')))
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatInd == 'E' && oldVat == '' && reqType == 'U')) {
         findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
