@@ -67,7 +67,7 @@ public class IndiaTransformer extends ISATransformer {
       handler.messageHash.put("TransCode", "N");
     }
     if ("Y".equalsIgnoreCase(handler.adminData.getProspLegalInd()) && MQMsgConstants.REQ_TYPE_CREATE.equals(handler.mqIntfReqQueue.getReqType())
-        && StringUtils.isNotBlank(handler.mqIntfReqQueue.getCmrNo()) && !"M".equalsIgnoreCase(handler.messageHash.get("TransCode"))) {
+        && StringUtils.isNotBlank(handler.mqIntfReqQueue.getCmrNo()) && handler.mqIntfReqQueue.getCmrNo().startsWith("P")) {
       String cmr = null;
       handler.messageHash.put("CustNo", cmr);
     }
