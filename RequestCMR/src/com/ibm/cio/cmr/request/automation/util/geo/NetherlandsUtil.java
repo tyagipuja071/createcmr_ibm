@@ -134,14 +134,6 @@ public class NetherlandsUtil extends AutomationUtil {
       break;
     }
 
-    if ("LOCAL".equals(data.getCustGrp()) && !(SCENARIO_PRIVATE_CUSTOMER.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario))
-        && StringUtils.isEmpty(data.getTaxCd2())) {
-      details.append("KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.\n");
-      engineData.addNegativeCheckStatus("_missingKvkValue",
-          "KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.");
-      return false;
-    }
-
     return true;
   }
 
@@ -366,8 +358,24 @@ public class NetherlandsUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+
+    if ("LOCAL".equals(data.getCustGrp()) && !(SCENARIO_PRIVATE_CUSTOMER.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario))
+        && StringUtils.isEmpty(data.getTaxCd2())) {
+      details.append("KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.\n");
+      engineData.addNegativeCheckStatus("_missingKvkValue",
+          "KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.");
+    } else {
+      details.append("Field Computation skipped.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return results;
+    }
+
+    results.setDetails(details.toString());
+    LOG.debug(results.getDetails());
+    return results;
   }
 
   @Override
