@@ -19,7 +19,7 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoResponse;
 
 public class IndiaTransformer extends ISATransformer {
   private static final Logger LOG = Logger.getLogger(IndiaTransformer.class);
-  
+
   public IndiaTransformer() throws Exception {
     super(SystemLocation.INDIA);
 
@@ -39,7 +39,7 @@ public class IndiaTransformer extends ISATransformer {
     handler.messageHash.put("CntryNo", SystemLocation.INDIA);
     String cmrPrefix = !StringUtils.isEmpty(handler.cmrData.getCmrNoPrefix()) ? handler.cmrData.getCmrNoPrefix() : "";
     String inacType = !StringUtils.isEmpty(handler.cmrData.getInacType()) ? handler.cmrData.getInacType() : "";
-    
+
     // handle reprocessing of dual create request when cmr number supplied
     if (MQMsgConstants.REQ_TYPE_CREATE.equals(handler.mqIntfReqQueue.getReqType())
         && MQMsgConstants.REQ_STATUS_NEW.equals(handler.mqIntfReqQueue.getReqStatus()) && isDoubleCreateProcess(handler)
@@ -67,8 +67,9 @@ public class IndiaTransformer extends ISATransformer {
       handler.messageHash.put("TransCode", "N");
     }
 
-    LOG.debug("CREATECMR - 9713 INDIA MQ ISSUE LOGS -----> " + handler.mqIntfReqQueue.getCmrNo().startsWith("P"));
-
+    if (StringUtils.isNotBlank(handler.mqIntfReqQueue.getCmrNo())) {
+      LOG.debug("CREATECMR - 9713 INDIA MQ ISSUE LOGS -----> " + handler.mqIntfReqQueue.getCmrNo().startsWith("P"));
+    }
     LOG.debug("Values before -----> ");
     LOG.debug("Values before -----> handler.cmrData.getCmrNo -> " + handler.cmrData.getCmrNo());
     LOG.debug("Values before -----> handler.mqIntfReqQueue.getCmrNo -> " + handler.mqIntfReqQueue.getCmrNo());
