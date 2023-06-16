@@ -3137,9 +3137,10 @@ public class LAHandler extends GEOHandler {
       txt = results.get(0);
     } else if (results != null && results.size() > 1) {
       for (String res : results) {
-        if (res.startsWith(stateProv)) {
+        if (StringUtils.isNotBlank(stateProv) && res.startsWith(stateProv)) {
           txt = res;
         }
+
       }
     }
 
