@@ -127,23 +127,6 @@
   <!-- Mukesh:Story 1067134: START For Sales Rep Name/No -->
   
   <cmr:row topPad="10">
-    <cmr:column span="2" containerForField="SalRepNameNo">
-      <p>
-        <cmr:label fieldId="repTeamMemberNo">
-          <cmr:fieldLabel fieldId="SalRepNameNo" />:
-          <cmr:delta text="${rdcdata.repTeamMemberNo}" oldValue="${reqentry.repTeamMemberNo}" />
-            <cmr:info text="${ui.info.salRepNameNo}" />
-        </cmr:label>
-        <%--Mukesh:Defect 1301380: Sales Rep field --%>
-        <%--  <div class="cmr-inline">
-          <cmr:bluepages model="salesRepNameNo" namePath="repTeamMemberName" idPath="repTeamMemberNo" useUID="true" editableId="true"/>
-          <span style="padding-left: 5px">&nbsp;</span>
-          </div> --%>
-
-        <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" size="80" tabId="MAIN_IBM_TAB" />
-
-      </p>
-    </cmr:column>
     <cmr:view forCountry="631">
     <cmr:column span="2" containerForField="ProxiLocationNumber">
       <p>

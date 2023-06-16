@@ -364,10 +364,6 @@ public class LAHandler extends GEOHandler {
       if (laReactivateCapable)
         data.setFunc("R");
     }
-
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      data.setRepTeamMemberNo(DEFAULT_SALES_REP);
-    }
   }
 
   private void importTaxInfo(EntityManager entityManager, Data data, long reqId, String sapNumber, String requesterId) {
@@ -793,7 +789,6 @@ public class LAHandler extends GEOHandler {
       data.setSalesRepTeamDateOfAssignment(SystemUtil.getCurrentTimestamp());
 
       data.setInstallRepTeamDateOfAssignment(SystemUtil.getCurrentTimestamp());
-      data.setInstallRep(data.getRepTeamMemberNo());
       data.setPaymentAddrCd("N");
 
     }
@@ -1598,15 +1593,6 @@ public class LAHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cntry, "BGLDERule", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getBgRuleId(), "BGLDERule", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getBgRuleId(), "BGLDERule", cmrCountry));
-      results.add(update);
-    }
-
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepresentativeTeamMemberNo(), newData.getRepTeamMemberNo())) {
-      update = new UpdatedDataModel();
-      String cntry = null;
-      update.setDataField(PageManager.getLabel(cntry, "SalRepNameNo", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getRepTeamMemberNo(), "SalRepNameNo", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getRepresentativeTeamMemberNo(), "SalRepNameNo", cmrCountry));
       results.add(update);
     }
 
@@ -3378,7 +3364,6 @@ public class LAHandler extends GEOHandler {
     map.put("##BGLDERule", "bgRuleId");
     map.put("##ProspectToLegalCMR", "prospLegalInd");
     map.put("##ClientTier", "clientTier");
-    map.put("##SalRepNameNo", "repTeamMemberNo");
     map.put("##ProxiLocationNumber", "proxiLocnNo");
     map.put("##DropDownCity", "city1");
     map.put("##SAPNumber", "sapNo");

@@ -290,12 +290,10 @@ function autoSetSBOAndSalesTMNo() {
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '631' && FormManager.getActualValue('reqType') == 'C') {
     if (_custSubGrp != 'undefined' && _custSubGrp == 'CROSS') {
-      FormManager.enable('repTeamMemberNo');
+      
       FormManager.enable('salesBusOffCd');
       if (_custType == 'INTER') {
-        FormManager.setValue('repTeamMemberNo', '010200');
         FormManager.setValue('salesBusOffCd', '010');
-        FormManager.readOnly('repTeamMemberNo');
         if (role == 'REQUESTER') {
           FormManager.readOnly('salesBusOffCd');
         }  else {
@@ -303,7 +301,6 @@ function autoSetSBOAndSalesTMNo() {
         }
 
         FormManager.setValue('crosTyp', '9');
-        console.log(">>> Process repTeamMemberNo >> " + FormManager.getActualValue('repTeamMemberNo'));
         console.log(">>> Process salesBusOffCd >> " + FormManager.getActualValue('salesBusOffCd'));
       }
       if (_custType == 'BUSPR' || _custType == 'PRIPE' || _custType == 'IBMEM') {
@@ -681,13 +678,9 @@ function autoSetFieldsForCustScenariosSSAMX() {
       if (_custType != '5PRIP' && _custType != '5COMP') {
         FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
         FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
-        if (role == 'PROCESSOR') {
-          FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
-        }
       } else {
         FormManager.resetValidations('isicCd');
         FormManager.resetValidations('subIndustryCd');
-        FormManager.resetValidations('repTeamMemberNo');
       }
       if (_custType == 'PRIPE') {
         FormManager.setValue('subIndustryCd', 'WQ');
@@ -731,8 +724,6 @@ function autoSetFieldsForCustScenariosSSAMX() {
         }, 500);
         FormManager.setValue(FormManager.getField('salesBusOffCd'), '9A9');
         FormManager.readOnly('salesBusOffCd');
-        FormManager.setValue(FormManager.getField('repTeamMemberNo'), '999999');
-        FormManager.readOnly('repTeamMemberNo');
         FormManager.setValue(FormManager.getField('collectorNameNo'), '999999');
         FormManager.readOnly('collectorNameNo');
         internalFlag = true;
@@ -1062,25 +1053,6 @@ function addTaxCode1ValidatorForOtherLACntries() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-}
-
-function addSalesRepNameNoValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
-        var lbl1 = FormManager.getLabel('SalRepNameNo');
-        if (repTeamMemberNo && repTeamMemberNo.length != 6) {
-          return new ValidationResult({
-            id : 'repTeamMemberNo',
-            type : 'text',
-            name : 'repTeamMemberNo'
-          }, false, 'The value for ' + lbl1 + ' is invalid. The length should always be 6.');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 /**
@@ -1753,7 +1725,6 @@ function addReqdFieldProcValidatorForBrazil() {
     var _custType = FormManager.getActualValue('custType');
     if (!(_custType == '5COMP' || _custType == '5PRIP' || _custType == 'PRIPE' || _custType == 'IBMEM')) {
       FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ lblCollectorNameNo ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ lblSalRepNameNo ], 'MAIN_IBM_TAB');
       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ lblSalesBusOff ], 'MAIN_IBM_TAB');
       FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ lblSubindustry ], 'MAIN_CUST_TAB');
       FormManager.addValidator('isicCd', Validators.REQUIRED, [ lblISIC ], 'MAIN_CUST_TAB');
@@ -2147,13 +2118,10 @@ function setFieldRequiredSSAMXOnSecnarios() {
       if (role == 'Processor' || role == 'Requester') {
         FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
         FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
-        // FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [
-        // 'SalRepNameNo' ], 'MAIN_IBM_TAB');
-      }
+     }
     } else {
       FormManager.resetValidations('isicCd');
       FormManager.resetValidations('subIndustryCd');
-      FormManager.resetValidations('repTeamMemberNo');
     }
     if (_cmrCntry == '781' && (_custSubGrp == '5PRIP' || _custSubGrp == '5COMP' || _custSubGrp == 'IBMEM' || _custSubGrp == 'PRIPE')) {
       if(_custSubGrp != 'IBMEM' ) {
@@ -2163,14 +2131,6 @@ function setFieldRequiredSSAMXOnSecnarios() {
       FormManager.resetValidations('salesBusOffCd');
       FormManager.resetValidations('collBoId');
     }
-    if (role == 'PROCESSOR' && _custSubGrp == 'PRIPE') {
-      FormManager.resetValidations('repTeamMemberNo');
-    }
-
-    if ((_cmrCntry == '681' || _cmrCntry == '663' || _cmrCntry == '663' || _cmrCntry == '869' || _cmrCntry == '811') && role == 'PROCESSOR' && _custSubGrp == 'PRIPE') {
-      FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
-    }
-
   }
 }
 
@@ -2369,8 +2329,6 @@ function makeFieldManadatoryLAReactivate() {
     if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
       FormManager.setValue('collBoId', '103');
       FormManager.readOnly('collBoId');
-      FormManager.setValue('repTeamMemberNo', '111111');
-      FormManager.readOnly('repTeamMemberNo');
     } else if (_pagemodel.userRole.toUpperCase() == "PROCESSOR") {
       FormManager.addValidator('collBoId', Validators.REQUIRED, [ 'CollBranchOff' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
@@ -2382,7 +2340,6 @@ function makeFieldManadatoryLAReactivate() {
     FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'LocalTax1' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
   } else if (FormManager.getActualValue('cmrIssuingCntry') == '799') {
     FormManager.addValidator('collectorNameNo', Validators.REQUIRED, [ 'CollectorNameNo' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
@@ -2512,12 +2469,10 @@ function setMrcCdRequiredForProcessors() {
         FormManager.addValidator('mrcCd', Validators.REQUIRED, [ lblMrcCd ], 'MAIN_IBM_TAB');
           if(reqType == 'C') {
             FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term/Sales Branch Office' ], 'MAIN_IBM_TAB');
-            FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep No' ], 'MAIN_IBM_TAB'); 
           }               
       } else {
         FormManager.resetValidations('mrcCd');
         FormManager.resetValidations('salesBusOffCd');
-        FormManager.resetValidations('repTeamMemberNo');
       }
     }
   }
@@ -3070,7 +3025,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addTaxCodesValidator, [ SysLoc.BRAZIL ],
   // null,
   // false, false);
-  GEOHandler.registerValidator(addSalesRepNameNoValidator, GEOHandler.LA);
   // /-- addressModal
   GEOHandler.registerValidator(addTaxCode1ValidatorInAddressModalForBrazil, [ SysLoc.BRAZIL ], null, true);
   GEOHandler.registerValidator(addTaxCode2ValidatorInAddressModalForBrazil, [ SysLoc.BRAZIL ], null, true);

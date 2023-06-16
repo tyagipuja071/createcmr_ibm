@@ -4946,7 +4946,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           model.setCompany(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COMPANY") - 1)));
           model.setCollBoId(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COLL_BO_ID") - 1)));
           model.setSalesBusOffCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("SALES_BO_CD") - 1)));
-          model.setRepTeamMemberNo(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("REP_TEAM_MEMBER_NO") - 1)));
           model.setCollectorNameNo(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COLLECTOR_NO") - 1)));
           model.setCodCondition(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COD_CONDITION") - 1)));
           model.setCodReason(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COD_RSN") - 1)));
