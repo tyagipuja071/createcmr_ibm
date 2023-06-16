@@ -66,23 +66,6 @@ public class IndiaTransformer extends ISATransformer {
       handler.messageHash.put("CustNo", cmrNo);
       handler.messageHash.put("TransCode", "N");
     }
-
-    if (StringUtils.isNotBlank(handler.cmrData.getCmrNo())) {
-      LOG.debug("CREATECMR - 9713 INDIA MQ ISSUE LOGS -----> " + handler.cmrData.getCmrNo().startsWith("P"));
-    }
-    LOG.debug("Values before -----> ");
-    LOG.debug("Values before -----> handler.cmrData.getCmrNo -> " + handler.cmrData.getCmrNo());
-    LOG.debug("Values before -----> handler.mqIntfReqQueue.getCmrNo -> " + handler.mqIntfReqQueue.getCmrNo());
-    LOG.debug("Values before -----> handler.messageHash.get(CustNo) -> " + handler.messageHash.get("CustNo"));
-
-    if ("Y".equalsIgnoreCase(handler.adminData.getProspLegalInd()) && MQMsgConstants.REQ_TYPE_CREATE.equals(handler.mqIntfReqQueue.getReqType())
-        && StringUtils.isNotBlank(handler.cmrData.getCmrNo()) && handler.cmrData.getCmrNo().startsWith("P")) {
-      LOG.debug("CREATECMR - 9713 INDIA MQ ISSUE LOGS ----> cmr number made null");
-      String cmr = null;
-      handler.cmrData.setCmrNo(cmr);
-      handler.mqIntfReqQueue.setCmrNo(cmr);
-      handler.messageHash.put("CustNo", cmr);
-    }
   }
 
   /**
