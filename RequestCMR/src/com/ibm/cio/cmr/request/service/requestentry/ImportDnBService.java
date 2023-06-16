@@ -155,12 +155,12 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         dataPK.setReqId(reqIdToUse);
         data.setId(dataPK);
 
-        savePageData(reqModel, admin, data);
+        // savePageData(reqModel, admin, data);
 
         if (geoHandler != null) {
           geoHandler.setDataDefaultsOnCreate(data, entityManager);
         }
-
+        savePageData(reqModel, admin, data);
         setAdminDefaults(admin, user, request);
         if (geoHandler != null) {
           geoHandler.setAdminDefaultsOnCreate(admin);
@@ -435,22 +435,24 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     // 1851537: EMEA, LA, ASIA&Pacific - D&B import done on update requests
     // is interfering with updates on UI
     // jz - do NOT update the mirror
-    
+
     DataPK rdcpk = new DataPK();
     rdcpk.setReqId(data.getId().getReqId());
     String cmrNo = "";
-    if (!newRequest){
+    if (!newRequest) {
       // find the current cmr no
       DataRdc rdcCurr = entityManager.find(DataRdc.class, rdcpk);
-      cmrNo = rdcCurr.getCmrNo();
-      LOG.debug("Found CMR No "+cmrNo+" on current DATA RDC for Request "+admin.getId().getReqId());
-      entityManager.detach(rdcCurr);
-    } 
+      if (rdcCurr != null) {
+        cmrNo = rdcCurr.getCmrNo();
+        LOG.debug("Found CMR No " + cmrNo + " on current DATA RDC for Request " + admin.getId().getReqId());
+        entityManager.detach(rdcCurr);
+      }
+    }
     DataRdc rdc = new DataRdc();
     PropertyUtils.copyProperties(rdc, data);
-    if (!StringUtils.isBlank(cmrNo) && cmrNo.startsWith("P")){
+    if (!StringUtils.isBlank(cmrNo) && cmrNo.startsWith("P")) {
       // put back the cmr no on data rdc for prospect conversions
-      LOG.debug("Setting CMR No "+cmrNo+" back to DATA RDC for Request "+admin.getId().getReqId());
+      LOG.debug("Setting CMR No " + cmrNo + " back to DATA RDC for Request " + admin.getId().getReqId());
       rdc.setCmrNo(cmrNo);
     }
     if (newRequest) {
