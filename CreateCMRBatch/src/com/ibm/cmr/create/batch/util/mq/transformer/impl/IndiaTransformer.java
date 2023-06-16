@@ -76,7 +76,7 @@ public class IndiaTransformer extends ISATransformer {
     LOG.debug("Values before -----> handler.messageHash.get(CustNo) -> " + handler.messageHash.get("CustNo"));
 
     if ("Y".equalsIgnoreCase(handler.adminData.getProspLegalInd()) && MQMsgConstants.REQ_TYPE_CREATE.equals(handler.mqIntfReqQueue.getReqType())
-        && StringUtils.isNotBlank(handler.mqIntfReqQueue.getCmrNo()) && handler.cmrData.getCmrNo().startsWith("P")) {
+        && StringUtils.isNotBlank(handler.cmrData.getCmrNo()) && handler.cmrData.getCmrNo().startsWith("P")) {
       LOG.debug("CREATECMR - 9713 INDIA MQ ISSUE LOGS ----> cmr number made null");
       String cmr = null;
       handler.cmrData.setCmrNo(cmr);
