@@ -178,7 +178,15 @@ public class WTAASMessageHandler extends MQMessageHandler {
       }
     }
 
-    if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
+    if ("Y".equalsIgnoreCase(this.adminData.getProspLegalInd()) && MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType())
+        && StringUtils.isNotBlank(this.cmrData.getCmrNo()) && this.cmrData.getCmrNo().startsWith("P")) {
+      LOG.debug("CREATECMR - 9713 INDIA MQ ISSUE LOGS ----> cmr number made null");
+      this.cmrData.setCmrNo(null);
+      this.mqIntfReqQueue.setCmrNo(null);
+      this.messageHash.put("CustNo", null);
+      LOG.debug("the value of TransCode is ---> " + this.messageHash.get("TransCode"));
+      LOG.debug("the value of lastSequence is ---> " + lastSequence);
+    } else if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
         && !StringUtils.isEmpty(this.cmrData.getCmrNo())) {
       LOG.debug("Setting CMR No to user supplied value: " + this.cmrData.getCmrNo());
       this.messageHash.put("CustNo", this.cmrData.getCmrNo());
