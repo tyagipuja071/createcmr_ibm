@@ -304,7 +304,7 @@ public class LAHandler extends GEOHandler {
 
       }
     } else {
-      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);                                                                                 // flow
+      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord); // flow
       data.setBgId(mainRecord.getCmrBuyingGroup());
       data.setGbgId(mainRecord.getCmrGlobalBuyingGroup());
       data.setBgRuleId(mainRecord.getCmrLde());
@@ -3256,7 +3256,7 @@ public class LAHandler extends GEOHandler {
       txt = results.get(0);
     } else if (results != null && results.size() > 1) {
       for (String res : results) {
-        if (res.startsWith(stateProv)) {
+        if (StringUtils.isNotBlank(stateProv) && res.startsWith(stateProv)) {
           txt = res;
         }
       }
