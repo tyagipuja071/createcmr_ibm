@@ -596,16 +596,6 @@ public abstract class AutomationUtil {
     case BluepagesError:
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
-    // case DuplicateCMR:
-    // if (SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(country)) {
-    // return true;
-    // }
-    // details.append("The name already matches a current record with CMR No. "
-    // + checkResult.getCmrNo()).append("\n");
-    // engineData.addRejectionComment("DUPC", "The name already has matches a
-    // current record with CMR No. " + checkResult.getCmrNo(),
-    // checkResult.getCmrNo(), checkResult.getKunnr());
-    // return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
@@ -658,23 +648,6 @@ public abstract class AutomationUtil {
         return false;
       }
     }
-
-    // // List<String> dupReqIds = checkDuplicateRequest(entityManager,
-    // reqData);
-    // // Duplicate Request check with customer name and Addr
-    // List<String> dupReqIds = checkDuplicateRequestPriv(entityManager,
-    // reqData);
-    // if (!dupReqIds.isEmpty()) {
-    // details.append("Duplicate request found with matching customer
-    // name.\nMatch found with Req id :").append("\n");
-    // details.append(StringUtils.join(dupReqIds, "\n"));
-    // engineData.addRejectionComment("DUPR", "Duplicate request found with
-    // matching customer name.", StringUtils.join(dupReqIds, ", "), "");
-    // return false;
-    // } else {
-    // details.append("No duplicate requests found");
-    //
-    // }
     PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
 
@@ -682,13 +655,6 @@ public abstract class AutomationUtil {
     case BluepagesError:
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
-    // case DuplicateCMR:
-    // details.append("The name already matches a current record with CMR No. "
-    // + checkResult.getCmrNo()).append("\n");
-    // engineData.addRejectionComment("DUPC", "The name already has matches a
-    // current record with CMR No. " + checkResult.getCmrNo(),
-    // checkResult.getCmrNo(), checkResult.getKunnr());
-    // return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
