@@ -36,6 +36,57 @@ function addAddrStdValidator() {
 }
 
 /**
+ * Validator for mandt stateProv according to landCntry
+ */
+
+function addStateProvValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqId = FormManager.getActualValue('reqId');
+        var landCntry = "";
+        var addrTxt = FormManager.getActualValue('addrTxt');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        var viewOnly = FormManager.getActualValue('viewOnlyPage');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        var landCountryList = [ 'IT', 'ES', 'PT', 'RO', 'US' ];
+        var addrType = "";
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (recordList == null && _allAddressData != null && _allAddressData[i] != null) {
+              recordList = _allAddressData[i];
+            }
+            addrType = recordList.addrType;
+            if (typeof (addrType) == 'object') {
+              addrType = stateProv[0];
+            }
+            landCntry = recordList.landCntry;
+            if (typeof (landCntry) == 'object') {
+              landCntry = stateProv[0];
+            }
+            stateProv = recordList.stateProv;
+            if (typeof (stateProv) == 'object') {
+              stateProv = stateProv[0];
+            }
+            if (addrType != undefined && addrType != null && addrType != '' && landCntry != undefined && landCntry != null && landCntry != '' && !landCountryList.includes(cmrIssuingCntry)) {
+              if (stateProv == undefined && stateProv == null && stateProv!= '') {
+                return new ValidationResult(null, false, 'State Province is mandatory for address with landCntry: ' + landCntry + ' addrType: ' + addrType);
+              } 
+            } 
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+
+
+/**
  * Validator for only a single Sold-to record for the request
  */
 function addSoldToValidator() {
@@ -68,7 +119,7 @@ function addSoldToValidator() {
         }
       }
     };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
 /**
@@ -1280,6 +1331,8 @@ dojo.addOnLoad(function() {
       '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708',
       '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '758', '760', '848', '649', '729', '678', '702', '806', '846' ], null, false, true);
   GEOHandler.registerWWValidator(addAddrStdValidator);
+  GEOHandler.registerWWValidator(addStateProvValidator);
+
   // exclude for LA
   GEOHandler.registerWWValidator(addTaxCodesValidator, GEOHandler.LA, null, false, true);
 
