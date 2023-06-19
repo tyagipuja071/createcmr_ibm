@@ -429,37 +429,6 @@ public class GermanyUtil extends AutomationUtil {
     }
     return valid;
   }
-  
-    @Override
-  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
-      MatchingResponse<DuplicateCMRCheckResponse> response) {
-
-    String[] scenariosToBeChecked = { "PRIPE", "IBMEM" };
-    String scenario = requestData.getData().getCustSubGrp();
-    String[] kuklaPriv = { "60" };
-    String[] kuklaIBMEM = { "71" };
-
-    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-      List<DuplicateCMRCheckResponse> matches = response.getMatches();
-      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
-      for (DuplicateCMRCheckResponse match : matches) {
-        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
-          filteredMatches.add(match);
-        }
-        if (StringUtils.isNotBlank(match.getCustClass())) {
-          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
-          if (Arrays.asList(kuklaPriv).contains(kukla) && ("PRIPE".equals(scenario))) {
-            filteredMatches.add(match);
-          } else if (Arrays.asList(kuklaIBMEM).contains(kukla) && ("IBMEM".equals(scenario))) {
-            filteredMatches.add(match);
-          }
-        }
-
-      }
-      // set filtered matches in response
-      response.setMatches(filteredMatches);
-    }
-  }
 
   @Override
   public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -964,7 +933,7 @@ public class GermanyUtil extends AutomationUtil {
           LOG.debug("Updates to the Abbreviated Name field  are skipped.");
         }
       } else if (changes.isDataChanged("PPS CEID")) {
-    	  cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, detail, resultCodes, changes.getDataChange("PPS CEID"), "R");
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, detail, resultCodes, changes.getDataChange("PPS CEID"), "R");
       } else {
         boolean otherFieldsChanged = false;
         for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
@@ -983,14 +952,14 @@ public class GermanyUtil extends AutomationUtil {
     }
 
     if (resultCodes.contains("R")) {
-    	output.setOnError(true);
-    	validation.setSuccess(false);
-    	validation.setMessage("Rejected");
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
     } else if (cmdeReview) {
-    	engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
-        detail.append("Updates to one or more fields cannot be validated.\n");
-        validation.setSuccess(false);
-        validation.setMessage("Not Validated");
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      detail.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
     } else if (isNegativeCheckNeedeed) {
       validation.setSuccess(false);
       validation.setMessage("Not validated");
