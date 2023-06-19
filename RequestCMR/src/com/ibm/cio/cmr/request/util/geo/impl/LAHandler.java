@@ -3125,6 +3125,7 @@ public class LAHandler extends GEOHandler {
         if (StringUtils.isNotBlank(stateProv) && res.startsWith(stateProv)) {
           txt = res;
         }
+
       }
     }
 

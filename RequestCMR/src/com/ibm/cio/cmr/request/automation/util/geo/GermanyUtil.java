@@ -933,7 +933,7 @@ public class GermanyUtil extends AutomationUtil {
           LOG.debug("Updates to the Abbreviated Name field  are skipped.");
         }
       } else if (changes.isDataChanged("PPS CEID")) {
-    	  cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, detail, resultCodes, changes.getDataChange("PPS CEID"), "R");
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, detail, resultCodes, changes.getDataChange("PPS CEID"), "R");
       } else {
         boolean otherFieldsChanged = false;
         for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
@@ -952,14 +952,14 @@ public class GermanyUtil extends AutomationUtil {
     }
 
     if (resultCodes.contains("R")) {
-    	output.setOnError(true);
-    	validation.setSuccess(false);
-    	validation.setMessage("Rejected");
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
     } else if (cmdeReview) {
-    	engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
-        detail.append("Updates to one or more fields cannot be validated.\n");
-        validation.setSuccess(false);
-        validation.setMessage("Not Validated");
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      detail.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
     } else if (isNegativeCheckNeedeed) {
       validation.setSuccess(false);
       validation.setMessage("Not validated");

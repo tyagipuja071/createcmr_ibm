@@ -20,10 +20,11 @@ public class USCMRNumGen {
   private static final Logger LOG = Logger.getLogger(USCMRNumGen.class);
   public static HashMap<String, ArrayList<String>> cmrNumMap = null;
   public static HashMap<String, ArrayList<String>> cmrNumMapMassCrt = null;
+  private static String reGenCMRFlag = "N";
 
   public static synchronized String genCMRNum(EntityManager entityManager, String type) {
     String cmrNum = "";
-    if (cmrNumMap == null || cmrNumMap.isEmpty()) {
+    if (cmrNumMap == null || cmrNumMap.isEmpty() || "Y".equals(reGenCMRFlag)) {
       LOG.info("there is no CMR number stored in cache, so init...");
       init(entityManager);
     }
@@ -61,8 +62,10 @@ public class USCMRNumGen {
     boolean nonExisted = query.getResults().isEmpty();
     while (!nonExisted) {
       LOG.info(" CMR number:" + cmrNum + " already existed, re-generate CMR number again.");
+      reGenCMRFlag = "Y";
       cmrNum = genCMRNum(entityManager, type);
     }
+    reGenCMRFlag = "N";
 
     return cmrNum;
   }
@@ -114,17 +117,17 @@ public class USCMRNumGen {
   }
 
   public static synchronized void init(EntityManager entityManager) {
-    if (cmrNumMap == null || cmrNumMap.isEmpty()) {
+    if (cmrNumMap == null || cmrNumMap.isEmpty() || "Y".equals(reGenCMRFlag)) {
       LOG.info("there is no CMR number stored in cache, so init...");
-
-      cmrNumMap = new HashMap<String, ArrayList<String>>();
-      ArrayList<String> poaList = getPOANumList(entityManager);
-      ArrayList<String> commonList = getCommonNumList(entityManager);
-      ArrayList<String> mainList = getMainNmNumList(entityManager);
-      cmrNumMap.put("POA", poaList);
-      cmrNumMap.put("COMM", commonList);
-      cmrNumMap.put("MAIN", mainList);
-    }
+     
+  cmrNumMap = new HashMap<String, ArrayList<String>>();
+  ArrayList<String> poaList = getPOANumList(entityManager);
+  ArrayList<String> commonList = getCommonNumList(entityManager);
+  ArrayList<String> mainList = getMainNmNumList(entityManager);
+  cmrNumMap.put("POA", poaList);
+  cmrNumMap.put("COMM", commonList);
+  cmrNumMap.put("MAIN", mainList);
+  }
   }
 
   public static synchronized void initMassCrt(EntityManager entityManager) {
@@ -166,7 +169,7 @@ public class USCMRNumGen {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("LOC", SystemLocation.UNITED_STATES);
-    List<String> records = query.getResults(500, String.class);
+    List<String> records = query.getResults(300, String.class);
 
     if (records != null && records.size() > 0) {
       for (String missCmrNo : records) {
@@ -257,7 +260,7 @@ public class USCMRNumGen {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("LOC", SystemLocation.UNITED_STATES);
-    List<String> records = query.getResults(500, String.class);
+    List<String> records = query.getResults(300, String.class);
 
     // for (int i = 1; i < 9; i++) {
     // query.setParameter("ZZKV_CUSNO1", i + "%");
@@ -360,7 +363,7 @@ public class USCMRNumGen {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("LOC", SystemLocation.UNITED_STATES);
-    List<String> records = query.getResults(500, String.class);
+    List<String> records = query.getResults(300, String.class);
 
     // List<String> records = query.getResults(String.class);
     if (records != null && records.size() > 0) {
