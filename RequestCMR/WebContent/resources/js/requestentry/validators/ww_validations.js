@@ -119,7 +119,7 @@ function addSoldToValidator() {
         }
       }
     };
-  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 /**
