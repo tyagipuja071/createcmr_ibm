@@ -2106,7 +2106,7 @@ function matchDnBForIndia() {
           } else {
             comp_proof_INAUSG = false;
             console.log("Name/Address validation failed by dnb");
-            cmr.showAlert("Please attach company proof as Name/Address validation failed by Dnb.");
+            cmr.showAlert('Please attach company proof as Name/Address validation failed by Dnb.', 'Warning', 'doOverrideDnBMatch()');
           }
           if (!data.validate) {
             checkDnBMatchingAttachmentValidator();

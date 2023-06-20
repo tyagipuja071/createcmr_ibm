@@ -59,17 +59,17 @@ function addStateProvValidator() {
             }
             addrType = recordList.addrType;
             if (typeof (addrType) == 'object') {
-              addrType = stateProv[0];
+              addrType = addrType[0];
             }
             landCntry = recordList.landCntry;
             if (typeof (landCntry) == 'object') {
-              landCntry = stateProv[0];
+              landCntry = landCntry[0];
             }
             stateProv = recordList.stateProv;
             if (typeof (stateProv) == 'object') {
               stateProv = stateProv[0];
             }
-            if (addrType != undefined && addrType != null && addrType != '' && landCntry != undefined && landCntry != null && landCntry != '' && !landCountryList.includes(cmrIssuingCntry)) {
+            if (addrType != undefined && addrType != null && addrType != '' && landCntry != undefined && landCntry != null && landCntry != '' && landCountryList.includes(landCntry)) {
               if (stateProv == undefined && stateProv == null && stateProv!= '') {
                 return new ValidationResult(null, false, 'State Province is mandatory for address with landCntry: ' + landCntry + ' addrType: ' + addrType);
               } 
