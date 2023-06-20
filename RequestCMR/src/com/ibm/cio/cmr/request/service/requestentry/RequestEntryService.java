@@ -648,18 +648,23 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         } else
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
       }
+      
+      if (oldVatIndValue == null){
+        oldVatIndValue = "";
+      } 
+      
       if (admin.getReqType().equals("U")) {
-        if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue != null ) && oldVatIndValue.equals('N')) {          
+        if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue != null ) && oldVatIndValue.equals("N")) {          
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
-        } else if ("N".equals(data.getVatInd()) && (iscrossBorder) && (oldVatValue != null) && oldVatIndValue.equals('N')) {          
+        } else if ("N".equals(data.getVatInd()) && (iscrossBorder) && (oldVatValue != null) && oldVatIndValue.equals("N")) {          
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
-        } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue == null || oldVatValue.isEmpty()) && oldVatIndValue.equals('N')) {
+        } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue == null || oldVatValue.isEmpty()) && oldVatIndValue.equals("N")) {
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
-        } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue != null) && data.getVat().isEmpty() && (oldVatIndValue.equals('T'))) {
+        } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue != null) && data.getVat().isEmpty() && (oldVatIndValue.equals("T"))) {
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);        
-        } else if ("N".equals(data.getVatInd()) && (iscrossBorder) && (oldVatValue != null) && data.getVat().isEmpty() && (oldVatIndValue.equals('E'))) {
+        } else if ("N".equals(data.getVatInd()) && (iscrossBorder) && (oldVatValue != null) && data.getVat().isEmpty() && (oldVatIndValue.equals("E"))) {
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
-        } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue == null|| oldVatValue.isEmpty()) && data.getVat().isEmpty() && (oldVatIndValue.equals('E'))) {
+        } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue == null|| oldVatValue.isEmpty()) && data.getVat().isEmpty() && (oldVatIndValue.equals("E"))) {
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
         }
       }
