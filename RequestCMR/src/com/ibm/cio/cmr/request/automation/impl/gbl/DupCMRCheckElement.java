@@ -287,8 +287,8 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
   }
 
   public void filterProspectCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
-      MatchingResponse<DuplicateCMRCheckResponse> response, String isProspectCmr) {
-    if ("Y".equals(isProspectCmr)) {
+      MatchingResponse<DuplicateCMRCheckResponse> response, String isProspectCmr, boolean fromApi) {
+    if ("Y".equals(isProspectCmr) || fromApi) {
       List<DuplicateCMRCheckResponse> cmrCheckMatches = response.getMatches();
       List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
@@ -353,14 +353,15 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     if (response.getSuccess() && response.getMatches().size() > 0) {
       log.debug("Matches found for the given search criteria.");
       String isProspectCmr = admin.getProspLegalInd();
+      boolean fromApi = !StringUtils.isBlank(admin.getSourceSystId());
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
       if (countryUtil != null) {
         countryUtil.filterDuplicateCMRMatches(entityManager, requestData, engineData, response);
       }
-      if ("Y".equals(isProspectCmr) || !StringUtils.isBlank(admin.getSourceSystId())) {
+      if ("Y".equals(isProspectCmr) || fromApi) {
         // remove all prospect cmr found in DUPC matches if it's an prospect cmr
         // CREATCMR-9640 - remove also for requests created via API
-        filterProspectCMRMatches(entityManager, requestData, engineData, response, isProspectCmr);
+        filterProspectCMRMatches(entityManager, requestData, engineData, response, isProspectCmr, fromApi);
       }
     }
 
