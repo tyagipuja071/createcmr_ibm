@@ -175,7 +175,7 @@ function processRequestAction() {
         findVatInd();
       } else if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
           .getActualValue('cmrIssuingCntry')))
-          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatIndValue != 'N' && oldVatValue != '' && reqType == 'U')) {
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatIndValue != 'N') && (reqType == 'U')) {
         findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
