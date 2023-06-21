@@ -375,7 +375,7 @@ function addAfterConfigAP() {
     }
   }
   // CREATCMR-5269
-    if (cntry != SysLoc.HONG_KONG && cntry !=  SysLoc.MACAO && reqType == 'U') {
+    if (reqType == 'U') {
     handleObseleteExpiredDataForUpdate();
   }
   if (cntry == '616' && reqType == 'U' && (role == 'PROCESSOR' || role == 'REQUESTER')) {
@@ -5655,11 +5655,11 @@ function handleObseleteExpiredDataForUpdate() {
   console.log('>>>> handleObseleteExpiredDataForUpdate >>>>');
  var reqType = FormManager.getActualValue('reqType');
  var cntry = FormManager.getActualValue('cmrIssuingCntry');
- if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' || cntry == SysLoc.HONG_KONG || cntry ==  SysLoc.MACAO) {
+ if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
    return;
  }
  // lock all the coverage fields and remove validator
- if (reqType == 'U') {
+ if (reqType == 'U' &&  cntry != SysLoc.HONG_KONG || cntry !=  SysLoc.MACAO) {
    FormManager.readOnly('apCustClusterId');
    FormManager.readOnly('clientTier');
    FormManager.readOnly('mrcCd');
@@ -5702,6 +5702,18 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.removeValidator('contactName2', Validators.REQUIRED);
    FormManager.removeValidator('contactName3', Validators.REQUIRED);
    FormManager.removeValidator('busnType', Validators.REQUIRED);
+ } 
+ if (reqType == 'U' &&  cntry == SysLoc.HONG_KONG || cntry ==  SysLoc.MACAO) {
+   FormManager.readOnly('apCustClusterId');
+   FormManager.readOnly('clientTier');
+   FormManager.readOnly('inacType');
+   FormManager.readOnly('inacCd');
+
+// setting all fields as not Mandt for update Req
+   FormManager.removeValidator('apCustClusterId', Validators.REQUIRED);
+   FormManager.removeValidator('clientTier', Validators.REQUIRED);
+   FormManager.removeValidator('inacType', Validators.REQUIRED);
+   FormManager.removeValidator('inacCd', Validators.REQUIRED);   
  } 
 }
 
