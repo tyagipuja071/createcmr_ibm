@@ -160,7 +160,8 @@ function processRequestAction() {
       REQ_ID : reqId
     });
 
-    // var oldVatValue = oldVat.ret1 != undefined ? oldVat.ret1 : '';
+    var oldVatValue = oldVat.ret1 != undefined ? oldVat.ret1 : '';
+    var oldVatIndValue = oldVatInd.ret1 != undefined ? oldVatInd.ret1 : '';
 
     var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
     if (_pagemodel.approvalResult == 'Rejected') {
@@ -174,7 +175,7 @@ function processRequestAction() {
         findVatInd();
       } else if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
           .getActualValue('cmrIssuingCntry')))
-          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatInd != 'N' && oldVat != '' && reqType == 'U')) {
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatIndValue != 'N' && oldVatValue != '' && reqType == 'U')) {
         findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
