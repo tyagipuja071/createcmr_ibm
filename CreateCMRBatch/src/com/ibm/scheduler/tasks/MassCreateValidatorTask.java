@@ -7,7 +7,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import com.ibm.scheduler.creator.BatchTask;
 
 public class MassCreateValidatorTask extends BatchTask {
-  String cronExpression = "00,05,10,15,20,25,30,35,40,45,50,55 * * * *";
+  String cronExpression = "* 00,05,10,15,20,25,30,35,40,45,50,55 * * * *";
 
   @Override
   public void run() {

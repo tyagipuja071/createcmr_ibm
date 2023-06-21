@@ -7,7 +7,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import com.ibm.scheduler.creator.BatchTask;
 
 public class TransConnMultiTask extends BatchTask {
-  String cronExpression = "*/2 * * * *";
+  String cronExpression = "* */2 * * * *";
 
   @Override
   public void run() {

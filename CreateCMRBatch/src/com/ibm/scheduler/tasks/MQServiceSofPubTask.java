@@ -7,7 +7,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import com.ibm.scheduler.creator.BatchTask;
 
 public class MQServiceSofPubTask extends BatchTask {
-  String cronExpression = "01,03,05,07,09,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59 * * * *";
+  String cronExpression = "* 01,03,05,07,09,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59 * * * *";
 
   @Override
   public void run() {

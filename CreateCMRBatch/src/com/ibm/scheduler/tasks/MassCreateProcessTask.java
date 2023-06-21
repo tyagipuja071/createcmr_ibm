@@ -7,7 +7,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import com.ibm.scheduler.creator.BatchTask;
 
 public class MassCreateProcessTask extends BatchTask {
-  String cronExpression = "02,07,12,17,22,27,32,37,42,47,52,57 * * * *";
+  String cronExpression = "* 02,07,12,17,22,27,32,37,42,47,52,57 * * * *";
 
   @Override
   public void run() {
