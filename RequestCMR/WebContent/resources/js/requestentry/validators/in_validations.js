@@ -1300,11 +1300,11 @@ function addSectorIsbuLogicOnSubIndu() {
     searchArryAndSetValue(arryIndCdForSectorCSI, _industryClass, 'sectorCd', 'CSI');
     searchArryAndSetValue(arryIndCdForSectorEXC, _industryClass, 'sectorCd', 'EXC');
   }
-
-  updateIsbuCd();
+  // updateIsbuCd();
 }
 
 function updateIsbuCd() {
+  addSectorIsbuLogicOnSubIndu();
   console.log(">>>> updateIsbuCd >>>>");
   var _mrcCd = FormManager.getActualValue('mrcCd');
   var _sectorCd = FormManager.getActualValue('sectorCd');
@@ -1323,7 +1323,7 @@ function updateIsbuCd() {
   if (_mrcCd == '3' && _industryClass != '') {
     _isbuCd = 'GMB' + _industryClass;
     FormManager.setValue('isbuCd', _isbuCd);
-  } else if (_mrcCd == '2' && _sectorCd != '' && _industryClass != '') {
+  }  else if (_mrcCd == '2' && _sectorCd != '' && _industryClass != '') {
     _isbuCd = _sectorCd + _industryClass;
     FormManager.setValue('isbuCd', _isbuCd);
   }
