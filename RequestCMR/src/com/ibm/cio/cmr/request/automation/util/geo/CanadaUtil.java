@@ -355,7 +355,7 @@ public class CanadaUtil extends AutomationUtil {
           }
           // Credit Code creditCd
           else if (custScenario.getFieldName().equals("creditCd")) {
-            String dataCreditCd = data.getCreditCd();
+            String dataCreditCd = StringUtils.isNotEmpty(data.getCreditCd()) ? data.getCreditCd() : "";
             if (StringUtils.isNotBlank(scenariofieldValue) && !dataCreditCd.equals(scenariofieldValue)) {
               details.append("Setting Credit Code to ").append(scenariofieldValue).append("\n");
               overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CREDIT_CD", dataCreditCd, scenariofieldValue);
@@ -1329,6 +1329,7 @@ public class CanadaUtil extends AutomationUtil {
     details.append("Setting CTC based on Coverage ").append(coverageId).append(" to ").append(ctc).append("\n");
     overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), ctc);
   }
+
   /**
    * * Validates if address closely matches with DnB records matched.
    * 
