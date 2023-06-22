@@ -175,7 +175,11 @@ function processRequestAction() {
         findVatInd();
       } else if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
           .getActualValue('cmrIssuingCntry')))
-          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatIndValue != 'N') && (reqType == 'U')) {
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatIndValue == 'T' || oldVatIndValue == 'E') && (reqType == 'U')) {
+        findVatInd();
+      } else if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
+          .getActualValue('cmrIssuingCntry')))
+          && (vatInd == 'N') && (crossScenTyp.includes(custGrp)) && (oldVatIndValue == 'E') && (reqType == 'U')) {
         findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
