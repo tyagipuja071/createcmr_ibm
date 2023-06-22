@@ -56,7 +56,8 @@ public class VatUtilController {
 
   private static final Logger LOG = Logger.getLogger(VatUtilController.class);
 
-  @RequestMapping(value = "/vat")
+  @RequestMapping(
+      value = "/vat")
   public ModelMap checkVat(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -85,7 +86,8 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(value = "/vat/vies")
+  @RequestMapping(
+      value = "/vat/vies")
   public ModelMap validateVATUsingVies(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -134,26 +136,29 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(value = "/in/gst")
+  @RequestMapping(
+      value = "/in/gst")
   public ModelMap validateGST(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
     ValidationResult validation = null;
-    String state = "";
+    String country = "";
     if (!StringUtils.isEmpty(request.getParameter("country"))) {
-      state = request.getParameter("country");
+      country = request.getParameter("country");
     }
     String vat = request.getParameter("vat");
     if (StringUtils.isEmpty(vat)) {
       validation = ValidationResult.error("'Gst#' param is required.");
     }
-    String name = request.getParameter("name");
-    if (StringUtils.isEmpty(name)) {
+    String custNm1 = request.getParameter("custNm1");
+    if (StringUtils.isEmpty(custNm1)) {
       validation = ValidationResult.error("'name' param is required.");
     }
-    String address = request.getParameter("address");
-    if (StringUtils.isEmpty(address)) {
-      validation = ValidationResult.error("'address' param is required.");
+    String custNm2 = request.getParameter("custNm2");
+
+    String addrTxt = request.getParameter("addrTxt");
+    if (StringUtils.isEmpty(addrTxt)) {
+      validation = ValidationResult.error("'addrTxt' param is required.");
     }
     String postal = request.getParameter("postal");
     if (StringUtils.isEmpty(postal)) {
@@ -163,6 +168,15 @@ public class VatUtilController {
     if (StringUtils.isEmpty(city)) {
       validation = ValidationResult.error("'city' param is required.");
     }
+    String stateProv = request.getParameter("stateProv");
+    if (StringUtils.isEmpty(stateProv)) {
+      validation = ValidationResult.error("'stateProv' param is required.");
+    }
+    String landCntry = request.getParameter("landCntry");
+    if (StringUtils.isEmpty(landCntry)) {
+      validation = ValidationResult.error("'landCntry' param is required.");
+    }
+
     if (validation == null || validation.isSuccess()) {
 
       LOG.debug("Validating GST# " + vat + " for India");
@@ -174,11 +188,13 @@ public class VatUtilController {
 
       GstLayerRequest gstLayerRequest = new GstLayerRequest();
       gstLayerRequest.setGst(vat);
-      gstLayerRequest.setCountry(state);
-      gstLayerRequest.setName(name);
-      gstLayerRequest.setAddress(address);
+      gstLayerRequest.setAddrTxt(addrTxt);
+      gstLayerRequest.setCustName1(custNm1);
+      gstLayerRequest.setCustName2(custNm2);
       gstLayerRequest.setCity(city);
       gstLayerRequest.setPostal(postal);
+      gstLayerRequest.setStateProv(stateProv);
+      gstLayerRequest.setLandCntry(landCntry);
 
       LOG.debug("Connecting to the GST Layer Service at " + baseUrl);
       AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.IN_GST_SERVICE_ID, gstLayerRequest,
@@ -189,8 +205,7 @@ public class VatUtilController {
       };
       AutomationResponse<GstLayerResponse> gstResponse = mapper.readValue(json, ref);
       if (gstResponse != null && gstResponse.isSuccess()) {
-        if (gstResponse.getMessage().equals("Valid GST and Company Name entered on the Request")
-            || gstResponse.getMessage().equals("Valid Address and Company Name entered on the Request")) {
+        if (gstResponse.getMessage().equals("GST provided is verified with the company details.")) {
           validation = ValidationResult.success();
         } else {
           validation = ValidationResult.error("GST# provided on the request is not valid as per GST Validation. Please verify the GST# provided.");
@@ -204,7 +219,8 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(value = "/zip")
+  @RequestMapping(
+      value = "/zip")
   public ModelMap checkPostalCode(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -240,7 +256,8 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(value = "/au/abn")
+  @RequestMapping(
+      value = "/au/abn")
   public ModelMap validateABN(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -326,7 +343,8 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(value = "/au/custNm")
+  @RequestMapping(
+      value = "/au/custNm")
   public ModelMap validateCustNmFromVat(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String regex = "\\s+$";
@@ -424,7 +442,8 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(value = "/au/custNmFromAPI")
+  @RequestMapping(
+      value = "/au/custNmFromAPI")
   public ModelMap validateCustNmFromAPI(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String regex = "\\s+$";
@@ -517,7 +536,8 @@ public class VatUtilController {
    *             {@link #checkCnAddrViaDNB(HttpServletRequest, HttpServletResponse)}
    */
   @Deprecated
-  @RequestMapping(value = "/cn/tyc")
+  @RequestMapping(
+      value = "/cn/tyc")
   public ModelMap checkCnAddr(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     // ValidationResult validation = null;
@@ -559,7 +579,8 @@ public class VatUtilController {
    * @return
    * @throws Exception
    */
-  @RequestMapping(value = "/cn/dnb")
+  @RequestMapping(
+      value = "/cn/dnb")
   public ModelMap checkCnAddrViaDNB(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     map.put("result", null);
@@ -637,7 +658,8 @@ public class VatUtilController {
     return query.exists();
   }
 
-  @RequestMapping(value = "/nz/nzbnFromAPI")
+  @RequestMapping(
+      value = "/nz/nzbnFromAPI")
   public ModelMap validateNZBNFromAPI(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     boolean apiSuccess = false;

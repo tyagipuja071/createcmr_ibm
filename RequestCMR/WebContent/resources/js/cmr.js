@@ -738,7 +738,7 @@ var cmr = {
     });
     return result;
   },
-  validateGST : function(country, vat, name, address, postal, city) {
+  validateGST : function(country, vat, custNm1, custNm2, addrTxt, postal, city, stateProv, landCntry) {
     var result = {};
     dojo.xhrGet({
       url : cmr.CONTEXT_ROOT + '/in/gst.json',
@@ -747,10 +747,13 @@ var cmr = {
       content : {
         country : country,
         vat : vat,
-        name : name,
-        address : address,
+        custNm1 : custNm1,
+        custNm2 : custNm2,
+        addrTxt : addrTxt,
         postal : postal,
-        city : city
+        city : city,
+        stateProv : stateProv,
+        landCntry : landCntry,
       },
       timeout : 50000,
       sync : true,

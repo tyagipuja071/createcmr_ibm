@@ -140,13 +140,13 @@ public class INGSTValidationElement extends ValidatingElement implements Company
       }
     }
     gstLayerRequest.setGst(vat);
-    gstLayerRequest.setCountry(state);
-    gstLayerRequest.setName((StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1() : ""));
-    gstLayerRequest.setAddress((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "") + " "
-        + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : "") + " "
-        + (StringUtils.isNotBlank(zs01.getDept()) ? " " + zs01.getDept() : ""));
+    gstLayerRequest.setStateProv(state);
+    gstLayerRequest.setCustName1((StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1() : ""));
+    gstLayerRequest.setCustName2((StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm2() : ""));
+    gstLayerRequest.setAddrTxt((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : ""));
     gstLayerRequest.setCity(zs01.getCity1());
     gstLayerRequest.setPostal(zs01.getPostCd());
+    gstLayerRequest.setLandCntry(zs01.getLandCntry());
 
     log.debug("Connecting to the GST Layer Service at " + baseUrl);
     AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.IN_GST_SERVICE_ID, gstLayerRequest,
