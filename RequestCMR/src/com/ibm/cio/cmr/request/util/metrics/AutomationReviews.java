@@ -123,7 +123,7 @@ public class AutomationReviews {
     group = new ReviewGroup("Non-Automated");
     group.setPriority(0);
     cat = new ReviewCategory("Attachment review");
-    cat.addPattern("An attachment of type.*has been added");
+    cat.addReason("An attachment of type 'Chinese Name And Address change'");
     group.add(cat);
 
     cat = new ReviewCategory("BO Code");
