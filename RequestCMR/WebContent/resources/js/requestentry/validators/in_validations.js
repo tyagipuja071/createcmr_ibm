@@ -2232,26 +2232,28 @@ function validateGSTForIndia() {
                 REQ_ID : reqId
               };
             }
-            var results = cmr.query('GET_ZS01', reqParam);
+            var results = cmr.query('GET_ZS01_GST_VALIDATE', reqParam);
             if (results.ret1 != undefined) {
               
-              var name = results.ret1;
-              var address = results.ret2;
-              var postal = results.ret3;
-              var city = results.ret4;
-              var state = results.ret5;
-              var country = '';
+              var custNm1 = results.ret1;
+              var custNm2 = results.ret2;
+              var addrTxt = results.ret3;
+              var postal = results.ret4;
+              var city = results.ret5;
+              var stateProv = results.ret6;
+              var landCntry = results.ret7;
+//              var country = '744';
               
-              if (state != null && state != '') {
+              if (stateProv != null && stateProv != '') {
                 reqParam = {
-                    STATE_PROV_CD : state,
+                    STATE_PROV_CD : stateProv,
                   };
               var stateResult = cmr.query('GET_STATE_DESC', reqParam);
                 if (stateResult != null) {
-                  country = stateResult.ret1;
+                  stateProv = stateResult.ret1;
                 }
               }
-            var gstRet = cmr.validateGST(country, vat, name, address, postal, city);
+            var gstRet = cmr.validateGST(cntry, vat, custNm1, custNm2, addrTxt, postal, city, stateProv, landCntry);
             if (!gstRet.success) {
               return new ValidationResult({
                 id : 'vat',
