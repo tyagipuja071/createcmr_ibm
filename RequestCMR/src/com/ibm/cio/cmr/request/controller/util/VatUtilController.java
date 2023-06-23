@@ -56,8 +56,7 @@ public class VatUtilController {
 
   private static final Logger LOG = Logger.getLogger(VatUtilController.class);
 
-  @RequestMapping(
-      value = "/vat")
+  @RequestMapping(value = "/vat")
   public ModelMap checkVat(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -86,8 +85,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/vat/vies")
+  @RequestMapping(value = "/vat/vies")
   public ModelMap validateVATUsingVies(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -136,8 +134,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/in/gst")
+  @RequestMapping(value = "/in/gst")
   public ModelMap validateGST(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -219,8 +216,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/zip")
+  @RequestMapping(value = "/zip")
   public ModelMap checkPostalCode(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -256,8 +252,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/au/abn")
+  @RequestMapping(value = "/au/abn")
   public ModelMap validateABN(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -343,8 +338,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/au/custNm")
+  @RequestMapping(value = "/au/custNm")
   public ModelMap validateCustNmFromVat(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String regex = "\\s+$";
@@ -442,8 +436,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/au/custNmFromAPI")
+  @RequestMapping(value = "/au/custNmFromAPI")
   public ModelMap validateCustNmFromAPI(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String regex = "\\s+$";
@@ -536,8 +529,7 @@ public class VatUtilController {
    *             {@link #checkCnAddrViaDNB(HttpServletRequest, HttpServletResponse)}
    */
   @Deprecated
-  @RequestMapping(
-      value = "/cn/tyc")
+  @RequestMapping(value = "/cn/tyc")
   public ModelMap checkCnAddr(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     // ValidationResult validation = null;
@@ -579,8 +571,7 @@ public class VatUtilController {
    * @return
    * @throws Exception
    */
-  @RequestMapping(
-      value = "/cn/dnb")
+  @RequestMapping(value = "/cn/dnb")
   public ModelMap checkCnAddrViaDNB(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     map.put("result", null);
@@ -658,8 +649,7 @@ public class VatUtilController {
     return query.exists();
   }
 
-  @RequestMapping(
-      value = "/nz/nzbnFromAPI")
+  @RequestMapping(value = "/nz/nzbnFromAPI")
   public ModelMap validateNZBNFromAPI(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     boolean apiSuccess = false;
