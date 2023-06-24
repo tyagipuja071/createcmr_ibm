@@ -203,8 +203,6 @@ public class SessionInactivityFilter implements Filter {
         if (session.getAttribute(CmrConstants.SESSION_APPUSER_KEY) == null) {
           LOG.debug("No user session found");
 
-          deleteWASCookies(req, resp);
-
           RequestUtils.performLogoutActivities(req);
 
           long reqId = RequestUtils.extractRequestId((HttpServletRequest) request);
@@ -221,8 +219,6 @@ public class SessionInactivityFilter implements Filter {
 
         if (tooLongSinceLastUserTriggeredRequest(req)) {
           LOG.debug("User session has expired");
-
-          deleteWASCookies(req, resp);
 
           RequestUtils.performLogoutActivities(req);
 
@@ -244,8 +240,6 @@ public class SessionInactivityFilter implements Filter {
         LocalDateTime tokenExpiringTime = (LocalDateTime) session.getAttribute("tokenExpiringTime");
         if (tokenExpiringTime != null && LocalDateTime.now().isAfter(tokenExpiringTime)) {
           LOG.debug("Access token expired! ");
-
-          deleteWASCookies(req, resp);
 
           RequestUtils.performLogoutActivities(req);
 

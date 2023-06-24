@@ -597,35 +597,12 @@ public class LoginController extends BaseController {
       String userIntranetEmail = "";
       HttpSession session = request.getSession();
 
-      OAuthUtils oAuthUtils = new OAuthUtils();
       UserHelper userHelper = (UserHelper) session.getAttribute("userHelper");
       SimpleJWT idToken = userHelper.getIDToken();
       String accessToken = userHelper.getAccessToken();
       Long expiresIn = Long.parseLong(userHelper.getPrivateHashtableAttr("expires_in"));
 
       JSONObject claims = idToken.getClaims();
-      // Tokens tokens = new Tokens();
-      //
-      // userHelper.getIDToken();
-      // // oAuthUtils.parseToken();
-      //
-      // // validate JWT signature
-      // boolean isJWTValid = false;
-      //
-      // try {
-      // LOG.trace("Validating signature for grant_id: " +
-      // request.getParameter("grant_id"));
-      // isJWTValid = OAuthUtils.validateSignature();
-      // LOG.trace("JWT Signature validated successfully for grant_id: " +
-      // request.getParameter("grant_id"));
-      // } catch (InvalidKeyException | NoSuchAlgorithmException |
-      // SignatureException e) {
-      // // TODO interrupt the thread here
-      // LOG.error("An error occured when validating the signature: ", e);
-      // }
-
-      // assign AppUser
-      // if (true) {
       userIntranetEmail = ((String) claims.get("emailAddress")).toLowerCase();
       session.setAttribute("userIntranetEmail", userIntranetEmail);
 
@@ -640,17 +617,7 @@ public class LoginController extends BaseController {
 
       request.getRequestDispatcher("/setUserRolesAndPermissions").forward(request, response);
       return;
-      // } else {
-      // LOG.trace("Invalid Token! Unable to proceed with the request.");
-      // // TODO what to do if token is invalid or expired?
-      // OAuthUtils.revokeToken(userHelper.getAccessToken());
-      // AppUser.remove(request);
-      // session.invalidate();
-      // response.sendRedirect("/CreateCMR/oidcclient/redirect/client01");
-      // return;
-      // }
     } catch (IOException | ServletException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     return;
