@@ -655,27 +655,23 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
             
       if (admin.getReqType().equals("U")) {
         if (!oldVatIndValue.isEmpty()){
-          
-        if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue.isEmpty()) && oldVatIndValue.equals("N")) {
-          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
-        } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue != null) && (oldVatIndValue.equals("T"))) {
-          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);        
-        } else if ("N".equals(data.getVatInd()) && (iscrossBorder) && (oldVatValue != null)  && (oldVatIndValue.equals("E"))) {
-          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
-        } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue.isEmpty() && data.getVat().isEmpty())  && (oldVatIndValue.equals("E"))) {
-          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
-        }
+          if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue.isEmpty()) && oldVatIndValue.equals("N")) {
+            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
+          } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue != null) && (oldVatIndValue.equals("T"))) {
+            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);        
+          } else if ("N".equals(data.getVatInd()) && (iscrossBorder) && (oldVatValue != null)  && (oldVatIndValue.equals("E"))) {
+            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+          } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue.isEmpty()) && (oldVatIndValue.equals("E"))) {
+            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+          }
         
-      }  
-        if (oldVatIndValue.isEmpty()){
+        } else if (oldVatIndValue.isEmpty()){
           if ("N".equals(data.getVatInd()) && (!iscrossBorder)) {
             scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
-          } else 
+          } else {
             scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
-        
-      }
-        
-      
+          }
+        }
       }
       
     
