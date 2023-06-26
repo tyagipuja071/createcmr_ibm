@@ -1494,6 +1494,14 @@ public class MEHandler extends BaseSOFHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Customer Classification Code", "Customer Classification Code"));
+      update.setNewData(service.getCodeAndDescription(newData.getCustClass(), "Customer Classification Code", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCustClass(), "Customer Classification Code", cmrCountry));
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBpAcctTyp(), newData.getBpAcctTyp())
         && SystemLocation.ABU_DHABI.equals(cmrCountry)) {
       update = new UpdatedDataModel();
