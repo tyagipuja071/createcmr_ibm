@@ -27,7 +27,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.model.login.LogInUserModel;
 import com.ibm.cio.cmr.request.service.user.UserService;
@@ -188,9 +187,13 @@ public class UserInjectFilter implements Filter {
 
     session.setAttribute("loginUser", loginUser);
 
-    AppUser appUser = new AppUser();
-    appUser.setIntranetId(loginUser.getUsername().toLowerCase());
-    request.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, appUser);
+    // AppUser appUser = new AppUser();
+    // appUser.setIntranetId(loginUser.getUsername().toLowerCase());
+    // request.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY,
+    // appUser);
+
+    OAuthUtils oAuthUtils = new OAuthUtils();
+    oAuthUtils.authorizeAndSetRoles(loginUser, userService, request, response);
 
   }
 
