@@ -1915,7 +1915,8 @@ function setPPSCEIDRequired() {
   if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (subGrp.includes('BP') || subGrp.includes('BUS')) {
+//  if (subGrp.includes('BP') || subGrp.includes('BUS')) {
+  if (subGrp=='BUSPR' || subGrp=='CBBUS') {
     FormManager.enable('ppsceid');
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   } else {
