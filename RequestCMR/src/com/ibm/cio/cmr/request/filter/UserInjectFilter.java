@@ -23,9 +23,11 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.model.login.LogInUserModel;
 import com.ibm.cio.cmr.request.service.user.UserService;
@@ -34,7 +36,6 @@ import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
 import com.ibm.cio.cmr.request.util.oauth.SimpleJWT;
 import com.ibm.cio.cmr.request.util.oauth.UserHelper;
 import com.ibm.json.java.JSONObject;
-import com.sun.istack.internal.Nullable;
 
 /**
  * This filter ensures valid user is present at the request. If not, the request
@@ -89,7 +90,6 @@ public class UserInjectFilter implements Filter {
     HttpServletRequest httpReq = (HttpServletRequest) request;
     HttpServletResponse httpResp = (HttpServletResponse) response;
 
-    // verify and force e ncoding
     assignEncoding(this.encoding, httpReq, httpResp);
 
     HttpSession session = shouldCreateSession(httpReq);
@@ -103,7 +103,6 @@ public class UserInjectFilter implements Filter {
           LOG.warn("No user on the session yet...");
           UserHelper userHelper = new UserHelper();
 
-          // connect to W3 to build user profile
           String ibmUniqueId = userHelper.getUNID();
 
           LOG.debug("Subject is set: " + ibmUniqueId);
@@ -120,9 +119,6 @@ public class UserInjectFilter implements Filter {
             LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmUniqueId is " + userHelper.getUNID());
             LOG.trace("User:" + userHelper.getDisplayName() + "'s ibmFullName is " + userHelper.getPrincipalName());
           }
-
-          LOG.debug("Redirecting to W3 ID Provisioner...");
-
           session.setAttribute("userHelper", userHelper);
           setSessionAttributes(httpReq, httpResp);
           filterChain.doFilter(request, response);
@@ -192,8 +188,9 @@ public class UserInjectFilter implements Filter {
 
     session.setAttribute("loginUser", loginUser);
 
-    OAuthUtils oAuthUtils = new OAuthUtils();
-    oAuthUtils.authorizeAndSetRoles(loginUser, userService, request, response);
+    AppUser appUser = new AppUser();
+    appUser.setIntranetId(loginUser.getUsername().toLowerCase());
+    request.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, appUser);
 
   }
 
