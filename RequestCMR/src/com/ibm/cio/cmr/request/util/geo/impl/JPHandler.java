@@ -40,6 +40,7 @@ import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients;
 import com.ibm.cio.cmr.request.entity.DefaultApprovals;
+import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
@@ -1484,7 +1485,42 @@ public class JPHandler extends GEOHandler {
     setCSBOBeforeAddrSave(entityManager, addr);
     setCustNmDetailBeforeAddrSave(entityManager, addr);
     // setAccountAbbNmBeforeAddrSave(entityManager, addr);
+    IntlAddr iAddr = getIntlAddrById(addr, entityManager);
+    if (iAddr == null) {
+      iAddr = getIntlAddrListById(addr, entityManager);
+      if (iAddr != null) {
+        iAddr.getId().setAddrType(addr.getId().getAddrType());
+        iAddr.getId().setAddrSeq(addr.getId().getAddrSeq());
+        entityManager.persist(iAddr);
+        entityManager.flush();
+      }
+    }
+  }
 
+  public IntlAddr getIntlAddrListById(Addr addr, EntityManager entityManager) {
+    String qryIntlAddrListById = ExternalizedQuery.getSql("GET.INTL_ADDR_LIST_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, qryIntlAddrListById);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    List<IntlAddr> intlAddrList;
+    intlAddrList = query.getResults(IntlAddr.class);
+    if (intlAddrList != null && intlAddrList.size() > 0)
+      return intlAddrList.get(0);
+    else
+      return null;
+  }
+
+  @Override
+  public IntlAddr getIntlAddrById(Addr addr, EntityManager entityManager) {
+    IntlAddr iAddr = new IntlAddr();
+    String qryIntlAddrById = ExternalizedQuery.getSql("GET.INTL_ADDR_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, qryIntlAddrById);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("ADDR_SEQ", addr.getId().getAddrSeq());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+
+    iAddr = query.getSingleResult(IntlAddr.class);
+
+    return iAddr;
   }
 
   private void setCSBOBeforeAddrSave(EntityManager entityManager, Addr addr) {
