@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.ProlifChecklist;
 import com.ibm.cio.cmr.request.entity.ProlifChecklistPK;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
@@ -798,6 +799,9 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       // } else {
       // reqEntryService.createEntity(rdc, entityManager);
       // }
+      if (SystemLocation.JAPAN.equals(reqModel.getCmrIssuingCntry())) {
+        setJPIntlAddr(entityManager, addr, cmr);
+      }
 
       reqEntryService.updateEntity(addr, entityManager);
       // if (this.autoEngineProcess) {
@@ -817,6 +821,26 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       AddressService.clearDplResults(entityManager, reqId);
     }
 
+  }
+
+  private void setJPIntlAddr(EntityManager entityManager, Addr addr, FindCMRRecordModel cmr) {
+    IntlAddr iAddr = null;
+    AddressService addSvc = new AddressService();
+    iAddr = addSvc.getIntlAddrById(addr, entityManager);
+    if (iAddr == null && StringUtils.isNoneBlank(cmr.getCmrName())) {
+      iAddr = addSvc.createIntlAddrFromModel(cmr, addr, entityManager);
+    } else if (StringUtils.isNoneBlank(cmr.getCmrName())) {
+      iAddr.setIntlCustNm1(cmr.getCmrName());
+      iAddr.setIntlCustNm2(cmr.getCmrName2());
+      iAddr.setAddrTxt(cmr.getCmrStreet());
+      iAddr.setIntlCustNm4("");
+      iAddr.setCity1(cmr.getCmrCity());
+      iAddr.setCity2(cmr.getCmrCity2());
+    }
+    if (iAddr != null) {
+      entityManager.persist(iAddr);
+      entityManager.flush();
+    }
   }
 
   /**
