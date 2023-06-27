@@ -7942,6 +7942,7 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     }
 
     if(cntry == '616') {
+      setAnzKuklaFor();
       clearClusterFieldsScenarios = ['ESOSW', 'NRML' ];
       if(scenario =='CROSS' && scenarioChanged){        
         FormManager.setValue('apCustClusterId', '00001');
@@ -7956,6 +7957,7 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     }
 	// CREATCMR-7884
     if(cntry == '796') {
+      setAnzKuklaFor();
       clearClusterFieldsScenarios = ['ESOSW', 'NRML', 'NRMLC', 'AQSTN', 'XAQST', 'XESO' ];
       if(scenario =='CROSS' && scenarioChanged){        
         FormManager.setValue('apCustClusterId', '00002');
