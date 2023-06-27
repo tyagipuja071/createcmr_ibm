@@ -10,6 +10,9 @@
 <%
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
 %>
+
+<script src="https://unpkg.com/read-excel-file@5.x/bundle/read-excel-file.min.js">
+</script>
 <style>
 #addEditAddressModal div.ibm-columns {
   width: 730px !important;
@@ -152,6 +155,18 @@
         <div id="dplChkInfoEdit">-</div>
       </cmr:column>
     </cmr:row>
+
+    <cmr:view forCountry="760">
+    	<cmr:row>
+      		<cmr:column span="1" width="200">
+    			<label for="endUserFile"> ${ui.endUserFile}: </label>
+    		</cmr:column>
+    		<cmr:column span="3">
+				<input type="file" id="endUserFile" accept=".xls" name="endUserFile">
+			</cmr:column>
+		</cmr:row>
+    </cmr:view>
+    
     <div style="display:none">
     <cmr:row addBackground="true">
       
@@ -219,6 +234,11 @@
       <cmr:button label="${ui.btn.addAddress}" onClick="doValidateSave()" highlight="true" pad="true" id="addressBtn" />
       </cmr:view>
       <cmr:button label="${ui.btn.cancel}" onClick="cancelAddressModal()" highlight="false" pad="true" />
+      
+      <cmr:view forCountry="760">
+        <cmr:button label="${ui.btn.upload}" onClick="uploadFile()" highlight="true" pad="true" id="uploadBtn" />
+      </cmr:view>
+    
     </cmr:buttonsRow>
   </cmr:form>
 </cmr:modal>

@@ -3119,3 +3119,10 @@ function resetSccInfo() {
 }
 // CREATCMR-5447
 
+function uploadFile(){
+	console.log("upload file....");	
+    var file = FormManager.getActualValue('endUserFile');
+    var fileStr = readXlsxFile(file);
+    console.log(fileStr);
+    
+}
