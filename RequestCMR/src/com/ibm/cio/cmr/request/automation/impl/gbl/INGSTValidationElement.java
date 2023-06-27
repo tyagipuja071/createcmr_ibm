@@ -66,14 +66,16 @@ public class INGSTValidationElement extends ValidatingElement implements Company
 
     // skip sos matching if matching records are found in SOS-RPA
 
-    if (engineData.isDnbVerified() || "Y".equals(admin.getCompVerifiedIndc())) {
-      validation.setSuccess(true);
-      validation.setMessage("Skipped");
-      output.setResults("Skipped");
-      output.setDetails("Name and Address Matching is skipped as matching records are found in DnB");
-      engineData.addPositiveCheckStatus(AutomationEngineData.DNB_MATCH);
-      return output;
-    }
+    // if (engineData.isDnbVerified() ||
+    // "Y".equals(admin.getCompVerifiedIndc())) {
+    // validation.setSuccess(true);
+    // validation.setMessage("Skipped");
+    // output.setResults("Skipped");
+    // output.setDetails("Name and Address Matching is skipped as matching
+    // records are found in DnB");
+    // engineData.addPositiveCheckStatus(AutomationEngineData.DNB_MATCH);
+    // return output;
+    // }
 
     Addr zs01 = requestData.getAddress("ZS01");
     StringBuilder details = new StringBuilder();
@@ -98,16 +100,16 @@ public class INGSTValidationElement extends ValidatingElement implements Company
       } else {
         // company proof
         if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-          details.append("No High Quality API Matches were found for name and address.").append("\n");
+          details.append("No API Matches were found for customer details with GST number.").append("\n");
           details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
         } else {
-          details.append("No High Quality API Matches were found for name and address.").append("\n");
+          details.append("No API Matches were found for customer details with GST number.").append("\n");
           details.append("\nNo supporting documentation is provided by the requester for address.").append("\n");
         }
         output.setOnError(false);
         validation.setMessage("No Matches");
         validation.setSuccess(false);
-        engineData.addNegativeCheckStatus("OTH", "Matches against API were found but no record matched the request data.");
+        engineData.addNegativeCheckStatus("OTH", "Matches against API were found but no record matched the GST provided.");
       }
     }
     output.setDetails(details.toString());
