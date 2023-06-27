@@ -2254,7 +2254,10 @@ function validateGSTForIndia() {
                 }
               }
             var gstRet = cmr.validateGST(cntry, vat, custNm1, custNm2, addrTxt, postal, city, stateProv, landCntry);
-            if (!gstRet.success) {
+            var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+              ID : reqId
+            });
+            if (!gstRet.success && (ret == null || ret.ret1 == null)) {
               return new ValidationResult({
                 id : 'vat',
                 type : 'text',
