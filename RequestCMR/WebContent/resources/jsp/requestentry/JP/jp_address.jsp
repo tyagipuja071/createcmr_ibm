@@ -93,15 +93,6 @@
     <cmr:field fieldId="JpStreetAddress1" id="cnAddrTxt" path="cnAddrTxt" size="400" />
   </cmr:column>
 </cmr:row>
-<cmr:row addBackground="true">
-  <cmr:column span="4">
-    <cmr:label fieldId="cnAddrTxt2">
-    <cmr:fieldLabel fieldId="JpStreetAddress2" />: 
-    </cmr:label>
-    <cmr:delta text="-" id="delta-cnAddrTxt2" />
-    <cmr:field fieldId="JpStreetAddress2" id="cnAddrTxt2" path="cnAddrTxt2" size="400" />
-  </cmr:column>
-</cmr:row>
 <cmr:row addBackground="true">  
   &nbsp;
 </cmr:row>
