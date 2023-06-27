@@ -152,6 +152,7 @@ function processRequestAction() {
     if (custGrp == null || custGrp == '') {
       custGrp = getCustGrp();
     }
+
     var oldVat = cmr.query('GET.OLD.VAT.VALUE', {
       REQ_ID : reqId
     });
@@ -430,7 +431,7 @@ function verifyGlcChangeIN() {
 function getCustGrp() {
   var custGrp = null;
   var issueCntry = getIssuingCntry();
-  var zs01LandCntry = getZS01LandCntry();
+  var zs01LandCntry = getZS01LandedCntry();
 
   if (issueCntry == zs01LandCntry) {
     custGrp = 'LOCAL'
@@ -440,7 +441,7 @@ function getCustGrp() {
   return custGrp;
 }
 
-function getZS01LandCntry() {
+function getZS01LandedCntry() {
   var reqId = FormManager.getActualValue('reqId');
   if (reqId != null) {
     reqParam = {
