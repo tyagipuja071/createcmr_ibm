@@ -6165,7 +6165,7 @@ function addressQuotationValidatorAP() {
     if(FormManager.getActualValue('reqType') == 'U'){
       FormManager.setValue('custClass',_pagemodel.custClass );
     }else{
-      FormManager.setValue('custClass','' );
+      FormManager.setValue('custClass','11' );
     }
     FormManager.setValue('cmrOwner', 'IBM');
     FormManager.readOnly('cmrOwner');
@@ -7903,6 +7903,7 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
   console.log('>>>> clearClusterFieldsOnScenarioChange >>>>');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var issuingCnt = ['818', '856', '852', '616', '796', '834'];
+
   if (issuingCnt.includes(cntry)) {
     var viewOnly = FormManager.getActualValue('viewOnlyPage');
     if (viewOnly != '' && viewOnly == 'true') {
@@ -7942,7 +7943,6 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     }
 
     if(cntry == '616') {
-      setAnzKuklaFor();
       clearClusterFieldsScenarios = ['ESOSW', 'NRML' ];
       if(scenario =='CROSS' && scenarioChanged){        
         FormManager.setValue('apCustClusterId', '00001');
@@ -7957,7 +7957,6 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     }
 	// CREATCMR-7884
     if(cntry == '796') {
-      setAnzKuklaFor();
       clearClusterFieldsScenarios = ['ESOSW', 'NRML', 'NRMLC', 'AQSTN', 'XAQST', 'XESO' ];
       if(scenario =='CROSS' && scenarioChanged){        
         FormManager.setValue('apCustClusterId', '00002');
