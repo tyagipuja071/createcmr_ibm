@@ -101,12 +101,16 @@ function afterConfigForJP() {
     setAdminDeptOptional();
     addScenarioDriven();
     setSortlOnOfcdChange();
+
+    disableFieldsForRolUpdate();
+    disableAddrFieldsForRolUpdate();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
   }
   // CREATCMR-788
   addressQuotationValidator();
+  addROLFieldLogic();
 }
 
 /**
@@ -130,6 +134,72 @@ function addHandlersForJP() {
     });
   }
 
+}
+
+function addROLFieldLogic() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+
+    var addrType = FormManager.getActualValue('addrType');
+    var companyRolFlag = '';
+    enableRolFlag(addrType);
+
+    if (addrType != 'ZC01' && addrType != 'ZE01') {
+
+      var qParams = {
+        _qall : 'Y',
+        REQ_ID : FormManager.getActualValue('reqId'),
+        ADDR_TYPE : 'ZC01',
+      };
+      var results = cmr.query('GET.ROL_BY_REQID', qParams);
+      if (results != null && results.length > 0) {
+        companyRolFlag = results[0].ret1.trim();
+      }
+      FormManager.setValue('rol', companyRolFlag);
+    }
+  }
+}
+
+function enableRolFlag() {
+  FormManager.enable('rol');
+  // FormManager.addValidator('rol', Validators.REQUIRED, [ 'ROL Flag' ]);
+}
+
+function disableFieldsForRolUpdate() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+    // FormManager.resetValidations('enterCMRNo');
+
+    var custType = FormManager.getActualValue('custType');
+    if (custType == 'CR' || custType == 'AR') {
+      var accountFieldList = [ 'abbrevNm', 'custPrefLang', 'subIndustryCd', 'jsicCd', 'isicCd', 'email2', 'proxiLocnNo', 'oemInd',
+          'leasingCompanyIndc', 'educAllowCd', 'custAcctType', 'custClass', 'iinInd', 'valueAddRem', 'channelCd', 'siInd', 'crsCd', 'creditCd',
+          'govType', 'outsourcingService', 'zseriesSw', 'cmrNo', 'cmrNo2', 'cmrOwner', 'isuCd', 'clientTier', 'searchTerm', 'mrcCd', 'bgId', 'gbgId',
+          'bgRuleId', 'covId', 'inacType', 'inacCd', 'dunsNo', 'repTeamMemberNo', 'salesTeamCd', 'salesBusOffCd', 'orgNo', 'chargeCd', 'soProjectCd',
+          'csDiv', 'billingProcCd', 'invoiceSplitCd', 'creditToCustNo', 'tier2', 'billToCustNo', 'adminDeptCd', 'adminDeptLine', 'func' ];
+      for (var i = 0; i < accountFieldList.length; i++) {
+        disableFiled(accountFieldList[i]);
+      }
+      // disableAddrFieldsForRolUpdate();
+    }
+  }
+}
+
+function disableAddrFieldsForRolUpdate() {
+
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+    // FormManager.resetValidations('enterCMRNo');
+
+    var custType = FormManager.getActualValue('custType');
+    if (custType == 'CR' || custType == 'AR') {
+      var accountFieldList = [ 'custNm1', 'custNm2', 'custNm4', 'custNm3', 'addrTxt', 'postCd', 'bldg', 'custPhone', 'locationCode', 'city2',
+          'companySize' ];
+      for (var i = 0; i < accountFieldList.length; i++) {
+        setAddrFieldHide(accountFieldList[i]);
+      }
+    }
+  }
 }
 
 function addScenarioDriven() {
@@ -5901,6 +5971,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(convertCustNmDetail2DBCS, GEOHandler.JP);
   GEOHandler.addAfterConfig(addScenarioDriven, GEOHandler.JP);
   GEOHandler.addAfterConfig(addHandlersForJP, GEOHandler.JP);
+  GEOHandler.addAfterConfig(enableRolFlag, GEOHandler.JP);
+  GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
 
   GEOHandler.addAfterTemplateLoad(setCSBORequired, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setPageLoadDone, GEOHandler.JP);
@@ -5947,6 +6019,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(addSpaceForCustNm1, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(addTelFaxValidator, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(replaceBanGaoForAddrTxt, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(enableRolFlag, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.JP);
   GEOHandler.addAddrFunction(setFieldValueOnAddrSave, GEOHandler.JP);

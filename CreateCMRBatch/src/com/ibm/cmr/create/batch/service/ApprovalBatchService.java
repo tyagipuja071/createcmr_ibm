@@ -25,13 +25,17 @@ import com.ibm.cio.cmr.request.entity.ApprovalComments;
 import com.ibm.cio.cmr.request.entity.ApprovalReq;
 import com.ibm.cio.cmr.request.entity.ApprovalTyp;
 import com.ibm.cio.cmr.request.entity.Attachment;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Lov;
 import com.ibm.cio.cmr.request.model.approval.ApprovalResponseModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.pdf.RequestToPDFConverter;
 import com.ibm.cmr.create.batch.util.BatchUtil;
@@ -197,6 +201,18 @@ public class ApprovalBatchService extends BaseBatchService {
           addAttachments(entityManager, mail, request, approvalType);
 
           mail.setTo(request.getIntranetId());
+
+          // CREATCMR-8813 Add JP Copy Member
+          String cmrIssuingCntry = getCmrIssuingCntry(entityManager, request.getReqId());
+          if (SystemLocation.JAPAN.equals(cmrIssuingCntry)) {
+            JPHandler jpHanler = (JPHandler) RequestUtils.getGEOHandler(cmrIssuingCntry);
+            boolean copyFlag = jpHanler.needCopy(entityManager, request);
+            if (copyFlag) {
+              mail.setCc("yangxuy@cn.ibm.com");
+              LOG.debug("Copy email to SME:" + mail.getCc() + "as the notification for Req Id:" + request.getReqId());
+            }
+          }
+
           mail.send(SystemConfiguration.getValue("MAIL_HOST"));
         }
 
@@ -450,4 +466,18 @@ public class ApprovalBatchService extends BaseBatchService {
       zip.close();
     }
   }
+
+  private String getCmrIssuingCntry(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("DATA.GET.RECORD.BYID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<Data> rs = query.getResults(1, Data.class);
+
+    if (rs != null && rs.size() > 0) {
+      return rs.get(0).getCmrIssuingCntry();
+    }
+    return null;
+  }
+
 }
