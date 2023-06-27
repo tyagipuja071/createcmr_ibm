@@ -1495,6 +1495,8 @@ public class JPHandler extends GEOHandler {
         entityManager.flush();
       }
     }
+
+    setRolBeforeAddrSave(entityManager, addr);
   }
 
   public IntlAddr getIntlAddrListById(Addr addr, EntityManager entityManager) {
@@ -1521,6 +1523,53 @@ public class JPHandler extends GEOHandler {
     iAddr = query.getSingleResult(IntlAddr.class);
 
     return iAddr;
+  }
+
+  private void setRolBeforeAddrSave(EntityManager entityManager, Addr addr) {
+    // if a company ROL change, the account ROL all need change
+    String addrType = addr.getId().getAddrType();
+    if ("ZC01".equals(addrType)) {
+      String companyRolFlag = addr.getRol();
+      List<Addr> addrList = getAddrByReqId(entityManager, addr.getId().getReqId());
+      if (addrList != null && addrList.size() > 0) {
+        for (Addr address : addrList) {
+          if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
+            address.setRol(companyRolFlag);
+            entityManager.merge(address);
+            entityManager.flush();
+          }
+        }
+      }
+    }
+  }
+
+  private List<Addr> getAddrByReqId(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.ADDR_BY_REQ_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Addr> addrList;
+    try {
+      addrList = query.getResults(Addr.class);
+    } catch (Exception ex) {
+      LOG.error("An error occured in getting the ADDR records");
+      throw ex;
+    }
+    return addrList;
+  }
+
+  public boolean needCopy(EntityManager entityManager, ApprovalReq req) {
+    boolean flag = false;
+    List<Addr> addrList = getAddrByReqId(entityManager, req.getReqId());
+    if (addrList != null && addrList.size() > 0) {
+
+      for (Addr addr : addrList) {
+        if ("ZC01".equals(addr.getId().getAddrType()) && "N".equals(addr.getRol()) && req.getDefaultApprovalId() == 389) {
+          flag = true;
+          break;
+        }
+      }
+    }
+    return flag;
   }
 
   private void setCSBOBeforeAddrSave(EntityManager entityManager, Addr addr) {
