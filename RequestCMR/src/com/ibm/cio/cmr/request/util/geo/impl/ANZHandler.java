@@ -737,6 +737,12 @@ public class ANZHandler extends APHandler {
         data.setEngineeringBo("9920");
       }
       data.setRepTeamMemberNo("000000");
+      if (data.getSubIndustryCd() != null
+          && ("G".equals(data.getSubIndustryCd().substring(0, 1)) || "Y".equals(data.getSubIndustryCd().substring(0, 1)))) {
+        data.setGovType("Y");
+      } else {
+        data.setGovType("N");
+      }
 
     }
     entityManager.merge(data);
