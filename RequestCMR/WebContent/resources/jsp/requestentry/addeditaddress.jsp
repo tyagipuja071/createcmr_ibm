@@ -11,8 +11,9 @@
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
 %>
 
-<script src="https://unpkg.com/read-excel-file@5.x/bundle/read-excel-file.min.js">
-</script>
+<script src="https://unpkg.com/read-excel-file@5.x/bundle/read-excel-file.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.7.7/xlsx.core.min.js"></script>  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xls/0.7.4-a/xls.core.min.js"></script>  
 <style>
 #addEditAddressModal div.ibm-columns {
   width: 730px !important;

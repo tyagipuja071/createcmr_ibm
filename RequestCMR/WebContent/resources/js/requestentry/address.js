@@ -3121,8 +3121,22 @@ function resetSccInfo() {
 
 function uploadFile(){
 	console.log("upload file....");	
-    var file = FormManager.getActualValue('endUserFile');
+/*    var file = FormManager.getActualValue('endUserFile');
     var fileStr = readXlsxFile(file);
-    console.log(fileStr);
+    console.log(fileStr);*/
     
+    
+    if (typeof (FileReader) != "undefined") {      
+	    var reader = new FileReader();  
+	    reader.onload = function (e) {  
+		    var data = e.target.result;  
+		    /*Converts the excel data in to object*/  
+		    if (xlsxflag) {  
+		      var workbook = XLSX.read(data, { type: 'binary' });  
+		    }  
+		    else {  
+		      var workbook = XLS.read(data, { type: 'binary' });  
+		    }  
+	    }   
+	}
 }
