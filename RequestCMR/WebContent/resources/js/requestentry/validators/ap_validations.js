@@ -6165,7 +6165,11 @@ function addressQuotationValidatorAP() {
     if(FormManager.getActualValue('reqType') == 'U'){
       FormManager.setValue('custClass',_pagemodel.custClass );
     }else{
-      FormManager.setValue('custClass','11' );
+      if(_pagemodel.custClass != null ){
+        FormManager.setValue('custClass',_pagemodel.custClass );
+      }else{        
+        FormManager.setValue('custClass','11' );
+      }
     }
     FormManager.setValue('cmrOwner', 'IBM');
     FormManager.readOnly('cmrOwner');
