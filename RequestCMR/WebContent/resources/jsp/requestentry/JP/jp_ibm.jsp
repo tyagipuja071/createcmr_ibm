@@ -227,14 +227,7 @@
       </cmr:column>  
     </cmr:row> 
   <cmr:row addBackground="false"> 
-      <cmr:column span="2" containerForField="AdminDeptCd">
-        <p>
-      <cmr:label fieldId="adminDeptCd">
-            <cmr:fieldLabel fieldId="AdminDeptCd" />:
-          </cmr:label>
-          <cmr:field path="adminDeptCd" id="adminDeptCd" fieldId="AdminDeptCd" tabId="MAIN_IBM_TAB" />
-        </p>
-      </cmr:column>  
+  
       <cmr:column span="2" containerForField="AdminDeptLine">
         <p>
       <cmr:label fieldId="adminDeptLine">

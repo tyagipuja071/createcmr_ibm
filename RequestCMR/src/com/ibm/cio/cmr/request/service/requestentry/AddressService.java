@@ -1891,7 +1891,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
   public void createJPIntlAddr(AddressModel model, Addr addr, EntityManager entityManager) {
     IntlAddr iAddr = createIntlAddrFromModel(model, addr, entityManager);
-    createEntity(iAddr, entityManager);
+    IntlAddr iAddrExist = getIntlAddrById(addr, entityManager);
+    if (iAddrExist != null) {
+      updateEntity(iAddr, entityManager);
+    } else {
+      createEntity(iAddr, entityManager);
+    }
   }
 
   public void createCNIntlAddr(AddressModel model, Addr addr, EntityManager entityManager) {
