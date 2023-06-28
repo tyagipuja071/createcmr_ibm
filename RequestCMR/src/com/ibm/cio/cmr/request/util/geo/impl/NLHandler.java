@@ -2793,7 +2793,11 @@ public class NLHandler extends BaseSOFHandler {
       }
     }
   }
-
+@Override
+  public void convertDnBImportValues(EntityManager entityManager, Admin admin, Data data) {
+    String taxCd2 = StringUtils.isNotBlank(data.getTaxCd1()) ? data.getTaxCd1() : "";
+    data.setTaxCd2(taxCd2);
+  }
   @Override
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
     return true;
