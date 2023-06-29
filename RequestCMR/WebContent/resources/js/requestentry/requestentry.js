@@ -149,6 +149,7 @@ function processRequestAction() {
     var custGrp = FormManager.getActualValue('custGrp');
     var reqId = FormManager.getActualValue('reqId');
     var crossScenTyp = [ 'CROSS', 'LUCRO', 'EECRO', 'LTCRO', 'LVCRO', 'FOCRO', 'GLCRO', 'ISCRO' ];
+
     if (custGrp == null || custGrp == '') {
       custGrp = getCustGrp();
     }
@@ -430,10 +431,31 @@ function verifyGlcChangeIN() {
 
 function getCustGrp() {
   var custGrp = null;
+  var cntryLocCd = FormManager.getActualValue('cmrIssuingCntry');
   var issueCntry = getIssuingCntry();
   var zs01LandCntry = getZS01LandedCntry();
+  var isSubRegion = false;
+  var FIsubRegion = [ 'LV', 'LT', 'EE' ];
+  var DKsubRegion = [ 'FO', 'GL', 'IS' ];
+  var BEsubRegion = [ 'BE', 'LU' ];
+
+  var reqId = FormManager.getActualValue('reqId');
+  if (reqId != null) {
+    reqParam = {
+      REQ_ID : reqId,
+    };
+  }
+  var results = cmr.query('ADDR.GET.ZS01LANDCNTRY.BY_REQID', reqParam);
+  var zs01LandCntryCd = results.ret2 != undefined ? results.ret2 : '';
+
+  if ((FIsubRegion.includes(zs01LandCntryCd) && cntryLocCd == '702') || (DKsubRegion.includes(zs01LandCntryCd) && cntryLocCd == '678')
+      || (BEsubRegion.includes(zs01LandCntryCd) && cntryLocCd == '624')) {
+    isSubRegion = true;
+  }
 
   if (issueCntry == zs01LandCntry) {
+    custGrp = 'LOCAL'
+  } else if (isSubRegion) {
     custGrp = 'LOCAL'
   } else {
     custGrp = 'CROSS'
