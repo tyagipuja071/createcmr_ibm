@@ -82,13 +82,13 @@ public class INGSTValidationElement extends ValidatingElement implements Company
 
     if (zs01 != null) {
       AutomationResponse<GstLayerResponse> response = getGstMatches(entityManager, admin.getId().getReqId(), zs01, data.getVat());
-      String msg = "Valid Address and Company Name entered on the Request";
+      String msg = "GST provided is verified with the company details.";
       if (response != null && response.isSuccess() && msg.equalsIgnoreCase(response.getMessage())) {
         admin.setCompVerifiedIndc("Y");
         validation.setSuccess(true);
         validation.setMessage("Successful Execution");
         log.debug(response.getMessage());
-        details.append("Record found in GST service : Address and Company Name Validated on API");
+        details.append("Details mathced against D&B Data : Company details and GST verified.");
 
         details.append("\nCustomer Name = " + (StringUtils.isBlank(response.getRecord().getName()) ? "" : response.getRecord().getName()));
         details.append("\nGST = " + (StringUtils.isBlank(response.getRecord().getGst()) ? "" : response.getRecord().getGst()));
