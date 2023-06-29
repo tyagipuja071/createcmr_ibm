@@ -175,12 +175,28 @@ function disableFieldsForRolUpdate() {
       var accountFieldList = [ 'abbrevNm', 'custPrefLang', 'subIndustryCd', 'jsicCd', 'isicCd', 'email2', 'proxiLocnNo', 'oemInd',
           'leasingCompanyIndc', 'educAllowCd', 'custAcctType', 'custClass', 'iinInd', 'valueAddRem', 'channelCd', 'siInd', 'crsCd', 'creditCd',
           'govType', 'outsourcingService', 'zseriesSw', 'cmrNo', 'cmrNo2', 'cmrOwner', 'isuCd', 'clientTier', 'searchTerm', 'mrcCd', 'bgId', 'gbgId',
-          'bgRuleId', 'covId', 'inacType', 'inacCd', 'dunsNo', 'repTeamMemberNo', 'salesTeamCd', 'salesBusOffCd', 'orgNo', 'chargeCd', 'soProjectCd',
-          'csDiv', 'billingProcCd', 'invoiceSplitCd', 'creditToCustNo', 'tier2', 'billToCustNo', 'adminDeptCd', 'adminDeptLine', 'func' ];
+          'bgRuleId', 'covId', 'inacType', 'inacCd', 'dunsNo', 'repTeamMemberNo', 'salesTeamCd', 'privIndc_1', 'privIndc_2', 'privIndc_3',
+          'salesBusOffCd', 'orgNo', 'chargeCd', 'soProjectCd', 'csDiv', 'billingProcCd', 'invoiceSplitCd', 'creditToCustNo', 'csBo', 'tier2',
+          'billToCustNo', 'adminDeptCd', 'adminDeptLine', 'func' ];
       for (var i = 0; i < accountFieldList.length; i++) {
         disableFiled(accountFieldList[i]);
       }
-      // disableAddrFieldsForRolUpdate();
+
+      // disable Request For
+      document.getElementById('ast-privIndc').innerHTML = '';
+      try {
+        FormManager.getField('privIndc_1').set('checked', false);
+        FormManager.getField('privIndc_2').set('checked', false);
+        FormManager.getField('privIndc_3').set('checked', false);
+      } catch (e) {
+        FormManager.getField('privIndc_1').checked = false;
+        FormManager.getField('privIndc_2').checked = false;
+        FormManager.getField('privIndc_3').checked = false;
+      }
+      FormManager.disable('privIndc_1');
+      FormManager.disable('privIndc_2');
+      FormManager.disable('privIndc_3');
+
     }
   }
 }
@@ -193,8 +209,9 @@ function disableAddrFieldsForRolUpdate() {
 
     var custType = FormManager.getActualValue('custType');
     if (custType == 'CR' || custType == 'AR') {
-      var accountFieldList = [ 'custNm1', 'custNm2', 'custNm4', 'custNm3', 'addrTxt', 'postCd', 'bldg', 'custPhone', 'locationCode', 'city2',
-          'companySize' ];
+      var accountFieldList = [ 'custNm1', 'custNm2', 'custNm4', 'cnCustName1', 'cnCustName2', 'custNm3', 'addrTxt', 'cnAddrTxt', 'cnCity',
+          'cnDistrict', 'postCd', 'dept', 'office', 'bldg', 'custPhone', 'locationCode', 'custFax', 'estabFuncCd', 'divn', 'city2', 'companySize',
+          'contact' ];
       for (var i = 0; i < accountFieldList.length; i++) {
         setAddrFieldHide(accountFieldList[i]);
       }
@@ -4413,8 +4430,14 @@ function addRequestForValidator() {
           } else if (FormManager.getField('privIndc_3').checked == true) {
             checked = true;
           }
+
           if (checked == false) {
-            return new ValidationResult(null, false, 'Requset For is required.');
+            var custType = FormManager.getActualValue('custType');
+            if (custType == 'CR' || custType == 'AR') {
+              return new ValidationResult(null, true, null);
+            } else {
+              return new ValidationResult(null, false, 'Requset For is required.');
+            }
           } else {
             return new ValidationResult(null, true, null);
           }
@@ -5987,6 +6010,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(disableFieldsForRolUpdate, GEOHandler.JP);
 
   // CREATCMR-9327
   GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);

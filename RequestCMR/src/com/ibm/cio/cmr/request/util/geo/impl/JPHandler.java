@@ -54,6 +54,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.AdminService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -1496,7 +1497,11 @@ public class JPHandler extends GEOHandler {
       }
     }
 
-    setRolBeforeAddrSave(entityManager, addr);
+    AdminService adminSvc = new AdminService();
+    Admin admin = adminSvc.getCurrentRecordById(addr.getId().getReqId(), entityManager);
+    if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
+      setRolBeforeAddrSave(entityManager, addr);
+    }
   }
 
   public IntlAddr getIntlAddrListById(Addr addr, EntityManager entityManager) {
@@ -1557,19 +1562,55 @@ public class JPHandler extends GEOHandler {
     return addrList;
   }
 
+  private Admin getAdminByReqId(long reqId, EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.GET.ADMIN.RECORD");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    Admin admin = new Admin();
+    try {
+      admin = query.getSingleResult(Admin.class);
+    } catch (Exception ex) {
+      LOG.error("An error occured in getting the Admin records");
+      throw ex;
+    }
+    return admin;
+  }
+
   public boolean needCopy(EntityManager entityManager, ApprovalReq req) {
     boolean flag = false;
     List<Addr> addrList = getAddrByReqId(entityManager, req.getReqId());
-    if (addrList != null && addrList.size() > 0) {
+    Admin admin = getAdminByReqId(req.getReqId(), entityManager);
+    String defaultApprovalId = String.valueOf(req.getDefaultApprovalId());
+    String approvalDesc = getApprovalDesc(entityManager, defaultApprovalId);
 
-      for (Addr addr : addrList) {
-        if ("ZC01".equals(addr.getId().getAddrType()) && "N".equals(addr.getRol()) && req.getDefaultApprovalId() == 389) {
+    if (approvalDesc != null && CmrConstants.JP_ROL_APPROVAL_DESC.equals(approvalDesc)) {
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        if (addrList != null && addrList.size() > 0) {
+          for (Addr addr : addrList) {
+            if ("ZC01".equals(addr.getId().getAddrType()) && "N".equals(addr.getRol())) {
+              flag = true;
+              break;
+            }
+          }
+        }
+      } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+        if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
           flag = true;
-          break;
         }
       }
     }
     return flag;
+  }
+
+  private String getApprovalDesc(EntityManager entityManager, String id) {
+    String sql = ExternalizedQuery.getSql("SYSTEM.GET_DEFAULT_APPR.DETAILS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", id);
+    DefaultApprovals approve = query.getSingleResult(DefaultApprovals.class);
+    if (approve != null) {
+      return approve.getDefaultApprovalDesc();
+    }
+    return null;
   }
 
   private void setCSBOBeforeAddrSave(EntityManager entityManager, Addr addr) {
