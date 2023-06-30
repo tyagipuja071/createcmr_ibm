@@ -1819,154 +1819,164 @@ public class TransConnService extends BaseBatchService {
       StringBuilder comment = new StringBuilder();
 
       boolean ignoreWfhistory = false;
-      for (Addr addr : addresses) {
+      // CREATCMR-9847 company update only do not need to send to RDC. back
+      // successful directly
+      if (!("760".equals(data.getCmrIssuingCntry()) && addresses != null && addresses.size() == 1
+          && "ZC01".equals(addresses.get(0).getId().getAddrType()))) {
 
-        if (isDataUpdated || "Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()) || "Y".equals(addr.getImportInd())
-            || "D".equals(addr.getImportInd()) || StringUtils.isNotBlank(addr.getId().getAddrType())) {
-          continueUpdate = true;
-        }
+        for (Addr addr : addresses) {
 
-        if (continueUpdate) {
-          request.setSapNo(addr.getSapNo());
-
-          request.setAddrType(addr.getId().getAddrType());
-
-          request.setSeqNo(addr.getId().getAddrSeq());
-
-          // call the create cmr service
-          LOG.info("Sending request to Process Service [Request ID: " + request.getReqId() + " CMR No: " + request.getCmrNo() + " Type: "
-              + request.getReqType() + " SAP No: " + request.getSapNo() + "]");
-
-          LOG.trace("Request JSON:");
-          if (LOG.isTraceEnabled()) {
-            DebugUtil.printObjectAsJson(LOG, request);
+          if (isDataUpdated || "Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()) || "Y".equals(addr.getImportInd())
+              || "D".equals(addr.getImportInd()) || StringUtils.isNotBlank(addr.getId().getAddrType())) {
+            continueUpdate = true;
           }
 
-          ProcessResponse response = null;
-          String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
-          if (applicationId == null) {
-            LOG.debug("No Application ID mapped to " + data.getCmrIssuingCntry());
-            response = new ProcessResponse();
-            response.setReqId(request.getReqId());
-            response.setCmrNo(request.getCmrNo());
-            response.setMandt(request.getMandt());
-            response.setStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
-            response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
-          } else {
-            try {
-              this.serviceClient.setReadTimeout(60 * 20 * 1000); // 20
-              // mins
-              response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
-            } catch (Exception e) {
-              LOG.error("Error when connecting to the service.", e);
-              response = new ProcessResponse();
-              response.setReqId(admin.getId().getReqId());
-              response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
-              response.setMessage("Cannot connect to the service at the moment.");
+          if (continueUpdate) {
+            request.setSapNo(addr.getSapNo());
+
+            request.setAddrType(addr.getId().getAddrType());
+
+            request.setSeqNo(addr.getId().getAddrSeq());
+
+            // call the create cmr service
+            LOG.info("Sending request to Process Service [Request ID: " + request.getReqId() + " CMR No: " + request.getCmrNo() + " Type: "
+                + request.getReqType() + " SAP No: " + request.getSapNo() + "]");
+
+            LOG.trace("Request JSON:");
+            if (LOG.isTraceEnabled()) {
+              DebugUtil.printObjectAsJson(LOG, request);
             }
-          }
 
-          if (response.getReqId() <= 0) {
-            response.setReqId(request.getReqId());
-          }
+            ProcessResponse response = null;
+            String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
+            if (applicationId == null) {
+              LOG.debug("No Application ID mapped to " + data.getCmrIssuingCntry());
+              response = new ProcessResponse();
+              response.setReqId(request.getReqId());
+              response.setCmrNo(request.getCmrNo());
+              response.setMandt(request.getMandt());
+              response.setStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+              response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
+            } else {
+              try {
+                this.serviceClient.setReadTimeout(60 * 20 * 1000); // 20
+                // mins
+                response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
+              } catch (Exception e) {
+                LOG.error("Error when connecting to the service.", e);
+                response = new ProcessResponse();
+                response.setReqId(admin.getId().getReqId());
+                response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
+                response.setMessage("Cannot connect to the service at the moment.");
+              }
+            }
 
-          resultCode = response.getStatus();
-          if (StringUtils.isBlank(resultCode)) {
-            statusCodes.add(CmrConstants.RDC_STATUS_NOT_COMPLETED);
-          } else {
-            statusCodes.add(resultCode);
-          }
+            if (response.getReqId() <= 0) {
+              response.setReqId(request.getReqId());
+            }
 
-          LOG.trace("Response JSON:");
-          if (LOG.isTraceEnabled()) {
-            DebugUtil.printObjectAsJson(LOG, response);
-          }
+            resultCode = response.getStatus();
+            if (StringUtils.isBlank(resultCode)) {
+              statusCodes.add(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+            } else {
+              statusCodes.add(resultCode);
+            }
 
-          LOG.info("Response received from Process Service [Request ID: " + response.getReqId() + " CMR No: " + response.getCmrNo() + " KUNNR: "
-              + addr.getSapNo() + " Status: " + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-")
-              + "]");
+            LOG.trace("Response JSON:");
+            if (LOG.isTraceEnabled()) {
+              DebugUtil.printObjectAsJson(LOG, response);
+            }
 
-          // get the results from the service and process jason
-          // response
+            LOG.info("Response received from Process Service [Request ID: " + response.getReqId() + " CMR No: " + response.getCmrNo() + " KUNNR: "
+                + addr.getSapNo() + " Status: " + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-")
+                + "]");
 
-          // create comment log and workflow history entries for
-          // update type of
-          // request
-          if (isCompletedSuccessfully(resultCode)) {
+            // get the results from the service and process jason
+            // response
 
-            addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
+            // create comment log and workflow history entries for
+            // update type of
+            // request
+            if (isCompletedSuccessfully(resultCode)) {
 
-            if (response.getRecords() != null) {
-              comment = comment.append("\nRDc processing successfully updated KUNNR(s): ");
-              if (response.getRecords() != null && response.getRecords().size() != 0) {
-                for (int i = 0; i < response.getRecords().size(); i++) {
-                  comment = comment.append(response.getRecords().get(i).getSapNo() + " ");
-                  if (StringUtils.isBlank(addr.getSapNo())) {
-                    addr.setSapNo(response.getRecords().get(i).getSapNo());
+              addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
+
+              if (response.getRecords() != null) {
+                comment = comment.append("\nRDc processing successfully updated KUNNR(s): ");
+                if (response.getRecords() != null && response.getRecords().size() != 0) {
+                  for (int i = 0; i < response.getRecords().size(); i++) {
+                    comment = comment.append(response.getRecords().get(i).getSapNo() + " ");
+                    if (StringUtils.isBlank(addr.getSapNo())) {
+                      addr.setSapNo(response.getRecords().get(i).getSapNo());
+                    }
+                    if (StringUtils.isBlank(addr.getIerpSitePrtyId())) {
+                      addr.setIerpSitePrtyId(response.getRecords().get(i).getIerpSitePartyId());
+                    }
+
+                    // if (("PayGo-Test".equals(admin.getSourceSystId()) ||
+                    // "BSS".equals(admin.getSourceSystId()))
+                    // && ("616".equals(data.getCmrIssuingCntry()) ||
+                    // "796".equals(data.getCmrIssuingCntry()))) {
+                    // if
+                    // ("200".equals(response.getRecords().get(i).getSeqNo()))
+                    // {
+                    // addr.getId().setAddrSeq(response.getRecords().get(i).getSeqNo());
+                    // }
+                    // }
                   }
-                  if (StringUtils.isBlank(addr.getIerpSitePrtyId())) {
-                    addr.setIerpSitePrtyId(response.getRecords().get(i).getIerpSitePartyId());
-                  }
-
-                  // if (("PayGo-Test".equals(admin.getSourceSystId()) ||
-                  // "BSS".equals(admin.getSourceSystId()))
-                  // && ("616".equals(data.getCmrIssuingCntry()) ||
-                  // "796".equals(data.getCmrIssuingCntry()))) {
-                  // if ("200".equals(response.getRecords().get(i).getSeqNo()))
-                  // {
-                  // addr.getId().setAddrSeq(response.getRecords().get(i).getSeqNo());
-                  // }
-                  // }
+                }
+                if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
+                  comment = comment.append("\nWarning Message: " + response.getMessage());
+                  rdcProcessingMsg.append("Warning: " + response.getMessage() + "[KUNNR:" + addr.getSapNo() + "]\n");
+                }
+              } else {
+                comment.append("RDc records were not processed.");
+                if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
+                  comment = comment.append("\nWarning Message: " + response.getMessage());
                 }
               }
-              if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
-                comment = comment.append("\nWarning Message: " + response.getMessage());
-                rdcProcessingMsg.append("Warning: " + response.getMessage() + "[KUNNR:" + addr.getSapNo() + "]\n");
+
+              updateEntity(addr, entityManager);
+              if (("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))
+                  && ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry()))
+                  && "PG01".equals(addr.getId().getAddrType())) {
+                updPaygoSeqNoForANZ(entityManager, addr.getSapNo(), reqId);
               }
             } else {
-              comment.append("RDc records were not processed.");
-              if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
-                comment = comment.append("\nWarning Message: " + response.getMessage());
+              if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
+                comment = comment.append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")
+                    + " failed. Error: " + response.getMessage() + "\n");
+              } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
+                comment = comment.append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")
+                    + " failed. Error: " + response.getMessage() + " System will retry processing once.\n");
+              } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
+                comment = comment.append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")
+                    + " failed. Error: " + response.getMessage() + "\n");
+              } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
+                comment = comment.append("\nUpdate processing in RDc skipped: " + response.getMessage() + "\n");
+              }
+              rdcProcessingMsg.append("Error: " + response.getMessage() + "[KUNNR:" + addr.getSapNo() + "]\n");
+              if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
+                SlackAlertsUtil.recordGenericAlert("TransConn", "Request " + admin.getId().getReqId(),
+                    SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
               }
             }
 
-            updateEntity(addr, entityManager);
-            if (("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))
-                && ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry()))
-                && "PG01".equals(addr.getId().getAddrType())) {
-              updPaygoSeqNoForANZ(entityManager, addr.getSapNo(), reqId);
-            }
-          } else {
-            if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
-              comment = comment.append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")
-                  + " failed. Error: " + response.getMessage() + "\n");
-            } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
-              comment = comment.append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")
-                  + " failed. Error: " + response.getMessage() + " System will retry processing once.\n");
-            } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
-              comment = comment.append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")
-                  + " failed. Error: " + response.getMessage() + "\n");
-            } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
-              comment = comment.append("\nUpdate processing in RDc skipped: " + response.getMessage() + "\n");
-            }
-            rdcProcessingMsg.append("Error: " + response.getMessage() + "[KUNNR:" + addr.getSapNo() + "]\n");
             if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
-              SlackAlertsUtil.recordGenericAlert("TransConn", "Request " + admin.getId().getReqId(),
-                  SlackAlertsUtil.bold("Processing Result: " + resultCode + ", Message: " + response.getMessage()));
+              // RequestUtils.createWorkflowHistoryFromBatch(entityManager,
+              // BATCH_USER_ID, admin, comment.toString().trim(),
+              // ACTION_RDC_UPDATE, null,
+              // null, "COM".equals(admin.getReqStatus()));
+            } else {
+              continueUpdate = false;
+              ignoreWfhistory = true;
             }
+            keepAlive();
           }
-
-          if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
-            // RequestUtils.createWorkflowHistoryFromBatch(entityManager,
-            // BATCH_USER_ID, admin, comment.toString().trim(),
-            // ACTION_RDC_UPDATE, null,
-            // null, "COM".equals(admin.getReqStatus()));
-          } else {
-            continueUpdate = false;
-            ignoreWfhistory = true;
-          }
-          keepAlive();
         }
+
+      } else {
+        comment = comment.append("\nCompany updated  successfully! ");
       }
 
       RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, reqId, comment.toString().trim());
