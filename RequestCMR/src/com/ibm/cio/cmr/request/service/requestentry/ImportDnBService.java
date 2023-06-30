@@ -680,29 +680,29 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       }
       String street = cmr.getCmrStreet();
       if (street != null && street.length() > addrLength) {
-        if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
-          // there is a con't, trim this only
-          addr.setAddrTxt(street.substring(0, addrLength));
-          if (cmr.getCmrStreetAddressCont().length() > addrLength) {
-            addr.setAddrTxt2(cmr.getCmrStreetAddressCont().substring(0, addrLength));
-          } else {
-            addr.setAddrTxt2(cmr.getCmrStreetAddressCont());
-          }
+        // Align with API
+        /*
+         * if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) { // there
+         * is a con't, trim this only addr.setAddrTxt(street.substring(0,
+         * addrLength)); if (cmr.getCmrStreetAddressCont().length() >
+         * addrLength) {
+         * addr.setAddrTxt2(cmr.getCmrStreetAddressCont().substring(0,
+         * addrLength)); } else {
+         * addr.setAddrTxt2(cmr.getCmrStreetAddressCont()); } } else {
+         */
+        // no street address con't, overflow
+        String[] streetParts;
+        if (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry())
+            || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())
+            || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())) {
+          streetParts = converter.doSplitName(street, "", 35, 35);
         } else {
-          // no street address con't, overflow
-          String[] streetParts;
-          if (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry())
-              || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())
-              || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())) {
-            streetParts = converter.doSplitName(street, "", 35, 35);
-          } else {
-            streetParts = converter.doSplitName(street, "", 30, 30);
-          }
-          String street1 = streetParts[0];
-          String street2 = streetParts[1];
-          addr.setAddrTxt(street1);
-          addr.setAddrTxt2(street2);
+          streetParts = converter.doSplitName(street, "", 30, 30);
         }
+        String street1 = streetParts[0];
+        String street2 = streetParts[1];
+        addr.setAddrTxt(street1);
+        addr.setAddrTxt2(street2);
       } else {
         addr.setAddrTxt(street);
         if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
