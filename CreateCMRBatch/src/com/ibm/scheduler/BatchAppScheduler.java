@@ -9,7 +9,7 @@ public class BatchAppScheduler {
 
   public static void main(String[] args) {
     ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-    scheduler.setPoolSize(2);
+    scheduler.setPoolSize(BatchTaskCreator.getTotalNumberOfBatches());
     scheduler.initialize();
     for (BatchTask cronTask : BatchTaskCreator.createTasks()) {
       if (cronTask.isCronEnable()) {
