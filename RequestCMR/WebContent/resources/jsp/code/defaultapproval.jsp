@@ -498,7 +498,7 @@ span.mail {
                     <span ng-switch-when="CON">contains</span>
                     <span ng-switch-when="NCO">doesn't contain</span>
                     <span ng-switch-when="STA">start with</span>
-                    <span ng-switch-when="CHG">is changed</span>                 
+                    <span ng-switch-when="CHG">is changed</span>
                   </td>
                   <td>
                     <span ng-show="condition.edit">
