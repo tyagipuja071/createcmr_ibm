@@ -419,17 +419,18 @@ public class AutomationEngine {
             && nonCompanyVerificationErrorCount == 0 && engineData.get().getTrackedNegativeCheckCount() == 0 && payGoAddredited) {
           moveForPayGo = true;
         }
+
         if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited && !Arrays.asList("PRIV","PRICU","BEPRI","LUPRI","PRIPE","CHPRI").contains(data.getCustSubGrp())) {
-          admin.setPaygoProcessIndc("Y");
+        admin.setPaygoProcessIndc("Y");
           createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
         }
 
         if ("U".equals(admin.getReqType())) {
           if ("PG".equals(data.getOrdBlk())) {
-            // admin.setPaygoProcessIndc("Y");
+      //      admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited) {
-            // admin.setPaygoProcessIndc("Y");
+        //    admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           }
         }
