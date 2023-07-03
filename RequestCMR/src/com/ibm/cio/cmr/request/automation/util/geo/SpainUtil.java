@@ -289,7 +289,7 @@ public class SpainUtil extends AutomationUtil {
     }
 
     // for P2L Conversions - checking of mandatory fields
-    if ("Y".equalsIgnoreCase(admin.getProspLegalInd()) && "Saas-Test".equalsIgnoreCase(admin.getSourceSystId())) {
+    if ("Y".equalsIgnoreCase(admin.getProspLegalInd()) && StringUtils.isNotBlank(admin.getSourceSystId())) {
       if ("COMME".equalsIgnoreCase(data.getCustSubGrp())) {
         Addr soldtoAddr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
         if (StringUtils.isBlank(soldtoAddr.getStateProv())) {
