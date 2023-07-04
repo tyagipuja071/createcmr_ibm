@@ -679,6 +679,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         addrLength = 35;
       }
       String street = cmr.getCmrStreet();
+      String streetCont = cmr.getCmrStreetAddressCont();
       if (street != null && street.length() > addrLength) {
         // Align with API
         /*
@@ -697,7 +698,11 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
             || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())) {
           streetParts = converter.doSplitName(street, "", 35, 35);
         } else {
-          streetParts = converter.doSplitName(street, "", 30, 30);
+          if (!StringUtils.isBlank(streetCont)) {
+            streetParts = converter.doSplitName(street, streetCont, 30, 30);
+          } else {
+            streetParts = converter.doSplitName(street, "", 30, 30);
+          }
         }
         String street1 = streetParts[0];
         String street2 = streetParts[1];
