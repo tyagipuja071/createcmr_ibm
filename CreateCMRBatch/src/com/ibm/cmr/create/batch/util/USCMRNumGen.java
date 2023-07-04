@@ -62,10 +62,10 @@ public class USCMRNumGen {
     boolean nonExisted = query.getResults().isEmpty();
     while (!nonExisted) {
       LOG.info(" CMR number:" + cmrNum + " already existed, re-generate CMR number again.");
-      //reGenCMRFlag = "Y";
+      reGenCMRFlag = "Y";
       cmrNum = genCMRNum(entityManager, type);
     }
-    //reGenCMRFlag = "N";
+    reGenCMRFlag = "N";
 
     return cmrNum;
   }
