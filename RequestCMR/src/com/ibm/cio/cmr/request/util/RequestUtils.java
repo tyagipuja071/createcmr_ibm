@@ -12,8 +12,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +68,11 @@ import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileRow;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.StandardCityServiceClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
+import com.ibm.cmr.services.client.dpl.DPLRecord;
+import com.ibm.cmr.services.client.dpl.DPLSearchResponse;
+import com.ibm.cmr.services.client.dpl.DPLSearchResults;
+import com.ibm.cmr.services.client.dpl.KycScreeningResponse;
+import com.ibm.cmr.services.client.dpl.KycScreeningResult;
 import com.ibm.cmr.services.client.stdcity.StandardCityRequest;
 import com.ibm.cmr.services.client.stdcity.StandardCityResponse;
 
@@ -1866,6 +1873,81 @@ public class RequestUtils {
       }
     }
 
+  }
+
+
+  public static DPLSearchResponse convertToLegacySearchResults(String userId, KycScreeningResponse response) {
+    DPLSearchResponse legacy = new DPLSearchResponse();
+
+    legacy.setMsg(response.getMsg());
+    legacy.setSuccess(response.isSuccess());
+
+    if (response.getResult() != null) {
+      KycScreeningResult result = response.getResult();
+      DPLSearchResults legacyResult = new DPLSearchResults();
+      legacyResult.setSearchArgument(result.getQuery());
+      legacyResult
+          .setSearchDate(result.getStartTime() != null ? result.getStartTime() : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+      legacyResult.setResults(result.getMessage());
+      if (result.getResult() != null) {
+        List<DPLRecord> legacyRecords = new ArrayList<DPLRecord>();
+        result.getResult().stream().forEach((record) -> {
+          DPLRecord legacyRecord = new DPLRecord();
+          legacyRecord.setAdditionalInfo("Score per relevant term: " + record.getScorePerRelevantTerm());
+          legacyRecord.setComments(("1".equals(record.getPerson()) ? "[Individual] " : "") + record.getNotes());
+          legacyRecord.setCompanyName(record.getNameInCorrectOrder());
+          legacyRecord.setCountryCode(record.getCountryIso2Code());
+          legacyRecord.setDenialCode(record.getCleanCode());
+          legacyRecord.setDenialCodeDescription(record.getCodeDescription());
+          legacyRecord.setEntityAddress(record.getStreet());
+          legacyRecord.setEntityCity(record.getCity());
+          legacyRecord.setEntityCountry(record.getCountryDesc());
+          legacyRecord.setEntityId(record.getCustomerId());
+          legacyRecord.setLastUpdated(record.getLastUpdate());
+          legacyRecord.setStartDate(record.getStartDate());
+          legacyRecord.setStatus("Relevance: " + record.getRelevance());
+          legacyRecords.add(legacyRecord);
+        });
+        LOG.debug("Added " + legacyRecords.size() + " DPL results");
+        legacyResult.setDeniedPartyRecords(legacyRecords);
+
+      }
+      legacy.setResults(legacyResult);
+    }
+
+    return legacy;
+  }
+
+  public static boolean fromBPPortal(long reqId) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      return fromBPPortal(entityManager, reqId);
+    } finally {
+      // empty the manager
+      entityManager.clear();
+      entityManager.close();
+    }
+  }
+
+  private static boolean fromBPPortal(EntityManager entityManager, long reqId) {
+    String sourceSystId = getSourceSystId(entityManager, reqId);
+    if (CmrConstants.CMRBPPortal.equals(sourceSystId)) {
+      return true;
+    }
+    return false;
+  }
+
+  private static String getSourceSystId(EntityManager entityManager, long reqId) {
+    String output = null;
+    String sql = ExternalizedQuery.getSql("QUERY.GET.SOURCESYSTID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      output = result;
+    }
+    return output;
   }
 
 }

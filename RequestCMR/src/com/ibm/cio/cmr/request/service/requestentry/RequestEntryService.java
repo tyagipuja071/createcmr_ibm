@@ -606,8 +606,6 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
     saveAccessToken(admin, request);
     setLockByName(admin);
-    RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
-    updateEntity(admin, entityManager);
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(model.getReqType()) && LAHandler.isLACountry(model.getCmrIssuingCntry())
         && CmrConstants.Create_Update_CMR().equals(model.getAction())) {
@@ -626,6 +624,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         model.setStatusChgCmt(model.getStatusChgCmt().substring(20));
       }
     }
+    RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
+    updateEntity(admin, entityManager);
     updateEntity(data, entityManager);
 
     long reqId = model.getReqId();
@@ -637,23 +637,44 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       addr = new Addr();
     boolean iscrossBorder = isCrossBorder(entityManager, model.getCmrIssuingCntry(), addr.getLandCntry());
 
-    if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())) {
-      String oldVatValue = getOldVatValue(entityManager, reqId);
+    if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && (CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())
+        || SystemLocation.SPAIN.equals(model.getCmrIssuingCntry()))) {
+      
+      String oldVat = getOldVatValue(entityManager, reqId);      
+      String oldVatInd = getOldVatIndValue(entityManager, reqId);
+      
+      String oldVatValue = (oldVat != null ? oldVat : "");
+      String oldVatIndValue = (oldVatInd != null ? oldVatInd : "");
+      
       if (admin.getReqType().equals("C")) {
         if ("N".equals(data.getVatInd()) && (!iscrossBorder)) {
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
         } else
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
       }
+            
       if (admin.getReqType().equals("U")) {
-        if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue == null || oldVatValue.isEmpty())) {
-          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
-        } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue != null)) {
-          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
-        } else {
-          scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
+        if (!oldVatIndValue.isEmpty()){
+          if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue.isEmpty()) && oldVatIndValue.equals("N")) {
+            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
+          } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue != null) && (oldVatIndValue.equals("T"))) {
+            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);        
+          } else if ("N".equals(data.getVatInd()) && (iscrossBorder) && (oldVatValue != null)  && (oldVatIndValue.equals("E"))) {
+            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+          } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue.isEmpty()) && (oldVatIndValue.equals("E"))) {
+            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+          }
+        
+        } else if (oldVatIndValue.isEmpty()){
+          if ("N".equals(data.getVatInd()) && (!iscrossBorder)) {
+            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+          } else {
+            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
+          }
         }
       }
+      
+    
     }
     // CREATCMR-3144 - CN 2.0 special
     if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
@@ -720,6 +741,14 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     query.setParameter("REQ_ID", reqId);
     String vatVal = query.getSingleResult(String.class);
     return vatVal;
+  }
+  
+  private String getOldVatIndValue(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.GET.OLD.VATIND.VALUE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    String vatIndVal = query.getSingleResult(String.class);
+    return vatIndVal;
   }
 
   public static boolean isCrossBorder(EntityManager entityManager, String issuingCntry, String landCntry) {

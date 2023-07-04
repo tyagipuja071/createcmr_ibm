@@ -468,7 +468,7 @@ public class RequestEntryController extends BaseController {
     ModelAndView mv = null;
     try {
       String action = model.getAction();
-      if (!"CLM".equals(action)) {
+      if (!"CLM".equals(action) || RequestUtils.fromBPPortal(checklist.getReqId())) {
         service.setChecklist(checklist);
       }
       service.processTransaction(model, request);

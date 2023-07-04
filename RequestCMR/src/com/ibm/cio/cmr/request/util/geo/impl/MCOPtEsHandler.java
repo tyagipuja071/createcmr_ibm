@@ -482,6 +482,11 @@ public class MCOPtEsHandler extends MCOHandler {
           data.setSpecialTaxCd(StringUtils.isEmpty(cust.getTaxCd()) ? "" : cust.getTaxCd());
         }
       }
+
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        data.setVatInd(StringUtils.isNotBlank(data.getVat()) ? "T" : "N");
+
+      }
     }
 
     if (SystemLocation.PORTUGAL.equalsIgnoreCase(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
@@ -783,7 +788,9 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
-    // To Do
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) && SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
+      data.setVatInd(StringUtils.isNotBlank(data.getVat()) ? "T" : "N");
+    }
   }
 
   @Override
@@ -1573,6 +1580,10 @@ public class MCOPtEsHandler extends MCOHandler {
     super.convertDnBImportValues(entityManager, admin, data);
     if (SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
       data.setCustPrefLang("S");
+
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        data.setVatInd(StringUtils.isNotBlank(data.getVat()) ? "T" : "N");
+      }
     }
   }
 

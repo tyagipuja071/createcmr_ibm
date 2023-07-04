@@ -40,6 +40,7 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
   private String user;
   private long searchTs;
   private String companyName;
+  private boolean includeSearchDetails;
 
   private Scorecard scorecard;
 
@@ -83,72 +84,77 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
               if (result.getDeniedPartyRecords() == null) {
                 result.setDeniedPartyRecords(new ArrayList<DPLRecord>());
               }
-              document.add(blankLine());
-              document.add(blankLine());
-              document.add(createSubHeader("Search Details - " + result.getSearchArgument().toUpperCase()));
-              section = createDetailsTable(new float[] { 30, 70 });
-              section.addCell(createLabelCell("Searching For:"));
-              section.addCell(createValueCell(result.getSearchArgument().toUpperCase()));
-              section.addCell(createLabelCell("Records Found:"));
-              section.addCell(createValueCell(result.getDeniedPartyRecords().size() + ""));
-              section.addCell(createLabelCell("Exact Match Found:"));
-              section.addCell(createValueCell(DPLSearchResult.exactMatchFound(result) ? "Yes" : "No"));
-              section.addCell(createLabelCell("Partial Match Found:"));
-              section.addCell(createValueCell(DPLSearchResult.partialMatchFound(result) ? "Yes" : "No"));
-              section.addCell(createLabelCell("Closest Name Match:"));
-              StringBuilder closest = new StringBuilder();
-              for (DPLRecord closestItem : DPLSearchResult.getTopMatches(result)) {
-                String dplName = closestItem.getCompanyName();
-                boolean person = false;
-                if (StringUtils.isBlank(dplName) && !StringUtils.isBlank(closestItem.getCustomerLastName())) {
-                  dplName = closestItem.getCustomerFirstName() + " " + closestItem.getCustomerLastName();
-                  person = true;
+              if (this.includeSearchDetails) {
+                document.add(blankLine());
+                document.add(blankLine());
+                document.add(createSubHeader("Search Details - " + result.getSearchArgument().toUpperCase()));
+                section = createDetailsTable(new float[] { 30, 70 });
+                section.addCell(createLabelCell("Searching For:"));
+                section.addCell(createValueCell(result.getSearchArgument().toUpperCase()));
+                section.addCell(createLabelCell("Records Found:"));
+                section.addCell(createValueCell(result.getDeniedPartyRecords().size() + ""));
+                section.addCell(createLabelCell("Exact Match Found:"));
+                section.addCell(createValueCell(DPLSearchResult.exactMatchFound(result) ? "Yes" : "No"));
+                section.addCell(createLabelCell("Partial Match Found:"));
+                section.addCell(createValueCell(DPLSearchResult.partialMatchFound(result) ? "Yes" : "No"));
+                section.addCell(createLabelCell("Closest Name Match:"));
+                StringBuilder closest = new StringBuilder();
+                for (DPLRecord closestItem : DPLSearchResult.getTopMatches(result)) {
+                  String dplName = closestItem.getCompanyName();
+                  boolean person = false;
+                  if (StringUtils.isBlank(dplName) && !StringUtils.isBlank(closestItem.getCustomerLastName())) {
+                    dplName = closestItem.getCustomerFirstName() + " " + closestItem.getCustomerLastName();
+                    person = true;
+                  }
+                  if (!person) {
+                    person = closestItem.getComments() != null && closestItem.getComments().contains("[Individual]");
+                  }
+                  if (dplName == null) {
+                    dplName = "";
+                  }
+                  closest.append(closest.length() > 0 ? "\n" : "");
+                  closest.append(dplName + " (" + (person ? "Individual" : "Company") + ")");
                 }
-                if (dplName == null) {
-                  dplName = "";
-                }
-                closest.append(closest.length() > 0 ? "\n" : "");
-                closest.append(dplName + " (" + (person ? "Individual" : "Company") + ")");
-              }
-              section.addCell(createValueCell(closest.toString()));
+                section.addCell(createValueCell(closest.toString()));
 
-              if (this.scorecard != null) {
-                section.addCell(createLabelCell("Results Assessment:"));
-                String assessment = this.scorecard.getDplAssessmentResult();
-                if (assessment == null) {
-                  assessment = "";
+                if (this.scorecard != null) {
+                  section.addCell(createLabelCell("Results Assessment:"));
+                  String assessment = this.scorecard.getDplAssessmentResult();
+                  if (assessment == null) {
+                    assessment = "";
+                  }
+                  String assessResult = "Not Done";
+                  switch (assessment) {
+                  case "Y":
+                    assessResult = "Matched DPL entities";
+                    break;
+                  case "N":
+                    assessResult = "No actual matches";
+                    break;
+                  case "U":
+                    assessResult = "Needs further review";
+                    break;
+                  }
+                  section.addCell(createValueCell(assessResult));
                 }
-                String assessResult = "Not Done";
-                switch (assessment) {
-                case "Y":
-                  assessResult = "Matched DPL entities";
-                  break;
-                case "N":
-                  assessResult = "No actual matches";
-                  break;
-                case "U":
-                  assessResult = "Needs further review";
-                  break;
+                section.addCell(createLabelCell("Assessed By:"));
+                if (this.scorecard != null) {
+                  section.addCell(createValueCell(this.scorecard.getDplAssessmentBy() != null ? this.scorecard.getDplAssessmentBy() : ""));
+                } else {
+                  section.addCell("");
                 }
-                section.addCell(createValueCell(assessResult));
-              }
-              section.addCell(createLabelCell("Assessed By:"));
-              if (this.scorecard != null) {
-                section.addCell(createValueCell(this.scorecard.getDplAssessmentBy() != null ? this.scorecard.getDplAssessmentBy() : ""));
-              } else {
-                section.addCell("");
-              }
-              section.addCell(createLabelCell("Assessed Date:"));
-              if (this.scorecard != null) {
-                if (this.scorecard.getDplAssessmentDate() != null) {
-                  section.addCell(createValueCell(formatter.format(this.scorecard.getDplAssessmentDate())));
+                section.addCell(createLabelCell("Assessed Date:"));
+                if (this.scorecard != null) {
+                  if (this.scorecard.getDplAssessmentDate() != null) {
+                    section.addCell(createValueCell(formatter.format(this.scorecard.getDplAssessmentDate())));
+                  } else {
+                    section.addCell(createValueCell(""));
+                  }
                 } else {
                   section.addCell(createValueCell(""));
                 }
-              } else {
-                section.addCell(createValueCell(""));
+                document.add(section);
               }
-              document.add(section);
               document.add(blankLine());
 
               document.add(createSubHeader("Results"));
@@ -171,6 +177,9 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
                   }
                   if (dplName == null) {
                     dplName = "";
+                  }
+                  if (!person) {
+                    person = item.getComments() != null && item.getComments().contains("[Individual]");
                   }
                   section.addCell(createValueCell(item.getEntityId()));
                   section.addCell(createValueCell(item.getCountryCode()));
@@ -229,6 +238,10 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
 
   public void setScorecard(Scorecard scorecard) {
     this.scorecard = scorecard;
+  }
+
+  public void setIncludeSearchDetails(boolean includeSearchDetails) {
+    this.includeSearchDetails = includeSearchDetails;
   }
 
 }

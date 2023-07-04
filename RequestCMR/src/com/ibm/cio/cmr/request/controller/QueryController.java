@@ -60,6 +60,9 @@ public class QueryController {
         for (String param : request.getParameterMap().keySet()) {
           query.setParameter(param.toUpperCase(), request.getParameter(param));
         }
+        if (!request.getParameterMap().containsKey("MANDT")){
+          query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        }
         query.setForReadOnly(true);
         List<Object[]> results = query.getResults(qall ? -1 : 1);
         int i = 1;

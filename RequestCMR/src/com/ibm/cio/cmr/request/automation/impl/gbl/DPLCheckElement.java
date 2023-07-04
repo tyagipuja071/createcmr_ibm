@@ -184,10 +184,7 @@ public class DPLCheckElement extends ValidatingElement {
             addr.setDplChkTs(SystemUtil.getCurrentTimestamp());
             entityManager.merge(addr);
           } else {
-            Boolean isPrivate = false;
-            if (StringUtils.isNotEmpty(data.getIsicCd()) && "9500".equals(data.getIsicCd())) {
-              isPrivate = true;
-            }
+            Boolean isPrivate = isPrivate(data);
 
             Boolean errorStatus = false;
             try {
@@ -324,6 +321,10 @@ public class DPLCheckElement extends ValidatingElement {
         validation.setMessage("CMR with DPL/Embargo Code");
       }
 
+    } catch (Exception e) {
+      details.append("DPL Search cannot be executed at the moment.");
+      engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
+      output.setOnError(true);
     } finally {
       ChangeLogListener.clearManager();
     }
@@ -386,6 +387,9 @@ public class DPLCheckElement extends ValidatingElement {
       scorecard.setDplChkUsrId(user.getIntranetId());
       scorecard.setDplChkUsrNm(user.getBluePagesName());
     }
+    log.debug("Flushing changes to DB for DPL Check..");
+    updateEntity(scorecard, entityManager);
+    entityManager.flush();
     if (failed > 0) {
       log.debug("Performing DPL Search for Request " + reqId + " with DPL Status: " + scorecard.getDplChkResult());
 
@@ -429,6 +433,16 @@ public class DPLCheckElement extends ValidatingElement {
   @Override
   public String getProcessDesc() {
     return "DPL Check";
+  }
+
+  private boolean isPrivate(Data data) {
+    String subGrp = data.getCustSubGrp();
+    if (subGrp != null) {
+      if (subGrp.toUpperCase().contains("PRIV") || subGrp.toUpperCase().contains("PRIPE") || subGrp.toUpperCase().contains("PRICU")) {
+        return true;
+      }
+    }
+    return "60".equals(data.getCustClass()) || "9500".equals(data.getIsicCd());
   }
 
 }

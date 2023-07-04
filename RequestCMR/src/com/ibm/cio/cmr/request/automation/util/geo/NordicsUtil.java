@@ -367,10 +367,14 @@ public class NordicsUtil extends AutomationUtil {
     String[] bpScenariosToBeChecked = { "BUSPR", "FIBUS", "DKBUS", "CBBUS", "LTBUS", "LVBUS", "EEBUS", "FOBUS", "GLBUS", "ISBUS" };
     String[] isoScenariosToBeChecked = { "INTSO", "DKISO", "FIISO", "FOISO", "GLISO", "ISISO", "LTISO", "LVISO", "EEISO", "CBISO" };
     String[] intScenariosToBeChecked = { "INTER", "DKINT", "FIINT", "CBINT", "GLINT", "FOINT", "ISINT", "LTINT", "LVINT", "EEINT" };
+    String[] privScenariosToBeChecked = { "DKPRI", "ISPRI", "GLPRI", "FOPRI" };
+    String[] ibmScenariosToBeChecked = { "DKIBM", "ISIIBM", "GLIBM", "FOIBM" };
 
     String scenario = requestData.getData().getCustSubGrp();
     String[] kuklaBUSPR = { "43", "44", "45" };
     String[] kuklaISO = { "81", "85" };
+    String[] kuklaPriv = { "60" };
+    String[] kuklaIBMEM = { "71" };
     String cntry = requestData.getData().getCmrIssuingCntry();
     String landCntry = getLandedCntry(requestData.getAddresses());
 
@@ -380,6 +384,9 @@ public class NordicsUtil extends AutomationUtil {
 
     if (Arrays.asList(bpScenariosToBeChecked).contains(scenario)) {
       for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
         if (StringUtils.isNotBlank(match.getCustClass())) {
           String kukla = match.getCustClass() != null ? match.getCustClass() : "";
           if (Arrays.asList(kuklaBUSPR).contains(kukla) || isuCTCMatch(match.getCmrNo(), entityManager, cntry)) {
@@ -414,11 +421,42 @@ public class NordicsUtil extends AutomationUtil {
       }
       // set filtered matches in response
       response.setMatches(filteredMatches);
+    } else if (Arrays.asList(privScenariosToBeChecked).contains(scenario)) {
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaPriv).contains(kukla)) {
+            filteredMatches.add(match);
+          }
+        }
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
+    } else if (Arrays.asList(ibmScenariosToBeChecked).contains(scenario)) {
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaIBMEM).contains(kukla)) {
+            filteredMatches.add(match);
+          }
+        }
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
     }
 
     if (response.getMatches() != null) {
       for (DuplicateCMRCheckResponse res : response.getMatches()) {
         List<CmrtCust> results = null;
+        if (res.getCmrNo() != null && res.getCmrNo().startsWith("P") && "75".equals(res.getOrderBlk())) {
+          subScenarioMatches.add(res);
+        }
         try {
           String sql = ExternalizedQuery.getSql("LEGACYD.GETCUST");
           PreparedQuery query = new PreparedQuery(entityManager, sql);

@@ -128,6 +128,14 @@ public class LAHandler extends GEOHandler {
         }
       }
       source.setItems(converted);
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
+      for (FindCMRRecordModel record : records) {
+        if ("ZS01".equals(record.getCmrAddrTypeCode()) && "90".equals(record.getCmrOrderBlock())) {
+          continue;
+        }
+        converted.add(record);
+      }
+      source.setItems(converted);
     }
   }
 
@@ -975,25 +983,10 @@ public class LAHandler extends GEOHandler {
     List<GeoContactInfoModel> tempList = new ArrayList<GeoContactInfoModel>();
     GeoContactInfoModel tempMod = null;
     int loopCount = 0;
-    if (isBRIssuingCountry(modToCopy.getCmrIssuingCntry())) {
-      while (loopCount < 3) {
-        tempMod = new GeoContactInfoModel();
-        copyContactModelProps(modToCopy, tempMod, loopCount);
-        tempList.add(tempMod);
-        loopCount++;
-      }
-    } else if (SystemLocation.PERU.equalsIgnoreCase(modToCopy.getCmrIssuingCntry())) {
-      while (loopCount < 2) {
-        tempMod = new GeoContactInfoModel();
-        copyContactModelProps(modToCopy, tempMod, loopCount);
-        tempList.add(tempMod);
-        loopCount++;
-      }
-    } else if (isMXIssuingCountry(modToCopy.getCmrIssuingCntry())) {
-      tempMod = new GeoContactInfoModel();
-      copyContactModelProps(modToCopy, tempMod, loopCount);
-      tempList.add(tempMod);
-    }
+    tempMod = new GeoContactInfoModel();
+    copyContactModelProps(modToCopy, tempMod, loopCount);
+    tempList.add(tempMod);
+
     return tempList;
   }
 
@@ -3144,9 +3137,10 @@ public class LAHandler extends GEOHandler {
       txt = results.get(0);
     } else if (results != null && results.size() > 1) {
       for (String res : results) {
-        if (res.startsWith(stateProv)) {
+        if (StringUtils.isNotBlank(stateProv) && res.startsWith(stateProv)) {
           txt = res;
         }
+
       }
     }
 

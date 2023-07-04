@@ -218,13 +218,13 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       // }
 
       if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry())) {
-        //if ("C".equals(admin.getReqType())) {
-          if ("ZS01".equals(model.getAddrType())) {
-            newAddrSeq = "001";
-          } else if ("ZI01".equals(model.getAddrType())) {
-            newAddrSeq = "002";
-          }
-        //}
+        // if ("C".equals(admin.getReqType())) {
+        if ("ZS01".equals(model.getAddrType())) {
+          newAddrSeq = "001";
+        } else if ("ZI01".equals(model.getAddrType())) {
+          newAddrSeq = "002";
+        }
+        // }
       }
       if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry()) || SystemLocation.GREECE.equals(model.getCmrIssuingCntry())) {
         if ("U".equals(admin.getReqType())) {
@@ -1148,11 +1148,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         errorInfo = null;
         if (addr.getDplChkResult() == null) {
           Boolean errorStatus = false;
-          Boolean isPrivate = false;
-          if ("PRIV".equals(data.getCustSubGrp()) || "PRICU".equals(data.getCustSubGrp())) {
-            isPrivate = true;
-
-          }
+          Boolean isPrivate = isPrivate(data);
           try {
             dplResult = dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
                 geoHandler != null ? !geoHandler.customerNamesOnAddress() : false, isPrivate);
@@ -1351,7 +1347,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       request.setCompanyName(name);
     log.debug("Performing DPL Check (service) on Request ID " + admin.getId().getReqId() + " (" + id + ")");
     log.debug(" - Name: " + name);
-    DPLCheckResponse response = dplClient.executeAndWrap(DPLCheckClient.EVS_APP_ID, request, DPLCheckResponse.class);
+    String dplSystemId = SystemUtil.useKYCForDPLChecks() ? DPLCheckClient.KYC_APP_ID : DPLCheckClient.EVS_APP_ID;
+    DPLCheckResponse response = dplClient.executeAndWrap(dplSystemId, request, DPLCheckResponse.class);
     if (!response.isSuccess()) {
       throw new Exception("Failed to connect to DPL check service: " + response.getMsg());
     } else {
@@ -2460,4 +2457,15 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
     return addrSeq;
   }
+
+  private boolean isPrivate(Data data) {
+    String subGrp = data.getCustSubGrp();
+    if (subGrp != null) {
+      if (subGrp.toUpperCase().contains("PRIV") || subGrp.toUpperCase().contains("PRIPE") || subGrp.toUpperCase().contains("PRICU")) {
+        return true;
+      }
+    }
+    return "60".equals(data.getCustClass()) || "9500".equals(data.getIsicCd());
+  }
+
 }

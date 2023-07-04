@@ -146,7 +146,7 @@ function afterConfigForFR() {
     setHideFieldForFR();
     setINACOnScenario();
     setISICAndSubindustryOnScenario();
-    setVATOnScenario();
+    // setVATOnScenario();
     // setSBOOnScenario();
     setSalesRepLogic();
     setTaxCdOnScnrio();
@@ -202,7 +202,7 @@ function afterConfigForFR() {
   } else {
     FormManager.readOnly('taxCd1');
   }
-  addVatExemptHandler();
+  // addVatExemptHandler();
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     if (value != '' || value != 'undefined') {
       var landedCountry = getSoldToLanded();
@@ -1475,7 +1475,7 @@ function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, for
     if (addrType == 'ZS01' || copyingToA) {
       addAbbrevLocnlogic();
       // add32SBODependcyOnPostCdOnAddrSave();
-      addVATScenarioOnAddrSave();
+      // addVATScenarioOnAddrSave();
       setTaxCdOnAddrSave();
     }
   }
@@ -3668,7 +3668,7 @@ function addVatExemptHandler() {
           FormManager.enable('vat');
           FormManager.removeValidator('vat', Validators.REQUIRED);
         } else {
-          setVATOnScenario(true);
+          // setVATOnScenario(true);
         }
       });
     }
@@ -4378,6 +4378,48 @@ function set2H23CoverageChangesOnLandedCoutrychange() {
   }
 }
 
+function addVatIndValidator() {
+  var _vatHandler = null;
+  var _vatIndHandler = null;
+  var vat = FormManager.getActualValue('vat');
+  var vatInd = FormManager.getActualValue('vatInd');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnlyPage == 'true') {
+    FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
+  } else {
+
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+      ISSUING_CNTRY : cntry
+    });
+
+    if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.enable('vatInd');
+      // FormManager.readOnly('vatInd');
+    } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
+      FormManager.setValue('vat', '');
+      FormManager.setValue('vatInd', '');
+    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
+      FormManager.setValue('vatInd', 'T');
+      FormManager.enable('vatInd');
+      // FormManager.readOnly('vatInd');
+    } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.setValue('vatInd', 'N');
+    }
+
+    if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null) && vatInd == 'N') {
+      FormManager.resetValidations('vat');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -4458,5 +4500,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(set2H23CoverageChangesOnLandedCoutrychange, '706');
   GEOHandler.addAfterTemplateLoad(set2H23CoverageChanges, '706');
   GEOHandler.addAfterTemplateLoad(setCoverage2H23FieldBehaviour, '706');
+
+  GEOHandler.registerValidator(addVatIndValidator, [ '706' ], null, true);
+  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, '706');
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [ '706' ]);
 
 });

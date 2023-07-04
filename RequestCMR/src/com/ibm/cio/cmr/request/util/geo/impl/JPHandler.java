@@ -311,6 +311,7 @@ public class JPHandler extends GEOHandler {
         }
         addr.setAddrTxt(company.getAddress() == null ? company.getAddress()
             : company.getAddress().trim().length() > 23 ? company.getAddress().trim().substring(0, 23) : company.getAddress().trim());
+        addr.setAddrTxt(convert2DBCS(addr.getAddrTxt()));
         addr.setAddrTxt2(addrTxt);
         sbPhone = new StringBuilder();
         sbPhone.append(!StringUtils.isEmpty(company.getPhoneShi()) ? company.getPhoneShi() : "");
@@ -376,6 +377,7 @@ public class JPHandler extends GEOHandler {
           addr.setAddrTxt(establishment.getAddress() == null ? establishment.getAddress()
               : establishment.getAddress().trim().length() > 23 ? establishment.getAddress().trim().substring(0, 23)
                   : establishment.getAddress().trim());
+          addr.setAddrTxt(convert2DBCS(addr.getAddrTxt()));
           addr.setAddrTxt2(estAddrTxt);
           addr.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
           addr.setImportInd(CmrConstants.YES_NO.Y.toString());
@@ -777,6 +779,7 @@ public class JPHandler extends GEOHandler {
     address.setAddrTxt(currentRecord.getCmrStreetAddress() == null ? currentRecord.getCmrStreetAddress()
         : currentRecord.getCmrStreetAddress().trim().length() > 23 ? currentRecord.getCmrStreetAddress().trim().substring(0, 23)
             : currentRecord.getCmrStreetAddress().trim());
+    address.setAddrTxt(convert2DBCS(address.getAddrTxt()));
     address.setAddrTxt2(addrTxt);
     // 1652081
     convertKATAKANA(currentRecord.getCmrName2Plain(), address);
@@ -1457,9 +1460,9 @@ public class JPHandler extends GEOHandler {
     String custNm1 = addr.getCustNm1() == null ? "" : addr.getCustNm1();
     String custNm2 = addr.getCustNm2() == null ? "" : addr.getCustNm2();
     String custNm12 = custNm1 + custNm2;
-    addr.setCustNm1(custNm12.length() > 15 ? custNm12.substring(0, 15) : custNm12);
+    addr.setCustNm1(custNm12.length() > 17 ? custNm12.substring(0, 17) : custNm12);
     addr.setCustNm2(
-        custNm12.length() > 15 ? custNm12.substring(15).length() > 15 ? custNm12.substring(15).substring(0, 15) : custNm12.substring(15) : "");
+        custNm12.length() > 17 ? custNm12.substring(17).length() > 17 ? custNm12.substring(17).substring(0, 17) : custNm12.substring(17) : "");
     String nameTemp = null;
     if (addr.getCustNm4() != null && addr.getCustNm4().trim().length() > 23) {
       nameTemp = addr.getCustNm4().trim().substring(23);
@@ -1475,6 +1478,7 @@ public class JPHandler extends GEOHandler {
     }
     addr.setAddrTxt(addr.getAddrTxt() == null ? addr.getAddrTxt()
         : addr.getAddrTxt().trim().length() > 23 ? addr.getAddrTxt().trim().substring(0, 23) : addr.getAddrTxt().trim());
+    addr.setAddrTxt(convert2DBCS(addr.getAddrTxt()));
 
     setCSBOBeforeAddrSave(entityManager, addr);
     setCustNmDetailBeforeAddrSave(entityManager, addr);
@@ -1783,9 +1787,9 @@ public class JPHandler extends GEOHandler {
       String output = matcher.replaceFirst("$1　$2");
       addr.setCustNm1(output);
     }
-    if (addr.getCustNm1() != null && addr.getCustNm1().length() > 15) {
-      addr.setCustNm2(addr.getCustNm1().substring(15) + addr.getCustNm2());
-      addr.setCustNm1(addr.getCustNm1().substring(0, 15));
+    if (addr.getCustNm1() != null && addr.getCustNm1().length() > 17) {
+      addr.setCustNm2(addr.getCustNm1().substring(17) + addr.getCustNm2());
+      addr.setCustNm1(addr.getCustNm1().substring(0, 17));
     }
   }
 
@@ -1878,6 +1882,8 @@ public class JPHandler extends GEOHandler {
       modifiedVal = modifiedVal.replaceAll("Y", "Ｙ");
       modifiedVal = modifiedVal.replaceAll("Z", "Ｚ");
       modifiedVal = modifiedVal.replaceAll(" ", "　");
+      modifiedVal = modifiedVal.replaceAll("-", "－");
+      modifiedVal = modifiedVal.replaceAll("−", "－");
     }
     return modifiedVal;
   }
@@ -2511,11 +2517,11 @@ public class JPHandler extends GEOHandler {
   @Override
   public String[] dividingCustName1toName2(String name1, String name2) {
     String[] nameArray = new String[2];
-    if (name1 != null && name1.length() > 15 || name1 != null && name2 != null && (name1.length() + name2.length()) > 30
-        || name2 != null && name2.length() > 15) {
+    if (name1 != null && name1.length() > 17 || name1 != null && name2 != null && (name1.length() + name2.length()) > 30
+        || name2 != null && name2.length() > 17) {
       String nameTotal = name1 + (name2 == null ? "" : name2);
-      nameArray[0] = nameTotal.substring(0, 15);
-      nameArray[1] = nameTotal.substring(15).length() > 15 ? nameTotal.substring(15, 30) : nameTotal.substring(15);
+      nameArray[0] = nameTotal.substring(0, 17);
+      nameArray[1] = nameTotal.substring(17).length() > 17 ? nameTotal.substring(17, 30) : nameTotal.substring(17);
     } else {
       nameArray[0] = name1;
       nameArray[1] = name2;

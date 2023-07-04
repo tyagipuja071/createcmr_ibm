@@ -106,7 +106,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
               if (result.isOnError()) {
                 return result;
               }
-              if (cmrCheckMatches.size() != 0 && !"Y".equals(isProspectCmr)) {
+              if (cmrCheckMatches.size() != 0) {
                 result.setResults("Matches Found");
                 details.append(cmrCheckMatches.size() + " record(s) found.");
                 List<String> dupCMRNos = new ArrayList<>();
@@ -283,6 +283,20 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     return result;
   }
 
+  public void filterProspectCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response, String isProspectCmr) {
+    if ("Y".equals(isProspectCmr)) {
+      List<DuplicateCMRCheckResponse> cmrCheckMatches = response.getMatches();
+      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        if (cmrCheckRecord.getCmrNo() != null && !cmrCheckRecord.getCmrNo().startsWith("P") && !"75".equals(cmrCheckRecord.getOrderBlk())) {
+          filteredMatches.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(filteredMatches);
+    }
+  }
+
   public MatchingResponse<DuplicateCMRCheckResponse> getMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
     Admin admin = requestData.getAdmin();
@@ -335,9 +349,14 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
 
     if (response.getSuccess() && response.getMatches().size() > 0) {
       log.debug("Matches found for the given search criteria.");
+      String isProspectCmr = admin.getProspLegalInd();
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
       if (countryUtil != null) {
         countryUtil.filterDuplicateCMRMatches(entityManager, requestData, engineData, response);
+      }
+      if ("Y".equals(isProspectCmr)) {
+        // remove all prospect cmr found in DUPC matches if it's an prospect cmr
+        filterProspectCMRMatches(entityManager, requestData, engineData, response, isProspectCmr);
       }
     }
 
