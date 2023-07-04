@@ -268,9 +268,12 @@ public class NetherlandsUtil extends AutomationUtil {
         sortlList.add(sortl);
         // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
       }
-    }
-    sortl = sortlList.get(0);
-    return sortl;
+      sortl = sortlList.get(0);
+    } else {
+      // Handle the case when the list is empty
+      LOG.debug("The list is empty.");
+    }    
+    return sortl;    
   }
 
   private NLFieldsContainer calculate32SValuesFromIMSNL(EntityManager entityManager, Data data) {
