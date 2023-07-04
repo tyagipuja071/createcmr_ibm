@@ -11,9 +11,8 @@
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
 %>
 
-<script src="https://unpkg.com/read-excel-file@5.x/bundle/read-excel-file.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.7.7/xlsx.core.min.js"></script>  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xls/0.7.4-a/xls.core.min.js"></script>  
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
 <style>
 #addEditAddressModal div.ibm-columns {
   width: 730px !important;
@@ -156,16 +155,17 @@
         <div id="dplChkInfoEdit">-</div>
       </cmr:column>
     </cmr:row>
-
+    
     <cmr:view forCountry="760">
-    	<cmr:row>
-      		<cmr:column span="1" width="200">
-    			<label for="endUserFile"> ${ui.endUserFile}: </label>
-    		</cmr:column>
-    		<cmr:column span="3">
-				<input type="file" id="endUserFile" accept=".xls" name="endUserFile">
-			</cmr:column>
-		</cmr:row>
+	    <cmr:row addBackground="true" topPad="5">
+			<cmr:column span="2">		     
+		        <label for="endUserFile"> ${ui.endUserFile}: </label>
+		        <input type="file" id="xlsFile" accept=".xls" name="xlsFile">	
+		     </cmr:column>		      
+			 <cmr:column span="2">
+				<cmr:button label="${ui.btn.endUserFile}" onClick="parseXLS()" highlight="true" pad="true" id="endUserFileBtn" />		      
+		    </cmr:column>    	
+	    </cmr:row>
     </cmr:view>
     
     <div style="display:none">
@@ -235,11 +235,6 @@
       <cmr:button label="${ui.btn.addAddress}" onClick="doValidateSave()" highlight="true" pad="true" id="addressBtn" />
       </cmr:view>
       <cmr:button label="${ui.btn.cancel}" onClick="cancelAddressModal()" highlight="false" pad="true" />
-      
-      <cmr:view forCountry="760">
-        <cmr:button label="${ui.btn.upload}" onClick="uploadFile()" highlight="true" pad="true" id="uploadBtn" />
-      </cmr:view>
-    
     </cmr:buttonsRow>
   </cmr:form>
 </cmr:modal>
