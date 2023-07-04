@@ -3131,3 +3131,78 @@ function resetSccInfo() {
 }
 // CREATCMR-5447
 
+function parseXLS() {
+	
+  var contactCon = '';
+  const input = document.getElementById('xlsFile');
+  const file = input.files[0];
+  
+  const reader = new FileReader();
+  
+  reader.onload = function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    
+    // Access the worksheets
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    
+    // Process the data
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    // Access and read the data
+    for (let row = 0; row < jsonData.length; row++) {
+      const rowData = jsonData[row];
+      for (let col = 0; col < rowData.length; col++) {
+        const cellData = rowData[col];
+        
+        
+        
+        if (row ==8 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('custNm4' , cellData);
+        }
+        if (row ==9 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('custNm1' , cellData);
+        }
+        if (row ==10 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('dept' , cellData);
+        }
+        if (row ==11 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('postCd' , cellData);
+        }
+        if (row ==12 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('addrTxt' , cellData);
+        }
+        if (row ==8 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('custNm3' , cellData);
+        }
+        if (row ==9 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('contact' , cellData);
+        }
+        if (row ==10 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          contactCon = cellData;
+        }
+        if (row ==11 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('bldg' , cellData);
+        }
+        if (row ==11 && col==7) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('custPhone' , cellData);
+        }
+      }
+    }
+    var contact = FormManager.getActualValue('contact');
+    if(contact !=null && contact.length>0 && contactCon!=null && contactCon.length>0)
+    FormManager.setValue('contact' , contact+contactCon);
+    console.log(jsonData);
+  };
+  
+  reader.readAsArrayBuffer(file);
+}
