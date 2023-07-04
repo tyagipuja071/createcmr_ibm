@@ -3,6 +3,8 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.Arrays;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -26,6 +28,13 @@ import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
  */
 
 public abstract class ISATransformer extends APTransformer {
+  private static final String[] clusterIndiaMrc2 = { "05224", "04477", "04490", "04467", "05225" };
+  private static final String[] clusterIndiaMrc3 = { "09062", "10193", "10194", "10195", "10196", "10197", "10198", "10199", "10200", "10201",
+      "10202", "10203", "10204", "10205", "10206", "10207", "10208", "10209", "10210", "10211", "10212", "10213", "10214", "10215", "10590", "10591",
+      "10592", "10593", "10594", "10595", "10596", "10597", "10598", "10599", "10600", "10601", "10602", "10603", "10604", "10605", "10606", "10607",
+      "10608", "10609", "10610", "10611", "10612", "10613", "10614", "10615", "10616", "10617", "10618", "10619", "10620", "10621", "10622", "10623",
+      "10624", "10625", "10626", "10627", "10628", "10629", "10630", "10631", "10632", "10633", "10634", "10635", "10636", "10637", "10638", "10639",
+      "10640", "10641", "10642", "10643", "10644", "10645", "10654", "10655", "10656", "10657" };
 
   /**
    * @param cmrIssuingCntry
@@ -48,12 +57,6 @@ public abstract class ISATransformer extends APTransformer {
 
     String isu = handler.cmrData.getIsuCd();
 
-    if ("32".equalsIgnoreCase(isu) || "34".equalsIgnoreCase(isu) || "21".equalsIgnoreCase(isu)) {
-      handler.messageHash.put("MrktRespCode", "3");
-    } else {
-      handler.messageHash.put("MrktRespCode", "2");
-    }
-
     if ("0".equalsIgnoreCase(handler.cmrData.getClientTier())) {
       handler.messageHash.put("GB_SegCode", "");
     }
@@ -69,6 +72,13 @@ public abstract class ISATransformer extends APTransformer {
       handler.messageHash.put("ClusterNo", "");
     } else {
       handler.messageHash.put("ClusterNo", clusterID);
+    }
+
+    String reqType = handler.adminData.getReqType();
+    if (clusterID != null && Arrays.asList(clusterIndiaMrc2).contains(clusterID) && !StringUtils.equalsIgnoreCase(reqType, "U")) {
+      handler.messageHash.put("MrktRespCode", "3");
+    } else if (clusterID != null && Arrays.asList(clusterIndiaMrc3).contains(clusterID) && !StringUtils.equalsIgnoreCase(reqType, "U")) {
+      handler.messageHash.put("MrktRespCode", "2");
     }
 
     // Handling obsolete data

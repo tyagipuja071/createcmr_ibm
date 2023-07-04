@@ -20,6 +20,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueuePK;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.APHandler;
@@ -87,7 +88,10 @@ public abstract class APTransformer extends MessageTransformer {
   protected void handleDataDefaults(MQMessageHandler handler) {
     // String mrcCode = (("32".equalsIgnoreCase(handler.cmrData.getIsuCd()) ||
     // ("34".equalsIgnoreCase(handler.cmrData.getIsuCd())))) ? "3" : "2";
-    handler.messageHash.put("MrktRespCode", "3");
+    APHandler aphandler = (APHandler) RequestUtils.getGEOHandler(handler.cmrData.getCmrIssuingCntry());
+    if (!(handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.INDIA) && "U".equals(handler.adminData.getReqType()))) {
+      handler.messageHash.put("MrktRespCode", "3");
+    }
     handler.messageHash.put("SellBrnchOff", handler.cmrData.getTerritoryCd());
     handler.messageHash.put("SellDept", handler.cmrData.getIsbuCd());
     handler.messageHash.put("InstBrnchOff", handler.cmrData.getTerritoryCd());
@@ -178,8 +182,8 @@ public abstract class APTransformer extends MessageTransformer {
     Addr addrData = handler.addrData;
 
     List<String> abbrevLandCountries = new ArrayList<String>();
-    abbrevLandCountries = (List<String>) Arrays.asList("US", "MY", "GB", "SG", "AE", "CH", "MV", "AU", "FR", "TH", "NL", "IE", "HK", "DE",
-        "ID", "BD", "CA", "LK", "TW", "NZ", "VN", "PH", "KR", "MM", "KH", "BN", "PG");
+    abbrevLandCountries = (List<String>) Arrays.asList("US", "MY", "GB", "SG", "AE", "CH", "MV", "AU", "FR", "TH", "NL", "IE", "HK", "DE", "ID", "BD",
+        "CA", "LK", "TW", "NZ", "VN", "PH", "KR", "MM", "KH", "BN", "PG");
     String line66 = "";
     boolean update = "U".equals(handler.adminData.getReqType());
     String scenario = handler.cmrData.getCustSubGrp();
@@ -188,7 +192,7 @@ public abstract class APTransformer extends MessageTransformer {
       if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry()))) {
         if (!update && abbrevLandCountries.contains(addrData.getLandCntry()) && "CROSS".equals(scenario))
           line66 += " " + "<" + addrData.getLandCntry() + ">";
-        else 
+        else
           line66 += " " + "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
       }
       if ("LA".equalsIgnoreCase(addrData.getLandCntry()))
@@ -200,9 +204,9 @@ public abstract class APTransformer extends MessageTransformer {
       if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry())))
         if (abbrevLandCountries.contains(addrData.getLandCntry()) && scenario.equals("CROSS"))
           line66 += " " + "<" + addrData.getLandCntry() + ">";
-        else 
+        else
           line66 += " " + "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
-        
+
       if ("LA".equalsIgnoreCase(addrData.getLandCntry()))
         line66 = "<Laos>";
       if (addrData.getPostCd() != null)
