@@ -642,10 +642,12 @@ function onCustSubGrpChange() {
       
     }  
     
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custSubGrpInDB = _pagemodel.custSubGrp;
-    if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB) {
-      FormManager.setValue('abbrevNm', _pagemodel.abbrevNm);
+    var abbrevNm = null;
+    if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB ) {
+      FormManager.setValue('abbrevNm', _pagemodel.abbrevNm); 
       FormManager.setValue('abbrevLocn', _pagemodel.abbrevLocn);
       FormManager.setValue('isbuCd', _pagemodel.isbuCd);
       return;
@@ -2241,27 +2243,32 @@ function validateGSTForIndia() {
                 REQ_ID : reqId
               };
             }
-            var results = cmr.query('GET_ZS01', reqParam);
+              var results = cmr.query('GET_ZS01_GST_VALIDATE', reqParam);
             if (results.ret1 != undefined) {
-              
-              var name = results.ret1;
-              var address = results.ret2;
-              var postal = results.ret3;
-              var city = results.ret4;
-              var state = results.ret5;
-              var country = '';
-              
-              if (state != null && state != '') {
+
+              var custNm1 = results.ret1;
+              var custNm2 = results.ret2;
+              var addrTxt = results.ret3;
+              var postal = results.ret4;
+              var city = results.ret5;
+              var stateProv = results.ret6;
+              var landCntry = results.ret7;
+//              var country = '744';
+
+              if (stateProv != null && stateProv != '') {
                 reqParam = {
-                    STATE_PROV_CD : state,
+                    STATE_PROV_CD : stateProv,
                   };
               var stateResult = cmr.query('GET_STATE_DESC', reqParam);
                 if (stateResult != null) {
-                  country = stateResult.ret1;
+                  stateProv = stateResult.ret1;
                 }
               }
-            var gstRet = cmr.validateGST(country, vat, name, address, postal, city);
-            if (!gstRet.success) {
+            var gstRet = cmr.validateGST(cntry, vat, custNm1, custNm2, addrTxt, postal, city, stateProv, landCntry);
+            var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+              ID : reqId
+            });
+            if (!gstRet.success && (ret == null || ret.ret1 == null)) {
               return new ValidationResult({
                 id : 'vat',
                 type : 'text',
@@ -2971,6 +2978,10 @@ function setDefaultOnScenarioChange(fromAddress, scenario, scenarioChanged) {
 
 
 function setLockIsicfromDNB() {
+	 var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
   var isDnbRecord = FormManager.getActualValue('findDnbResult');
   if (isDnbRecord =='Accepted' && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
@@ -3215,6 +3226,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, [ SysLoc.INDIA ]); 
   GEOHandler.addAfterTemplateLoad(lockInacNacFieldsByScenarioSubType, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChange, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChange, [ SysLoc.INDIA ]);   
   GEOHandler.addAfterConfig(lockInacType, [ SysLoc.INDIA ]);
  
 });
