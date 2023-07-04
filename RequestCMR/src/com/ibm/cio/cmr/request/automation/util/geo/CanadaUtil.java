@@ -44,7 +44,9 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
@@ -284,7 +286,7 @@ public class CanadaUtil extends AutomationUtil {
           String scenariofieldValue = custScenario.getValue();
           // Sales Branch Office
           if (custScenario.getFieldName().equals("salesBusOffCd")) {
-            String dataSalesBusOffCd = data.getSalesBusOffCd();
+            String dataSalesBusOffCd = StringUtils.isNotEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd() : "";
             if (StringUtils.isNotBlank(scenariofieldValue) && !dataSalesBusOffCd.equals(scenariofieldValue)) {
               details.append("Setting Sales Branch Office to ").append(scenariofieldValue).append("\n");
               overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", dataSalesBusOffCd, scenariofieldValue);
@@ -293,7 +295,7 @@ public class CanadaUtil extends AutomationUtil {
           }
           // Marketing Rep
           else if (custScenario.getFieldName().equals("repTeamMemberNo")) {
-            String dataRepTeamMemberNo = data.getRepTeamMemberNo();
+            String dataRepTeamMemberNo = StringUtils.isNotEmpty(data.getRepTeamMemberNo()) ? data.getRepTeamMemberNo() : "";
             if (StringUtils.isNotBlank(scenariofieldValue) && !dataRepTeamMemberNo.equals(scenariofieldValue)) {
               details.append("Setting Mktg Rep to ").append(scenariofieldValue).append("\n");
               overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "REP_TEAM_MEMBER_NO", dataRepTeamMemberNo,
@@ -302,7 +304,7 @@ public class CanadaUtil extends AutomationUtil {
           }
           // CS Branch
           else if (custScenario.getFieldName().equals("salesTeamCd")) {
-            String dataSalesTeamCd = data.getSalesTeamCd();
+            String dataSalesTeamCd = StringUtils.isNotEmpty(data.getSalesTeamCd()) ? data.getSalesTeamCd() : "";
             if (StringUtils.isNotBlank(scenariofieldValue) && !dataSalesTeamCd.equals(scenariofieldValue)) {
               details.append("Setting CS Branch to ").append(scenariofieldValue).append("\n");
               overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_TEAM_CD", dataSalesTeamCd, scenariofieldValue);
@@ -319,7 +321,7 @@ public class CanadaUtil extends AutomationUtil {
           }
           // AR-FAAR
           else if (custScenario.getFieldName().equals("adminDeptCd")) {
-            String dataAdminDeptCd = data.getAdminDeptCd();
+            String dataAdminDeptCd = StringUtils.isNotEmpty(data.getAdminDeptCd()) ? data.getAdminDeptCd() : "";
             String sbo = data.getSalesBusOffCd();
             if (StringUtils.isNotBlank(scenariofieldValue) && !dataAdminDeptCd.equals(scenariofieldValue)) {
               details.append("Setting AR-FAAR to ").append(scenariofieldValue).append("\n");
@@ -328,7 +330,7 @@ public class CanadaUtil extends AutomationUtil {
           }
           // Credit Code creditCd
           else if (custScenario.getFieldName().equals("creditCd")) {
-            String dataCreditCd = data.getCreditCd();
+            String dataCreditCd = StringUtils.isNotEmpty(data.getCreditCd()) ? data.getCreditCd() : "";
             if (StringUtils.isNotBlank(scenariofieldValue) && !dataCreditCd.equals(scenariofieldValue)) {
               details.append("Setting Credit Code to ").append(scenariofieldValue).append("\n");
               overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CREDIT_CD", dataCreditCd, scenariofieldValue);
@@ -336,7 +338,7 @@ public class CanadaUtil extends AutomationUtil {
           }
           // Pref Lang
           else if (custScenario.getFieldName().equals("custPrefLang")) {
-            String dataCustPrefLang = data.getCustPrefLang();
+            String dataCustPrefLang = StringUtils.isNotEmpty(data.getCustPrefLang()) ? data.getCustPrefLang() : "";
             if (soldTo != null && "QC".equals(soldTo.getStateProv())) {
               details.append("Setting Preferred Language to French").append("\n");
               overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", dataCustPrefLang, "F");
@@ -348,7 +350,7 @@ public class CanadaUtil extends AutomationUtil {
           }
           // Tax Code/Estab Function Code (EFC)
           else if (custScenario.getFieldName().equals("taxCd1")) {
-            String dataTaxCd1 = data.getTaxCd1();
+            String dataTaxCd1 = StringUtils.isNotEmpty(data.getTaxCd1()) ? data.getTaxCd1() : "";
             if (StringUtils.isBlank(dataTaxCd1)
                 || (StringUtils.isNotBlank(dataTaxCd1) && StringUtils.isNotBlank(scenariofieldValue) && !dataTaxCd1.equals(scenariofieldValue))) {
               details.append("Setting Tax Code/EFC to ").append(scenariofieldValue).append("\n");
