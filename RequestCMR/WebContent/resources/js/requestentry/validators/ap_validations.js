@@ -317,7 +317,7 @@ function addAfterConfigAP() {
   if (cntry == '796' && reqType == 'C') { 
     setLockIsicNZfromDNB();
     // CREATCMR-7656
-    setDefaultValueforCustomerServiceCode();
+    // setDefaultValueforCustomerServiceCode();
     // setLockStatusforSalesReqNo();
     // removeSalesReqNoValidation();
     
@@ -2140,9 +2140,61 @@ function updateIndustryClass() {
   if (subIndustryCd != null && subIndustryCd.length > 1) {
     var _industryClass = subIndustryCd.substr(0, 1);
     FormManager.setValue('IndustryClass', _industryClass);
+    if(_industryClass =='Y' || _industryClass =='G' ){
+      FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'Government Customer Type' ], 'MAIN_IBM_TAB');
+    }else{
+      FormManager.removeValidator('taxCd2', Validators.REQUIRED);
+    }
+    setAnzKuklaFor();
     updateCluster(_industryClass);
   }
 }
+
+function setAnzKuklaFor() {
+  console.log('>>>> setAnzKukla >>>>');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var govCustType =   FormManager.getActualValue('taxCd2');
+  var industryClass = FormManager.getActualValue('subIndustryCd');
+  var subScenariotype = FormManager.getActualValue('custSubGrp');
+  var sKukla = '11'
+  
+  if (viewOnlyPage == 'true' || reqType != 'C') {
+    return;
+  }
+  if (cmrIssuCntry != '616' && cmrIssuCntry != '796') {
+    return;
+  }
+  if (cmrIssuCntry == '796') {
+    if (subScenariotype == 'INTER') {
+      sKukla = '81';
+    } else if (subScenariotype == 'PRIV') {
+      sKukla = '60';
+    } else if (industryClass != null && (industryClass.substring(0, 1) =='Y' || industryClass.substring(0, 1) =='G')
+        && (subScenariotype ==  'XESO' || subScenariotype == 'XAQST' || subScenariotype == 'AQSTN' || subScenariotype == 'CROSS'
+            || subScenariotype == 'ESOSW' || subScenariotype == 'NRML')) {
+      sKukla = '14';
+    } else {
+      sKukla = '11';
+    }
+  } else if (cmrIssuCntry == '616') {
+    if (subScenariotype == 'INTER' || subScenariotype == 'XINT') {
+      sKukla = '81';
+    } else if (subScenariotype == 'PRIV' || subScenariotype == 'XPRIV') {
+      sKukla = '60';
+    } else if ((subScenariotype == 'AQSTN' || subScenariotype == 'NRML' || subScenariotype == 'ESOSW'
+        || subScenariotype == 'CROSS' || subScenariotype == 'XAQST' || subScenariotype == 'NRMLC')
+        && govCustType != null && govCustType.length == 3) {
+      sKukla = govCustType.substring(1, 3);
+    } else {
+      sKukla = '11';
+    }
+  }
+  FormManager.setValue('custClass', sKukla);
+}
+
+  
 
 function updateCluster(value) {
   console.log('>>>> updateCluster >>>>');
@@ -3378,7 +3430,8 @@ function addGovIndcHanlder() {
 var _govCustTypeHandler = null;
 function addGovCustTypHanlder() {
   _govIndcHandler = dojo.connect(FormManager.getField('taxCd2'), 'onChange', function(value) {
-    setAbbrevNameforGovType();
+    // setAbbrevNameforGovType();
+    setAnzKuklaFor();
   });
 }
 
@@ -5274,6 +5327,37 @@ function addressQuotationValidatorAP() {
     FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Address Con\'t' ]);
     FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'Suburb' ]);
     FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+    
+    // CREATCMR-9637，CREATCMR-9638
+    FormManager.show('CustClass', 'custClass');
+    FormManager.readOnly('custClass');
+    if(FormManager.getActualValue('reqType') == 'U'){
+      FormManager.setValue('custClass',_pagemodel.custClass );
+    }else{
+      if(_pagemodel.custClass != null ){
+        FormManager.setValue('custClass',_pagemodel.custClass );
+      }else{        
+        FormManager.setValue('custClass','11' );
+      }
+    }
+    FormManager.setValue('cmrOwner', 'IBM');
+    FormManager.readOnly('cmrOwner');
+    FormManager.setValue('miscBillCd', '');
+    FormManager.readOnly('miscBillCd');
+    if(cntry == SysLoc.AUSTRALIA){
+      var industryClass = FormManager.getActualValue('IndustryClass');
+      if( industryClass == 'G' || industryClass == 'Y'){
+        FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'Government Customer Type' ], 'MAIN_IBM_TAB');
+      }
+    }
+    if(cntry == SysLoc.NEW_ZEALAND){
+      FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
+      FormManager.hide('CustomerServiceCd', 'engineeringBo');
+    }
+    FormManager.hide('SalRepNameNo', 'repTeamMemberNo');
+    FormManager.hide('RestrictedInd', 'restrictInd');
+    FormManager.hide('GovIndicator', 'govType');    
+    
   }
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
@@ -7243,8 +7327,8 @@ dojo.addOnLoad(function() {
   // setting collection code for ASEAN
   GEOHandler.addAfterConfig(onISBUCdChange, GEOHandler.ASEAN);
 
-  GEOHandler.addAfterConfig(addGovIndcHanlder, [ SysLoc.AUSTRALIA ]);
-  GEOHandler.addAfterConfig(addGovCustTypHanlder, [ SysLoc.AUSTRALIA ]);
+  // GEOHandler.addAfterConfig(addGovIndcHanlder, [ SysLoc.AUSTRALIA ]);
+  GEOHandler.addAfterConfig(addGovCustTypHanlder, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
   GEOHandler.addAfterConfig(onInacTypeChange, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.INDIA, SysLoc.SINGAPORE, SysLoc.THAILAND]);
 
   // ERO specific

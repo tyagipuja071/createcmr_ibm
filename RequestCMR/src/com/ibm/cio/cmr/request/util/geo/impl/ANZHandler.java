@@ -562,6 +562,7 @@ public class ANZHandler extends APHandler {
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##RegionCode", "miscBillCd");
+    map.put("##CustClass", "custClass");
     return map;
   }
 
@@ -733,6 +734,21 @@ public class ANZHandler extends APHandler {
       if (data.getAbbrevLocn() != null && data.getAbbrevLocn().length() > 12) {
         data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 12));
       }
+
+      String custSubGrp = data.getCustSubGrp();
+      List<String> custSubGrpList = Arrays.asList("NRML", "INTER", "DUMMY", "AQSTN", "BLUMX", "MKTPC", "ECSYS", "ESOSW", "CROSS", "XAQST", "XBLUM",
+          "XMKTP", "XESO", "PRIV", "NRMLC", "KYND");
+      if (custSubGrpList.contains(custSubGrp) && SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
+        data.setEngineeringBo("9920");
+      }
+      data.setRepTeamMemberNo("000000");
+      if (data.getSubIndustryCd() != null
+          && ("G".equals(data.getSubIndustryCd().substring(0, 1)) || "Y".equals(data.getSubIndustryCd().substring(0, 1)))) {
+        data.setGovType("Y");
+      } else {
+        data.setGovType("N");
+      }
+
     }
     entityManager.merge(data);
     entityManager.flush();
