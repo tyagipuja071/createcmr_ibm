@@ -1074,6 +1074,14 @@
       <description>if this is to generate the potential match item
       </description>
     </attribute>
+    <attribute>
+      <name>displayNumber</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <description>Display Sequence Number (1-10) decimal value
+      </description>
+    </attribute>
   </tag>
 
   <tag>

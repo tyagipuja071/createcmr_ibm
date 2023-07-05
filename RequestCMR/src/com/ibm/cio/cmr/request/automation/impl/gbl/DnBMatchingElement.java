@@ -146,7 +146,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
           } else if (payGoAddredited && !hasValidMatches) {
             LOG.debug("DnB Matches not found for PayGo.");
-
+            admin.setPaygoProcessIndc("Y");
             result.setOnError(false);
             result.setResults("DnB Matches not found for PayGo.");
             result.setDetails("DnB Matches not found for PayGo.");

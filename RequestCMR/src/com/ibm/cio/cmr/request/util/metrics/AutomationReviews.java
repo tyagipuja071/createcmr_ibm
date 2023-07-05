@@ -42,6 +42,7 @@ public class AutomationReviews {
     cat.addReason("Legal Name on request and D&B doesn't match");
     cat.addReason("Matches against D&B were found but no record matched the request data");
     cat.addReason("Org ID value did not match with the highest confidence D&B match");
+    cat.addReason("Name and Address Change(China Specific)");
     group.add(cat);
 
     cat = new ReviewCategory("D&B Override");
@@ -122,7 +123,7 @@ public class AutomationReviews {
     group = new ReviewGroup("Non-Automated");
     group.setPriority(0);
     cat = new ReviewCategory("Attachment review");
-    cat.addPattern("An attachment of type.*has been added");
+    cat.addReason("An attachment of type 'Chinese Name And Address change'");
     group.add(cat);
 
     cat = new ReviewCategory("BO Code");

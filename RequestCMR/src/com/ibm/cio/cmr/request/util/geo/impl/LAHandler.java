@@ -130,9 +130,10 @@ public class LAHandler extends GEOHandler {
       source.setItems(converted);
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
       for (FindCMRRecordModel record : records) {
-        if ("ZS01".equals(record.getCmrAddrTypeCode()) && !"90".equals(record.getCmrOrderBlock())) {
-          converted.add(record);
+        if ("ZS01".equals(record.getCmrAddrTypeCode()) && "90".equals(record.getCmrOrderBlock())) {
+          continue;
         }
+        converted.add(record);
       }
       source.setItems(converted);
     }
@@ -3136,9 +3137,10 @@ public class LAHandler extends GEOHandler {
       txt = results.get(0);
     } else if (results != null && results.size() > 1) {
       for (String res : results) {
-        if (res.startsWith(stateProv)) {
+        if (StringUtils.isNotBlank(stateProv) && res.startsWith(stateProv)) {
           txt = res;
         }
+
       }
     }
 
