@@ -647,6 +647,9 @@ public class NordicsUtil extends AutomationUtil {
         details.append("*https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14*").append("\n");
         details.append("Thank you.");
         break;
+      case "PPS CEID":
+    	cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
+    	break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;

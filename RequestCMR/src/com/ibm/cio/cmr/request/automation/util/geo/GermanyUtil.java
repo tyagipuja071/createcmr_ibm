@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -821,6 +823,8 @@ public class GermanyUtil extends AutomationUtil {
     Data data = requestData.getData();
     Addr soldTo = requestData.getAddress("ZS01");
     String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
+    boolean cmdeReview = false;
+    Set<String> resultCodes = new HashSet<String>();
     StringBuilder detail = new StringBuilder(details);
     String duns = null;
     boolean isZS01WithAufsdPG = (CmrConstants.RDC_SOLD_TO.equals(soldTo.getId().getAddrSeq()) && "PG".equals(data.getOrdBlk()));
@@ -892,6 +896,8 @@ public class GermanyUtil extends AutomationUtil {
           detail.append("Updates to the Abbreviated Name field  are skipped.\n");
           LOG.debug("Updates to the Abbreviated Name field  are skipped.");
         }
+      } else if (changes.isDataChanged("PPS CEID")) {
+    	  cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, detail, resultCodes, changes.getDataChange("PPS CEID"), "R");
       } else {
         boolean otherFieldsChanged = false;
         for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
@@ -908,7 +914,17 @@ public class GermanyUtil extends AutomationUtil {
       }
 
     }
-    if (isNegativeCheckNeedeed) {
+
+    if (resultCodes.contains("R")) {
+    	output.setOnError(true);
+    	validation.setSuccess(false);
+    	validation.setMessage("Rejected");
+    } else if (cmdeReview) {
+    	engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+        detail.append("Updates to one or more fields cannot be validated.\n");
+        validation.setSuccess(false);
+        validation.setMessage("Not Validated");
+    } else if (isNegativeCheckNeedeed) {
       validation.setSuccess(false);
       validation.setMessage("Not validated");
       engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
