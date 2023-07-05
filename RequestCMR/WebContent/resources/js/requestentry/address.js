@@ -3187,8 +3187,16 @@ function parseXLS() {
       }
     }
     var contact = FormManager.getActualValue('contact');
-    if(contact !=null && contact.length>0 && contactCon!=null && contactCon.length>0)
-    FormManager.setValue('contact' , contactCon+contact);
+    if(contact !=null && contact.length>0 && contactCon!=null && contactCon.length>0){
+	  FormManager.setValue('contact' , contactCon+contact);
+	}else if(contact !=null && contact.length>0 ){
+	  FormManager.setValue('contact' , contact );
+	}else if(contactCon!=null && contactCon.length>0 ){
+	  FormManager.setValue('contact' , contactCon );
+	}else{
+	  FormManager.setValue('contact' , '' );
+	}
+    
     console.log(jsonData);
   };
   
