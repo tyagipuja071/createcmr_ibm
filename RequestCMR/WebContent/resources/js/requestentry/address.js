@@ -3166,7 +3166,7 @@ function parseXLS() {
         }
         if (row ==8 && col==5) {
           console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
-          FormManager.setValue('custNm3' , cellData);
+          FormManager.setValue('cnCustName1' , cellData);
         }
         if (row ==9 && col==5) {
           console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
@@ -3188,7 +3188,7 @@ function parseXLS() {
     }
     var contact = FormManager.getActualValue('contact');
     if(contact !=null && contact.length>0 && contactCon!=null && contactCon.length>0)
-    FormManager.setValue('contact' , contact+contactCon);
+    FormManager.setValue('contact' , contactCon+contact);
     console.log(jsonData);
   };
   
