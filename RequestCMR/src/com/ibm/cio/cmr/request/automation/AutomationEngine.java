@@ -287,7 +287,7 @@ public class AutomationEngine {
           } else {
             actionsOnError.add(element.getActionOnError());
             if (element.isStopOnError()) {
-              //if ((element instanceof CompanyVerifier) && payGoAddredited) {
+              // if ((element instanceof CompanyVerifier) && payGoAddredited) {
               if (element instanceof CompanyVerifier) {
                 // don't stop for paygo accredited and verifier element
                 LOG.debug("Error in " + element.getProcessDesc() + " but continuing process for PayGo.");
@@ -373,7 +373,7 @@ public class AutomationEngine {
             reqId, appUser);
       }
     } else {
-      if (systemError) {
+      if (systemError || ("N".equals(admin.getCompVerifiedIndc()) && actionsOnError.isEmpty())) {
         if (AutomationConst.STATUS_AUTOMATED_PROCESSING.equals(reqStatus)) {
           // change status to retry
           if ("N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
@@ -382,7 +382,7 @@ public class AutomationEngine {
             } else {
               createComment(entityManager, "Processing error encountered as data is not company verified.", reqId, appUser);
             }
-            //admin.setReqStatus("PPN");
+            admin.setReqStatus("PPN");
           } else {
             createComment(entityManager, "A system error occurred during the processing. A retry will be attempted shortly.", reqId, appUser);
             admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY);
