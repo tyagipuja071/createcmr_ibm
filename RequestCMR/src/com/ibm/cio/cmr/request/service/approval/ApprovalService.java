@@ -487,6 +487,13 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       }
       if (conditionallyApproved) {
         comment = "Approval requests have been approved conditionally.\nThe request requires a processor review before proceeding.";
+      } else if ("N".equals(admin.getCompVerifiedIndc())) {
+        if ("S".equalsIgnoreCase(admin.getCompInfoSrc())) {
+          comment = "Processing error encountered as SCC(State / County / City) values unavailable.";
+        } else {
+          comment = "Processing error encountered as data is not company verified.";
+        }
+        admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
       }
       AppUser appuser = new AppUser();
       appuser.setIntranetId(user);

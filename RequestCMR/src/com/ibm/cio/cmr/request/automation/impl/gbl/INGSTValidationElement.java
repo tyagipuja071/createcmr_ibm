@@ -84,7 +84,7 @@ public class INGSTValidationElement extends ValidatingElement implements Company
       AutomationResponse<GstLayerResponse> response = getGstMatches(entityManager, admin.getId().getReqId(), zs01, data.getVat());
       String msg = "GST provided is verified with the company details.";
       if (response != null && response.isSuccess() && msg.equalsIgnoreCase(response.getMessage())) {
-        admin.setCompVerifiedIndc("Y");
+        // admin.setCompVerifiedIndc("Y");
         validation.setSuccess(true);
         validation.setMessage("Successful Execution");
         log.debug(response.getMessage());
