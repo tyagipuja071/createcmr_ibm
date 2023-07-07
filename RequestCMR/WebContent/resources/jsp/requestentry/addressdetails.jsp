@@ -994,14 +994,6 @@
         <div id="cnAddrTxt_view">-</div>
       </cmr:column>
      </cmr:row>
-     <cmr:row addBackground="true">
-     <cmr:column span="1">
-      <cmr:label fieldId="cnAddrTxt2_view">English Street Address Continue:</cmr:label>
-      </cmr:column>
-      <cmr:column span="2">
-        <div id="cnAddrTxt2_view">-</div>
-      </cmr:column>
-     </cmr:row>
     </cmr:view>
   
   <cmr:row addBackground="true">

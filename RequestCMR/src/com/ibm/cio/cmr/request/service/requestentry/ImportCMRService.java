@@ -870,11 +870,12 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     IntlAddr iAddr = null;
     AddressService addSvc = new AddressService();
     iAddr = addSvc.getIntlAddrById(addr, entityManager);
-    if (iAddr == null && StringUtils.isNoneBlank(cmr.getCmrName())) {
+    if (iAddr == null && (StringUtils.isNoneBlank(cmr.getCmrName()) || StringUtils.isNoneBlank(cmr.getCmrName3()))) {
       iAddr = addSvc.createIntlAddrFromModel(cmr, addr, entityManager);
-    } else if (StringUtils.isNoneBlank(cmr.getCmrName())) {
-      iAddr.setIntlCustNm1(cmr.getCmrName());
-      iAddr.setIntlCustNm2(cmr.getCmrName2());
+    } else if ((StringUtils.isNoneBlank(cmr.getCmrName()) || StringUtils.isNoneBlank(cmr.getCmrName3()))) {
+      iAddr.setIntlCustNm1(
+          StringUtils.isNoneBlank(cmr.getCmrName()) ? cmr.getCmrName() : (StringUtils.isNoneBlank(cmr.getCmrName3()) ? cmr.getCmrName3() : ""));
+      iAddr.setIntlCustNm2(StringUtils.isNoneBlank(cmr.getCmrName2()) ? cmr.getCmrName2() : "");
       iAddr.setAddrTxt(cmr.getCmrStreet());
       iAddr.setIntlCustNm4("");
       iAddr.setCity1(cmr.getCmrCity());
