@@ -424,12 +424,13 @@ public class IndiaUtil extends AutomationUtil {
 
     GstLayerRequest gstLayerRequest = new GstLayerRequest();
     gstLayerRequest.setGst(vat);
-    gstLayerRequest.setCountry("IN");
-    gstLayerRequest.setName((StringUtils.isNotBlank(addr.getCustNm1()) ? addr.getCustNm1() : ""));
-    gstLayerRequest.setAddress((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt() : "")
-        + (StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : ""));
+    gstLayerRequest.setStateProv(addr.getStateProv());
+    gstLayerRequest.setCustName1((StringUtils.isNotBlank(addr.getCustNm1()) ? addr.getCustNm1() : ""));
+    gstLayerRequest.setCustName2((StringUtils.isNotBlank(addr.getCustNm1()) ? addr.getCustNm2() : ""));
+    gstLayerRequest.setAddrTxt((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt() : ""));
     gstLayerRequest.setCity(addr.getCity1());
     gstLayerRequest.setPostal(addr.getPostCd());
+    gstLayerRequest.setLandCntry(addr.getLandCntry());
 
     LOG.debug("Connecting to the GST Layer Service at " + baseUrl);
     AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.IN_GST_SERVICE_ID, gstLayerRequest,
