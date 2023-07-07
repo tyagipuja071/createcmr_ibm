@@ -1972,8 +1972,9 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     iAddrPK.setReqId(addr.getId().getReqId());
 
     iAddr.setId(iAddrPK);
-    iAddr.setIntlCustNm1(model.getCmrName());
-    iAddr.setIntlCustNm2(model.getCmrName2());
+    iAddr.setIntlCustNm1(
+        StringUtils.isNoneBlank(model.getCmrName()) ? model.getCmrName() : (StringUtils.isNoneBlank(model.getCmrName3()) ? model.getCmrName3() : ""));
+    iAddr.setIntlCustNm2(StringUtils.isNoneBlank(model.getCmrName2()) ? model.getCmrName2() : "");
     iAddr.setAddrTxt(model.getCmrStreet());
     iAddr.setIntlCustNm4("");
     iAddr.setCity1(model.getCmrCity());

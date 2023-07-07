@@ -1496,6 +1496,7 @@ public class JPHandler extends GEOHandler {
         entityManager.flush();
       }
     }
+    addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");
 
     AdminService adminSvc = new AdminService();
     Admin admin = adminSvc.getCurrentRecordById(addr.getId().getReqId(), entityManager);
