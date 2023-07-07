@@ -80,13 +80,14 @@ public class INGSTValidationElement extends ValidatingElement implements Company
 
     if (zs01 != null) {
       AutomationResponse<GstLayerResponse> response = getGstMatches(entityManager, admin.getId().getReqId(), zs01, data.getVat());
-      if (response != null && response.isSuccess() && response.getMessage().equals("Valid Address and Company Name entered on the Request")) {
-        admin.setCompVerifiedIndc("Y");
+      String msg = "GST provided is verified with the company details.";
+      if (response != null && response.isSuccess() && msg.equalsIgnoreCase(response.getMessage())) {
+        // admin.setCompVerifiedIndc("Y");
         validation.setSuccess(true);
         validation.setMessage("Successful Execution");
         log.debug(response.getMessage());
-        details.append("Record found in GST service : Address and Company Name Validated on API");
-        
+        details.append("Details mathced against D&B Data : Company details and GST verified.");
+
         details.append("\nCustomer Name = " + (StringUtils.isBlank(response.getRecord().getName()) ? "" : response.getRecord().getName()));
         details.append("\nGST = " + (StringUtils.isBlank(response.getRecord().getGst()) ? "" : response.getRecord().getGst()));
         details.append("\nAddress = " + (StringUtils.isBlank(response.getRecord().getAddress()) ? "" : response.getRecord().getAddress()));
@@ -97,16 +98,16 @@ public class INGSTValidationElement extends ValidatingElement implements Company
       } else {
         // company proof
         if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-          details.append("No High Quality API Matches were found for name and address.").append("\n");
+          details.append("No API Matches were found for customer details with GST number.").append("\n");
           details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
         } else {
-          details.append("No High Quality API Matches were found for name and address.").append("\n");
+          details.append("No API Matches were found for customer details with GST number.").append("\n");
           details.append("\nNo supporting documentation is provided by the requester for address.").append("\n");
         }
         output.setOnError(false);
         validation.setMessage("No Matches");
         validation.setSuccess(false);
-        engineData.addNegativeCheckStatus("OTH", "Matches against API were found but no record matched the request data.");
+        engineData.addNegativeCheckStatus("OTH", "Matches against API were found but no record matched the GST provided.");
       }
     }
     output.setDetails(details.toString());
@@ -139,13 +140,13 @@ public class INGSTValidationElement extends ValidatingElement implements Company
       }
     }
     gstLayerRequest.setGst(vat);
-    gstLayerRequest.setCountry(state);
-    gstLayerRequest.setName((StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1() : ""));
-    gstLayerRequest.setAddress((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "") + " "
-        + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : "") + " "
-        + (StringUtils.isNotBlank(zs01.getDept()) ? " " + zs01.getDept() : ""));
+    gstLayerRequest.setStateProv(state);
+    gstLayerRequest.setCustName1((StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1() : ""));
+    gstLayerRequest.setCustName2((StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm2() : ""));
+    gstLayerRequest.setAddrTxt((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : ""));
     gstLayerRequest.setCity(zs01.getCity1());
     gstLayerRequest.setPostal(zs01.getPostCd());
+    gstLayerRequest.setLandCntry(zs01.getLandCntry());
 
     log.debug("Connecting to the GST Layer Service at " + baseUrl);
     AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.IN_GST_SERVICE_ID, gstLayerRequest,
