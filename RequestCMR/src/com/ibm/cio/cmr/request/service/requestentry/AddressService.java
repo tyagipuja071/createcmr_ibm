@@ -1893,9 +1893,16 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     IntlAddr iAddr = createIntlAddrFromModel(model, addr, entityManager);
     IntlAddr iAddrExist = getIntlAddrById(addr, entityManager);
     if (iAddrExist != null) {
+
       updateEntity(iAddr, entityManager);
+      addr.setCustNm3(iAddr.getIntlCustNm1());
+      updateEntity(addr, entityManager);
     } else {
       createEntity(iAddr, entityManager);
+      if (addr.getId() != null) {
+        addr.setCustNm3(iAddr.getIntlCustNm1());
+        updateEntity(addr, entityManager);
+      }
     }
   }
 
@@ -1998,6 +2005,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       iAddr.setCity2(model.getCnDistrict());
 
       updateEntity(iAddr, entityManager);
+      addr.setCustNm3(model.getCnCustName1());
+      updateEntity(addr, entityManager);
 
     } else {
       createJPIntlAddr(model, addr, entityManager);
