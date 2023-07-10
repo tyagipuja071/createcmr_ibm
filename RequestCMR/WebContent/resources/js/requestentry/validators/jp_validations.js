@@ -136,33 +136,32 @@ function addHandlersForJP() {
 
 }
 
-function addROLFieldLogic() {
-  var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'U') {
-
-    var addrType = FormManager.getActualValue('addrType');
-    var companyRolFlag = '';
-    enableRolFlag(addrType);
-
-    if (addrType != 'ZC01' && addrType != 'ZE01') {
-
-      var qParams = {
-        _qall : 'Y',
-        REQ_ID : FormManager.getActualValue('reqId'),
-        ADDR_TYPE : 'ZC01',
-      };
-      var results = cmr.query('GET.ROL_BY_REQID', qParams);
-      if (results != null && results.length > 0) {
-        companyRolFlag = results[0].ret1.trim();
-      }
-      FormManager.setValue('rol', companyRolFlag);
-    }
-  }
-}
+// function addROLFieldLogic() {
+// var reqType = FormManager.getActualValue('reqType');
+// if (reqType == 'U') {
+//
+// var addrType = FormManager.getActualValue('addrType');
+// var companyRolFlag = '';
+// enableRolFlag();
+//
+// if (addrType != 'ZC01' && addrType != 'ZE01') {
+//
+// var qParams = {
+// _qall : 'Y',
+// REQ_ID : FormManager.getActualValue('reqId'),
+// ADDR_TYPE : 'ZC01',
+// };
+// var results = cmr.query('GET.ROL_BY_REQID', qParams);
+// if (results != null && results.length > 0) {
+// companyRolFlag = results[0].ret1.trim();
+// }
+// FormManager.setValue('rol', companyRolFlag);
+// }
+// }
+// }
 
 function enableRolFlag() {
   FormManager.enable('rol');
-  // FormManager.addValidator('rol', Validators.REQUIRED, [ 'ROL Flag' ]);
 }
 
 function disableFieldsForRolUpdate() {
@@ -217,6 +216,120 @@ function disableAddrFieldsForRolUpdate() {
       }
     }
   }
+}
+function addrTypeOnChange() {
+  // dojo.connect(FormManager.getField('addrType'), 'onChange', function(value)
+  // {
+  // var _addrType = FormManager.getActualValue('addrType');
+  // if (_addrType == 'ZC01') {
+  // return;
+  // } else {
+  // FormManager.hide('TaigaCode', 'poBoxPostCd');
+  // }
+  // });
+  dojo.connect(FormManager.getField('addrType_ZC01'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZC01').checked == true) {
+      FormManager.show('TaigaCode', 'poBoxPostCd');
+      FormManager.show('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZE01'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZE01').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZS02'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZS02').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZS01'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZS01').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP01'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP01').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP09'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP09').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZI02'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZI02').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZI01'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZI01').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZI03'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZI03').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP02'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP02').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP03'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP03').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP04'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP04').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP05'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP05').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP06'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP06').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP07'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP07').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP08'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP08').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+}
+function disableTaigaCode() {
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType != 'ZC01') {
+    FormManager.hide('TaigaCode', 'poBoxPostCd');
+  }
+  FormManager.disable('territoryCd');
 }
 
 function addScenarioDriven() {
@@ -5996,6 +6109,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForJP, GEOHandler.JP);
   GEOHandler.addAfterConfig(enableRolFlag, GEOHandler.JP);
   GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
+  GEOHandler.addAfterConfig(disableTaigaCode, GEOHandler.JP);
 
   GEOHandler.addAfterTemplateLoad(setCSBORequired, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setPageLoadDone, GEOHandler.JP);
@@ -6045,6 +6159,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(replaceBanGaoForAddrTxt, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(enableRolFlag, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(disableTaigaCode, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(addrTypeOnChange, GEOHandler.JP);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.JP);
   GEOHandler.addAddrFunction(setFieldValueOnAddrSave, GEOHandler.JP);

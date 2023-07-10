@@ -236,6 +236,19 @@
           <cmr:field path="adminDeptLine" id="adminDeptLine" fieldId="AdminDeptLine" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>  
-  
+      <cmr:column span="2">
+        <p>
+          <cmr:label fieldId="identClient">
+            <cmr:fieldLabel fieldId="ROL" />:
+          </cmr:label>
+          <cmr:field path="identClient" id="identClient" fieldId="ROL" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+          	  <cmr:column span="2">
+      		<p>
+        	  <cmr:label fieldId="territoryCd"><cmr:fieldLabel fieldId="TaigaCode" />: </cmr:label>
+        	  <cmr:field path="territoryCd" id="territoryCd" fieldId="TaigaCode" tabId="MAIN_IBM_TAB" />
+      		</p>
+     </cmr:column>
     </cmr:row> 
 </cmr:view>

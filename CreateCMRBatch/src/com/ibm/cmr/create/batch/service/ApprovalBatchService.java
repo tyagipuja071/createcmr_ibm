@@ -208,7 +208,7 @@ public class ApprovalBatchService extends BaseBatchService {
             JPHandler jpHanler = (JPHandler) RequestUtils.getGEOHandler(cmrIssuingCntry);
             boolean copyFlag = jpHanler.needCopy(entityManager, request);
             if (copyFlag) {
-              mail.setCc("yangxuy@cn.ibm.com");
+              mail.setCc("ychongg@cn.ibm.com");
               LOG.debug("Copy email to SME:" + mail.getCc() + "as the notification for Req Id:" + request.getReqId());
             }
           }

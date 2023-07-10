@@ -1252,6 +1252,11 @@ public class JPHandler extends GEOHandler {
     setSalesRepTmDateOfAssign(data, admin, entityManager);
     updateCSBOBeforeDataSave(entityManager, admin, data);
     setAccountAbbNmOnSaveForBP(admin, data);
+
+    if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
+      setFieldBeforeDataSave(entityManager, data, "ROL", data.getIdentClient());
+    }
+    setFieldBeforeDataSave(entityManager, data, "TAIGA", data.getTerritoryCd());
   }
 
   private void setSalesRepTmDateOfAssign(Data data, Admin admin, EntityManager entityManager) {
@@ -1501,8 +1506,9 @@ public class JPHandler extends GEOHandler {
     AdminService adminSvc = new AdminService();
     Admin admin = adminSvc.getCurrentRecordById(addr.getId().getReqId(), entityManager);
     if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
-      setRolBeforeAddrSave(entityManager, addr);
+      setFieldBeforeAddrSave(entityManager, addr, "ROL", addr.getRol());
     }
+    setFieldBeforeAddrSave(entityManager, addr, "TAIGA", addr.getPoBoxPostCd());
   }
 
   public IntlAddr getIntlAddrListById(Addr addr, EntityManager entityManager) {
@@ -1531,18 +1537,54 @@ public class JPHandler extends GEOHandler {
     return iAddr;
   }
 
-  private void setRolBeforeAddrSave(EntityManager entityManager, Addr addr) {
-    // if a company ROL change, the account ROL all need change
-    String addrType = addr.getId().getAddrType();
-    if ("ZC01".equals(addrType)) {
-      String companyRolFlag = addr.getRol();
-      List<Addr> addrList = getAddrByReqId(entityManager, addr.getId().getReqId());
-      if (addrList != null && addrList.size() > 0) {
-        for (Addr address : addrList) {
-          if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
-            address.setRol(companyRolFlag);
-            entityManager.merge(address);
-            entityManager.flush();
+  private void setFieldBeforeDataSave(EntityManager entityManager, Data data, String fieldId, String fieldValue) {
+    // Update account level TAIGA/ROL in ADDR table if account level changed
+    List<Addr> addrList = getAddrByReqId(entityManager, data.getId().getReqId());
+    if (addrList != null && addrList.size() > 0) {
+      for (Addr address : addrList) {
+        if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
+          if ("ROL".equals(fieldId)) {
+            address.setRol(fieldValue);
+          } else if ("TAIGA".equals(fieldId)) {
+            address.setPoBoxPostCd(fieldValue);
+          }
+          address.setPoBoxPostCd(fieldValue);
+          entityManager.merge(address);
+          entityManager.flush();
+        }
+      }
+    }
+  }
+
+  private void setFieldBeforeAddrSave(EntityManager entityManager, Addr addr, String fieldId, String fieldValue) {
+    if ("ZC01".equals(addr.getId().getAddrType())) {
+      DataPK pk = new DataPK();
+      pk.setReqId(addr.getId().getReqId());
+      Data data = entityManager.find(Data.class, pk);
+
+      if (fieldValue != null && fieldValue.length() > 0) {
+        // Update account level TAIGA/ROL in DATA table if company level changed
+        if ("ROL".equals(fieldId)) {
+          data.setIdentClient(fieldValue);
+        } else if ("TAIGA".equals(fieldId)) {
+          data.setTerritoryCd(fieldValue);
+        }
+        entityManager.merge(data);
+        entityManager.flush();
+
+        // Update account level TAIGA/ROL in ADDR table if company level changed
+        List<Addr> addrList = getAddrByReqId(entityManager, addr.getId().getReqId());
+        if (addrList != null && addrList.size() > 0) {
+          for (Addr address : addrList) {
+            if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
+              if ("ROL".equals(fieldId)) {
+                address.setRol(fieldValue);
+              } else if ("TAIGA".equals(fieldId)) {
+                address.setPoBoxPostCd(fieldValue);
+              }
+              entityManager.merge(address);
+              entityManager.flush();
+            }
           }
         }
       }
