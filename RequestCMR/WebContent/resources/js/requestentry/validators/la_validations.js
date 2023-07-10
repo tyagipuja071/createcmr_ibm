@@ -3060,6 +3060,33 @@ function autoSetFieldsForCustScenariosBR() {
   }
 }
 
+function lockFieldsForLA() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custType =  FormManager.getActualValue('custType');
+  var userRole = FormManager.getActualValue('userRole').toUpperCase();
+  var custGrpSet = new Set([ 'IBMEM','PRIPE','BUSPR','INTOU','INTUS']);
+  var custTypeSet = new Set([ 'IBMEM','PRIPE','BUSPR','INTOU','INTUS']);
+  
+  if (reqType != 'C') {
+    return;
+  }
+  
+  if (custGrp == 'LOCAL') {
+    if (userRole == 'REQUESTER' && custGrpSet.has(custSubGrp)) {
+      FormManager.readOnly('clientTier');
+    }
+  } else {
+    if (userRole == 'REQUESTER' && custTypeSet.has(custType)) {
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('clientTier');
+    }
+  }
+}
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -3156,6 +3183,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSortlForStateProvince, SysLoc.BRAZIL);
   GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setIsuMrcFor161A, SysLoc.BRAZIL);
-  
+  GEOHandler.addAfterTemplateLoad(lockFieldsForLA, GEOHandler.LA);
   
 });
