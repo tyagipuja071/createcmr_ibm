@@ -565,6 +565,7 @@ function afterConfigForLA() {
       setAbbrevNameRequiredForProcessors();
       setMrcCdToReadOnly();
       togglePPSCeid();
+      lockFieldsForLA();
     });
   }
 
@@ -3065,6 +3066,7 @@ function lockFieldsForLA() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
+  var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custType =  FormManager.getActualValue('custType');
