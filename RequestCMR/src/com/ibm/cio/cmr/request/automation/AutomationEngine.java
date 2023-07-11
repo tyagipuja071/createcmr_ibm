@@ -366,7 +366,7 @@ public class AutomationEngine {
             reqId, appUser);
       }
     } else {
-      if (systemError || "N".equalsIgnoreCase(admin.getCompVerifiedIndc())){
+      if (systemError || ("N".equals(admin.getCompVerifiedIndc()) && actionsOnError.isEmpty())) {
         if (AutomationConst.STATUS_AUTOMATED_PROCESSING.equals(reqStatus)) {
           // change status to retry
           if ("N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
