@@ -2655,7 +2655,7 @@ function getIsicDataRDCValue(){
 
 function setIsicCdIfDnbResultAccepted(){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var cond2 = new Set(['AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM']);
+  var cond2 = new Set(['AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM','NRMLC']);
   var cond3 = new Set(['INTER', 'PRIV', 'XPRIV', 'DUMMY','IGF']);
   if (cond2.has(custSubGrp)) {
     var oldISIC = getIsicDataRDCValue();
