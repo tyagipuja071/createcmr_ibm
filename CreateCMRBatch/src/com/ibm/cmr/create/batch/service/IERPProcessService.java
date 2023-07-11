@@ -1511,17 +1511,17 @@ public class IERPProcessService extends BaseBatchService {
       DataRdc dataRdc = getDataRdcRecords(em, data);
       boolean isDataUpdated = false;
       boolean isAdminUpdated = false;
-      isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
+      if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+    	  isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
+      		}else{
+      			isDataUpdated = true;
+      		}
       isAdminUpdated = cntryHandler.isAdminUpdate(admin, data.getCmrIssuingCntry());
       isDataUpdated = isAdminUpdated || isDataUpdated;
 
       if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry()) && !isDataUpdated) {
         isDataUpdated = LAHandler.isTaxInfoUpdated(em, admin.getId().getReqId());
       }
-      
-      if ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry())) {
-          isDataUpdated = true;
-        }
       
       // 3. Check if there are customer and IBM changes, propagate to other
       // addresses
