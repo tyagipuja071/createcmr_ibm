@@ -510,15 +510,14 @@ function afterConfigForLA() {
   if (dojo.byId('collBoId' && _reqType != 'U')) {
     dojo.byId('collBoId').readOnly = true;
   }
-  // DENNIS: Original code allows us to auto select MRC when the SBO is
-  // selected
-  // if (_salesBranchOffHandler == null && !COV_2018) {
-  // _salesBranchOffHandler =
-  // dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange',
-  // function(value) {
-  // autoSetMrcIsu();
-  // });
-  // }
+
+   if (_salesBranchOffHandler == null) {
+     _salesBranchOffHandler = dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
+       if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL) {
+         setCtcBySBOForBrazil();
+       }
+     });
+   }
 
   // DENNIS: This is new coverage handler where auto selecting ISU is done
   // through MRC
@@ -3032,6 +3031,35 @@ function lockFieldsForLA() {
     }
   }
 }
+function setCtcBySBOForBrazil() {
+
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var sboCd = FormManager.getActualValue('salesBusOffCd');
+  var userRole = FormManager.getActualValue('userRole').toUpperCase();
+  
+  var sboSetCtcJ = new Set([ '167','170','171','172','173','174','162','164','166' ]);
+  var sboSetCtcY = new Set([ '515','175','176' ]);
+  var sboSetCtcBlank = new Set([ '461','010','979','161' ]);
+  var sboSetCtcQ = new Set([ '504','556','763','761','764','758' ]);
+  
+  if (sboSetCtcJ.has(sboCd)) {
+    FormManager.setValue('clientTier', 'J');
+  } else if (sboSetCtcY.has(sboCd)) {
+    FormManager.setValue('clientTier', 'Y');
+  } else if (sboSetCtcQ.has(sboCd)) {
+    FormManager.setValue('clientTier', 'Q');
+  } else if (sboSetCtcBlank.has(sboCd)) {
+    FormManager.setValue('clientTier', '');
+  }
+  
+  if (userRole == 'REQUESTER') {
+    FormManager.readOnly('clientTier');
+  }
+  
+}
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -3128,5 +3156,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setIsuMrcFor161A, SysLoc.BRAZIL);
   GEOHandler.addAfterTemplateLoad(lockFieldsForLA, GEOHandler.LA);
-  
+  GEOHandler.addAfterTemplateLoad(setCtcBySBOForBrazil, SysLoc.BRAZIL);
+
 });
