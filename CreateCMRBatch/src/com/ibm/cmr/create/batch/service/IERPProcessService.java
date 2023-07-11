@@ -1518,7 +1518,11 @@ public class IERPProcessService extends BaseBatchService {
       if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry()) && !isDataUpdated) {
         isDataUpdated = LAHandler.isTaxInfoUpdated(em, admin.getId().getReqId());
       }
-
+      
+      if ("616".equals(data.getCmrIssuingCntry()) || "796".equals(data.getCmrIssuingCntry())) {
+          isDataUpdated = true;
+        }
+      
       // 3. Check if there are customer and IBM changes, propagate to other
       // addresses
 
