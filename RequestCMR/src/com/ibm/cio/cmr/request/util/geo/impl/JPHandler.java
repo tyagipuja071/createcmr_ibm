@@ -124,6 +124,14 @@ public class JPHandler extends GEOHandler {
     }
   };
 
+  public static boolean isJPCountry(String issuingCntry) {
+    if (SystemLocation.JAPAN.equals(issuingCntry)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   /**
    * Handle import of Company/Estab only
    */
