@@ -492,6 +492,19 @@ function displayHwMstInstallFlagNew() {
     }
   }
 }
+
+function displayEndUserFileFlag() {
+  console.log(">>> Executing displayEndUserFileFlag <<<");
+  
+  if (cmr.addressMode == 'newAddress'
+      && (FormManager.getActualValue('cmrIssuingCntry') == '760' )) {
+    if (FormManager.getActualValue('custGrp') == 'BUSPR') {
+      cmr.showNode('endUserFile');
+    } else {
+      cmr.hideNode('endUserFile');
+    }
+  }
+}
 /**
  * 
  * @param queryId
@@ -877,6 +890,12 @@ function doAddAddress() {
    */
   cmr.addressMode = 'newAddress';
   cmr.showModal('addEditAddressModal');
+  
+  if (FormManager.getActualValue('custGrp') == 'BUSPR' && FormManager.getActualValue('cmrIssuingCntry') == '760') {
+    cmr.showNode('endUserFileFlag');
+  } else {
+    cmr.hideNode('endUserFileFlag');
+  }
 }
 cmr.noCreatePop = 'N';
 
@@ -3120,6 +3139,7 @@ function resetSccInfo() {
 // CREATCMR-5447
 
 function parseXLS() {
+
 	
   var contactCon = '';
   const input = document.getElementById('xlsFile');

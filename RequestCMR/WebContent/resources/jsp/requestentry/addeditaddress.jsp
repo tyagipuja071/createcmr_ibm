@@ -156,17 +156,19 @@
       </cmr:column>
     </cmr:row>
     
-    <cmr:view forCountry="760">
-	    <cmr:row addBackground="true" topPad="5">
-			<cmr:column span="2">		     
-		        <label for="endUserFile"> ${ui.endUserFile}: </label>
-		        <input type="file" id="xlsFile" accept=".xls" name="xlsFile">	
-		     </cmr:column>		      
-			 <cmr:column span="2">
-				<cmr:button label="${ui.btn.endUserFile}" onClick="parseXLS()" highlight="true" pad="true" id="endUserFileBtn" />		      
-		    </cmr:column>    	
-	    </cmr:row>
-    </cmr:view>
+    <div id="endUserFileFlag">
+	    <cmr:view forCountry="760">
+		    <cmr:row addBackground="true" topPad="5">
+				<cmr:column span="2">		     
+			        <label for="endUserFile"> ${ui.endUserFile}: </label>
+			        <input type="file" id="xlsFile" accept=".xls" name="xlsFile">	
+			     </cmr:column>		      
+				 <cmr:column span="2">
+					<cmr:button label="${ui.btn.endUserFile}" onClick="parseXLS()" highlight="true" pad="true" id="endUserFileBtn" />		      
+			    </cmr:column>    	
+		    </cmr:row>
+	    </cmr:view>
+    </div>
     
     <div style="display:none">
     <cmr:row addBackground="true">
