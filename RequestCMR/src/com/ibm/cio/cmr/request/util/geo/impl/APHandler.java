@@ -461,8 +461,10 @@ public abstract class APHandler extends GEOHandler {
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
     setAbbrevLocNMBeforeAddrSave(entityManager, addr, cmrIssuingCntry);
-    // call only for zs01
-    setProvNameCdFrmCityState(entityManager, addr);
+    // call only for zs01 and India
+    if (SystemLocation.INDIA.equals(cmrIssuingCntry) && "ZS01".equalsIgnoreCase(addr.getId().getAddrType())) {
+      setProvNameCdFrmCityState(entityManager, addr);
+    }
   }
 
   private void setProvNameCdFrmCityState(EntityManager entityManager, Addr addr) {
