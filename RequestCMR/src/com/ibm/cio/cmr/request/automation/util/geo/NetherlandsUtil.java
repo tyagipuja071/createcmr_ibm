@@ -375,9 +375,16 @@ public class NetherlandsUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+    Admin admin = requestData.getAdmin();
 
-    if ("LOCAL".equals(data.getCustGrp()) && !(SCENARIO_PRIVATE_CUSTOMER.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario))
-        && StringUtils.isEmpty(data.getTaxCd2())) {
+    boolean isPaygo = "Y".equals(admin.getPaygoProcessIndc());
+    boolean isScenarioCovered = "LOCAL".equals(data.getCustGrp())
+        && !(SCENARIO_PRIVATE_CUSTOMER.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario));
+    boolean hasDunsNo = StringUtils.isNotEmpty(data.getDunsNo());
+    boolean isFromP2LApi = "Y".equalsIgnoreCase(admin.getProspLegalInd()) && StringUtils.isNotBlank(admin.getSourceSystId());
+
+    LOG.debug("isPaygo: " + isPaygo + ", isScenarioCovered: " + isScenarioCovered + ", hasDunsNo: " + hasDunsNo + ", isFromP2LApi: " + isFromP2LApi);
+    if (hasDunsNo && !isPaygo && isFromP2LApi && isScenarioCovered && StringUtils.isEmpty(data.getTaxCd2())) {
       details.append("KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.\n");
       engineData.addNegativeCheckStatus("_missingKvkValue",
           "KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.");
