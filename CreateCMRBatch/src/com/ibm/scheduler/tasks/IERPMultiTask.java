@@ -11,10 +11,10 @@ public class IERPMultiTask extends BatchTask {
 
   @Override
   public void run() {
-    System.out.println("Starting " + this.getClass().getCanonicalName() + " ...");
     Process process;
     try {
       process = Runtime.getRuntime().exec("/bin/sh -c /cmr/batch/run_ierp_multi_batch.ksh >> /cmr/batch/batch-run.log 2> /cmr/batch/batch-err.log");
+      logProcessOutputToConsole(process, this.getClass().getSimpleName());
       process.waitFor();
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();

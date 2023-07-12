@@ -11,10 +11,10 @@ public class LogsCleanUpTask extends BatchTask {
 
   @Override
   public void run() {
-    System.out.println("Starting " + this.getClass().getSimpleName() + "...");
     Process process;
     try {
       process = Runtime.getRuntime().exec("/bin/sh -c /cmr/batch/logscleanup.sh &");
+      logProcessOutputToConsole(process, this.getClass().getSimpleName());
       process.waitFor();
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();
