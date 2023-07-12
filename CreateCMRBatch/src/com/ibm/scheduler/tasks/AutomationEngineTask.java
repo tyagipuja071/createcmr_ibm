@@ -15,6 +15,7 @@ public class AutomationEngineTask extends BatchTask {
     Process process;
     try {
       process = Runtime.getRuntime().exec("/bin/sh -c /cmr/batch/run_auto_engine.ksh >> /cmr/batch/batch-run.log 2>/cmr/batch/batch-err.log");
+      logProcessOutputToConsole(process, this.getClass().getSimpleName());
       process.waitFor();
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();

@@ -11,10 +11,10 @@ public class ChangeLogAcessTask extends BatchTask {
 
   @Override
   public void run() {
-    System.out.println("Starting " + this.getClass().getSimpleName() + "...");
     Process process;
     try {
       process = Runtime.getRuntime().exec("/bin/sh -c chmod -R 777 /ci/shared/data/applogs && chmod -R 777 /cmr/batch/logs");
+      logProcessOutputToConsole(process, this.getClass().getSimpleName());
       process.waitFor();
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();
