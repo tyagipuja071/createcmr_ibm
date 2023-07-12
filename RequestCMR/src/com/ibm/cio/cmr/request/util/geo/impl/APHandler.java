@@ -477,6 +477,7 @@ public abstract class APHandler extends GEOHandler {
         String requestCity = StringUtils.isNotEmpty(addr.getCity1()) ? addr.getCity1().toUpperCase() : "";
         if (mappingCity.contains(requestCity)) {
           data.setBusnType(mapping.getProvinceCd());
+          data.setTerritoryCd(mapping.getProvinceCd());
           data.setCollectionCd(mapping.getArCode());
           matchFound = true;
           break;
@@ -490,6 +491,7 @@ public abstract class APHandler extends GEOHandler {
           String requestState = getStateDesc(entityManager, addr.getStateProv());
           if (mappingState.contains(requestState)) {
             data.setBusnType(mapping.getProvinceCd());
+            data.setTerritoryCd(mapping.getProvinceCd());
             data.setCollectionCd(mapping.getArCode());
             break;
           }
