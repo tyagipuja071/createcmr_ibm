@@ -475,8 +475,10 @@ public class IERPProcessService extends BaseBatchService {
               wfHistCmt = statusMessage.toString();
             }
 
+            if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry())) {
             statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
-
+            }
+            
             createCommentLog(em, admin, statusMessage.toString());
 
             String disableAutoProc = "N";
@@ -641,8 +643,10 @@ public class IERPProcessService extends BaseBatchService {
               wfHistCmt = statusMessage.toString();
             }
 
+            if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry())) {
             statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
-
+            }
+            
             createCommentLog(em, admin, statusMessage.toString());
 
             String disableAutoProc = "N";
