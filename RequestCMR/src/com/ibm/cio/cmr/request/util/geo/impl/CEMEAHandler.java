@@ -2267,6 +2267,32 @@ public class CEMEAHandler extends BaseSOFHandler {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError((rowIndex + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
+        for (String name : countryAddrss) {
+          sheet = book.getSheet(name);
+          // Address Sheet
+          String city = ""; // 8
+          String stateProv = ""; // 9
+          String landCntry = ""; // 10
+          row = sheet.getRow(rowIndex);
+          if (row == null) {
+            return; // stop immediately when row is blank
+          }
+          currCell = row.getCell(8);
+          city = validateColValFromCell(currCell);
+
+          currCell = row.getCell(9);
+          stateProv = validateColValFromCell(currCell);
+
+          currCell = row.getCell(10);
+          landCntry = validateColValFromCell(currCell);
+
+          if (!StringUtils.isBlank(city) && "RO".equals(landCntry) && "B".equals(stateProv)) {
+            if (city.equals("Bucharest")) {
+              error.addError((rowIndex + 1), "Tab Name : " + name + "," + " City  ",
+                  "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+            }
+          }
+        }
         if (error.hasErrors()) {
           validations.add(error);
         }
@@ -2539,8 +2565,10 @@ public class CEMEAHandler extends BaseSOFHandler {
     addressDataMap.put("stdCityNm", addr.getStdCityNm());
     addressDataMap.put("taxOffice", addr.getTaxOffice());
     for (String key : addressDataMap.keySet()) {
-      if (StringUtils.isNotEmpty(addressDataMap.get(key))) {
-        addressDataMap.put(key, addressDataMap.get(key).toUpperCase());
+      if (!("B".equals(addr.getStateProv()) && "RO".equals(addr.getLandCntry()) && "ROMANIA".equals(addr.getBldg()))) {
+        if (StringUtils.isNotEmpty(addressDataMap.get(key))) {
+          addressDataMap.put(key, addressDataMap.get(key).toUpperCase());
+        }
       }
       if (!(StringUtils.isEmpty(addressDataMap.get("addrTxt"))) && !(addressDataMap.get("addrTxt").equals(addr.getAddrTxt()))) {
         addr.setAddrTxt(addressDataMap.get("addrTxt"));
