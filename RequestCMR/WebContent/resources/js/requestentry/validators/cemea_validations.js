@@ -726,11 +726,12 @@ function addHandlersForCEMEA() {
     });
   }
 
-//  if (_SalesRepHandler == null) {
-//    _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-//      setSBO(value);
-//    });
-//  }
+// if (_SalesRepHandler == null) {
+// _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'),
+// 'onChange', function(value) {
+// setSBO(value);
+// });
+// }
 
   if (_ExpediteHandler == null) {
     _ExpediteHandler = dojo.connect(FormManager.getField('expediteInd'), 'onChange', function(value) {
@@ -1969,7 +1970,7 @@ function setSalesRepValues(clientTier) {
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
       if (salesReps.length == 1) {
         FormManager.setValue('repTeamMemberNo', salesReps[0]);
-//        setSBO();
+// setSBO();
       }
     }
   }
@@ -3618,7 +3619,7 @@ function resetVatExempt() {
 
 function resetVatExemptOnchange() {
   dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
-//    resetVatExempt();
+// resetVatExempt();
   });
 }
 
@@ -5331,6 +5332,39 @@ function retainVatValueAT() {
     FormManager.setValue('vat', _vat);
   }
 }
+// CREATCMR-9427
+function addProvinceCityValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var landCntry = FormManager.getActualValue('landCntry');
+        var stateProv = FormManager.getActualValue('stateProv');
+        var city = FormManager.getActualValue('city1');
+        var addrType = FormManager.getActualValue('addrType');
+
+        if ((landCntry == 'RO' && stateProv == 'B') && (reqType =='C'|| reqType=='U')) {
+          if (addrType == 'ZP02') {
+            if ((city.substr(0, 18) == 'București Sectorul' && city.length == '20')
+                && (city.at(-1) == '1' || city.at(-1) == '2' || city.at(-1) == '3' || city.at(-1) == '4' || city.at(-1) == '5' || city.at(-1) == '6')) {
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult(null, false, 'Correct format for city is București Sectorul \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+            }
+          }
+          if ((city.substr(0, 16) == 'BUCHAREST SECTOR' && city.length == '18')
+              && (city.at(-1) == '1' || city.at(-1) == '2' || city.at(-1) == '3' || city.at(-1) == '4' || city.at(-1) == '5' || city.at(-1) == '6')) {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult(null, false, 'Correct format for city is BUCHAREST SECTOR \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+          }
+        } 
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 // CREATCMR-788
 function addressQuotationValidatorCEMEA() {
   var cmrIssueCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -5418,8 +5452,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setVatRequired, GEOHandler.CEMEA);
   // CMR-2101 Austria the func for Austria, setSBO also used by CEE
   // countries
-//  GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
-//  GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
+// GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
+// GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
   // GEOHandler.addAfterConfig(setSBO2, [ SysLoc.RUSSIA ]);
   // GEOHandler.addAfterTemplateLoad(setSBO2, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setCommercialFinanced, GEOHandler.CEMEA);
@@ -5448,10 +5482,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
-//  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); // CMR-2101
-//  GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]);
-//  GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
-//  GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
+// GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); //
+// CMR-2101
+// GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]);
+// GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
+// GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(resetVatExemptOnchange, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(lockLocationNo, [ SysLoc.AUSTRIA ]);
 
@@ -5612,4 +5647,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
+  GEOHandler.registerValidator(addProvinceCityValidator, [ SysLoc.ROMANIA ], null, true);
 });
