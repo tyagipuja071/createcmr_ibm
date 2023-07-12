@@ -145,8 +145,43 @@ function addAfterConfigAP() {
   // CREATCMR-788
   addressQuotationValidatorAP();
   
+  //CREATCMR - 9104
+  modifyBusnTypeTerrCdFieldBehaviour();
+  
  
 }
+
+function modifyBusnTypeTerrCdFieldBehaviour(){
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  if(custSubGrp == 'CROSS'){
+	FormManager.setValue('busnType','709');
+  FormManager.setValue('territoryCd','709');
+	FormManager.setValue('collectionCd','I001');
+   }else if(custSubGrp == 'IGF'){
+  FormManager.setValue('busnType','000');
+  FormManager.setValue('territoryCd','000');
+	FormManager.setValue('collectionCd','NDUM');
+	   }else if(custSubGrp == 'INTER'){
+	FormManager.setValue('busnType','709');
+  FormManager.setValue('territoryCd','709');
+	FormManager.setValue('collectionCd','RP01');
+   }
+   
+
+	if(role == 'REQUESTER'){
+		FormManager.hide('ProvinceName','busnType');
+		FormManager.hide('ProvinceCode','territoryCd');
+		FormManager.hide('CollectionCd','collectionCd');
+	}else{
+		FormManager.show('ProvinceName','busnType');
+		FormManager.show('ProvinceCode','territoryCd');
+		FormManager.show('CollectionCd','collectionCd');
+	}
+	  
+}
+
 
 function setInacByCluster() {
   console.log(">>>> setInacByCluster >>>>");

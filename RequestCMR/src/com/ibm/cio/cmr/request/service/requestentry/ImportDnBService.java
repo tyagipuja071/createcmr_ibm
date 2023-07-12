@@ -56,6 +56,7 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.APHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cio.cmr.request.util.pdf.impl.DnBPDFConverter;
@@ -598,6 +599,12 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         && (Arrays.asList(SystemLocation.AUSTRIA, SystemLocation.SWITZERLAND, SystemLocation.NORWAY, SystemLocation.FINLAND, SystemLocation.DENMARK,
             SystemLocation.SWEDEN).contains(reqModel.getCmrIssuingCntry()))) {
       convertStateNameToStateCode(addr, cmr, entityManager);
+    }
+    // CREATCMR - 9104
+    if (SystemLocation.INDIA.equals(reqModel.getCmrIssuingCntry()) && "ZS01".equalsIgnoreCase(addr.getId().getAddrType()) && converter != null
+        && (converter instanceof APHandler)) {
+      APHandler.setProvNameCdFrmCityState(entityManager, addr);
+
     }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {
       addr.setStateProv(null);
