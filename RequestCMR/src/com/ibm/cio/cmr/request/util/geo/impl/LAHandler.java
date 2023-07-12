@@ -850,8 +850,7 @@ public class LAHandler extends GEOHandler {
 
           String taxCd1 = data.getTaxCd1();
           if ("LOCAL".equals(data.getCustGrp()) && CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())) {
-            if (StringUtils.isNotBlank(taxCd1) && taxCd1.length() >= 11) {
-              String taxCd1Subtr = taxCd1.substring(3, 11);
+            if (StringUtils.isNotBlank(taxCd1)) {
               boolean createNewTaxRecords = false;
 
               if (geoTaxInfoRecords == null || geoTaxInfoRecords.isEmpty()) {
@@ -864,13 +863,13 @@ public class LAHandler extends GEOHandler {
 
               if (createNewTaxRecords) {
                 deleteAllTaxInfoRecord(data, entityManager);
-                doCreateARDefaultTaxRecord("01", taxCd1Subtr, data.getId().getReqId(), entityManager, true, true, true);
-                doCreateARDefaultTaxRecord("11", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
-                doCreateARDefaultTaxRecord("02", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
-                doCreateARDefaultTaxRecord("07", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
-                doCreateARDefaultTaxRecord("12", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
+                doCreateARDefaultTaxRecord("01", taxCd1, data.getId().getReqId(), entityManager, true, true, true);
+                doCreateARDefaultTaxRecord("11", taxCd1, data.getId().getReqId(), entityManager, false, false, false);
+                doCreateARDefaultTaxRecord("02", taxCd1, data.getId().getReqId(), entityManager, false, false, false);
+                doCreateARDefaultTaxRecord("07", taxCd1, data.getId().getReqId(), entityManager, false, false, false);
+                doCreateARDefaultTaxRecord("12", taxCd1, data.getId().getReqId(), entityManager, false, false, false);
               } else {
-                doUpdateARDefaultTaxRecord(taxCd1Subtr, data.getId().getReqId(), entityManager, data);
+                doUpdateARDefaultTaxRecord(taxCd1, data.getId().getReqId(), entityManager, data);
               }
             }
           } else {
