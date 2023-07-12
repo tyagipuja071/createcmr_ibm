@@ -22,7 +22,6 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -1915,19 +1914,6 @@ public abstract class APHandler extends GEOHandler {
   protected void doAfterConvert(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel,
       List<FindCMRRecordModel> converted) {
 
-  }
-
-  @Override
-  public void convertDnBImportValues(EntityManager entityManager, Admin admin, Data data) {
-    // call only for zs01 and India
-    AddrPK addrPK = new AddrPK();
-    addrPK.setReqId(data.getId().getReqId());
-    addrPK.setAddrSeq("00001");
-    addrPK.setAddrType("ZS01");
-    Addr addr = entityManager.find(Addr.class, addrPK);
-    if (SystemLocation.INDIA.equals(data.getCmrIssuingCntry())) {
-      setProvNameCdFrmCityState(entityManager, addr);
-    }
   }
 
   @Override
