@@ -2668,6 +2668,7 @@ function setIsicCdIfDnbResultAccepted(){
     FormManager.setValue('isicCd', '');
     FormManager.enable('isicCd');
   }
+  FormManager.readOnly('isicCd');
 }
 
 function setIsicCdIfDnbAndCmrResultOther(){
@@ -2677,7 +2678,7 @@ function setIsicCdIfDnbAndCmrResultOther(){
   if (cond4.has(custSubGrp)) {
     FormManager.setValue('isicCd', value);
     FormManager.readOnly('isicCd');
-  } else if(custSubGrp != ''){
+  }else if(custSubGrp != ''){
     FormManager.setValue('isicCd', '');
     FormManager.enable('isicCd');
   }
@@ -2693,6 +2694,7 @@ function onIsicChange() {
   var value = FormManager.getActualValue('isicCd');
   var cmrResult = FormManager.getActualValue('findCmrResult');
   var dnbResult = FormManager.getActualValue('findDnbResult');
+  var dplCheck = FormManager.getActualValue('dplChkResult');
   var cntrySet = new Set (['744', '834','616']);
   
   if (reqType != 'C' && role != 'REQUESTER' && !cntrySet.has(cmrIssuingCntry)) {
@@ -2705,6 +2707,8 @@ function onIsicChange() {
     setIsicCdIfDnbResultAccepted();
   } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
     setIsicCdIfDnbAndCmrResultOther();
+  }else if (dplCheck == 'AF') {
+    FormManager.readOnly('isicCd');
   }
 }
 function setPrivate() {
