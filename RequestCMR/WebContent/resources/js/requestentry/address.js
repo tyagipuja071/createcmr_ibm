@@ -902,8 +902,8 @@ function doAddAddress() {
    */
   cmr.addressMode = 'newAddress';
   cmr.showModal('addEditAddressModal');
-  
-  if (FormManager.getActualValue('custGrp') == 'BUSPR' && FormManager.getActualValue('cmrIssuingCntry') == '760') {
+  var reqType = FormManager.getActualValue('reqType');
+  if ( reqType == 'C' && FormManager.getActualValue('custGrp') == 'BUSPR' && FormManager.getActualValue('cmrIssuingCntry') == '760') {
     cmr.showNode('endUserFileFlag');
   } else {
     cmr.hideNode('endUserFileFlag');
