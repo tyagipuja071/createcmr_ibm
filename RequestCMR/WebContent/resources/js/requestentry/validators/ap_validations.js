@@ -2668,7 +2668,6 @@ function setIsicCdIfDnbResultAccepted(){
     FormManager.setValue('isicCd', '');
     FormManager.enable('isicCd');
   }
-  FormManager.readOnly('isicCd');
 }
 
 function setIsicCdIfDnbAndCmrResultOther(){
@@ -2678,7 +2677,7 @@ function setIsicCdIfDnbAndCmrResultOther(){
   if (cond4.has(custSubGrp)) {
     FormManager.setValue('isicCd', value);
     FormManager.readOnly('isicCd');
-  }else if(custSubGrp != ''){
+  } else if(custSubGrp != ''){
     FormManager.setValue('isicCd', '');
     FormManager.enable('isicCd');
   }
