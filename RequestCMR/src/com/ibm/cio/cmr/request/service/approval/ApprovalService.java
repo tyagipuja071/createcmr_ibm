@@ -487,6 +487,13 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       }
       if (conditionallyApproved) {
         comment = "Approval requests have been approved conditionally.\nThe request requires a processor review before proceeding.";
+      } else if ("N".equals(admin.getCompVerifiedIndc())) {
+        if ("S".equalsIgnoreCase(admin.getCompInfoSrc())) {
+          comment = "Processing error encountered as SCC(State / County / City) values unavailable.";
+        } else {
+          comment = "Processing error encountered as data is not company verified.";
+        }
+        admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
       }
       AppUser appuser = new AppUser();
       appuser.setIntranetId(user);
@@ -505,7 +512,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     boolean approvalsRej = queryRej.exists();
     if (approvalsRej) {
       admin.setReqStatus("AUT");
-    }else if (isConditionApprovalCN(entityManager, admin.getId().getReqId())) {
+    } else if (isConditionApprovalCN(entityManager, admin.getId().getReqId())) {
       if (hasCNAttachment(entityManager, admin.getId().getReqId())) {
         admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
       } else {
