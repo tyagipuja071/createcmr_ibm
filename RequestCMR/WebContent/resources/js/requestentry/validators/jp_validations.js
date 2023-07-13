@@ -110,7 +110,6 @@ function afterConfigForJP() {
   }
   // CREATCMR-788
   addressQuotationValidator();
-  addROLFieldLogic();
 }
 
 /**
@@ -160,10 +159,6 @@ function addHandlersForJP() {
 // }
 // }
 
-function enableRolFlag() {
-  FormManager.enable('rol');
-}
-
 function disableFieldsForRolUpdate() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'U') {
@@ -209,24 +204,30 @@ function disableAddrFieldsForRolUpdate() {
     var custType = FormManager.getActualValue('custType');
     if (custType == 'CR' || custType == 'AR') {
       var accountFieldList = [ 'custNm1', 'custNm2', 'custNm4', 'cnCustName1', 'cnCustName2', 'custNm3', 'addrTxt', 'cnAddrTxt', 'cnCity',
-          'cnDistrict', 'postCd', 'dept', 'office', 'bldg', 'custPhone', 'locationCode', 'custFax', 'estabFuncCd', 'divn', 'city2', 'companySize',
-          'contact' ];
+          'cnDistrict', 'postCd', 'dept', 'office', 'poBoxPostCd', 'bldg', 'custPhone', 'locationCode', 'custFax', 'estabFuncCd', 'divn', 'city2',
+          'companySize', 'contact' ];
       for (var i = 0; i < accountFieldList.length; i++) {
         setAddrFieldHide(accountFieldList[i]);
       }
     }
   }
 }
+
+function disableRolTaigaCode() {
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType == 'ZC01') {
+    FormManager.show('TaigaCode', 'poBoxPostCd');
+    FormManager.show('ROL', 'rol');
+    FormManager.enable('rol');
+  } else {
+    FormManager.hide('TaigaCode', 'poBoxPostCd');
+    FormManager.hide('ROL', 'rol');
+  }
+
+  FormManager.readOnly('territoryCd');
+}
+
 function addrTypeOnChange() {
-  // dojo.connect(FormManager.getField('addrType'), 'onChange', function(value)
-  // {
-  // var _addrType = FormManager.getActualValue('addrType');
-  // if (_addrType == 'ZC01') {
-  // return;
-  // } else {
-  // FormManager.hide('TaigaCode', 'poBoxPostCd');
-  // }
-  // });
   dojo.connect(FormManager.getField('addrType_ZC01'), 'onClick', function(value) {
     if (FormManager.getField('addrType_ZC01').checked == true) {
       FormManager.show('TaigaCode', 'poBoxPostCd');
@@ -323,13 +324,6 @@ function addrTypeOnChange() {
       FormManager.hide('ROL', 'rol');
     }
   });
-}
-function disableTaigaCode() {
-  var addrType = FormManager.getActualValue('addrType');
-  if (addrType != 'ZC01') {
-    FormManager.hide('TaigaCode', 'poBoxPostCd');
-  }
-  FormManager.disable('territoryCd');
 }
 
 function addScenarioDriven() {
@@ -6107,9 +6101,14 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(convertCustNmDetail2DBCS, GEOHandler.JP);
   GEOHandler.addAfterConfig(addScenarioDriven, GEOHandler.JP);
   GEOHandler.addAfterConfig(addHandlersForJP, GEOHandler.JP);
-  GEOHandler.addAfterConfig(enableRolFlag, GEOHandler.JP);
+
   GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
-  GEOHandler.addAfterConfig(disableTaigaCode, GEOHandler.JP);
+  GEOHandler.addAfterConfig(disableRolTaigaCode, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(disableFieldsForRolUpdate, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(disableRolTaigaCode, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(addrTypeOnChange, GEOHandler.JP);
+  GEOHandler.addAddrFunction(disableRolTaigaCode, GEOHandler.JP);
 
   GEOHandler.addAfterTemplateLoad(setCSBORequired, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setPageLoadDone, GEOHandler.JP);
@@ -6124,7 +6123,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
-  GEOHandler.addAfterTemplateLoad(disableFieldsForRolUpdate, GEOHandler.JP);
 
   // CREATCMR-9327
   GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
@@ -6157,10 +6155,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(addSpaceForCustNm1, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(addTelFaxValidator, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(replaceBanGaoForAddrTxt, GEOHandler.JP);
-  GEOHandler.addToggleAddrTypeFunction(enableRolFlag, GEOHandler.JP);
-  GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
-  GEOHandler.addToggleAddrTypeFunction(disableTaigaCode, GEOHandler.JP);
-  GEOHandler.addToggleAddrTypeFunction(addrTypeOnChange, GEOHandler.JP);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.JP);
   GEOHandler.addAddrFunction(setFieldValueOnAddrSave, GEOHandler.JP);

@@ -1261,10 +1261,8 @@ public class JPHandler extends GEOHandler {
     updateCSBOBeforeDataSave(entityManager, admin, data);
     setAccountAbbNmOnSaveForBP(admin, data);
 
-    if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
-      setFieldBeforeDataSave(entityManager, data, "ROL", data.getIdentClient());
-    }
-    setFieldBeforeDataSave(entityManager, data, "TAIGA", data.getTerritoryCd());
+    setROLBeforeDataSave(entityManager, data, admin);
+    setTAIGABeforeDataSave(entityManager, data);
   }
 
   private void setSalesRepTmDateOfAssign(Data data, Admin admin, EntityManager entityManager) {
@@ -1511,12 +1509,7 @@ public class JPHandler extends GEOHandler {
     }
     addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");
 
-    AdminService adminSvc = new AdminService();
-    Admin admin = adminSvc.getCurrentRecordById(addr.getId().getReqId(), entityManager);
-    if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
-      setFieldBeforeAddrSave(entityManager, addr, "ROL", addr.getRol());
-    }
-    setFieldBeforeAddrSave(entityManager, addr, "TAIGA", addr.getPoBoxPostCd());
+    setFieldBeforeAddrSave(entityManager, addr);
   }
 
   public IntlAddr getIntlAddrListById(Addr addr, EntityManager entityManager) {
@@ -1545,57 +1538,102 @@ public class JPHandler extends GEOHandler {
     return iAddr;
   }
 
-  private void setFieldBeforeDataSave(EntityManager entityManager, Data data, String fieldId, String fieldValue) {
-    // Update account level TAIGA/ROL in ADDR table if account level changed
+  private void setROLBeforeDataSave(EntityManager entityManager, Data data, Admin admin) {
     List<Addr> addrList = getAddrByReqId(entityManager, data.getId().getReqId());
-    if (addrList != null && addrList.size() > 0) {
-      for (Addr address : addrList) {
-        if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
-          if ("ROL".equals(fieldId)) {
-            address.setRol(fieldValue);
-          } else if ("TAIGA".equals(fieldId)) {
-            address.setPoBoxPostCd(fieldValue);
+    if ("CR".equals(admin.getCustType())) {
+      // Update account level ROL in DATA table if company level changed
+      String rolZC01 = null;
+      if (addrList != null && addrList.size() > 0) {
+        for (Addr address : addrList) {
+          if ("ZC01".equals(address.getId().getAddrType())) {
+            rolZC01 = address.getRol() == null ? "" : address.getRol();
+            break;
           }
-          address.setPoBoxPostCd(fieldValue);
-          entityManager.merge(address);
-          entityManager.flush();
+        }
+      }
+      data.setIdentClient(rolZC01);
+
+    } else if ("AR".equals(admin.getCustType())) {
+      // Update account level ROL in ADDR table if account level changed
+      String rolData = data.getIdentClient() == null ? "" : data.getIdentClient();
+      if (addrList != null && addrList.size() > 0) {
+        for (Addr address : addrList) {
+          if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
+            address.setRol(rolData);
+            entityManager.merge(address);
+            entityManager.flush();
+          }
         }
       }
     }
   }
 
-  private void setFieldBeforeAddrSave(EntityManager entityManager, Addr addr, String fieldId, String fieldValue) {
+  private void setTAIGABeforeDataSave(EntityManager entityManager, Data data) {
+    // Update account level TAIGA in DATA table if company level changed
+    List<Addr> addrList = getAddrByReqId(entityManager, data.getId().getReqId());
+    String taigaCd = null;
+    if (addrList != null && addrList.size() > 0) {
+      for (Addr address : addrList) {
+        if ("ZC01".equals(address.getId().getAddrType())) {
+          taigaCd = address.getPoBoxPostCd() == null ? "" : address.getPoBoxPostCd();
+          break;
+        }
+      }
+    }
+    data.setTerritoryCd(taigaCd);
+  }
+
+  private void setFieldBeforeAddrSave(EntityManager entityManager, Addr addr) throws Exception {
+    AdminService adminSvc = new AdminService();
+    Admin admin = adminSvc.getCurrentRecordById(addr.getId().getReqId(), entityManager);
+
     if ("ZC01".equals(addr.getId().getAddrType())) {
+      // Update account level TAIGA/ROL in DATA table if company level changed
+      String rol = addr.getRol() == null ? "" : addr.getRol();
+      String taigaCd = addr.getPoBoxPostCd() == null ? "" : addr.getPoBoxPostCd();
       DataPK pk = new DataPK();
       pk.setReqId(addr.getId().getReqId());
       Data data = entityManager.find(Data.class, pk);
+      if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
+        data.setIdentClient(rol);
+      }
+      data.setTerritoryCd(taigaCd);
+      entityManager.merge(data);
+      entityManager.flush();
 
-      if (fieldValue != null && fieldValue.length() > 0) {
-        // Update account level TAIGA/ROL in DATA table if company level changed
-        if ("ROL".equals(fieldId)) {
-          data.setIdentClient(fieldValue);
-        } else if ("TAIGA".equals(fieldId)) {
-          data.setTerritoryCd(fieldValue);
-        }
-        entityManager.merge(data);
-        entityManager.flush();
-
+      if (rol.length() > 0 || taigaCd.length() > 0) {
         // Update account level TAIGA/ROL in ADDR table if company level changed
         List<Addr> addrList = getAddrByReqId(entityManager, addr.getId().getReqId());
         if (addrList != null && addrList.size() > 0) {
           for (Addr address : addrList) {
             if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
-              if ("ROL".equals(fieldId)) {
-                address.setRol(fieldValue);
-              } else if ("TAIGA".equals(fieldId)) {
-                address.setPoBoxPostCd(fieldValue);
+              if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
+                address.setRol(rol);
               }
+              address.setPoBoxPostCd(taigaCd);
               entityManager.merge(address);
               entityManager.flush();
             }
           }
         }
       }
+    } else if (!("ZC01".equals(addr.getId().getAddrType()) || "ZE01".equals(addr.getId().getAddrType()))) {
+      List<Addr> addrList = getAddrByReqId(entityManager, addr.getId().getReqId());
+      String rol = null;
+      String taigaCd = null;
+      if (addrList != null && addrList.size() > 0) {
+        for (Addr address : addrList) {
+          if ("ZC01".equals(address.getId().getAddrType())) {
+            rol = address.getRol() == null ? "" : address.getRol();
+            taigaCd = address.getPoBoxPostCd() == null ? "" : address.getPoBoxPostCd();
+            break;
+          }
+        }
+      }
+      if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
+        addr.setRol(rol);
+      }
+      addr.setPoBoxPostCd(taigaCd);
     }
   }
 

@@ -236,12 +236,13 @@
           <cmr:field path="adminDeptLine" id="adminDeptLine" fieldId="AdminDeptLine" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>  
-      <cmr:column span="2">
+      <cmr:column span="2" containerForField="ROLAccount">
         <p>
           <cmr:label fieldId="identClient">
-            <cmr:fieldLabel fieldId="ROL" />:
+            <cmr:fieldLabel fieldId="ROLAccount" />:<cmr:info text="${ui.info.rol}" />
+             <cmr:delta text="-" id="delta-identClient" />
           </cmr:label>
-          <cmr:field path="identClient" id="identClient" fieldId="ROL" tabId="MAIN_IBM_TAB" />
+          <cmr:field path="identClient" id="identClient" fieldId="ROLAccount" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
           	  <cmr:column span="2">
