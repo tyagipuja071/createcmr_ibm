@@ -753,7 +753,7 @@ public class UKIUtil extends AutomationUtil {
     UkiFieldsContainer container = new UkiFieldsContainer();
     String cmrIssuingCntry = requestData.getData().getCmrIssuingCntry();
     String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
-    String covSql = ExternalizedQuery.getSql("AUTO.COV.GET_COV_FROM_BG_ES_UK");
+    String covSql = ExternalizedQuery.getSql("AUTO.COV.GET_COV_FROM_BG_UK");
     PreparedQuery queryCov = new PreparedQuery(entityManager, covSql);
 
     queryCov.setParameter("KEY", requestData.getData().getBgId());
@@ -862,7 +862,7 @@ public class UKIUtil extends AutomationUtil {
     UkiFieldsContainer container = new UkiFieldsContainer();
     String cmrIssuingCntry = requestData.getData().getCmrIssuingCntry();
     String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
-    String covSql = ExternalizedQuery.getSql("AUTO.COV.GET_COV_FROM_BG_ES_UK");
+    String covSql = ExternalizedQuery.getSql("AUTO.COV.GET_COV_FROM_BG_IR");
     PreparedQuery queryCov = new PreparedQuery(entityManager, covSql);
 
     queryCov.setParameter("KEY", requestData.getData().getBgId());
