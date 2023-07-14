@@ -659,22 +659,17 @@ public abstract class AutomationUtil {
       }
     }
 
-    // // List<String> dupReqIds = checkDuplicateRequest(entityManager,
-    // reqData);
-    // // Duplicate Request check with customer name and Addr
-    // List<String> dupReqIds = checkDuplicateRequestPriv(entityManager,
-    // reqData);
-    // if (!dupReqIds.isEmpty()) {
-    // details.append("Duplicate request found with matching customer
-    // name.\nMatch found with Req id :").append("\n");
-    // details.append(StringUtils.join(dupReqIds, "\n"));
-    // engineData.addRejectionComment("DUPR", "Duplicate request found with
-    // matching customer name.", StringUtils.join(dupReqIds, ", "), "");
-    // return false;
-    // } else {
-    // details.append("No duplicate requests found");
-    //
-    // }
+    // Duplicate Request check with customer name and Addr
+    List<String> dupReqIds = checkDuplicateRequest(entityManager, reqData);
+    if (!dupReqIds.isEmpty()) {
+      details.append("Duplicate request found with matching customer name and address.\nMatch found with Req id :").append("\n");
+      details.append(StringUtils.join(dupReqIds, "\n"));
+      engineData.addRejectionComment("DUPR", "Duplicate request found with matching customer name and address.", StringUtils.join(dupReqIds, ", "),
+          "");
+      return false;
+    } else {
+      details.append("No duplicate requests found");
+    }
     PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
 
@@ -690,8 +685,8 @@ public abstract class AutomationUtil {
     // checkResult.getCmrNo(), checkResult.getKunnr());
     // return false;
     case DuplicateCheckError:
-      details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
-      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+      details.append("Duplicate CMR check using customer name and address match failed to execute.").append("\n");
+      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name and address match failed to execute.");
       break;
     case NoIBMRecord:
       engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
