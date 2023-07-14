@@ -648,18 +648,6 @@ public abstract class AutomationUtil {
         return false;
       }
     }
-
-    // Duplicate Request check with customer name and Addr
-    List<String> dupReqIds = checkDuplicateRequest(entityManager, reqData);
-    if (!dupReqIds.isEmpty()) {
-      details.append("Duplicate request found with matching customer name and address.\nMatch found with Req id :").append("\n");
-      details.append(StringUtils.join(dupReqIds, "\n"));
-      engineData.addRejectionComment("DUPR", "Duplicate request found with matching customer name and address.", StringUtils.join(dupReqIds, ", "),
-          "");
-      return false;
-    } else {
-      details.append("No duplicate requests found");
-    }
     PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
 
