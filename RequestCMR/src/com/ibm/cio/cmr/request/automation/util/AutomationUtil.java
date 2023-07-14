@@ -656,8 +656,8 @@ public abstract class AutomationUtil {
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
     case DuplicateCheckError:
-      details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
-      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+      details.append("Duplicate CMR check using customer name and address match failed to execute.").append("\n");
+      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name and address match failed to execute.");
       break;
     case NoIBMRecord:
       engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
@@ -1359,6 +1359,10 @@ public abstract class AutomationUtil {
     Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     String custNm = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
+    String addrTxt = getFormattedString(zs01.getAddrTxt());
+    String addrTxt2 = (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? getFormattedString(zs01.getAddrTxt2()) : "");
+    String postCd = zs01.getPostCd();
+    String city = zs01.getCity1();
     String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("LAND_CNTRY", zs01.getLandCntry().toUpperCase());
@@ -1373,12 +1377,69 @@ public abstract class AutomationUtil {
       while (it.hasNext()) {
         Addr addr = it.next();
         String custNm2 = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
+        String streetLine1 = (StringUtils.isNotBlank(addr.getAddrTxt()) ? getFormattedString(addr.getAddrTxt()) : "");
+        String streetLine2 = (StringUtils.isNotBlank(addr.getAddrTxt2()) ? getFormattedString(addr.getAddrTxt2()) : "");
+        String postCd2 = addr.getPostCd();
+        String city2 = addr.getCity1();
         if (custNm.equals(custNm2)) {
-          dupReqIds.add(Long.toString(addr.getId().getReqId()));
+          if (matchdupExactAddr(addrTxt, addrTxt2, streetLine1, streetLine2, postCd, postCd2, city, city2)) {
+            dupReqIds.add(Long.toString(addr.getId().getReqId()));
+          } else if (matchAddress(addrTxt, addrTxt2, streetLine1, streetLine2)) {
+            dupReqIds.add(Long.toString(addr.getId().getReqId()));
+          } else {
+            for (String key : CommonWordsUtil.getVariations(streetLine1)) {
+              if (matchAddress(addrTxt, addrTxt2, key, "")) {
+                dupReqIds.add(Long.toString(addr.getId().getReqId()));
+                break;
+              }
+            }
+            if (StringUtils.isNotBlank(streetLine2)) {
+              for (String key : CommonWordsUtil.getVariations(streetLine2)) {
+                if (matchAddress(addrTxt, addrTxt2, "", key)) {
+                  dupReqIds.add(Long.toString(addr.getId().getReqId()));
+                  break;
+                }
+              }
+            }
+          }
         }
       }
     }
     return dupReqIds;
+  }
+
+  private boolean matchAddress(String addrTxt, String addrTxt2, String streetLine1, String streetLine2) {
+    return (match(addrTxt, streetLine1) || match(addrTxt2, streetLine1) || match(addrTxt, streetLine2) || match(addrTxt2, streetLine2));
+  }
+
+  public static boolean match(String str, String key) {
+    if (StringUtils.isNotBlank(str) && StringUtils.isNotBlank(key)) {
+      if (str.matches(".*" + key + ".*")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean matchdupExactAddr(String addrTxt, String addrTxt2, String streetLine1, String streetLine2, String postCd, String postCd2,
+      String city, String city2) {
+    Boolean addrMatch = false;
+    String addrStreet = addrTxt.concat(addrTxt2);
+    String addrStreet2 = streetLine1.concat(streetLine2);
+    if ((StringUtils.isNotBlank(addrStreet) && StringUtils.isNotBlank(addrStreet2)
+        && !(StringUtils.getLevenshteinDistance(addrStreet.toUpperCase(), addrStreet2.toUpperCase()) > 3)
+        && (addrStreet2.replaceAll("\\s", "").contains(addrStreet.replaceAll("\\s", ""))))) {
+      addrMatch = ((StringUtils.isNotBlank(postCd) && StringUtils.isNotBlank(postCd2) && postCd2.contains(postCd))
+          && (StringUtils.isNotBlank(city) && StringUtils.isNotBlank(city2) && city2.replaceAll("\\s", "").contains(city.replaceAll("\\s", ""))));
+    }
+    return addrMatch;
+  }
+
+  public static String getFormattedString(String str) {
+    if (StringUtils.isNotBlank(str)) {
+      return str.trim().replaceAll("[^a-zA-Z0-9 ]", "").replaceAll("\\s+", " ").toUpperCase();
+    }
+    return "";
   }
 
   public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
