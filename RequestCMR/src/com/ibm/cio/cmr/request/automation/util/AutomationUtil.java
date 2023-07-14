@@ -674,23 +674,6 @@ public abstract class AutomationUtil {
     return true;
   }
 
-  protected boolean doDupReqCheckPrivIbmem(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
-      boolean checkBluepages, RequestData reqData) {
-    EntityManager entityManager = JpaManager.getEntityManager();
-    // List<String> dupReqIds = checkDuplicateRequest(entityManager, reqData);
-    // Duplicate Request check with customer name and Addr
-    List<String> dupReqIds = checkDuplicateRequestPriv(entityManager, reqData);
-    if (!dupReqIds.isEmpty()) {
-      details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
-      details.append(StringUtils.join(dupReqIds, "\n"));
-      engineData.addRejectionComment("DUPR", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
-      return false;
-    } else {
-      details.append("No duplicate requests found");
-    }
-    return true;
-  }
-
   /**
    * Checks the private person record against current CMR records and optionally
    * against BluePages
@@ -1376,36 +1359,8 @@ public abstract class AutomationUtil {
     Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     String custNm = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
-    String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("LAND_CNTRY", zs01.getLandCntry().toUpperCase());
-    query.setParameter("SCENARIO", StringUtils.isNotBlank(data.getCustSubGrp()) ? data.getCustSubGrp().toUpperCase() : "%%");
-    query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
-    query.setParameter("ADDR_TYPE", zs01.getId().getAddrType());
-    query.setParameter("REQ_ID", admin.getId().getReqId());
-    query.setForReadOnly(true);
-    List<Addr> results = query.getResults(Addr.class);
-    if (results != null && !results.isEmpty()) {
-      Iterator<Addr> it = results.iterator();
-      while (it.hasNext()) {
-        Addr addr = it.next();
-        String custNm2 = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
-        if (custNm.equals(custNm2)) {
-          dupReqIds.add(Long.toString(addr.getId().getReqId()));
-        }
-      }
-    }
-    return dupReqIds;
-  }
-
-  public List<String> checkDuplicateRequestPriv(EntityManager entityManager, RequestData requestData) {
-    List<String> dupReqIds = new ArrayList<>();
-    Data data = requestData.getData();
-    Admin admin = requestData.getAdmin();
-    Addr zs01 = requestData.getAddress("ZS01");
-    String custNm = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
-    String addrStreet = getFormattedString(zs01.getAddrTxt())
-        + (StringUtils.isNotBlank(zs01.getCustNm2()) ? getFormattedString(zs01.getAddrTxt2()) : "");
+    String addrTxt = getFormattedString(zs01.getAddrTxt());
+    String addrTxt2 = (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? getFormattedString(zs01.getAddrTxt2()) : "");
     String postCd = zs01.getPostCd();
     String city = zs01.getCity1();
     String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
@@ -1422,13 +1377,30 @@ public abstract class AutomationUtil {
       while (it.hasNext()) {
         Addr addr = it.next();
         String custNm2 = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
-        String addrStreet2 = getFormattedString(addr.getAddrTxt())
-            + (StringUtils.isNotBlank(addr.getAddrTxt2()) ? getFormattedString(addr.getAddrTxt2()) : "");
+        String streetLine1 = (StringUtils.isNotBlank(addr.getAddrTxt()) ? getFormattedString(addr.getAddrTxt()) : "");
+        String streetLine2 = (StringUtils.isNotBlank(addr.getAddrTxt2()) ? getFormattedString(addr.getAddrTxt2()) : "");
         String postCd2 = addr.getPostCd();
         String city2 = addr.getCity1();
         if (custNm.equals(custNm2)) {
-          if (matchdupAddrPriv(addrStreet, addrStreet2, postCd, postCd2, city, city2)) {
+          if (matchdupExactAddr(addrTxt, addrTxt2, streetLine1, streetLine2, postCd, postCd2, city, city2)) {
             dupReqIds.add(Long.toString(addr.getId().getReqId()));
+          } else if (matchAddress(addrTxt, addrTxt2, streetLine1, streetLine2)) {
+            dupReqIds.add(Long.toString(addr.getId().getReqId()));
+          } else {
+            for (String key : CommonWordsUtil.getVariations(streetLine1)) {
+              if (matchAddress(addrTxt, addrTxt2, key, "")) {
+                dupReqIds.add(Long.toString(addr.getId().getReqId()));
+                break;
+              }
+            }
+            if (StringUtils.isNotBlank(streetLine2)) {
+              for (String key : CommonWordsUtil.getVariations(streetLine2)) {
+                if (matchAddress(addrTxt, addrTxt2, "", key)) {
+                  dupReqIds.add(Long.toString(addr.getId().getReqId()));
+                  break;
+                }
+              }
+            }
           }
         }
       }
@@ -1436,11 +1408,27 @@ public abstract class AutomationUtil {
     return dupReqIds;
   }
 
-  private boolean matchdupAddrPriv(String addrStreet, String addrStreet2, String postCd, String postCd2, String city, String city2) {
+  private boolean matchAddress(String addrTxt, String addrTxt2, String streetLine1, String streetLine2) {
+    return (match(addrTxt, streetLine1) || match(addrTxt2, streetLine1) || match(addrTxt, streetLine2) || match(addrTxt2, streetLine2));
+  }
+
+  public static boolean match(String str, String key) {
+    if (StringUtils.isNotBlank(str) && StringUtils.isNotBlank(key)) {
+      if (str.matches(".*" + key + ".*")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean matchdupExactAddr(String addrTxt, String addrTxt2, String streetLine1, String streetLine2, String postCd, String postCd2,
+      String city, String city2) {
     Boolean addrMatch = false;
+    String addrStreet = addrTxt.concat(addrTxt2);
+    String addrStreet2 = streetLine1.concat(streetLine2);
     if ((StringUtils.isNotBlank(addrStreet) && StringUtils.isNotBlank(addrStreet2)
-        && StringUtils.getLevenshteinDistance(addrStreet.toUpperCase(), addrStreet2.toUpperCase()) > 5
-        && !(addrStreet2.replaceAll("\\s", "").contains(addrStreet.replaceAll("\\s", ""))))) {
+        && !(StringUtils.getLevenshteinDistance(addrStreet.toUpperCase(), addrStreet2.toUpperCase()) > 3)
+        && (addrStreet2.replaceAll("\\s", "").contains(addrStreet.replaceAll("\\s", ""))))) {
       addrMatch = ((StringUtils.isNotBlank(postCd) && StringUtils.isNotBlank(postCd2) && postCd2.contains(postCd))
           && (StringUtils.isNotBlank(city) && StringUtils.isNotBlank(city2) && city2.replaceAll("\\s", "").contains(city.replaceAll("\\s", ""))));
     }
@@ -1590,41 +1578,40 @@ public abstract class AutomationUtil {
    * @param reject
    * @return cmdeReview = true, for Update / Delete.
    */
-  protected boolean validatePpsCeidForUpdateRequest(AutomationEngineData engineData, Data data, StringBuilder details, 
-		  Set<String> resultCodes, UpdatedDataModel change, String reject) {
-	  String newppsceid = change.getNewData();
-	  String oldppsceid = change.getOldData();
-	  String kukla = data.getCustClass();
-	  List<String> kuklaValuesStartingWith4 = Arrays.asList("41", "42", "43", "44", "45", "46", "47", "48", "49");
-	  boolean cmdeReview = false;
+  protected boolean validatePpsCeidForUpdateRequest(AutomationEngineData engineData, Data data, StringBuilder details, Set<String> resultCodes,
+      UpdatedDataModel change, String reject) {
+    String newppsceid = change.getNewData();
+    String oldppsceid = change.getOldData();
+    String kukla = data.getCustClass();
+    List<String> kuklaValuesStartingWith4 = Arrays.asList("41", "42", "43", "44", "45", "46", "47", "48", "49");
+    boolean cmdeReview = false;
 
-	  // ADD
-	  if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
-		  if (kuklaValuesStartingWith4.contains(kukla)) {
-			  if (checkPPSCEID(data.getPpsceid())) {
-				  details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
-			  } else {
-				  resultCodes.add(reject);
-				  details.append("PPS ceid on the request is invalid").append("\n");
-			  }
-		  } else {
-			  resultCodes.add(reject);
-			  details.append("PPS CE ID added for CMR with Kukla other than 41, 42, 43, 44, 45, 46, 47, 48, 49.").append("\n");
-		  }
-	  } else if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
-		  // DELETE
-		  cmdeReview = true;
-		  engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
-		  details.append("Deletion of ppsceid needs cmde review.\n");
-	  } else if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)) {
-		  // UPDATE
-		  cmdeReview = true;
-		  engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
-		  details.append("Update of ppsceid needs cmde review.\n");
-	  }
+    // ADD
+    if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
+      if (kuklaValuesStartingWith4.contains(kukla)) {
+        if (checkPPSCEID(data.getPpsceid())) {
+          details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
+        } else {
+          resultCodes.add(reject);
+          details.append("PPS ceid on the request is invalid").append("\n");
+        }
+      } else {
+        resultCodes.add(reject);
+        details.append("PPS CE ID added for CMR with Kukla other than 41, 42, 43, 44, 45, 46, 47, 48, 49.").append("\n");
+      }
+    } else if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
+      // DELETE
+      cmdeReview = true;
+      engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
+      details.append("Deletion of ppsceid needs cmde review.\n");
+    } else if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)) {
+      // UPDATE
+      cmdeReview = true;
+      engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
+      details.append("Update of ppsceid needs cmde review.\n");
+    }
 
-	  return cmdeReview;
+    return cmdeReview;
   }
-  
 
 }
