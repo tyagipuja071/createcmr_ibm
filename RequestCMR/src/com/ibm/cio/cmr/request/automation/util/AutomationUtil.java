@@ -1354,6 +1354,7 @@ public abstract class AutomationUtil {
   }
 
   public List<String> checkDuplicateRequest(EntityManager entityManager, RequestData requestData) {
+    LOG.debug("Duplicate Request check with customer name and Address for Private person record");
     List<String> dupReqIds = new ArrayList<>();
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
