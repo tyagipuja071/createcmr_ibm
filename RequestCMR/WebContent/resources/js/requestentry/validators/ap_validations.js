@@ -2706,7 +2706,8 @@ function onIsicChange() {
     setIsicCdIfDnbResultAccepted();
   } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
     setIsicCdIfDnbAndCmrResultOther();
-  }else if (dplCheck == 'AF') {
+  }
+  if (dplCheck == 'AF') {
     FormManager.readOnly('isicCd');
   }
 }
