@@ -2846,18 +2846,20 @@ function togglePPSCeid() {
 function retainImportValues(fromAddress, scenario, scenarioChanged) {
   var isCmrImported = getImportedIndc();
 
-  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'D' && scenarioChanged && scenario == 'COMME' || scenario == 'BUSPR' || scenario == 'GOVDI' || scenario == 'GOVIN') {
+  if ((FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'D') && (scenarioChanged && (scenario == 'COMME' || scenario == 'BUSPR' || scenario == 'GOVDI' || scenario == 'GOVIN'))) {
     var reqId = FormManager.getActualValue('reqId');
     var result = cmr.query("GET.CMRINFO.IMPORTED_LA", {
       REQ_ID : reqId
     });
 
-    if (result != null && result != '') {
+    if (result != null && result != '' && result != undefined) {
       var origIsic = result.ret1;
       var origSubInd = result.ret2;
 
-      FormManager.setValue('isicCd', origIsic);
-      FormManager.setValue('subIndustryCd', origSubInd);
+      if (origIsic != undefined && origSubInd != undefined) {
+        FormManager.setValue('isicCd', origIsic);
+        FormManager.setValue('subIndustryCd', origSubInd);
+      }
     }
   }
 }
