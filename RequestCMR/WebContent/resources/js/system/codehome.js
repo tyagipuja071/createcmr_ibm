@@ -454,5 +454,19 @@ var _allGroups = [ {
     "table" : "CREQCMR.LOV",
     "subType" : false,
     "parent" : "Germany"
+  }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/jpjsiccodemap',
+    "name" : "List of JSIC Code Map",
+    "description" : "Maintains JSIC code mappings",
+    "table" : "CREQCMR.JP_JSIC_CODE_MAP",
+    "subType" : false,
+    "parent" : "Japan"
+  }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/jpofficesectorinac',
+    "name" : "JP OfficeCd Sector Inac Map",
+    "description" : "Maintains JP OfficeCd Sector Inac mappings",
+    "table" : "CREQCMR.JP_OFFICE_SECTOR_INAC_MAPPING",
+    "subType" : false,
+    "parent" : null
   }, ]
 } ];
