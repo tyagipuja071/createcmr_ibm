@@ -21,24 +21,23 @@ public class JpJsicCodeMapPK extends BaseEntityPk implements Serializable {
   // default serial version id, required for serializable classes.
   private static final long serialVersionUID = 1L;
 
-  @Column(
-      name = "JSIC_CD")
+  @Column(name = "JSIC_CD")
   private String jsicCd;
 
-  @Column(
-      name = "SUB_INDUSTRY_CD")
+  @Column(name = "SUB_INDUSTRY_CD")
   private String subIndustryCd;
 
-  @Column(
-      name = "ISU_CD")
+  @Column(name = "ISU_CD")
   private String isuCd;
 
-  @Column(
-      name = "ISIC_CD")
+  @Column(name = "ISIC_CD")
   private String isicCd;
 
+  @Column(name = "DEPT")
+  private String dept;
+
   public String getJsicCd() {
-    return jsicCd;
+    return this.jsicCd;
   }
 
   public void setJsicCd(String jsicCd) {
@@ -46,7 +45,7 @@ public class JpJsicCodeMapPK extends BaseEntityPk implements Serializable {
   }
 
   public String getSubIndustryCd() {
-    return subIndustryCd;
+    return this.subIndustryCd;
   }
 
   public void setSubIndustryCd(String subIndustryCd) {
@@ -54,7 +53,7 @@ public class JpJsicCodeMapPK extends BaseEntityPk implements Serializable {
   }
 
   public String getIsuCd() {
-    return isuCd;
+    return this.isuCd;
   }
 
   public void setIsuCd(String isuCd) {
@@ -62,11 +61,19 @@ public class JpJsicCodeMapPK extends BaseEntityPk implements Serializable {
   }
 
   public String getIsicCd() {
-    return isicCd;
+    return this.isicCd;
   }
 
   public void setIsicCd(String isicCd) {
     this.isicCd = isicCd;
+  }
+
+  public String getDept() {
+    return this.dept;
+  }
+
+  public void setDept(String dept) {
+    this.dept = dept;
   }
 
   @Override
@@ -78,7 +85,8 @@ public class JpJsicCodeMapPK extends BaseEntityPk implements Serializable {
       return false;
     }
     JpJsicCodeMapPK o = (JpJsicCodeMapPK) other;
-    return this.isicCd.equals(o.isicCd) && this.isuCd.equals(o.isuCd) && this.jsicCd.equals(o.jsicCd) && this.subIndustryCd.equals(o.subIndustryCd);
+    return this.isicCd.equals(o.isicCd) && this.isuCd.equals(o.isuCd) && this.jsicCd.equals(o.jsicCd) && this.subIndustryCd.equals(o.subIndustryCd)
+        && this.dept.equals(o.dept);
 
   }
 
@@ -91,6 +99,7 @@ public class JpJsicCodeMapPK extends BaseEntityPk implements Serializable {
     hash = hash * prime + (this.isuCd != null ? this.isuCd.hashCode() : 0);
     hash = hash * prime + (this.jsicCd != null ? this.jsicCd.hashCode() : 0);
     hash = hash * prime + (this.subIndustryCd != null ? this.subIndustryCd.hashCode() : 0);
+    hash = hash * prime + (this.dept != null ? this.dept.hashCode() : 0);
 
     return hash;
   }
@@ -98,7 +107,7 @@ public class JpJsicCodeMapPK extends BaseEntityPk implements Serializable {
   @Override
   protected boolean allKeysAssigned() {
     return !StringUtils.isEmpty(this.isicCd) && !StringUtils.isEmpty(this.isuCd) && !StringUtils.isEmpty(this.jsicCd)
-        && !StringUtils.isEmpty(this.subIndustryCd);
+        && !StringUtils.isEmpty(this.subIndustryCd) && !StringUtils.isEmpty(this.dept);
 
   }
 }
