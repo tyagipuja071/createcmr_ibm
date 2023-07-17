@@ -743,7 +743,7 @@ public class ANZHandler extends APHandler {
       } else {
         data.setGovType("N");
       }
-
+      data.setMrcCd("");
     }
     entityManager.merge(data);
     entityManager.flush();
