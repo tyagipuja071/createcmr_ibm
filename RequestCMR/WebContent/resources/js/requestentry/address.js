@@ -1614,6 +1614,23 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
   } else {
     cmr.showModal('addEditAddressModal');
   }
+  if(FormManager.getActualValue('cmrIssuingCntry') == '760'){
+    disableRolTaigaCode();
+  }
+}
+
+function disableRolTaigaCode() {
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType == 'ZC01') {
+    FormManager.show('TaigaCode', 'poBoxPostCd');
+    FormManager.show('ROL', 'rol');
+    FormManager.enable('rol');
+  } else {
+    FormManager.hide('TaigaCode', 'poBoxPostCd');
+    FormManager.hide('ROL', 'rol');
+  }
+
+  FormManager.readOnly('territoryCd');
 }
 
 function continueEditDnbAddress() {
