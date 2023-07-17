@@ -6168,6 +6168,8 @@ function addressQuotationValidatorAP() {
     
     // CREATCMR-9637，CREATCMR-9638
     FormManager.show('CustClass', 'custClass');
+    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
+    FormManager.hide('MrcCd','mrcCd'); 
     FormManager.readOnly('custClass');
     if(FormManager.getActualValue('reqType') == 'U'){
       FormManager.setValue('custClass',_pagemodel.custClass );
