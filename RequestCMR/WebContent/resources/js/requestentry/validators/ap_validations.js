@@ -8480,6 +8480,7 @@ dojo.addOnLoad(function() {
 // SysLoc.SINGAPORE ]);
 // GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.INDIA,
 // SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
+  GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.AUSTRALIA]);
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForISA, GEOHandler.ISA);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
