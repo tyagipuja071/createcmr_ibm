@@ -2141,9 +2141,12 @@ function updateIndustryClass() {
     var _industryClass = subIndustryCd.substr(0, 1);
     FormManager.setValue('IndustryClass', _industryClass);
     if(_industryClass =='Y' || _industryClass =='G' ){
+      FormManager.enable('taxCd2');
       FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'Government Customer Type' ], 'MAIN_IBM_TAB');
     }else{
       FormManager.removeValidator('taxCd2', Validators.REQUIRED);
+      FormManager.readOnly('taxCd2');
+      FormManager.setValue('taxCd2', '');
     }
     setAnzKuklaFor();
     updateCluster(_industryClass);
