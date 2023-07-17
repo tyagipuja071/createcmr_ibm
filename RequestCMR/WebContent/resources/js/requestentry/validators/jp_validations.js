@@ -192,6 +192,11 @@ function disableFieldsForRolUpdate() {
       FormManager.disable('privIndc_3');
 
     }
+    if (custType == 'CR') {
+      FormManager.readOnly('identClient');
+    } else if (custType == 'AR') {
+      FormManager.enable('identClient');
+    }
   }
 }
 
@@ -210,6 +215,11 @@ function disableAddrFieldsForRolUpdate() {
         setAddrFieldHide(accountFieldList[i]);
       }
     }
+    if (custType == 'AR') {
+      FormManager.readOnly('rol');
+    } else if (custType == 'CR') {
+      FormManager.enable('rol');
+    }
   }
 }
 
@@ -223,7 +233,10 @@ function disableRolTaigaCode() {
     FormManager.hide('TaigaCode', 'poBoxPostCd');
     FormManager.hide('ROL', 'rol');
   }
-
+  var custType = FormManager.getActualValue('custType');
+  if (custType == 'CR' || custType == 'AR') {
+    FormManager.readOnly('poBoxPostCd');
+  }
   FormManager.readOnly('territoryCd');
 }
 
@@ -6102,14 +6115,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addScenarioDriven, GEOHandler.JP);
   GEOHandler.addAfterConfig(addHandlersForJP, GEOHandler.JP);
 
-  GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
-  GEOHandler.addAfterConfig(disableRolTaigaCode, GEOHandler.JP);
-  GEOHandler.addAfterTemplateLoad(disableFieldsForRolUpdate, GEOHandler.JP);
-  GEOHandler.addToggleAddrTypeFunction(disableRolTaigaCode, GEOHandler.JP);
-  GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
-  GEOHandler.addToggleAddrTypeFunction(addrTypeOnChange, GEOHandler.JP);
-  GEOHandler.addAddrFunction(disableRolTaigaCode, GEOHandler.JP);
-
   GEOHandler.addAfterTemplateLoad(setCSBORequired, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setPageLoadDone, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(removeDefaultValueTelNo, GEOHandler.JP);
@@ -6178,6 +6183,15 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(ROLValidatorForZC01, GEOHandler.JP, null, true);
   // GEOHandler.registerValidator(addAddressRecordsValidatorJP, GEOHandler.JP,
   // GEOHandler.ROLE_PROCESSOR, true);
+
+  // 8831
+  GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
+  GEOHandler.addAfterConfig(disableRolTaigaCode, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(disableFieldsForRolUpdate, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(disableRolTaigaCode, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(addrTypeOnChange, GEOHandler.JP);
+  GEOHandler.addAddrFunction(disableRolTaigaCode, GEOHandler.JP);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);

@@ -1586,11 +1586,13 @@ public class JPHandler extends GEOHandler {
   private void setFieldBeforeAddrSave(EntityManager entityManager, Addr addr) throws Exception {
     AdminService adminSvc = new AdminService();
     Admin admin = adminSvc.getCurrentRecordById(addr.getId().getReqId(), entityManager);
+    String rol = null;
+    String taigaCd = null;
 
     if ("ZC01".equals(addr.getId().getAddrType())) {
       // Update account level TAIGA/ROL in DATA table if company level changed
-      String rol = addr.getRol() == null ? "" : addr.getRol();
-      String taigaCd = addr.getPoBoxPostCd() == null ? "" : addr.getPoBoxPostCd();
+      rol = addr.getRol() == null ? "" : addr.getRol();
+      taigaCd = addr.getPoBoxPostCd() == null ? "" : addr.getPoBoxPostCd();
       DataPK pk = new DataPK();
       pk.setReqId(addr.getId().getReqId());
       Data data = entityManager.find(Data.class, pk);
@@ -1619,14 +1621,14 @@ public class JPHandler extends GEOHandler {
       }
     } else if (!("ZC01".equals(addr.getId().getAddrType()) || "ZE01".equals(addr.getId().getAddrType()))) {
       List<Addr> addrList = getAddrByReqId(entityManager, addr.getId().getReqId());
-      String rol = null;
-      String taigaCd = null;
-      if (addrList != null && addrList.size() > 0) {
-        for (Addr address : addrList) {
-          if ("ZC01".equals(address.getId().getAddrType())) {
-            rol = address.getRol() == null ? "" : address.getRol();
-            taigaCd = address.getPoBoxPostCd() == null ? "" : address.getPoBoxPostCd();
-            break;
+      if (rol == null || taigaCd == null) {
+        if (addrList != null && addrList.size() > 0) {
+          for (Addr address : addrList) {
+            if ("ZC01".equals(address.getId().getAddrType())) {
+              rol = address.getRol() == null ? "" : address.getRol();
+              taigaCd = address.getPoBoxPostCd() == null ? "" : address.getPoBoxPostCd();
+              break;
+            }
           }
         }
       }
