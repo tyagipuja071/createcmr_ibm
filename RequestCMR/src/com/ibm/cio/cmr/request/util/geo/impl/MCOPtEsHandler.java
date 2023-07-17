@@ -487,9 +487,7 @@ public class MCOPtEsHandler extends MCOHandler {
         data.setVatInd(StringUtils.isNotBlank(data.getVat()) ? "T" : "N");
 
         if ("Y".equals(admin.getProspLegalInd())) {
-          if (!"S".equals(data.getCustPrefLang())) {
-            data.setCustPrefLang("S");
-          }
+          data.setCustPrefLang("S");
         }
       }
     }
