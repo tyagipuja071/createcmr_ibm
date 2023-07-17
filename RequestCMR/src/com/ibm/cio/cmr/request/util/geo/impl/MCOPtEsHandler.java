@@ -486,6 +486,11 @@ public class MCOPtEsHandler extends MCOHandler {
       if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
         data.setVatInd(StringUtils.isNotBlank(data.getVat()) ? "T" : "N");
 
+        if ("Y".equals(admin.getProspLegalInd())) {
+          if (!"S".equals(data.getCustPrefLang())) {
+            data.setCustPrefLang("S");
+          }
+        }
       }
     }
 
