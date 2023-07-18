@@ -831,7 +831,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     } else {
       AddressModel model = new AddressModel();
       setJPIntlAddrModel(model, cmr);
-      addressService.createCNIntlAddr(model, addr, entityManager);
+      addressService.updateJPIntlAddr(model, entityManager, addr);
     }
 
     if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())
