@@ -789,7 +789,7 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.readOnly('mrcCd');
       FormManager.readOnly('inacType');
             
-    } else if (['BLUMX', 'MKTPC', 'IGF', 'PRIV'].includes(custSubGrp)) {
+    } else if (['BLUMX', 'MKTPC', 'PRIV'].includes(custSubGrp)) {
       FormManager.readOnly('apCustClusterId');
       
       FormManager.resetDropdownValues(FormManager.getField('clientTier'));
@@ -802,13 +802,26 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
-      
-      if(['IGF', 'PRIV'].includes(custSubGrp)) {
+           
+      if(['PRIV'].includes(custSubGrp)) {
         FormManager.setValue('inacCd', '');
         FormManager.readOnly('inacCd');
         FormManager.setValue('inacType', '');
         FormManager.readOnly('inacType');
       }      
+    }  else  if (custSubGrp == 'IGF') {
+      FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
+      FormManager.setValue('isuCd','21');
+      FormManager.readOnly('isuCd');
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+      FormManager.setValue('clientTier', 'Z');
+      FormManager.readOnly('clientTier');
+      FormManager.setValue('inacCd', '');
+      FormManager.readOnly('inacCd');
+      FormManager.setValue('inacType', '');
+      FormManager.readOnly('inacType');
     } else if (['ECOSY'].includes(custSubGrp)) {
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('mrcCd');
@@ -1522,6 +1535,14 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
                FormManager.setValue('isuCd','34');
                FormManager.enable('clientTier');
                
+               if (_cmrIssuingCntry == '744' &&  custSubGrp == 'IGF') {
+                 FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
+                 FormManager.setValue('isuCd','21');
+                 FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+                 FormManager.setValue('clientTier', 'Z');
+                 FormManager.readOnly('clientTier');
+               }
+               
                // fixing issue 8513 for india
                // GB Segment values are not correct and it is not locked
                if (_cmrIssuingCntry == '744' && (custSubGrp == 'BLUMX' || custSubGrp ==
@@ -2095,6 +2116,15 @@ function setISUDropDownValues() {
              FormManager.setValue('isuCd','34');
              FormManager.enable('clientTier');
              
+             if (_cmrIssuingCntry == '744' && custSubGrp == 'IGF') {
+               FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+               FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+               FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+               FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
+               FormManager.setValue('clientTier', 'Z');
+               FormManager.setValue('isuCd','21');
+               FormManager.readOnly('clientTier');
+             }
              // fixing issue 8513 for india
              // GB Segment values are not correct and it is not locked
              if (_cmrIssuingCntry == '744' && (custSubGrp == 'BLUMX' || custSubGrp ==
