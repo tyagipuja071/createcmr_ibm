@@ -10547,6 +10547,34 @@ function addChangeTaxCdValidLicenseValidator() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
+
+function addMandatoryLicenseValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'U') {
+          var taxCd = FormManager.getActualValue('specialTaxCd');
+          if (taxCd == 'Z') {
+            var reqId = FormManager.getActualValue('reqId');
+
+            var qParams = {
+              REQ_ID : reqId,
+            };
+            var oldTaxRes = cmr.query('GET_SPECIAL_TAX_CD_OLD', qParams);
+            var oldTaxCd = oldTaxRes.ret1;
+
+            if (oldTaxCd != 'Z' && !hasValidLicenseDate()) {
+              return new ValidationResult(null, false, 'The Tax Code value has been changed to Z. Please add a valid license.');
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function hasValidLicenseDate() {
   var today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   if (CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount > 0) {
@@ -10843,6 +10871,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(toggleLicenseFields, [ SysLoc.IRELAND ]);
   GEOHandler.registerValidator(addChangeToTaxCdZValidator, [ SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addChangeTaxCdValidLicenseValidator, [ SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(addMandatoryLicenseValidator, [ SysLoc.IRELAND ], null, true);
 
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
