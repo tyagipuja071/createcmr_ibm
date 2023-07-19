@@ -1255,8 +1255,7 @@ public class LegacyDirectService extends TransConnService {
 
       while (!start.after(end)) {
         int day = start.get(Calendar.DAY_OF_WEEK);
-        if ((day != Calendar.SATURDAY) && (day != Calendar.SUNDAY))
-          workingDays++;
+        workingDays++;
         start.add(Calendar.DATE, 1);
       }
       LOG.debug("No of workingDays=" + workingDays);
