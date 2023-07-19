@@ -27,11 +27,12 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Licenses;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.LicenseService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
@@ -39,7 +40,6 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
-import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
@@ -309,13 +309,16 @@ public class UKIUtil extends AutomationUtil {
       }
     }
     if ("U".equals(admin.getReqType()) && SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
-      DataRdc rdcData = LegacyDirectUtil.getOldData(entityManager, String.valueOf(data.getId().getReqId()));
-      if (rdcData != null && !"Z".equals(rdcData.getSpecialTaxCd()) && "Z".equals(data.getSpecialTaxCd())) {
-        details.append("The Tax Code has been updated to 'Z', so the request will now be placed in CMDE's queue.\n");
-        engineData.addNegativeCheckStatus("_updatedToZTaxCode",
-            "The Tax Code has been updated to 'Z', so the request will now be placed in CMDE's queue.");
-        validation.setSuccess(false);
-        validation.setMessage("Review Required");
+      if ("Z".equals(data.getSpecialTaxCd())) {
+        LicenseService service = new LicenseService();
+        List<Licenses> newLicenses = service.getLicensesByIndc(entityManager, data.getId().getReqId(), LicenseService.NEW_LICENSE_INDC);
+        if (newLicenses.size() > 0) {
+          details.append("A new license has been added, so the request will now be placed in CMDE's queue.\n");
+          engineData.addNegativeCheckStatus("_updatedToZTaxCode", "A new license has been added, so the request will now be placed in CMDE's queue.");
+          validation.setSuccess(false);
+          validation.setMessage("Review Required");
+
+        }
       }
     }
 
