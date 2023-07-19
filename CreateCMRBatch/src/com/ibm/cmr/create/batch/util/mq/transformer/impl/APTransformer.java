@@ -90,7 +90,7 @@ public abstract class APTransformer extends MessageTransformer {
     // String mrcCode = (("32".equalsIgnoreCase(handler.cmrData.getIsuCd()) ||
     // ("34".equalsIgnoreCase(handler.cmrData.getIsuCd())))) ? "3" : "2";
     APHandler aphandler = (APHandler) RequestUtils.getGEOHandler(handler.cmrData.getCmrIssuingCntry());
-    if (!(handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.INDIA) && "U".equals(handler.adminData.getReqType()))) {
+    if (!handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.INDIA)) {
       handler.messageHash.put("MrktRespCode", "3");
     }
     handler.messageHash.put("SellBrnchOff", handler.cmrData.getTerritoryCd());
