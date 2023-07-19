@@ -275,7 +275,7 @@ public class CNPDFConverter extends DefaultPDFConverter {
         Paragraph label = new Paragraph();
         label.setFontSize(7);
         if (text.contains("C1")) {
-          text.replace("C1", "C1.1");
+          text = text.replace("C1", "C1.1");
         } else if (text.contains("C2")) {
           text = text.replace("C2", "C1.2");
         } else if (text.contains("C3")) {
