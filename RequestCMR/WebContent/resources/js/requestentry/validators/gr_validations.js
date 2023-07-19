@@ -861,7 +861,7 @@ function addHandlersForGR() {
   lockUnlockField();
   if (_custSubTypeHandlerGr == null && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     _custSubTypeHandlerGr = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-      FormManager.setValue('salesTeamCd', '');
+     // FormManager.setValue('salesTeamCd', '');
       resetSubIndustryCdGR();
     });
   }
