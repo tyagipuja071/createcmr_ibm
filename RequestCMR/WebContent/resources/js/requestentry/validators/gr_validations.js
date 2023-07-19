@@ -2415,7 +2415,7 @@ function lockUnlockFieldForGR() {
   console.log(">>>> lockUnlockFieldForGR");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var _custGrpSet = new Set([ 'COMME', 'GOVRN' ]);
+  var _custGrpSet = new Set([ 'COMME', 'GOVRN' ,'CROSS']);
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('isuCd');
@@ -2485,7 +2485,7 @@ function setEntepriseGR() {
   var clientTier = FormManager.getActualValue('clientTier');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet21 = new Set([ 'BUSPR', 'CRBUS', 'CRINT', 'IBMEM', 'INTER' ]);
-  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'PRICU', 'SAASP' ]);
+  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'PRICU', 'SAASP','CROSS' ]);
   var custSubGrpSet = new Set([ 'COMME', 'GOVRN' ]);
 
   var isuCtc = isuCd + clientTier;
