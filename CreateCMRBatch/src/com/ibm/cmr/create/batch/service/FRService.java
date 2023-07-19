@@ -1401,18 +1401,10 @@ public class FRService extends TransConnService {
       LOG.debug("processed.setTime(processedDate) O/P >>> " + processed.getTime());
       LOG.debug("current.setTime(processedDate) O/P >>> " + current.getTime());
 
-      int day = current.get(Calendar.DAY_OF_WEEK);
-      if ((day != Calendar.SATURDAY) && (day != Calendar.SUNDAY) && current.after(processed)) {
-        if (current.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY && processed.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-          hoursBetween = 0;
-        } else {
-          hoursBetween = (current.getTimeInMillis() - processed.getTimeInMillis()) / (60 * 60 * 1000);
-        }
-        LOG.debug("current.get(Calendar.DAY_OF_YEAR) >>> " + current.getTime());
-        LOG.debug("processed.get(Calendar.DAY_OF_YEAR) >>> " + processed.getTime());
-        LOG.debug("hoursBetween >>> " + hoursBetween);
-
-      }
+      hoursBetween = (current.getTimeInMillis() - processed.getTimeInMillis()) / (60 * 60 * 1000);
+      LOG.debug("current.get(Calendar.DAY_OF_YEAR) >>> " + current.getTime());
+      LOG.debug("processed.get(Calendar.DAY_OF_YEAR) >>> " + processed.getTime());
+      LOG.debug("hoursBetween >>> " + hoursBetween);
 
       LOG.debug("No of workingDays=" + hoursBetween);
     } catch (Exception e) {
