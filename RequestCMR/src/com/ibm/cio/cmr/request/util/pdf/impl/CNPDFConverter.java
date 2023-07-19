@@ -274,6 +274,17 @@ public class CNPDFConverter extends DefaultPDFConverter {
         cell.setFont(this.chineseFont);
         Paragraph label = new Paragraph();
         label.setFontSize(7);
+        if (text.contains("C1")) {
+          text.replace("C1", "C1.1");
+        } else if (text.contains("C2")) {
+          text = text.replace("C2", "C1.2");
+        } else if (text.contains("C3")) {
+          text = text.replace("C3", "C1.3");
+        } else if (text.contains("C4")) {
+          text = text.replace("C4", "C2.1");
+        } else if (text.contains("C5")) {
+          text = text.replace("C5", "C2.2");
+        }
         label.add(text);
         cell.setFont(this.chineseFont);
         cell.add(label);
