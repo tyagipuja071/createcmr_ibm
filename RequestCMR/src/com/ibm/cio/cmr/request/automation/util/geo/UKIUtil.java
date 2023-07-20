@@ -350,20 +350,6 @@ public class UKIUtil extends AutomationUtil {
       }
     }
     
-    if ("U".equals(admin.getReqType()) && SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
-      if ("Z".equals(data.getSpecialTaxCd())) {
-        LicenseService service = new LicenseService();
-        List<Licenses> newLicenses = service.getLicensesByIndc(entityManager, data.getId().getReqId(), LicenseService.NEW_LICENSE_INDC);
-        if (newLicenses.size() > 0) {
-          details.append("A new license has been added, so the request will now be placed in CMDE's queue.\n");
-          engineData.addNegativeCheckStatus("_updatedToZTaxCode", "A new license has been added, so the request will now be placed in CMDE's queue.");
-          validation.setSuccess(false);
-          validation.setMessage("Review Required");
-
-        }
-      }
-    }
-    
     output.setDetails(details.toString());
     output.setProcessOutput(validation);
     return true;
@@ -539,6 +525,21 @@ public class UKIUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+
+    if ("U".equals(admin.getReqType()) && SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      if ("Z".equals(data.getSpecialTaxCd())) {
+        LicenseService service = new LicenseService();
+        List<Licenses> newLicenses = service.getLicensesByIndc(entityManager, data.getId().getReqId(), LicenseService.NEW_LICENSE_INDC);
+        if (newLicenses.size() > 0) {
+          details.append("A new license has been added, so the request will now be placed in CMDE's queue.\n");
+          engineData.addNegativeCheckStatus("_updatedToZTaxCode", "A new license has been added, so the request will now be placed in CMDE's queue.");
+          results.setResults("Review Required");
+          results.setDetails(details.toString());
+          return results;
+        }
+      }
+    }
+
     if (!"C".equals(admin.getReqType())) {
       details.append("Field Computation skipped for Updates.");
       results.setResults("Skipped");
