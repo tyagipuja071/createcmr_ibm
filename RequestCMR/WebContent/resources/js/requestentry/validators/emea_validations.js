@@ -10507,12 +10507,10 @@ function addChangeToTaxCdZValidator() {
               REQ_ID : reqId,
             };
 
-            var oldTaxRes = cmr.query('GET_SPECIAL_TAX_CD_OLD', qParams);
             var attachRes = cmr.query('CHECK_TAX_LICENSE_ATTACHMENT', qParams);
-            var oldTaxCd = oldTaxRes.ret1;
 
-            if (oldTaxCd != 'Z' && attachRes.ret1 == null) {
-              return new ValidationResult(null, false, 'Tax License attachment required. Please provide the mandatory Tax License attachment when changing the Tax Code to Z.');
+            if (isNewLicenseAdded() && attachRes.ret1 == null) {
+              return new ValidationResult(null, false, 'Tax License attachment required. Please provide the mandatory Tax License attachment when adding a new License.');
             }
           }
         }
@@ -10575,6 +10573,24 @@ function addMandatoryLicenseValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addTaxCodeZAndNewLicenseValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'U') {
+          var taxCd = FormManager.getActualValue('specialTaxCd');
+
+          if (taxCd != 'Z' && isNewLicenseAdded()) {
+            return new ValidationResult(null, false, 'Adding new licenses is only allowed if the Tax Code is Z. Please set the Tax Code to Z or remove the new license.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 function hasValidLicenseDate() {
   var today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   if (CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount > 0) {
@@ -10582,6 +10598,19 @@ function hasValidLicenseDate() {
       var record = CmrGrid.GRIDS.LICENSES_GRID_GRID.getItem(i);
       var validTo = record.validTo[0]
       if (today < validTo) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function isNewLicenseAdded() {
+  if (CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount > 0) {
+    for (var i = 0; i < CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount; i++) {
+      var record = CmrGrid.GRIDS.LICENSES_GRID_GRID.getItem(i);
+      var changeIndc = record.currentIndc[0];
+      if ('N' == changeIndc) {
         return true;
       }
     }
@@ -10872,6 +10901,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addChangeToTaxCdZValidator, [ SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addChangeTaxCdValidLicenseValidator, [ SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addMandatoryLicenseValidator, [ SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(addTaxCodeZAndNewLicenseValidator, [ SysLoc.IRELAND ], null, true);
 
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
