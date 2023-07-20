@@ -1,26 +1,16 @@
 package com.ibm.scheduler.tasks;
 
-import java.io.IOException;
-
 import org.springframework.scheduling.support.CronTrigger;
 
 import com.ibm.scheduler.creator.BatchTask;
 
 public class AutomationEngineTask extends BatchTask {
   String cronExpression = "* */2 * * * *";
+  String command = "/bin/sh -c /cmr/batch/run_auto_engine.ksh >> /cmr/batch/batch-run.log 2> /cmr/batch/batch-err.log";
 
   @Override
   public void run() {
-    System.out.println("Starting " + this.getClass().getCanonicalName() + " ...");
-    Process process;
-    try {
-      process = Runtime.getRuntime().exec("/bin/sh -c /cmr/batch/run_auto_engine.ksh >> /cmr/batch/batch-run.log 2>/cmr/batch/batch-err.log");
-      logProcessOutputToConsole(process, this.getClass().getSimpleName());
-      process.waitFor();
-    } catch (IOException | InterruptedException e) {
-      e.printStackTrace();
-    }
-
+    runProcess(command, this.getClass().getSimpleName());
   }
 
   @Override

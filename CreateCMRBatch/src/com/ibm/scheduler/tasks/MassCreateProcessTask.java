@@ -1,26 +1,16 @@
 package com.ibm.scheduler.tasks;
 
-import java.io.IOException;
-
 import org.springframework.scheduling.support.CronTrigger;
 
 import com.ibm.scheduler.creator.BatchTask;
 
 public class MassCreateProcessTask extends BatchTask {
   String cronExpression = "* 02,07,12,17,22,27,32,37,42,47,52,57 * * * *";
+  String command = "/bin/sh -c /cmr/batch/run_masscreateprocess_batch.ksh >> /cmr/batch/batch-run.log 2> /cmr/batch/batch-err.log";
 
   @Override
   public void run() {
-    Process process;
-    try {
-      process = Runtime.getRuntime()
-          .exec("/bin/sh -c /cmr/batch/run_masscreateprocess_batch.ksh >> /cmr/batch/batch-run.log 2> /cmr/batch/batch-err.log");
-      logProcessOutputToConsole(process, this.getClass().getSimpleName());
-      process.waitFor();
-    } catch (IOException | InterruptedException e) {
-      e.printStackTrace();
-    }
-
+    runProcess(command, this.getClass().getSimpleName());
   }
 
   @Override
