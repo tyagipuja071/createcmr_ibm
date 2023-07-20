@@ -3145,15 +3145,15 @@ public class EMEAHandler extends BaseSOFHandler {
     if (entityManager != null && sapNumber != null) {
       LicenseService licenseService = new LicenseService();
 
+      List<Licenses> licensesResult = licenseService.getAllLicenses(entityManager, reqId);
+
+      // clear licenses
+      if (licensesResult != null && !licensesResult.isEmpty() && licensesResult.size() > 0) {
+        licenseService.deleteAllLicense(licensesResult, entityManager);
+      }
+
       List<Knvl> knvlList = licenseService.getKnvlByKunnr(entityManager, sapNumber);
       if (knvlList != null && knvlList.size() > 0) {
-        List<Licenses> licensesResult = licenseService.getAllLicenses(entityManager, reqId);
-
-        // clear licenses
-        if (licensesResult != null && !licensesResult.isEmpty() && licensesResult.size() > 0) {
-          licenseService.deleteAllLicense(licensesResult, entityManager);
-        }
-
         // create licenses
         for (Knvl knvl : knvlList) {
           licenseService.createLicenseFromKnvl(entityManager, knvl, reqId, requesterId);
