@@ -352,7 +352,7 @@
 						</p>
 					</cmr:column>
 					<cmr:column span="1" containerForField="LicenseValidFrom"
-						width="130">
+						width="190">
 						<p>
 							<cmr:label fieldId="LicenseValidFrom">
 								<cmr:fieldLabel fieldId="LicenseValidFrom" />:
@@ -360,7 +360,7 @@
 							<cmr:date path="licenseValidFrom" format="yyyyMMdd" />
 						</p>
 					</cmr:column>
-					<cmr:column span="1" containerForField="LicenseValidTo" width="130">
+					<cmr:column span="1" containerForField="LicenseValidTo" width="190">
 						<p>
 							<cmr:label fieldId="LicenseValidTo">
 								<cmr:fieldLabel fieldId="LicenseValidTo" />:
