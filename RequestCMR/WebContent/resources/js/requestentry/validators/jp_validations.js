@@ -101,6 +101,8 @@ function afterConfigForJP() {
     setAdminDeptOptional();
     addScenarioDriven();
     setSortlOnOfcdChange();
+    disableFieldsForRA();
+    disableAddrFieldsForRA();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -130,6 +132,31 @@ function addHandlersForJP() {
     });
   }
 
+}
+
+function disableFieldsForRA() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'RACMR') {
+    var accountFieldList = [ 'abbrevNm', 'custPrefLang', 'subIndustryCd', 'jsicCd', 'isicCd', 'email2', 'proxiLocnNo', 'oemInd',
+        'leasingCompanyIndc', 'educAllowCd', 'custAcctType', 'custClass', 'iinInd', 'valueAddRem', 'channelCd', 'siInd', 'crsCd', 'creditCd',
+        'govType', 'outsourcingService', 'zseriesSw', 'cmrNo', 'cmrNo2', 'cmrOwner', 'isuCd', 'clientTier', 'searchTerm', 'mrcCd', 'bgId', 'gbgId',
+        'bgRuleId', 'covId', 'inacType', 'inacCd', 'dunsNo', 'repTeamMemberNo', 'salesTeamCd', 'salesBusOffCd', 'orgNo', 'chargeCd', 'soProjectCd',
+        'csDiv', 'billingProcCd', 'invoiceSplitCd', 'creditToCustNo', 'tier2', 'billToCustNo', 'adminDeptCd', 'adminDeptLine', 'func' ];
+    for (var i = 0; i < accountFieldList.length; i++) {
+      disableFiled(accountFieldList[i]);
+    }
+  }
+}
+
+function disableAddrFieldsForRA() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'RACMR') {
+    var accountFieldList = [ 'custNm1', 'custNm2', 'custNm4', 'custNm3', 'addrTxt', 'postCd', 'bldg', 'custPhone', 'locationCode', 'city2',
+        'companySize' ];
+    for (var i = 0; i < accountFieldList.length; i++) {
+      setAddrFieldHide(accountFieldList[i]);
+    }
+  }
 }
 
 function addScenarioDriven() {
@@ -5915,6 +5942,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(disableFieldsForRA, GEOHandler.JP);
 
   // CREATCMR-9327
   GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
@@ -5947,6 +5975,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(addSpaceForCustNm1, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(addTelFaxValidator, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(replaceBanGaoForAddrTxt, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRA, GEOHandler.JP);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.JP);
   GEOHandler.addAddrFunction(setFieldValueOnAddrSave, GEOHandler.JP);

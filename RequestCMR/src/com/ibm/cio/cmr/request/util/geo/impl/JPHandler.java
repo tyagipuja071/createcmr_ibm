@@ -748,6 +748,25 @@ public class JPHandler extends GEOHandler {
       data.setSalesBusOffCd(
           mainRecord.getSboSub() != null && mainRecord.getSboSub().length() == 3 ? mainRecord.getSboSub().substring(1) : mainRecord.getSboSub());
     }
+    handleData4RAOnImport(data);
+  }
+  
+  private void handleData4RAOnImport(Data data) {
+    if (data.getJpCloseDays() != null && data.getJpCloseDays().length() >= 6) {
+      data.setJpCloseDays1(data.getJpCloseDays().substring(0, 1));
+      data.setJpCloseDays2(data.getJpCloseDays().substring(2, 3));
+      data.setJpCloseDays3(data.getJpCloseDays().substring(4, 5));
+    }
+    if (data.getJpPayCycles() != null && data.getJpPayCycles().length() >= 6) {
+      data.setJpPayCycles1(data.getJpPayCycles().substring(0, 1));
+      data.setJpPayCycles2(data.getJpPayCycles().substring(2, 3));
+      data.setJpPayCycles3(data.getJpPayCycles().substring(4, 5));
+    }
+    if (data.getJpPayDays() != null && data.getJpPayDays().length() >= 6) {
+      data.setJpPayDays1(data.getJpPayDays().substring(0, 1));
+      data.setJpPayDays2(data.getJpPayDays().substring(2, 3));
+      data.setJpPayDays3(data.getJpPayDays().substring(4, 5));
+    }
   }
 
   @Override
@@ -1249,6 +1268,7 @@ public class JPHandler extends GEOHandler {
     setSalesRepTmDateOfAssign(data, admin, entityManager);
     updateCSBOBeforeDataSave(entityManager, admin, data);
     setAccountAbbNmOnSaveForBP(admin, data);
+    handleData4RAOnDataSave(data);
   }
 
   private void setSalesRepTmDateOfAssign(Data data, Admin admin, EntityManager entityManager) {
@@ -1444,6 +1464,33 @@ public class JPHandler extends GEOHandler {
     }
     accountAbbNmInCris = crisRecord.getNameAbbr();
     return accountAbbNmInCris;
+  }
+  
+  private void handleData4RAOnDataSave(Data data) {
+    handleJpCloseDay(data);
+    handleJpPayDay(data);
+    handleJpPayCycle(data);
+  }
+
+  private void handleJpCloseDay(Data data) {
+    String jpCloseDay1 = StringUtils.isNoneEmpty(data.getJpCloseDays1()) ? data.getJpCloseDays1() : "  ";
+    String jpCloseDay2 = StringUtils.isNoneEmpty(data.getJpCloseDays2()) ? data.getJpCloseDays2() : "  ";
+    String jpCloseDay3 = StringUtils.isNoneEmpty(data.getJpCloseDays3()) ? data.getJpCloseDays3() : "  ";
+    data.setJpCloseDays(jpCloseDay1 + jpCloseDay2 + jpCloseDay3);
+  }
+
+  private void handleJpPayDay(Data data) {
+    String jpPayDay1 = StringUtils.isNoneEmpty(data.getJpPayDays1()) ? data.getJpPayDays1() : "  ";
+    String jpPayDay2 = StringUtils.isNoneEmpty(data.getJpPayDays2()) ? data.getJpPayDays2() : "  ";
+    String jpPayDay3 = StringUtils.isNoneEmpty(data.getJpPayDays3()) ? data.getJpPayDays3() : "  ";
+    data.setJpPayDays(jpPayDay1 + jpPayDay2 + jpPayDay3);
+  }
+
+  private void handleJpPayCycle(Data data) {
+    String jpPayCycle1 = StringUtils.isNoneEmpty(data.getJpPayCycles1()) ? data.getJpPayCycles1() : "  ";
+    String jpPayCycle2 = StringUtils.isNoneEmpty(data.getJpPayCycles2()) ? data.getJpPayCycles2() : "  ";
+    String jpPayCycle3 = StringUtils.isNoneEmpty(data.getJpPayCycles3()) ? data.getJpPayCycles3() : "  ";
+    data.setJpPayCycles(jpPayCycle1 + jpPayCycle2 + jpPayCycle3);
   }
 
   @Override
