@@ -109,7 +109,8 @@ public abstract class GCGTransformer extends APTransformer {
       handler.messageHash.put("GB_SegCode", "");
     }
     // Handling obsolete data
-    if (handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.TAIWAN)) {
+    if (handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.TAIWAN) || handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.HONG_KONG)
+        || handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.MACAO)) {
       // Handling obsolete data
       DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
       String reqType = handler.adminData.getReqType();
@@ -120,7 +121,7 @@ public abstract class GCGTransformer extends APTransformer {
         if (!StringUtils.isNotBlank(handler.cmrData.getClientTier())) {
           handler.messageHash.put("GB_SegCode", oldDataRdc.getClientTier());
         }
-        if (!StringUtils.isNotBlank(handler.cmrData.getIsuCd())) {
+        if (!StringUtils.isNotBlank(handler.cmrData.getIsuCd()) && handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.TAIWAN)) {
           handler.messageHash.put("ISU", oldDataRdc.getIsuCd());
         }
         if (!StringUtils.isNotBlank(handler.cmrData.getInacType())) {
@@ -129,10 +130,10 @@ public abstract class GCGTransformer extends APTransformer {
         if (!StringUtils.isNotBlank(handler.cmrData.getInacCd())) {
           handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
         }
-        if (!StringUtils.isNotBlank(handler.cmrData.getCollectionCd())) {
+        if (!StringUtils.isNotBlank(handler.cmrData.getCollectionCd()) && handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.TAIWAN)) {
           handler.messageHash.put("IBMCode", oldDataRdc.getCollectionCd());
         }
-        if (!StringUtils.isNotBlank(handler.cmrData.getEngineeringBo())) {
+        if (!StringUtils.isNotBlank(handler.cmrData.getEngineeringBo()) && handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.TAIWAN)) {
           handler.messageHash.put("EngrBrnchOff", oldDataRdc.getEngineeringBo());
         }
       }

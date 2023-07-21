@@ -872,19 +872,6 @@ public abstract class APHandler extends GEOHandler {
     setMRC(admin, data);
     setISBU(admin, data);
 
-    switch (data.getCmrIssuingCntry()) {
-    case SystemLocation.HONG_KONG:
-    case SystemLocation.MACAO:
-      // Coverage 1H22 CREATCMR-4790, set expired Search Term "00000"
-      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-        if (expiredSearchTerm(entityManager, data.getApCustClusterId(), data.getCmrIssuingCntry())) {
-          data.setApCustClusterId("00000");
-          data.setClientTier("Q");
-        }
-      }
-      break;
-    }
-
   }
 
   private boolean expiredSearchTerm(EntityManager entityManager, String searchTerm, String cmrIssuingCntry) {
