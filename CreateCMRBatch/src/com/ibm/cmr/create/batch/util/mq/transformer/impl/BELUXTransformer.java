@@ -1174,6 +1174,7 @@ public class BELUXTransformer extends EMEATransformer {
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
     data.setOrdBlk("88");
+    data.setEmbargoCd("D");
     entityManager.merge(data);
     entityManager.flush();
   }
