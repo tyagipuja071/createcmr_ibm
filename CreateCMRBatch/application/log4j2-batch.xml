@@ -8,6 +8,10 @@
     <Console name="console" target="SYSTEM_OUT">
       <PatternLayout pattern="[%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p [%t] (%13F:%L): %m%n" charset="UTF-8"/>
     </Console>
+    
+    <Console name="logdna" target="SYSTEM_OUT">
+        <PatternLayout pattern="[%-5level] [%d{dd MMM yyyy HH:mm:ss:SSS}] [%t] [${sys:BATCH_APP}] (%13F:%L) : %m%n" charset="UTF-8"/>
+    </Console>
 
     <RollingFile name="rollingFile" fileName="/cmr/batch/logs/${sys:BATCH_APP}.log" filePattern="/cmr/batch/logs/${sys:BATCH_APP}.log-%d{yyyy-MM-dd}-%i.log.gz">
       <PatternLayout pattern="[%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p [%t] (%13F:%L) : %m%n" charset="UTF-8"/>
@@ -27,8 +31,9 @@
     <Root level="ERROR" additivity="false">
       <AppenderRef ref="console" />
     </Root> 
-    <Logger name="com.ibm" level="DEBUG" additivity="false">
+    <Logger name="com.ibm" level="TRACE" additivity="false">
       <AppenderRef ref="console" level="DEBUG"/>
+      <AppenderRef ref="logdna" level="TRACE"/>
     </Logger>
     <Logger name="batch-profiler" level="TRACE" additivity="false">
       <AppenderRef ref="rollingFileProfiler" level="TRACE"/>
