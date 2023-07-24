@@ -164,7 +164,20 @@ function vatExemptIBMEmp() {
 
 var oldIsicValue = null;
 function saveOldIsic() {
-  oldIsicValue = FormManager.getActualValue('isicCd');
+	oldIsicValue = FormManager.getActualValue('isicCd');
+	// CREATCMR - 9967 
+	var oldISIC = null;
+	var requestId = FormManager.getActualValue('reqId');
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	qParams = {
+		REQ_ID: requestId,
+	};
+	var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+	oldISIC = result.ret1;
+	if (['COMME', 'GOVMT', '3PA', 'SENSI', 'DC', 'CROSS', 'XDC', 'X3PA', '3PADC'].includes(custSubGrp) &&
+		(oldISIC != null || oldISIC != undefined || oldISIC != '')) {
+		FormManager.setValue('isicCd', oldISIC);
+	}
 }
 
 function setSboOnIMS(value) {
@@ -1420,6 +1433,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(limitClientTierValuesOnUpdate, GEOHandler.DE);
   // GEOHandler.addAfterConfig(setISUValuesOnUpdate, GEOHandler.DE);
   GEOHandler.addAfterConfig(saveOldIsic, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(saveOldIsic, GEOHandler.DE);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.GERMANY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.GERMANY ], null, true);
   GEOHandler.addAfterConfig(defaultCapIndicator, SysLoc.GERMANY);
   GEOHandler.addAfterConfig(disableAutoProcForProcessor, GEOHandler.DE);
