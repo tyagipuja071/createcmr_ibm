@@ -507,7 +507,8 @@ public abstract class APHandler extends GEOHandler {
         data.setTerritoryCd("000");
         data.setCollectionCd("I001");
       }
-      entityManager.persist(data);
+      entityManager.merge(data);
+      entityManager.flush();
     }
   }
 
