@@ -1553,7 +1553,7 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
                // fixing issue 8513 for india
                // GB Segment values are not correct and it is not locked
                if (_cmrIssuingCntry == '744' && (custSubGrp == 'BLUMX' || custSubGrp ==
-                 'MKTPC' || custSubGrp == 'IGF'|| custSubGrp == 'PRIV')) {
+                 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'PRIV')) {
 
                  FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
                  FormManager.setValue('clientTier', 'Z');
