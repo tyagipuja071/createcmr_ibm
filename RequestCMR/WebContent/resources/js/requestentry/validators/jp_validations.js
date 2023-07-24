@@ -105,7 +105,7 @@ function afterConfigForJP() {
     disableFieldsForRolUpdate();
     disableAddrFieldsForRolUpdate();
     
-    disableFieldsForRA();
+    handleFields4RA();
     disableAddrFieldsForRA();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
@@ -342,6 +342,11 @@ function addrTypeOnChange() {
   });
 }
 
+function handleFields4RA() {
+  disableFieldsForRA();
+  handleRAFields();
+}
+
 function disableFieldsForRA() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'RACMR') {
@@ -356,13 +361,60 @@ function disableFieldsForRA() {
   }
 }
 
+function handleRAFields() {
+  var RAFieldsList = [ 'jpCloseDays1', 'jpCloseDays2', 'jpCloseDays3', 'jpPayCycles1', 'jpPayCycles2', 'jpPayCycles3', 'jpPayDays1', 'jpPayDays2',
+      'jpPayDays3' ];
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  showRAFieldsValue();
+  if (custSubGrp == 'RACMR') {
+    setRAFieldsMandatory();
+    for (var i = 0; i < RAFieldsList.length; i++) {
+      FormManager.enable(RAFieldsList[i]);
+    }
+  } else {
+    for (var i = 0; i < RAFieldsList.length; i++) {
+      disableFiled(RAFieldsList[i]);
+      FormManager.clearValue(RAFieldsList[i]);
+    }
+  }
+}
+
+function showRAFieldsValue() {
+  if (typeof (_pagemodel) != 'undefined') {
+    var _jpCloseDays = _pagemodel.jpCloseDays != null ? _pagemodel.jpCloseDays : '';
+    var _jpPayCycles = _pagemodel.jpPayCycles != null ? _pagemodel.jpPayCycles : '';
+    var _jpPayDays = _pagemodel.jpPayDays != null ? _pagemodel.jpPayDays : '';
+    FormManager.setValue('jpCloseDays1', _jpCloseDays.substring(0, 2));
+    FormManager.setValue('jpCloseDays2', _jpCloseDays.substring(2, 4));
+    FormManager.setValue('jpCloseDays3', _jpCloseDays.substring(4, 6));
+    FormManager.setValue('jpPayCycles1', _jpPayCycles.substring(0, 2));
+    FormManager.setValue('jpPayCycles2', _jpPayCycles.substring(2, 4));
+    FormManager.setValue('jpPayCycles3', _jpPayCycles.substring(4, 6));
+    FormManager.setValue('jpPayDays1', _jpPayDays.substring(0, 2));
+    FormManager.setValue('jpPayDays2', _jpPayDays.substring(2, 4));
+    FormManager.setValue('jpPayDays3', _jpPayDays.substring(4, 6));
+  }
+}
+
+function setRAFieldsMandatory() {
+  FormManager.addValidator('jpCloseDays1', Validators.REQUIRED, [ 'Close Day01' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpCloseDays2', Validators.REQUIRED, [ 'Close Day02' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpCloseDays3', Validators.REQUIRED, [ 'Close Day03' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayCycles1', Validators.REQUIRED, [ 'Payment Cycle Code01' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayCycles2', Validators.REQUIRED, [ 'Payment Cycle Code01' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayCycles3', Validators.REQUIRED, [ 'Payment Cycle Code01' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayDays1', Validators.REQUIRED, [ 'Pay Day01' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayDays2', Validators.REQUIRED, [ 'Pay Day02' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayDays3', Validators.REQUIRED, [ 'Pay Day03' ], 'MAIN_IBM_TAB');
+}
+
 function disableAddrFieldsForRA() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'RACMR') {
-    var accountFieldList = [ 'custNm1', 'custNm2', 'custNm4', 'custNm3', 'addrTxt', 'postCd', 'bldg', 'custPhone', 'locationCode', 'city2',
-        'companySize' ];
-    for (var i = 0; i < accountFieldList.length; i++) {
-      setAddrFieldHide(accountFieldList[i]);
+    var addrFieldList = [ 'custNm1', 'custNm2', 'custNm3', 'custNm4', 'addrTxt', 'postCd', 'bldg', 'custPhone', 'locationCode', 'city2',
+        'companySize', 'dept', 'office', 'custFax', 'estabFuncCd', 'divn', 'contact', 'rol' ];
+    for (var i = 0; i < addrFieldList.length; i++) {
+      setAddrFieldHide(addrFieldList[i]);
     }
   }
 }
@@ -6156,7 +6208,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
-  GEOHandler.addAfterTemplateLoad(disableFieldsForRA, GEOHandler.JP);
+  GEOHandler.addAfterConfig(handleFields4RA, GEOHandler.JP);
 
   // CREATCMR-9327
   GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
