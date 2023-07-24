@@ -495,9 +495,17 @@ public abstract class APHandler extends GEOHandler {
             data.setBusnType(mapping.getProvinceCd());
             data.setTerritoryCd(mapping.getProvinceCd());
             data.setCollectionCd(mapping.getArCode());
+            matchFound = true;
             break;
           }
         }
+      }
+
+      // if both city and state mismatch, set default value to 'others'
+      if (!matchFound) {
+        data.setBusnType("000");
+        data.setTerritoryCd("000");
+        data.setCollectionCd("I001");
       }
       entityManager.persist(data);
     }
