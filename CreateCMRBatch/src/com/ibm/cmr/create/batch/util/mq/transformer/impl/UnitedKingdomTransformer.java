@@ -1056,6 +1056,7 @@ public class UnitedKingdomTransformer extends EMEATransformer {
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
     data.setOrdBlk("88");
+    data.setEmbargoCd("E");
     entityManager.merge(data);
     entityManager.flush();
   }
@@ -1726,5 +1727,5 @@ public class UnitedKingdomTransformer extends EMEATransformer {
     }
     return str;
   }
-
+  
 }
