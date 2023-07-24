@@ -324,11 +324,18 @@ function savePreviousSubScenario() {
 }
 
 function setIsuOnIsic(){
-  console.log('>>>> setIsuOnIsic >>>>');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-   
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isuClusterList = ['05224', '04477', '04490', '04467', '05225'];
+  var scenarioList =['NRML' , 'ESOSW' , 'CROSS'];
   var _cluster = FormManager.getActualValue('apCustClusterId');
+  var mrcCd = FormManager.getActualValue('mrcCd');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');  
+  if(cmrIssuingCntry != '744' || !isuClusterList.includes(_cluster) || mrcCd != '2' || !scenarioList.includes(custSubGrp)) {
+    return ; 
+  }
+  
+  console.log('>>>> setIsuOnIsic >>>>');
   if (_cluster != '') {
     if (_cluster.indexOf(" - ") > 0) {
       _cluster = _cluster.substring(0, _cluster.indexOf(" - "));
@@ -2307,7 +2314,7 @@ function validateGSTForIndia() {
               var city = results.ret5;
               var stateProv = results.ret6;
               var landCntry = results.ret7;
-//              var country = '744';
+// var country = '744';
               
               if (stateProv != null && stateProv != '') {
                 reqParam = {
