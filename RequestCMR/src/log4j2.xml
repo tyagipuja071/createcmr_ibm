@@ -6,11 +6,11 @@
 
   <Appenders>
     <Console name="console" target="SYSTEM_OUT">
-      <PatternLayout pattern="[%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p (%13F:%L) : %m%n" charset="UTF-8"/>
+      <PatternLayout pattern="[%-5level] [%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p (%13F:%L) : %m%n" charset="UTF-8"/>
     </Console>
 
     <Console name="logdna" target="SYSTEM_OUT">
-      <PatternLayout pattern="[%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p [%t] (%13F:%L) : %m%n" charset="UTF-8"/>
+      <PatternLayout pattern="[%-5level] [%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p [%t] (%13F:%L) : %m%n" charset="UTF-8"/>
     </Console>
 
     <RollingFile name="rollingFile" fileName="/ci/shared/data/applogs/createcmr/CreateCMR.log" filePattern="/ci/shared/data/applogs/createcmr/CreateCMR.log-%d{yyyy-MM-dd}-%i.log.gz">
