@@ -151,23 +151,36 @@ function addAfterConfigAP() {
  
 }
 
-function modifyBusnTypeTerrCdFieldBehaviour(){
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  
-  if(custSubGrp == 'CROSS'){
-	FormManager.setValue('busnType','709');
-  FormManager.setValue('territoryCd','709');
-	FormManager.setValue('collectionCd','I001');
-   }else if(custSubGrp == 'IGF'){
-  FormManager.setValue('busnType','000');
-  FormManager.setValue('territoryCd','000');
-	FormManager.setValue('collectionCd','NDUM');
-	   }else if(custSubGrp == 'INTER'){
-	FormManager.setValue('busnType','709');
-  FormManager.setValue('territoryCd','709');
-	FormManager.setValue('collectionCd','RP01');
-   }
+function modifyBusnTypeTerrCdFieldBehaviour() {
+	var role = FormManager.getActualValue('userRole').toUpperCase();
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	var reqId = FormManager.getActualValue('reqId');
+
+	if (custSubGrp == 'CROSS') {
+		FormManager.setValue('busnType', '709');
+		FormManager.setValue('territoryCd', '709');
+		FormManager.setValue('collectionCd', 'I001');
+	} else if (custSubGrp == 'IGF') {
+		FormManager.setValue('busnType', '000');
+		FormManager.setValue('territoryCd', '000');
+		FormManager.setValue('collectionCd', 'NDUM');
+	} else if (custSubGrp == 'INTER') {
+		FormManager.setValue('busnType', '709');
+		FormManager.setValue('territoryCd', '709');
+		FormManager.setValue('collectionCd', 'RP01');
+	} else {
+		// retrieve values from DB
+		var qParam = {
+			REQ_ID: reqId,
+		};
+		var result = cmr.query('GET.PROVNM_CD', qParam);
+		if (result) {
+			FormManager.setValue('busnType', result.ret1);
+			FormManager.setValue('territoryCd', result.ret2);
+			FormManager.setValue('collectionCd', result.ret3);
+		}
+
+	}
    
 
 	if(role == 'REQUESTER'){
