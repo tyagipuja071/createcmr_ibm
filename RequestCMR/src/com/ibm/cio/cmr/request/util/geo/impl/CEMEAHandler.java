@@ -2274,24 +2274,26 @@ public class CEMEAHandler extends BaseSOFHandler {
           String stateProv = ""; // 9
           String landCntry = ""; // 10
           row = sheet.getRow(rowIndex);
-          if (row == null) {
-            return; // stop immediately when row is blank
-          }
-          currCell = row.getCell(8);
-          city = validateColValFromCell(currCell);
 
-          currCell = row.getCell(9);
-          stateProv = validateColValFromCell(currCell);
+          if (row != null) {
+            currCell = row.getCell(8);
+            city = validateColValFromCell(currCell);
 
-          currCell = row.getCell(10);
-          landCntry = validateColValFromCell(currCell);
+            currCell = row.getCell(9);
+            stateProv = validateColValFromCell(currCell);
 
-          if (!StringUtils.isBlank(city) && "RO".equals(landCntry) && "B".equals(stateProv)) {
-            if (city.equals("Bucharest")) {
-              error.addError((rowIndex + 1), "Tab Name : " + name + "," + " City  ",
-                  "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+            currCell = row.getCell(10);
+            landCntry = validateColValFromCell(currCell);
+
+            if (!StringUtils.isBlank(city) && "RO".equals(landCntry) && "B".equals(stateProv)) {
+              if (city.equals("Bucharest") && ("Ship To".equals(name) || "Mail to".equals(name) || "Bill To".equals(name) || "Sold To".equals(name)
+                  || "Install At".equals(name) || "Address in Local language".equals(name))) {
+                error.addError((rowIndex + 1), "Tab Name : " + name + "," + " City  ",
+                    "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+              }
             }
           }
+
         }
         if (error.hasErrors()) {
           validations.add(error);
