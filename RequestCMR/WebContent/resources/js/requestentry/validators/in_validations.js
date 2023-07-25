@@ -40,7 +40,7 @@ function afterConfigForIndia() {
       console.log(">>> RUNNING!!!!");
       var custSubGrp = FormManager.getActualValue('custSubGrp');
       FormManager.resetValidations('vat');
-      if (dijit.byId('vatExempt').get('checked')) {
+      if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
         console.log(">>> Process gstExempt remove * >> ");
         FormManager.readOnly('vat');
         FormManager.setValue('vat', '');

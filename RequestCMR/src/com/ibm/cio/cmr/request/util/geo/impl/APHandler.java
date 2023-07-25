@@ -18,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.controller.DropdownListController;
@@ -455,6 +456,14 @@ public abstract class APHandler extends GEOHandler {
     Addr soldTo = query.getSingleResult(Addr.class);
     if (soldTo != null) {
       setAbbrevLocNMBeforeAddrSave(entityManager, soldTo, data.getCmrIssuingCntry());
+    }
+    if (SystemLocation.INDIA.equals(cmrIssuingCntry) && StringUtils.isEmpty(data.getBusnType())) {
+      // retrieve zs01 address
+      RequestData requestData = new RequestData(entityManager, admin.getId().getReqId());
+
+      Addr addr = requestData.getAddress("ZS01");
+      setProvNameCdFrmCityState(entityManager, addr);
+
     }
   }
 
