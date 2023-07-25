@@ -2520,7 +2520,7 @@ function updateMRCAseanAnzIsa() {
     return;
   }
   // CREATCMR-7878
-  if (cntry == '778' || cntry == '749'|| cntry == '615' || cntry == '652' ) {
+  if (cntry == '778' || cntry == '749'|| cntry == '615' || cntry == '652' ||  cntry == '744') {
     return
   }
   if ((cntry == '856' && ['01251', '08047' , '09053' , '00000'].includes(cluster)) || (cntry == '818' && ['01231', '08044', '00000' , '09054'].includes(cluster)) || (cntry == '778' && ['01222', '00000', '08042' ,'09051'].includes(cluster))  || (cntry == '643' && ['00000'].includes(cluster)) || (cntry == '749' && ['00000' , '09050' , '08040' , '09050'].includes(cluster)) || (cntry == '852' && ['00000' , '01277' , '01273' , '09055' ,'08046'].includes(cluster)) || (cntry == '616' && ['01150' , '71100' , '00001' , '08039' ,'09057'].includes(cluster)) || (cntry == '796' && ['01147' , '71101' , '08037' , '00002' ,'09056'].includes(cluster))) {
