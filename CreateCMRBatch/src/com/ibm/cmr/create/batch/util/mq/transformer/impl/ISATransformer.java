@@ -79,10 +79,10 @@ public abstract class ISATransformer extends APTransformer {
     String scenario = handler.cmrData.getCustSubGrp();
     if (clusterID != null && cntry != null && cntry.equals(SystemLocation.INDIA) && Arrays.asList(clusterIndiaMrc2).contains(clusterID)
         && !StringUtils.equalsIgnoreCase(reqType, "U")) {
-      handler.messageHash.put("MrktRespCode", "3");
+      handler.messageHash.put("MrktRespCode", "2");
     } else if (clusterID != null && cntry.equals(SystemLocation.INDIA) && Arrays.asList(clusterIndiaMrc3).contains(clusterID)
         && !StringUtils.equalsIgnoreCase(reqType, "U")) {
-      handler.messageHash.put("MrktRespCode", "2");
+      handler.messageHash.put("MrktRespCode", "3");
     }
 
     if (cntry != null && StringUtils.equalsIgnoreCase(reqType, "C") && ((cntry.equals(SystemLocation.INDIA) && scenario.equalsIgnoreCase("IGF"))
