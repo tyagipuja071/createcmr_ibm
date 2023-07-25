@@ -66,6 +66,7 @@ public class GBLScenarioCheckElement extends ValidatingElement {
       boolean isPrivateSubScenario = scenarioExceptions != null ? scenarioExceptions.isSkipFindGbgForPrivates() : false;
       if (isPrivateSubScenario) {
         boolean foundCloseMatch = checkDunsMatchOnPrivates(requestData, engineData, "ZS01");
+        log.debug("checking for close match");
         if (foundCloseMatch) {
           output.setSuccess(false);
           output.setMessage("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
@@ -79,6 +80,8 @@ public class GBLScenarioCheckElement extends ValidatingElement {
         }
       }
       if (countryUtil != null) {
+        log.debug("Perform country util checks");
+
         boolean countryCheck = false;
         countryCheck = countryUtil.performScenarioValidation(entityManager, requestData, engineData, result, details, output);
         if (countryCheck) {
