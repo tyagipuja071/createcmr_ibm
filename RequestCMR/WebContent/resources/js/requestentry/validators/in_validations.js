@@ -117,12 +117,7 @@ function addAfterConfigAP() {
     FormManager.enable('IndustryClass');
     FormManager.enable('subIndustryCd');
   }
-  
-
  
-  var clusterId = FormManager.getActualValue('apCustClusterId');
-  
-  
  if (role == 'REQUESTER' && reqType == 'C') {
      
  if (custSubGrp == "CROSS" && _pagemodel.apCustClusterId == null) {
@@ -145,7 +140,8 @@ function addAfterConfigAP() {
   // CREATCMR-788
   addressQuotationValidatorAP();
   
- 
+ var clusterId = FormManager.getActualValue('apCustClusterId');
+  FormManager.addValidator('apCustClusterId', Validators.REQUIRED, [ 'Cluster' ], 'MAIN_IBM_TAB');
 }
 
 function setInacByCluster() {
