@@ -174,7 +174,7 @@ function saveOldIsic() {
 	};
 	var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
 	oldISIC = result.ret1;
-	if (['COMME', 'GOVMT', '3PA', 'SENSI', 'DC', 'CROSS', 'XDC', 'X3PA', '3PADC'].includes(custSubGrp) &&
+	if (['COMME', 'GOVMT', '3PA', 'SENSI', 'DC', 'CROSS', 'XDC', 'X3PA', '3PADC','BROKR'].includes(custSubGrp) &&
 		(oldISIC != null || oldISIC != undefined || oldISIC != '')) {
 		FormManager.setValue('isicCd', oldISIC);
 	}
