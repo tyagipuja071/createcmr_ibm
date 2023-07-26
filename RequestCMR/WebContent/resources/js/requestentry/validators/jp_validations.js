@@ -350,11 +350,11 @@ function handleFields4RA() {
 function disableFieldsForRA() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'RACMR') {
-    var accountFieldList = [ 'abbrevNm', 'custPrefLang', 'subIndustryCd', 'jsicCd', 'isicCd', 'email2', 'proxiLocnNo', 'oemInd',
+    var accountFieldList = [ 'abbrevNm', 'custPrefLang', 'subIndustryCd', 'jsicCd', 'isicCd', 'email2', 'proxiLocnNo', 'oemInd', 'identClient',
         'leasingCompanyIndc', 'educAllowCd', 'custAcctType', 'custClass', 'iinInd', 'valueAddRem', 'channelCd', 'siInd', 'crsCd', 'creditCd',
-        'govType', 'outsourcingService', 'zseriesSw', 'cmrNo', 'cmrNo2', 'cmrOwner', 'isuCd', 'clientTier', 'searchTerm', 'mrcCd', 'bgId', 'gbgId',
-        'bgRuleId', 'covId', 'inacType', 'inacCd', 'dunsNo', 'repTeamMemberNo', 'salesTeamCd', 'salesBusOffCd', 'orgNo', 'chargeCd', 'soProjectCd',
-        'csDiv', 'billingProcCd', 'invoiceSplitCd', 'creditToCustNo', 'tier2', 'billToCustNo', 'adminDeptCd', 'adminDeptLine', 'func' ];
+        'govType', 'outsourcingService', 'zseriesSw', 'cmrNo2', 'cmrOwner', 'isuCd', 'clientTier', 'mrcCd', 'bgId', 'gbgId', 'bgRuleId', 'covId',
+        'inacType', 'inacCd', 'dunsNo', 'repTeamMemberNo', 'salesTeamCd', 'salesBusOffCd', 'orgNo', 'chargeCd', 'soProjectCd', 'csDiv',
+        'billingProcCd', 'invoiceSplitCd', 'creditToCustNo', 'tier2', 'adminDeptCd', 'adminDeptLine', 'func' ];
     for (var i = 0; i < accountFieldList.length; i++) {
       disableFiled(accountFieldList[i]);
     }
@@ -362,10 +362,13 @@ function disableFieldsForRA() {
 }
 
 function handleRAFields() {
-  var RAFieldsList = [ 'jpCloseDays1', 'jpCloseDays2', 'jpCloseDays3', 'jpPayCycles1', 'jpPayCycles2', 'jpPayCycles3', 'jpPayDays1', 'jpPayDays2',
-      'jpPayDays3' ];
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
   showRAFieldsValue();
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var RAFieldsList = [ 'jpCloseDays1', 'jpCloseDays2', 'jpCloseDays3', 'jpPayCycles1', 'jpPayCycles2', 'jpPayCycles3', 'jpPayDays1', 'jpPayDays2',
+      'jpPayDays3', 'cmrNo', 'searchTerm', 'billToCustNo' ];
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'RACMR') {
     setRAFieldsMandatory();
     for (var i = 0; i < RAFieldsList.length; i++) {
@@ -4231,7 +4234,7 @@ function addSoldToValidatorJP() {
               if (Number(zs01Reccount) > 1) {
                 return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
               } else if (Number(zs01Reccount == 0)
-                  && (custSubGrp != 'BCEXA' && custSubGrp != 'BFKSC' && custSubGrp != 'BPWPQ' && custSubGrp != 'ISOCU')) {
+                  && (custSubGrp != 'BCEXA' && custSubGrp != 'BFKSC' && custSubGrp != 'BPWPQ' && custSubGrp != 'ISOCU' && custSubGrp != 'RACMR')) {
                 return new ValidationResult(null, false, 'At least one Sold-To Address must be defined.');
               } else {
                 return new ValidationResult(null, true);
@@ -4694,7 +4697,7 @@ function addDPLCheckValidatorJP() {
       validate : function() {
         var result = FormManager.getActualValue('dplChkResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == '' || custSubGrp == 'BQICL') {
+        if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == '' || custSubGrp == 'BQICL' || custSubGrp == 'RACMR') {
           return new ValidationResult(null, true);
         } else {
           if (result == '' || result.toUpperCase() == 'NOT DONE') {
@@ -6162,6 +6165,33 @@ function addressQuotationValidator() {
   FormManager.addValidator('contact', Validators.NO_QUOTATION, [ 'Contact' ]);
 
 }
+/**
+ * Validator to check whether CMR search has been performed
+ */
+function addCMRSearchValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var result = FormManager.getActualValue('findCmrResult');
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (custSubGrp == 'RACMR') {
+          return new ValidationResult(null, true);
+        }
+        if (reqType == 'C' && FormManager.getActualValue('sourceSystId').toUpperCase() == 'FEDCMR' && FormManager.getActualValue('custGrp') == '14') {
+          return new ValidationResult(null, true);
+        }
+        if (result == '' || result.toUpperCase() == 'NOT DONE') {
+          return new ValidationResult(null, false, 'CMR Search has not been performed yet.');
+        }
+        if (reqType == 'U' && result.toUpperCase() != 'ACCEPTED') {
+          return new ValidationResult(null, false, 'An existing CMR for update must be searched for and imported properly to the request.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -6265,6 +6295,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(ROLValidatorForZC01, GEOHandler.JP, null, true);
   // GEOHandler.registerValidator(addAddressRecordsValidatorJP, GEOHandler.JP,
   // GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.JP, null, true);
 
   // 8831
   GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
