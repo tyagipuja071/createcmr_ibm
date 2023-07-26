@@ -462,11 +462,17 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
             }
           } else if (cnConditionallyApproved) {
             setAdminStatus4CN(entityManager, admin);
+          } else if (data != null && admin != null && ("AR".equals(admin.getCustType()) || "CR".equals(admin.getCustType()))
+              && SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
+            admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
           } else {
             admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
           }
         } else if (cnConditionallyApproved) {
           setAdminStatus4CN(entityManager, admin);
+        } else if (data != null && admin != null && ("AR".equals(admin.getCustType()) || "CR".equals(admin.getCustType()))
+            && SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
+          admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
         } else {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
         }
