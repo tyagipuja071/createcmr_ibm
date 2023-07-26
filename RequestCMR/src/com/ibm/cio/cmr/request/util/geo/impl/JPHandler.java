@@ -2580,4 +2580,11 @@ public class JPHandler extends GEOHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
+  
+  public static void addJpLogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+    String custSubGroup = data.getCustSubGrp();
+    if ("RACMR".equals(custSubGroup)) {
+      admin.setReqStatus("PCP");
+    }
+  }
 }

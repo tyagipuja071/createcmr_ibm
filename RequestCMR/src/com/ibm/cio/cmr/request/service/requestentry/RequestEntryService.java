@@ -79,6 +79,7 @@ import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNDHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -659,6 +660,10 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     // CREATCMR-3144 - CN 2.0 special
     if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
       CNHandler.doBeforeSendForProcessing(entityManager, admin, data, model);
+    }
+    
+    if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())) {
+      JPHandler.addJpLogicOnSendForProcessing(entityManager, admin, data, model);
     }
 
     // check if there's a status change
