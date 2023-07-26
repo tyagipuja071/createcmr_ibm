@@ -134,7 +134,20 @@ function vatExemptIBMEmp() {
 
 var oldIsicValue = null;
 function saveOldIsic() {
-  oldIsicValue = FormManager.getActualValue('isicCd');
+	oldIsicValue = FormManager.getActualValue('isicCd');
+	// CREATCMR - 9967 
+	var oldISIC = null;
+	var requestId = FormManager.getActualValue('reqId');
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	qParams = {
+		REQ_ID: requestId,
+	};
+	var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+	oldISIC = result.ret1;
+	if (['COMME', 'GOVMT', '3PA', 'SENSI', 'DC', 'CROSS', 'XDC', 'X3PA', '3PADC','BROKR'].includes(custSubGrp) &&
+		(oldISIC != null || oldISIC != undefined || oldISIC != '')) {
+		FormManager.setValue('isicCd', oldISIC);
+	}
 }
 
 function setSboOnIMS(value) {
