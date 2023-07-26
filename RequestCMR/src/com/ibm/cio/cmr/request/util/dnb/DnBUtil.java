@@ -79,7 +79,7 @@ public class DnBUtil {
     registerDnBVATCode("RU", 1437); // Tax Registration Number (Russian
                                     // Federation)
     registerDnBVATCode("CH", 28865); // Swiss Uniform Identification Number
-    registerDnBVATCode("SE", 1861); // SW Business Registration Number
+    registerDnBVATCode("SE", 42067); // VAT Number
     registerDnBVATCode("IL", 1365); // Israel Registration Number
     registerDnBVATCode("JP", 32475); // Corporate Number
     registerDnBVATCode("CN", 32476); // United Social Credit Code (CN)
