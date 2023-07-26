@@ -2022,11 +2022,14 @@ function setSBOValuesForIsuCtc(value) {
     console.log("There are " + results.length + " SBO returned.");
 
     var custSubGrp = FormManager.getActualValue('custSubGrp');
+    FormManager.clearValue('salesBusOffCd');
     if (results != null && results.length > 0) {
       for (var i = 0; i < results.length; i++) {
         sbo.push(results[i].ret1);
+      } 
+      if(results.length == 1 ){
+        FormManager.setValue('salesBusOffCd', sbo[0]);
       }
-      FormManager.setValue('salesBusOffCd', sbo[0]);
     }
     
     var lockSboScenario = [ 'PRICU', 'RSXPC', 'CSPC', 'MEPC', 'RSPC' ];
