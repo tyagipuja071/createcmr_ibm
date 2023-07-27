@@ -861,6 +861,11 @@ public class IERPProcessService extends BaseBatchService {
               }
 
               if (response.getRecords() != null && response.getRecords().size() != 0) {
+            	  if(index >= response.getRecords().size() ){
+            		  LOG.debug("size = " + response.getRecords().size());
+            		  LOG.debug("index = " + index);
+            		  break;
+            	  }
 
                 if (CmrConstants.RDC_SOLD_TO.equals(response.getRecords().get(index).getAddressType())) {
                   String[] addrSeqs = response.getRecords().get(index).getSeqNo().split(",");
