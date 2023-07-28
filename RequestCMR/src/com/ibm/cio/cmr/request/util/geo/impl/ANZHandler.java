@@ -417,9 +417,11 @@ public class ANZHandler extends APHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-    Addr mailing = getAddressByType(entityManager, "MAIL", addr.getId().getReqId());
+    	 
+	//Addr mailing = getAddressByType(entityManager, "MAIL", addr.getId().getReqId());
     if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
-      if (mailing == null) {
+      /*
+    	if (mailing == null) {
         // create a dummy mailing
         AddrPK pk = new AddrPK();
         pk.setReqId(addr.getId().getReqId());
@@ -436,8 +438,9 @@ public class ANZHandler extends APHandler {
           entityManager.persist(mailing);
           entityManager.flush();
         }
-      }
-
+      }  */
+      
+      
       AdminPK adminPK = new AdminPK();
       adminPK.setReqId(addr.getId().getReqId());
       Admin admin = entityManager.find(Admin.class, adminPK);
