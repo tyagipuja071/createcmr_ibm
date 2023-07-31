@@ -87,7 +87,7 @@ public class SpainUtil extends AutomationUtil {
   private static final List<String> SCENARIOS_TO_SKIP_COVERAGE = Arrays.asList(SCENARIO_INTERNAL, SCENARIO_INTERNAL_SO, SCENARIO_BUSINESS_PARTNER,
       SCENARIO_CROSSBORDER_BP);
 
-  private static final String QUERY_BG_ES = "AUTO.COV.GET_COV_FROM_BG_ES_UK";
+  private static final String QUERY_BG_ES = "AUTO.COV.GET_COV_FROM_BG_ES";
 
   @SuppressWarnings("unchecked")
   public SpainUtil() {
