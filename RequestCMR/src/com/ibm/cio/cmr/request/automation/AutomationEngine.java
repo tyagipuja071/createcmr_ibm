@@ -191,6 +191,7 @@ public class AutomationEngine {
     boolean isUsTaxSkipToPcp = false;
     // CREATCMR-5447
     boolean isUsTaxSkipToPpn = false;
+    boolean isEroSkipToPpn = false;
     boolean usProliferationCntrySkip = false;
     boolean requesterFromTaxTeam = false;
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
@@ -221,6 +222,12 @@ public class AutomationEngine {
       }
     }
 
+    // Skip Automation elements for HK, MO, CN for TREC
+    if (Arrays.asList("641").contains(requestData.getData().getCmrIssuingCntry())
+        && "TREC".equals(requestData.getAdmin().getReqReason())) {
+      isEroSkipToPpn = true;
+    }
+
     for (AutomationElement<?> element : this.elements) {
       // determine if element is to be skipped
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
@@ -232,7 +239,7 @@ public class AutomationEngine {
       skipVerification = skipVerification && (element instanceof CompanyVerifier);
 
       // CREATCMR-4872
-      if (isUsTaxSkipToPcp) {
+      if (isUsTaxSkipToPcp || isEroSkipToPpn) {
         break;
       }
 
@@ -402,6 +409,10 @@ public class AutomationEngine {
           createHistory(entityManager, admin, "System failed to complete processing during the retry. Please wait a while then reprocess the record.",
               AutomationConst.STATUS_AWAITING_PROCESSING, "Automated Processing", reqId, appUser, null, null, false, null);
         }
+      } else if (isEroSkipToPpn) {
+        createComment(entityManager, "Automation Elements skipped for Temporary Reactive Embargo request. Sending the request for CMDE validation.",
+            reqId, appUser);
+        admin.setReqStatus("PPN");
       } else {
         boolean moveToNextStep = true;
         // get rejection comments
