@@ -613,6 +613,14 @@ function doAddToAddressList() {
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var asean_isa_cntries = [ '643', '744', '736', '738', '796', '778', '749', '834', '818', '852', '856', '616', '652', '615' ];
+  var ero_countries = ['641'];
+  var reqReason = FormManager.getActualValue('reqReason');
+  
+  if (ero_countries.indexOf(cntry) >= 0 && reqReason == 'TREC') {
+    cmr.showAlert('This is a Temporary Embargo Removal Request. Updation or creation of new records is not allowed.');
+    return;
+  }
+  
   // CREATCMR-5741 no TGME Addr Std
   // if (GEOHandler.isTGMERequired(cntry)) {
   // var tgmeResult = tgmePreSave();

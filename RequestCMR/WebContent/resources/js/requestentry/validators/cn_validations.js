@@ -3726,6 +3726,135 @@ function getClusterDataRdc() {
   return clusterDataRdc;
 }
 
+function addEROAttachmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        var reqReason = FormManager.getActualValue('reqReason');
+        
+        if (typeof (_pagemodel) != 'undefined') {
+          if (reqType == 'U' && reqReason == 'TREC' ) {
+            var id = FormManager.getActualValue('reqId');
+            var ret = cmr.query('CHECK_ERO_ATTACHMENT', {
+              ID : id
+            });
+            if(ret == null || ret.ret1 == null){
+              return new ValidationResult(null, false, 'ERO Approval Attachment is required for Temporary Reactivate Reqeusts.');
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        }
+        
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
+function reqReasonHandler() {
+  var _reqReasonHandler = dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
+    var reqReason = FormManager.getActualValue('reqReason');
+    checkEmbargoCd(reqReason);
+  });
+  if (_reqReasonHandler && _reqReasonHandler[0]) {
+    _reqReasonHandler[0].onChange();
+  }
+}
+
+function checkEmbargoCd(value) {
+  releaseFieldsFromERO();
+  if (value != 'TREC')
+    return;
+  var reqId = FormManager.getActualValue('reqId');
+  var emabargoCd = FormManager.getActualValue('ordBlk');
+  var qParams = {
+    REQ_ID : reqId
+  };
+  
+  lockFieldsForERO();
+
+  var result = cmr.query('GET.DATA_RDC.EMBARGO_BY_REQID_SWISS', qParams);
+  if (result.ret1 == '88') {
+
+  } else {
+    FormManager.clearValue('reqReason');
+    cmr.showAlert('This Request reason can be chosen only if imported record has 88 embargo code.');
+    return;
+  }
+}
+
+//function setDropdownField2Values() {
+//  var cmrIssuingCntry = FormManager.getActualValue('dupIssuingCntryCd');
+//  FilteringDropdown.loadItems('reqReason', null, 'lov', 'fieldId=RequestReason&cmrIssuingCntry=_cmrIssuingCntry' + cmrIssuingCntry);
+//}
+
+function lockFieldsForERO(){
+  console.log('>>>> Lock Fields for ERO Temporary Reactivate >>>>');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqReason = FormManager.getActualValue('reqReason');
+  if (reqType == 'U' && role == 'REQUESTER' && reqReason == 'TREC') {
+//    FormManager.readOnly('abbrevNm');
+//    FormManager.readOnly('abbrevLocn');
+    FormManager.readOnly('custPrefLang');
+    FormManager.readOnly('subIndustryCd');
+    FormManager.readOnly('isicCd');
+    FormManager.readOnly('rdcComment');
+    FormManager.readOnly('vatExempt');
+    FormManager.removeValidator('busnType', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+    FormManager.resetValidations('busnType');
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('company');
+    FormManager.readOnly('ppsceid');
+    FormManager.readOnly('memLvl');
+    FormManager.readOnly('dealerNo');
+//    FormManager.readOnly('taxCd1');
+//    FormManager.readOnly('cmrNo');
+//    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('bpRelType');
+//    FormManager.readOnly('bpName');
+    FormManager.readOnly('busnType');  
+    FormManager.readOnly('dunsNo');
+  }
+}
+
+function releaseFieldsFromERO() {
+  console.log('>>>> Releasing fields from ERO Temporary Reactivate >>>>');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqReason = FormManager.getActualValue('reqReason');
+  if (reqType == 'U' && role == 'REQUESTER' && reqReason != 'TREC') {
+    FormManager.enable('abbrevNm');
+    // FormManager.enable('abbrevLocn');
+      FormManager.enable('custPrefLang');
+      FormManager.enable('subIndustryCd');
+      FormManager.enable('isicCd');
+      FormManager.enable('rdcComment');
+      FormManager.enable('vatExempt');
+      FormManager.enable('vat');
+      FormManager.resetValidations('vat');
+      FormManager.enable('enterprise');
+      FormManager.enable('company');
+      FormManager.enable('ppsceid');
+      FormManager.enable('memLvl');
+      FormManager.enable('dealerNo');
+    // FormManager.enable('taxCd1');
+    // FormManager.enable('cmrNo');
+    // FormManager.enable('cmrOwner');
+      FormManager.enable('bpRelType');
+    // FormManager.enable('bpName');
+      FormManager.enable('busnType');  
+      FormManager.enable('dunsNo');
+  }
+}
+
 function checkClusterExpired(clusterDataRdc) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var qParams = {
@@ -3954,6 +4083,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setReadOnly4Update, GEOHandler.CN);
   GEOHandler.addAfterConfig(setCtcOnIsuCdChangeCN, GEOHandler.CN);
   GEOHandler.addAfterConfig(handleExpiredClusterCN, GEOHandler.CN);
+  GEOHandler.addAfterConfig(reqReasonHandler, GEOHandler.CN);
+//  GEOHandler.addAfterConfig(setDropdownField2Values, GEOHandler.CN);
   
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(afterConfigForCN, GEOHandler.CN);
@@ -4001,6 +4132,7 @@ dojo.addOnLoad(function() {
 // GEOHandler.registerValidator(isValidDate,GEOHandler.CN);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addFastPassAttachmentValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
+  GEOHandler.registerValidator(addEROAttachmentValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(setTDOFlagToYesValidator, GEOHandler.CN, GEOHandler.PROCESSOR, false, false);
   GEOHandler.registerValidator(addSoltToAddressValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);

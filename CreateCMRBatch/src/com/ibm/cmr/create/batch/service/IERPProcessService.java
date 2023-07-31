@@ -374,7 +374,8 @@ public class IERPProcessService extends BaseBatchService {
         GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
         boolean enableTempReact = cntryHandler.enableTempReactivateOnUpdate() && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason());
 
-        if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
+        if ((SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) || SystemLocation.CHINA.equals(data.getCmrIssuingCntry()))
+            && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
           enableTempReact = true;
         }
 
@@ -559,13 +560,23 @@ public class IERPProcessService extends BaseBatchService {
           boolean firstRun = false;
           if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry())) {
             rdcOrderBlk = dataRdc.getOrdBlk();
+          } else if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
+              && ("PCP".equals(admin.getReqStatus()) || "PCR".equals(admin.getReqStatus()))) {
+            data.setOrdBlk("");
+          }
+          if ("TREC".equals(admin.getReqReason()) && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+            rdcOrderBlk = "88";
           }
           if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
               && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && (rdcOrderBlk != null && !StringUtils.isBlank(rdcOrderBlk))
               && CmrConstants.ORDER_BLK_LIST.contains(rdcOrderBlk) && (dataOrderBlk == null || StringUtils.isBlank(dataOrderBlk))) {
             if (admin.getProcessedTs() == null || IERPRequestUtils.isTimeStampEquals(admin.getProcessedTs())) {
               firstRun = true;
-              overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+              if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+                overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
+              } else {
+                overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+              }
             } else {
               int noOFWorkingDays = 0;
               if (admin.getReqStatus() != null && !CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())
@@ -584,8 +595,13 @@ public class IERPProcessService extends BaseBatchService {
                 LOG.debug("Processing 2nd time ,no Of Working days = " + noOFWorkingDays);
                 createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
                 data.setCustAcctType(rdcOrderBlk);
+                data.setOrdBlk(rdcOrderBlk);
                 updateEntity(data, em);
-                overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+                if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+                  overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
+                } else {
+                  overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+                }
               }
             }
           }
@@ -642,11 +658,10 @@ public class IERPProcessService extends BaseBatchService {
                   + " has FAILED processing. Status: NOT COMPLETED. Response message: " + ncMessage);
               wfHistCmt = statusMessage.toString();
             }
-
-            if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry())) {
-            statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
-            }
             
+            if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry()) && !SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+              statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
+            }
             createCommentLog(em, admin, statusMessage.toString());
 
             String disableAutoProc = "N";
