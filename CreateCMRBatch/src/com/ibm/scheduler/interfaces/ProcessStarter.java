@@ -10,8 +10,8 @@ public interface ProcessStarter {
       ProcessBuilder pb = new ProcessBuilder(command.split(" "));
       pb.redirectOutput(Redirect.INHERIT);
       pb.redirectError(Redirect.INHERIT);
-      pb.start();
-      pb.wait();
+      Process start = pb.start();
+      start.waitFor();
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();
     }
