@@ -2057,7 +2057,7 @@ public class RequestUtils {
     PreparedQuery query = new PreparedQuery(em, sql);
     List<Admin> pending = query.getResults(Admin.class);
     List<Admin> notifList = new ArrayList<>();
-    boolean sendNotification = true;
+    boolean sendNotification = false;
     Calendar current = Calendar.getInstance();
     int day = current.get(Calendar.DAY_OF_WEEK);
 
@@ -2076,10 +2076,8 @@ public class RequestUtils {
       noOFWorkingDays = IERPRequestUtils.checkNoOfWorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
       if (noOFWorkingDays >= 3) {
         notifList.add(admin);
-        admin.setIterationId(1);
       } else if ((noOFWorkingDays == 2 || noOFWorkingDays == 1) && day == Calendar.FRIDAY) {
         notifList.add(admin);
-        admin.setIterationId(1);
       }
     }
 
@@ -2137,7 +2135,12 @@ public class RequestUtils {
         sb.append("<td>" + (blockDt != null ? blockDt.toString() : " ") + "</td>");
         sb.append("<td>" + admin.getRequesterId() + "</td>");
         sb.append("</tr>");
+
+        admin.setIterationId(1);
+        em.merge(admin);
       }
+
+      em.flush();
 
       sb.append("</table>");
 
