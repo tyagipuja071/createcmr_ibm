@@ -2025,7 +2025,7 @@ public class RequestUtils {
     PreparedQuery query = new PreparedQuery(em, sql);
     List<Admin> pending = query.getResults(Admin.class);
     List<Admin> notifList = new ArrayList<>();
-    boolean sendNotification = true;
+    boolean sendNotification = false;
     Calendar current = Calendar.getInstance();
     int day = current.get(Calendar.DAY_OF_WEEK);
 
