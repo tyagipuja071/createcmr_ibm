@@ -874,7 +874,11 @@ public abstract class AutomationUtil {
         || SystemLocation.FINLAND.equals(data.getCmrIssuingCntry()) || SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
     } else if (DUP_ADDR_CHECK_COUNTRIES.contains(data.getCmrIssuingCntry())) {
-      sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE_OR_SOLDTO");
+    	if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
+    		sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE");
+    	} else {
+    		sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE_OR_SOLDTO");
+    	}
     } else {
       sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
     }
