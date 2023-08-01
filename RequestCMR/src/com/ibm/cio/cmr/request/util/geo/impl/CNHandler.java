@@ -849,7 +849,8 @@ public class CNHandler extends GEOHandler {
         String state = addr.getStateProv() != null ? addr.getStateProv().toUpperCase() : "";
         String cmtMsg = "Your address city value on address type " + addr.getId().getAddrType() + ", sequence number " + addr.getId().getAddrSeq()
             + " has been changed because the city value is not on CreateCMR.";
-        if (!containsWhiteSpace(addr.getCity1()) && !StringUtils.isEmpty(city1Upper) && !CmrConstants.CN_NON_SPACED_CITIES.contains(city1Upper)) {
+        if (!containsWhiteSpace(addr.getCity1()) && !StringUtils.isEmpty(city1Upper) && !CmrConstants.CN_NON_SPACED_CITIES.contains(city1Upper)
+            && !"TREC".equals(admin.getReqReason())) {
           // 1. query code from LOV
           String cdOfUpperDesc = getCNCityCdByUpperDesc(entityManager, city1Upper, state);
           // 2. query desc from lov with the use of code from 1
@@ -863,7 +864,7 @@ public class CNHandler extends GEOHandler {
           }
 
           createCommentLog(entityManager, admin, cmtMsg);
-        } else {
+        } else if (!"TREC".equals(admin.getReqReason())) {
           // ASSUMPTION: CITY CONTAINS WHITESPACE
           // 1. query desc from lov with the use of desc from toUpperCase
           String enDesc = getCNCityCdByUpperDesc(entityManager, city1Upper, state);
