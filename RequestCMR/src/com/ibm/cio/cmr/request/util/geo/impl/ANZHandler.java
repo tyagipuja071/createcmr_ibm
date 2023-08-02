@@ -46,7 +46,7 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
  * @author JeffZAMORA
  * 
  */
-public class ANZHandler extends APHandler {
+public class ANZHandler extends GEOHandler {
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
   private static final String[] NZ_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5", "G", "H" };
@@ -60,6 +60,7 @@ public class ANZHandler extends APHandler {
 
   public static void main(String[] args) {
   }
+
 
   protected String getMappedAddressType(String country, String rdcType, String addressSeq) {
     switch (country) {
@@ -278,23 +279,30 @@ public class ANZHandler extends APHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-
-    // Addr mailing = getAddressByType(entityManager, "MAIL",
-    // addr.getId().getReqId());
+    	 
+	//Addr mailing = getAddressByType(entityManager, "MAIL", addr.getId().getReqId());
     if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
       /*
-       * if (mailing == null) { // create a dummy mailing AddrPK pk = new
-       * AddrPK(); pk.setReqId(addr.getId().getReqId()); pk.setAddrType("XXXX");
-       * pk.setAddrSeq("X");
-       * 
-       * mailing = entityManager.find(Addr.class, pk); if (mailing == null) {
-       * mailing = new Addr(); mailing.setId(pk);
-       * mailing.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
-       * 
-       * LOG.debug("Creating dummy mailing address..");
-       * entityManager.persist(mailing); entityManager.flush(); } }
-       */
+    	if (mailing == null) {
+        // create a dummy mailing
+        AddrPK pk = new AddrPK();
+        pk.setReqId(addr.getId().getReqId());
+        pk.setAddrType("XXXX");
+        pk.setAddrSeq("X");
 
+        mailing = entityManager.find(Addr.class, pk);
+        if (mailing == null) {
+          mailing = new Addr();
+          mailing.setId(pk);
+          mailing.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
+
+          LOG.debug("Creating dummy mailing address..");
+          entityManager.persist(mailing);
+          entityManager.flush();
+        }
+      }  */
+      
+      
       AdminPK adminPK = new AdminPK();
       adminPK.setReqId(addr.getId().getReqId());
       Admin admin = entityManager.find(Admin.class, adminPK);
@@ -639,46 +647,47 @@ public class ANZHandler extends APHandler {
         source.setItems(filteredRecords);
       }
     }
-
+    
   }
 
   @SuppressWarnings("unchecked")
   public static void doFilterAddresses(RequestEntryModel reqEntry, Object mainRecords, Object filteredRecords) {
     if (mainRecords instanceof java.util.List<?> && filteredRecords instanceof java.util.List<?>) {
-      List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
-      List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
-      for (Object tempRecObj : recordsToCheck) {
-        if (tempRecObj instanceof FindCMRRecordModel) {
-          FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
-          recordsToReturn.add(tempRec);
+        List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
+        List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
+        for (Object tempRecObj : recordsToCheck) {
+          if (tempRecObj instanceof FindCMRRecordModel) {
+            FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+            recordsToReturn.add(tempRec);
+          }
         }
       }
-    }
 
   }
-
+  
+  
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
   public void createOtherAddressesOnDNBImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
@@ -696,31 +705,31 @@ public class ANZHandler extends APHandler {
   @Override
   public void setAdminDefaultsOnCreate(Admin admin) {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
   public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
   public void handleImportByType(String requestType, Admin admin, Data data, boolean importing) {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
   public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
@@ -732,7 +741,7 @@ public class ANZHandler extends APHandler {
   @Override
   public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
@@ -754,9 +763,9 @@ public class ANZHandler extends APHandler {
   }
 
   @Override
-  public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
+  public void doAfterImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
     // TODO Auto-generated method stub
-
+    
   }
 
   @Override
@@ -769,13 +778,6 @@ public class ANZHandler extends APHandler {
   public boolean hasChecklist(String cmrIssiungCntry) {
     // TODO Auto-generated method stub
     return false;
-  }
-
-  @Override
-  protected void handleWTAASAddressImport(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel mainRecord,
-      FindCMRRecordModel record, WtaasAddress address) {
-    // TODO Auto-generated method stub
-
   }
 
 }
