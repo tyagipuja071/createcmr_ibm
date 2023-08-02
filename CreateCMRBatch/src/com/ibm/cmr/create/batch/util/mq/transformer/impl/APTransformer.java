@@ -72,7 +72,7 @@ public abstract class APTransformer extends MessageTransformer {
     GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
     if (handler != null && handler instanceof APHandler) {
       this.geoHandler = (APHandler) handler;
-    } else {
+    } else if( !"616".equalsIgnoreCase(cmrIssuingCntry) && !"796".equalsIgnoreCase(cmrIssuingCntry)) {
       throw new Exception("Handler should be an instance of APHandler.");
     }
   }
