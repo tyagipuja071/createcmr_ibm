@@ -255,6 +255,7 @@ var _ISICHandler = null; // CMR-1993
 var _sortlHandler = null;
 var sortlFlag = false;
 var _landCntryHandler = null;
+var _inacHandler = null;
 function addHandlersForNORDX() {
 
   // if (_ISUHandler == null) {
@@ -303,6 +304,13 @@ function addHandlersForNORDX() {
       FormManager.readOnly('subIndustryCd'); // CMR-1993
     });
   }
+
+  if (_inacHandler == null) {
+    _inacHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      prospectFilter();
+    });
+  }
+
   if (_subIndCdHandler1 == null) {
     _subIndCdHandler1 = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
 
@@ -3529,6 +3537,16 @@ function setInacCd() {
   }
 }
 
+function prospectFilter() {
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  if (ifProspect == 'Y') {
+    FormManager.enable('inacCd');
+  }
+}
+
 function setAddressDetailsForView() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage == 'true') {
@@ -5194,4 +5212,6 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(prospectFilter, GEOHandler.NORDX);
 });

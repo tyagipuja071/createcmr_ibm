@@ -217,6 +217,9 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           // convert Prospect to Legal CMR
           admin.setReqType("C");
           admin.setProspLegalInd(CmrConstants.YES_NO.Y.toString());
+          if("Y".equals(admin.getProspLegalInd())){
+            data.setInacCd(null);
+          }
           admin.setDelInd(null);
           admin.setModelCmrNo(null);
 
