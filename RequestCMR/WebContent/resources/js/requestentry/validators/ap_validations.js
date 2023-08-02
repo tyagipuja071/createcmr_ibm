@@ -45,7 +45,7 @@ function addHandlersForAP() {
     _vatRegisterHandlerSG = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
     cmr
     .showAlert(
-        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of “VAT Registration Status” is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ‘No – VAT unapplicable’, you are confirming that this customer has no VAT# then “VAT Registration Status” is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
+        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of “VAT Registration Status�? is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ‘No – VAT unapplicable’, you are confirming that this customer has no VAT# then “VAT Registration Status�? is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
           OK : 'I confirm',
         });
         });
@@ -284,7 +284,7 @@ function addAfterConfigAP() {
     onInacTypeChange();
     // CREATCMR-7883-7884
     _inacHandlerANZSG = 0;
-    setInacByCluster();
+    // setInacByCluster();
   }
   // CREATCMR-5258
   if (cntry == '834') {
@@ -340,9 +340,22 @@ function addAfterConfigAP() {
   }
 }
 
+function saveClusterVal() {
+  console.log(">>>> saveClusterVal");
+  if (oldClusterCd == null) {
+    oldClusterCd = FormManager.getActualValue('apCustClusterId');
+  }
+}
+
 function setInacByCluster() {
 	console.log(">>>> setInacByCluster >>>>");
     var _cluster = FormManager.getActualValue('apCustClusterId');
+    if (oldClusterCd == null) {
+      saveClusterVal();
+    }
+    if (_cluster == oldClusterCd) {
+      return;
+    }
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     // CREATCMR-7884
@@ -7298,6 +7311,8 @@ function setInacCdTypeStatus(){
       console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
       FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+      FormManager.enable('inacCd');
+      FormManager.enable('inacType'); 
     }
     // LOCK GB Seg(QTC)/ISU
     FormManager.readOnly('clientTier');
