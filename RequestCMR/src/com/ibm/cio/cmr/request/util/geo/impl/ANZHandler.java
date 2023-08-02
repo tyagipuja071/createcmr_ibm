@@ -46,7 +46,7 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
  * @author JeffZAMORA
  * 
  */
-public class ANZHandler extends GEOHandler {
+public class ANZHandler extends APHandler {
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
   private static final String[] NZ_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5", "G", "H" };
@@ -60,7 +60,6 @@ public class ANZHandler extends GEOHandler {
 
   public static void main(String[] args) {
   }
-
 
   protected String getMappedAddressType(String country, String rdcType, String addressSeq) {
     switch (country) {
@@ -705,31 +704,31 @@ public class ANZHandler extends GEOHandler {
   @Override
   public void setAdminDefaultsOnCreate(Admin admin) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void handleImportByType(String requestType, Admin admin, Data data, boolean importing) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -741,7 +740,7 @@ public class ANZHandler extends GEOHandler {
   @Override
   public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -763,9 +762,9 @@ public class ANZHandler extends GEOHandler {
   }
 
   @Override
-  public void doAfterImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
+  public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -778,6 +777,13 @@ public class ANZHandler extends GEOHandler {
   public boolean hasChecklist(String cmrIssiungCntry) {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  protected void handleWTAASAddressImport(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel mainRecord,
+      FindCMRRecordModel record, WtaasAddress address) {
+    // TODO Auto-generated method stub
+
   }
 
 }
