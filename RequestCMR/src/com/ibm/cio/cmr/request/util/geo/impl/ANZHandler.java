@@ -278,30 +278,23 @@ public class ANZHandler extends APHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-    	 
-	//Addr mailing = getAddressByType(entityManager, "MAIL", addr.getId().getReqId());
+
+    // Addr mailing = getAddressByType(entityManager, "MAIL",
+    // addr.getId().getReqId());
     if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
       /*
-    	if (mailing == null) {
-        // create a dummy mailing
-        AddrPK pk = new AddrPK();
-        pk.setReqId(addr.getId().getReqId());
-        pk.setAddrType("XXXX");
-        pk.setAddrSeq("X");
+       * if (mailing == null) { // create a dummy mailing AddrPK pk = new
+       * AddrPK(); pk.setReqId(addr.getId().getReqId()); pk.setAddrType("XXXX");
+       * pk.setAddrSeq("X");
+       * 
+       * mailing = entityManager.find(Addr.class, pk); if (mailing == null) {
+       * mailing = new Addr(); mailing.setId(pk);
+       * mailing.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
+       * 
+       * LOG.debug("Creating dummy mailing address..");
+       * entityManager.persist(mailing); entityManager.flush(); } }
+       */
 
-        mailing = entityManager.find(Addr.class, pk);
-        if (mailing == null) {
-          mailing = new Addr();
-          mailing.setId(pk);
-          mailing.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
-
-          LOG.debug("Creating dummy mailing address..");
-          entityManager.persist(mailing);
-          entityManager.flush();
-        }
-      }  */
-      
-      
       AdminPK adminPK = new AdminPK();
       adminPK.setReqId(addr.getId().getReqId());
       Admin admin = entityManager.find(Admin.class, adminPK);
@@ -646,47 +639,46 @@ public class ANZHandler extends APHandler {
         source.setItems(filteredRecords);
       }
     }
-    
+
   }
 
   @SuppressWarnings("unchecked")
   public static void doFilterAddresses(RequestEntryModel reqEntry, Object mainRecords, Object filteredRecords) {
     if (mainRecords instanceof java.util.List<?> && filteredRecords instanceof java.util.List<?>) {
-        List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
-        List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
-        for (Object tempRecObj : recordsToCheck) {
-          if (tempRecObj instanceof FindCMRRecordModel) {
-            FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
-            recordsToReturn.add(tempRec);
-          }
+      List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
+      List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
+      for (Object tempRecObj : recordsToCheck) {
+        if (tempRecObj instanceof FindCMRRecordModel) {
+          FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+          recordsToReturn.add(tempRec);
         }
       }
+    }
 
   }
-  
-  
+
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void createOtherAddressesOnDNBImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
