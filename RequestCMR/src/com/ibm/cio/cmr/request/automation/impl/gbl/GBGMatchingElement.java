@@ -275,6 +275,9 @@ public class GBGMatchingElement extends MatchingElement {
 
           result.setProcessOutput(output);
           result.setDetails(details.toString());
+          if (!domesticGBGFound && countryUtil != null) {
+            countryUtil.emptyINAC(entityManager, requestData, engineData);
+          }
         } else {
           countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
           if (countryUtil != null) {
