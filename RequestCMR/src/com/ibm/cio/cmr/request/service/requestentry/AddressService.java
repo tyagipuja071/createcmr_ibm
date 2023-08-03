@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.GeoContactInfo;
 import com.ibm.cio.cmr.request.entity.GeoContactInfoPK;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
@@ -108,6 +109,10 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       AdminPK pk = new AdminPK();
       pk.setReqId(model.getReqId());
       Admin admin = entityManager.find(Admin.class, pk);
+
+      DataPK dataPk = new DataPK();
+      dataPk.setReqId(model.getReqId());
+      Data data = entityManager.find(Data.class, dataPk);
       /*
        * if (SystemLocation.NETHERLANDS.equals(model.getCmrIssuingCntry()) &&
        * (model.getAddrType().equals("ZD01"))) { newAddrSeq =
@@ -146,9 +151,15 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       }
 
       if ("618".equals(model.getCmrIssuingCntry())) {
-
         newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
+      }
 
+      if (("866".equals(model.getCmrIssuingCntry()) || "754".equals(model.getCmrIssuingCntry())) && "U".equals(admin.getReqType())) {
+        int legacyMaxSeq = getMaxSequenceOnLegacyAddr(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
+        if (legacyMaxSeq > Integer.parseInt(newAddrSeq)) {
+          String maxSeq = Integer.toString(legacyMaxSeq);
+          newAddrSeq = StringUtils.leftPad(maxSeq, 5, '0');
+        }
       }
 
       if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
