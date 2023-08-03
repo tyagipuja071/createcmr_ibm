@@ -99,8 +99,16 @@ public class IndiaUtil extends AutomationUtil {
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String customerName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
     ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
     scenarioExceptions.setCheckVATForDnB(false);
+    String[] scenariosToBeChecked = { "PRIV" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
+
     switch (scenario) {
     case SCENARIO_ACQUISITION:
     case SCENARIO_NORMAL:

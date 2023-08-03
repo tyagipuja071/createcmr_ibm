@@ -130,6 +130,12 @@ public class UKIUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
     }
 
+    String[] scenariosToBeChecked = { "IBMEM", "PRICU" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
+
     if (SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
@@ -139,7 +145,7 @@ public class UKIUtil extends AutomationUtil {
     case SCENARIO_BUSINESS_PARTNER:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     case SCENARIO_PRIVATE_PERSON:
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false);
+      break;
     case SCENARIO_INTERNAL:
       if (!customerName.contains("IBM") && !customerNameZI01.contains("IBM")) {
         details.append("Mailing and Billing addresses should have IBM in them.");
@@ -298,8 +304,8 @@ public class UKIUtil extends AutomationUtil {
         }
         break;
       case "PPS CEID":
-		cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
-	    break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;

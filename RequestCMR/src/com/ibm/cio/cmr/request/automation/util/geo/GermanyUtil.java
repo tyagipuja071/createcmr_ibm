@@ -106,6 +106,7 @@ public class GermanyUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     Addr zi01 = requestData.getAddress("ZI01");
     Admin admin = requestData.getAdmin();
+    String customerName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
     boolean valid = true;
     String scenario = data.getCustSubGrp();
     String custGrp = data.getCustGrp();
@@ -132,6 +133,12 @@ public class GermanyUtil extends AutomationUtil {
     if ("C".equals(requestData.getAdmin().getReqType())) {
       // remove duplicates
       removeDuplicateAddresses(entityManager, requestData, details);
+    }
+
+    String[] scenariosToBeChecked = { "PRIPE", "IBMEM" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
     }
 
     if (StringUtils.isNotBlank(scenario)) {
@@ -933,7 +940,7 @@ public class GermanyUtil extends AutomationUtil {
           LOG.debug("Updates to the Abbreviated Name field  are skipped.");
         }
       } else if (changes.isDataChanged("PPS CEID")) {
-    	  cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, detail, resultCodes, changes.getDataChange("PPS CEID"), "R");
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, detail, resultCodes, changes.getDataChange("PPS CEID"), "R");
       } else {
         boolean otherFieldsChanged = false;
         for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
@@ -952,14 +959,14 @@ public class GermanyUtil extends AutomationUtil {
     }
 
     if (resultCodes.contains("R")) {
-    	output.setOnError(true);
-    	validation.setSuccess(false);
-    	validation.setMessage("Rejected");
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
     } else if (cmdeReview) {
-    	engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
-        detail.append("Updates to one or more fields cannot be validated.\n");
-        validation.setSuccess(false);
-        validation.setMessage("Not Validated");
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      detail.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
     } else if (isNegativeCheckNeedeed) {
       validation.setSuccess(false);
       validation.setMessage("Not validated");
