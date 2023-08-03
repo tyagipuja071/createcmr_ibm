@@ -1476,6 +1476,15 @@ public class JPHandler extends GEOHandler {
     String jpCloseDay1 = StringUtils.isNoneEmpty(data.getJpCloseDays1()) ? data.getJpCloseDays1() : "  ";
     String jpCloseDay2 = StringUtils.isNoneEmpty(data.getJpCloseDays2()) ? data.getJpCloseDays2() : "  ";
     String jpCloseDay3 = StringUtils.isNoneEmpty(data.getJpCloseDays3()) ? data.getJpCloseDays3() : "  ";
+    if (jpCloseDay1.length()==1) {
+    	jpCloseDay1 = " "+jpCloseDay1;
+    }
+    if (jpCloseDay2.length()==1) {
+    	jpCloseDay2 = " "+jpCloseDay2;
+    }
+    if (jpCloseDay3.length()==1) {
+    	jpCloseDay3 = " "+jpCloseDay3;
+    }
     data.setJpCloseDays(jpCloseDay1 + jpCloseDay2 + jpCloseDay3);
   }
 
@@ -1483,6 +1492,15 @@ public class JPHandler extends GEOHandler {
     String jpPayDay1 = StringUtils.isNoneEmpty(data.getJpPayDays1()) ? data.getJpPayDays1() : "  ";
     String jpPayDay2 = StringUtils.isNoneEmpty(data.getJpPayDays2()) ? data.getJpPayDays2() : "  ";
     String jpPayDay3 = StringUtils.isNoneEmpty(data.getJpPayDays3()) ? data.getJpPayDays3() : "  ";
+    if (jpPayDay1.length()==1) {
+    	jpPayDay1 = " "+jpPayDay1;
+    }
+    if (jpPayDay2.length()==1) {
+    	jpPayDay2 = " "+jpPayDay2;
+    }
+    if (jpPayDay3.length()==1) {
+    	jpPayDay3 = " "+jpPayDay3;
+    }
     data.setJpPayDays(jpPayDay1 + jpPayDay2 + jpPayDay3);
   }
 
@@ -1490,6 +1508,15 @@ public class JPHandler extends GEOHandler {
     String jpPayCycle1 = StringUtils.isNoneEmpty(data.getJpPayCycles1()) ? data.getJpPayCycles1() : "  ";
     String jpPayCycle2 = StringUtils.isNoneEmpty(data.getJpPayCycles2()) ? data.getJpPayCycles2() : "  ";
     String jpPayCycle3 = StringUtils.isNoneEmpty(data.getJpPayCycles3()) ? data.getJpPayCycles3() : "  ";
+    if (jpPayCycle1.length()==1) {
+    	jpPayCycle1 = " "+jpPayCycle1;
+    }
+    if (jpPayCycle2.length()==1) {
+    	jpPayCycle2 = " "+jpPayCycle2;
+    }
+    if (jpPayCycle3.length()==1) {
+    	jpPayCycle3 = " "+jpPayCycle3;
+    }
     data.setJpPayCycles(jpPayCycle1 + jpPayCycle2 + jpPayCycle3);
   }
 
