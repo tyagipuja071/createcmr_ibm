@@ -820,9 +820,9 @@ public class UKIUtil extends AutomationUtil {
         container.setSbo("758");
         container.setSalesRep("SPA758");
         return container;
-      } else if ("Q".equals(clientTier) && NORTHERN_IRELAND_POST_CD.equals(PostCd)) {
-        container.setSbo("958");
-        container.setSalesRep("MMIRE1");
+      } else if ("Q".equals(clientTier) && NORTHERN_IRELAND_POST_CD.equals(PostCd) && SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry)) {
+        container.setSbo("057");
+        container.setSalesRep("SPA057");
         return container;
       } else {
         String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
