@@ -367,13 +367,16 @@ function handleRAFields() {
     return;
   }
   var RAFieldsList = [ 'jpCloseDays1', 'jpCloseDays2', 'jpCloseDays3', 'jpPayCycles1', 'jpPayCycles2', 'jpPayCycles3', 'jpPayDays1', 'jpPayDays2',
-      'jpPayDays3', 'cmrNo', 'searchTerm', 'billToCustNo' ];
+      'jpPayDays3' ];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'RACMR') {
     setRAFieldsMandatory();
     for (var i = 0; i < RAFieldsList.length; i++) {
       FormManager.enable(RAFieldsList[i]);
     }
+    FormManager.enable('cmrNo');
+    FormManager.enable('searchTerm');
+    FormManager.enable('billToCustNo');
   } else {
     for (var i = 0; i < RAFieldsList.length; i++) {
       disableFiled(RAFieldsList[i]);
@@ -409,6 +412,9 @@ function setRAFieldsMandatory() {
   FormManager.addValidator('jpPayDays1', Validators.REQUIRED, [ 'Pay Day01' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('jpPayDays2', Validators.REQUIRED, [ 'Pay Day02' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('jpPayDays3', Validators.REQUIRED, [ 'Pay Day03' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Search Term (SORTL)' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
 }
 
 function disableAddrFieldsForRA() {
