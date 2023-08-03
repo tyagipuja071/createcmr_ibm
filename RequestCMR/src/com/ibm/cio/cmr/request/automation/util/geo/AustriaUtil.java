@@ -112,8 +112,10 @@ public class AustriaUtil extends AutomationUtil {
 
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
+      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
+          SCENARIO_PRIVATE_CUSTOMER.equals(scenario), requestData);
     case SCENARIO_IBM_EMPLOYEE:
-      return doPrivatePersonChecks(engineData, SystemLocation.AUSTRIA, soldTo.getLandCntry(), customerName, details,
+      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
           SCENARIO_IBM_EMPLOYEE.equals(scenario), requestData);
     case SCENARIO_BUSINESS_PARTNER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
@@ -194,8 +196,8 @@ public class AustriaUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "PPS CEID":
-    	cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
-    	break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -515,7 +517,7 @@ public class AustriaUtil extends AutomationUtil {
           data.getCmrIssuingCntry());
       if (queryResults != null && !queryResults.isEmpty()) {
         for (DACHFieldContainer result : queryResults) {
-          DACHFieldContainer queryResult = (DACHFieldContainer) result;
+          DACHFieldContainer queryResult = result;
           String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
           String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
           String queryIsu = queryResult.getIsuCd();

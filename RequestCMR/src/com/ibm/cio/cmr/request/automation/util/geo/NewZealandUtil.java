@@ -71,6 +71,13 @@ public class NewZealandUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String customerName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
+    String[] scenariosToBeChecked = { "PRIV" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
 
     processSkipCompanyChecks(engineData, requestData, details);
     switch (scenario) {
