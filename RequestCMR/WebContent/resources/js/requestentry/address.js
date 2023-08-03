@@ -616,7 +616,7 @@ function doAddToAddressList() {
   var ero_countries = ['641'];
   var reqReason = FormManager.getActualValue('reqReason');
   
-  if (ero_countries.indexOf(cntry) >= 0 && reqReason == 'TREC') {
+  if (ero_countries.indexOf(cntry) >= 0 && reqReason == 'TREC' && _pagemodel.userRole.toUpperCase() == 'REQUESTER') {
     cmr.showAlert('This is a Temporary Embargo Removal Request. Updation or creation of new records is not allowed.');
     return;
   }
