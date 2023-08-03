@@ -106,6 +106,7 @@ public class GermanyUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     Addr zi01 = requestData.getAddress("ZI01");
     Admin admin = requestData.getAdmin();
+    String customerName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
     boolean valid = true;
     String scenario = data.getCustSubGrp();
     String custGrp = data.getCustGrp();
@@ -132,6 +133,12 @@ public class GermanyUtil extends AutomationUtil {
     if ("C".equals(requestData.getAdmin().getReqType())) {
       // remove duplicates
       removeDuplicateAddresses(entityManager, requestData, details);
+    }
+
+    String[] scenariosToBeChecked = { "PRIPE", "IBMEM" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
     }
 
     if (StringUtils.isNotBlank(scenario)) {

@@ -253,16 +253,18 @@ public class FranceUtil extends AutomationUtil {
         // remove duplicate address
         removeDuplicateAddresses(entityManager, requestData, details);
       }
+      String[] scenariosToBeChecked = { "PRICU", "IBMEM", "CBIEM", "XBLUM" };
+      if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+        doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+            Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+      }
       switch (scenario) {
       case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
       case SCENARIO_PRIVATE_PERSON:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, false, requestData);
       case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
       case SCENARIO_IBM_EMPLOYEE:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, true, requestData);
-
       case SCENARIO_INTERNAL:
       case SCENARIO_CROSSBORDER_INTERNAL:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
@@ -1028,8 +1030,8 @@ public class FranceUtil extends AutomationUtil {
         }
         break;
       case "PPS CEID":
-    	cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
-    	break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;

@@ -168,11 +168,14 @@ public class SpainUtil extends AutomationUtil {
         return false;
       }
     }
-
+    String[] scenariosToBeChecked = { "IBMEM", "PRICU" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-      return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_CROSSBORDER_BP:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
@@ -453,8 +456,8 @@ public class SpainUtil extends AutomationUtil {
         }
         break;
       case "PPS CEID":
-  		cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
-  	    break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;

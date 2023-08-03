@@ -67,6 +67,7 @@ public class NetherlandsUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     Addr zp01 = requestData.getAddress("ZP01");
     String customerName = zs01.getCustNm1();
+    String customerNameCombined = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
     String customerNameZP01 = "";
     String landedCountryZP01 = "";
     String custGrp = data.getCustGrp();
@@ -98,6 +99,11 @@ public class NetherlandsUtil extends AutomationUtil {
         && !SCENARIO_LOCAL_PUBLIC.equals(scenario)) {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
     }
+    String[] scenariosToBeChecked = { "PRICU", "IBMEM", "CBPRI" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameCombined, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
     switch (scenario) {
 
     case SCENARIO_LOCAL_COMMERCIAL:
@@ -117,9 +123,6 @@ public class NetherlandsUtil extends AutomationUtil {
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
 
     case SCENARIO_PRIVATE_CUSTOMER:
-      String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
-
     case SCENARIO_IBM_EMPLOYEE:
       Person person = null;
       if (StringUtils.isNotBlank(zs01.getCustNm1())) {
