@@ -683,8 +683,32 @@ public class ANZHandler extends GEOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-    // TODO Auto-generated method stub
+    address.setCustNm1(currentRecord.getCmrName1Plain());
+    address.setCustNm2(currentRecord.getCmrName2Plain());
+    String name3 = currentRecord.getCmrName3();
+    String name4 = currentRecord.getCmrName4();
+    String stras = currentRecord.getCmrStreetAddress();
+    address.getId().setAddrSeq(currentRecord.getCmrAddrSeq());
     
+    if( StringUtils.isNotEmpty(name3) && StringUtils.isNotEmpty(name4) && StringUtils.isNotEmpty(stras)) {
+      address.setAddrTxt(name4);
+      address.setAddrTxt2(stras);
+      address.setDept(name3.substring(4));
+    }
+    
+    if( StringUtils.isEmpty(name3) && StringUtils.isNotEmpty(name4) && StringUtils.isNotEmpty(stras)) {      
+      if(name4.contains("ATTN")) {
+        address.setDept(name4.substring(4));
+        address.setAddrTxt(stras);
+      }else {
+        address.setAddrTxt(name4);
+        address.setAddrTxt2(stras);
+      }
+    }
+    
+    if( StringUtils.isEmpty(name3) && StringUtils.isEmpty(name4) && StringUtils.isNotEmpty(stras)) {      
+      address.setAddrTxt(stras);
+    }
   }
 
   @Override
