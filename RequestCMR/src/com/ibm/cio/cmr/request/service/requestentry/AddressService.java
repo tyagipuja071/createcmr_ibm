@@ -618,6 +618,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     String sql = null;
     if ("758".equalsIgnoreCase(model.getCmrIssuingCntry())) {
       sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDR.SEARCH_BY_REQID_IT");
+    } else if ("616".equalsIgnoreCase(model.getCmrIssuingCntry()) || "796".equalsIgnoreCase(model.getCmrIssuingCntry())) {
+      sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDR.SEARCH_BY_REQID_ANZ");
     } else {
       sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDR.SEARCH_BY_REQID");
     }
