@@ -195,6 +195,9 @@ function openAddressDetails(reqId, addrType, addrSeq, mandt) {
     MANDT : mandt,
   };
   var result = cmr.query('ADDRDETAIL', qParams);
+  if ( cntry == '796' || cntry == '616' ) {
+    result = cmr.query( 'ADDRDETAIL_ANZ', qParams );
+  }
   cmr.addrdetails = result;
   cmr.showModal('AddressDetailsModal');
   openAddressDetails.addrType = addrType;
