@@ -688,7 +688,6 @@ public class ANZHandler extends GEOHandler {
     String name3 = currentRecord.getCmrName3();
     String name4 = currentRecord.getCmrName4();
     String stras = currentRecord.getCmrStreetAddress();
-    address.getId().setAddrSeq(currentRecord.getCmrAddrSeq());
     
     if( StringUtils.isNotEmpty(name3) && StringUtils.isNotEmpty(name4) && StringUtils.isNotEmpty(stras)) {
       address.setAddrTxt(name4);
