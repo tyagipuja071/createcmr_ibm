@@ -712,14 +712,12 @@ public class ANZHandler extends GEOHandler {
 
   @Override
   public int getName1Length() {
-    // TODO Auto-generated method stub
-    return 0;
+    return 35;
   }
 
   @Override
   public int getName2Length() {
-    // TODO Auto-generated method stub
-    return 0;
+    return 35;
   }
 
   @Override
