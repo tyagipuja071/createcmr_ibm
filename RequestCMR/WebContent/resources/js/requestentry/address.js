@@ -1611,6 +1611,11 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
     MANDT : mandt,
   };
   var result = cmr.query('ADDRDETAIL', qParams);
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if ( cntry == '796' || cntry == '616' ) {
+    result = cmr.query( 'ADDRDETAIL_ANZ', qParams );
+  }
+
   cmr.addrdetails = result;
   cmr.addressMode = 'updateAddress';
   if (result && result.ret31 == 'D' && !skipDnb) {
