@@ -55,6 +55,7 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.APHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
@@ -852,7 +853,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
   }
 
-  private void setJPIntlAddrModel(AddressModel model, FindCMRRecordModel cmr) {
+  private void setJPIntlAddrModel(AddressModel model, FindCMRRecordModel cmr) throws Exception {
     // TODO Auto-generated method stub
     model.setCnAddrTxt(cmr.getCmrStreetAddress());
     model.setCnAddrTxt2(cmr.getCmrStreetAddressCont() == null ? "" : cmr.getCmrStreetAddressCont());
@@ -860,7 +861,9 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     model.setCnCustName2(cmr.getCmrName2Plain() == null ? "" : cmr.getCmrName2Plain());
     model.setCnCustName3("");
     model.setCnCity(cmr.getCmrCity());
-    model.setCnDistrict(cmr.getCmrState());
+    DnBCompany dnbData = DnBUtil.getDnBDetails(cmr.getCmrDuns());
+    if (dnbData != null)
+      model.setCnDistrict(dnbData.getPrimaryStateName());
   }
 
   private void setCNIntlAddrModel(AddressModel model, FindCMRRecordModel cmr) {
