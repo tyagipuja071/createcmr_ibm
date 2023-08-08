@@ -860,7 +860,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     model.setCnCustName2(cmr.getCmrName2Plain() == null ? "" : cmr.getCmrName2Plain());
     model.setCnCustName3("");
     model.setCnCity(cmr.getCmrCity());
-    model.setCnDistrict(cmr.getCmrStateDesc());
+    model.setCnDistrict(cmr.getCmrState());
   }
 
   private void setCNIntlAddrModel(AddressModel model, FindCMRRecordModel cmr) {
