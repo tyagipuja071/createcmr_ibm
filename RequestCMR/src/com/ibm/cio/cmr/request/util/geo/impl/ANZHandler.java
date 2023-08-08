@@ -279,10 +279,11 @@ public class ANZHandler extends GEOHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-    	 
+    	
+	  /*  
 	//Addr mailing = getAddressByType(entityManager, "MAIL", addr.getId().getReqId());
     if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
-      /*
+      
     	if (mailing == null) {
         // create a dummy mailing
         AddrPK pk = new AddrPK();
@@ -300,7 +301,7 @@ public class ANZHandler extends GEOHandler {
           entityManager.persist(mailing);
           entityManager.flush();
         }
-      }  */
+      } 
       
       
       AdminPK adminPK = new AdminPK();
@@ -312,6 +313,7 @@ public class ANZHandler extends GEOHandler {
         }
       }
     }
+    */
   }
 
   private Addr getAddressByType(EntityManager entityManager, String addrType, long reqId) {
