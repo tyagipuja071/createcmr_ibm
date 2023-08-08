@@ -192,7 +192,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         data.setCountryUse("706");
       }
 
-      if (!StringUtils.isBlank(mainRecord.getCmrIsic())) {
+      if (!StringUtils.isBlank(mainRecord.getCmrIsic()) && !SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
         if (!CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
             || (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()))) {
           LOG.debug("Retrieving ISIC and Subindustry [ISIC=" + mainRecord.getCmrIsic() + "]");
@@ -860,7 +860,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     model.setCnCustName2(cmr.getCmrName2Plain() == null ? "" : cmr.getCmrName2Plain());
     model.setCnCustName3("");
     model.setCnCity(cmr.getCmrCity());
-    model.setCnDistrict(cmr.getCmrState());
+    model.setCnDistrict(cmr.getCmrStateDesc());
   }
 
   private void setCNIntlAddrModel(AddressModel model, FindCMRRecordModel cmr) {

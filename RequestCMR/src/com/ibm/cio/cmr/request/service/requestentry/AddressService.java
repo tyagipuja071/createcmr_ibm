@@ -629,8 +629,6 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     String sql = null;
     if ("758".equalsIgnoreCase(model.getCmrIssuingCntry())) {
       sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDR.SEARCH_BY_REQID_IT");
-    } else if ("616".equalsIgnoreCase(model.getCmrIssuingCntry()) || "796".equalsIgnoreCase(model.getCmrIssuingCntry())) {
-      sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDR.SEARCH_BY_REQID_ANZ");
     } else {
       sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDR.SEARCH_BY_REQID");
     }
@@ -1905,6 +1903,14 @@ public class AddressService extends BaseService<AddressModel, Addr> {
   public void createJPIntlAddr(AddressModel model, Addr addr, EntityManager entityManager) {
     IntlAddr iAddr = createIntlAddrFromModel(model, addr, entityManager);
     IntlAddr iAddrExist = getIntlAddrById(addr, entityManager);
+    String phone = addr.getCustPhone();
+    if (phone != null && phone.length() >= 9) {
+      phone = "0" + phone.substring(phone.length() - 9);
+    }
+    if (phone != null && phone.length() == 10) {
+      phone = phone.substring(0, 2) + "-" + phone.substring(2, 6) + "-" + phone.substring(6, 10);
+    }
+
     if (iAddrExist != null) {
 
       updateEntity(iAddr, entityManager);
@@ -1912,7 +1918,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (newAddr != null) {
         newAddr.setPostCd(StringUtils.isNoneBlank(addr.getPostCd()) ? addr.getPostCd() : newAddr.getPostCd());
         newAddr.setCustPhone(addr.getCustPhone() != null && addr.getCustPhone().length() == 10
-            ? (addr.getCustPhone().substring(0, 2) + "-" + addr.getCustPhone().substring(2, 4) + "-" + addr.getCustPhone().substring(6,4))
+            ? (addr.getCustPhone().substring(0, 2) + "-" + addr.getCustPhone().substring(2, 4) + "-" + addr.getCustPhone().substring(6, 4))
             : newAddr.getCustPhone());
         newAddr.setCustNm3(iAddr.getIntlCustNm1());
         updateEntity(newAddr, entityManager);
@@ -1920,8 +1926,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         newAddr = new Addr();
         newAddr.setId(addr.getId());
         newAddr.setPostCd(addr.getPostCd());
-        newAddr.setCustPhone(addr.getCustPhone() != null && addr.getCustPhone().length() == 10
-            ? (addr.getCustPhone().substring(0, 2) + "-" + addr.getCustPhone().substring(2, 4) + "-" + addr.getCustPhone().substring(6,4)) : "");
+        newAddr.setCustPhone(phone != null ? phone : "");
         newAddr.setCustNm3(model.getCnCustName1());
         updateEntity(newAddr, entityManager);
       }
@@ -1931,17 +1936,14 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         Addr newAddr = getAddrByAddrSeq(entityManager, addr.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq());
         if (newAddr != null) {
           newAddr.setPostCd(StringUtils.isNoneBlank(addr.getPostCd()) ? addr.getPostCd() : newAddr.getPostCd());
-          newAddr.setCustPhone(addr.getCustPhone() != null && addr.getCustPhone().length() == 10
-              ? (addr.getCustPhone().substring(0, 2) + "-" + addr.getCustPhone().substring(2, 4) + "-" + addr.getCustPhone().substring(6,4))
-              : newAddr.getCustPhone());
+          newAddr.setCustPhone(phone != null ? phone : newAddr.getCustPhone());
           newAddr.setCustNm3(iAddr.getIntlCustNm1());
           updateEntity(newAddr, entityManager);
         } else {
           newAddr = new Addr();
           newAddr.setId(addr.getId());
           newAddr.setPostCd(addr.getPostCd());
-          newAddr.setCustPhone(addr.getCustPhone() != null && addr.getCustPhone().length() == 10
-              ? (addr.getCustPhone().substring(0, 2) + "-" + addr.getCustPhone().substring(2, 4) + "-" + addr.getCustPhone().substring(6,4)) : "");
+          newAddr.setCustPhone(phone != null ? phone : "");
           newAddr.setCustNm3(model.getCnCustName1());
           updateEntity(newAddr, entityManager);
         }
@@ -2049,20 +2051,23 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
       updateEntity(iAddr, entityManager);
       Addr newAddr = getAddrByAddrSeq(entityManager, addr.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    String phone = addr.getCustPhone();
+        if (phone != null && phone.length() >= 9) {
+          phone = "0" + phone.substring(phone.length() - 9);
+        }
+        if (phone != null && phone.length() == 10) {
+          phone = phone.substring(0, 2) + "-" + phone.substring(2, 6) + "-" + phone.substring(6, 10);
+        }
       if (newAddr != null) {
-        newAddr.setPostCd(StringUtils.isNoneBlank(addr.getPostCd()) ? addr.getPostCd() : newAddr.getPostCd());
-        newAddr.setCustPhone(addr.getCustPhone() != null && addr.getCustPhone().length() == 10
-            ? (addr.getCustPhone().substring(0, 2) + "-" + addr.getCustPhone().substring(2, 4) + "-" + addr.getCustPhone().substring(6,4))
-            : newAddr.getCustPhone());
+        newAddr.setPostCd(StringUtils.isNoneBlank(addr.getPostCd()) ? addr.getPostCd() : newAddr.getPostCd());       
+        newAddr.setCustPhone(phone != null ? phone : newAddr.getCustPhone());
         newAddr.setCustNm3(model.getCnCustName1());
         updateEntity(newAddr, entityManager);
       } else {
         newAddr = new Addr();
         newAddr.setId(addr.getId());
         newAddr.setPostCd(addr.getPostCd());
-        newAddr.setCustPhone(addr.getCustPhone() != null && addr.getCustPhone().length() == 10
-            ? (addr.getCustPhone().substring(0, 2) + "-" + addr.getCustPhone().substring(2, 4) + "-" + addr.getCustPhone().substring(6,4)) : "");
-        newAddr.setCustNm3(model.getCnCustName1());
+        newAddr.setCustPhone(phone != null ? phone : "");
         updateEntity(newAddr, entityManager);
       }
     } else {
