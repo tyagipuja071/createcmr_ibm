@@ -10,14 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -32,7 +28,6 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasAddress;
-import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys.Address;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
@@ -279,8 +274,10 @@ public class ANZHandler extends GEOHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    /*
     Addr mailing = getAddressByType(entityManager, "MAIL", addr.getId().getReqId());
     if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
+      
       if (mailing == null) {
         // create a dummy mailing
         AddrPK pk = new AddrPK();
@@ -308,19 +305,7 @@ public class ANZHandler extends GEOHandler {
           addr.setPostCd("0121");
         }
       }
-    }
-  }
-
-  private Addr getAddressByType(EntityManager entityManager, String addrType, long reqId) {
-    String sql = ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setParameter("ADDR_TYPE", addrType);
-    List<Addr> addrList = query.getResults(1, Addr.class);
-    if (addrList != null && addrList.size() > 0) {
-      return addrList.get(0);
-    }
-    return null;
+    }*/
   }
 
   @Override
@@ -764,8 +749,7 @@ public class ANZHandler extends GEOHandler {
 
   @Override
   public boolean customerNamesOnAddress() {
-    // TODO Auto-generated method stub
-    return false;
+    return true;
   }
 
   @Override
