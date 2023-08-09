@@ -2599,7 +2599,7 @@ function setTaxRegimeMX() {
   if (FormManager.getActualValue('custGrp') == 'CROSS') {
     FormManager.limitDropdownValues(FormManager.getField('taxCd3'), '616');
   } else if(FormManager.getActualValue('custGrp') == 'LOCAL') {
-    if (custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM') {
+    if (custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR') {
       taxGrp = '1';
     } else {
       taxGrp = '2';
