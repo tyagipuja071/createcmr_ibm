@@ -135,6 +135,17 @@ function addHandlersForJP() {
 }
 
 function handleFields4RA() {
+  var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
+  console.log('isJPBlueGroupFlg:'+isJPBlueGroupFlg);
+  if (isJPBlueGroupFlg == 'true') {
+  	FormManager.setValue('custGrp', 'IBMTP');
+  	dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+	  FormManager.limitDropdownValues(FormManager.getField('custSubGrp'), 'RACMR');
+  	FormManager.setValue('custSubGrp', 'RACMR');
+    });
+  } else {
+	FormManager.resetDropdownValues(FormManager.getField('custSubGrp'));
+  }
   disableFieldsForRA();
   handleRAFields();
 }
@@ -146,7 +157,7 @@ function disableFieldsForRA() {
         'leasingCompanyIndc', 'educAllowCd', 'custAcctType', 'custClass', 'iinInd', 'valueAddRem', 'channelCd', 'siInd', 'crsCd', 'creditCd',
         'govType', 'outsourcingService', 'zseriesSw', 'cmrNo2', 'cmrOwner', 'isuCd', 'clientTier', 'mrcCd', 'bgId', 'gbgId', 'bgRuleId', 'covId',
         'inacType', 'inacCd', 'dunsNo', 'repTeamMemberNo', 'salesTeamCd', 'salesBusOffCd', 'orgNo', 'chargeCd', 'soProjectCd', 'csDiv',
-        'billingProcCd', 'invoiceSplitCd', 'creditToCustNo', 'tier2', 'adminDeptCd', 'adminDeptLine', 'func' ];
+        'billingProcCd', 'invoiceSplitCd', 'creditToCustNo', 'tier2', 'adminDeptCd', 'adminDeptLine', 'func', 'csBo', 'salesBusOffCd' ];
     for (var i = 0; i < accountFieldList.length; i++) {
       disableFiled(accountFieldList[i]);
     }
@@ -185,9 +196,9 @@ function showRAFieldsValue() {
     FormManager.setValue('jpCloseDays1', _jpCloseDays.substring(0, 2));
     FormManager.setValue('jpCloseDays2', _jpCloseDays.substring(2, 4));
     FormManager.setValue('jpCloseDays3', _jpCloseDays.substring(4, 6));
-    FormManager.setValue('jpPayCycles1', _jpPayCycles.substring(0, 2));
-    FormManager.setValue('jpPayCycles2', _jpPayCycles.substring(2, 4));
-    FormManager.setValue('jpPayCycles3', _jpPayCycles.substring(4, 6));
+    FormManager.setValue('jpPayCycles1', _jpPayCycles.substring(0, 1));
+    FormManager.setValue('jpPayCycles2', _jpPayCycles.substring(1, 2));
+    FormManager.setValue('jpPayCycles3', _jpPayCycles.substring(2, 3));
     FormManager.setValue('jpPayDays1', _jpPayDays.substring(0, 2));
     FormManager.setValue('jpPayDays2', _jpPayDays.substring(2, 4));
     FormManager.setValue('jpPayDays3', _jpPayDays.substring(4, 6));
@@ -786,6 +797,13 @@ function setCmrNoCmrNo2Required() {
     FormManager.readOnly('cmrNo2');
     FormManager.resetValidations('cmrNo2');
     break;
+  case 'RACMR':
+    FormManager.enable('cmrNo');
+    FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
+    FormManager.setValue('cmrNo2', '');
+    FormManager.readOnly('cmrNo2');
+    FormManager.resetValidations('cmrNo2');
+    break;
   default:
     if (_role == 'Requester') {
       FormManager.setValue('cmrNo', '');
@@ -1202,9 +1220,12 @@ function setMrcByOfficeCd() {
 
 // CREATCMR-9327
 function disableFields() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   FormManager.readOnly('isuCd');
   FormManager.readOnly('clientTier');
-  FormManager.readOnly('searchTerm');
+  if (custSubGrp != 'RACMR') {
+    FormManager.readOnly('searchTerm');
+  }
 }
 
 /*
@@ -5958,7 +5979,7 @@ function addressQuotationValidator() {
 
 }
 /**
- * Validator to check whether CMR search has been performed
+ * Override WW validator Validator to check whether CMR search has been performed
  */
 function addCMRSearchValidator() {
   FormManager.addFormValidator((function() {
@@ -5984,6 +6005,66 @@ function addCMRSearchValidator() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+
+function jpBlueGroupValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (isJPBlueGroupFlg == 'false' && custSubGrp == 'RACMR') {
+		  return new ValidationResult(null, false, 'Only Blue Group person can choose RA Maintenance scenario.');
+        } else if (isJPBlueGroupFlg == 'true' && custSubGrp != 'RACMR') {
+		  return new ValidationResult(null, false, 'Blue Group person can only choose RA Maintenance scenario.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+/**
+ * Override WW validator Validator to check whether D&B search has been
+ * performed
+ */
+function addDnBSearchValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var ifProspect = FormManager.getActualValue('prospLegalInd');
+        if (dijit.byId('prospLegalInd')) {
+          ifProspect = dijit.byId('prospLegalInd').get('value');
+        }
+       
+        if (FormManager.getActualValue('dnbPrimary') != 'Y' && ifProspect != 'Y') {
+          return new ValidationResult(null, true);
+        }
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'U') {
+          return new ValidationResult(null, true);
+        }
+        var reqStatus = FormManager.getActualValue('reqStatus');
+        if (reqStatus != 'DRA') {
+          return new ValidationResult(null, true);
+        }
+        if (isSkipDnbMatching() && ifProspect != 'Y') {
+          return new ValidationResult(null, true);
+        }
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var result = FormManager.getActualValue('findDnbResult');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (custSubGrp == 'RACMR') {
+		  return new ValidationResult(null, true);
+		}
+        if ((result == '' || result.toUpperCase() == 'NOT DONE') && cntry != SysLoc.CHINA) {
+          return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -6088,6 +6169,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addAddressRecordsValidatorJP, GEOHandler.JP,
   // GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.JP, null, true);
+  GEOHandler.registerValidator(jpBlueGroupValidator, GEOHandler.JP, null, true);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);

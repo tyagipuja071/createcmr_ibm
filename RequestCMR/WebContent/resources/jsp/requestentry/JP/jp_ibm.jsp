@@ -1,5 +1,7 @@
 <%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
 <%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
+<%@page import="com.ibm.cio.cmr.request.util.BluePagesHelper" %>
+<%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -25,6 +27,10 @@
   String prodType6 = reqentry.getSizeCd();
   String prodType7 = reqentry.getFootnoteNo();
   String prodType8 = reqentry.getFomeZero();
+  
+  boolean isJPBlueGroupFlg = true;
+  AppUser user = AppUser.getUser(request);
+  isJPBlueGroupFlg = BluePagesHelper.isUserInJPBlueGroup(user.getIntranetId());
   
 %>
 <style>
@@ -322,5 +328,6 @@
           <cmr:field path="jpPayDays3" id="jpPayDays3" fieldId="JpPayDays3" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
+      <input type="hidden" id="isJPBlueGroupFlg" name="isJPBlueGroupFlg" value="<%= isJPBlueGroupFlg %>" />
     </cmr:row>
 </cmr:view>
