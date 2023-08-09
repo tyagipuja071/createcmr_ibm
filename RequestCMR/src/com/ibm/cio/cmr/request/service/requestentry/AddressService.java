@@ -1904,8 +1904,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     IntlAddr iAddr = createIntlAddrFromModel(model, addr, entityManager);
     IntlAddr iAddrExist = getIntlAddrById(addr, entityManager);
     String phone = addr.getCustPhone();
-    if (phone != null && phone.length() >= 9) {
-      phone = "0" + phone.substring(phone.length() - 9);
+    if (phone != null && phone.length() == 9) {
+      phone = "0" + phone;
     }
     if (phone != null && phone.length() == 10) {
       phone = phone.substring(0, 2) + "-" + phone.substring(2, 6) + "-" + phone.substring(6, 10);
@@ -2051,15 +2051,15 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
       updateEntity(iAddr, entityManager);
       Addr newAddr = getAddrByAddrSeq(entityManager, addr.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq());
-    String phone = addr.getCustPhone();
-        if (phone != null && phone.length() >= 9) {
-          phone = "0" + phone.substring(phone.length() - 9);
-        }
-        if (phone != null && phone.length() == 10) {
-          phone = phone.substring(0, 2) + "-" + phone.substring(2, 6) + "-" + phone.substring(6, 10);
-        }
+      String phone = addr.getCustPhone();
+      if (phone != null && phone.length() == 9) {
+        phone = "0" + phone;
+      }
+      if (phone != null && phone.length() == 10) {
+        phone = phone.substring(0, 2) + "-" + phone.substring(2, 6) + "-" + phone.substring(6, 10);
+      }
       if (newAddr != null) {
-        newAddr.setPostCd(StringUtils.isNoneBlank(addr.getPostCd()) ? addr.getPostCd() : newAddr.getPostCd());       
+        newAddr.setPostCd(StringUtils.isNoneBlank(addr.getPostCd()) ? addr.getPostCd() : newAddr.getPostCd());
         newAddr.setCustPhone(phone != null ? phone : newAddr.getCustPhone());
         newAddr.setCustNm3(model.getCnCustName1());
         updateEntity(newAddr, entityManager);
