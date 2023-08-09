@@ -69,13 +69,13 @@ public class GBLScenarioCheckElement extends ValidatingElement {
         log.debug("checking for close match");
         if (foundCloseMatch) {
           output.setSuccess(false);
-          output.setMessage("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
-          result.setDetails("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
+          output.setMessage("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
+          result.setDetails("DUNS closely matching name and address in 'Private Household leads to automatic rejection.");
           result.setOnError(true);
-          result.setResults("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
-          engineData.addRejectionComment("OTH", "DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.", "",
+          result.setResults("DUNS closely matching name and address in 'Private Household leads to automatic rejection.");
+          engineData.addRejectionComment("DUPD", "Request should be re-submitted as a company or private Indivuduals", "",
               "");
-          log.debug("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
+          log.debug("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
           return result;
         }
       }

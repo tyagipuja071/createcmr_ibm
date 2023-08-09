@@ -55,14 +55,16 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
     boolean ifDnBRejected = false;
     boolean ifDnBNotRequired = false;
     boolean isSourceSysIDBlank = StringUtils.isBlank(admin.getSourceSystId()) ? true : false;
-
+    //creatcmr-9798 
+    boolean isDnBExempt = DnBUtil.isDnbExempt(entityManager, admin.getSourceSystId());    
     LOG.debug("Entering DnB Check Element");
-    if (requestData.getAdmin().getReqType().equalsIgnoreCase("U")) {
+    if (requestData.getAdmin().getReqType().equalsIgnoreCase("U") || isDnBExempt) {
       validation.setSuccess(true);
       validation.setMessage("Skipping DnB check");
       result.setDetails("Skipping DnB check for updates");
       LOG.debug("Skipping DnB check for updates");
     }
+   
     // else if (admin.getCompVerifiedIndc() != null &&
     // admin.getCompVerifiedIndc().equalsIgnoreCase(COMPANY_VERIFIED_INDC_YES))
     // {
