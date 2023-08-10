@@ -3103,7 +3103,6 @@ dojo.addOnLoad(function() {
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateVATChile, [ SysLoc.CHILE ], null, true);
   GEOHandler.registerValidator(validateCustNameChangeForDPLCheck, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateAddlContactEmailFieldForReactivate, [ SysLoc.BRAZIL ], GEOHandler.ROLE_PROCESSOR, true);
     
