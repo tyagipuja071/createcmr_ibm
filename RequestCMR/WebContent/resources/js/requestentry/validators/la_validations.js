@@ -1033,18 +1033,19 @@ function addLatinAmericaAddressHandler(cntry, addressMode, saving) {
     FormManager.enable('landCntry');
   }
 }
+
 function addTaxCode1ValidatorForOtherLACntries() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var taxCd1 = FormManager.getActualValue('taxCd1');
         var lbl1 = FormManager.getLabel('LocalTax1');
         if (taxCd1 && taxCd1.length > 0 && !taxCd1.match("^[0-9a-zA-Z-]+$")) {
           return new ValidationResult({
-            id : 'taxCd1',
-            type : 'text',
-            name : 'taxCd1'
-          }, false, 'The value for ' + lbl1 + ' is invalid. Only digits, alphabets and dashes combination is allowed');
+            id: 'taxCd1',
+            type: 'text',
+            name: 'taxCd1'
+          }, false, 'The value for ' + lbl1 + ' is invalid. Only digits, alphabets and dashes combination is allowed.');
         }
         return new ValidationResult(null, true);
       }
@@ -3077,9 +3078,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-531
   GEOHandler.registerValidator(addTaxCode1ValidatorForOtherLACntries, SSAMX_COUNTRIES, null, false, false);
   // GEOHandler.registerValidator(addTaxCodesValidator, GEOHandler.LA);
-  // GEOHandler.registerValidator(addTaxCodesValidator, [ SysLoc.BRAZIL ],
-  // null,
-  // false, false);
+  // GEOHandler.registerValidator(addTaxCodesValidator, [ SysLoc.BRAZIL ], null, false, false);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHILE , 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHILE ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.COLOMBIA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.COLOMBIA ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.VENEZUELA , 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.VENEZUELA ], null, true);
