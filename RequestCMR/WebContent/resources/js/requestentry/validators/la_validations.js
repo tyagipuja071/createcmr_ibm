@@ -3080,6 +3080,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addTaxCodesValidator, [ SysLoc.BRAZIL ],
   // null,
   // false, false);
+  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.COLOMBIA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.COLOMBIA ], null, true);
   // /-- addressModal
   GEOHandler.registerValidator(addTaxCode1ValidatorInAddressModalForBrazil, [ SysLoc.BRAZIL ], null, true);
   GEOHandler.registerValidator(addTaxCode2ValidatorInAddressModalForBrazil, [ SysLoc.BRAZIL ], null, true);
