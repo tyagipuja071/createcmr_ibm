@@ -2199,26 +2199,6 @@ function setCrosTypSubTypSSAMXOnSecnarios() {
   }
 }
 
-function validateVATChile() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        console.log("Running validateVATChile");
-        var taxCd1 = FormManager.getActualValue('taxCd1');
-        var lbl1 = FormManager.getLabel('LocalTax1');
-        if (taxCd1 && taxCd1.length > 0 && !taxCd1.match(/^[0-9a-zA-Z]{8}-[0-9a-zA-Z]{1}$/)) {
-          return new ValidationResult({
-            id : 'taxCd1',
-            type : 'text',
-            name : 'taxCd1'
-          }, false, 'The value for ' + lbl1 + ' is invalid. The correct Format For Chile Vat is 00000000-0');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
-}
-
 function validateCustNameChangeForDPLCheck() {
   // CRU
   console.log("validateCustNameChangeForDPLCheck..............");
@@ -3080,6 +3060,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addTaxCodesValidator, [ SysLoc.BRAZIL ],
   // null,
   // false, false);
+  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHILE , 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHILE ], null, true);
+  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.COLOMBIA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.COLOMBIA ], null, true);
   // /-- addressModal
   GEOHandler.registerValidator(addTaxCode1ValidatorInAddressModalForBrazil, [ SysLoc.BRAZIL ], null, true);
   GEOHandler.registerValidator(addTaxCode2ValidatorInAddressModalForBrazil, [ SysLoc.BRAZIL ], null, true);
