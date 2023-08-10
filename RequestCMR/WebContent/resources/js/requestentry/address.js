@@ -641,6 +641,7 @@ function doAddToAddressList() {
 	} else {
 	  console.log('No radio button selected');
 	}
+	FormManager.setValue('addrSeq' , cmr.addressSequence);
   }  
   if(cntry=='616') {
     var selectedRadio = document.querySelector('input[name="addrType"]:checked');
@@ -669,8 +670,9 @@ function doAddToAddressList() {
 	} else {
 	  console.log('No radio button selected');
 	}
+    FormManager.setValue('addrSeq' , cmr.addressSequence);
   }
-  FormManager.setValue('addrSeq' , cmr.addressSequence);
+
   cmr.addressType = FormManager.getActualValue('addrType');
   var dummyseq = "xx";
   var qParams;

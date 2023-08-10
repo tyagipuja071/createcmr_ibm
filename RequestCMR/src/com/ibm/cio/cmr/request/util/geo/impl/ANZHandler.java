@@ -274,6 +274,10 @@ public class ANZHandler extends GEOHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    if(StringUtils.isEmpty(addr.getId().getAddrSeq())) {
+      String addrSeq = computeAddrSeq(cmrIssuingCntry,addr.getId().getAddrType());
+      addr.getId().setAddrSeq(addrSeq);      
+    }
     /*
     Addr mailing = getAddressByType(entityManager, "MAIL", addr.getId().getReqId());
     if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
@@ -781,5 +785,55 @@ public class ANZHandler extends GEOHandler {
     // TODO Auto-generated method stub
     return false;
   }
+  
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String addrSeq = "";
+    addrSeq = computeAddrSeq(cmrIssuingCntry,addrType);
+    
+    return addrSeq ; 
+  }
 
+  private String computeAddrSeq(String cmrIssuingCntry, String addrType) {
+    String addrSeq="";
+    if(StringUtils.isNotEmpty(cmrIssuingCntry) && "616".equals(cmrIssuingCntry)) {
+      if(StringUtils.isNotEmpty(addrType) && "ZP01".equals(addrType)) {
+        addrSeq = "01";
+      }
+      if(StringUtils.isNotEmpty(addrType) && "ZI01".equals(addrType)) {
+        addrSeq = "02";
+      }
+      if(StringUtils.isNotEmpty(addrType) && "ZF01".equals(addrType)) {
+        addrSeq = "03";
+      }
+      if(StringUtils.isNotEmpty(addrType) && "ZS01".equals(addrType)) {
+        addrSeq = "07";
+      }
+      if(StringUtils.isNotEmpty(addrType) && "CTYG".equals(addrType)) {
+        addrSeq = "G";
+      }
+      if(StringUtils.isNotEmpty(addrType) && "CTYH".equals(addrType)) {
+        addrSeq = "H";
+      }
+    }
+    if(StringUtils.isNotEmpty(cmrIssuingCntry) && "796".equals(cmrIssuingCntry)) {
+      if(StringUtils.isNotEmpty(addrType) && "ZI01".equals(addrType)) {
+        addrSeq = "09";
+      }
+      if(StringUtils.isNotEmpty(addrType) && "ZS01".equals(addrType)) {
+        addrSeq = "02";
+      }
+      if(StringUtils.isNotEmpty(addrType) && "ZP01".equals(addrType)) {
+        addrSeq = "01";
+      }
+      if(StringUtils.isNotEmpty(addrType) && "CTYG".equals(addrType)) {
+        addrSeq = "G";
+      }
+      if(StringUtils.isNotEmpty(addrType) && "CTYH".equals(addrType)) {
+        addrSeq = "H";
+      }
+    }
+    
+    return addrSeq;
+  }
+  
 }
