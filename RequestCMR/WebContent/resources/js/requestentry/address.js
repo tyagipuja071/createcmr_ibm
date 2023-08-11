@@ -617,6 +617,62 @@ function doAddToAddressList() {
   cmr.currentModalId = 'addEditAddressModal';
   cmr.addressReqId = FormManager.getActualValue('reqId');
   cmr.addressSequence = FormManager.getActualValue('addrSeq');
+  if(cntry=='796') {
+    var selectedRadio = document.querySelector('input[name="addrType"]:checked');
+    if (selectedRadio) {
+	  var selectedValue = selectedRadio.value;
+	  if(selectedValue=='ZI01'){
+		cmr.addressSequence = '09';
+	  }
+	  if(selectedValue=='ZS01'){
+		cmr.addressSequence = '02';
+	  }
+	  if(selectedValue=='CTYG'){
+		cmr.addressSequence = 'G';
+	  }
+	  if(selectedValue=='CTYH'){
+		cmr.addressSequence = 'H';
+	  }
+	  if(selectedValue=='ZP01'){
+		cmr.addressSequence = '01';
+	  }
+      console.log('Selected radio value:', selectedValue);
+      console.log('Addr Seq:', cmr.addressSequence);
+	} else {
+	  console.log('No radio button selected');
+	}
+	FormManager.setValue('addrSeq' , cmr.addressSequence);
+  }  
+  if(cntry=='616') {
+    var selectedRadio = document.querySelector('input[name="addrType"]:checked');
+    if (selectedRadio) {
+	  var selectedValue = selectedRadio.value;
+	  if(selectedValue=='ZP01'){
+		cmr.addressSequence = '01';
+	  }
+	  if(selectedValue=='ZI01'){
+		cmr.addressSequence = '02';
+	  }
+	  if(selectedValue=='ZF01'){
+		cmr.addressSequence = '03';
+	  }
+	  if(selectedValue=='ZS01'){
+		cmr.addressSequence = '07';
+	  }
+	  if(selectedValue=='CTYG'){
+		cmr.addressSequence = 'G';
+	  }
+	  if(selectedValue=='CTYH'){
+		cmr.addressSequence = 'G';
+	  }
+      console.log('Selected radio value:', selectedValue);
+      console.log('Addr Seq:', cmr.addressSequence);
+	} else {
+	  console.log('No radio button selected');
+	}
+    FormManager.setValue('addrSeq' , cmr.addressSequence);
+  }
+
   cmr.addressType = FormManager.getActualValue('addrType');
   var dummyseq = "xx";
   var qParams;
@@ -632,6 +688,9 @@ function doAddToAddressList() {
         ADDR_SEQ : cmr.addressSequence,
       };
     } else {
+      if(cntry=='796' || cntry =='616') {
+        dummyseq = cmr.addressSequence;
+      }
       qParams = {
         REQ_ID : cmr.addressReqId,
         ADDR_SEQ : dummyseq,
@@ -1566,6 +1625,11 @@ function doCopyAddr(reqId, addrType, addrSeq, mandt, name, type) {
     MANDT : mandt,
   };
   var result = cmr.query('ADDRDETAIL', qParams);
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if ( cntry == '796' || cntry == '616' ) {
+    result = cmr.query( 'ADDRDETAIL_ANZ', qParams );
+  }
+  if(FormManager.getActualValue)
   cmr.addrdetails = result;
   cmr.addressMode = 'copyAddress';
   cmr.showModal('addEditAddressModal');
