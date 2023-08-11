@@ -2802,4 +2802,5 @@ public class NLHandler extends BaseSOFHandler {
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
     return true;
   }
+
 }

@@ -24,6 +24,8 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
+import com.ibm.cio.cmr.request.entity.IntlAddr;
+import com.ibm.cio.cmr.request.entity.IntlAddrPK;
 import com.ibm.cio.cmr.request.model.requestentry.CopyAddressModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -32,6 +34,7 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.NORDXHandler;
 
 /**
@@ -116,8 +119,8 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
       int seq = 0;
       for (Addr copyAddr : results) {
 
-        if(handler != null && handler.checkCopyToAdditionalAddress(entityManager, copyAddr, model.getCmrIssuingCntry())){
-            continue;
+        if (handler != null && handler.checkCopyToAdditionalAddress(entityManager, copyAddr, model.getCmrIssuingCntry())) {
+          continue;
         }
         if (!seqMap.containsKey(copyAddr.getId().getAddrType())) {
           seqMap.put(copyAddr.getId().getAddrType(), 0);
@@ -285,6 +288,27 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
         newAddr.setSapNo(null);
         newAddr.setRdcCreateDt(null);
         newAddr.setId(newPk);
+
+        if (JPHandler.isJPCountry(model.getCmrIssuingCntry())) {
+          AddressService addressService = new AddressService();
+          IntlAddr theJPIntelAddr = addressService.getIntlAddrById(sourceAddr, entityManager);
+          if (theJPIntelAddr != null) {
+            IntlAddr newJPIntelAddr = addressService.getIntlAddrById(newAddr, entityManager);
+            if (newJPIntelAddr == null) {
+              newJPIntelAddr = new IntlAddr();
+              PropertyUtils.copyProperties(newJPIntelAddr, theJPIntelAddr);
+              IntlAddrPK pk = new IntlAddrPK();
+              pk.setReqId(sourceAddr.getId().getReqId());
+              pk.setAddrSeq(newAddr.getId().getAddrSeq());
+              pk.setAddrType(newAddr.getId().getAddrType());
+              newJPIntelAddr.setId(pk);
+              createEntity(newJPIntelAddr, entityManager);
+            } else {
+              PropertyUtils.copyProperties(newJPIntelAddr, theJPIntelAddr);
+              updateEntity(newJPIntelAddr, entityManager);
+            }
+          }
+        }
 
         if (handler != null) {
           handler.doBeforeAddrSave(entityManager, newAddr, model.getCmrIssuingCntry());

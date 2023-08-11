@@ -66,14 +66,16 @@ public class INGSTValidationElement extends ValidatingElement implements Company
 
     // skip sos matching if matching records are found in SOS-RPA
 
-    if (engineData.isDnbVerified() || "Y".equals(admin.getCompVerifiedIndc())) {
-      validation.setSuccess(true);
-      validation.setMessage("Skipped");
-      output.setResults("Skipped");
-      output.setDetails("Name and Address Matching is skipped as matching records are found in DnB");
-      engineData.addPositiveCheckStatus(AutomationEngineData.DNB_MATCH);
-      return output;
-    }
+    // if (engineData.isDnbVerified() ||
+    // "Y".equals(admin.getCompVerifiedIndc())) {
+    // validation.setSuccess(true);
+    // validation.setMessage("Skipped");
+    // output.setResults("Skipped");
+    // output.setDetails("Name and Address Matching is skipped as matching
+    // records are found in DnB");
+    // engineData.addPositiveCheckStatus(AutomationEngineData.DNB_MATCH);
+    // return output;
+    // }
 
     Addr zs01 = requestData.getAddress("ZS01");
     StringBuilder details = new StringBuilder();
@@ -94,7 +96,7 @@ public class INGSTValidationElement extends ValidatingElement implements Company
         details.append("\nCity = " + (StringUtils.isBlank(response.getRecord().getCity()) ? "" : response.getRecord().getCity()));
         details.append("\nState = " + (StringUtils.isBlank(response.getRecord().getState()) ? "" : response.getRecord().getState()));
         details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getPostal()) ? "" : response.getRecord().getPostal()));
-         
+
       } else {
         // company proof
         if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {

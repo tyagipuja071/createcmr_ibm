@@ -1139,20 +1139,29 @@ public class MCOSaHandler extends MCOHandler {
             if (StringUtils.isNotBlank(cof) && ("R".equals(cof) || "S".equals(cof) || "T".equals(cof)) && "Y".equals(codFlag)) {
               LOG.trace("if COF is R/S/T, then COD will be N only >> ");
               error.addError((row.getRowNum() + 1), "COD and COF", "if COF is R/S/T, then COD will be N only <br>");
+              // validations.add(error);
             } else if (StringUtils.isBlank(cof) && "N".equals(codFlag)) {
               LOG.trace("If COF is Blank, then COD will be Y only >> ");
               error.addError((row.getRowNum() + 1), "COD and COF", "If COF is Blank, then COD will be Y only. <br>");
+              // validations.add(error);
             }
 
             if (!StringUtils.isBlank(cmrNo) && !cmrNo.startsWith("99") && !StringUtils.isBlank(intDeptNum)) {
               LOG.trace("Internal Department Number can be filled only when cmrNo Start with 99.");
               error.addError((row.getRowNum() + 1), "Internal Dept Number.",
                   "Internal Department Number can be filled only when cmrNo Start with 99.<br>");
+              // validations.add(error);
             }
 
             if (!StringUtils.isBlank(zs01Phone) && !zs01Phone.contains("@") && !zs01Phone.matches("\\d+.\\d*")) {
               LOG.trace("Phone Number should contain only digits.");
               error.addError((row.getRowNum() + 1), "Phone #", "Phone Number should contain only digits. <br>");
+              // validations.add(error);
+            }
+
+            if (!StringUtils.isBlank(enterprise) && !enterprise.contains("@") && !enterprise.matches("\\d+.\\d*")) {
+              LOG.trace("Enterprise Number should contain only digits.");
+              error.addError((row.getRowNum() + 1), "Enterprise #", "Enterprise Number should contain only digits. <br>");
             }
 
             if (!StringUtils.isBlank(enterprise) && !enterprise.contains("@") && !enterprise.matches("\\d+.\\d*")) {
@@ -1212,11 +1221,13 @@ public class MCOSaHandler extends MCOHandler {
             if (StringUtils.isEmpty(cmrNo)) {
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
+              // validations.add(error);
             }
             if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
               LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "Address Sequence No.",
                   "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again. <br>");
+              // validations.add(error);
             }
 
             if (!isDummyUpdate) {
@@ -1257,6 +1268,7 @@ public class MCOSaHandler extends MCOHandler {
                 LOG.trace("Landed Country is required.");
                 error.addError((row.getRowNum() + 1), "Landed Country", "Landed Country is required.<br>");
               }
+              // validations.add(error);
             }
             if (error.hasErrors()) {
               validations.add(error);

@@ -248,6 +248,12 @@
     <class>com.ibm.cio.cmr.request.entity.Stxl</class>
     <class>com.ibm.cio.cmr.request.entity.StxlPK</class>
     
+    <class>com.ibm.cio.cmr.request.entity.Knvl</class>
+    <class>com.ibm.cio.cmr.request.entity.KnvlPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.Licenses</class>
+    <class>com.ibm.cio.cmr.request.entity.LicensesPK</class>
+
     <properties>
     <!-- ORIGINAL -->
       <property name="openjpa.ConnectionFactoryMode" value="managed" />

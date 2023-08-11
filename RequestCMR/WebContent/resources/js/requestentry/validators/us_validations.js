@@ -7,6 +7,8 @@
 var _usSicmenHandler = null;
 var _usIsuHandler = null;
 var _usTaxcd1Handler = null;
+var _usIsicHandler = null;
+var _usCustClassHandler = null;
 var _usSicm = "";
 var _kukla = "";
 var _usIsicHandler = null;
@@ -421,6 +423,21 @@ function addCtcObsoleteValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addCustName1Validator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custName1 = FormManager.getActualValue('mainCustNm1');
+        if (custName1.length > 25) {
+          return new ValidationResult(null, false, 'Customer Name has exceeded the maximum characters allowed(the Length is 25). Please check and valid value.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    }
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 /**
  * After configuration for US
  */
@@ -428,7 +445,6 @@ function addCtcObsoleteValidator() {
 var resetIsicFlag = -1;
 
 function afterConfigForUS() {
-
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -470,8 +486,8 @@ function afterConfigForUS() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (reqType == 'C' && role == 'Requester' && custGrp == '15' && custSubGrp == 'FSP POOL') {
-    FormManager.setValue('isuCd', '28');
+  } else if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'IBMEM') {
+    FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
@@ -538,6 +554,10 @@ function afterConfigForUS() {
       var _custType = FormManager.getActualValue('custSubGrp');
       if (_custType == 'OEMHW' || _custType == 'OEM-SW' || _custType == 'TPD' || _custType == 'SSD' || _custType == 'DB4') {
         FormManager.setValue('isicCd', '357X');
+      } else if (_custType == 'IBMEM') {
+        FormManager.setValue('isicCd', '9500');
+        FormManager.setValue('subIndustryCd', 'WQ');
+        FormManager.readOnly('subIndustryCd');
       } else {
         var currIsic = FormManager.getActualValue('isicCd');
         if (currIsic != '357X') {
@@ -666,7 +686,7 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'N');
     FormManager.readOnly('isuCd');
-  } else if (scenario != 'FSP POOL') {
+  } else if (scenario != 'FSP POOL' && scenario != 'IBMEM') {
     FormManager.enable('isuCd');
   }
 }
@@ -1071,6 +1091,7 @@ function orderBlockValidation() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 // CREATCMR-5447
 function TaxTeamUpdateAddrValidation() {
   FormManager.addFormValidator((function() {
@@ -1331,6 +1352,7 @@ function setPreviousIsicValue(newval) {
 }
 
 function onChangeCustClassOrKuklaAndIsic() {
+
   var onChangedKukla = FormManager.getActualValue('custClass');
   var onChangedIsic = FormManager.getActualValue('usSicmen');
   var previousKukla = oldKukla;
@@ -1458,6 +1480,42 @@ function federalIsicCheck() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function custClassIsicValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var result1 = null;
+        var rdcKukla = null;
+        var onChangedKukla = null;
+        var result2 = null;
+        var rdcIsic = null;
+        var onChangedIsic = null;
+
+        onChangedKukla = FormManager.getActualValue('custClass');
+        var result1 = getIsicAndKuklaFromDataRdc("custClass");
+
+        onChangedIsic = FormManager.getActualValue('usSicmen');
+        var result2 = getIsicAndKuklaFromDataRdc("usSicmen");
+
+        if (result1 != null) {
+          rdcKukla = result1;
+        }
+
+        if (result2 != null) {
+          rdcIsic = result2;
+        }
+
+        if (FormManager.getActualValue('reqType') == 'U') {
+          if (onChangedIsic == '9500' && onChangedKukla != '60' || onChangedIsic != '9500' && onChangedKukla == '60') {
+            return new ValidationResult(null, false, 'Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
@@ -1467,6 +1525,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(addCustName1Validator, [ SysLoc.USA ], null,
+  // true);
+  // GEOHandler.registerValidator(clientTierValidator, [ SysLoc.USA ], null,
+  // true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(initUSTemplateHandler, [ SysLoc.USA ]);
@@ -1482,7 +1544,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
   // CREATCMR-4466
   // GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA
-  // ], null, true);
   // ], null, true);
   GEOHandler.addAfterConfig(lockOrdBlk, [ SysLoc.USA ]);
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.USA ], null, true);

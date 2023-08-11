@@ -974,12 +974,13 @@ public class ATService extends TransConnService {
 
           updateEntity(admin, entityManager);
 
+          WfHist history = null;
           if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
             RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
                 "Some errors occurred during RDc processing. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
                 "CPR".equals(admin.getReqStatus()));
           } else {
-            RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
+            history = RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
                 "RDc  Processing has been completed(First batch run). Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
                 "CPR".equals(admin.getReqStatus()));
           }
@@ -987,6 +988,10 @@ public class ATService extends TransConnService {
           partialCommit(entityManager);
           LOG.debug(
               "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
+
+          if ("CPR".equals(admin.getReqStatus())) {
+            RequestUtils.sendEmailNotifications(entityManager, admin, history, false, false);
+          }
 
         } catch (Exception e) {
           LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
@@ -999,9 +1004,9 @@ public class ATService extends TransConnService {
         if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
           noOFWorkingHours = checked2WorkingDays(admin.getRdcProcessingTs(), SystemUtil.getCurrentTimestamp());
         }
-        if (noOFWorkingHours >= 48) {
+        if (noOFWorkingHours >= 72) {
           lockRecordUpdt(entityManager, admin);
-          LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
+          LOG.info("RDc: Temporary Reactivate Embargo process: run after 3 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
 
@@ -1433,18 +1438,10 @@ public class ATService extends TransConnService {
       LOG.debug("processed.setTime(processedDate) O/P >>> " + processed.getTime());
       LOG.debug("current.setTime(processedDate) O/P >>> " + current.getTime());
 
-      int day = current.get(Calendar.DAY_OF_WEEK);
-      if ((day != Calendar.SATURDAY) && (day != Calendar.SUNDAY) && current.after(processed)) {
-        if (current.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY && processed.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-          hoursBetween = 0;
-        } else {
-          hoursBetween = (current.getTimeInMillis() - processed.getTimeInMillis()) / (60 * 60 * 1000);
-        }
-        LOG.debug("current.get(Calendar.DAY_OF_YEAR) >>> " + current.getTime());
-        LOG.debug("processed.get(Calendar.DAY_OF_YEAR) >>> " + processed.getTime());
-        LOG.debug("hoursBetween >>> " + hoursBetween);
-
-      }
+      hoursBetween = (current.getTimeInMillis() - processed.getTimeInMillis()) / (60 * 60 * 1000);
+      LOG.debug("current.get(Calendar.DAY_OF_YEAR) >>> " + current.getTime());
+      LOG.debug("processed.get(Calendar.DAY_OF_YEAR) >>> " + processed.getTime());
+      LOG.debug("hoursBetween >>> " + hoursBetween);
 
       LOG.debug("No of workingDays=" + hoursBetween);
     } catch (Exception e) {
@@ -1906,10 +1903,19 @@ public class ATService extends TransConnService {
               if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
                 comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
                     + " was SUCCESSFULLY processed:\n");
+                LOG.info("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
+                    + " was SUCCESSFULLY processed:\n");
                 for (RDcRecord pRecord : response.getRecords()) {
-                  comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
-                  comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  if (comment.length() > 9900) {
+                    LOG.info("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    LOG.info(" address type: " + pRecord.getAddressType() + "\n");
+                  } else {
+                    comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  }
+
                 }
+
               }
             } else {
               comment.append("RDc records were not processed.");

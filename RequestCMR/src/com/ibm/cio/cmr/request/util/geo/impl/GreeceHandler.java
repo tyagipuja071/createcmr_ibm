@@ -171,7 +171,6 @@ public class GreeceHandler extends BaseSOFHandler {
         } else {
           record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
         }
-        // CREATCMR-6139
       }
 
       if (SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {
@@ -3534,7 +3533,7 @@ public class GreeceHandler extends BaseSOFHandler {
   @Override
   public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
-    //noop
+    // noop
   }
 
   public String getaddAddressAdrnr(EntityManager entityManager, String mandt, String kunnr, String ktokd, String seq) {

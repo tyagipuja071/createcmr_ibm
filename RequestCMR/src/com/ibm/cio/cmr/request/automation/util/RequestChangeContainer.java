@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.model.requestentry.LicenseModel;
 import com.ibm.cio.cmr.request.model.window.RequestSummaryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
@@ -34,6 +35,7 @@ public class RequestChangeContainer {
   private String country;
   private List<UpdatedDataModel> dataUpdates;
   private List<UpdatedNameAddrModel> addressUpdates;
+  private List<LicenseModel> newlyAddedLicenses;
   private long reqId;
   private Admin admin;
 
@@ -112,6 +114,12 @@ public class RequestChangeContainer {
               + addr.getNewData());
         }
       }
+    }
+
+    this.newlyAddedLicenses = new ArrayList<>();
+    List<LicenseModel> licensesChangeList = summaryService.getNewLicenses(entityManager, reqId);
+    if (licensesChangeList != null) {
+      this.newlyAddedLicenses = licensesChangeList;
     }
 
   }
@@ -254,6 +262,10 @@ public class RequestChangeContainer {
    */
   public boolean hasAddressChanges() {
     return !this.addressUpdates.isEmpty();
+  }
+
+  public boolean hasNewLicenses() {
+    return !this.newlyAddedLicenses.isEmpty();
   }
 
   public String getCountry() {

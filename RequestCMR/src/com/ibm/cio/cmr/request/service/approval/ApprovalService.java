@@ -462,11 +462,17 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
             }
           } else if (cnConditionallyApproved) {
             setAdminStatus4CN(entityManager, admin);
+          } else if (data != null && admin != null && ("AR".equals(admin.getCustType()) || "CR".equals(admin.getCustType()))
+              && SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
+            admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
           } else {
             admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
           }
         } else if (cnConditionallyApproved) {
           setAdminStatus4CN(entityManager, admin);
+        } else if (data != null && admin != null && ("AR".equals(admin.getCustType()) || "CR".equals(admin.getCustType()))
+            && SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
+          admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
         } else {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
         }
@@ -730,16 +736,23 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
    */
   public Admin fillApprovalInformation(ApprovalReq req, ApprovalResponseModel approval, EntityManager entityManager) throws CmrException {
 
-    approval.setApproverNm(req.getDisplayName());
+    try {
+      approval.setApproverNm(req.getDisplayName());
 
-    String sql = ExternalizedQuery.getSql("APPROVAL.GETREQUESTER");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", req.getReqId());
-    Admin admin = query.getSingleResult(Admin.class);
-    Person p = BluePagesHelper.getPerson(req.getCreateBy());
-    approval.setRequester(p != null ? p.getName() : admin.getLastUpdtBy());
+      String sql = ExternalizedQuery.getSql("APPROVAL.GETREQUESTER");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      req.getReqId();
+      query.setParameter("REQ_ID", req.getReqId());
+      Admin admin = query.getSingleResult(Admin.class);
+      Person p = BluePagesHelper.getPerson(req.getCreateBy());
+      approval.setRequester(p != null ? p.getName() : admin.getLastUpdtBy());
 
-    return admin;
+      return admin;
+    } catch (Exception e) {
+      this.log.error("Error querying Admin.class from request id: " + req.getReqId() + " - " + e);
+    }
+
+    return null;
   }
 
   /**

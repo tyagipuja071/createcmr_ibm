@@ -3250,6 +3250,7 @@ function validatorEnterpriseES() {
   var isuCd = FormManager.getActualValue('isuCd');
   var enterprise = FormManager.getActualValue('enterprise');
   var landCntry = getLandedCntry();
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   var entp = '';
   var salRep = '';
   var enterpriseSetForCB = new Set([ '985111', '985107', '985902', '985504', '985404', '985403', '985603', '985703', '985303', '985212', '986111', '986162', '986140', '986181', '986254', '986270',
@@ -3261,8 +3262,8 @@ function validatorEnterpriseES() {
     salRep = result1[0].ret2;
   }
 
-  var condForEntCross1 = isuCd == '34' && !enterpriseSetForCB.has(enterprise) && custGrp == 'CROSS';
-  var condForEnt2 = isuCd == '34' && !entFor34QES.has(enterprise) && enterprise != entp && custGrp != 'CROSS';
+  var condForEntCross1 = isuCd == '34' && !enterpriseSetForCB.has(enterprise);
+  var condForEnt2 = isuCd == '34' && !enterpriseSetForCB.has(enterprise) && enterprise != entp && custGrp != 'CROSS';
   var condForEnt3 = isuCd == '36' && !entFor36YES.has(enterprise);
   var condForEnt4 = isuCd == '32' && enterprise != '985985';
   var condForEnt5 = isuCd == '04' && !entFor04ES.has(enterprise);

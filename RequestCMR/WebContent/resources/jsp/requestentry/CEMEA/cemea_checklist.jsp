@@ -170,4 +170,3 @@
       <%=RequestUtils.generateChecklistFreeTxtField5(request)%>
    </cmr:chk-lbl-field>
 </cmr:checklist>
-

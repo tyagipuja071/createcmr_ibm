@@ -178,6 +178,10 @@ public class NORDXHandler extends BaseSOFHandler {
             String legacyseqNoformat = StringUtils.leftPad(seqNo, 5, '0');
             String legacyAddressSeq = getLegacyAddressSeq(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), legacyseqNoformat);
 
+            /*
+             * if (StringUtils.isBlank(legacyAddressSeq)) { continue; }
+             */
+
             if (StringUtils.isBlank(legacyAddressSeq)) {
               if ("ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
                 record.setCmrAddrTypeCode("PG01");
@@ -2975,5 +2979,20 @@ public class NORDXHandler extends BaseSOFHandler {
 
     return addrSeq;
   }
+
+  // private boolean isAllClientTierAllowed(String country, String isuCd) {
+  // boolean isAllClientTierAllowed = true;
+  // if (country.equals("678") && (isuCd == "5K" || isuCd == "19")) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("806") && (isuCd == "5K" || isuCd == "04")) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("846") && Arrays.asList("5K", "5E", "1R",
+  // "04").contains(isuCd)) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("702") && isuCd.equals("5K")) {
+  // isAllClientTierAllowed = false;
+  // }
+  // return isAllClientTierAllowed;
+  // }
 
 }

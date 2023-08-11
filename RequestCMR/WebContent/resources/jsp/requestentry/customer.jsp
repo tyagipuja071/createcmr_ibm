@@ -227,7 +227,6 @@
             <cmr:view forCountry="706">
               <cmr:info text="${ui.info.sIRETFR}" />
             </cmr:view> <cmr:view forCountry="758">
-              <cmr:info text="${ui.info.fiscalCdInfoIT}" />
             </cmr:view> </label>
           <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1" tabId="MAIN_CUST_TAB" />
         </p>
@@ -498,7 +497,7 @@
        <p>                    
            <label for="vatInd">
             <cmr:fieldLabel fieldId="VATInd" />:
-               </label>
+            </label>
           <cmr:field fieldId="VATInd" id="vatInd" path="vatInd" tabId="MAIN_CUST_TAB" />         
         </p>
       </cmr:column>      

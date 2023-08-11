@@ -70,20 +70,24 @@ public abstract class BatchEntryPoint {
     }
 
     ConfigUtil.initFromBatch();
-    System.err.println("CMR Home Dir: " + System.getProperty("cmr.home"));
-    System.err.println("Initializing Log4J for Request CMR...");
+    System.out.println("CMR Home Dir: " + System.getProperty("cmr.home"));
+    System.out.println("Initializing Log4J for Request CMR...");
 
     // PropertyConfigurator.configure(CmrContextListener.class.getClassLoader().getResource(log4jFile));
 
     logger = Logger.getLogger(CmrContextListener.class);
     logger.debug("Log4j Inititialized.");
+    System.out.println("Log4j Inititialized.");
 
+    System.out.println("Initializing System Configuration...");
     logger.debug("Initializing System Configuration...");
     try {
       SystemConfiguration.refresh();
       logger.debug("System Configuration initialized.");
+      System.out.println("System Configuration initialized.");
     } catch (Exception e1) {
       logger.error("Error in initializing System Configuration", e1);
+      System.err.println("System Configuration initialized.");
     }
     String skipBatch = SystemConfiguration.getValue("SKIP_BATCH_APPS", "N");
     if ("Y".equals(skipBatch)) {
@@ -91,69 +95,102 @@ public abstract class BatchEntryPoint {
     }
 
     logger.debug("Initializing JPA Manager...");
+    System.out.println("Initializing JPA Manager...");
     JpaManager.init();
     logger.debug("JPA Manager Inititialized.");
+    System.out.println("JPA Manager Inititialized.");
+
     JpaManager.setDefaultUnitName(DEFAULT_BATCH_PERSISTENCE_UNIT);
     EntityManager entityManager = JpaManager.getEntityManager();
     try {
 
       logger.debug("Initializing Externalized Queries...");
+      System.out.println("Initializing Externalized Queries...");
+
       try {
         ExternalizedQuery.refresh();
         logger.debug("Externalized Queries initialized.");
+        System.out.println("Externalized Queries initialized.");
+
       } catch (Exception e1) {
         logger.error("Error in initializing Externalized Queries", e1);
+        System.out.println("Error in initializing Externalized Queries");
+
       }
 
       logger.debug("Initializing System Parameters...");
+      System.out.println("Initializing System Parameters...");
+
       try {
         SystemParameters.refresh(entityManager);
       } catch (Exception e1) {
         logger.error("Error in initializing system parameters", e1);
+        System.out.println("Error in initializing system parameters.");
+
       }
       if (!shouldBatchRun(batchAppName)) {
         throw new CmrException(new Exception("XRUN param for " + batchAppName + " caused execution to stop."));
       }
 
       logger.debug("Initializing Message Util...");
+      System.out.println("Initializing Message Util...");
+
       try {
         MessageUtil.refresh();
         logger.debug("Message Util initialized.");
+        System.out.println("Message Util initialized.");
+
       } catch (Exception e1) {
         logger.error("Error in initializing Message Util", e1);
+        System.out.println("Error in initializing Message Util");
+
       }
 
       logger.debug("Initializing SBO Filter Util...");
+      System.out.println("Initializing SBO Filter Util...");
+
       try {
         SBOFilterUtil.refresh();
         logger.debug("SBO Filter Util initialized.");
+        System.out.println("SBO Filter Util initialized.");
+
       } catch (Exception e1) {
         logger.error("Error in initializing SBO Filter Util", e1);
+        System.out.println("Error in initializing SBO Filter Util");
       }
 
       logger.debug("Initializing MQ Util...");
+      System.out.println("Initializing MQ Util...");
       try {
         MQProcessUtil.refresh();
         logger.debug("MQ Util initialized.");
+        System.out.println("MQ Util initialized.");
       } catch (Exception e1) {
         logger.error("Error in initializing MQ Util", e1);
+        System.out.println("Error in initializing MQ Util");
       }
 
       if (initUI) {
         logger.debug("Initializing UI Manager...");
+        System.out.println("Initializing UI Manager...");
         try {
           UIMgr.refresh();
           logger.debug("UI Manager initialized.");
+          System.out.println("UI Manager initialized.");
         } catch (Exception e1) {
           logger.error("Error in initializing UI Manager", e1);
+          System.out.println("Error in initializing UI Manager");
         }
 
         logger.debug("Initializing Page Manager...");
+        System.out.println("Initializing Page Manager...");
         try {
           PageManager.init(entityManager);
           logger.debug("Page Manager initialized.");
+          System.out.println("Page Manager initialized.");
         } catch (Exception e) {
           logger.error("Error in initializing PageManager", e);
+          System.out.println("Error in initializing PageManager");
         }
       }
       String DBTZ = SystemUtil.getDBTimezone(entityManager);
@@ -161,10 +198,13 @@ public abstract class BatchEntryPoint {
       Timestamp ts = SystemUtil.getCurrentTimestamp();
       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
       logger.info("Current DB time: " + sdf.format(ts));
+      System.out.println("Current DB time: " + sdf.format(ts));
 
     } finally {
       entityManager.close();
     }
+
+    System.out.println("Batch Context initialized...");
   }
 
   private static void startPlainBatchContext(String log4jFile) throws CmrException {

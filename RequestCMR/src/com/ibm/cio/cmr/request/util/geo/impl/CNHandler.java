@@ -154,9 +154,6 @@ public class CNHandler extends GEOHandler {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
-    }
   }
 
   @Override
@@ -635,8 +632,7 @@ public class CNHandler extends GEOHandler {
             LOG.debug("No Parent for DUNS " + dnbData.getDunsNo());
             break;
           } else {
-            // this DNB is for 'GuoZiWei', it is a special case, need to get
-            // ParDunsNo.
+            //this DNB is for 'GuoZiWei', it is a special case, need to get ParDunsNo.
             if ("544957715".equals(dnbData.getDuDunsNo()) && dnbData.getParDunsNo() != null && !dunsNo.equals(dnbData.getParDunsNo())) {
               dunsNo = dnbData.getParDunsNo();
               break;

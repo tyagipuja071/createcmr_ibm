@@ -544,6 +544,7 @@ form.ibm-column-form .dijitTextBox INPUT {
                        </div>
                        <div ng-show="rec.recType == 'REQ'">
                          <span title="Match Quality (0 - lowest, 100 - highest)" class="match-dnb">{{rec.matchGrade}}</span>
+                         
                        </div>
                      </td>
                     <td>

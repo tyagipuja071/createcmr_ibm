@@ -330,6 +330,14 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       query.setParameter("LAND1", params.getParam("landCntry"));
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     }
+    
+    // CREATCMR-8323
+    if ("StateProvUS".equalsIgnoreCase(fieldId)) {
+      query.append(" and LAND1 = :LAND1 ");
+      query.append(" and MANDT = :MANDT ");
+      query.setParameter("LAND1", params.getParam("landCntry"));
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    }
 
     // CREATCMR-8323
     if ("StateProvUS".equalsIgnoreCase(fieldId)) {
@@ -345,6 +353,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       // query.append(" and LAND1 = :LAND1 ");
       // query.setParameter("LAND1", params.getParam("landCntry"));
     }
+
     if ("County".equalsIgnoreCase(fieldId)) {
       // support only US for now
       // query.append(" and 'US' = :LAND1 ");
@@ -361,6 +370,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       query.setParameter("LAND1", params.getParam("landCntry"));
       query.setParameter("N_ST", params.getParam("stateProv"));
     }
+
     if ("Subindustry".equalsIgnoreCase(fieldId)) {
       String geo = "WW";
       if (SystemLocation.UNITED_STATES.equals(cntry)) {
