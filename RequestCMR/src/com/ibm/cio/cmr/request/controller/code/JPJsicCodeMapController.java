@@ -95,12 +95,12 @@ public class JPJsicCodeMapController extends BaseController {
         try {
           maintainService.save(model, request);
 
-          String url = "/code/jp_jsic_code_map_form?jsic=" + model.getJsicCd();
-          url += "&subIndustry=" + String.valueOf(model.getSubIndustryCd());
+          String url = "/code/jpjsiccodemapform?jsicCd=" + model.getJsicCd();
+          url += "&subIndustryCd=" + String.valueOf(model.getSubIndustryCd());
           url += "&isuCd=" + String.valueOf(model.getIsuCd());
           url += "&isicCd=" + String.valueOf(model.getIsicCd());
           url += "&dept=" + String.valueOf(model.getDept());
-          mv = new ModelAndView("redirect:" + url, "jp_jsic_code_map", model);
+          mv = new ModelAndView("redirect:" + url, "jpjsiccodemapform", model);
 
           MessageUtil.setInfoMessage(mv, MessageUtil.INFO_RECORD_SAVED, model.getRecordDescription());
         } catch (Exception e) {
