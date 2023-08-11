@@ -245,7 +245,6 @@ public class LegacyDirectService extends TransConnService {
         continue;
       }
       try {
-
         CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin, true);
         data = cmrObjects.getData();
 
@@ -554,7 +553,7 @@ public class LegacyDirectService extends TransConnService {
             noOFWorkingDays = checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
           }
 
-          if (noOFWorkingDays >= 3) {
+          if (noOFWorkingDays >= 4) {
             // lock
             lockRecord(entityManager, admin);
             // admin.setProcessedTs(SystemUtil.getCurrentTimestamp());
@@ -1256,8 +1255,7 @@ public class LegacyDirectService extends TransConnService {
 
       while (!start.after(end)) {
         int day = start.get(Calendar.DAY_OF_WEEK);
-        if ((day != Calendar.SATURDAY) && (day != Calendar.SUNDAY))
-          workingDays++;
+        workingDays++;
         start.add(Calendar.DATE, 1);
       }
       LOG.debug("No of workingDays=" + workingDays);
@@ -1412,6 +1410,14 @@ public class LegacyDirectService extends TransConnService {
         legacyAddrPk.setCustomerNo(cmrNo);
         legacyAddrPk.setSofCntryCode(cntry);
         String newSeqNo = StringUtils.leftPad(Integer.toString(seqNo), 5, '0');
+        
+        // CREATCMR - 8014 -> for API Requests
+    	String reqAddrSeq = addr.getId().getAddrSeq(); 
+    	
+        if(StringUtils.isNotEmpty(reqAddrSeq) && reqAddrSeq.length() < 5) {
+        	String paddedSeq = StringUtils.leftPad(reqAddrSeq, 5, '0');
+        	addr.getId().setAddrSeq(paddedSeq);
+        }
         // Mukesh:Story 1698123
         if ("00001".equals(addr.getId().getAddrSeq()))
           legacyAddrPk.setAddrNo(newSeqNo);
@@ -1600,9 +1606,9 @@ public class LegacyDirectService extends TransConnService {
     if (!StringUtils.isBlank(data.getAcAdminBo())) {
       cust.setAccAdminBo(data.getAcAdminBo());
     }
-
+    LOG.debug("LegacyDirectService - data.getEmbargoCd() : " + data.getEmbargoCd());
     cust.setEmbargoCd(data.getEmbargoCd() != null ? data.getEmbargoCd() : "");
-
+    LOG.debug("LegacyDirectService - cust.setEmbargoCd() : " + cust.getEmbargoCd());
     if (!StringUtils.isBlank(data.getIsicCd())) {
       cust.setIsicCd(data.getIsicCd());
     }
@@ -2564,7 +2570,7 @@ public class LegacyDirectService extends TransConnService {
             response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
           } else {
             try {
-              this.serviceClient.setReadTimeout(60 * 30 * 1000); // 30 mins
+              this.serviceClient.setReadTimeout(60 * 60 * 1000); // 60 mins
               response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
 
               if (response != null && response.getStatus().equals("A")
@@ -2607,9 +2613,17 @@ public class LegacyDirectService extends TransConnService {
               if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
                 comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
                     + " was SUCCESSFULLY processed:\n");
+                LOG.info("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
+                    + " was SUCCESSFULLY processed:\n");
                 for (RDcRecord pRecord : response.getRecords()) {
-                  comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
-                  comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  if (comment.length() > 9900) {
+                    LOG.info("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    LOG.info(" address type: " + pRecord.getAddressType() + "\n");
+                  } else {
+                    comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  }
+
                 }
               }
             } else {
@@ -2993,8 +3007,8 @@ public class LegacyDirectService extends TransConnService {
         if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
           noOFWorkingDays = checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
         }
-        if (noOFWorkingDays >= 3) {
-          LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
+        if (noOFWorkingDays >= 4) {
+          LOG.info("RDc: Temporary Reactivate Embargo process: run after 3 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setProcessedTs(SystemUtil.getCurrentTimestamp());
             List<Addr> addresses = cmrObjects.getAddresses();

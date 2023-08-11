@@ -52,11 +52,24 @@ public class BrazilRetrieveDataController {
       String email3 = "";
       String taxSepInd = "";
       String proxiLocNo = "";
+      String company = "";
+      String inacCd = "";
+      String isuCd = "";
+      String collectorNameNo = "";
+      String salesBusOffCd = "";
+
       for (FindCMRRecordModel item : searchFindCMR.getItems()) {
         if ("ZS01".equals(item.getCmrAddrTypeCode())) {
           muniFiscalCodeLE = item.getCmrFiscalCd();
           kunnr = item.getCmrSapNumber();
           proxiLocNo = item.getCmrProxiLocn();
+
+          company = item.getCmrCompanyNo();
+          inacCd = item.getCmrInac();
+          isuCd = item.getIsuCode();
+          collectorNameNo = item.getCmrCollectorNo();
+          salesBusOffCd = item.getCmrSortl();
+
         } else if ("ZI01".equals(item.getCmrAddrTypeCode())) {
           muniFiscalCodeUS = item.getCmrFiscalCd();
         }
@@ -91,6 +104,12 @@ public class BrazilRetrieveDataController {
       map.addAttribute("muniFiscalCodeLE", muniFiscalCodeLE);
       map.addAttribute("muniFiscalCodeUS", muniFiscalCodeUS);
       map.addAttribute("proxiLocnNo", proxiLocNo);
+      map.addAttribute("company", company);
+      map.addAttribute("inacCd", inacCd);
+      map.addAttribute("isuCd", isuCd);
+      map.addAttribute("collectorNameNo", collectorNameNo);
+      map.addAttribute("salesBusOffCd", salesBusOffCd);
+
       map.addAttribute("success", true);
     } else {
       map.addAttribute("success", false);

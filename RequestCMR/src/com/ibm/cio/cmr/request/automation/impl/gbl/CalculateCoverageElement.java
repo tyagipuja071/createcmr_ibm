@@ -485,7 +485,7 @@ public class CalculateCoverageElement extends OverridingElement {
                 break;
               case "LengthGreaterThan":
                 break;
-                
+
               case "NotIn":
                 break;
 
@@ -531,7 +531,7 @@ public class CalculateCoverageElement extends OverridingElement {
           if (createOverrides) {
             output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), coverageContainer.getIsuCd());
             output.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", requestData.getData().getClientTier(),
-                StringUtils.isBlank(coverageContainer.getClientTierCd()) ? "" : coverageContainer.getClientTierCd());
+                StringUtils.isNotBlank(coverageContainer.getClientTierCd()) ? coverageContainer.getClientTierCd() : "");
           }
         }
       }

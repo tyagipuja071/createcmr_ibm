@@ -31,7 +31,7 @@ public class ScenarioExceptionsUtil {
   Map<String, List<String>> addressTypesForDuplicateCMRCheck = new HashMap<>();
   private static final List<String> PRIVATE_SCENARIOS = Arrays.asList("AFPC", "BEPRI", "CHPRI", "CROPR", "CRPRI", "CSPC", "DKPRI", "EEPRI", "FIPRI",
       "FOPRI", "GLPRI", "ISPRI", "JOPC", "LIPRI", "LSPC", "LSXPC", "LTPRI", "LUPRI", "LVPRI", "MEPC", "NAPC", "NAXPC", "PKPC", "PRICU", "PRIPE",
-      "PRISM", "PRIV", "PRIVA", "PSPC", "RSPC", "RSXPC", "SZPC", "SZXPC", "XPC", "XPRIC", "XPRIV", "ZAPC", "ZAXPC");
+      "PRISM", "PRIV", "PRIVA", "PSPC", "RSPC", "RSXPC", "SZPC", "SZXPC", "XPC", "XPRIC", "XPRIV", "ZAPC", "ZAXPC","CBPRI","XBLUM");
   boolean skipDuplicateChecks;
   boolean importDnbInfo;
   boolean skipChecks;

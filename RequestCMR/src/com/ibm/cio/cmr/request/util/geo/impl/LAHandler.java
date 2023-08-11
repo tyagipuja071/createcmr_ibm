@@ -326,7 +326,7 @@ public class LAHandler extends GEOHandler {
 
       }
     } else {
-      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);
+      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord); // flow
       data.setBgId(mainRecord.getCmrBuyingGroup());
       data.setGbgId(mainRecord.getCmrGlobalBuyingGroup());
       data.setBgRuleId(mainRecord.getCmrLde());
@@ -1620,6 +1620,15 @@ public class LAHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cntry, "MrcCd", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getMrcCd(), "MrcCd", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getMrcCd(), "MrcCd", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getInacCd(), newData.getInacCd())) {
+      update = new UpdatedDataModel();
+      String cntry = null;
+      update.setDataField(PageManager.getLabel(cntry, "INACCode", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getInacCd(), "INACCode", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getInacCd(), "INACCode", cmrCountry));
       results.add(update);
     }
 
@@ -3771,6 +3780,7 @@ public class LAHandler extends GEOHandler {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     BrazilV2ReqModel model = new BrazilV2ReqModel();
+
     try {
       PropertyUtils.copyProperties(model, admin);
       PropertyUtils.copyProperties(model, data);
@@ -3863,6 +3873,10 @@ public class LAHandler extends GEOHandler {
 
     } else {
       LOG.error("ZI01 address not found on request.");
+    }
+
+    if (brModel.getProxiLocnNo() != null) {
+      requestData.getData().setProxiLocnNo(brModel.getProxiLocnNo());
     }
 
     LOG.debug("Getting contact info from V2 inputs..");
@@ -3989,6 +4003,46 @@ public class LAHandler extends GEOHandler {
           entityManager.flush();
         }
       }
+    }
+
+    // roll-back to user's new values to Update IBM Codes
+    // mexicoBillingName is a temporary placeholder for Update Reason
+    if ("U".equalsIgnoreCase(admin.getReqType()) && "UPIC".equalsIgnoreCase(data.getMexicoBillingName())) {
+      data.setSalesBusOffCd(brModel.getSalesBusOffCd());
+      data.setIsuCd(brModel.getIsuCd());
+      data.setInacCd(brModel.getInacCd());
+      data.setCompany(brModel.getCompany());
+      data.setCollectorNameNo(brModel.getCollectorNameNo());
+
+      entityManager.merge(data);
+
+      if (StringUtils.isNotBlank(data.getSalesBusOffCd())) {
+
+        String isuCd = "";
+        String clientTier = "";
+        String mrcCd = "";
+
+        // set ISU_CD, CLIENT_TIER, MRC_CD values based on SALES_BO_CD value
+        // as per BR Coverage / SORTL Rules Combination 1H2023
+        LOG.debug("Getting ISU_CD, CLIENT_TIER, MRC_CD values...");
+        String extQuery = ExternalizedQuery.getSql("BR.GET_SORTL_RULES");
+        PreparedQuery prepQuery = new PreparedQuery(entityManager, extQuery);
+        prepQuery.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+        prepQuery.setParameter("SALES_BO_CD", data.getSalesBusOffCd());
+        List<Object[]> results = prepQuery.getResults();
+
+        if (results != null && results.size() == 1) {
+          isuCd = (String) results.get(0)[0];
+          clientTier = (String) results.get(0)[1];
+          mrcCd = (String) results.get(0)[2];
+
+          data.setIsuCd(isuCd);
+          data.setClientTier(clientTier);
+          data.setMrcCd(mrcCd);
+        }
+      }
+
+      entityManager.flush();
     }
   }
 

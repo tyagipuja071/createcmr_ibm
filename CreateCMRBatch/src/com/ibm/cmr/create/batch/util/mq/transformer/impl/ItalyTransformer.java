@@ -1190,6 +1190,7 @@ public class ItalyTransformer extends EMEATransformer {
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
     data.setOrdBlk("88");
+    data.setEmbargoCd("Y");
     entityManager.merge(data);
     entityManager.flush();
   }
@@ -1211,6 +1212,7 @@ public class ItalyTransformer extends EMEATransformer {
     } else {
       legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : "");
     }
+
     formatAddressLinesLD(dummyHandler, legacyAddr);
   }
 

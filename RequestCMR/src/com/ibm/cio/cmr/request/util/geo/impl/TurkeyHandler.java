@@ -3624,7 +3624,6 @@ public class TurkeyHandler extends BaseSOFHandler {
     map.put("##GlobalBuyingGroupID", "gbgId");
     map.put("##CoverageID", "covId");
     map.put("##OriginatorID", "originatorId");
-    map.put("##BPRelationType", "bpRelType");
     map.put("##CAP", "capInd");
     map.put("##RequestReason", "reqReason");
     map.put("##SpecialTaxCd", "specialTaxCd");
@@ -3671,7 +3670,6 @@ public class TurkeyHandler extends BaseSOFHandler {
     map.put("##BuyingGroupID", "bgId");
     map.put("##RequesterID", "requesterId");
     map.put("##GeoLocationCode", "geoLocationCd");
-    map.put("##MembLevel", "memLvl");
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##EngineeringBo", "engineeringBo");
@@ -3680,6 +3678,8 @@ public class TurkeyHandler extends BaseSOFHandler {
     map.put("##CustClass", "custClass");
     map.put("##TypeOfCustomer", "crosSubTyp");
     map.put("##IERPSitePrtyId", "ierpSitePrtyId");
+    map.put("##BPRelationType", "bpRelType");
+    map.put("##MembLevel", "memLvl");
     return map;
   }
 

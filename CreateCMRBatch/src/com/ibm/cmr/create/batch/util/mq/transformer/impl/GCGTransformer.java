@@ -98,7 +98,7 @@ public abstract class GCGTransformer extends APTransformer {
       handler.messageHash.put("SellDept", bussinessPartner);
       handler.messageHash.put("InstDept", bussinessPartner);
       handler.messageHash.put("EngrDept", bussinessPartner);
-    } else if ("KYND".equalsIgnoreCase(custSubGrp)|| "NRMLC".equalsIgnoreCase(custSubGrp) || "NRMLD".equalsIgnoreCase(custSubGrp)) {
+    } else if ("KYND".equalsIgnoreCase(custSubGrp) || "NRMLC".equalsIgnoreCase(custSubGrp) || "NRMLD".equalsIgnoreCase(custSubGrp)) {
       String bussinessPartner = subIndCd + mrcCode + "T" + repTeamMemNo;
       handler.messageHash.put("SellDept", bussinessPartner);
       handler.messageHash.put("InstDept", bussinessPartner);

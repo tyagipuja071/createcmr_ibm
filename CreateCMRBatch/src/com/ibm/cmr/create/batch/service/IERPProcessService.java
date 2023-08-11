@@ -374,7 +374,8 @@ public class IERPProcessService extends BaseBatchService {
         GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
         boolean enableTempReact = cntryHandler.enableTempReactivateOnUpdate() && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason());
 
-        if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
+        if ((SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) || SystemLocation.CHINA.equals(data.getCmrIssuingCntry()))
+            && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
           enableTempReact = true;
         }
 
@@ -475,8 +476,10 @@ public class IERPProcessService extends BaseBatchService {
               wfHistCmt = statusMessage.toString();
             }
 
+            if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry())) {
             statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
-
+            }
+            
             createCommentLog(em, admin, statusMessage.toString());
 
             String disableAutoProc = "N";
@@ -557,13 +560,23 @@ public class IERPProcessService extends BaseBatchService {
           boolean firstRun = false;
           if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry())) {
             rdcOrderBlk = dataRdc.getOrdBlk();
+          } else if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
+              && ("PCP".equals(admin.getReqStatus()) || "PCR".equals(admin.getReqStatus()))) {
+            data.setOrdBlk("");
+          }
+          if ("TREC".equals(admin.getReqReason()) && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+            rdcOrderBlk = "88";
           }
           if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
               && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && (rdcOrderBlk != null && !StringUtils.isBlank(rdcOrderBlk))
               && CmrConstants.ORDER_BLK_LIST.contains(rdcOrderBlk) && (dataOrderBlk == null || StringUtils.isBlank(dataOrderBlk))) {
             if (admin.getProcessedTs() == null || IERPRequestUtils.isTimeStampEquals(admin.getProcessedTs())) {
               firstRun = true;
-              overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+              if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+                overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
+              } else {
+                overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+              }
             } else {
               int noOFWorkingDays = 0;
               if (admin.getReqStatus() != null && !CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())
@@ -575,14 +588,20 @@ public class IERPProcessService extends BaseBatchService {
                 LOG.debug("no Of Working days before check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
                 noOFWorkingDays = IERPRequestUtils.checkNoOfWorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
                 LOG.debug("no Of Working days after check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
+
               }
-              int tempReactThres = SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) ? 2 : 3;
+              int tempReactThres = 4;
               if (noOFWorkingDays >= tempReactThres) {
                 LOG.debug("Processing 2nd time ,no Of Working days = " + noOFWorkingDays);
                 createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
                 data.setCustAcctType(rdcOrderBlk);
+                data.setOrdBlk(rdcOrderBlk);
                 updateEntity(data, em);
-                overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+                if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+                  overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
+                } else {
+                  overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+                }
               }
             }
           }
@@ -639,9 +658,10 @@ public class IERPProcessService extends BaseBatchService {
                   + " has FAILED processing. Status: NOT COMPLETED. Response message: " + ncMessage);
               wfHistCmt = statusMessage.toString();
             }
-
-            statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
-
+            
+            if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry()) && !SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+              statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
+            }
             createCommentLog(em, admin, statusMessage.toString());
 
             String disableAutoProc = "N";
@@ -710,8 +730,10 @@ public class IERPProcessService extends BaseBatchService {
                   "COM".equals(admin.getReqStatus()));
             }
 
+            WfHist history = null;
+
             if (!CmrConstants.RDC_STATUS_IGNORED.equals(overallStatus) && firstRun) {
-              IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
+              history = IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
                   "CPR".equals(admin.getReqStatus()));
             }
 
@@ -720,7 +742,11 @@ public class IERPProcessService extends BaseBatchService {
             // send email notif regardless of abort or complete
             LOG.debug("*** IERP Site IDs on EMAIL >> " + siteIds.toString());
             try {
-              sendEmailNotifications(em, admin, siteIds.toString(), statusMessage.toString());
+              if ("CPR".equals(admin.getReqStatus())) {
+                RequestUtils.sendEmailNotifications(em, admin, history, false, false);
+              } else {
+                sendEmailNotifications(em, admin, siteIds.toString(), statusMessage.toString());
+              }
             } catch (Exception e) {
               LOG.error("ERROR: " + e.getMessage());
             }
@@ -850,6 +876,11 @@ public class IERPProcessService extends BaseBatchService {
               }
 
               if (response.getRecords() != null && response.getRecords().size() != 0) {
+            	  if(index >= response.getRecords().size() ){
+            		  LOG.debug("size = " + response.getRecords().size());
+            		  LOG.debug("index = " + index);
+            		  break;
+            	  }
 
                 if (CmrConstants.RDC_SOLD_TO.equals(response.getRecords().get(index).getAddressType())) {
                   String[] addrSeqs = response.getRecords().get(index).getSeqNo().split(",");
@@ -877,6 +908,14 @@ public class IERPProcessService extends BaseBatchService {
                       addr.setPairedAddrSeq(addrSeqs[0]);
                       addr.setSapNo(red.getSapNo());
                       addr.setIerpSitePrtyId(red.getIerpSitePartyId());
+                      if ((SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry()))
+                          && !StringUtils.isEmpty(response.getCmrNo()) && !StringUtils.isEmpty(addr.getId().getAddrSeq())) {
+                        String strPaygoNo = getPaygoSapnoForNZ(em, response.getCmrNo(), addr.getId().getAddrSeq(), data.getCmrIssuingCntry());
+                        if (!StringUtils.isEmpty(strPaygoNo)) {
+                          addr.setSapNo(strPaygoNo);
+                          addr.setIerpSitePrtyId("S" + strPaygoNo.substring(1));
+                        }
+                      }
                     }
                   }
                 }
@@ -906,6 +945,9 @@ public class IERPProcessService extends BaseBatchService {
         ProfilerLogger.LOG.trace("After monitorCreqcmr for Request ID: " + admin.getId().getReqId() + " "
             + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       }
+      
+      // Check and send the notifications to the recipients for soon to be blocked back CMRs..
+      RequestUtils.sendEmailNotificationsTREC_CN(em);
       Thread.currentThread().setName("IERPProcess-" + Thread.currentThread().getId());
     }
 
@@ -1282,7 +1324,7 @@ public class IERPProcessService extends BaseBatchService {
       // cmrNo = "TEMP";
       // } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
       // cmrNo = data.getCmrNo();
-      // }
+      // }if (!StringUtils.isBlank(prospectCMR)) {
       cmrNo = data.getCmrNo();
       synchronized (IERPProcessService.class) {
         if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && "C".equals(requestType)
@@ -1496,14 +1538,18 @@ public class IERPProcessService extends BaseBatchService {
       DataRdc dataRdc = getDataRdcRecords(em, data);
       boolean isDataUpdated = false;
       boolean isAdminUpdated = false;
-      isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
+      if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+    	  isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
+      		}else{
+      			isDataUpdated = true;
+      		}
       isAdminUpdated = cntryHandler.isAdminUpdate(admin, data.getCmrIssuingCntry());
       isDataUpdated = isAdminUpdated || isDataUpdated;
 
       if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry()) && !isDataUpdated) {
         isDataUpdated = LAHandler.isTaxInfoUpdated(em, admin.getId().getReqId());
       }
-
+      
       // 3. Check if there are customer and IBM changes, propagate to other
       // addresses
 
@@ -1621,6 +1667,19 @@ public class IERPProcessService extends BaseBatchService {
 
   public void setMultiMode(boolean multiMode) {
     this.multiMode = multiMode;
+  }
+
+  private String getPaygoSapnoForNZ(EntityManager entityManager, String cmrNo, String seqNo, String cmrIssuingCntry) {
+    LOG.debug("getPaygoSapnoForNZ ");
+    String PaygoSapno = "";
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GET.NZ.PAYGOSAPNO"));
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", cmrIssuingCntry);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setParameter("ZZKV_SEQNO", seqNo);
+    query.setForReadOnly(true);
+    PaygoSapno = query.getSingleResult(String.class);
+    return PaygoSapno;
   }
 
   // public List<Long> getPendingReqIds() {

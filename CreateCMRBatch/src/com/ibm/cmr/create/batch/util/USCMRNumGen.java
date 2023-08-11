@@ -62,87 +62,87 @@ public class USCMRNumGen {
     boolean nonExisted = query.getResults().isEmpty();
     while (!nonExisted) {
       LOG.info(" CMR number:" + cmrNum + " already existed, re-generate CMR number again.");
-      reGenCMRFlag = "Y";
+      //reGenCMRFlag = "Y";
       cmrNum = genCMRNum(entityManager, type);
     }
-    reGenCMRFlag = "N";
+    //reGenCMRFlag = "N";
 
     return cmrNum;
   }
-  
+
   public static synchronized String genCMRNumMassCrt(EntityManager entityManager, String type) {
-	    String cmrNum = "";
-	    if (cmrNumMapMassCrt == null || cmrNumMapMassCrt.isEmpty()) {
-	      LOG.info("there is no CMR number stored in cache, so init...");
-	      initMassCrt(entityManager);
-	    }
+    String cmrNum = "";
+    if (cmrNumMapMassCrt == null || cmrNumMapMassCrt.isEmpty()) {
+      LOG.info("there is no CMR number stored in cache, so init...");
+      initMassCrt(entityManager);
+    }
 
-	    if ("POA".equals(type)) {
-	      ArrayList<String> poaList = cmrNumMapMassCrt.get("POA");
-	      if (poaList == null || poaList.isEmpty()) {
-	        LOG.info("no POA CMR number stored in cache, so generate...");
-	        poaList = getPOANumListMassCrt(entityManager);
-	      }
-	      cmrNum = poaList.remove(0);
-	      LOG.info("return CMR number for Mass Create:" + cmrNum + ", there are " + poaList.size() + " poa CMR Number left in cache...");
-	    } else if ("COMM".equals(type)) {
-	      ArrayList<String> commList = cmrNumMapMassCrt.get("COMM");
-	      if (commList == null || commList.isEmpty()) {
-	        commList = getCommonNumListMassCrt(entityManager);
-	      }
-	      cmrNum = commList.remove(0);
-	      LOG.info("return CMR number for Mass Create:" + cmrNum + ", there are " + commList.size() + " common CMR Number left in cache...");
-	    } else if ("MAIN".equals(type)) {
-	      ArrayList<String> mainList = cmrNumMapMassCrt.get("MAIN");
-	      if (mainList == null || mainList.isEmpty()) {
-	        mainList = getMainNmNumListMassCrt(entityManager);
-	      }
-	      cmrNum = mainList.remove(0);
-	      LOG.info("return CMR number for Mass Create:" + cmrNum + ", there are " + mainList.size() + " Main Name CMR Number left in cache...");
-	    }
+    if ("POA".equals(type)) {
+      ArrayList<String> poaList = cmrNumMapMassCrt.get("POA");
+      if (poaList == null || poaList.isEmpty()) {
+        LOG.info("no POA CMR number stored in cache, so generate...");
+        poaList = getPOANumListMassCrt(entityManager);
+      }
+      cmrNum = poaList.remove(0);
+      LOG.info("return CMR number for Mass Create:" + cmrNum + ", there are " + poaList.size() + " poa CMR Number left in cache...");
+    } else if ("COMM".equals(type)) {
+      ArrayList<String> commList = cmrNumMapMassCrt.get("COMM");
+      if (commList == null || commList.isEmpty()) {
+        commList = getCommonNumListMassCrt(entityManager);
+      }
+      cmrNum = commList.remove(0);
+      LOG.info("return CMR number for Mass Create:" + cmrNum + ", there are " + commList.size() + " common CMR Number left in cache...");
+    } else if ("MAIN".equals(type)) {
+      ArrayList<String> mainList = cmrNumMapMassCrt.get("MAIN");
+      if (mainList == null || mainList.isEmpty()) {
+        mainList = getMainNmNumListMassCrt(entityManager);
+      }
+      cmrNum = mainList.remove(0);
+      LOG.info("return CMR number for Mass Create:" + cmrNum + ", there are " + mainList.size() + " Main Name CMR Number left in cache...");
+    }
 
-	    String querySql = ExternalizedQuery.getSql("BATCH.GET.KNA1_MANDT_CMRNO");
-	    PreparedQuery query = new PreparedQuery(entityManager, querySql);
-	    query.setParameter("KATR6", SystemLocation.UNITED_STATES);
-	    query.setParameter("CMR_NO", cmrNum);
-	    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-	    query.setForReadOnly(true);
-	    boolean nonExisted = query.getResults().isEmpty();
-	    while (!nonExisted) {
-	      LOG.info(" CMR number:" + cmrNum + " already existed, re-generate CMR number again.");
-	      cmrNum = genCMRNumMassCrt(entityManager, type);
-	    }
+    String querySql = ExternalizedQuery.getSql("BATCH.GET.KNA1_MANDT_CMRNO");
+    PreparedQuery query = new PreparedQuery(entityManager, querySql);
+    query.setParameter("KATR6", SystemLocation.UNITED_STATES);
+    query.setParameter("CMR_NO", cmrNum);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setForReadOnly(true);
+    boolean nonExisted = query.getResults().isEmpty();
+    while (!nonExisted) {
+      LOG.info(" CMR number:" + cmrNum + " already existed, re-generate CMR number again.");
+      cmrNum = genCMRNumMassCrt(entityManager, type);
+    }
 
-	    return cmrNum;
-	  }
+    return cmrNum;
+  }
 
   public static synchronized void init(EntityManager entityManager) {
-	  if (cmrNumMap == null || cmrNumMap.isEmpty() || "Y".equals(reGenCMRFlag)) {
-	      LOG.info("there is no CMR number stored in cache, so init...");
-	     
-    cmrNumMap = new HashMap<String, ArrayList<String>>();
-    ArrayList<String> poaList = getPOANumList(entityManager);
-    ArrayList<String> commonList = getCommonNumList(entityManager);
-    ArrayList<String> mainList = getMainNmNumList(entityManager);
-    cmrNumMap.put("POA", poaList);
-    cmrNumMap.put("COMM", commonList);
-    cmrNumMap.put("MAIN", mainList);
-	  }
+    if (cmrNumMap == null || cmrNumMap.isEmpty() || "Y".equals(reGenCMRFlag)) {
+      LOG.info("there is no CMR number stored in cache, so init...");
+     
+  cmrNumMap = new HashMap<String, ArrayList<String>>();
+  ArrayList<String> poaList = getPOANumList(entityManager);
+  ArrayList<String> commonList = getCommonNumList(entityManager);
+  ArrayList<String> mainList = getMainNmNumList(entityManager);
+  cmrNumMap.put("POA", poaList);
+  cmrNumMap.put("COMM", commonList);
+  cmrNumMap.put("MAIN", mainList);
   }
-  
+  }
+
   public static synchronized void initMassCrt(EntityManager entityManager) {
-	  
-	  if (cmrNumMapMassCrt == null || cmrNumMapMassCrt.isEmpty()) {
-	      LOG.info("there is no CMR number stored for mass create in cache, so init...");
-	      	  
-	    cmrNumMapMassCrt = new HashMap<String, ArrayList<String>>();
-	    ArrayList<String> poaListMassCrt = getPOANumListMassCrt(entityManager);
-	    ArrayList<String> commonListMassCrt = getCommonNumListMassCrt(entityManager);
-	    ArrayList<String> mainListMassCrt = getMainNmNumListMassCrt(entityManager);
-	    cmrNumMapMassCrt.put("POA", poaListMassCrt);
-	    cmrNumMapMassCrt.put("COMM", commonListMassCrt);
-	    cmrNumMapMassCrt.put("MAIN", mainListMassCrt);
-	  }
+
+    if (cmrNumMapMassCrt == null || cmrNumMapMassCrt.isEmpty()) {
+      LOG.info("there is no CMR number stored for mass create in cache, so init...");
+
+      cmrNumMapMassCrt = new HashMap<String, ArrayList<String>>();
+      ArrayList<String> poaListMassCrt = getPOANumListMassCrt(entityManager);
+      ArrayList<String> commonListMassCrt = getCommonNumListMassCrt(entityManager);
+      ArrayList<String> mainListMassCrt = getMainNmNumListMassCrt(entityManager);
+      cmrNumMapMassCrt.put("POA", poaListMassCrt);
+      cmrNumMapMassCrt.put("COMM", commonListMassCrt);
+      cmrNumMapMassCrt.put("MAIN", mainListMassCrt);
+    }
   }
 
   private static ArrayList<String> getPOANumList(EntityManager entityManager) {

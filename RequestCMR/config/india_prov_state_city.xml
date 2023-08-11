@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings>
+
+	<mapping>
+		<city>
+			Navi Mumbai,Mumbai
+		</city>
+		<state></state>
+		<provinceCd>
+			101
+		</provinceCd>
+		<arCode>
+			IW01
+		</arCode>
+	</mapping>
+
+	<mapping>
+		<city>
+			Pune
+		</city>
+		<state></state>
+		<provinceCd>
+			102
+		</provinceCd>
+		<arCode>
+			IW01
+		</arCode>
+	</mapping>
+
+<mapping>
+		<city></city>
+		<state>Maharashtra</state>
+		<provinceCd>
+			103
+		</provinceCd>
+		<arCode>
+			IW01
+		</arCode>
+	</mapping>
+
+	<mapping>
+		<city></city>
+		<state>Gujarat</state>
+		<provinceCd>
+			104
+		</provinceCd>
+		<arCode>
+			IW01
+		</arCode>
+	</mapping>
+
+	<mapping>
+		<city>
+			Ahmedabad
+		</city>
+		<state></state>
+		<provinceCd>
+			105
+		</provinceCd>
+		<arCode>
+			IW01
+		</arCode>
+	</mapping>
+	
+	<mapping>
+		<city>
+			Nashik
+		</city>
+		<state></state>
+		<provinceCd>
+			107
+		</provinceCd>
+		<arCode>
+			IW01
+		</arCode>
+	</mapping>
+	
+	<mapping>
+		<city>
+			Surat
+		</city>
+		<state></state>
+		<provinceCd>
+			108
+		</provinceCd>
+		<arCode>
+			IW01
+		</arCode>
+	</mapping>
+	
+	<mapping>
+		<city>
+			Nashik
+		</city>
+		<state></state>
+		<provinceCd>
+			107
+		</provinceCd>
+		<arCode>
+			IW01
+		</arCode>
+	</mapping>
+	
+	<mapping>
+		<city></city>
+		<state>Andhra Pradesh</state>
+		<provinceCd>
+			201
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city>Bangalore,Bengaluru
+		</city>
+		<state></state>
+		<provinceCd>
+			213
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Tamil Nadu</state>
+		<provinceCd>
+			203
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city>Chennai</city>
+		<state></state>
+		<provinceCd>
+			214
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city>Pondicherry</city>
+		<state></state>
+		<provinceCd>
+			204
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Kerala</state>
+		<provinceCd>
+			205
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Goa</state>
+		<provinceCd>
+			206
+		</provinceCd>
+		<arCode>
+			IW01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Karnataka</state>
+		<provinceCd>
+			207
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city>Cochin</city>
+		<state></state>
+		<provinceCd>
+			208
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city>Coimbatore</city>
+		<state></state>
+		<provinceCd>
+			209
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city>Hyderabad</city>
+		<state></state>
+		<provinceCd>
+			210
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city>Trichy</city>
+		<state></state>
+		<provinceCd>
+			211
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city>Visakhapatnam,Vizag</city>
+		<state></state>
+		<provinceCd>
+			212
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city>Kolkotta</city>
+		<state></state>
+		<provinceCd>
+			301
+		</provinceCd>
+		<arCode>
+			IE01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Assam</state>
+		<provinceCd>
+			302
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Bihar</state>
+		<provinceCd>
+			303
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Jharkhand</state>
+		<provinceCd>
+			304
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Orissa</state>
+		<provinceCd>
+			305
+		</provinceCd>
+		<arCode>
+			IS01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Chhatisgarh</state>
+		<provinceCd>
+			409
+		</provinceCd>
+		<arCode>
+			IE01
+		</arCode>
+	</mapping>
+	
+		
+	
+	<mapping>
+		<city>New Delhi,Delhi,Noida,Gurgaon</city>
+		<state>Delhi</state>
+		<provinceCd>
+			401
+		</provinceCd>
+		<arCode>
+			IN01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Chandigarh</state>
+		<provinceCd>
+			402
+		</provinceCd>
+		<arCode>
+			IN01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Jammu And Kashmir</state>
+		<provinceCd>
+			403
+		</provinceCd>
+		<arCode>
+			IN01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Haryana</state>
+		<provinceCd>
+			404
+		</provinceCd>
+		<arCode>
+			IN01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Punjab</state>
+		<provinceCd>
+			405
+		</provinceCd>
+		<arCode>
+			IN01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Rajasthan</state>
+		<provinceCd>
+			406
+		</provinceCd>
+		<arCode>
+			IN01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Uttarakhand</state>
+		<provinceCd>
+			407
+		</provinceCd>
+		<arCode>
+			IN01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Uttar Pradesh</state>
+		<provinceCd>
+			408
+		</provinceCd>
+		<arCode>
+			IN01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city>Nagpur</city>
+		<state></state>
+		<provinceCd>
+			106
+		</provinceCd>
+		<arCode>
+			IW01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Madhya Pradesh</state>
+		<provinceCd>
+			410
+		</provinceCd>
+		<arCode>
+			IN01
+		</arCode>
+	</mapping>
+	
+		
+	<mapping>
+		<city></city>
+		<state>Himachal Pradesh</state>
+		<provinceCd>
+			411
+		</provinceCd>
+		<arCode>
+			IN01
+		</arCode>
+	</mapping>
+
+</mappings>

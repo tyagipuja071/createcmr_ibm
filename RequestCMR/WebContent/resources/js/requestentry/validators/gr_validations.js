@@ -564,7 +564,6 @@ function addGRAddressTypeValidator() {
               return new ValidationResult(null, false, 'Sold-to and Local Translation, mismatched fields: ' + mismatchFields);
             }
           }
-
           if (zs01Cnt == 0 || zp01Cnt == 0 || zd01Cnt == 0 || zi01Cnt == 0) {
             return new ValidationResult(null, false, 'All addresses are mandatory');
           } else if (zs01Cnt > 1) {
@@ -862,7 +861,7 @@ function addHandlersForGR() {
   lockUnlockField();
   if (_custSubTypeHandlerGr == null && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     _custSubTypeHandlerGr = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-      FormManager.setValue('salesTeamCd', '');
+     // FormManager.setValue('salesTeamCd', '');
       resetSubIndustryCdGR();
     });
   }
@@ -1043,7 +1042,7 @@ function setVatValidatorGRCYTR() {
     if (vatInd == 'N') {
       FormManager.clearValue('vat');
     }
-    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
+    if (undefined != vatInd && vatInd != '' && vatInd != 'N' && cntry == SysLoc.GREECE) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
       FormManager.enable('vat');
     }
@@ -1750,15 +1749,14 @@ function setCustSubTypeBpGRTRCY() {
     FormManager.enable('clientTier');
     FormManager.enable('isuCd');
   }
-
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE
-      && (FormManager.getActualValue('custSubGrp') != 'COMME' || FormManager.getActualValue('custSubGrp') != 'CROSS' || FormManager.getActualValue('custSubGrp') != 'GOVRN' || FormManager
-          .getActualValue('custSubGrp') != 'PRICU')) {
-    setISRValuesGR();
-  } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
-    console.log("skip set ISR.");
+  // Control Classification Code
+  if (custType == 'BUSPR' || custType == 'XBP') {
+    FormManager.show('CustClass', 'custClass');
+    FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
   } else {
-    setISRValues();
+    FormManager.hide('CustClass', 'custClass');
+    FormManager.setValue('custClass', '');
+    FormManager.resetValidations('custClass');
   }
 }
 
@@ -2417,7 +2415,7 @@ function lockUnlockFieldForGR() {
   console.log(">>>> lockUnlockFieldForGR");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var _custGrpSet = new Set([ 'COMME', 'GOVRN' ]);
+  var _custGrpSet = new Set([ 'COMME', 'GOVRN' ,'CROSS']);
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('isuCd');
@@ -2487,7 +2485,7 @@ function setEntepriseGR() {
   var clientTier = FormManager.getActualValue('clientTier');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet21 = new Set([ 'BUSPR', 'CRBUS', 'CRINT', 'IBMEM', 'INTER' ]);
-  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'PRICU', 'SAASP' ]);
+  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'PRICU', 'SAASP','CROSS' ]);
   var custSubGrpSet = new Set([ 'COMME', 'GOVRN' ]);
 
   var isuCtc = isuCd + clientTier;
@@ -2718,4 +2716,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE ]);
 
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.GREECE ], null, true);
+  GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE ]);
 });

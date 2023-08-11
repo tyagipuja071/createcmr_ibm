@@ -55,7 +55,9 @@ public class RecordCollector {
         mqIntfReqQueuePK.setQueryReqId(SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "QUERY_REQ_ID", "CREQCMR"));
         mqIntfReqQueue.setId(mqIntfReqQueuePK);
         mqIntfReqQueue.setReqId(((Long) entity.getValue("REQ_ID")).longValue());
-        mqIntfReqQueue.setCmrNo((String) entity.getValue("CMR_NO"));
+        if (entity.getValue("CMR_NO") != null && !entity.getValue("CMR_NO").toString().startsWith("P")) {
+          mqIntfReqQueue.setCmrNo((String) entity.getValue("CMR_NO"));
+        }
         mqIntfReqQueue.setCmrIssuingCntry((String) entity.getValue("CMR_ISSUING_CNTRY"));
         mqIntfReqQueue.setReqStatus(mqStatus);
         mqIntfReqQueue.setReqType((String) entity.getValue("REQ_TYPE"));

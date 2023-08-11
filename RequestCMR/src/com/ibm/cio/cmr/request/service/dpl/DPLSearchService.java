@@ -123,9 +123,11 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         resultCount += result.getDeniedPartyRecords().size();
       }
     }
+
     ScorecardPK scorecardPk = new ScorecardPK();
     scorecardPk.setReqId(reqId);
     Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
+
     if (scorecard != null && resultCount == 0) {
       LOG.debug("Auto assessinging DPL check results.");
       scorecard.setDplAssessmentBy("CreateCMR");

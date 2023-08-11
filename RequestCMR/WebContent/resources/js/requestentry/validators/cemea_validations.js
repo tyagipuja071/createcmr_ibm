@@ -681,7 +681,7 @@ function addHandlersForCEMEA() {
             FormManager.enable('clientTier');
           }
         }
-
+       
         // CREATCMR-4293
         if (GEOHandler.CEE.includes(cntry)) {
           var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -690,6 +690,11 @@ function addHandlersForCEMEA() {
             FormManager.removeValidator('clientTier', Validators.REQUIRED);
           }
         }
+
+        if (cntry == '618') {
+          FormManager.removeValidator('clientTier', Validators.REQUIRED);
+        }
+        // CREATCMR-4293
       }
       if (cntry == '618') {
         setClientTierValuesAT(value);
@@ -721,11 +726,12 @@ function addHandlersForCEMEA() {
     });
   }
 
-//  if (_SalesRepHandler == null) {
-//    _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-//      setSBO(value);
-//    });
-//  }
+// if (_SalesRepHandler == null) {
+// _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'),
+// 'onChange', function(value) {
+// setSBO(value);
+// });
+// }
 
   if (_ExpediteHandler == null) {
     _ExpediteHandler = dojo.connect(FormManager.getField('expediteInd'), 'onChange', function(value) {
@@ -745,7 +751,7 @@ function addHandlersForCEMEA() {
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       setVatValidatorCEMEA();
-     // customVATMandatoryForAT();
+      // customVATMandatoryForAT();
     });
   }
 
@@ -803,7 +809,10 @@ function setClientTierValuesAT(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  }
 }
 
 function addAfterConfigCEE() {
@@ -1961,7 +1970,7 @@ function setSalesRepValues(clientTier) {
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
       if (salesReps.length == 1) {
         FormManager.setValue('repTeamMemberNo', salesReps[0]);
-//        setSBO();
+// setSBO();
       }
     }
   }
@@ -1990,6 +1999,7 @@ function setSBOValuesForIsuCtc(value) {
     return;
   }
 
+
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
@@ -1998,7 +2008,7 @@ function setSBOValuesForIsuCtc(value) {
   var isuCtc = isuCd + clientTier;
   var qParams = null;
   var sbo = [];
-
+ 
   // SBO will be based on IMS
   if (isuCd != '') {
     var results = null;
@@ -2022,7 +2032,7 @@ function setSBOValuesForIsuCtc(value) {
     console.log("There are " + results.length + " SBO returned.");
 
     var custSubGrp = FormManager.getActualValue('custSubGrp');
-    FormManager.clearValue('salesBusOffCd');
+   // FormManager.clearValue('salesBusOffCd');
     if (results != null && results.length > 0) {
       for (var i = 0; i < results.length; i++) {
         sbo.push(results[i].ret1);
@@ -2368,9 +2378,9 @@ function afterConfigForRussia() {
 }
 
 function setSBOafterAddrConfig() {
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
+   if (FormManager.getActualValue('reqType') != 'C') {
+   return;
+   }
   if (FormManager.getActualValue('addrType') == 'ZS01') {
 
     var custType = FormManager.getActualValue('custGrp');
@@ -2425,9 +2435,9 @@ function setSBOafterAddrConfig() {
 }
 
 function setSBOValues() {
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
+   if (FormManager.getActualValue('reqType') != 'C') {
+   return;
+   }
   var custType = FormManager.getActualValue('custGrp');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
@@ -3612,7 +3622,7 @@ function resetVatExempt() {
 
 function resetVatExemptOnchange() {
   dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
-    resetVatExempt();
+// resetVatExempt();
   });
 }
 
@@ -5325,6 +5335,39 @@ function retainVatValueAT() {
     FormManager.setValue('vat', _vat);
   }
 }
+// CREATCMR-9427
+function addProvinceCityValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var landCntry = FormManager.getActualValue('landCntry');
+        var stateProv = FormManager.getActualValue('stateProv');
+        var city = FormManager.getActualValue('city1');
+        var addrType = FormManager.getActualValue('addrType');
+
+        if ((landCntry == 'RO' && stateProv == 'B') && (reqType =='C'|| reqType=='U')) {
+          if (addrType == 'ZP02') {
+            if ((city.substr(0, 18) == 'București Sectorul' && city.length == '20')
+                && (city.at(-1) == '1' || city.at(-1) == '2' || city.at(-1) == '3' || city.at(-1) == '4' || city.at(-1) == '5' || city.at(-1) == '6')) {
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult(null, false, 'Correct format for city is București Sectorul \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+            }
+          }
+          if ((city.substr(0, 16) == 'BUCHAREST SECTOR' && city.length == '18')
+              && (city.at(-1) == '1' || city.at(-1) == '2' || city.at(-1) == '3' || city.at(-1) == '4' || city.at(-1) == '5' || city.at(-1) == '6')) {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult(null, false, 'Correct format for city is BUCHAREST SECTOR \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+          }
+        } 
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 // CREATCMR-788
 function addressQuotationValidatorCEMEA() {
   var cmrIssueCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -5412,8 +5455,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setVatRequired, GEOHandler.CEMEA);
   // CMR-2101 Austria the func for Austria, setSBO also used by CEE
   // countries
-//  GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
-//  GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
+// GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
+// GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
   // GEOHandler.addAfterConfig(setSBO2, [ SysLoc.RUSSIA ]);
   // GEOHandler.addAfterTemplateLoad(setSBO2, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setCommercialFinanced, GEOHandler.CEMEA);
@@ -5442,10 +5485,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
-//  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); // CMR-2101
-//  GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]);
-//  GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
-//  GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
+// GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); //
+// CMR-2101
+// GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]);
+// GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
+// GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(resetVatExemptOnchange, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(lockLocationNo, [ SysLoc.AUSTRIA ]);
 
@@ -5469,7 +5513,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGaddrValidatorForCEE, GEOHandler.CEE, null, true);
   // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
   // true);
-  //GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
+  // GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA
+  // ], null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741',
       '787', '820', '821', '826', '889', '358', '359', '363' ]);
   GEOHandler.registerValidator(cemeaCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
@@ -5500,8 +5545,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(validatorsDIGIT, GEOHandler.CEE);
   // CMR-1912 Vat should be required for AT local-BP and Commercial
-  //GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
-  //GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
+  // GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
+  // GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA
+  // ]);
   /*
    * GEOHandler.addAfterConfig(cemeaCustomVATMandatory, GEOHandler.CEMEA);
    * GEOHandler.addAfterTemplateLoad(cemeaCustomVATMandatory, GEOHandler.CEMEA);
@@ -5526,8 +5572,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(lockIBMtab, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(lockIBMtab, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(resetVatExemptOnScenario, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(resetVatExemptOnScenario, SysLoc.AUSTRIA);
+// GEOHandler.addAfterConfig(resetVatExemptOnScenario, [ SysLoc.AUSTRIA ]);
+// GEOHandler.addAfterTemplateLoad(resetVatExemptOnScenario, SysLoc.AUSTRIA);
   // CEE
   GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
@@ -5604,4 +5650,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
+  GEOHandler.registerValidator(addProvinceCityValidator, [ SysLoc.ROMANIA ], null, true);
 });

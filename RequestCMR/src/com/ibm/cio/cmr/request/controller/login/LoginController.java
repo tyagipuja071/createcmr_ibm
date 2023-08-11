@@ -4,10 +4,13 @@
 package com.ibm.cio.cmr.request.controller.login;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -16,6 +19,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -48,8 +52,12 @@ import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
+import com.ibm.cio.cmr.request.util.oauth.SimpleJWT;
+import com.ibm.cio.cmr.request.util.oauth.UserHelper;
 import com.ibm.cmr.services.client.AuthorizationClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.auth.Authorization;
@@ -57,6 +65,7 @@ import com.ibm.cmr.services.client.auth.AuthorizationRequest;
 import com.ibm.cmr.services.client.auth.AuthorizationRequest.ApplicationCode;
 import com.ibm.cmr.services.client.auth.AuthorizationResponse;
 import com.ibm.cmr.services.client.auth.Role;
+import com.ibm.json.java.JSONObject;
 
 /**
  * Handles the login page and home page and related functions such as logout,
@@ -119,6 +128,8 @@ public class LoginController extends BaseController {
    */
   @RequestMapping(value = "/home", method = RequestMethod.GET)
   public ModelAndView showHomePage(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
+    AppUser user = AppUser.getUser(request);
+
     ModelAndView mv = new ModelAndView("landingPage", "loginUser", new LogInUserModel());
     setPageKeys("HOME", "OVERVIEW", mv);
     return mv;
@@ -145,6 +156,12 @@ public class LoginController extends BaseController {
       model.addAttribute("c", findcmrparams);
       newModel.setC(findcmrparams);
     }
+
+    if (OAuthUtils.isSSOActivated()) {
+      RequestUtils.performLogoutActivities(request);
+      return new ModelAndView("redirect:/logout", "loginUser", new LogInUserModel());
+    }
+
     return new ModelAndView("redirect:/login", "loginUser", new LogInUserModel());
   }
 
@@ -156,14 +173,43 @@ public class LoginController extends BaseController {
    * @return
    */
   @RequestMapping(value = "/logout", method = RequestMethod.GET)
-  public ModelAndView performLogout(ModelMap model, HttpServletRequest request) {
+  public ModelAndView performLogout(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+
+    if (OAuthUtils.isSSOActivated()) {
+
+      // revoke token
+      RequestUtils.performLogoutActivities(request);
+
+      updateTimeout(request);
+
+      LogInUserModel userModel = new LogInUserModel();
+      setReqIdIntoUserModel(request, userModel);
+      ModelAndView mv = new ModelAndView("loggedOut", "loginUser", userModel);
+      return mv;
+    }
 
     AppUser.remove(request);
     request.getSession().invalidate();
-
     ModelAndView mv = new ModelAndView("redirect:/login", "loginUser", new LogInUserModel());
     MessageUtil.setInfoMessage(mv, MessageUtil.INFO_LOGOUT);
     return mv;
+  }
+
+  private void updateTimeout(HttpServletRequest request) {
+    SessionInactivityFilter filterInstance = new SessionInactivityFilter();
+    filterInstance.timeoutLengthMinutes = 120;
+    filterInstance.updateLastUserTriggeredRequestDate(request);
+  }
+
+  private void setReqIdIntoUserModel(HttpServletRequest request, LogInUserModel userModel) {
+    try {
+      long reqId = 0;
+      reqId = Long.parseLong(request.getParameter("r"));
+      if (reqId != 0) {
+        userModel.setR(reqId);
+      }
+    } catch (Exception e) {
+    }
   }
 
   /**
@@ -182,6 +228,7 @@ public class LoginController extends BaseController {
 
     ModelAndView mv = null;
     try {
+
       boolean authenticated = userService.authenticateUser(loginUser.getUsername(), loginUser.getPassword());
 
       if (authenticated) {
@@ -330,7 +377,8 @@ public class LoginController extends BaseController {
           appUser.setRequestor(inRequestorGroup);
           appUser.setCmde(inCMDEGroup);
 
-          // Set it in the session so that it can be later accessed in UI
+          // Set it in the session so that it can be later accessed in
+          // UI
           // for display
           request.getSession().setAttribute("displayName", bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_NAME));
 
@@ -540,6 +588,261 @@ public class LoginController extends BaseController {
     query.setParameter("ID", intranetId.toLowerCase());
     query.setForReadOnly(true);
     return query.exists();
+  }
+
+  @RequestMapping(method = RequestMethod.GET, value = "/oidc")
+  public void getAccessToken(HttpServletRequest request, HttpServletResponse response) {
+    try {
+
+      String userIntranetEmail = "";
+      HttpSession session = request.getSession();
+
+      UserHelper userHelper = (UserHelper) session.getAttribute("userHelper");
+      SimpleJWT idToken = userHelper.getIDToken();
+      String accessToken = userHelper.getAccessToken();
+      Long expiresIn = Long.parseLong(userHelper.getPrivateHashtableAttr("expires_in"));
+
+      JSONObject claims = idToken.getClaims();
+      userIntranetEmail = ((String) claims.get("emailAddress")).toLowerCase();
+      session.setAttribute("userIntranetEmail", userIntranetEmail);
+
+      LogInUserModel loginUser = new LogInUserModel();
+      loginUser.setUsername(userIntranetEmail);
+
+      session.setAttribute("loggedInUserModel", loginUser);
+      session.setAttribute("accessToken", accessToken);
+      session.setAttribute("tokenExpiringTime", LocalDateTime.now().plus(expiresIn, ChronoUnit.SECONDS));
+
+      session.setAttribute("loginUser", loginUser);
+
+      request.getRequestDispatcher("/setUserRolesAndPermissions").forward(request, response);
+      return;
+    } catch (IOException | ServletException e) {
+      e.printStackTrace();
+    }
+    return;
+  }
+
+  @RequestMapping(method = RequestMethod.GET, value = "/setUserRolesAndPermissions")
+  public ModelAndView handleOIDCRedirect(HttpServletRequest request, HttpServletResponse response) {
+
+    ModelAndView mv = null;
+    AppUser appUser = new AppUser();
+    LogInUserModel loginUser = (LogInUserModel) request.getSession().getAttribute("loggedInUserModel");
+
+    LOG.info("Logon Attempt (" + CmrConstants.DATE_TIME_FORMAT().format(SystemUtil.getCurrentTimestamp()) + ") by " + loginUser.getUsername());
+
+    try {
+      boolean isApprover = false;
+
+      // implement the new Role mapping
+      AuthorizationResponse authResp = authenticateViaService(loginUser.getUsername());
+
+      // authResp.setAuthorized(false);
+
+      if (authResp.isError()) {
+        // error in service layer
+        throw new CmrException(MessageUtil.ERROR_CANNOT_AUTHENTICATE);
+      }
+
+      EntityManager entityManager = JpaManager.getEntityManager();
+      try {
+
+        if (!authResp.isAuthorized()) {
+          // user has no roles, check if approver first
+          LOG.debug("User has no CreateCMR roles. Checking if approver..");
+          isApprover = isApprover(entityManager, loginUser.getUsername());
+
+          if (!isApprover) {
+            throw new CmrException(MessageUtil.ERROR_BLUEGROUPS_AUTH);
+          } else {
+            Authorization auth = new Authorization();
+            auth.setRoles(new ArrayList<Role>());
+            authResp.setAuthorization(auth);
+          }
+        }
+
+        LOG.debug("User " + loginUser.getUsername() + " authenticated and authorised successfully");
+
+        String userCnum = userService.getUserCnum(loginUser.getUsername());
+
+        Map<String, String> bpPersonDetails = BluePagesHelper.getBluePagesDetailsByIntranetAddr(loginUser.getUsername());
+
+        boolean inAdminGroup = false;
+        boolean inProcessorGroup = false;
+        boolean inRequestorGroup = false;
+        boolean inCMDEGroup = false;
+
+        appUser.setUserCnum(userCnum);
+        appUser.setIntranetId(loginUser.getUsername().toLowerCase());
+        appUser.setEmpName(bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_NAME));
+        appUser.setCountryCode(bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_COUNTRY_CODE));
+        String notesEmail = bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_NOTES_MAIL);
+
+        // set the user roles
+        String roleKey = null;
+        Authorization auth = authResp.getAuthorization();
+        for (Role role : auth.getRoles()) {
+          roleKey = role.getRoleId();
+          if (roleKey.equals(CmrConstants.ROLES.ADMIN.toString())) {
+            inAdminGroup = true;
+          }
+          if (roleKey.equals(CmrConstants.ROLES.PROCESSOR.toString())) {
+            inProcessorGroup = true;
+          }
+          if (roleKey.equals(CmrConstants.ROLES.REQUESTER.toString())) {
+            inRequestorGroup = true;
+          }
+          if (roleKey.equals(CmrConstants.ROLES.CMDE.toString())) {
+            inCMDEGroup = true;
+          }
+          appUser.addRole(roleKey, role.getSubRoleId());
+        }
+
+        if (isApprover) {
+          appUser.setApprover(true);
+        } else if (isApprover(entityManager, loginUser.getUsername())) {
+          appUser.setHasApprovals(true);
+        }
+        appUser.setAuth(auth);
+        LOG.debug("User " + loginUser.getUsername() + ": Roles = " + auth.getRdcRoles().size() + " Auth Groups: " + auth.getAuthGroups().size());
+
+        // set CMR Owner via blue pages' notes email
+        appUser.setNotesEmailId(notesEmail);
+        if (notesEmail.toUpperCase().contains("LENOVO")) {
+          appUser.setCompanyCode("KAU");
+        } else if (notesEmail.toUpperCase().contains("TRURO")) {
+          appUser.setCompanyCode("TRU");
+        } else if (notesEmail.toUpperCase().contains("FONSECA")) {
+          appUser.setCompanyCode("FON");
+        } else if (notesEmail.toUpperCase().contains("IBM")) {
+          appUser.setCompanyCode("IBM");
+        }
+
+        PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("LOGIN.HAS_PREF"));
+        query.setParameter("USER_ID", appUser.getIntranetId().toLowerCase());
+        List<Object[]> results = query.getResults(2);
+        boolean hasDelegate = false;
+        boolean hasRecord = false;
+        for (Object[] result : results) {
+          hasRecord = true;
+          if (!StringUtils.isEmpty((String) result[2])) {
+            hasDelegate = true;
+          }
+          if (!StringUtils.isEmpty((String) result[3]) && appUser.getProcessingCenter() == null) {
+            appUser.setProcessingCenter((String) result[3]);
+          }
+          if (!StringUtils.isEmpty((String) result[1]) && appUser.getCmrIssuingCntry() == null) {
+            appUser.setCmrIssuingCntry((String) result[1]);
+          }
+          if (!StringUtils.isEmpty((String) result[4]) && appUser.getBluePagesName() == null) {
+            appUser.setBluePagesName((String) result[4]);
+          }
+          if (!StringUtils.isEmpty((String) result[5])) {
+            appUser.setDefaultLineOfBusn((String) result[5]);
+          }
+          if (!StringUtils.isEmpty((String) result[6])) {
+            appUser.setDefaultRequestRsn((String) result[6]);
+          }
+          if (!StringUtils.isEmpty((String) result[7])) {
+            appUser.setDefaultReqType((String) result[7]);
+          }
+          if (!StringUtils.isEmpty((String) result[8])) {
+            appUser.setDefaultNoOfRecords(Integer.parseInt((String) result[8]));
+          }
+          if (!StringUtils.isEmpty((String) result[9])) {
+            appUser.setHasCountries(true);
+          }
+          appUser.setShowPendingOnly("Y".equals(result[10]));
+          appUser.setShowLatestFirst("Y".equals(result[11]));
+        }
+        if (hasDelegate) {
+          appUser.setPreferencesSet(true);
+          if (appUser.getBluePagesName() == null) {
+            Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
+            if (p != null) {
+              appUser.setBluePagesName(p.getName());
+            }
+          }
+
+        } else if (!hasRecord) {
+          // create the default record
+          String name = createUserPrefRecord(entityManager, appUser.getIntranetId(), appUser.getEmpName(), appUser.getCountryCode(), notesEmail);
+          appUser.setBluePagesName(name);
+        }
+
+        appUser.setAdmin(inAdminGroup);
+        appUser.setProcessor(inProcessorGroup);
+        appUser.setRequestor(inRequestorGroup);
+        appUser.setCmde(inCMDEGroup);
+
+        // Set it in the session so that it can be later accessed in
+        // UI
+        // for display
+        request.getSession().setAttribute("displayName", bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_NAME));
+
+        request.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, appUser);
+
+        request.getSession().setAttribute("cmr.last.request.date", new Date());
+
+        request.getSession().setAttribute("logged-in", "true");
+
+        request.getSession().setAttribute("WTMStatus", "P");
+
+        request.getSession().setMaxInactiveInterval(60 * 60 * 3);
+
+        // response.addHeader("Set-Cookie",
+        // "countryCode=" + appUser.getCountryCode() + "; HttpOnly;
+        // Secure; SameSite=Strict");
+
+        if (appUser.isPreferencesSet()) {
+          if (loginUser.getR() > 0) {
+            mv = new ModelAndView("redirect:/request/" + loginUser.getR(), "appUser", appUser);
+          } else if (!StringUtils.isBlank(loginUser.getC())) {
+            String c = loginUser.getC();
+            String decoded = new String(Base64.getDecoder().decode(c));
+            String params = decoded.substring(2);
+            if (decoded.startsWith("f")) {
+              mv = new ModelAndView("redirect:/findcmr?" + params, "appUser", appUser);
+            } else if (decoded.startsWith("r")) {
+              mv = new ModelAndView("redirect:/request?" + params, "appUser", appUser);
+            } else {
+              mv = new ModelAndView("redirect:/home", "appUser", appUser);
+            }
+          } else if (appUser.isApprover()) {
+            mv = new ModelAndView("redirect:/myappr", "approval", new MyApprovalsModel());
+          } else {
+            mv = new ModelAndView("redirect:/home", "appUser", appUser);
+          }
+          // setPageKeys("HOME", "OVERVIEW", mv);
+        } else {
+          UserPrefModel pref = new UserPrefModel();
+          pref.setRequesterId(appUser.getIntranetId());
+          mv = new ModelAndView("redirect:/preferences", "pref", pref);
+          // setPageKeys("PREFERENCE", "PREF_SUB", mv);
+        }
+
+        SystemParameters.logUserAccess("CreateCMR", appUser.getIntranetId());
+        AuthCodeRetriever authCode = new AuthCodeRetriever(loginUser.getUsername(), request.getSession());
+        Thread authThread = new Thread(authCode);
+        authThread.start();
+
+      } catch (Exception e) {
+        LOG.error("Error in retrieving Preference settings.", e);
+        if (e instanceof CmrException) {
+          throw e;
+        }
+        throw new CmrException(MessageUtil.ERROR_GENERAL);
+      } finally {
+        entityManager.clear();
+        entityManager.close();
+      }
+    } catch (Exception ex) {
+      mv = new ModelAndView("redirect:/login", "loginUser", loginUser);
+      setError(ex, mv);
+    }
+
+    return mv;
   }
 
 }

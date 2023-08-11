@@ -460,10 +460,10 @@ function afterConfigForCEMEA() {
     FormManager.setValue('defaultLandedCountry', landCntry);
   }
 
-  FormManager.readOnly('capInd');
-  if (FormManager.getActualValue('reqType') == 'C') {
-    FormManager.getField('capInd').set('checked', true);
-  }
+//  FormManager.readOnly('capInd');
+//  if (FormManager.getActualValue('reqType') == 'C') {
+//    FormManager.getField('capInd').set('checked', true);
+//  }
 
   FormManager.readOnly('subIndustryCd');
 
@@ -1833,7 +1833,7 @@ function setSBO(repTeamMemberNo) {
       FormManager.getField('templatevalue-repTeamMemberNo').style.display = 'none';
     }
     // FormManager.setValue('salesBusOffCd', '0000000');
-    // FormManager.setValue('repTeamMemberNo', '099998');
+//    FormManager.setValue('repTeamMemberNo', '099998');
     return;
   }
 
@@ -4259,7 +4259,6 @@ function hideDisableAutoProcessingCheckBox() {
 function afterConfigTemplateLoadForME() {
   filterCmrnoForME();
   togglePPSCeidME();
-  setClassificationCodeME();
   // disableSBO();
   setEngineeringBO();
   addLandCntryHandler();
@@ -4878,6 +4877,7 @@ dojo
       GEOHandler.addAfterConfig(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
       GEOHandler.addAfterTemplateLoad(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
       GEOHandler.addAfterTemplateLoad(setIsuCtcOnScenarioChange, GEOHandler.ME);
+      GEOHandler.addAfterTemplateLoad(setClassificationCodeME, GEOHandler.ME);
       GEOHandler.registerValidator(addVATAttachValidation, [ SysLoc.EGYPT ], null, true);
       // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
       // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);

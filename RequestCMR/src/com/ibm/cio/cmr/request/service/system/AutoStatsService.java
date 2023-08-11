@@ -85,6 +85,8 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     String sql = ExternalizedQuery.getSql("METRICS.AUTOMATION_STATS");
     String geoMarket = model.getGroupByGeo();
 
+    sql += " and admin.REQ_ID in (385352, 384920) ";
+
     if (!StringUtils.isBlank(geoMarket)) {
       String[] parts = geoMarket.split("[-]");
       if (parts.length == 2) {

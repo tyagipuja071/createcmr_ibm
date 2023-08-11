@@ -831,14 +831,23 @@ public class ItalyHandler extends BaseSOFHandler {
     String processingType = PageManager.getProcessingType(SystemLocation.ITALY, "U");
     boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
     String billinglandCntry = "";
+    String companylandCntry = "";
     boolean isUpdateReq = CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType());
+
+    // CREATCMR-8815 / 2765
     if (results != null && !results.getItems().isEmpty()) {
       FindCMRRecordModel billingRecord = results.getItems().stream().filter(item -> "ZP01".equalsIgnoreCase(item.getCmrAddrTypeCode())).findAny()
           .orElse(null);
       billinglandCntry = billingRecord != null ? billingRecord.getCmrCountryLanded() : "";
+
+      FindCMRRecordModel companyRecord = results.getItems().stream().filter(item -> "ZI01".equalsIgnoreCase(item.getCmrAddrTypeCode())).findAny()
+          .orElse(null);
+      companylandCntry = companyRecord != null ? companyRecord.getCmrCountryLanded() : "";
+      billinglandCntry = StringUtils.isNotEmpty(billinglandCntry) ? billinglandCntry : companylandCntry;
     }
 
     boolean crossBorder = isCrossBorderIT(billinglandCntry);
+
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       isLD = true;
       if (!prospectCmrChosen) {

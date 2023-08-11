@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.GeoContactInfo;
 import com.ibm.cio.cmr.request.entity.GeoContactInfoPK;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
@@ -39,6 +40,7 @@ import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.KeyContainer;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -108,6 +110,10 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       AdminPK pk = new AdminPK();
       pk.setReqId(model.getReqId());
       Admin admin = entityManager.find(Admin.class, pk);
+
+      DataPK dataPk = new DataPK();
+      dataPk.setReqId(model.getReqId());
+      Data data = entityManager.find(Data.class, dataPk);
       /*
        * if (SystemLocation.NETHERLANDS.equals(model.getCmrIssuingCntry()) &&
        * (model.getAddrType().equals("ZD01"))) { newAddrSeq =
@@ -137,7 +143,14 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && geoHandler != null) {
         newAddrSeq = generateAddrSeqLD(entityManager, model.getAddrType(), model.getReqId(), model.getCmrIssuingCntry(), geoHandler);
       }
-
+      if (geoHandler != null && newAddrSeq == null && (SystemLocation.NEW_ZEALAND.equals(model.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(model.getCmrIssuingCntry()))) {
+        if(StringUtils.isNotEmpty(model.getAddrSeq())) {
+          newAddrSeq = model.getAddrSeq();
+        } else {
+          newAddrSeq = "";
+        }
+      }
+      
       if (geoHandler != null && newAddrSeq == null) {
         newAddrSeq = geoHandler.generateAddrSeq(entityManager, model.getAddrType(), model.getReqId(), model.getCmrIssuingCntry());
       }
@@ -146,9 +159,15 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       }
 
       if ("618".equals(model.getCmrIssuingCntry())) {
-
         newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
+      }
 
+      if (("866".equals(model.getCmrIssuingCntry()) || "754".equals(model.getCmrIssuingCntry())) && "U".equals(admin.getReqType())) {
+        int legacyMaxSeq = getMaxSequenceOnLegacyAddr(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
+        if (legacyMaxSeq > Integer.parseInt(newAddrSeq)) {
+          String maxSeq = Integer.toString(legacyMaxSeq);
+          newAddrSeq = StringUtils.leftPad(maxSeq, 5, '0');
+        }
       }
 
       if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
@@ -235,6 +254,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
           }
         }
       }
+
       model.setAddrSeq(newAddrSeq);
       if (addrExists(entityManager, model.getAddrType(), model.getAddrSeq(), model.getReqId())) {
         throw new CmrException(MessageUtil.ERROR_ALREADY_ADDRESS, uniqAddr.toString());
@@ -279,6 +299,10 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
       if (EMEAHandler.isITIssuingCountry(model.getCmrIssuingCntry())) {
         setStateProvForITAddr(entityManager, addr);
+      }
+
+      if (JPHandler.isJPIssuingCountry(model.getCmrIssuingCntry())) {
+        createJPIntlAddr(model, addr, entityManager);
       }
 
       if (CNHandler.isCNIssuingCountry(model.getCmrIssuingCntry())) {
@@ -407,6 +431,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         updateCNGeoContactInfo(model, entityManager, addr);
         updateCNCityInfo(entityManager, addr, model);
       }
+
+      if (JPHandler.isJPIssuingCountry(model.getCmrIssuingCntry())) {
+        updateJPIntlAddr(model, entityManager, addr);
+      }
+
       if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry())) {
         createMachines(model, addr, entityManager, request);
       }
@@ -438,6 +467,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (CNHandler.isCNIssuingCountry(model.getCmrIssuingCntry())) {
         IntlAddr iAddr = getIntlAddrById(addrList, entityManager);
         deleteEntity(iAddr, entityManager);
+      }
+
+      if (JPHandler.isJPIssuingCountry(model.getCmrIssuingCntry())) {
+        IntlAddr iAddr = getIntlAddrById(addrList, entityManager);
+        if (iAddr != null)
+          deleteEntity(iAddr, entityManager);
       }
 
       if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry())) {
@@ -500,6 +535,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
           if (CNHandler.isCNIssuingCountry(model.getCmrIssuingCntry())) {
             IntlAddr iAddr = getIntlAddrById(addr, entityManager);
             deleteEntity(iAddr, entityManager);
+          }
+
+          if (JPHandler.isJPIssuingCountry(model.getCmrIssuingCntry())) {
+            IntlAddr iAddr = getIntlAddrById(addr, entityManager);
+            if (iAddr != null)
+              deleteEntity(iAddr, entityManager);
           }
 
           if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry())) {
@@ -693,6 +734,21 @@ public class AddressService extends BaseService<AddressModel, Addr> {
             addrModel.setCnCustContNm(geoContactInfo.getContactName());
             addrModel.setCnCustContPhone2(geoContactInfo.getContactPhone());
           }
+        }
+
+        if (JPHandler.isJPIssuingCountry(model.getCmrIssuingCntry())) {
+          // fetch data from INTL_ADDR
+          IntlAddr iAddr = getIntlAddrById(addr, entityManager);
+
+          if (iAddr != null && iAddr.getId().getReqId() != 0) {
+            addrModel.setCnAddrTxt(iAddr.getAddrTxt());
+            addrModel.setCnAddrTxt2(iAddr.getIntlCustNm4());
+            addrModel.setCnCustName1(iAddr.getIntlCustNm1());
+            addrModel.setCnCustName2(iAddr.getIntlCustNm2());
+            addrModel.setCnCity(iAddr.getCity1());
+            addrModel.setCnDistrict(iAddr.getCity2());
+          }
+
         }
 
         results.add(addrModel);
@@ -1340,7 +1396,6 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     request.setAddr2(addr.getAddrTxt2());
     request.setId(id);
     request.setPrivate(isPrivate);
-
     if (JPHandler.isJPIssuingCountry(issuingCountry))
       request.setCompanyName(addr.getCustNm3());
     else
@@ -1852,6 +1907,57 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     return sapNo;
   }
 
+  public void createJPIntlAddr(AddressModel model, Addr addr, EntityManager entityManager) {
+    IntlAddr iAddr = createIntlAddrFromModel(model, addr, entityManager);
+    IntlAddr iAddrExist = getIntlAddrById(addr, entityManager);
+    String phone = addr.getCustPhone();
+    if (phone != null && phone.length() == 9) {
+      phone = "0" + phone;
+    }
+    if (phone != null && phone.length() == 10) {
+      phone = phone.substring(0, 2) + "-" + phone.substring(2, 6) + "-" + phone.substring(6, 10);
+    }
+
+    if (iAddrExist != null) {
+
+      updateEntity(iAddr, entityManager);
+      Addr newAddr = getAddrByAddrSeq(entityManager, addr.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq());
+      if (newAddr != null) {
+        newAddr.setPostCd(StringUtils.isNoneBlank(addr.getPostCd()) ? addr.getPostCd() : newAddr.getPostCd());
+        newAddr.setCustPhone(addr.getCustPhone() != null && addr.getCustPhone().length() == 10
+            ? (addr.getCustPhone().substring(0, 2) + "-" + addr.getCustPhone().substring(2, 4) + "-" + addr.getCustPhone().substring(6, 4))
+            : newAddr.getCustPhone());
+        newAddr.setCustNm3(iAddr.getIntlCustNm1());
+        updateEntity(newAddr, entityManager);
+      } else {
+        newAddr = new Addr();
+        newAddr.setId(addr.getId());
+        newAddr.setPostCd(addr.getPostCd());
+        newAddr.setCustPhone(phone != null ? phone : "");
+        newAddr.setCustNm3(model.getCnCustName1());
+        updateEntity(newAddr, entityManager);
+      }
+    } else {
+      createEntity(iAddr, entityManager);
+      if (addr.getId() != null) {
+        Addr newAddr = getAddrByAddrSeq(entityManager, addr.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq());
+        if (newAddr != null) {
+          newAddr.setPostCd(StringUtils.isNoneBlank(addr.getPostCd()) ? addr.getPostCd() : newAddr.getPostCd());
+          newAddr.setCustPhone(phone != null ? phone : newAddr.getCustPhone());
+          newAddr.setCustNm3(iAddr.getIntlCustNm1());
+          updateEntity(newAddr, entityManager);
+        } else {
+          newAddr = new Addr();
+          newAddr.setId(addr.getId());
+          newAddr.setPostCd(addr.getPostCd());
+          newAddr.setCustPhone(phone != null ? phone : "");
+          newAddr.setCustNm3(model.getCnCustName1());
+          updateEntity(newAddr, entityManager);
+        }
+      }
+    }
+  }
+
   public void createCNIntlAddr(AddressModel model, Addr addr, EntityManager entityManager) {
     int tempNewLen = 0;
     String newTxt = "";
@@ -1914,6 +2020,67 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
     return iAddr;
 
+  }
+
+  public IntlAddr createIntlAddrFromModel(FindCMRRecordModel model, Addr addr, EntityManager entityManager) {
+    IntlAddr iAddr = new IntlAddr();
+    IntlAddrPK iAddrPK = new IntlAddrPK();
+
+    iAddrPK.setAddrSeq(addr.getId().getAddrSeq());
+    iAddrPK.setAddrType(addr.getId().getAddrType());
+    iAddrPK.setReqId(addr.getId().getReqId());
+
+    iAddr.setId(iAddrPK);
+    iAddr.setIntlCustNm1(
+        StringUtils.isNoneBlank(model.getCmrName()) ? model.getCmrName() : (StringUtils.isNoneBlank(model.getCmrName3()) ? model.getCmrName3() : ""));
+    iAddr.setIntlCustNm2(StringUtils.isNoneBlank(model.getCmrName2()) ? model.getCmrName2() : "");
+    iAddr.setAddrTxt(model.getCmrStreet());
+    iAddr.setIntlCustNm4("");
+    iAddr.setCity1(model.getCmrCity());
+    iAddr.setCity2(model.getCmrCity2());
+    iAddr.setLangCd(StringUtils.isEmpty(getCustPrefLang(addr, entityManager)) ? "1" : getCustPrefLang(addr, entityManager));
+
+    return iAddr;
+
+  }
+
+  public boolean updateJPIntlAddr(AddressModel model, EntityManager entityManager, Addr addr) {
+    IntlAddr iAddr = getIntlAddrById(addr, entityManager);
+
+    if (iAddr != null) {
+      iAddr.setIntlCustNm1(model.getCnCustName1());
+      iAddr.setIntlCustNm2(model.getCnCustName2());
+      iAddr.setIntlCustNm3(model.getCnCustName3());
+      iAddr.setAddrTxt(model.getCnAddrTxt());
+      iAddr.setIntlCustNm4(model.getCnAddrTxt2());
+      iAddr.setCity1(model.getCnCity());
+      iAddr.setCity2(model.getCnDistrict());
+
+      updateEntity(iAddr, entityManager);
+      Addr newAddr = getAddrByAddrSeq(entityManager, addr.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq());
+      String phone = addr.getCustPhone();
+      if (phone != null && phone.length() == 9) {
+        phone = "0" + phone;
+      }
+      if (phone != null && phone.length() == 10) {
+        phone = phone.substring(0, 2) + "-" + phone.substring(2, 6) + "-" + phone.substring(6, 10);
+      }
+      if (newAddr != null) {
+        newAddr.setPostCd(StringUtils.isNoneBlank(addr.getPostCd()) ? addr.getPostCd() : newAddr.getPostCd());
+        newAddr.setCustPhone(phone != null ? phone : newAddr.getCustPhone());
+        newAddr.setCustNm3(model.getCnCustName1());
+        updateEntity(newAddr, entityManager);
+      } else {
+        newAddr = new Addr();
+        newAddr.setId(addr.getId());
+        newAddr.setPostCd(addr.getPostCd());
+        newAddr.setCustPhone(phone != null ? phone : "");
+        updateEntity(newAddr, entityManager);
+      }
+    } else {
+      createJPIntlAddr(model, addr, entityManager);
+    }
+    return true;
   }
 
   public boolean updateCNIntlAddr(AddressModel model, EntityManager entityManager, Addr addr) {

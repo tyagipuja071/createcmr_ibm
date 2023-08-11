@@ -575,6 +575,18 @@ public class SWISSService extends BaseBatchService {
               + ". Number of response records and on ADDR table are inconsistent.");
           break;
         }
+        
+        deleteEntity(addr, entityManager);
+        
+        for (RDcRecord red : response.getRecords()) {
+          String[] addrSeqs = {};
+          if (red.getSeqNo() != null && red.getSeqNo() != "") {
+            addrSeqs = red.getSeqNo().split(",");
+          }
+          if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+            addr.getId().setAddrSeq(addrSeqs[0]);
+          }
+        }
 
         if (response.getRecords() != null && response.getRecords().size() != 0) {
 
@@ -586,12 +598,12 @@ public class SWISSService extends BaseBatchService {
           } else {
             for (RDcRecord red : response.getRecords()) {
               String[] addrSeqs = { "", "" };
-
               if (red.getSeqNo() != null && red.getSeqNo() != "") {
                 addrSeqs = red.getSeqNo().split(",");
               }
 
-              if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+
+              if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[0].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                 LOG.debug("Address matched");
                 addr.setPairedAddrSeq(addrSeqs[0]);
                 addr.setSapNo(red.getSapNo());
@@ -606,8 +618,19 @@ public class SWISSService extends BaseBatchService {
 
             }
           }
-
           updateEntity(addr, entityManager);
+        }
+        if (response.getRecords() != null && response.getRecords().size() != 0) {
+          for (RDcRecord red : response.getRecords()) {
+            String[] addrSeqs = { "", "" };
+
+            if (red.getSeqNo() != null && red.getSeqNo() != "") {
+              addrSeqs = red.getSeqNo().split(",");
+            }
+            if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+              updateAddrSeq(entityManager, admin.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq(), addrSeqs[0]);
+            }
+          }
         }
         index++;
       }
@@ -894,13 +917,13 @@ public class SWISSService extends BaseBatchService {
           }
 
           updateEntity(admin, entityManager);
-
+          WfHist history = null;
           if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
             RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
                 "Some errors occurred during RDc processing. Please check request's comment log for details.", TransConnService.ACTION_RDC_UPDATE,
                 null, null, "CPR".equals(admin.getReqStatus()));
           } else {
-            RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
+            history = RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
                 "RDc  Processing has been completed(First batch run). Please check request's comment log for details.",
                 TransConnService.ACTION_RDC_UPDATE, null, null, "CPR".equals(admin.getReqStatus()));
           }
@@ -908,7 +931,9 @@ public class SWISSService extends BaseBatchService {
           partialCommit(entityManager);
           LOG.debug(
               "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
-
+          if ("CPR".equals(admin.getReqStatus())) {
+            RequestUtils.sendEmailNotifications(entityManager, admin, history, false, false);
+          }
         } catch (Exception e) {
           LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
           addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
@@ -920,9 +945,9 @@ public class SWISSService extends BaseBatchService {
         if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
           noOFWorkingHours = checked2WorkingDays(admin.getRdcProcessingTs(), SystemUtil.getCurrentTimestamp());
         }
-        if (noOFWorkingHours >= 48) {
+        if (noOFWorkingHours >= 72) {
           lockRecordUpdt(entityManager, admin);
-          LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
+          LOG.info("RDc: Temporary Reactivate Embargo process: run after 3 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
             List<Addr> addresses = this.cmrObjects.getAddresses();
@@ -1336,7 +1361,7 @@ public class SWISSService extends BaseBatchService {
 
     }
   }
-
+  
   // CREATCMR-8052 - Item 3
   private void addVatIndToKunnrExtForCB(EntityManager entityManager, String mandt, Data data, Addr addr) {
     KunnrExtPK pk = new KunnrExtPK();
@@ -1366,18 +1391,11 @@ public class SWISSService extends BaseBatchService {
       LOG.debug("processed.setTime(processedDate) O/P >>> " + processed.getTime());
       LOG.debug("current.setTime(processedDate) O/P >>> " + current.getTime());
 
-      int day = current.get(Calendar.DAY_OF_WEEK);
-      if ((day != Calendar.SATURDAY) && (day != Calendar.SUNDAY) && current.after(processed)) {
-        if (current.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY && processed.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-          hoursBetween = 0;
-        } else {
-          hoursBetween = (current.getTimeInMillis() - processed.getTimeInMillis()) / (60 * 60 * 1000);
-        }
-        LOG.debug("current.get(Calendar.DAY_OF_YEAR) >>> " + current.getTime());
-        LOG.debug("processed.get(Calendar.DAY_OF_YEAR) >>> " + processed.getTime());
-        LOG.debug("hoursBetween >>> " + hoursBetween);
-
-      }
+      hoursBetween = (current.getTimeInMillis() - processed.getTimeInMillis()) / (60 * 60 * 1000);
+      
+      LOG.debug("current.get(Calendar.DAY_OF_YEAR) >>> " + current.getTime());
+      LOG.debug("processed.get(Calendar.DAY_OF_YEAR) >>> " + processed.getTime());
+      LOG.debug("hoursBetween >>> " + hoursBetween);
 
       LOG.debug("No of workingDays=" + hoursBetween);
     } catch (Exception e) {
@@ -1838,9 +1856,17 @@ public class SWISSService extends BaseBatchService {
               if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
                 comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
                     + " was SUCCESSFULLY processed:\n");
+                LOG.info("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
+                    + " was SUCCESSFULLY processed:\n");
                 for (RDcRecord pRecord : response.getRecords()) {
-                  comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
-                  comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  if (comment.length() > 9900) {
+                    LOG.info("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    LOG.info(" address type: " + pRecord.getAddressType() + "\n");
+                  } else {
+                    comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  }
+
                 }
               }
             } else {
@@ -2193,5 +2219,16 @@ public class SWISSService extends BaseBatchService {
       partialCommit(em);
     }
     return response;
+  }
+
+  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq) {
+    String updateSeq = ExternalizedQuery.getSql("SWISS.UPDATE_ADDR_SEQ");
+    PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
+    q.setParameter("NEW_SEQ", newSeq);
+    q.setParameter("REQ_ID", reqId);
+    q.setParameter("TYPE", addrType);
+    q.setParameter("OLD_SEQ", oldSeq);
+    LOG.debug("Assigning address sequence " + newSeq + " to " + addrType + " address.");
+    q.executeSql();
   }
 }

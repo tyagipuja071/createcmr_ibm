@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.util.geo.impl;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,13 +11,17 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.digester.Digester;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -32,6 +37,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -54,6 +60,36 @@ public abstract class APHandler extends GEOHandler {
   private static final Logger LOG = Logger.getLogger(APHandler.class);
   private static final String[] AP_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "SearchTerm", "TransportZone" };
   protected WtaasRecord currentRecord;
+  private static List<IndiaProvCdStateCityMapping> provCdArCdMappings = new ArrayList<IndiaProvCdStateCityMapping>();
+
+  @SuppressWarnings("unchecked")
+  public APHandler() {
+
+    if (APHandler.provCdArCdMappings.isEmpty()) {
+      Digester digester = new Digester();
+
+      digester.setValidating(false);
+
+      digester.addObjectCreate("mappings", ArrayList.class);
+      digester.addObjectCreate("mappings/mapping", IndiaProvCdStateCityMapping.class);
+
+      digester.addBeanPropertySetter("mappings/mapping/city", "city");
+      digester.addBeanPropertySetter("mappings/mapping/state", "state");
+      digester.addBeanPropertySetter("mappings/mapping/provinceCd", "provinceCd");
+      digester.addBeanPropertySetter("mappings/mapping/arCode", "arCode");
+
+      digester.addSetNext("mappings/mapping", "add");
+
+      try {
+        InputStream is = ConfigUtil.getResourceStream("india_prov_state_city.xml");
+        APHandler.provCdArCdMappings = (ArrayList<IndiaProvCdStateCityMapping>) digester.parse(is);
+
+      } catch (Exception e) {
+        LOG.error("Error occured while digesting xml.", e);
+      }
+    }
+
+  }
 
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
@@ -123,11 +159,11 @@ public abstract class APHandler extends GEOHandler {
                       record.setCmrAddrTypeCode(supportedAddrType);
                   }
                   record.setCmrAddrSeq(wtaasAddress.getAddressNo());
-                  
-                  if (("616".equals(reqEntry.getCmrIssuingCntry()) || "796".equals(reqEntry.getCmrIssuingCntry())) && "MAIL".equals(record.getCmrAddrTypeCode())) {
-                      continue;
-                    }
-                  
+
+                  if ("MAIL".equals(record.getCmrAddrTypeCode())) {
+                    continue;
+                  }
+
                   if (shouldAddWTAASAddess(record.getCmrIssuedBy(), wtaasAddress)) {
                     converted.add(record);
                   }
@@ -324,7 +360,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(oldData.getAbbrevLocn());
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "SalRepNameNo", "-"));
@@ -332,7 +367,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getRepTeamMemberNo(), "SalRepNameNo", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CollectionCd", "-"));
@@ -340,7 +374,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getCollectionCd(), "CollectionCd", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getEngineeringBo(), newData.getEngineeringBo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "EngineeringBo", "-"));
@@ -348,7 +381,6 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEngineeringBo(), "EngineeringBo", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getApCustClusterId(), newData.getApCustClusterId())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Cluster", "-"));
@@ -356,6 +388,14 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(oldData.getApCustClusterId());
       results.add(update);
     }
+  }
+
+  public String getCodeAndDescription(String code, String fieldId, String cntry) {
+    String desc = DropdownListController.getDescription(fieldId, code, cntry);
+    if (!StringUtils.isEmpty(desc)) {
+      return desc;
+    }
+    return code;
   }
 
   public DataRdc getAPClusterDataRdc(long reqId) {
@@ -417,11 +457,79 @@ public abstract class APHandler extends GEOHandler {
     if (soldTo != null) {
       setAbbrevLocNMBeforeAddrSave(entityManager, soldTo, data.getCmrIssuingCntry());
     }
+    if (SystemLocation.INDIA.equals(cmrIssuingCntry) && StringUtils.isEmpty(data.getBusnType())) {
+      // retrieve zs01 address
+      RequestData requestData = new RequestData(entityManager, admin.getId().getReqId());
+
+      Addr addr = requestData.getAddress("ZS01");
+      setProvNameCdFrmCityState(entityManager, addr);
+
+    }
   }
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
     setAbbrevLocNMBeforeAddrSave(entityManager, addr, cmrIssuingCntry);
+    // call only for zs01 and India
+    if (SystemLocation.INDIA.equals(cmrIssuingCntry) && "ZS01".equalsIgnoreCase(addr.getId().getAddrType())) {
+      setProvNameCdFrmCityState(entityManager, addr);
+    }
+  }
+
+  public static void setProvNameCdFrmCityState(EntityManager entityManager, Addr addr) {
+    DataPK dataPK = new DataPK();
+    dataPK.setReqId(addr.getId().getReqId());
+    Data data = entityManager.find(Data.class, dataPK);
+    boolean matchFound = false;
+    if (!APHandler.provCdArCdMappings.isEmpty()) {
+      // first check if any city matches
+      for (IndiaProvCdStateCityMapping mapping : provCdArCdMappings) {
+        String mappingCity = AutomationUtil.getCleanString(mapping.getCity());
+        String requestCity = StringUtils.isNotEmpty(addr.getCity1()) ? addr.getCity1().toUpperCase() : "";
+        if (mappingCity.contains(requestCity)) {
+          data.setBusnType(mapping.getProvinceCd());
+          data.setTerritoryCd(mapping.getProvinceCd());
+          data.setCollectionCd(mapping.getArCode());
+          matchFound = true;
+          break;
+        }
+      }
+
+      // then check if any state matches
+      if (!matchFound) {
+        for (IndiaProvCdStateCityMapping mapping : provCdArCdMappings) {
+          String mappingState = AutomationUtil.getCleanString(mapping.getState());
+          String requestState = getStateDesc(entityManager, addr.getStateProv());
+          if (mappingState.contains(requestState)) {
+            data.setBusnType(mapping.getProvinceCd());
+            data.setTerritoryCd(mapping.getProvinceCd());
+            data.setCollectionCd(mapping.getArCode());
+            matchFound = true;
+            break;
+          }
+        }
+      }
+
+      // if both city and state mismatch, set default value to 'others'
+      if (!matchFound) {
+        data.setBusnType("000");
+        data.setTerritoryCd("000");
+        data.setCollectionCd("I001");
+      }
+      entityManager.merge(data);
+      entityManager.flush();
+    }
+  }
+
+  private static String getStateDesc(EntityManager em, String state) {
+    String sql = ExternalizedQuery.getSql("AUTO.GET_STATE_DESCRIP");
+    PreparedQuery query = new PreparedQuery(em, sql);
+    query.setParameter("STATE_PROV_CD", state);
+    String stateDesc = query.getSingleResult(String.class);
+    if (StringUtils.isNotBlank(stateDesc)) {
+      state = stateDesc.toUpperCase();
+    }
+    return state;
   }
 
   private void setAbbrevLocNMBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) {

@@ -616,7 +616,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <cmr:tabs>
       <cmr:tab label="${ui.tab.general}" id="MAIN_GENERAL_TAB" active="true" sectionId="GENERAL_REQ_TAB" gridIds="COMMENT_LIST_GRID" />
       <cmr:tab label="${ui.tab.address}" id="MAIN_NAME_TAB" sectionId="NAME_REQ_TAB" gridIds="ADDRESS_GRID" />
-      <cmr:tab label="${ui.tab.customer}" id="MAIN_CUST_TAB" sectionId="CUST_REQ_TAB" />
+      <cmr:tab label="${ui.tab.customer}" id="MAIN_CUST_TAB" sectionId="CUST_REQ_TAB" gridIds="LICENSES_GRID"/>
       <cmr:tab label="${ui.tab.ibm}" id="MAIN_IBM_TAB" sectionId="IBM_REQ_TAB" />
       <cmr:view forGEO="LA">
         <cmr:tab label="${ui.tab.contactInfo}" id="MAIN_CONTACTINFO_TAB" sectionId="CONTACTINFO_REQ_TAB" gridIds="CONTACTINFO_GRID" />

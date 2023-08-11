@@ -163,7 +163,7 @@ public class MCOPtEsHandler extends MCOHandler {
                 if (!StringUtils.isEmpty(addrType)) {
                   addr = cloneAddress(record, addrType);
                   LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
-
+                  LOG.info("Spain MCOPtEsHandler Update from CreateCMR: " + record.getCmrNum());
                   // name3 in rdc = Address Con't on SOF
                   addr.setCmrStreetAddressCont(record.getCmrName3());
                   addr.setCmrName3(null);

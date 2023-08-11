@@ -1,6 +1,7 @@
 var app = angular.module('QuickSearchApp', [ 'ngSanitize' ]);
 var _inscp = null;
 var _currQuickDet = null;
+
 app.filter('recFilter', function() {
   return function(items, search) {
     if (!search) {

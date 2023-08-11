@@ -1897,6 +1897,10 @@ function handleRequiredDnBSearch() {
         cmr.hideNode('dnbRequired');
         cmr.hideNode('dnbRequiredIndc');
       }
+      if(FormManager.getActualValue('cmrIssuingCntry') == '760' && (FormManager.getActualValue('custSubGrp') == 'RACMR'||FormManager.getActualValue('custSubGrp') == 'BFKSC')){
+        cmr.hideNode('dnbRequired');
+        cmr.hideNode('dnbRequiredIndc');
+      }
     });
   }
 
@@ -2834,6 +2838,104 @@ function setClusterIDAfterRetrieveAction(glcCode) {
 function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
   console.log('>>> setClusterIDAfterRetrieveAction4CN >>>');
   var indc = 'C';
+  if (custSubGrp == 'ECOSY') {
+    indc = 'E';
+  }
+  var result = cmr.query('GLC.CN.SEARCHTERM', {
+    GLC_CD : '%' + glcCode + '%',
+    DEFAULT_INDC : indc
+  });
+  if (result != null && result.ret1 != undefined && result.ret1 != '') {
+    var searchTerm = result.ret1;
+    var clientTier = result.ret2;
+    var isuCd = result.ret3;
+    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ searchTerm ]);
+    FormManager.setValue('searchTerm', searchTerm);
+    FormManager.readOnly('searchTerm');
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ clientTier ]);
+    FormManager.setValue('clientTier', clientTier);
+    FormManager.readOnly('clientTier');
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ isuCd ]);
+    FormManager.setValue('isuCd', isuCd);
+    FormManager.readOnly('isuCd');
+    if (clientTier == '00000' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('isuCd', '34');
+    }
+  } else if (custSubGrp == 'ECOSY' && glcCode != undefined && glcCode != '') {
+    FormManager.limitDropdownValues(FormManager.getField('searchTerm'), [ '08036' ]);
+    FormManager.setValue('searchTerm', '08036');
+    FormManager.readOnly('searchTerm');
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), [ 'Y' ]);
+    FormManager.setValue('clientTier', 'Y');
+    FormManager.readOnly('clientTier');
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), [ '36' ]);
+    FormManager.setValue('isuCd', '36');
+    FormManager.readOnly('isuCd');
+  }
+}
+
+// CREATCMR-7884
+function checkRetrievedForNZ() {
+  console.log('>>> checkRetrievedForNZ >>>');
+  var glcClusterMap = {};
+  glcClusterMap['NZL0005'] = '10662';
+  glcClusterMap['NZL0020'] = '10662';
+  glcClusterMap['NZL0010'] = '10663';
+  glcClusterMap['NZL9999'] = '01147';
+  var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
+  var oldGlcCode = FormManager.getActualValue('geoLocationCd');
+  var oldClusterId = FormManager.getActualValue('apCustClusterId');
+  console.log("hasRetrievedValue is ", hasRetrievedValue, "old GLC code is ", oldGlcCode);
+
+  if (!hasRetrievedValue) {
+    cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
+  } else {
+    console.log("Checking the GLC match... retrieve value again...")
+    var data = CmrServices.getAll('reqentry');
+    cmr.hideProgress();
+    if (data) {
+      console.log(data);
+      if (data.error && data.error == 'Y') {
+        cmr.showAlert('An error was encountered when retrieving the values.\nPlease contact your system administrator.', 'Create CMR');
+      } else {
+        if (data.glcError) {
+          // errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
+        } else {
+          if (glcClusterMap[data.glcCode] != oldClusterId) {
+            console.log("The cluster id are different, then overwrite the GLC code and cluster id.")
+            FormManager.setValue('geoLocationCd', data.glcCode);
+            FormManager.setValue('geoLocDesc', data.glcDesc);
+            FormManager.setValue('apCustClusterId', glcClusterMap[data.glcCode]);
+            FormManager.setValue('clientTier', 'Q');
+            FormManager.setValue('isuCd', '34');
+            // cmr.showAlert('The GLC and Cluster has been overwritten to ' +
+            // data.glcCode + '-' + glcClusterMap[data.glcCode] + ', please
+            // continue the process.\nPlease contact your system
+            // administrator.', 'Create CMR');
+            cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to ' + data.glcCode + '-' + glcClusterMap[data.glcCode]
+                + '. Do you want to proceed with this request?', 'Warning', null, {
+              OK : 'Yes',
+              CANCEL : 'No'
+            });
+          } else {
+            if (data.glcCode != oldGlcCode) {
+              console.log("The GLC code are different, the cluster id are same, then overwrite the GLC code only.")
+              FormManager.setValue('geoLocationCd', data.glcCode);
+              FormManager.setValue('geoLocDesc', data.glcDesc);
+            }
+            showAddressVerificationModal();
+          }
+        }
+      }
+    }
+  }
+}
+
+// CREATCMR-7879
+function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
+  console.log('>>> setClusterIDAfterRetrieveAction4CN >>>');
+  var indc = 'C';
   if (custSubGrp == 'EMBSA') {
     var _GBGId = FormManager.getActualValue('gbgId');
     if (FormManager.getActualValue('gbgId') != undefined && FormManager.getActualValue('gbgId') != '') {
@@ -2909,62 +3011,6 @@ function setClusterIDAfterRetrieveAction4CN(custSubGrp, glcCode) {
   }
 }
 
-// CREATCMR-7884
-function checkRetrievedForNZ() {
-  console.log('>>> checkRetrievedForNZ >>>');
-  var glcClusterMap = {};
-  glcClusterMap['NZL0005'] = '10662';
-  glcClusterMap['NZL0020'] = '10662';
-  glcClusterMap['NZL0010'] = '10663';
-  glcClusterMap['NZL9999'] = '01147';
-  var hasRetrievedValue = FormManager.getActualValue('covBgRetrievedInd') == 'Y';
-  var oldGlcCode = FormManager.getActualValue('geoLocationCd');
-  var oldClusterId = FormManager.getActualValue('apCustClusterId');
-  console.log("hasRetrievedValue is ", hasRetrievedValue, "old GLC code is ", oldGlcCode);
-
-  if (!hasRetrievedValue) {
-    cmr.showAlert('Request cannot be submitted because retrieve value is required action . ');
-  } else {
-    console.log("Checking the GLC match... retrieve value again...")
-    var data = CmrServices.getAll('reqentry');
-    cmr.hideProgress();
-    if (data) {
-      console.log(data);
-      if (data.error && data.error == 'Y') {
-        cmr.showAlert('An error was encountered when retrieving the values.\nPlease contact your system administrator.', 'Create CMR');
-      } else {
-        if (data.glcError) {
-          // errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
-        } else {
-          if (glcClusterMap[data.glcCode] != oldClusterId) {
-            console.log("The cluster id are different, then overwrite the GLC code and cluster id.")
-            FormManager.setValue('geoLocationCd', data.glcCode);
-            FormManager.setValue('geoLocDesc', data.glcDesc);
-            FormManager.setValue('apCustClusterId', glcClusterMap[data.glcCode]);
-            FormManager.setValue('clientTier', 'Q');
-            FormManager.setValue('isuCd', '34');
-            // cmr.showAlert('The GLC and Cluster has been overwritten to ' +
-            // data.glcCode + '-' + glcClusterMap[data.glcCode] + ', please
-            // continue the process.\nPlease contact your system
-            // administrator.', 'Create CMR');
-            cmr.showConfirm('showAddressVerificationModal()', 'The GLC and Cluster has been overwritten to ' + data.glcCode + '-' + glcClusterMap[data.glcCode]
-                + '. Do you want to proceed with this request?', 'Warning', null, {
-              OK : 'Yes',
-              CANCEL : 'No'
-            });
-          } else {
-            if (data.glcCode != oldGlcCode) {
-              console.log("The GLC code are different, the cluster id are same, then overwrite the GLC code only.")
-              FormManager.setValue('geoLocationCd', data.glcCode);
-              FormManager.setValue('geoLocDesc', data.glcDesc);
-            }
-            showAddressVerificationModal();
-          }
-        }
-      }
-    }
-  }
-}
 // CREATCMR-8430: do DNB check for NZ update
 function matchDnBForNZUpdate() {
   console.log('>>> matchDnBForNZUpdate >>>');

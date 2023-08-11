@@ -171,11 +171,21 @@ function doAddAttachment() {
  * Adds the attachment to the request
  */
 function addAttachment() {
-  if (FormManager.validate('frmCMR_addAttachmentModal', true)) {
-    cmr.aftertoken = refreshAttachmentGrid;
-    cmr.modalmode = true;
-    FormManager.doHiddenFileAction('frmCMR_addAttachmentModal', 'ADD_ATTACHMENT', cmr.CONTEXT_ROOT + '/request/addattachment.json', true, 'attachToken', true);
+
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var typeContent = FormManager.getActualValue('docContent');
+
+  if (cmrIssuingCntry == '796' && (custSubGrp == 'ESOSW' || custSubGrp == 'XESO') && typeContent == 'ESA') {
+    ANZshowConfirmEsa()
+  } else {
+    if (FormManager.validate('frmCMR_addAttachmentModal', true)) {
+      cmr.aftertoken = refreshAttachmentGrid;
+      cmr.modalmode = true;
+      FormManager.doHiddenFileAction('frmCMR_addAttachmentModal', 'ADD_ATTACHMENT', cmr.CONTEXT_ROOT + '/request/addattachment.json', true, 'attachToken', true);
+    }
   }
+
 }
 
 /**
@@ -242,7 +252,7 @@ dojo.addOnLoad(function() {
     try {
       if (e.clipboardData) {
         var items = e.clipboardData.items;
-        for ( var i = 0; i < items.length; i++) {
+        for (var i = 0; i < items.length; i++) {
           console.log(items[i].type);
           if (items[i].type != null && items[i].type.indexOf('image') >= 0) {
             var reader = new FileReader();
@@ -282,4 +292,23 @@ function exportToPdf() {
   FormManager.setValue('pdfTokenId', token);
   document.forms['frmPDF'].submit();
   window.setTimeout('checkToken("' + token + '")', 1000);
+}
+function ANZshowConfirmEsa() {
+
+  var res = cmr
+      .showConfirm(
+          'setAnzConfirmYes()',
+          'By selecting "I confirm" you are certifying that you are aware of the attachment you are going to save is official document of ESA Enrollment Form to support this CMR creation of particular type, and agree to take the responsibility',
+          null, null, {
+            CANCEL : 'No',
+            OK : 'I Confirm'
+          });
+
+}
+function setAnzConfirmYes() {
+  if (FormManager.validate('frmCMR_addAttachmentModal', true)) {
+    cmr.aftertoken = refreshAttachmentGrid;
+    cmr.modalmode = true;
+    FormManager.doHiddenFileAction('frmCMR_addAttachmentModal', 'ADD_ATTACHMENT', cmr.CONTEXT_ROOT + '/request/addattachment.json', true, 'attachToken', true);
+  }
 }

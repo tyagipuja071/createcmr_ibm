@@ -3016,7 +3016,7 @@ function lockUnlockFieldForCY() {
   console.log(">>>> lockUnlockFieldForCY");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var _custGrpSet = new Set([ 'COMME', 'GOVRN']);
+  var _custGrpSet = new Set([ 'COMME', 'GOVRN','CROSS']);
   var reqType = FormManager.getActualValue('reqType');
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || (reqType == 'C' && !_custGrpSet.has(custSubGrp))) {
@@ -3026,7 +3026,7 @@ function lockUnlockFieldForCY() {
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('salesTeamCd');
     FormManager.readOnly('salesBusOffCd');
-    if(custSubGrp != 'BUSPR' && custSubGrp != 'CRBUS' ) {
+    if(custSubGrp != 'BUSPR' && custSubGrp != 'CRBUS') {
       FormManager.readOnly('ppsceid');
     }
   } else if (_custGrpSet.has(custSubGrp)) {
@@ -3083,7 +3083,7 @@ function setEntepriseCY() {
   var clientTier = FormManager.getActualValue('clientTier');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet21 = new Set([ 'BUSPR','CRBUS','CRINT','IBMEM','INTER']);
-  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN','PRICU', 'SAASP' ]);
+  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN','PRICU', 'SAASP','CROSS' ]);
   var custSubGrpSet = new Set([ 'COMME', 'GOVRN']);
   
   
@@ -3336,5 +3336,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.CYPRUS ], null, true);
-
 });

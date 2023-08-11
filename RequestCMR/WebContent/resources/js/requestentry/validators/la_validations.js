@@ -290,6 +290,7 @@ function autoSetSBOAndSalesTMNo() {
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '631' && FormManager.getActualValue('reqType') == 'C') {
     if (_custSubGrp != 'undefined' && _custSubGrp == 'CROSS') {
+      
       FormManager.enable('salesBusOffCd');
       if (_custType == 'INTER') {
         FormManager.setValue('salesBusOffCd', '010');
@@ -509,13 +510,15 @@ function afterConfigForLA() {
   if (dojo.byId('collBoId' && _reqType != 'U')) {
     dojo.byId('collBoId').readOnly = true;
   }
-  if (_salesBranchOffHandler == null) {
-    _salesBranchOffHandler = dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
-      if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL) {
-        setCtcBySBOForBrazil();
-      }
-    });
-  }
+
+   if (_salesBranchOffHandler == null) {
+     _salesBranchOffHandler = dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
+       if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL) {
+         setCtcBySBOForBrazil();
+       }
+     });
+   }
+
   // DENNIS: This is new coverage handler where auto selecting ISU is done
   // through MRC
   if (_mrcCdHandler == null) {
@@ -2116,7 +2119,7 @@ function setFieldRequiredSSAMXOnSecnarios() {
       if (role == 'Processor' || role == 'Requester') {
         FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
         FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
-      }
+     }
     } else {
       FormManager.resetValidations('isicCd');
       FormManager.resetValidations('subIndustryCd');
@@ -2198,26 +2201,6 @@ function setCrosTypSubTypSSAMXOnSecnarios() {
       console.log(">>> Process crosSubTyp >> " + FormManager.getActualValue('crosSubTyp'));
     }
   }
-}
-
-function validateVATChile() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        console.log("Running validateVATChile");
-        var taxCd1 = FormManager.getActualValue('taxCd1');
-        var lbl1 = FormManager.getLabel('LocalTax1');
-        if (taxCd1 && taxCd1.length > 0 && !taxCd1.match(/^[0-9a-zA-Z]{8}-[0-9a-zA-Z]{1}$/)) {
-          return new ValidationResult({
-            id : 'taxCd1',
-            type : 'text',
-            name : 'taxCd1'
-          }, false, 'The value for ' + lbl1 + ' is invalid. The correct Format For Chile Vat is 00000000-0');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 function validateCustNameChangeForDPLCheck() {
@@ -2522,7 +2505,7 @@ function setSortlForStateProvince() {
   if (cmrIssuingCntry != '631' || reqType != 'C') {
     return;
   }
-  
+
   if (gbgId != '' && gbgId != 'BGNONE') {
     return;
   }
@@ -2600,18 +2583,18 @@ function setTaxRegimeMX() {
   if (FormManager.getActualValue('custGrp') == 'CROSS') {
     FormManager.limitDropdownValues(FormManager.getField('taxCd3'), '616');
   } else if(FormManager.getActualValue('custGrp') == 'LOCAL') {
-    if (custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM') {
+    if (custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR') {
       taxGrp = '1';
     } else {
       taxGrp = '2';
     }
-  
+
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
       CMT: '%' + taxGrp + '%'
     };
-  
+
     var taxDropDown = cmr.query('GET.MX_TAX_CODE', qParams);
     var arr =  taxDropDown.map(taxDropDown => taxDropDown.ret1);
     FormManager.limitDropdownValues(FormManager.getField('taxCd3'), arr);
@@ -2621,19 +2604,19 @@ function setTaxRegimeMX() {
 // CREATCMR-4897 SBO and MRC to not be mandatory for Prospect conversion
 function makeMrcSboOptionalForProspectLA() {
   var ifProspect = FormManager.getActualValue('prospLegalInd');
-    if (dijit.byId('prospLegalInd')) {
-      ifProspect = checkForProspect();
-    }
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = checkForProspect();
+  }
     if('Y' == ifProspect){
       if (typeof (_pagemodel) != 'undefined') {
         if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
-          FormManager.resetValidations('mrcCd');
-          FormManager.resetValidations('salesBusOffCd');
-          FormManager.setValue('isuCd', '');
-          FormManager.setValue('mrcCd', '');
-          FormManager.setValue('salesBusOffCd', '');
-          FormManager.enable('isuCd');
-          }
+                FormManager.resetValidations('mrcCd');
+                FormManager.resetValidations('salesBusOffCd');
+                FormManager.setValue('isuCd', '');
+                FormManager.setValue('mrcCd', '');
+                FormManager.setValue('salesBusOffCd', '');
+                FormManager.enable('isuCd');
+                }
         }
       }
     console.log('SBO & MRC are non mandatory for Prospect');
@@ -3002,6 +2985,7 @@ function autoSetFieldsForCustScenariosBR() {
     }
   }
 }
+
 function lockFieldsForLA() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
@@ -3014,11 +2998,11 @@ function lockFieldsForLA() {
   var userRole = FormManager.getActualValue('userRole').toUpperCase();
   var custGrpSet = new Set([ 'IBMEM','PRIPE','BUSPR','INTOU','INTUS']);
   var custTypeSet = new Set([ 'IBMEM','PRIPE','BUSPR','INTOU','INTUS']);
-
+  
   if (reqType != 'C') {
     return;
   }
-
+  
   if (custGrp == 'LOCAL') {
     if (userRole == 'REQUESTER' && custGrpSet.has(custSubGrp)) {
       FormManager.readOnly('clientTier');
@@ -3038,12 +3022,12 @@ function setCtcBySBOForBrazil() {
   }
   var sboCd = FormManager.getActualValue('salesBusOffCd');
   var userRole = FormManager.getActualValue('userRole').toUpperCase();
-
+  
   var sboSetCtcJ = new Set([ '167','170','171','172','173','174','162','164','166' ]);
   var sboSetCtcY = new Set([ '515','175','176' ]);
   var sboSetCtcBlank = new Set([ '461','010','979','161' ]);
   var sboSetCtcQ = new Set([ '504','556','763','761','764','758' ]);
-
+  
   if (sboSetCtcJ.has(sboCd)) {
     FormManager.setValue('clientTier', 'J');
   } else if (sboSetCtcY.has(sboCd)) {
@@ -3053,11 +3037,11 @@ function setCtcBySBOForBrazil() {
   } else if (sboSetCtcBlank.has(sboCd)) {
     FormManager.setValue('clientTier', '');
   }
-
+  
   if (userRole == 'REQUESTER') {
     FormManager.readOnly('clientTier');
   }
-
+  
 }
 /* Register LA Validators */
 dojo.addOnLoad(function() {
@@ -3079,10 +3063,11 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTaxCode1ValidatorForOtherLACntries, SSAMX_COUNTRIES, null, false, false);
   // GEOHandler.registerValidator(addTaxCodesValidator, GEOHandler.LA);
   // GEOHandler.registerValidator(addTaxCodesValidator, [ SysLoc.BRAZIL ], null, false, false);
+  
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHILE , 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHILE ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.COLOMBIA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.COLOMBIA ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.VENEZUELA , 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.VENEZUELA ], null, true);
-
+  
   // /-- addressModal
   GEOHandler.registerValidator(addTaxCode1ValidatorInAddressModalForBrazil, [ SysLoc.BRAZIL ], null, true);
   GEOHandler.registerValidator(addTaxCode2ValidatorInAddressModalForBrazil, [ SysLoc.BRAZIL ], null, true);
@@ -3124,7 +3109,6 @@ dojo.addOnLoad(function() {
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateVATChile, [ SysLoc.CHILE ], null, true);
   GEOHandler.registerValidator(validateCustNameChangeForDPLCheck, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateAddlContactEmailFieldForReactivate, [ SysLoc.BRAZIL ], GEOHandler.ROLE_PROCESSOR, true);
     
@@ -3156,7 +3140,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSortlForStateProvince, SysLoc.BRAZIL);
   GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setIsuMrcFor161A, SysLoc.BRAZIL);
-  
   GEOHandler.addAfterTemplateLoad(lockFieldsForLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setCtcBySBOForBrazil, SysLoc.BRAZIL);
+
 });

@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueuePK;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -71,7 +72,7 @@ public abstract class APTransformer extends MessageTransformer {
     GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
     if (handler != null && handler instanceof APHandler) {
       this.geoHandler = (APHandler) handler;
-    } else {
+    } else if( !"616".equalsIgnoreCase(cmrIssuingCntry) && !"796".equalsIgnoreCase(cmrIssuingCntry)) {
       throw new Exception("Handler should be an instance of APHandler.");
     }
   }
@@ -138,6 +139,35 @@ public abstract class APTransformer extends MessageTransformer {
       // handler.messageHash.put("NotifierSrc1", "");
       handler.messageHash.put("NotifierSrc2", "");
     }
+
+    // Handling obsolete data
+    if (handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.KOREA)) {
+      DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
+      String reqType = handler.adminData.getReqType();
+      if (StringUtils.equalsIgnoreCase(reqType, "U")) {
+        if (StringUtils.isBlank(handler.cmrData.getApCustClusterId())) {
+          handler.messageHash.put("ClusterNo", oldDataRdc.getApCustClusterId());
+        }
+        if (StringUtils.isBlank(handler.cmrData.getClientTier())) {
+          handler.messageHash.put("GB_SegCode", oldDataRdc.getClientTier());
+        }
+        if (StringUtils.isBlank(handler.cmrData.getIsuCd())) {
+          handler.messageHash.put("ISU", oldDataRdc.getIsuCd());
+        }
+        if (StringUtils.isBlank(handler.cmrData.getInacType())) {
+          handler.messageHash.put("inacType", oldDataRdc.getInacType());
+        }
+        if (StringUtils.isBlank(handler.cmrData.getInacCd())) {
+          handler.messageHash.put("inacCd", oldDataRdc.getInacCd());
+        }
+        if (StringUtils.isBlank(handler.cmrData.getCollectionCd())) {
+          handler.messageHash.put("IBMCode", oldDataRdc.getCollectionCd());
+        }
+        if (StringUtils.isBlank(handler.cmrData.getEngineeringBo())) {
+          handler.messageHash.put("EngrBrnchOff", oldDataRdc.getEngineeringBo());
+        }
+      }
+    }
   }
 
   /**
@@ -182,11 +212,11 @@ public abstract class APTransformer extends MessageTransformer {
     Addr addrData = handler.addrData;
 
     List<String> abbrevLandCountries = new ArrayList<String>();
-    abbrevLandCountries = (List<String>) Arrays.asList("US", "MY", "GB", "SG", "AE", "CH", "MV", "AU", "FR", "TH", "NL", "IE", "HK", "DE", "ID", "BD",
-        "CA", "LK", "TW", "NZ", "VN", "PH", "KR", "MM", "KH", "BN", "PG");
+    abbrevLandCountries = Arrays.asList("US", "MY", "GB", "SG", "AE", "CH", "MV", "AU", "FR", "TH", "NL", "IE", "HK", "DE", "ID", "BD", "CA", "LK",
+        "TW", "NZ", "VN", "PH", "KR", "MM", "KH", "BN", "PG");
     String line66 = "";
-    boolean update = "U".equals(handler.adminData.getReqType());
     String scenario = handler.cmrData.getCustSubGrp();
+    boolean update = "U".equals(handler.adminData.getReqType());
     if (!StringUtils.isBlank(addrData.getCity1())) {
       line66 = addrData.getCity1();
       if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry()))) {

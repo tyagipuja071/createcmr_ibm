@@ -191,7 +191,6 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
 
   public void processMassUpdateRequest(EntityManager entityManager, ProcessRequest request, Admin admin, Data data, String histMessage)
       throws Exception {
-
     String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
     long reqId = admin.getId().getReqId();
     boolean isIndexNotUpdated = false;
@@ -375,7 +374,6 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
       LOG.error("Error in processing Mass Update Request " + admin.getId().getReqId(), e);
       addError("Mass Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
     }
-
   }
 
   /**

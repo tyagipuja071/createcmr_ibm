@@ -15,6 +15,7 @@
 package com.ibm.cio.cmr.request.filter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -28,7 +29,9 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +40,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 
 /**
  * This filter can test to see if a session has expired, and if it has can
@@ -183,6 +187,8 @@ public class SessionInactivityFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse resp = (HttpServletResponse) response;
+
     if (filterPath(request)) {
 
       // LOG.debug("Inside the Filter: "+req.getRequestURI());
@@ -196,8 +202,10 @@ public class SessionInactivityFilter implements Filter {
 
         if (session.getAttribute(CmrConstants.SESSION_APPUSER_KEY) == null) {
           LOG.debug("No user session found");
-          session.invalidate();
-          long reqId = extractRequestId((HttpServletRequest) request);
+
+          RequestUtils.performLogoutActivities(req);
+
+          long reqId = RequestUtils.extractRequestId((HttpServletRequest) request);
           if (reqId > 0) {
             req.setAttribute("r", reqId);
           }
@@ -211,9 +219,31 @@ public class SessionInactivityFilter implements Filter {
 
         if (tooLongSinceLastUserTriggeredRequest(req)) {
           LOG.debug("User session has expired");
-          AppUser.remove(req);
-          session.invalidate();
-          long reqId = extractRequestId((HttpServletRequest) request);
+
+          RequestUtils.performLogoutActivities(req);
+
+          long reqId = RequestUtils.extractRequestId((HttpServletRequest) request);
+
+          if (reqId > 0) {
+            req.setAttribute("r", reqId);
+          }
+
+          String findCmrParams = extractFindCMRParams((HttpServletRequest) request);
+          if (!StringUtils.isBlank(findCmrParams)) {
+            req.setAttribute("c", findCmrParams);
+          }
+
+          req.getRequestDispatcher(sessionTimeoutPath).forward(req, response);
+          return;
+        }
+
+        LocalDateTime tokenExpiringTime = (LocalDateTime) session.getAttribute("tokenExpiringTime");
+        if (tokenExpiringTime != null && LocalDateTime.now().isAfter(tokenExpiringTime)) {
+          LOG.debug("Access token expired! ");
+
+          RequestUtils.performLogoutActivities(req);
+
+          long reqId = RequestUtils.extractRequestId((HttpServletRequest) request);
           if (reqId > 0) {
             req.setAttribute("r", reqId);
           }
@@ -228,9 +258,10 @@ public class SessionInactivityFilter implements Filter {
         if (!req.getRequestURI().contains("/sessioncheck")) {
           updateLastUserTriggeredRequestDate(req);
         }
+
       } else {
         // LOG.debug("User has no session");
-        long reqId = extractRequestId((HttpServletRequest) request);
+        long reqId = RequestUtils.extractRequestId((HttpServletRequest) request);
         if (reqId > 0) {
           req.setAttribute("r", reqId);
         }
@@ -246,32 +277,6 @@ public class SessionInactivityFilter implements Filter {
     filterChain.doFilter(request, response);
 
   } // End doFilter().
-
-  private long extractRequestId(HttpServletRequest request) {
-    String reqIdParam = request.getParameter("reqId");
-    if (reqIdParam != null && StringUtils.isNumeric(reqIdParam) && !"0".equals(reqIdParam)) {
-      return Long.parseLong(reqIdParam);
-    }
-    Object reqIdAtt = request.getAttribute("reqId");
-    if (reqIdAtt != null && StringUtils.isNumeric(reqIdAtt.toString()) && !"0".equals(reqIdAtt.toString())) {
-      return Long.parseLong(reqIdAtt.toString());
-    }
-
-    String url = request.getRequestURI();
-    if (url != null) {
-      if (url.contains("?")) {
-        url = url.substring(0, url.indexOf("?"));
-      }
-      if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
-        String reqId = url.substring(url.lastIndexOf("/") + 1);
-        if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
-          return Long.parseLong(reqId);
-        }
-      }
-    }
-
-    return 0;
-  }
 
   private String extractFindCMRParams(HttpServletRequest request) {
     String url = request.getRequestURI();
@@ -400,5 +405,15 @@ public class SessionInactivityFilter implements Filter {
     return retVal;
 
   } // Ebd filterPath().
+
+  public static void deleteWASCookies(HttpServletRequest request, HttpServletResponse response) {
+    Cookie[] cookies = request.getCookies();
+    for (Cookie cookie : cookies) {
+      if (cookie.getName().contains("WAS")) {
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+      }
+    }
+  }
 
 } // End class.

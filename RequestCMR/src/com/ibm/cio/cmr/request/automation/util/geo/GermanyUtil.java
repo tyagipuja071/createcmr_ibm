@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -105,8 +106,19 @@ public class GermanyUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     Addr zi01 = requestData.getAddress("ZI01");
     Admin admin = requestData.getAdmin();
+    String customerName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
     boolean valid = true;
     String scenario = data.getCustSubGrp();
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if (zs01 != null) {
+      String landCntry = zs01.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
+    }
     // cmr-2067 fix
     engineData.setMatchDepartment(true);
     // if (admin.getSourceSystId() != null &&
@@ -121,6 +133,12 @@ public class GermanyUtil extends AutomationUtil {
     if ("C".equals(requestData.getAdmin().getReqType())) {
       // remove duplicates
       removeDuplicateAddresses(entityManager, requestData, details);
+    }
+
+    String[] scenariosToBeChecked = { "PRIPE", "IBMEM" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
     }
 
     if (StringUtils.isNotBlank(scenario)) {
@@ -302,8 +320,26 @@ public class GermanyUtil extends AutomationUtil {
       case "X3PA":
       case "DC":
       case "XDC":
+        // Duplicate Request checks Based on Name and Addresses for DC and XDC
+        if (scenario.equals("DC") || scenario.equals("XDC")) {
+          List<String> dupReqIds = checkDuplicateRequestForDC(entityManager, requestData);
+          if (!dupReqIds.isEmpty()) {
+            details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
+            details.append(StringUtils.join(dupReqIds, "\n"));
+            engineData.addRejectionComment("DUPR", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
+            return false;
+          } else {
+            details.append("No duplicate requests found");
+          }
+        }
         // Duplicate CMR checks Based on Name and Addresses
         valid = duplicateCmrCheck3PADC(requestData, engineData, details, data, zs01, zi01, valid, scenario);
+        // Sold-To and Install-At cannot be same for these scenarios
+        if (zs01 != null && zi01 != null && addressEquals(zs01, zi01)) {
+          engineData.addRejectionComment("OTH", "For this scenario, Sold-to and Install-at need to be different", "", "");
+          details.append("For 3rd Party and Data Center Sold-To and Install-At address should be different");
+          return false;
+        }
         break;
       }
 
@@ -398,16 +434,10 @@ public class GermanyUtil extends AutomationUtil {
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
     }
-    // Sold-To and Install-At cannot be same for these scenarios
-    if (zs01 != null && zi01 != null && addressEquals(zs01, zi01)) {
-      engineData.addRejectionComment("OTH", "For this scenario, Sold-to and Install-at need to be different", "", "");
-      details.append("For 3rd Party and Data Center Sold-To and Install-At address should be different");
-      return false;
-    }
     return valid;
   }
-  
-    @Override
+
+  @Override
   public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<DuplicateCMRCheckResponse> response) {
 
@@ -689,7 +719,7 @@ public class GermanyUtil extends AutomationUtil {
           data.getCmrIssuingCntry());
       if (queryResults != null && !queryResults.isEmpty()) {
         for (DACHFieldContainer result : queryResults) {
-          DACHFieldContainer queryResult = (DACHFieldContainer) result;
+          DACHFieldContainer queryResult = result;
           String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
           String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
           String queryIsu = queryResult.getIsuCd();
@@ -834,6 +864,13 @@ public class GermanyUtil extends AutomationUtil {
       if (changes.isDataChanged("VAT #")
           || (CmrConstants.RDC_SOLD_TO.equals("ZS01") && soldTo != null && isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo))) {
         UpdatedDataModel vatChange = changes.getDataChange("VAT #");
+        if (vatChange != null && requestData.getAddress("ZS01").getLandCntry().equals("GB")) {
+          if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)) {
+            engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+            detail.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+            isNegativeCheckNeedeed = true;
+          }
+        }
         if (isRelevantAddressFieldUpdatedZS01ZP01(changes, soldTo)
             || (vatChange != null && (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
                 || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())))) {
@@ -845,11 +882,17 @@ public class GermanyUtil extends AutomationUtil {
           }
           String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
           if (!matches.isEmpty()) {
+            boolean matchesDnb = false;
             for (DnBMatchingResponse dnbRecord : matches) {
               if ("Y".equals(dnbRecord.getOrgIdMatch()) && (StringUtils.isNotEmpty(custName) && StringUtils.isNotEmpty((dnbRecord.getDnbName()))
                   && StringUtils.getLevenshteinDistance(custName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) <= 5)) {
                 duns = dnbRecord.getDunsNo();
                 isNegativeCheckNeedeed = false;
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+                if (!matchesDnb) {
+                  isNegativeCheckNeedeed = true;
+                  engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
+                }
                 break;
               }
               isNegativeCheckNeedeed = true;
@@ -897,7 +940,7 @@ public class GermanyUtil extends AutomationUtil {
           LOG.debug("Updates to the Abbreviated Name field  are skipped.");
         }
       } else if (changes.isDataChanged("PPS CEID")) {
-    	  cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, detail, resultCodes, changes.getDataChange("PPS CEID"), "R");
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, detail, resultCodes, changes.getDataChange("PPS CEID"), "R");
       } else {
         boolean otherFieldsChanged = false;
         for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
@@ -916,14 +959,14 @@ public class GermanyUtil extends AutomationUtil {
     }
 
     if (resultCodes.contains("R")) {
-    	output.setOnError(true);
-    	validation.setSuccess(false);
-    	validation.setMessage("Rejected");
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
     } else if (cmdeReview) {
-    	engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
-        detail.append("Updates to one or more fields cannot be validated.\n");
-        validation.setSuccess(false);
-        validation.setMessage("Not Validated");
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      detail.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
     } else if (isNegativeCheckNeedeed) {
       validation.setSuccess(false);
       validation.setMessage("Not validated");
@@ -1008,6 +1051,20 @@ public class GermanyUtil extends AutomationUtil {
           output.setProcessOutput(validation);
           return true;
         }
+
+        if (StringUtils.isNotBlank(data.getCustSubGrp()) && "3PA".contains(data.getCustSubGrp())
+            && ((changes.isAddressChanged("ZI01") && isOnlyDnBRelevantFieldUpdated(changes, "ZI01")) || isAddressAdded(installAt))) {
+          // Check if address closely matches DnB
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installAt, false);
+          if (matches != null) {
+            isBillToMatchesDnb = ifaddressCloselyMatchesDnb(matches, installAt, admin, data.getCmrIssuingCntry());
+            if (!isBillToMatchesDnb) {
+              isNegativeCheckNeedeed = true;
+              detail.append("Updates to Install-at address need verification as it does not matches D&B");
+              LOG.debug("Updates to Install-at address need verification as it does not matches D&B");
+            }
+          }
+        }
       }
 
       if (billTo != null && (changes.isAddressChanged("ZP01") || isAddressAdded(billTo))) {
@@ -1083,6 +1140,7 @@ public class GermanyUtil extends AutomationUtil {
           }
         }
       }
+
       if (isNegativeCheckNeedeed || isShipToExistOnReq || isInstallAtExistOnReq || isBillToExistOnReq || isPayGoBillToExistOnReq) {
         validation.setSuccess(false);
         validation.setMessage("Not validated");
@@ -1277,4 +1335,62 @@ public class GermanyUtil extends AutomationUtil {
     return false;
   }
 
+  public List<String> checkDuplicateRequestForDC(EntityManager entityManager, RequestData requestData) {
+    LOG.debug("checkDuplicateRequestForDC");
+    List<String> dupReqIds = new ArrayList<>();
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    Addr zs01 = requestData.getAddress("ZS01");
+    List<Addr> results = getRecentAddrBasedOnIssuingAndLandedCntries(entityManager, zs01, data, admin);
+    if (results != null && !results.isEmpty()) {
+      Iterator<Addr> it = results.iterator();
+      while (it.hasNext()) {
+        Addr addr = it.next();
+        if (addressEquals(zs01, addr)) {
+          List<Addr> addrToCheck = getAddressBasedOnAddrTypAndReqId(entityManager, "ZI01", Long.toString(addr.getId().getReqId()));
+          if (addrToCheck != null && !addrToCheck.isEmpty()) {
+            Iterator<Addr> itr = addrToCheck.iterator();
+            while (itr.hasNext()) {
+              Addr addrItr = itr.next();
+              boolean hasDup = false;
+              for (Addr addrCheck : requestData.getAddresses()) {
+                if (addressEquals(addrCheck, addrItr)) {
+                  hasDup = true;
+                }
+              }
+              if (hasDup) {
+                dupReqIds.add(Long.toString(addr.getId().getReqId()));
+              }
+            }
+          }
+        }
+      }
+    }
+    return dupReqIds;
+  }
+
+  public List<Addr> getAddressBasedOnAddrTypAndReqId(EntityManager entityManager, String addrTyp, String reqId) {
+    LOG.debug("getAddressBasedOnAddrTypAndReqId");
+    String sql = ExternalizedQuery.getSql("GET.ADDR.ADDR_TYP.FROM.REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ADDR_TYPE", addrTyp);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    List<Addr> results = query.getResults(Addr.class);
+    return results;
+  }
+
+  public List<Addr> getRecentAddrBasedOnIssuingAndLandedCntries(EntityManager entityManager, Addr addr, Data data, Admin admin) {
+    LOG.debug("getRecentAddrBasedOnIssuingAndLandedCntries");
+    String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("LAND_CNTRY", addr.getLandCntry().toUpperCase());
+    query.setParameter("SCENARIO", StringUtils.isNotBlank(data.getCustSubGrp()) ? data.getCustSubGrp().toUpperCase() : "%%");
+    query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setForReadOnly(true);
+    List<Addr> results = query.getResults(Addr.class);
+    return results;
+  }
 }
