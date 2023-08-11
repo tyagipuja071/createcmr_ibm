@@ -541,7 +541,15 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
       return {
         validate : function() {
           var reqType = FormManager.getActualValue('reqType');
-          var vat = FormManager.getActualValue('vat');
+          var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+
+          // if Chile, Colombia, Venezuela are the CMR issuing country
+          // proxy's the taxCd1 value to vat to proceed with the validation
+          if (cmrIssuingCntry == '655' || cmrIssuingCntry == '661' || cmrIssuingCntry == '871') {
+            var vat = FormManager.getActualValue('taxCd1');
+          } else {
+            var vat = FormManager.getActualValue('vat');
+          }
 
           if (!vat || vat == '' || vat.trim() == '') {
             return new ValidationResult(null, true);
