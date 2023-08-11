@@ -1020,6 +1020,23 @@ function addDivStreetCountValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function addInstallAtPoBoxValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('addrType') == 'ZS01') {
+          const
+          regex = /PO\s?BOX|P\.O\.\s?BOX|BOX/gi;
+          if (regex.test(FormManager.getActualValue('addrTxt'))) {
+            return new ValidationResult(null, false, 'PO BOX is strictly not allowed for Install At, please provide physical address.');
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 function hideKUKLA() {
   if (FormManager.getActualValue('reqType') == 'U') {
     FormManager.show('CustClass', 'custClass');
@@ -1498,8 +1515,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addKuklaValidator, [ SysLoc.USA ], null,
   // true);
   // CREATCMR-6255
-  // GEOHandler.registerValidator(addDivStreetCountValidator, [ SysLoc.USA ],
-  // null, true);
+  GEOHandler.registerValidator(addInstallAtPoBoxValidator, [ SysLoc.USA ], null, true);
 
   GEOHandler.addAfterTemplateLoad(setClientTierValuesUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(setBPNameValuesUS, [ SysLoc.USA ]);
