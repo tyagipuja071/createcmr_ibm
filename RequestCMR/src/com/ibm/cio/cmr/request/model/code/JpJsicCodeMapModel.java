@@ -1,6 +1,6 @@
 package com.ibm.cio.cmr.request.model.code;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.ui.ModelMap;
@@ -22,9 +22,11 @@ public class JpJsicCodeMapModel extends BaseModel {
   private String dept;
   private String sectorCd;
   private String createBy;
-  private Timestamp createTs;
+  private Date createTs;
+  private String createTsStr;
   private String updateBy;
-  private Timestamp updateTs;
+  private Date updateTs;
+  private String updateTsStr;
 
   public String getJsicCd() {
     return jsicCd;
@@ -82,11 +84,11 @@ public class JpJsicCodeMapModel extends BaseModel {
     this.createBy = createBy;
   }
 
-  public Timestamp getCreateTs() {
+  public Date getCreateTs() {
     return createTs;
   }
 
-  public void setCreateTs(Timestamp createTs) {
+  public void setCreateTs(Date createTs) {
     this.createTs = createTs;
   }
 
@@ -98,11 +100,11 @@ public class JpJsicCodeMapModel extends BaseModel {
     this.updateBy = updateBy;
   }
 
-  public Timestamp getUpdateTs() {
+  public Date getUpdateTs() {
     return updateTs;
   }
 
-  public void setUpdateTs(Timestamp updateTs) {
+  public void setUpdateTs(Date updateTs) {
     this.updateTs = updateTs;
   }
 
@@ -127,6 +129,22 @@ public class JpJsicCodeMapModel extends BaseModel {
 
   @Override
   public void addKeyParameters(ModelMap map) {
+  }
+
+  public String getCreateTsStr() {
+    return createTsStr;
+  }
+
+  public void setCreateTsStr(String createTsStr) {
+    this.createTsStr = createTsStr;
+  }
+
+  public String getUpdateTsStr() {
+    return updateTsStr;
+  }
+
+  public void setUpdateTsStr(String updateTsStr) {
+    this.updateTsStr = updateTsStr;
   }
 
 }

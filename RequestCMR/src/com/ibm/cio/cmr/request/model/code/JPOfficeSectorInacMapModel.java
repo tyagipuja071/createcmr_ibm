@@ -21,8 +21,10 @@ public class JPOfficeSectorInacMapModel extends BaseModel {
   private String apCustClusterId;
   private String createBy;
   private Date createTs;
+  private String createTsStr;
   private String updateBy;
   private Date updateTs;
+  private String updateTsStr;
 
   public String getOfficeCd() {
     return officeCd;
@@ -109,6 +111,22 @@ public class JPOfficeSectorInacMapModel extends BaseModel {
 
   @Override
   public void addKeyParameters(ModelMap map) {
+  }
+
+  public String getCreateTsStr() {
+    return createTsStr;
+  }
+
+  public void setCreateTsStr(String createTsStr) {
+    this.createTsStr = createTsStr;
+  }
+
+  public String getUpdateTsStr() {
+    return updateTsStr;
+  }
+
+  public void setUpdateTsStr(String updateTsStr) {
+    this.updateTsStr = updateTsStr;
   }
 
 }

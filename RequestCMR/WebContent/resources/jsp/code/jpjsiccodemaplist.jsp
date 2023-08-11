@@ -26,7 +26,6 @@
         loc += '&isuCd=' + encodeURIComponent(isuCd);
         loc += '&isicCd=' + encodeURIComponent(isicCd);
         loc += '&dept=' + encodeURIComponent(dept);
-        alert('loc='+loc);
         window.location = loc;
       },
       remove : function(jsicCd, subIndustryCd, isuCd, isicCd, dept) {
@@ -35,7 +34,6 @@
         loc += '&isuCd=' + encodeURIComponent(isuCd);
         loc += '&isicCd=' + encodeURIComponent(isicCd);
         loc += '&dept=' + encodeURIComponent(dept);
-        alert('Are you sure to remove '+loc + '?');
         window.location = loc;
       },
       actionIcons : function(value, rowIndex) {

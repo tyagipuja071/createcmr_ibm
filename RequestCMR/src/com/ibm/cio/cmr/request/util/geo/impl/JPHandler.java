@@ -2822,7 +2822,7 @@ public class JPHandler extends GEOHandler {
   public static void addJpLogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
     String custSubGroup = data.getCustSubGrp();
     if ("RACMR".equals(custSubGroup)) {
-      admin.setReqStatus("PCP");
+      admin.setReqStatus("COM");
     }
   }
 }
