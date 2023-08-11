@@ -143,7 +143,14 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && geoHandler != null) {
         newAddrSeq = generateAddrSeqLD(entityManager, model.getAddrType(), model.getReqId(), model.getCmrIssuingCntry(), geoHandler);
       }
-
+      if (geoHandler != null && newAddrSeq == null && (SystemLocation.NEW_ZEALAND.equals(model.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(model.getCmrIssuingCntry()))) {
+        if(StringUtils.isNotEmpty(model.getAddrSeq())) {
+          newAddrSeq = model.getAddrSeq();
+        } else {
+          newAddrSeq = "";
+        }
+      }
+      
       if (geoHandler != null && newAddrSeq == null) {
         newAddrSeq = geoHandler.generateAddrSeq(entityManager, model.getAddrType(), model.getReqId(), model.getCmrIssuingCntry());
       }
