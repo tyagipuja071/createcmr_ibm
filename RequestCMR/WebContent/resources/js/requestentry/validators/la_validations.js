@@ -562,6 +562,7 @@ function afterConfigForLA() {
       setMrcCdToReadOnly();
       togglePPSCeid();
       lockFieldsForLA();
+      toggleTaxRegimeForCrossMx();
     });
   }
 
@@ -3043,6 +3044,35 @@ function setCtcBySBOForBrazil() {
   }
   
 }
+
+function toggleTaxRegimeForCrossMx() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custType =  FormManager.getActualValue('custType');
+  var taxGrp = null;
+
+  if (FormManager.getActualValue('custGrp') == 'CROSS') {
+    FormManager.limitDropdownValues(FormManager.getField('taxCd3'), '616');
+    if(custType == 'BUSPR' || custType == 'COMME') {
+      taxGrp = '3';
+        var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry,
+        CMT: '%' + taxGrp + '%'
+        };
+      var taxDropDown = cmr.query('GET.MX_TAX_CODE', qParams);
+      var arr =  taxDropDown.map(taxDropDown => taxDropDown.ret1);
+      FormManager.limitDropdownValues(FormManager.getField('taxCd3'), arr);
+    }
+  }
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -3140,7 +3170,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSortlForStateProvince, SysLoc.BRAZIL);
   GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setIsuMrcFor161A, SysLoc.BRAZIL);
+  
   GEOHandler.addAfterTemplateLoad(lockFieldsForLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setCtcBySBOForBrazil, SysLoc.BRAZIL);
 
+  GEOHandler.addAfterTemplateLoad(toggleTaxRegimeForCrossMx, [ SysLoc.MEXICO ]);
 });
