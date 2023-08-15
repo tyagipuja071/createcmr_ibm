@@ -1962,7 +1962,7 @@ function setEcoCodeBasedOnSubScenario() {
     FormManager.setValue('economicCd', '');
   } else if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
     FormManager.setValue('economicCd', 'K49');
-  } else if (custSubScnrio == 'PRICU') {
+  } else if (custSubScnrio == 'PRICU' || custSubScnrio == 'CBPRI') {
     FormManager.setValue('economicCd', 'K60');
   } else if (custSubScnrio == 'INTER') {
     FormManager.setValue('economicCd', 'K81');
