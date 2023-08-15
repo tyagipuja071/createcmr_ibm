@@ -52,7 +52,7 @@ public class GBLScenarioCheckElement extends ValidatingElement {
     String cmrIssuingCntry = data.getCmrIssuingCntry();
 
     if ("Y".equals(admin.getScenarioVerifiedIndc())) {
-      log.debug("Skip processing of element");
+      log.debug("***Skip processing of element");
       result.setDetails("Skip processing of element");
       result.setOnError(false);
       output.setSuccess(true);
@@ -64,10 +64,14 @@ public class GBLScenarioCheckElement extends ValidatingElement {
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(cmrIssuingCntry);
       log.debug("Automation Util for " + data.getCmrIssuingCntry() + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
       boolean isPrivateSubScenario = scenarioExceptions != null ? scenarioExceptions.isSkipFindGbgForPrivates() : false;
+      log.debug("GBLScenarioCheckElement (isPrivateSubScenario) of request id " + data.getId().getReqId() + " = " + isPrivateSubScenario);
       if (isPrivateSubScenario) {
+        log.debug("GBLScenarioCheckElement will call checkDunsMatchOnPrivates of request id " + data.getId().getReqId());
         boolean foundCloseMatch = checkDunsMatchOnPrivates(requestData, engineData, "ZS01");
         log.debug("checking for close match");
+        log.debug("GBLScenarioCheckElement (foundCloseMatch) of request id  " + data.getId().getReqId() + " = " + foundCloseMatch);
         if (foundCloseMatch) {
+          log.debug("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
           output.setSuccess(false);
           output.setMessage("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
           result.setDetails("DUNS closely matching name and address in 'Private Household leads to automatic rejection.");
@@ -80,11 +84,12 @@ public class GBLScenarioCheckElement extends ValidatingElement {
         }
       }
       if (countryUtil != null) {
-        log.debug("Perform country util checks");
+        log.debug("***Perform country util checks");
 
         boolean countryCheck = false;
         countryCheck = countryUtil.performScenarioValidation(entityManager, requestData, engineData, result, details, output);
         if (countryCheck) {
+          log.debug("***countryCheck is true");
           output.setSuccess(true);
           output.setMessage("Scenario Valid");
           details.insert(0, "Scenario Checks Performed Successfully.\n" + (details.length() > 0 ? "Details:\n" : ""));
@@ -128,11 +133,13 @@ public class GBLScenarioCheckElement extends ValidatingElement {
           Data data = requestData.getData();
           // call a method to check customer name and address
           boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
+          log.debug("GBLScenarioCheckElement (closelyMatches) of request id " + data.getId().getReqId() + " = " + closelyMatches);
           if (closelyMatches) {
             return true;
           }
         }
       }
+      log.debug("GBLScenarioCheckElement.checkDunsMatchOnPrivates --> FALSE");
     }
     return false;
   }
