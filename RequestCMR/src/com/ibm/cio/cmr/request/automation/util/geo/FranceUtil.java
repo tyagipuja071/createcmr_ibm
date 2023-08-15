@@ -216,6 +216,7 @@ public class FranceUtil extends AutomationUtil {
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
+    LOG.debug("***FranceUtil.performScenarioValidation");
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
     String customerName = getCustomerFullName(zs01);
@@ -1010,8 +1011,8 @@ public class FranceUtil extends AutomationUtil {
         details.append("-" + change.getDataField() + " needs to be verified.\n");
         break;
       case "PPS CEID":
-    	cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
-    	break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -1330,6 +1331,7 @@ public class FranceUtil extends AutomationUtil {
   @Override
   protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
       boolean checkBluepages, RequestData reqData) {
+    LOG.debug("***FranceUtil.doPrivatePersonChecks");
     EntityManager entityManager = JpaManager.getEntityManager();
     boolean legalEndingExists = false;
     Data data = reqData.getData();
@@ -1396,7 +1398,7 @@ public class FranceUtil extends AutomationUtil {
   }
 
   private PrivatePersonCheckResult chkPrivatePersonRecordFR(String country, String landCntry, String name, boolean checkBluePages, Data data) {
-    LOG.debug("Validating Private Person record for " + name);
+    LOG.debug("***Validating Private Person record for " + name);
     try {
       DuplicateCMRCheckResponse checkResponse = chkDupPrivatePersonRecordFR(name, country, landCntry, data);
       String cmrNo = "";
@@ -1446,6 +1448,7 @@ public class FranceUtil extends AutomationUtil {
 
   private DuplicateCMRCheckResponse chkDupPrivatePersonRecordFR(String name, String issuingCountry, String landedCountry, Data data)
       throws Exception {
+    LOG.debug("***FranceUtil.chkDupPrivatePersonRecordFR");
     MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         MatchingServiceClient.class);
     DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();

@@ -870,13 +870,16 @@ public class DnBUtil {
    * @return
    */
   public static boolean hasValidMatches(MatchingResponse<DnBMatchingResponse> response) {
+    LOG.debug("DnBUtil.hasValidMatches");
     if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
       for (DnBMatchingResponse dnbRecord : response.getMatches()) {
         if (dnbRecord.getConfidenceCode() > 7) {
+          LOG.debug("dnbRecord.getConfidenceCode() --> " + dnbRecord.getConfidenceCode());
           return true;
         }
       }
     }
+    LOG.debug("dnbRecord.getConfidenceCode() --> will return FALSE");
     return false;
   }
 
