@@ -2582,7 +2582,7 @@ function setTaxRegimeMX() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var taxGrp = null;
   if (FormManager.getActualValue('custGrp') == 'CROSS') {
-    FormManager.limitDropdownValues(FormManager.getField('taxCd3'), '616');
+    // FormManager.limitDropdownValues(FormManager.getField('taxCd3'), '616');
   } else if(FormManager.getActualValue('custGrp') == 'LOCAL') {
     if (custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR') {
       taxGrp = '1';
@@ -3058,7 +3058,6 @@ function toggleTaxRegimeForCrossMx() {
   var taxGrp = null;
 
   if (FormManager.getActualValue('custGrp') == 'CROSS') {
-    FormManager.limitDropdownValues(FormManager.getField('taxCd3'), '616');
     if(custType == 'BUSPR' || custType == 'COMME') {
       taxGrp = '3';
         var qParams = {
@@ -3069,6 +3068,8 @@ function toggleTaxRegimeForCrossMx() {
       var taxDropDown = cmr.query('GET.MX_TAX_CODE', qParams);
       var arr =  taxDropDown.map(taxDropDown => taxDropDown.ret1);
       FormManager.limitDropdownValues(FormManager.getField('taxCd3'), arr);
+    } else {
+      FormManager.limitDropdownValues(FormManager.getField('taxCd3'), '616');
     }
   }
 }
