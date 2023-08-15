@@ -101,6 +101,8 @@ function afterConfigForJP() {
     setAdminDeptOptional();
     addScenarioDriven();
     setSortlOnOfcdChange();
+    handleFields4RA();
+    disableAddrFieldsForRA();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -130,6 +132,103 @@ function addHandlersForJP() {
     });
   }
 
+}
+
+function handleFields4RA() {
+  var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
+  console.log('isJPBlueGroupFlg:'+isJPBlueGroupFlg);
+  if (isJPBlueGroupFlg == 'true') {
+  	FormManager.setValue('custGrp', 'IBMTP');
+  	dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+	  FormManager.limitDropdownValues(FormManager.getField('custSubGrp'), 'RACMR');
+  	FormManager.setValue('custSubGrp', 'RACMR');
+    });
+  } else {
+	FormManager.resetDropdownValues(FormManager.getField('custSubGrp'));
+  }
+  disableFieldsForRA();
+  handleRAFields();
+}
+
+function disableFieldsForRA() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'RACMR') {
+    var accountFieldList = [ 'abbrevNm', 'custPrefLang', 'subIndustryCd', 'jsicCd', 'isicCd', 'email2', 'proxiLocnNo', 'oemInd', 'identClient',
+        'leasingCompanyIndc', 'educAllowCd', 'custAcctType', 'custClass', 'iinInd', 'valueAddRem', 'channelCd', 'siInd', 'crsCd', 'creditCd',
+        'govType', 'outsourcingService', 'zseriesSw', 'cmrNo2', 'cmrOwner', 'isuCd', 'clientTier', 'mrcCd', 'bgId', 'gbgId', 'bgRuleId', 'covId',
+        'inacType', 'inacCd', 'dunsNo', 'repTeamMemberNo', 'salesTeamCd', 'salesBusOffCd', 'orgNo', 'chargeCd', 'soProjectCd', 'csDiv',
+        'billingProcCd', 'invoiceSplitCd', 'creditToCustNo', 'tier2', 'adminDeptCd', 'adminDeptLine', 'func', 'csBo', 'salesBusOffCd' ];
+    for (var i = 0; i < accountFieldList.length; i++) {
+      disableFiled(accountFieldList[i]);
+    }
+  }
+}
+
+function handleRAFields() {
+  showRAFieldsValue();
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var RAFieldsList = [ 'jpCloseDays1', 'jpCloseDays2', 'jpCloseDays3', 'jpPayCycles1', 'jpPayCycles2', 'jpPayCycles3', 'jpPayDays1', 'jpPayDays2',
+      'jpPayDays3' ];
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'RACMR') {
+    setRAFieldsMandatory();
+    for (var i = 0; i < RAFieldsList.length; i++) {
+      FormManager.enable(RAFieldsList[i]);
+    }
+    FormManager.enable('cmrNo');
+    FormManager.enable('searchTerm');
+    FormManager.enable('billToCustNo');
+  } else {
+    for (var i = 0; i < RAFieldsList.length; i++) {
+      disableFiled(RAFieldsList[i]);
+      FormManager.clearValue(RAFieldsList[i]);
+    }
+  }
+}
+
+function showRAFieldsValue() {
+  if (typeof (_pagemodel) != 'undefined') {
+    var _jpCloseDays = _pagemodel.jpCloseDays != null ? _pagemodel.jpCloseDays : '';
+    var _jpPayCycles = _pagemodel.jpPayCycles != null ? _pagemodel.jpPayCycles : '';
+    var _jpPayDays = _pagemodel.jpPayDays != null ? _pagemodel.jpPayDays : '';
+    FormManager.setValue('jpCloseDays1', _jpCloseDays.substring(0, 2));
+    FormManager.setValue('jpCloseDays2', _jpCloseDays.substring(2, 4));
+    FormManager.setValue('jpCloseDays3', _jpCloseDays.substring(4, 6));
+    FormManager.setValue('jpPayCycles1', _jpPayCycles.substring(0, 1));
+    FormManager.setValue('jpPayCycles2', _jpPayCycles.substring(1, 2));
+    FormManager.setValue('jpPayCycles3', _jpPayCycles.substring(2, 3));
+    FormManager.setValue('jpPayDays1', _jpPayDays.substring(0, 2));
+    FormManager.setValue('jpPayDays2', _jpPayDays.substring(2, 4));
+    FormManager.setValue('jpPayDays3', _jpPayDays.substring(4, 6));
+  }
+}
+
+function setRAFieldsMandatory() {
+  FormManager.addValidator('jpCloseDays1', Validators.REQUIRED, [ 'Close Day01' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpCloseDays2', Validators.REQUIRED, [ 'Close Day02' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpCloseDays3', Validators.REQUIRED, [ 'Close Day03' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayCycles1', Validators.REQUIRED, [ 'Payment Cycle Code01' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayCycles2', Validators.REQUIRED, [ 'Payment Cycle Code01' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayCycles3', Validators.REQUIRED, [ 'Payment Cycle Code01' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayDays1', Validators.REQUIRED, [ 'Pay Day01' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayDays2', Validators.REQUIRED, [ 'Pay Day02' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('jpPayDays3', Validators.REQUIRED, [ 'Pay Day03' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Search Term (SORTL)' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
+}
+
+function disableAddrFieldsForRA() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'RACMR') {
+    var addrFieldList = [ 'custNm1', 'custNm2', 'custNm3', 'custNm4', 'addrTxt', 'postCd', 'bldg', 'custPhone', 'locationCode', 'city2',
+        'companySize', 'dept', 'office', 'custFax', 'estabFuncCd', 'divn', 'contact', 'rol' ];
+    for (var i = 0; i < addrFieldList.length; i++) {
+      setAddrFieldHide(addrFieldList[i]);
+    }
+  }
 }
 
 function addScenarioDriven() {
@@ -698,6 +797,13 @@ function setCmrNoCmrNo2Required() {
     FormManager.readOnly('cmrNo2');
     FormManager.resetValidations('cmrNo2');
     break;
+  case 'RACMR':
+    FormManager.enable('cmrNo');
+    FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
+    FormManager.setValue('cmrNo2', '');
+    FormManager.readOnly('cmrNo2');
+    FormManager.resetValidations('cmrNo2');
+    break;
   default:
     if (_role == 'Requester') {
       FormManager.setValue('cmrNo', '');
@@ -1114,9 +1220,12 @@ function setMrcByOfficeCd() {
 
 // CREATCMR-9327
 function disableFields() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   FormManager.readOnly('isuCd');
   FormManager.readOnly('clientTier');
-  FormManager.readOnly('searchTerm');
+  if (custSubGrp != 'RACMR') {
+    FormManager.readOnly('searchTerm');
+  }
 }
 
 /*
@@ -3944,7 +4053,7 @@ function addSoldToValidatorJP() {
               if (Number(zs01Reccount) > 1) {
                 return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
               } else if (Number(zs01Reccount == 0)
-                  && (custSubGrp != 'BCEXA' && custSubGrp != 'BFKSC' && custSubGrp != 'BPWPQ' && custSubGrp != 'ISOCU')) {
+                  && (custSubGrp != 'BCEXA' && custSubGrp != 'BFKSC' && custSubGrp != 'BPWPQ' && custSubGrp != 'ISOCU' && custSubGrp != 'RACMR')) {
                 return new ValidationResult(null, false, 'At least one Sold-To Address must be defined.');
               } else {
                 return new ValidationResult(null, true);
@@ -4401,7 +4510,7 @@ function addDPLCheckValidatorJP() {
       validate : function() {
         var result = FormManager.getActualValue('dplChkResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == '' || custSubGrp == 'BQICL') {
+        if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == '' || custSubGrp == 'BQICL' || custSubGrp == 'RACMR') {
           return new ValidationResult(null, true);
         } else {
           if (result == '' || result.toUpperCase() == 'NOT DONE') {
@@ -5869,6 +5978,93 @@ function addressQuotationValidator() {
   FormManager.addValidator('contact', Validators.NO_QUOTATION, [ 'Contact' ]);
 
 }
+/**
+ * Override WW validator Validator to check whether CMR search has been performed
+ */
+function addCMRSearchValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var result = FormManager.getActualValue('findCmrResult');
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (custSubGrp == 'RACMR') {
+          return new ValidationResult(null, true);
+        }
+        if (reqType == 'C' && FormManager.getActualValue('sourceSystId').toUpperCase() == 'FEDCMR' && FormManager.getActualValue('custGrp') == '14') {
+          return new ValidationResult(null, true);
+        }
+        if (result == '' || result.toUpperCase() == 'NOT DONE') {
+          return new ValidationResult(null, false, 'CMR Search has not been performed yet.');
+        }
+        if (reqType == 'U' && result.toUpperCase() != 'ACCEPTED') {
+          return new ValidationResult(null, false, 'An existing CMR for update must be searched for and imported properly to the request.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function jpBlueGroupValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (isJPBlueGroupFlg == 'false' && custSubGrp == 'RACMR') {
+		  return new ValidationResult(null, false, 'Only Blue Group person can choose RA Maintenance scenario.');
+        } else if (isJPBlueGroupFlg == 'true' && custSubGrp != 'RACMR') {
+		  return new ValidationResult(null, false, 'Blue Group person can only choose RA Maintenance scenario.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+/**
+ * Override WW validator Validator to check whether D&B search has been
+ * performed
+ */
+function addDnBSearchValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var ifProspect = FormManager.getActualValue('prospLegalInd');
+        if (dijit.byId('prospLegalInd')) {
+          ifProspect = dijit.byId('prospLegalInd').get('value');
+        }
+       
+        if (FormManager.getActualValue('dnbPrimary') != 'Y' && ifProspect != 'Y') {
+          return new ValidationResult(null, true);
+        }
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'U') {
+          return new ValidationResult(null, true);
+        }
+        var reqStatus = FormManager.getActualValue('reqStatus');
+        if (reqStatus != 'DRA') {
+          return new ValidationResult(null, true);
+        }
+        if (isSkipDnbMatching() && ifProspect != 'Y') {
+          return new ValidationResult(null, true);
+        }
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var result = FormManager.getActualValue('findDnbResult');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (custSubGrp == 'RACMR') {
+		  return new ValidationResult(null, true);
+		}
+        if ((result == '' || result.toUpperCase() == 'NOT DONE') && cntry != SysLoc.CHINA) {
+          return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -5915,6 +6111,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
+  GEOHandler.addAfterConfig(handleFields4RA, GEOHandler.JP);
 
   // CREATCMR-9327
   GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
@@ -5947,6 +6144,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(addSpaceForCustNm1, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(addTelFaxValidator, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(replaceBanGaoForAddrTxt, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRA, GEOHandler.JP);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.JP);
   GEOHandler.addAddrFunction(setFieldValueOnAddrSave, GEOHandler.JP);
@@ -5970,6 +6168,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(ROLValidatorForZC01, GEOHandler.JP, null, true);
   // GEOHandler.registerValidator(addAddressRecordsValidatorJP, GEOHandler.JP,
   // GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.JP, null, true);
+  GEOHandler.registerValidator(jpBlueGroupValidator, GEOHandler.JP, null, true);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);

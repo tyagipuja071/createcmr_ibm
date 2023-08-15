@@ -748,6 +748,25 @@ public class JPHandler extends GEOHandler {
       data.setSalesBusOffCd(
           mainRecord.getSboSub() != null && mainRecord.getSboSub().length() == 3 ? mainRecord.getSboSub().substring(1) : mainRecord.getSboSub());
     }
+    handleData4RAOnImport(data);
+  }
+  
+  private void handleData4RAOnImport(Data data) {
+    String jpPayDaysStr = data.getJpPayDays() != null ? data.getJpPayDays() : "";
+    String jpCloseDaysStr = data.getJpCloseDays() != null ? data.getJpCloseDays() : "";
+    String jpPayCyclesStr = data.getJpPayCycles() != null ? data.getJpPayCycles() : "";
+
+    data.setJpCloseDays1(jpCloseDaysStr.length() >= 2 ? jpCloseDaysStr.substring(0, 2) : null);
+    data.setJpCloseDays2(jpCloseDaysStr.length() >= 4 ? jpCloseDaysStr.substring(2, 4) : null);
+    data.setJpCloseDays3(jpCloseDaysStr.length() >= 6 ? jpCloseDaysStr.substring(4, 6) : null);
+
+    data.setJpPayDays1(jpPayDaysStr.length() >= 2 ? jpPayDaysStr.substring(0, 2) : null);
+    data.setJpPayDays2(jpPayDaysStr.length() >= 4 ? jpPayDaysStr.substring(2, 4) : null);
+    data.setJpPayDays3(jpPayDaysStr.length() >= 6 ? jpPayDaysStr.substring(4, 6) : null);
+
+    data.setJpPayCycles1(jpPayCyclesStr.length() >= 1 ? jpPayCyclesStr.substring(0, 1) : null);
+    data.setJpPayCycles2(jpPayCyclesStr.length() >= 2 ? jpPayCyclesStr.substring(1, 2) : null);
+    data.setJpPayCycles3(jpPayCyclesStr.length() >= 3 ? jpPayCyclesStr.substring(2, 3) : null);
   }
 
   @Override
@@ -1249,6 +1268,7 @@ public class JPHandler extends GEOHandler {
     setSalesRepTmDateOfAssign(data, admin, entityManager);
     updateCSBOBeforeDataSave(entityManager, admin, data);
     setAccountAbbNmOnSaveForBP(admin, data);
+    handleData4RAOnDataSave(data);
   }
 
   private void setSalesRepTmDateOfAssign(Data data, Admin admin, EntityManager entityManager) {
@@ -1444,6 +1464,52 @@ public class JPHandler extends GEOHandler {
     }
     accountAbbNmInCris = crisRecord.getNameAbbr();
     return accountAbbNmInCris;
+  }
+  
+  private void handleData4RAOnDataSave(Data data) {
+    handleJpCloseDay(data);
+    handleJpPayDay(data);
+    handleJpPayCycle(data);
+  }
+
+  private void handleJpCloseDay(Data data) {
+    String jpCloseDay1 = StringUtils.isNoneEmpty(data.getJpCloseDays1()) ? data.getJpCloseDays1() : "  ";
+    String jpCloseDay2 = StringUtils.isNoneEmpty(data.getJpCloseDays2()) ? data.getJpCloseDays2() : "  ";
+    String jpCloseDay3 = StringUtils.isNoneEmpty(data.getJpCloseDays3()) ? data.getJpCloseDays3() : "  ";
+    if (jpCloseDay1.length() == 1) {
+      jpCloseDay1 = " " + jpCloseDay1;
+    }
+    if (jpCloseDay2.length() == 1) {
+      jpCloseDay2 = " " + jpCloseDay2;
+    }
+    if (jpCloseDay3.length() == 1) {
+      jpCloseDay3 = " " + jpCloseDay3;
+    }
+    data.setJpCloseDays(jpCloseDay1 + jpCloseDay2 + jpCloseDay3);
+  }
+
+  private void handleJpPayDay(Data data) {
+    String jpPayDay1 = StringUtils.isNoneEmpty(data.getJpPayDays1()) ? data.getJpPayDays1() : "  ";
+    String jpPayDay2 = StringUtils.isNoneEmpty(data.getJpPayDays2()) ? data.getJpPayDays2() : "  ";
+    String jpPayDay3 = StringUtils.isNoneEmpty(data.getJpPayDays3()) ? data.getJpPayDays3() : "  ";
+    if (jpPayDay1.length() == 1) {
+      jpPayDay1 = " " + jpPayDay1;
+    }
+    if (jpPayDay2.length() == 1) {
+      jpPayDay2 = " " + jpPayDay2;
+    }
+    if (jpPayDay3.length() == 1) {
+      jpPayDay3 = " " + jpPayDay3;
+    }
+    data.setJpPayDays(jpPayDay1 + jpPayDay2 + jpPayDay3);
+  }
+
+  private void handleJpPayCycle(Data data) {
+    String jpPayCycle1 = StringUtils.isNoneEmpty(data.getJpPayCycles1()) ? data.getJpPayCycles1() : " ";
+    String jpPayCycle2 = StringUtils.isNoneEmpty(data.getJpPayCycles2()) ? data.getJpPayCycles2() : " ";
+    String jpPayCycle3 = StringUtils.isNoneEmpty(data.getJpPayCycles3()) ? data.getJpPayCycles3() : " ";
+
+    data.setJpPayCycles(jpPayCycle1 + jpPayCycle2 + jpPayCycle3);
   }
 
   @Override
@@ -2532,5 +2598,12 @@ public class JPHandler extends GEOHandler {
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
+  }
+  
+  public static void addJpLogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+    String custSubGroup = data.getCustSubGrp();
+    if ("RACMR".equals(custSubGroup)) {
+      admin.setReqStatus("PCP");
+    }
   }
 }
