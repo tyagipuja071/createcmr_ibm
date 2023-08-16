@@ -45,7 +45,7 @@ function addHandlersForAP() {
     _vatRegisterHandlerSG = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
     cmr
     .showAlert(
-        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of “VAT Registration Status�? is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ‘No – VAT unapplicable’, you are confirming that this customer has no VAT# then “VAT Registration Status�? is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
+        '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of “VAT Registration Status�? is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting ‘No – VAT unapplicable’, you are confirming that this customer has no VAT# then “VAT Registration Status�? is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()','VatRegistrationStatus' , {
           OK : 'I confirm',
         });
         });
@@ -2110,6 +2110,13 @@ function onIsicChange() {
   if (dplCheck == 'AF') {
     FormManager.readOnly('isicCd');
   }
+}
+
+function getIsicDataRDCValue(){
+  var result = cmr.query('GET.ISIC_OLD_BY_REQID', {
+    REQ_ID : FormManager.getActualValue('reqId')
+  });
+  return result.ret1;
 }
 
 function setIsicCdIfCmrResultAccepted(){
