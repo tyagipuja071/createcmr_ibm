@@ -195,9 +195,6 @@ function openAddressDetails(reqId, addrType, addrSeq, mandt) {
     MANDT : mandt,
   };
   var result = cmr.query('ADDRDETAIL', qParams);
-  if ( cntry == '796' || cntry == '616' ) {
-    result = cmr.query( 'ADDRDETAIL_ANZ', qParams );
-  }
   cmr.addrdetails = result;
   cmr.showModal('AddressDetailsModal');
   openAddressDetails.addrType = addrType;
@@ -617,63 +614,17 @@ function doAddToAddressList() {
   cmr.currentModalId = 'addEditAddressModal';
   cmr.addressReqId = FormManager.getActualValue('reqId');
   cmr.addressSequence = FormManager.getActualValue('addrSeq');
-  if(cntry=='796') {
-    var selectedRadio = document.querySelector('input[name="addrType"]:checked');
-    if (selectedRadio) {
-	  var selectedValue = selectedRadio.value;
-	  if(selectedValue=='ZI01'){
-		cmr.addressSequence = '09';
-	  }
-	  if(selectedValue=='ZS01'){
-		cmr.addressSequence = '02';
-	  }
-	  if(selectedValue=='CTYG'){
-		cmr.addressSequence = 'G';
-	  }
-	  if(selectedValue=='CTYH'){
-		cmr.addressSequence = 'H';
-	  }
-	  if(selectedValue=='ZP01'){
-		cmr.addressSequence = '01';
-	  }
-      console.log('Selected radio value:', selectedValue);
-      console.log('Addr Seq:', cmr.addressSequence);
-	} else {
-	  console.log('No radio button selected');
-	}
-	FormManager.setValue('addrSeq' , cmr.addressSequence);
-  }  
-  if(cntry=='616') {
-    var selectedRadio = document.querySelector('input[name="addrType"]:checked');
-    if (selectedRadio) {
-	  var selectedValue = selectedRadio.value;
-	  if(selectedValue=='ZP01'){
-		cmr.addressSequence = '01';
-	  }
-	  if(selectedValue=='ZI01'){
-		cmr.addressSequence = '02';
-	  }
-	  if(selectedValue=='ZF01'){
-		cmr.addressSequence = '03';
-	  }
-	  if(selectedValue=='ZS01'){
-		cmr.addressSequence = '07';
-	  }
-	  if(selectedValue=='CTYG'){
-		cmr.addressSequence = 'G';
-	  }
-	  if(selectedValue=='CTYH'){
-		cmr.addressSequence = 'G';
-	  }
-      console.log('Selected radio value:', selectedValue);
-      console.log('Addr Seq:', cmr.addressSequence);
-	} else {
-	  console.log('No radio button selected');
-	}
-    FormManager.setValue('addrSeq' , cmr.addressSequence);
-  }
 
   cmr.addressType = FormManager.getActualValue('addrType');
+  if(cmr.addressSequence=='undefined' && (cntry=='796') ) {
+    if(cmr.addressType=='G'){
+      cmr.addressType = 'CTYG'      
+    }
+    if(cmr.addressType=='H'){
+      cmr.addressType = 'CTYH'
+    }
+    FormManager.setValue('addrType' , cmr.addressType);
+  }
   var dummyseq = "xx";
   var qParams;
 
@@ -688,9 +639,6 @@ function doAddToAddressList() {
         ADDR_SEQ : cmr.addressSequence,
       };
     } else {
-      if(cntry=='796' || cntry =='616') {
-        dummyseq = cmr.addressSequence;
-      }
       qParams = {
         REQ_ID : cmr.addressReqId,
         ADDR_SEQ : dummyseq,
@@ -1649,9 +1597,6 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
   };
   var result = cmr.query('ADDRDETAIL', qParams);
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if ( cntry == '796' || cntry == '616' ) {
-    result = cmr.query( 'ADDRDETAIL_ANZ', qParams );
-  }
 
   cmr.addrdetails = result;
   cmr.addressMode = 'updateAddress';
