@@ -71,13 +71,14 @@ public class GBLScenarioCheckElement extends ValidatingElement {
         log.debug("checking for close match");
         log.debug("GBLScenarioCheckElement (foundCloseMatch) of request id  " + data.getId().getReqId() + " = " + foundCloseMatch);
         if (foundCloseMatch) {
+          admin.setReqReason("DUPD");
           log.debug("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
           output.setSuccess(false);
-          output.setMessage("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
-          result.setDetails("DUNS closely matching name and address in 'Private Household leads to automatic rejection.");
+          output.setMessage("Request should be re-submitted as a company or private Indivuduals");
+          result.setDetails("Request should be re-submitted as a company or private Indivuduals");
           result.setOnError(true);
-          result.setResults("DUNS closely matching name and address in 'Private Household leads to automatic rejection.");
-          engineData.addRejectionComment("DUPD", "Request should be re-submitted as a company or private Indivuduals", "",
+          result.setResults("Request should be re-submitted as a company or private Indivuduals");
+          engineData.addRejectionComment("DUPD", "DUNS closely matching name and address in 'Private Household leads to automatic rejection", "",
               "");
           log.debug("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
           return result;
