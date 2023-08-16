@@ -141,6 +141,13 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (geoHandler != null && newAddrSeq == null && (SystemLocation.NEW_ZEALAND.equals(model.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(model.getCmrIssuingCntry()))) {
         if(StringUtils.isNotEmpty(model.getAddrSeq())) {
           newAddrSeq = model.getAddrSeq();
+          
+          if(model.getAddrType().equals("CTYG")) {
+            newAddrSeq = "G";
+          }
+          if(model.getAddrType().equals("CTYH")) {
+            newAddrSeq = "H";
+          }
         } else {
           newAddrSeq = "";
         }
@@ -625,8 +632,6 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     String sql = null;
     if ("758".equalsIgnoreCase(model.getCmrIssuingCntry())) {
       sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDR.SEARCH_BY_REQID_IT");
-    } else if ("616".equalsIgnoreCase(model.getCmrIssuingCntry()) || "796".equalsIgnoreCase(model.getCmrIssuingCntry())) {
-      sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDR.SEARCH_BY_REQID_ANZ");
     } else {
       sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDR.SEARCH_BY_REQID");
     }
