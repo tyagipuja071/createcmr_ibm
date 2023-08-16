@@ -1653,9 +1653,7 @@ function doCopyAddr(reqId, addrType, addrSeq, mandt, name, type) {
   };
   var result = cmr.query('ADDRDETAIL', qParams);
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if ( cntry == '796' || cntry == '616' ) {
-    result = cmr.query( 'ADDRDETAIL_ANZ', qParams );
-  }
+
   if(FormManager.getActualValue)
   cmr.addrdetails = result;
   cmr.addressMode = 'copyAddress';
