@@ -146,6 +146,13 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (geoHandler != null && newAddrSeq == null && (SystemLocation.NEW_ZEALAND.equals(model.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(model.getCmrIssuingCntry()))) {
         if(StringUtils.isNotEmpty(model.getAddrSeq())) {
           newAddrSeq = model.getAddrSeq();
+          
+          if(model.getAddrType().equals("CTYG")) {
+            newAddrSeq = "G";
+          }
+          if(model.getAddrType().equals("CTYH")) {
+            newAddrSeq = "H";
+          }
         } else {
           newAddrSeq = "";
         }
