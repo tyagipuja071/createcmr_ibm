@@ -12,8 +12,16 @@ public interface ProcessLogger {
         String line = in.readLine();
         if (line == null)
           break;
-        System.out.println("[ " + className + " ] : " + line);
+        System.out.println(line);
       }
     }
-  };
+    try (BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+      while (true) {
+        String line = in.readLine();
+        if (line == null)
+          break;
+        System.err.println(line);
+      }
+    }
+  }
 }
