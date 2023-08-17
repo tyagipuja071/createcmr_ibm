@@ -469,7 +469,7 @@ var _allGroups = [ {
     "subType" : false,
     "parent" : "Japan"
   }, {
-    "href" : cmr.CONTEXT_ROOT + '/code/jpofficesectorinac',
+    "href" : cmr.CONTEXT_ROOT + '/code/jpofficesectorinacmap',
     "name" : "JP OfficeCd Sector Inac Map",
     "description" : "Maintains JP OfficeCd Sector Inac mappings",
     "table" : "CREQCMR.JP_OFFICE_SECTOR_INAC_MAPPING",

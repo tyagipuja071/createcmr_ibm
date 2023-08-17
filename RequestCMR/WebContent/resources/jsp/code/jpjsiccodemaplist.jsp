@@ -29,7 +29,14 @@
         window.location = loc;
       },
       remove : function(jsicCd, subIndustryCd, isuCd, isicCd, dept) {
-        var loc = cmr.CONTEXT_ROOT + '/code/jpjsiccodemapform?jsicCd=' + jsicCd;
+        var str1 = 'actions.actualRemove(\"' + jsicCd + '\",\"' + subIndustryCd + '\",\"';
+        str1 += isuCd + '\",\"' + isicCd + '\",\"' + dept + '\")';
+        var str2 = 'Are you sure remove this record? jsicCd: '+jsicCd + ' subIndustryCd: ';
+        str2 += subIndustryCd + ' isuCd: '+isuCd + ' isicCd: '+isicCd + ' dept: '+dept;
+        cmr.showConfirm(str1, str2);
+      },
+      actualRemove : function(jsicCd, subIndustryCd, isuCd, isicCd, dept) {
+        var loc = cmr.CONTEXT_ROOT + '/code/jpjsiccodemap/delete?jsicCd=' + encodeURIComponent(jsicCd);
         loc += '&subIndustryCd=' + encodeURIComponent(subIndustryCd);
         loc += '&isuCd=' + encodeURIComponent(isuCd);
         loc += '&isicCd=' + encodeURIComponent(isicCd);

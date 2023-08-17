@@ -28,17 +28,6 @@
 
 <script>
   dojo.addOnLoad(function() {
-    <%
-      if (newEntry){
-    %>
-      FormManager.addValidator('jsicCd', Validators.REQUIRED , ['JSIC_CD']);
-      FormManager.addValidator('subIndustryCd', Validators.REQUIRED , ['SUB_INDUSTRY_CD']);
-      FormManager.addValidator('isuCd', Validators.REQUIRED , ['ISU_CD']);
-      FormManager.addValidator('isicCd', Validators.REQUIRED , ['ISIC_CD']);
-      FormManager.addValidator('dept', Validators.REQUIRED , ['DEPT']);
-    <%
-      }
-    %>
     FormManager.addValidator('jsicCd', Validators.REQUIRED , ['JSIC_CD']);
     FormManager.addValidator('subIndustryCd', Validators.REQUIRED , ['SUB_INDUSTRY_CD']);
     FormManager.addValidator('isuCd', Validators.REQUIRED , ['ISU_CD']);
@@ -51,7 +40,7 @@
     return {
       save : function(flag) {
         if(flag){
-          var checkIndc = cmr.query('JP.SIC_CODE_MAP_EXISTS', {
+          var checkIndc = cmr.query('JP.JSIC_CODE_MAP_EXISTS', {
             JSIC_CD: FormManager.getActualValue('jsicCd'),
             SUB_INDUSTRY_CD: FormManager.getActualValue('subIndustryCd'),
             ISU_CD: FormManager.getActualValue('isuCd'),

@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.service.code;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.JPOfficeSectorInacMap;
 import com.ibm.cio.cmr.request.entity.JPOfficeSectorInacMapPK;
 import com.ibm.cio.cmr.request.model.BaseModel;
@@ -42,13 +44,19 @@ public class JPOfficeSectorInacMappingMaintainService extends BaseService<JPOffi
   @Override
   protected List<JPOfficeSectorInacMapModel> doSearch(JPOfficeSectorInacMapModel model, EntityManager entityManager, HttpServletRequest request)
       throws Exception {
-
+    SimpleDateFormat formatter = new SimpleDateFormat(SystemConfiguration.getValue("DATE_TIME_FORMAT"));
     JPOfficeSectorInacMap currentModel = getCurrentRecord(model, entityManager, request);
     JPOfficeSectorInacMapModel newModel = new JPOfficeSectorInacMapModel();
 
     copyValuesFromEntity(currentModel, newModel);
 
     newModel.setState(BaseModel.STATE_EXISTING);
+    if (currentModel.getCreateTs() != null) {
+      newModel.setCreateTsStr(formatter.format(currentModel.getCreateTs()));
+    }
+    if (currentModel.getUpdateTs() != null) {
+      newModel.setUpdateTsStr(formatter.format(currentModel.getUpdateTs()));
+    }
 
     return Collections.singletonList(newModel);
   }
