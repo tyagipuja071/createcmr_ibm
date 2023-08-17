@@ -13,7 +13,7 @@ var _importIndIN = null;
 var _vatRegisterHandlerSG = null;
 var _clusterHandlerINDONESIA = 0;
 var _inacHandlerANZSG = 0;
-var custSubGrpHandler = null;
+var _custSubGrpHandler = null;
 var oldClusterCd = null;
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
@@ -421,6 +421,16 @@ function saveClusterVal() {
   console.log(">>>> saveClusterVal");
   if (oldClusterCd == null) {
     oldClusterCd = FormManager.getActualValue('apCustClusterId');
+  }
+}
+
+function prospectFilter() {
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  if (ifProspect == 'Y') {
+    custSubGrpHandler();
   }
 }
 
@@ -2624,17 +2634,16 @@ function filterInacCd(cmrIssuCntry, clusters,inacType,inacCd) {
 }
 
 
-var _isicHandler = null;
-function onIsicChangeHandler() {
-  console.log('>>>> onIsicChangeHandler >>>>');
-  if (_isicHandler == null) {
-    _isicHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+function custSubGrpHandler() {
+  console.log('>>>> custSubGrpHandler >>>>');
+  if (_custSubGrpHandler == null) {
+    _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       onIsicChange();
     });
   }
 }
 
-function setIsicCdIfCmrResultAccepted(){
+function setIsicCdIfCmrResultAccepted(value){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cond1 = new Set(['INTER','PRIV', 'XPRIV ','DUMMY','IGF']);
   if(cond1.has(custSubGrp)){
@@ -2653,7 +2662,7 @@ function getIsicDataRDCValue(){
   return result.ret1;
 }
 
-function setIsicCdIfDnbResultAccepted(){
+function setIsicCdIfDnbResultAccepted(value){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cond2 = new Set(['AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM','NRMLC']);
   var cond3 = new Set(['INTER', 'PRIV', 'XPRIV', 'DUMMY','IGF']);
@@ -2670,7 +2679,7 @@ function setIsicCdIfDnbResultAccepted(){
   }
 }
 
-function setIsicCdIfDnbAndCmrResultOther(){
+function setIsicCdIfDnbAndCmrResultOther(value){
   var value = FormManager.getActualValue('isicCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cond4 = new Set(['INTER','PRIV','XPRIV','DUMMY','IGF']);
@@ -2701,11 +2710,11 @@ function onIsicChange() {
   }
   FormManager.readOnly('isicCd');
   if (cmrResult != '' && cmrResult == 'Accepted' ) {
-    setIsicCdIfCmrResultAccepted();
+    setIsicCdIfCmrResultAccepted(value);
   } else if (dnbResult != '' && dnbResult == 'Accepted') {
-    setIsicCdIfDnbResultAccepted();
+    setIsicCdIfDnbResultAccepted(value);
   } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
-    setIsicCdIfDnbAndCmrResultOther();
+    setIsicCdIfDnbAndCmrResultOther(value);
   }
   if (dplCheck == 'AF') {
     FormManager.readOnly('isicCd');
@@ -8488,12 +8497,14 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateStreetAddrCont2, [ SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
   SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ], null, true);
   // CREATCMR-7589
-  GEOHandler.addAfterConfig(onIsicChangeHandler, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
+  GEOHandler.addAfterConfig(custSubGrpHandler, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
 // GEOHandler.addAfterConfig(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA,
 // SysLoc.SINGAPORE ]);
 // GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.INDIA,
 // SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.AUSTRALIA]);
+  GEOHandler.addAfterConfig(onIsicChange, [SysLoc.AUSTRALIA]);
+  GEOHandler.addAfterTemplateLoad(custSubGrpHandler, [SysLoc.AUSTRALIA]);
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForISA, GEOHandler.ISA);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
@@ -8602,5 +8613,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(applyClusterFilters, [ SysLoc.INDIA ]);
   GEOHandler.addAfterConfig(lockFieldsWithDefaultValuesByScenarioSubType, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockFieldsWithDefaultValuesByScenarioSubType, [ SysLoc.INDIA ]);
-  GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, [ SysLoc.INDIA ]);  
+  GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, [ SysLoc.INDIA ]); 
+  GEOHandler.addAfterTemplateLoad(prospectFilter, SysLoc.AUSTRALIA);
+  GEOHandler.addAfterConfig(prospectFilter, SysLoc.AUSTRALIA);
 });
