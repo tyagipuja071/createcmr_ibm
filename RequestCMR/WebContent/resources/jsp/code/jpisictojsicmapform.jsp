@@ -1,7 +1,7 @@
 <%@page import="java.util.Map"%>
 <%@page import="java.util.HashMap"%>
 <%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
-<%@page import="com.ibm.cio.cmr.request.model.code.JPOfficeSectorInacMapModel"%>
+<%@page import="com.ibm.cio.cmr.request.model.code.JpIsicToJsicMapModel"%>
 <%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@page import="org.codehaus.jackson.map.ObjectMapper"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
@@ -12,12 +12,12 @@
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
 
 <%
-  JPOfficeSectorInacMapModel jpofficesectorinacform = (JPOfficeSectorInacMapModel) request.getAttribute("jpofficesectorinacform");
+  JpIsicToJsicMapModel jpisictojsicmapform = (JpIsicToJsicMapModel) request.getAttribute("jpisictojsicmapform");
 
   boolean newEntry = false;
   boolean readOnly = true;
 
-  if (jpofficesectorinacform.getState() == BaseModel.STATE_NEW) {
+  if (jpisictojsicmapform.getState() == BaseModel.STATE_NEW) {
     newEntry = true;
     readOnly = false;
   }
@@ -28,10 +28,8 @@
 
 <script>
   dojo.addOnLoad(function() {
-    FormManager.addValidator('officeCd', Validators.REQUIRED , ['OFFICE_CD']);
-    FormManager.addValidator('sectorCd', Validators.REQUIRED , ['SECTOR_CD']);
-    FormManager.addValidator('inacCd', Validators.REQUIRED , ['INAC_CD']);
-    FormManager.addValidator('apCustClusterId', Validators.REQUIRED , ['AP_CUST_CLUSTER_ID']);
+    FormManager.addValidator('mandt', Validators.REQUIRED , ['MANDT']);
+    FormManager.addValidator('jsicCd', Validators.REQUIRED , ['JSIC_CD']);
     FormManager.ready();
   });
   
@@ -39,27 +37,16 @@
     return {
       save : function(flag) {
         if(flag){
-          var checkIndc = cmr.query('JP.JP_OFFICE_SECTOR_INAC_MAPPING_EXISTS', {
-            OFFICE_CD: FormManager.getActualValue('officeCd'),
-            INAC_CD: FormManager.getActualValue('sectorCd'),
-            SECTOR_CD: FormManager.getActualValue('inacCd'),
-            AP_CUST_CLUSTER_ID: FormManager.getActualValue('apCustClusterId')
+          var checkIndc = cmr.query('JP.ISIC_TO_JSIC_MAP_EXISTS', {
+            JSIC_CD: FormManager.getActualValue('jsicCd'),
+            MANDT: FormManager.getActualValue('mandt'),
           });
           if (checkIndc.ret1 == '1') {
             cmr.showAlert('This record already exists in the system.');
             return;
           }
         } else {
-          /* var checkIndc = cmr.query('JP.JP_OFFICE_SECTOR_INAC_MAPPING_EXISTS', {
-            OFFICE_CD: FormManager.getActualValue('officeCd'),
-            INAC_CD: FormManager.getActualValue('sectorCd'),
-            SECTOR_CD: FormManager.getActualValue('inacCd'),
-            AP_CUST_CLUSTER_ID: FormManager.getActualValue('apCustClusterId')
-          });
-          if (checkIndc.ret1 == null  ||  checkIndc.ret1 == '') {
-            cmr.showAlert('No such record exists in the system.');
-            return;
-          } */
+          // todo
          }
         FormManager.save('frmCMR');
       }
@@ -67,14 +54,14 @@
   })();
   
   function backToList(){
-    window.location = '${contextPath}/code/jpofficesectorinacmap';
+    window.location = '${contextPath}/code/jpisictojsicmap';
   }
 
 </script>
 
 <cmr:boxContent>
   <cmr:tabs />
-  <cmr:form method="POST" action="${contextPath}/code/jpofficesectorinacform" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="jpofficesectorinacform" >
+  <cmr:form method="POST" action="${contextPath}/code/jpisictojsicmapform" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="jpisictojsicmapform" >
     <cmr:modelAction formName="frmCMR" />
     <cmr:section>
       <cmr:row topPad="8">
@@ -87,44 +74,33 @@
 	 <cmr:row>
         <cmr:column span="1" width="180">
           <p>
-            <cmr:label fieldId="officeCd">OFFICE_CD: </cmr:label>
+            <cmr:label fieldId="mandt">MANDT: </cmr:label>
           </p>
         </cmr:column>
         <cmr:column span="2">
-            <form:input id="officeCd" path="officeCd" dojoType="dijit.form.TextBox" placeHolder="OFFICE_CD"  maxlength="2" readOnly="<%= readOnly %>"/>
+            <form:input id="mandt" path="mandt" dojoType="dijit.form.TextBox" placeHolder="MANDT"  maxlength="3" readOnly="<%= readOnly %>"/>
         </cmr:column>
       </cmr:row>
       
       <cmr:row>
         <cmr:column span="1" width="180">
           <p>
-            <cmr:label fieldId="sectorCd">SECTOR_CD: </cmr:label>
+            <cmr:label fieldId="jsicCd">JSIC_CD: </cmr:label>
           </p>
         </cmr:column>
         <cmr:column span="2">
-            <form:input id="sectorCd" path="sectorCd" dojoType="dijit.form.TextBox" placeHolder="SECTOR_CD"  maxlength="4" readOnly="<%= readOnly %>"/>
+            <form:input id="jsicCd" path="jsicCd" dojoType="dijit.form.TextBox" placeHolder="JSIC_CD"  maxlength="5" readOnly="<%= readOnly %>"/>
         </cmr:column>
       </cmr:row>
       
       <cmr:row>
         <cmr:column span="1" width="180">
           <p>
-            <cmr:label fieldId="inacCd">INAC_CD: </cmr:label>
+            <cmr:label fieldId="isicCd">ISIC_CD: </cmr:label>
           </p>
         </cmr:column>
         <cmr:column span="2">
-            <form:input id="inacCd" path="inacCd" dojoType="dijit.form.TextBox" placeHolder="INAC_CD"  maxlength="4" readOnly="<%= readOnly %>"/>
-        </cmr:column>
-      </cmr:row>
-      
-      <cmr:row>
-        <cmr:column span="1" width="180">
-          <p>
-            <cmr:label fieldId="apCustClusterId">AP_CUST_CLUSTER_ID: </cmr:label>
-          </p>
-        </cmr:column>
-        <cmr:column span="2">
-          <form:input id="apCustClusterId" path="apCustClusterId" dojoType="dijit.form.TextBox" placeHolder="AP_CUST_CLUSTER_ID" maxlength="8" readOnly="<%= readOnly %>" />
+          <form:input id="isicCd" path="isicCd" dojoType="dijit.form.TextBox" placeHolder="ISIC_CD"  maxlength="4" />
         </cmr:column>
       </cmr:row>
       
@@ -135,10 +111,10 @@
           </p>
         </cmr:column>
         <cmr:column span="2">
-          <c:if test="${jpofficesectorinacform.createTsStr != null}">
-            ${jpofficesectorinacform.createTsStr}
+          <c:if test="${jpisictojsicmapform.createTsStr != null}">
+            ${jpisictojsicmapform.createTsStr}
           </c:if>
-          <c:if test="${jpofficesectorinacform.createTsStr == null}">-</c:if>
+          <c:if test="${jpisictojsicmapform.createTsStr == null}">-</c:if>
           <form:hidden id="createTs" path="createTs" />
         </cmr:column>
         
@@ -148,10 +124,10 @@
           </p>
         </cmr:column>
         <cmr:column span="2">
-          <c:if test="${jpofficesectorinacform.createBy != null}">
-            ${jpofficesectorinacform.createBy}
+          <c:if test="${jpisictojsicmapform.createBy != null}">
+            ${jpisictojsicmapform.createBy}
           </c:if>
-          <c:if test="${jpofficesectorinacform.createBy == null}">-</c:if>
+          <c:if test="${jpisictojsicmapform.createBy == null}">-</c:if>
           <form:hidden id="createBy" path="createBy" />
         </cmr:column>
       </cmr:row>
@@ -163,10 +139,10 @@
           </p>
         </cmr:column>
         <cmr:column span="2">
-          <c:if test="${jpofficesectorinacform.updateTsStr != null}">
-            ${jpofficesectorinacform.updateTsStr}
+          <c:if test="${jpisictojsicmapform.updateTsStr != null}">
+            ${jpisictojsicmapform.updateTsStr}
           </c:if>
-          <c:if test="${jpofficesectorinacform.updateTsStr == null}">-</c:if>
+          <c:if test="${jpisictojsicmapform.updateTsStr == null}">-</c:if>
           <form:hidden id="updateTs" path="updateTs" />
         </cmr:column>
         
@@ -176,10 +152,10 @@
           </p>
         </cmr:column>
         <cmr:column span="2">
-          <c:if test="${jpofficesectorinacform.updateBy != null}">
-            ${jpofficesectorinacform.updateBy}
+          <c:if test="${jpisictojsicmapform.updateBy != null}">
+            ${jpisictojsicmapform.updateBy}
           </c:if>
-          <c:if test="${jpofficesectorinacform.updateBy == null}">-</c:if>
+          <c:if test="${jpisictojsicmapform.updateBy == null}">-</c:if>
           <form:hidden id="updateBy" path="updateBy" />
         </cmr:column>
       </cmr:row>
@@ -200,8 +176,8 @@
     <%
       }
     %>
-    <cmr:button label="Back to JP OfficeCd Sector Inac Mapping List" onClick="backToList()" pad="true"/>
+    <cmr:button label="Back to JP JSIC ISIC TO JSIC MAP List" onClick="backToList()" pad="true"/>
   </cmr:buttonsRow>
 </cmr:section>
 
-<cmr:model model="jpofficesectorinacform" />
+<cmr:model model="jpisictojsicmapform" />
