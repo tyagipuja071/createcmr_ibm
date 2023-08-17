@@ -5349,11 +5349,11 @@ function addProvinceCityValidator() {
 
         if ((landCntry == 'RO' && stateProv == 'B') && (reqType =='C'|| reqType=='U')) {
           if (addrType == 'ZP02') {
-            if ((city.substr(0, 18) == 'București Sectorul' && city.length == '20')
+            if ((city.substr(0, 18) == 'BUCUREȘTI SECTORUL' && city.length == '20')
                 && (city.at(-1) == '1' || city.at(-1) == '2' || city.at(-1) == '3' || city.at(-1) == '4' || city.at(-1) == '5' || city.at(-1) == '6')) {
               return new ValidationResult(null, true);
             } else {
-              return new ValidationResult(null, false, 'Correct format for city is București Sectorul \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+              return new ValidationResult(null, false, 'Correct format for city is BUCUREȘTI SECTORUL \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
             }
           }
           if ((city.substr(0, 16) == 'BUCHAREST SECTOR' && city.length == '18')

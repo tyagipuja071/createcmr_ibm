@@ -2286,8 +2286,8 @@ public class CEMEAHandler extends BaseSOFHandler {
             landCntry = validateColValFromCell(currCell);
 
             if (!StringUtils.isBlank(city) && "RO".equals(landCntry) && "B".equals(stateProv)) {
-              if (city.equals("Bucharest") && ("Ship To".equals(name) || "Mail to".equals(name) || "Bill To".equals(name) || "Sold To".equals(name)
-                  || "Install At".equals(name) || "Address in Local language".equals(name))) {
+              if (city.equalsIgnoreCase("BUCHAREST") && ("Ship To".equals(name) || "Mail to".equals(name) || "Bill To".equals(name)
+                  || "Sold To".equals(name) || "Install At".equals(name) || "Address in Local language".equals(name))) {
                 error.addError((rowIndex + 1), "Tab Name : " + name + "," + " City  ",
                     "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
               }
@@ -2567,10 +2567,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     addressDataMap.put("stdCityNm", addr.getStdCityNm());
     addressDataMap.put("taxOffice", addr.getTaxOffice());
     for (String key : addressDataMap.keySet()) {
-      if (!("B".equals(addr.getStateProv()) && "RO".equals(addr.getLandCntry()) && "ROMANIA".equals(addr.getBldg()))) {
-        if (StringUtils.isNotEmpty(addressDataMap.get(key))) {
-          addressDataMap.put(key, addressDataMap.get(key).toUpperCase());
-        }
+      if (StringUtils.isNotEmpty(addressDataMap.get(key))) {
+        addressDataMap.put(key, addressDataMap.get(key).toUpperCase());
       }
       if (!(StringUtils.isEmpty(addressDataMap.get("addrTxt"))) && !(addressDataMap.get("addrTxt").equals(addr.getAddrTxt()))) {
         addr.setAddrTxt(addressDataMap.get("addrTxt"));
