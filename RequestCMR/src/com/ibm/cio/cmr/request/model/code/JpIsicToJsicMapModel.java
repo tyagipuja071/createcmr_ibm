@@ -8,17 +8,16 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.model.BaseModel;
 
-public class JPOfficeSectorInacMapModel extends BaseModel {
+public class JpIsicToJsicMapModel extends BaseModel {
 
   /**
    * 
    */
   private static final long serialVersionUID = 1L;
 
-  private String officeCd;
-  private String sectorCd;
-  private String inacCd;
-  private String apCustClusterId;
+  private String mandt;
+  private String jsicCd;
+  private String isicCd;
   private String createBy;
   private Date createTs;
   private String createTsStr;
@@ -26,36 +25,28 @@ public class JPOfficeSectorInacMapModel extends BaseModel {
   private Date updateTs;
   private String updateTsStr;
 
-  public String getOfficeCd() {
-    return officeCd;
+  public String getMandt() {
+    return mandt;
   }
 
-  public void setOfficeCd(String officeCd) {
-    this.officeCd = officeCd;
+  public void setMandt(String mandt) {
+    this.mandt = mandt;
   }
 
-  public String getSectorCd() {
-    return sectorCd;
+  public String getJsicCd() {
+    return jsicCd;
   }
 
-  public void setSectorCd(String sectorCd) {
-    this.sectorCd = sectorCd;
+  public void setJsicCd(String jsicCd) {
+    this.jsicCd = jsicCd;
   }
 
-  public String getInacCd() {
-    return inacCd;
+  public String getIsicCd() {
+    return isicCd;
   }
 
-  public void setInacCd(String inacCd) {
-    this.inacCd = inacCd;
-  }
-
-  public String getApCustClusterId() {
-    return apCustClusterId;
-  }
-
-  public void setApCustClusterId(String apCustClusterId) {
-    this.apCustClusterId = apCustClusterId;
+  public void setIsicCd(String isicCd) {
+    this.isicCd = isicCd;
   }
 
   public String getCreateBy() {
@@ -93,8 +84,7 @@ public class JPOfficeSectorInacMapModel extends BaseModel {
   @Override
   public boolean allKeysAssigned() {
     boolean allKeysAssigned = false;
-    if (!StringUtils.isEmpty(this.officeCd) && !StringUtils.isEmpty(this.inacCd) && !StringUtils.isEmpty(this.sectorCd)
-        && !StringUtils.isEmpty(this.apCustClusterId)) {
+    if (!StringUtils.isEmpty(this.jsicCd) && !StringUtils.isEmpty(this.mandt)) {
       allKeysAssigned = true;
     }
     return allKeysAssigned;
@@ -102,7 +92,7 @@ public class JPOfficeSectorInacMapModel extends BaseModel {
 
   @Override
   public String getRecordDescription() {
-    return "JP OFFICE SECTOR INAC MAPPING";
+    return "JP ISIC TO JSIC MAP";
   }
 
   @Override

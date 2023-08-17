@@ -455,6 +455,13 @@ var _allGroups = [ {
     "subType" : false,
     "parent" : "Germany"
   }, {
+    "href" : null,
+    "name" : "Japan",
+    "description" : null,
+    "table" : null,
+    "subType" : true,
+    "parent" : null,
+  }, {
     "href" : cmr.CONTEXT_ROOT + '/code/jpjsiccodemap',
     "name" : "List of JSIC Code Map",
     "description" : "Maintains JSIC code mappings",
@@ -462,11 +469,25 @@ var _allGroups = [ {
     "subType" : false,
     "parent" : "Japan"
   }, {
-    "href" : cmr.CONTEXT_ROOT + '/code/jpofficesectorinac',
+    "href" : cmr.CONTEXT_ROOT + '/code/jpofficesectorinacmap',
     "name" : "JP OfficeCd Sector Inac Map",
     "description" : "Maintains JP OfficeCd Sector Inac mappings",
     "table" : "CREQCMR.JP_OFFICE_SECTOR_INAC_MAPPING",
     "subType" : false,
-    "parent" : null
-  }, ]
+    "parent" : "Japan"
+  }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/jpisictojsicmap',
+    "name" : "JP ISIC To JSIC Map",
+    "description" : "Maintains JP ISIC to JSIC map",
+    "table" : "JPINTERIM.ISIC_TO_JSIC_MAP",
+    "subType" : false,
+    "parent" : "Japan"
+  }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/jpbocodesmap',
+    "name" : "JP BO Codes Map",
+    "description" : "Maintains Bo codes map",
+    "table" : "JPINTERIM.BO_CODES_MAP",
+    "subType" : false,
+    "parent" : "Japan"
+  } ]
 } ];

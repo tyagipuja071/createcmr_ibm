@@ -63,6 +63,12 @@ public class JPJsicCodeMapService extends BaseService<JpJsicCodeMapModel, JpJsic
       jpJsicCodeMapModel.setCreateTs(element.getCreateTs());
       jpJsicCodeMapModel.setUpdateBy(element.getUpdateBy());
       jpJsicCodeMapModel.setUpdateTs(element.getUpdateTs());
+      if (element.getCreateTs() != null) {
+        jpJsicCodeMapModel.setCreateTsStr(formatter.format(element.getCreateTs()));
+      }
+      if (element.getUpdateTs() != null) {
+        jpJsicCodeMapModel.setUpdateTsStr(formatter.format(element.getUpdateTs()));
+      }
 
       list.add(jpJsicCodeMapModel);
     }

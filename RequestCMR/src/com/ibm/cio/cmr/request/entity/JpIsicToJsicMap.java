@@ -14,30 +14,30 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 /**
- * The persistent class for the JP_JSIC_CODE_MAP database table.
+ * The persistent class for the JPINTERIM.ISIC_TO_JSIC_MAP database table.
  * 
  * @author XiangBinLiu
  */
 @Entity
-@Table(name = "JP_JSIC_CODE_MAP", schema = "CREQCMR")
-public class JpJsicCodeMap extends BaseEntity<JpJsicCodeMapPK> implements Serializable {
+@Table(name = "ISIC_TO_JSIC_MAP", schema = "JPINTERIM")
+public class JpIsicToJsicMap extends BaseEntity<JpIsicToJsicMapPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @EmbeddedId
-  private JpJsicCodeMapPK id;
+  private JpIsicToJsicMapPK id;
 
   @Override
-  public JpJsicCodeMapPK getId() {
+  public JpIsicToJsicMapPK getId() {
     return id;
   }
 
   @Override
-  public void setId(JpJsicCodeMapPK id) {
+  public void setId(JpIsicToJsicMapPK id) {
     this.id = id;
   }
 
-  @Column(name = "SECTOR_CD")
-  private String sectorCd;
+  @Column(name = "ISIC_CD")
+  private String isicCd;
 
   @Column(name = "CREATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
@@ -46,19 +46,19 @@ public class JpJsicCodeMap extends BaseEntity<JpJsicCodeMapPK> implements Serial
   @Column(name = "CREATE_BY")
   private String createBy;
 
-  @Column(name = "UPDT_TS")
+  @Column(name = "LAST_UPDT_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date updateTs;
 
-  @Column(name = "UPDT_BY")
+  @Column(name = "LAST_UPDT_BY")
   private String updateBy;
 
-  public String getSectorCd() {
-    return this.sectorCd;
+  public String getIsicCd() {
+    return isicCd;
   }
 
-  public void setSectorCd(String sectorCd) {
-    this.sectorCd = sectorCd;
+  public void setIsicCd(String isicCd) {
+    this.isicCd = isicCd;
   }
 
   public Date getCreateTs() {
