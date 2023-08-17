@@ -418,10 +418,13 @@ public class ANZHandler extends GEOHandler {
             String cmrIssuingCntry = tempRec.getCmrIssuedBy();
             if(StringUtils.isNotEmpty(addrSeq)){
               if( "G".equals(addrSeq) && CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
-                tempRec.setCmrAddrTypeCode("CTYG");;
+                tempRec.setCmrAddrTypeCode("CTYG");
               }
               if( "H".equals(addrSeq) && CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
-                tempRec.setCmrAddrTypeCode("CTYH");;
+                tempRec.setCmrAddrTypeCode("CTYH");
+              }
+              if( "03".equals(addrSeq) && CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
+                tempRec.setCmrAddrTypeCode("ZF01");
               }
             }
 
@@ -571,6 +574,7 @@ public class ANZHandler extends GEOHandler {
     return false;
   }
   
+  @Override
   public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
     String addrSeq = "";
     if("796".equals(cmrIssuingCntry)) {
@@ -585,6 +589,26 @@ public class ANZHandler extends GEOHandler {
       }
       if("ZS01".equals(addrType)) {
         addrSeq = "02";
+      }
+      if("ZP01".equals(addrType)) {
+        addrSeq = "01";
+      }
+    }
+    if("616".equals(cmrIssuingCntry)) {
+      if("CTYH".equals(addrType)) {
+        addrSeq = "H";
+      }
+      if("CTYG".equals(addrType)) {
+        addrSeq = "G";
+      }
+      if("ZI01".equals(addrType)) {
+        addrSeq = "02";
+      }
+      if("ZF01".equals(addrType)) {
+        addrSeq = "03";
+      }
+      if("ZS01".equals(addrType)) {
+        addrSeq = "07";
       }
       if("ZP01".equals(addrType)) {
         addrSeq = "01";
