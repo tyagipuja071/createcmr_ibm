@@ -7935,6 +7935,9 @@ function clearInacOnClusterChange(selectedCluster) {
 
 function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   console.log('>>>> clearClusterFieldsOnScenarioChange >>>>');
+  var clusterSGAllInac = (cluster=='01241' && ['NRMLC','XAQST','AQSTN','ASLOM','CROSS'].includes(custSubGrp)) || 
+  (cluster=='00000' && ['XBLUM','BLUMX','XMKTP','MKTPC','SPOFF','CROSS'].includes(custSubGrp)) || 
+  (cluster=='08038' && ['ECSYS','ASLOM','CROSS'].includes(custSubGrp));
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var issuingCnt = ['818', '856', '852', '616', '796', '834'];
 
@@ -8490,8 +8493,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(setCollCdFrSGOnAddrSave, [ SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(setCollCdFrSingapore, [ SysLoc.SINGAPORE ]);
   // CREATCMR-9955 remove character limitation in below scenario
-  // GEOHandler.registerValidator(addAddressLengthValidators, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ], null, true);
-  // GEOHandler.registerValidator(addStreetValidationChkReq, [ SysLoc.AUSTRALIA ], null, true);
+  // GEOHandler.registerValidator(addAddressLengthValidators, [
+  // SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ], null, true);
+  // GEOHandler.registerValidator(addStreetValidationChkReq, [ SysLoc.AUSTRALIA
+  // ], null, true);
   GEOHandler.registerValidator(validateContractAddrAU, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(validateCustNameForNonContractAddrs, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(validateStreetAddrCont2, [ SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
