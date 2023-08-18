@@ -904,10 +904,11 @@ function setVatValidator() {
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
     if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
-      FormManager.readOnly('vat');
+      FormManager.setValue('vatExempt', 'Y');
     }
     if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
       FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
     }
     if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
