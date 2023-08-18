@@ -134,6 +134,9 @@ function vatExemptIBMEmp() {
 
 var oldIsicValue = null;
 function saveOldIsic() {
+	if(PageManager.isReadOnly()){
+		return;
+	}
 	oldIsicValue = FormManager.getActualValue('isicCd');
 	// CREATCMR - 9967 
 	var oldISIC = null;
