@@ -3757,9 +3757,9 @@ function setVatValidatorGRCYTR() {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
-      FormManager.readOnly('vat');
-    }
+//    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+//      FormManager.readOnly('vat');
+//    }
     // For CREATCMR-7984
     /*
      * if (dijit.byId('vatExempt').get('checked')) {
@@ -3767,6 +3767,15 @@ function setVatValidatorGRCYTR() {
      * !dijit.byId('vatExempt').get('checked')) { checkAndAddValidator('vat',
      * Validators.REQUIRED, [ 'VAT' ]); FormManager.enable('vat'); }
      */
+    
+    if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
+        FormManager.clearValue('vat');
+        FormManager.readOnly('vat');
+      }
+      if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+        FormManager.enable('vat');
+      }
   }
 }
 
@@ -8766,7 +8775,7 @@ function turkish(input) {
     return true;
   }
   // var reg =
-  // /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|�?|‘|’|�?|＂|．|？|：|。|，]+/;
+  // /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|�?|‘|’|�?|＂|．|？|：|。|，]+/;
   var reg = /[a-zA-Z0-9ğüşöçİĞÜŞÖÇ]+/;
   if (!value.match(reg)) {
     return new ValidationResult(input, false, '{1} is not a valid value for {0}. Please enter turkish characters only.');
@@ -9253,7 +9262,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
+  //GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addEmbargoCdValidatorForTR, [ SysLoc.TURKEY ], null, true);
 
   // Greece
