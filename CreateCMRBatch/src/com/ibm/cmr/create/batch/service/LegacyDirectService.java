@@ -565,6 +565,7 @@ public class LegacyDirectService extends TransConnService {
 
             // finally update all data
             CmrtCust legacyCust = legacyObjects.getCustomer();
+            Data data = cmrObjects.getData();
             if (legacyCust == null) {
               throw new Exception("Customer record cannot be updated.");
             }
@@ -577,10 +578,9 @@ public class LegacyDirectService extends TransConnService {
               updateEntity(cmrObjects.getData(), entityManager);
             }
 
-            completeTRECRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
+            completeTRECRecord(entityManager, admin, data, legacyObjects.getCustomerNo(), legacyObjects);
 
             // Add to update duplicate CMR data for Russia CMR-4606
-            Data data = cmrObjects.getData();
             if ("Y".equals(data.getCisServiceCustIndc()) && data.getDupIssuingCntryCd() != null) {
               CEEProcessService theService = new CEEProcessService();
               theService.processDupUpdate(entityManager, admin, data, cmrObjects);
@@ -1023,9 +1023,10 @@ public class LegacyDirectService extends TransConnService {
    * @throws SQLException
    * @throws CmrException
    */
-  private void completeTRECRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects)
+  private void completeTRECRecord(EntityManager entityManager, Admin admin, Data data, String cmrNo, LegacyDirectObjectContainer legacyObjects)
       throws CmrException, SQLException {
     LOG.info("Completing legacy processing for  Request " + admin.getId().getReqId());
+    CmrtCust legacyCust = legacyObjects.getCustomer();
     admin.setLockBy(null);
     admin.setLockByNm(null);
     admin.setLockInd("N");
@@ -1033,7 +1034,11 @@ public class LegacyDirectService extends TransConnService {
     admin.setProcessedFlag("Y");
     admin.setReqStatus("CPR");
     admin.setLastUpdtBy(BATCH_USER_ID);
+    data.setEmbargoCd("E");
+    legacyCust.setEmbargoCd("E");
     updateEntity(admin, entityManager);
+    updateEntity(data, entityManager);
+    updateEntity(legacyCust, entityManager);
 
     String message = "Records updated successfully on the Legacy Database. CMR No. " + cmrNo + " "
         + (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) ? " assigned." : " updated.");
@@ -2778,8 +2783,7 @@ public class LegacyDirectService extends TransConnService {
     if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
         && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())
         && (dataRdc.getEmbargoCd() != null && !StringUtils.isBlank(dataRdc.getEmbargoCd())) && EMBARGO_LIST.contains(dataRdc.getEmbargoCd())
-        && (data.getEmbargoCd() == null || StringUtils.isBlank(data.getEmbargoCd())) && admin.getReqStatus() != null
-        && CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
+        && admin.getReqStatus() != null && CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
 
       if (admin.getRdcProcessingTs() == null || isTimeStampEquals(admin.getRdcProcessingTs())) {
         LOG.info("Temporary Reactivate Embargo process: Batch 1st run for Req Id :" + admin.getId().getReqId());
