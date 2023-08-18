@@ -2645,12 +2645,12 @@ function custSubGrpHandler() {
 
 function setIsicCdIfCmrResultAccepted(value){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var cond1 = new Set(['INTER','PRIV', 'XPRIV ','DUMMY','IGF']);
+  var cond1 = new Set(['INTER','PRIV', 'XPRIV ','DUMMY','IGF','AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM','NRMLC']);
   if(cond1.has(custSubGrp)){
     FormManager.setValue('isicCd', value);
     FormManager.readOnly('isicCd');
   } else {
-    FormManager.setValue('isicCd', '');
+    // FormManager.setValue('isicCd', '');
     FormManager.enable('isicCd');
   }
 }
