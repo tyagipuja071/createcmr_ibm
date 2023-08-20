@@ -280,9 +280,18 @@ function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   } else if (saving) {
     var landCntry = FormManager.getActualValue('landCntry');
     var postCode = FormManager.getActualValue('postCd');
+    var stateProv = FormManager.getActualValue('stateProv');
+    var reqType = FormManager.getActualValue('reqType');
+    
     if (landCntry == 'SA' && postCode == '') {
       FormManager.setValue('postCd', '00000');
-    }
+    } else if ((landCntry == 'RO' && stateProv == 'B') && (reqType =='C'|| reqType=='U')) {
+       FormManager.setValue('custNm1', FormManager.getActualValue('custNm1').toUpperCase());
+       FormManager.setValue('custNm2', FormManager.getActualValue('custNm2').toUpperCase());
+       FormManager.setValue('custNm3', FormManager.getActualValue('custNm3').toUpperCase());
+       FormManager.setValue('custNm4', FormManager.getActualValue('custNm4').toUpperCase());  
+       FormManager.setValue('addrTxt', FormManager.getActualValue('addrTxt').toUpperCase());
+      }
 
     /**
      * Defect 1525544: disable copy address pop-up for G
@@ -1050,7 +1059,6 @@ function addPrefixVat() {
         prefix = 'BG';
         break;
       case '668':
-        prefix = 'CZ';
         break;
       case '693':
         prefix = 'SK';
@@ -5349,6 +5357,7 @@ function addProvinceCityValidator() {
 
         if ((landCntry == 'RO' && stateProv == 'B') && (reqType =='C'|| reqType=='U')) {
           if (addrType == 'ZP02') {
+            
             if ((city.substr(0, 18) == 'BUCUREȘTI SECTORUL' && city.length == '20')
                 && (city.at(-1) == '1' || city.at(-1) == '2' || city.at(-1) == '3' || city.at(-1) == '4' || city.at(-1) == '5' || city.at(-1) == '6')) {
               return new ValidationResult(null, true);
