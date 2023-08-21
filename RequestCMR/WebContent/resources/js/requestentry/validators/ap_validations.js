@@ -2107,8 +2107,10 @@ function onIsicChange() {
   } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
     setIsicCdIfDnbAndCmrResultOther();
   }
-  if (dplCheck == 'AF') {
+   if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd != '') {
     FormManager.readOnly('isicCd');
+  } else {
+    FormManager.enable('isicCd');
   }
 }
 
