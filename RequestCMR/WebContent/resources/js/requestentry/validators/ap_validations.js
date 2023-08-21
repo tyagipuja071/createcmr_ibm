@@ -2643,16 +2643,16 @@ function custSubGrpHandler() {
   }
 }
 
-function setIsicCdIfCmrResultAccepted(value){
+function setIsicCdIfCmrResultAccepted(val){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cond1 = new Set(['INTER','PRIV', 'XPRIV ','DUMMY','IGF','AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM','NRMLC']);
   if(cond1.has(custSubGrp)){
-    FormManager.setValue('isicCd', value);
-    FormManager.readOnly('isicCd');
+    FormManager.setValue('isicCd', val);
   } else {
     // FormManager.setValue('isicCd', '');
     FormManager.enable('isicCd');
   }
+  FormManager.readOnly('isicCd');
 }
 
 function getIsicDataRDCValue(){
@@ -2662,7 +2662,7 @@ function getIsicDataRDCValue(){
   return result.ret1;
 }
 
-function setIsicCdIfDnbResultAccepted(value){
+function setIsicCdIfDnbResultAccepted(val){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cond2 = new Set(['AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM','NRMLC']);
   var cond3 = new Set(['INTER', 'PRIV', 'XPRIV', 'DUMMY','IGF']);
@@ -2671,7 +2671,7 @@ function setIsicCdIfDnbResultAccepted(value){
     FormManager.setValue('isicCd', oldISIC);
     FormManager.readOnly('isicCd');
   } else if (cond3.has(custSubGrp)) {
-    FormManager.setValue('isicCd', value);
+    FormManager.setValue('isicCd', val);
     FormManager.readOnly('isicCd');
   } else  if (custSubGrp != '') {
     FormManager.setValue('isicCd', '');
@@ -2679,12 +2679,12 @@ function setIsicCdIfDnbResultAccepted(value){
   }
 }
 
-function setIsicCdIfDnbAndCmrResultOther(value){
+function setIsicCdIfDnbAndCmrResultOther(val){
   var value = FormManager.getActualValue('isicCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cond4 = new Set(['INTER','PRIV','XPRIV','DUMMY','IGF']);
   if (cond4.has(custSubGrp)) {
-    FormManager.setValue('isicCd', value);
+    FormManager.setValue('isicCd', val);
     FormManager.readOnly('isicCd');
   } else if(custSubGrp != ''){
     FormManager.setValue('isicCd', '');
@@ -2708,17 +2708,22 @@ function onIsicChange() {
   if (reqType != 'C' && role != 'REQUESTER' && !cntrySet.has(cmrIssuingCntry)) {
     return ;
   }
-  FormManager.readOnly('isicCd');
-  if (cmrResult != '' && cmrResult == 'Accepted' ) {
-    setIsicCdIfCmrResultAccepted(value);
-  } else if (dnbResult != '' && dnbResult == 'Accepted') {
-    setIsicCdIfDnbResultAccepted(value);
-  } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
-    setIsicCdIfDnbAndCmrResultOther(value);
-  }
-  if (dplCheck == 'AF') {
+  
+  if(value != null){
+    var val = value;
     FormManager.readOnly('isicCd');
   }
+  
+  if (cmrResult != '' && cmrResult == 'Accepted') {
+    setIsicCdIfCmrResultAccepted(val);
+  } else if (dnbResult != '' && dnbResult == 'Accepted') {
+    setIsicCdIfDnbResultAccepted(val);
+  } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
+    setIsicCdIfDnbAndCmrResultOther(val);
+  }
+  /*
+   * if(dplCheck == 'AF'){ FormManager.enable('isicCd'); }
+   */
 }
 function setPrivate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -2729,9 +2734,6 @@ function setPrivate() {
   }
 }
 
-function setIsic() {
-  FormManager.setValue('isicCd', '');
-}
 
 function updateIndustryClass() {
   console.log('>>>> updateIndustryClass >>>>');
