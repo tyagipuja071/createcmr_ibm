@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.impl.APHandler;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
@@ -74,9 +75,18 @@ public abstract class ISATransformer extends APTransformer {
       handler.messageHash.put("ClusterNo", clusterID);
     }
     String reqType = handler.adminData.getReqType();
-    if (clusterID != null && Arrays.asList(clusterIndiaMrc2).contains(clusterID) && !StringUtils.equalsIgnoreCase(reqType, "U")) {
+    String cntry = handler.cmrData.getCmrIssuingCntry();
+    String scenario = handler.cmrData.getCustSubGrp();
+    if (clusterID != null && cntry != null && cntry.equals(SystemLocation.INDIA) && Arrays.asList(clusterIndiaMrc2).contains(clusterID)
+        && !StringUtils.equalsIgnoreCase(reqType, "U")) {
+      handler.messageHash.put("MrktRespCode", "2");
+    } else if (clusterID != null && cntry.equals(SystemLocation.INDIA) && Arrays.asList(clusterIndiaMrc3).contains(clusterID)
+        && !StringUtils.equalsIgnoreCase(reqType, "U")) {
       handler.messageHash.put("MrktRespCode", "3");
-    } else if (clusterID != null && Arrays.asList(clusterIndiaMrc3).contains(clusterID) && !StringUtils.equalsIgnoreCase(reqType, "U")) {
+    }
+
+    if (cntry != null && StringUtils.equalsIgnoreCase(reqType, "C") && ((cntry.equals(SystemLocation.INDIA) && scenario.equalsIgnoreCase("IGF"))
+        || ((cntry.equals(SystemLocation.BANGLADESH) || cntry.equals(SystemLocation.SRI_LANKA)) && scenario.equalsIgnoreCase("DUMMY")))) {
       handler.messageHash.put("MrktRespCode", "2");
     }
 

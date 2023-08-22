@@ -181,8 +181,37 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               if (highestCloseMatch == null) {
                 highestCloseMatch = dnbRecord;
                 perfectMatch = dnbRecord;
-                engineData.setVatVerified(true, "VAT Verified");
-                LOG.debug("VAT verified");
+                // CMR -10030
+                isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
+                if (isTaxCdMatch) {
+                  if ((SystemLocation.SINGAPORE).equals(data.getCmrIssuingCntry()) && "TH".equals(soldTo.getLandCntry())
+                      && !("NA".equals(data.getTaxCd1()))) {
+                    List<DnbOrganizationId> dnbOrgIdList = dnbRecord.getOrgIdDetails();
+                    for (DnbOrganizationId orgId : dnbOrgIdList) {
+                      String dnbOrgId = orgId.getOrganizationIdCode();
+                      String dnbOrgType = orgId.getOrganizationIdType();
+                      if (data.getVat().equals(dnbOrgId) && "Registration Number (TH)".equals(dnbOrgType)) {
+                        orgIdFound = true;
+                      }
+                    }
+                  } else
+                    orgIdFound = StringUtils.isNotBlank(DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
+                } else {
+                  orgIdFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
+                }
+                if (scenarioExceptions.isCheckVATForDnB()
+                    && ((!isTaxCdMatch && !StringUtils.isBlank(data.getVat())) || (isTaxCdMatch && !StringUtils.isBlank(data.getTaxCd1())))
+                    && ((!orgIdFound && engineData.isVatVerified()) || (orgIdFound && isOrgIdMatched))) {
+                  // found the perfect match here
+                  if (!isTaxCdMatch) {
+                    engineData.setVatVerified(true, "VAT Verified");
+                    LOG.debug("VAT verified");
+                  }
+                  // perfectMatch = dnbRecord;
+                  // break;
+                }
+                // engineData.setVatVerified(true, "VAT Verified");
+                // LOG.debug("VAT verified");
                 break;
               }
             } else if (dnbRecord.getConfidenceCode() > 7) {

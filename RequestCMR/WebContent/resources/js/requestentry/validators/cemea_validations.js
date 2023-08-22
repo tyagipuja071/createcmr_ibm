@@ -280,9 +280,18 @@ function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   } else if (saving) {
     var landCntry = FormManager.getActualValue('landCntry');
     var postCode = FormManager.getActualValue('postCd');
+    var stateProv = FormManager.getActualValue('stateProv');
+    var reqType = FormManager.getActualValue('reqType');
+    
     if (landCntry == 'SA' && postCode == '') {
       FormManager.setValue('postCd', '00000');
-    }
+    } else if ((landCntry == 'RO' && stateProv == 'B') && (reqType =='C'|| reqType=='U')) {
+       FormManager.setValue('custNm1', FormManager.getActualValue('custNm1').toUpperCase());
+       FormManager.setValue('custNm2', FormManager.getActualValue('custNm2').toUpperCase());
+       FormManager.setValue('custNm3', FormManager.getActualValue('custNm3').toUpperCase());
+       FormManager.setValue('custNm4', FormManager.getActualValue('custNm4').toUpperCase());  
+       FormManager.setValue('addrTxt', FormManager.getActualValue('addrTxt').toUpperCase());
+      }
 
     /**
      * Defect 1525544: disable copy address pop-up for G
@@ -1050,7 +1059,6 @@ function addPrefixVat() {
         prefix = 'BG';
         break;
       case '668':
-        prefix = 'CZ';
         break;
       case '693':
         prefix = 'SK';
@@ -2032,11 +2040,14 @@ function setSBOValuesForIsuCtc(value) {
     console.log("There are " + results.length + " SBO returned.");
 
     var custSubGrp = FormManager.getActualValue('custSubGrp');
+    FormManager.clearValue('salesBusOffCd');
     if (results != null && results.length > 0) {
       for (var i = 0; i < results.length; i++) {
         sbo.push(results[i].ret1);
+      } 
+      if(results.length == 1 ){
+        FormManager.setValue('salesBusOffCd', sbo[0]);
       }
-      FormManager.setValue('salesBusOffCd', sbo[0]);
     }
     
     var lockSboScenario = [ 'PRICU', 'RSXPC', 'CSPC', 'MEPC', 'RSPC' ];
@@ -5346,11 +5357,12 @@ function addProvinceCityValidator() {
 
         if ((landCntry == 'RO' && stateProv == 'B') && (reqType =='C'|| reqType=='U')) {
           if (addrType == 'ZP02') {
-            if ((city.substr(0, 18) == 'București Sectorul' && city.length == '20')
+            
+            if ((city.substr(0, 18) == 'BUCUREȘTI SECTORUL' && city.length == '20')
                 && (city.at(-1) == '1' || city.at(-1) == '2' || city.at(-1) == '3' || city.at(-1) == '4' || city.at(-1) == '5' || city.at(-1) == '6')) {
               return new ValidationResult(null, true);
             } else {
-              return new ValidationResult(null, false, 'Correct format for city is București Sectorul \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+              return new ValidationResult(null, false, 'Correct format for city is BUCUREȘTI SECTORUL \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
             }
           }
           if ((city.substr(0, 16) == 'BUCHAREST SECTOR' && city.length == '18')
