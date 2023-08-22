@@ -339,7 +339,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 									}
 
 								}
-								if (StringUtils.isNotEmpty(data.getTaxCd2()))
+								else
 
 								{
 									if (data.getTaxCd2().equalsIgnoreCase(taxCd2Val)) {
