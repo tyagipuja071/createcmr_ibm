@@ -64,7 +64,7 @@ public class GBLScenarioCheckElement extends ValidatingElement {
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(cmrIssuingCntry);
       log.debug("Automation Util for " + data.getCmrIssuingCntry() + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
       boolean isPrivateSubScenario = scenarioExceptions != null ? scenarioExceptions.isSkipFindGbgForPrivates() : false;
-      //creatcmr-9798 
+      // creatcmr-9798 
       boolean isDnBExempt = DnBUtil.isDnbExempt(entityManager, admin.getSourceSystId());
       if (isPrivateSubScenario ) {
         boolean foundCloseMatch = checkDunsMatchOnPrivates(requestData, engineData, "ZS01");
