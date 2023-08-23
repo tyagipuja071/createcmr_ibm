@@ -705,6 +705,12 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
   private String jpCloseDays3;
 
   @Transient
+  private String jpCloseDays4;
+
+  @Transient
+  private String jpCloseDays5;
+
+  @Transient
   private String jpPayCycles1;
 
   @Transient
@@ -714,6 +720,12 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
   private String jpPayCycles3;
 
   @Transient
+  private String jpPayCycles4;
+
+  @Transient
+  private String jpPayCycles5;
+
+  @Transient
   private String jpPayDays1;
 
   @Transient
@@ -721,6 +733,12 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
 
   @Transient
   private String jpPayDays3;
+
+  @Transient
+  private String jpPayDays4;
+
+  @Transient
+  private String jpPayDays5;
 
   public String getMexicoBillingName() {
     return mexicoBillingName;
@@ -2429,6 +2447,22 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
     this.jpCloseDays3 = jpCloseDays3;
   }
 
+  public String getJpCloseDays4() {
+    return jpCloseDays4;
+  }
+
+  public void setJpCloseDays4(String jpCloseDays4) {
+    this.jpCloseDays4 = jpCloseDays4;
+  }
+
+  public String getJpCloseDays5() {
+    return jpCloseDays5;
+  }
+
+  public void setJpCloseDays5(String jpCloseDays5) {
+    this.jpCloseDays5 = jpCloseDays5;
+  }
+
   public String getJpPayCycles1() {
     return jpPayCycles1;
   }
@@ -2453,6 +2487,22 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
     this.jpPayCycles3 = jpPayCycles3;
   }
 
+  public String getJpPayCycles4() {
+    return jpPayCycles4;
+  }
+
+  public void setJpPayCycles4(String jpPayCycles4) {
+    this.jpPayCycles4 = jpPayCycles4;
+  }
+
+  public String getJpPayCycles5() {
+    return jpPayCycles5;
+  }
+
+  public void setJpPayCycles5(String jpPayCycles5) {
+    this.jpPayCycles5 = jpPayCycles5;
+  }
+
   public String getJpPayDays1() {
     return jpPayDays1;
   }
@@ -2475,6 +2525,22 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
 
   public void setJpPayDays3(String jpPayDays3) {
     this.jpPayDays3 = jpPayDays3;
+  }
+
+  public String getJpPayDays4() {
+    return jpPayDays4;
+  }
+
+  public void setJpPayDays4(String jpPayDays4) {
+    this.jpPayDays4 = jpPayDays4;
+  }
+
+  public String getJpPayDays5() {
+    return jpPayDays5;
+  }
+
+  public void setJpPayDays5(String jpPayDays5) {
+    this.jpPayDays5 = jpPayDays5;
   }
 
 }

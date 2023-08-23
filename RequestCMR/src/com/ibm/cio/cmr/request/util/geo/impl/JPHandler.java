@@ -759,14 +759,20 @@ public class JPHandler extends GEOHandler {
     data.setJpCloseDays1(jpCloseDaysStr.length() >= 2 ? jpCloseDaysStr.substring(0, 2) : null);
     data.setJpCloseDays2(jpCloseDaysStr.length() >= 4 ? jpCloseDaysStr.substring(2, 4) : null);
     data.setJpCloseDays3(jpCloseDaysStr.length() >= 6 ? jpCloseDaysStr.substring(4, 6) : null);
+    data.setJpCloseDays4(jpCloseDaysStr.length() >= 8 ? jpCloseDaysStr.substring(6, 8) : null);
+    data.setJpCloseDays5(jpCloseDaysStr.length() >= 10 ? jpCloseDaysStr.substring(8, 10) : null);
 
     data.setJpPayDays1(jpPayDaysStr.length() >= 2 ? jpPayDaysStr.substring(0, 2) : null);
     data.setJpPayDays2(jpPayDaysStr.length() >= 4 ? jpPayDaysStr.substring(2, 4) : null);
     data.setJpPayDays3(jpPayDaysStr.length() >= 6 ? jpPayDaysStr.substring(4, 6) : null);
+    data.setJpPayDays4(jpPayDaysStr.length() >= 8 ? jpPayDaysStr.substring(6, 8) : null);
+    data.setJpPayDays5(jpPayDaysStr.length() >= 10 ? jpPayDaysStr.substring(8, 10) : null);
 
     data.setJpPayCycles1(jpPayCyclesStr.length() >= 1 ? jpPayCyclesStr.substring(0, 1) : null);
     data.setJpPayCycles2(jpPayCyclesStr.length() >= 2 ? jpPayCyclesStr.substring(1, 2) : null);
     data.setJpPayCycles3(jpPayCyclesStr.length() >= 3 ? jpPayCyclesStr.substring(2, 3) : null);
+    data.setJpPayCycles4(jpPayCyclesStr.length() >= 4 ? jpPayCyclesStr.substring(3, 4) : null);
+    data.setJpPayCycles5(jpPayCyclesStr.length() >= 5 ? jpPayCyclesStr.substring(4, 5) : null);
   }
 
   @Override
@@ -1476,6 +1482,8 @@ public class JPHandler extends GEOHandler {
     String jpCloseDay1 = StringUtils.isNoneEmpty(data.getJpCloseDays1()) ? data.getJpCloseDays1() : "  ";
     String jpCloseDay2 = StringUtils.isNoneEmpty(data.getJpCloseDays2()) ? data.getJpCloseDays2() : "  ";
     String jpCloseDay3 = StringUtils.isNoneEmpty(data.getJpCloseDays3()) ? data.getJpCloseDays3() : "  ";
+    String jpCloseDay4 = StringUtils.isNoneEmpty(data.getJpCloseDays4()) ? data.getJpCloseDays4() : "  ";
+    String jpCloseDay5 = StringUtils.isNoneEmpty(data.getJpCloseDays5()) ? data.getJpCloseDays5() : "  ";
     if (jpCloseDay1.length() == 1) {
       jpCloseDay1 = " " + jpCloseDay1;
     }
@@ -1485,13 +1493,21 @@ public class JPHandler extends GEOHandler {
     if (jpCloseDay3.length() == 1) {
       jpCloseDay3 = " " + jpCloseDay3;
     }
-    data.setJpCloseDays(jpCloseDay1 + jpCloseDay2 + jpCloseDay3);
+    if (jpCloseDay4.length() == 1) {
+      jpCloseDay4 = " " + jpCloseDay4;
+    }
+    if (jpCloseDay5.length() == 1) {
+      jpCloseDay5 = " " + jpCloseDay5;
+    }
+    data.setJpCloseDays(jpCloseDay1 + jpCloseDay2 + jpCloseDay3 + jpCloseDay4 + jpCloseDay5);
   }
 
   private void handleJpPayDay(Data data) {
     String jpPayDay1 = StringUtils.isNoneEmpty(data.getJpPayDays1()) ? data.getJpPayDays1() : "  ";
     String jpPayDay2 = StringUtils.isNoneEmpty(data.getJpPayDays2()) ? data.getJpPayDays2() : "  ";
     String jpPayDay3 = StringUtils.isNoneEmpty(data.getJpPayDays3()) ? data.getJpPayDays3() : "  ";
+    String jpPayDay4 = StringUtils.isNoneEmpty(data.getJpPayDays4()) ? data.getJpPayDays4() : "  ";
+    String jpPayDay5 = StringUtils.isNoneEmpty(data.getJpPayDays5()) ? data.getJpPayDays5() : "  ";
     if (jpPayDay1.length() == 1) {
       jpPayDay1 = " " + jpPayDay1;
     }
@@ -1501,15 +1517,23 @@ public class JPHandler extends GEOHandler {
     if (jpPayDay3.length() == 1) {
       jpPayDay3 = " " + jpPayDay3;
     }
-    data.setJpPayDays(jpPayDay1 + jpPayDay2 + jpPayDay3);
+    if (jpPayDay4.length() == 1) {
+      jpPayDay4 = " " + jpPayDay4;
+    }
+    if (jpPayDay5.length() == 1) {
+      jpPayDay5 = " " + jpPayDay5;
+    }
+    data.setJpPayDays(jpPayDay1 + jpPayDay2 + jpPayDay3 + jpPayDay4 + jpPayDay5);
   }
 
   private void handleJpPayCycle(Data data) {
     String jpPayCycle1 = StringUtils.isNoneEmpty(data.getJpPayCycles1()) ? data.getJpPayCycles1() : " ";
     String jpPayCycle2 = StringUtils.isNoneEmpty(data.getJpPayCycles2()) ? data.getJpPayCycles2() : " ";
     String jpPayCycle3 = StringUtils.isNoneEmpty(data.getJpPayCycles3()) ? data.getJpPayCycles3() : " ";
+    String jpPayCycle4 = StringUtils.isNoneEmpty(data.getJpPayCycles4()) ? data.getJpPayCycles4() : " ";
+    String jpPayCycle5 = StringUtils.isNoneEmpty(data.getJpPayCycles5()) ? data.getJpPayCycles5() : " ";
 
-    data.setJpPayCycles(jpPayCycle1 + jpPayCycle2 + jpPayCycle3);
+    data.setJpPayCycles(jpPayCycle1 + jpPayCycle2 + jpPayCycle3 + jpPayCycle4 + jpPayCycle5);
   }
 
   @Override
@@ -2603,7 +2627,7 @@ public class JPHandler extends GEOHandler {
   public static void addJpLogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
     String custSubGroup = data.getCustSubGrp();
     if ("RACMR".equals(custSubGroup)) {
-      admin.setReqStatus("PCP");
+      admin.setReqStatus("COM");
     }
   }
 }

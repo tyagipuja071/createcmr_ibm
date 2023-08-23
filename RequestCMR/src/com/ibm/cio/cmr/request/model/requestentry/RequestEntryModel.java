@@ -426,14 +426,20 @@ public class RequestEntryModel extends BaseModel {
   private String jpCloseDays1;
   private String jpCloseDays2;
   private String jpCloseDays3;
+  private String jpCloseDays4;
+  private String jpCloseDays5;
   private String jpPayCycles;
   private String jpPayCycles1;
   private String jpPayCycles2;
   private String jpPayCycles3;
+  private String jpPayCycles4;
+  private String jpPayCycles5;
   private String jpPayDays;
   private String jpPayDays1;
   private String jpPayDays2;
   private String jpPayDays3;
+  private String jpPayDays4;
+  private String jpPayDays5;
 
   // CH Specific
   private String custLangCd;
@@ -3265,6 +3271,22 @@ public class RequestEntryModel extends BaseModel {
     this.jpCloseDays3 = jpCloseDays3;
   }
 
+  public String getJpCloseDays4() {
+    return jpCloseDays4;
+  }
+
+  public void setJpCloseDays4(String jpCloseDays4) {
+    this.jpCloseDays4 = jpCloseDays4;
+  }
+
+  public String getJpCloseDays5() {
+    return jpCloseDays5;
+  }
+
+  public void setJpCloseDays5(String jpCloseDays5) {
+    this.jpCloseDays5 = jpCloseDays5;
+  }
+
   public String getJpPayCycles() {
     return jpPayCycles;
   }
@@ -3297,6 +3319,22 @@ public class RequestEntryModel extends BaseModel {
     this.jpPayCycles3 = jpPayCycles3;
   }
 
+  public String getJpPayCycles4() {
+    return jpPayCycles4;
+  }
+
+  public void setJpPayCycles4(String jpPayCycles4) {
+    this.jpPayCycles4 = jpPayCycles4;
+  }
+
+  public String getJpPayCycles5() {
+    return jpPayCycles5;
+  }
+
+  public void setJpPayCycles5(String jpPayCycles5) {
+    this.jpPayCycles5 = jpPayCycles5;
+  }
+
   public String getJpPayDays() {
     return jpPayDays;
   }
@@ -3327,5 +3365,21 @@ public class RequestEntryModel extends BaseModel {
 
   public void setJpPayDays3(String jpPayDays3) {
     this.jpPayDays3 = jpPayDays3;
+  }
+
+  public String getJpPayDays4() {
+    return jpPayDays4;
+  }
+
+  public void setJpPayDays4(String jpPayDays4) {
+    this.jpPayDays4 = jpPayDays4;
+  }
+
+  public String getJpPayDays5() {
+    return jpPayDays5;
+  }
+
+  public void setJpPayDays5(String jpPayDays5) {
+    this.jpPayDays5 = jpPayDays5;
   }
 }

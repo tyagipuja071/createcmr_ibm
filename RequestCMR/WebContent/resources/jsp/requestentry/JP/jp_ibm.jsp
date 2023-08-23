@@ -330,4 +330,56 @@
       </cmr:column>
       <input type="hidden" id="isJPBlueGroupFlg" name="isJPBlueGroupFlg" value="<%= isJPBlueGroupFlg %>" />
     </cmr:row>
+    <cmr:row addBackground="true"> 
+      <cmr:column span="2" containerForField="JpCloseDays4">
+        <p>
+      <cmr:label fieldId="jpCloseDays4">
+            <cmr:fieldLabel fieldId="JpCloseDays4" />:
+          </cmr:label>
+          <cmr:field path="jpCloseDays4" id="jpCloseDays4" fieldId="JpCloseDays4" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column> 
+      <cmr:column span="2" containerForField="JpPayCycles4">
+        <p>
+      <cmr:label fieldId="jpPayCycles4">
+            <cmr:fieldLabel fieldId="JpPayCycles1" />:
+          </cmr:label>
+          <cmr:field path="jpPayCycles4" id="jpPayCycles4" fieldId="JpPayCycles4" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      <cmr:column span="2" containerForField="JpPayDays4">
+        <p>
+      <cmr:label fieldId="jpPayDays4">
+            <cmr:fieldLabel fieldId="JpPayDays4" />:
+          </cmr:label>
+          <cmr:field path="jpPayDays4" id="jpPayDays4" fieldId="JpPayDays4" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:row>
+    <cmr:row addBackground="true"> 
+      <cmr:column span="2" containerForField="JpCloseDays5">
+        <p>
+      <cmr:label fieldId="jpCloseDays5">
+            <cmr:fieldLabel fieldId="JpCloseDays5" />:
+          </cmr:label>
+          <cmr:field path="jpCloseDays5" id="jpCloseDays5" fieldId="JpCloseDays5" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column> 
+      <cmr:column span="2" containerForField="JpPayCycles5">
+        <p>
+      <cmr:label fieldId="jpPayCycles5">
+            <cmr:fieldLabel fieldId="JpPayCycles5" />:
+          </cmr:label>
+          <cmr:field path="jpPayCycles5" id="jpPayCycles5" fieldId="JpPayCycles5" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      <cmr:column span="2" containerForField="JpPayDays5">
+        <p>
+      <cmr:label fieldId="jpPayDays5">
+            <cmr:fieldLabel fieldId="JpPayDays5" />:
+          </cmr:label>
+          <cmr:field path="jpPayDays5" id="jpPayDays5" fieldId="JpPayDays5" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:row>
 </cmr:view>
