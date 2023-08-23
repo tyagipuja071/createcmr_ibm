@@ -634,8 +634,8 @@ function onCustSubGrpChange() {
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     console.log('custSubGrp CHANGED here >>>>');
     FormManager.readOnly('subIndustryCd');
-    if (FormManager.getActualValue('viewOnlyPage') != 'true')
-      FormManager.enable('isicCd');
+//    if (FormManager.getActualValue('viewOnlyPage') != 'true')
+//      FormManager.enable('isicCd');
        
     if (FormManager.getActualValue('reqType') == 'C') {  
       setLockIsicfromDNB();
@@ -1216,12 +1216,12 @@ function setIsicCdIfCmrResultAccepted(value) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  var custSubGroups = ['BLUMX', 'MKTPC', 'AQSTN', 'NRML', 'NRMLC', 'KYND', 'ESOSW', 'ECSYS', 'CROSS', 'XAQST', 'XBLUM', 'XESO', 'XMKTP'];
+  var custSubGroups = ['BLUMX', 'MKTPC', 'AQSTN', 'NRML', 'NRMLC', 'KYNDR', 'ESOSW', 'ECSYS', 'CROSS', 'XAQST', 'XBLUM', 'XESO', 'XMKTP', 'ASLOM'];
   if(custSubGroups.includes(custSubGrp)){
     var reqIdParams = {
         REQ_ID : reqId,
     };
-    var isicCdResult = cmr.query('GET.ISIC_OLD_BY_REQID', reqIdParams);
+    var isicCdResult = cmr.query('GET.ISIC_CD_BY_REQID', reqIdParams);
 
     if (isicCdResult.ret1 != undefined) {
       isicCdInDB = isicCdResult.ret1;
@@ -3057,9 +3057,10 @@ function setLockIsicfromDNB() {
   var isDnbRecord = FormManager.getActualValue('findDnbResult');
   if (isDnbRecord =='Accepted' && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
-  } else {
-    FormManager.enable('isicCd');
-  }
+  } 
+//  else {
+//    FormManager.enable('isicCd');
+//  }
 }
 
 function addressQuotationValidatorGCG() {
