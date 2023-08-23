@@ -64,10 +64,12 @@ public class GBLScenarioCheckElement extends ValidatingElement {
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(cmrIssuingCntry);
       log.debug("Automation Util for " + data.getCmrIssuingCntry() + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
       boolean isPrivateSubScenario = scenarioExceptions != null ? scenarioExceptions.isSkipFindGbgForPrivates() : false;
-      if (isPrivateSubScenario) {
+      //creatcmr-9798 
+      boolean isDnBExempt = DnBUtil.isDnbExempt(entityManager, admin.getSourceSystId());
+      if (isPrivateSubScenario ) {
         boolean foundCloseMatch = checkDunsMatchOnPrivates(requestData, engineData, "ZS01");
         log.debug("checking for close match");
-        if (foundCloseMatch) {
+        if (foundCloseMatch && !isDnBExempt) {
           output.setSuccess(false);
           output.setMessage("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
           result.setDetails("DUNS closely matching name and address in 'Private Household leads to automatic rejection.");
