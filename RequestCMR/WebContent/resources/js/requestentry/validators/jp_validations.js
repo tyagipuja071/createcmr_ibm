@@ -416,7 +416,7 @@ function showRAFieldsValue() {
     FormManager.setValue('jpCloseDays2', _jpCloseDays.substring(2, 4));
     FormManager.setValue('jpCloseDays3', _jpCloseDays.substring(4, 6));
     FormManager.setValue('jpCloseDays4', _jpCloseDays.substring(6, 8));
-    FormManager.setValue('jpCloseDays3', _jpCloseDays.substring(8, 10));
+    FormManager.setValue('jpCloseDays5', _jpCloseDays.substring(8, 10));
     FormManager.setValue('jpPayCycles1', _jpPayCycles.substring(0, 1));
     FormManager.setValue('jpPayCycles2', _jpPayCycles.substring(1, 2));
     FormManager.setValue('jpPayCycles3', _jpPayCycles.substring(2, 3));
