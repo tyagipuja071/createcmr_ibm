@@ -64,15 +64,13 @@ public class GBLScenarioCheckElement extends ValidatingElement {
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(cmrIssuingCntry);
       log.debug("Automation Util for " + data.getCmrIssuingCntry() + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
       boolean isPrivateSubScenario = scenarioExceptions != null ? scenarioExceptions.isSkipFindGbgForPrivates() : false;
-      log.debug("GBLScenarioCheckElement (isPrivateSubScenario) of request id " + data.getId().getReqId() + " = " + isPrivateSubScenario);
-      if (isPrivateSubScenario) {
-        log.debug("GBLScenarioCheckElement will call checkDunsMatchOnPrivates of request id " + data.getId().getReqId());
+      // creatcmr-9798 
+      boolean isDnBExempt = DnBUtil.isDnbExempt(entityManager, admin.getSourceSystId());
+      if (isPrivateSubScenario ) {
         boolean foundCloseMatch = checkDunsMatchOnPrivates(requestData, engineData, "ZS01");
         log.debug("checking for close match");
-        log.debug("GBLScenarioCheckElement (foundCloseMatch) of request id  " + data.getId().getReqId() + " = " + foundCloseMatch);
-        if (foundCloseMatch) {
+        if (foundCloseMatch && !isDnBExempt) {
           admin.setReqReason("DUPD");
-          log.debug("DUNS closely matching name and address in 'Private Household CMR' leads to automatic rejection.");
           output.setSuccess(false);
           output.setMessage("Request should be re-submitted as a company or private Indivuduals");
           result.setDetails("Request should be re-submitted as a company or private Indivuduals");
