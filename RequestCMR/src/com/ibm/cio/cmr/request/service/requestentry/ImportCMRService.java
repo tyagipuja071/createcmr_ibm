@@ -216,7 +216,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           // convert Prospect to Legal CMR
           admin.setReqType("C");
           admin.setProspLegalInd(CmrConstants.YES_NO.Y.toString());
-          if("Y".equals(admin.getProspLegalInd())){
+          if ("Y".equals(admin.getProspLegalInd())) {
             data.setInacCd(null);
           }
           admin.setDelInd(null);
@@ -601,10 +601,10 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       }
     }
     data.setPpsceid(record.getCmrPpsceid());
-    //CREATCMR-8243
-    if(!SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())){
-    data.setMemLvl(record.getCmrMembLevel());
-    data.setBpRelType(record.getCmrBPRelType());
+    // CREATCMR-8243
+    if (!SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
+      data.setMemLvl(record.getCmrMembLevel());
+      data.setBpRelType(record.getCmrBPRelType());
     }
     data.setCovId(record.getCmrCoverage());
     data.setBgId(record.getCmrBuyingGroup());
@@ -740,6 +740,9 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setStateProv(cmr.getCmrState());
       addr.setPostCd(cmr.getCmrPostalCode());
       addr.setLandCntry(cmr.getCmrCountryLanded());
+      if (!StringUtils.isBlank(cmr.getCmrName4()) && ("866".equals(reqModel.getCmrIssuingCntry()) || "754".equals(reqModel.getCmrIssuingCntry()))) {
+        addr.setAddrTxt2(cmr.getCmrName4());
+      }
       if ("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) {
         addr.setSapNo(cmr.getCmrSapNumber());
         addr.setIerpSitePrtyId(cmr.getCmrSitePartyID()); // ierpSitePrtyId
@@ -780,6 +783,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setOffice(cmr.getCmrOffice());
       addr.setExtWalletId(cmr.getExtWalletId());
       addr.setDept(cmr.getCmrDept());
+
       if (converter != null) {
         converter.setAddressValuesOnImport(addr, admin, cmr, cmrNo);
       }
