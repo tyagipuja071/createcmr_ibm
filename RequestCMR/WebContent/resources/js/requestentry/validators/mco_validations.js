@@ -3660,7 +3660,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setTaxCdByPostCdPT, [ SysLoc.PORTUGAL ]);
   // GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   // GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
-  GEOHandler.addAfterConfig(TaxCdOnPostalChange, [ SysLoc.SPAIN ]);
+  GEOHandler.addAfterTemplateLoad(TaxCdOnPostalChange, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
   GEOHandler.registerValidator(validateCMRNumberForPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
