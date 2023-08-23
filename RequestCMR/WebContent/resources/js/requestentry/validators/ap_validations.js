@@ -2679,12 +2679,12 @@ function setIsicCdIfCmrResultAccepted(value) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  var custSubGroups = ['BLUMX', 'MKTPC', 'AQSTN', 'NRML', 'NRMLC', 'KYND', 'ESOSW', 'ECSYS', 'CROSS', 'XAQST', 'XBLUM', 'XESO', 'XMKTP'];
+  var custSubGroups = ['BLUMX', 'MKTPC', 'AQSTN', 'NRML', 'NRMLC', 'KYNDR', 'ESOSW', 'ECSYS', 'CROSS', 'XAQST', 'XBLUM', 'XESO', 'XMKTP', 'ASLOM'];
   if (custSubGroups.includes(custSubGrp)) {
     var reqIdParams = {
       REQ_ID: reqId,
     };
-    var isicCdResult = cmr.query('GET.ISIC_OLD_BY_REQID', reqIdParams);
+    var isicCdResult = cmr.query('GET.ISIC_CD_BY_REQID', reqIdParams);
 
     if (isicCdResult.ret1 != undefined) {
       isicCdInDB = isicCdResult.ret1;
@@ -8067,6 +8067,7 @@ function clearInacOnClusterChange(selectedCluster) {
 
 function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   console.log('>>>> clearClusterFieldsOnScenarioChange >>>>');
+  var cluster = FormManager.getActualValue('apCustClusterId');
   var clusterSGAllInac = (cluster == '01241' && ['NRMLC', 'XAQST', 'AQSTN', 'ASLOM', 'CROSS'].includes(custSubGrp)) ||
     (cluster == '00000' && ['XBLUM', 'BLUMX', 'XMKTP', 'MKTPC', 'SPOFF', 'CROSS'].includes(custSubGrp)) ||
     (cluster == '08038' && ['ECSYS', 'ASLOM', 'CROSS'].includes(custSubGrp));
