@@ -1036,11 +1036,11 @@ function setVatValidatorGRCYTR() {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    FormManager.setValue('vatExempt', false);
-    if (FormManager.getActualValue('custSubGrp') == 'IBMEM' || FormManager.getActualValue('custSubGrp') == 'SPAS'
-    	|| FormManager.getActualValue('custSubGrp') == 'PRICU') {
-    	FormManager.setValue('vatExempt', 'Y');
-    }
+//    FormManager.setValue('vatExempt', false);
+//    if (FormManager.getActualValue('custSubGrp') == 'IBMEM' || FormManager.getActualValue('custSubGrp') == 'SPAS'
+//    	|| FormManager.getActualValue('custSubGrp') == 'PRICU') {
+//    	FormManager.setValue('vatExempt', 'Y');
+//    }
 //    if (vatInd == 'N') {
 //      FormManager.clearValue('vat');
 //    }
