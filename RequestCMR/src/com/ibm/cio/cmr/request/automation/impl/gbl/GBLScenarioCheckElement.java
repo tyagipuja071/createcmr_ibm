@@ -66,21 +66,29 @@ public class GBLScenarioCheckElement extends ValidatingElement {
       boolean isPrivateSubScenario = scenarioExceptions != null ? scenarioExceptions.isSkipFindGbgForPrivates() : false;
       // creatcmr-9798 
       boolean isDnBExempt = DnBUtil.isDnbExempt(entityManager, admin.getSourceSystId());
-      if (isPrivateSubScenario ) {
-        boolean foundCloseMatch = checkDunsMatchOnPrivates(requestData, engineData, "ZS01");
-        log.debug("checking for close match");
-        if (foundCloseMatch && !isDnBExempt) {
-          admin.setReqReason("DUPD");
-          output.setSuccess(false);
-          output.setMessage("Request should be re-submitted as a company or private Indivuduals");
-          result.setDetails("Request should be re-submitted as a company or private Indivuduals");
-          result.setOnError(true);
-          result.setResults("Request should be re-submitted as a company or private Indivuduals");
-          engineData.addRejectionComment("DUPD", "DUNS closely matching name and address in 'Private Household leads to automatic rejection", "",
-              "");
-          log.debug("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
-          return result;
+      if (!isDnBExempt) {
+        if (isPrivateSubScenario ) {
+          boolean foundCloseMatch = checkDunsMatchOnPrivates(requestData, engineData, "ZS01");
+          log.debug("checking for close match");
+          if (foundCloseMatch) {
+            admin.setReqReason("DUPD");
+            output.setSuccess(false);
+            output.setMessage("Request should be re-submitted as a company or private Indivuduals");
+            result.setDetails("Request should be re-submitted as a company or private Indivuduals");
+            result.setOnError(true);
+            result.setResults("Request should be re-submitted as a company or private Indivuduals");
+            engineData.addRejectionComment("DUPD", "DUNS closely matching name and address in 'Private Household leads to automatic rejection", "",
+                "");
+            log.debug("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
+            return result;
+          }
         }
+      } else {
+        log.debug("***DnB Exempted");
+        result.setDetails("DnB Exempted");
+        result.setOnError(false);
+        output.setSuccess(true);
+        output.setMessage("DnB Exempted");
       }
       if (countryUtil != null) {
         log.debug("***Perform country util checks");
