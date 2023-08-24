@@ -2679,7 +2679,7 @@ function setIsicCdIfCmrResultAccepted(value) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  var custSubGroups = ['BLUMX', 'MKTPC', 'AQSTN', 'NRML', 'NRMLC', 'KYNDR', 'ESOSW', 'ECSYS', 'CROSS', 'XAQST', 'XBLUM', 'XESO', 'XMKTP', 'ASLOM'];
+  var custSubGroups = ['BLUMX', 'MKTPC', 'AQSTN', 'NRML', 'NRMLC', 'KYNDR', 'KYND', 'ESOSW', 'ECSYS', 'CROSS', 'XAQST', 'XBLUM', 'XESO', 'XMKTP', 'ASLOM'];
   if (custSubGroups.includes(custSubGrp)) {
     var reqIdParams = {
       REQ_ID: reqId,
