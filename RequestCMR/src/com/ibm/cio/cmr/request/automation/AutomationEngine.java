@@ -410,7 +410,7 @@ public class AutomationEngine {
         }
 
         if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited && !Arrays.asList("PRIV","PRICU","BEPRI","LUPRI","PRIPE","CHPRI").contains(data.getCustSubGrp())) {
-        admin.setPaygoProcessIndc("Y");
+       // admin.setPaygoProcessIndc("Y");
           createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
         }
 
