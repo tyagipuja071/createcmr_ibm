@@ -785,6 +785,49 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setOffice(cmr.getCmrOffice());
       addr.setExtWalletId(cmr.getExtWalletId());
       addr.setDept(cmr.getCmrDept());
+      int addrLength = SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) ? 24 : 30;
+      if (SystemLocation.FRANCE.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry())
+          || SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())
+          || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())) {
+        addrLength = 35;
+      }
+
+      if (SystemLocation.IRELAND.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.UNITED_KINGDOM.equals(reqModel.getCmrIssuingCntry())) {
+        String street = cmr.getCmrStreetAddress();
+        String streetCont = cmr.getCmrDept();
+        if (street != null && street.length() > addrLength) {
+          // Align with API
+          /*
+           * if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) { // there
+           * is a con't, trim this only addr.setAddrTxt(street.substring(0,
+           * addrLength)); if (cmr.getCmrStreetAddressCont().length() >
+           * addrLength) {
+           * addr.setAddrTxt2(cmr.getCmrStreetAddressCont().substring(0,
+           * addrLength)); } else {
+           * addr.setAddrTxt2(cmr.getCmrStreetAddressCont()); } } else {
+           */
+          // no street address con't, overflow
+          String[] streetParts;
+          if (!StringUtils.isBlank(streetCont)) {
+            streetParts = converter.doSplitName(street, streetCont, 30, 30);
+          } else {
+            streetParts = converter.doSplitName(street, "", 30, 30);
+          }
+          String street1 = streetParts[0];
+          String street2 = streetParts[1];
+          addr.setAddrTxt(street1);
+          addr.setDept(street2);
+        } else {
+          addr.setAddrTxt(street);
+          if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
+            if (cmr.getCmrDept().length() > addrLength) {
+              addr.setDept(cmr.getCmrDept().substring(0, addrLength));
+            } else {
+              addr.setDept(cmr.getCmrDept());
+            }
+          }
+        }
+      }
       if (converter != null) {
         converter.setAddressValuesOnImport(addr, admin, cmr, cmrNo);
       }
