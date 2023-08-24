@@ -8073,6 +8073,8 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     (cluster == '08038' && ['ECSYS', 'ASLOM', 'CROSS'].includes(custSubGrp));
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var issuingCnt = ['818', '856', '852', '616', '796', '834'];
+  var inacCdValue = [];
+  var isInacRequired = false;
 
   if (issuingCnt.includes(cntry)) {
     var viewOnly = FormManager.getActualValue('viewOnlyPage');
@@ -8081,10 +8083,11 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     } else if (clusterSGAllInac) {
       console.log('setInacCdTypeStatus() >>>> clusterSGAllInac.');
       cmt = '%';
-    } else if (!custSubGrpListSg.includes(custSubGrp)) {
-      cmt = '%' + cluster + '%';
-      console.log('setInacCdTypeStatus() >>>> cmt=' + cmt);
     }
+//    else if (!custSubGrpListSg.includes(custSubGrp)) {
+//      cmt = '%' + cluster + '%';
+//      console.log('setInacCdTypeStatus() >>>> cmt=' + cmt);
+//    }
 
     var qParams = {
       _qall: 'Y',
