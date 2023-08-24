@@ -343,7 +343,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
 								{
 									if (data.getTaxCd2().equalsIgnoreCase(taxCd2Val)) {
-										admin.setPaygoProcessIndc("Y");
+										
 									} else {
 										if (taxCd2Found) {
 											data.setTaxCd2(taxCd2Val);
