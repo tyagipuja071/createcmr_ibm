@@ -122,7 +122,7 @@ public class NetherlandsUtil extends AutomationUtil {
     case SCENARIO_BP_CROSS:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
 
-    case SCENARIO_PRIVATE_CUSTOMER:
+    //case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
       Person person = null;
       if (StringUtils.isNotBlank(zs01.getCustNm1())) {
