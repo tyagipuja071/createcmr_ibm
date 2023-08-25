@@ -347,6 +347,16 @@ function saveClusterVal() {
   }
 }
 
+function prospectFilter() {
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  if (ifProspect == 'Y') {
+    custSubGrpHandler();
+  }
+}
+
 function setInacByCluster() {
 	console.log(">>>> setInacByCluster >>>>");
     var _cluster = FormManager.getActualValue('apCustClusterId');
