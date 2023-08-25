@@ -1540,7 +1540,7 @@ function setCustSubTypeBpGRTRCY(fromAddress, scenario, scenarioChanged) {
     }
       
     if (FormManager.getActualValue('vatExempt') != null && FormManager.getActualValue('vatExempt') != 'Y'
-      && (custType != 'PRICU' || custType != 'SAASP' || custType != 'SAASP')) {
+      && (custType != 'PRICU' || custType != 'SAASP' || custType != 'IBMEM')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
     }
     
