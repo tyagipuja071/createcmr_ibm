@@ -53,6 +53,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.AdminService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -1275,7 +1276,10 @@ public class JPHandler extends GEOHandler {
     setSalesRepTmDateOfAssign(data, admin, entityManager);
     updateCSBOBeforeDataSave(entityManager, admin, data);
     setAccountAbbNmOnSaveForBP(admin, data);
+
     handleData4RAOnDataSave(data);
+    setROLBeforeDataSave(entityManager, data, admin);
+    setTAIGABeforeDataSave(entityManager, data);
   }
 
   private void setSalesRepTmDateOfAssign(Data data, Admin admin, EntityManager entityManager) {
@@ -1574,6 +1578,174 @@ public class JPHandler extends GEOHandler {
     setCSBOBeforeAddrSave(entityManager, addr);
     setCustNmDetailBeforeAddrSave(entityManager, addr);
     // setAccountAbbNmBeforeAddrSave(entityManager, addr);
+
+    setFieldBeforeAddrSave(entityManager, addr);
+  }
+
+  private void setROLBeforeDataSave(EntityManager entityManager, Data data, Admin admin) {
+    List<Addr> addrList = getAddrByReqId(entityManager, data.getId().getReqId());
+    if ("CR".equals(admin.getCustType())) {
+      // Update account level ROL in DATA table if company level changed
+      String rolZC01 = null;
+      if (addrList != null && addrList.size() > 0) {
+        for (Addr address : addrList) {
+          if ("ZC01".equals(address.getId().getAddrType())) {
+            rolZC01 = address.getRol() == null ? "" : address.getRol();
+            break;
+          }
+        }
+      }
+      data.setIdentClient(rolZC01);
+
+    } else if ("AR".equals(admin.getCustType())) {
+      // Update account level ROL in ADDR table if account level changed
+      String rolData = data.getIdentClient() == null ? "" : data.getIdentClient();
+      if (addrList != null && addrList.size() > 0) {
+        for (Addr address : addrList) {
+          if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
+            address.setRol(rolData);
+            entityManager.merge(address);
+            entityManager.flush();
+          }
+        }
+      }
+    }
+  }
+
+  private void setTAIGABeforeDataSave(EntityManager entityManager, Data data) {
+    // Update account level TAIGA in DATA table if company level changed
+    List<Addr> addrList = getAddrByReqId(entityManager, data.getId().getReqId());
+    String taigaCd = null;
+    if (addrList != null && addrList.size() > 0) {
+      for (Addr address : addrList) {
+        if ("ZC01".equals(address.getId().getAddrType())) {
+          taigaCd = address.getPoBoxPostCd() == null ? "" : address.getPoBoxPostCd();
+          break;
+        }
+      }
+    }
+    data.setTerritoryCd(taigaCd);
+  }
+
+  private void setFieldBeforeAddrSave(EntityManager entityManager, Addr addr) throws Exception {
+    AdminService adminSvc = new AdminService();
+    Admin admin = adminSvc.getCurrentRecordById(addr.getId().getReqId(), entityManager);
+    String rol = null;
+    String taigaCd = null;
+
+    if ("ZC01".equals(addr.getId().getAddrType())) {
+      // Update account level TAIGA/ROL in DATA table if company level changed
+      rol = addr.getRol() == null ? "" : addr.getRol();
+      taigaCd = addr.getPoBoxPostCd() == null ? "" : addr.getPoBoxPostCd();
+      DataPK pk = new DataPK();
+      pk.setReqId(addr.getId().getReqId());
+      Data data = entityManager.find(Data.class, pk);
+      if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
+        data.setIdentClient(rol);
+      }
+      data.setTerritoryCd(taigaCd);
+      entityManager.merge(data);
+      entityManager.flush();
+
+      if (rol.length() > 0 || taigaCd.length() > 0) {
+        // Update account level TAIGA/ROL in ADDR table if company level changed
+        List<Addr> addrList = getAddrByReqId(entityManager, addr.getId().getReqId());
+        if (addrList != null && addrList.size() > 0) {
+          for (Addr address : addrList) {
+            if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
+              if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
+                address.setRol(rol);
+              }
+              address.setPoBoxPostCd(taigaCd);
+              entityManager.merge(address);
+              entityManager.flush();
+            }
+          }
+        }
+      }
+    } else if (!("ZC01".equals(addr.getId().getAddrType()) || "ZE01".equals(addr.getId().getAddrType()))) {
+      List<Addr> addrList = getAddrByReqId(entityManager, addr.getId().getReqId());
+      if (rol == null || taigaCd == null) {
+        if (addrList != null && addrList.size() > 0) {
+          for (Addr address : addrList) {
+            if ("ZC01".equals(address.getId().getAddrType())) {
+              rol = address.getRol() == null ? "" : address.getRol();
+              taigaCd = address.getPoBoxPostCd() == null ? "" : address.getPoBoxPostCd();
+              break;
+            }
+          }
+        }
+      }
+      if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
+        addr.setRol(rol);
+      }
+      addr.setPoBoxPostCd(taigaCd);
+    }
+  }
+
+  private List<Addr> getAddrByReqId(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.ADDR_BY_REQ_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Addr> addrList;
+    try {
+      addrList = query.getResults(Addr.class);
+    } catch (Exception ex) {
+      LOG.error("An error occured in getting the ADDR records");
+      throw ex;
+    }
+    return addrList;
+  }
+
+  private Admin getAdminByReqId(long reqId, EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.GET.ADMIN.RECORD");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    Admin admin = new Admin();
+    try {
+      admin = query.getSingleResult(Admin.class);
+    } catch (Exception ex) {
+      LOG.error("An error occured in getting the Admin records");
+      throw ex;
+    }
+    return admin;
+  }
+
+  public boolean needCopy(EntityManager entityManager, ApprovalReq req) {
+    boolean flag = false;
+    List<Addr> addrList = getAddrByReqId(entityManager, req.getReqId());
+    Admin admin = getAdminByReqId(req.getReqId(), entityManager);
+    String defaultApprovalId = String.valueOf(req.getDefaultApprovalId());
+    String approvalDesc = getApprovalDesc(entityManager, defaultApprovalId);
+
+    if (approvalDesc != null && CmrConstants.JP_ROL_APPROVAL_DESC.equals(approvalDesc)) {
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        if (addrList != null && addrList.size() > 0) {
+          for (Addr addr : addrList) {
+            if ("ZC01".equals(addr.getId().getAddrType()) && "N".equals(addr.getRol())) {
+              flag = true;
+              break;
+            }
+          }
+        }
+      } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+        if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
+          flag = true;
+        }
+      }
+    }
+    return flag;
+  }
+
+  private String getApprovalDesc(EntityManager entityManager, String id) {
+    String sql = ExternalizedQuery.getSql("SYSTEM.GET_DEFAULT_APPR.DETAILS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", id);
+    DefaultApprovals approve = query.getSingleResult(DefaultApprovals.class);
+    if (approve != null) {
+      return approve.getDefaultApprovalDesc();
+    }
+    return null;
   }
 
   private void setCSBOBeforeAddrSave(EntityManager entityManager, Addr addr) {

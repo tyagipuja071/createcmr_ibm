@@ -103,6 +103,9 @@ function afterConfigForJP() {
     setSortlOnOfcdChange();
     addRAFieldLogic();
     disableAddrFieldsForRA();
+
+    disableFieldsForRolUpdate();
+    disableAddrFieldsForRolUpdate();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -132,6 +135,184 @@ function addHandlersForJP() {
     });
   }
 
+}
+
+function disableFieldsForRolUpdate() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+    // FormManager.resetValidations('enterCMRNo');
+
+    var custType = FormManager.getActualValue('custType');
+    if (custType == 'CR' || custType == 'AR') {
+      var accountFieldList = [ 'abbrevNm', 'custPrefLang', 'subIndustryCd', 'jsicCd', 'isicCd', 'email2', 'proxiLocnNo', 'oemInd',
+          'leasingCompanyIndc', 'educAllowCd', 'custAcctType', 'custClass', 'iinInd', 'valueAddRem', 'channelCd', 'siInd', 'crsCd', 'creditCd',
+          'govType', 'outsourcingService', 'zseriesSw', 'cmrNo', 'cmrNo2', 'cmrOwner', 'isuCd', 'clientTier', 'searchTerm', 'mrcCd', 'bgId', 'gbgId',
+          'bgRuleId', 'covId', 'inacType', 'inacCd', 'dunsNo', 'repTeamMemberNo', 'salesTeamCd', 'privIndc_1', 'privIndc_2', 'privIndc_3',
+          'salesBusOffCd', 'orgNo', 'chargeCd', 'soProjectCd', 'csDiv', 'billingProcCd', 'invoiceSplitCd', 'creditToCustNo', 'csBo', 'tier2',
+          'billToCustNo', 'adminDeptCd', 'adminDeptLine', 'func' ];
+      for (var i = 0; i < accountFieldList.length; i++) {
+        disableFiled(accountFieldList[i]);
+      }
+
+      // disable Request For
+      document.getElementById('ast-privIndc').innerHTML = '';
+      try {
+        FormManager.getField('privIndc_1').set('checked', false);
+        FormManager.getField('privIndc_2').set('checked', false);
+        FormManager.getField('privIndc_3').set('checked', false);
+      } catch (e) {
+        FormManager.getField('privIndc_1').checked = false;
+        FormManager.getField('privIndc_2').checked = false;
+        FormManager.getField('privIndc_3').checked = false;
+      }
+      FormManager.disable('privIndc_1');
+      FormManager.disable('privIndc_2');
+      FormManager.disable('privIndc_3');
+
+    }
+    if (custType == 'CR') {
+      FormManager.readOnly('identClient');
+    } else if (custType == 'AR') {
+      FormManager.enable('identClient');
+    }
+  }
+}
+
+function disableAddrFieldsForRolUpdate() {
+
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+    // FormManager.resetValidations('enterCMRNo');
+
+    var custType = FormManager.getActualValue('custType');
+    if (custType == 'CR' || custType == 'AR') {
+      var accountFieldList = [ 'custNm1', 'custNm2', 'custNm4', 'cnCustName1', 'cnCustName2', 'custNm3', 'addrTxt', 'cnAddrTxt', 'cnCity',
+          'cnDistrict', 'postCd', 'dept', 'office', 'poBoxPostCd', 'bldg', 'custPhone', 'locationCode', 'custFax', 'estabFuncCd', 'divn', 'city2',
+          'companySize', 'contact' ];
+      for (var i = 0; i < accountFieldList.length; i++) {
+        setAddrFieldHide(accountFieldList[i]);
+      }
+    }
+    if (custType == 'AR') {
+      FormManager.readOnly('rol');
+    } else if (custType == 'CR') {
+      FormManager.enable('rol');
+    }
+  }
+}
+function disableRolTaigaCode() {
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType == 'ZC01') {
+    FormManager.show('TaigaCode', 'poBoxPostCd');
+    FormManager.show('ROL', 'rol');
+    FormManager.enable('rol');
+  } else {
+    FormManager.hide('TaigaCode', 'poBoxPostCd');
+    FormManager.hide('ROL', 'rol');
+  }
+  var custType = FormManager.getActualValue('custType');
+  if (custType == 'CR' || custType == 'AR') {
+    FormManager.readOnly('poBoxPostCd');
+  }
+  FormManager.readOnly('territoryCd');
+}
+function addrTypeOnChange() {
+  dojo.connect(FormManager.getField('addrType_ZC01'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZC01').checked == true) {
+      FormManager.show('TaigaCode', 'poBoxPostCd');
+      FormManager.show('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZE01'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZE01').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZS02'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZS02').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZS01'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZS01').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP01'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP01').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP09'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP09').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZI02'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZI02').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZI01'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZI01').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZI03'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZI03').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP02'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP02').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP03'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP03').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP04'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP04').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP05'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP05').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP06'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP06').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP07'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP07').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
+  dojo.connect(FormManager.getField('addrType_ZP08'), 'onClick', function(value) {
+    if (FormManager.getField('addrType_ZP08').checked == true) {
+      FormManager.hide('TaigaCode', 'poBoxPostCd');
+      FormManager.hide('ROL', 'rol');
+    }
+  });
 }
 
 function handleFields4RAOnPageLoad() {
@@ -4567,7 +4748,12 @@ function addRequestForValidator() {
             checked = true;
           }
           if (checked == false) {
-            return new ValidationResult(null, false, 'Requset For is required.');
+            var custType = FormManager.getActualValue('custType');
+            if (custType == 'CR' || custType == 'AR') {
+              return new ValidationResult(null, true, null);
+            } else {
+              return new ValidationResult(null, false, 'Requset For is required.');
+            }
           } else {
             return new ValidationResult(null, true, null);
           }
@@ -6286,6 +6472,15 @@ dojo.addOnLoad(function() {
   // GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(jpBlueGroupValidator, GEOHandler.JP, null, true);
+
+  // 8831
+  GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
+  GEOHandler.addAfterConfig(disableRolTaigaCode, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(disableFieldsForRolUpdate, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(disableRolTaigaCode, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(addrTypeOnChange, GEOHandler.JP);
+  GEOHandler.addAddrFunction(disableRolTaigaCode, GEOHandler.JP);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);

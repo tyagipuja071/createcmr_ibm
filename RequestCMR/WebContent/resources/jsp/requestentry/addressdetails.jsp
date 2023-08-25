@@ -1069,6 +1069,13 @@
       <cmr:column span="2">
         <div id="office_view">-</div>
       </cmr:column>
+      <cmr:column span="1">
+        <cmr:label fieldId="poBoxPostCd_view">
+          <span class="lbl-TaigaCode">TAIGA Code</span>:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="poBoxPostCd_view">-</div>
+      </cmr:column>
     </cmr:row>
     <cmr:row addBackground="true">
      <cmr:column span="1">

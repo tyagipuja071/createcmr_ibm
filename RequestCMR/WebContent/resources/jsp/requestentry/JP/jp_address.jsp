@@ -142,6 +142,14 @@
       <cmr:field fieldId="Office" id="office" path="office" />
     </p>
   </cmr:column>
+  <cmr:column span="2" containerForField="TaigaCode">
+    <p>
+      <cmr:label fieldId="poBoxPostCd">
+        <cmr:fieldLabel fieldId="TaigaCode" />:
+      </cmr:label>
+      <cmr:field fieldId="TaigaCode" id="poBoxPostCd" path="poBoxPostCd" />
+    </p>
+  </cmr:column>
   </cmr:row>
   <cmr:row>
   <cmr:column span="2" containerForField="Building">
