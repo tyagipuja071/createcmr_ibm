@@ -717,7 +717,8 @@ public class JPHandler extends GEOHandler {
     data.setCreditToCustNo(mainRecord.getCreditToCustNo());
     data.setBillToCustNo(mainRecord.getBillingCustNo());
     data.setTier2(mainRecord.getTier2());
-    data.setAbbrevNm(mainRecord.getCmrName3() == null ? mainRecord.getCmrName3() : mainRecord.getCmrName3().trim());
+    // data.setAbbrevNm(mainRecord.getCmrName3() == null ?
+    // mainRecord.getCmrName3() : mainRecord.getCmrName3().trim());
     data.setSiInd(mainRecord.getSiInd());
     data.setIinInd(mainRecord.getIinInd());
     data.setLeasingCompanyIndc(mainRecord.getLeasingCompanyIndc());
@@ -750,7 +751,7 @@ public class JPHandler extends GEOHandler {
     }
     handleData4RAOnImport(data);
   }
-  
+
   private void handleData4RAOnImport(Data data) {
     String jpPayDaysStr = data.getJpPayDays() != null ? data.getJpPayDays() : "";
     String jpCloseDaysStr = data.getJpCloseDays() != null ? data.getJpCloseDays() : "";
@@ -1471,7 +1472,7 @@ public class JPHandler extends GEOHandler {
     accountAbbNmInCris = crisRecord.getNameAbbr();
     return accountAbbNmInCris;
   }
-  
+
   private void handleData4RAOnDataSave(Data data) {
     handleJpCloseDay(data);
     handleJpPayDay(data);
@@ -1572,7 +1573,7 @@ public class JPHandler extends GEOHandler {
 
     setCSBOBeforeAddrSave(entityManager, addr);
     setCustNmDetailBeforeAddrSave(entityManager, addr);
-    setAccountAbbNmBeforeAddrSave(entityManager, addr);
+    // setAccountAbbNmBeforeAddrSave(entityManager, addr);
   }
 
   private void setCSBOBeforeAddrSave(EntityManager entityManager, Addr addr) {
@@ -1996,7 +1997,7 @@ public class JPHandler extends GEOHandler {
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
     setCSBOAfterImport(entityManager, admin, data);
-    setAccountAbbNmAfterImport(entityManager, admin, data);
+    // setAccountAbbNmAfterImport(entityManager, admin, data);
     // updateBillToCustomerNoAfterImport(data);
   }
 
@@ -2623,7 +2624,7 @@ public class JPHandler extends GEOHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
-  
+
   public static void addJpLogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
     String custSubGroup = data.getCustSubGrp();
     if ("RACMR".equals(custSubGroup)) {
