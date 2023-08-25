@@ -740,9 +740,6 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setStateProv(cmr.getCmrState());
       addr.setPostCd(cmr.getCmrPostalCode());
       addr.setLandCntry(cmr.getCmrCountryLanded());
-      if (!StringUtils.isBlank(cmr.getCmrName4()) && ("866".equals(reqModel.getCmrIssuingCntry()) || "754".equals(reqModel.getCmrIssuingCntry()))) {
-        addr.setAddrTxt2(cmr.getCmrName4());
-      }
       if ("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) {
         addr.setSapNo(cmr.getCmrSapNumber());
         addr.setIerpSitePrtyId(cmr.getCmrSitePartyID()); // ierpSitePrtyId
