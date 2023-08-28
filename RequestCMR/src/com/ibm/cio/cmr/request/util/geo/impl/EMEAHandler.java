@@ -167,8 +167,8 @@ public class EMEAHandler extends BaseSOFHandler {
         record.setCmrStreetAddressCont(record.getCmrName3());
         record.setCmrName3(null);
       }
+      // name4 in rdc = Attn on SOF
       if (!("866".equals(SystemLocation.UNITED_KINGDOM) || ("754".equals(SystemLocation.IRELAND)))) {
-        // name4 in rdc = Attn on SOF
         record.setCmrDept(record.getCmrName4());
         record.setCmrName4(null);
       }

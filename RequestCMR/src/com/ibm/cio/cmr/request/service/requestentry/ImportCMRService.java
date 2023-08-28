@@ -788,7 +788,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())) {
         addrLength = 35;
       }
-
+      
       if (SystemLocation.IRELAND.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.UNITED_KINGDOM.equals(reqModel.getCmrIssuingCntry())) {
         String street = cmr.getCmrStreetAddress();
         String streetCont = cmr.getCmrDept();
@@ -868,7 +868,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     }
 
   }
-
+  
   private void setJPIntlAddr(EntityManager entityManager, Addr addr, FindCMRRecordModel cmr) {
     IntlAddr iAddr = null;
     AddressService addSvc = new AddressService();
