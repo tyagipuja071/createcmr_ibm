@@ -2267,6 +2267,67 @@ public class CEMEAHandler extends BaseSOFHandler {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError((rowIndex + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
+        for (String name : countryAddrss) {
+          sheet = book.getSheet(name);
+          // Address Sheet
+
+          String custNm1 = ""; // 2
+          String custNm2 = ""; // 3
+          String custNm3 = ""; // 4
+          String custNm4 = ""; // 5
+          String street = ""; // 6
+          String postCode = ""; // 7
+          String city = ""; // 8
+          String stateProv = ""; // 9
+          String landCntry = ""; // 10
+          String hardWareMaster = ""; // 11
+
+          row = sheet.getRow(rowIndex);
+          if (row != null) {
+            currCell = row.getCell(2);
+            custNm1 = validateColValFromCell(currCell);
+
+            currCell = row.getCell(3);
+            custNm2 = validateColValFromCell(currCell);
+
+            currCell = row.getCell(4);
+            custNm3 = validateColValFromCell(currCell);
+
+            currCell = row.getCell(5);
+            custNm4 = validateColValFromCell(currCell);
+
+            currCell = row.getCell(6);
+            street = validateColValFromCell(currCell);
+
+            currCell = row.getCell(7);
+            postCode = validateColValFromCell(currCell);
+
+            currCell = row.getCell(8);
+            city = validateColValFromCell(currCell);
+
+            currCell = row.getCell(9);
+            stateProv = validateColValFromCell(currCell);
+
+            currCell = row.getCell(10);
+            landCntry = validateColValFromCell(currCell);
+
+            currCell = row.getCell(11);
+            hardWareMaster = validateColValFromCell(currCell);
+
+            if ("RO".equals(landCntry) && "B".equals(stateProv)) {
+              if (!(city.equals(city.toUpperCase()) && custNm1.equals(custNm1.toUpperCase()) && custNm2.equals(custNm2.toUpperCase())
+                  && custNm3.equals(custNm3.toUpperCase()) && custNm4.equals(custNm4.toUpperCase()) && street.equals(street.toUpperCase())
+                  && postCode.equals(postCode.toUpperCase()) && stateProv.equals(stateProv.toUpperCase())
+                  && hardWareMaster.equals(hardWareMaster.toUpperCase()))) {
+                error.addError((rowIndex + 1), "Tab Name : " + name + "," + "", "'The address data must be entered in capital letters'. <br>");
+              } else if (!StringUtils.isBlank(city) && (city.equalsIgnoreCase("BUCHAREST") && ("Ship To".equals(name) || "Mail to".equals(name)
+                  || "Bill To".equals(name) || "Sold To".equals(name) || "Install At".equals(name) || "Address in Local language".equals(name)))) {
+                error.addError((rowIndex + 1), "Tab Name : " + name + "," + " City  ",
+                    "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+              }
+            }
+          }
+        }
         if (error.hasErrors()) {
           validations.add(error);
         }

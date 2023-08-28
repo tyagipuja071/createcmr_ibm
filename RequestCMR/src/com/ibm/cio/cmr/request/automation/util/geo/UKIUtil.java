@@ -27,10 +27,13 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+
+import com.ibm.cio.cmr.request.entity.Licenses;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.LicenseService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
@@ -134,6 +137,12 @@ public class UKIUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
     }
 
+    String[] scenariosToBeChecked = { "IBMEM", "PRICU" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
+
     if (SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
@@ -143,7 +152,7 @@ public class UKIUtil extends AutomationUtil {
     case SCENARIO_BUSINESS_PARTNER:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     case SCENARIO_PRIVATE_PERSON:
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false);
+      break;
     case SCENARIO_INTERNAL:
       if (!customerName.contains("IBM") && !customerNameZI01.contains("IBM")) {
         details.append("Mailing and Billing addresses should have IBM in them.");
@@ -301,6 +310,9 @@ public class UKIUtil extends AutomationUtil {
           // noop, for switch handling only
         }
         break;
+      case "PPS CEID":
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -341,17 +353,6 @@ public class UKIUtil extends AutomationUtil {
       details.append("Updates to the following fields skipped validation:\n");
       for (String field : ignoredUpdates) {
         details.append(" - " + field + "\n");
-      }
-    }
-    
-    if ("U".equals(admin.getReqType()) && SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
-      DataRdc rdcData = LegacyDirectUtil.getOldData(entityManager, String.valueOf(data.getId().getReqId()));
-      if (rdcData != null && !"Z".equals(rdcData.getSpecialTaxCd()) && "Z".equals(data.getSpecialTaxCd())) {
-        details.append("The Tax Code has been updated to 'Z', so the request will now be placed in CMDE's queue.\n");
-        engineData.addNegativeCheckStatus("_updatedToZTaxCode",
-            "The Tax Code has been updated to 'Z', so the request will now be placed in CMDE's queue.");
-        validation.setSuccess(false);
-        validation.setMessage("Review Required");
       }
     }
     
@@ -530,6 +531,21 @@ public class UKIUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+
+    if ("U".equals(admin.getReqType()) && SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      if ("Z".equals(data.getSpecialTaxCd())) {
+        LicenseService service = new LicenseService();
+        List<Licenses> newLicenses = service.getLicensesByIndc(entityManager, data.getId().getReqId(), LicenseService.NEW_LICENSE_INDC);
+        if (newLicenses.size() > 0) {
+          details.append("A new license has been added, so the request will now be placed in CMDE's queue.\n");
+          engineData.addNegativeCheckStatus("_updatedToZTaxCode", "A new license has been added, so the request will now be placed in CMDE's queue.");
+          results.setResults("Review Required");
+          results.setDetails(details.toString());
+          return results;
+        }
+      }
+    }
+
     if (!"C".equals(admin.getReqType())) {
       details.append("Field Computation skipped for Updates.");
       results.setResults("Skipped");
@@ -616,7 +632,6 @@ public class UKIUtil extends AutomationUtil {
         }
       }
     }
-    
     // List<String> isicList = Arrays.asList("7230", "7240", "7290", "7210",
     // "7221", "7229", "7250", "7123", "9802");
     // if (!(SCENARIO_INTERNAL.equals(scenario) ||
@@ -655,13 +670,12 @@ public class UKIUtil extends AutomationUtil {
     // for P2L Conversions , checking mandatory fields
 
     // first identity if P2L
-    if ("Y".equalsIgnoreCase(admin.getProspLegalInd()) && "Saas-Test".equalsIgnoreCase(admin.getSourceSystId())) {
+    if ("Y".equalsIgnoreCase(admin.getProspLegalInd())) {
       if ("COMME".equalsIgnoreCase(data.getCustSubGrp()) && StringUtils.isEmpty(data.getTaxCd1()) && !"Y".equalsIgnoreCase(data.getRestrictInd())) {
         details.append("CRN is a mandatory field. Processor Review will be required.\n");
         engineData.addNegativeCheckStatus("_crnMissing", "CRN is a mandatory field.");
       }
     }
-    
     results.setDetails(details.toString());
     LOG.debug(results.getDetails());
     return results;
@@ -853,9 +867,9 @@ public class UKIUtil extends AutomationUtil {
         container.setSbo("758");
         container.setSalesRep("SPA758");
         return container;
-      } else if ("Q".equals(clientTier) && NORTHERN_IRELAND_POST_CD.equals(PostCd)) {
-        container.setSbo("958");
-        container.setSalesRep("MMIRE1");
+      } else if ("Q".equals(clientTier) && NORTHERN_IRELAND_POST_CD.equals(PostCd) && SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry)) {
+        container.setSbo("057");
+        container.setSalesRep("SPA057");
         return container;
       } else {
         String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");

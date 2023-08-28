@@ -462,11 +462,17 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
             }
           } else if (cnConditionallyApproved) {
             setAdminStatus4CN(entityManager, admin);
+          } else if (data != null && admin != null && ("AR".equals(admin.getCustType()) || "CR".equals(admin.getCustType()))
+              && SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
+            admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
           } else {
             admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
           }
         } else if (cnConditionallyApproved) {
           setAdminStatus4CN(entityManager, admin);
+        } else if (data != null && admin != null && ("AR".equals(admin.getCustType()) || "CR".equals(admin.getCustType()))
+            && SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
+          admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
         } else {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
         }
@@ -487,6 +493,13 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       }
       if (conditionallyApproved) {
         comment = "Approval requests have been approved conditionally.\nThe request requires a processor review before proceeding.";
+      } else if ("N".equals(admin.getCompVerifiedIndc())) {
+        if ("S".equalsIgnoreCase(admin.getCompInfoSrc())) {
+          comment = "Processing error encountered as SCC(State / County / City) values unavailable.";
+        } else {
+          comment = "Processing error encountered as data is not company verified.";
+        }
+        admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
       }
       AppUser appuser = new AppUser();
       appuser.setIntranetId(user);

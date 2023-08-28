@@ -168,11 +168,14 @@ public class SpainUtil extends AutomationUtil {
         return false;
       }
     }
-
+    String[] scenariosToBeChecked = { "IBMEM", "PRICU" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-      return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_CROSSBORDER_BP:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
@@ -289,7 +292,7 @@ public class SpainUtil extends AutomationUtil {
     }
 
     // for P2L Conversions - checking of mandatory fields
-    if ("Y".equalsIgnoreCase(admin.getProspLegalInd()) && "Saas-Test".equalsIgnoreCase(admin.getSourceSystId())) {
+    if ("Y".equalsIgnoreCase(admin.getProspLegalInd()) && StringUtils.isNotBlank(admin.getSourceSystId())) {
       if ("COMME".equalsIgnoreCase(data.getCustSubGrp())) {
         Addr soldtoAddr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
         if (StringUtils.isBlank(soldtoAddr.getStateProv())) {
@@ -451,6 +454,9 @@ public class SpainUtil extends AutomationUtil {
         if ("E".equals(change.getOldData()) || "E".equals(change.getNewData())) {
           // noop, for switch handling only
         }
+        break;
+      case "PPS CEID":
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
         break;
       default:
         ignoredUpdates.add(change.getDataField());

@@ -19,7 +19,7 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoResponse;
 
 public class IndiaTransformer extends ISATransformer {
   private static final Logger LOG = Logger.getLogger(IndiaTransformer.class);
-  
+
   public IndiaTransformer() throws Exception {
     super(SystemLocation.INDIA);
 
@@ -39,7 +39,7 @@ public class IndiaTransformer extends ISATransformer {
     handler.messageHash.put("CntryNo", SystemLocation.INDIA);
     String cmrPrefix = !StringUtils.isEmpty(handler.cmrData.getCmrNoPrefix()) ? handler.cmrData.getCmrNoPrefix() : "";
     String inacType = !StringUtils.isEmpty(handler.cmrData.getInacType()) ? handler.cmrData.getInacType() : "";
-    
+
     // handle reprocessing of dual create request when cmr number supplied
     if (MQMsgConstants.REQ_TYPE_CREATE.equals(handler.mqIntfReqQueue.getReqType())
         && MQMsgConstants.REQ_STATUS_NEW.equals(handler.mqIntfReqQueue.getReqStatus()) && isDoubleCreateProcess(handler)
@@ -62,17 +62,9 @@ public class IndiaTransformer extends ISATransformer {
       // for correlated requests, add the CN
       LOG.debug(
           "Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. " + handler.mqIntfReqQueue.getCmrNo());
-      // CREATCMR - 8980
       String cmrNo = handler.mqIntfReqQueue.getCmrNo();
       handler.messageHash.put("CustNo", cmrNo);
       handler.messageHash.put("TransCode", "N");
-    }
-
-    // CREATCMR - 9495
-    if (StringUtils.isNotEmpty(handler.cmrData.getCmrNo()) && "C".equals(handler.mqIntfReqQueue.getReqType())
-        && "Y".equalsIgnoreCase(handler.adminData.getProspLegalInd()) && handler.messageHash.containsKey("CustNo")) {
-      LOG.debug("removing Cust No. from message hashmap for Prospect CMR conversion create requests...");
-      handler.messageHash.remove("CustNo");
     }
   }
 

@@ -82,6 +82,7 @@ public class BeLuxUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     Addr zi01 = requestData.getAddress("ZI01");
     String customerName = zs01.getCustNm1();
+    String customerNameCombined = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
     Addr zp01 = requestData.getAddress("ZP01");
     String customerNameZP01 = "";
     String landedCountryZP01 = "";
@@ -103,6 +104,11 @@ public class BeLuxUtil extends AutomationUtil {
         scenarioExceptions.setCheckVATForDnB(false);
       }
     }
+    String[] scenariosToBeChecked = { "BEPRI", "IBMEM", "LUIBM", "LUPRI" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameCombined, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
     if ((SCENARIO_BP_LOCAL.equals(scenario) || SCENARIO_BP_CROSS.equals(scenario) || SCENARIO_BP_LOCAL_LU.equals(scenario)) && zp01 != null
         && (!StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZP01))
             || !StringUtils.equals(zs01.getLandCntry(), landedCountryZP01))) {
@@ -116,7 +122,6 @@ public class BeLuxUtil extends AutomationUtil {
     case SCENARIO_LOCAL_COMMERCIAL:
     case SCENARIO_CROSS_COMMERCIAL:
     case SCENARIO_LOCAL_COMMERCIAL_LU:
-      String customerNameCombined = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
       if (customerNameCombined.contains("IBM")) {
         details.append("Scenario sub-type should be Internal or Internal SO").append("\n");
         engineData.addRejectionComment("OTH", "Change Scenario sub-type to Internal or Internal SO.", "", "");
@@ -149,9 +154,6 @@ public class BeLuxUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_PRIVATE_CUSTOMER_LU:
-      String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
-
     case SCENARIO_THIRD_PARTY:
     case SCENARIO_THIRD_PARTY_LU:
     case SCENARIO_DATA_CENTER:
@@ -649,7 +651,7 @@ public class BeLuxUtil extends AutomationUtil {
               if ("U".equals(admin.getReqType()) && payGoAddredited) {
                 LOG.debug("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
                 checkDetails.append("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
-                //admin.setPaygoProcessIndc("Y");
+            //    admin.setPaygoProcessIndc("Y");
               } else if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                 resultCodes.add("X");

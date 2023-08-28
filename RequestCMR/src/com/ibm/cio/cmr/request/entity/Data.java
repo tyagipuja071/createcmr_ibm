@@ -17,6 +17,7 @@ import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.ibm.cio.cmr.request.entity.listeners.AutoTrimStrings;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogDetails;
@@ -684,6 +685,60 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
 
   @Column(name = "GOE_RSN_CD")
   private String goeRsnCd;
+
+  @Column(name = "JP_CLOSE_DAYS")
+  private String jpCloseDays;
+
+  @Column(name = "JP_PAY_CYCLES")
+  private String jpPayCycles;
+
+  @Column(name = "JP_PAY_DAYS")
+  private String jpPayDays;
+
+  @Transient
+  private String jpCloseDays1;
+
+  @Transient
+  private String jpCloseDays2;
+
+  @Transient
+  private String jpCloseDays3;
+
+  @Transient
+  private String jpCloseDays4;
+
+  @Transient
+  private String jpCloseDays5;
+
+  @Transient
+  private String jpPayCycles1;
+
+  @Transient
+  private String jpPayCycles2;
+
+  @Transient
+  private String jpPayCycles3;
+
+  @Transient
+  private String jpPayCycles4;
+
+  @Transient
+  private String jpPayCycles5;
+
+  @Transient
+  private String jpPayDays1;
+
+  @Transient
+  private String jpPayDays2;
+
+  @Transient
+  private String jpPayDays3;
+
+  @Transient
+  private String jpPayDays4;
+
+  @Transient
+  private String jpPayDays5;
 
   public String getMexicoBillingName() {
     return mexicoBillingName;
@@ -2342,6 +2397,150 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
 
   public void setGoeRsnCd(String goeRsnCd) {
     this.goeRsnCd = goeRsnCd;
+  }
+
+  public String getJpCloseDays() {
+    return jpCloseDays;
+  }
+
+  public void setJpCloseDays(String jpCloseDays) {
+    this.jpCloseDays = jpCloseDays;
+  }
+
+  public String getJpPayCycles() {
+    return jpPayCycles;
+  }
+
+  public void setJpPayCycles(String jpPayCycles) {
+    this.jpPayCycles = jpPayCycles;
+  }
+
+  public String getJpPayDays() {
+    return jpPayDays;
+  }
+
+  public void setJpPayDays(String jpPayDays) {
+    this.jpPayDays = jpPayDays;
+  }
+
+  public String getJpCloseDays1() {
+    return jpCloseDays1;
+  }
+
+  public void setJpCloseDays1(String jpCloseDays1) {
+    this.jpCloseDays1 = jpCloseDays1;
+  }
+
+  public String getJpCloseDays2() {
+    return jpCloseDays2;
+  }
+
+  public void setJpCloseDays2(String jpCloseDays2) {
+    this.jpCloseDays2 = jpCloseDays2;
+  }
+
+  public String getJpCloseDays3() {
+    return jpCloseDays3;
+  }
+
+  public void setJpCloseDays3(String jpCloseDays3) {
+    this.jpCloseDays3 = jpCloseDays3;
+  }
+
+  public String getJpCloseDays4() {
+    return jpCloseDays4;
+  }
+
+  public void setJpCloseDays4(String jpCloseDays4) {
+    this.jpCloseDays4 = jpCloseDays4;
+  }
+
+  public String getJpCloseDays5() {
+    return jpCloseDays5;
+  }
+
+  public void setJpCloseDays5(String jpCloseDays5) {
+    this.jpCloseDays5 = jpCloseDays5;
+  }
+
+  public String getJpPayCycles1() {
+    return jpPayCycles1;
+  }
+
+  public void setJpPayCycles1(String jpPayCycles1) {
+    this.jpPayCycles1 = jpPayCycles1;
+  }
+
+  public String getJpPayCycles2() {
+    return jpPayCycles2;
+  }
+
+  public void setJpPayCycles2(String jpPayCycles2) {
+    this.jpPayCycles2 = jpPayCycles2;
+  }
+
+  public String getJpPayCycles3() {
+    return jpPayCycles3;
+  }
+
+  public void setJpPayCycles3(String jpPayCycles3) {
+    this.jpPayCycles3 = jpPayCycles3;
+  }
+
+  public String getJpPayCycles4() {
+    return jpPayCycles4;
+  }
+
+  public void setJpPayCycles4(String jpPayCycles4) {
+    this.jpPayCycles4 = jpPayCycles4;
+  }
+
+  public String getJpPayCycles5() {
+    return jpPayCycles5;
+  }
+
+  public void setJpPayCycles5(String jpPayCycles5) {
+    this.jpPayCycles5 = jpPayCycles5;
+  }
+
+  public String getJpPayDays1() {
+    return jpPayDays1;
+  }
+
+  public void setJpPayDays1(String jpPayDays1) {
+    this.jpPayDays1 = jpPayDays1;
+  }
+
+  public String getJpPayDays2() {
+    return jpPayDays2;
+  }
+
+  public void setJpPayDays2(String jpPayDays2) {
+    this.jpPayDays2 = jpPayDays2;
+  }
+
+  public String getJpPayDays3() {
+    return jpPayDays3;
+  }
+
+  public void setJpPayDays3(String jpPayDays3) {
+    this.jpPayDays3 = jpPayDays3;
+  }
+
+  public String getJpPayDays4() {
+    return jpPayDays4;
+  }
+
+  public void setJpPayDays4(String jpPayDays4) {
+    this.jpPayDays4 = jpPayDays4;
+  }
+
+  public String getJpPayDays5() {
+    return jpPayDays5;
+  }
+
+  public void setJpPayDays5(String jpPayDays5) {
+    this.jpPayDays5 = jpPayDays5;
   }
 
 }

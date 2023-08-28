@@ -217,6 +217,7 @@ public class FranceUtil extends AutomationUtil {
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
+    LOG.debug("***FranceUtil.performScenarioValidation");
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
     String customerName = getCustomerFullName(zs01);
@@ -253,16 +254,18 @@ public class FranceUtil extends AutomationUtil {
         // remove duplicate address
         removeDuplicateAddresses(entityManager, requestData, details);
       }
+      String[] scenariosToBeChecked = { "PRICU", "IBMEM", "CBIEM", "XBLUM" };
+      if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+        doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+            Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+      }
       switch (scenario) {
       case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
       case SCENARIO_PRIVATE_PERSON:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, false, requestData);
       case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
       case SCENARIO_IBM_EMPLOYEE:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, true, requestData);
-
       case SCENARIO_INTERNAL:
       case SCENARIO_CROSSBORDER_INTERNAL:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
@@ -968,6 +971,7 @@ public class FranceUtil extends AutomationUtil {
 
     StringBuilder details = new StringBuilder();
     boolean cmdeReview = false;
+    Set<String> resultCodes = new HashSet<String>();
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
@@ -1026,13 +1030,20 @@ public class FranceUtil extends AutomationUtil {
           details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
         }
         break;
+      case "PPS CEID":
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
       }
     }
 
-    if (cmdeReview) {
+    if (resultCodes.contains("R")) {
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
+    } else if (cmdeReview) {
       engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
@@ -1343,6 +1354,7 @@ public class FranceUtil extends AutomationUtil {
   @Override
   protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
       boolean checkBluepages, RequestData reqData) {
+    LOG.debug("***FranceUtil.doPrivatePersonChecks");
     EntityManager entityManager = JpaManager.getEntityManager();
     boolean legalEndingExists = false;
     Data data = reqData.getData();
@@ -1369,12 +1381,12 @@ public class FranceUtil extends AutomationUtil {
     }
 
     // Duplicate Request check with customer name
-
+    LOG.debug("Duplicate Request check for Private person record for france");
     List<String> dupReqIds = checkDuplicateRequest(entityManager, reqData);
     if (!dupReqIds.isEmpty()) {
-      details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
+      details.append("Duplicate request found with matching customer name and address.\nMatch found with Req id :").append("\n");
       details.append(StringUtils.join(dupReqIds, "\n"));
-      engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", "", "");
+      engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name and address.", "", "");
       return false;
     } else {
       details.append("No duplicate requests found").append("\n");
@@ -1389,11 +1401,6 @@ public class FranceUtil extends AutomationUtil {
     case BluepagesError:
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
-    case DuplicateCMR:
-      details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
-      engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
-          checkResult.getCmrNo(), checkResult.getKunnr());
-      return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
@@ -1416,7 +1423,7 @@ public class FranceUtil extends AutomationUtil {
   }
 
   private PrivatePersonCheckResult chkPrivatePersonRecordFR(String country, String landCntry, String name, boolean checkBluePages, Data data) {
-    LOG.debug("Validating Private Person record for " + name);
+    LOG.debug("***Validating Private Person record for " + name);
     try {
       DuplicateCMRCheckResponse checkResponse = chkDupPrivatePersonRecordFR(name, country, landCntry, data);
       String cmrNo = "";
@@ -1466,6 +1473,7 @@ public class FranceUtil extends AutomationUtil {
 
   private DuplicateCMRCheckResponse chkDupPrivatePersonRecordFR(String name, String issuingCountry, String landedCountry, Data data)
       throws Exception {
+    LOG.debug("***FranceUtil.chkDupPrivatePersonRecordFR");
     MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         MatchingServiceClient.class);
     DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();

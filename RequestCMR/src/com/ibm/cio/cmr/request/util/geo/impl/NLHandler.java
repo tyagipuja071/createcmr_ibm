@@ -2795,7 +2795,18 @@ public class NLHandler extends BaseSOFHandler {
   }
 
   @Override
+  public void convertDnBImportValues(EntityManager entityManager, Admin admin, Data data) {
+    Addr zs01Addr = null;
+    zs01Addr = getAddressByType(entityManager, CmrConstants.ADDR_TYPE.ZS01.toString(), admin.getId().getReqId());
+    if (zs01Addr != null && "NL".equals(zs01Addr.getLandCntry())) {
+      String taxCd2 = StringUtils.isNotBlank(data.getTaxCd1()) ? data.getTaxCd1() : "";
+      data.setTaxCd2(taxCd2);
+    }
+  }
+
+  @Override
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
     return true;
   }
+
 }

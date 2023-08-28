@@ -278,6 +278,11 @@ public class SingaporeUtil extends AutomationUtil {
         LOG.debug("Error on searching for CMR in FIND CMR." + e.getMessage());
       }
     }
+    String[] scenariosToBeChecked = { "PRIV", "XPRIV" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
     switch (scenario) {
     // CREATCMR - 2031
     // case SCENARIO_BLUEMIX:
@@ -301,7 +306,6 @@ public class SingaporeUtil extends AutomationUtil {
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_CROSS_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-      return doPrivatePersonChecks(engineData, SystemLocation.SINGAPORE, soldTo.getLandCntry(), customerName, details, false, requestData);
     }
     result.setDetails(details.toString());
     return true;

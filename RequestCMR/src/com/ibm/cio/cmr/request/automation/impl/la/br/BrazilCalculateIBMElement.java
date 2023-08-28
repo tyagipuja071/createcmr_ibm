@@ -283,9 +283,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
           overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Q");
           LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
         }
-
-        details.append("Sales Rep No = " + sbo.getSbo() + "001" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), sbo.getSbo() + "001");
       }
 
       boolean checkIfFiscalCodeExists = true;
@@ -501,9 +498,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
           LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
         }
 
-        details.append("Sales Rep No = " + (String) rootMatch[8] + "001" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), (String) rootMatch[8] + "001");
-
         // commented for defect CMR-392
         /*
          * details.append("ISIC = " + (String) rootMatch[10] + "\n");
@@ -646,9 +640,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
           overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Q");
           LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
         }
-
-        details.append("Sales Rep No = " + sbo.getSbo() + "001" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), sbo.getSbo() + "001");
       }
 
       if (cnaeRecord != null) {
@@ -756,6 +747,13 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
     // scenario fields start
     if ("C".equals(admin.getReqType()) || ("U".equals(admin.getReqType()) && "REAC".equalsIgnoreCase(admin.getReqReason()))) {
+      if (!sboToBeUnchanged) {
+        if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && "ES".equals(soldTo.getStateProv())) {
+          LOG.debug("Setting DATA.SALES_BO_CD for StateProv 'ES' to '761'");
+          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "761");
+        }
+      }
+
       if ("COMME".equalsIgnoreCase(scenarioSubType)) {
         // SET IBM Bank Number
         details.append("IBM BANK NO = " + "34A" + "\n");
@@ -835,10 +833,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Client Tier = " + clientTier + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
 
-        // SET Sales Rep No
-        details.append("Sales Rep No = " + "606900" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), "606900");
-
         // SET Partnership Indicator
         details.append("Partnership Ind = " + CmrConstants.DEFAULT_BUSPR_PARTNERSHIP_IND + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "PARTNERSHIP_IND", data.getPartnershipInd(), CmrConstants.DEFAULT_BUSPR_PARTNERSHIP_IND);
@@ -889,10 +883,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         String clientTier = getClientTier(entityManager, "9", isu);
         details.append("Client Tier = " + clientTier + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-
-        // SET Sales Rep No
-        details.append("Sales Rep No = " + "010200" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), "010200");
 
         // SET Partnership Indicator
         details.append("Partnership Ind = " + CmrConstants.DEFAULT_BUSPR_PARTNERSHIP_IND + "\n");
@@ -967,10 +957,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         String clientTier = getClientTier(entityManager, "Y", isu);
         details.append("Client Tier = " + clientTier + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-
-        // SET Sales Rep No
-        details.append("Sales Rep No = " + "509001" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), "509001");
 
         // SET ISIC
         details.append("ISIC = " + "7499" + "\n");

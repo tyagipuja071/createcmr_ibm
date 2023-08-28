@@ -185,8 +185,37 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               if (highestCloseMatch == null) {
                 highestCloseMatch = dnbRecord;
                 perfectMatch = dnbRecord;
-                engineData.setVatVerified(true, "VAT Verified");
-                LOG.debug("VAT verified");
+                // CMR -10030
+                isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
+                if (isTaxCdMatch) {
+                  if ((SystemLocation.SINGAPORE).equals(data.getCmrIssuingCntry()) && "TH".equals(soldTo.getLandCntry())
+                      && !("NA".equals(data.getTaxCd1()))) {
+                    List<DnbOrganizationId> dnbOrgIdList = dnbRecord.getOrgIdDetails();
+                    for (DnbOrganizationId orgId : dnbOrgIdList) {
+                      String dnbOrgId = orgId.getOrganizationIdCode();
+                      String dnbOrgType = orgId.getOrganizationIdType();
+                      if (data.getVat().equals(dnbOrgId) && "Registration Number (TH)".equals(dnbOrgType)) {
+                        orgIdFound = true;
+                      }
+                    }
+                  } else
+                    orgIdFound = StringUtils.isNotBlank(DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
+                } else {
+                  orgIdFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
+                }
+                if (scenarioExceptions.isCheckVATForDnB()
+                    && ((!isTaxCdMatch && !StringUtils.isBlank(data.getVat())) || (isTaxCdMatch && !StringUtils.isBlank(data.getTaxCd1())))
+                    && ((!orgIdFound && engineData.isVatVerified()) || (orgIdFound && isOrgIdMatched))) {
+                  // found the perfect match here
+                  if (!isTaxCdMatch) {
+                    engineData.setVatVerified(true, "VAT Verified");
+                    LOG.debug("VAT verified");
+                  }
+                  // perfectMatch = dnbRecord;
+                  // break;
+                }
+                // engineData.setVatVerified(true, "VAT Verified");
+                // LOG.debug("VAT verified");
                 break;
               }
             } else if (dnbRecord.getConfidenceCode() > 7) {
@@ -257,6 +286,76 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                 matchWithDnbMailingAddr = handler.matchDnbMailingAddr(perfectMatch, soldTo, data.getCmrIssuingCntry(), false);
               }
             }
+            
+          // CREATCMR-9938 (KVK Implementation)
+
+						if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())
+								&& data.getCustGrp().equalsIgnoreCase("LOCAL")
+								&& data.getCustSubGrp().equalsIgnoreCase("COMME")) {
+							boolean taxCd2Found = false;
+							String taxCd2Val = null;
+							long confCode = 0L;
+							long highestConfCode = 0L;
+							int count = 0;
+							DnBMatchingResponse dnbWithHighConfCode = null;
+							for (DnBMatchingResponse dnbRecord : dnbMatches) {
+								confCode = dnbRecord.getConfidenceCode();
+								if (highestConfCode <= confCode) {
+
+									highestConfCode = confCode;
+									dnbWithHighConfCode = dnbRecord;
+									count++;
+								}
+
+							}
+							if (count > 1) {
+								admin.setPaygoProcessIndc("Y");
+								data.setTaxCd2("");
+							}
+							if (count == 1) {
+								List<DnbOrganizationId> dnbOrgIdList = dnbWithHighConfCode.getOrgIdDetails();
+								if (!dnbOrgIdList.isEmpty()) {
+									for (DnbOrganizationId orgId : dnbOrgIdList) {
+										String dnbOrgId = orgId.getOrganizationIdCode();
+										String dnbOrgType = orgId.getOrganizationIdType();
+										if (dnbOrgType.equalsIgnoreCase("Trade Register Number (NL)")
+												&& StringUtils.isNotEmpty(dnbOrgId)) {
+											taxCd2Val = dnbOrgId;
+											taxCd2Found = true;
+										}
+
+									}
+								}
+
+								if (StringUtils.isEmpty(data.getTaxCd2())) {
+
+									if (taxCd2Found) {
+										data.setTaxCd2(taxCd2Val);
+									}
+
+									if (!taxCd2Found) {
+										data.setTaxCd2("");
+										admin.setPaygoProcessIndc("Y");
+									}
+
+								}
+								else
+
+								{
+									if (data.getTaxCd2().equalsIgnoreCase(taxCd2Val)) {
+										
+									} else {
+										if (taxCd2Found) {
+											data.setTaxCd2(taxCd2Val);
+										} else {
+											admin.setPaygoProcessIndc("Y");
+											data.setTaxCd2("");
+										}
+									}
+								}
+
+							}
+						}
 
             // Cmr-1701-AU_SG Dnb matches found & Isic doesn't match dnb record.
             // Supporting doc provided requires cmde review

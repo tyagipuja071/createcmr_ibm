@@ -149,13 +149,22 @@ function processRequestAction() {
     var custGrp = FormManager.getActualValue('custGrp');
     var reqId = FormManager.getActualValue('reqId');
     var crossScenTyp = [ 'CROSS', 'LUCRO', 'EECRO', 'LTCRO', 'LVCRO', 'FOCRO', 'GLCRO', 'ISCRO' ];
+
     if (custGrp == null || custGrp == '') {
       custGrp = getCustGrp();
     }
+
     var oldVat = cmr.query('GET.OLD.VAT.VALUE', {
       REQ_ID : reqId
     });
+
+    var oldVatInd = cmr.query('GET.OLD.VATIND.VALUE', {
+      REQ_ID : reqId
+    });
+
     var oldVatValue = oldVat.ret1 != undefined ? oldVat.ret1 : '';
+    var oldVatIndValue = oldVatInd.ret1 != undefined ? oldVatInd.ret1 : '';
+
     var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
@@ -164,7 +173,15 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
       if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
           .getActualValue('cmrIssuingCntry')))
-          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && ((oldVatValue != vat && reqType == 'U') || (reqType == 'C'))) {
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (reqType == 'C')) {
+        findVatInd();
+      } else if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
+          .getActualValue('cmrIssuingCntry')))
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatIndValue == 'T' || oldVatIndValue == 'E') && (reqType == 'U')) {
+        findVatInd();
+      } else if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
+          .getActualValue('cmrIssuingCntry')))
+          && (vatInd == 'N') && (crossScenTyp.includes(custGrp)) && (oldVatIndValue == 'E') && (reqType == 'U')) {
         findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
@@ -414,10 +431,31 @@ function verifyGlcChangeIN() {
 
 function getCustGrp() {
   var custGrp = null;
+  var cntryLocCd = FormManager.getActualValue('cmrIssuingCntry');
   var issueCntry = getIssuingCntry();
-  var zs01LandCntry = getZS01LandCntry();
+  var zs01LandCntry = getZS01LandedCntry();
+  var isSubRegion = false;
+  var FIsubRegion = [ 'LV', 'LT', 'EE' ];
+  var DKsubRegion = [ 'FO', 'GL', 'IS' ];
+  var BEsubRegion = [ 'BE', 'LU' ];
+
+  var reqId = FormManager.getActualValue('reqId');
+  if (reqId != null) {
+    reqParam = {
+      REQ_ID : reqId,
+    };
+  }
+  var results = cmr.query('ADDR.GET.ZS01LANDCNTRY.BY_REQID', reqParam);
+  var zs01LandCntryCd = results.ret2 != undefined ? results.ret2 : '';
+
+  if ((FIsubRegion.includes(zs01LandCntryCd) && cntryLocCd == '702') || (DKsubRegion.includes(zs01LandCntryCd) && cntryLocCd == '678')
+      || (BEsubRegion.includes(zs01LandCntryCd) && cntryLocCd == '624')) {
+    isSubRegion = true;
+  }
 
   if (issueCntry == zs01LandCntry) {
+    custGrp = 'LOCAL'
+  } else if (isSubRegion) {
     custGrp = 'LOCAL'
   } else {
     custGrp = 'CROSS'
@@ -425,7 +463,7 @@ function getCustGrp() {
   return custGrp;
 }
 
-function getZS01LandCntry() {
+function getZS01LandedCntry() {
   var reqId = FormManager.getActualValue('reqId');
   if (reqId != null) {
     reqParam = {
@@ -1859,6 +1897,10 @@ function handleRequiredDnBSearch() {
         cmr.hideNode('dnbRequired');
         cmr.hideNode('dnbRequiredIndc');
       }
+      if(FormManager.getActualValue('cmrIssuingCntry') == '760' && (FormManager.getActualValue('custSubGrp') == 'RACMR'||FormManager.getActualValue('custSubGrp') == 'BFKSC')){
+        cmr.hideNode('dnbRequired');
+        cmr.hideNode('dnbRequiredIndc');
+      }
     });
   }
 
@@ -2096,7 +2138,7 @@ function matchDnBForIndia() {
           } else {
             comp_proof_INAUSG = false;
             console.log("Name/Address validation failed by dnb");
-            cmr.showAlert("Please attach company proof as Name/Address validation failed by Dnb.");
+            cmr.showAlert('Please attach company proof as Name/Address validation failed by Dnb.', 'Warning', 'doOverrideDnBMatch()');
           }
           if (!data.validate) {
             checkDnBMatchingAttachmentValidator();

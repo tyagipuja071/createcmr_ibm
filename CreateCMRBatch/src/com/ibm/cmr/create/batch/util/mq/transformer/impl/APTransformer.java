@@ -72,7 +72,7 @@ public abstract class APTransformer extends MessageTransformer {
     GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
     if (handler != null && handler instanceof APHandler) {
       this.geoHandler = (APHandler) handler;
-    } else {
+    } else if( !"616".equalsIgnoreCase(cmrIssuingCntry) && !"796".equalsIgnoreCase(cmrIssuingCntry)) {
       throw new Exception("Handler should be an instance of APHandler.");
     }
   }
@@ -90,7 +90,9 @@ public abstract class APTransformer extends MessageTransformer {
     // String mrcCode = (("32".equalsIgnoreCase(handler.cmrData.getIsuCd()) ||
     // ("34".equalsIgnoreCase(handler.cmrData.getIsuCd())))) ? "3" : "2";
     APHandler aphandler = (APHandler) RequestUtils.getGEOHandler(handler.cmrData.getCmrIssuingCntry());
-    handler.messageHash.put("MrktRespCode", "3");
+    if (!handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.INDIA)) {
+      handler.messageHash.put("MrktRespCode", "3");
+    }
     handler.messageHash.put("SellBrnchOff", handler.cmrData.getTerritoryCd());
     handler.messageHash.put("SellDept", handler.cmrData.getIsbuCd());
     handler.messageHash.put("InstBrnchOff", handler.cmrData.getTerritoryCd());

@@ -79,7 +79,7 @@ public class DnBUtil {
     registerDnBVATCode("RU", 1437); // Tax Registration Number (Russian
                                     // Federation)
     registerDnBVATCode("CH", 28865); // Swiss Uniform Identification Number
-    registerDnBVATCode("SE", 1861); // SW Business Registration Number
+    registerDnBVATCode("SE", 42067); // VAT Number
     registerDnBVATCode("IL", 1365); // Israel Registration Number
     registerDnBVATCode("JP", 32475); // Corporate Number
     registerDnBVATCode("CN", 32476); // United Social Credit Code (CN)
@@ -874,13 +874,16 @@ public class DnBUtil {
    * @return
    */
   public static boolean hasValidMatches(MatchingResponse<DnBMatchingResponse> response) {
+    LOG.debug("DnBUtil.hasValidMatches");
     if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
       for (DnBMatchingResponse dnbRecord : response.getMatches()) {
         if (dnbRecord.getConfidenceCode() > 7) {
+          LOG.debug("dnbRecord.getConfidenceCode() --> " + dnbRecord.getConfidenceCode());
           return true;
         }
       }
     }
+    LOG.debug("dnbRecord.getConfidenceCode() --> will return FALSE");
     return false;
   }
 
@@ -1002,6 +1005,14 @@ public class DnBUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", String.valueOf(reqId));
 
+    return query.exists();
+  }
+  //creatcmr-9798
+  public static boolean isDnbExempt(EntityManager entityManager, String serviceId) {
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_EXEMPT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("SERVICE_ID", serviceId);
+    query.setForReadOnly(true);
     return query.exists();
   }
 

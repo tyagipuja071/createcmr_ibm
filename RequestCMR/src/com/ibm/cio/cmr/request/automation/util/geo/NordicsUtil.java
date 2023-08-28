@@ -267,6 +267,11 @@ public class NordicsUtil extends AutomationUtil {
       details.append("Sold-to and Bill-to name are not identical. Request will require CMDE review before proceeding.").append("\n");
       engineData.addNegativeCheckStatus("SOLDTO_BILLTO_DIFF", "Sold-to and Bill-to name are not identical.");
     }
+    String[] scenariosToBeChecked = { "DKPRI", "ISPRI", "GLPRI", "FOPRI", "DKIBM", "ISIIBM", "GLIBM", "FOIBM" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
 
     // if ((DK_BUSPR_LOCAL.equals(scenario) || FI_BUSPR_LOCAL.equals(scenario)
     // || BUSPR_LOCAL.equals(scenario) || CROSS_BUSPR.equals(scenario))
@@ -663,6 +668,9 @@ public class NordicsUtil extends AutomationUtil {
         details.append("In case of INAC update/ ISIC update/ KUKLA update/ Leading Account Number update please raise a JIRA ticket:").append("\n");
         details.append("*https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14*").append("\n");
         details.append("Thank you.");
+        break;
+      case "PPS CEID":
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
         break;
       default:
         ignoredUpdates.add(change.getDataField());

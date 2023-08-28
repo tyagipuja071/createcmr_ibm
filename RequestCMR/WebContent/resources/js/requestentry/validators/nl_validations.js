@@ -1733,7 +1733,7 @@ function clientTierCodeValidator() {
 
   // if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType ==
   // 'C') || (isuCode != '34' && reqType == 'U')) {
-  var activeIsuCd = [ '32', '34', '36' ];
+  var activeIsuCd = [ '32', '34', '36', '21' ];
   var activeCtc = [ 'Q', 'Y', 'T' ];
 
   if (!activeIsuCd.includes(isuCode)) {
@@ -1936,8 +1936,9 @@ function setPPSCEIDRequired() {
   if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (subGrp.includes('BP') || subGrp.includes('BUS')) {
-    FormManager.enable('ppsceid');
+ // if (subGrp.includes('BP') || subGrp.includes('BUS')) {
+  if (subGrp=='BUSPR' || subGrp=='CBBUS') {  
+ FormManager.enable('ppsceid');
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.clearValue('ppsceid');
@@ -1961,7 +1962,7 @@ function setEcoCodeBasedOnSubScenario() {
     FormManager.setValue('economicCd', '');
   } else if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
     FormManager.setValue('economicCd', 'K49');
-  } else if (custSubScnrio == 'PRICU') {
+  } else if (custSubScnrio == 'PRICU' || custSubScnrio == 'CBPRI') {
     FormManager.setValue('economicCd', 'K60');
   } else if (custSubScnrio == 'INTER') {
     FormManager.setValue('economicCd', 'K81');

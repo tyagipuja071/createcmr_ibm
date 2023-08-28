@@ -565,6 +565,7 @@ public class PortugalTransformer extends MessageTransformer {
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
     data.setOrdBlk("88");
+    data.setEmbargoCd("Y");
     entityManager.merge(data);
     entityManager.flush();
   }

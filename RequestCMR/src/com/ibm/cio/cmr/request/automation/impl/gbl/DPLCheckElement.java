@@ -320,6 +320,10 @@ public class DPLCheckElement extends ValidatingElement {
         validation.setMessage("CMR with DPL/Embargo Code");
       }
 
+    } catch (Exception e) {
+      details.append("DPL Search cannot be executed at the moment.");
+      engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
+      output.setOnError(true);
     } finally {
       ChangeLogListener.clearManager();
     }

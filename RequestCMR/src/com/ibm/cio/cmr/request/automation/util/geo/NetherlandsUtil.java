@@ -67,6 +67,7 @@ public class NetherlandsUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     Addr zp01 = requestData.getAddress("ZP01");
     String customerName = zs01.getCustNm1();
+    String customerNameCombined = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
     String customerNameZP01 = "";
     String landedCountryZP01 = "";
     String custGrp = data.getCustGrp();
@@ -98,6 +99,11 @@ public class NetherlandsUtil extends AutomationUtil {
         && !SCENARIO_LOCAL_PUBLIC.equals(scenario)) {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
     }
+    String[] scenariosToBeChecked = { "PRICU", "IBMEM", "CBPRI" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameCombined, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
     switch (scenario) {
 
     case SCENARIO_LOCAL_COMMERCIAL:
@@ -116,10 +122,7 @@ public class NetherlandsUtil extends AutomationUtil {
     case SCENARIO_BP_CROSS:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
 
-    case SCENARIO_PRIVATE_CUSTOMER:
-      String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
-
+    //case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
       Person person = null;
       if (StringUtils.isNotBlank(zs01.getCustNm1())) {
@@ -268,9 +271,12 @@ public class NetherlandsUtil extends AutomationUtil {
         sortlList.add(sortl);
         // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
       }
-    }
-    sortl = sortlList.get(0);
-    return sortl;
+      sortl = sortlList.get(0);
+    } else {
+      // Handle the case when the list is empty
+      LOG.debug("The list is empty.");
+    }    
+    return sortl;    
   }
 
   private NLFieldsContainer calculate32SValuesFromIMSNL(EntityManager entityManager, Data data) {
@@ -370,8 +376,31 @@ public class NetherlandsUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    Admin admin = requestData.getAdmin();
+
+    boolean isPaygo = "Y".equals(admin.getPaygoProcessIndc());
+    boolean isScenarioCovered = "LOCAL".equals(data.getCustGrp())
+        && !(SCENARIO_PRIVATE_CUSTOMER.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario));
+    boolean hasDunsNo = StringUtils.isNotEmpty(data.getDunsNo());
+    boolean isFromP2LApi = "Y".equalsIgnoreCase(admin.getProspLegalInd()) && StringUtils.isNotBlank(admin.getSourceSystId());
+
+    LOG.debug("isPaygo: " + isPaygo + ", isScenarioCovered: " + isScenarioCovered + ", hasDunsNo: " + hasDunsNo + ", isFromP2LApi: " + isFromP2LApi);
+    if (hasDunsNo && !isPaygo && isFromP2LApi && isScenarioCovered && StringUtils.isEmpty(data.getTaxCd2())) {
+      details.append("KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.\n");
+      engineData.addNegativeCheckStatus("_missingKvkValue",
+          "KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.");
+    } else {
+      details.append("Field Computation skipped.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return results;
+    }
+
+    results.setDetails(details.toString());
+    LOG.debug(results.getDetails());
+    return results;
   }
 
   @Override

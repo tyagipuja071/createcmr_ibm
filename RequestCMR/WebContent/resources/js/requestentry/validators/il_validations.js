@@ -2942,11 +2942,11 @@ function lockUnlockFieldForISrael() {
     FormManager.clearValue('ppsceid');
     FormManager.readOnly('ppsceid');
   }
-  if (custSubGrp != 'BUSPR'){
+  if (custSubGrp != 'BUSPR' && reqType == 'C'){
     FormManager.clearValue('ppsceid');
   }
   if ((_custGrpSet2.has(custSubGrp)) && (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' || 'PROCESSOR')){
-    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'ppsceid' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
     FormManager.enable('ppsceid');
   }
   if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER'){
@@ -3076,7 +3076,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showHideKuklaField, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(lockCustomerClassByLob, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(finalizeAbbrevName, [ SysLoc.ISRAEL ]);
-//  GEOHandler.addAfterTemplateLoad(adjustChecklistContact, [ SysLoc.ISRAEL ]);
+// GEOHandler.addAfterTemplateLoad(adjustChecklistContact, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(setSalesRepEnterpriseNoSBO, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(lockCMROwner, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(setCTCByScenario, [ SysLoc.ISRAEL ]);

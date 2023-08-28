@@ -36,6 +36,59 @@ function addAddrStdValidator() {
 }
 
 /**
+ * Validator for mandt stateProv according to landCntry
+ */
+
+function addStateProvValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqId = FormManager.getActualValue('reqId');
+        var landCntry = "";
+        var addrTxt = FormManager.getActualValue('addrTxt');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        var viewOnly = FormManager.getActualValue('viewOnlyPage');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        var landCountryList = [ 'IT', 'ES', 'US' ];
+        var addrType = "";
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (recordList == null && _allAddressData != null && _allAddressData[i] != null) {
+              recordList = _allAddressData[i];
+            }
+            addrType = recordList.addrType;
+            if (typeof (addrType) == 'object') {
+              addrType = addrType[0];
+            }
+            // fetch land Cntry and stateProv frm Addr type
+            var reqIdParams = {
+                REQ_ID : reqId,
+                ADDR_TYPE : addrType
+              };
+              var addrResult = cmr.query('GETLANDSTATEBYREQID', reqIdParams);
+              stateProv = addrResult.ret1;
+              landCntry = addrResult.ret2;
+              if (stateProv != null && landCntry!= null) {
+              }
+            if (addrType != undefined && addrType != null && addrType != '' && landCntry != undefined && landCntry != null && landCntry != '' && landCountryList.includes(landCntry)) {
+              if (stateProv == undefined && stateProv == null && stateProv!= '') {
+                return new ValidationResult(null, false, 'State Province is mandatory for address with landCntry: ' + landCntry + ' addrType: ' + addrType);
+              } 
+            } 
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+
+
+/**
  * Validator for only a single Sold-to record for the request
  */
 function addSoldToValidator() {
@@ -490,7 +543,15 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
       return {
         validate : function() {
           var reqType = FormManager.getActualValue('reqType');
-          var vat = FormManager.getActualValue('vat');
+          var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+
+          // if Chile, Colombia, Venezuela are the CMR issuing country
+          // proxy's the taxCd1 value to vat to proceed with the validation
+          if (cmrIssuingCntry == '655' || cmrIssuingCntry == '661' || cmrIssuingCntry == '871') {
+            var vat = FormManager.getActualValue('taxCd1');
+          } else {
+            var vat = FormManager.getActualValue('vat');
+          }
 
           if (!vat || vat == '' || vat.trim() == '') {
             return new ValidationResult(null, true);
@@ -1172,6 +1233,22 @@ function isPrivateScenario() {
   return ["PRICU", "PRIPE", "FIPRI", "DKPRI", "BEPRI", "CHPRI","LUPRI"].includes(custSubGrp);
 }
 
+function prospectFilter() {
+  console.log('>>> prospectFilter');
+  if (_inacHandler == null) {
+    _inacHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      var ifProspect = FormManager.getActualValue('prospLegalInd');
+      if (dijit.byId('prospLegalInd')) {
+        ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+      }
+      if (ifProspect == 'Y') {
+        FormManager.clearValue('inacCd');
+        FormManager.enable('inacCd');
+      }
+    });
+  }
+}
+
 function setVatIndFieldsForGrp1AndNordx() {
   if (isViewOnly()) {
     return;
@@ -1264,7 +1341,7 @@ dojo.addOnLoad(function() {
   GEOHandler.AFRICA = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
        '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
 
-  GEOHandler.GROUP1 = [ '724', '848', '618', '624', '788', '624', '649', '866', '754' ];
+  GEOHandler.GROUP1 = [ '724', '848', '618', '624', '788', '649', '866', '754' ];
   GEOHandler.AllCountries =  ['229' ,'358' ,'359' ,'363' ,'373' ,'382' ,'383' ,'428' ,'433' ,'440' ,'443' ,'446' ,'461' ,'465' ,'479' ,'498' ,'602' ,'603' ,'607' ,'608' ,'610' ,'613' ,'614' ,'615' ,'616' ,'618' ,'619' ,'620' ,'621' ,'624' ,'626' ,'627' ,'629' ,'631' ,'635' ,'636' ,'637' ,'638' ,'640' ,'641' ,'642' ,'643' ,'644' ,'645' ,'646' ,'647' ,'649' ,'651' ,'652' ,'655' ,'656' ,'661' ,'662' ,'663' ,'666' ,'667' ,'668' ,'669' ,'670' ,'677' ,'678' ,'680' ,'681' ,'682' ,'683' ,'691' ,'692' ,'693' ,'694' ,'695' ,'698' ,'699' ,'700' ,'702' ,'704' ,'705' ,'706' ,'707' ,'708' ,'711' ,'713' ,'717' ,'718' ,'724' ,'725' ,'726' ,'729' ,'731' ,'733' ,'735' ,'736' ,'738' ,'740' ,'741' ,'742' ,'744' ,'745' ,'749' ,'750' ,'752' ,'753' ,'754' ,'755' ,'756' ,'758' ,'759' ,'760' ,'762' ,'764' ,'766' ,'767' ,'768' ,'769' ,'770' ,'772' ,'778' ,'780' ,'781' ,'782' ,'787' ,'788' ,'791' ,'796' ,'799' ,'804' ,'805' ,'806' ,'808' ,'810' ,'811' ,'813' ,'815' ,'818' ,'820' ,'821' ,'822' ,'823' ,'825' ,'826' ,'827' ,'829' ,'831' ,'832' ,'833' ,'834' ,'835' ,'838' ,'839' ,'840' ,'841' ,'842' ,'843' ,'846' ,'848' ,'849' ,'850' ,'851' ,'852' ,'853' ,'855' ,'856' ,'857' ,'858' ,'859' ,'862' ,'864' ,'865' ,'866' ,'869' ,'871' ,'876' ,'881' ,'883' ,'889' ,'897' ,'714' ,'720' ,'790' ,'675' ,'879' ,'880'];
   
   GEOHandler.registerWWValidator(addCMRSearchValidator);
@@ -1280,6 +1357,8 @@ dojo.addOnLoad(function() {
       '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708',
       '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '758', '760', '848', '649', '729', '678', '702', '806', '846' ], null, false, true);
   GEOHandler.registerWWValidator(addAddrStdValidator);
+  GEOHandler.registerWWValidator(addStateProvValidator);
+
   // exclude for LA
   GEOHandler.registerWWValidator(addTaxCodesValidator, GEOHandler.LA, null, false, true);
 
@@ -1322,11 +1401,14 @@ dojo.addOnLoad(function() {
   // Removing this for coverage-2023 as ISU -32 is no longer obsoleted
   // GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
   GEOHandler.addAfterConfig(updateProspectLegalInd,  GEOHandler.AllCountries);
-  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706', '838']);  
+  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706','838']);  
   GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706','838']); 
   GEOHandler.registerWWValidator(addVatIndValidator);
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];
   
   GEOHandler.registerWWValidator(forceLockUnlock);
+  GEOHandler.addAfterConfig(prospectFilter, GEOHandler.AllCountries);
+  GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.AllCountries)
+
 });

@@ -414,7 +414,7 @@ visibility: hidden !IMPORTANT;
 
         
         <!-- State Province -->
-        <cmr:view forGEO="LA,US,SWISS,NORDX">
+		<cmr:view forGEO="LA,US,SWISS,NORDX,CEMEA">
           <cmr:gridCol width="80px" field="stateProv" header="${ui.grid.stateProvince}" >
             <cmr:formatter functionName="stateProvFormatter" />
           </cmr:gridCol>
@@ -427,7 +427,7 @@ visibility: hidden !IMPORTANT;
           </cmr:gridCol>
         </cmr:view>
         
-         <cmr:view forCountry="618">
+         <cmr:view forCountry="618,726,755,822,838,666,758,706,724,848,624,788">
           <cmr:gridCol width="80px" field="stateProv" header="${ui.grid.stateProvince}" >
             <cmr:formatter functionName="stateProvFormatter" />
           </cmr:gridCol>

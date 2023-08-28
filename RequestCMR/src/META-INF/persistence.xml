@@ -253,6 +253,19 @@
     
     <class>com.ibm.cio.cmr.request.entity.Licenses</class>
     <class>com.ibm.cio.cmr.request.entity.LicensesPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.JpJsicCodeMap</class>
+    <class>com.ibm.cio.cmr.request.entity.JpJsicCodeMapPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.JPOfficeSectorInacMap</class>
+    <class>com.ibm.cio.cmr.request.entity.JPOfficeSectorInacMapPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.JpIsicToJsicMap</class>
+    <class>com.ibm.cio.cmr.request.entity.JpIsicToJsicMapPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.JpBoCodesMap</class>
+    <class>com.ibm.cio.cmr.request.entity.JpBoCodesMapPK</class>
+    
 
     <properties>
     <!-- ORIGINAL -->

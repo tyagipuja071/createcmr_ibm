@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -49,6 +50,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
@@ -594,14 +596,6 @@ public abstract class AutomationUtil {
     case BluepagesError:
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
-    case DuplicateCMR:
-      if (SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(country)) {
-        return true;
-      }
-      details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
-      engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
-          checkResult.getCmrNo(), checkResult.getKunnr());
-      return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
@@ -655,16 +649,16 @@ public abstract class AutomationUtil {
       }
     }
 
-    // Duplicate Request check with customer name
+    // Duplicate Request check with customer name and Addr
     List<String> dupReqIds = checkDuplicateRequest(entityManager, reqData);
     if (!dupReqIds.isEmpty()) {
-      details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
+      details.append("Duplicate request found with matching customer name and address.\nMatch found with Req id :").append("\n");
       details.append(StringUtils.join(dupReqIds, "\n"));
-      engineData.addRejectionComment("DUPR", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
+      engineData.addRejectionComment("DUPR", "Duplicate request found with matching customer name and address.", StringUtils.join(dupReqIds, ", "),
+          "");
       return false;
     } else {
       details.append("No duplicate requests found");
-
     }
     PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
@@ -673,14 +667,9 @@ public abstract class AutomationUtil {
     case BluepagesError:
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
-    case DuplicateCMR:
-      details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
-      engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
-          checkResult.getCmrNo(), checkResult.getKunnr());
-      return false;
     case DuplicateCheckError:
-      details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
-      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+      details.append("Duplicate CMR check using customer name and address match failed to execute.").append("\n");
+      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name and address match failed to execute.");
       break;
     case NoIBMRecord:
       engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
@@ -706,7 +695,7 @@ public abstract class AutomationUtil {
    * @return
    */
   protected PrivatePersonCheckResult checkPrivatePersonRecord(String country, String landCntry, String name, boolean checkBluePages) {
-    LOG.debug("Validating Private Person record for " + name);
+    LOG.debug("***Validating Private Person record for " + name);
     try {
       DuplicateCMRCheckResponse checkResponse = checkDuplicatePrivatePersonRecord(name, country, landCntry);
       String cmrNo = "";
@@ -885,7 +874,12 @@ public abstract class AutomationUtil {
         || SystemLocation.FINLAND.equals(data.getCmrIssuingCntry()) || SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
     } else if (DUP_ADDR_CHECK_COUNTRIES.contains(data.getCmrIssuingCntry())) {
-      sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE_OR_SOLDTO");
+    	if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry()) 
+    	 || SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
+    		sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE");
+    	} else {
+    		sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE_OR_SOLDTO");
+    	}
     } else {
       sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
     }
@@ -958,6 +952,7 @@ public abstract class AutomationUtil {
    * @param details
    */
   protected boolean removeDuplicateAddresses(EntityManager entityManager, RequestData requestData, StringBuilder details) {
+    LOG.debug("***AutomationUtil.removeDuplicateAddresses");
     Addr zs01 = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
@@ -971,6 +966,7 @@ public abstract class AutomationUtil {
     boolean removed = false;
     details.append("Checking for duplicate address records - ").append("\n");
     while (it.hasNext()) {
+      LOG.debug("***AutomationUtil.removeDuplicateAddresses found more than one address");
       Addr addr = it.next();
       if (!payGoAddredited) {
         if (!"ZS01".equals(addr.getId().getAddrType())) {
@@ -1358,6 +1354,7 @@ public abstract class AutomationUtil {
    */
 
   public static boolean compareCustomerNames(Addr addr1, Addr addr2) {
+    LOG.debug("***AutomationUtil.compareCustomerNames");
     String customerName1 = addr1.getCustNm1() + (StringUtils.isNotBlank(addr1.getCustNm2()) ? " " + addr1.getCustNm2() : "");
     String customerName2 = addr2.getCustNm1() + (StringUtils.isNotBlank(addr2.getCustNm2()) ? " " + addr2.getCustNm2() : "");
 
@@ -1377,11 +1374,16 @@ public abstract class AutomationUtil {
   }
 
   public List<String> checkDuplicateRequest(EntityManager entityManager, RequestData requestData) {
+    LOG.debug("Duplicate Request check with customer name and Address for Private person record");
     List<String> dupReqIds = new ArrayList<>();
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     String custNm = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
+    String addrTxt = getFormattedString(zs01.getAddrTxt());
+    String addrTxt2 = (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? getFormattedString(zs01.getAddrTxt2()) : "");
+    String postCd = zs01.getPostCd();
+    String city = zs01.getCity1();
     String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("LAND_CNTRY", zs01.getLandCntry().toUpperCase());
@@ -1396,12 +1398,69 @@ public abstract class AutomationUtil {
       while (it.hasNext()) {
         Addr addr = it.next();
         String custNm2 = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
+        String streetLine1 = (StringUtils.isNotBlank(addr.getAddrTxt()) ? getFormattedString(addr.getAddrTxt()) : "");
+        String streetLine2 = (StringUtils.isNotBlank(addr.getAddrTxt2()) ? getFormattedString(addr.getAddrTxt2()) : "");
+        String postCd2 = addr.getPostCd();
+        String city2 = addr.getCity1();
         if (custNm.equals(custNm2)) {
-          dupReqIds.add(Long.toString(addr.getId().getReqId()));
+          if (matchdupExactAddr(addrTxt, addrTxt2, streetLine1, streetLine2, postCd, postCd2, city, city2)) {
+            dupReqIds.add(Long.toString(addr.getId().getReqId()));
+          } else if (matchAddress(addrTxt, addrTxt2, streetLine1, streetLine2)) {
+            dupReqIds.add(Long.toString(addr.getId().getReqId()));
+          } else {
+            for (String key : CommonWordsUtil.getVariations(streetLine1)) {
+              if (matchAddress(addrTxt, addrTxt2, key, "")) {
+                dupReqIds.add(Long.toString(addr.getId().getReqId()));
+                break;
+              }
+            }
+            if (StringUtils.isNotBlank(streetLine2)) {
+              for (String key : CommonWordsUtil.getVariations(streetLine2)) {
+                if (matchAddress(addrTxt, addrTxt2, "", key)) {
+                  dupReqIds.add(Long.toString(addr.getId().getReqId()));
+                  break;
+                }
+              }
+            }
+          }
         }
       }
     }
     return dupReqIds;
+  }
+
+  private boolean matchAddress(String addrTxt, String addrTxt2, String streetLine1, String streetLine2) {
+    return (match(addrTxt, streetLine1) || match(addrTxt2, streetLine1) || match(addrTxt, streetLine2) || match(addrTxt2, streetLine2));
+  }
+
+  public static boolean match(String str, String key) {
+    if (StringUtils.isNotBlank(str) && StringUtils.isNotBlank(key)) {
+      if (str.matches(".*" + key + ".*")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean matchdupExactAddr(String addrTxt, String addrTxt2, String streetLine1, String streetLine2, String postCd, String postCd2,
+      String city, String city2) {
+    Boolean addrMatch = false;
+    String addrStreet = addrTxt.concat(addrTxt2);
+    String addrStreet2 = streetLine1.concat(streetLine2);
+    if ((StringUtils.isNotBlank(addrStreet) && StringUtils.isNotBlank(addrStreet2)
+        && !(StringUtils.getLevenshteinDistance(addrStreet.toUpperCase(), addrStreet2.toUpperCase()) > 3)
+        && (addrStreet2.replaceAll("\\s", "").contains(addrStreet.replaceAll("\\s", ""))))) {
+      addrMatch = ((StringUtils.isNotBlank(postCd) && StringUtils.isNotBlank(postCd2) && postCd2.contains(postCd))
+          && (StringUtils.isNotBlank(city) && StringUtils.isNotBlank(city2) && city2.replaceAll("\\s", "").contains(city.replaceAll("\\s", ""))));
+    }
+    return addrMatch;
+  }
+
+  public static String getFormattedString(String str) {
+    if (StringUtils.isNotBlank(str)) {
+      return str.trim().replaceAll("[^a-zA-Z0-9 ]", "").replaceAll("\\s+", " ").toUpperCase();
+    }
+    return "";
   }
 
   public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -1528,6 +1587,52 @@ public abstract class AutomationUtil {
       }
     }
     return calculatedFields;
+  }
+
+  /**
+   * Validates PPS CEID on Update request.
+   * @param engineData
+   * @param data
+   * @param details
+   * @param resultCodes
+   * @param change
+   * @param reject
+   * @return cmdeReview = true, for Update / Delete.
+   */
+  protected boolean validatePpsCeidForUpdateRequest(AutomationEngineData engineData, Data data, StringBuilder details, Set<String> resultCodes,
+      UpdatedDataModel change, String reject) {
+    String newppsceid = change.getNewData();
+    String oldppsceid = change.getOldData();
+    String kukla = data.getCustClass();
+    List<String> kuklaValuesStartingWith4 = Arrays.asList("41", "42", "43", "44", "45", "46", "47", "48", "49");
+    boolean cmdeReview = false;
+
+    // ADD
+    if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
+      if (kuklaValuesStartingWith4.contains(kukla)) {
+        if (checkPPSCEID(data.getPpsceid())) {
+          details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
+        } else {
+          resultCodes.add(reject);
+          details.append("PPS ceid on the request is invalid").append("\n");
+        }
+      } else {
+        resultCodes.add(reject);
+        details.append("PPS CE ID added for CMR with Kukla other than 41, 42, 43, 44, 45, 46, 47, 48, 49.").append("\n");
+      }
+    } else if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
+      // DELETE
+      cmdeReview = true;
+      engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
+      details.append("Deletion of ppsceid needs cmde review.\n");
+    } else if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)) {
+      // UPDATE
+      cmdeReview = true;
+      engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
+      details.append("Update of ppsceid needs cmde review.\n");
+    }
+
+    return cmdeReview;
   }
 
 }

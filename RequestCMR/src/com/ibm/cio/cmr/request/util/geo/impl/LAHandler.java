@@ -326,7 +326,7 @@ public class LAHandler extends GEOHandler {
 
       }
     } else {
-      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);
+      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord); // flow
       data.setBgId(mainRecord.getCmrBuyingGroup());
       data.setGbgId(mainRecord.getCmrGlobalBuyingGroup());
       data.setBgRuleId(mainRecord.getCmrLde());
@@ -363,10 +363,6 @@ public class LAHandler extends GEOHandler {
       boolean laReactivateCapable = PageManager.laReactivateEnabled(issuingCountry, "U");
       if (laReactivateCapable)
         data.setFunc("R");
-    }
-
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      data.setRepTeamMemberNo(DEFAULT_SALES_REP);
     }
   }
 
@@ -793,7 +789,6 @@ public class LAHandler extends GEOHandler {
       data.setSalesRepTeamDateOfAssignment(SystemUtil.getCurrentTimestamp());
 
       data.setInstallRepTeamDateOfAssignment(SystemUtil.getCurrentTimestamp());
-      data.setInstallRep(data.getRepTeamMemberNo());
       data.setPaymentAddrCd("N");
 
     }
@@ -850,8 +845,7 @@ public class LAHandler extends GEOHandler {
 
           String taxCd1 = data.getTaxCd1();
           if ("LOCAL".equals(data.getCustGrp()) && CmrConstants.CUST_TYPE_IBMEM.equals(data.getCustSubGrp())) {
-            if (StringUtils.isNotBlank(taxCd1) && taxCd1.length() >= 11) {
-              String taxCd1Subtr = taxCd1.substring(3, 11);
+            if (StringUtils.isNotBlank(taxCd1)) {
               boolean createNewTaxRecords = false;
 
               if (geoTaxInfoRecords == null || geoTaxInfoRecords.isEmpty()) {
@@ -864,13 +858,13 @@ public class LAHandler extends GEOHandler {
 
               if (createNewTaxRecords) {
                 deleteAllTaxInfoRecord(data, entityManager);
-                doCreateARDefaultTaxRecord("01", taxCd1Subtr, data.getId().getReqId(), entityManager, true, true, true);
-                doCreateARDefaultTaxRecord("11", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
-                doCreateARDefaultTaxRecord("02", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
-                doCreateARDefaultTaxRecord("07", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
-                doCreateARDefaultTaxRecord("12", taxCd1Subtr, data.getId().getReqId(), entityManager, false, false, false);
+                doCreateARDefaultTaxRecord("01", taxCd1, data.getId().getReqId(), entityManager, true, true, true);
+                doCreateARDefaultTaxRecord("11", taxCd1, data.getId().getReqId(), entityManager, false, false, false);
+                doCreateARDefaultTaxRecord("02", taxCd1, data.getId().getReqId(), entityManager, false, false, false);
+                doCreateARDefaultTaxRecord("07", taxCd1, data.getId().getReqId(), entityManager, false, false, false);
+                doCreateARDefaultTaxRecord("12", taxCd1, data.getId().getReqId(), entityManager, false, false, false);
               } else {
-                doUpdateARDefaultTaxRecord(taxCd1Subtr, data.getId().getReqId(), entityManager, data);
+                doUpdateARDefaultTaxRecord(taxCd1, data.getId().getReqId(), entityManager, data);
               }
             }
           } else {
@@ -1599,24 +1593,6 @@ public class LAHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cntry, "BGLDERule", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getBgRuleId(), "BGLDERule", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getBgRuleId(), "BGLDERule", cmrCountry));
-      results.add(update);
-    }
-
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepresentativeTeamMemberNo(), newData.getRepTeamMemberNo())) {
-      update = new UpdatedDataModel();
-      String cntry = null;
-      update.setDataField(PageManager.getLabel(cntry, "SalRepNameNo", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getRepTeamMemberNo(), "SalRepNameNo", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getRepresentativeTeamMemberNo(), "SalRepNameNo", cmrCountry));
-      results.add(update);
-    }
-
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getMarketingChnlIndcValue(), newData.getMrktChannelInd())) {
-      update = new UpdatedDataModel();
-      String cntry = null;
-      update.setDataField(PageManager.getLabel(cntry, "MrktChannelInd", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getMrktChannelInd(), "MrktChannelInd", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getMarketingChnlIndcValue(), "MrktChannelInd", cmrCountry));
       results.add(update);
     }
 
@@ -3146,9 +3122,10 @@ public class LAHandler extends GEOHandler {
       txt = results.get(0);
     } else if (results != null && results.size() > 1) {
       for (String res : results) {
-        if (res.startsWith(stateProv)) {
+        if (StringUtils.isNotBlank(stateProv) && res.startsWith(stateProv)) {
           txt = res;
         }
+
       }
     }
 
@@ -3362,7 +3339,6 @@ public class LAHandler extends GEOHandler {
     map.put("##RequestReason", "reqReason");
     map.put("##CustomerType", "custType");
     map.put("##POBox", "poBox");
-    map.put("##MrktChannelInd", "mrktChannelInd");
     map.put("##LandedCountry", "landCntry");
     map.put("##CMRIssuingCountry", "cmrIssuingCntry");
     map.put("##INACCode", "inacCd");
@@ -3389,7 +3365,6 @@ public class LAHandler extends GEOHandler {
     map.put("##BGLDERule", "bgRuleId");
     map.put("##ProspectToLegalCMR", "prospLegalInd");
     map.put("##ClientTier", "clientTier");
-    map.put("##SalRepNameNo", "repTeamMemberNo");
     map.put("##ProxiLocationNumber", "proxiLocnNo");
     map.put("##DropDownCity", "city1");
     map.put("##SAPNumber", "sapNo");

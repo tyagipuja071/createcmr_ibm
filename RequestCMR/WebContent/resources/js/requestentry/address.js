@@ -416,6 +416,18 @@ function AddressDetailsModal_onLoad() {
     _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
     _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
   }
+  
+  if (FormManager.getActualValue('cmrIssuingCntry') == '760') {
+    _assignDetailsValue('#AddressDetailsModal #cnCustName1_view', details.ret59);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName2_view', details.ret60);
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt2_view', details.ret61);
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt_view', details.ret62);
+    _assignDetailsValue('#AddressDetailsModal #cnCity_view', details.ret63);
+    _assignDetailsValue('#AddressDetailsModal #cnDistrict_view', details.ret64);
+    _assignDetailsValue('#AddressDetailsModal #cnCustContNm_view', details.ret65);
+    _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
+  }
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
     _assignDetailsValue('#AddressDetailsModal #billingPstlAddr_view', details.ret58);
@@ -489,6 +501,19 @@ function displayHwMstInstallFlagNew() {
           cmr.hideNode('hwFlag');
         }
       });
+    }
+  }
+}
+
+function displayEndUserFileFlag() {
+  console.log(">>> Executing displayEndUserFileFlag <<<");
+  
+  if (cmr.addressMode == 'newAddress'
+      && (FormManager.getActualValue('cmrIssuingCntry') == '760' )) {
+    if (FormManager.getActualValue('custGrp') == 'BUSPR') {
+      cmr.showNode('endUserFile');
+    } else {
+      cmr.hideNode('endUserFile');
     }
   }
 }
@@ -588,6 +613,14 @@ function doAddToAddressList() {
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var asean_isa_cntries = [ '643', '744', '736', '738', '796', '778', '749', '834', '818', '852', '856', '616', '652', '615' ];
+  var ero_countries = ['641'];
+  var reqReason = FormManager.getActualValue('reqReason');
+  
+  if (ero_countries.indexOf(cntry) >= 0 && reqReason == 'TREC' && _pagemodel.userRole.toUpperCase() == 'REQUESTER') {
+    cmr.showAlert('This is a Temporary Embargo Removal Request. Updation or creation of new records is not allowed.');
+    return;
+  }
+  
   // CREATCMR-5741 no TGME Addr Std
   // if (GEOHandler.isTGMERequired(cntry)) {
   // var tgmeResult = tgmePreSave();
@@ -602,7 +635,17 @@ function doAddToAddressList() {
   cmr.currentModalId = 'addEditAddressModal';
   cmr.addressReqId = FormManager.getActualValue('reqId');
   cmr.addressSequence = FormManager.getActualValue('addrSeq');
+
   cmr.addressType = FormManager.getActualValue('addrType');
+  if(cmr.addressSequence=='undefined' && (cntry=='796') ) {
+    if(cmr.addressType=='G'){
+      cmr.addressType = 'CTYG'      
+    }
+    if(cmr.addressType=='H'){
+      cmr.addressType = 'CTYH'
+    }
+    FormManager.setValue('addrType' , cmr.addressType);
+  }
   var dummyseq = "xx";
   var qParams;
 
@@ -676,6 +719,10 @@ function doAddToAddressList() {
           // existing Sold-To. This address can not be added.');
           // return;
         }
+      }
+      if (FormManager.getActualValue('cmrIssuingCntry') == '760' && cmr.addressType == 'ZC01') {
+        var rol = FormManager.getActualValue('rol');
+        FormManager.setValue('identClient', rol);
       }
       if (asean_isa_cntries.indexOf(cntry) >= 0) {
         // do
@@ -877,6 +924,12 @@ function doAddAddress() {
    */
   cmr.addressMode = 'newAddress';
   cmr.showModal('addEditAddressModal');
+  var reqType = FormManager.getActualValue('reqType');
+  if ( reqType == 'C' && FormManager.getActualValue('custGrp') == 'BUSPR' && FormManager.getActualValue('cmrIssuingCntry') == '760') {
+    cmr.showNode('endUserFileFlag');
+  } else {
+    cmr.hideNode('endUserFileFlag');
+  }
 }
 cmr.noCreatePop = 'N';
 
@@ -1253,7 +1306,7 @@ function addEditAddressModal_onLoad() {
     }
 
     // IERP: China specific address load
-    if (FormManager.getActualValue('cmrIssuingCntry') == '641' && (cmr.addressMode == 'copyAddress' || cmr.addressMode == 'updateAddress' || cmr.addressMode == 'removeAddress')) {
+    if ((FormManager.getActualValue('cmrIssuingCntry') == '641' || FormManager.getActualValue('cmrIssuingCntry') == '760') && (cmr.addressMode == 'copyAddress' || cmr.addressMode == 'updateAddress' || cmr.addressMode == 'removeAddress')) {
       FormManager.setValue('cnCustName1', details.ret59);
       cmr.oldcncustname = details.ret59;
       FormManager.setValue('cnCustName2', details.ret60);
@@ -1551,6 +1604,9 @@ function doCopyAddr(reqId, addrType, addrSeq, mandt, name, type) {
     MANDT : mandt,
   };
   var result = cmr.query('ADDRDETAIL', qParams);
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  if(FormManager.getActualValue)
   cmr.addrdetails = result;
   cmr.addressMode = 'copyAddress';
   cmr.showModal('addEditAddressModal');
@@ -1569,6 +1625,8 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
     MANDT : mandt,
   };
   var result = cmr.query('ADDRDETAIL', qParams);
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
   cmr.addrdetails = result;
   cmr.addressMode = 'updateAddress';
   if (result && result.ret31 == 'D' && !skipDnb) {
@@ -1583,6 +1641,23 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
   } else {
     cmr.showModal('addEditAddressModal');
   }
+  if(FormManager.getActualValue('cmrIssuingCntry') == '760'){
+    disableRolTaigaCode();
+  }
+}
+
+function disableRolTaigaCode() {
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType == 'ZC01') {
+    FormManager.show('TaigaCode', 'poBoxPostCd');
+    FormManager.show('ROL', 'rol');
+    FormManager.enable('rol');
+  } else {
+    FormManager.hide('TaigaCode', 'poBoxPostCd');
+    FormManager.hide('ROL', 'rol');
+  }
+
+  FormManager.readOnly('territoryCd');
 }
 
 function continueEditDnbAddress() {
@@ -3119,3 +3194,87 @@ function resetSccInfo() {
 }
 // CREATCMR-5447
 
+function parseXLS() {
+
+	
+  var contactCon = '';
+  const input = document.getElementById('xlsFile');
+  const file = input.files[0];
+  
+  const reader = new FileReader();
+  
+  reader.onload = function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    
+    // Access the worksheets
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    
+    // Process the data
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    // Access and read the data
+    for (let row = 0; row < jsonData.length; row++) {
+      const rowData = jsonData[row];
+      for (let col = 0; col < rowData.length; col++) {
+        const cellData = rowData[col];
+        
+        
+        
+        if (row ==8 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('custNm4' , cellData);
+        }
+        if (row ==9 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('custNm1' , cellData);
+        }
+        if (row ==10 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('dept' , cellData);
+        }
+        if (row ==11 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('postCd' , cellData);
+        }
+        if (row ==12 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('addrTxt' , cellData);
+        }
+        if (row ==8 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('cnCustName1' , cellData);
+        }
+        if (row ==9 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('contact' , cellData);
+        }
+        if (row ==10 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          contactCon = cellData;
+        }
+        if (row ==11 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('bldg' , cellData);
+        }
+        if (row ==11 && col==7) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('custPhone' , cellData);
+        }
+      }
+    }
+    var contact = FormManager.getActualValue('contact');
+    if(contact !=null && contact.length>0 && contactCon!=null && contactCon.length>0){
+	  FormManager.setValue('contact' , contactCon+contact);
+	}else if(contact !=null && contact.length>0 ){
+	  FormManager.setValue('contact' , contact );
+	}else if(contactCon!=null && contactCon.length>0 ){
+	  FormManager.setValue('contact' , contactCon );
+	}else{
+	  FormManager.setValue('contact' , '' );
+	}
+    
+    console.log(jsonData);
+  };
+  
+  reader.readAsArrayBuffer(file);
+}

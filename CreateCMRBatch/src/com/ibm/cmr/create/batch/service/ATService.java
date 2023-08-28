@@ -1004,9 +1004,9 @@ public class ATService extends TransConnService {
         if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
           noOFWorkingHours = checked2WorkingDays(admin.getRdcProcessingTs(), SystemUtil.getCurrentTimestamp());
         }
-        if (noOFWorkingHours >= 24) {
+        if (noOFWorkingHours >= 72) {
           lockRecordUpdt(entityManager, admin);
-          LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
+          LOG.info("RDc: Temporary Reactivate Embargo process: run after 3 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
 
@@ -1438,18 +1438,10 @@ public class ATService extends TransConnService {
       LOG.debug("processed.setTime(processedDate) O/P >>> " + processed.getTime());
       LOG.debug("current.setTime(processedDate) O/P >>> " + current.getTime());
 
-      int day = current.get(Calendar.DAY_OF_WEEK);
-      if ((day != Calendar.SATURDAY) && (day != Calendar.SUNDAY) && current.after(processed)) {
-        if (current.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY && processed.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-          hoursBetween = 0;
-        } else {
-          hoursBetween = (current.getTimeInMillis() - processed.getTimeInMillis()) / (60 * 60 * 1000);
-        }
-        LOG.debug("current.get(Calendar.DAY_OF_YEAR) >>> " + current.getTime());
-        LOG.debug("processed.get(Calendar.DAY_OF_YEAR) >>> " + processed.getTime());
-        LOG.debug("hoursBetween >>> " + hoursBetween);
-
-      }
+      hoursBetween = (current.getTimeInMillis() - processed.getTimeInMillis()) / (60 * 60 * 1000);
+      LOG.debug("current.get(Calendar.DAY_OF_YEAR) >>> " + current.getTime());
+      LOG.debug("processed.get(Calendar.DAY_OF_YEAR) >>> " + processed.getTime());
+      LOG.debug("hoursBetween >>> " + hoursBetween);
 
       LOG.debug("No of workingDays=" + hoursBetween);
     } catch (Exception e) {

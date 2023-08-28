@@ -62,7 +62,7 @@ function doImportCRISRecord(result) {
       var confMsg = '';
       switch (result.type) {
       case 'A':
-        if (custType != 'CEA') {
+        if (custType != 'CEA' && custType != 'AR') {
           cmr.showAlert('Accounts can only be imported when updating an existing Account.');
           return;
         }
@@ -86,7 +86,7 @@ function doImportCRISRecord(result) {
         });
         break;
       case 'C':
-        if (custType != 'C') {
+        if (custType != 'C' && custType != 'CR') {
           cmr.showAlert('Companies can only be imported when updating an existing Company.');
           return;
         }

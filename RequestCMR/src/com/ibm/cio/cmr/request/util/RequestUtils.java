@@ -13,8 +13,12 @@ import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +46,7 @@ import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.Lov;
 import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
@@ -2044,6 +2049,113 @@ public class RequestUtils {
       output = result;
     }
     return output;
+  }
+
+  public static void sendEmailNotificationsTREC_CN(EntityManager em) {
+
+    String sql = ExternalizedQuery.getSql("CN.TREC.NOTIF.ADMIN");
+    PreparedQuery query = new PreparedQuery(em, sql);
+    List<Admin> pending = query.getResults(Admin.class);
+    List<Admin> notifList = new ArrayList<>();
+    boolean sendNotification = false;
+    Calendar current = Calendar.getInstance();
+    int day = current.get(Calendar.DAY_OF_WEEK);
+
+    if (pending != null && pending.size() > 0) {
+      LocalTime localTime = LocalTime.now(ZoneId.of("GMT"));
+      localTime = localTime.plusHours(8);
+      int hour = localTime.getHour();
+      if (hour == 0 && day != Calendar.SATURDAY && day != Calendar.SUNDAY) {
+        sendNotification = true;
+      }
+    }
+
+    int noOFWorkingDays = 0;
+    for (Admin admin : pending) {
+      // Check if the CMR is going to be blocked back in next 1 day
+      noOFWorkingDays = IERPRequestUtils.checkNoOfWorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
+      if (noOFWorkingDays >= 3) {
+        notifList.add(admin);
+      } else if ((noOFWorkingDays == 2 || noOFWorkingDays == 1) && day == Calendar.FRIDAY) {
+        notifList.add(admin);
+      }
+    }
+
+    if (!notifList.isEmpty() && sendNotification) {
+
+      String from = SystemConfiguration.getValue("MAIL_FROM");
+      String subject = "CMR Numbers to be blocked back in next 24 hours";
+      // String template = getCMREmailTemplate();
+      // String email = new String(template);
+
+      StringBuilder sb = new StringBuilder();
+      sb.append("<table>");
+      sb.append("<tr>");
+      sb.append("<th style=\"text-align:left\">Country Code</th>");
+      sb.append("<th style=\"text-align:left\">CMR#</th>");
+      sb.append("<th style=\"text-align:left\">Customer Name</th>");
+      sb.append("<th style=\"text-align:left\">Customer name Chinese (CN only)</th>");
+      sb.append("<th style=\"text-align:left\">Release timestamp (GMT+8)</th>");
+      sb.append("<th style=\"text-align:left\">Block timestamp (GMT+8)</th>");
+      sb.append("<th style=\"text-align:left\">Processer ID</th>");
+      sb.append("</tr>");
+
+      Data data = null;
+      IntlAddr intlAddr = null;
+      LocalDateTime releaseDt = null;
+      Date release = null;
+      LocalDateTime blockDt = null;
+      for (Admin admin : notifList) {
+        try {
+          sql = ExternalizedQuery.getSql("REQUESTENTRY.DATA.SEARCH_BY_REQID");
+          query = new PreparedQuery(em, sql);
+          query.setParameter("REQ_ID", admin.getId().getReqId());
+          data = query.getSingleResult(Data.class);
+
+          sql = ExternalizedQuery.getSql("DNB.GET_CURR_SOLD_TO_INTLADDR");
+          query = new PreparedQuery(em, sql);
+          query.setParameter("REQ_ID", admin.getId().getReqId());
+          intlAddr = query.getSingleResult(IntlAddr.class);
+        } catch (Exception e) {
+          LOG.debug("An error occured while trying to fetch data from DB:" + e);
+        }
+
+        release = admin.getRdcProcessingTs();
+        if (release != null) {
+          releaseDt = release.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+          blockDt = release.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().plusDays(4);
+        }
+
+        sb.append("<tr>");
+        sb.append("<td>641</td>");
+        sb.append("<td>" + (data != null ? data.getCmrNo() : "") + "</td>");
+        sb.append("<td>" + (admin.getMainCustNm1() + admin.getMainCustNm2()) + "</td>");
+        sb.append("<td>" + (intlAddr != null ? intlAddr.getIntlCustNm1() : " ") + "</td>");
+        sb.append("<td>" + (releaseDt != null ? releaseDt.toString() : " ") + "</td>");
+        sb.append("<td>" + (blockDt != null ? blockDt.toString() : " ") + "</td>");
+        sb.append("<td>" + admin.getRequesterId() + "</td>");
+        sb.append("</tr>");
+
+        admin.setIterationId(1);
+        em.merge(admin);
+      }
+
+      em.flush();
+
+      sb.append("</table>");
+
+      String host = SystemConfiguration.getValue("MAIL_HOST");
+      String recipients = "xuxuedl@cn.ibm.com, yuyf@cn.ibm.com";
+      Email mail = new Email();
+      mail.setSubject(subject);
+      mail.setTo(recipients);
+      mail.setFrom(from);
+      mail.setMessage(sb.toString());
+      mail.setType(MessageType.HTML);
+
+      mail.send(host);
+    }
+
   }
 
 }

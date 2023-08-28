@@ -553,7 +553,7 @@ public class LegacyDirectService extends TransConnService {
             noOFWorkingDays = checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
           }
 
-          if (noOFWorkingDays >= 3) {
+          if (noOFWorkingDays >= 4) {
             // lock
             lockRecord(entityManager, admin);
             // admin.setProcessedTs(SystemUtil.getCurrentTimestamp());
@@ -565,6 +565,7 @@ public class LegacyDirectService extends TransConnService {
 
             // finally update all data
             CmrtCust legacyCust = legacyObjects.getCustomer();
+            Data data = cmrObjects.getData();
             if (legacyCust == null) {
               throw new Exception("Customer record cannot be updated.");
             }
@@ -577,10 +578,9 @@ public class LegacyDirectService extends TransConnService {
               updateEntity(cmrObjects.getData(), entityManager);
             }
 
-            completeTRECRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
+            completeTRECRecord(entityManager, admin, data, legacyObjects.getCustomerNo(), legacyObjects);
 
             // Add to update duplicate CMR data for Russia CMR-4606
-            Data data = cmrObjects.getData();
             if ("Y".equals(data.getCisServiceCustIndc()) && data.getDupIssuingCntryCd() != null) {
               CEEProcessService theService = new CEEProcessService();
               theService.processDupUpdate(entityManager, admin, data, cmrObjects);
@@ -1023,9 +1023,10 @@ public class LegacyDirectService extends TransConnService {
    * @throws SQLException
    * @throws CmrException
    */
-  private void completeTRECRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects)
+  private void completeTRECRecord(EntityManager entityManager, Admin admin, Data data, String cmrNo, LegacyDirectObjectContainer legacyObjects)
       throws CmrException, SQLException {
     LOG.info("Completing legacy processing for  Request " + admin.getId().getReqId());
+    CmrtCust legacyCust = legacyObjects.getCustomer();
     admin.setLockBy(null);
     admin.setLockByNm(null);
     admin.setLockInd("N");
@@ -1033,7 +1034,11 @@ public class LegacyDirectService extends TransConnService {
     admin.setProcessedFlag("Y");
     admin.setReqStatus("CPR");
     admin.setLastUpdtBy(BATCH_USER_ID);
+    data.setEmbargoCd("E");
+    legacyCust.setEmbargoCd("E");
     updateEntity(admin, entityManager);
+    updateEntity(data, entityManager);
+    updateEntity(legacyCust, entityManager);
 
     String message = "Records updated successfully on the Legacy Database. CMR No. " + cmrNo + " "
         + (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) ? " assigned." : " updated.");
@@ -1255,8 +1260,7 @@ public class LegacyDirectService extends TransConnService {
 
       while (!start.after(end)) {
         int day = start.get(Calendar.DAY_OF_WEEK);
-        if ((day != Calendar.SATURDAY) && (day != Calendar.SUNDAY))
-          workingDays++;
+        workingDays++;
         start.add(Calendar.DATE, 1);
       }
       LOG.debug("No of workingDays=" + workingDays);
@@ -2780,8 +2784,7 @@ public class LegacyDirectService extends TransConnService {
     if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
         && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())
         && (dataRdc.getEmbargoCd() != null && !StringUtils.isBlank(dataRdc.getEmbargoCd())) && EMBARGO_LIST.contains(dataRdc.getEmbargoCd())
-        && (data.getEmbargoCd() == null || StringUtils.isBlank(data.getEmbargoCd())) && admin.getReqStatus() != null
-        && CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
+        && admin.getReqStatus() != null && CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
 
       if (admin.getRdcProcessingTs() == null || isTimeStampEquals(admin.getRdcProcessingTs())) {
         LOG.info("Temporary Reactivate Embargo process: Batch 1st run for Req Id :" + admin.getId().getReqId());
@@ -3008,8 +3011,8 @@ public class LegacyDirectService extends TransConnService {
         if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
           noOFWorkingDays = checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
         }
-        if (noOFWorkingDays >= 3) {
-          LOG.info("RDc: Temporary Reactivate Embargo process: run after 2 working days for Req Id :" + admin.getId().getReqId());
+        if (noOFWorkingDays >= 4) {
+          LOG.info("RDc: Temporary Reactivate Embargo process: run after 3 working days for Req Id :" + admin.getId().getReqId());
           try {
             admin.setProcessedTs(SystemUtil.getCurrentTimestamp());
             List<Addr> addresses = cmrObjects.getAddresses();
