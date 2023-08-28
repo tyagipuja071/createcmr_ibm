@@ -54,11 +54,11 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.service.requestentry.AdminService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -745,6 +745,7 @@ public class JPHandler extends GEOHandler {
     // data.setIcmsInd(mainRecord.getIcmsInd());
     data.setCsDiv(mainRecord.getCsDiv());
     data.setOemInd(mainRecord.getOemInd());
+    data.setTerritoryCd(mainRecord.getCmrPOBoxPostCode());
     if (mainRecord.getCompanyCd() != null) {
       if (mainRecord.getCompanyCd().equals("AA")) {
         data.setCustGrp("IBMTP");
@@ -761,7 +762,7 @@ public class JPHandler extends GEOHandler {
     }
     handleData4RAOnImport(data);
   }
-  
+
   private void handleData4RAOnImport(Data data) {
     String jpPayDaysStr = data.getJpPayDays() != null ? data.getJpPayDays() : "";
     String jpCloseDaysStr = data.getJpCloseDays() != null ? data.getJpCloseDays() : "";
@@ -1229,6 +1230,14 @@ public class JPHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getAdminDeptLine(), "AdminDeptLine", cmrCountry));
       results.add(update);
     }
+    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getIdentClient(), newData.getIdentClient())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ROLAccount", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getIdentClient(), "ROLAccount", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getIdentClient(), "ROLAccount", cmrCountry));
+      results.add(update);
+    }
   }
 
   @Override
@@ -1241,6 +1250,24 @@ public class JPHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "Contact", "-"));
       update.setNewData(addr.getContact());
       update.setOldData(addr.getContactOld());
+      results.add(update);
+    }
+    if (!equals(addr.getPoBoxPostCd(), addr.getPoBoxPostCdOld())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField("Taiga Code");
+      update.setNewData(addr.getPoBoxPostCd());
+      update.setOldData(addr.getPoBoxPostCdOld());
+      results.add(update);
+    }
+    if (!equals(addr.getRol(), addr.getRolOld())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "ROL", "-"));
+      update.setNewData(addr.getRol());
+      update.setOldData(addr.getRolOld());
       results.add(update);
     }
   }
@@ -1485,7 +1512,7 @@ public class JPHandler extends GEOHandler {
     accountAbbNmInCris = crisRecord.getNameAbbr();
     return accountAbbNmInCris;
   }
-  
+
   private void handleData4RAOnDataSave(Data data) {
     handleJpCloseDay(data);
     handleJpPayDay(data);
@@ -1628,34 +1655,60 @@ public class JPHandler extends GEOHandler {
     return iAddr;
   }
 
-  private void setROLBeforeDataSave(EntityManager entityManager, Data data, Admin admin) {
+  private void setROLBeforeDataSave(EntityManager entityManager, Data data, Admin admin) throws Exception {
     List<Addr> addrList = getAddrByReqId(entityManager, data.getId().getReqId());
-    if ("CR".equals(admin.getCustType())) {
-      // Update account level ROL in DATA table if company level changed
-      String rolZC01 = null;
-      if (addrList != null && addrList.size() > 0) {
-        for (Addr address : addrList) {
-          if ("ZC01".equals(address.getId().getAddrType())) {
-            rolZC01 = address.getRol() == null ? "" : address.getRol();
-            break;
-          }
-        }
-      }
-      data.setIdentClient(rolZC01);
-
-    } else if ("AR".equals(admin.getCustType())) {
-      // Update account level ROL in ADDR table if account level changed
-      String rolData = data.getIdentClient() == null ? "" : data.getIdentClient();
-      if (addrList != null && addrList.size() > 0) {
-        for (Addr address : addrList) {
-          if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
+    String rol = "";
+    if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
+      rol = getRolByCreditToCustNo(data.getCreditToCustNo() == null ? "" : data.getCreditToCustNo());
+    }
+    if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
+      data.setIdentClient(rol);
+    } else if ("SUBSI".equals(data.getCustGrp())) {
+      data.setIdentClient("");
+    }
+    // Update account level ROL in ADDR table if account level changed
+    String rolData = data.getIdentClient() == null ? "" : data.getIdentClient();
+    if (addrList != null && addrList.size() > 0) {
+      for (Addr address : addrList) {
+        if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
+          if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
+            address.setRol(rol);
+          } else if ("SUBSI".equals(data.getCustGrp())) {
+            address.setRol("");
+          } else {
             address.setRol(rolData);
-            entityManager.merge(address);
-            entityManager.flush();
           }
+          entityManager.merge(address);
+          entityManager.flush();
         }
       }
     }
+  }
+
+  private String getRolByCreditToCustNo(String cmrNo) throws Exception {
+    String rol = "";
+    List<String> results = new ArrayList<String>();
+    EntityManager entityManager = JpaManager.getEntityManager();
+
+    try {
+      String mandt = SystemConfiguration.getValue("MANDT");
+      if (StringUtils.isEmpty(cmrNo) || StringUtils.isEmpty(mandt)) {
+        return null;
+      }
+      String sql = ExternalizedQuery.getSql("GET.ROL.KNA1.BYCMR");
+      sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+      sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+      sql = StringUtils.replace(sql, ":KATR6", "'" + "760" + "'");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      results = query.getResults(String.class);
+      if (results != null && results.size() > 0) {
+        rol = results.get(0);
+      }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+    return rol;
   }
 
   private void setTAIGABeforeDataSave(EntityManager entityManager, Data data) {
@@ -1674,8 +1727,6 @@ public class JPHandler extends GEOHandler {
   }
 
   private void setFieldBeforeAddrSave(EntityManager entityManager, Addr addr) throws Exception {
-    AdminService adminSvc = new AdminService();
-    Admin admin = adminSvc.getCurrentRecordById(addr.getId().getReqId(), entityManager);
     String rol = null;
     String taigaCd = null;
 
@@ -1686,9 +1737,7 @@ public class JPHandler extends GEOHandler {
       DataPK pk = new DataPK();
       pk.setReqId(addr.getId().getReqId());
       Data data = entityManager.find(Data.class, pk);
-      if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
-        data.setIdentClient(rol);
-      }
+      data.setIdentClient(rol);
       data.setTerritoryCd(taigaCd);
       entityManager.merge(data);
       entityManager.flush();
@@ -1699,9 +1748,7 @@ public class JPHandler extends GEOHandler {
         if (addrList != null && addrList.size() > 0) {
           for (Addr address : addrList) {
             if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
-              if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
-                address.setRol(rol);
-              }
+              address.setRol(rol);
               address.setPoBoxPostCd(taigaCd);
               entityManager.merge(address);
               entityManager.flush();
@@ -1722,9 +1769,8 @@ public class JPHandler extends GEOHandler {
           }
         }
       }
-      if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
-        addr.setRol(rol);
-      }
+
+      addr.setRol(rol);
       addr.setPoBoxPostCd(taigaCd);
     }
   }
@@ -2842,7 +2888,7 @@ public class JPHandler extends GEOHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
-  
+
   public static void addJpLogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
     String custSubGroup = data.getCustSubGrp();
     if ("RACMR".equals(custSubGroup)) {
