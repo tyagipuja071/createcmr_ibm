@@ -2282,6 +2282,7 @@ public class CEMEAHandler extends BaseSOFHandler {
           String landCntry = ""; // 10
           String hardWareMaster = ""; // 11
 
+          row = sheet.getRow(rowIndex);
           if (row != null) {
             currCell = row.getCell(2);
             custNm1 = validateColValFromCell(currCell);
