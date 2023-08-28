@@ -104,7 +104,7 @@ function afterConfigForJP() {
 
     disableFieldsForRolUpdate();
     disableAddrFieldsForRolUpdate();
-    
+
     addRAFieldLogic();
     disableAddrFieldsForRA();
   });
@@ -113,6 +113,11 @@ function afterConfigForJP() {
   }
   // CREATCMR-788
   addressQuotationValidator();
+
+  var _custGrpHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+    setRolForCustGrp();
+  });
+
 }
 
 /**
@@ -161,6 +166,14 @@ function addHandlersForJP() {
 // }
 // }
 // }
+
+function setRolForCustGrp() {
+  var custGrp = FormManager.getField('custGrp');
+  if (custGrp == 'SUBSI') {
+    FormManager.setValue('identClient', '');
+    FormManager.readOnly('identClient');
+  }
+}
 
 function disableFieldsForRolUpdate() {
   var reqType = FormManager.getActualValue('reqType');
@@ -346,17 +359,17 @@ function handleFields4RAOnPageLoad() {
   var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
   console.log('isJPBlueGroupFlg:'+isJPBlueGroupFlg);
   if (isJPBlueGroupFlg == 'true') {
-	FormManager.readOnly('requestingLob');
-	FormManager.readOnly('reqReason');
-	FormManager.setValue('requestingLob', 'AR');
-	FormManager.setValue('reqReason', 'ERR');
-  	FormManager.setValue('custGrp', 'IBMTP');
-  	dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
-	  FormManager.limitDropdownValues(FormManager.getField('custSubGrp'), 'RACMR');
-  	  FormManager.setValue('custSubGrp', 'RACMR');
+    FormManager.readOnly('requestingLob');
+    FormManager.readOnly('reqReason');
+    FormManager.setValue('requestingLob', 'AR');
+    FormManager.setValue('reqReason', 'ERR');
+    FormManager.setValue('custGrp', 'IBMTP');
+    dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+      FormManager.limitDropdownValues(FormManager.getField('custSubGrp'), 'RACMR');
+      FormManager.setValue('custSubGrp', 'RACMR');
     });
   } else {
-	FormManager.resetDropdownValues(FormManager.getField('custSubGrp'));
+    FormManager.resetDropdownValues(FormManager.getField('custSubGrp'));
   }
   addRAFieldLogic();
 }
@@ -440,7 +453,7 @@ function setRAFieldsMandatory() {
 
 function setSearchTermViaCmrNo() {
   if (FormManager.getActualValue('cmrNo') == '') {
-	return;
+    return;
   }
   var searchTerm = getSearchTermByCmrNo();
   FormManager.setValue('searchTerm', searchTerm);
@@ -465,20 +478,20 @@ function setRAValuesOnCmrNoChange() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  
+
   dojo.connect(FormManager.getField('cmrNo'), 'onChange', function(value) {
-	if (FormManager.getActualValue('custSubGrp') != 'RACMR') {
-	  return;
+    if (FormManager.getActualValue('custSubGrp') != 'RACMR') {
+      return;
     }
-	if (value == '') {
-	  return;
-	}
-	
-	var kunnr = getKunnrByCmrNo();
+    if (value == '') {
+      return;
+    }
+
+    var kunnr = getKunnrByCmrNo();
 	console.log('mandt='+cmr.MANDT);
 	console.log('kunnr='+kunnr);
-	setSalesPaymentFieldsValue(kunnr);
-	setSearchTermViaCmrNo();
+    setSalesPaymentFieldsValue(kunnr);
+    setSearchTermViaCmrNo();
   });
 }
 
@@ -498,7 +511,7 @@ function getKunnrByCmrNo() {
 
 function setSalesPaymentFieldsValue(kunnr) {
   if (kunnr == null || kunnr == undefined) {
-	return;
+    return;
   }
   var qParams = {
     MANDT : cmr.MANDT,
@@ -1458,7 +1471,7 @@ function setCTCByOfficeCd() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
   if (isJPBlueGroupFlg == 'true') {
-	return;
+    return;
   }
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp) {
     return;
@@ -1512,7 +1525,7 @@ function setMrcByOfficeCd() {
   var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (isJPBlueGroupFlg == 'true' || custSubGrp == 'RACMR') {
-	return;
+    return;
   }
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var ofcd = FormManager.getActualValue('salesBusOffCd');
@@ -2925,8 +2938,8 @@ function disableFieldsForUpdate() {
     }
 
     if (isJPBlueGroupFlg == 'true') {
-	  FormManager.removeValidator('icmsInd', Validators.REQUIRED);
-	}
+      FormManager.removeValidator('icmsInd', Validators.REQUIRED);
+    }
   } else if (reqType == 'C') {
     FormManager.hide('ICMSContribution', 'icmsInd');
   }
@@ -3901,9 +3914,9 @@ function setSortlOnOfcdChange() {
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp || 'RACMR' == custSubGrp) {
     return;
   }
-  
+
   if (isJPBlueGroupFlg == 'true') {
-	return;
+    return;
   }
 
   if (custGrp == 'IBMTP' || custGrp == 'BUSPR') {
@@ -3940,7 +3953,7 @@ function setClusterOnOfcdChange() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
   if (isJPBlueGroupFlg == 'true') {
-	return;
+    return;
   }
   if (custGrp == 'IBMTP' && custSubGrp != 'RACMR') {
     addClusterOfcdLogic();
@@ -4365,32 +4378,32 @@ function updateBillToCustomerNo() {
 function addSoldToValidatorJP() {
   FormManager.addFormValidator(
       (function() {
-        return {
-          validate : function() {
-            var zs01ReqId = FormManager.getActualValue('reqId');
-            var custSubGrp = FormManager.getActualValue('custSubGrp');
-            var qParams = {
-              REQ_ID : zs01ReqId,
-            };
-            var record = cmr.query('GETZS01VALRECORDS', qParams);
-            var zs01Reccount = record.ret1;
-            var custType = FormManager.getActualValue('custType');
-            if (custType.includes('A')) {
-              if (Number(zs01Reccount) > 1) {
-                return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
-              } else if (Number(zs01Reccount == 0)
-                  && (custSubGrp != 'BCEXA' && custSubGrp != 'BFKSC' && custSubGrp != 'BPWPQ' && custSubGrp != 'ISOCU' && custSubGrp != 'RACMR')) {
-                return new ValidationResult(null, false, 'At least one Sold-To Address must be defined.');
-              } else {
-                return new ValidationResult(null, true);
-              }
-            } else {
-              return new ValidationResult(null, true);
-            }
+    return {
+      validate : function() {
+        var zs01ReqId = FormManager.getActualValue('reqId');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var qParams = {
+          REQ_ID : zs01ReqId,
+        };
+        var record = cmr.query('GETZS01VALRECORDS', qParams);
+        var zs01Reccount = record.ret1;
+        var custType = FormManager.getActualValue('custType');
+        if (custType.includes('A')) {
+          if (Number(zs01Reccount) > 1) {
+            return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
+          } else if (Number(zs01Reccount == 0)
+              && (custSubGrp != 'BCEXA' && custSubGrp != 'BFKSC' && custSubGrp != 'BPWPQ' && custSubGrp != 'ISOCU' && custSubGrp != 'RACMR')) {
+            return new ValidationResult(null, false, 'At least one Sold-To Address must be defined.');
+          } else {
             return new ValidationResult(null, true);
           }
-        };
-      })(), 'MAIN_NAME_TAB', 'frmCMR');
+        } else {
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 function setEnterCMRNoForupdate() {
   var reqType = FormManager.getActualValue('reqType');
@@ -6345,9 +6358,9 @@ function jpBlueGroupValidator() {
         var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         if (isJPBlueGroupFlg == 'false' && custSubGrp == 'RACMR') {
-		  return new ValidationResult(null, false, 'Only Blue Group person can choose RA Maintenance scenario.');
+          return new ValidationResult(null, false, 'Only Blue Group person can choose RA Maintenance scenario.');
         } else if (isJPBlueGroupFlg == 'true' && custSubGrp != 'RACMR') {
-		  return new ValidationResult(null, false, 'Blue Group person can only choose RA Maintenance scenario.');
+          return new ValidationResult(null, false, 'Blue Group person can only choose RA Maintenance scenario.');
         }
         return new ValidationResult(null, true);
       }
@@ -6367,7 +6380,7 @@ function addDnBSearchValidator() {
         if (dijit.byId('prospLegalInd')) {
           ifProspect = dijit.byId('prospLegalInd').get('value');
         }
-       
+
         if (FormManager.getActualValue('dnbPrimary') != 'Y' && ifProspect != 'Y') {
           return new ValidationResult(null, true);
         }
@@ -6386,8 +6399,8 @@ function addDnBSearchValidator() {
         var result = FormManager.getActualValue('findDnbResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         if (custSubGrp == 'RACMR') {
-		  return new ValidationResult(null, true);
-		}
+          return new ValidationResult(null, true);
+        }
         if ((result == '' || result.toUpperCase() == 'NOT DONE') && cntry != SysLoc.CHINA) {
           return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
         }
@@ -6445,7 +6458,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
-  
+
 
   // CREATCMR-9327
   GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
@@ -6505,7 +6518,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(jpBlueGroupValidator, GEOHandler.JP, null, true);
 
-  // 8831
+  // CREATCMR-9709
   GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
   GEOHandler.addAfterConfig(disableRolTaigaCode, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(disableFieldsForRolUpdate, GEOHandler.JP);
@@ -6513,6 +6526,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(addrTypeOnChange, GEOHandler.JP);
   GEOHandler.addAddrFunction(disableRolTaigaCode, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(setRolForCustGrp, GEOHandler.JP);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);

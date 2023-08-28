@@ -1001,7 +1001,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
         }
         if (!(SystemLocation.CYPRUS.equals(cmrCountry) || SystemLocation.SPAIN.equals(cmrCountry) || SystemLocation.PORTUGAL.equals(cmrCountry)
             || SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.UNITED_KINGDOM.equals(cmrCountry)
-            || SystemLocation.IRELAND.equals(cmrCountry)) && !equals(addr.getPoBoxPostCd(), addr.getPoBoxPostCdOld())
+            || SystemLocation.IRELAND.equals(cmrCountry) || SystemLocation.JAPAN.equals(cmrCountry))
+            && !equals(addr.getPoBoxPostCd(), addr.getPoBoxPostCdOld())
             && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "POBoxPostalCode"))) {
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
