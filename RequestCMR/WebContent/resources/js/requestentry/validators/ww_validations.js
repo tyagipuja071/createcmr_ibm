@@ -49,7 +49,7 @@ function addStateProvValidator() {
         var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         var viewOnly = FormManager.getActualValue('viewOnlyPage');
         var role = FormManager.getActualValue('userRole').toUpperCase();
-        var landCountryList = [ 'IT', 'ES', 'PT', 'RO', 'US' ];
+        var landCountryList = [ 'IT', 'ES', 'US' ];
         var addrType = "";
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
@@ -61,14 +61,16 @@ function addStateProvValidator() {
             if (typeof (addrType) == 'object') {
               addrType = addrType[0];
             }
-            landCntry = recordList.landCntry;
-            if (typeof (landCntry) == 'object') {
-              landCntry = landCntry[0];
-            }
-            stateProv = recordList.stateProv;
-            if (typeof (stateProv) == 'object') {
-              stateProv = stateProv[0];
-            }
+            // fetch land Cntry and stateProv frm Addr type
+            var reqIdParams = {
+                REQ_ID : reqId,
+                ADDR_TYPE : addrType
+              };
+              var addrResult = cmr.query('GETLANDSTATEBYREQID', reqIdParams);
+              stateProv = addrResult.ret1;
+              landCntry = addrResult.ret2;
+              if (stateProv != null && landCntry!= null) {
+              }
             if (addrType != undefined && addrType != null && addrType != '' && landCntry != undefined && landCntry != null && landCntry != '' && landCountryList.includes(landCntry)) {
               if (stateProv == undefined && stateProv == null && stateProv!= '') {
                 return new ValidationResult(null, false, 'State Province is mandatory for address with landCntry: ' + landCntry + ' addrType: ' + addrType);
