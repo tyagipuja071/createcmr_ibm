@@ -3768,6 +3768,17 @@ function setVatValidatorGRCYTR() {
      * Validators.REQUIRED, [ 'VAT' ]); FormManager.enable('vat'); }
      */
     
+    if ((FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'INTER'
+    	|| FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'XINT') && scenarioChanged ) {
+    	FormManager.resetValidations('vat');
+    	FormManager.setValue('vatExempt', 'Y');
+    }
+    
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+        FormManager.setValue('vatExempt', false);
+      }
+    
     if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
         FormManager.clearValue('vat');
         FormManager.readOnly('vat');
