@@ -3751,7 +3751,7 @@ function addPOBoxValidatorGR() {
   FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO Box' ]);
 }
 
-function setVatValidatorGRCYTR() {
+function setVatValidatorGRCYTR(fromAddress, scenario, scenarioChanged) {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
