@@ -121,7 +121,6 @@ function afterConfigTW() {
   // CREATCMR-788
   addressQuotationValidator();
   addCoverageFieldsValidator();
-  chineseAddrMandtValidator();
 }
 
 /**
@@ -518,7 +517,6 @@ function chineseAddrMandtValidator() {
   var result = cmr.query('ADDR.GET.CUSTNM3_DEPT.BY_REQID', qParams);
   var custNm3 = result.ret1;
   var dept = result.ret2;
-  if (FormManager.GETFIELD_VALIDATIONS['custNm3'].indexOf(Validators.REQUIRED) < 0) {
    FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -530,8 +528,7 @@ function chineseAddrMandtValidator() {
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
-  }
-  if (FormManager.GETFIELD_VALIDATIONS['dept'].indexOf(Validators.REQUIRED) < 0) {
+  
    FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -543,7 +540,6 @@ function chineseAddrMandtValidator() {
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
-  }
 }
 
 // CREATCMR-7882
@@ -942,6 +938,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addCoverageFieldsValidator, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(clearDescriptionOnScenarioChange, GEOHandler.TW); 
   GEOHandler.registerValidator(checkCustomerNameForKYND, GEOHandler.TW, null, true);
+  GEOHandler.registerValidator(chineseAddrMandtValidator, GEOHandler.TW, null, true);
+
   // skip byte checks
   // FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4',
   // 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',
