@@ -963,10 +963,18 @@
      </cmr:row>
      <cmr:row>
      <cmr:column span="1">
-      <cmr:label fieldId="custNm3_view">Full English Name:</cmr:label>
+      <cmr:label fieldId="cnCustName1_view">Full English Name:</cmr:label>
       </cmr:column>
       <cmr:column span="2">
-        <div id="custNm3_view">-</div>
+        <div id="cnCustName1_view">-</div>
+      </cmr:column>
+     </cmr:row>
+     <cmr:row>
+     <cmr:column span="1">
+      <cmr:label fieldId="cnCustName2_view">Full English Name Continue:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="cnCustName2_view">-</div>
       </cmr:column>
     </cmr:row>
 
@@ -976,6 +984,14 @@
       </cmr:column>
       <cmr:column span="2">
         <div id="addrTxt_view">-</div>
+      </cmr:column>
+     </cmr:row>
+     <cmr:row addBackground="true">
+     <cmr:column span="1">
+      <cmr:label fieldId="cnAddrTxt_view">English Street Address:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="cnAddrTxt_view">-</div>
       </cmr:column>
      </cmr:row>
     </cmr:view>
@@ -1046,7 +1062,21 @@
   </cmr:row>
   <!--DENNIS: START JAPAN SPECIFIC  -->
   <cmr:view forGEO="JP">
-       <cmr:row addBackground="true">
+  	<cmr:row addBackground="true">
+      <cmr:column span="1">
+        <cmr:label fieldId="cnCity_view">English City Name:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="cnCity_view">-</div>
+      </cmr:column>
+      <cmr:column span="1">
+        <cmr:label fieldId="cnDistrict_view">English District:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="cnDistrict_view">-</div>
+      </cmr:column>
+    </cmr:row>
+    <cmr:row addBackground="true">
       <cmr:column span="1">
         <cmr:label fieldId="postCd_view">
           <span class="lbl-PostalCode">Postal Code</span>:</cmr:label>

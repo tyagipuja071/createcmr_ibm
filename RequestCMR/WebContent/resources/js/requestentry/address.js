@@ -412,6 +412,18 @@ function AddressDetailsModal_onLoad() {
     _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
     _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
   }
+  
+  if (FormManager.getActualValue('cmrIssuingCntry') == '760') {
+    _assignDetailsValue('#AddressDetailsModal #cnCustName1_view', details.ret59);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName2_view', details.ret60);
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt2_view', details.ret61);
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt_view', details.ret62);
+    _assignDetailsValue('#AddressDetailsModal #cnCity_view', details.ret63);
+    _assignDetailsValue('#AddressDetailsModal #cnDistrict_view', details.ret64);
+    _assignDetailsValue('#AddressDetailsModal #cnCustContNm_view', details.ret65);
+    _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
+  }
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
     _assignDetailsValue('#AddressDetailsModal #billingPstlAddr_view', details.ret58);
