@@ -77,7 +77,7 @@ function setSearchTermList(){
       '10239','10240','10241','10242','10243','10244','10245','10246','10247','10248','10249','10250','10251','10252','10253','10254',
       '10255','10256','10257','10258','10259','10260' ]);
     $("#cnsearchterminfoSpan").show();
-    FormManager.readOnly('searchTerm');
+  //  FormManager.readOnly('searchTerm');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
   } else if (custSubType == 'CROSS') {
@@ -490,17 +490,7 @@ function setInacBySearchTerm() {
   }
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var searchTerm = FormManager.getActualValue('searchTerm');
-  // var _GBGId = FormManager.getActualValue('gbgId');
-  // var custSubT = FormManager.getActualValue('custSubGrp');
-// if(FormManager.getActualValue('reqType') == 'C' && (custSubT == 'CROSS' ||
-// custSubT == 'NRMLC' || custSubT == 'NRMLD' ||custSubT == 'AQSTN')
-// &&( _GBGId == 'undefined' || _GBGId == '')){
-// FormManager.setValue('inacCd', '');
-// FormManager.readOnly('inacCd');
-// FormManager.setValue('inacType', '');
-// FormManager.readOnly('inacType');
-// return;
-// }
+ 
   if (FormManager.getActualValue('reqType') == 'C' && searchTerm != undefined && searchTerm != '') {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');

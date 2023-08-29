@@ -121,6 +121,7 @@ function afterConfigTW() {
   // CREATCMR-788
   addressQuotationValidator();
   addCoverageFieldsValidator();
+  chineseAddrMandtValidator();
 }
 
 /**
@@ -503,6 +504,46 @@ function addressQuotationValidator() {
   FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Customer Chinese Address Con\'t' ]);
   FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
 
+}
+
+function chineseAddrMandtValidator() {
+  // CREATCMR-10152 
+  
+
+  // retrieve chinese name and addr from db
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
+  var result = cmr.query('ADDR.GET.CUSTNM3_DEPT.BY_REQID', qParams);
+  var custNm3 = result.ret1;
+  var dept = result.ret2;
+  if (FormManager.GETFIELD_VALIDATIONS['custNm3'].indexOf(Validators.REQUIRED) < 0) {
+   FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+         custNm3 = FormManager.getActualValue('custNm3');
+        if(custNm3 == '' || custNm3 == undefined){
+          return new ValidationResult(null, false, "Chinese Name in address is required.");
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  }
+  if (FormManager.GETFIELD_VALIDATIONS['dept'].indexOf(Validators.REQUIRED) < 0) {
+   FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+         dept = FormManager.getActualValue('dept');
+        if(dept == '' || dept == undefined){
+          return new ValidationResult(null, false, "Chinese Address in address is required.");
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  }
 }
 
 // CREATCMR-7882
