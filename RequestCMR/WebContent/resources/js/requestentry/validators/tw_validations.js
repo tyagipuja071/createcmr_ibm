@@ -505,6 +505,43 @@ function addressQuotationValidator() {
 
 }
 
+function chineseAddrMandtValidator() {
+  // CREATCMR-10152 
+  
+
+  // retrieve chinese name and addr from db
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
+  var result = cmr.query('ADDR.GET.CUSTNM3_DEPT.BY_REQID', qParams);
+  var custNm3 = result.ret1;
+  var dept = result.ret2;
+   FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+         custNm3 = FormManager.getActualValue('custNm3');
+        if(custNm3 == '' || custNm3 == undefined){
+          return new ValidationResult(null, false, "Chinese Name in address is required.");
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  
+   FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+         dept = FormManager.getActualValue('dept');
+        if(dept == '' || dept == undefined){
+          return new ValidationResult(null, false, "Chinese Address in address is required.");
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 // CREATCMR-7882
 function setCluster(){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -901,6 +938,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addCoverageFieldsValidator, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(clearDescriptionOnScenarioChange, GEOHandler.TW); 
   GEOHandler.registerValidator(checkCustomerNameForKYND, GEOHandler.TW, null, true);
+  GEOHandler.registerValidator(chineseAddrMandtValidator, GEOHandler.TW, null, true);
+
   // skip byte checks
   // FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4',
   // 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',

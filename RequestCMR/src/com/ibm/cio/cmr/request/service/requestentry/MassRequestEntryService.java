@@ -1118,7 +1118,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
       admin.setWarnMsgSentDt(null);
 
-      // POOJA TYAGI
       // setDisableProc(model, admin); // FOR LA and EMEA
       if (StringUtils.isEmpty(admin.getLockInd())) {
         admin.setLockInd(CmrConstants.YES_NO.N.toString());
