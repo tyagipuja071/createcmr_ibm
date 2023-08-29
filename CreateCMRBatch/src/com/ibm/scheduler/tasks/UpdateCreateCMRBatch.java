@@ -5,7 +5,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import com.ibm.scheduler.creator.BatchTask;
 
 public class UpdateCreateCMRBatch extends BatchTask {
-  String cronExpression = "* /2 * * * *";
+  String cronExpression = "* */2 * * * *";
   String command = "/bin/sh -c /cmr/batch/run_createcmrbatch_update.ksh >> /cmr/batch/batch-run.log 2> /cmr/batch/batch-err.log";
 
   @Override
