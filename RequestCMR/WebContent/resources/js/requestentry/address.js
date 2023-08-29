@@ -686,6 +686,10 @@ function doAddToAddressList() {
           // return;
         }
       }
+      if (FormManager.getActualValue('cmrIssuingCntry') == '760' && cmr.addressType == 'ZC01') {
+        var rol = FormManager.getActualValue('rol');
+        FormManager.setValue('identClient', rol);
+      }
       if (asean_isa_cntries.indexOf(cntry) >= 0) {
         // do
         if (isAPAddressDetailsExisting()) {

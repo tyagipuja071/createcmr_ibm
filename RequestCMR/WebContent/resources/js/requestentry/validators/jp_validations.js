@@ -112,6 +112,11 @@ function afterConfigForJP() {
   }
   // CREATCMR-788
   addressQuotationValidator();
+
+  var _custGrpHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
+    setRolForCustGrp();
+  });
+
 }
 
 /**
@@ -135,6 +140,14 @@ function addHandlersForJP() {
     });
   }
 
+}
+
+function setRolForCustGrp() {
+  var custGrp = FormManager.getField('custGrp');
+  if (custGrp == 'SUBSI') {
+    FormManager.setValue('identClient', '');
+    FormManager.readOnly('identClient');
+  }
 }
 
 function disableFieldsForRolUpdate() {
@@ -6473,7 +6486,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(jpBlueGroupValidator, GEOHandler.JP, null, true);
 
-  // 8831
+  // CREATCMR-9709
   GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
   GEOHandler.addAfterConfig(disableRolTaigaCode, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(disableFieldsForRolUpdate, GEOHandler.JP);
@@ -6481,6 +6494,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(addrTypeOnChange, GEOHandler.JP);
   GEOHandler.addAddrFunction(disableRolTaigaCode, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(setRolForCustGrp, GEOHandler.JP);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);
