@@ -61,9 +61,6 @@ public class GBGMatchingElement extends MatchingElement {
   List<String> emeaCntries = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL, SystemLocation.TURKEY,
       SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
 
-  List<String> emeaCntries = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL, SystemLocation.TURKEY,
-      SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
-
   @Override
   public AutomationResult<MatchingOutput> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
