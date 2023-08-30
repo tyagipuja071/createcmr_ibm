@@ -997,6 +997,14 @@ public class DnBUtil {
 
     return query.exists();
   }
+  //creatcmr-9798
+  public static boolean isDnbExempt(EntityManager entityManager, String serviceId) {
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_EXEMPT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("SERVICE_ID", serviceId);
+    query.setForReadOnly(true);
+    return query.exists();
+  }
 
   /**
    * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
