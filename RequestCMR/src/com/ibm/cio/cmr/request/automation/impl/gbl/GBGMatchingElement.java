@@ -225,40 +225,6 @@ public class GBGMatchingElement extends MatchingElement {
               details.append("\n").append("IA Account: " + (gbg.getIntAcctType() != null ? gbg.getIntAcctType() : "-"));
               if (gbg.isDnbMatch()) {
                 details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
-            itemNo++;
-            details.append("\n");
-            if (gbg.isDnbMatch()) {
-              if (StringUtils.isNotBlank(gbg.getLdeRule())) {
-                importLDE(entityManager, requestData, gbg.getLdeRule());
-              }
-              if (StringUtils.isNotBlank(data.getInacType()) && skipFindGbgForNoInacNac(data.getInacType(), data.getCompany())) {
-                details.append("Find GBG skipped for this request, creating CMR without GBG.");
-                result.setDetails(details.toString());
-                result.setResults("Skipped");
-                result.setProcessOutput(output);
-                LOG.debug("Skip processing of element as no Inac, Nacs or Compay Number found attached with the matching GBG.");
-              } else if ((StringUtils.isNotBlank(data.getInacType()) && "N".equals(data.getInacType()) && StringUtils.isNotBlank(data.getInacCd()))
-                  || StringUtils.isNotBlank(data.getCompany())) {
-                engineData.addNegativeCheckStatus("_noInacOnGbg", " request need to be send to CMDE queue for further review. ");
-                details.append("No INAC found on matching gbg. The request need to be send to CMDE queue for further review.\n");
-              } else {
-                LOG.debug("Matches found via D&B matching..");
-                details.append("\n").append("Found via DUNS matching:");
-                output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "DUNS-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
-                    itemNo);
-                output.addMatch(getProcessCode(), "BG_ID", gbg.getBgId(), "Derived", "Derived", "GBG", itemNo);
-                output.addMatch(getProcessCode(), "GBG_ID", gbg.getGbgId(), "Derived", "Derived", "GBG", itemNo);
-                output.addMatch(getProcessCode(), "BG_NAME", gbg.getBgName(), "Derived", "Derived", "GBG", itemNo);
-                output.addMatch(getProcessCode(), "GBG_NAME", gbg.getGbgName(), "Derived", "Derived", "GBG", itemNo);
-                details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
-                details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
-                details.append("\n").append("Country: " + gbg.getCountry());
-                details.append("\n").append("CMR Count: " + gbg.getCmrCount());
-                details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
-                details.append("\n").append("IA Account: " + (gbg.getIntAcctType() != null ? gbg.getIntAcctType() : "-"));
-                if (gbg.isDnbMatch()) {
-                  details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
-                }
               }
 
               if (itemNo == 1 && gbg.isDomesticGBG()) {
