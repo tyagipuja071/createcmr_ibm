@@ -1087,8 +1087,6 @@ function setCmrNoCmrNo2Required() {
   case 'RACMR':
     FormManager.enable('cmrNo');
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
-    FormManager.setValue('cmrNo2', '');
-    FormManager.readOnly('cmrNo2');
     FormManager.resetValidations('cmrNo2');
     break;
   default:
