@@ -3012,7 +3012,11 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public boolean hasChecklist(String cmrIssiungCntry) {
-    return false;
+    if (SystemLocation.VENEZUELA_BOLIVARIAN.equals(cmrIssiungCntry)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @Override
