@@ -382,6 +382,42 @@ function addAddressRecordTypeValidator() {
         }
       }
     };
+  })(), null, 'frmCMR');
+
+}
+
+function addInstallAtPOBoxValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('===== addInstallAtPoBoxValidator');
+        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.USA) {
+          return new ValidationResult(null, true);
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var invoiceToCnt = 0;
+          var installAtCnt = 0;
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            type = record.addrType;
+            addrTxt = record.addrTxt;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (type == 'ZS01') {
+              const
+              regex = /PO\s?BOX|P\.O\.\s?BOX|BOX/gi;
+              if (regex.test(addrTxt)) {
+                return new ValidationResult(null, false, 'PO BOX is strictly not allowed for Install At, please provide physical address.');
+              }
+              return new ValidationResult(null, true);
+            }
+          }
+        }
+      }
+    };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 
 }
@@ -1020,6 +1056,23 @@ function addDivStreetCountValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function addInstallAtPoBoxValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('addrType') == 'ZS01') {
+          const
+          regex = /PO\s?BOX|P\.O\.\s?BOX|BOX/gi;
+          if (regex.test(FormManager.getActualValue('addrTxt'))) {
+            return new ValidationResult(null, false, 'PO BOX is strictly not allowed for Install At, please provide physical address.');
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 function hideKUKLA() {
   if (FormManager.getActualValue('reqType') == 'U') {
     FormManager.show('CustClass', 'custClass');
@@ -1466,6 +1519,7 @@ dojo.addOnLoad(function() {
   // true);
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
+  GEOHandler.registerValidator(addInstallAtPOBoxValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForUS, [ SysLoc.USA ]);
@@ -1498,8 +1552,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addKuklaValidator, [ SysLoc.USA ], null,
   // true);
   // CREATCMR-6255
-  // GEOHandler.registerValidator(addDivStreetCountValidator, [ SysLoc.USA ],
-  // null, true);
+  GEOHandler.registerValidator(addInstallAtPoBoxValidator, [ SysLoc.USA ], null, true);
 
   GEOHandler.addAfterTemplateLoad(setClientTierValuesUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(setBPNameValuesUS, [ SysLoc.USA ]);
