@@ -3537,16 +3537,6 @@ function setInacCd() {
   }
 }
 
-function prospectFilter() {
-  var ifProspect = FormManager.getActualValue('prospLegalInd');
-  if (dijit.byId('prospLegalInd')) {
-    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
-  }
-  if (ifProspect == 'Y') {
-    FormManager.enable('inacCd');
-  }
-}
-
 function setAddressDetailsForView() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage == 'true') {
@@ -5212,6 +5202,4 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.NORDX);
-  GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.NORDX);
-  GEOHandler.addAfterConfig(prospectFilter, GEOHandler.NORDX);
 });
