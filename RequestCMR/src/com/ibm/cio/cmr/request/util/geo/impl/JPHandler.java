@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 
 //import java.sql.SQLException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,6 +41,10 @@ import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients;
 import com.ibm.cio.cmr.request.entity.DefaultApprovals;
+import com.ibm.cio.cmr.request.entity.IntlAddr;
+import com.ibm.cio.cmr.request.entity.Kna1;
+import com.ibm.cio.cmr.request.entity.SalesPayment;
+import com.ibm.cio.cmr.request.entity.SalesPaymentPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
@@ -57,6 +62,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -121,6 +127,14 @@ public class JPHandler extends GEOHandler {
       put("H", "ZP08");
     }
   };
+
+  public static boolean isJPCountry(String issuingCntry) {
+    if (SystemLocation.JAPAN.equals(issuingCntry)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   /**
    * Handle import of Company/Estab only
@@ -717,7 +731,8 @@ public class JPHandler extends GEOHandler {
     data.setCreditToCustNo(mainRecord.getCreditToCustNo());
     data.setBillToCustNo(mainRecord.getBillingCustNo());
     data.setTier2(mainRecord.getTier2());
-    data.setAbbrevNm(mainRecord.getCmrName3() == null ? mainRecord.getCmrName3() : mainRecord.getCmrName3().trim());
+    // data.setAbbrevNm(mainRecord.getCmrName3() == null ?
+    // mainRecord.getCmrName3() : mainRecord.getCmrName3().trim());
     data.setSiInd(mainRecord.getSiInd());
     data.setIinInd(mainRecord.getIinInd());
     data.setLeasingCompanyIndc(mainRecord.getLeasingCompanyIndc());
@@ -734,6 +749,7 @@ public class JPHandler extends GEOHandler {
     // data.setIcmsInd(mainRecord.getIcmsInd());
     data.setCsDiv(mainRecord.getCsDiv());
     data.setOemInd(mainRecord.getOemInd());
+    data.setTerritoryCd(mainRecord.getCmrPOBoxPostCode());
     if (mainRecord.getCompanyCd() != null) {
       if (mainRecord.getCompanyCd().equals("AA")) {
         data.setCustGrp("IBMTP");
@@ -750,7 +766,7 @@ public class JPHandler extends GEOHandler {
     }
     handleData4RAOnImport(data);
   }
-  
+
   private void handleData4RAOnImport(Data data) {
     String jpPayDaysStr = data.getJpPayDays() != null ? data.getJpPayDays() : "";
     String jpCloseDaysStr = data.getJpCloseDays() != null ? data.getJpCloseDays() : "";
@@ -759,14 +775,20 @@ public class JPHandler extends GEOHandler {
     data.setJpCloseDays1(jpCloseDaysStr.length() >= 2 ? jpCloseDaysStr.substring(0, 2) : null);
     data.setJpCloseDays2(jpCloseDaysStr.length() >= 4 ? jpCloseDaysStr.substring(2, 4) : null);
     data.setJpCloseDays3(jpCloseDaysStr.length() >= 6 ? jpCloseDaysStr.substring(4, 6) : null);
+    data.setJpCloseDays4(jpCloseDaysStr.length() >= 8 ? jpCloseDaysStr.substring(6, 8) : null);
+    data.setJpCloseDays5(jpCloseDaysStr.length() >= 10 ? jpCloseDaysStr.substring(8, 10) : null);
 
     data.setJpPayDays1(jpPayDaysStr.length() >= 2 ? jpPayDaysStr.substring(0, 2) : null);
     data.setJpPayDays2(jpPayDaysStr.length() >= 4 ? jpPayDaysStr.substring(2, 4) : null);
     data.setJpPayDays3(jpPayDaysStr.length() >= 6 ? jpPayDaysStr.substring(4, 6) : null);
+    data.setJpPayDays4(jpPayDaysStr.length() >= 8 ? jpPayDaysStr.substring(6, 8) : null);
+    data.setJpPayDays5(jpPayDaysStr.length() >= 10 ? jpPayDaysStr.substring(8, 10) : null);
 
     data.setJpPayCycles1(jpPayCyclesStr.length() >= 1 ? jpPayCyclesStr.substring(0, 1) : null);
     data.setJpPayCycles2(jpPayCyclesStr.length() >= 2 ? jpPayCyclesStr.substring(1, 2) : null);
     data.setJpPayCycles3(jpPayCyclesStr.length() >= 3 ? jpPayCyclesStr.substring(2, 3) : null);
+    data.setJpPayCycles4(jpPayCyclesStr.length() >= 4 ? jpPayCyclesStr.substring(3, 4) : null);
+    data.setJpPayCycles5(jpPayCyclesStr.length() >= 5 ? jpPayCyclesStr.substring(4, 5) : null);
   }
 
   @Override
@@ -1212,6 +1234,14 @@ public class JPHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getAdminDeptLine(), "AdminDeptLine", cmrCountry));
       results.add(update);
     }
+    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getIdentClient(), newData.getIdentClient())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ROLAccount", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getIdentClient(), "ROLAccount", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getIdentClient(), "ROLAccount", cmrCountry));
+      results.add(update);
+    }
   }
 
   @Override
@@ -1224,6 +1254,24 @@ public class JPHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "Contact", "-"));
       update.setNewData(addr.getContact());
       update.setOldData(addr.getContactOld());
+      results.add(update);
+    }
+    if (!equals(addr.getPoBoxPostCd(), addr.getPoBoxPostCdOld())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField("Taiga Code");
+      update.setNewData(addr.getPoBoxPostCd());
+      update.setOldData(addr.getPoBoxPostCdOld());
+      results.add(update);
+    }
+    if (!equals(addr.getRol(), addr.getRolOld())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "ROL", "-"));
+      update.setNewData(addr.getRol());
+      update.setOldData(addr.getRolOld());
       results.add(update);
     }
   }
@@ -1268,7 +1316,10 @@ public class JPHandler extends GEOHandler {
     setSalesRepTmDateOfAssign(data, admin, entityManager);
     updateCSBOBeforeDataSave(entityManager, admin, data);
     setAccountAbbNmOnSaveForBP(admin, data);
+
     handleData4RAOnDataSave(data);
+    setROLBeforeDataSave(entityManager, data, admin);
+    setTAIGABeforeDataSave(entityManager, data);
   }
 
   private void setSalesRepTmDateOfAssign(Data data, Admin admin, EntityManager entityManager) {
@@ -1465,7 +1516,7 @@ public class JPHandler extends GEOHandler {
     accountAbbNmInCris = crisRecord.getNameAbbr();
     return accountAbbNmInCris;
   }
-  
+
   private void handleData4RAOnDataSave(Data data) {
     handleJpCloseDay(data);
     handleJpPayDay(data);
@@ -1476,6 +1527,8 @@ public class JPHandler extends GEOHandler {
     String jpCloseDay1 = StringUtils.isNoneEmpty(data.getJpCloseDays1()) ? data.getJpCloseDays1() : "  ";
     String jpCloseDay2 = StringUtils.isNoneEmpty(data.getJpCloseDays2()) ? data.getJpCloseDays2() : "  ";
     String jpCloseDay3 = StringUtils.isNoneEmpty(data.getJpCloseDays3()) ? data.getJpCloseDays3() : "  ";
+    String jpCloseDay4 = StringUtils.isNoneEmpty(data.getJpCloseDays4()) ? data.getJpCloseDays4() : "  ";
+    String jpCloseDay5 = StringUtils.isNoneEmpty(data.getJpCloseDays5()) ? data.getJpCloseDays5() : "  ";
     if (jpCloseDay1.length() == 1) {
       jpCloseDay1 = " " + jpCloseDay1;
     }
@@ -1485,13 +1538,21 @@ public class JPHandler extends GEOHandler {
     if (jpCloseDay3.length() == 1) {
       jpCloseDay3 = " " + jpCloseDay3;
     }
-    data.setJpCloseDays(jpCloseDay1 + jpCloseDay2 + jpCloseDay3);
+    if (jpCloseDay4.length() == 1) {
+      jpCloseDay4 = " " + jpCloseDay4;
+    }
+    if (jpCloseDay5.length() == 1) {
+      jpCloseDay5 = " " + jpCloseDay5;
+    }
+    data.setJpCloseDays(jpCloseDay1 + jpCloseDay2 + jpCloseDay3 + jpCloseDay4 + jpCloseDay5);
   }
 
   private void handleJpPayDay(Data data) {
     String jpPayDay1 = StringUtils.isNoneEmpty(data.getJpPayDays1()) ? data.getJpPayDays1() : "  ";
     String jpPayDay2 = StringUtils.isNoneEmpty(data.getJpPayDays2()) ? data.getJpPayDays2() : "  ";
     String jpPayDay3 = StringUtils.isNoneEmpty(data.getJpPayDays3()) ? data.getJpPayDays3() : "  ";
+    String jpPayDay4 = StringUtils.isNoneEmpty(data.getJpPayDays4()) ? data.getJpPayDays4() : "  ";
+    String jpPayDay5 = StringUtils.isNoneEmpty(data.getJpPayDays5()) ? data.getJpPayDays5() : "  ";
     if (jpPayDay1.length() == 1) {
       jpPayDay1 = " " + jpPayDay1;
     }
@@ -1501,15 +1562,23 @@ public class JPHandler extends GEOHandler {
     if (jpPayDay3.length() == 1) {
       jpPayDay3 = " " + jpPayDay3;
     }
-    data.setJpPayDays(jpPayDay1 + jpPayDay2 + jpPayDay3);
+    if (jpPayDay4.length() == 1) {
+      jpPayDay4 = " " + jpPayDay4;
+    }
+    if (jpPayDay5.length() == 1) {
+      jpPayDay5 = " " + jpPayDay5;
+    }
+    data.setJpPayDays(jpPayDay1 + jpPayDay2 + jpPayDay3 + jpPayDay4 + jpPayDay5);
   }
 
   private void handleJpPayCycle(Data data) {
     String jpPayCycle1 = StringUtils.isNoneEmpty(data.getJpPayCycles1()) ? data.getJpPayCycles1() : " ";
     String jpPayCycle2 = StringUtils.isNoneEmpty(data.getJpPayCycles2()) ? data.getJpPayCycles2() : " ";
     String jpPayCycle3 = StringUtils.isNoneEmpty(data.getJpPayCycles3()) ? data.getJpPayCycles3() : " ";
+    String jpPayCycle4 = StringUtils.isNoneEmpty(data.getJpPayCycles4()) ? data.getJpPayCycles4() : " ";
+    String jpPayCycle5 = StringUtils.isNoneEmpty(data.getJpPayCycles5()) ? data.getJpPayCycles5() : " ";
 
-    data.setJpPayCycles(jpPayCycle1 + jpPayCycle2 + jpPayCycle3);
+    data.setJpPayCycles(jpPayCycle1 + jpPayCycle2 + jpPayCycle3 + jpPayCycle4 + jpPayCycle5);
   }
 
   @Override
@@ -1548,7 +1617,231 @@ public class JPHandler extends GEOHandler {
 
     setCSBOBeforeAddrSave(entityManager, addr);
     setCustNmDetailBeforeAddrSave(entityManager, addr);
-    setAccountAbbNmBeforeAddrSave(entityManager, addr);
+    // setAccountAbbNmBeforeAddrSave(entityManager, addr);
+    IntlAddr iAddr = getIntlAddrById(addr, entityManager);
+    if (iAddr == null) {
+      iAddr = getIntlAddrListById(addr, entityManager);
+      if (iAddr != null) {
+        iAddr.getId().setAddrType(addr.getId().getAddrType());
+        iAddr.getId().setAddrSeq(addr.getId().getAddrSeq());
+        entityManager.persist(iAddr);
+        entityManager.flush();
+      }
+    }
+    addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");
+
+    setFieldBeforeAddrSave(entityManager, addr);
+  }
+
+  public IntlAddr getIntlAddrListById(Addr addr, EntityManager entityManager) {
+    String qryIntlAddrListById = ExternalizedQuery.getSql("GET.INTL_ADDR_LIST_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, qryIntlAddrListById);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    List<IntlAddr> intlAddrList;
+    intlAddrList = query.getResults(IntlAddr.class);
+    if (intlAddrList != null && intlAddrList.size() > 0)
+      return intlAddrList.get(0);
+    else
+      return null;
+  }
+
+  @Override
+  public IntlAddr getIntlAddrById(Addr addr, EntityManager entityManager) {
+    IntlAddr iAddr = new IntlAddr();
+    String qryIntlAddrById = ExternalizedQuery.getSql("GET.INTL_ADDR_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, qryIntlAddrById);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("ADDR_SEQ", addr.getId().getAddrSeq());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+
+    iAddr = query.getSingleResult(IntlAddr.class);
+
+    return iAddr;
+  }
+
+  private void setROLBeforeDataSave(EntityManager entityManager, Data data, Admin admin) throws Exception {
+    List<Addr> addrList = getAddrByReqId(entityManager, data.getId().getReqId());
+    String rol = "";
+    if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
+      rol = getRolByCreditToCustNo(data.getCreditToCustNo() == null ? "" : data.getCreditToCustNo());
+    }
+    if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
+      data.setIdentClient(rol);
+    } else if ("SUBSI".equals(data.getCustGrp())) {
+      data.setIdentClient("");
+    }
+    // Update account level ROL in ADDR table if account level changed
+    String rolData = data.getIdentClient() == null ? "" : data.getIdentClient();
+    if (addrList != null && addrList.size() > 0) {
+      for (Addr address : addrList) {
+        if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
+          if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
+            address.setRol(rol);
+          } else if ("SUBSI".equals(data.getCustGrp())) {
+            address.setRol("");
+          } else {
+            address.setRol(rolData);
+          }
+          entityManager.merge(address);
+          entityManager.flush();
+        }
+      }
+    }
+  }
+
+  private String getRolByCreditToCustNo(String cmrNo) throws Exception {
+    String rol = "";
+    List<String> results = new ArrayList<String>();
+    EntityManager entityManager = JpaManager.getEntityManager();
+
+    try {
+      String mandt = SystemConfiguration.getValue("MANDT");
+      if (StringUtils.isEmpty(cmrNo) || StringUtils.isEmpty(mandt)) {
+        return null;
+      }
+      String sql = ExternalizedQuery.getSql("GET.ROL.KNA1.BYCMR");
+      sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+      sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+      sql = StringUtils.replace(sql, ":KATR6", "'" + "760" + "'");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      results = query.getResults(String.class);
+      if (results != null && results.size() > 0) {
+        rol = results.get(0);
+      }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+    return rol;
+  }
+
+  private void setTAIGABeforeDataSave(EntityManager entityManager, Data data) {
+    // Update account level TAIGA in DATA table if company level changed
+    List<Addr> addrList = getAddrByReqId(entityManager, data.getId().getReqId());
+    String taigaCd = null;
+    if (addrList != null && addrList.size() > 0) {
+      for (Addr address : addrList) {
+        if ("ZC01".equals(address.getId().getAddrType())) {
+          taigaCd = address.getPoBoxPostCd() == null ? "" : address.getPoBoxPostCd();
+          break;
+        }
+      }
+    }
+    data.setTerritoryCd(taigaCd);
+  }
+
+  private void setFieldBeforeAddrSave(EntityManager entityManager, Addr addr) throws Exception {
+    String rol = null;
+    String taigaCd = null;
+
+    if ("ZC01".equals(addr.getId().getAddrType())) {
+      // Update account level TAIGA/ROL in DATA table if company level changed
+      rol = addr.getRol() == null ? "" : addr.getRol();
+      taigaCd = addr.getPoBoxPostCd() == null ? "" : addr.getPoBoxPostCd();
+      DataPK pk = new DataPK();
+      pk.setReqId(addr.getId().getReqId());
+      Data data = entityManager.find(Data.class, pk);
+      data.setIdentClient(rol);
+      data.setTerritoryCd(taigaCd);
+      entityManager.merge(data);
+      entityManager.flush();
+
+      if (rol.length() > 0 || taigaCd.length() > 0) {
+        // Update account level TAIGA/ROL in ADDR table if company level changed
+        List<Addr> addrList = getAddrByReqId(entityManager, addr.getId().getReqId());
+        if (addrList != null && addrList.size() > 0) {
+          for (Addr address : addrList) {
+            if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
+              address.setRol(rol);
+              address.setPoBoxPostCd(taigaCd);
+              entityManager.merge(address);
+              entityManager.flush();
+            }
+          }
+        }
+      }
+    } else if (!("ZC01".equals(addr.getId().getAddrType()) || "ZE01".equals(addr.getId().getAddrType()))) {
+      List<Addr> addrList = getAddrByReqId(entityManager, addr.getId().getReqId());
+      if (rol == null || taigaCd == null) {
+        if (addrList != null && addrList.size() > 0) {
+          for (Addr address : addrList) {
+            if ("ZC01".equals(address.getId().getAddrType())) {
+              rol = address.getRol() == null ? "" : address.getRol();
+              taigaCd = address.getPoBoxPostCd() == null ? "" : address.getPoBoxPostCd();
+              break;
+            }
+          }
+        }
+      }
+
+      addr.setRol(rol);
+      addr.setPoBoxPostCd(taigaCd);
+    }
+  }
+
+  private List<Addr> getAddrByReqId(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.ADDR_BY_REQ_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Addr> addrList;
+    try {
+      addrList = query.getResults(Addr.class);
+    } catch (Exception ex) {
+      LOG.error("An error occured in getting the ADDR records");
+      throw ex;
+    }
+    return addrList;
+  }
+
+  private Admin getAdminByReqId(long reqId, EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.GET.ADMIN.RECORD");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    Admin admin = new Admin();
+    try {
+      admin = query.getSingleResult(Admin.class);
+    } catch (Exception ex) {
+      LOG.error("An error occured in getting the Admin records");
+      throw ex;
+    }
+    return admin;
+  }
+
+  public boolean needCopy(EntityManager entityManager, ApprovalReq req) {
+    boolean flag = false;
+    List<Addr> addrList = getAddrByReqId(entityManager, req.getReqId());
+    Admin admin = getAdminByReqId(req.getReqId(), entityManager);
+    String defaultApprovalId = String.valueOf(req.getDefaultApprovalId());
+    String approvalDesc = getApprovalDesc(entityManager, defaultApprovalId);
+
+    if (approvalDesc != null && CmrConstants.JP_ROL_APPROVAL_DESC.equals(approvalDesc)) {
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        if (addrList != null && addrList.size() > 0) {
+          for (Addr addr : addrList) {
+            if ("ZC01".equals(addr.getId().getAddrType()) && "N".equals(addr.getRol())) {
+              flag = true;
+              break;
+            }
+          }
+        }
+      } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+        if ("CR".equals(admin.getCustType()) || "AR".equals(admin.getCustType())) {
+          flag = true;
+        }
+      }
+    }
+    return flag;
+  }
+
+  private String getApprovalDesc(EntityManager entityManager, String id) {
+    String sql = ExternalizedQuery.getSql("SYSTEM.GET_DEFAULT_APPR.DETAILS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", id);
+    DefaultApprovals approve = query.getSingleResult(DefaultApprovals.class);
+    if (approve != null) {
+      return approve.getDefaultApprovalDesc();
+    }
+    return null;
   }
 
   private void setCSBOBeforeAddrSave(EntityManager entityManager, Addr addr) {
@@ -1972,7 +2265,7 @@ public class JPHandler extends GEOHandler {
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
     setCSBOAfterImport(entityManager, admin, data);
-    setAccountAbbNmAfterImport(entityManager, admin, data);
+    // setAccountAbbNmAfterImport(entityManager, admin, data);
     // updateBillToCustomerNoAfterImport(data);
   }
 
@@ -2599,11 +2892,243 @@ public class JPHandler extends GEOHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
-  
-  public static void addJpLogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+
+  public static String addJpRALogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
     String custSubGroup = data.getCustSubGrp();
     if ("RACMR".equals(custSubGroup)) {
-      admin.setReqStatus("PCP");
+      try {
+        handleRACMRs(entityManager, admin, data);
+        boolean successFlag = true;
+        if (successFlag) {
+          admin.setReqStatus("COM");
+        } else {
+          // todo
+          return "RA Maintenance process failed for request " + data.getId().getReqId();
+        }
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        LOG.error("ERROR in addJpLogicOnSendForProcessing. CmrNo " + data.getCmrNo() + ", reqId " + admin.getId().getReqId() + ". Message: " + e);
+        e.printStackTrace();
+        admin.setReqStatus("DRA");
+        admin.setLockBy(admin.getRequesterId());
+        admin.setLockByNm(admin.getRequesterNm());
+        admin.setLockInd("Y");
+        admin.setLockTs(SystemUtil.getCurrentTimestamp());
+        admin.setProcessedFlag("N");
+        return "RA Maintenance process error for request " + data.getId().getReqId() + ". Message: " + e;
+      }
     }
+    return "RA Maintenance process completed for request " + data.getId().getReqId();
+  }
+
+  private static void handleRACMRs(EntityManager entityManager, Admin admin, Data data) throws Exception {
+    // 1, get kna1 list
+    // 2, for each kan1 record, check current SALES_PAYMENT
+    // 3, if not exist, create new SALES_PAYMENT
+    // 4, if exist, update SALES_PAYMENT
+
+    String mandt = SystemConfiguration.getValue("MANDT");
+    List<Kna1> kna1List = getKna1List(entityManager, mandt, data.getCmrNo());
+
+    if (kna1List == null || kna1List.isEmpty()) {
+      LOG.debug("No kna1 record for cmrNo " + data.getCmrNo() + ", reqId " + admin.getId().getReqId());
+      return;
+    }
+
+    for (Kna1 kna1 : kna1List) {
+      SalesPayment salesPayment = new SalesPayment();
+      Boolean existIndc = checkCurrentSalesPayment(entityManager, kna1);
+      if (!existIndc) {
+        LOG.info("Creating SalesPayment record for cmrNo: " + data.getCmrNo() + " MANDT: " + kna1.getId().getMandt() + " KUNNR: "
+            + kna1.getId().getKunnr());
+        createSalesPayment(entityManager, salesPayment, kna1, data, admin.getRequesterId());
+        entityManager.persist(salesPayment);
+        entityManager.flush();
+      } else {
+        LOG.debug(
+            "Updating SalesPayment for cmrNo: " + data.getCmrNo() + " MANDT: " + kna1.getId().getMandt() + " KUNNR: " + kna1.getId().getKunnr());
+        salesPayment = getCurrentSalesPayment(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+        updateSalesPayment(entityManager, salesPayment, kna1, data, admin.getRequesterId());
+        entityManager.merge(salesPayment);
+        entityManager.flush();
+      }
+    }
+
+  }
+
+  private static List<Kna1> getKna1List(EntityManager entityManager, String mandt, String cmrNo) throws Exception {
+    if (StringUtils.isEmpty(cmrNo)) {
+      return null;
+    }
+    String sql = ExternalizedQuery.getSql("JP.GET.KNA1.BY_CMR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR", cmrNo);
+    query.setParameter("KATR6", SystemLocation.JAPAN);
+    query.setParameter("MANDT", mandt);
+    query.setForReadOnly(true);
+    return query.getResults(Kna1.class);
+  }
+
+  private static Boolean checkCurrentSalesPayment(EntityManager entityManager, Kna1 kna1) throws Exception {
+    String sql = ExternalizedQuery.getSql("JP.CHECK.SALESPAYMENT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", kna1.getId().getMandt());
+    query.setParameter("KUNNR", kna1.getId().getKunnr());
+    List<String> results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      return true;
+    }
+    return false;
+  }
+
+  private static SalesPayment getCurrentSalesPayment(EntityManager entityManager, String mandt, String kunnr) throws Exception {
+    String sql = ExternalizedQuery.getSql("JP.GET.SALESPAYMENT.BY_MANDT_KUNNR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KUNNR", kunnr);
+    query.setParameter("MANDT", mandt);
+    query.setForReadOnly(true);
+    return query.getSingleResult(SalesPayment.class);
+  }
+
+  private static void createSalesPayment(EntityManager rdcMgr, SalesPayment salesPayment, Kna1 kna1, Data data, String userId) throws Exception {
+    String jpPayDaysStr = data.getJpPayDays() != null ? data.getJpPayDays() : "";
+    String jpCloseDaysStr = data.getJpCloseDays() != null ? data.getJpCloseDays() : "";
+    String jpPayCyclesStr = data.getJpPayCycles() != null ? data.getJpPayCycles() : "";
+    Timestamp ts = SystemUtil.getCurrentTimestamp();
+
+    SalesPaymentPK salesPaymentPK = new SalesPaymentPK();
+    salesPaymentPK.setKunnr(kna1.getId().getKunnr());
+    salesPaymentPK.setMandt(kna1.getId().getMandt());
+    salesPayment.setId(salesPaymentPK);
+
+    salesPayment.setSalesTeamNo(data.getSearchTerm());
+    salesPayment.setCreateBy(userId);
+    salesPayment.setCreateTs(ts);
+    salesPayment.setLastUpdtBy(userId);
+    salesPayment.setLastUpdtTs(ts);
+    salesPayment.setSalesTeamUpdtDt(ts);
+
+    String jpCloseDaysStr1 = jpCloseDaysStr.length() >= 2 ? jpCloseDaysStr.substring(0, 2).trim() : "";
+    String jpCloseDaysStr2 = jpCloseDaysStr.length() >= 4 ? jpCloseDaysStr.substring(2, 4).trim() : "";
+    String jpCloseDaysStr3 = jpCloseDaysStr.length() >= 6 ? jpCloseDaysStr.substring(4, 6).trim() : "";
+    String jpCloseDaysStr4 = jpCloseDaysStr.length() >= 8 ? jpCloseDaysStr.substring(6, 8).trim() : "";
+    String jpCloseDaysStr5 = jpCloseDaysStr.length() >= 10 ? jpCloseDaysStr.substring(8, 10).trim() : "";
+    String jpCloseDaysStr6 = jpCloseDaysStr.length() >= 12 ? jpCloseDaysStr.substring(10, 12).trim() : "";
+    String jpCloseDaysStr7 = jpCloseDaysStr.length() >= 14 ? jpCloseDaysStr.substring(12, 14).trim() : "";
+    String jpCloseDaysStr8 = jpCloseDaysStr.length() >= 16 ? jpCloseDaysStr.substring(14, 16).trim() : "";
+
+    String jpPayDaysStr1 = jpPayDaysStr.length() >= 2 ? jpPayDaysStr.substring(0, 2).trim() : "";
+    String jpPayDaysStr2 = jpPayDaysStr.length() >= 4 ? jpPayDaysStr.substring(2, 4).trim() : "";
+    String jpPayDaysStr3 = jpPayDaysStr.length() >= 6 ? jpPayDaysStr.substring(4, 6).trim() : "";
+    String jpPayDaysStr4 = jpPayDaysStr.length() >= 8 ? jpPayDaysStr.substring(6, 8).trim() : "";
+    String jpPayDaysStr5 = jpPayDaysStr.length() >= 10 ? jpPayDaysStr.substring(8, 10).trim() : "";
+    String jpPayDaysStr6 = jpPayDaysStr.length() >= 12 ? jpPayDaysStr.substring(10, 12).trim() : "";
+    String jpPayDaysStr7 = jpPayDaysStr.length() >= 14 ? jpPayDaysStr.substring(12, 14).trim() : "";
+    String jpPayDaysStr8 = jpPayDaysStr.length() >= 16 ? jpPayDaysStr.substring(14, 16).trim() : "";
+
+    String jpPayCyclesStr1 = jpPayCyclesStr.length() >= 1 ? jpPayCyclesStr.substring(0, 1).trim() : "";
+    String jpPayCyclesStr2 = jpPayCyclesStr.length() >= 2 ? jpPayCyclesStr.substring(1, 2).trim() : "";
+    String jpPayCyclesStr3 = jpPayCyclesStr.length() >= 3 ? jpPayCyclesStr.substring(2, 3).trim() : "";
+    String jpPayCyclesStr4 = jpPayCyclesStr.length() >= 4 ? jpPayCyclesStr.substring(3, 4).trim() : "";
+    String jpPayCyclesStr5 = jpPayCyclesStr.length() >= 5 ? jpPayCyclesStr.substring(4, 5).trim() : "";
+    String jpPayCyclesStr6 = jpPayCyclesStr.length() >= 6 ? jpPayCyclesStr.substring(5, 6).trim() : "";
+    String jpPayCyclesStr7 = jpPayCyclesStr.length() >= 7 ? jpPayCyclesStr.substring(6, 7).trim() : "";
+    String jpPayCyclesStr8 = jpPayCyclesStr.length() >= 8 ? jpPayCyclesStr.substring(7, 8).trim() : "";
+
+    salesPayment.setCloseDay1(jpCloseDaysStr1.isEmpty() ? null : jpCloseDaysStr1);
+    salesPayment.setCloseDay2(jpCloseDaysStr2.isEmpty() ? null : jpCloseDaysStr2);
+    salesPayment.setCloseDay3(jpCloseDaysStr3.isEmpty() ? null : jpCloseDaysStr3);
+    salesPayment.setCloseDay4(jpCloseDaysStr4.isEmpty() ? null : jpCloseDaysStr4);
+    salesPayment.setCloseDay5(jpCloseDaysStr5.isEmpty() ? null : jpCloseDaysStr5);
+    salesPayment.setCloseDay6(jpCloseDaysStr6.isEmpty() ? null : jpCloseDaysStr6);
+    salesPayment.setCloseDay7(jpCloseDaysStr7.isEmpty() ? null : jpCloseDaysStr7);
+    salesPayment.setCloseDay8(jpCloseDaysStr8.isEmpty() ? null : jpCloseDaysStr8);
+
+    salesPayment.setPayDay1(jpPayDaysStr1.isEmpty() ? null : jpPayDaysStr1);
+    salesPayment.setPayDay2(jpPayDaysStr2.isEmpty() ? null : jpPayDaysStr2);
+    salesPayment.setPayDay3(jpPayDaysStr3.isEmpty() ? null : jpPayDaysStr3);
+    salesPayment.setPayDay4(jpPayDaysStr4.isEmpty() ? null : jpPayDaysStr4);
+    salesPayment.setPayDay5(jpPayDaysStr5.isEmpty() ? null : jpPayDaysStr5);
+    salesPayment.setPayDay6(jpPayDaysStr6.isEmpty() ? null : jpPayDaysStr6);
+    salesPayment.setPayDay7(jpPayDaysStr7.isEmpty() ? null : jpPayDaysStr7);
+    salesPayment.setPayDay8(jpPayDaysStr8.isEmpty() ? null : jpPayDaysStr8);
+
+    salesPayment.setPayCycleCd1(jpPayCyclesStr1.isEmpty() ? null : jpPayCyclesStr1);
+    salesPayment.setPayCycleCd2(jpPayCyclesStr2.isEmpty() ? null : jpPayCyclesStr2);
+    salesPayment.setPayCycleCd3(jpPayCyclesStr3.isEmpty() ? null : jpPayCyclesStr3);
+    salesPayment.setPayCycleCd4(jpPayCyclesStr4.isEmpty() ? null : jpPayCyclesStr4);
+    salesPayment.setPayCycleCd5(jpPayCyclesStr5.isEmpty() ? null : jpPayCyclesStr5);
+    salesPayment.setPayCycleCd6(jpPayCyclesStr6.isEmpty() ? null : jpPayCyclesStr6);
+    salesPayment.setPayCycleCd7(jpPayCyclesStr7.isEmpty() ? null : jpPayCyclesStr7);
+    salesPayment.setPayCycleCd8(jpPayCyclesStr8.isEmpty() ? null : jpPayCyclesStr8);
+  }
+
+  private static void updateSalesPayment(EntityManager rdcMgr, SalesPayment salesPayment, Kna1 kna1, Data data, String userId) throws Exception {
+    String jpPayDaysStr = data.getJpPayDays() != null ? data.getJpPayDays() : "";
+    String jpCloseDaysStr = data.getJpCloseDays() != null ? data.getJpCloseDays() : "";
+    String jpPayCyclesStr = data.getJpPayCycles() != null ? data.getJpPayCycles() : "";
+    Timestamp ts = SystemUtil.getCurrentTimestamp();
+
+    // salesPayment.getId().setMandt(kna1.getId().getMandt());
+    // salesPayment.getId().setKunnr(kna1.getId().getKunnr());
+
+    salesPayment.setSalesTeamNo(data.getSearchTerm());
+    salesPayment.setLastUpdtBy(userId);
+    salesPayment.setLastUpdtTs(ts);
+    salesPayment.setSalesTeamUpdtDt(ts);
+
+    String jpCloseDaysStr1 = jpCloseDaysStr.length() >= 2 ? jpCloseDaysStr.substring(0, 2).trim() : "";
+    String jpCloseDaysStr2 = jpCloseDaysStr.length() >= 4 ? jpCloseDaysStr.substring(2, 4).trim() : "";
+    String jpCloseDaysStr3 = jpCloseDaysStr.length() >= 6 ? jpCloseDaysStr.substring(4, 6).trim() : "";
+    String jpCloseDaysStr4 = jpCloseDaysStr.length() >= 8 ? jpCloseDaysStr.substring(6, 8).trim() : "";
+    String jpCloseDaysStr5 = jpCloseDaysStr.length() >= 10 ? jpCloseDaysStr.substring(8, 10).trim() : "";
+    String jpCloseDaysStr6 = jpCloseDaysStr.length() >= 12 ? jpCloseDaysStr.substring(10, 12).trim() : "";
+    String jpCloseDaysStr7 = jpCloseDaysStr.length() >= 14 ? jpCloseDaysStr.substring(12, 14).trim() : "";
+    String jpCloseDaysStr8 = jpCloseDaysStr.length() >= 16 ? jpCloseDaysStr.substring(14, 16).trim() : "";
+
+    String jpPayDaysStr1 = jpPayDaysStr.length() >= 2 ? jpPayDaysStr.substring(0, 2).trim() : "";
+    String jpPayDaysStr2 = jpPayDaysStr.length() >= 4 ? jpPayDaysStr.substring(2, 4).trim() : "";
+    String jpPayDaysStr3 = jpPayDaysStr.length() >= 6 ? jpPayDaysStr.substring(4, 6).trim() : "";
+    String jpPayDaysStr4 = jpPayDaysStr.length() >= 8 ? jpPayDaysStr.substring(6, 8).trim() : "";
+    String jpPayDaysStr5 = jpPayDaysStr.length() >= 10 ? jpPayDaysStr.substring(8, 10).trim() : "";
+    String jpPayDaysStr6 = jpPayDaysStr.length() >= 12 ? jpPayDaysStr.substring(10, 12).trim() : "";
+    String jpPayDaysStr7 = jpPayDaysStr.length() >= 14 ? jpPayDaysStr.substring(12, 14).trim() : "";
+    String jpPayDaysStr8 = jpPayDaysStr.length() >= 16 ? jpPayDaysStr.substring(14, 16).trim() : "";
+
+    String jpPayCyclesStr1 = jpPayCyclesStr.length() >= 1 ? jpPayCyclesStr.substring(0, 1).trim() : "";
+    String jpPayCyclesStr2 = jpPayCyclesStr.length() >= 2 ? jpPayCyclesStr.substring(1, 2).trim() : "";
+    String jpPayCyclesStr3 = jpPayCyclesStr.length() >= 3 ? jpPayCyclesStr.substring(2, 3).trim() : "";
+    String jpPayCyclesStr4 = jpPayCyclesStr.length() >= 4 ? jpPayCyclesStr.substring(3, 4).trim() : "";
+    String jpPayCyclesStr5 = jpPayCyclesStr.length() >= 5 ? jpPayCyclesStr.substring(4, 5).trim() : "";
+    String jpPayCyclesStr6 = jpPayCyclesStr.length() >= 6 ? jpPayCyclesStr.substring(5, 6).trim() : "";
+    String jpPayCyclesStr7 = jpPayCyclesStr.length() >= 7 ? jpPayCyclesStr.substring(6, 7).trim() : "";
+    String jpPayCyclesStr8 = jpPayCyclesStr.length() >= 8 ? jpPayCyclesStr.substring(7, 8).trim() : "";
+
+    salesPayment.setCloseDay1(jpCloseDaysStr1.isEmpty() ? null : jpCloseDaysStr1);
+    salesPayment.setCloseDay2(jpCloseDaysStr2.isEmpty() ? null : jpCloseDaysStr2);
+    salesPayment.setCloseDay3(jpCloseDaysStr3.isEmpty() ? null : jpCloseDaysStr3);
+    salesPayment.setCloseDay4(jpCloseDaysStr4.isEmpty() ? null : jpCloseDaysStr4);
+    salesPayment.setCloseDay5(jpCloseDaysStr5.isEmpty() ? null : jpCloseDaysStr5);
+    salesPayment.setCloseDay6(jpCloseDaysStr6.isEmpty() ? null : jpCloseDaysStr6);
+    salesPayment.setCloseDay7(jpCloseDaysStr7.isEmpty() ? null : jpCloseDaysStr7);
+    salesPayment.setCloseDay8(jpCloseDaysStr8.isEmpty() ? null : jpCloseDaysStr8);
+
+    salesPayment.setPayDay1(jpPayDaysStr1.isEmpty() ? null : jpPayDaysStr1);
+    salesPayment.setPayDay2(jpPayDaysStr2.isEmpty() ? null : jpPayDaysStr2);
+    salesPayment.setPayDay3(jpPayDaysStr3.isEmpty() ? null : jpPayDaysStr3);
+    salesPayment.setPayDay4(jpPayDaysStr4.isEmpty() ? null : jpPayDaysStr4);
+    salesPayment.setPayDay5(jpPayDaysStr5.isEmpty() ? null : jpPayDaysStr5);
+    salesPayment.setPayDay6(jpPayDaysStr6.isEmpty() ? null : jpPayDaysStr6);
+    salesPayment.setPayDay7(jpPayDaysStr7.isEmpty() ? null : jpPayDaysStr7);
+    salesPayment.setPayDay8(jpPayDaysStr8.isEmpty() ? null : jpPayDaysStr8);
+
+    salesPayment.setPayCycleCd1(jpPayCyclesStr1.isEmpty() ? null : jpPayCyclesStr1);
+    salesPayment.setPayCycleCd2(jpPayCyclesStr2.isEmpty() ? null : jpPayCyclesStr2);
+    salesPayment.setPayCycleCd3(jpPayCyclesStr3.isEmpty() ? null : jpPayCyclesStr3);
+    salesPayment.setPayCycleCd4(jpPayCyclesStr4.isEmpty() ? null : jpPayCyclesStr4);
+    salesPayment.setPayCycleCd5(jpPayCyclesStr5.isEmpty() ? null : jpPayCyclesStr5);
+    salesPayment.setPayCycleCd6(jpPayCyclesStr6.isEmpty() ? null : jpPayCyclesStr6);
+    salesPayment.setPayCycleCd7(jpPayCyclesStr7.isEmpty() ? null : jpPayCyclesStr7);
+    salesPayment.setPayCycleCd8(jpPayCyclesStr8.isEmpty() ? null : jpPayCyclesStr8);
   }
 }

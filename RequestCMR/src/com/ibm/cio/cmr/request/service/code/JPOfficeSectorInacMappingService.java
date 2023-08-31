@@ -61,6 +61,12 @@ public class JPOfficeSectorInacMappingService extends BaseService<JPOfficeSector
       jPOfficeSectorInacMapModel.setCreateTs(element.getCreateTs());
       jPOfficeSectorInacMapModel.setUpdateBy(element.getUpdateBy());
       jPOfficeSectorInacMapModel.setUpdateTs(element.getUpdateTs());
+      if (element.getCreateTs() != null) {
+        jPOfficeSectorInacMapModel.setCreateTsStr(formatter.format(element.getCreateTs()));
+      }
+      if (element.getUpdateTs() != null) {
+        jPOfficeSectorInacMapModel.setUpdateTsStr(formatter.format(element.getUpdateTs()));
+      }
 
       list.add(jPOfficeSectorInacMapModel);
     }
