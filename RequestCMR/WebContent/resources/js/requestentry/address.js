@@ -412,6 +412,18 @@ function AddressDetailsModal_onLoad() {
     _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
     _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
   }
+  
+  if (FormManager.getActualValue('cmrIssuingCntry') == '760') {
+    _assignDetailsValue('#AddressDetailsModal #cnCustName1_view', details.ret59);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName2_view', details.ret60);
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt2_view', details.ret61);
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt_view', details.ret62);
+    _assignDetailsValue('#AddressDetailsModal #cnCity_view', details.ret63);
+    _assignDetailsValue('#AddressDetailsModal #cnDistrict_view', details.ret64);
+    _assignDetailsValue('#AddressDetailsModal #cnCustContNm_view', details.ret65);
+    _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
+  }
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
     _assignDetailsValue('#AddressDetailsModal #billingPstlAddr_view', details.ret58);
@@ -485,6 +497,19 @@ function displayHwMstInstallFlagNew() {
           cmr.hideNode('hwFlag');
         }
       });
+    }
+  }
+}
+
+function displayEndUserFileFlag() {
+  console.log(">>> Executing displayEndUserFileFlag <<<");
+  
+  if (cmr.addressMode == 'newAddress'
+      && (FormManager.getActualValue('cmrIssuingCntry') == '760' )) {
+    if (FormManager.getActualValue('custGrp') == 'BUSPR') {
+      cmr.showNode('endUserFile');
+    } else {
+      cmr.hideNode('endUserFile');
     }
   }
 }
@@ -672,6 +697,10 @@ function doAddToAddressList() {
           // existing Sold-To. This address can not be added.');
           // return;
         }
+      }
+      if (FormManager.getActualValue('cmrIssuingCntry') == '760' && cmr.addressType == 'ZC01') {
+        var rol = FormManager.getActualValue('rol');
+        FormManager.setValue('identClient', rol);
       }
       if (asean_isa_cntries.indexOf(cntry) >= 0) {
         // do
@@ -873,6 +902,12 @@ function doAddAddress() {
    */
   cmr.addressMode = 'newAddress';
   cmr.showModal('addEditAddressModal');
+  var reqType = FormManager.getActualValue('reqType');
+  if ( reqType == 'C' && FormManager.getActualValue('custGrp') == 'BUSPR' && FormManager.getActualValue('cmrIssuingCntry') == '760') {
+    cmr.showNode('endUserFileFlag');
+  } else {
+    cmr.hideNode('endUserFileFlag');
+  }
 }
 cmr.noCreatePop = 'N';
 
@@ -1578,6 +1613,23 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
   } else {
     cmr.showModal('addEditAddressModal');
   }
+  if(FormManager.getActualValue('cmrIssuingCntry') == '760'){
+    disableRolTaigaCode();
+  }
+}
+
+function disableRolTaigaCode() {
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType == 'ZC01') {
+    FormManager.show('TaigaCode', 'poBoxPostCd');
+    FormManager.show('ROL', 'rol');
+    FormManager.enable('rol');
+  } else {
+    FormManager.hide('TaigaCode', 'poBoxPostCd');
+    FormManager.hide('ROL', 'rol');
+  }
+
+  FormManager.readOnly('territoryCd');
 }
 
 function continueEditDnbAddress() {
@@ -3114,3 +3166,87 @@ function resetSccInfo() {
 }
 // CREATCMR-5447
 
+function parseXLS() {
+
+	
+  var contactCon = '';
+  const input = document.getElementById('xlsFile');
+  const file = input.files[0];
+  
+  const reader = new FileReader();
+  
+  reader.onload = function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    
+    // Access the worksheets
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    
+    // Process the data
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    // Access and read the data
+    for (let row = 0; row < jsonData.length; row++) {
+      const rowData = jsonData[row];
+      for (let col = 0; col < rowData.length; col++) {
+        const cellData = rowData[col];
+        
+        
+        
+        if (row ==8 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('custNm4' , cellData);
+        }
+        if (row ==9 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('custNm1' , cellData);
+        }
+        if (row ==10 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('dept' , cellData);
+        }
+        if (row ==11 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('postCd' , cellData);
+        }
+        if (row ==12 && col==1) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('addrTxt' , cellData);
+        }
+        if (row ==8 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('cnCustName1' , cellData);
+        }
+        if (row ==9 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('contact' , cellData);
+        }
+        if (row ==10 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          contactCon = cellData;
+        }
+        if (row ==11 && col==5) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('bldg' , cellData);
+        }
+        if (row ==11 && col==7) {
+          console.log(`Row: ${row + 1}, Column: ${col + 1}, Data: ${cellData}`);
+          FormManager.setValue('custPhone' , cellData);
+        }
+      }
+    }
+    var contact = FormManager.getActualValue('contact');
+    if(contact !=null && contact.length>0 && contactCon!=null && contactCon.length>0){
+	  FormManager.setValue('contact' , contactCon+contact);
+	}else if(contact !=null && contact.length>0 ){
+	  FormManager.setValue('contact' , contact );
+	}else if(contactCon!=null && contactCon.length>0 ){
+	  FormManager.setValue('contact' , contactCon );
+	}else{
+	  FormManager.setValue('contact' , '' );
+	}
+    
+    console.log(jsonData);
+  };
+  
+  reader.readAsArrayBuffer(file);
+}

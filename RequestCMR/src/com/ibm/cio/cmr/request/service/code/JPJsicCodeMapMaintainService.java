@@ -15,6 +15,7 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.JpJsicCodeMap;
 import com.ibm.cio.cmr.request.entity.JpJsicCodeMapPK;
+import com.ibm.cio.cmr.request.model.BaseModel;
 import com.ibm.cio.cmr.request.model.code.JpJsicCodeMapModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -48,6 +49,14 @@ public class JPJsicCodeMapMaintainService extends BaseService<JpJsicCodeMapModel
     JpJsicCodeMapModel newModel = new JpJsicCodeMapModel();
 
     copyValuesFromEntity(currentModel, newModel);
+
+    newModel.setState(BaseModel.STATE_EXISTING);
+    if (currentModel.getCreateTs() != null) {
+      newModel.setCreateTsStr(formatter.format(currentModel.getCreateTs()));
+    }
+    if (currentModel.getUpdateTs() != null) {
+      newModel.setUpdateTsStr(formatter.format(currentModel.getUpdateTs()));
+    }
 
     return Collections.singletonList(newModel);
   }

@@ -155,12 +155,12 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         dataPK.setReqId(reqIdToUse);
         data.setId(dataPK);
 
-        // savePageData(reqModel, admin, data);
+        savePageData(reqModel, admin, data);
 
         if (geoHandler != null) {
           geoHandler.setDataDefaultsOnCreate(data, entityManager);
         }
-        savePageData(reqModel, admin, data);
+
         setAdminDefaults(admin, user, request);
         if (geoHandler != null) {
           geoHandler.setAdminDefaultsOnCreate(admin);
@@ -191,7 +191,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         data.setCountryUse("706");
       }
 
-      if (!StringUtils.isBlank(mainRecord.getCmrIsic())) {
+      if (!StringUtils.isBlank(mainRecord.getCmrIsic()) && !SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
         if (!CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
             || (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()))) {
           LOG.debug("Retrieving ISIC and Subindustry [ISIC=" + mainRecord.getCmrIsic() + "]");
@@ -224,9 +224,6 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         data.setBusnType(mainRecord.getCreditCd());
       }
 
-      if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && !StringUtils.isBlank(mainRecord.getCmrVat()) && importAddress) {
-        data.setBusnType(mainRecord.getCmrVat());
-      }
       if (newRequest) {
         admin.setMainAddrType(mainRecord.getCmrAddrTypeCode());
 
@@ -791,7 +788,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     }
 
     // Ed|1043386| Only require DPL check for Create requests
-    if (!CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(reqModel.getReqType())) {
+    if (!CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(reqModel.getReqType()) && !SystemLocation.JAPAN.equals(reqModel.getCmrIssuingCntry())) {
       addr.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
       addr.setDplChkInfo(null);
     }
@@ -802,14 +799,20 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       cnHandler.setCNAddressENCityOnImport(addr, cmr, entityManager);
     }
 
-    reqEntryService.createEntity(addr, entityManager);
+    if (!SystemLocation.JAPAN.equals(reqModel.getCmrIssuingCntry())) {
+      reqEntryService.createEntity(addr, entityManager);
 
-    AddrRdc rdc = new AddrRdc();
-    AddrPK rdcpk = new AddrPK();
-    PropertyUtils.copyProperties(rdc, addr);
-    PropertyUtils.copyProperties(rdcpk, addr.getId());
-    rdc.setId(rdcpk);
-    reqEntryService.createEntity(rdc, entityManager);
+      AddrRdc rdc = new AddrRdc();
+      AddrPK rdcpk = new AddrPK();
+      PropertyUtils.copyProperties(rdc, addr);
+      PropertyUtils.copyProperties(rdcpk, addr.getId());
+      rdc.setId(rdcpk);
+      reqEntryService.createEntity(rdc, entityManager);
+    } else {
+      AddressModel model = new AddressModel();
+      setJPIntlAddrModel(model, cmr);
+      addressService.updateJPIntlAddr(model, entityManager, addr);
+    }
 
     if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())
         && (StringUtils.isNotBlank(cmr.getCmrIntlAddress()) || StringUtils.isNotBlank(cmr.getCmrIntlName()))) {
@@ -823,10 +826,23 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     }
 
     // Ed|1043386| Only require DPL check for Create requests
-    if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(reqModel.getReqType())) {
+    if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(reqModel.getReqType()) && !SystemLocation.JAPAN.equals(reqModel.getCmrIssuingCntry())) {
       AddressService.clearDplResults(entityManager, reqId);
     }
 
+  }
+
+  private void setJPIntlAddrModel(AddressModel model, FindCMRRecordModel cmr) throws Exception {
+    // TODO Auto-generated method stub
+    model.setCnAddrTxt(cmr.getCmrStreetAddress());
+    model.setCnAddrTxt2(cmr.getCmrStreetAddressCont() == null ? "" : cmr.getCmrStreetAddressCont());
+    model.setCnCustName1(cmr.getCmrName1Plain());
+    model.setCnCustName2(cmr.getCmrName2Plain() == null ? "" : cmr.getCmrName2Plain());
+    model.setCnCustName3("");
+    model.setCnCity(cmr.getCmrCity());
+    DnBCompany dnbData = DnBUtil.getDnBDetails(cmr.getCmrDuns());
+    if (dnbData != null)
+      model.setCnDistrict(dnbData.getPrimaryStateName());
   }
 
   private void setCNIntlAddrModel(AddressModel model, FindCMRRecordModel cmr) {

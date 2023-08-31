@@ -28,17 +28,6 @@
 
 <script>
   dojo.addOnLoad(function() {
-    <%
-      if (newEntry){
-    %>
-      FormManager.addValidator('jsicCd', Validators.REQUIRED , ['JSIC_CD']);
-      FormManager.addValidator('subIndustryCd', Validators.REQUIRED , ['SUB_INDUSTRY_CD']);
-      FormManager.addValidator('isuCd', Validators.REQUIRED , ['ISU_CD']);
-      FormManager.addValidator('isicCd', Validators.REQUIRED , ['ISIC_CD']);
-      FormManager.addValidator('dept', Validators.REQUIRED , ['DEPT']);
-    <%
-      }
-    %>
     FormManager.addValidator('jsicCd', Validators.REQUIRED , ['JSIC_CD']);
     FormManager.addValidator('subIndustryCd', Validators.REQUIRED , ['SUB_INDUSTRY_CD']);
     FormManager.addValidator('isuCd', Validators.REQUIRED , ['ISU_CD']);
@@ -51,29 +40,29 @@
     return {
       save : function(flag) {
         if(flag){
-          var checkIndc = cmr.query('JP.SIC_CODE_MAP_EXISTS', {
+          var checkIndc = cmr.query('JP.JSIC_CODE_MAP_EXISTS', {
             JSIC_CD: FormManager.getActualValue('jsicCd'),
             SUB_INDUSTRY_CD: FormManager.getActualValue('subIndustryCd'),
             ISU_CD: FormManager.getActualValue('isuCd'),
             ISIC_CD: FormManager.getActualValue('isicCd'),
             DEPT: FormManager.getActualValue('dept'),
           });
-          if (checkIndc.ret1 != null  ||  checkIndc.ret1 != '') {
+          if (checkIndc.ret1 == '1') {
             cmr.showAlert('This record already exists in the system.');
             return;
           }
         } else {
-          var checkIndc = cmr.query('JP.SIC_CODE_MAP_EXISTS', {
+          /* var checkIndc = cmr.query('JP.SIC_CODE_MAP_EXISTS', {
             JSIC_CD: FormManager.getActualValue('jsicCd'),
             SUB_INDUSTRY_CD: FormManager.getActualValue('subIndustryCd'),
             ISU_CD: FormManager.getActualValue('isuCd'),
             ISIC_CD: FormManager.getActualValue('isicCd'),
             DEPT: FormManager.getActualValue('dept'),
           });
-          if (checkIndc.ret1 == null  ||  checkIndc.ret1 == '') {
+          if (checkIndc.ret1 == undefined) {
             cmr.showAlert('No such record exists in the system.');
             return;
-          }
+          } */
          }
         FormManager.save('frmCMR');
       }
@@ -105,7 +94,7 @@
           </p>
         </cmr:column>
         <cmr:column span="2">
-            <form:input id="jsicCd" path="jsicCd" dojoType="dijit.form.TextBox" placeHolder="JSIC_CD"  maxlength="15"/>
+            <form:input id="jsicCd" path="jsicCd" dojoType="dijit.form.TextBox" placeHolder="JSIC_CD"  maxlength="5" readOnly="<%= readOnly %>"/>
         </cmr:column>
       </cmr:row>
       
@@ -116,7 +105,7 @@
           </p>
         </cmr:column>
         <cmr:column span="2">
-            <form:input id="subIndustryCd" path="subIndustryCd" dojoType="dijit.form.TextBox" placeHolder="SUB_INDUSTRY_CD"  maxlength="15"/>
+            <form:input id="subIndustryCd" path="subIndustryCd" dojoType="dijit.form.TextBox" placeHolder="SUB_INDUSTRY_CD"  maxlength="2" readOnly="<%= readOnly %>"/>
         </cmr:column>
       </cmr:row>
       
@@ -127,7 +116,7 @@
           </p>
         </cmr:column>
         <cmr:column span="2">
-            <form:input id="isuCd" path="isuCd" dojoType="dijit.form.TextBox" placeHolder="ISU_CD"  maxlength="15"/>
+            <form:input id="isuCd" path="isuCd" dojoType="dijit.form.TextBox" placeHolder="ISU_CD"  maxlength="2" readOnly="<%= readOnly %>"/>
         </cmr:column>
       </cmr:row>
       
@@ -138,7 +127,7 @@
           </p>
         </cmr:column>
         <cmr:column span="2">
-          <form:input id="isicCd" path="isicCd" dojoType="dijit.form.TextBox" placeHolder="ISIC_CD"  />
+          <form:input id="isicCd" path="isicCd" dojoType="dijit.form.TextBox" placeHolder="ISIC_CD"  maxlength="4" readOnly="<%= readOnly %>"/>
         </cmr:column>
       </cmr:row>
       
@@ -149,7 +138,7 @@
           </p>
         </cmr:column>
         <cmr:column span="2">
-          <form:input id="dept" path="dept" dojoType="dijit.form.TextBox" placeHolder="DEPT"  />
+          <form:input id="dept" path="dept" dojoType="dijit.form.TextBox" placeHolder="DEPT"  maxlength="3" readOnly="<%= readOnly %>"/>
         </cmr:column>
       </cmr:row>
       
@@ -160,22 +149,22 @@
           </p>
         </cmr:column>
         <cmr:column span="2">
-          <form:input id="sectorCd" path="sectorCd" dojoType="dijit.form.TextBox" placeHolder="SECTOR_CD"  />
+          <form:input id="sectorCd" path="sectorCd" dojoType="dijit.form.TextBox" placeHolder="SECTOR_CD" maxlength="4" />
         </cmr:column>
       </cmr:row>
       
       <cmr:row>
         <cmr:column span="1" width="180">
           <p>
-            <cmr:label fieldId="CreateDt">Create Date: </cmr:label>
+            <cmr:label fieldId="createTs">Create Date: </cmr:label>
           </p>
         </cmr:column>
         <cmr:column span="2">
-          <%-- <c:if test="${jpjsiccodemapform.createTs != null}">
-            ${jpjsiccodemapform.createTs}
+          <c:if test="${jpjsiccodemapform.createTsStr != null}">
+            ${jpjsiccodemapform.createTsStr}
           </c:if>
-          <c:if test="${jpjsiccodemapform.createTs == null}">-</c:if>
-          <form:hidden id="createDt" path="createDt" /> --%>
+          <c:if test="${jpjsiccodemapform.createTsStr == null}">-</c:if>
+          <form:hidden id="createTs" path="createTs" />
         </cmr:column>
         
         <cmr:column span="1" width="180">
@@ -195,15 +184,15 @@
       <cmr:row>
         <cmr:column span="1" width="180">
           <p>
-            <cmr:label fieldId="updateDt">Last Updated: </cmr:label>
+            <cmr:label fieldId="updateTs">Last Updated: </cmr:label>
           </p>
         </cmr:column>
         <cmr:column span="2">
-          <%-- <c:if test="${jpjsiccodemapform.updateTs != null}">
-            ${jpjsiccodemapform.updateTs}
+          <c:if test="${jpjsiccodemapform.updateTsStr != null}">
+            ${jpjsiccodemapform.updateTsStr}
           </c:if>
-          <c:if test="${jpjsiccodemapform.updateTs == null}">-</c:if>
-          <form:hidden id="updateDt" path="updateDt" /> --%>
+          <c:if test="${jpjsiccodemapform.updateTsStr == null}">-</c:if>
+          <form:hidden id="updateTs" path="updateTs" />
         </cmr:column>
         
         <cmr:column span="1" width="180">

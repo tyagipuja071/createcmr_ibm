@@ -25,15 +25,21 @@
         loc += '&sectorCd=' + encodeURIComponent(sectorCd);
         loc += '&inacCd=' + encodeURIComponent(inacCd);
         loc += '&apCustClusterId=' + encodeURIComponent(apCustClusterId);
-        alert('loc='+loc);
         window.location = loc;
       },
       remove : function(officeCd, sectorCd, inacCd, apCustClusterId) {
-        var loc = cmr.CONTEXT_ROOT + '/code/jpofficesectorinacform?officeCd=' + officeCd;
+        var str = 'actions.actualRemove(\"' + officeCd + '\",\"' + sectorCd + '\",\"' + inacCd + '\",\"' + apCustClusterId + '\")';
+        /* str += 'officeCd: '+officeCd;
+        str += 'sectorCd: '+sectorCd;
+        str += 'inacCd: '+inacCd;
+        str += 'apCustClusterId: '+apCustClusterId; */
+        cmr.showConfirm('actions.actualRemove(\"' + officeCd + '\",\"' + sectorCd + '\",\"' + inacCd + '\",\"' + apCustClusterId + '\")', 'Are you sure remove this record? /br officeCd: '+officeCd + ' sectorCd: '+sectorCd + ' inacCd: '+inacCd + ' apCustClusterId: '+apCustClusterId);
+      },
+      actualRemove : function(officeCd, sectorCd, inacCd, apCustClusterId) {
+        var loc = cmr.CONTEXT_ROOT + '/code/jpofficesectorinacmap/delete?officeCd=' + encodeURIComponent(officeCd);
         loc += '&sectorCd=' + encodeURIComponent(sectorCd);
         loc += '&inacCd=' + encodeURIComponent(inacCd);
         loc += '&apCustClusterId=' + encodeURIComponent(apCustClusterId);
-        alert('Are you sure to remove '+loc + '?');
         window.location = loc;
       },
       actionIcons : function(value, rowIndex) {

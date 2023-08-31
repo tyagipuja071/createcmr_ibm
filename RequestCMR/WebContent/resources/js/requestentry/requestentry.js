@@ -1897,6 +1897,10 @@ function handleRequiredDnBSearch() {
         cmr.hideNode('dnbRequired');
         cmr.hideNode('dnbRequiredIndc');
       }
+      if(FormManager.getActualValue('cmrIssuingCntry') == '760' && (FormManager.getActualValue('custSubGrp') == 'RACMR'||FormManager.getActualValue('custSubGrp') == 'BFKSC')){
+        cmr.hideNode('dnbRequired');
+        cmr.hideNode('dnbRequiredIndc');
+      }
     });
   }
 

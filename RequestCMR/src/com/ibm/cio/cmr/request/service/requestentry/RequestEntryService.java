@@ -682,8 +682,10 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       CNHandler.doBeforeSendForProcessing(entityManager, admin, data, model);
     }
     
-    if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())) {
-      JPHandler.addJpLogicOnSendForProcessing(entityManager, admin, data, model);
+    if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())
+        && "RACMR".equals(data.getCustSubGrp())) {
+      String comment = JPHandler.addJpRALogicOnSendForProcessing(entityManager, admin, data, model);
+      RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
     }
 
     // check if there's a status change
