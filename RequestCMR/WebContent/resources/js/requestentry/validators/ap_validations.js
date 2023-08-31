@@ -1268,6 +1268,7 @@ function defaultCMRNumberPrefix() {
 function defaultCMRNumberPrefixforSingapore() {
   console.log('>>>> defaultCMRNumberPrefixforSingapore >>>>');
   if (custSubGrp == 'INTER' && cmrIssuingCntry == '834') {
+    FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, [ 'CmrNoPrefix' ], 'MAIN_IBM_TAB');
     FormManager.show('CmrNoPrefix', 'cmrNoPrefix');
   }
 }
