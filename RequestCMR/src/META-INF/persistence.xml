@@ -268,6 +268,9 @@
     
     <class>com.ibm.cio.cmr.request.entity.SalesPayment</class>
     <class>com.ibm.cio.cmr.request.entity.SalesPaymentPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.Knb1</class>
+    <class>com.ibm.cio.cmr.request.entity.Knb1PK</class>
 
     <properties>
     <!-- ORIGINAL -->
