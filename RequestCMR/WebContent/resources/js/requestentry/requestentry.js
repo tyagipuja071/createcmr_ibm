@@ -339,9 +339,15 @@ function processRequestAction() {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR')) {
       var result = FormManager.getActualValue('dplChkResult');
+      var reqReason = FormManager.getActualValue('reqReason');
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+      if (cntry == '641' && reqReason == 'TREC') {
+        doYourAction();
+      }
       // if DPL check status is not 'All Passed', ask for confirmation to
       // proceed
-      if (result == '' || (result.toUpperCase() != 'AP' && result.toUpperCase() != 'NR')) {
+      else if (result == '' || (result.toUpperCase() != 'AP' && result.toUpperCase() != 'NR')) {
         cmr.showConfirm('doYourAction()', 'This request has not passed all DPL checks. Are you sure you want to process this request?', 'Warning', null, {
           OK : 'Yes',
           CANCEL : 'No'
