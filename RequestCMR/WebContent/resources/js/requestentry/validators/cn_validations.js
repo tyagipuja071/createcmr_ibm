@@ -1705,6 +1705,12 @@ function addAddrUpdateValidator() {
                 var cnAddrTxtOther = null;
                 var cnAddrTxt2Other = null;
                 
+                var reqReason = FormManager.getActualValue('reqReason');
+                
+                if (reqReason == 'TREC') {
+                  return new ValidationResult(null, true);
+                }
+                
                 // get addr, addr_rdc, intl_addr, intl_addr_rdc
                 var reqId = FormManager.getActualValue('reqId');
                 var qParams = {
@@ -2888,6 +2894,12 @@ function validateCnNameAndAddr4Update() {
           var cnCityZS01 = null;
           var cnDistrictZS01 = null;
           
+          var reqReason = FormManager.getActualValue('reqReason');
+          
+          if (reqReason == 'TREC') {
+            return new ValidationResult(null, true);
+          }
+          
           addrList = getAddrList();
           addrRdcList = getAddrRdcList();
           cnAddrList = getCnAddrList();
@@ -3745,6 +3757,81 @@ function checkEmbargoCd(value) {
   }
 }
 
+function addChecklistValidatorCN() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('validating checklist..');
+        var checklist = dojo.query('table.checklist');
+        var reqReason = FormManager.getActualValue('reqReason');
+        
+        if (reqReason == 'TREC') {
+          return new ValidationResult(null, true);
+        }
+        
+        // local customer name if found
+        var localNm = checklist.query('input[name="localCustNm"]');
+        if (localNm.length > 0 && localNm[0].value.trim() == '') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+
+        // local customer name if found
+        var localAddr = checklist.query('input[name="localAddr"]');
+        if (localAddr.length > 0 && localAddr[0].value.trim() == '') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+
+        var questions = checklist.query('input[type="radio"]');
+        if (questions.length > 0) {
+          var noOfQuestions = questions.length / 2;
+          var checkCount = 0;
+          for (var i = 0; i < questions.length; i++) {
+            if (questions[i].checked) {
+              checkCount++;
+            }
+          }
+          if (noOfQuestions != checkCount) {
+            return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+          }
+        }
+
+        // add check for checklist on DB
+        var reqId = FormManager.getActualValue('reqId');
+        var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {
+          REQID : reqId
+        });
+        if (!record || !record.sectionA1) {
+          return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CHECKLIST_TAB', 'frmCMR');
+}
+
+function addDPLCheckValidatorCN() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var result = FormManager.getActualValue('dplChkResult');
+        var reqReason = FormManager.getActualValue('reqReason');
+        if (reqReason == 'TREC') {
+          return new ValidationResult(null, true);
+        }
+        console.log('>>> RUNNING WW addDPLCheckValidator');
+        if (result == '' || result.toUpperCase() == 'NOT DONE') {
+          return new ValidationResult(null, false, 'DPL Check has not been performed yet.');
+        } else if (result == '' || result.toUpperCase() == 'ALL FAILED') {
+          return new ValidationResult(null, false, 'DPL Check has failed. This record cannot be processed.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+
 //function setDropdownField2Values() {
 //  var cmrIssuingCntry = FormManager.getActualValue('dupIssuingCntryCd');
 //  FilteringDropdown.loadItems('reqReason', null, 'lov', 'fieldId=RequestReason&cmrIssuingCntry=_cmrIssuingCntry' + cmrIssuingCntry);
@@ -3756,7 +3843,7 @@ function lockFieldsForERO(){
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqReason = FormManager.getActualValue('reqReason');
-  if (reqType == 'U' && role == 'REQUESTER' && reqReason == 'TREC') {
+  if (reqType == 'U' && reqReason == 'TREC') {
 //    FormManager.readOnly('abbrevNm');
 //    FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('custPrefLang');
@@ -4083,9 +4170,9 @@ dojo.addOnLoad(function() {
   //  CREATCMR-8581
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.CN,null,true);
   
-  GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
+  GEOHandler.registerValidator(addDPLCheckValidatorCN, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHINA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHINA ], null, true);
-  GEOHandler.registerValidator(addChecklistValidator, GEOHandler.CN);
+  GEOHandler.registerValidator(addChecklistValidatorCN, GEOHandler.CN);
   GEOHandler.registerValidator(retrievedValueValidator, GEOHandler.CN);
 // GEOHandler.registerValidator(isValidDate,GEOHandler.CN);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
