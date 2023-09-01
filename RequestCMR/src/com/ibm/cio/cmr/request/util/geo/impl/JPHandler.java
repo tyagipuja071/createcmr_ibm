@@ -43,6 +43,8 @@ import com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients;
 import com.ibm.cio.cmr.request.entity.DefaultApprovals;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.Kna1;
+import com.ibm.cio.cmr.request.entity.Knb1;
+import com.ibm.cio.cmr.request.entity.Knb1PK;
 import com.ibm.cio.cmr.request.entity.SalesPayment;
 import com.ibm.cio.cmr.request.entity.SalesPaymentPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
@@ -2952,6 +2954,7 @@ public class JPHandler extends GEOHandler {
         entityManager.merge(salesPayment);
         entityManager.flush();
       }
+      handleCmrNo2(entityManager, mandt, kna1.getId().getKunnr(), data.getCmrNo2(), kna1);
     }
 
   }
@@ -3130,5 +3133,113 @@ public class JPHandler extends GEOHandler {
     salesPayment.setPayCycleCd6(jpPayCyclesStr6.isEmpty() ? null : jpPayCyclesStr6);
     salesPayment.setPayCycleCd7(jpPayCyclesStr7.isEmpty() ? null : jpPayCyclesStr7);
     salesPayment.setPayCycleCd8(jpPayCyclesStr8.isEmpty() ? null : jpPayCyclesStr8);
+  }
+  
+  private static void handleCmrNo2(EntityManager entityManager, String mandt, String kunnr, String cmrNo2, Kna1 kna1) throws Exception {
+    if (mandt == null || kunnr == null || cmrNo2 == null || "".equals(cmrNo2)) {
+      return;
+    }
+    boolean knb1ExistIndc = checkCurrentKnb1(entityManager, mandt, kunnr);
+    if (!knb1ExistIndc) {
+      Knb1 knb1 = new Knb1();
+      Knb1PK knb1PK = new Knb1PK();
+
+      knb1PK.setBukrs("7600");
+      knb1PK.setKunnr(kunnr);
+      knb1PK.setMandt(mandt);
+
+      knb1.setId(knb1PK);
+      knb1.setAkont("1070110000");
+      knb1.setAltkn("");
+      knb1.setBegru(kna1.getBegru());
+      knb1.setBlnkz("");
+      knb1.setBusab("");
+      knb1.setDatlz("00000000");
+      knb1.setEikto("");
+      knb1.setEkvbd("");
+      knb1.setErdat(kna1.getErdat());
+      knb1.setErnam(kna1.getErnam());
+      knb1.setFdgrv("");
+      knb1.setFrgrp("");
+      knb1.setHbkid("");
+      knb1.setIntad("");
+      knb1.setKnrzb(cmrNo2);
+      knb1.setKnrze("");
+      knb1.setKultg(0);
+      knb1.setKverm("");
+      knb1.setLockb("");
+      knb1.setLoevm(kna1.getLoevm());
+      knb1.setMgrup("");
+      knb1.setPerkz(" ");
+      knb1.setPernr("00000000");
+      knb1.setRemit("");
+      knb1.setSapTs(kna1.getSapTs());
+      knb1.setShadUpdateInd(kna1.getShadUpdateInd());
+      knb1.setShadUpdateTs(kna1.getShadUpdateTs());
+      knb1.setSperr(kna1.getSperr());
+      knb1.setSregl("");
+      knb1.setTlfxs("");
+      knb1.setTogru("");
+      knb1.setUrlid("");
+      knb1.setUzawe("");
+      knb1.setVerdt("00000000");
+      knb1.setVlibb(0);
+      knb1.setVrbkz("");
+      knb1.setVrsdg("");
+      knb1.setVrsnr("");
+      knb1.setVrspr(0);
+      knb1.setVrszl(0);
+      knb1.setVzskz("0");
+      knb1.setWakon("");
+      knb1.setWebtr(0);
+      knb1.setXausz(" ");
+      knb1.setXdezv(" ");
+      knb1.setXedip(" ");
+      knb1.setXpore(" ");
+      knb1.setXverr(" ");
+      knb1.setXzver(" ");
+      knb1.setZahls(" ");
+      knb1.setZamib(" ");
+      knb1.setZamim(" ");
+      knb1.setZamio(" ");
+      knb1.setZamir(" ");
+      knb1.setZamiv(" ");
+      knb1.setZgrup("");
+      knb1.setZindt("00000000");
+      knb1.setZinrt("00");
+      knb1.setZsabe("");
+      knb1.setZterm(" ");
+      knb1.setZuawa("");
+      knb1.setZwels("");
+
+      entityManager.persist(knb1);
+    } else {
+      Knb1 knb1 = getCurrentKnb1(entityManager, mandt, kunnr);
+      knb1.setKnrzb(cmrNo2);
+
+      entityManager.merge(knb1);
+    }
+    entityManager.flush();
+  }
+
+  private static Boolean checkCurrentKnb1(EntityManager entityManager, String mandt, String kunnr) throws Exception {
+    String sql = ExternalizedQuery.getSql("JP.CHECK.KNB1");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KUNNR", kunnr);
+    List<String> results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      return true;
+    }
+    return false;
+  }
+
+  private static Knb1 getCurrentKnb1(EntityManager entityManager, String mandt, String kunnr) throws Exception {
+    String sql = ExternalizedQuery.getSql("JP.GET.KNB1.BY_MANDT_KUNNR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KUNNR", kunnr);
+    query.setParameter("MANDT", mandt);
+    query.setForReadOnly(true);
+    return query.getSingleResult(Knb1.class);
   }
 }
