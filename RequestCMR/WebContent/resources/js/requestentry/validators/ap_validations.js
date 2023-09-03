@@ -366,18 +366,18 @@ function addAfterConfigAP() {
   if (cntry == '834') {
     // FormManager.removeValidator('clientTier', Validators.REQUIRED);
     addVatValidationforSingapore();
-    // CREATCMR-7885
-    if(reqType == 'C' && ['ASLOM','NRML','CROSS'].includes(custSubGrp)){
-      console.log('addAfterConfigAP >>> 834/ASLOM/NRML/CROSS >>> Set Cluster default as BLANK.');
-      if(custSubGrp =='CROSS' && _pagemodel.apCustClusterId == null ){
-        FormManager.setValue('apCustClusterId', '00000');
-      }
-    }
+    // CREATCMR-10202
+      if((custSubGrp =='CROSS' || custSubGrp =='KYNDR' || custSubGrp =='ASLOM') && _pagemodel.apCustClusterId == null ){
+        FormManager.setValue('apCustClusterId', '09052');
+        FormManager.readOnly('apCustClusterId');
+        FormManager.setValue('isuCd', '5K');
+      } 
   }
   // CREATCMR-5269
     if (reqType == 'U') {
     handleObseleteExpiredDataForUpdate();
   }
+    
   if (cntry == '616' && reqType == 'U' && (role == 'PROCESSOR' || role == 'REQUESTER')) {
     FormManager.readOnly('isicCd');
     FormManager.readOnly('subIndustryCd');
@@ -1411,8 +1411,8 @@ function onCustSubGrpChange() {
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     console.log('custSubGrp CHANGED here >>>>');
     FormManager.readOnly('subIndustryCd');
-//    if (FormManager.getActualValue('viewOnlyPage') != 'true')
-//      FormManager.enable('isicCd');
+// if (FormManager.getActualValue('viewOnlyPage') != 'true')
+// FormManager.enable('isicCd');
 //    
     setISBUScenarioLogic();
     
@@ -1436,9 +1436,10 @@ function onCustSubGrpChange() {
     
     // CREATCMR-7885
  // CREATCMR-7878
+      
     if(FormManager.getActualValue('cmrIssuingCntry') == '834' || FormManager.getActualValue('cmrIssuingCntry') == '615' || FormManager.getActualValue('cmrIssuingCntry') == '652'){
       console.log('No need to reset isuCd for 834/SG >>>>');
-    } else {
+    }  else {
       resetFieldsAfterCustSubGrpChange();
     }
     
@@ -1465,10 +1466,22 @@ function applyClusterFilters() {
 
 function resetFieldsAfterCustSubGrpChange() {
   console.log(">>>> resetInacNacCdAfterCustSubGrpChange >>>>");
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp')
+  var clientTier = FormManager.getActualValue('clientTier')
+  var apCustClusterId = FormManager.getActualValue('apCustClusterId')
+  if (cmrIssuingCntry == '616' && (custSubGrp== 'ESOSW' || custSubGrp== 'KYNDR' || custSubGrp== 'CROSS')) {
+    FormManager.setValue('apCustClusterId', "09057");
+    FormManager.setValue('isuCd', '5K');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('apCustClusterId');
+  } 
+  else {
+    FormManager.setValue('isuCd', '');
+ // FormManager.setValue('inacType', '');
+ // FormManager.setValue('inacCd', '');
+  }
   
-  FormManager.setValue('isuCd', '');
-// FormManager.setValue('inacType', '');
-// FormManager.setValue('inacCd', '');
 }
 
 function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrpArray, clusterArray) {
@@ -2768,7 +2781,7 @@ function onIsicChange() {
     return ;
   }
   
-//  FormManager.readOnly('isicCd');
+// FormManager.readOnly('isicCd');
   if (cmrResult != '' && cmrResult == 'Accepted' ) {
     setIsicCdIfCmrResultAccepted(value);
   } else if (dnbResult != '' && dnbResult == 'Accepted') {
@@ -2776,11 +2789,12 @@ function onIsicChange() {
   } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
     setIsicCdIfDnbAndCmrResultOther(value);
   }
-//  if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd != '') {
-//    FormManager.readOnly('isicCd');
-//  } else {
-//    FormManager.enable('isicCd');
-//  }
+// if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
+// '') {
+// FormManager.readOnly('isicCd');
+// } else {
+// FormManager.enable('isicCd');
+// }
 }
 function setPrivate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -5223,43 +5237,43 @@ function lockFieldsForERO(){
   var reqReason = FormManager.getActualValue('reqReason');
   if (reqType == 'U' && role == 'REQUESTER' && reqReason == 'TREC') {
     FormManager.readOnly('abbrevNm');
-//    FormManager.readOnly('abbrevLocn');
+// FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('custPrefLang');
-//    FormManager.readOnly('subIndustryCd');
+// FormManager.readOnly('subIndustryCd');
     FormManager.readOnly('isicCd');
     FormManager.readOnly('taxCd1');
     FormManager.readOnly('cmrNo');
     FormManager.readOnly('cmrOwner');
     FormManager.resetValidations('cmrOwner');
   
-//    FormManager.readOnly('apCustClusterId');
-//    FormManager.resetValidations('apCustClusterId');
+// FormManager.readOnly('apCustClusterId');
+// FormManager.resetValidations('apCustClusterId');
   
-//    FormManager.readOnly('clientTier');
-//    FormManager.resetValidations('clientTier');
+// FormManager.readOnly('clientTier');
+// FormManager.resetValidations('clientTier');
   
-//    FormManager.readOnly('isuCd');
-//    FormManager.readOnly('mrcCd');
+// FormManager.readOnly('isuCd');
+// FormManager.readOnly('mrcCd');
     FormManager.readOnly('bpRelType');
     FormManager.readOnly('bpName');
     FormManager.readOnly('busnType');
     FormManager.resetValidations('busnType');
   
-//    FormManager.readOnly('cmrNoPrefix');
-//    FormManager.readOnly('collectionCd');
-//    FormManager.resetValidations('collectionCd');
+// FormManager.readOnly('cmrNoPrefix');
+// FormManager.readOnly('collectionCd');
+// FormManager.resetValidations('collectionCd');
   
-//    FormManager.readOnly('repTeamMemberNo');
-//    FormManager.resetValidations('repTeamMemberNo');
+// FormManager.readOnly('repTeamMemberNo');
+// FormManager.resetValidations('repTeamMemberNo');
   
     FormManager.readOnly('miscBillCd');
     FormManager.readOnly('inacType');
     FormManager.readOnly('inacCd');
     FormManager.readOnly('restrictInd');
-//    FormManager.readOnly('govType');
-//    FormManager.readOnly('repTeamMemberName');
-//    FormManager.readOnly('covId');
-//    FormManager.resetValidations('covId');
+// FormManager.readOnly('govType');
+// FormManager.readOnly('repTeamMemberName');
+// FormManager.readOnly('covId');
+// FormManager.resetValidations('covId');
   
     FormManager.readOnly('dunsNo');
   }
