@@ -5489,24 +5489,26 @@ function autoPopulateIdentClientIT() {
     FormManager.resetValidations('taxCd1');
     FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesCross);
 
-  } else if (scenario == 'LOCAL' && checkImportIndc != 'Y') {
-    if (custSubType == 'COMME') {
-      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A', 'D' ]);
-    } else if (custSubType == 'BUSPR') {
-      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A', 'D' ]);
-    } else if (custSubType == 'PRICU') {
-      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'X' ]);
-    } else if (custSubType == 'LOCEN' || custSubType == 'UNIVE' || custSubType == 'GOVST') {
-      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'B', 'C' ]);
-    } else if (custSubType == 'NGOIT') {
-      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'B' ]);
-    } else {
-      FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesLocal);
-    }
-  } else if (scenario == 'LOCAL' && (custSubType != 'IBMIT') && checkImportIndc == 'Y') {
+  }
+//  else if (scenario == 'LOCAL' && checkImportIndc != 'Y') {
+//    if (custSubType == 'COMME') {
+//      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A', 'D' ]);
+//    } else if (custSubType == 'BUSPR') {
+//      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A', 'D' ]);
+//    } else if (custSubType == 'PRICU') {
+//      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'X' ]);
+//    } else if (custSubType == 'LOCEN' || custSubType == 'UNIVE' || custSubType == 'GOVST') {
+//      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'B', 'C' ]);
+//    } else if (custSubType == 'NGOIT') {
+//      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'B' ]);
+//    } else {
+//      FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesLocal);
+//    }
+//  } else if (scenario == 'LOCAL' && (custSubType != 'IBMIT') && checkImportIndc == 'Y') {
+//    FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesLocal);
+//  } 
+  else {
     FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesLocal);
-  } else {
-    FormManager.resetDropdownValues(FormManager.getField('identClient'));
   }
 
   var result = cmr.query('VALIDATOR.CROSSBORDERIT', {
@@ -6465,62 +6467,80 @@ function validateFiscalLengthOnIdentIT() {
       validate : function() {
         var requestType = FormManager.getActualValue('reqType');
         var role = FormManager.getActualValue('userRole').toUpperCase();
-        if (requestType != 'C') {
-          return new ValidationResult(null, true);
-        }
+        var reqId = FormManager.getActualValue('reqId');
         var ident = FormManager.getActualValue('identClient');
         var fiscal = FormManager.getActualValue('taxCd1');
+        var isFiscalIdentChanged = false;
+        
+        var result = cmr.query('GETDATARDCVALUESIT', {
+          REQ_ID : reqId
+        });
+        
+        if (result != null && result != undefined && (result['ret4'] != fiscal || result['ret3'] != ident)) {
+          isFiscalIdentChanged = true;
+        }
+        
+        if (requestType == 'U' && !isFiscalIdentChanged) {
+          return new ValidationResult(null, true);
+        }
+
         var lbl1 = FormManager.getLabel('LocalTax1');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var custGrp = FormManager.getActualValue('custGrp');
 
-        if (ident == 'A' && fiscal != undefined && fiscal != '' && (fiscal.length != 11 || !fiscal.match("^[0-9]*$")) && (role == 'PROCESSOR' || (role == 'REQUESTER' && custSubGrp == 'BUSPR'))) {
-          return new ValidationResult({
-            id : 'taxCd1',
-            type : 'text',
-            name : 'taxCd1'
-          }, false, 'For Ident Client A ' + lbl1 + ' must be of 11 digits only');
-        }
-        if (ident == 'B' && fiscal != undefined && fiscal != '' && (fiscal.length != 11 || !fiscal.match("^[0-9]*$"))) {
-          return new ValidationResult({
-            id : 'taxCd1',
-            type : 'text',
-            name : 'taxCd1'
-          }, false, 'For Ident Client B ' + lbl1 + ' must be of 11 digits only');
-        }
-        if (ident == 'C' && fiscal != undefined && fiscal != '' && (fiscal.length != 11 || !fiscal.match("^[0-9]*$"))) {
-          return new ValidationResult({
-            id : 'taxCd1',
-            type : 'text',
-            name : 'taxCd1'
-          }, false, 'For Ident Client C ' + lbl1 + ' must be of 11 digits only');
-        }
-        if (ident == 'D' && fiscal != undefined && fiscal != '' && (fiscal.length != 16 || !fiscal.match("^[0-9a-zA-Z]*$")) && role == 'PROCESSOR') {
-          return new ValidationResult({
-            id : 'taxCd1',
-            type : 'text',
-            name : 'taxCd1'
-          }, false, 'For Ident Client D ' + lbl1 + ' must be of 16 alphanumerics only');
-        }
-        if (ident == 'X' && fiscal != undefined && fiscal != '' && fiscal.length != 16) {
-          return new ValidationResult({
-            id : 'taxCd1',
-            type : 'text',
-            name : 'taxCd1'
-          }, false, 'For Ident Client X ' + lbl1 + ' must be of 16 chars');
-        }
-        if (ident == 'X' && fiscal != undefined && fiscal != '' && !fiscal.match("^(?=.*[a-zA-Z])(?=.*[0-9])[0-9a-zA-Z]*$")) {
-          return new ValidationResult({
-            id : 'taxCd1',
-            type : 'text',
-            name : 'taxCd1'
-          }, false, 'For Ident Client X ' + lbl1 + ' must contain alphanumeric characters.');
-        }
-        if (ident == 'N' && fiscal != undefined && fiscal != '' && !fiscal.match("^[0-9a-zA-Z]*$") && role == 'PROCESSOR') {
-          return new ValidationResult({
-            id : 'taxCd1',
-            type : 'text',
-            name : 'taxCd1'
-          }, false, 'For Ident Client N ' + lbl1 + ' must contain digits and alphabets only');
+        if (requestType == 'U' || custGrp == 'LOCAL') {
+          
+          if (ident == 'A' && (fiscal == undefined || fiscal == '' || fiscal.length != 11 || !fiscal.match("^[0-9]*$"))) {
+            return new ValidationResult({
+              id : 'taxCd1',
+              type : 'text',
+              name : 'taxCd1'
+            }, false, 'For Ident Client A ' + lbl1 + ' must be of 11 digits.');
+          }
+          if (ident == 'B' && (fiscal == undefined || fiscal == '' || fiscal.length != 11 || !fiscal.match("^[0-9]*$"))) {
+            return new ValidationResult({
+              id : 'taxCd1',
+              type : 'text',
+              name : 'taxCd1'
+            }, false, 'For Ident Client B ' + lbl1 + ' must be of 11 digits.');
+          }
+          if (ident == 'C' && (fiscal == undefined || fiscal == '' || fiscal.length != 11 || !fiscal.match("^[0-9]*$"))) {
+            return new ValidationResult({
+              id : 'taxCd1',
+              type : 'text',
+              name : 'taxCd1'
+            }, false, 'For Ident Client C ' + lbl1 + ' must be of 11 digits.');
+          }
+          if (ident == 'D' && (fiscal == undefined || fiscal != '' || fiscal.length != 16 || !fiscal.match("^[0-9a-zA-Z]*$"))) {
+            return new ValidationResult({
+              id : 'taxCd1',
+              type : 'text',
+              name : 'taxCd1'
+            }, false, 'For Ident Client D ' + lbl1 + ' must be of 16 alphanumerics.');
+          }
+          if (ident == 'X' && (fiscal != undefined || fiscal != '' || fiscal.length != 16)) {
+            return new ValidationResult({
+              id : 'taxCd1',
+              type : 'text',
+              name : 'taxCd1'
+            }, false, 'For Ident Client X ' + lbl1 + ' must be of 16 chars');
+          }
+          if (ident == 'X' && (fiscal != undefined || fiscal != '' || !fiscal.match("^(?=.*[a-zA-Z])(?=.*[0-9])[0-9a-zA-Z]*$"))) {
+            return new ValidationResult({
+              id : 'taxCd1',
+              type : 'text',
+              name : 'taxCd1'
+            }, false, 'For Ident Client X ' + lbl1 + ' must contain alphanumeric characters.');
+          }          
+          if ((ident == 'N' || ident == 'Y') && (fiscal != undefined || fiscal != '')) {
+            FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+            return new ValidationResult({
+              id : 'taxCd1',
+              type : 'text',
+              name : 'taxCd1'
+            }, false, 'For Ident Client ' + ident + ' ' + lbl1 + ' must be blank');
+          }
+         
         }
         // Defect 1593720
         var cntryRegion = FormManager.getActualValue('countryUse');
@@ -6529,17 +6549,6 @@ function validateFiscalLengthOnIdentIT() {
           tempCntryRegion = cntryRegion.substring(3, 5);
         }
         console.log("cntryRegion is>>" + cntryRegion);
-        // if (tempCntryRegion != 'VA') {
-        // console.log("For Not VA CntryRegion>>" + tempCntryRegion);
-        // if (ident == 'N' && fiscal != undefined && (fiscal == '' ||
-        // fiscal.length > 16) && role == 'PROCESSOR') {
-        // return new ValidationResult({
-        // id : 'taxCd1',
-        // type : 'text',
-        // name : 'taxCd1'
-        // }, false, 'For Ident Client N ' + lbl1 + ' must be of 1-16 chars');
-        // }
-        // }
         return new ValidationResult(null, true);
       }
     };
@@ -8886,9 +8895,9 @@ function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
 
   if (checkImportIndc != 'Y') {
     var ident = FormManager.getActualValue('identClient');
+    FormManager.enable('identClient');
     if (FormManager.getActualValue('reqType') == 'C' && 'CROSS' == FormManager.getActualValue('custGrp')) {
       var checkImportIndc = getImportedIndcForItaly();
-      FormManager.enable('identClient');
       if (ident == 'N') {
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'vat' ], 'MAIN_CUST_TAB');
         FormManager.enable('vat');
