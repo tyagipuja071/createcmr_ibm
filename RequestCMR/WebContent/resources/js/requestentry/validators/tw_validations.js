@@ -520,7 +520,6 @@ function chineseAddrMandtValidator() {
    FormManager.addFormValidator((function() {
     return {
       validate : function() {
-         custNm3 = FormManager.getActualValue('custNm3');
         if(custNm3 == '' || custNm3 == undefined){
           return new ValidationResult(null, false, "Chinese Name in address is required.");
         }
@@ -532,7 +531,6 @@ function chineseAddrMandtValidator() {
    FormManager.addFormValidator((function() {
     return {
       validate : function() {
-         dept = FormManager.getActualValue('dept');
         if(dept == '' || dept == undefined){
           return new ValidationResult(null, false, "Chinese Address in address is required.");
         }
