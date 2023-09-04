@@ -1036,25 +1036,19 @@ function setVatValidatorGRCYTR(fromAddress, scenario, scenarioChanged) {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-//    FormManager.setValue('vatExempt', false);
-//    if (FormManager.getActualValue('custSubGrp') == 'IBMEM' || FormManager.getActualValue('custSubGrp') == 'SPAS'
-//    	|| FormManager.getActualValue('custSubGrp') == 'PRICU') {
-//    	FormManager.setValue('vatExempt', 'Y');
-//    }
-//    if (vatInd == 'N') {
-//      FormManager.clearValue('vat');
-//    }
-//    if (undefined != vatInd && vatInd != '' && vatInd != 'N' && cntry == SysLoc.GREECE) {
-//      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-//      FormManager.enable('vat');
-//    }
     
-    if ((FormManager.getActualValue('custSubGrp') == 'IBMEM' || FormManager.getActualValue('custSubGrp') == 'SPAS'
-    	|| FormManager.getActualValue('custSubGrp') == 'PRICU') && scenarioChanged ) {
+    if (scenarioChanged)
+  {
+    if (FormManager.getActualValue('custSubGrp') == 'IBMEM' || FormManager.getActualValue('custSubGrp') == 'SPAS'
+    	|| FormManager.getActualValue('custSubGrp') == 'PRICU') {
     	FormManager.resetValidations('vat');
     	FormManager.setValue('vatExempt', 'Y');
-    }
-    
+    }else
+	{
+		  checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+	      FormManager.setValue('vatExempt', false);
+	}
+  }
     if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
         checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
         FormManager.setValue('vatExempt', false);
