@@ -80,8 +80,8 @@ function afterConfigForJP() {
     setCustNmDetailOnScenario();
     setFieldsRequired();
     setCmrNoCmrNo2Required();
-    // setAccntAbbNmOnScrnarioChange();
-    // setAccountAbbNmRequired();
+    setAccntAbbNmOnScrnarioChange();
+    setAccountAbbNmRequired();
     performDPLCheck4JP();
     setDefaultValueForChargeCode();
     setTier2Required();
@@ -1153,7 +1153,7 @@ function setAccntAbbNmOnScrnarioChange() {
     // FormManager.setValue('abbrevNm', _pagemodel.abbrevNm);
     return;
   } else {
-    // setAccountAbbNm();
+    setAccountAbbNm();
   }
 }
 
@@ -1299,18 +1299,18 @@ function getZS01CustNm3() {
 function resetAccountAbbNmOnFieldChange() {
   dojo.connect(FormManager.getField('salesTeamCd'), 'onChange', function(value) {
     if (value != _pagemodel.salesTeamCd) {
-      // setAccountAbbNm();
+      setAccountAbbNm();
     }
     setTier2Required();
   });
   dojo.connect(FormManager.getField('tier2'), 'onChange', function(value) {
     if (value != _pagemodel.tier2) {
-      // setAccountAbbNm();
+      setAccountAbbNm();
     }
   });
   dojo.connect(FormManager.getField('chargeCd'), 'onChange', function(value) {
     if (value != _pagemodel.chargeCd) {
-      // setAccountAbbNm();
+      setAccountAbbNm();
       setCustNmDetailOnScenario();
     }
   });
@@ -1335,17 +1335,17 @@ function setAccountAbbNmRequired() {
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
     }
     break;
-  case 'ISOCU':
-    FormManager.readOnly('abbrevNm');
-    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-    break;
-  case 'BCEXA':
-  case 'BFKSC':
-    FormManager.clearValue('abbrevNm');
-    FormManager.readOnly('abbrevNm');
-    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-    break;
-  case '':
+//  case 'ISOCU':
+//    FormManager.readOnly('abbrevNm');
+//    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+//    break;
+//  case 'BCEXA':
+//  case 'BFKSC':
+//    FormManager.clearValue('abbrevNm');
+//    FormManager.readOnly('abbrevNm');
+//    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+//    break;
+//  case '':
   default:
     FormManager.enable('abbrevNm');
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
@@ -3437,7 +3437,7 @@ function setFieldValueOnAddrSave(cntry, addressMode, saving, finalSave, force) {
       setCSBOOnAddrSave();
       if (role != 'Processor') {
         setCustNmDetailOnAddrSave();
-        // setAccountAbbNmOnAddrSave();
+        setAccountAbbNmOnAddrSave();
       }
     }
   }
@@ -6396,7 +6396,7 @@ function addDnBSearchValidator() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var result = FormManager.getActualValue('findDnbResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'RACMR') {
+        if (custSubGrp == 'RACMR' || custSubGrp == 'BFKSC' || custSubGrp == 'BPWPQ') {
           return new ValidationResult(null, true);
         }
         if ((result == '' || result.toUpperCase() == 'NOT DONE') && cntry != SysLoc.CHINA) {

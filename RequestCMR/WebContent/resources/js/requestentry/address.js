@@ -1643,6 +1643,7 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
   }
   if(FormManager.getActualValue('cmrIssuingCntry') == '760'){
     disableRolTaigaCode();
+    displayEndUserFileFlag();
   }
 }
 
