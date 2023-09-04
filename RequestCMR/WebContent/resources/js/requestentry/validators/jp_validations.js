@@ -1188,9 +1188,9 @@ function setAccountAbbNmForCreate() {
     return;
   }
   var oldAccountAbbNm = getZS01CustNm3();
-  if (_pagemodel.abbrevNm == null) {
-    oldAccountAbbNm = FormManager.getActualValue('abbrevNm');
-  }
+//  if (_pagemodel.abbrevNm == null) {
+//    oldAccountAbbNm = FormManager.getActualValue('abbrevNm');
+//  }
   var accountAbbNm = '';
   switch (custSubGrp) {
   case 'OUTSC':
