@@ -1013,6 +1013,7 @@ function defaultCMRNumberPrefix() {
 function defaultCMRNumberPrefixforSingapore() {
   console.log('>>>> defaultCMRNumberPrefixforSingapore >>>>');
   if(custSubGrp == 'INTER' && cmrIssuingCntry == '834') {
+    FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, [ 'CmrNoPrefix' ], 'MAIN_IBM_TAB');
     FormManager.show('CmrNoPrefix', 'cmrNoPrefix');
   }
 }
@@ -1117,8 +1118,8 @@ function onCustSubGrpChange() {
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     console.log('custSubGrp CHANGED here >>>>');
     FormManager.readOnly('subIndustryCd');
-//    if (FormManager.getActualValue('viewOnlyPage') != 'true')
-//      FormManager.enable('isicCd');
+// if (FormManager.getActualValue('viewOnlyPage') != 'true')
+// FormManager.enable('isicCd');
     setISBUScenarioLogic();
     
     // CREATCMR-7653
@@ -2186,7 +2187,7 @@ function onIsicChange() {
     return;
   }
 
-  //  FormManager.readOnly('isicCd');
+  // FormManager.readOnly('isicCd');
   if (cmrResult != '' && cmrResult == 'Accepted') {
     setIsicCdIfCmrResultAccepted(value);
   } else if (dnbResult != '' && dnbResult == 'Accepted') {
@@ -2194,11 +2195,12 @@ function onIsicChange() {
   } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
     setIsicCdIfDnbAndCmrResultOther(value);
   }
-  //  if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd != '') {
-  //    FormManager.readOnly('isicCd');
-  //  } else {
-  //    FormManager.enable('isicCd');
-  //  }
+  // if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
+  // '') {
+  // FormManager.readOnly('isicCd');
+  // } else {
+  // FormManager.enable('isicCd');
+  // }
 }
 function setPrivate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
