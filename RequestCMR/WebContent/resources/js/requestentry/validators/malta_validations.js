@@ -9,7 +9,7 @@ var _oldEnt = null;
 function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
   console.log(">>>> addMaltaLandedCountryHandler");
   var custGrp = FormManager.getActualValue('custGrp');
-  var addrType = FormManager.getActualValue('a*ddrType');
+  var addrType = FormManager.getActualValue('addrType');
   var landCntry = 'MT'; // default to Malta
   // set default landed country
   FormManager.setValue('defaultLandedCountry', landCntry);
