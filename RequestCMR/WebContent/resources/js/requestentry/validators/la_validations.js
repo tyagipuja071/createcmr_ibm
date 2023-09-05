@@ -290,7 +290,6 @@ function autoSetSBOAndSalesTMNo() {
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '631' && FormManager.getActualValue('reqType') == 'C') {
     if (_custSubGrp != 'undefined' && _custSubGrp == 'CROSS') {
-      
       FormManager.enable('salesBusOffCd');
       if (_custType == 'INTER') {
         FormManager.setValue('salesBusOffCd', '010');
@@ -3328,5 +3327,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addChecklistValidator, [ SysLoc.VENEZUELA ]);
   GEOHandler.addAfterConfig(addChecklistBtnHandler, [ SysLoc.VENEZUELA ]);
   GEOHandler.addAfterConfig(checkChecklistButtons, [ SysLoc.VENEZUELA ]);
-  
+
 });
