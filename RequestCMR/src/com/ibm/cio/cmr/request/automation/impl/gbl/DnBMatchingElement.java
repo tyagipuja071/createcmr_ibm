@@ -357,6 +357,76 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 							}
 						}
 
+         // CREATCMR-9938 (KVK Implementation)
+
+            if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())
+                && data.getCustGrp().equalsIgnoreCase("LOCAL")
+                && data.getCustSubGrp().equalsIgnoreCase("COMME")) {
+              boolean taxCd2Found = false;
+              String taxCd2Val = null;
+              long confCode = 0L;
+              long highestConfCode = 0L;
+              int count = 0;
+              DnBMatchingResponse dnbWithHighConfCode = null;
+              for (DnBMatchingResponse dnbRecord : dnbMatches) {
+                confCode = dnbRecord.getConfidenceCode();
+                if (highestConfCode <= confCode) {
+
+                  highestConfCode = confCode;
+                  dnbWithHighConfCode = dnbRecord;
+                  count++;
+                }
+
+              }
+              if (count > 1) {
+                admin.setPaygoProcessIndc("Y");
+                data.setTaxCd2("");
+              }
+              if (count == 1) {
+                List<DnbOrganizationId> dnbOrgIdList = dnbWithHighConfCode.getOrgIdDetails();
+                if (!dnbOrgIdList.isEmpty()) {
+                  for (DnbOrganizationId orgId : dnbOrgIdList) {
+                    String dnbOrgId = orgId.getOrganizationIdCode();
+                    String dnbOrgType = orgId.getOrganizationIdType();
+                    if (dnbOrgType.equalsIgnoreCase("Trade Register Number (NL)")
+                        && StringUtils.isNotEmpty(dnbOrgId)) {
+                      taxCd2Val = dnbOrgId;
+                      taxCd2Found = true;
+                    }
+
+                  }
+                }
+
+                if (StringUtils.isEmpty(data.getTaxCd2())) {
+
+                  if (taxCd2Found) {
+                    data.setTaxCd2(taxCd2Val);
+                  }
+
+                  if (!taxCd2Found) {
+                    data.setTaxCd2("");
+                    admin.setPaygoProcessIndc("Y");
+                  }
+
+                }
+                else
+
+                {
+                  if (data.getTaxCd2().equalsIgnoreCase(taxCd2Val)) {
+                   
+                  } else {
+                    if (taxCd2Found) {
+                      data.setTaxCd2(taxCd2Val);
+                    } else {
+                      admin.setPaygoProcessIndc("Y");
+                      data.setTaxCd2("");
+                    }
+                  }
+                }
+
+              }
+            }
+            
             // Cmr-1701-AU_SG Dnb matches found & Isic doesn't match dnb record.
             // Supporting doc provided requires cmde review
             if (((SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry()) && AuIsicScenarioList.contains(data.getCustSubGrp()))
