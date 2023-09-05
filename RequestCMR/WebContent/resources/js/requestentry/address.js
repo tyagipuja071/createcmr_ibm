@@ -1644,9 +1644,9 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
   if(FormManager.getActualValue('cmrIssuingCntry') == '760'){
     disableRolTaigaCode();
     if (FormManager.getActualValue('custGrp') == 'BUSPR') {
-      cmr.showNode('endUserFile');
+      cmr.showNode('endUserFileFlag');
     } else {
-      cmr.hideNode('endUserFile');
+      cmr.hideNode('endUserFileFlag');
     }
   }
 }
