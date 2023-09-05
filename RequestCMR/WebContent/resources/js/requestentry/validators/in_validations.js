@@ -1378,11 +1378,11 @@ function addSectorIsbuLogicOnSubIndu() {
     searchArryAndSetValue(arryIndCdForSectorCSI, _industryClass, 'sectorCd', 'CSI');
     searchArryAndSetValue(arryIndCdForSectorEXC, _industryClass, 'sectorCd', 'EXC');
   }
-  // updateIsbuCd();
+   updateIsbuCd();
 }
 
 function updateIsbuCd() {
-  addSectorIsbuLogicOnSubIndu();
+  // addSectorIsbuLogicOnSubIndu();
   console.log(">>>> updateIsbuCd >>>>");
   var _mrcCd = FormManager.getActualValue('mrcCd');
   var _sectorCd = FormManager.getActualValue('sectorCd');
@@ -3235,8 +3235,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.AP);
 
   GEOHandler.addAfterConfig(onCustSubGrpChange, GEOHandler.AP);
-  GEOHandler.addAfterConfig(setCTCIsuByCluster, GEOHandler.AP);
-  GEOHandler.addAfterTemplateLoad(setCTCIsuByCluster, GEOHandler.AP);
+  GEOHandler.addAfterConfig(setCTCIsuByCluster,  [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(setCTCIsuByCluster, [ SysLoc.INDIA ]);
   
   GEOHandler.addAfterTemplateLoad(setISUDropDownValues, GEOHandler.AP);
 
