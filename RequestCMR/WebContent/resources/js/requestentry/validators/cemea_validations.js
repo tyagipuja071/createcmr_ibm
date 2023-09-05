@@ -367,7 +367,7 @@ function orderBlockValidation() {
           var ordBlk = FormManager.getActualValue('ordBlk');
           if (role == 'PROCESSOR') {
             if (ordBlk != '') {
-              if (ordBlk == '88' || ordBlk == '94') {
+              if (ordBlk == '88' || ordBlk == '94' || ordBlk == 'ST') {
               } else {
                 return new ValidationResult(null, false, 'Only blank, 88, 94 are allowed.');
               }

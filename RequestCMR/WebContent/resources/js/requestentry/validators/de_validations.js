@@ -29,7 +29,8 @@ function afterConfigForDE() {
         FormManager.resetValidations('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
-       // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+       // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+        // 'MAIN_CUST_TAB');
       }
       vatExemptIBMEmp();
     });
@@ -154,7 +155,8 @@ function vatExemptIBMEmp() {
       dijit.byId('vatExempt').set('checked', false);
       FormManager.resetValidations('vat');
       if (!dijit.byId('vatExempt').get('checked')) {
-      //  FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+      // 'MAIN_CUST_TAB');
       }
     }
   }
@@ -300,7 +302,7 @@ function disableVatExemptForScenarios() {
       FormManager.disable('vatExempt');
     } else {
       FormManager.enable('vatExempt');
-//      autoSetTax();
+// autoSetTax();
     }
   }
 }
@@ -310,12 +312,12 @@ function autoSetTax() {
   if (reqType != 'C') {
     return;
   }
-//  if (dijit.byId('vatExempt').get('checked')) {
-//    FormManager.resetValidations('vat');
-//  } else {
-//    // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
-//    // 'MAIN_CUST_TAB');
-//  }
+// if (dijit.byId('vatExempt').get('checked')) {
+// FormManager.resetValidations('vat');
+// } else {
+// // FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+// // 'MAIN_CUST_TAB');
+// }
 }
 
 function setPrivacyIndcReqdForProc() {
@@ -766,7 +768,7 @@ function addOrderBlockValidator() {
         return new ValidationResult(null, true);
 
         // below not used, keeping for now
-        if (!ordBlk || ordBlk == '88') {
+        if (!ordBlk || ordBlk == '88' ||  ordBlk == 'ST') {
           return new ValidationResult(null, true);
         } else {
 
@@ -1276,7 +1278,7 @@ function addVatIndValidator(){
 }
 }
 
-//CREATCMR-7424_7425
+// CREATCMR-7424_7425
 function setAbbreviatedNameBasedOnAddressType() {
   var _reqId = FormManager.getActualValue('reqId');
   var subCustGrp = FormManager.getActualValue('custSubGrp');
@@ -1385,7 +1387,7 @@ dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
   GEOHandler.addAfterConfig(afterConfigForDE, GEOHandler.DE);
-//  GEOHandler.addAfterConfig(autoSetTax, GEOHandler.DE);
+// GEOHandler.addAfterConfig(autoSetTax, GEOHandler.DE);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.DE);
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.DE);
   GEOHandler.addAddrFunction(setAbbrevNameDEUpdate, GEOHandler.DE);
@@ -1425,8 +1427,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);
   // GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
-//  GEOHandler.addAfterTemplateLoad(lockCtcFieldOnIsu, GEOHandler.DE);
-//  GEOHandler.addAfterConfig(lockCtcFieldOnIsu, SysLoc.GERMANY);
+// GEOHandler.addAfterTemplateLoad(lockCtcFieldOnIsu, GEOHandler.DE);
+// GEOHandler.addAfterConfig(lockCtcFieldOnIsu, SysLoc.GERMANY);
   GEOHandler.addAfterTemplateLoad(vatExemptIBMEmp, GEOHandler.DE);
 
   // CREATCMR-4293
@@ -1436,7 +1438,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
-//  GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
+// GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.registerValidator(validateEnterpriseNum, GEOHandler.DE, null, true);
