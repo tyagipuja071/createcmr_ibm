@@ -3757,22 +3757,18 @@ function setVatValidatorGRCYTR(fromAddress, scenario, scenarioChanged) {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-//    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
-//      FormManager.readOnly('vat');
-//    }
-    // For CREATCMR-7984
-    /*
-     * if (dijit.byId('vatExempt').get('checked')) {
-     * FormManager.clearValue('vat'); } if (undefined != dijit.byId('vatExempt') &&
-     * !dijit.byId('vatExempt').get('checked')) { checkAndAddValidator('vat',
-     * Validators.REQUIRED, [ 'VAT' ]); FormManager.enable('vat'); }
-     */
-    
-    if ((FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'INTER'
-    	|| FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'XINT') && scenarioChanged ) {
+    if (scenarioChanged)
+    {
+    if (FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'INTER'
+    	|| FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'XINT') {
     	FormManager.resetValidations('vat');
     	FormManager.setValue('vatExempt', 'Y');
-    }
+    }else
+	{
+		  checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+	      FormManager.setValue('vatExempt', false);
+	}
+   }
     
     if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
         checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
