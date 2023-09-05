@@ -1491,6 +1491,7 @@ function getCtcByOfcd() {
 
 function setMrcByOfficeCd() {
   var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
+  var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (isJPBlueGroupFlg == 'true' || custSubGrp == 'RACMR') {
     return;
@@ -1498,9 +1499,18 @@ function setMrcByOfficeCd() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var ofcd = FormManager.getActualValue('salesBusOffCd');
   var mrc = '';
+  var repTeamCd = '';
+  if ('IBMTP' == custGrp) {
+	repTeamCd = 'AA';
+  } else if ('SUBSI' == custGrp && custSubGrp != null) {
+	repTeamCd = custSubGrp.substring(0,2) + '0XT';
+  } else {
+	return;
+  }
   var qParams = {
     _qall : 'Y',
     ISSUING_CNTRY : cntry,
+    REP_TEAM_CD : repTeamCd,
     OFFICE_CD : ofcd
   };
   var results = cmr.query('GET.MRC_BY_OFFICE_CD', qParams);
