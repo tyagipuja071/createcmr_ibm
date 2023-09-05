@@ -38,6 +38,7 @@ function custSubGrpHandler() {
   if (_custSubGrpHandler == null) {
     _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       onIsicChange();
+      prospectFilterISBU();
     });
   }
 }
@@ -83,6 +84,16 @@ function resetGstExempt() {
     console.log(">>> Process gstExempt remove * >> ");
     FormManager.resetValidations('vat');
     FormManager.readOnly('vat');
+  }
+}
+
+function prospectFilterISBU() {
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  if (ifProspect == 'Y') {
+    setISBUScenarioLogic();
   }
 }
 
