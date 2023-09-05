@@ -5252,7 +5252,7 @@ function set34QYZlogicOnISUCtcChange() {
     }
     setSBOSalesRepFor34QYZ();
   }
- 
+
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setSBOSalesRepFor34QYZ();
@@ -5380,10 +5380,10 @@ function setSBOSalesRepFor34QYZ() {
       FormManager.setValue('salesBusOffCd', 'EB');
     } else if (isuCTC == '28') {
       FormManager.setValue('salesBusOffCd', 'EO');
-    }else if (isuCTC == '36Y') {
+    } else if (isuCTC == '36Y') {
       FormManager.setValue('salesBusOffCd', 'FL');
     }
-    
+
   } else if (bpCustTypes.includes(custSubType)) {
     FormManager.setValue('salesBusOffCd', 'ZP');
   } else if (internalCustSubTypes.includes(custSubType)) {
@@ -7286,7 +7286,7 @@ function lockRequireFieldsUKI() {
     FormManager.readOnly('inacCd');
     return;
   }
-  
+
   if (reqType == 'C') {
     if (custSubGroup == 'PRICU' || custSubGroup == 'BUSPR' || custSubGroup == 'INTER') {
       FormManager.readOnly('inacCd');
@@ -8124,7 +8124,7 @@ function validateSBOForIT() {
           _qall : 'Y',
           CNTRY : cntry,
           SBO : sbo,
-          SALES_REP :'%' +  salRep  + '%',
+          SALES_REP : '%' + salRep + '%',
           ISU : '%' + isuCTC + '%'
         };
         var results = cmr.query('GET.SR.SBO.BYISUCTC', qParams);
@@ -10547,6 +10547,29 @@ function addVatIndValidator() {
   }
 }
 
+function StcOrderBlockValidation() {
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        // var role = FormManager.getActualValue('userRole').toUpperCase();
+        var ordBlk = FormManager.getActualValue('ordBlk');
+        var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
+        if (ordBlk == null || ordBlk == '') {
+          if (stcOrdBlk == 'ST') {
+          } else {
+            return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
+          }
+        } else if ((ordBlk != null || ordBlk != '') && (stcOrdBlk != null || stcOrdBlk != '')) {
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -10850,4 +10873,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateSboSrForIsuCtcIE, [ SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.EMEA, null, true);
+
 });

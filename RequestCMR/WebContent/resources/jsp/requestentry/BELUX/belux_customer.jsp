@@ -71,6 +71,17 @@
     </cmr:column>
   </cmr:row>
   <cmr:row  addBackground="false">
+  <!-- STC order block code field addn -->
+  <cmr:column span="2" containerForField="TaxExemptStatus3">
+      <p>
+        <cmr:label fieldId="taxExemptStatus3">
+          <cmr:fieldLabel fieldId="TaxExemptStatus3" />:
+            <cmr:delta text="${rdcdata.taxExemptStatus3}" oldValue="${reqentry.taxExemptStatus3}" />
+            <cmr:info text="${ui.info.StcOrderBlock}" /> 
+        </cmr:label>
+        <cmr:field path="taxExemptStatus3" id="taxExemptStatus3" fieldId="TaxExemptStatus3" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
         <cmr:column span="2" containerForField="InternalDept">
         <p>
           <cmr:label fieldId="ibmDeptCostCenter">
