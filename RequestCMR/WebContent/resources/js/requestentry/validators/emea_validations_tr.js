@@ -882,6 +882,8 @@ function autoSetVAT(_custType, custTypeinDB) {
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
 
+    
+
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -9154,7 +9156,7 @@ function StcOrderBlockValidation() {
           } else {
             return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
           }
-        } else if ((ordBlk != null || ordBlk != '') && (stcOrdBlk != null || stcOrdBlk != '')) {
+        } else if (ordBlk != '' && stcOrdBlk != '') {
           return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
         }
         return new ValidationResult(null, true);
