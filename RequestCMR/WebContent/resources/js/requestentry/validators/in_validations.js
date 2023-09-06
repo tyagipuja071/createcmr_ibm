@@ -160,54 +160,54 @@ function addAfterConfigAP() {
   // CREATCMR-788
   addressQuotationValidatorAP();
   
-  //CREATCMR - 9104
+  // CREATCMR - 9104
   modifyBusnTypeTerrCdFieldBehaviour();
   var clusterId = FormManager.getActualValue('apCustClusterId');
   FormManager.addValidator('apCustClusterId', Validators.REQUIRED, [ 'Cluster' ], 'MAIN_IBM_TAB');
 }
 
 function modifyBusnTypeTerrCdFieldBehaviour() {
-	var role = FormManager.getActualValue('userRole').toUpperCase();
-	var custSubGrp = FormManager.getActualValue('custSubGrp');
-	var reqId = FormManager.getActualValue('reqId');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqId = FormManager.getActualValue('reqId');
 
-	if (custSubGrp == 'CROSS') {
-		FormManager.setValue('busnType', '709');
-		FormManager.setValue('territoryCd', '709');
-		FormManager.setValue('collectionCd', 'I001');
-	} else if (custSubGrp == 'IGF') {
-		FormManager.setValue('busnType', '000');
-		FormManager.setValue('territoryCd', '000');
-		FormManager.setValue('collectionCd', 'NDUM');
-	} else if (custSubGrp == 'INTER') {
-		FormManager.setValue('busnType', '709');
-		FormManager.setValue('territoryCd', '709');
-		FormManager.setValue('collectionCd', 'RP01');
-	} else {
-		// retrieve values from DB
-		var qParam = {
-			REQ_ID: reqId,
-		};
-		var result = cmr.query('GET.PROVNM_CD', qParam);
-		if (result) {
-			FormManager.setValue('busnType', result.ret1);
-			FormManager.setValue('territoryCd', result.ret2);
-			FormManager.setValue('collectionCd', result.ret3);
-		}
+  if (custSubGrp == 'CROSS') {
+    FormManager.setValue('busnType', '709');
+    FormManager.setValue('territoryCd', '709');
+    FormManager.setValue('collectionCd', 'I001');
+  } else if (custSubGrp == 'IGF') {
+    FormManager.setValue('busnType', '000');
+    FormManager.setValue('territoryCd', '000');
+    FormManager.setValue('collectionCd', 'NDUM');
+  } else if (custSubGrp == 'INTER') {
+    FormManager.setValue('busnType', '709');
+    FormManager.setValue('territoryCd', '709');
+    FormManager.setValue('collectionCd', 'RP01');
+  } else {
+    // retrieve values from DB
+    var qParam = {
+      REQ_ID: reqId,
+    };
+    var result = cmr.query('GET.PROVNM_CD', qParam);
+    if (result) {
+      FormManager.setValue('busnType', result.ret1);
+      FormManager.setValue('territoryCd', result.ret2);
+      FormManager.setValue('collectionCd', result.ret3);
+    }
 
-	}
+  }
    
 
-	if(role == 'REQUESTER'){
-		FormManager.hide('ProvinceName','busnType');
-		FormManager.hide('ProvinceCode','territoryCd');
-		FormManager.hide('CollectionCd','collectionCd');
-	}else{
-		FormManager.show('ProvinceName','busnType');
-		FormManager.show('ProvinceCode','territoryCd');
-		FormManager.show('CollectionCd','collectionCd');
-	}
-	  
+  if(role == 'REQUESTER'){
+    FormManager.hide('ProvinceName','busnType');
+    FormManager.hide('ProvinceCode','territoryCd');
+    FormManager.hide('CollectionCd','collectionCd');
+  }else{
+    FormManager.show('ProvinceName','busnType');
+    FormManager.show('ProvinceCode','territoryCd');
+    FormManager.show('CollectionCd','collectionCd');
+  }
+    
 }
 
 
@@ -692,8 +692,8 @@ function onCustSubGrpChange() {
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     console.log('custSubGrp CHANGED here >>>>');
     FormManager.readOnly('subIndustryCd');
-//    if (FormManager.getActualValue('viewOnlyPage') != 'true')
-//      FormManager.enable('isicCd');
+// if (FormManager.getActualValue('viewOnlyPage') != 'true')
+// FormManager.enable('isicCd');
        
     if (FormManager.getActualValue('reqType') == 'C') {  
       setLockIsicfromDNB();
@@ -1230,15 +1230,16 @@ function filterInacCd(cmrIssuCntry, clusters,inacType,inacCd) {
   }
 }
 
-//var _isicHandler = null;
-//function onIsicChangeHandler() {
-//  console.log('>>>> onIsicChangeHandler >>>>');
-//  if (_isicHandler == null) {
-//    _isicHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-//      onIsicChange();
-//    });
-//  }
-//}
+// var _isicHandler = null;
+// function onIsicChangeHandler() {
+// console.log('>>>> onIsicChangeHandler >>>>');
+// if (_isicHandler == null) {
+// _isicHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange',
+// function(value) {
+// onIsicChange();
+// });
+// }
+// }
 
 function onIsicChange() {
   console.log('>>>> onIsicChange >>>>');
@@ -1655,18 +1656,10 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
                  FormManager.readOnly('clientTier');
                }
                
-               if (_cmrIssuingCntry == '744' &&  custSubGrp == 'IGF') {
-                 FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
-                 FormManager.setValue('isuCd','21');
-                 FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-                 FormManager.setValue('clientTier', 'Z');
-                 FormManager.readOnly('clientTier');
-               }
-               
                // fixing issue 8513 for india
                // GB Segment values are not correct and it is not locked
                if (_cmrIssuingCntry == '744' && (custSubGrp == 'BLUMX' || custSubGrp ==
-                 'MKTPC' || custSubGrp == 'PRIV')) {
+                 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'PRIV')) {
 
                  FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
                  FormManager.setValue('clientTier', 'Z');
@@ -3124,9 +3117,9 @@ function setLockIsicfromDNB() {
   if (isDnbRecord =='Accepted' && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
   } 
-//  else {
-//    FormManager.enable('isicCd');
-//  }
+// else {
+// FormManager.enable('isicCd');
+// }
 }
 
 function addressQuotationValidatorGCG() {
@@ -3327,7 +3320,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateStreetAddrCont2, [ SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
   SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ], null, true);
   // CREATCMR-7589
-//  GEOHandler.addAfterConfig(onIsicChangeHandler, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
+// GEOHandler.addAfterConfig(onIsicChangeHandler, [SysLoc.INDIA,
+// SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
 
