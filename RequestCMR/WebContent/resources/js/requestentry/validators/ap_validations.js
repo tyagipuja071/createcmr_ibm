@@ -367,7 +367,7 @@ function addAfterConfigAP() {
     // FormManager.removeValidator('clientTier', Validators.REQUIRED);
     addVatValidationforSingapore();
     // CREATCMR-10202
-      if((custSubGrp =='CROSS' || custSubGrp =='KYNDR' || custSubGrp =='ASLOM') && _pagemodel.apCustClusterId != null ){
+      if(custSubGrp =='CROSS' || custSubGrp =='KYNDR' || custSubGrp =='ASLOM'){
         FormManager.setValue('apCustClusterId', '09052');
         FormManager.readOnly('apCustClusterId');
         FormManager.setValue('isuCd', '5K');
@@ -2796,7 +2796,7 @@ function onIsicChange() {
 // } else {
 // FormManager.enable('isicCd');
 // }
-  if ((dplCheck == 'AF' || dplCheck == 'SF') && (cmrIssuingCntry == '616' || cmrIssuingCntry == '834')
+  if ((dplCheck == 'AP' || dplCheck == 'AF') && (cmrIssuingCntry == '616' || cmrIssuingCntry == '834')
       && (custSubGrp == 'KYNDR' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS' || custSubGrp == 'ESOSW')) {
     FormManager.readOnly('apCustClusterId');
     FormManager.readOnly('clientTier');
