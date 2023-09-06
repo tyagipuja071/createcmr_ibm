@@ -5499,23 +5499,32 @@ function autoPopulateIdentClientIT() {
     FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesCross);
 
   }
-//  else if (scenario == 'LOCAL' && checkImportIndc != 'Y') {
-//    if (custSubType == 'COMME') {
-//      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A', 'D' ]);
-//    } else if (custSubType == 'BUSPR') {
-//      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A', 'D' ]);
-//    } else if (custSubType == 'PRICU') {
-//      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'X' ]);
-//    } else if (custSubType == 'LOCEN' || custSubType == 'UNIVE' || custSubType == 'GOVST') {
-//      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'B', 'C' ]);
-//    } else if (custSubType == 'NGOIT') {
-//      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'B' ]);
-//    } else {
-//      FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesLocal);
-//    }
-//  } else if (scenario == 'LOCAL' && (custSubType != 'IBMIT') && checkImportIndc == 'Y') {
-//    FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesLocal);
-//  } 
+  // else if (scenario == 'LOCAL' && checkImportIndc != 'Y') {
+  // if (custSubType == 'COMME') {
+  // FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A',
+  // 'D' ]);
+  // } else if (custSubType == 'BUSPR') {
+  // FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A',
+  // 'D' ]);
+  // } else if (custSubType == 'PRICU') {
+  // FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'X'
+  // ]);
+  // } else if (custSubType == 'LOCEN' || custSubType == 'UNIVE' || custSubType
+  // == 'GOVST') {
+  // FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'B',
+  // 'C' ]);
+  // } else if (custSubType == 'NGOIT') {
+  // FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'B'
+  // ]);
+  // } else {
+  // FormManager.limitDropdownValues(FormManager.getField('identClient'),
+  // identClientValuesLocal);
+  // }
+  // } else if (scenario == 'LOCAL' && (custSubType != 'IBMIT') &&
+  // checkImportIndc == 'Y') {
+  // FormManager.limitDropdownValues(FormManager.getField('identClient'),
+  // identClientValuesLocal);
+  // }
   else {
     FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesLocal);
   }
@@ -6482,15 +6491,15 @@ function validateFiscalLengthOnIdentIT() {
         var ident = FormManager.getActualValue('identClient');
         var fiscal = FormManager.getActualValue('taxCd1');
         var isFiscalIdentChanged = false;
-        
+
         var result = cmr.query('GETDATARDCVALUESIT', {
           REQ_ID : reqId
         });
-        
+
         if (result != null && result != undefined && (result['ret4'] != fiscal || result['ret3'] != ident)) {
           isFiscalIdentChanged = true;
         }
-        
+
         if (requestType == 'U' && !isFiscalIdentChanged) {
           return new ValidationResult(null, true);
         }
@@ -6500,7 +6509,7 @@ function validateFiscalLengthOnIdentIT() {
         var custGrp = FormManager.getActualValue('custGrp');
 
         if (requestType == 'U' || custGrp == 'LOCAL') {
-          
+
           if (ident == 'A' && (fiscal == undefined || fiscal == '' || fiscal.length != 11 || !fiscal.match("^[0-9]*$"))) {
             return new ValidationResult({
               id : 'taxCd1',
@@ -6542,7 +6551,7 @@ function validateFiscalLengthOnIdentIT() {
               type : 'text',
               name : 'taxCd1'
             }, false, 'For Ident Client X ' + lbl1 + ' must contain alphanumeric characters.');
-          }          
+          }
           if ((ident == 'N' || ident == 'Y') && (fiscal != undefined || fiscal != '')) {
             FormManager.removeValidator('taxCd1', Validators.REQUIRED);
             return new ValidationResult({
@@ -6551,7 +6560,7 @@ function validateFiscalLengthOnIdentIT() {
               name : 'taxCd1'
             }, false, 'For Ident Client ' + ident + ' ' + lbl1 + ' must be blank');
           }
-         
+
         }
         // Defect 1593720
         var cntryRegion = FormManager.getActualValue('countryUse');
@@ -10624,7 +10633,39 @@ function addChangeTaxCdValidLicenseValidator() {
               return new ValidationResult(null, false, 'The license(s) are still valid. Tax code changes are not allowed. Please change the Tax Code back to Z.');
             }
           }
-          
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+function addMandatoryLicenseValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'U') {
+          var taxCd = FormManager.getActualValue('specialTaxCd');
+          if (taxCd == 'Z') {
+            var reqId = FormManager.getActualValue('reqId');
+
+            var qParams = {
+              REQ_ID : reqId,
+            };
+            var oldTaxRes = cmr.query('GET_SPECIAL_TAX_CD_OLD', qParams);
+            var oldTaxCd = oldTaxRes.ret1;
+
+            if (oldTaxCd != 'Z' && !hasValidLicenseDate()) {
+              return new ValidationResult(null, false, 'The Tax Code value has been changed to Z. Please add a valid license.');
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function StcOrderBlockValidation() {
 
   FormManager.addFormValidator((function() {
@@ -10647,6 +10688,50 @@ function StcOrderBlockValidation() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addTaxCodeZAndNewLicenseValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'U') {
+          var taxCd = FormManager.getActualValue('specialTaxCd');
+
+          if (taxCd != 'Z' && isNewLicenseAdded()) {
+            return new ValidationResult(null, false, 'Adding new licenses is only allowed if the Tax Code is Z. Please set the Tax Code to Z or remove the new license.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
+function hasValidLicenseDate() {
+  var today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  if (CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount > 0) {
+    for (var i = 0; i < CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount; i++) {
+      var record = CmrGrid.GRIDS.LICENSES_GRID_GRID.getItem(i);
+      var validTo = record.validTo[0]
+      if (today < validTo) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function isNewLicenseAdded() {
+  if (CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount > 0) {
+    for (var i = 0; i < CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount; i++) {
+      var record = CmrGrid.GRIDS.LICENSES_GRID_GRID.getItem(i);
+      var changeIndc = record.currentIndc[0];
+      if ('N' == changeIndc) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
