@@ -9128,7 +9128,14 @@ function vatValidatorTR() {
           if (vat.match(/^[0-9]{10}$/) || vat.match(/^[0-9]{11}$/)) {
             return new ValidationResult(null, true);
           }
-          if (vat != '' || oldVAT != '' || (oldVAT != '' && oldZS01DEPT != soldToDistrict)) {
+          if ((vat != '') && reqType == 'U') {
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, 'Invalid VAT for TR. Length should be 10, or 11 characters long.');
+            }
+          if ((vat != '' || oldVAT != '' || (oldVAT != '' && oldZS01DEPT != soldToDistrict))&& reqType == 'C') {
             return new ValidationResult({
               id : 'vat',
               type : 'text',
