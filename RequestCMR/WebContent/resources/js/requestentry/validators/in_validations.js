@@ -94,6 +94,7 @@ function prospectFilterISBU() {
   }
   if (ifProspect == 'Y') {
     setISBUScenarioLogic();
+    FormManager.readOnly('isicCd');
   }
 }
 
@@ -1307,6 +1308,7 @@ function setIsicCdIfCmrResultAccepted(value) {
         break;
     }
   }
+  FormManager.setValue('isicCd', _pagemodel.isicCd);
 }
 
 function setIsicCdIfDnbResultAccepted(value){
@@ -1321,7 +1323,7 @@ function setIsicCdIfDnbResultAccepted(value){
     FormManager.setValue('isicCd', value);
     FormManager.readOnly('isicCd');
   } 
-  
+  FormManager.setValue('isicCd', _pagemodel.isicCd); 
 }
 
 function setIsicCdIfDnbAndCmrResultOther(value){
@@ -1335,6 +1337,7 @@ function setIsicCdIfDnbAndCmrResultOther(value){
     FormManager.setValue('isicCd', '');
     FormManager.enable('isicCd');
   }
+  FormManager.setValue('isicCd', _pagemodel.isicCd);
 }
 
 function updateIndustryClass() {

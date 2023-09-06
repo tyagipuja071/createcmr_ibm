@@ -2790,13 +2790,14 @@ function onIsicChange() {
   } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
     setIsicCdIfDnbAndCmrResultOther(value);
   }
-  // if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
-  // '') {
-  // FormManager.readOnly('isicCd');
-  // } else {
-  // FormManager.enable('isicCd');
-  // }
-  if ((dplCheck == 'AF' || dplCheck == 'SF') && (cmrIssuingCntry == '616' || cmrIssuingCntry == '834') && (custSubGrp == 'KYNDR' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS' || custSubGrp == 'ESOSW')) {
+// if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
+// '') {
+// FormManager.readOnly('isicCd');
+// } else {
+// FormManager.enable('isicCd');
+// }
+  if ((dplCheck == 'AF' || dplCheck == 'SF') && (cmrIssuingCntry == '616' || cmrIssuingCntry == '834')
+      && (custSubGrp == 'KYNDR' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS' || custSubGrp == 'ESOSW')) {
     FormManager.readOnly('apCustClusterId');
     FormManager.readOnly('clientTier');
   }
