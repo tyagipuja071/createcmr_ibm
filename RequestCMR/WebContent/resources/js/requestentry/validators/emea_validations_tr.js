@@ -888,6 +888,14 @@ function autoSetVAT(_custType, custTypeinDB) {
 
     
 
+            
+
+    
+
+        
+
+    
+
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -9133,7 +9141,7 @@ function StcOrderBlockValidation() {
         var ordBlk = FormManager.getActualValue('ordBlk');
         var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
         if (ordBlk == null || ordBlk == '') {
-          if (stcOrdBlk == 'ST') {
+          if (stcOrdBlk == 'ST' || stcOrdBlk == '') {
           } else {
             return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
           }
