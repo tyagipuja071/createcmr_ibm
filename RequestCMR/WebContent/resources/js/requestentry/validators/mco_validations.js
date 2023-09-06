@@ -3562,6 +3562,8 @@ function lockUnlockVatBasedOnVatInd() {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.enable('vat');
   }
+}
+
 function StcOrderBlockValidation() {
   FormManager.addFormValidator((function() {
     return {
