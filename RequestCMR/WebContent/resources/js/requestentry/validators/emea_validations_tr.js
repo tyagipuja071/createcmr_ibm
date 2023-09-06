@@ -884,6 +884,10 @@ function autoSetVAT(_custType, custTypeinDB) {
 
     
 
+        
+
+    
+
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -9136,6 +9140,28 @@ function vatValidatorTR() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
+
+function StcOrderBlockValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        // var role = FormManager.getActualValue('userRole').toUpperCase();
+        var ordBlk = FormManager.getActualValue('ordBlk');
+        var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
+        if (ordBlk == null || ordBlk == '') {
+          if (stcOrdBlk == 'ST') {
+          } else {
+            return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
+          }
+        } else if ((ordBlk != null || ordBlk != '') && (stcOrdBlk != null || stcOrdBlk != '')) {
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function addressQuotationValidatorTR() {
   // CREATCMR-788
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
@@ -9436,4 +9462,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsuChangeHandler, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
- });
+  GEOHandler.registerValidator(StcOrderBlockValidation, [ SysLoc.TURKEY ], null, true);
+
+});
